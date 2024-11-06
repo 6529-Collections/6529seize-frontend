@@ -1,5 +1,5 @@
 import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { WaveDropsProps } from "../WaveDrops";
+import { WaveDropsProps } from "../WaveDropsAll";
 
 
 export default function WaveChatDrops({

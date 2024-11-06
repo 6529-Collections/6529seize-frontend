@@ -2,12 +2,13 @@ import { useMemo, useState, useEffect } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import CreateDrop from "./CreateDrop";
-import WaveDrops from "./drops/WaveDrops";
+import WaveDrops from "./drops/WaveDropsAll";
 import { useSearchParams, useRouter } from "next/navigation";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { CreateDropWaveWrapper } from "./CreateDropWaveWrapper";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import { WaveDetailedDropsView } from "./WaveDetailed";
+import WaveDropsWrapper from "./WaveDropsWrapper";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -27,6 +28,7 @@ interface WaveDetailedContentProps {
 
 export default function WaveDetailedContent({
   wave,
+  dropsView,
 }: WaveDetailedContentProps) {
   const capacitor = useCapacitor();
   const searchParams = useSearchParams();
@@ -90,12 +92,13 @@ export default function WaveDetailedContent({
     <div className="tw-relative tw-h-full">
       <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
         <div className={containerClassName}>
-          <WaveDrops
+          <WaveDropsWrapper
             waveId={wave.id}
             onReply={handleReply}
             onQuote={handleQuote}
             activeDrop={activeDrop}
             initialDrop={initialDrop}
+            dropsView={dropsView}
           />
           {canDrop && (
             <div className="tw-mt-auto">

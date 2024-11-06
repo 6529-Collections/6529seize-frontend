@@ -2,7 +2,6 @@ import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 import { useCallback, useEffect, useState } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
-import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import {
   keepPreviousData,
   useInfiniteQuery,
@@ -16,12 +15,7 @@ import {
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
-
-export enum WaveDropsSearchStrategy {
-  FIND_OLDER = "FIND_OLDER",
-  FIND_NEWER = "FIND_NEWER",
-  FIND_BOTH = "FIND_BOTH",
-}
+import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
 
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
@@ -40,7 +34,7 @@ function useTabVisibility() {
   return isVisible;
 }
 
-export function useWaveDrops(
+export function useWaveDropsLeaderboard(
   waveId: string,
   connectedProfileHandle: string | undefined,
   reverse: boolean = false
@@ -51,16 +45,15 @@ export function useWaveDrops(
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
-    ApiWaveDropsFeed | undefined
+    ApiDropsLeaderboardPage | undefined
   >(undefined);
   const isTabVisible = useTabVisibility();
 
   const queryKey = [
-    QueryKey.DROPS,
+    QueryKey.DROPS_LEADERBOARD,
     {
       waveId,
-      limit: WAVE_DROPS_PARAMS.limit,
-      dropId: null,
+      page_size: WAVE_DROPS_PARAMS.limit,
     },
   ];
 
@@ -69,19 +62,20 @@ export function useWaveDrops(
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
-          limit: WAVE_DROPS_PARAMS.limit.toString(),
+          page_size: WAVE_DROPS_PARAMS.limit.toString(),
         };
 
         if (pageParam) {
-          params.serial_no_less_than = `${pageParam}`;
+          params.page = `${pageParam}`;
         }
-        return await commonApiFetch<ApiWaveDropsFeed>({
-          endpoint: `waves/${waveId}/drops`,
+        return await commonApiFetch<ApiDropsLeaderboardPage>({
+          endpoint: `waves/${waveId}/leaderboard`,
           params,
         });
       },
       initialPageParam: null,
-      getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
+      getNextPageParam: (lastPage) =>
+        lastPage.next ? lastPage.page + 1 : null,
       pages: 3,
       staleTime: 60000,
     });
@@ -96,37 +90,24 @@ export function useWaveDrops(
     refetch,
   } = useInfiniteQuery({
     queryKey,
-    queryFn: async ({
-      pageParam,
-    }: {
-      pageParam: {
-        serialNo: number | null;
-        strategy: WaveDropsSearchStrategy;
-      } | null;
-    }) => {
+    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
-        limit: WAVE_DROPS_PARAMS.limit.toString(),
+        page_size: WAVE_DROPS_PARAMS.limit.toString(),
       };
-      if (pageParam?.serialNo) {
-        params.serial_no_limit = `${pageParam.serialNo}`;
-        params.search_strategy = `${pageParam.strategy}`;
+
+      if (pageParam) {
+        params.page = `${pageParam}`;
       }
 
-      const results = await commonApiFetch<ApiWaveDropsFeed>({
-        endpoint: `waves/${waveId}/drops`,
+      const results = await commonApiFetch<ApiDropsLeaderboardPage>({
+        endpoint: `waves/${waveId}/leaderboard`,
         params,
       });
 
       return results;
     },
     initialPageParam: null,
-    getNextPageParam: (lastPage) =>
-      lastPage.drops.at(-1)?.serial_no
-        ? {
-            serialNo: lastPage.drops.at(-1)?.serial_no ?? null,
-            strategy: WaveDropsSearchStrategy.FIND_OLDER,
-          }
-        : null,
+    getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
@@ -136,7 +117,21 @@ export function useWaveDrops(
     setDrops((prev) => {
       const newDrops = data?.pages
         ? mapToExtendedDrops(
-            data.pages.map((page) => ({ wave: page.wave, drops: page.drops })),
+            data.pages.map((page) => ({
+              wave: {
+                id: page.wave.id,
+                name: page.wave.name,
+                picture: page.wave.picture ?? "",
+                description_drop_id: page.wave.description_drop.id,
+                authenticated_user_eligible_to_vote:
+                  page.wave.voting.authenticated_user_eligible,
+                authenticated_user_eligible_to_participate:
+                  page.wave.participation.authenticated_user_eligible,
+                authenticated_user_eligible_to_chat:
+                  page.wave.chat.authenticated_user_eligible,
+              },
+              drops: page.drops,
+            })),
             prev,
             reverse
           )
@@ -151,10 +146,10 @@ export function useWaveDrops(
     queryKey: [...queryKey, "polling"],
     queryFn: async () => {
       const params: Record<string, string> = {
-        limit: "1",
+        page_size: "1",
       };
-      return await commonApiFetch<ApiWaveDropsFeed>({
-        endpoint: `waves/${waveId}/drops`,
+      return await commonApiFetch<ApiDropsLeaderboardPage>({
+        endpoint: `waves/${waveId}/leaderboard`,
         params,
       });
     },

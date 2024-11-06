@@ -1,25 +1,17 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { AuthContext, TitleType } from "../../../auth/Auth";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { AuthContext } from "../../../auth/Auth";
+import { useWaveDropsLeaderboard } from "../../../../hooks/useWaveDropsLeaderboard";
 import { ActiveDropState } from "../WaveDetailedContent";
+import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
 import DropsList from "../../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
-import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
-import { useWaveDrops } from "../../../../hooks/useWaveDrops";
-import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
-import { useRouter } from "next/router";
+import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
 
-export interface WaveDropsProps {
+interface WaveDropsProps {
   readonly waveId: string;
   readonly onReply: ({
     drop,
@@ -46,10 +38,7 @@ export default function WaveDrops({
   activeDrop,
   initialDrop,
 }: WaveDropsProps) {
-  const router = useRouter();
-  const { connectedProfile, setTitle } = useContext(AuthContext);
-
-  const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
+  const { connectedProfile } = useContext(AuthContext);
   const {
     drops,
     fetchNextPage,
@@ -57,7 +46,7 @@ export default function WaveDrops({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDrops(waveId, connectedProfile?.profile?.handle, true);
+  } = useWaveDropsLeaderboard(waveId, connectedProfile?.profile?.handle, true);
 
   const {
     scrollContainerRef,
@@ -67,124 +56,24 @@ export default function WaveDrops({
     handleScroll,
   } = useScrollBehavior();
 
-  const targetDropRef = useRef<HTMLDivElement | null>(null);
-
   const [isScrolling, setIsScrolling] = useState(false);
-
-  const scrollToSerialNo = useCallback(
-    (behavior: ScrollBehavior) => {
-      if (serialNo && targetDropRef.current) {
-        targetDropRef.current.scrollIntoView({
-          behavior: behavior,
-          block: "center",
-        });
-        return true;
-      }
-      return false;
-    },
-    [serialNo]
-  );
 
   const [newItemsCount, setNewItemsCount] = useState(0);
 
   useEffect(() => {
-    setTitle({
-      title: haveNewDrops ? "New Drops Available | 6529 SEIZE" : null,
-      type: TitleType.WAVE,
-    });
-
-    return () => {
-      setTitle({
-        title: null,
-        type: TitleType.WAVE,
-      });
-    };
-  }, [haveNewDrops]);
-
-  const smallestSerialNo = useRef<number | null>(null);
-  const [init, setInit] = useState(false);
-
-  useEffect(() => {
     if (drops.length > 0) {
-      setInit(true);
       setNewItemsCount((prevCount) => {
         const newCount = drops.length - prevCount;
         return prevCount !== newCount ? newCount : prevCount;
       });
-      const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
-      smallestSerialNo.current = minSerialNo;
-      const lastDrop = drops[drops.length - 1];
-      if (lastDrop.id.startsWith("temp-")) {
-        setSerialNo(lastDrop.serial_no);
-      }
-    } else {
-      smallestSerialNo.current = null;
     }
   }, [drops]);
-
-  const fetchAndScrollToDrop = useCallback(async () => {
-    if (!serialNo) return;
-    let found = false;
-    setIsScrolling(true);
-
-    const checkAndFetchNext = async () => {
-      if (found || !hasNextPage || isFetching || isFetchingNextPage) {
-        setIsScrolling(false);
-        return;
-      }
-      await fetchNextPage();
-
-      if (smallestSerialNo.current && smallestSerialNo.current <= serialNo) {
-        found = true;
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        scrollToSerialNo("smooth");
-        setIsScrolling(false);
-        setSerialNo(null);
-      } else {
-        scrollToTop();
-        setTimeout(checkAndFetchNext, 1000);
-      }
-    };
-
-    checkAndFetchNext();
-  }, [
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    scrollToSerialNo,
-    serialNo,
-    setSerialNo,
-    scrollToTop,
-  ]);
-
-  useEffect(() => {
-    if (init && serialNo) {
-      const success = scrollToSerialNo("smooth");
-      if (success) {
-        setSerialNo(null);
-      } else {
-        fetchAndScrollToDrop();
-      }
-    }
-  }, [init, serialNo]);
 
   const handleTopIntersection = useCallback(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage]);
-
-  const onQuoteClick = useCallback(
-    (drop: ApiDrop) => {
-      if (drop.wave.id !== waveId) {
-        router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
-      } else {
-        setSerialNo(drop.serial_no);
-      }
-    },
-    [router, waveId, setSerialNo]
-  );
 
   const memoizedDrops = useMemo(() => drops, [drops]);
 
@@ -199,7 +88,7 @@ export default function WaveDrops({
       >
         <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
           <DropsList
-            onReplyClick={setSerialNo}
+            onReplyClick={() => {}}
             drops={memoizedDrops}
             showWaveInfo={false}
             isFetchingNextPage={isFetchingNextPage}
@@ -207,9 +96,9 @@ export default function WaveDrops({
             onQuote={onQuote}
             showReplyAndQuote={true}
             activeDrop={activeDrop}
-            serialNo={serialNo}
-            targetDropRef={targetDropRef}
-            onQuoteClick={onQuoteClick}
+            serialNo={null}
+            targetDropRef={null}
+            onQuoteClick={() => {}}
             parentContainerRef={scrollContainerRef}
           />
         </div>
