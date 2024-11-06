@@ -16,6 +16,7 @@ import {
 import { useDebounce } from "react-use";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
+import { WaveDetailedDropsSortBy } from "../components/waves/detailed/WaveDetailed";
 
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
@@ -37,7 +38,8 @@ function useTabVisibility() {
 export function useWaveDropsLeaderboard(
   waveId: string,
   connectedProfileHandle: string | undefined,
-  reverse: boolean = false
+  reverse: boolean = false,
+  dropsSortBy: WaveDetailedDropsSortBy = WaveDetailedDropsSortBy.RANK
 ) {
   const queryClient = useQueryClient();
 
@@ -54,6 +56,7 @@ export function useWaveDropsLeaderboard(
     {
       waveId,
       page_size: WAVE_DROPS_PARAMS.limit,
+      sort: dropsSortBy,
     },
   ];
 
@@ -63,7 +66,12 @@ export function useWaveDropsLeaderboard(
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
           page_size: WAVE_DROPS_PARAMS.limit.toString(),
+          sort: dropsSortBy,
         };
+
+        if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
+          params.sort_direction = "DESC"
+        }
 
         if (pageParam) {
           params.page = `${pageParam}`;
@@ -79,7 +87,7 @@ export function useWaveDropsLeaderboard(
       pages: 3,
       staleTime: 60000,
     });
-  }, [waveId]);
+  }, [waveId, dropsSortBy]);
 
   const {
     data,
@@ -93,10 +101,15 @@ export function useWaveDropsLeaderboard(
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         page_size: WAVE_DROPS_PARAMS.limit.toString(),
+        sort: dropsSortBy,
       };
 
       if (pageParam) {
         params.page = `${pageParam}`;
+      }
+
+      if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
+        params.sort_direction = "DESC"
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -136,7 +149,12 @@ export function useWaveDropsLeaderboard(
     queryFn: async () => {
       const params: Record<string, string> = {
         page_size: "1",
+        sort: dropsSortBy,
       };
+
+      if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
+        params.sort_direction = "DESC"
+      }
       return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,
         params,

@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { CreateDropWaveWrapper } from "./CreateDropWaveWrapper";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
-import { WaveDetailedDropsView } from "./WaveDetailed";
+import { WaveDetailedDropsSortBy, WaveDetailedDropsView } from "./WaveDetailed";
 import WaveDropsWrapper from "./WaveDropsWrapper";
 
 export enum ActiveDropAction {
@@ -24,11 +24,13 @@ export interface ActiveDropState {
 interface WaveDetailedContentProps {
   readonly wave: ApiWave;
   readonly dropsView: WaveDetailedDropsView;
+  readonly dropsSortBy: WaveDetailedDropsSortBy;
 }
 
 export default function WaveDetailedContent({
   wave,
   dropsView,
+  dropsSortBy,
 }: WaveDetailedContentProps) {
   const capacitor = useCapacitor();
   const searchParams = useSearchParams();
@@ -99,6 +101,7 @@ export default function WaveDetailedContent({
             activeDrop={activeDrop}
             initialDrop={initialDrop}
             dropsView={dropsView}
+            dropsSortBy={dropsSortBy}
           />
           {canDrop && (
             <div className="tw-mt-auto">

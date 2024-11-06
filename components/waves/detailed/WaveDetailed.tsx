@@ -9,12 +9,15 @@ export enum WaveDetailedView {
   FOLLOWERS = "FOLLOWERS",
 }
 
-
 export enum WaveDetailedDropsView {
   ALL = "ALL",
   DROPS = "DROPS",
 }
 
+export enum WaveDetailedDropsSortBy {
+  RANK = "RANK",
+  CREATION_TIME = "CREATION_TIME",
+}
 
 interface WaveDetailedProps {
   readonly wave: ApiWave;
@@ -26,11 +29,14 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeView, setActiveView] = useState<WaveDetailedView>(
     WaveDetailedView.CONTENT
   );
-  
+
   const [dropsView, setDropsView] = useState<WaveDetailedDropsView>(
     WaveDetailedDropsView.ALL
   );
 
+  const [dropsSortBy, setDropsSortBy] = useState<WaveDetailedDropsSortBy>(
+    WaveDetailedDropsSortBy.RANK
+  );
 
   const [activeWave, setActiveWave] = useState(wave);
 
@@ -56,8 +62,8 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
       wave={activeWave}
       view={activeView}
       dropsView={dropsView}
+      dropsSortBy={dropsSortBy}
       setView={setActiveView}
-      setDropsView={setDropsView}
       isLoading={isLoading}
       onWaveChange={handleWaveChange}
       setIsLoading={setIsLoading}
@@ -68,7 +74,9 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
       view={activeView}
       setView={setActiveView}
       dropsView={dropsView}
+      dropsSortBy={dropsSortBy}
       setDropsView={setDropsView}
+      setDropsSortBy={setDropsSortBy}
       onWaveChange={handleWaveChange}
       setIsLoading={setIsLoading}
     />

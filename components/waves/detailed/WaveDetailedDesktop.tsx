@@ -4,7 +4,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
-import { WaveDetailedDropsView, WaveDetailedView } from "./WaveDetailed";
+import { WaveDetailedDropsSortBy, WaveDetailedDropsView, WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedAbout from "./WaveDetailedAbout";
 import WaveDetailedRightSidebar from "./WaveDetailedRightSidebar";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
@@ -14,8 +14,10 @@ interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
   readonly view: WaveDetailedView;
   readonly dropsView: WaveDetailedDropsView;
+  readonly dropsSortBy: WaveDetailedDropsSortBy;
   readonly setView: (view: WaveDetailedView) => void;
   readonly setDropsView: (view: WaveDetailedDropsView) => void;
+  readonly setDropsSortBy: (sortBy: WaveDetailedDropsSortBy) => void;
   readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
@@ -24,8 +26,10 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   wave,
   view,
   dropsView,
+  dropsSortBy,
   setView,
   setDropsView,
+  setDropsSortBy,
   onWaveChange,
   setIsLoading,
 }) => {
@@ -75,6 +79,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
         key={`wave-detailed-content-${wave.id}`}
         wave={wave}
         dropsView={dropsView}
+        dropsSortBy={dropsSortBy}
       />
     ),
     [WaveDetailedView.FOLLOWERS]: (
@@ -128,6 +133,8 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
                     <WaveDetailedDropsHeaderNav
                       dropsView={dropsView}
                       setDropsView={setDropsView}
+                      dropsSortBy={dropsSortBy}
+                      setDropsSortBy={setDropsSortBy}
                     />
                   )}
                   {components[view]}

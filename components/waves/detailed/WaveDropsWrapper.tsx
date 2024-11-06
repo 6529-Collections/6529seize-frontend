@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ActiveDropState } from "./WaveDetailedContent";
-import { WaveDetailedDropsView } from "./WaveDetailed";
+import { WaveDetailedDropsSortBy, WaveDetailedDropsView } from "./WaveDetailed";
 import WaveDropsAll from "./drops/WaveDropsAll";
 import WaveDrops from "./drops/WaveDrops";
 
@@ -24,6 +24,7 @@ interface WaveDropsWrapperProps {
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
   readonly dropsView: WaveDetailedDropsView;
+  readonly dropsSortBy: WaveDetailedDropsSortBy;
 }
 
 export default function WaveDropsWrapper({
@@ -33,6 +34,7 @@ export default function WaveDropsWrapper({
   activeDrop,
   initialDrop,
   dropsView,
+  dropsSortBy,
 }: WaveDropsWrapperProps) {
   const components: Record<WaveDetailedDropsView, JSX.Element> = {
     [WaveDetailedDropsView.ALL]: (
@@ -51,6 +53,7 @@ export default function WaveDropsWrapper({
         onQuote={onQuote}
         activeDrop={activeDrop}
         initialDrop={initialDrop}
+        dropsSortBy={dropsSortBy}
       />
     ),
   };

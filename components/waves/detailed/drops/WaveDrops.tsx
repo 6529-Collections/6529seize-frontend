@@ -10,6 +10,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
+import { WaveDetailedDropsSortBy } from "../WaveDetailed";
 
 interface WaveDropsProps {
   readonly waveId: string;
@@ -29,6 +30,7 @@ interface WaveDropsProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
+  readonly dropsSortBy: WaveDetailedDropsSortBy;
 }
 
 export default function WaveDrops({
@@ -37,6 +39,7 @@ export default function WaveDrops({
   onQuote,
   activeDrop,
   initialDrop,
+  dropsSortBy,
 }: WaveDropsProps) {
   const { connectedProfile } = useContext(AuthContext);
   const {
@@ -46,7 +49,12 @@ export default function WaveDrops({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDropsLeaderboard(waveId, connectedProfile?.profile?.handle, true);
+  } = useWaveDropsLeaderboard(
+    waveId,
+    connectedProfile?.profile?.handle,
+    true,
+    dropsSortBy
+  );
 
   const {
     scrollContainerRef,
