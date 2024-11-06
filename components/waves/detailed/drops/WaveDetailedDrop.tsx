@@ -51,13 +51,18 @@ const shouldGroupWithDrop = (
   return bothNotReplies || repliesInSameThread;
 };
 
-const getRankClasses = ({
+const getColorClasses = ({
+  isActiveDrop,
   rank,
   isDrop,
 }: {
-  rank: number | null;
-  isDrop: boolean;
+  readonly isActiveDrop: boolean;
+  readonly rank: number | null;
+  readonly isDrop: boolean;
 }): string => {
+  if (isActiveDrop) {
+    return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
+  }
   if (!isDrop) return "tw-bg-iron-950";
   if (rank === 1) {
     return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(36,36,35,0.75)_100%)] tw-border tw-border-solid tw-border-[#E8D48A]/5";
@@ -78,24 +83,18 @@ const getDropClasses = (
   rank: number | null,
   isDrop: boolean
 ): string => {
-
-
   const baseClasses =
     "tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
 
-  const activeClasses =
-    "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
-  const inactiveClasses = "";
-  const borderClasses = "tw-ring-1 tw-ring-inset tw-ring-iron-800";
+  const streamClasses = `tw-rounded-xl ${
+    !isDrop && "tw-ring-1 tw-ring-inset tw-ring-iron-800"
+  }`;
 
-  const rankClasses = getRankClasses({ rank, isDrop });
+  const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop });
 
-  return `${baseClasses} ${
-    isActiveDrop ? activeClasses : inactiveClasses
-  } ${groupingClass} ${
-    location === DropLocation.MY_STREAM ? borderClasses : ""
+  return `${baseClasses} ${groupingClass} ${
+    location === DropLocation.MY_STREAM ? streamClasses : ""
   } ${rankClasses}`.trim();
-
 };
 
 interface WaveDetailedDropProps {
@@ -222,7 +221,9 @@ const WaveDetailedDrop = ({
   );
 
   return (
-    <div className={isDrop && location === DropLocation.WAVE ? "tw-py-0.5" : ""}>
+    <div
+      className={isDrop && location === DropLocation.WAVE ? "tw-py-0.5" : ""}
+    >
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}
