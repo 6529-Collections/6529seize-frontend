@@ -82,7 +82,6 @@ export default function DropPartActionTriggers({
           {!!drop.raters_count && (
             <DropPartActionTriggersVoteVoters drop={drop} />
           )}
-
           <DropPartActionTriggersVoteVotings drop={drop} />
         </div>
         <DropListItemRateGive
