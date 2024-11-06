@@ -46,6 +46,7 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
           viewBox="0 0 24 24"
           strokeWidth="2"
           stroke="currentColor"
+          aria-hidden="true"
           className="tw-size-4 tw-text-iron-400"
           animate={{ rotate: isOpen ? 0 : -95 }}
           transition={{ duration: 0.2 }}
