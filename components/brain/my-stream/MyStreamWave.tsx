@@ -36,10 +36,12 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
         type: ApiFeedItemType.DropReplied,
         serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
         item: {
-          drop: drop,
-          reply: {
+          drop: {
             ...drop.reply_to.drop,
             wave: drop.wave,
+          },
+          reply: {
+            ...drop,
           },
         },
       };

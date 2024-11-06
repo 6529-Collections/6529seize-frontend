@@ -10,8 +10,11 @@ import useManifoldClaim, {
   ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
 import { MEMES_MANIFOLD_PROXY_ABI } from "../../abis";
-import MintCountdownBox from "../mintCountdownBox/MintCountdownBox";
+import MintCountdownBox, {
+  MemePageMintBtn,
+} from "../mintCountdownBox/MintCountdownBox";
 import { useEffect } from "react";
+import useCapacitor from "../../hooks/useCapacitor";
 
 export default function MemePageMintCountdown(
   props: Readonly<{
@@ -27,6 +30,8 @@ export default function MemePageMintCountdown(
     MEMES_MANIFOLD_PROXY_ABI,
     props.nft_id
   );
+
+  const { platform } = useCapacitor();
 
   useEffect(() => {
     if (props.setClaim && manifoldClaim) {
@@ -53,6 +58,33 @@ export default function MemePageMintCountdown(
       : `${phaseName} Ends In`;
   };
 
+  const getButtons = () => {
+    const hideMintOnSeize = platform === "ios";
+    const buttons: MemePageMintBtn[] = [];
+    if (!hideMintOnSeize) {
+      buttons.push({
+        label: "Mint on Seize",
+        link: `/the-memes/mint`,
+        target: "_self",
+      });
+    }
+    buttons.push({
+      label: (
+        <span className="d-flex align-items-center justify-content-center gap-2">
+          Mint on Manifold{" "}
+          {!hideMintOnSeize && (
+            <span className="badge bg-white text-dark font-smaller">
+              backup
+            </span>
+          )}
+        </span>
+      ),
+      link: MEMES_MINTING_HREF,
+      target: "_blank",
+    });
+    return buttons;
+  };
+
   return (
     <Container className="no-padding pb-3">
       <Row>
@@ -66,25 +98,7 @@ export default function MemePageMintCountdown(
             }
             hide_mint_btn={props.hide_mint_btn}
             is_full_width={props.is_full_width}
-            buttons={[
-              {
-                label: "Mint on Seize",
-                link: `/the-memes/mint`,
-                target: "_self",
-              },
-              {
-                label: (
-                  <span className="d-flex align-items-center justify-content-center gap-2">
-                    Mint on Manifold{" "}
-                    <span className="badge bg-white text-dark font-smaller">
-                      backup
-                    </span>
-                  </span>
-                ),
-                link: MEMES_MINTING_HREF,
-                target: "_blank",
-              },
-            ]}
+            buttons={getButtons()}
             additional_elements={
               manifoldClaim.phase === ManifoldPhase.ALLOWLIST && (
                 <span className="font-smaller pt-1">
