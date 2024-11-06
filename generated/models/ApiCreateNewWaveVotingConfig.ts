@@ -19,7 +19,7 @@ import { HttpFile } from '../http/http';
 export class ApiCreateNewWaveVotingConfig {
     'scope': ApiCreateNewWaveScope;
     'credit_type': ApiWaveCreditType;
-    'credit_scope': ApiWaveCreditScope;
+    'credit_scope'?: ApiWaveCreditScope;
     /**
     * Only relevant when credit_type=REP. The REP category which is usable as credit. If not set then all categories will be usable as voting credits.
     */

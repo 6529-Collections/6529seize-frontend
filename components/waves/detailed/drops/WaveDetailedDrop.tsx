@@ -18,6 +18,11 @@ export interface DropInteractionParams {
   partId: number;
 }
 
+export enum DropLocation {
+  MY_STREAM = "MY_STREAM",
+  WAVE = "WAVE",
+}
+
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
 }
@@ -46,39 +51,50 @@ const shouldGroupWithDrop = (
   return bothNotReplies || repliesInSameThread;
 };
 
-const getRankClasses = (rank: number | null): string => {
-  if (rank === null) return "tw-bg-iron-950";
+const getColorClasses = ({
+  isActiveDrop,
+  rank,
+  isDrop,
+}: {
+  readonly isActiveDrop: boolean;
+  readonly rank: number | null;
+  readonly isDrop: boolean;
+}): string => {
+  if (isActiveDrop) {
+    return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
+  }
+  if (!isDrop) return "tw-bg-iron-950";
   if (rank === 1) {
-    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(36,36,35,0.75)_100%)] tw-border tw-border-solid tw-border-[#E8D48A]/5";
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(36,36,35,0.75)_100%)] tw-border-x-0 tw-border tw-border-solid tw-border-[#E8D48A]/5";
   }
   if (rank === 2) {
-    return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.4)_3.5%,rgba(35,35,36,0.6)_100%)] tw-border tw-border-solid tw-border-[#DDDDDD]/5";
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(35,35,36,0.75)_100%)] tw-border-x-0 tw-border tw-border-solid tw-border-[#DDDDDD]/5";
   }
   if (rank === 3) {
-    return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.4)_3.5%,rgba(32,31,31,0.6)_100%)] tw-border tw-border-solid tw-border-[#D9A962]/5";
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(32,31,31,0.75)_100%)] tw-border-x-0 tw-border tw-border-solid tw-border-[#D9A962]/5";
   }
-  return "tw-bg-iron-900/80";
+  return "tw-bg-[#19191D] tw-border tw-border-x-0 tw-border-solid tw-border-iron-900";
 };
 
 const getDropClasses = (
   isActiveDrop: boolean,
   groupingClass: string,
-  border: boolean,
-  rank: number | null
+  location: DropLocation,
+  rank: number | null,
+  isDrop: boolean
 ): string => {
   const baseClasses =
     "tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
 
-  const activeClasses =
-    "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
-  const inactiveClasses = "tw-rounded-lg";
-  const borderClasses = "tw-ring-1 tw-ring-inset tw-ring-iron-800";
+  const streamClasses = `tw-rounded-xl ${
+    !isDrop && "tw-ring-1 tw-ring-inset tw-ring-iron-800"
+  }`;
 
-  const rankClasses = getRankClasses(rank);
+  const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop });
 
-  return `${baseClasses} ${
-    isActiveDrop ? activeClasses : inactiveClasses
-  } ${groupingClass} ${border ? borderClasses : ""} ${rankClasses}`.trim();
+  return `${baseClasses} ${groupingClass} ${
+    location === DropLocation.MY_STREAM ? streamClasses : ""
+  } ${rankClasses}`.trim();
 };
 
 interface WaveDetailedDropProps {
@@ -88,7 +104,7 @@ interface WaveDetailedDropProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
-  readonly border?: boolean;
+  readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
@@ -102,7 +118,7 @@ const WaveDetailedDrop = ({
   nextDrop,
   showWaveInfo,
   activeDrop,
-  border = false,
+  location,
   onReply,
   onQuote,
   onReplyClick,
@@ -115,18 +131,14 @@ const WaveDetailedDrop = ({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
-
-  const rank =
-    drop.drop_type === ApiDropType.Chat
-      ? null
-      : Math.floor(Math.random() * 5) + 1;
-
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
+  const isDrop = drop.drop_type === ApiDropType.Participatory;
 
   const shouldGroupWithPreviousDrop =
-    !rank && shouldGroupWithDrop(drop, previousDrop);
-  const shouldGroupWithNextDrop = !rank && shouldGroupWithDrop(drop, nextDrop);
+    !isDrop && shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithNextDrop =
+    !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
 
@@ -200,10 +212,18 @@ const WaveDetailedDrop = ({
     };
   }, []);
 
-  const dropClasses = getDropClasses(isActiveDrop, groupingClass, border, rank);
+  const dropClasses = getDropClasses(
+    isActiveDrop,
+    groupingClass,
+    location,
+    drop.rank,
+    isDrop
+  );
 
   return (
-    <div className={rank ? "tw-px-4 tw-py-2" : ""}>
+    <div
+      className={isDrop && location === DropLocation.WAVE ? "tw-py-0.5" : ""}
+    >
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}
@@ -239,7 +259,6 @@ const WaveDetailedDrop = ({
                 isStorm={isStorm}
                 currentPartIndex={activePartIndex}
                 partsCount={drop.parts.length}
-                rank={rank}
               />
             )}
             <div className={shouldGroupWithPreviousDrop ? "tw-ml-[52px]" : ""}>

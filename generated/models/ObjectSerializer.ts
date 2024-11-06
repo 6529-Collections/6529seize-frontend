@@ -60,6 +60,7 @@ export * from '../models/ApiDropTraceItem';
 export * from '../models/ApiDropType';
 export * from '../models/ApiDropVote';
 export * from '../models/ApiDropWithoutWave';
+export * from '../models/ApiDropsLeaderboardPage';
 export * from '../models/ApiDropsPage';
 export * from '../models/ApiFeedItem';
 export * from '../models/ApiFeedItemType';
@@ -188,7 +189,7 @@ import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisi
 import { ApiCreateNewWaveVotingConfig        } from '../models/ApiCreateNewWaveVotingConfig';
 import { ApiCreateWaveConfig       } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
-import { ApiDrop                    } from '../models/ApiDrop';
+import { ApiDrop                     } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropContextProfileContext   , ApiDropContextProfileContextRatingCurrencyEnum   } from '../models/ApiDropContextProfileContext';
 import { ApiDropMedia } from '../models/ApiDropMedia';
@@ -205,7 +206,8 @@ import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTa
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropVote } from '../models/ApiDropVote';
-import { ApiDropWithoutWave                   } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWave                    } from '../models/ApiDropWithoutWave';
+import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsPage } from '../models/ApiDropsPage';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
 import { ApiFeedItemType } from '../models/ApiFeedItemType';
@@ -287,7 +289,7 @@ import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
-import { ApiWaveVotingConfig         } from '../models/ApiWaveVotingConfig';
+import { ApiWaveVotingConfig        } from '../models/ApiWaveVotingConfig';
 import { ApiWavesOverviewType } from '../models/ApiWavesOverviewType';
 
 /* tslint:disable:no-unused-variable */
@@ -389,6 +391,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropTraceItem": ApiDropTraceItem,
     "ApiDropVote": ApiDropVote,
     "ApiDropWithoutWave": ApiDropWithoutWave,
+    "ApiDropsLeaderboardPage": ApiDropsLeaderboardPage,
     "ApiDropsPage": ApiDropsPage,
     "ApiFeedItem": ApiFeedItem,
     "ApiGroup": ApiGroup,

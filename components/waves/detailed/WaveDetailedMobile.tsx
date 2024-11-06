@@ -3,13 +3,15 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import WaveDetailedContent from "./WaveDetailedContent";
-import { WaveDetailedView } from "./WaveDetailed";
+import { WaveDetailedDropsSortBy, WaveDetailedDropsView, WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
 
 interface WaveDetailedMobileProps {
   readonly wave: ApiWave;
   readonly view: WaveDetailedView;
+  readonly dropsView: WaveDetailedDropsView;
   readonly setView: (view: WaveDetailedView) => void;
+  readonly dropsSortBy: WaveDetailedDropsSortBy;
   readonly isLoading: boolean;
   readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
@@ -24,6 +26,8 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   wave,
   view,
   setView,
+  dropsView,
+  dropsSortBy,
   isLoading,
   onWaveChange,
   setIsLoading,
@@ -78,7 +82,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   };
 
   const chatComponents: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CONTENT]: <WaveDetailedContent wave={wave} />,
+    [WaveDetailedView.CONTENT]: <WaveDetailedContent wave={wave} dropsView={dropsView} dropsSortBy={dropsSortBy}  />,
     [WaveDetailedView.FOLLOWERS]: (
       <WaveDetailedFollowers
         wave={wave}

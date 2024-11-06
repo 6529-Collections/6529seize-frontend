@@ -201,10 +201,7 @@ const getVotingValidationErrors = ({
   readonly voting: CreateWaveVotingConfig;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (
-    voting.type === ApiWaveCreditType.Tdh ||
-    voting.type === ApiWaveCreditType.Unique
-  ) {
+  if (voting.type === ApiWaveCreditType.Tdh) {
     if (voting.profileId) {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_MUST_BE_EMPTY);
     }
@@ -383,16 +380,18 @@ const calculatePercentages = ({
   }
 
   // Calculate raw percentages and floor them
-  let percentages = values.map((value) => Math.floor((value / totalAmount) * 100));
-  
+  let percentages = values.map((value) =>
+    Math.floor((value / totalAmount) * 100)
+  );
+
   // Calculate remaining points to distribute (due to rounding down)
   const remainingPoints = 100 - percentages.reduce((acc, p) => acc + p, 0);
-  
+
   // Distribute remaining points to the largest original values first
   const indexesOrderedByValue = values
     .map((value, index) => ({ value, index }))
     .sort((a, b) => b.value - a.value)
-    .map(item => item.index);
+    .map((item) => item.index);
 
   for (let i = 0; i < remainingPoints; i++) {
     percentages[indexesOrderedByValue[i % indexesOrderedByValue.length]]++;

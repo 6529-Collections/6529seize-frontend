@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { IFeedItemDropReplied } from "../../../../../types/feed.types";
 import WaveDetailedDrop, {
   DropInteractionParams,
+  DropLocation,
 } from "../../../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../../../waves/detailed/WaveDetailedContent";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
@@ -40,7 +41,7 @@ export default function FeedItemDropReplied({
       showWaveInfo={showWaveInfo}
       activeDrop={activeDrop}
       showReplyAndQuote={true}
-      border={true}
+      location={DropLocation.MY_STREAM}
       onReply={onReply}
       onQuote={onQuote}
       onReplyClick={onReplyClick}
