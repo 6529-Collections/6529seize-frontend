@@ -3,7 +3,7 @@ import DateCountdown from "../date-countdown/DateCountdown";
 import { Container, Row, Col } from "react-bootstrap";
 import Link from "next/link";
 
-interface MintBtn {
+export interface MemePageMintBtn {
   label: JSX.Element | string;
   link: string;
   target: "_blank" | "_self";
@@ -14,7 +14,7 @@ interface Props {
   date: number;
   hide_mint_btn?: boolean;
   is_full_width?: boolean;
-  buttons: MintBtn[];
+  buttons: MemePageMintBtn[];
   additional_elements?: any;
 }
 
