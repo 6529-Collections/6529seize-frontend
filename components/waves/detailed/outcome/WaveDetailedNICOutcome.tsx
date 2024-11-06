@@ -32,33 +32,43 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 hover:tw-border-iron-700/50">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-900/80 tw-transition-colors tw-duration-300 hover:tw-bg-iron-800/50"
       >
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-blue-400/5">
+            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-blue-400/10">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
                 stroke="currentColor"
-                className="tw-size-4 tw-text-blue-300"
+                aria-hidden="true"
+                className="tw-size-5 tw-text-blue-300"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"
+                />
               </svg>
             </div>
             <div className="tw-text-left">
-              <div className="tw-text-sm tw-font-medium tw-text-blue-300">NIC</div>
+              <div className="tw-text-sm tw-font-medium tw-text-blue-300">
+                NIC
+              </div>
               <div className="tw-text-xs tw-text-iron-400">
-                {formatNumberWithCommas(winnersCount)} winners
+                {formatNumberWithCommas(winnersCount)}{" "}
+                {winnersCount === 1 ? "Winner" : "Winners"}
               </div>
             </div>
           </div>
+
           <div className="tw-flex tw-items-center tw-gap-3">
             <div className="tw-text-right">
-              <div className="tw-text-lg tw-font-semibold tw-text-blue-300">
+              <div className="tw-text-base tw-font-semibold tw-text-blue-300">
                 {formatNumberWithCommas(outcome.amount ?? 0)}
               </div>
               <div className="tw-text-xs tw-text-iron-400">total pool</div>
@@ -69,11 +79,16 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
               viewBox="0 0 24 24"
               strokeWidth="2"
               stroke="currentColor"
+              aria-hidden="true"
               className="tw-flex-shrink-0 tw-size-4 tw-text-iron-400"
-              animate={{ rotate: isOpen ? 180 : 0 }}
+              animate={{ rotate: isOpen ? 0 : -90 }}
               transition={{ duration: 0.2 }}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m19.5 8.25-7.5 7.5-7.5-7.5"
+              />
             </motion.svg>
           </div>
         </div>

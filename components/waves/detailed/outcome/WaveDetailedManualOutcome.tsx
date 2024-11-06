@@ -14,9 +14,8 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 hover:tw-border-iron-700/50">
       <button
-        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/80 tw-transition-colors tw-duration-300 hover:tw-bg-iron-800/50 tw-group"
+        className="tw-flex tw-items-center tw-justify-between tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-900/80 tw-transition-colors tw-duration-300 hover:tw-bg-iron-800/50"
       >
         <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-purple-400/5">
