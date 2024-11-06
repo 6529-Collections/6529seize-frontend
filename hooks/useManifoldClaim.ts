@@ -102,7 +102,9 @@ export default function useManifoldClaim(
         return MEME_PHASES.find((mp) => mp.id === "public");
       }
 
-      const endTime = `${Time.seconds(end).toIsoTimeString()} UTC`;
+      const endTime = `${Time.seconds(
+        end
+      ).toIsoTimeStringWithoutSeconds()} UTC`;
       return MEME_PHASES.filter((mp) => mp.end >= endTime)[0];
     },
     []
