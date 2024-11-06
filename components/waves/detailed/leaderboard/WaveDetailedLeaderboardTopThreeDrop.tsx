@@ -63,15 +63,18 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
         {thropyIcon(drop.rank)}
         <div className="tw-flex-1">
           <div className="tw-text-iron-50 tw-font-normal tw-mb-2 tw-line-clamp-3">
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Lorem
-            ipsum dolor sit amet consectetur adipisicing elit.
+          {drop.parts[0].content}
           </div>
           <div className="tw-flex tw-items-center tw-gap-x-2">
-            <img
-              className="tw-size-5 tw-rounded-md tw-bg-iron-800"
-              src="#"
-              alt=""
-            />
+            {drop.author.pfp ? (
+              <img
+                className="tw-size-5 tw-rounded-md tw-bg-iron-800"
+                src={drop.author.pfp}
+                alt=""
+              />
+            ) : (
+              <div className="tw-size-5 tw-rounded-md tw-bg-iron-800" />
+            )}
             <span className="tw-inline-flex tw-items-center tw-gap-x-2">
               <span className="tw-text-iron-50 tw-text-xs tw-font-semibold">
                 {drop.author.handle}
