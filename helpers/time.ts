@@ -233,6 +233,11 @@ export class Time {
     return this.toIsoString().split("T")[1].split(".")[0];
   }
 
+  public toIsoTimeStringWithoutSeconds(): string {
+    const [hours, minutes] = this.toIsoTimeString().split(":");
+    return `${hours}:${minutes}`;
+  }
+
   public toLocaleDateTimeString(): string {
     const date = this.toDate();
     const year = date.getFullYear();
