@@ -40,8 +40,8 @@ export default function HeaderQR() {
     <div className="tailwind-scope tw-relative xl:tw-mr-3 tw-self-center">
       <button
         type="button"
-        aria-label="Search"
-        title="Search"
+        aria-label="QR Code"
+        title="QR Code"
         onClick={() => setShowQRModal(true)}
         className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-light-400 tw-transition tw-duration-300 tw-ease-out">
         <FontAwesomeIcon icon={faQrcode} height={18} />
@@ -200,7 +200,7 @@ export function HeaderQRModal({
   }
 
   return (
-    <Modal show={show} onHide={onClose} keyboard={false} centered>
+    <Modal show={show} onHide={onClose} keyboard centered>
       <Modal.Body className={styles.modalBody}>
         <ModalMenu
           isShareConnection={!!getRefreshToken()}
