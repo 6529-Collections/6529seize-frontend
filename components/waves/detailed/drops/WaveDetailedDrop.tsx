@@ -63,12 +63,12 @@ const getRankClasses = ({
     return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(36,36,35,0.75)_100%)] tw-border tw-border-solid tw-border-[#E8D48A]/5";
   }
   if (rank === 2) {
-    return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.4)_3.5%,rgba(35,35,36,0.6)_100%)] tw-border tw-border-solid tw-border-[#DDDDDD]/5";
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(35,35,36,0.75)_100%)] tw-border tw-border-solid tw-border-[#DDDDDD]/5";
   }
   if (rank === 3) {
-    return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.4)_3.5%,rgba(32,31,31,0.6)_100%)] tw-border tw-border-solid tw-border-[#D9A962]/5";
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(32,31,31,0.75)_100%)] tw-border tw-border-solid tw-border-[#D9A962]/5";
   }
-  return "tw-bg-iron-900/80";
+  return "tw-bg-[#19191D] tw-border tw-border-solid tw-border-iron-900";
 };
 
 const getDropClasses = (
@@ -85,7 +85,7 @@ const getDropClasses = (
 
   const activeClasses =
     "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
-  const inactiveClasses = "tw-rounded-lg";
+  const inactiveClasses = "";
   const borderClasses = "tw-ring-1 tw-ring-inset tw-ring-iron-800";
 
   const rankClasses = getRankClasses({ rank, isDrop });
@@ -222,7 +222,7 @@ const WaveDetailedDrop = ({
   );
 
   return (
-    <div className={isDrop ? "tw-px-4 tw-py-2" : ""}>
+    <div className={isDrop && location === DropLocation.WAVE ? "tw-py-0.5" : ""}>
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}
