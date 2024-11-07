@@ -70,7 +70,7 @@ export function useWaveDropsLeaderboard(
         };
 
         if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
-          params.sort_direction = "DESC"
+          params.sort_direction = "ASC"
         }
 
         if (pageParam) {
@@ -109,7 +109,7 @@ export function useWaveDropsLeaderboard(
       }
 
       if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
-        params.sort_direction = "DESC"
+        params.sort_direction = "ASC"
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -153,7 +153,7 @@ export function useWaveDropsLeaderboard(
       };
 
       if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
-        params.sort_direction = "DESC"
+        params.sort_direction = "ASC"
       }
       return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,

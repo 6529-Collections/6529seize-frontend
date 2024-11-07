@@ -1324,6 +1324,11 @@ export default function ReactQueryWrapper({
     });
 
     invalidateQueries({
+      key: QueryKey.DROPS_LEADERBOARD,
+      values: [{ waveId: drop.wave.id }],
+    });
+
+    invalidateQueries({
       key: QueryKey.WAVE,
       values: [{ wave_id: drop.wave.id }],
     });
@@ -1399,6 +1404,9 @@ export default function ReactQueryWrapper({
   const invalidateDrops = () => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROPS],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROPS_LEADERBOARD],
     });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP],

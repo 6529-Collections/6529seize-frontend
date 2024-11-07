@@ -39,7 +39,35 @@ export default function CreateDrop({
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
-  const [isDropMode, setIsDropMode] = useState(false);
+
+  const getInitialIsDropMode = () => {
+    if (wave.chat.authenticated_user_eligible) return false;
+    if (wave.participation.authenticated_user_eligible) return true;
+    return false;
+  };
+
+  const [isDropMode, setIsDropMode] = useState(getInitialIsDropMode());
+
+  const onDropModeChange = useCallback(
+    (newIsDropMode: boolean) => {
+      if (newIsDropMode && !wave.participation.authenticated_user_eligible) {
+        setToast({
+        message: "You are not eligible to drop in this wave",
+        type: "error",
+      });
+      return;
+    }
+
+    if (!newIsDropMode && !wave.chat.authenticated_user_eligible) {
+      setToast({
+        message: "You are not eligible to chat in this wave",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsDropMode(newIsDropMode);
+  }, [wave]);
 
   const onRemovePart = useCallback((partIndex: number) => {
     setDrop((prevDrop) => {
@@ -157,7 +185,7 @@ export default function CreateDrop({
       isDropMode,
       setDrop,
       setIsStormMode,
-      setIsDropMode,
+      onDropModeChange,
       submitDrop,
     }),
     [
@@ -168,7 +196,7 @@ export default function CreateDrop({
       isDropMode,
       setDrop,
       setIsStormMode,
-      setIsDropMode,
+      onDropModeChange,
       submitDrop,
     ]
   );
