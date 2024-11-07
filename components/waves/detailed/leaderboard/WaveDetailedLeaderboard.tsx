@@ -37,12 +37,12 @@ export const WaveDetailedLeaderboard: React.FC<
   });
 
   return (
-    <div className="tw-p-4">
+    <div className="tw-p-4 tw-max-h-[30rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
       <h2 className="tw-text-iron-50 tw-text-lg tw-font-semibold tw-mb-3">
         Leaderboard
       </h2>
 
-      <div className="tw-mt-2 tw-max-h-[30rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
+      <div className="tw-mt-2">
         <div className="tw-flex tw-flex-col">
           <ul className="tw-space-y-3 tw-pl-0">
             {memoizedDrops.map((drop) => (

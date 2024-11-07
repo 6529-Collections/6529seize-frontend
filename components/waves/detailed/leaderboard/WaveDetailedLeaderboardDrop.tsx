@@ -13,6 +13,8 @@ export const WaveDetailedLeaderboardDrop: React.FC<
   return drop.rank && drop.rank <= 3 ? (
     <WaveDetailedLeaderboardTopThreeDrop drop={drop} />
   ) : (
-    <WaveDetailedLeaderboardDefaultDrop drop={drop} />
+   
+      <WaveDetailedLeaderboardDefaultDrop drop={drop} />
+ 
   );
 };
