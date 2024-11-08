@@ -49,12 +49,13 @@ export default function WaveDrops({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDropsLeaderboard(
+  } = useWaveDropsLeaderboard({
     waveId,
-    connectedProfile?.profile?.handle,
-    true,
-    dropsSortBy
-  );
+    connectedProfileHandle: connectedProfile?.profile?.handle,
+    reverse: true,
+    dropsSortBy,
+    sortDirection: dropsSortBy === WaveDetailedDropsSortBy.RANK ? "ASC" : "DESC",
+  });
 
   const {
     scrollContainerRef,

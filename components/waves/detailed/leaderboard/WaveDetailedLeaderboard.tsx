@@ -21,12 +21,13 @@ export const WaveDetailedLeaderboard: React.FC<
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDropsLeaderboard(
-    wave.id,
-    connectedProfile?.profile?.handle,
-    true,
-    WaveDetailedDropsSortBy.RANK
-  );
+  } = useWaveDropsLeaderboard({
+    waveId: wave.id,
+    connectedProfileHandle: connectedProfile?.profile?.handle,
+    reverse: true,
+    dropsSortBy: WaveDetailedDropsSortBy.RANK,
+    sortDirection: "DESC",
+  });
 
   const memoizedDrops = useMemo(() => drops, [drops]);
 
