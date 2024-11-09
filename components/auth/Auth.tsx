@@ -469,7 +469,6 @@ export default function Auth({
   const [showWaves, setShowWaves] = useState(getShowWaves());
 
   useEffect(() => {
-    console.log("i am getShowWaves", getShowWaves());
     setShowWaves(getShowWaves());
   }, [connectedProfile, activeProfileProxy, address]);
 
