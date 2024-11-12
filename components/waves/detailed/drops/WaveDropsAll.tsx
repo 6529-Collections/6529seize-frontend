@@ -8,7 +8,6 @@ import {
 } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { ActiveDropState } from "../WaveDetailedContent";
 import DropsList from "../../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
@@ -18,6 +17,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/router";
+import { ActiveDropState } from "../chat/WaveChat";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;

@@ -51,8 +51,8 @@ import NewHashtagsPlugin, {
 import { MaxLengthPlugin } from "../../drops/create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../../drops/create/lexical/plugins/DragDropPastePlugin";
 import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlugin";
-import { ActiveDropAction } from "./WaveDetailedContent";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { ActiveDropAction } from "./chat/WaveChat";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;

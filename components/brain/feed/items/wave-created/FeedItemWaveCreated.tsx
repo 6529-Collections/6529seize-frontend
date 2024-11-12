@@ -4,8 +4,8 @@ import WaveDetailedDrop, {
   DropInteractionParams,
   DropLocation,
 } from "../../../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../../../waves/detailed/WaveDetailedContent";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { ActiveDropState } from "../../../../waves/detailed/chat/WaveChat";
 
 export default function FeedItemWaveCreated({
   item,

@@ -6,7 +6,8 @@ import { TypedFeedItem } from "../../../types/feed.types";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+
 interface MyStreamWaveProps {
   readonly waveId: string;
   readonly activeDrop: ActiveDropState | null;

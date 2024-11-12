@@ -2,8 +2,8 @@ import { useMemo, RefObject, useCallback, memo } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 
 import WaveDetailedDrop, { DropLocation } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 
 type DropActionHandler = ({
   drop,

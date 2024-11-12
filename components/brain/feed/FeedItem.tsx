@@ -5,7 +5,7 @@ import FeedItemDropReplied from "./items/drop-replied/FeedItemDropReplied";
 import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 
 export interface FeedItemProps {
   readonly item: TypedFeedItem;

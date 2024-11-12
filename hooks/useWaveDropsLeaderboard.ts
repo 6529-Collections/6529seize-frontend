@@ -16,15 +16,26 @@ import {
 import { useDebounce } from "react-use";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
-import { WaveDetailedDropsSortBy } from "../components/waves/detailed/WaveDetailed";
+
+export enum WaveDropsLeaderboardSortBy {
+  RANK = "RANK",
+  CREATION_TIME = "CREATION_TIME",
+}
+
+export enum WaveDropsLeaderboardSortDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | undefined;
   readonly reverse: boolean;
-  readonly dropsSortBy: WaveDetailedDropsSortBy;
-  readonly sortDirection: "ASC" | "DESC";
+  readonly dropsSortBy: WaveDropsLeaderboardSortBy;
+  readonly sortDirection: WaveDropsLeaderboardSortDirection;
 }
+
+
 
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;

@@ -5,19 +5,11 @@ import { createBreakpoint } from "react-use";
 import WaveDetailedMobile from "./WaveDetailedMobile";
 
 export enum WaveDetailedView {
-  CONTENT = "CONTENT",
+  CHAT = "CHAT",
+  LEADERBOARD = "LEADERBOARD",
   FOLLOWERS = "FOLLOWERS",
 }
 
-export enum WaveDetailedDropsView {
-  ALL = "ALL",
-  DROPS = "DROPS",
-}
-
-export enum WaveDetailedDropsSortBy {
-  RANK = "RANK",
-  CREATION_TIME = "CREATION_TIME",
-}
 
 interface WaveDetailedProps {
   readonly wave: ApiWave;
@@ -27,16 +19,9 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeView, setActiveView] = useState<WaveDetailedView>(
-    WaveDetailedView.CONTENT
+    WaveDetailedView.CHAT
   );
 
-  const [dropsView, setDropsView] = useState<WaveDetailedDropsView>(
-    WaveDetailedDropsView.ALL
-  );
-
-  const [dropsSortBy, setDropsSortBy] = useState<WaveDetailedDropsSortBy>(
-    WaveDetailedDropsSortBy.RANK
-  );
 
   const [activeWave, setActiveWave] = useState(wave);
 
@@ -49,7 +34,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const handleWaveChange = (newWave: ApiWave) => {
     setIsLoading(true);
     setActiveWave(newWave);
-    setActiveView(WaveDetailedView.CONTENT);
+    setActiveView(WaveDetailedView.CHAT);
     setTimeout(() => {
       setIsLoading(false);
     }, 300);
@@ -61,8 +46,6 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
     <WaveDetailedMobile
       wave={activeWave}
       view={activeView}
-      dropsView={dropsView}
-      dropsSortBy={dropsSortBy}
       setView={setActiveView}
       isLoading={isLoading}
       onWaveChange={handleWaveChange}
@@ -73,10 +56,6 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
       wave={activeWave}
       view={activeView}
       setView={setActiveView}
-      dropsView={dropsView}
-      dropsSortBy={dropsSortBy}
-      setDropsView={setDropsView}
-      setDropsSortBy={setDropsSortBy}
       onWaveChange={handleWaveChange}
       setIsLoading={setIsLoading}
     />

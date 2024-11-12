@@ -1,8 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { AuthContext } from "../../../auth/Auth";
-import { useWaveDropsLeaderboard } from "../../../../hooks/useWaveDropsLeaderboard";
-import { ActiveDropState } from "../WaveDetailedContent";
+import { useWaveDropsLeaderboard, WaveDropsLeaderboardSortDirection, WaveDropsLeaderboardSortBy } from "../../../../hooks/useWaveDropsLeaderboard";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
 import DropsList from "../../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
@@ -10,7 +9,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import { useScrollBehavior } from "../../../../hooks/useScrollBehavior";
-import { WaveDetailedDropsSortBy } from "../WaveDetailed";
+import { ActiveDropState } from "../chat/WaveChat";
 
 interface WaveDropsProps {
   readonly waveId: string;
@@ -30,7 +29,6 @@ interface WaveDropsProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
-  readonly dropsSortBy: WaveDetailedDropsSortBy;
 }
 
 export default function WaveDrops({
@@ -39,7 +37,6 @@ export default function WaveDrops({
   onQuote,
   activeDrop,
   initialDrop,
-  dropsSortBy,
 }: WaveDropsProps) {
   const { connectedProfile } = useContext(AuthContext);
   const {
@@ -53,8 +50,8 @@ export default function WaveDrops({
     waveId,
     connectedProfileHandle: connectedProfile?.profile?.handle,
     reverse: true,
-    dropsSortBy,
-    sortDirection: dropsSortBy === WaveDetailedDropsSortBy.RANK ? "ASC" : "DESC",
+    dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
+    sortDirection: WaveDropsLeaderboardSortDirection.ASC,
   });
 
   const {

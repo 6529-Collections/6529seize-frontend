@@ -5,7 +5,8 @@ import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import { getFeedItemKey } from "../../../helpers/waves/drop.helpers";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+
 export interface FeedItemsProps {
   readonly items: TypedFeedItem[];
   readonly showWaveInfo: boolean;

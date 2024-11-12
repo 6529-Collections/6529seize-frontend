@@ -2,16 +2,17 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
-import WaveDetailedContent from "./WaveDetailedContent";
-import { WaveDetailedDropsSortBy, WaveDetailedDropsView, WaveDetailedView } from "./WaveDetailed";
+import {
+  WaveDetailedView,
+} from "./WaveDetailed";
 import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
+import { WaveChat } from "./chat/WaveChat";
+import { WaveLeaderboard } from "./leaderboard/WaveLeaderboard";
 
 interface WaveDetailedMobileProps {
   readonly wave: ApiWave;
   readonly view: WaveDetailedView;
-  readonly dropsView: WaveDetailedDropsView;
   readonly setView: (view: WaveDetailedView) => void;
-  readonly dropsSortBy: WaveDetailedDropsSortBy;
   readonly isLoading: boolean;
   readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
@@ -26,8 +27,6 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   wave,
   view,
   setView,
-  dropsView,
-  dropsSortBy,
   isLoading,
   onWaveChange,
   setIsLoading,
@@ -75,18 +74,19 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
     setIsLoading(true);
     onWaveChange(newWave);
     setActiveView(WaveDetailedMobileView.CHAT);
-    setView(WaveDetailedView.CONTENT);
+    setView(WaveDetailedView.CHAT);
     setTimeout(() => {
       setIsLoading(false);
     }, 300);
   };
 
   const chatComponents: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CONTENT]: <WaveDetailedContent wave={wave} dropsView={dropsView} dropsSortBy={dropsSortBy}  />,
+    [WaveDetailedView.CHAT]: <WaveChat wave={wave} />,
+    [WaveDetailedView.LEADERBOARD]: <WaveLeaderboard wave={wave} />,
     [WaveDetailedView.FOLLOWERS]: (
       <WaveDetailedFollowers
         wave={wave}
-        onBackClick={() => setView(WaveDetailedView.CONTENT)}
+        onBackClick={() => setView(WaveDetailedView.CHAT)}
       />
     ),
   };

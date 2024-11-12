@@ -3,13 +3,16 @@ import MyStream from "./MyStream";
 import { useRouter } from "next/router";
 import MyStreamWave from "./MyStreamWave";
 import BrainContent from "../content/BrainContent";
+import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
+import { AuthContext, TitleType } from "../../auth/Auth";
+import {
+  useMyStreamQuery,
+  usePollingQuery,
+} from "../../../hooks/useMyStreamQuery";
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../waves/detailed/WaveDetailedContent";
-import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { AuthContext, TitleType } from "../../auth/Auth";
-import { useMyStreamQuery, usePollingQuery } from "../../../hooks/useMyStreamQuery";
+} from "../../waves/detailed/chat/WaveChat";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);

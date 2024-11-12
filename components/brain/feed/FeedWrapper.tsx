@@ -2,9 +2,10 @@ import { TypedFeedItem } from "../../../types/feed.types";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 import FeedItems from "./FeedItems";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+
 interface FeedWrapperProps {
   readonly items: TypedFeedItem[];
   readonly loading: boolean;

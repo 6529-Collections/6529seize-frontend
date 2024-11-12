@@ -1,5 +1,4 @@
 import PrimaryButton from "../../utils/button/PrimaryButton";
-import { ActiveDropAction, ActiveDropState } from "./WaveDetailedContent";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
 import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -38,6 +37,7 @@ import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import { ActiveDropAction, ActiveDropState } from "./chat/WaveChat";
 
 export type CreateDropMetadataType =
   | {

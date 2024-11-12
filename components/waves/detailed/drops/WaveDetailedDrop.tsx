@@ -5,13 +5,13 @@ import WaveDetailedDropContent from "./WaveDetailedDropContent";
 import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
 import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
 import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
-import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
+import { ActiveDropState } from "../chat/WaveChat";
 
 export interface DropInteractionParams {
   drop: ExtendedDrop;
