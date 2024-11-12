@@ -188,42 +188,39 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
           </div>
 
           <div className="tw-w-full tw-ml-[21.5rem] no-scrollbar tw-overflow-y-auto tw-h-[calc(100vh-102px)] tw-pb-6">
-            <div className="tw-justify-center tw-inline-flex tw-items-center tw-p-1 tw-h-9 tw-bg-iron-950/80 tw-border tw-border-iron-800/60 tw-rounded-xl tw-relative tw-backdrop-blur-sm">
-              <div
-                className="tw-absolute tw-h-10 tw-bg-gradient-to-r tw-from-indigo-500/10 tw-via-indigo-500/5 tw-to-transparent tw-rounded-xl tw-transition-all tw-duration-300"
-                style={{
-                  width: "calc(50% - 4px)",
-                  left: activeTab === "leaderboard" ? "2px" : "calc(50% + 2px)",
-                }}
-              />
-              <a
-                onClick={() => setActiveTab("leaderboard")}
-                className={`tw-cursor-pointer tw-px-8 tw-py-2.5 tw-z-10 tw-transition-all tw-duration-200 ${
-                  activeTab === "leaderboard"
-                    ? "tw-text-white tw-font-medium"
-                    : "tw-text-iron-400 hover:tw-text-iron-200"
-                } tw-text-sm tw-tracking-wide`}
-              >
-                Leaderboard
-              </a>
-              <a
-                onClick={() => setActiveTab("chat")}
-                className={`tw-cursor-pointer tw-px-8 tw-py-2.5 tw-z-10 tw-transition-all tw-duration-200 ${
-                  activeTab === "chat"
-                    ? "tw-text-white tw-font-medium"
-                    : "tw-text-iron-400 hover:tw-text-iron-200"
-                } tw-text-sm tw-tracking-wide`}
-              >
-                Chat
-              </a>
+            <div className="tw-p-0.5 tw-relative tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-iron-700 tw-inline-flex tw-rounded-lg tw-w-auto tw-gap-x-0.5">
+              <div className={activeTab === "leaderboard" ? "tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800" : "tw-p-[1px] tw-flex tw-rounded-lg"}>
+                <button
+                  onClick={() => setActiveTab("leaderboard")}
+                  className={`tw-whitespace-nowrap tw-flex-1 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-font-medium tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out ${
+                    activeTab === "leaderboard"
+                      ? "tw-bg-iron-800 tw-text-iron-100"
+                      : "tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100"
+                  }`}
+                >
+                  Leaderboard
+                </button>
+              </div>
+              <div className={activeTab === "chat" ? "tw-p-[1px] tw-flex tw-rounded-full tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800" : "tw-p-[1px] tw-flex tw-rounded-full"}>
+                <button
+                  onClick={() => setActiveTab("chat")}
+                  className={`tw-whitespace-nowrap tw-flex-1 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-font-medium tw-border-0 tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out ${
+                    activeTab === "chat"
+                      ? "tw-bg-iron-800 tw-text-iron-100" 
+                      : "tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100"
+                  }`}
+                >
+                  Chat
+                </button>
+              </div>
             </div>
 
-            <div className="tw-mt-6 tw-rounded-xl tw-bg-gradient-to-br tw-from-indigo-500/10 tw-via-iron-900/95 tw-to-iron-900/90 tw-p-6 tw-backdrop-blur-sm">
+            <div className="tw-mt-4 tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
               <div className="tw-flex tw-flex-col sm:tw-flex-row tw-justify-between tw-items-center tw-gap-5">
                 <div className="tw-flex tw-items-center tw-gap-5">
-                  <div className="tw-size-12 tw-rounded-xl tw-bg-iron-800/40 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-indigo-500/20">
+                  <div className="tw-size-10 tw-rounded-xl tw-bg-gradient-to-br tw-from-primary-300/10 tw-to-primary-400/5 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10">
                     <svg
-                      className="tw-w-6 tw-h-6 tw-text-indigo-400"
+                      className="tw-w-5 tw-h-5 tw-text-white/60 mix-blend-overlay"
                       viewBox="0 0 24 24"
                       fill="none"
                     >
@@ -237,37 +234,37 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
                     </svg>
                   </div>
                   <div>
-                    <h2 className="tw-text-lg tw-font-medium tw-mb-1 tw-text-iron-50">
+                    <h2 className="tw-text-base tw-font-medium tw-mb-1 tw-text-white/90 mix-blend-overlay">
                       Time Remaining
                     </h2>
-                    <p className="tw-text-sm tw-text-iron-400 tw-m-0">
+                    <p className="tw-text-xs tw-text-white/60 mix-blend-overlay tw-m-0">
                       Competition ends December 15, 2024
                     </p>
                   </div>
                 </div>
-                <div className="tw-flex tw-gap-3">
-                  <div className="tw-group tw-bg-iron-950/60 tw-backdrop-blur-sm tw-px-5 tw-py-3 tw-rounded-xl tw-border tw-border-iron-800/40 hover:tw-border-indigo-500/30 tw-transition-colors">
-                    <span className="tw-text-2xl tw-font-medium tw-text-iron-50 tw-tracking-tight tw-group-hover:tw-text-white">
-                      01
+                <div className="tw-flex tw-gap-2">
+                  <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 hover:tw-border-primary-300/20 tw-transition-all">
+                    <span className="tw-text-lg tw-font-medium tw-text-white/90 tw-tracking-tight tw-group-hover:tw-text-white">
+                      1
                     </span>
-                    <span className="tw-ml-2 tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-400 tw-font-medium">
-                      Days
-                    </span>
-                  </div>
-                  <div className="tw-group tw-bg-iron-950/60 tw-backdrop-blur-sm tw-px-5 tw-py-3 tw-rounded-xl tw-border tw-border-iron-800/40 hover:tw-border-indigo-500/30 tw-transition-colors">
-                    <span className="tw-text-2xl tw-font-medium tw-text-iron-50 tw-tracking-tight tw-group-hover:tw-text-white">
-                      02
-                    </span>
-                    <span className="tw-ml-2 tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-400 tw-font-medium">
-                      Hrs
+                    <span className="tw-ml-1.5 tw-text-[10px] tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                      Day
                     </span>
                   </div>
-                  <div className="tw-group tw-bg-iron-950/60 tw-backdrop-blur-sm tw-px-5 tw-py-3 tw-rounded-xl tw-border tw-border-iron-800/40 hover:tw-border-indigo-500/30 tw-transition-colors">
-                    <span className="tw-text-2xl tw-font-medium tw-text-iron-50 tw-tracking-tight tw-group-hover:tw-text-white">
+                  <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 hover:tw-border-primary-300/20 tw-transition-all">
+                    <span className="tw-text-lg tw-font-medium tw-text-white/90 tw-tracking-tight tw-group-hover:tw-text-white">
+                      2
+                    </span>
+                    <span className="tw-ml-1.5 tw-text-[10px] tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                      Hours
+                    </span>
+                  </div>
+                  <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 hover:tw-border-primary-300/20 tw-transition-all">
+                    <span className="tw-text-lg tw-font-medium tw-text-white/90 tw-tracking-tight tw-group-hover:tw-text-white">
                       45
                     </span>
-                    <span className="tw-ml-2 tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-400 tw-font-medium">
-                      Min
+                    <span className="tw-ml-1.5 tw-text-[10px] tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                      Minutes
                     </span>
                   </div>
                 </div>
@@ -276,18 +273,19 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
 
             <div className="tw-mt-8 tw-flex tw-items-center tw-justify-between tw-mb-6">
               <div>
-                <h3 className="tw-text-xl tw-font-medium tw-text-iron-50 tw-mb-1">
+                <h3 className="tw-text-2xl tw-font-medium tw-text-iron-50 tw-mb-1">
                   Leaderboard
                 </h3>
                 <p className="tw-text-sm tw-text-iron-400 tw-mb-0">
                   Ranked by community ratings
                 </p>
               </div>
-              <div className="tw-flex tw-items-center tw-gap-x-6">
-                <button className="tw-group tw-border-0 tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-rounded-xl tw-bg-transparent tw-text-iron-300 hover:tw-bg-iron-950 tw-transition-all tw-duration-200">
+              <div className="tw-flex tw-items-center tw-gap-x-4">
+                <button className="tw-group tw-border-0 tw-flex tw-items-center tw-gap-2 tw-bg-transparent tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-rounded-lg tw-text-iron-300 hover:tw-bg-iron-800/60 hover:tw-text-white">
                   <svg
-                    className="tw-w-4 tw-h-4 tw-flex-shrink-0 tw-text-indigo-400 tw-group-hover:tw-text-indigo-300"
+                    className="tw-w-4 tw-h-4 tw-flex-shrink-0 tw-text-blue-400 group-hover:tw-text-blue-300"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                     fill="none"
                   >
                     <path
@@ -298,13 +296,13 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
                       strokeLinejoin="round"
                     />
                   </svg>
-                  My Work
+                  My Drops
                 </button>
-                <div className="tw-flex tw-items-center tw-gap-x-2">
-                  <button className="tw-border-0 tw-px-4 tw-py-1.5 tw-text-sm tw-font-medium tw-rounded-lg tw-bg-iron-800/80 tw-text-iron-200">
+                <div className="tw-flex tw-items-center tw-bg-iron-900/40 tw-backdrop-blur-sm tw-p-0.5 tw-rounded-lg tw-gap-x-1">
+                  <button className="tw-border-0 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-rounded-lg tw-bg-iron-800/80 tw-text-white">
                     Top Rated
                   </button>
-                  <button className="tw-bg-transparent tw-border-0 tw-px-4 tw-py-1.5 tw-text-sm tw-font-medium tw-rounded-lg tw-text-iron-400 hover:tw-text-iron-200 hover:tw-bg-iron-950 tw-transition-colors">
+                  <button className="tw-bg-transparent tw-border-0 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-rounded-lg tw-text-iron-300 hover:tw-bg-iron-800/60 hover:tw-text-white">
                     Recent
                   </button>
                 </div>
