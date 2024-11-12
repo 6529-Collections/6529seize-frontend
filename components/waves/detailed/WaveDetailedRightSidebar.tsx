@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ObjectSerializer";
 import { WaveDetailedOutcomes } from "./outcome/WaveDetailedOutcomes";
-import { WaveDetailedLeaderboard } from "./leaderboard/WaveDetailedLeaderboard";
+import { WaveDetailedSmallLeaderboard } from "./small-leaderboard/WaveDetailedSmallLeaderboard";
 
 interface WaveDetailedRightSidebarProps {
   readonly isOpen: boolean;
@@ -47,7 +47,7 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
       </button>
       <div className="tw-pt-[5.6rem] xl:tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
         <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
-          <WaveDetailedLeaderboard wave={wave} />
+          <WaveDetailedSmallLeaderboard wave={wave} />
           <WaveDetailedOutcomes wave={wave} />
         </div>
       </div>

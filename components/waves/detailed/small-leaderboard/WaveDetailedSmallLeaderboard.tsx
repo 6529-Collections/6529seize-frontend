@@ -6,12 +6,12 @@ import { WaveDetailedDropsSortBy } from "../WaveDetailed";
 import { WaveDetailedLeaderboardDrop } from "./WaveDetailedLeaderboardDrop";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
 
-interface WaveDetailedLeaderboardProps {
+interface WaveDetailedSmallLeaderboardProps {
   readonly wave: ApiWave;
 }
 
-export const WaveDetailedLeaderboard: React.FC<
-  WaveDetailedLeaderboardProps
+export const WaveDetailedSmallLeaderboard: React.FC<
+  WaveDetailedSmallLeaderboardProps
 > = ({ wave }) => {
   const { connectedProfile } = useContext(AuthContext);
   const {
@@ -47,7 +47,11 @@ export const WaveDetailedLeaderboard: React.FC<
         <div className="tw-flex tw-flex-col">
           <ul className="tw-space-y-3 tw-pl-0">
             {memoizedDrops.map((drop) => (
-              <WaveDetailedLeaderboardDrop drop={drop} wave={wave} key={drop.id} />
+              <WaveDetailedLeaderboardDrop
+                drop={drop}
+                wave={wave}
+                key={drop.id}
+              />
             ))}
           </ul>
           {isFetchingNextPage && (
