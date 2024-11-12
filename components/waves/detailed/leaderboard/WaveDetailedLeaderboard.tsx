@@ -47,7 +47,7 @@ export const WaveDetailedLeaderboard: React.FC<
         <div className="tw-flex tw-flex-col">
           <ul className="tw-space-y-3 tw-pl-0">
             {memoizedDrops.map((drop) => (
-              <WaveDetailedLeaderboardDrop drop={drop} key={drop.id} />
+              <WaveDetailedLeaderboardDrop drop={drop} wave={wave} key={drop.id} />
             ))}
           </ul>
           {isFetchingNextPage && (
