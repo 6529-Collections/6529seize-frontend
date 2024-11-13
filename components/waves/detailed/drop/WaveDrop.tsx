@@ -28,10 +28,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({ wave }) => {
                 </div>
                 <div className="tw-relative tw-mb-5">
                   <p className="tw-text-md tw-mb-0 tw-font-normal tw-leading-relaxed tw-text-iron-300">
-                    Building scalable solutions for next-generation web
-                    applications with focus on performance and security.
-                    Implementing advanced caching strategies and optimization
-                    techniques.
+                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Illo excepturi cum esse deleniti, veniam aliquam inventore odit vitae? Delectus, nam at. Laboriosam ratione non animi deserunt voluptas. 
                   </p>
                 </div>
 
@@ -175,13 +172,13 @@ export const WaveDrop: React.FC<WaveDropProps> = ({ wave }) => {
 
                     <div className="tw-flex tw-items-center tw-gap-2">
                       <button className="tw-border-0 tw-group tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-lg tw-bg-iron-950/50 hover:tw-bg-iron-950/80 tw-ring-1 tw-ring-iron-700/50 hover:tw-ring-emerald-500/50 tw-transition-all">
-                        <span className="tw-text-xs tw-font-medium tw-text-iron-300 group-hover:tw-text-emerald-400">2.1k to #3</span>
+                        <span className="tw-text-xs tw-font-medium tw-text-iron-300 group-hover:tw-text-emerald-400">2.1k TDH to #3</span>
                         <svg className="tw-w-3.5 tw-h-3.5 tw-text-emerald-500 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                       </button>
                       <button className="tw-border-0 tw-group tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-lg tw-bg-iron-950/50 hover:tw-bg-iron-950/80 tw-ring-1 tw-ring-iron-700/50 hover:tw-ring-emerald-500/50 tw-transition-all">
-                        <span className="tw-text-xs tw-font-medium tw-text-iron-300 group-hover:tw-text-emerald-400">4.5k to #2</span>
+                        <span className="tw-text-xs tw-font-medium tw-text-iron-300 group-hover:tw-text-emerald-400">4.5k TDH to #2</span>
                         <svg className="tw-w-3.5 tw-h-3.5 tw-text-emerald-500 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
