@@ -4,7 +4,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import WaveDetailedDropHeaderRank from "./WaveDetailedDropHeaderRank";
+import { DropTrophyIcon } from "../../utils/DropThrophyIcon";
 
 interface WaveDetailedDropHeaderProps {
   readonly drop: ApiDrop;
@@ -49,7 +49,7 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
             {getTimeAgoShort(drop.created_at)}
           </p>
         </div>
-        {drop.rank && <WaveDetailedDropHeaderRank rank={drop.rank} />}
+        {drop.rank && <DropTrophyIcon rank={drop.rank} />}
       </div>
       <div className="tw-mt-0.5">
         {showWaveInfo && (

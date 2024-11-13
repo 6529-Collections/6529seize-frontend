@@ -8,6 +8,7 @@ import { WaveChat } from "./chat/WaveChat";
 import { WaveLeaderboard } from "./leaderboard/WaveLeaderboard";
 import { WaveDetailedDesktopTabs } from "./WaveDetailedDesktopTabs";
 import { WaveDrop } from "./drop/WaveDrop";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
@@ -59,12 +60,14 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
+  const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
+
   const components: Record<WaveDetailedView, JSX.Element> = {
     [WaveDetailedView.CHAT]: (
       <WaveChat wave={wave} activeTab={view} setActiveTab={setView} />
     ),
     [WaveDetailedView.LEADERBOARD]: (
-      <WaveLeaderboard wave={wave}>
+      <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
         <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
       </WaveLeaderboard>
     ),
@@ -96,9 +99,15 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               />
             </div>
           </div>
-
-          {components[view]}
-          {/* <WaveDrop wave={wave} /> */}
+          {activeDrop ? (
+            <WaveDrop
+              wave={wave}
+              drop={activeDrop}
+              onClose={() => setActiveDrop(null)}
+            />
+          ) : (
+            components[view]
+          )}
         </div>
       </div>
     </div>

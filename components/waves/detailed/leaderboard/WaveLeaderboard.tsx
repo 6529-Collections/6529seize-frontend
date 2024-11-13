@@ -7,10 +7,12 @@ import {
   WaveDropsLeaderboardSortBy,
   WaveDropsLeaderboardSortDirection,
 } from "../../../../hooks/useWaveDropsLeaderboard";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveLeaderboardProps {
   readonly wave: ApiWave;
   readonly children: React.ReactNode;
+  readonly setActiveDrop: (drop: ExtendedDrop) => void;
 }
 
 export enum WaveLeaderboardSortType {
@@ -21,6 +23,7 @@ export enum WaveLeaderboardSortType {
 export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
   wave,
   children,
+  setActiveDrop,
 }) => {
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
     WaveLeaderboardSortType.RANK
@@ -58,6 +61,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
         dropsSortBy={sortBy[sort]}
         sortDirection={sortDirection[sort]}
         showMyDrops={showMyDrops}
+        setActiveDrop={setActiveDrop}
       />
     </div>
   );

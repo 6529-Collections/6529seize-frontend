@@ -8,12 +8,14 @@ import {
 } from "../../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../../hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
+import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
   readonly dropsSortBy: WaveDropsLeaderboardSortBy;
   readonly sortDirection: WaveDropsLeaderboardSortDirection;
   readonly showMyDrops: boolean;
+  readonly setActiveDrop: (drop: ExtendedDrop) => void;
 }
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
@@ -21,6 +23,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   dropsSortBy,
   sortDirection,
   showMyDrops,
+  setActiveDrop,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const {
@@ -50,7 +53,12 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   return (
     <div className="tw-space-y-4">
       {memoizedDrops.map((drop) => (
-        <WaveLeaderboardDrop key={drop.id} drop={drop} wave={wave} />
+        <WaveLeaderboardDrop
+          key={drop.id}
+          drop={drop}
+          wave={wave}
+          setActiveDrop={setActiveDrop}
+        />
       ))}{" "}
       {isFetchingNextPage && (
         <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
