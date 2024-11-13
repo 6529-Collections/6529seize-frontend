@@ -16,30 +16,28 @@ export const WaveLeaderboardDropAuthor: React.FC<
   return (
     <Link
       href={`/${drop.author.handle}`}
-      className="tw-flex tw-items-center tw-gap-3 tw-no-underline"
+      className="tw-flex tw-items-center tw-gap-x-3 tw-no-underline"
     >
       <div className="tw-relative">
         {drop.author.pfp ? (
           <img
-            className="tw-size-8 tw-rounded-lg tw-ring-2 tw-ring-[#E8D48A]/20 tw-object-cover"
+            className="tw-size-8 tw-rounded-lg tw-bg-iron-900 tw-ring-2 tw-ring-white/10 tw-object-contain"
             src={drop.author.pfp}
             alt="User avatar"
           />
         ) : (
-          <div className="tw-size-8 tw-rounded-lg tw-ring-2 tw-ring-[#E8D48A]/20 tw-bg-iron-800" />
+          <div className="tw-size-8 tw-rounded-lg tw-ring-2 tw-ring-white/10 tw-bg-iron-800" />
         )}
       </div>
-      <div>
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <span className="tw-text-md tw-font-semibold tw-text-iron-100">
-            {drop.author.handle}
-          </span>
-          <UserCICAndLevel
-            level={drop.author.level}
-            cicType={cicToType(drop.author.cic)}
-            size={UserCICAndLevelSize.MEDIUM}
-          />
-        </div>
+      <div className="tw-flex tw-items-center tw-gap-x-2">
+        <UserCICAndLevel
+          level={drop.author.level}
+          cicType={cicToType(drop.author.cic)}
+          size={UserCICAndLevelSize.MEDIUM}
+        />
+        <span className="tw-text-md tw-font-semibold tw-text-iron-100">
+          {drop.author.handle}
+        </span>
       </div>
     </Link>
   );

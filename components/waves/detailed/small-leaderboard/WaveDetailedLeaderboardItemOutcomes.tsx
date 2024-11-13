@@ -62,6 +62,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
           <svg
             className="tw-size-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
+            aria-hidden="true"
             fill="none"
           >
             <path
@@ -81,6 +82,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
           <svg
             className="tw-size-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
+            aria-hidden="true"
             fill="none"
           >
             <path
@@ -103,6 +105,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
           <svg
             className="tw-size-4 tw-text-amber-300 tw-flex-shrink-0"
             viewBox="0 0 24 24"
+            aria-hidden="true"
             fill="none"
           >
             <path
@@ -113,7 +116,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
               strokeLinejoin="round"
             />
           </svg>
-          <span className="tw-text-iron-300 tw-truncate tw-max-w-[150px]">
+          <span className="tw-text-iron-300">
             {outcome.description}
           </span>
         </div>

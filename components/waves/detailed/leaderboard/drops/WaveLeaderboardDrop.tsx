@@ -17,7 +17,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
 }) => {
   const getContainerClasses = (): string => {
     if (!drop.rank || drop.rank > 3) {
-      return "tw-from-iron-900/40 tw-to-iron-900/20 hover:tw-from-iron-900";
+      return "tw-from-iron-900 tw-to-iron-900 hover:tw-from-iron-800 hover:tw-to-iron-800";
     }
     if (drop.rank === 1) {
       return "tw-from-[#E8D48A]/15 tw-to-iron-900/80 hover:tw-from-[#E8D48A]/30";
@@ -38,7 +38,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       <div
         className={`tw-rounded-xl tw-bg-gradient-to-b ${containerClasses} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
       >
-        <div className="tw-rounded-xl tw-bg-iron-950/95 tw-backdrop-blur-xl tw-p-6">
+        <div className="tw-rounded-xl tw-bg-iron-950 tw-p-6">
           <div className="tw-flex tw-gap-5">
             <WaveLeaderboardDropRankIndicator drop={drop} />
             <div className="tw-flex-1">

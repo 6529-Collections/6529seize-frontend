@@ -23,7 +23,7 @@ export const WaveLeaderboardDropRaters: React.FC<
   const rankStyle = drop.rank && drop.rank <= 3 ? topThreeRankStyles[drop.rank] : "tw-text-iron-300";
 
   return (
-    <div className="tw-px-4 tw-py-1.5 tw-rounded-xl tw-bg-iron-900/80 tw-ring-1 tw-ring-iron-700/50 tw-backdrop-blur-sm">
+    <div className="tw-px-4 tw-py-1.5 tw-rounded-xl tw-bg-iron-900/80 tw-ring-1 tw-ring-iron-700/50">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <span className="tw-text-sm tw-font-normal tw-text-iron-400">
           {formatNumberWithCommas(drop.raters_count)} {votersCountLabel}

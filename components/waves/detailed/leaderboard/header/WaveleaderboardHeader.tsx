@@ -23,28 +23,26 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   return (
     <div className="tw-mt-8 tw-flex tw-items-center tw-justify-between tw-mb-6">
       <div>
-        <h3 className="tw-text-2xl tw-font-medium tw-text-iron-50 tw-mb-1">
+        <h3 className="tw-text-2xl tw-font-semibold tw-text-iron-200 tw-mb-0">
           Leaderboard
         </h3>
         <p className="tw-text-sm tw-text-iron-400 tw-mb-0">
-          Ranked by community ratings
+          Ranked by community votings
         </p>
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-4">
         {connectedProfile && (
           <button
-            className={`tw-group tw-border-0 tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-rounded-lg ${
+            className={`tw-group tw-border tw-border-solid tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out ${
               showMyDrops
-                ? "tw-bg-iron-800/60 tw-text-white"
-                : "tw-bg-transparent tw-text-iron-300 hover:tw-bg-iron-800/60 hover:tw-text-white"
+                ? "tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-500/80 tw-border-primary-500 desktop-hover:hover:tw-border-primary-500/80"
+                : "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-white tw-border-transparent"
             }`}
             onClick={() => setShowMyDrops(!showMyDrops)}
           >
             <svg
-              className={`tw-w-4 tw-h-4 tw-flex-shrink-0 ${
-                showMyDrops
-                  ? "tw-text-blue-300"
-                  : "tw-text-blue-400 group-hover:tw-text-blue-300"
+              className={`tw-w-4 tw-h-4 tw-flex-shrink-0 tw-transition-all tw-duration-300 tw-ease-out ${
+                showMyDrops ? "tw-text-white" : "tw-text-primary-300"
               }`}
               viewBox="0 0 24 24"
               aria-hidden="true"
