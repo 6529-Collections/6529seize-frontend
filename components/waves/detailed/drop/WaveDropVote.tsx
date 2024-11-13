@@ -147,14 +147,14 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
             </div>
           </div>
 
-          <div className="tw-flex tw-items-center tw-gap-x-2">
+          <div className="tw-flex tw-items-center tw-gap-x-3">
             <button
               onMouseDown={() => startPress(true)}
               onMouseUp={stopPress}
               onMouseLeave={stopPress}
               onTouchStart={() => startPress(true)}
               onTouchEnd={stopPress}
-              className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-xl tw-bg-iron-900/80 tw-ring-1 tw-ring-iron-700/50 hover:tw-ring-iron-600/50 tw-text-iron-300 hover:tw-text-iron-200 tw-transition-all tw-duration-300"
+              className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-xl tw-bg-iron-800/80 tw-ring-1 tw-ring-iron-700/50 hover:tw-ring-emerald-400/50 tw-text-emerald-400 hover:tw-text-emerald-300 tw-transition-all tw-duration-300 hover:tw-scale-105 hover:tw-bg-iron-800/90 active:tw-scale-95"
             >
               <svg
                 className="tw-w-4 tw-h-4 tw-flex-shrink-0 tw-transition-transform tw-duration-300 tw-group-hover/btn:-tw-translate-y-0.5"
@@ -176,7 +176,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
               onMouseLeave={stopPress}
               onTouchStart={() => startPress(false)}
               onTouchEnd={stopPress}
-              className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-xl tw-bg-iron-900/80 tw-ring-1 tw-ring-iron-700/50 hover:tw-ring-iron-600/50 tw-text-iron-300 hover:tw-text-iron-200 tw-transition-all tw-duration-300"
+              className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-xl tw-bg-iron-800/80 tw-ring-1 tw-ring-iron-700/50 hover:tw-ring-rose-400/50 tw-text-rose-400 hover:tw-text-rose-300 tw-transition-all tw-duration-300 hover:tw-scale-105 hover:tw-bg-iron-800/90 active:tw-scale-95"
             >
               <svg
                 className="tw-w-4 tw-h-4 tw-flex-shrink-0 tw-transition-transform tw-duration-300 tw-group-hover/btn:tw-translate-y-0.5"

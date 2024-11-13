@@ -57,7 +57,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
     (outcome) => outcome.type === ApiWaveOutcomeType.Manual && false
   );
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-3 tw-text-xs">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-text-xs">
       {!!nic && (
         <div className="tw-flex tw-items-center tw-text-blue-300 tw-gap-x-1 tw-whitespace-nowrap">
           <svg

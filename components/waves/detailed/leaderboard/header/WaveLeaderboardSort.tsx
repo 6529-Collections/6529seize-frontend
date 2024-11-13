@@ -20,7 +20,7 @@ export const WaveLeaderboardSort: React.FC<WaveLeaderboardSortProps> = ({
             : "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800/80 desktop-hover:hover:tw-border-iron-800/80 tw-border-transparent"
         }`}
       >
-        Top Rated
+        Top Voted
       </button>
       <button
         onClick={() => setSort(WaveLeaderboardSortType.RECENT)}

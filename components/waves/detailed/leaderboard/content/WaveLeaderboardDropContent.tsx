@@ -37,6 +37,7 @@ export const WaveLeaderboardDropContent: React.FC<
             <svg
               className="tw-size-4 tw-text-iron-400 tw-flex-shrink-0"
               viewBox="0 0 24 24"
+              aria-hidden="true"
               fill="none"
             >
               <path

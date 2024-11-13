@@ -108,6 +108,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
           ) : (
             components[view]
           )}
+          <div className="tw-flex-1">chat</div>
         </div>
       </div>
     </div>

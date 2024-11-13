@@ -37,12 +37,12 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
   });
 
   return (
-    <div className="tw-max-w-lg">
+    <div className="tw-ml-[21.5rem] tw-max-w-md tw-w-full">
       <div className="tw-rounded-xl tw-bg-gradient-to-b tw-from-iron-900 tw-to-iron-900 tw-p-[1px] tw-transition tw-duration-300 tw-ease-out">
-        <div className="tw-relative tw-rounded-xl tw-bg-iron-950/95 tw-backdrop-blur-xl tw-p-6">
+        <div className="tw-relative tw-rounded-xl tw-bg-iron-950/95 tw-backdrop-blur-xl tw-py-6">
           <button
             type="button"
-            className="tw-absolute tw-z-1000 tw-top-4 tw-right-4 hover:tw-text-gray-400 tw-bg-transparent tw-border-none"
+            className="tw-absolute tw-z-1000 tw-top-4 tw-right-4 tw-text-iron-300 desktop-hover:hover:tw-text-iron-100 tw-bg-transparent tw-border-0 tw-transition tw-duration-300 tw-ease-out"
             onClick={onClose}
           >
             <svg
@@ -60,13 +60,17 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
               />
             </svg>
           </button>
-          <div className="tw-flex tw-gap-6">
-            {drop.rank && <WaveDropPosition rank={drop.rank} />}
+          <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2">
+            <div className="tw-px-6">
+              {drop.rank && <WaveDropPosition rank={drop.rank} />}
+            </div>
 
             <div className="tw-flex-1">
-              <WaveDropContent drop={drop} />
+              <div className="tw-px-6">
+                <WaveDropContent drop={drop} />
+              </div>
 
-              <div className="tw-flex tw-flex-col tw-gap-3">
+              <div className="tw-flex tw-flex-col tw-gap-3 tw-border-t tw-border-iron-800 tw-pt-3 tw-px-6 tw-border-solid tw-border-x-0 tw-border-b-0">
                 <WaveDropTime wave={wave} />
                 <WaveDropVote wave={wave} drop={drop} />
                 <WaveDropVotes drop={drop} />

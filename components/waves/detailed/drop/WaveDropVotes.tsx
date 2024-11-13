@@ -12,14 +12,14 @@ export const WaveDropVotes: React.FC<WaveDropVotesProps> = ({ drop }) => {
   const firstThreeVoters = drop.top_raters.slice(0, 3);
   return (
     <div className="tw-flex tw-items-center tw-justify-between tw-px-1">
-      <div className="tw-flex tw-items-baseline tw-gap-2">
+      <div className="tw-flex tw-items-baseline tw-gap-x-2">
         <span className="tw-text-xl tw-font-semibold tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent">
           {formatNumberWithCommas(drop.rating)}
         </span>
         <span className="tw-text-xs tw-text-iron-400">TDH total</span>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-3">
-        <div className="tw-flex -tw-space-x-1.5">
+      <div className="tw-flex tw-items-end tw-gap-x-3">
+        <div className="tw-flex tw-items-center -tw-space-x-1.5">
           {firstThreeVoters.map((voter) => (
             <Tippy
               key={voter.profile.handle}
@@ -41,7 +41,7 @@ export const WaveDropVotes: React.FC<WaveDropVotesProps> = ({ drop }) => {
             </Tippy>
           ))}
         </div>
-        <div className="tw-flex tw-items-baseline tw-gap-1.5">
+        <div className="tw-flex tw-items-baseline tw-gap-x-1">
           <span className="tw-text-base tw-font-medium tw-text-iron-100">
             {formatNumberWithCommas(drop.raters_count)}
           </span>

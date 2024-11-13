@@ -53,6 +53,7 @@ export const WaveDropVoteQuickButton: React.FC<
             }`}
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
             stroke="currentColor"
           >
             <path

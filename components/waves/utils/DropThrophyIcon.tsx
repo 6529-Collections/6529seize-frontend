@@ -8,9 +8,10 @@ interface DropTrophyIconProps {
 export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
   if (rank === 1) {
     return (
-      <div className="tw-bg-[#35322C] tw-rounded-full tw-py-1 tw-px-2 tw-text-[#E8D48A] tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#E8D48A]/30 tw-ring-[#E8D48A]/30 tw-rounded-lg tw-py-1 tw-px-2 tw-text-[#E8D48A] tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-2">
         <svg
-          className="tw-size-3 tw-flex-shrink-0 tw-text-[#E8D48A]"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-[#E8D48A]"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 576 512"
         >
@@ -27,9 +28,10 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
 
   if (rank === 2) {
     return (
-      <div className="tw-bg-[#32343C] tw-rounded-full tw-py-1 tw-px-2 tw-text-[#DDDDDD] tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#dddddd]/20 tw-ring-[#dddddd]/30 tw-rounded-lg tw-py-1 tw-px-2 tw-text-[#DDDDDD] tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-2">
         <svg
-          className="tw-size-3 tw-flex-shrink-0 tw-text-[#DDDDDD]"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-[#DDDDDD]"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 576 512"
         >
@@ -46,10 +48,11 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
 
   if (rank === 3) {
     return (
-      <div className="tw-bg-[#33302C] tw-rounded-full tw-py-1 tw-px-2 tw-text-[#D9A962] tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-2">
+      <div className="tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#CD7F32]/20 tw-ring-[#CD7F32]/30 tw-rounded-lg tw-py-1 tw-px-2 tw-text-[#CD7F32] tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-2">
         <svg
-          className="tw-size-3 tw-flex-shrink-0 tw-text-[#D9A962]"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-[#CD7F32]"
           xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
           viewBox="0 0 576 512"
         >
           {/* Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. */}
@@ -64,8 +67,7 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
   }
 
   return (
-    <div className="tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-1 tw-text-iron-500">
-      <span>Rank</span>
+    <div className="tw-font-semibold tw-text-xs tw-text-iron-300 tw-flex tw-items-center tw-py-1 tw-px-2 tw-rounded-lg tw-bg-iron-800/80 tw-justify-center tw-ring-1 tw-ring-iron-700/50">
       <span>{formatNumberWithCommas(rank)}</span>
     </div>
   );
