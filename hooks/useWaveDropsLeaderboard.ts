@@ -33,9 +33,8 @@ interface UseWaveDropsLeaderboardProps {
   readonly reverse: boolean;
   readonly dropsSortBy: WaveDropsLeaderboardSortBy;
   readonly sortDirection: WaveDropsLeaderboardSortDirection;
+  readonly handle?: string | undefined;
 }
-
-
 
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
@@ -60,6 +59,7 @@ export function useWaveDropsLeaderboard({
   reverse,
   dropsSortBy,
   sortDirection,
+  handle,
 }: UseWaveDropsLeaderboardProps) {
   const queryClient = useQueryClient();
 
@@ -78,6 +78,7 @@ export function useWaveDropsLeaderboard({
       page_size: WAVE_DROPS_PARAMS.limit,
       sort: dropsSortBy,
       sort_direction: sortDirection,
+      handle,
     },
   ];
 
@@ -94,6 +95,11 @@ export function useWaveDropsLeaderboard({
         if (pageParam) {
           params.page = `${pageParam}`;
         }
+
+        if (handle) {
+          params.author_identity = handle;
+        }
+
         return await commonApiFetch<ApiDropsLeaderboardPage>({
           endpoint: `waves/${waveId}/leaderboard`,
           params,
@@ -125,6 +131,10 @@ export function useWaveDropsLeaderboard({
 
       if (pageParam) {
         params.page = `${pageParam}`;
+      }
+
+      if (handle) {
+        params.author_identity = handle;
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -167,6 +177,10 @@ export function useWaveDropsLeaderboard({
         sort: dropsSortBy,
         sort_direction: sortDirection,
       };
+
+      if (handle) {
+        params.author_identity = handle;
+      }
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,

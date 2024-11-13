@@ -26,6 +26,8 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
     WaveLeaderboardSortType.RANK
   );
 
+  const [showMyDrops, setShowMyDrops] = useState(false);
+
   const sortBy: Record<WaveLeaderboardSortType, WaveDropsLeaderboardSortBy> = {
     [WaveLeaderboardSortType.RANK]: WaveDropsLeaderboardSortBy.RANK,
     [WaveLeaderboardSortType.RECENT]: WaveDropsLeaderboardSortBy.CREATION_TIME,
@@ -44,11 +46,18 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
       {children}
 
       <WaveLeaderboardTime wave={wave} />
-      <WaveLeaderboardHeader wave={wave} sort={sort} setSort={setSort} />
+      <WaveLeaderboardHeader
+        wave={wave}
+        sort={sort}
+        setSort={setSort}
+        showMyDrops={showMyDrops}
+        setShowMyDrops={setShowMyDrops}
+      />
       <WaveLeaderboardDrops
         wave={wave}
         dropsSortBy={sortBy[sort]}
         sortDirection={sortDirection[sort]}
+        showMyDrops={showMyDrops}
       />
     </div>
   );

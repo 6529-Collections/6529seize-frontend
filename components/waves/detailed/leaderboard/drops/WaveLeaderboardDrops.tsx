@@ -13,12 +13,14 @@ interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
   readonly dropsSortBy: WaveDropsLeaderboardSortBy;
   readonly sortDirection: WaveDropsLeaderboardSortDirection;
+  readonly showMyDrops: boolean;
 }
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
   dropsSortBy,
   sortDirection,
+  showMyDrops,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const {
@@ -34,6 +36,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     reverse: true,
     dropsSortBy,
     sortDirection,
+    handle: showMyDrops ? connectedProfile?.profile?.handle : undefined,
   });
 
   const memoizedDrops = useMemo(() => drops, [drops]);

@@ -97,8 +97,8 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
             </div>
           </div>
 
-          {/* {components[view]} */}
-          <WaveDrop wave={wave} />
+          {components[view]}
+          {/* <WaveDrop wave={wave} /> */}
         </div>
       </div>
     </div>
