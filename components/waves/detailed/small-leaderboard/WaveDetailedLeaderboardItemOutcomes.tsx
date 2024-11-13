@@ -1,11 +1,12 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiWaveOutcomeCredit } from "../../../../generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "../../../../generated/models/ApiWaveOutcomeType";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 interface WaveDetailedLeaderboardItemOutcomesProps {
-  readonly drop: ExtendedDrop;
+  readonly drop: ApiDrop;
   readonly wave: ApiWave;
 }
 
@@ -13,7 +14,7 @@ const calculateNIC = ({
   drop,
   wave,
 }: {
-  drop: ExtendedDrop;
+  drop: ApiDrop;
   wave: ApiWave;
 }): number => {
   const rank = drop.rank;
@@ -32,7 +33,7 @@ const calculateRep = ({
   drop,
   wave,
 }: {
-  drop: ExtendedDrop;
+  drop: ApiDrop;
   wave: ApiWave;
 }): number => {
   const rank = drop.rank;
@@ -53,7 +54,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
   const nic = calculateNIC({ drop, wave });
   const rep = calculateRep({ drop, wave });
   const manualOutcomes = wave.outcomes.filter(
-    (outcome) => outcome.type === ApiWaveOutcomeType.Manual
+    (outcome) => outcome.type === ApiWaveOutcomeType.Manual && false
   );
   return (
     <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-3 tw-text-xs">

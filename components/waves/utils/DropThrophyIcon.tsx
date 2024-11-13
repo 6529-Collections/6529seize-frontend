@@ -1,13 +1,11 @@
 import React from "react";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { formatNumberWithCommas } from "../../../helpers/Helpers";
 
-interface WaveDetailedDropHeaderRankProps {
+interface DropTrophyIconProps {
   readonly rank: number;
 }
 
-const WaveDetailedDropHeaderRank: React.FC<WaveDetailedDropHeaderRankProps> = ({
-  rank,
-}) => {
+export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
   if (rank === 1) {
     return (
       <div className="tw-bg-[#35322C] tw-rounded-full tw-py-1 tw-px-2 tw-text-[#E8D48A] tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-2">
@@ -72,5 +70,3 @@ const WaveDetailedDropHeaderRank: React.FC<WaveDetailedDropHeaderRankProps> = ({
     </div>
   );
 };
-
-export default WaveDetailedDropHeaderRank;
