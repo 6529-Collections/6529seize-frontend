@@ -102,6 +102,11 @@ export const WaveDropTime: React.FC<WaveDropTimeProps> = ({ wave }) => {
           </div>
         </div>
       </div>
+
+      <div className="tw-text-sm tw-text-white/60 tw-bg-white/5 tw-rounded-lg tw-p-3 tw-text-center">
+        The voting has ended
+      </div>
+
       {/* <div className="tw-h-1 tw-bg-iron-800/50 tw-rounded-full">
         <div 
           className="tw-h-full tw-bg-gradient-to-r tw-from-emerald-700 tw-to-emerald-600 tw-rounded-full" 

@@ -1,6 +1,9 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ApiDrop, ApiWave } from "../../../../generated/models/ObjectSerializer";
+import {
+  ApiDrop,
+  ApiWave,
+} from "../../../../generated/models/ObjectSerializer";
 import { useState, useEffect, useRef } from "react";
 import DropListItemRateGiveSubmit from "../../../drops/view/item/rate/give/DropListItemRateGiveSubmit";
 import { DropVoteState } from "../../../drops/view/item/DropsListItem";
@@ -159,6 +162,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
               <svg
                 className="tw-w-4 tw-h-4 tw-flex-shrink-0 tw-transition-transform tw-duration-300 tw-group-hover/btn:-tw-translate-y-0.5"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
                 fill="none"
               >
                 <path
@@ -205,7 +209,18 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
           isMobile={false}
         />
       </div>
-
+      <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-400">
+        <div className="tw-flex tw-items-center tw-gap-1">
+          <span>
+            Your votes: <span className="tw-text-iron-200">2</span>
+          </span>
+        </div>
+        <div className="tw-flex tw-items-center tw-gap-1">
+          <span>
+            Remaining: <span className="tw-text-iron-200">5</span>
+          </span>
+        </div>
+      </div>
       {drop.rank !== 1 && (
         <WaveDropVoteQuick drop={drop} setValue={setVoteValue} />
       )}

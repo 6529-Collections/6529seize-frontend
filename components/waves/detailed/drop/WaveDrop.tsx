@@ -14,6 +14,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { WaveDropVotes } from "./WaveDropVotes";
 import { WaveDropAuthor } from "./WaveDropAuthor";
 import { WaveDetailedLeaderboardItemOutcomes } from "../small-leaderboard/WaveDetailedLeaderboardItemOutcomes";
+import Tippy from "@tippyjs/react";
 
 interface WaveDropProps {
   readonly wave: ApiWave;
@@ -37,7 +38,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
   });
 
   return (
-    <div className="tw-ml-[21.5rem] tw-max-w-md tw-w-full">
+    <div className="tw-ml-[21.5rem] tw-max-w-md tw-w-full tw-h-[calc(100vh-102px)] tw-overflow-y-auto">
       <div className="tw-rounded-xl tw-bg-gradient-to-b tw-from-iron-900 tw-to-iron-900 tw-p-[1px] tw-transition tw-duration-300 tw-ease-out">
         <div className="tw-relative tw-rounded-xl tw-bg-iron-950/95 tw-backdrop-blur-xl tw-py-6">
           <button
@@ -65,7 +66,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
               {drop.rank && <WaveDropPosition rank={drop.rank} />}
             </div>
 
-            <div className="tw-flex-1">
+            <div className="tw-flex-1 tw-w-full">
               <div className="tw-px-6">
                 <WaveDropContent drop={drop} />
               </div>
@@ -75,8 +76,16 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
                 <WaveDropVote wave={wave} drop={drop} />
                 <WaveDropVotes drop={drop} />
 
-                <div className="tw-flex tw-items-center tw-gap-x-4 tw-mt-1">
-                  <WaveDropAuthor drop={drop} />
+                <div className="tw-flex tw-items-center tw-gap-x-4 tw-justify-between tw-mt-1">
+                  <div className="tw-flex tw-items-center tw-gap-x-2">
+                    <WaveDropAuthor drop={drop} />
+                    <div className="tw-flex tw-gap-x-2 tw-items-center">
+                      <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+                      <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+                        15min
+                      </p>
+                    </div>
+                  </div>
                   <WaveDetailedLeaderboardItemOutcomes
                     drop={drop}
                     wave={wave}

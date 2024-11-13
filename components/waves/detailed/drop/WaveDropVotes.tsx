@@ -12,7 +12,7 @@ export const WaveDropVotes: React.FC<WaveDropVotesProps> = ({ drop }) => {
   const firstThreeVoters = drop.top_raters.slice(0, 3);
   return (
     <div className="tw-flex tw-items-center tw-justify-between tw-px-1">
-      <div className="tw-flex tw-items-baseline tw-gap-x-2">
+      <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
         <span className="tw-text-xl tw-font-semibold tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent">
           {formatNumberWithCommas(drop.rating)}
         </span>
