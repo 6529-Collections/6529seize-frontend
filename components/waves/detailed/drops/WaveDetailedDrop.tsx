@@ -110,6 +110,7 @@ interface WaveDetailedDropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
@@ -125,6 +126,7 @@ const WaveDetailedDrop = ({
   onQuote,
   onReplyClick,
   onQuoteClick,
+  onDropClick,
   showReplyAndQuote,
   parentContainerRef,
 }: WaveDetailedDropProps) => {
@@ -192,9 +194,8 @@ const WaveDetailedDrop = ({
   }, []);
 
   const handleDropClick = useCallback(() => {
-    if (isMobile) return;
-    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
-  }, [onReply, drop, activePartIndex, isMobile]);
+    onDropClick(drop);
+  }, [onDropClick, drop]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);

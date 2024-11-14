@@ -36,7 +36,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   const containerClasses = getContainerClasses();
 
   return (
-    <div className="tw-group">
+    <div className="tw-group tw-cursor-pointer" onClick={() => setActiveDrop(drop)}>
       <div
         className={`tw-rounded-xl tw-bg-gradient-to-b ${containerClasses} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
       >

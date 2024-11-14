@@ -47,6 +47,8 @@ export default function FeedItemDropReplied({
       onQuote={onQuote}
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
+      // TODO: Implement this
+      onDropClick={() => {}}
     />
   );
 }

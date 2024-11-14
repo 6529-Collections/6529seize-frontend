@@ -141,6 +141,8 @@ export default function Drops() {
         isFetchingNextPage={isFetchingNextPage}
         onQuoteClick={onQuoteClick}
         dropViewDropId={null}
+        // TODO: Implement this
+        onDropClick={() => {}}
       />
       <div ref={bottomRef} style={{ height: "1px" }} />
     </div>

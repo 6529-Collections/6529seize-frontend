@@ -2,9 +2,7 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
-import {
-  WaveDetailedView,
-} from "./WaveDetailed";
+import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
 import { WaveChat } from "./chat/WaveChat";
 import { WaveLeaderboard } from "./leaderboard/WaveLeaderboard";
@@ -81,8 +79,21 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   };
 
   const chatComponents: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CHAT]: <WaveChat wave={wave} />,
-    [WaveDetailedView.LEADERBOARD]: <WaveLeaderboard wave={wave} />,
+    [WaveDetailedView.CHAT]: (
+      <WaveChat
+        wave={wave}
+        // TODO: Implement this
+        activeTab={WaveDetailedView.CHAT}
+        setActiveTab={() => {}}
+        onDropClick={() => {}}
+      />
+    ),
+    [WaveDetailedView.LEADERBOARD]: (
+      // TODO: Implement this
+      <WaveLeaderboard wave={wave} setActiveDrop={() => {}} >
+        <div></div>
+      </WaveLeaderboard>
+    ),
     [WaveDetailedView.FOLLOWERS]: (
       <WaveDetailedFollowers
         wave={wave}

@@ -46,6 +46,8 @@ export default function FeedItemDropCreated({
       onQuote={onQuote}
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
+      // TODO: Implement this
+      onDropClick={() => {}}
     />
   );
 }

@@ -28,7 +28,7 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
     action: ActiveDropAction.REPLY,
     drop: drop,
-    partId: 0,
+    partId: 1,
   });
 
   const onReply = (drop: ApiDrop, partId: number) => {
@@ -60,7 +60,7 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     setActiveDrop({
       action: ActiveDropAction.REPLY,
       drop: drop,
-      partId: 0,
+      partId: 1,
     });
   };
 
@@ -81,6 +81,8 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
                 activeDrop={activeDrop}
                 initialDrop={null}
                 dropId={drop.id}
+                // TODO: Implement this
+                onDropClick={() => {}}
               />
               {true && (
                 <div className="tw-mt-auto">

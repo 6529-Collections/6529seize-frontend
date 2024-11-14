@@ -11,6 +11,7 @@ import { CreateDropWaveWrapper } from "../CreateDropWaveWrapper";
 import CreateDrop from "../CreateDrop";
 import { WaveDetailedView } from "../WaveDetailed";
 import { WaveDetailedDesktopTabs } from "../WaveDetailedDesktopTabs";
+import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -27,12 +28,14 @@ interface WaveChatProps {
   readonly wave: ApiWave;
   readonly activeTab: WaveDetailedView;
   readonly setActiveTab: (tab: WaveDetailedView) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveChat: React.FC<WaveChatProps> = ({
   wave,
   activeTab,
   setActiveTab,
+  onDropClick,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -126,6 +129,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
                   activeDrop={activeDrop}
                   initialDrop={initialDrop}
                   dropId={null}
+                  onDropClick={onDropClick}
                 />
                 {canDrop && (
                   <div className="tw-mt-auto">
@@ -148,6 +152,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
         <WaveDetailedRightSidebar
           isOpen={isSidebarOpen}
           wave={wave}
+          onDropClick={onDropClick}
           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         />
       )}
