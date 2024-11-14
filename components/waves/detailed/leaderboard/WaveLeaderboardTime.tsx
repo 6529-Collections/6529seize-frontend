@@ -27,9 +27,10 @@ enum WaveLeaderboardTimeState {
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
 }) => {
-
-  const participationPeriodMin = wave.participation.period?.min ?? Time.currentMillis();
-  const participationPeriodMax = wave.participation.period?.max ?? Time.currentMillis();
+  const participationPeriodMin =
+    wave.participation.period?.min ?? Time.currentMillis();
+  const participationPeriodMax =
+    wave.participation.period?.max ?? Time.currentMillis();
   const votingPeriodMin = wave.voting.period?.min ?? Time.currentMillis();
   const votingPeriodMax = wave.voting.period?.max ?? Time.currentMillis();
 
@@ -59,8 +60,10 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     return WaveLeaderboardTimeState.IN_PROGRESS;
   };
 
-  const [droppingTimeState, setDroppingTimeState] = useState<WaveLeaderboardTimeState>(getDroppingTimeState());
-  const [votingTimeState, setVotingTimeState] = useState<WaveLeaderboardTimeState>(getVotingTimeState());
+  const [droppingTimeState, setDroppingTimeState] =
+    useState<WaveLeaderboardTimeState>(getDroppingTimeState());
+  const [votingTimeState, setVotingTimeState] =
+    useState<WaveLeaderboardTimeState>(getVotingTimeState());
 
   const [droppingTimeLeft, setDroppingTimeLeft] = useState<TimeLeft>({
     days: 0,
@@ -173,227 +176,224 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   }, [wave]);
 
   return (
-    <div className="container">
-      <div className="tw-mt-4 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
-        {/* Dropping Phase Card */}
-        <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20 [container-type:inline-size]">
-          <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
-            <div className="tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-emerald-300/10 tw-to-emerald-400/5 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10">
-              {droppingTimeState === WaveLeaderboardTimeState.COMPLETED ? (
-                <svg
-                  className="tw-w-4 tw-h-4 tw-text-emerald-400/80"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M20 6L9 17l-5-5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="tw-w-4 tw-h-4 tw-text-emerald-400/80"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M12 8v4l2.5 2.5M12 2v2m10 8a10 10 0 11-20 0 10 10 0 0120 0z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
+    <div className="tw-mt-4 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+      {/* Dropping Phase Card */}
+      <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20 ">
+        <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
+          <div className="tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-emerald-300/10 tw-to-emerald-400/5 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10">
+            {droppingTimeState === WaveLeaderboardTimeState.COMPLETED ? (
+              <svg
+                className="tw-w-4 tw-h-4 tw-text-emerald-400/80"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M20 6L9 17l-5-5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="tw-w-4 tw-h-4 tw-text-emerald-400/80"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M12 8v4l2.5 2.5M12 2v2m10 8a10 10 0 11-20 0 10 10 0 0120 0z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+          </div>
+          <div>
+            {droppingTimeState === WaveLeaderboardTimeState.UPCOMING && (
+              <>
+                <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Dropping Starts In
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  {new Date(participationPeriodMin).toLocaleDateString()}
+                </p>
+              </>
+            )}
+            {droppingTimeState === WaveLeaderboardTimeState.IN_PROGRESS && (
+              <>
+                <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Dropping Ends In
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  {new Date(participationPeriodMax).toLocaleDateString()}
+                </p>
+              </>
+            )}
+            {droppingTimeState === WaveLeaderboardTimeState.COMPLETED && (
+              <>
+                <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Dropping Complete
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  Completed on{" "}
+                  {new Date(participationPeriodMax).toLocaleDateString()}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+        {droppingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
+          <div className="tw-grid tw-grid-cols-4 tw-gap-2">
+            <div className="tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+              <span className="tw-text-xl [@container]:tw-text-xl [@container_(max-width:50px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                {droppingTimeLeft.days}
+              </span>
+              <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                {droppingTimeLeft.days === 1 ? "Day" : "Days"}
+              </span>
             </div>
-            <div>
-              {droppingTimeState === WaveLeaderboardTimeState.UPCOMING && (
-                <>
-                  <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Dropping Starts In
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    {new Date(participationPeriodMin).toLocaleDateString()}
-                  </p>
-                </>
-              )}
-              {droppingTimeState === WaveLeaderboardTimeState.IN_PROGRESS && (
-                <>
-                  <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Dropping Ends In
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    {new Date(participationPeriodMax).toLocaleDateString()}
-                  </p>
-                </>
-              )}
-              {droppingTimeState === WaveLeaderboardTimeState.COMPLETED && (
-                <>
-                  <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Dropping Complete
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    Completed on{' '}
-                    {new Date(participationPeriodMax).toLocaleDateString()}
-                  </p>
-                </>
-              )}
+            <div className="tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+              <span className="tw-text-xl [@container]:tw-text-xl [@container_(max-width:50px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                {droppingTimeLeft.hours}
+              </span>
+              <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                {droppingTimeLeft.hours === 1 ? "Hr" : "Hrs"}
+              </span>
+            </div>
+            <div className="tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+              <span className="tw-text-xl [@container]:tw-text-xl [@container_(max-width:50px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                {droppingTimeLeft.minutes}
+              </span>
+              <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                Min
+              </span>
+            </div>
+            <div className="tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+              <span className="tw-text-xl [@container]:tw-text-xl [@container_(max-width:50px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                {droppingTimeLeft.seconds}
+              </span>
+              <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                Sec
+              </span>
             </div>
           </div>
-          {droppingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
-            <div className="tw-grid tw-grid-cols-4 tw-gap-2">
-              <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl [container-type:inline-size] [@container]:tw-text-xl [@container_(max-width:300px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
-                  {droppingTimeLeft.days}
-                </span>
-                <span className="tw-ml-6 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                  {droppingTimeLeft.days === 1 ? 'Day' : 'Days'}
-                </span>
-              </div>
-              <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
-                  {droppingTimeLeft.hours}
-                </span>
-                <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                  {droppingTimeLeft.hours === 1 ? 'Hr' : 'Hrs'}
-                </span>
-              </div>
-              <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
-                  {droppingTimeLeft.minutes}
-                </span>
-                <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                  Min
-                </span>
-              </div>
-              <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
-                  {droppingTimeLeft.seconds}
-                </span>
-                <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                  Sec
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="tw-text-sm tw-text-white/60 tw-bg-white/5 tw-rounded-lg tw-p-3 tw-text-center">
-              The dropping phase has ended
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="tw-text-sm tw-text-white/60 tw-bg-white/5 tw-rounded-lg tw-p-3 tw-text-center">
+            The dropping phase has ended
+          </div>
+        )}
+      </div>
 
-        {/* Voting Phase Card */}
-        <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20 [container-type:inline-size]">
-          <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
-            <div className="tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-violet-300/10 tw-to-violet-400/5 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10">
-              {votingTimeState === WaveLeaderboardTimeState.COMPLETED ? (
-                <svg
-                  className="tw-w-4 tw-h-4 tw-text-violet-400/80"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M20 6L9 17l-5-5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="tw-w-4 tw-h-4 tw-text-violet-400/80"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <path
-                    d="M12 8v4l2.5 2.5M12 2v2m10 8a10 10 0 11-20 0 10 10 0 0120 0z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
+      {/* Voting Phase Card */}
+      <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
+        <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
+          <div className="tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-violet-300/10 tw-to-violet-400/5 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10">
+            {votingTimeState === WaveLeaderboardTimeState.COMPLETED ? (
+              <svg
+                className="tw-w-4 tw-h-4 tw-text-violet-400/80"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M20 6L9 17l-5-5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="tw-w-4 tw-h-4 tw-text-violet-400/80"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M12 8v4l2.5 2.5M12 2v2m10 8a10 10 0 11-20 0 10 10 0 0120 0z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+          </div>
+          <div>
+            {votingTimeState === WaveLeaderboardTimeState.UPCOMING && (
+              <>
+                <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Voting Starts In
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  {new Date(votingPeriodMin).toLocaleDateString()}
+                </p>
+              </>
+            )}
+            {votingTimeState === WaveLeaderboardTimeState.IN_PROGRESS && (
+              <>
+                <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Voting Ends In
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  {new Date(votingPeriodMax).toLocaleDateString()}
+                </p>
+              </>
+            )}
+            {votingTimeState === WaveLeaderboardTimeState.COMPLETED && (
+              <>
+                <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Voting Complete
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  Completed on {new Date(votingPeriodMax).toLocaleDateString()}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+        {votingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
+          <div className="tw-grid tw-grid-cols-4 tw-gap-2">
+            <div className="tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+              <span className="tw-text-xl [@container]:tw-text-xl [@container_(max-width:50px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                {votingTimeLeft.days}
+              </span>
+              <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                {votingTimeLeft.days === 1 ? "Day" : "Days"}
+              </span>
             </div>
-            <div>
-              {votingTimeState === WaveLeaderboardTimeState.UPCOMING && (
-                <>
-                  <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Voting Starts In
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    {new Date(votingPeriodMin).toLocaleDateString()}
-                  </p>
-                </>
-              )}
-              {votingTimeState === WaveLeaderboardTimeState.IN_PROGRESS && (
-                <>
-                  <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Voting Ends In
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    {new Date(votingPeriodMax).toLocaleDateString()}
-                  </p>
-                </>
-              )}
-              {votingTimeState === WaveLeaderboardTimeState.COMPLETED && (
-                <>
-                  <h2 className="tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Voting Complete
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    Completed on{" "}
-                    {new Date(votingPeriodMax).toLocaleDateString()}
-                  </p>
-                </>
-              )}
+            <div className="tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+              <span className="tw-text-xl [@container]:tw-text-xl [@container_(max-width:50px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                {votingTimeLeft.hours}
+              </span>
+              <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                {votingTimeLeft.hours === 1 ? "Hr" : "Hrs"}
+              </span>
+            </div>
+            <div className="tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+              <span className="tw-text-xl [@container]:tw-text-xl [@container_(max-width:50px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                {votingTimeLeft.minutes}
+              </span>
+              <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                Min
+              </span>
+            </div>
+            <div className="tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+              <span className="tw-text-xl [@container]:tw-text-xl [@container_(max-width:50px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                {votingTimeLeft.seconds}
+              </span>
+              <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                Sec
+              </span>
             </div>
           </div>
-          {votingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
-            <div className="tw-grid tw-grid-cols-4 tw-gap-2">
-              <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-3xl [container-type:inline-size] [@container]:tw-text-4xl [@container_(max-width:300px)]:tw-text-2xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
-                  {votingTimeLeft.days}
-                </span>
-                <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                  {votingTimeLeft.days === 1 ? 'Day' : 'Days'}
-                </span>
-              </div>
-              <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
-                  {votingTimeLeft.hours}
-                </span>
-                <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                  {votingTimeLeft.hours === 1 ? 'Hr' : 'Hrs'}
-                </span>
-              </div>
-              <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
-                  {votingTimeLeft.minutes}
-                </span>
-                <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                  Min
-                </span>
-              </div>
-              <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
-                  {votingTimeLeft.seconds}
-                </span>
-                <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                  Sec
-                </span>
-              </div>
-            </div>
-          ) : (
-            <div className="tw-text-sm tw-text-white/60 tw-bg-white/5 tw-rounded-lg tw-p-3 tw-text-center">
-              The voting phase has ended
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="tw-text-sm tw-text-white/60 tw-bg-white/5 tw-rounded-lg tw-p-3 tw-text-center">
+            The voting phase has ended
+          </div>
+        )}
       </div>
     </div>
   );
