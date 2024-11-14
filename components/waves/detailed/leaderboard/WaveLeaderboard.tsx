@@ -31,7 +31,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
   );
 
   const [showMyDrops, setShowMyDrops] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const sortBy: Record<WaveLeaderboardSortType, WaveDropsLeaderboardSortBy> = {
     [WaveLeaderboardSortType.RANK]: WaveDropsLeaderboardSortBy.RANK,

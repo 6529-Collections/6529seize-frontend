@@ -223,6 +223,12 @@ const WaveDetailedDrop = ({
     isDrop
   );
 
+  const onContainerClick = () => {
+    if (drop.drop_type === ApiDropType.Participatory) {
+      onDropClick(drop);
+    }
+  };
+
   return (
     <div
       className={isDrop && location === DropLocation.WAVE ? "tw-py-0.5" : ""}
@@ -248,6 +254,7 @@ const WaveDetailedDrop = ({
             />
           )}
         <div
+          onClick={onContainerClick}
           className={`tw-flex tw-gap-x-3 ${
             drop.drop_type === ApiDropType.Participatory
               ? "tw-cursor-pointer"
