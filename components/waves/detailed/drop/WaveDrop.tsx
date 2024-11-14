@@ -15,6 +15,7 @@ import { WaveDropVotes } from "./WaveDropVotes";
 import { WaveDropAuthor } from "./WaveDropAuthor";
 import { WaveDetailedLeaderboardItemOutcomes } from "../small-leaderboard/WaveDetailedLeaderboardItemOutcomes";
 import Tippy from "@tippyjs/react";
+import { WaveDropChat } from "./WaveDropChat";
 
 interface WaveDropProps {
   readonly wave: ApiWave;
@@ -99,11 +100,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
             </div>
           </div>
         </div>
-        <div className="tw-flex-1">
-          <div className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative">
-            chat
-          </div>
-        </div>
+        <WaveDropChat wave={wave} drop={drop} />
       </div>
     </div>
   );
