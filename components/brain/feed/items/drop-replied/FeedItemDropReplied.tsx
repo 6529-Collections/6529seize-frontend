@@ -4,8 +4,8 @@ import WaveDetailedDrop, {
   DropInteractionParams,
   DropLocation,
 } from "../../../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../../../waves/detailed/WaveDetailedContent";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { ActiveDropState } from "../../../../waves/detailed/chat/WaveChat";
 
 export default function FeedItemDropReplied({
   item,
@@ -42,10 +42,13 @@ export default function FeedItemDropReplied({
       activeDrop={activeDrop}
       showReplyAndQuote={true}
       location={DropLocation.MY_STREAM}
+      dropViewDropId={null}
       onReply={onReply}
       onQuote={onQuote}
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
+      // TODO: Implement this
+      onDropClick={() => {}}
     />
   );
 }

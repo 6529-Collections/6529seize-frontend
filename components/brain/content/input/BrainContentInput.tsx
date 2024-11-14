@@ -2,7 +2,8 @@ import React, { useMemo } from "react";
 import { useWaveData } from "../../../../hooks/useWaveData";
 import CreateDrop from "../../../waves/detailed/CreateDrop";
 import useCapacitor from "../../../../hooks/useCapacitor";
-import { ActiveDropState } from "../../../waves/detailed/WaveDetailedContent";
+import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";
+
 
 interface BrainContentInputProps {
   readonly waveId: string | null;
@@ -33,6 +34,7 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
         key={wave.id}
+        dropId={null}
       />
     </div>
   );

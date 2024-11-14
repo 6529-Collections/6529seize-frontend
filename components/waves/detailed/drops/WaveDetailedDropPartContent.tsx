@@ -8,6 +8,7 @@ import { ApiWaveMin } from "../../../../generated/models/ApiWaveMin";
 import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
 import WaveDetailedDropQuoteWithDropId from "./WaveDetailedDropQuoteWithDropId";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import WaveDetailedDropPartContentMarkdown from "./WaveDetailedDropPartContentMarkdown";
 
 interface WaveDetailedDropPartContentProps {
   readonly mentionedUsers: ApiDropMentionedUser[];
@@ -94,7 +95,7 @@ const WaveDetailedDropPartContent: React.FC<
     <div className="tw-pt-1 tw-pb-1 tw-w-full tw-flex tw-justify-between tw-space-x-3 tw-transition tw-duration-300 tw-ease-out">
       {isStorm && renderNavigationButton("previous")}
       <div
-        className="tw-h-full tw-w-full active:tw-bg-iron-900"
+        className="tw-h-full tw-w-full"
         ref={contentRef}
       >
         <motion.div
@@ -104,31 +105,15 @@ const WaveDetailedDropPartContent: React.FC<
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <DropPartMarkdownWithPropLogger
+          <WaveDetailedDropPartContentMarkdown
             mentionedUsers={memoizedMentionedUsers}
             referencedNfts={memoizedReferencedNfts}
-            partContent={activePart.content}
-            onQuoteClick={onQuoteClick}
+            part={activePart}
+            wave={wave}
           />
-          {activePart.quoted_drop?.drop_id && (
-            <div className="tw-mt-3">
-              <WaveDetailedDropQuoteWithDropId
-                dropId={activePart.quoted_drop.drop_id}
-                partId={activePart.quoted_drop.drop_part_id}
-                maybeDrop={
-                  activePart.quoted_drop.drop
-                    ? { ...activePart.quoted_drop.drop, wave: wave }
-                    : null
-                }
-                onQuoteClick={onQuoteClick}
-              />
-            </div>
-          )}
         </motion.div>
         {!!activePart.media.length && (
-          <WaveDetailedDropPartContentMedias
-            activePart={activePart}
-          />
+          <WaveDetailedDropPartContentMedias activePart={activePart} />
         )}
       </div>
       {isStorm && renderNavigationButton("next")}

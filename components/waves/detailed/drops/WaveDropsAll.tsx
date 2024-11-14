@@ -8,7 +8,6 @@ import {
 } from "react";
 import { AuthContext, TitleType } from "../../../auth/Auth";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { ActiveDropState } from "../WaveDetailedContent";
 import DropsList from "../../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
@@ -18,9 +17,12 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/router";
+import { ActiveDropState } from "../chat/WaveChat";
+import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
+  readonly dropId: string | null;
   readonly onReply: ({
     drop,
     partId,
@@ -37,14 +39,17 @@ export interface WaveDropsAllProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export default function WaveDropsAll({
   waveId,
+  dropId,
   onReply,
   onQuote,
   activeDrop,
   initialDrop,
+  onDropClick,
 }: WaveDropsAllProps) {
   const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
@@ -57,7 +62,12 @@ export default function WaveDropsAll({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDrops(waveId, connectedProfile?.profile?.handle, true);
+  } = useWaveDrops({
+    waveId,
+    connectedProfileHandle: connectedProfile?.profile?.handle,
+    reverse: true,
+    dropId,
+  });
 
   const {
     scrollContainerRef,
@@ -211,6 +221,8 @@ export default function WaveDropsAll({
             targetDropRef={targetDropRef}
             onQuoteClick={onQuoteClick}
             parentContainerRef={scrollContainerRef}
+            dropViewDropId={dropId}
+            onDropClick={onDropClick}
           />
         </div>
       </WaveDropsScrollContainer>

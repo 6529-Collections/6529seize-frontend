@@ -16,7 +16,25 @@ import {
 import { useDebounce } from "react-use";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
-import { WaveDetailedDropsSortBy } from "../components/waves/detailed/WaveDetailed";
+
+export enum WaveDropsLeaderboardSortBy {
+  RANK = "RANK",
+  CREATION_TIME = "CREATION_TIME",
+}
+
+export enum WaveDropsLeaderboardSortDirection {
+  ASC = "ASC",
+  DESC = "DESC",
+}
+
+interface UseWaveDropsLeaderboardProps {
+  readonly waveId: string;
+  readonly connectedProfileHandle: string | undefined;
+  readonly reverse: boolean;
+  readonly dropsSortBy: WaveDropsLeaderboardSortBy;
+  readonly sortDirection: WaveDropsLeaderboardSortDirection;
+  readonly handle?: string | undefined;
+}
 
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
@@ -35,12 +53,14 @@ function useTabVisibility() {
   return isVisible;
 }
 
-export function useWaveDropsLeaderboard(
-  waveId: string,
-  connectedProfileHandle: string | undefined,
-  reverse: boolean = false,
-  dropsSortBy: WaveDetailedDropsSortBy = WaveDetailedDropsSortBy.RANK
-) {
+export function useWaveDropsLeaderboard({
+  waveId,
+  connectedProfileHandle,
+  reverse,
+  dropsSortBy,
+  sortDirection,
+  handle,
+}: UseWaveDropsLeaderboardProps) {
   const queryClient = useQueryClient();
 
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
@@ -57,6 +77,8 @@ export function useWaveDropsLeaderboard(
       waveId,
       page_size: WAVE_DROPS_PARAMS.limit,
       sort: dropsSortBy,
+      sort_direction: sortDirection,
+      handle,
     },
   ];
 
@@ -67,15 +89,17 @@ export function useWaveDropsLeaderboard(
         const params: Record<string, string> = {
           page_size: WAVE_DROPS_PARAMS.limit.toString(),
           sort: dropsSortBy,
+          sort_direction: sortDirection,
         };
-
-        if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
-          params.sort_direction = "DESC"
-        }
 
         if (pageParam) {
           params.page = `${pageParam}`;
         }
+
+        if (handle) {
+          params.author_identity = handle;
+        }
+
         return await commonApiFetch<ApiDropsLeaderboardPage>({
           endpoint: `waves/${waveId}/leaderboard`,
           params,
@@ -102,14 +126,15 @@ export function useWaveDropsLeaderboard(
       const params: Record<string, string> = {
         page_size: WAVE_DROPS_PARAMS.limit.toString(),
         sort: dropsSortBy,
+        sort_direction: sortDirection,
       };
 
       if (pageParam) {
         params.page = `${pageParam}`;
       }
 
-      if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
-        params.sort_direction = "DESC"
+      if (handle) {
+        params.author_identity = handle;
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -150,11 +175,13 @@ export function useWaveDropsLeaderboard(
       const params: Record<string, string> = {
         page_size: "1",
         sort: dropsSortBy,
+        sort_direction: sortDirection,
       };
 
-      if (dropsSortBy === WaveDetailedDropsSortBy.RANK) { 
-        params.sort_direction = "DESC"
+      if (handle) {
+        params.author_identity = handle;
       }
+
       return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,
         params,

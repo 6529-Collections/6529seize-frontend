@@ -23,6 +23,13 @@ export enum WaveDropsSearchStrategy {
   FIND_BOTH = "FIND_BOTH",
 }
 
+interface UseWaveDropsProps {
+  readonly waveId: string;
+  readonly connectedProfileHandle: string | undefined;
+  readonly reverse: boolean;
+  readonly dropId: string | null;
+}
+
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
 const INACTIVE_POLLING_INTERVAL = 30000;
@@ -40,11 +47,12 @@ function useTabVisibility() {
   return isVisible;
 }
 
-export function useWaveDrops(
-  waveId: string,
-  connectedProfileHandle: string | undefined,
-  reverse: boolean = false
-) {
+export function useWaveDrops({
+  waveId,
+  connectedProfileHandle,
+  reverse,
+  dropId,
+}: UseWaveDropsProps) {
   const queryClient = useQueryClient();
 
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
@@ -60,7 +68,7 @@ export function useWaveDrops(
     {
       waveId,
       limit: WAVE_DROPS_PARAMS.limit,
-      dropId: null,
+      dropId,
     },
   ];
 
@@ -71,6 +79,9 @@ export function useWaveDrops(
         const params: Record<string, string> = {
           limit: WAVE_DROPS_PARAMS.limit.toString(),
         };
+        if (dropId) {
+          params.drop_id = dropId;
+        }
 
         if (pageParam) {
           params.serial_no_less_than = `${pageParam}`;
@@ -107,6 +118,10 @@ export function useWaveDrops(
       const params: Record<string, string> = {
         limit: WAVE_DROPS_PARAMS.limit.toString(),
       };
+
+      if (dropId) {
+        params.drop_id = dropId;
+      }
       if (pageParam?.serialNo) {
         params.serial_no_limit = `${pageParam.serialNo}`;
         params.search_strategy = `${pageParam.strategy}`;
@@ -153,6 +168,9 @@ export function useWaveDrops(
       const params: Record<string, string> = {
         limit: "1",
       };
+      if (dropId) {
+        params.drop_id = dropId;
+      }
       return await commonApiFetch<ApiWaveDropsFeed>({
         endpoint: `waves/${waveId}/drops`,
         params,

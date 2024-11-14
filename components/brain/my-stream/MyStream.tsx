@@ -1,7 +1,7 @@
 import FeedWrapper from "../feed/FeedWrapper";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { TypedFeedItem } from "../../../types/feed.types";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 
 interface MyStreamProps {
   readonly onReply: (param: DropInteractionParams) => void;

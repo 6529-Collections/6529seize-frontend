@@ -12,6 +12,8 @@ export default function CreateWaveGroups({
   waveType,
   groups,
   onGroupSelect,
+  chatEnabled,
+  setChatEnabled,
 }: {
   readonly waveType: ApiWaveType;
   readonly groups: WaveGroupsConfig;
@@ -19,6 +21,8 @@ export default function CreateWaveGroups({
     group: ApiGroupFull | null;
     groupType: CreateWaveGroupConfigType;
   }) => void;
+  readonly chatEnabled: boolean;
+  readonly setChatEnabled: (enabled: boolean) => void;
 }) {
   const isRestrictedGroup = !!groups.admin && !!groups.canView;
 
@@ -29,6 +33,8 @@ export default function CreateWaveGroups({
           key={groupType}
           groupType={groupType}
           waveType={waveType}
+          chatEnabled={chatEnabled}
+          setChatEnabled={setChatEnabled}
           onGroupSelect={(group) => onGroupSelect({ group, groupType })}
         />
       ))}

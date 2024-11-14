@@ -88,7 +88,6 @@ export default function CreateWave({
         endDate: null,
       },
       drops: {
-        allowDiscussionDrops: true,
         noOfApplicationsAllowedPerParticipant: null,
         requiredTypes: [],
         requiredMetadata: [],
@@ -241,6 +240,15 @@ export default function CreateWave({
         type,
         category: null,
         profileId: null,
+      },
+    }));
+  };
+
+  const onChatEnabledChange = (enabled: boolean) => {
+    setConfig((prev) => ({
+      ...prev,
+      chat: {
+        enabled,
       },
     }));
   };
@@ -570,6 +578,8 @@ export default function CreateWave({
       <CreateWaveGroups
         waveType={config.overview.type}
         groups={config.groups}
+        chatEnabled={config.chat.enabled}
+        setChatEnabled={onChatEnabledChange}
         onGroupSelect={onGroupSelect}
       />
     ),

@@ -1,23 +1,20 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
-import WaveDetailedContent from "./WaveDetailedContent";
-import { WaveDetailedDropsSortBy, WaveDetailedDropsView, WaveDetailedView } from "./WaveDetailed";
+import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedAbout from "./WaveDetailedAbout";
-import WaveDetailedRightSidebar from "./WaveDetailedRightSidebar";
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
-import WaveDetailedDropsHeaderNav from "./WaveDetailedDropsHeaderNav";
+import { WaveChat } from "./chat/WaveChat";
+import { WaveLeaderboard } from "./leaderboard/WaveLeaderboard";
+import { WaveDetailedDesktopTabs } from "./WaveDetailedDesktopTabs";
+import { WaveDrop } from "./drop/WaveDrop";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
   readonly view: WaveDetailedView;
-  readonly dropsView: WaveDetailedDropsView;
-  readonly dropsSortBy: WaveDetailedDropsSortBy;
   readonly setView: (view: WaveDetailedView) => void;
-  readonly setDropsView: (view: WaveDetailedDropsView) => void;
-  readonly setDropsSortBy: (sortBy: WaveDetailedDropsSortBy) => void;
   readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
@@ -25,19 +22,12 @@ interface WaveDetailedDesktopProps {
 const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   wave,
   view,
-  dropsView,
-  dropsSortBy,
   setView,
-  setDropsView,
-  setDropsSortBy,
   onWaveChange,
   setIsLoading,
 }) => {
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
-
-
-  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const getIsAuthorAndNotProxy = () =>
     connectedProfile?.profile?.handle === wave.author.handle &&
@@ -71,26 +61,29 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
 
   const components: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CONTENT]: (
-      <WaveDetailedContent
-        key={`wave-detailed-content-${wave.id}`}
+    [WaveDetailedView.CHAT]: (
+      <WaveChat
         wave={wave}
-        dropsView={dropsView}
-        dropsSortBy={dropsSortBy}
+        activeTab={view}
+        setActiveTab={setView}
+        onDropClick={setActiveDrop}
       />
+    ),
+    [WaveDetailedView.LEADERBOARD]: (
+      <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
+        <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
+      </WaveLeaderboard>
     ),
     [WaveDetailedView.FOLLOWERS]: (
       <WaveDetailedFollowers
         wave={wave}
-        onBackClick={() => setView(WaveDetailedView.CONTENT)}
+        onBackClick={() => setView(WaveDetailedView.CHAT)}
       />
     ),
   };
-
-  const isNotChatWave = wave.wave.type !== ApiWaveType.Chat;
 
   if (!showWaves) {
     return null;
@@ -98,8 +91,8 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
 
   return (
     <div className="tailwind-scope tw-bg-black">
-      <div className="tw-mt-3 tw-px-4">
-        <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
+      <div className="tw-pl-4">
+        <div className="tw-flex tw-items-start tw-gap-x-4 tw-relative">
           <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-pl-4 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[21.5rem] tw-w-full">
             <div className="tw-flex tw-flex-1 tw-flex-col">
               <WaveDetailedAbout
@@ -112,43 +105,24 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               />
             </div>
           </div>
-          <div
-            className={`tw-flex-1 tw-ml-[21.5rem] ${
-              isSidebarOpen && isNotChatWave ? "tw-mr-[19.5rem]" : ""
-            } tw-transition-all tw-duration-300`}
-          >
-            <div
-              ref={contentWrapperRef}
-              className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={view}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {isNotChatWave && (
-                    <WaveDetailedDropsHeaderNav
-                      dropsView={dropsView}
-                      setDropsView={setDropsView}
-                      dropsSortBy={dropsSortBy}
-                      setDropsSortBy={setDropsSortBy}
-                    />
-                  )}
-                  {components[view]}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-          {isNotChatWave && (
-            <WaveDetailedRightSidebar
-              isOpen={isSidebarOpen}
-              wave={wave}
-              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-            />
-          )}
+          <AnimatePresence>
+            {activeDrop && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="tw-absolute tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
+              >
+                <WaveDrop
+                  wave={wave}
+                  drop={activeDrop}
+                  onClose={() => setActiveDrop(null)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {components[view]}
         </div>
       </div>
     </div>

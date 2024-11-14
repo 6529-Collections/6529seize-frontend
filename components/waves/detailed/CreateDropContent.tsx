@@ -1,5 +1,4 @@
 import PrimaryButton from "../../utils/button/PrimaryButton";
-import { ActiveDropAction, ActiveDropState } from "./WaveDetailedContent";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
 import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -38,6 +37,7 @@ import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import { ActiveDropAction, ActiveDropState } from "./chat/WaveChat";
 import { ApiReplyToDropResponse } from "../../../generated/models/ApiReplyToDropResponse";
 
 export type CreateDropMetadataType =
@@ -67,11 +67,12 @@ interface CreateDropContentProps {
   readonly drop: CreateDropConfig | null;
   readonly isStormMode: boolean;
   readonly isDropMode: boolean;
+  readonly dropId: string | null;
   readonly setDrop: React.Dispatch<
     React.SetStateAction<CreateDropConfig | null>
   >;
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
-  readonly setIsDropMode: React.Dispatch<React.SetStateAction<boolean>>;
+  readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly submitDrop: (dropRequest: ApiCreateDropRequest) => void;
 }
 
@@ -404,9 +405,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   drop,
   isStormMode,
   isDropMode,
+  dropId,
   setDrop,
   setIsStormMode,
-  setIsDropMode,
+  onDropModeChange,
   submitDrop,
 }) => {
   const breakpoint = useBreakpoint();
@@ -601,7 +603,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setMentionedUsers([]);
     setReferencedNfts([]);
     setDrop(null);
-    setIsDropMode(false);
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
@@ -849,6 +850,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         activeDrop={activeDrop}
         submitting={submitting}
         onCancelReplyQuote={onCancelReplyQuote}
+        dropId={dropId}
       />
       <div className="tw-flex tw-items-end tw-w-full">
         <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
@@ -882,14 +884,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            {isParticipatory && (
+            {isParticipatory && !dropId && (
               <Tippy
                 content={<span className="tw-text-xs">Drop Mode</span>}
                 placement="top"
               >
                 <button
                   type="button"
-                  onClick={() => setIsDropMode(!isDropMode)}
+                  onClick={() => onDropModeChange(!isDropMode)}
                   className={`tw-cursor-pointer tw-flex-shrink-0 tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90 ${
                     isDropMode
                       ? "tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"

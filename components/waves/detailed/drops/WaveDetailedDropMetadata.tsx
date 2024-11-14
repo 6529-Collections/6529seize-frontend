@@ -16,7 +16,8 @@ export default function WaveDetailedDropMetadata({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobileDevice();
 
-  const toggleDropdown = () => {
+  const toggleDropdown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     setIsDropdownOpen(!isDropdownOpen);
   };
 
