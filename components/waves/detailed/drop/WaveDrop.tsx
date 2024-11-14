@@ -41,7 +41,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
   });
 
   return (
-    <div className="tw-ml-[21.5rem] tw-w-full">
+    <div className="tw-w-full">
       <div className="tw-flex">
         <div className="tw-w-[28rem] 2xl:tw-max-w-2xl 2xl:tw-w-full tw-py-6 tw-border tw-border-r-[3px] tw-border-solid tw-border-iron-800 tw-border-y-0 tw-bg-iron-950 tw-overflow-y-auto tw-h-[calc(100vh-102px)] tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 ">
           <div className="tw-h-full tw-relative tw-bg-iron-950">

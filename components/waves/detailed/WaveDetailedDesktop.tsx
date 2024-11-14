@@ -9,6 +9,7 @@ import { WaveLeaderboard } from "./leaderboard/WaveLeaderboard";
 import { WaveDetailedDesktopTabs } from "./WaveDetailedDesktopTabs";
 import { WaveDrop } from "./drop/WaveDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
@@ -91,7 +92,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   return (
     <div className="tailwind-scope tw-bg-black">
       <div className="tw-pl-4">
-        <div className="tw-flex tw-items-start tw-gap-x-4">
+        <div className="tw-flex tw-items-start tw-gap-x-4 tw-relative">
           <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-pl-4 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[21.5rem] tw-w-full">
             <div className="tw-flex tw-flex-1 tw-flex-col">
               <WaveDetailedAbout
@@ -104,15 +105,24 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               />
             </div>
           </div>
-          {activeDrop ? (
-            <WaveDrop
-              wave={wave}
-              drop={activeDrop}
-              onClose={() => setActiveDrop(null)}
-            />
-          ) : (
-            components[view]
-          )}
+          <AnimatePresence>
+            {activeDrop && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="tw-absolute tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
+              >
+                <WaveDrop
+                  wave={wave}
+                  drop={activeDrop}
+                  onClose={() => setActiveDrop(null)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {components[view]}
         </div>
       </div>
     </div>

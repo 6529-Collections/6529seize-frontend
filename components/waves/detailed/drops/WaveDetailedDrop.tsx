@@ -233,19 +233,27 @@ const WaveDetailedDrop = ({
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
       >
-        {drop.reply_to && drop.reply_to.drop_id !== dropViewDropId && (
-          <WaveDetailedDropReply
-            onReplyClick={onReplyClick}
-            dropId={drop.reply_to.drop_id}
-            dropPartId={drop.reply_to.drop_part_id}
-            maybeDrop={
-              drop.reply_to.drop
-                ? { ...drop.reply_to.drop, wave: drop.wave }
-                : null
-            }
-          />
-        )}
-        <div className="tw-flex tw-gap-x-3">
+        {drop.reply_to &&
+          drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id &&
+          drop.reply_to.drop_id !== dropViewDropId && (
+            <WaveDetailedDropReply
+              onReplyClick={onReplyClick}
+              dropId={drop.reply_to.drop_id}
+              dropPartId={drop.reply_to.drop_part_id}
+              maybeDrop={
+                drop.reply_to.drop
+                  ? { ...drop.reply_to.drop, wave: drop.wave }
+                  : null
+              }
+            />
+          )}
+        <div
+          className={`tw-flex tw-gap-x-3 ${
+            drop.drop_type === ApiDropType.Participatory
+              ? "tw-cursor-pointer"
+              : ""
+          }`}
+        >
           {!shouldGroupWithPreviousDrop && (
             <WaveDetailedDropAuthorPfp drop={drop} />
           )}
