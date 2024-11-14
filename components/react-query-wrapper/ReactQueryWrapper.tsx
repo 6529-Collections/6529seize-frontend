@@ -1213,6 +1213,7 @@ export default function ReactQueryWrapper({
   }: {
     readonly drop: ApiDrop;
   }): Promise<void> => {
+    console.log(drop)
     addDropToDrops(queryClient, { drop });
     increaseWavesOverviewDropsCount(queryClient, drop.wave.id);
     increaseFeedItemsDropRedropCount({ drop });

@@ -102,7 +102,6 @@ import Auth from "../components/auth/Auth";
 import { NextPage, NextPageContext } from "next";
 import { ReactElement, ReactNode, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 import "../components/drops/create/lexical/lexical.styles.scss";
@@ -307,7 +306,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
           {!hideFooter && <Footer />}
         </WagmiProvider>
       </Provider>
-      <ReactQueryDevtools initialIsOpen={false} />
+
     </QueryClientProvider>
   );
 }

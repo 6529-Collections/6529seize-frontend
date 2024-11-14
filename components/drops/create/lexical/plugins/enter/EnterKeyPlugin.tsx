@@ -10,6 +10,8 @@ import {
 import { useEffect } from "react";
 import { $isListItemNode, $isListNode } from "@lexical/list";
 import { $isHeadingNode } from "@lexical/rich-text";
+import useIsMobileDevice from "../../../../../../hooks/isMobileDevice";
+import useCapacitor from "../../../../../../hooks/useCapacitor";
 
 export default function EnterKeyPlugin({
   disabled,
@@ -20,6 +22,9 @@ export default function EnterKeyPlugin({
   readonly handleSubmit: () => void;
   readonly canSubmitWithEnter: () => boolean;
 }) {
+  const isMobile = useIsMobileDevice();
+  const { isCapacitor } = useCapacitor();
+
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
@@ -29,6 +34,10 @@ export default function EnterKeyPlugin({
         if (disabled || !canSubmitWithEnter()) {
           // Let the mention plugin handle the Enter key
           return false; // Allows the mention plugin to process the Enter key
+        }
+
+        if (isMobile || isCapacitor) {
+          return true;
         }
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
@@ -40,7 +49,6 @@ export default function EnterKeyPlugin({
 
           // Check if the cursor is inside a list item
           if ($isListItemNode(parentNode) || $isListNode(parentNode)) {
-          
             // Inside a list item: Let Lexical handle the 'Enter' key as usual
             return false; // Returning false allows default Lexical behavior
           }
@@ -54,7 +62,7 @@ export default function EnterKeyPlugin({
             return true;
           }
         }
-        
+
         if (event?.shiftKey) {
           event.preventDefault();
           editor.update(() => {
@@ -72,7 +80,7 @@ export default function EnterKeyPlugin({
       },
       COMMAND_PRIORITY_HIGH
     );
-  }, [editor]);
+  }, [editor, isMobile, isCapacitor]);
 
   return null;
 }
