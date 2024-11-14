@@ -38,14 +38,14 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
       >
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-emerald-400/10">
+            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-[#C3B5D9]/10">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
+                strokeWidth="1.5"
                 stroke="currentColor"
-                className="tw-size-5 tw-text-emerald-400"
+                className="tw-size-5 tw-text-[#C3B5D9]"
               >
                 <path
                   strokeLinecap="round"
@@ -55,7 +55,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
               </svg>
             </div>
             <div className="tw-text-left">
-              <div className="tw-text-sm tw-font-medium tw-text-emerald-400">
+              <div className="tw-text-sm tw-font-medium tw-text-[#C3B5D9]">
                 Rep
               </div>
               <div className="tw-text-xs tw-text-iron-400">
@@ -66,7 +66,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
           </div>
           <div className="tw-flex tw-items-center tw-gap-3">
             <div className="tw-text-right">
-              <div className="tw-text-base tw-font-semibold tw-text-emerald-400">
+              <div className="tw-text-base tw-font-semibold tw-text-[#C3B5D9]">
                 {formatNumberWithCommas(outcome.amount ?? 0)}
               </div>
               <div className="tw-text-xs tw-text-iron-400">total pool</div>
@@ -114,10 +114,10 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
                   className="tw-px-4 tw-py-2 tw-bg-iron-900/30"
                 >
                   <div className="tw-flex tw-items-center tw-gap-3">
-                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-[#75E0A7]/5 tw-text-[#86efac] tw-text-xs tw-font-medium">
+                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-[#C3B5D9]/5 tw-text-[#C3B5D9] tw-text-xs tw-font-medium">
                       {i + 1}
                     </span>
-                    <span className="tw-whitespace-nowrap tw-text-[#86efac] tw-text-sm tw-font-medium">
+                    <span className="tw-whitespace-nowrap tw-text-[#C3B5D9] tw-text-sm tw-font-medium">
                       {formatNumberWithCommas(amount)} Rep
                     </span>
                   </div>

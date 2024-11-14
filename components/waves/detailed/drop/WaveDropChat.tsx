@@ -21,7 +21,7 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     return `tw-w-full tw-flex tw-flex-col ${
       capacitor.isCapacitor
         ? "tw-h-[calc(100vh-14.7rem)]"
-        : `tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-10rem)]`
+        : `tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-102px)]`
     }`;
   }, [capacitor.isCapacitor]);
 
@@ -69,10 +69,10 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     <div className="tw-flex-1">
       <div
         ref={contentWrapperRef}
-        className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
+        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
       >
         <div className="tw-relative tw-h-full">
-          <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
+          <div className="tw-h-full tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
             <div className={containerClassName}>
               <WaveDropsAll
                 waveId={wave.id}

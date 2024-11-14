@@ -15,7 +15,7 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
-          className="tw-size-3"
+          className="tw-size-3 tw-flex-shrink-0"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
         </svg>

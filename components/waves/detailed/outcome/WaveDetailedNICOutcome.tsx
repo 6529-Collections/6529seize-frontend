@@ -40,7 +40,7 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
           <div className="tw-flex tw-items-center tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-blue-400/10">
               <svg
-                className="tw-size-5 tw-flex-shrink-0 tw-text-blue-300"
+                className="tw-size-5 tw-flex-shrink-0 tw-text-[#A4C2DB]"
                 viewBox="0 0 24 24"
                 fill="none"
               >
@@ -54,7 +54,7 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
               </svg>
             </div>
             <div className="tw-text-left">
-              <div className="tw-text-sm tw-font-medium tw-text-blue-300">
+              <div className="tw-text-sm tw-font-medium tw-text-[#A4C2DB]">
                 NIC
               </div>
               <div className="tw-text-xs tw-text-iron-400">
@@ -66,7 +66,7 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
 
           <div className="tw-flex tw-items-center tw-gap-3">
             <div className="tw-text-right">
-              <div className="tw-text-base tw-font-semibold tw-text-blue-300">
+              <div className="tw-text-base tw-font-semibold tw-text-[#A4C2DB]">
                 {formatNumberWithCommas(outcome.amount ?? 0)}
               </div>
               <div className="tw-text-xs tw-text-iron-400">total pool</div>
@@ -108,10 +108,10 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
                   className="tw-px-4 tw-py-2 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/30"
                 >
                   <div className="tw-flex tw-items-center tw-gap-3">
-                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-blue-400/5 tw-text-blue-300 tw-text-xs tw-font-medium">
+                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-blue-400/5 tw-text-[#A4C2DB] tw-text-xs tw-font-medium">
                       {index + 1}
                     </span>
-                    <span className="tw-text-blue-300 tw-text-sm tw-font-medium">
+                    <span className="tw-text-[#A4C2DB] tw-text-sm tw-font-medium">
                       {formatNumberWithCommas(amount)} NIC
                     </span>
                   </div>

@@ -232,7 +232,7 @@ export default function DropListItemRateGiveClap({
         <button
           disabled={!rate || !canVote}
           id={`clap-${randomID}`}
-          className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-iron-950 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
+          className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-current tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
           onClick={(e) => {
             e.stopPropagation();
             handleClick();

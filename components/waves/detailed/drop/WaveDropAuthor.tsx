@@ -18,12 +18,12 @@ export const WaveDropAuthor: React.FC<WaveDropAuthorProps> = ({ drop }) => {
     >
       {drop.author.pfp ? (
         <img
-          className="tw-size-6 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/10 tw-object-cover"
+          className="tw-size-6 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-object-contain tw-bg-iron-900"
           src={drop.author.pfp}
           alt="User avatar"
         />
       ) : (
-        <div className="tw-size-6 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800" />
+        <div className="tw-size-6 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800" />
       )}
       <UserCICAndLevel
         level={drop.author.level}
