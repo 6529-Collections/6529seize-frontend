@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from "react";
 import DropListItemRateGiveSubmit from "../../../drops/view/item/rate/give/DropListItemRateGiveSubmit";
 import { DropVoteState } from "../../../drops/view/item/DropsListItem";
 import WaveDropVoteQuick from "./WaveDropVoteQuick";
+import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 interface WaveDropVoteProps {
   readonly wave: ApiWave;
@@ -212,12 +213,18 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
       <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-400">
         <div className="tw-flex tw-items-center tw-gap-1">
           <span>
-            Your votes: <span className="tw-text-iron-200">2</span>
+            Your votes:{" "}
+            <span className="tw-text-iron-200">
+              {formatNumberWithCommas(drop.context_profile_context?.rating ?? 0)}
+            </span>
           </span>
         </div>
         <div className="tw-flex tw-items-center tw-gap-1">
           <span>
-            Remaining: <span className="tw-text-iron-200">5</span>
+            Remaining:{" "}
+            <span className="tw-text-iron-200">
+              {formatNumberWithCommas(availableCredit)}
+            </span>
           </span>
         </div>
       </div>

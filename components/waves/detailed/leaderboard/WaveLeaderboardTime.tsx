@@ -336,7 +336,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                     Voting Ends In
                   </h2>
                   <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    {new Date(wave.voting.period?.max).toLocaleDateString()}
+                    {new Date(votingPeriodMax).toLocaleDateString()}
                   </p>
                 </>
               )}
@@ -346,7 +346,8 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                     Voting Complete
                   </h2>
                   <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    Completed on {new Date(wave.voting.period?.max).toLocaleDateString()}
+                    Completed on{" "}
+                    {new Date(votingPeriodMax).toLocaleDateString()}
                   </p>
                 </>
               )}
