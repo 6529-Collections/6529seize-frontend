@@ -38,12 +38,13 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
     <div>
       <div className="tw-relative tw-flex tw-flex-col tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
         <div className="tw-p-4">
-          <div className="tw-flex tw-items-start tw-gap-x-3">
-            <div className="tw-size-6 tw-flex tw-items-center tw-justify-center tw-font-semibold tw-rounded-full tw-bg-iron-900/50 tw-ring-1 tw-ring-iron-800">
-              <span className="tw-text-iron-400 tw-text-sm">{drop.rank}</span>
+          <div>
+            <div className="tw-size-6 tw-flex tw-items-center tw-justify-center tw-font-semibold tw-rounded-lg tw-bg-iron-800/80 tw-ring-1 tw-ring-iron-700/50">
+              <span className="tw-text-iron-300 tw-text-sm">{drop.rank}</span>
             </div>
 
             <div className="tw-flex-1">
+              <WaveDetailedLeaderboardItemContent drop={drop} />
               <div className="tw-flex tw-justify-between tw-items-center">
                 <Link
                   href={`/${drop.author.handle}`}
@@ -93,8 +94,10 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
                   </span>
                 </div>
               </div>
-              <WaveDetailedLeaderboardItemContent drop={drop} />
-              <WaveDetailedLeaderboardItemOutcomes drop={drop} wave={wave} />
+
+              <div className="tw-mt-3">
+                <WaveDetailedLeaderboardItemOutcomes drop={drop} wave={wave} />
+              </div>
             </div>
           </div>
         </div>

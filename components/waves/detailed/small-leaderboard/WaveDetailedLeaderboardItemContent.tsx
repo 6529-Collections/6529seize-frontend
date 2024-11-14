@@ -26,7 +26,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
   const haveMedia = !!drop.parts.filter((part) => !!part.media.length).length;
 
   return (
-    <div className="tw-mt-3 tw-mb-4">
+    <div className="tw-mt-4">
       <div
         ref={contentRef}
         className="tw-relative tw-max-h-52 tw-overflow-hidden"
@@ -44,7 +44,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
           <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/50 tw-to-transparent" />
         )}
       </div>
-      <div className="tw-flex tw-items-center tw-mt-3 tw-gap-x-2">
+      <div className="tw-flex tw-items-center tw-mt-3 tw-gap-x-2 tw-mb-3">
         {isStorm && (
           <Tippy content="Storm">
             <svg

@@ -60,7 +60,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
     if (rank === 1) {
       return (
         <svg
-          className="tw-size-4 tw-flex-shrink-0 tw-mt-1 tw-text-[#E8D48A]"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-[#E8D48A]"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 576 512"
         >
@@ -75,7 +75,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
     if (rank === 2) {
       return (
         <svg
-          className="tw-size-4 tw-flex-shrink-0 tw-mt-1 tw-text-[#DDDDDD]"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-[#DDDDDD]"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 576 512"
         >
@@ -90,7 +90,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
     if (rank === 3) {
       return (
         <svg
-          className="tw-size-4 tw-flex-shrink-0 tw-mt-1 tw-text-[#D9A962]"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-[#D9A962]"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 576 512"
         >
@@ -113,11 +113,24 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
             drop.rank
           )}`}
         >
-          <div className="tw-rounded-xl tw-bg-iron-900/95 tw-p-4">
-            <div className="tw-flex tw-items-start tw-gap-x-3">
-              {thropyIcon(drop.rank)}
+          <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4">
+            <div className="">
+              <div
+                className={`${
+                  drop.rank === 1
+                    ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#E8D48A]/30 tw-ring-[#E8D48A]/30 tw-rounded-lg tw-text-[#E8D48A]"
+                    : drop.rank === 2
+                    ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-lg tw-bg-gradient-to-b tw-shadow-lg tw-ring-1 tw-to-iron-900 tw-from-[#dddddd]/20 tw-ring-[#dddddd]/30"
+                    : drop.rank === 3
+                    ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#CD7F32]/20 tw-ring-[#CD7F32]/30 tw-rounded-lg tw-text-[#CD7F32]"
+                    : ""
+                }`}
+              >
+                {thropyIcon(drop.rank)}
+              </div>
 
               <div className="tw-flex-1">
+                <WaveDetailedLeaderboardItemContent drop={drop} />
                 <div className="tw-flex tw-justify-between tw-items-center">
                   <Link
                     href={`/${drop.author.handle}`}
@@ -142,8 +155,8 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                       {drop.author.handle}
                     </span>
                     <div className="tw-relative">
-                      <div className="tw-size-4 tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-ring-1 tw-ring-iron-700 tw-ring-inset">
-                        <span className="tw-text-[9px] tw-text-iron-200">
+                      <div className="tw-size-5 tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-ring-1 tw-ring-iron-700 tw-ring-inset">
+                        <span className="tw-text-[10px] tw-text-iron-200">
                           {drop.author.level}
                         </span>
                       </div>
@@ -178,8 +191,13 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                     </span>
                   </div>
                 </div>
-                <WaveDetailedLeaderboardItemContent drop={drop} />
-                <WaveDetailedLeaderboardItemOutcomes drop={drop} wave={wave} />
+
+                <div className="tw-mt-3">
+                  <WaveDetailedLeaderboardItemOutcomes
+                    drop={drop}
+                    wave={wave}
+                  />
+                </div>
               </div>
             </div>
           </div>

@@ -134,7 +134,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-2xl tw-bg-gradient-to-b tw-from-iron-900/60 tw-to-iron-900/40 tw-backdrop-blur-lg tw-border tw-border-iron-800/30">
+    <div className="tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800/30">
       <div className="tw-flex tw-justify-between tw-items-center">
         <div className="tw-flex tw-items-center tw-gap-4">
           <div className="tw-relative tw-w-32">
@@ -215,7 +215,9 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
           <span>
             Your votes:{" "}
             <span className="tw-text-iron-200">
-              {formatNumberWithCommas(drop.context_profile_context?.rating ?? 0)}
+              {formatNumberWithCommas(
+                drop.context_profile_context?.rating ?? 0
+              )}
             </span>
           </span>
         </div>
