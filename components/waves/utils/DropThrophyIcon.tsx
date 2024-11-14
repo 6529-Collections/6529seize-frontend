@@ -2,10 +2,26 @@ import React from "react";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
 
 interface DropTrophyIconProps {
-  readonly rank: number;
+  readonly rank: number | null;
 }
 
 export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
+  if (!rank) {
+    return (
+      <div className="tw-font-semibold tw-text-xs tw-text-iron-500 tw-flex tw-items-center tw-size-6 tw-rounded-lg tw-bg-iron-800/80 tw-justify-center tw-ring-1 tw-ring-iron-700/50">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          className="tw-size-3"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+        </svg>
+      </div>
+    );
+  }
   if (rank === 1) {
     return (
       <div className="tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#E8D48A]/30 tw-ring-[#E8D48A]/30 tw-rounded-lg tw-py-1 tw-px-2 tw-text-[#E8D48A] tw-font-semibold tw-text-xs tw-flex tw-items-center tw-gap-x-2">

@@ -2,7 +2,7 @@ import React from "react";
 import { DropTrophyIcon } from "../../utils/DropThrophyIcon";
 
 interface WaveDropPositionProps {
-  readonly rank: number;
+  readonly rank: number | null;
 }
 
 export const WaveDropPosition: React.FC<WaveDropPositionProps> = ({ rank }) => {

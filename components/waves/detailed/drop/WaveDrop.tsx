@@ -1,6 +1,7 @@
 import React from "react";
 import {
   ApiDrop,
+  ApiDropType,
   ApiWave,
 } from "../../../../generated/models/ObjectSerializer";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
@@ -66,7 +67,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
               </button>
               <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2">
                 <div className="tw-px-6">
-                  {drop.rank && <WaveDropPosition rank={drop.rank} />}
+                {drop.drop_type === ApiDropType.Participatory && <WaveDropPosition rank={drop.rank} />}
                 </div>
 
                 <div className="tw-flex-1 tw-w-full">
