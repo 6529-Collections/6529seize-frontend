@@ -173,10 +173,10 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   }, [wave]);
 
   return (
-    <div>
+    <div className="container">
       <div className="tw-mt-4 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
         {/* Dropping Phase Card */}
-        <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
+        <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20 [container-type:inline-size]">
           <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
             <div className="tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-emerald-300/10 tw-to-emerald-400/5 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10">
               {droppingTimeState === WaveLeaderboardTimeState.COMPLETED ? (
@@ -246,10 +246,10 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
           {droppingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
             <div className="tw-grid tw-grid-cols-4 tw-gap-2">
               <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                <span className="tw-text-xl [container-type:inline-size] [@container]:tw-text-xl [@container_(max-width:300px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
                   {droppingTimeLeft.days}
                 </span>
-                <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                <span className="tw-ml-6 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
                   {droppingTimeLeft.days === 1 ? 'Day' : 'Days'}
                 </span>
               </div>
@@ -286,7 +286,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
         </div>
 
         {/* Voting Phase Card */}
-        <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
+        <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20 [container-type:inline-size]">
           <div className="tw-flex tw-items-center tw-gap-3 tw-mb-4">
             <div className="tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-violet-300/10 tw-to-violet-400/5 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10">
               {votingTimeState === WaveLeaderboardTimeState.COMPLETED ? (
@@ -356,7 +356,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
           {votingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
             <div className="tw-grid tw-grid-cols-4 tw-gap-2">
               <div className="tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-3 tw-py-2 tw-rounded-lg tw-border tw-border-primary-300/10">
-                <span className="tw-text-xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
+                <span className="tw-text-3xl [container-type:inline-size] [@container]:tw-text-4xl [@container_(max-width:300px)]:tw-text-2xl tw-font-medium tw-text-white/90 tw-tracking-tight tw-inline-block tw-text-center">
                   {votingTimeLeft.days}
                 </span>
                 <span className="tw-ml-1 tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
