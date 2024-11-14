@@ -218,6 +218,7 @@ export default function WaveDropsAll({
             targetDropRef={targetDropRef}
             onQuoteClick={onQuoteClick}
             parentContainerRef={scrollContainerRef}
+            dropViewDropId={dropId}
           />
         </div>
       </WaveDropsScrollContainer>

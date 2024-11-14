@@ -105,6 +105,7 @@ interface WaveDetailedDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
+  readonly dropViewDropId: string | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
@@ -119,6 +120,7 @@ const WaveDetailedDrop = ({
   showWaveInfo,
   activeDrop,
   location,
+  dropViewDropId,
   onReply,
   onQuote,
   onReplyClick,
@@ -231,7 +233,8 @@ const WaveDetailedDrop = ({
         onTouchMove={handleTouchMove}
       >
         {drop.reply_to &&
-          drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id && (
+          drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id &&
+          drop.reply_to.drop_id !== dropViewDropId && (
             <WaveDetailedDropReply
               onReplyClick={onReplyClick}
               dropId={drop.reply_to.drop_id}

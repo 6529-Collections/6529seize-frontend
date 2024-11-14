@@ -66,6 +66,7 @@ export default function FeedItemWaveCreated({
           nextDrop={null}
           showWaveInfo={showWaveInfo}
           activeDrop={activeDrop}
+          dropViewDropId={null}
           showReplyAndQuote={true}
           location={DropLocation.MY_STREAM}
           onReply={onReply}

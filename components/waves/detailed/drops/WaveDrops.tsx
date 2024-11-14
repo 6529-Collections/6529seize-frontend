@@ -104,6 +104,7 @@ export default function WaveDrops({
             activeDrop={activeDrop}
             serialNo={null}
             targetDropRef={null}
+            dropViewDropId={null}
             onQuoteClick={() => {}}
             parentContainerRef={scrollContainerRef}
           />

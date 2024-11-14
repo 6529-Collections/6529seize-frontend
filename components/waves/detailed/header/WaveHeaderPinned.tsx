@@ -103,6 +103,7 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave, side }) => {
                 }}
                 showWaveInfo={false}
                 activeDrop={null}
+                dropViewDropId={null}
                 onReplyClick={() => {}}
                 showReplyAndQuote={false}
                 location={DropLocation.WAVE}

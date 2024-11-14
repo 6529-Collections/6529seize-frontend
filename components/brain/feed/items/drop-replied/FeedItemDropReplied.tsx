@@ -42,6 +42,7 @@ export default function FeedItemDropReplied({
       activeDrop={activeDrop}
       showReplyAndQuote={true}
       location={DropLocation.MY_STREAM}
+      dropViewDropId={null}
       onReply={onReply}
       onQuote={onQuote}
       onReplyClick={onReplyClick}
