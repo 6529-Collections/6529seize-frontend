@@ -34,6 +34,7 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
         key={wave.id}
+        dropId={null}
       />
     </div>
   );

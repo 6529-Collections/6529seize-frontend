@@ -66,6 +66,7 @@ interface CreateDropContentProps {
   readonly drop: CreateDropConfig | null;
   readonly isStormMode: boolean;
   readonly isDropMode: boolean;
+  readonly dropId: string | null;
   readonly setDrop: React.Dispatch<
     React.SetStateAction<CreateDropConfig | null>
   >;
@@ -402,6 +403,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   drop,
   isStormMode,
   isDropMode,
+  dropId,
   setDrop,
   setIsStormMode,
   onDropModeChange,
@@ -846,6 +848,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         activeDrop={activeDrop}
         submitting={submitting}
         onCancelReplyQuote={onCancelReplyQuote}
+        dropId={dropId}
       />
       <div className="tw-flex tw-items-end tw-w-full">
         <div className="tw-w-full tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-3">

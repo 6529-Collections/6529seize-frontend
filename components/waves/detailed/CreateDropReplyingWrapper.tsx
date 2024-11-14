@@ -6,17 +6,19 @@ import { ActiveDropState } from "./chat/WaveChat";
 interface CreateDropReplyingWrapperProps {
   readonly activeDrop: ActiveDropState | null;
   readonly submitting: boolean;
+  readonly dropId: string | null;
   readonly onCancelReplyQuote: () => void;
 }
 
 const CreateDropReplyingWrapper: React.FC<CreateDropReplyingWrapperProps> = ({
   activeDrop,
   submitting,
+  dropId,
   onCancelReplyQuote,
 }) => {
   return (
     <AnimatePresence>
-      {activeDrop && (
+      {activeDrop && activeDrop.drop.id !== dropId && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}

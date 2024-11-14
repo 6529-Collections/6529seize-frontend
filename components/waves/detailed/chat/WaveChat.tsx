@@ -125,6 +125,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
                   onQuote={handleQuote}
                   activeDrop={activeDrop}
                   initialDrop={initialDrop}
+                  dropId={null}
                 />
                 {canDrop && (
                   <div className="tw-mt-auto">
@@ -133,6 +134,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
                         activeDrop={activeDrop}
                         onCancelReplyQuote={onCancelReplyQuote}
                         wave={wave}
+                        dropId={null}
                       />
                     </CreateDropWaveWrapper>
                   </div>

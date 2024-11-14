@@ -21,6 +21,7 @@ import { ActiveDropState } from "../chat/WaveChat";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
+  readonly dropId: string | null;
   readonly onReply: ({
     drop,
     partId,
@@ -41,6 +42,7 @@ export interface WaveDropsAllProps {
 
 export default function WaveDropsAll({
   waveId,
+  dropId,
   onReply,
   onQuote,
   activeDrop,
@@ -57,7 +59,12 @@ export default function WaveDropsAll({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-  } = useWaveDrops(waveId, connectedProfile?.profile?.handle, true);
+  } = useWaveDrops({
+    waveId,
+    connectedProfileHandle: connectedProfile?.profile?.handle,
+    reverse: true,
+    dropId,
+  });
 
   const {
     scrollContainerRef,

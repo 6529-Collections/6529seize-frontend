@@ -25,6 +25,7 @@ interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly wave: ApiWave;
+  readonly dropId: string | null;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -33,6 +34,7 @@ export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
   wave,
+  dropId,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -183,6 +185,7 @@ export default function CreateDrop({
       drop,
       isStormMode,
       isDropMode,
+      dropId,
       setDrop,
       setIsStormMode,
       onDropModeChange,
@@ -194,6 +197,7 @@ export default function CreateDrop({
       drop,
       isStormMode,
       isDropMode,
+      dropId,
       setDrop,
       setIsStormMode,
       onDropModeChange,
