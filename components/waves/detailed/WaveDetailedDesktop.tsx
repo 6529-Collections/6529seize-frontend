@@ -64,7 +64,12 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
 
   const components: Record<WaveDetailedView, JSX.Element> = {
     [WaveDetailedView.CHAT]: (
-      <WaveChat wave={wave} activeTab={view} setActiveTab={setView} />
+      <WaveChat
+        wave={wave}
+        activeTab={view}
+        setActiveTab={setView}
+        onDropClick={setActiveDrop}
+      />
     ),
     [WaveDetailedView.LEADERBOARD]: (
       <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>

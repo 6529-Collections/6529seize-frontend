@@ -884,7 +884,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            {isParticipatory && (
+            {isParticipatory  && (
               <Tippy
                 content={<span className="tw-text-xs">Drop Mode</span>}
                 placement="top"

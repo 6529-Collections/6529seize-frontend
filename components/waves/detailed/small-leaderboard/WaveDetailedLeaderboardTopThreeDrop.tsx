@@ -11,11 +11,12 @@ import { ApiWave } from "../../../../generated/models/ApiWave";
 interface WaveDetailedLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
   WaveDetailedLeaderboardTopThreeDropProps
-> = ({ drop, wave }) => {
+> = ({ drop, wave, onDropClick }) => {
   const getBGColor = (rank: number | null): string | null => {
     if (rank === 1) return "tw-from-[#E8D48A]/10";
     if (rank === 2) return "tw-from-[#DDDDDD]/10";
@@ -121,6 +122,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                 <div className="tw-flex tw-justify-between tw-items-center">
                   <Link
                     href={`/${drop.author.handle}`}
+                    onClick={(e) => e.stopPropagation()}
                     className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline"
                   >
                     {drop.author.pfp ? (
@@ -178,7 +180,10 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                     </span>
                   </div>
                 </div>
-                <WaveDetailedLeaderboardItemContent drop={drop} />
+                <WaveDetailedLeaderboardItemContent
+                  drop={drop}
+                  onDropClick={onDropClick}
+                />
                 <WaveDetailedLeaderboardItemOutcomes drop={drop} wave={wave} />
               </div>
             </div>

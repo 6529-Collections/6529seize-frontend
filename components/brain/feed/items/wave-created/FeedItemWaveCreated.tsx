@@ -73,6 +73,8 @@ export default function FeedItemWaveCreated({
           onQuote={onQuote}
           onReplyClick={onReplyClick}
           onQuoteClick={onQuoteClick}
+          // TODO: Implement this
+          onDropClick={() => {}}
         />
       </div>
     </div>

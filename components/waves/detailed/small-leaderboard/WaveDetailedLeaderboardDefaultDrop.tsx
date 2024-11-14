@@ -11,11 +11,12 @@ import { WaveDetailedLeaderboardItemOutcomes } from "./WaveDetailedLeaderboardIt
 interface WaveDetailedLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveDetailedLeaderboardDefaultDrop: React.FC<
   WaveDetailedLeaderboardDefaultDropProps
-> = ({ drop, wave }) => {
+> = ({ drop, wave, onDropClick }) => {
   const getCICColor = (cic: number): string => {
     const cicType = cicToType(cic);
     switch (cicType) {
@@ -93,7 +94,7 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
                   </span>
                 </div>
               </div>
-              <WaveDetailedLeaderboardItemContent drop={drop} />
+              <WaveDetailedLeaderboardItemContent drop={drop} onDropClick={onDropClick} />
               <WaveDetailedLeaderboardItemOutcomes drop={drop} wave={wave} />
             </div>
           </div>

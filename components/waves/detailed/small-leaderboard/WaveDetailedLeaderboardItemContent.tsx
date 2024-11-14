@@ -7,11 +7,12 @@ import WaveDetailedDropPartContentMedias from "../drops/WaveDetailedDropPartCont
 
 interface WaveDetailedLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveDetailedLeaderboardItemContent: React.FC<
   WaveDetailedLeaderboardItemContentProps
-> = ({ drop }) => {
+> = ({ drop, onDropClick }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [showGradient, setShowGradient] = useState(false);
 
@@ -29,7 +30,8 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
     <div className="tw-mt-3 tw-mb-4">
       <div
         ref={contentRef}
-        className="tw-relative tw-max-h-52 tw-overflow-hidden"
+        onClick={() => onDropClick(drop)}
+        className="tw-relative tw-cursor-pointer tw-max-h-52 tw-overflow-hidden"
       >
         {!!drop.parts[0].media.length && (
           <WaveDetailedDropPartContentMedias activePart={drop.parts[0]} />

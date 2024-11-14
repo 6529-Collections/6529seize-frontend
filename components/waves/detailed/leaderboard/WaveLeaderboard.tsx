@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { WaveLeaderboardTime } from "./WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "./header/WaveleaderboardHeader";

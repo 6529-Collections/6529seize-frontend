@@ -8,14 +8,16 @@ import {
 } from "../../../../hooks/useWaveDropsLeaderboard";
 import { WaveDetailedLeaderboardDrop } from "./WaveDetailedLeaderboardDrop";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
+import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
 
 interface WaveDetailedSmallLeaderboardProps {
   readonly wave: ApiWave;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveDetailedSmallLeaderboard: React.FC<
   WaveDetailedSmallLeaderboardProps
-> = ({ wave }) => {
+> = ({ wave, onDropClick }) => {
   const { connectedProfile } = useContext(AuthContext);
   const {
     drops,
@@ -54,6 +56,7 @@ export const WaveDetailedSmallLeaderboard: React.FC<
                 drop={drop}
                 wave={wave}
                 key={drop.id}
+                onDropClick={onDropClick}
               />
             ))}
           </ul>

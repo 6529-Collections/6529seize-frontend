@@ -17,6 +17,7 @@ import { WaveDropAuthor } from "./WaveDropAuthor";
 import { WaveDetailedLeaderboardItemOutcomes } from "../small-leaderboard/WaveDetailedLeaderboardItemOutcomes";
 import Tippy from "@tippyjs/react";
 import { WaveDropChat } from "./WaveDropChat";
+import { getTimeAgoShort } from "../../../../helpers/Helpers";
 
 interface WaveDropProps {
   readonly wave: ApiWave;
@@ -89,7 +90,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
                       <div className="tw-flex tw-gap-x-2 tw-items-center">
                         <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
                         <p className="tw-text-sm tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-                          15min
+                          {getTimeAgoShort(drop.created_at)}
                         </p>
                       </div>
                     </div>

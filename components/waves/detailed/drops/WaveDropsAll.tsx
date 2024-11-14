@@ -18,6 +18,7 @@ import CircleLoader, {
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../chat/WaveChat";
+import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -38,6 +39,7 @@ export interface WaveDropsAllProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export default function WaveDropsAll({
@@ -47,6 +49,7 @@ export default function WaveDropsAll({
   onQuote,
   activeDrop,
   initialDrop,
+  onDropClick,
 }: WaveDropsAllProps) {
   const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
@@ -219,6 +222,7 @@ export default function WaveDropsAll({
             onQuoteClick={onQuoteClick}
             parentContainerRef={scrollContainerRef}
             dropViewDropId={dropId}
+            onDropClick={onDropClick}
           />
         </div>
       </WaveDropsScrollContainer>

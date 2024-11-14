@@ -19,7 +19,7 @@ export const WaveLeaderboardDropHeader: React.FC<
         <div className="tw-flex tw-gap-x-2 tw-items-center">
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
           <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-          {getTimeAgoShort(drop.created_at)}
+            {getTimeAgoShort(drop.created_at)}
           </p>
         </div>
       </div>

@@ -32,7 +32,6 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     hasNextPage,
     isFetching,
     isFetchingNextPage,
-    haveNewDrops,
   } = useWaveDropsLeaderboard({
     waveId: wave.id,
     connectedProfileHandle: connectedProfile?.profile?.handle,

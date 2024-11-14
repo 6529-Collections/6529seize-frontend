@@ -16,6 +16,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
   return (
     <Link
       href={`/${drop.author.handle}`}
+      onClick={(e) => e.stopPropagation()}
       className="tw-flex tw-items-center tw-gap-x-3 tw-no-underline"
     >
       <div className="tw-relative">

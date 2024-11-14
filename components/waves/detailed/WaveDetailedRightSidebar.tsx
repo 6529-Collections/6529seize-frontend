@@ -3,17 +3,20 @@ import { motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ObjectSerializer";
 import { WaveDetailedOutcomes } from "./outcome/WaveDetailedOutcomes";
 import { WaveDetailedSmallLeaderboard } from "./small-leaderboard/WaveDetailedSmallLeaderboard";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface WaveDetailedRightSidebarProps {
   readonly isOpen: boolean;
   readonly wave: ApiWave;
   readonly onToggle: () => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
   isOpen,
   wave,
   onToggle,
+  onDropClick,
 }) => {
   return (
     <motion.div
@@ -47,7 +50,7 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
       </button>
       <div className="tw-pt-[5.6rem] xl:tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
         <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
-          <WaveDetailedSmallLeaderboard wave={wave} />
+          <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
           <WaveDetailedOutcomes wave={wave} />
         </div>
       </div>

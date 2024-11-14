@@ -563,8 +563,6 @@ export default function CreateWave({
       drop: dropRequest,
     });
 
-    console.log(waveBody)
-
     await addWaveMutation.mutateAsync(waveBody);
   };
 
