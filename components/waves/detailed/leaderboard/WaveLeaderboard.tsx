@@ -10,6 +10,8 @@ import {
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveLeaderboardRightSidebar from "./WaveLeaderboardRightSidebar";
 import { WaveDropCreate } from "./create/WaveDropCreate";
+import { motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 interface WaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -67,25 +69,42 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             setShowMyDrops={setShowMyDrops}
             onCreateDrop={() => setIsCreatingDrop(true)}
           />
-          
-          {isCreatingDrop ? (
-            <WaveDropCreate 
-              wave={wave}
-              onCancel={() => setIsCreatingDrop(false)}
-              onSuccess={() => {
-                setIsCreatingDrop(false);
-                // Optionally refresh the drops list
-              }}
-            />
-          ) : (
-            <WaveLeaderboardDrops
-              wave={wave}
-              dropsSortBy={sortBy[sort]}
-              sortDirection={sortDirection[sort]}
-              showMyDrops={showMyDrops}
-              setActiveDrop={setActiveDrop}
-            />
-          )}
+
+          <AnimatePresence mode="wait">
+            {isCreatingDrop ? (
+              <motion.div
+                key="create"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <WaveDropCreate
+                  wave={wave}
+                  onCancel={() => setIsCreatingDrop(false)}
+                  onSuccess={() => {
+                    setIsCreatingDrop(false);
+                  }}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <WaveLeaderboardDrops
+                  wave={wave}
+                  dropsSortBy={sortBy[sort]}
+                  sortDirection={sortDirection[sort]}
+                  showMyDrops={showMyDrops}
+                  setActiveDrop={setActiveDrop}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
       <WaveLeaderboardRightSidebar

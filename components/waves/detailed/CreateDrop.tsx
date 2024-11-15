@@ -21,11 +21,17 @@ import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
 import { ActiveDropState } from "./chat/WaveChat";
 
+export enum DropMode {
+  CHAT = "CHAT",
+  PARTICIPATION = "PARTICIPATION",
+}
+
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly wave: ApiWave;
   readonly dropId: string | null;
+  readonly fixedDropMode?: DropMode;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -35,6 +41,7 @@ export default function CreateDrop({
   onCancelReplyQuote,
   wave,
   dropId,
+  fixedDropMode,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -43,6 +50,12 @@ export default function CreateDrop({
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
 
   const getIsDropMode = () => {
+    if (fixedDropMode === DropMode.CHAT) {
+      return false;
+    }
+    if (fixedDropMode === DropMode.PARTICIPATION) {
+      return true;
+    }
     if (wave.chat.authenticated_user_eligible) return false;
     if (wave.participation.authenticated_user_eligible) return true;
     if (activeDrop) return false;
@@ -69,6 +82,9 @@ export default function CreateDrop({
 
   const onDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
+      if (fixedDropMode) {
+        return;
+      }
       if (newIsDropMode && !wave.participation.authenticated_user_eligible) {
         setToast({
           message: "You are not eligible to drop in this wave",
