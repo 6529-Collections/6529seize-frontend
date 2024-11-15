@@ -6,6 +6,7 @@ import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 export interface FeedItemProps {
   readonly item: TypedFeedItem;
@@ -13,6 +14,7 @@ export interface FeedItemProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedItem({
@@ -21,6 +23,7 @@ export default function FeedItem({
   activeDrop,
   onReply,
   onQuote,
+  onDropClick,
 }: FeedItemProps) {
   const getComponent = (): JSX.Element => {
     switch (item.type) {
@@ -32,6 +35,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
+            onDropClick={onDropClick}
           />
         );
       case ApiFeedItemType.DropCreated:
@@ -42,6 +46,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
+            onDropClick={onDropClick}
           />
         );
       case ApiFeedItemType.DropReplied:
@@ -52,6 +57,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
+            onDropClick={onDropClick}
           />
         );
       default:

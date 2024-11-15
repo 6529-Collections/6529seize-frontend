@@ -19,7 +19,6 @@ import CircleLoader, {
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../chat/WaveChat";
 import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;

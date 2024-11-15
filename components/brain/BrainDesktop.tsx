@@ -29,13 +29,16 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
       >
         <div
           className={`tw-h-screen lg:tw-h-[calc(100vh-6.25rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-transition-all tw-duration-300 ${
-            showRightSidebar && !isCollapsed ? "tw-mr-[20.5rem] min-[1980px]:tw-mr-0" : ""
+            showRightSidebar && !isCollapsed
+              ? "tw-mr-[20.5rem] min-[1980px]:tw-mr-0"
+              : ""
           }`}
         >
+  
           <BrainLeftSidebar activeWaveId={router.query.wave as string} />
           {children}
         </div>
-
+  
         {showRightSidebar && (
           <BrainRightSidebar
             isCollapsed={isCollapsed}

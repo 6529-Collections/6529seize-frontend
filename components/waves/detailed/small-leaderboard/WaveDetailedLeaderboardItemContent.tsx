@@ -41,6 +41,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
           referencedNfts={drop.referenced_nfts}
           part={drop.parts[0]}
           wave={drop.wave}
+          onQuoteClick={() => {}}
         />
         {showGradient && (
           <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/50 tw-to-transparent" />

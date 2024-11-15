@@ -2,6 +2,7 @@ import FeedWrapper from "../feed/FeedWrapper";
 import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface MyStreamProps {
   readonly onReply: (param: DropInteractionParams) => void;
@@ -10,6 +11,7 @@ interface MyStreamProps {
   readonly items: TypedFeedItem[];
   readonly isFetching: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export default function MyStream({
@@ -19,8 +21,8 @@ export default function MyStream({
   items,
   isFetching,
   onBottomIntersection,
+  onDropClick,
 }: MyStreamProps) {
-
   return (
     <div className="tw-flex-shrink-0">
       <FeedWrapper
@@ -31,6 +33,7 @@ export default function MyStream({
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
+        onDropClick={onDropClick}
       />
     </div>
   );

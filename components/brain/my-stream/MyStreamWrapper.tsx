@@ -13,6 +13,7 @@ import {
   ActiveDropAction,
   ActiveDropState,
 } from "../../waves/detailed/chat/WaveChat";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);
@@ -25,6 +26,11 @@ const MyStreamWrapper: React.FC = () => {
   }, [router.query]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+
+  const onDropClick = (drop: ExtendedDrop) => {
+    console.log(drop);
+  };
+
   const getActiveWaveId = () => {
     return activeDrop?.drop.wave.id ?? serialisedWaveId;
   };
@@ -121,11 +127,13 @@ const MyStreamWrapper: React.FC = () => {
       onReply={onReply}
       onQuote={onQuote}
       activeDrop={activeDrop}
+      onDropClick={onDropClick}
     />
   ) : (
     <MyStream
       onReply={onReply}
       onQuote={onQuote}
+      onDropClick={onDropClick}
       activeDrop={activeDrop}
       items={items}
       isFetching={isFetching}
