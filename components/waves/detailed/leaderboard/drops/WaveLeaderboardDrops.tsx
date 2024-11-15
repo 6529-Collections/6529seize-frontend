@@ -26,20 +26,15 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   setActiveDrop,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
-  const {
-    drops,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-  } = useWaveDropsLeaderboard({
-    waveId: wave.id,
-    connectedProfileHandle: connectedProfile?.profile?.handle,
-    reverse: true,
-    dropsSortBy,
-    sortDirection,
-    handle: showMyDrops ? connectedProfile?.profile?.handle : undefined,
-  });
+  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useWaveDropsLeaderboard({
+      waveId: wave.id,
+      connectedProfileHandle: connectedProfile?.profile?.handle,
+      reverse: true,
+      dropsSortBy,
+      sortDirection,
+      handle: showMyDrops ? connectedProfile?.profile?.handle : undefined,
+    });
 
   const memoizedDrops = useMemo(() => drops, [drops]);
 
@@ -48,6 +43,19 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
       fetchNextPage();
     }
   });
+
+  if (memoizedDrops.length === 0 && !isFetching) {
+    return (
+      <div className="tw-text-center tw-h-full tw-rounded-xl tw-bg-iron-950 tw-flex tw-flex-col tw-items-center tw-justify-center">
+        <h3 className="tw-text-xl tw-font-medium tw-mb-2 tw-text-iron-400">
+          No drops yet
+        </h3>
+        <p className="tw-text-iron-500">
+          Be the first to create a drop in this wave
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="tw-space-y-4">
@@ -58,7 +66,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
           wave={wave}
           setActiveDrop={setActiveDrop}
         />
-      ))}{" "}
+      ))}
       {isFetchingNextPage && (
         <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
           <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>

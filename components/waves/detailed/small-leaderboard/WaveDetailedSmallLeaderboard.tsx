@@ -45,16 +45,22 @@ export const WaveDetailedSmallLeaderboard: React.FC<
   return (
     <div className="tw-p-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
       <div className="tw-flex tw-flex-col">
-        <ul className="tw-space-y-3 tw-pl-0">
-          {memoizedDrops.map((drop) => (
-            <WaveDetailedLeaderboardDrop
-              drop={drop}
-              wave={wave}
-              key={drop.id}
-              onDropClick={onDropClick}
-            />
-          ))}
-        </ul>
+        {(memoizedDrops.length === 0 || isFetching) ? (
+          <div className="tw-text-iron-400 tw-text-center tw-py-4">
+            No drops have been made yet in this wave
+          </div>
+        ) : (
+          <ul className="tw-space-y-3 tw-pl-0">
+            {memoizedDrops.map((drop) => (
+              <WaveDetailedLeaderboardDrop
+                drop={drop}
+                wave={wave}
+                key={drop.id}
+                onDropClick={onDropClick}
+              />
+            ))}
+          </ul>
+        )}
         {isFetchingNextPage && (
           <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
             <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
