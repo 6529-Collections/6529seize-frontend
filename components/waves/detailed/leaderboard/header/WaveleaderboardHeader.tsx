@@ -31,6 +31,9 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         </p>
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-4">
+        <div className="tw-text-sm tw-text-iron-400">
+          <span>My remaining votes: <span className="tw-text-iron-200">1,234</span></span>
+        </div>
         {connectedProfile && (
           <button
             className={`tw-group tw-border tw-border-solid tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out ${

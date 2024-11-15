@@ -69,7 +69,7 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     <div className="tw-flex-1">
       <div
         ref={contentWrapperRef}
-        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
+        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-relative"
       >
         <div className="tw-relative tw-h-full">
           <div className="tw-h-full tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">

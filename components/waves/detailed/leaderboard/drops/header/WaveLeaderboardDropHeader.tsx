@@ -1,4 +1,7 @@
 import React from "react";
+import Tippy from "@tippyjs/react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 import { WaveLeaderboardDropAuthor } from "./WaveLeaderboardDropAuthor";
 import { WaveLeaderboardDropRaters } from "./WaveleaderboardDropRaters";
@@ -23,9 +26,9 @@ export const WaveLeaderboardDropHeader: React.FC<
           </p>
         </div>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-6">
-        <WaveDetailedDropActionsRate drop={drop} />
+      <div className="tw-flex tw-items-center tw-gap-x-6">
         {!!drop.rating && <WaveLeaderboardDropRaters drop={drop} />}
+        <WaveDetailedDropActionsRate drop={drop} />
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import CircleLoader, {
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../chat/WaveChat";
 import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -200,37 +201,52 @@ export default function WaveDropsAll({
 
   return (
     <div className="tw-flex tw-flex-col tw-relative tw-overflow-y-auto">
-      <WaveDropsScrollContainer
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        newItemsCount={newItemsCount}
-        isFetchingNextPage={isFetchingNextPage}
-        onTopIntersection={handleTopIntersection}
-      >
-        <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
-          <DropsList
-            onReplyClick={setSerialNo}
-            drops={memoizedDrops}
-            showWaveInfo={false}
-            isFetchingNextPage={isFetchingNextPage}
-            onReply={onReply}
-            onQuote={onQuote}
-            showReplyAndQuote={true}
-            activeDrop={activeDrop}
-            serialNo={serialNo}
-            targetDropRef={targetDropRef}
-            onQuoteClick={onQuoteClick}
-            parentContainerRef={scrollContainerRef}
-            dropViewDropId={dropId}
-            onDropClick={onDropClick}
-          />
+      {drops.length === 0 ? (
+        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-min-h-[200px] tw-text-iron-400 tw-space-y-6">
+          <div className="tw-text-center">
+            <h3 className="tw-text-xl tw-font-medium tw-mb-2">
+              No replies yet
+            </h3>
+            <p className="tw-text-iron-500">
+              Maybe you&apos;ll be the first to share your thoughts on this drop
+            </p>
+          </div>
         </div>
-      </WaveDropsScrollContainer>
+      ) : (
+        <>
+          <WaveDropsScrollContainer
+            ref={scrollContainerRef}
+            onScroll={handleScroll}
+            newItemsCount={newItemsCount}
+            isFetchingNextPage={isFetchingNextPage}
+            onTopIntersection={handleTopIntersection}
+          >
+            <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
+              <DropsList
+                onReplyClick={setSerialNo}
+                drops={memoizedDrops}
+                showWaveInfo={false}
+                isFetchingNextPage={isFetchingNextPage}
+                onReply={onReply}
+                onQuote={onQuote}
+                showReplyAndQuote={true}
+                activeDrop={activeDrop}
+                serialNo={serialNo}
+                targetDropRef={targetDropRef}
+                onQuoteClick={onQuoteClick}
+                parentContainerRef={scrollContainerRef}
+                dropViewDropId={dropId}
+                onDropClick={onDropClick}
+              />
+            </div>
+          </WaveDropsScrollContainer>
 
-      <WaveDropsScrollBottomButton
-        isAtBottom={isAtBottom}
-        scrollToBottom={scrollToBottom}
-      />
+          <WaveDropsScrollBottomButton
+            isAtBottom={isAtBottom}
+            scrollToBottom={scrollToBottom}
+          />
+        </>
+      )}
 
       {isScrolling && (
         <>
