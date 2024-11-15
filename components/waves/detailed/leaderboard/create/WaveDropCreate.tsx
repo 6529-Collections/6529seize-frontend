@@ -14,10 +14,10 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   onSuccess,
 }) => {
   return (
-    <div className="tw-mt-6 tw-bg-iron-900 tw-rounded-lg tw-p-6">
+    <div className="tw-mt-6 tw-bg-iron-950 tw-rounded-xl tw-p-6 tw-ring-1 tw-ring-inset tw-ring-iron-800">
       <div className="tw-flex tw-justify-between tw-items-center tw-mb-6">
         <h3 className="tw-text-xl tw-font-semibold tw-text-iron-200">
-          Create New Drop
+          Create a New Drop
         </h3>
         <button
           onClick={onCancel}
