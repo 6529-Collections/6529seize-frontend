@@ -15,6 +15,7 @@ import {
 } from "../../waves/detailed/chat/WaveChat";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import BrainDesktopDrop from "../BrainDesktopDrop";
+import { useWaveData } from "../../../hooks/useWaveData";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);
@@ -27,9 +28,12 @@ const MyStreamWrapper: React.FC = () => {
   }, [router.query]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  const [dropToShow, setDropToShow] = useState<ExtendedDrop | null>(null);
+
+  const { data: dropToShowWave } = useWaveData(dropToShow?.wave.id ?? null);
 
   const onDropClick = (drop: ExtendedDrop) => {
-    console.log(drop);
+    setDropToShow(drop);
   };
 
   const getActiveWaveId = () => {
@@ -147,7 +151,9 @@ const MyStreamWrapper: React.FC = () => {
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
     >
-      <BrainDesktopDrop/>
+      {dropToShow && dropToShowWave && dropToShow.wave.id === dropToShowWave.id && (
+        <BrainDesktopDrop drop={dropToShow} wave={dropToShowWave} onClose={() => setDropToShow(null)} />
+      )}
       {component}
     </BrainContent>
   );
