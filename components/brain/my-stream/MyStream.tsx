@@ -23,6 +23,7 @@ export default function MyStream({
   onBottomIntersection,
   onDropClick,
 }: MyStreamProps) {
+
   return (
     <div className="tw-flex-shrink-0">
       <FeedWrapper

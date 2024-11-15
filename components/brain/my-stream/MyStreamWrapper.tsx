@@ -14,6 +14,7 @@ import {
   ActiveDropState,
 } from "../../waves/detailed/chat/WaveChat";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import BrainDesktopDrop from "../BrainDesktopDrop";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);
@@ -146,6 +147,7 @@ const MyStreamWrapper: React.FC = () => {
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
     >
+      <BrainDesktopDrop/>
       {component}
     </BrainContent>
   );
