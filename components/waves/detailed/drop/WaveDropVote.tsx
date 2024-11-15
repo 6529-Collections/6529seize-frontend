@@ -217,7 +217,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
             <span className="tw-text-iron-200">
               {formatNumberWithCommas(
                 drop.context_profile_context?.rating ?? 0
-              )}
+              )} TDH
             </span>
           </span>
         </div>
@@ -225,7 +225,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
           <span>
             Remaining:{" "}
             <span className="tw-text-iron-200">
-              {formatNumberWithCommas(availableCredit)}
+              {formatNumberWithCommas(availableCredit)} TDH
             </span>
           </span>
         </div>

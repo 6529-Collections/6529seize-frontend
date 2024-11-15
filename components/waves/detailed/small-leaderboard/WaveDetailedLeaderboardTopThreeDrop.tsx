@@ -7,6 +7,7 @@ import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import { WaveDetailedLeaderboardItemContent } from "./WaveDetailedLeaderboardItemContent";
 import { WaveDetailedLeaderboardItemOutcomes } from "./WaveDetailedLeaderboardItemOutcomes";
 import { ApiWave } from "../../../../generated/models/ApiWave";
+import WaveDetailedDropActionsRate from "../drops/WaveDetailedDropActionsRate";
 
 interface WaveDetailedLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
@@ -115,19 +116,22 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
           )}`}
         >
           <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4">
-            <div className="">
-              <div
-                className={`${
-                  drop.rank === 1
-                    ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#E8D48A]/30 tw-ring-[#E8D48A]/30 tw-rounded-lg tw-text-[#E8D48A]"
-                    : drop.rank === 2
-                    ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-lg tw-bg-gradient-to-b tw-shadow-lg tw-ring-1 tw-to-iron-900 tw-from-[#dddddd]/20 tw-ring-[#dddddd]/30"
-                    : drop.rank === 3
-                    ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#CD7F32]/20 tw-ring-[#CD7F32]/30 tw-rounded-lg tw-text-[#CD7F32]"
-                    : ""
-                }`}
-              >
-                {thropyIcon(drop.rank)}
+            <div>
+              <div className="tw-w-full tw-inline-flex tw-justify-between">
+                <div
+                  className={`${
+                    drop.rank === 1
+                      ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#E8D48A]/30 tw-ring-[#E8D48A]/30 tw-rounded-lg tw-text-[#E8D48A]"
+                      : drop.rank === 2
+                      ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-lg tw-bg-gradient-to-b tw-shadow-lg tw-ring-1 tw-to-iron-900 tw-from-[#dddddd]/20 tw-ring-[#dddddd]/30"
+                      : drop.rank === 3
+                      ? "tw-flex tw-items-center tw-justify-center tw-size-6 tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#CD7F32]/20 tw-ring-[#CD7F32]/30 tw-rounded-lg tw-text-[#CD7F32]"
+                      : ""
+                  }`}
+                >
+                  {thropyIcon(drop.rank)}
+                </div>
+                <WaveDetailedDropActionsRate drop={drop} />
               </div>
 
               <div className="tw-flex-1">

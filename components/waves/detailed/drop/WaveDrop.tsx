@@ -15,9 +15,9 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { WaveDropVotes } from "./WaveDropVotes";
 import { WaveDropAuthor } from "./WaveDropAuthor";
 import { WaveDetailedLeaderboardItemOutcomes } from "../small-leaderboard/WaveDetailedLeaderboardItemOutcomes";
-import Tippy from "@tippyjs/react";
 import { WaveDropChat } from "./WaveDropChat";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
+import { WaveDropClose } from "./WaveDropClose";
 
 interface WaveDropProps {
   readonly wave: ApiWave;
@@ -45,26 +45,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
       <div className="tw-flex">
         <div className="tw-w-[28rem] 2xl:tw-max-w-2xl 2xl:tw-w-full tw-py-6 tw-border tw-border-r-[3px] tw-border-solid tw-border-iron-800 tw-border-y-0 tw-bg-iron-950 tw-overflow-y-auto tw-h-[calc(100vh-102px)] tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 ">
           <div className="tw-h-full tw-relative tw-bg-iron-950">
-            <button
-              type="button"
-              className="tw-absolute tw-z-1000 tw-top-0 tw-right-4 tw-text-iron-300 desktop-hover:hover:tw-text-iron-50 tw-bg-transparent tw-border-0 tw-transition tw-duration-300 tw-ease-out"
-              onClick={onClose}
-            >
-              <svg
-                className="tw-h-6 tw-w-6"
-                aria-hidden="true"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+            <WaveDropClose onClose={onClose} />
             <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2 tw-pb-6">
               <div className="tw-px-6">
                 {drop.drop_type === ApiDropType.Participatory && (

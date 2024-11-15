@@ -7,6 +7,7 @@ import { cicToType, formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import { WaveDetailedLeaderboardItemContent } from "./WaveDetailedLeaderboardItemContent";
 import { WaveDetailedLeaderboardItemOutcomes } from "./WaveDetailedLeaderboardItemOutcomes";
+import WaveDetailedDropActionsRate from "../drops/WaveDetailedDropActionsRate";
 
 interface WaveDetailedLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
@@ -40,8 +41,11 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
       <div className="tw-relative tw-flex tw-flex-col tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
         <div className="tw-p-4">
           <div>
-            <div className="tw-size-6 tw-flex tw-items-center tw-justify-center tw-font-semibold tw-rounded-lg tw-bg-iron-800/80 tw-ring-1 tw-ring-iron-700/50">
-              <span className="tw-text-iron-300 tw-text-sm">{drop.rank}</span>
+            <div className="tw-w-full tw-inline-flex tw-justify-between">
+              <div className="tw-size-6 tw-flex tw-items-center tw-justify-center tw-font-semibold tw-rounded-lg tw-bg-iron-800/80 tw-ring-1 tw-ring-iron-700/50">
+                <span className="tw-text-iron-300 tw-text-sm">{drop.rank}</span>
+              </div>
+              <WaveDetailedDropActionsRate drop={drop} />
             </div>
 
             <div className="tw-flex-1">
