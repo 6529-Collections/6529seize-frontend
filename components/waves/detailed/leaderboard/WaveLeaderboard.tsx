@@ -70,14 +70,13 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             onCreateDrop={() => setIsCreatingDrop(true)}
           />
 
-          <AnimatePresence mode="wait">
-            {isCreatingDrop ? (
+          <AnimatePresence>
+            {isCreatingDrop && (
               <motion.div
-                key="create"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
               >
                 <WaveDropCreate
                   wave={wave}
@@ -87,24 +86,15 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
                   }}
                 />
               </motion.div>
-            ) : (
-              <motion.div
-                key="list"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <WaveLeaderboardDrops
-                  wave={wave}
-                  dropsSortBy={sortBy[sort]}
-                  sortDirection={sortDirection[sort]}
-                  showMyDrops={showMyDrops}
-                  setActiveDrop={setActiveDrop}
-                />
-              </motion.div>
             )}
           </AnimatePresence>
+          <WaveLeaderboardDrops
+            wave={wave}
+            dropsSortBy={sortBy[sort]}
+            sortDirection={sortDirection[sort]}
+            showMyDrops={showMyDrops}
+            setActiveDrop={setActiveDrop}
+          />
         </div>
       </div>
       <WaveLeaderboardRightSidebar

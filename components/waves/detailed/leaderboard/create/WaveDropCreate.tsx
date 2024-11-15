@@ -14,17 +14,17 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   onSuccess,
 }) => {
   return (
-    <div className="tw-mt-6 tw-bg-iron-950 tw-rounded-xl tw-p-6 tw-ring-1 tw-ring-inset tw-ring-iron-800">
-      <div className="tw-flex tw-justify-between tw-items-center tw-mb-6">
-        <h3 className="tw-text-xl tw-font-semibold tw-text-iron-200">
+    <div className="tw-mt-4 tw-mb-4 tw-bg-iron-950 tw-rounded-xl tw-pt-4 tw-px-6 tw-pb-5 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+      <div className="tw-flex tw-justify-between tw-items-center tw-mb-3">
+        <span className="tw-text-base tw-font-semibold tw-text-iron-200">
           Create a New Drop
-        </h3>
+        </span>
         <button
           onClick={onCancel}
-          className="tw-text-iron-400 hover:tw-text-iron-200 tw-transition-colors"
+          className="tw-bg-transparent tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-200 tw-transition-all tw-duration-300 tw-ease-out tw-rounded-lg tw-p-1"
         >
           <svg
-            className="tw-w-5 tw-h-5"
+            className="tw-size-6"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
