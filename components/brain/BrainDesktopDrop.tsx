@@ -13,7 +13,7 @@ interface Props {
 const BrainDesktopDrop: React.FC<Props> = ({ drop, wave, onClose }) => {
 
   return (
-    <div className="tw-absolute tw-inset-0 tw-z-1000">
+    <div className="tw-full">
       <WaveDrop wave={wave} drop={drop} onClose={onClose} />
     </div>
   );
