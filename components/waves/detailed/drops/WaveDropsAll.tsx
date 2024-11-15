@@ -201,7 +201,7 @@ export default function WaveDropsAll({
 
   return (
     <div className="tw-flex tw-flex-col tw-relative tw-overflow-y-auto">
-      {drops.length === 0 ? (
+      {drops.length === 0 && !isFetching ? (
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-full tw-min-h-[200px] tw-text-iron-400 tw-space-y-6">
           <div className="tw-text-center">
             <h3 className="tw-text-xl tw-font-medium tw-mb-2">

@@ -32,7 +32,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-4">
         <div className="tw-text-sm tw-text-iron-400">
-          <span>My remaining votes: <span className="tw-text-iron-200">1,234</span></span>
+          <span>My remaining: <span className="tw-text-iron-200">1,234 TDH</span></span>
         </div>
         {connectedProfile && (
           <button
