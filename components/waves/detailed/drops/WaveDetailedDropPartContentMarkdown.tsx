@@ -14,18 +14,19 @@ interface WaveDetailedDropPartContentMarkdownProps {
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly part: ApiDropPart;
   readonly wave: ApiWaveMin;
+  readonly onQuoteClick: (drop: ApiDrop) => void;
 }
 
 const WaveDetailedDropPartContentMarkdown: React.FC<
   WaveDetailedDropPartContentMarkdownProps
-> = ({ mentionedUsers, referencedNfts, part, wave }) => {
+> = ({ mentionedUsers, referencedNfts, part, wave, onQuoteClick }) => {
   return (
     <>
       <DropPartMarkdownWithPropLogger
         mentionedUsers={mentionedUsers}
         referencedNfts={referencedNfts}
         partContent={part.content}
-        onQuoteClick={() => {}}
+        onQuoteClick={onQuoteClick}
       />
       {part.quoted_drop?.drop_id && (
         <div className="tw-mt-3">
@@ -37,7 +38,7 @@ const WaveDetailedDropPartContentMarkdown: React.FC<
                 ? { ...part.quoted_drop.drop, wave: wave }
                 : null
             }
-            onQuoteClick={() => {}}
+            onQuoteClick={onQuoteClick}
           />
         </div>
       )}

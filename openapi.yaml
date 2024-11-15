@@ -2242,6 +2242,12 @@ paths:
             enum:
               - RANK
               - CREATION_TIME
+        - name: author_identity
+          in: query
+          description: Identity of author to filter by
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: successful operation

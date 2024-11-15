@@ -42,34 +42,53 @@ export default function CreateDrop({
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
 
-  const getInitialIsDropMode = () => {
+  const getIsDropMode = () => {
     if (wave.chat.authenticated_user_eligible) return false;
     if (wave.participation.authenticated_user_eligible) return true;
+    if (activeDrop) return false;
     return false;
   };
 
-  const [isDropMode, setIsDropMode] = useState(getInitialIsDropMode());
+  const [isDropMode, setIsDropMode] = useState(getIsDropMode());
+  useEffect(() => setIsDropMode(getIsDropMode()), [wave, activeDrop]);
+
+  const getIsDropModeDisabled = () => {
+    if (!wave.participation.authenticated_user_eligible) return true;
+    if (activeDrop) return true;
+    return false;
+  };
+
+  const [dropModeDisabled, setDropModeDisabled] = useState(
+    getIsDropModeDisabled()
+  );
+
+  useEffect(
+    () => setDropModeDisabled(getIsDropModeDisabled()),
+    [wave, activeDrop]
+  );
 
   const onDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
       if (newIsDropMode && !wave.participation.authenticated_user_eligible) {
         setToast({
-        message: "You are not eligible to drop in this wave",
-        type: "error",
-      });
-      return;
-    }
+          message: "You are not eligible to drop in this wave",
+          type: "error",
+        });
+        return;
+      }
 
-    if (!newIsDropMode && !wave.chat.authenticated_user_eligible) {
-      setToast({
-        message: "You are not eligible to chat in this wave",
-        type: "error",
-      });
-      return;
-    }
+      if (!newIsDropMode && !wave.chat.authenticated_user_eligible) {
+        setToast({
+          message: "You are not eligible to chat in this wave",
+          type: "error",
+        });
+        return;
+      }
 
-    setIsDropMode(newIsDropMode);
-  }, [wave]);
+      setIsDropMode(newIsDropMode);
+    },
+    [wave]
+  );
 
   const onRemovePart = useCallback((partIndex: number) => {
     setDrop((prevDrop) => {
@@ -190,6 +209,7 @@ export default function CreateDrop({
       setIsStormMode,
       onDropModeChange,
       submitDrop,
+      dropModeDisabled,
     }),
     [
       activeDrop,
@@ -202,6 +222,7 @@ export default function CreateDrop({
       setIsStormMode,
       onDropModeChange,
       submitDrop,
+      dropModeDisabled,
     ]
   );
 

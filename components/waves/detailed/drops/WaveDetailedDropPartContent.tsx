@@ -110,6 +110,7 @@ const WaveDetailedDropPartContent: React.FC<
             referencedNfts={memoizedReferencedNfts}
             part={activePart}
             wave={wave}
+            onQuoteClick={onQuoteClick}
           />
         </motion.div>
         {!!activePart.media.length && (
