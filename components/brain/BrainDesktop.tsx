@@ -70,7 +70,6 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
             <>
               <BrainLeftSidebar 
                 activeWaveId={router.query.wave as string}
-                className="tw-w-[280px] tw-flex-shrink-0 tw-relative tw-z-[1001]"
               />
               <div className="tw-flex-grow tw-relative">
                 {drop && wave && drop.wave.id === wave.id && router.query.drop && (
