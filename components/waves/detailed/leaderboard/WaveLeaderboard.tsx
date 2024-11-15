@@ -9,6 +9,7 @@ import {
 } from "../../../../hooks/useWaveDropsLeaderboard";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveLeaderboardRightSidebar from "./WaveLeaderboardRightSidebar";
+import { WaveDropCreate } from "./create/WaveDropCreate";
 
 interface WaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -32,6 +33,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
 
   const [showMyDrops, setShowMyDrops] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isCreatingDrop, setIsCreatingDrop] = useState(false);
 
   const sortBy: Record<WaveLeaderboardSortType, WaveDropsLeaderboardSortBy> = {
     [WaveLeaderboardSortType.RANK]: WaveDropsLeaderboardSortBy.RANK,
@@ -63,14 +65,27 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             setSort={setSort}
             showMyDrops={showMyDrops}
             setShowMyDrops={setShowMyDrops}
+            onCreateDrop={() => setIsCreatingDrop(true)}
           />
-          <WaveLeaderboardDrops
-            wave={wave}
-            dropsSortBy={sortBy[sort]}
-            sortDirection={sortDirection[sort]}
-            showMyDrops={showMyDrops}
-            setActiveDrop={setActiveDrop}
-          />
+          
+          {isCreatingDrop ? (
+            <WaveDropCreate 
+              wave={wave}
+              onCancel={() => setIsCreatingDrop(false)}
+              onSuccess={() => {
+                setIsCreatingDrop(false);
+                // Optionally refresh the drops list
+              }}
+            />
+          ) : (
+            <WaveLeaderboardDrops
+              wave={wave}
+              dropsSortBy={sortBy[sort]}
+              sortDirection={sortDirection[sort]}
+              showMyDrops={showMyDrops}
+              setActiveDrop={setActiveDrop}
+            />
+          )}
         </div>
       </div>
       <WaveLeaderboardRightSidebar
