@@ -66,31 +66,25 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
         <div className={`tw-h-screen lg:tw-h-[calc(100vh-6.25rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-transition-all tw-duration-300 ${
           showRightSidebar && !isCollapsed ? "tw-mr-[20.5rem] min-[1980px]:tw-mr-0" : ""
         }`}>
-          {isDropOpen ? (
-            <>
-              <BrainLeftSidebar 
-                activeWaveId={router.query.wave as string}
-              />
-              <div className="tw-flex-grow tw-relative">
-                {drop && wave && drop.wave.id === wave.id && router.query.drop && (
-                  <BrainDesktopDrop
-                    drop={{
-                      ...drop,
-                      stableKey: drop.id,
-                      stableHash: drop.id,
-                    }}
-                    wave={wave}
-                    onClose={onDropClose}
-                  />
-                )}
+          <BrainLeftSidebar 
+            activeWaveId={router.query.wave as string}
+          />
+          <div className="tw-flex-grow tw-relative">
+            {children}
+            {isDropOpen && (
+              <div className="tw-absolute tw-inset-0 tw-z-[1000]">
+                <BrainDesktopDrop
+                  drop={{
+                    ...drop,
+                    stableKey: drop.id,
+                    stableHash: drop.id,
+                  }}
+                  wave={wave}
+                  onClose={onDropClose}
+                />
               </div>
-            </>
-          ) : (
-            <>
-              <BrainLeftSidebar activeWaveId={router.query.wave as string} />
-              {children}
-            </>
-          )}
+            )}
+          </div>
         </div>
 
         {showRightSidebar && (
