@@ -18,6 +18,7 @@ import { WaveDetailedLeaderboardItemOutcomes } from "../small-leaderboard/WaveDe
 import { WaveDropChat } from "./WaveDropChat";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { WaveDropClose } from "./WaveDropClose";
+import { useAuth } from "../../../auth/Auth";
 
 interface WaveDropProps {
   readonly wave: ApiWave;
@@ -30,6 +31,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
+  const { connectedProfile } = useAuth();
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: initialDrop.id }],
     queryFn: async () =>
@@ -61,7 +63,11 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
                 <div className="tw-border-t tw-border-iron-800 tw-pt-3 tw-border-solid tw-border-x-0 tw-border-b-0">
                   <div className="tw-px-6 tw-flex tw-flex-col tw-gap-y-3">
                     <WaveDropTime wave={wave} />
-                    <WaveDropVote wave={wave} drop={drop} />
+                    {wave.voting.authenticated_user_eligible &&
+                      drop?.author.handle !==
+                        connectedProfile?.profile?.handle && (
+                        <WaveDropVote wave={wave} drop={drop} />
+                      )}
                     <WaveDropVotes drop={drop} />
                   </div>
 

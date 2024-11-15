@@ -3,6 +3,7 @@ import { AuthContext } from "../../../auth/Auth";
 import { DropVoteState } from "../../../drops/view/item/DropsListItem";
 import DropListItemRateGive from "../../../drops/view/item/rate/give/DropListItemRateGive";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ApiDropType } from "../../../../generated/models/ApiDropType";
 
 interface WaveDetailedDropActionsRateProps {
   readonly drop: ApiDrop;
@@ -33,6 +34,19 @@ const WaveDetailedDropActionsRate: React.FC<
     if (connectedProfile.profile.handle === drop.author.handle) {
       return DropVoteState.AUTHOR;
     }
+    if (
+      drop.drop_type === ApiDropType.Participatory &&
+      !drop.wave.authenticated_user_eligible_to_vote
+    ) {
+      return DropVoteState.CANT_VOTE;
+    }
+
+    if (
+      drop.drop_type === ApiDropType.Chat &&
+      !drop.wave.authenticated_user_eligible_to_chat
+    ) {
+      return DropVoteState.CANT_VOTE;
+    }
 
     if (!availableCredit) {
       return DropVoteState.NO_CREDIT;
@@ -54,9 +68,7 @@ const WaveDetailedDropActionsRate: React.FC<
 
   const getShowClap = (state: DropVoteState): boolean => {
     return (
-      state === DropVoteState.CAN_VOTE ||
-      state === DropVoteState.CANT_VOTE ||
-      state === DropVoteState.NO_CREDIT
+      state === DropVoteState.CAN_VOTE || state === DropVoteState.NO_CREDIT
     );
   };
 

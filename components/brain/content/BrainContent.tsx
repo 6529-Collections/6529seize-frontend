@@ -32,11 +32,14 @@ const BrainContent: React.FC<BrainContentProps> = ({
     <div className={containerClassName}>
       <div className="tw-pr-2">
         {showPinnedWaves && <BrainContentPinnedWaves />}
-        <BrainContentInput
-          waveId={waveId}
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-        />
+        {(wave?.chat.authenticated_user_eligible ||
+          wave?.participation.authenticated_user_eligible) && (
+          <BrainContentInput
+            waveId={waveId}
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+          />
+        )}
         <div className="tw-mt-2 tw-flex-1">
           {!!wave && (
             <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2">

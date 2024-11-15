@@ -47,7 +47,6 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     });
   };
 
-
   const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
     onReply(drop, partId);
   };
@@ -63,7 +62,6 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
       partId: 1,
     });
   };
-
 
   return (
     <div className="tw-flex-1">
@@ -84,7 +82,7 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
                 // TODO: Implement this
                 onDropClick={() => {}}
               />
-              {true && (
+              {wave.chat.authenticated_user_eligible && (
                 <div className="tw-mt-auto">
                   <CreateDropWaveWrapper>
                     <CreateDrop

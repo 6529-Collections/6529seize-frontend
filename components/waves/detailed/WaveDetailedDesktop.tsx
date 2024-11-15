@@ -26,6 +26,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   onWaveChange,
   setIsLoading,
 }) => {
+
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
 
