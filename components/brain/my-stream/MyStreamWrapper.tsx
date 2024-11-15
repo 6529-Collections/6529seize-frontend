@@ -28,12 +28,18 @@ const MyStreamWrapper: React.FC = () => {
   }, [router.query]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-  const [dropToShow, setDropToShow] = useState<ExtendedDrop | null>(null);
-
-  const { data: dropToShowWave } = useWaveData(dropToShow?.wave.id ?? null);
 
   const onDropClick = (drop: ExtendedDrop) => {
-    setDropToShow(drop);
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   const getActiveWaveId = () => {
@@ -151,9 +157,6 @@ const MyStreamWrapper: React.FC = () => {
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
     >
-      {dropToShow && dropToShowWave && dropToShow.wave.id === dropToShowWave.id && (
-        <BrainDesktopDrop drop={dropToShow} wave={dropToShowWave} onClose={() => setDropToShow(null)} />
-      )}
       {component}
     </BrainContent>
   );
