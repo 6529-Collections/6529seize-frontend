@@ -4,7 +4,6 @@ import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
 import { useWaveData } from "../../../hooks/useWaveData";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
-import { useRouter } from "next/router";
 
 interface BrainContentProps {
   readonly children: React.ReactNode;
@@ -22,7 +21,6 @@ const BrainContent: React.FC<BrainContentProps> = ({
   onCancelReplyQuote,
 }) => {
   const capacitor = useCapacitor();
-  const router = useRouter();
   const containerClassName = `tw-relative lg:tw-mt-6 tw-pb-2 lg:tw-pb-12 tw-flex tw-flex-col tw-h-[calc(100vh-10.75rem)] lg:tw-h-full lg:tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tailwind-scope${
     capacitor.isCapacitor ? " tw-pb-[calc(4rem+80px)]" : ""
   }`;
@@ -31,17 +29,13 @@ const BrainContent: React.FC<BrainContentProps> = ({
 
   return (
     <div className={containerClassName}>
-
       <div className="tw-pr-2">
         {showPinnedWaves && <BrainContentPinnedWaves />}
-        {(wave?.chat.authenticated_user_eligible ||
-          wave?.participation.authenticated_user_eligible) && (
-          <BrainContentInput
-            waveId={waveId}
-            activeDrop={activeDrop}
-            onCancelReplyQuote={onCancelReplyQuote}
-          />
-        )}
+        <BrainContentInput
+          waveId={waveId}
+          activeDrop={activeDrop}
+          onCancelReplyQuote={onCancelReplyQuote}
+        />
         <div className="tw-mt-2 tw-flex-1">
           {!!wave && (
             <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2">

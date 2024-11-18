@@ -6,8 +6,8 @@ import {
 import useCapacitor from "../../../../hooks/useCapacitor";
 import WaveDropsAll from "../drops/WaveDropsAll";
 import { CreateDropWaveWrapper } from "../CreateDropWaveWrapper";
-import CreateDrop from "../CreateDrop";
 import { ActiveDropAction, ActiveDropState } from "../chat/WaveChat";
+import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 
 interface WaveDropChatProps {
   readonly wave: ApiWave;
@@ -82,18 +82,17 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
                 // TODO: Implement this
                 onDropClick={() => {}}
               />
-              {wave.chat.authenticated_user_eligible && (
-                <div className="tw-mt-auto">
-                  <CreateDropWaveWrapper>
-                    <CreateDrop
-                      activeDrop={activeDrop}
-                      onCancelReplyQuote={onCancelReplyQuote}
-                      wave={wave}
-                      dropId={drop.id}
-                    />
-                  </CreateDropWaveWrapper>
-                </div>
-              )}
+              <div className="tw-mt-auto">
+                <CreateDropWaveWrapper>
+                  <PrivilegedDropCreator
+                    activeDrop={activeDrop}
+                    onCancelReplyQuote={onCancelReplyQuote}
+                    wave={wave}
+                    dropId={drop.id}
+                    fixedDropMode={DropMode.BOTH}
+                  />
+                </CreateDropWaveWrapper>
+              </div>
             </div>
           </div>
         </div>

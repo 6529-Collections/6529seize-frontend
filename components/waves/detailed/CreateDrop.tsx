@@ -20,18 +20,18 @@ import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
 import { ActiveDropState } from "./chat/WaveChat";
+import { DropMode } from "./PrivilegedDropCreator";
+import { DropPrivileges } from "../../../hooks/useDropPriviledges";
 
-export enum DropMode {
-  CHAT = "CHAT",
-  PARTICIPATION = "PARTICIPATION",
-}
+
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly wave: ApiWave;
   readonly dropId: string | null;
-  readonly fixedDropMode?: DropMode;
+  readonly fixedDropMode: DropMode;
+  readonly privileges: DropPrivileges;
 }
 
 const ANIMATION_DURATION = 0.3;
