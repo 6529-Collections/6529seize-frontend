@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { WaveLeaderboardRightSidebarTabs } from "./WaveLeaderboardRightSidebarTabs";
 import { WaveLeaderboardRightSidebarOpenToggle } from "./WaveLeaderboardRightSidebarOpenToggle";
 import { WaveLeaderboardRightSidebarVoters } from "./WaveLeaderboardRightSidebarVoters";
-import { WaveLeaderboardRightSidebarActivityLog } from "./WaveLeaderboardRightSidebarActivityLog";
+import { WaveLeaderboardRightSidebarActivityLogs } from "./WaveLeaderboardRightSidebarActivityLogs";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
 
 interface WaveLeaderboardRightSidebarProps {
@@ -29,7 +29,7 @@ const WaveLeaderboardRightSidebar: React.FC<
       <WaveLeaderboardRightSidebarVoters />
     ),
     [WaveLeaderboardRightSidebarTab.ACTIVITY]: (
-      <WaveLeaderboardRightSidebarActivityLog wave={wave} />
+      <WaveLeaderboardRightSidebarActivityLogs wave={wave} />
     ),
   };
 

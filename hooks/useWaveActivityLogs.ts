@@ -1,6 +1,7 @@
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { useCallback, useEffect, useState } from "react";
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useQuery,
   useQueryClient,
@@ -15,6 +16,7 @@ interface UseWaveActivityLogsProps {
   readonly connectedProfileHandle: string | undefined;
   readonly reverse: boolean;
   readonly dropId: string | null;
+  readonly logTypes: string[];
 }
 
 const POLLING_DELAY = 3000;
@@ -39,6 +41,7 @@ export function useWaveActivityLogs({
   connectedProfileHandle,
   reverse,
   dropId,
+  logTypes,
 }: UseWaveActivityLogsProps) {
   const queryClient = useQueryClient();
 
@@ -51,11 +54,12 @@ export function useWaveActivityLogs({
   const isTabVisible = useTabVisibility();
 
   const queryKey = [
-    QueryKey.LOGS,
+    QueryKey.WAVE_LOGS,
     {
       waveId,
       limit: WAVE_LOGS_PARAMS.limit,
       dropId,
+      logTypes,
     },
   ];
 
@@ -69,7 +73,9 @@ export function useWaveActivityLogs({
         if (dropId) {
           params.drop_id = dropId;
         }
-
+        if (logTypes) {
+          params.log_types = logTypes.join(",");
+        }
         if (pageParam) {
           params.offset = `${pageParam}`;
         }
@@ -104,6 +110,9 @@ export function useWaveActivityLogs({
       if (dropId) {
         params.drop_id = dropId;
       }
+      if (logTypes) {
+        params.log_types = logTypes.join(",");
+      }
       if (pageParam !== null) {
         params.offset = `${pageParam}`;
       }
@@ -120,7 +129,7 @@ export function useWaveActivityLogs({
       lastPage.length === WAVE_LOGS_PARAMS.limit
         ? allPages.length * WAVE_LOGS_PARAMS.limit
         : null,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
   });
@@ -142,6 +151,9 @@ export function useWaveActivityLogs({
       };
       if (dropId) {
         params.drop_id = dropId;
+      }
+      if (logTypes) {
+        params.log_types = logTypes.join(",");
       }
       return await commonApiFetch<ApiWaveLog[]>({
         endpoint: `waves/${waveId}/logs`,
@@ -203,7 +215,7 @@ export function useWaveActivityLogs({
   useEffect(() => {
     return () => {
       queryClient.removeQueries({
-        queryKey: [QueryKey.LOGS, { waveId }],
+        queryKey: [QueryKey.WAVE_LOGS, { waveId }],
       });
     };
   }, [waveId, queryClient]);
@@ -224,4 +236,4 @@ export function useWaveActivityLogs({
     haveNewLogs,
     manualFetch,
   };
-} 
+}

@@ -1,7 +1,4 @@
 import React from "react";
-import Tippy from "@tippyjs/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 import { WaveLeaderboardDropAuthor } from "./WaveLeaderboardDropAuthor";
 import { WaveLeaderboardDropRaters } from "./WaveleaderboardDropRaters";
