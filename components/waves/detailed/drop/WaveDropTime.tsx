@@ -114,7 +114,7 @@ export const WaveDropTime: React.FC<WaveDropTimeProps> = ({ wave }) => {
                 <span className="tw-text-xl tw-font-semibold tw-text-iron-100">
                   {timeRemaining.days}
                 </span>
-                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium tw-ml-1">
+                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-medium tw-ml-1">
                   {timeRemaining.days === 1 ? "Day" : "Days"}
                 </span>
               </div>
@@ -122,7 +122,7 @@ export const WaveDropTime: React.FC<WaveDropTimeProps> = ({ wave }) => {
                 <span className="tw-text-xl tw-font-semibold tw-text-iron-100">
                   {timeRemaining.hours}
                 </span>
-                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium tw-ml-1">
+                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-medium tw-ml-1">
                   Hrs
                 </span>
               </div>
@@ -130,7 +130,7 @@ export const WaveDropTime: React.FC<WaveDropTimeProps> = ({ wave }) => {
                 <span className="tw-text-xl tw-font-semibold tw-text-iron-100">
                   {timeRemaining.minutes}
                 </span>
-                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium tw-ml-1">
+                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-medium tw-ml-1">
                   Min
                 </span>
               </div>
@@ -138,7 +138,7 @@ export const WaveDropTime: React.FC<WaveDropTimeProps> = ({ wave }) => {
                 <span className="tw-text-xl tw-font-semibold tw-text-iron-100">
                   {timeRemaining.seconds}
                 </span>
-                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium tw-ml-1">
+                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-medium tw-ml-1">
                   Sec
                 </span>
               </div>
@@ -149,14 +149,14 @@ export const WaveDropTime: React.FC<WaveDropTimeProps> = ({ wave }) => {
 
       {votingState === WaveDropTimeState.IN_PROGRESS && (
         <>
-          <span className="tw-text-xs tw-text-iron-400">Voting Ends In</span>
+          <span className="tw-text-sm tw-text-iron-400">Voting Ends In</span>
           <div className="tw-flex tw-items-center tw-justify-between tw-mb-2 tw-mt-1">
             <div className="tw-flex tw-items-center tw-gap-x-4">
               <div className="tw-flex tw-items-baseline">
                 <span className="tw-text-xl tw-font-semibold tw-text-iron-100">
                   {timeRemaining.days}
                 </span>
-                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium tw-ml-1">
+                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-medium tw-ml-1">
                   {timeRemaining.days === 1 ? "Day" : "Days"}
                 </span>
               </div>
@@ -164,23 +164,23 @@ export const WaveDropTime: React.FC<WaveDropTimeProps> = ({ wave }) => {
                 <span className="tw-text-xl tw-font-semibold tw-text-iron-100">
                   {timeRemaining.hours}
                 </span>
-                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium tw-ml-1">
-                  Hrs
+                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-medium tw-ml-1">
+                  Hours
                 </span>
               </div>
               <div className="tw-flex tw-items-baseline">
                 <span className="tw-text-xl tw-font-semibold tw-text-iron-100">
                   {timeRemaining.minutes}
                 </span>
-                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium tw-ml-1">
-                  Min
+                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-medium tw-ml-1">
+                  Minutes
                 </span>
               </div>
               <div className="tw-flex tw-items-baseline">
-                <span className="tw-text-xl tw-font-semibold tw-text-iron-100">
+                <span className="tw-text-xl tw-font-semibold tw-text-iron-100 tw-w-6">
                   {timeRemaining.seconds}
                 </span>
-                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium tw-ml-1">
+                <span className="tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-font-medium tw-ml-1">
                   Sec
                 </span>
               </div>

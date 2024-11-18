@@ -19,36 +19,84 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
     <div className="tw-relative">
       <div className="tw-p-3 tw-rounded-lg tw-bg-iron-900">
         <div className="tw-flex tw-items-center tw-justify-between">
-          <div className="tw-flex tw-items-center tw-gap-2">
-            <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-              {getTimeAgoShort(new Date(log.created_at).getTime())}
-            </span>
-            <span className="tw-size-1 tw-rounded-full tw-bg-iron-700"></span>
-            <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-              {formatNumberWithCommas(
-                log.contents.newVote - log.contents.oldVote
-              )}{" "}
-              TDH
-            </span>
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <div className="tw-flex tw-items-center tw-gap-1.5">
+              <svg
+                className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                fill="none"
+              >
+                <path
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                {getTimeAgoShort(new Date(log.created_at).getTime())}
+              </span>
+            </div>
+            <div className="tw-size-1 tw-rounded-full tw-bg-iron-600"></div>
+            <div className="tw-flex tw-items-center tw-gap-1">
+              <svg
+                className={`tw-w-3.5 tw-h-3.5 ${
+                  log.contents.newVote >= log.contents.oldVote
+                    ? "tw-text-emerald-400"
+                    : "tw-text-red tw-rotate-180"
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <path
+                  d="M12 4v16m0-16l4 4m-4-4l-4 4"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span
+                className={`tw-text-xs tw-font-medium ${
+                  log.contents.newVote >= log.contents.oldVote
+                    ? "tw-text-emerald-400"
+                    : "tw-text-red"
+                }`}
+              >
+                {log.contents.newVote >= log.contents.oldVote ? "+" : "-"}
+                {formatNumberWithCommas(
+                  Math.abs(log.contents.newVote - log.contents.oldVote)
+                )}{" "}
+                TDH
+              </span>
+            </div>
           </div>
+
           <button
             onMouseEnter={() => setShowDrop(true)}
             onMouseLeave={() => setShowDrop(false)}
-            className="tw-ml-auto tw-p-1 tw-text-iron-400 hover:tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 hover:tw-ring-iron-650 tw-rounded-md tw-bg-iron-800 tw-text-sm tw-font-semibold tw-shadow-sm hover:tw-bg-iron-700 hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-ml-auto tw-size-6 tw-text-iron-400 hover:tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 hover:tw-ring-iron-650 tw-rounded-md tw-bg-iron-800 tw-text-sm tw-font-semibold tw-shadow-sm hover:tw-bg-iron-700 hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
           >
             <svg
-              className="tw-size-3.5 tw-flex-shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              aria-hidden="true"
+              className="tw-size-3.5 tw-flex-shrink-0"
             >
               <path
-                d="M12.0004 15L12.0004 22M8.00043 7.30813V9.43875C8.00043 9.64677 8.00043 9.75078 7.98001 9.85026C7.9619 9.93852 7.93194 10.0239 7.89095 10.1042C7.84474 10.1946 7.77977 10.2758 7.64982 10.4383L6.08004 12.4005C5.4143 13.2327 5.08143 13.6487 5.08106 13.9989C5.08073 14.3035 5.21919 14.5916 5.4572 14.7815C5.73088 15 6.26373 15 7.32943 15H16.6714C17.7371 15 18.27 15 18.5437 14.7815C18.7817 14.5916 18.9201 14.3035 18.9198 13.9989C18.9194 13.6487 18.5866 13.2327 17.9208 12.4005L16.351 10.4383C16.2211 10.2758 16.1561 10.1946 16.1099 10.1042C16.0689 10.0239 16.039 9.93852 16.0208 9.85026C16.0004 9.75078 16.0004 9.64677 16.0004 9.43875V7.30813C16.0004 7.19301 16.0004 7.13544 16.0069 7.07868C16.0127 7.02825 16.0223 6.97833 16.0357 6.92937C16.0507 6.87424 16.0721 6.8208 16.1149 6.71391L17.1227 4.19423C17.4168 3.45914 17.5638 3.09159 17.5025 2.79655C17.4489 2.53853 17.2956 2.31211 17.0759 2.1665C16.8247 2 16.4289 2 15.6372 2H8.36368C7.57197 2 7.17611 2 6.92494 2.1665C6.70529 2.31211 6.55199 2.53853 6.49838 2.79655C6.43707 3.09159 6.58408 3.45914 6.87812 4.19423L7.88599 6.71391C7.92875 6.8208 7.95013 6.87424 7.96517 6.92937C7.97853 6.97833 7.98814 7.02825 7.99392 7.07868C8.00043 7.13544 8.00043 7.19301 8.00043 7.30813Z"
-                stroke="currentColor"
-                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
               />
             </svg>
           </button>
@@ -56,7 +104,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
         <div className="tw-mt-1.5 tw-flex tw-items-center tw-gap-1.5">
           <Link
             href={`/${log.invoker.handle}`}
-            className="tw-flex tw-items-center tw-gap-2 tw-no-underline"
+            className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group hover:tw-opacity-80 tw-transition-all tw-duration-300"
           >
             {log.invoker.pfp ? (
               <img
@@ -67,14 +115,14 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             ) : (
               <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800" />
             )}
-            <span className="tw-text-sm tw-font-medium tw-text-iron-50">
+            <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300">
               {log.invoker.handle}
             </span>
           </Link>
           <span className="tw-text-sm tw-text-iron-400">voted</span>
           <Link
             href={`/${log.drop_author?.handle}`}
-            className="tw-flex tw-items-center tw-gap-2 tw-no-underline"
+            className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group hover:tw-opacity-80 tw-transition-all tw-duration-300"
           >
             {log.drop_author?.pfp ? (
               <img
@@ -85,7 +133,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             ) : (
               <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800" />
             )}
-            <span className="tw-text-sm tw-font-medium tw-text-iron-50">
+            <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300">
               {log.drop_author?.handle}
             </span>
           </Link>
