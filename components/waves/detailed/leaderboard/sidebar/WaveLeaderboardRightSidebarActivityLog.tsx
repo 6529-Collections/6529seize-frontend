@@ -96,7 +96,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             </span>
           </Link>
           <span className="tw-text-sm tw-text-iron-400">voted</span>
-          <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+          <div className="tw-flex tw-items-center tw-gap-x-0.5 tw-whitespace-nowrap">
             <svg
               className={`tw-w-3.5 tw-h-3.5 ${
                 log.contents.newVote >= log.contents.oldVote
@@ -121,7 +121,6 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
                   : "tw-text-red"
               }`}
             >
-              {log.contents.newVote >= log.contents.oldVote ? "+" : "-"}
               {formatNumberWithCommas(
                 Math.abs(log.contents.newVote - log.contents.oldVote)
               )}{" "}

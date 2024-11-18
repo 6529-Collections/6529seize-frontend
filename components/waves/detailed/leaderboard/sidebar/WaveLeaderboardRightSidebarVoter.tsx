@@ -2,6 +2,7 @@ import React from "react";
 import { ApiWaveVoter } from "../../../../../generated/models/ApiWaveVoter";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import Link from "next/link";
+import Tippy from "@tippyjs/react";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;
@@ -11,6 +12,9 @@ interface WaveLeaderboardRightSidebarVoterProps {
 export const WaveLeaderboardRightSidebarVoter: React.FC<
   WaveLeaderboardRightSidebarVoterProps
 > = ({ voter, position }) => {
+  const hasPositiveVotes = voter.positive_votes_summed > 0;
+  const hasNegativeVotes = voter.negative_votes_summed > 0;
+
   return (
     <div className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-rounded-lg tw-bg-iron-900">
       <div className="tw-flex tw-items-center tw-gap-3">
@@ -33,12 +37,23 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           </span>
         </Link>
       </div>
-      <span>
-        <span className="tw-text-iron-400">
-          {formatNumberWithCommas(voter.votes_summed)}
-        </span>{" "}
-        <span className="tw-text-xs tw-text-iron-400">TDH total</span>
-      </span>
+      <div className="tw-flex tw-items-center tw-gap-3">
+        <Tippy content={
+          <div className="tw-text-sm">
+            <div className="tw-text-emerald-400">+{formatNumberWithCommas(voter.positive_votes_summed)}</div>
+            {hasNegativeVotes && <div className="tw-text-red-400">-{formatNumberWithCommas(voter.negative_votes_summed)}</div>}
+          </div>
+        }>
+          <div className="tw-flex tw-items-center tw-gap-1">
+            {hasPositiveVotes && <div className="tw-w-1.5 tw-h-1.5 tw-rounded-sm tw-bg-emerald-400" />}
+            {hasNegativeVotes && <div className="tw-w-1.5 tw-h-1.5 tw-rounded-sm tw-bg-red-400" />}
+          </div>
+        </Tippy>
+        <span>
+          <span className="tw-text-iron-400">{formatNumberWithCommas(voter.absolute_votes_summed)}</span>{" "}
+          <span className="tw-text-xs tw-text-iron-400">TDH total</span>
+        </span>
+      </div>
     </div>
   );
 };
