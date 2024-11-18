@@ -47,7 +47,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     }
   });
 
-  if (memoizedDrops.length !== 0 && !isFetching) {
+  if (memoizedDrops.length === 0 && !isFetching) {
     return (
       <div className="tw-text-center tw-h-full tw-rounded-xl tw-bg-iron-950 tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-8">
         <h3 className="tw-text-xl tw-font-medium tw-mb-2 tw-text-iron-400">
