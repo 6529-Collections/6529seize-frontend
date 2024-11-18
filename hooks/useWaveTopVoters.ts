@@ -1,3 +1,4 @@
+
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 import {
@@ -6,35 +7,36 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
-import { WAVE_LOGS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
-import { ApiWaveLog } from "../generated/models/ApiWaveLog";
+import { ApiWaveVotersPage } from "../generated/models/ApiWaveVotersPage";
+import { ApiWaveVoter } from "../generated/models/ApiWaveVoter";
 
-interface UseWaveActivityLogsProps {
+interface UseWaveTopVotersProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | undefined;
   readonly reverse: boolean;
   readonly dropId: string | null;
-  readonly logTypes: string[];
+  readonly sortDirection?: 'ASC' | 'DESC';
+  readonly sort?: 'ABSOLUTE' | 'POSITIVE' | 'NEGATIVE';
 }
 
-export function useWaveActivityLogs({
+export function useWaveTopVoters({
   waveId,
   connectedProfileHandle,
   reverse,
   dropId,
-  logTypes,
-}: UseWaveActivityLogsProps) {
+  sortDirection = 'ASC',
+  sort = 'ABSOLUTE',
+}: UseWaveTopVotersProps) {
   const queryClient = useQueryClient();
-
-  const [logs, setLogs] = useState<ApiWaveLog[]>([]);
+  const [voters, setVoters] = useState<ApiWaveVoter[]>([]);
 
   const queryKey = [
-    QueryKey.WAVE_LOGS,
+    QueryKey.WAVE_VOTERS,
     {
       waveId,
-      limit: WAVE_LOGS_PARAMS.limit,
       dropId,
-      logTypes,
+      sortDirection,
+      sort,
     },
   ];
 
@@ -43,31 +45,28 @@ export function useWaveActivityLogs({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
-          limit: WAVE_LOGS_PARAMS.limit.toString(),
+          page_size: '20',
+          sort_direction: sortDirection,
+          sort: sort,
         };
         if (dropId) {
           params.drop_id = dropId;
         }
-        if (logTypes) {
-          params.log_types = logTypes.join(",");
+        if (pageParam !== null) {
+          params.page = pageParam.toString();
         }
-        if (pageParam) {
-          params.offset = `${pageParam}`;
-        }
-        return await commonApiFetch<ApiWaveLog[]>({
-          endpoint: `waves/${waveId}/logs`,
+        return await commonApiFetch<ApiWaveVotersPage>({
+          endpoint: `waves/${waveId}/voters`,
           params,
         });
       },
       initialPageParam: null,
       getNextPageParam: (lastPage, allPages) =>
-        lastPage.length === WAVE_LOGS_PARAMS.limit
-          ? allPages.length * WAVE_LOGS_PARAMS.limit
-          : null,
+        lastPage.data?.length === 20 ? allPages.length : null,
       pages: 3,
       staleTime: 60000,
     });
-  }, [waveId]);
+  }, [waveId, dropId, sortDirection, sort]);
 
   const {
     data,
@@ -80,47 +79,43 @@ export function useWaveActivityLogs({
     queryKey,
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
-        limit: WAVE_LOGS_PARAMS.limit.toString(),
+        page_size: '20',
+        sort_direction: sortDirection,
+        sort: sort,
       };
       if (dropId) {
         params.drop_id = dropId;
       }
-      if (logTypes) {
-        params.log_types = logTypes.join(",");
-      }
       if (pageParam !== null) {
-        params.offset = `${pageParam}`;
+        params.page = pageParam.toString();
       }
 
-      const results = await commonApiFetch<ApiWaveLog[]>({
-        endpoint: `waves/${waveId}/logs`,
+      return await commonApiFetch<ApiWaveVotersPage>({
+        endpoint: `waves/${waveId}/voters`,
         params,
       });
-
-      return results;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === WAVE_LOGS_PARAMS.limit
-        ? allPages.length * WAVE_LOGS_PARAMS.limit
-        : null,
+      lastPage.data?.length === 20 ? allPages.length : null,
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
   });
 
   useEffect(() => {
-    setLogs((prev) => {
-      const newLogs = data?.pages ? data.pages.flat() : [];
-      return reverse ? newLogs.reverse() : newLogs;
+    setVoters((prev) => {
+      const newVoters = (data?.pages ? data.pages : []).flatMap(page => page.data);
+      return reverse ? [...newVoters].reverse() : newVoters;
     });
   }, [data, reverse]);
 
   return {
-    logs,
+    voters,
     fetchNextPage,
     hasNextPage,
     isFetching,
     isFetchingNextPage,
+    refetch,
   };
 }

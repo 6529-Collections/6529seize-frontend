@@ -1,39 +1,49 @@
 import React from "react";
+import { ApiWave } from "../../../../../generated/models/ObjectSerializer";
+import { useAuth } from "../../../../auth/Auth";
+import { useWaveTopVoters } from "../../../../../hooks/useWaveTopVoters";
+import { useIntersectionObserver } from "../../../../../hooks/useIntersectionObserver";
+import { WaveLeaderboardRightSidebarVoter } from "./WaveLeaderboardRightSidebarVoter";
 
 interface WaveLeaderboardRightSidebarVotersProps {
+  readonly wave: ApiWave;
 }
 
-export const WaveLeaderboardRightSidebarVoters: React.FC<WaveLeaderboardRightSidebarVotersProps> = () => {
+export const WaveLeaderboardRightSidebarVoters: React.FC<
+  WaveLeaderboardRightSidebarVotersProps
+> = ({ wave }) => {
+  const { connectedProfile } = useAuth();
+  const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isFetching } =
+    useWaveTopVoters({
+      waveId: wave.id,
+      connectedProfileHandle: connectedProfile?.profile?.handle,
+      reverse: false,
+      dropId: null,
+      sortDirection: "DESC",
+      sort: "ABSOLUTE",
+    });
+
+  const intersectionElementRef = useIntersectionObserver(() => {
+    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  });
+
   return (
     <div className="tw-space-y-2">
-    {[1, 2, 3].map((index) => (
-      <div
-        key={index}
-        className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-rounded-lg tw-bg-iron-900"
-      >
-        <div className="tw-flex tw-items-center tw-gap-3">
-          <span className="tw-text-iron-400 tw-font-medium">
-            {index}.
-          </span>
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            <img
-              src=""
-              alt=""
-              className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-white/10 tw-bg-iron-800"
-            />
-            <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
-              Username
-            </span>
-          </div>
+      {voters.map((voter, index) => (
+        <WaveLeaderboardRightSidebarVoter
+          voter={voter}
+          key={voter.voter.id}
+          position={index + 1}
+        />
+      ))}
+      {isFetchingNextPage && (
+        <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
+          <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
         </div>
-        <span>
-          <span className="tw-text-iron-400">123 </span>{" "}
-          <span className="tw-text-xs tw-text-iron-400">
-            TDH total
-          </span>
-        </span>
-      </div>
-    ))}
-  </div>
+      )}
+      <div ref={intersectionElementRef}></div>
+    </div>
   );
 };

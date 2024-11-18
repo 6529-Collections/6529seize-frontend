@@ -21,12 +21,12 @@ const WaveLeaderboardRightSidebar: React.FC<
   WaveLeaderboardRightSidebarProps
 > = ({ isOpen, onToggle, wave }) => {
   const [activeTab, setActiveTab] = useState<WaveLeaderboardRightSidebarTab>(
-    WaveLeaderboardRightSidebarTab.ACTIVITY
+    WaveLeaderboardRightSidebarTab.VOTERS
   );
 
   const components: Record<WaveLeaderboardRightSidebarTab, React.ReactNode> = {
     [WaveLeaderboardRightSidebarTab.VOTERS]: (
-      <WaveLeaderboardRightSidebarVoters />
+      <WaveLeaderboardRightSidebarVoters wave={wave} />
     ),
     [WaveLeaderboardRightSidebarTab.ACTIVITY]: (
       <WaveLeaderboardRightSidebarActivityLogs wave={wave} />

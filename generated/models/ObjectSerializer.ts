@@ -73,6 +73,7 @@ export * from '../models/ApiGroupLevelFilter';
 export * from '../models/ApiGroupOwnsNft';
 export * from '../models/ApiGroupRepFilter';
 export * from '../models/ApiGroupTdhFilter';
+export * from '../models/ApiIdentity';
 export * from '../models/ApiIdentityAndSubscriptionActions';
 export * from '../models/ApiIdentitySubscriptionActions';
 export * from '../models/ApiIdentitySubscriptionTargetAction';
@@ -143,6 +144,8 @@ export * from '../models/ApiWaveSubscriptionActions';
 export * from '../models/ApiWaveSubscriptionTargetAction';
 export * from '../models/ApiWaveType';
 export * from '../models/ApiWaveVisibilityConfig';
+export * from '../models/ApiWaveVoter';
+export * from '../models/ApiWaveVotersPage';
 export * from '../models/ApiWaveVotingConfig';
 export * from '../models/ApiWavesOverviewType';
 
@@ -221,6 +224,7 @@ import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
 import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum    } from '../models/ApiGroupOwnsNft';
 import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter } from '../models/ApiGroupTdhFilter';
+import { ApiIdentity } from '../models/ApiIdentity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
@@ -291,6 +295,8 @@ import { ApiWaveSubscriptionActions } from '../models/ApiWaveSubscriptionActions
 import { ApiWaveSubscriptionTargetAction } from '../models/ApiWaveSubscriptionTargetAction';
 import { ApiWaveType } from '../models/ApiWaveType';
 import { ApiWaveVisibilityConfig } from '../models/ApiWaveVisibilityConfig';
+import { ApiWaveVoter } from '../models/ApiWaveVoter';
+import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
 import { ApiWaveVotingConfig        } from '../models/ApiWaveVotingConfig';
 import { ApiWavesOverviewType } from '../models/ApiWavesOverviewType';
 
@@ -404,6 +410,7 @@ let typeMap: {[index: string]: any} = {
     "ApiGroupOwnsNft": ApiGroupOwnsNft,
     "ApiGroupRepFilter": ApiGroupRepFilter,
     "ApiGroupTdhFilter": ApiGroupTdhFilter,
+    "ApiIdentity": ApiIdentity,
     "ApiIdentityAndSubscriptionActions": ApiIdentityAndSubscriptionActions,
     "ApiIdentitySubscriptionActions": ApiIdentitySubscriptionActions,
     "ApiIncomingIdentitySubscriptionsPage": ApiIncomingIdentitySubscriptionsPage,
@@ -460,6 +467,8 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveScope": ApiWaveScope,
     "ApiWaveSubscriptionActions": ApiWaveSubscriptionActions,
     "ApiWaveVisibilityConfig": ApiWaveVisibilityConfig,
+    "ApiWaveVoter": ApiWaveVoter,
+    "ApiWaveVotersPage": ApiWaveVotersPage,
     "ApiWaveVotingConfig": ApiWaveVotingConfig,
 }
 
