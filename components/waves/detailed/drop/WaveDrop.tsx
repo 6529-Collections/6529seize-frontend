@@ -187,8 +187,62 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
                               transition={{ duration: 0.3 }}
                               className="tw-overflow-hidden"
                             >
-                              <div className="tw-flex tw-items-center tw-gap-x-2">
-                                <div className="tw-flex tw-items-center tw-gap-1.5">
+                              <div className="tw-flex tw-items-start tw-justify-between tw-w-full">
+                                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                                  <a
+                                    href=""
+                                    className="tw-group tw-flex tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 hover:tw-opacity-80 tw-whitespace-nowrap"
+                                  >
+                                    <img
+                                      src=""
+                                      alt=""
+                                      className="tw-size-6 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-object-cover"
+                                    />
+
+                                    <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300">
+                                     Lorem
+                                    </span>
+                                  </a>
+
+                                  <span className="tw-text-sm tw-text-iron-400">
+                                    voted
+                                  </span>
+                                  <div className="tw-flex tw-items-center tw-gap-1 tw-whitespace-nowrap">
+                                    <svg
+                                      className="tw-w-3.5 tw-h-3.5 tw-text-emerald-400"
+                                      viewBox="0 0 24 24"
+                                      aria-hidden="true"
+                                      fill="none"
+                                    >
+                                      <path
+                                        d="M12 4v16m0-16l4 4m-4-4l-4 4"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      />
+                                    </svg>
+
+                                    <span className="tw-text-xs tw-font-medium tw-text-emerald-400">
+                                      +12 TDH
+                                    </span>
+                                  </div>
+                                  <a
+                                    href=""
+                                    className="tw-group tw-flex tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 hover:tw-opacity-80 tw-whitespace-nowrap"
+                                  >
+                                    <img
+                                      src=""
+                                      alt=""
+                                      className="tw-size-6 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-object-cover"
+                                    />
+                                    <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300">
+                                      handle
+                                    </span>
+                                  </a>
+                                </div>
+
+                                <div className="tw-mt-1 tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap">
                                   <svg
                                     className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
                                     viewBox="0 0 24 24"
@@ -207,61 +261,6 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
                                     12 min
                                   </span>
                                 </div>
-                                <div className="tw-size-1 tw-rounded-full tw-bg-iron-600"></div>
-                                <div className="tw-flex tw-items-center tw-gap-1">
-                                  <svg
-                                    className="tw-w-3.5 tw-h-3.5 tw-text-emerald-400"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                    fill="none"
-                                  >
-                                    <path
-                                      d="M12 4v16m0-16l4 4m-4-4l-4 4"
-                                      stroke="currentColor"
-                                      strokeWidth="1.5"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    />
-                                  </svg>
-
-                                  <span className="tw-text-xs tw-font-medium tw-text-emerald-400">
-                                    + 12 TDH
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="tw-mt-2.5 tw-flex tw-items-center tw-gap-2">
-                                <a
-                                  href=""
-                                  className="tw-group tw-flex tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 hover:tw-opacity-80"
-                                >
-                                  <img
-                                    src=""
-                                    alt=""
-                                    className="tw-size-6 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-object-cover"
-                                  />
-
-                                  <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300">
-                                    jandle
-                                  </span>
-                                </a>
-
-                                <span className="tw-text-sm tw-text-iron-400">
-                                  voted on
-                                </span>
-
-                                <a
-                                  href=""
-                                  className="tw-group tw-flex tw-items-center tw-gap-2 tw-no-underline tw-transition-all tw-duration-300 hover:tw-opacity-80"
-                                >
-                                  <img
-                                    src=""
-                                    alt=""
-                                    className="tw-size-6 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-object-cover"
-                                  />
-                                  <span className="tw-text-sm tw-font-semibold tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300">
-                                    handle
-                                  </span>
-                                </a>
                               </div>
                             </motion.div>
                           )}
