@@ -127,6 +127,7 @@ export * from '../models/ApiWaveContributorOverview';
 export * from '../models/ApiWaveCreditScope';
 export * from '../models/ApiWaveCreditType';
 export * from '../models/ApiWaveDropsFeed';
+export * from '../models/ApiWaveLog';
 export * from '../models/ApiWaveMetadataType';
 export * from '../models/ApiWaveMetrics';
 export * from '../models/ApiWaveMin';
@@ -274,6 +275,7 @@ import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
+import { ApiWaveLog } from '../models/ApiWaveLog';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
 import { ApiWaveMin } from '../models/ApiWaveMin';
@@ -449,6 +451,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveConfig": ApiWaveConfig,
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
     "ApiWaveDropsFeed": ApiWaveDropsFeed,
+    "ApiWaveLog": ApiWaveLog,
     "ApiWaveMetrics": ApiWaveMetrics,
     "ApiWaveMin": ApiWaveMin,
     "ApiWaveOutcome": ApiWaveOutcome,

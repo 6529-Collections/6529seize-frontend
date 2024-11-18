@@ -2255,6 +2255,67 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropsLeaderboardPage"
+  /waves/{id}/logs:
+    get:
+      tags:
+        - Waves
+      summary: Get drop logs
+      operationId: getDropLogs
+      parameters:
+        - name: id
+          in: path
+          description: Filter by wave ID
+          required: true
+          schema:
+            type: string
+        - name: log_types
+          in: query
+          description: Filter by log type (comma separated)
+          required: false
+          schema:
+            type: string
+        - name: drop_id
+          in: query
+          description: Filter by drop ID
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveLog"
+        "404":
+          description: Wave not found
   /waves/{id}/subscriptions:
     post:
       tags:
@@ -5089,9 +5150,8 @@ components:
         contributor_pfp:
           type: string
     ApiWaveCreditScope:
-      description: >
+      description: |
         The scope of the credit. 
-
         * WAVE - Credit is spendable across all drops in wave.
       enum:
         - WAVE
@@ -5120,6 +5180,37 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropTraceItem"
+    ApiWaveLog:
+      type: object
+      required:
+        - id
+        - action
+        - wave_id
+        - drop_id
+        - invoker
+        - created_at
+        - contents
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        wave_id:
+          type: string
+        drop_id:
+          type: string
+        drop_author:
+          $ref: "#/components/schemas/ApiProfileMin"
+        invoker:
+          $ref: "#/components/schemas/ApiProfileMin"
+        invoker_proxy:
+          $ref: "#/components/schemas/ApiProfileMin"
+        created_at:
+          type: string
+          format: date-time
+        contents:
+          type: object
+          additionalProperties: true
     ApiWaveMetadataType:
       type: string
       enum:

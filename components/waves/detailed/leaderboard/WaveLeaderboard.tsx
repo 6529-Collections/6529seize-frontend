@@ -8,7 +8,7 @@ import {
   WaveDropsLeaderboardSortDirection,
 } from "../../../../hooks/useWaveDropsLeaderboard";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import WaveLeaderboardRightSidebar from "./WaveLeaderboardRightSidebar";
+import WaveLeaderboardRightSidebar from "./sidebar/WaveLeaderboardRightSidebar";
 import { WaveDropCreate } from "./create/WaveDropCreate";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
@@ -74,9 +74,9 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             {isCreatingDrop && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
               >
                 <WaveDropCreate
                   wave={wave}
@@ -99,6 +99,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
       </div>
       <WaveLeaderboardRightSidebar
         isOpen={isSidebarOpen}
+        wave={wave}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
       />
     </>
