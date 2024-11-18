@@ -688,6 +688,43 @@ paths:
                   type: string
         "404":
           description: Group not found
+  /identities:
+    get:
+      tags:
+        - Identities
+      summary: Search for identities
+      operationId: searchIdentities
+      parameters:
+        - name: handle
+          description: At least 3 characters of a handle
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: wave_id
+          description: Search only users who can view given wave
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          description: Number of results (20 by default)
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiIdentity"
   /identities/{id}/subscriptions:
     get:
       tags:
@@ -2242,6 +2279,12 @@ paths:
             enum:
               - RANK
               - CREATION_TIME
+        - name: author_identity
+          in: query
+          description: Identity of author to filter by
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: successful operation
@@ -2249,6 +2292,127 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropsLeaderboardPage"
+  /waves/{id}/logs:
+    get:
+      tags:
+        - Waves
+      summary: Get drop logs
+      operationId: getDropLogs
+      parameters:
+        - name: id
+          in: path
+          description: Filter by wave ID
+          required: true
+          schema:
+            type: string
+        - name: log_types
+          in: query
+          description: Filter by log type (comma separated)
+          required: false
+          schema:
+            type: string
+        - name: drop_id
+          in: query
+          description: Filter by drop ID
+          required: false
+          schema:
+            type: string
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort_direction
+          in: query
+          description: Default is DESC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveLog"
+        "404":
+          description: Wave not found
+  /waves/{id}/voters:
+    get:
+      tags:
+        - Waves
+      summary: Get info about waves voters (top voters etc)
+      operationId: getWaveVotersInfo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: drop_id
+          in: query
+          description: If set then you"ll get stats for specific drop
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 0
+        - name: page_size
+          in: query
+          description: Default is 20
+          required: false
+          schema:
+            type: number
+            format: int64
+            minimum: 1
+            maximum: 100
+        - name: sort_direction
+          in: query
+          description: Default is ASC
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+        - name: sort
+          in: query
+          description: Default is ABSOLUTE
+          required: false
+          schema:
+            type: string
+            enum:
+              - ABSOLUTE
+              - POSITIVE
+              - NEGATIVE
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveVotersPage"
   /waves/{id}/subscriptions:
     post:
       tags:
@@ -4465,6 +4629,45 @@ components:
         next:
           type: string
           nullable: true
+    ApiIdentity:
+      type: object
+      required:
+        - id
+        - handle
+        - normalised_handle
+        - pfp
+        - cic
+        - rep
+        - level
+        - tdh
+        - display
+        - primary_wallet
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        normalised_handle:
+          type: string
+        pfp:
+          type: string
+          nullable: true
+        cic:
+          type: integer
+          format: int65
+        rep:
+          type: integer
+          format: int65
+        level:
+          type: integer
+          format: int65
+        tdh:
+          type: integer
+          format: int65
+        display:
+          type: string
+        primary_wallet:
+          type: string
     ApiProfileMin:
       type: object
       required:
@@ -5083,9 +5286,8 @@ components:
         contributor_pfp:
           type: string
     ApiWaveCreditScope:
-      description: >
+      description: |
         The scope of the credit. 
-
         * WAVE - Credit is spendable across all drops in wave.
       enum:
         - WAVE
@@ -5114,6 +5316,37 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropTraceItem"
+    ApiWaveLog:
+      type: object
+      required:
+        - id
+        - action
+        - wave_id
+        - drop_id
+        - invoker
+        - created_at
+        - contents
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+        wave_id:
+          type: string
+        drop_id:
+          type: string
+        drop_author:
+          $ref: "#/components/schemas/ApiProfileMin"
+        invoker:
+          $ref: "#/components/schemas/ApiProfileMin"
+        invoker_proxy:
+          $ref: "#/components/schemas/ApiProfileMin"
+        created_at:
+          type: string
+          format: date-time
+        contents:
+          type: object
+          additionalProperties: true
     ApiWaveMetadataType:
       type: string
       enum:
@@ -5304,6 +5537,56 @@ components:
       properties:
         scope:
           $ref: "#/components/schemas/ApiWaveScope"
+    ApiWaveVoter:
+      type: object
+      required:
+        - voter
+        - votes_summed
+        - positive_votes_summed
+        - negative_votes_summed
+        - absolute_votes_summed
+        - min_vote
+        - max_vote
+        - different_drops_voted
+        - average_vote
+      properties:
+        voter:
+          $ref: "#/components/schemas/ApiProfileMin"
+        votes_summed:
+          type: integer
+          format: int64
+        positive_votes_summed:
+          type: integer
+          format: int64
+        negative_votes_summed:
+          type: number
+          format: int64
+        absolute_votes_summed:
+          type: number
+          format: int64
+        min_vote:
+          type: number
+          format: int64
+        max_vote:
+          type: number
+          format: int64
+        different_drops_voted:
+          type: number
+          format: int64
+        average_vote:
+          type: number
+          format: int64
+    ApiWaveVotersPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveVoter"
     ApiWaveVotingConfig:
       type: object
       required:

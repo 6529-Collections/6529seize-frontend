@@ -6,6 +6,7 @@ import WaveDetailedDrop, {
 } from "../../../../waves/detailed/drops/WaveDetailedDrop";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../waves/detailed/chat/WaveChat";
+import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 
 export default function FeedItemDropReplied({
   item,
@@ -13,12 +14,14 @@ export default function FeedItemDropReplied({
   activeDrop,
   onReply,
   onQuote,
+  onDropClick,
 }: {
   readonly item: IFeedItemDropReplied;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
@@ -47,8 +50,7 @@ export default function FeedItemDropReplied({
       onQuote={onQuote}
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
-      // TODO: Implement this
-      onDropClick={() => {}}
+      onDropClick={onDropClick}
     />
   );
 }

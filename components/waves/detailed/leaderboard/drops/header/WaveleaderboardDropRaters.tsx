@@ -10,7 +10,7 @@ export const WaveLeaderboardDropRaters: React.FC<
   WaveLeaderboardDropRatersProps
 > = ({ drop }) => {
   const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
-  const votingsLabel = drop.rating === 1 ? "vote" : "votes";
+
 
   const topThreeRankStyles: {
     [key: number]: string;
@@ -31,7 +31,7 @@ export const WaveLeaderboardDropRaters: React.FC<
         <div className="tw-size-1 tw-bg-iron-700 tw-rounded-full"></div>
         <span className={`tw-text-sm tw-font-normal ${rankStyle}`}>
           {formatNumberWithCommas(drop.rating)}{" "}
-          <span className="tw-text-iron-400"> {votingsLabel}</span>
+          <span className="tw-text-iron-400"> TDH</span>
         </span>
       </div>
     </div>

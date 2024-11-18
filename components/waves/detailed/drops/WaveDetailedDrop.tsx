@@ -65,15 +65,15 @@ const getColorClasses = ({
   }
   if (!isDrop) return "tw-bg-iron-950";
   if (rank === 1) {
-    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.6)_3.5%,rgba(36,36,35,0.75)_100%)] tw-border tw-border-solid tw-border-[#E8D48A]/10";
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.6)_3.5%,rgba(45,40,35,0.75)_100%)] tw-ring-1 tw-ring-inset tw-ring-[#D9A962]/20 tw-shadow-[inset_0_0_12px_rgba(217,169,98,0.05)]";
   }
   if (rank === 2) {
-    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.6)_3.5%,rgba(35,35,36,0.75)_100%)] tw-border tw-border-solid tw-border-[#DDDDDD]/10";
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.8)_3.5%,rgba(35,35,36,0.9)_100%)] tw-ring-1 tw-ring-inset tw-ring-[#DDDDDD]/20 tw-shadow-[inset_0_0_16px_rgba(221,221,221,0.08)]";
   }
   if (rank === 3) {
-    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.6)_3.5%,rgba(32,31,31,0.75)_100%)] tw-border tw-border-solid tw-border-[#D9A962]/10";
+    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.6)_3.5%,rgba(45,40,35,0.75)_100%)] tw-ring-1 tw-ring-inset tw-ring-[#D9A962]/20 tw-shadow-[inset_0_0_12px_rgba(217,169,98,0.05)]";
   }
-  return "tw-bg-[#19191D] tw-border tw-border-x-0 tw-border-solid tw-border-iron-800";
+  return "tw-bg-[#19191D] tw-ring-1 tw-ring-inset tw-ring-iron-800";
 };
 
 const getDropClasses = (

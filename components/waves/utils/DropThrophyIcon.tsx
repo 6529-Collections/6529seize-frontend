@@ -8,14 +8,14 @@ interface DropTrophyIconProps {
 export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
   if (!rank) {
     return (
-      <div className="tw-font-semibold tw-text-xs tw-text-iron-500 tw-flex tw-items-center tw-size-6 tw-rounded-lg tw-bg-iron-800/80 tw-justify-center tw-ring-1 tw-ring-iron-700/50">
+      <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-size-6 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="tw-size-3 tw-flex-shrink-0"
+          strokeWidth="2.5"
+          stroke="currentColor" 
+          className="tw-size-3.5 tw-flex-shrink-0"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
         </svg>
@@ -83,7 +83,7 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
   }
 
   return (
-    <div className="tw-font-semibold tw-text-xs tw-text-iron-300 tw-flex tw-items-center tw-py-1 tw-px-2 tw-rounded-lg tw-bg-iron-800/80 tw-justify-center tw-ring-1 tw-ring-iron-700/50">
+    <div className="tw-font-semibold tw-text-xs tw-text-iron-300 tw-flex tw-items-center tw-size-6 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
       <span>{formatNumberWithCommas(rank)}</span>
     </div>
   );

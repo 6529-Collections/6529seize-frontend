@@ -37,6 +37,7 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
 
             <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
               <Link
+                onClick={(e) => e.stopPropagation()}
                 href={`/${drop.author.handle}`}
                 className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
               >
@@ -50,7 +51,9 @@ const WaveDetailedDropHeader: React.FC<WaveDetailedDropHeaderProps> = ({
             {getTimeAgoShort(drop.created_at)}
           </p>
         </div>
-        {drop.drop_type === ApiDropType.Participatory && <DropTrophyIcon rank={drop.rank} />}
+        {drop.drop_type === ApiDropType.Participatory && (
+          <DropTrophyIcon rank={drop.rank} />
+        )}
       </div>
       <div className="tw-mt-0.5">
         {showWaveInfo && (

@@ -1,17 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-
 import WaveDetailedRightSidebar from "../WaveDetailedRightSidebar";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDropsAll from "../drops/WaveDropsAll";
 import { CreateDropWaveWrapper } from "../CreateDropWaveWrapper";
-import CreateDrop from "../CreateDrop";
 import { WaveDetailedView } from "../WaveDetailed";
 import { WaveDetailedDesktopTabs } from "../WaveDetailedDesktopTabs";
 import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
+import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 
 export enum ActiveDropAction {
   REPLY = "REPLY",
@@ -37,7 +36,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
   setActiveTab,
   onDropClick,
 }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const isNotChatWave = wave.wave.type !== ApiWaveType.Chat;
   const capacitor = useCapacitor();
@@ -45,9 +44,6 @@ export const WaveChat: React.FC<WaveChatProps> = ({
   const router = useRouter();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
-  const canDrop =
-    wave.chat.authenticated_user_eligible ||
-    wave.participation.authenticated_user_eligible;
   const [searchParamsDone, setSearchParamsDone] = useState(false);
   useEffect(() => {
     const dropParam = searchParams.get("drop");
@@ -92,7 +88,11 @@ export const WaveChat: React.FC<WaveChatProps> = ({
     return `tw-w-full tw-flex tw-flex-col ${
       capacitor.isCapacitor
         ? "tw-h-[calc(100vh-14.7rem)]"
-        : `tw-h-[calc(100vh-8.8rem)] ${isNotChatWave ? "lg:tw-h-[calc(100vh-10rem)]" : "lg:tw-h-[calc(100vh-7.5rem)]"}`
+        : `tw-h-[calc(100vh-8.8rem)] ${
+            isNotChatWave
+              ? "lg:tw-h-[calc(100vh-10rem)]"
+              : "lg:tw-h-[calc(100vh-7.5rem)]"
+          }`
     }`;
   }, [capacitor.isCapacitor, isNotChatWave]);
 
@@ -131,18 +131,17 @@ export const WaveChat: React.FC<WaveChatProps> = ({
                   dropId={null}
                   onDropClick={onDropClick}
                 />
-                {canDrop && (
-                  <div className="tw-mt-auto">
-                    <CreateDropWaveWrapper>
-                      <CreateDrop
-                        activeDrop={activeDrop}
-                        onCancelReplyQuote={onCancelReplyQuote}
-                        wave={wave}
-                        dropId={null}
-                      />
-                    </CreateDropWaveWrapper>
-                  </div>
-                )}
+                <div className="tw-mt-auto">
+                  <CreateDropWaveWrapper>
+                    <PrivilegedDropCreator
+                      activeDrop={activeDrop}
+                      onCancelReplyQuote={onCancelReplyQuote}
+                      wave={wave}
+                      dropId={null}
+                      fixedDropMode={DropMode.BOTH}
+                    />
+                  </CreateDropWaveWrapper>
+                </div>
               </div>
             </div>
           </div>

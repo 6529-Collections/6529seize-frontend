@@ -6,8 +6,8 @@ import {
 import useCapacitor from "../../../../hooks/useCapacitor";
 import WaveDropsAll from "../drops/WaveDropsAll";
 import { CreateDropWaveWrapper } from "../CreateDropWaveWrapper";
-import CreateDrop from "../CreateDrop";
 import { ActiveDropAction, ActiveDropState } from "../chat/WaveChat";
+import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 
 interface WaveDropChatProps {
   readonly wave: ApiWave;
@@ -47,7 +47,6 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     });
   };
 
-
   const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
     onReply(drop, partId);
   };
@@ -64,12 +63,11 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     });
   };
 
-
   return (
     <div className="tw-flex-1">
       <div
         ref={contentWrapperRef}
-        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
+        className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-relative"
       >
         <div className="tw-relative tw-h-full">
           <div className="tw-h-full tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
@@ -84,18 +82,17 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
                 // TODO: Implement this
                 onDropClick={() => {}}
               />
-              {true && (
-                <div className="tw-mt-auto">
-                  <CreateDropWaveWrapper>
-                    <CreateDrop
-                      activeDrop={activeDrop}
-                      onCancelReplyQuote={onCancelReplyQuote}
-                      wave={wave}
-                      dropId={drop.id}
-                    />
-                  </CreateDropWaveWrapper>
-                </div>
-              )}
+              <div className="tw-mt-auto">
+                <CreateDropWaveWrapper>
+                  <PrivilegedDropCreator
+                    activeDrop={activeDrop}
+                    onCancelReplyQuote={onCancelReplyQuote}
+                    wave={wave}
+                    dropId={drop.id}
+                    fixedDropMode={DropMode.BOTH}
+                  />
+                </CreateDropWaveWrapper>
+              </div>
             </div>
           </div>
         </div>

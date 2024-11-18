@@ -20,12 +20,18 @@ import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
 import { ActiveDropState } from "./chat/WaveChat";
+import { DropMode } from "./PrivilegedDropCreator";
+import { DropPrivileges } from "../../../hooks/useDropPriviledges";
+
+
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly wave: ApiWave;
   readonly dropId: string | null;
+  readonly fixedDropMode: DropMode;
+  readonly privileges: DropPrivileges;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -35,6 +41,7 @@ export default function CreateDrop({
   onCancelReplyQuote,
   wave,
   dropId,
+  fixedDropMode,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -42,34 +49,62 @@ export default function CreateDrop({
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
 
-  const getInitialIsDropMode = () => {
+  const getIsDropMode = () => {
+    if (fixedDropMode === DropMode.CHAT) {
+      return false;
+    }
+    if (fixedDropMode === DropMode.PARTICIPATION) {
+      return true;
+    }
     if (wave.chat.authenticated_user_eligible) return false;
     if (wave.participation.authenticated_user_eligible) return true;
+    if (activeDrop) return false;
     return false;
   };
 
-  const [isDropMode, setIsDropMode] = useState(getInitialIsDropMode());
+  const [isDropMode, setIsDropMode] = useState(getIsDropMode());
+  useEffect(() => setIsDropMode(getIsDropMode()), [wave, activeDrop]);
+
+  const getIsDropModeDisabled = () => {
+    if (!wave.participation.authenticated_user_eligible) return true;
+    if (activeDrop) return true;
+    return false;
+  };
+
+  const [dropModeDisabled, setDropModeDisabled] = useState(
+    getIsDropModeDisabled()
+  );
+
+  useEffect(
+    () => setDropModeDisabled(getIsDropModeDisabled()),
+    [wave, activeDrop]
+  );
 
   const onDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
+      if (fixedDropMode) {
+        return;
+      }
       if (newIsDropMode && !wave.participation.authenticated_user_eligible) {
         setToast({
-        message: "You are not eligible to drop in this wave",
-        type: "error",
-      });
-      return;
-    }
+          message: "You are not eligible to drop in this wave",
+          type: "error",
+        });
+        return;
+      }
 
-    if (!newIsDropMode && !wave.chat.authenticated_user_eligible) {
-      setToast({
-        message: "You are not eligible to chat in this wave",
-        type: "error",
-      });
-      return;
-    }
+      if (!newIsDropMode && !wave.chat.authenticated_user_eligible) {
+        setToast({
+          message: "You are not eligible to chat in this wave",
+          type: "error",
+        });
+        return;
+      }
 
-    setIsDropMode(newIsDropMode);
-  }, [wave]);
+      setIsDropMode(newIsDropMode);
+    },
+    [wave]
+  );
 
   const onRemovePart = useCallback((partIndex: number) => {
     setDrop((prevDrop) => {
@@ -190,6 +225,7 @@ export default function CreateDrop({
       setIsStormMode,
       onDropModeChange,
       submitDrop,
+      dropModeDisabled,
     }),
     [
       activeDrop,
@@ -202,6 +238,7 @@ export default function CreateDrop({
       setIsStormMode,
       onDropModeChange,
       submitDrop,
+      dropModeDisabled,
     ]
   );
 

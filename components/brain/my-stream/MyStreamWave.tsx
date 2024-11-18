@@ -13,6 +13,7 @@ interface MyStreamWaveProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({
@@ -20,6 +21,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
   activeDrop,
   onReply,
   onQuote,
+  onDropClick,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
@@ -80,6 +82,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
+        onDropClick={onDropClick}
       />
     </div>
   );

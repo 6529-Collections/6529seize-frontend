@@ -142,7 +142,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
               type="text"
               pattern="-?[0-9]*"
               inputMode="numeric"
-              className="tw-w-full tw-px-3 tw-h-9 tw-bg-iron-950/40 tw-rounded-lg tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-border-0 tw-ring-1 tw-ring-iron-700/50 focus:tw-ring-primary-400/50 hover:tw-ring-primary-400/30 tw-outline-none tw-transition-all hover:tw-bg-iron-950/60 focus:tw-bg-iron-950/80 focus:tw-scale-105"
+              className="tw-w-full tw-px-3 tw-h-9 tw-bg-iron-950 tw-rounded-lg tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-border-0 tw-ring-1 tw-ring-iron-700/50 focus:tw-ring-primary-400/50 hover:tw-ring-primary-400/30 tw-outline-none tw-transition-all hover:tw-bg-iron-950/60 focus:tw-bg-iron-950/80 focus:tw-scale-105"
               value={voteValue}
               onChange={handleInputChange}
             />
@@ -217,7 +217,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
             <span className="tw-text-iron-200">
               {formatNumberWithCommas(
                 drop.context_profile_context?.rating ?? 0
-              )}
+              )} TDH
             </span>
           </span>
         </div>
@@ -225,7 +225,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
           <span>
             Remaining:{" "}
             <span className="tw-text-iron-200">
-              {formatNumberWithCommas(availableCredit)}
+              {formatNumberWithCommas(availableCredit)} TDH
             </span>
           </span>
         </div>

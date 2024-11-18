@@ -8,7 +8,10 @@ import {
   WaveDropsLeaderboardSortDirection,
 } from "../../../../hooks/useWaveDropsLeaderboard";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import WaveLeaderboardRightSidebar from "./WaveLeaderboardRightSidebar";
+import WaveLeaderboardRightSidebar from "./sidebar/WaveLeaderboardRightSidebar";
+import { WaveDropCreate } from "./create/WaveDropCreate";
+import { motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 interface WaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -32,6 +35,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
 
   const [showMyDrops, setShowMyDrops] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isCreatingDrop, setIsCreatingDrop] = useState(false);
 
   const sortBy: Record<WaveLeaderboardSortType, WaveDropsLeaderboardSortBy> = {
     [WaveLeaderboardSortType.RANK]: WaveDropsLeaderboardSortBy.RANK,
@@ -63,18 +67,40 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             setSort={setSort}
             showMyDrops={showMyDrops}
             setShowMyDrops={setShowMyDrops}
+            onCreateDrop={() => setIsCreatingDrop(true)}
           />
+
+          <AnimatePresence>
+            {isCreatingDrop && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+              >
+                <WaveDropCreate
+                  wave={wave}
+                  onCancel={() => setIsCreatingDrop(false)}
+                  onSuccess={() => {
+                    setIsCreatingDrop(false);
+                  }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
           <WaveLeaderboardDrops
             wave={wave}
             dropsSortBy={sortBy[sort]}
             sortDirection={sortDirection[sort]}
             showMyDrops={showMyDrops}
             setActiveDrop={setActiveDrop}
+            onCreateDrop={() => setIsCreatingDrop(true)}
           />
         </div>
       </div>
       <WaveLeaderboardRightSidebar
         isOpen={isSidebarOpen}
+        wave={wave}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
       />
     </>
