@@ -100,7 +100,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             <svg
               className={`tw-w-3.5 tw-h-3.5 ${
                 log.contents.newVote >= log.contents.oldVote
-                  ? "tw-text-emerald-400"
+                  ? "tw-text-green"
                   : "tw-text-red tw-rotate-180"
               }`}
               viewBox="0 0 24 24"
@@ -117,7 +117,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             <span
               className={`tw-text-xs tw-font-medium ${
                 log.contents.newVote >= log.contents.oldVote
-                  ? "tw-text-emerald-400"
+                  ? "tw-text-green"
                   : "tw-text-red"
               }`}
             >
