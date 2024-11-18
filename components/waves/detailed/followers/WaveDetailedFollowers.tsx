@@ -14,7 +14,7 @@ export default function WaveDetailedFollowers({
   );
 
   return (
-    <div className="tw-px-4 tw-py-4">
+    <div className="tw-w-full tw-ml-[21.5rem] tw-px-4 tw-py-4">
       <button
         onClick={onBackClick}
         className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
