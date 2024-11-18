@@ -9,7 +9,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<WaveLeaderboardRightSid
     {[1, 2, 3].map((index) => (
       <div
         key={index}
-        className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-rounded-lg tw-bg-iron-900/30 hover:tw-bg-iron-900/50 tw-transition-colors tw-duration-200"
+        className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-rounded-lg tw-bg-iron-900"
       >
         <div className="tw-flex tw-items-center tw-gap-3">
           <span className="tw-text-iron-400 tw-font-medium">

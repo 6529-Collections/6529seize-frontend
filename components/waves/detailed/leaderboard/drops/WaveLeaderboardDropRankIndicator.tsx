@@ -27,7 +27,7 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
     };
 
     const defaultContainerStyles =
-      "tw-rounded-xl tw-bg-gradient-to-b tw-size-10 tw-flex tw-items-center tw-justify-center tw-shadow-lg tw-ring-1 tw-to-iron-900";
+      "tw-rounded-xl tw-bg-gradient-to-b tw-size-10 tw-flex tw-items-center tw-justify-center tw-shadow-lg tw-ring-1 tw-ring-inset tw-to-iron-800";
 
     const containerStyles = `${defaultContainerStyles} ${
       drop.rank ? rankStyles[drop.rank].container : ""
@@ -66,7 +66,7 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
 
   return (
     <div className="tw-flex tw-flex-col tw-items-center tw-gap-2 tw-w-12">
-      <div className="tw-size-8 tw-rounded-lg tw-bg-iron-800/80 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-iron-700/50">
+      <div className="tw-text-iron-300 tw-flex tw-items-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
         <span className="tw-text-base tw-font-semibold tw-text-iron-300">
           {drop.rank}
         </span>

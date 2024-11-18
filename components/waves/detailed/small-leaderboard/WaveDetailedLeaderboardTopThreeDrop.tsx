@@ -112,8 +112,8 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
   return (
     <div>
       <div className="tw-space-y-3">
-        <li className="tw-relative tw-flex tw-flex-col tw-rounded-xl tw-bg-gradient-to-b tw-to-iron-900 tw-p-[1px]">
-          <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4">
+        <li className="tw-relative tw-flex tw-flex-col">
+          <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 desktop-hover:hover:tw-bg-iron-800/70">
             <div>
               <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
                 {thropyIcon(drop.rank)}

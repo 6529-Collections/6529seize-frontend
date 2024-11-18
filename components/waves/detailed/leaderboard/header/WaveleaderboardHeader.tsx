@@ -69,7 +69,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 padding="tw-px-3 tw-py-1.5"
               >
                 <svg
-                  className="tw-w-4 tw-h-4 tw-flex-shrink-0 -tw-ml-0.5"
+                  className="tw-w-4 tw-h-4 tw-flex-shrink-0 -tw-ml-1"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="currentColor"
@@ -81,7 +81,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                     clipRule="evenodd"
                   />
                 </svg>
-                <span>Create a Drop</span>
+                <span>Create</span>
               </PrimaryButton>
             </>
           )}
