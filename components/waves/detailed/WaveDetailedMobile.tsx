@@ -165,7 +165,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className="tw-absolute tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
+            className="tw-absolute lg:tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
           >
             <WaveDrop
               wave={wave}
