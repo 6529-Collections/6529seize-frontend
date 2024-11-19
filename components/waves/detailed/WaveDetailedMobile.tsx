@@ -18,6 +18,7 @@ interface WaveDetailedMobileProps {
 
 export enum WaveDetailedMobileView {
   CHAT = "CHAT",
+  LEADERBOARD = "LEADERBOARD",
   ABOUT = "ABOUT",
 }
 
@@ -78,8 +79,8 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
     }, 300);
   };
 
-  const chatComponents: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CHAT]: (
+  const components: Record<WaveDetailedMobileView, JSX.Element> = {
+    [WaveDetailedMobileView.CHAT]: (
       <WaveChat
         wave={wave}
         // TODO: Implement this
@@ -88,35 +89,10 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
         onDropClick={() => {}}
       />
     ),
-    [WaveDetailedView.LEADERBOARD]: (
-      // TODO: Implement this
-      <WaveLeaderboard wave={wave} setActiveDrop={() => {}} >
+    [WaveDetailedMobileView.LEADERBOARD]: (
+      <WaveLeaderboard wave={wave} setActiveDrop={() => {}}>
         <div></div>
       </WaveLeaderboard>
-    ),
-    [WaveDetailedView.FOLLOWERS]: (
-      <WaveDetailedFollowers
-        wave={wave}
-        onBackClick={() => setView(WaveDetailedView.CHAT)}
-      />
-    ),
-  };
-  const components: Record<WaveDetailedMobileView, JSX.Element> = {
-    [WaveDetailedMobileView.CHAT]: isLoading ? (
-      <div className="tw-flex tw-items-center tw-justify-center tw-h-[calc(100vh-9rem)] tw-bg-iron-950">
-        <div className="tw-flex tw-flex-col tw-items-center tw-space-y-4">
-          <div className="tw-relative tw-w-16 tw-h-16">
-            <div className="tw-absolute tw-inset-0 tw-border-4 tw-border-primary-400 tw-rounded-full tw-animate-pulse"></div>
-            <div className="tw-absolute tw-inset-2 tw-border-4 tw-border-primary-300 tw-rounded-full tw-animate-ping"></div>
-            <div className="tw-absolute tw-inset-4 tw-bg-primary-500 tw-rounded-full tw-animate-pulse"></div>
-          </div>
-          <p className="tw-text-primary-300 tw-text-base tw-font-medium tw-animate-pulse">
-            Loading chat...
-          </p>
-        </div>
-      </div>
-    ) : (
-      chatComponents[view]
     ),
     [WaveDetailedMobileView.ABOUT]: (
       <WaveDetailedMobileAbout
@@ -150,6 +126,16 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
           }`}
         >
           Chat
+        </button>
+        <button
+          onClick={() => setActiveView(WaveDetailedMobileView.LEADERBOARD)}
+          className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-b-2 ${
+            activeView === WaveDetailedMobileView.LEADERBOARD
+              ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
+              : "tw-border-transparent tw-text-iron-500 hover:tw-border-iron-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+          }`}
+        >
+          Leaderboard
         </button>
         <button
           onClick={() => setActiveView(WaveDetailedMobileView.ABOUT)}
