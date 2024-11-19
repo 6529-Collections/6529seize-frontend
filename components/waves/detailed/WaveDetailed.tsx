@@ -19,7 +19,7 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeView, setActiveView] = useState<WaveDetailedView>(
-    WaveDetailedView.LEADERBOARD
+    WaveDetailedView.CHAT
   );
 
 
