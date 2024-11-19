@@ -43,6 +43,7 @@ interface DropEditorProps {
   readonly showDropError?: boolean;
   readonly showProfile?: boolean;
   readonly wave: DropEditorWaveProps | null;
+  readonly waveId: string | null;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
   readonly onCanSubmitChange?: (canSubmit: boolean) => void;
 }
@@ -60,6 +61,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
       showDropError = false,
       showProfile = true,
       wave,
+      waveId,
       onSubmitDrop,
       onCanSubmitChange,
     },
@@ -131,6 +133,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           quotedDrop={quotedDrop}
           showProfile={showProfile}
           type={type}
+          waveId={waveId}
           loading={loading}
           title={title}
           metadata={metadata}

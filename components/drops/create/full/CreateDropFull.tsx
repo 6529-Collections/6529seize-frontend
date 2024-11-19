@@ -44,6 +44,7 @@ export interface CreateDropFullProps {
   readonly showDropError?: boolean;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
+  readonly waveId: string | null;
   readonly children: React.ReactNode;
   readonly onTitle: (newV: string | null) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
@@ -78,6 +79,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
       showDropError = false,
       missingMedia,
       missingMetadata,
+      waveId,
       children,
       onTitle,
       onMetadataEdit,
@@ -115,6 +117,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           canSubmit={canSubmit}
           canAddPart={canAddPart}
           type={type}
+          waveId={waveId}
           files={files}
           loading={loading}
           showSubmit={showSubmit}
@@ -148,6 +151,7 @@ const CreateDropFull = forwardRef<CreateDropFullHandles, CreateDropFullProps>(
           canSubmit={canSubmit}
           canAddPart={canAddPart}
           type={type}
+          waveId={waveId}
           loading={loading}
           drop={drop}
           showSubmit={showSubmit}

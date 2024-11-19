@@ -301,6 +301,7 @@ export default function CreateDrop({
       quotedDrop={quotedDrop}
       showProfile={showProfile}
       type={type}
+      waveId={wave.id}
       loading={submitting}
       dropEditorRefreshKey={dropEditorRefreshKey}
       wave={wave}

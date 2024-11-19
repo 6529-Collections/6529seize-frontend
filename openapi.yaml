@@ -3363,7 +3363,6 @@ components:
         - type
         - time_lock_ms
         - winning_thresholds
-        - period
         - max_winners
         - admin_group
       properties:
@@ -3397,13 +3396,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiCreateNewWaveScope"
-        period:
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiIntRange"
-          example:
-            min: 1719850339996
-            max: 1719850339996
     ApiCreateWaveDropRequest:
       type: object
       required:
@@ -5234,7 +5226,6 @@ components:
         - type
         - time_lock_ms
         - winning_thresholds
-        - period
         - max_winners
         - admin_group
         - authenticated_user_eligible_for_admin
@@ -5267,13 +5258,6 @@ components:
           minimum: 1
         admin_group:
           $ref: "#/components/schemas/ApiWaveScope"
-        period:
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiIntRange"
-          example:
-            min: 1719850339996
-            max: 1719850339996
         authenticated_user_eligible_for_admin:
           type: boolean
     ApiWaveContributorOverview:

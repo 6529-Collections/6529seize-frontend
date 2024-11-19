@@ -9,7 +9,6 @@ import { TextNode } from "lexical";
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -19,10 +18,9 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { $createMentionNode } from "../../nodes/MentionNode";
-import { commonApiFetch } from "../../../../../../services/api/common-api";
-import { CommunityMemberMinimal } from "../../../../../../entities/IProfile";
 import MentionsTypeaheadMenu from "./MentionsTypeaheadMenu";
 import { MentionedUser } from "../../../../../../entities/IDrop";
+import { useIdentitiesSearch } from "../../../../../../hooks/useIdentitiesSearch";
 
 const PUNCTUATION =
   "\\.,\\+\\*\\?\\$\\@\\|#{}\\(\\)\\^\\-\\[\\]\\\\/!%'\"~=<>_:;";
@@ -87,32 +85,6 @@ const AtSignMentionsRegexAliasRegex = new RegExp(
 // At most, 5 suggestions are shown in the popup.
 const SUGGESTION_LIST_LENGTH_LIMIT = 5;
 
-function useMentionLookupService(mentionString: string | null) {
-  const [results, setResults] = useState<Array<CommunityMemberMinimal>>([]);
-
-  const getResults = async (query: string): Promise<void> => {
-    const response = await commonApiFetch<CommunityMemberMinimal[]>({
-      endpoint: "community-members",
-      params: {
-        param: query.trim(),
-        only_profile_owners: "true",
-      },
-    });
-    setResults(response);
-  };
-
-  useEffect(() => {
-    if (mentionString == null) {
-      setResults([]);
-      return;
-    }
-
-    getResults(mentionString);
-  }, [mentionString]);
-
-  return results;
-}
-
 function checkForAtSignMentions(
   text: string,
   minMatchLength: number
@@ -174,11 +146,17 @@ export interface NewMentionsPluginHandles {
 
 const NewMentionsPlugin = forwardRef<
   NewMentionsPluginHandles,
-  { readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void }
->(({ onSelect }, ref) => {
+  {
+    readonly waveId: string | null;
+    readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
+  }
+>(({ waveId, onSelect }, ref) => {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
-  const results = useMentionLookupService(queryString);
+  const { identities } = useIdentitiesSearch({
+    handle: queryString ?? "",
+    waveId,
+  });
   const [isOpen, setIsOpen] = useState(false);
   const isMentionsOpen = () => isOpen;
   const modalRef = useRef<HTMLDivElement>(null);
@@ -192,18 +170,18 @@ const NewMentionsPlugin = forwardRef<
 
   const options = useMemo(
     () =>
-      results
+      identities
         .map(
-          (result) =>
+          (identity) =>
             new MentionTypeaheadOption({
-              id: result.profile_id ?? "",
-              handle: result.handle ?? result.wallet,
-              display: result.display,
-              picture: result.pfp,
+              id: identity.id,
+              handle: identity.handle ?? identity.primary_wallet,
+              display: identity.display,
+              picture: identity.pfp,
             })
         )
         .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
-    [results]
+    [identities]
   );
 
   const onSelectOption = useCallback(
@@ -248,12 +226,11 @@ const NewMentionsPlugin = forwardRef<
         options={options}
         onOpen={() => setIsOpen(true)}
         onClose={() => setIsOpen(false)}
-        
         menuRenderFn={(
           anchorElementRef,
           { selectedIndex, selectOptionAndCleanUp, setHighlightedIndex }
         ) => {
-          return anchorElementRef.current && results.length
+          return anchorElementRef.current && identities.length
             ? ReactDOM.createPortal(
                 <MentionsTypeaheadMenu
                   selectedIndex={selectedIndex}

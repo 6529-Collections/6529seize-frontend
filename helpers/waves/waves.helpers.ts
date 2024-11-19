@@ -68,7 +68,6 @@ export const convertWaveToUpdateWave = (
     admin_group: {
       group_id: wave.wave.admin_group.group?.id ?? null,
     },
-    period: wave.wave.period,
   },
   outcomes: wave.outcomes,
 });
