@@ -131,7 +131,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
         )}
       </button>
 
-      <div className={`tw-fixed tw-right-0 tw-top-0 tw-bottom-0 tw-z-40 lg:tw-static ${!isSidebarOpen && 'tw-translate-x-full lg:tw-translate-x-0'} tw-transition-transform tw-duration-300`}>
+      <div className={`${!isSidebarOpen && 'tw-translate-x-full lg:tw-translate-x-0'} tw-transition-transform lg:tw-transform-none tw-duration-300`}>
         <WaveLeaderboardRightSidebar
           isOpen={isSidebarOpen}
           wave={wave}
