@@ -46,7 +46,9 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
       animate={{ x: isOpen ? 0 : "100%" }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
-      <WaveDetailedRightSidebarToggle isOpen={isOpen} onToggle={onToggle} />
+      <div className="tw-hidden lg:tw-block">
+        <WaveDetailedRightSidebarToggle isOpen={isOpen} onToggle={onToggle} />
+      </div>
       <div className="tw-pt-[5.6rem] xl:tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
         <WaveDetailedRightSidebarTabs
           activeTab={activeTab}
