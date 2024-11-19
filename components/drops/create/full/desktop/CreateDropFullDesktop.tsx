@@ -43,6 +43,7 @@ interface CreateDropFullDesktopProps {
   readonly showDropError?: boolean;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: ApiWaveRequiredMetadata[];
+  readonly waveId: string | null;
   readonly children: React.ReactNode;
   readonly onViewChange: (newV: CreateDropViewType) => void;
   readonly onMetadataEdit: (param: DropMetadata) => void;
@@ -79,6 +80,7 @@ const CreateDropFullDesktop = forwardRef<
       showDropError = false,
       missingMedia,
       missingMetadata,
+      waveId,
       children,
       onViewChange,
       onMetadataEdit,
@@ -190,6 +192,7 @@ const CreateDropFullDesktop = forwardRef<
                 viewType={CreateDropViewType.FULL}
                 editorState={editorState}
                 type={type}
+                waveId={waveId}
                 drop={drop}
                 canAddPart={canAddPart}
                 missingMedia={missingMedia}

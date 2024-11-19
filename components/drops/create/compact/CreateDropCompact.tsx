@@ -25,7 +25,7 @@ export interface CreateDropCompactHandles {
   clearEditorState: () => void;
 }
 interface CreateDropCompactProps {
-  readonly waveId: string;
+  readonly waveId: string | null;
   readonly profile: ProfileMinWithoutSubs;
   readonly showProfile?: boolean;
   readonly screenType: CreateDropScreenType;

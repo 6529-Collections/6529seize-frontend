@@ -147,7 +147,7 @@ export interface NewMentionsPluginHandles {
 const NewMentionsPlugin = forwardRef<
   NewMentionsPluginHandles,
   {
-    readonly waveId: string;
+    readonly waveId: string | null;
     readonly onSelect: (user: Omit<MentionedUser, "current_handle">) => void;
   }
 >(({ waveId, onSelect }, ref) => {

@@ -35,6 +35,7 @@ interface CreateDropFullMobileProps {
   readonly editorState: EditorState | null;
   readonly metadata: DropMetadata[];
   readonly files: File[];
+  readonly waveId: string | null;
   readonly canSubmit: boolean;
   readonly canAddPart: boolean;
   readonly type: CreateDropType;
@@ -70,6 +71,7 @@ const CreateDropFullMobile = forwardRef<
       editorState,
       metadata,
       files,
+      waveId,
       canSubmit,
       canAddPart,
       type,
@@ -172,6 +174,7 @@ const CreateDropFullMobile = forwardRef<
               viewType={CreateDropViewType.FULL}
               editorState={editorState}
               type={type}
+              waveId={waveId}
               drop={drop}
               canAddPart={canAddPart}
               canSubmit={canSubmit}
