@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import WaveDetailedDesktop from "./WaveDetailedDesktop";
 import { createBreakpoint } from "react-use";
 import WaveDetailedMobile from "./WaveDetailedMobile";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 export enum WaveDetailedView {
   CHAT = "CHAT",
@@ -24,6 +25,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
 
 
   const [activeWave, setActiveWave] = useState(wave);
+  const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,6 +50,8 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
       view={activeView}
       setView={setActiveView}
       isLoading={isLoading}
+      activeDrop={activeDrop}
+      setActiveDrop={setActiveDrop}
       onWaveChange={handleWaveChange}
       setIsLoading={setIsLoading}
     />
@@ -56,6 +60,8 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
       wave={activeWave}
       view={activeView}
       setView={setActiveView}
+      activeDrop={activeDrop}
+      setActiveDrop={setActiveDrop}
       onWaveChange={handleWaveChange}
       setIsLoading={setIsLoading}
     />

@@ -14,9 +14,11 @@ import { AnimatePresence, motion } from "framer-motion";
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
   readonly view: WaveDetailedView;
+  readonly activeDrop: ExtendedDrop | null;
   readonly setView: (view: WaveDetailedView) => void;
   readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
+  readonly setActiveDrop: (drop: ExtendedDrop | null) => void;
 }
 
 const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
@@ -25,6 +27,8 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   setView,
   onWaveChange,
   setIsLoading,
+  activeDrop,
+  setActiveDrop,
 }) => {
 
   const { connectedProfile, activeProfileProxy, showWaves } =
@@ -62,7 +66,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
-  const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
+
 
   const components: Record<WaveDetailedView, JSX.Element> = {
     [WaveDetailedView.CHAT]: (

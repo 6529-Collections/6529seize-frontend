@@ -6,12 +6,17 @@ import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
 import { WaveChat } from "./chat/WaveChat";
 import { WaveLeaderboard } from "./leaderboard/WaveLeaderboard";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { AnimatePresence, motion } from "framer-motion";
+import { WaveDrop } from "./drop/WaveDrop";
 
 interface WaveDetailedMobileProps {
   readonly wave: ApiWave;
   readonly view: WaveDetailedView;
   readonly setView: (view: WaveDetailedView) => void;
   readonly isLoading: boolean;
+  readonly activeDrop: ExtendedDrop | null;
+  readonly setActiveDrop: (drop: ExtendedDrop | null) => void;
   readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
 }
@@ -27,6 +32,8 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   view,
   setView,
   isLoading,
+  activeDrop,
+  setActiveDrop,
   onWaveChange,
   setIsLoading,
 }) => {
@@ -86,11 +93,11 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
         // TODO: Implement this
         activeTab={WaveDetailedView.CHAT}
         setActiveTab={() => {}}
-        onDropClick={() => {}}
+        onDropClick={setActiveDrop}
       />
     ),
     [WaveDetailedMobileView.LEADERBOARD]: (
-      <WaveLeaderboard wave={wave} setActiveDrop={() => {}}>
+      <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
         <div></div>
       </WaveLeaderboard>
     ),
@@ -113,7 +120,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
 
   return (
     <div
-      className="tailwind-scope tw-bg-black"
+      className="tailwind-scope tw-bg-black tw-relative"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="tw-px-4 min-[992px]:tw-px-3 tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
@@ -151,6 +158,23 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
       <div className="lg:tw-flex lg:tw-items-start lg:tw-justify-center lg:tw-gap-x-4">
         {components[activeView]}
       </div>
+      <AnimatePresence>
+        {activeDrop && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="tw-absolute tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
+          >
+            <WaveDrop
+              wave={wave}
+              drop={activeDrop}
+              onClose={() => setActiveDrop(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
