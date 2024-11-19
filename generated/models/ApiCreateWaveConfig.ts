@@ -27,7 +27,6 @@ export class ApiCreateWaveConfig {
     */
     'time_lock_ms': number | null;
     'admin_group': ApiCreateNewWaveScope | null;
-    'period': ApiIntRange | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -60,12 +59,6 @@ export class ApiCreateWaveConfig {
             "name": "admin_group",
             "baseName": "admin_group",
             "type": "ApiCreateNewWaveScope",
-            "format": ""
-        },
-        {
-            "name": "period",
-            "baseName": "period",
-            "type": "ApiIntRange",
             "format": ""
         }    ];
 

@@ -65,6 +65,7 @@ interface CreateDropWrapperProps {
   readonly showSubmit: boolean;
   readonly showDropError?: boolean;
   readonly wave: CreateDropWrapperWaveProps | null;
+  readonly waveId: string | null;
   readonly children: React.ReactNode;
   readonly showProfile?: boolean;
   readonly setIsStormMode: (isStormMode: boolean) => void;
@@ -105,6 +106,7 @@ const CreateDropWrapper = forwardRef<
       showDropError = false,
       showProfile = true,
       wave: waveProps,
+      waveId,
       children,
       setIsStormMode,
       setViewType,
@@ -415,6 +417,7 @@ const CreateDropWrapper = forwardRef<
           title={title}
           metadata={metadata}
           canSubmit={canSubmit}
+          waveId={waveId}
           canAddPart={canAddPart}
           drop={drop}
           loading={loading}
@@ -446,6 +449,7 @@ const CreateDropWrapper = forwardRef<
           metadata={metadata}
           editorState={editorState}
           canSubmit={canSubmit}
+          waveId={waveId}
           canAddPart={canAddPart}
           loading={loading}
           type={type}

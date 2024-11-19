@@ -16,7 +16,6 @@ export const WAVE_LABELS: Record<ApiWaveType, string> = {
 export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.Tdh]: "By TDH",
   [ApiWaveCreditType.Rep]: "By Rep",
-  [ApiWaveCreditType.Unique]: "By Unique Identity",
 };
 
 export const WAVE_SIGNATURE_LABELS: Record<

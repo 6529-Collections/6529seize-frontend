@@ -291,6 +291,7 @@ export default function DropReplyInputWrapper({
       context_profile_context: null,
       subscribed_actions: [],
       drop_type: ApiDropType.Chat,
+      rank: null,
     };
   };
 
@@ -332,6 +333,7 @@ export default function DropReplyInputWrapper({
     <div className="tw-flex tw-items-start tw-gap-x-3 tw-w-full tw-px-4 tw-pb-2 tw-pt-2">
       <DropReplyInput
         ref={dropReplyInputRef}
+        waveId={originalDrop.wave.id}
         editorState={editorState}
         drop={drop}
         canSubmit={canSubmit}

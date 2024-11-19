@@ -247,6 +247,7 @@ export default function CreateDrop({
       context_profile_context: null,
       subscribed_actions: [],
       drop_type: ApiDropType.Chat,
+      rank: null
     };
   };
 
@@ -300,6 +301,7 @@ export default function CreateDrop({
       quotedDrop={quotedDrop}
       showProfile={showProfile}
       type={type}
+      waveId={wave.id}
       loading={submitting}
       dropEditorRefreshKey={dropEditorRefreshKey}
       wave={wave}

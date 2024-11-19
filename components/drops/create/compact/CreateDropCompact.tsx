@@ -25,6 +25,7 @@ export interface CreateDropCompactHandles {
   clearEditorState: () => void;
 }
 interface CreateDropCompactProps {
+  readonly waveId: string | null;
   readonly profile: ProfileMinWithoutSubs;
   readonly showProfile?: boolean;
   readonly screenType: CreateDropScreenType;
@@ -61,6 +62,7 @@ const CreateDropCompact = forwardRef<
 >(
   (
     {
+      waveId,
       profile,
       showProfile = true,
       editorState,
@@ -133,6 +135,7 @@ const CreateDropCompact = forwardRef<
                 viewType={CreateDropViewType.COMPACT}
                 editorState={editorState}
                 type={type}
+                waveId={waveId}
                 drop={drop}
                 canAddPart={canAddPart}
                 canSubmit={canSubmit}

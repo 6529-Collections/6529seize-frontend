@@ -55,6 +55,7 @@ const CreateWaveDescription = forwardRef<
       <div className="tw-mt-6">
         <DropEditor
           ref={dropEditorRef}
+          waveId={null}
           profile={profileMin}
           quotedDrop={null}
           type={CreateDropType.DROP}

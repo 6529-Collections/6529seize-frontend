@@ -32,7 +32,6 @@ export default function CreateWaveVoting({
 
   const DISABLED_CREDIT_TYPES: ApiWaveCreditType[] = [
     ApiWaveCreditType.Rep,
-    ApiWaveCreditType.Unique,
   ];
 
   return (
