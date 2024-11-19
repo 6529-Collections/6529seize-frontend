@@ -80,12 +80,12 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
                 >
                   {drop.author.pfp ? (
                     <img
-                      className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-iron-800"
+                      className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10"
                       src={drop.author.pfp}
                       alt=""
                     />
                   ) : (
-                    <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-iron-800" />
+                    <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
                   )}
                   <span className="tw-text-iron-50 tw-text-sm tw-font-semibold">
                     {drop.author.handle}

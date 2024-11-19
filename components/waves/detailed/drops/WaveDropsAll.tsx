@@ -227,7 +227,7 @@ export default function WaveDropsAll({
               Be the First to Start a Discussion
             </span>
             <p className="tw-text-sm tw-text-iron-500 tw-text-center tw-mb-0 tw-max-w-xs">
-            {dropId ? "Share your thoughts and kickstart the conversation." : ""}
+            {dropId ? "Share your thoughts and join the discussion." : ""}
             </p>
           </div>
         </div>
