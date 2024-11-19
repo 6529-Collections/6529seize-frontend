@@ -98,7 +98,27 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
           />
         </div>
       </div>
-      <div className="tw-hidden lg:tw-block">
+
+     
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="tw-fixed tw-right-4 tw-top-24 tw-z-50 tw-bg-iron-900 tw-border tw-border-iron-700 tw-rounded-full tw-p-2 lg:tw-hidden"
+      >
+        <svg
+          className={`tw-w-5 tw-h-5 tw-text-iron-300 ${isSidebarOpen ? 'tw-rotate-180' : ''}`}
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      </button>
+
+      <div className={`tw-fixed tw-right-0 tw-top-0 tw-bottom-0 tw-z-40 lg:tw-static ${!isSidebarOpen && 'tw-translate-x-full lg:tw-translate-x-0'} tw-transition-transform tw-duration-300`}>
         <WaveLeaderboardRightSidebar
           isOpen={isSidebarOpen}
           wave={wave}

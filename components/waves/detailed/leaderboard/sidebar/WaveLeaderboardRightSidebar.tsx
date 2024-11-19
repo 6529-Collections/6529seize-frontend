@@ -40,10 +40,12 @@ const WaveLeaderboardRightSidebar: React.FC<
       animate={{ x: isOpen ? 0 : "100%" }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
-      <WaveLeaderboardRightSidebarOpenToggle
-        isOpen={isOpen}
-        onToggle={onToggle}
-      />
+      <div className="tw-hidden lg:tw-block">
+        <WaveLeaderboardRightSidebarOpenToggle
+          isOpen={isOpen}
+          onToggle={onToggle}
+        />
+      </div>
       <div className="tw-pt-[5.6rem] xl:tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full">
         <WaveLeaderboardRightSidebarTabs
           activeTab={activeTab}
