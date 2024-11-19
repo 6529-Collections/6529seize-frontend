@@ -53,11 +53,11 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
   return (
     <>
       <div
-        className={`tw-w-full tw-ml-[21.5rem] ${
-          isSidebarOpen ? "tw-mr-[20.5rem]" : ""
+        className={`tw-w-full lg:tw-ml-[21.5rem] ${
+          isSidebarOpen ? "lg:tw-mr-[20.5rem]" : ""
         } tw-transition-all tw-duration-300`}
       >
-        <div className="tw-w-full no-scrollbar tw-overflow-y-auto tw-h-[calc(100vh-102px)] tw-pb-6 tw-pr-4 tw-pt-3">
+        <div className="tw-w-full no-scrollbar tw-overflow-y-auto tw-h-[calc(100vh-102px)] tw-pb-6 tw-px-4 md:tw-px-2 lg:tw-pl-0 lg:tw-pr-4 lg:tw-mt-3">
           {children}
 
           <WaveLeaderboardTime wave={wave} />
@@ -98,11 +98,13 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
           />
         </div>
       </div>
-      <WaveLeaderboardRightSidebar
-        isOpen={isSidebarOpen}
-        wave={wave}
-        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-      />
+      <div className="tw-hidden lg:tw-block">
+        <WaveLeaderboardRightSidebar
+          isOpen={isSidebarOpen}
+          wave={wave}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+      </div>
     </>
   );
 };
