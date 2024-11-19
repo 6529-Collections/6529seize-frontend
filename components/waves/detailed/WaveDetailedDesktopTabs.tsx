@@ -18,7 +18,7 @@ export const WaveDetailedDesktopTabs: React.FC<WaveDetailedDesktopTabsProps> = (
           className={`tw-whitespace-nowrap tw-flex-1 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-font-medium tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out ${
             activeTab === WaveDetailedView.LEADERBOARD
               ? "tw-bg-iron-800 tw-text-iron-100"
-              : "tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100"
+              : "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900 tw-text-iron-500 desktop-hover:hover:tw-text-iron-100"
           }`}
         >
           Leaderboard
@@ -30,7 +30,7 @@ export const WaveDetailedDesktopTabs: React.FC<WaveDetailedDesktopTabsProps> = (
           className={`tw-whitespace-nowrap tw-flex-1 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-font-medium tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out ${
             activeTab === WaveDetailedView.CHAT
               ? "tw-bg-iron-800 tw-text-iron-100" 
-              : "tw-bg-iron-950 hover:tw-bg-iron-900 tw-text-iron-500 hover:tw-text-iron-100"
+              : "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900 tw-text-iron-500 desktop-hover:hover:tw-text-iron-100"
           }`}
         >
           Chat

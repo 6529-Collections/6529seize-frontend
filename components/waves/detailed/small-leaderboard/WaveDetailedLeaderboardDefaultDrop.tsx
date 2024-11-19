@@ -36,14 +36,34 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
         return "tw-bg-[#FEDF89]";
     }
   };
+
   return (
     <div>
       <div className="tw-relative tw-flex tw-flex-col tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
         <div className="tw-p-4 tw-rounded-xl desktop-hover:hover:tw-bg-iron-800/70 tw-transition tw-duration-300 tw-ease-out">
           <div>
             <div className="tw-w-full tw-inline-flex tw-justify-between">
-              <div className="tw-size-6 tw-flex tw-items-center tw-justify-center tw-font-semibold tw-rounded-lg tw-bg-iron-800/80 tw-ring-1 tw-ring-iron-700/50">
-                <span className="tw-text-iron-300 tw-text-sm">{drop.rank}</span>
+              <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-size-6 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+                {drop.rank ? (
+                  <span className="tw-text-iron-300 tw-text-sm">
+                    {drop.rank}
+                  </span>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2.5"
+                    stroke="currentColor"
+                    className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 12h14"
+                    />
+                  </svg>
+                )}
               </div>
               <WaveDetailedDropActionsRate drop={drop} />
             </div>
@@ -85,7 +105,7 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
                 </Link>
                 <div className="tw-flex tw-items-center tw-gap-x-1.5">
                   <svg
-                    className="tw-size-3.5 -tw-mt-0.5 tw-text-iron-400"
+                    className="tw-size-3.5 -tw-mt-0.5 tw-text-iron-400 tw-flex-shrink-0"
                     id="clap--icon-672c9d44f92440a3a313a608"
                     viewBox="0 0 346 360"
                     fill="none"

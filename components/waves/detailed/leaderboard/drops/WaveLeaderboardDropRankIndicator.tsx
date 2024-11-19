@@ -43,7 +43,7 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
 
     const positionLabel = drop.rank ? positionLabels[drop.rank] : "";
     return (
-      <div className="tw-flex tw-flex-col tw-items-center tw-gap-2 tw-w-12">
+      <div className="tw-flex tw-flex-col tw-gap-2 tw-w-10 tw-text-center">
         <div className={containerStyles}>
           <svg
             className={`tw-size-5 ${rankColor}`}
@@ -65,11 +65,28 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-items-center tw-gap-2 tw-w-12">
+    <div className="tw-flex tw-flex-col tw-gap-2 tw-w-10">
       <div className="tw-text-iron-300 tw-flex tw-items-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
-        <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-          {drop.rank}
-        </span>
+        {drop.rank ? (
+          <span className="tw-text-base tw-font-semibold tw-text-iron-300">
+            {drop.rank}
+          </span>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2.5"
+            stroke="currentColor"
+            className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M5 12h14"
+            ></path>
+          </svg>
+        )}
       </div>
     </div>
   );

@@ -22,13 +22,13 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       return "tw-from-iron-800 tw-to-iron-800 hover:tw-from-iron-700 hover:tw-to-iron-700";
     }
     if (drop.rank === 1) {
-      return "tw-from-[#E8D48A]/15 tw-to-iron-900/80 desktop-hover:hover:tw-from-[#E8D48A]/30 desktop-hover:hover:tw-to-[#E8D48A]/30";
+      return "tw-from-[#E8D48A]/20 tw-to-iron-900/80 desktop-hover:hover:tw-from-[#E8D48A]/30 desktop-hover:hover:tw-to-[#E8D48A]/30";
     }
     if (drop.rank === 2) {
-      return "tw-from-[#dddddd]/15 tw-to-iron-900/80 desktop-hover:hover:tw-from-[#dddddd]/30 desktop-hover:hover:tw-to-[#dddddd]/30";
+      return "tw-from-[#dddddd]/20 tw-to-iron-900/80 desktop-hover:hover:tw-from-[#dddddd]/30 desktop-hover:hover:tw-to-[#dddddd]/30";
     }
     if (drop.rank === 3) {
-      return "tw-from-[#CD7F32]/15 tw-to-iron-900/80 desktop-hover:hover:tw-from-[#CD7F32]/30 desktop-hover:hover:tw-to-[#CD7F32]/30";
+      return "tw-from-[#CD7F32]/20 tw-to-iron-900/80 desktop-hover:hover:tw-from-[#CD7F32]/30 desktop-hover:hover:tw-to-[#CD7F32]/30";
     }
     return "";
   };

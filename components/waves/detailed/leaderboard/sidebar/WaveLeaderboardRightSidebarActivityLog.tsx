@@ -19,26 +19,24 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
     <div className="tw-relative">
       <div className="tw-p-3 tw-rounded-lg tw-bg-iron-900">
         <div className="tw-flex tw-items-center tw-justify-between">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            <div className="tw-flex tw-items-center tw-gap-1.5">
-              <svg
-                className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                fill="none"
-              >
-                <path
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                {getTimeAgoShort(new Date(log.created_at).getTime())}
-              </span>
-            </div>
+          <div className="tw-flex tw-items-center tw-gap-1.5">
+            <svg
+              className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              fill="none"
+            >
+              <path
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+              {getTimeAgoShort(new Date(log.created_at).getTime())}
+            </span>
           </div>
 
           <div className="tw-relative">
@@ -77,7 +75,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             )}
           </div>
         </div>
-        <div className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1.5">
+        <div className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-2">
           <Link
             href={`/${log.invoker.handle}`}
             className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-whitespace-nowrap"

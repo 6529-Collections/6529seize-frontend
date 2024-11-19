@@ -90,7 +90,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
         ? "tw-h-[calc(100vh-14.7rem)]"
         : `tw-h-[calc(100vh-8.8rem)] ${
             isNotChatWave
-              ? "lg:tw-h-[calc(100vh-10rem)]"
+              ? "lg:tw-h-[calc(100vh-9.25rem)]"
               : "lg:tw-h-[calc(100vh-7.5rem)]"
           }`
     }`;
@@ -107,18 +107,18 @@ export const WaveChat: React.FC<WaveChatProps> = ({
           isSidebarOpen && isNotChatWave ? "tw-mr-[19.5rem]" : ""
         } tw-transition-all tw-duration-300`}
       >
-        {isNotChatWave && (
-          <div className="tw-pb-2">
-            <WaveDetailedDesktopTabs
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
-          </div>
-        )}
         <div
           ref={contentWrapperRef}
-          className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
+          className="tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
         >
+          {isNotChatWave && (
+            <div className="tw-pb-2 tw-pt-3 tw-bg-iron-950 tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
+              <WaveDetailedDesktopTabs
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+              />
+            </div>
+          )}
           <div className="tw-relative tw-h-full">
             <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
               <div className={containerClassName}>

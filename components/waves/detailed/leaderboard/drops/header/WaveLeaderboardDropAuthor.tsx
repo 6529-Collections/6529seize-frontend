@@ -22,12 +22,12 @@ export const WaveLeaderboardDropAuthor: React.FC<
       <div className="tw-relative">
         {drop.author.pfp ? (
           <img
-            className="tw-size-8 tw-rounded-lg tw-bg-iron-900 tw-ring-2 tw-ring-white/10 tw-object-contain"
+            className="tw-size-8 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-object-contain tw-flex-shrink-0"
             src={drop.author.pfp}
             alt="User avatar"
           />
         ) : (
-          <div className="tw-size-8 tw-rounded-lg tw-ring-2 tw-ring-white/10 tw-bg-iron-800" />
+          <div className="tw-size-8 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
         )}
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-2">
