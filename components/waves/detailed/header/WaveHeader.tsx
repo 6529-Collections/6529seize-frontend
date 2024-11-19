@@ -34,10 +34,6 @@ export default function WaveHeader({
 }: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const created = getTimeUntil(wave.created_at);
-  const ending = wave.wave.period?.max
-    ? getTimeUntil(wave.wave.period.max)
-    : null;
-
   const firstXContributors = wave.contributors_overview.slice(0, 10);
 
   const ringClasses = useRing
@@ -100,19 +96,6 @@ export default function WaveHeader({
               </span>
               <span className="tw-font-normal tw-text-iron-400">{created}</span>
             </div>
-            {ending && (
-              <>
-                <div className="tw-w-1 tw-h-1 tw-bg-iron-600 tw-rounded-full"></div>
-                <div className="tw-text-sm">
-                  <span className="tw-font-normal tw-text-iron-400 tw-pr-0.5">
-                    Ending
-                  </span>
-                  <span className="tw-font-normal tw-text-iron-400">
-                    {ending}
-                  </span>
-                </div>
-              </>
-            )}
           </div>
           <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-y-4">
             <div className="tw-flex tw-justify-between">

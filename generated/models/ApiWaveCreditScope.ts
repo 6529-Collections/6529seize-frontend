@@ -13,10 +13,8 @@
 import { HttpFile } from '../http/http';
 
 /**
-* The scope of the credit.  * WAVE - Credit is spendable across all drops in wave.  * DROP - The amount of votes, voter can give to a drop is not affected by votes spent on other drops.  * PARTICIPANT: The amount of votes, voter can give to a drop by concrete participant is only affected by voted given by same user to other drops by the same participant. 
+* The scope of the credit.  * WAVE - Credit is spendable across all drops in wave. 
 */
 export enum ApiWaveCreditScope {
-    Wave = 'WAVE',
-    Drop = 'DROP',
-    Participant = 'PARTICIPANT'
+    Wave = 'WAVE'
 }

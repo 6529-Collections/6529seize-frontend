@@ -56,6 +56,7 @@ export interface DropReplyInputHandles {
 const DropReplyInput = forwardRef<
   DropReplyInputHandles,
   {
+    readonly waveId: string;
     readonly editorState: EditorState | null;
     readonly drop: CreateDropConfig | null;
     readonly canSubmit: boolean;
@@ -71,6 +72,7 @@ const DropReplyInput = forwardRef<
 >(
   (
     {
+      waveId,
       editorState,
       drop,
       canSubmit,
@@ -184,6 +186,7 @@ const DropReplyInput = forwardRef<
 
               <OnChangePlugin onChange={onEditorStateChange} />
               <NewMentionsPlugin
+                waveId={waveId}
                 onSelect={onMentionedUserAdded}
                 ref={mentionsPluginRef}
               />

@@ -85,6 +85,7 @@ function DisableEditPlugin({ disabled }: { disabled: boolean }) {
 const CreateDropInput = forwardRef<
   CreateDropInputHandles,
   {
+    readonly waveId: string;
     readonly editorState: EditorState | null;
     readonly type: ActiveDropAction | null;
     readonly canSubmit: boolean;
@@ -100,6 +101,7 @@ const CreateDropInput = forwardRef<
 >(
   (
     {
+      waveId,
       editorState,
       type,
       canSubmit,
@@ -245,6 +247,7 @@ const CreateDropInput = forwardRef<
               <HistoryPlugin />
               <OnChangePlugin onChange={onEditorStateChange} />
               <NewMentionsPlugin
+                waveId={waveId}
                 onSelect={onMentionedUserAdded}
                 ref={mentionsPluginRef}
               />

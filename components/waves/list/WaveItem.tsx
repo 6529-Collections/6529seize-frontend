@@ -4,7 +4,6 @@ import {
   getRandomColorWithSeed,
   numberWithCommas,
 } from "../../../helpers/Helpers";
-import WaveItemEnding from "./WaveItemEnding";
 import WaveItemDropped from "./WaveItemDropped";
 import WaveItemFollow from "./WaveItemFollow";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
@@ -131,7 +130,6 @@ export default function WaveItem({ wave }: { readonly wave: ApiWave }) {
                 <span className="tw-text-iron-400 xl:tw-hidden">Followers</span>
               </div>
             </Tippy>
-            <WaveItemEnding wave={wave} />
           </div>
           <div className="tw-flex lg:tw-flex-col min-[1400px]:tw-flex-row tw-justify-between tw-gap-y-4 tw-mt-4">
             <WaveItemDropped wave={wave} />

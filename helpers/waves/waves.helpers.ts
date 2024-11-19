@@ -30,7 +30,6 @@ export const convertWaveToUpdateWave = (
       group_id: wave.voting.scope.group?.id ?? null,
     },
     credit_type: wave.voting.credit_type,
-    credit_scope: wave.voting.credit_scope,
     credit_category: wave.voting.credit_category,
     creditor_id: wave.voting.creditor?.id ?? null,
     signature_required: !!wave.voting.signature_required,
@@ -69,7 +68,6 @@ export const convertWaveToUpdateWave = (
     admin_group: {
       group_id: wave.wave.admin_group.group?.id ?? null,
     },
-    period: wave.wave.period,
   },
   outcomes: wave.outcomes,
 });

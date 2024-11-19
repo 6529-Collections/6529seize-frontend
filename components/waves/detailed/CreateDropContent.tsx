@@ -393,6 +393,7 @@ const getOptimisticDrop = (
     context_profile_context: null,
     subscribed_actions: [],
     drop_type: dropType,
+    rank: null,
   };
 };
 
@@ -865,6 +866,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           />
           <div className="tw-flex-grow tw-w-full">
             <CreateDropInput
+              waveId={wave.id}
               key={dropEditorRefreshKey}
               ref={createDropInputRef}
               editorState={editorState}
