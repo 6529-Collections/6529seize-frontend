@@ -34,7 +34,9 @@ export const WaveDropVoters: React.FC<WaveDropVotersProps> = ({ drop }) => {
     <div>
       <button
         onClick={() => setIsVotersOpen(!isVotersOpen)}
-        className="tw-w-full tw-group tw-ring-1 tw-ring-iron-700 tw-ring-inset desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-3 tw-px-5 tw-rounded-xl sm:tw-text-sm tw-bg-iron-950 tw-transition-all tw-duration-300 tw-border-0"
+        className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
+          isVotersOpen ? "tw-rounded-t-xl" : "tw-rounded-xl"
+        }`}
       >
         <span
           className={
@@ -74,7 +76,7 @@ export const WaveDropVoters: React.FC<WaveDropVotersProps> = ({ drop }) => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="tw-overflow-hidden"
+            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900"
           >
             {voters.map((voter, index) => (
               <WaveLeaderboardRightSidebarVoter

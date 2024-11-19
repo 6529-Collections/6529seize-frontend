@@ -31,10 +31,12 @@ export const WaveDropLogs: React.FC<WaveDropLogsProps> = ({ drop }) => {
   });
 
   return (
-    <div className="tw-space-y-4">
+    <div>
       <button
         onClick={() => setIsActivityOpen(!isActivityOpen)}
-        className="tw-w-full tw-group tw-ring-1 tw-ring-iron-700 tw-ring-inset desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-3 tw-px-5 sm:tw-text-sm tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-300 tw-border-0"
+        className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
+          isActivityOpen ? "tw-rounded-t-xl" : "tw-rounded-xl"
+        }`}
       >
         <span
           className={
@@ -66,32 +68,27 @@ export const WaveDropLogs: React.FC<WaveDropLogsProps> = ({ drop }) => {
         </motion.svg>
       </button>
 
-      <div className="tw-space-y-3">
-        <AnimatePresence>
-          {isActivityOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="tw-overflow-hidden"
-            >
-              {logs.map((log) => (
-                <WaveLeaderboardRightSidebarActivityLog
-                  key={log.id}
-                  log={log}
-                />
-              ))}
-              {isFetchingNextPage && (
-                <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
-                  <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
-                </div>
-              )}
-              <div ref={intersectionElementRef}></div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      <AnimatePresence>
+        {isActivityOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900"
+          >
+            {logs.map((log) => (
+              <WaveLeaderboardRightSidebarActivityLog key={log.id} log={log} />
+            ))}
+            {isFetchingNextPage && (
+              <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
+                <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
+              </div>
+            )}
+            <div ref={intersectionElementRef}></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

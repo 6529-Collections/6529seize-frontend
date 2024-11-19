@@ -1,7 +1,5 @@
 import React from "react";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons";
 
 import { useAuth } from "../../../../auth/Auth";
 import { useWaveActivityLogs } from "../../../../../hooks/useWaveActivityLogs";
