@@ -103,8 +103,8 @@ export const WaveChat: React.FC<WaveChatProps> = ({
   return (
     <>
       <div
-        className={`tw-flex-1 tw-ml-[21.5rem]  ${
-          isSidebarOpen && isNotChatWave ? "tw-mr-[20.5rem]" : ""
+        className={`tw-flex-1 lg:tw-ml-[21.5rem]  ${
+          isSidebarOpen && isNotChatWave ? "lg:tw-mr-[20.5rem]" : ""
         } tw-transition-all tw-duration-300`}
       >
         <div
@@ -112,7 +112,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
           className="tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
         >
           {isNotChatWave && (
-            <div className="tw-pb-2 tw-pt-3 tw-bg-iron-950 tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
+            <div className="tw-hidden lg:tw-block tw-pb-2 tw-pt-3 tw-bg-iron-950 tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
               <WaveDetailedDesktopTabs
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
@@ -147,14 +147,16 @@ export const WaveChat: React.FC<WaveChatProps> = ({
           </div>
         </div>
       </div>
-      {isNotChatWave && (
-        <WaveDetailedRightSidebar
-          isOpen={isSidebarOpen}
-          wave={wave}
-          onDropClick={onDropClick}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
-      )}
+      <div className="tw-hidden lg:tw-block">
+        {isNotChatWave && (
+          <WaveDetailedRightSidebar
+            isOpen={isSidebarOpen}
+            wave={wave}
+            onDropClick={onDropClick}
+            onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
+        )}
+      </div>
     </>
   );
 };
