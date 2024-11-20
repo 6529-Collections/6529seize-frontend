@@ -125,6 +125,15 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         .then((response) => {
           response.json().then((data: ManifoldInstance) => {
             setInstance(data);
+
+            if (
+              data.publicData.asset.animation_details &&
+              typeof data.publicData.asset.animation_details === "string"
+            ) {
+              data.publicData.asset.animation_details = JSON.parse(
+                data.publicData.asset.animation_details
+              );
+            }
             const nftImage = {
               id: data.id,
               contract: props.contract,
