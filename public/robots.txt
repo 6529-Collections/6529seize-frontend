@@ -1,2 +1,9 @@
+# *
 User-agent: *
 Allow: /
+
+# Host
+Host: https://seize.io
+
+# Sitemaps
+Sitemap: https://seize.io/sitemap.xml
