@@ -18,11 +18,13 @@ export interface ManifoldPublicData {
     image_details: ManifoldImageDetails;
     image: string;
     image_url: string;
-    animation_details: {
-      bytes: number;
-      format: string;
-      sha256: string;
-    };
+    animation_details:
+      | {
+          bytes: number;
+          format: string;
+          sha256: string;
+        }
+      | string;
     animation: string;
     animation_url: string;
   };
