@@ -9,7 +9,9 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.endsWith("favicon.ico") ||
     pathname.endsWith(".jpeg") ||
-    pathname.endsWith(".png")
+    pathname.endsWith(".png") ||
+    pathname.startsWith("/sitemap") ||
+    pathname.startsWith("/robots.txt")
   ) {
     return NextResponse.next();
   }
