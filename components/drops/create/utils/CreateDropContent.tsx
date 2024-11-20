@@ -71,6 +71,7 @@ export interface CreateDropContentHandles {
 const CreateDropContent = forwardRef<
   CreateDropContentHandles,
   {
+    readonly waveId: string | null;
     readonly viewType: CreateDropViewType;
     readonly editorState: EditorState | null;
     readonly type: CreateDropType;
@@ -99,6 +100,7 @@ const CreateDropContent = forwardRef<
       drop,
       canAddPart,
       canSubmit,
+      waveId,
       missingMedia,
       missingMetadata,
       onEditorState,
@@ -254,6 +256,7 @@ const CreateDropContent = forwardRef<
 
               <OnChangePlugin onChange={onEditorStateChange} />
               <NewMentionsPlugin
+                waveId={waveId}
                 onSelect={onMentionedUserAdded}
                 ref={mentionsPluginRef}
               />

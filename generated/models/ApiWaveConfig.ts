@@ -27,7 +27,6 @@ export class ApiWaveConfig {
     */
     'time_lock_ms': number | null;
     'admin_group': ApiWaveScope;
-    'period': ApiIntRange | null;
     'authenticated_user_eligible_for_admin': boolean;
 
     static readonly discriminator: string | undefined = undefined;
@@ -61,12 +60,6 @@ export class ApiWaveConfig {
             "name": "admin_group",
             "baseName": "admin_group",
             "type": "ApiWaveScope",
-            "format": ""
-        },
-        {
-            "name": "period",
-            "baseName": "period",
-            "type": "ApiIntRange",
             "format": ""
         },
         {

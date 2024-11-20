@@ -870,6 +870,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           />
           <div className="tw-flex-grow tw-w-full">
             <CreateDropInput
+              waveId={wave.id}
               key={dropEditorRefreshKey}
               ref={createDropInputRef}
               editorState={editorState}

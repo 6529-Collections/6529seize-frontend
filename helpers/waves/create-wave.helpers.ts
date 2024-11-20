@@ -588,11 +588,7 @@ export const getCreateNewWaveBody = ({
       time_lock_ms: config.approval.thresholdTimeMs,
       admin_group: {
         group_id: config.groups.admin,
-      },
-      period: {
-        min: config.dates.submissionStartDate,
-        max: config.dates.endDate,
-      },
+      }
     },
     outcomes: getOutcomes({ config }),
   };
