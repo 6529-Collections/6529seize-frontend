@@ -291,7 +291,7 @@ export default function NewDelegationComponent(props: Readonly<Props>) {
             </Form.Group>
             <Form.Group as={Row} className="pb-4">
               <Form.Label column sm={12} className="d-flex align-items-center">
-                Note: The currently supported use cases on seize.io are: #1 -
+                Note: The currently supported use cases on 6529.io are: #1 -
                 All, #2 - Minting/Allowlist, #3 - Airdrops{" "}
                 <a
                   href={`/delegation/delegation-faq/use-cases-overview`}

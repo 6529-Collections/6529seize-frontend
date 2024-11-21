@@ -22,7 +22,7 @@ export default function AboutPrivacyPolicy() {
           <>
             <p>
               This Privacy Policy describes how 6529 Collections LLC d/b/a
-              Seize.io (&quot;<b>Seize</b>&quot;, &quot;<b>we</b>&quot;, &quot;
+              6529.io (&quot;<b>Seize</b>&quot;, &quot;<b>we</b>&quot;, &quot;
               <b>our</b>&quot;) processes personal information that we collect
               through our digital or online properties or services that link to
               this Privacy Policy (including as applicable, our website, social

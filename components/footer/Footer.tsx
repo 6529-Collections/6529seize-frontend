@@ -73,11 +73,11 @@ export default function Footer() {
         {printSeparator()}
         {printLink(`/about/${AboutSection.LICENSE}`, "License")}
         {printSeparator()}
-        {printLink("https://api.seize.io/docs", "API Documentation")}
+        {printLink("https://api.6529.io/docs", "API Documentation")}
         {printSeparator()}
         {printLink(`/about/${AboutSection.CONTACT_US}`, "Contact Us")}
         {printSeparator()}
-        {printLink("https://status.seize.io/", "Status")}
+        {printLink("https://status.6529.io/", "Status")}
       </span>
     </footer>
   );

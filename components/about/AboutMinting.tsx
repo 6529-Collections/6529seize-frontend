@@ -541,7 +541,7 @@ export default function AboutMinting() {
             <li>
               For our full analysis of our Network Metrics, go here:{" "}
               <a href="/network/metrics" target="_blank" rel="noreferrer">
-                seize.io/network/metrics
+                6529.io/network/metrics
               </a>
             </li>
           </ul>
@@ -572,7 +572,7 @@ export default function AboutMinting() {
               On a daily basis, we publish to Arweave the statistics we use to
               create our own allowlists. You can find them here:{" "}
               <a href="/open-data" target="_blank" rel="noreferrer">
-                seize.io/open-data
+                6529.io/open-data
               </a>
             </li>
             <br />
