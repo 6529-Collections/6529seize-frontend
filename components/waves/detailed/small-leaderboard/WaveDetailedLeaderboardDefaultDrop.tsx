@@ -55,6 +55,7 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
                     viewBox="0 0 24 24"
                     strokeWidth="2.5"
                     stroke="currentColor"
+                    aria-hidden="true"
                     className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
                   >
                     <path

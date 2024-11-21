@@ -85,7 +85,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
               {renderProfilePicture()}
             </div>
           </div>
-          <div className="tw-mt-1 tw-flex tw-flex-col tw-w-full">
+          <div className="tw-flex tw-flex-col tw-w-full">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 {!!drop && (

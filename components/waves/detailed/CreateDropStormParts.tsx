@@ -41,7 +41,7 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
               <div className="tw-h-full tw-w-full tw-rounded-lg tw-bg-iron-900" />
             )}
           </div>
-          <div className="tw-mt-1 tw-flex tw-flex-col tw-w-full">
+          <div className="tw-flex tw-flex-col tw-w-full">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 <UserCICAndLevel

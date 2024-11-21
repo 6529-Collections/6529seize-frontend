@@ -21,7 +21,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
         <span className="tw-text-iron-400 tw-font-medium">{position}.</span>
         <Link
           href={`/${voter.voter.handle}`}
-          className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group hover:tw-opacity-80 tw-transition-all tw-duration-300"
+          className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300"
         >
           {voter.voter.pfp ? (
             <img
@@ -32,7 +32,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           ) : (
             <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
           )}
-          <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300 tw-truncate tw-max-w-28">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300 tw-truncate tw-max-w-28">
             {voter.voter.handle}
           </span>
         </Link>

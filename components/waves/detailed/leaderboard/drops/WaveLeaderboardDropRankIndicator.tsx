@@ -27,7 +27,7 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
     };
 
     const defaultContainerStyles =
-      "tw-rounded-xl tw-bg-gradient-to-b tw-size-10 tw-flex tw-items-center tw-justify-center tw-shadow-lg tw-ring-1 tw-ring-inset tw-to-iron-800";
+      "tw-rounded-lg md:tw-rounded-xl tw-bg-gradient-to-b tw-size-8 md:tw-size-10 tw-flex tw-items-center tw-justify-center tw-shadow-lg tw-ring-1 tw-ring-inset tw-to-iron-800";
 
     const containerStyles = `${defaultContainerStyles} ${
       drop.rank ? rankStyles[drop.rank].container : ""
@@ -43,10 +43,10 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
 
     const positionLabel = drop.rank ? positionLabels[drop.rank] : "";
     return (
-      <div className="tw-flex tw-flex-col tw-gap-2 tw-w-10 tw-text-center">
+      <div className="tw-flex tw-flex-col tw-gap-y-2 tw-w-8 md:tw-w-10 tw-text-center">
         <div className={containerStyles}>
           <svg
-            className={`tw-size-5 ${rankColor}`}
+            className={`tw-size-4 md:tw-size-5 tw-flex-shrink-0 ${rankColor}`}
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 576 512"
@@ -65,10 +65,10 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2 tw-w-10">
-      <div className="tw-text-iron-300 tw-flex tw-items-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+    <div className="tw-flex tw-flex-col tw-gap-y-2 tw-w-8 md:tw-w-10">
+      <div className="tw-text-iron-300 tw-flex tw-items-center tw-size-8 md:tw-size-10 tw-rounded-lg md:tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
         {drop.rank ? (
-          <span className="tw-text-base tw-font-semibold tw-text-iron-300">
+          <span className="tw-text-sm md:tw-text-base tw-font-semibold tw-text-iron-300">
             {drop.rank}
           </span>
         ) : (
@@ -76,13 +76,14 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            stroke-width="2.5"
+            strokeWidth="2.5"
             stroke="currentColor"
+            aria-hidden="true"
             className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               d="M5 12h14"
             ></path>
           </svg>

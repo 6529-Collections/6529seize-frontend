@@ -13,7 +13,7 @@ export const WaveLeaderboardDropHeader: React.FC<
   WaveLeaderboardDropHeaderProps
 > = ({ drop }) => {
   return (
-    <div className="tw-flex tw-justify-between tw-items-start tw-mb-2">
+    <div className="tw-flex tw-flex-col sm:tw-flex-row tw-gap-y-3 sm:tw-gap-y-0 tw-justify-between tw-items-start tw-mb-2">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <WaveLeaderboardDropAuthor drop={drop} />
         <div className="tw-flex tw-gap-x-2 tw-items-center">

@@ -152,25 +152,31 @@ export const WaveChat: React.FC<WaveChatProps> = ({
           <>
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="tw-fixed tw-right-4 tw-top-[6.75rem] tw-border-0 tw-z-50 tw-text-iron-500 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-800 tw-rounded-r-lg lg:tw-rounded-r-none tw-rounded-l-lg tw-size-7 tw-flex tw-items-center tw-justify-center tw-shadow-lg desktop-hover:hover:tw-shadow-primary-400/20 lg:tw-hidden"
+              className="tw-fixed tw-right-0 tw-top-[6.25rem] tw-border-0 tw-z-50 tw-text-iron-500 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-700 tw-rounded-r-none tw-rounded-l-lg tw-size-8 tw-flex tw-items-center tw-justify-center tw-shadow-lg lg:tw-hidden"
             >
               {isSidebarOpen ? (
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  strokeWidth="1.5" 
-                  stroke="currentColor" 
-                  className="tw-w-5 tw-h-5 tw-text-iron-300"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  className="tw-w-5 tw-h-5 tw-text-iron-300 tw-flex-shrink-0"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18 18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
                 <svg
-                  className="tw-w-5 tw-h-5 tw-text-iron-300"
+                  className="tw-w-5 tw-h-5 tw-text-iron-300 tw-flex-shrink-0"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
+                  aria-hidden="true"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
@@ -181,7 +187,11 @@ export const WaveChat: React.FC<WaveChatProps> = ({
               )}
             </button>
 
-            <div className={`${!isSidebarOpen && 'tw-translate-x-full lg:tw-translate-x-0'} tw-transition-transform lg:tw-transform-none tw-duration-300`}>
+            <div
+              className={`${
+                !isSidebarOpen && "tw-translate-x-full lg:tw-translate-x-0"
+              } tw-transition-transform lg:tw-transform-none tw-duration-300`}
+            >
               <WaveDetailedRightSidebar
                 isOpen={isSidebarOpen}
                 wave={wave}

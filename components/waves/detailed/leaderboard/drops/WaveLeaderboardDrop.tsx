@@ -40,7 +40,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       <div
         className={`tw-rounded-xl tw-bg-gradient-to-b ${containerClasses} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
       >
-        <div className="tw-rounded-xl tw-bg-iron-950 tw-p-6">
+        <div className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-p-6">
           <div className="tw-flex tw-gap-5">
             <WaveLeaderboardDropRankIndicator drop={drop} />
             <div className="tw-flex-1">

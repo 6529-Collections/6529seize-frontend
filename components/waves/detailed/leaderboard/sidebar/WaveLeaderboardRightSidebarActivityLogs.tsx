@@ -33,8 +33,8 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
     return (
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-10 tw-space-y-6 tw-text-iron-400">
         <div className="tw-relative tw-group">
-          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-primary-400/20 tw-via-indigo-500/10 tw-to-iron-800/10 tw-rounded-full tw-animate-[spin_4s_linear_infinite] group-hover:tw-from-primary-400/30"></div>
-          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-tr tw-from-iron-800/10 tw-via-indigo-500/10 tw-to-primary-400/20 tw-rounded-full tw-animate-[spin_5s_linear_infinite] group-hover:tw-to-primary-400/30"></div>
+          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-primary-400/20 tw-via-indigo-500/10 tw-to-iron-800/10 tw-rounded-full tw-animate-[spin_4s_linear_infinite] desktop-hover:group-hover:tw-from-primary-400/30"></div>
+          <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-tr tw-from-iron-800/10 tw-via-indigo-500/10 tw-to-primary-400/20 tw-rounded-full tw-animate-[spin_5s_linear_infinite] desktop-hover:group-hover:tw-to-primary-400/30"></div>
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-radial tw-from-primary-300/5 tw-to-transparent tw-animate-pulse"></div>
           <svg
             className="tw-size-10 tw-flex-shrink-0 tw-relative tw-text-white/40"

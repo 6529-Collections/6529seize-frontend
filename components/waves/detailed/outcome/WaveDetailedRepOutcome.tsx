@@ -45,6 +45,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
                 stroke="currentColor"
+                aria-hidden="true"
                 className="tw-size-5 tw-text-[#C3B5D9]"
               >
                 <path

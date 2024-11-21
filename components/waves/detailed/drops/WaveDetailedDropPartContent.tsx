@@ -92,7 +92,7 @@ const WaveDetailedDropPartContent: React.FC<
   };
 
   return (
-    <div className="tw-pt-1 tw-pb-1 tw-w-full tw-flex tw-justify-between tw-space-x-3 tw-transition tw-duration-300 tw-ease-out">
+    <div className="tw-w-full tw-flex tw-justify-between tw-space-x-3 tw-transition tw-duration-300 tw-ease-out">
       {isStorm && renderNavigationButton("previous")}
       <div
         className="tw-h-full tw-w-full"
