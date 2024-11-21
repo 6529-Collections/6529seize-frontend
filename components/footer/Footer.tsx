@@ -51,7 +51,6 @@ export default function Footer() {
           "OM Discord"
         )}
         {printSeparator()}
-        {printLinkWithImage("https://6529.io", "/Seize_Logo_2.png", "6529.io")}
         {printSeparator()}
         {printLinkWithImage(
           "https://github.com/6529-Collections",
