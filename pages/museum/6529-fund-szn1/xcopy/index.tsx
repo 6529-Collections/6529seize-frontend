@@ -131,7 +131,7 @@ One of the first artists in the crypto art world, XCOPY’s pieces have attained
                         </div>
                       </div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-3 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <img loading="lazy" decoding="async" className="Image--image" src="/wp-content/uploads/2022/08/SPECIAL-OPERATION.gif" style={{width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', textAlign: 'center'}} /><div className="fusion-title title fusion-title-4 fusion-sep-none fusion-title-text fusion-title-size-two">
+                        <img loading="lazy" decoding="async" className="Image--image" src="/wp-content/uploads/2022/08/SPECIAL-OPERATION.gif" style={{width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%', textAlign: 'center'}} alt="6529.io" /><div className="fusion-title title fusion-title-4 fusion-sep-none fusion-title-text fusion-title-size-two">
                           <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '1.2'}} />
                           <p style={{textAlign: 'center'}}>SPECIAL OPERATION</p>
                         </div>

@@ -111,13 +111,13 @@ COLLECTIONS FORM" />
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={826}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="name">Name <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-user-alt fas" /><input type="text" name="name" id="name"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} placeholder="e.g. John Doe or anon1234*" data-holds-private-data="false" minLength={0} />
+                                        <i className="awb-form-icon fa-user-alt fas" /><input type="text" name="name" id="name"defaultValue="true"className="fusion-form-input" required={true} placeholder="e.g. John Doe or anon1234*" data-holds-private-data="false" minLength={0} />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={826}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="twitter_handle">Twitter Handle <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-twitter fab" /><input type="text" name="twitter_handle" id="twitter_handle"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} placeholder="@yourtwitterhandle*" data-holds-private-data="false" minLength={2} />
+                                        <i className="awb-form-icon fa-twitter fab" /><input type="text" name="twitter_handle" id="twitter_handle"defaultValue="true"className="fusion-form-input" required={true} placeholder="@yourtwitterhandle*" data-holds-private-data="false" minLength={2} />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={826}>
@@ -135,7 +135,7 @@ COLLECTIONS FORM" />
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={826}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="initiative">What did you have in mind? <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-rocket fas" /><input type="text" name="initiative" id="initiative"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" minLength={0} />
+                                        <i className="awb-form-icon fa-rocket fas" /><input type="text" name="initiative" id="initiative"defaultValue="true"className="fusion-form-input" required={true} data-holds-private-data="false" minLength={0} />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-textarea-field fusion-form-label-above" data-form-id={826}>

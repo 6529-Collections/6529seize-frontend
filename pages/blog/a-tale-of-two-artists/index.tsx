@@ -243,7 +243,7 @@ So, it is startling to imagine that" />
                         </div>
                         <div className="fusion-text fusion-text-22">
                           <div style={{width: 310}} className="wp-caption aligncenter">
-                            <img loading="lazy" decoding="async" className="size-fusion-300" src="/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg" width={300} height={528} /><p className="wp-caption-text">summer.jpg</p>
+                            <img loading="lazy" decoding="async" className="size-fusion-300" src="/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg" width={300} height={528} alt="6529.io" /><p className="wp-caption-text">summer.jpg</p>
                           </div>
                           <p><span style={{fontWeight: 400}}>Both Van Gogh and XCOPY knew this: The trick about the survival of great art is that it needs the public to make a stir, a commotion; the art must thrill the people and also hold them in its thrall. In its own quiet darkness, a piece of art may be great, but</span> <span style={{fontWeight: 400}}>to serve its purpose, to move, teach, inspire, and endure, it must be lifted by the steam and roar of an eager audience that will preserve the artworks' legacy with the sheer force of enthusiasm.</span></p>
                           <p>***</p>

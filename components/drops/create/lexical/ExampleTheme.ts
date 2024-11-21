@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *
  */
-export default {
+const editorStyles = {
   ltr: "ltr",
   rtl: "rtl",
   placeholder: "editor-placeholder",
@@ -72,3 +72,5 @@ export default {
     variable: "editor-tokenVariable",
   },
 };
+
+export default editorStyles;

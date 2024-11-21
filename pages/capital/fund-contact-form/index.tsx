@@ -106,13 +106,13 @@ const IndexPage = () => (
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={816}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="namepseudonym">Name <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-user-alt fas" /><input type="text" name="namepseudonym" id="namepseudonym"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} placeholder="e.g. John Doe or anon1234*" data-holds-private-data="false" minLength={0} />
+                                        <i className="awb-form-icon fa-user-alt fas" /><input type="text" name="namepseudonym" id="namepseudonym"defaultValue="true"className="fusion-form-input" required={true} placeholder="e.g. John Doe or anon1234*" data-holds-private-data="false" minLength={0} />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-email-field fusion-form-label-above" data-form-id={816}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="email">Email <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-at fas" /><input type="email" name="email" id="email"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} placeholder="youremail@abc.xyz*" data-holds-private-data="false" />
+                                        <i className="awb-form-icon fa-at fas" /><input type="email" name="email" id="email"defaultValue="true"className="fusion-form-input" required={true} placeholder="youremail@abc.xyz*" data-holds-private-data="false" />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={816}>
@@ -131,10 +131,10 @@ const IndexPage = () => (
                                       <div className="fusion-form-label-wrapper"><span className="label">Are you an accredited investor? <abbr className="fusion-form-element-required" title="required">*</abbr></span></div>
                                       <fieldset>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-investor-1-0" type="radio" defaultValue="Yes" name="investor" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-investor-1-0">Yes</label>
+                                          <input tabIndex={0} id="radio-investor-1-0" type="radio" defaultValue="Yes" name="investor" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-investor-1-0">Yes</label>
                                         </div>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-investor-1-1" type="radio" defaultValue="No" name="investor" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-investor-1-1">No</label>
+                                          <input tabIndex={0} id="radio-investor-1-1" type="radio" defaultValue="No" name="investor" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-investor-1-1">No</label>
                                         </div>
                                       </fieldset>
                                     </div>
@@ -142,13 +142,13 @@ const IndexPage = () => (
                                       <div className="fusion-form-label-wrapper"><span className="label">Are you a qualified purchaser? <abbr className="fusion-form-element-required" title="required">*</abbr></span></div>
                                       <fieldset>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-purchaser-2-0" type="radio" defaultValue="Yes" name="purchaser" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-purchaser-2-0">Yes</label>
+                                          <input tabIndex={0} id="radio-purchaser-2-0" type="radio" defaultValue="Yes" name="purchaser" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-purchaser-2-0">Yes</label>
                                         </div>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-purchaser-2-1" type="radio" defaultValue="No" name="purchaser" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-purchaser-2-1">No</label>
+                                          <input tabIndex={0} id="radio-purchaser-2-1" type="radio" defaultValue="No" name="purchaser" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-purchaser-2-1">No</label>
                                         </div>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-purchaser-2-2" type="radio" defaultValue="Don't know" name="purchaser" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-purchaser-2-2">Don't know</label>
+                                          <input tabIndex={0} id="radio-purchaser-2-2" type="radio" defaultValue="Don't know" name="purchaser" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-purchaser-2-2">Don't know</label>
                                         </div>
                                       </fieldset>
                                     </div>
@@ -411,10 +411,10 @@ const IndexPage = () => (
                                       <div className="fusion-form-label-wrapper"><span className="label">Would you like to receive materials regarding the 6529 NFT Fund? <abbr className="fusion-form-element-required" title="required">*</abbr></span></div>
                                       <fieldset>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-materials-3-0" type="radio" defaultValue="Yes" name="materials" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-materials-3-0">Yes</label>
+                                          <input tabIndex={0} id="radio-materials-3-0" type="radio" defaultValue="Yes" name="materials" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-materials-3-0">Yes</label>
                                         </div>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-materials-3-1" type="radio" defaultValue="No" name="materials" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-materials-3-1">No</label>
+                                          <input tabIndex={0} id="radio-materials-3-1" type="radio" defaultValue="No" name="materials" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-materials-3-1">No</label>
                                         </div>
                                       </fieldset>
                                     </div>

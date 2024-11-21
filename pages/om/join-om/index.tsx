@@ -114,7 +114,7 @@ It is free to join. We will try to add as many folks as possible, but we can't g
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={1226}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="name">Name <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-user-alt fas" /><input type="text" name="name" id="name"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} placeholder="e.g. John Doe or anon1234*" data-holds-private-data="false" minLength={0} />
+                                        <i className="awb-form-icon fa-user-alt fas" /><input type="text" name="name" id="name"defaultValue="true"className="fusion-form-input" required={true} placeholder="e.g. John Doe or anon1234*" data-holds-private-data="false" minLength={0} />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-email-field fusion-form-label-above" data-form-id={1226}>
@@ -126,7 +126,7 @@ It is free to join. We will try to add as many folks as possible, but we can't g
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={1226}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="twitter_handle">Twitter Handle <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-twitter fab" /><input type="text" name="twitter_handle" id="twitter_handle"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} placeholder="@yourtwitterhandle*" data-holds-private-data="false" minLength={2} />
+                                        <i className="awb-form-icon fa-twitter fab" /><input type="text" name="twitter_handle" id="twitter_handle"defaultValue="true"className="fusion-form-input" required={true} placeholder="@yourtwitterhandle*" data-holds-private-data="false" minLength={2} />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={1226}>
@@ -138,23 +138,23 @@ It is free to join. We will try to add as many folks as possible, but we can't g
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={1226}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="what">What do you want to bring into OM? <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-rocket fas" /><input type="text" name="what" id="what"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} placeholder="Name of your organization*" data-holds-private-data="false" minLength={2} />
+                                        <i className="awb-form-icon fa-rocket fas" /><input type="text" name="what" id="what"defaultValue="true"className="fusion-form-input" required={true} placeholder="Name of your organization*" data-holds-private-data="false" minLength={2} />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-radio-field fusion-form-label-above" data-form-id={1226}>
                                       <div className="fusion-form-label-wrapper"><span className="label">How much space do you need? <abbr className="fusion-form-element-required" title="required">*</abbr></span></div>
                                       <fieldset>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-space-1-0" type="radio" defaultValue="A space / gallery" name="space" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-space-1-0">A space / gallery</label>
+                                          <input tabIndex={0} id="radio-space-1-0" type="radio" defaultValue="A space / gallery" name="space" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-space-1-0">A space / gallery</label>
                                         </div>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-space-1-1" type="radio" defaultValue="A building (can hold up to 100 spaces)" name="space" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-space-1-1">A building (can hold up to 100 spaces)</label>
+                                          <input tabIndex={0} id="radio-space-1-1" type="radio" defaultValue="A building (can hold up to 100 spaces)" name="space" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-space-1-1">A building (can hold up to 100 spaces)</label>
                                         </div>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-space-1-2" type="radio" defaultValue="A group of buildings" name="space" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-space-1-2">A group of buildings</label>
+                                          <input tabIndex={0} id="radio-space-1-2" type="radio" defaultValue="A group of buildings" name="space" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-space-1-2">A group of buildings</label>
                                         </div>
                                         <div className="fusion-form-radio option-inline">
-                                          <input tabIndex={0} id="radio-space-1-3" type="radio" defaultValue="A district (20 to 2,000 buildings)" name="space" className="fusion-form-input" required={true} aria-required={true} data-holds-private-data="false" /><label htmlFor="radio-space-1-3">A district (20 to 2,000 buildings)</label>
+                                          <input tabIndex={0} id="radio-space-1-3" type="radio" defaultValue="A district (20 to 2,000 buildings)" name="space" className="fusion-form-input" required={true} data-holds-private-data="false" /><label htmlFor="radio-space-1-3">A district (20 to 2,000 buildings)</label>
                                         </div>
                                       </fieldset>
                                     </div>

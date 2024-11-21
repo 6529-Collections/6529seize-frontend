@@ -111,7 +111,7 @@ EDUCATION COLLABORATION FORM" />
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={998}>
                                       <div className="fusion-form-label-wrapper"><label htmlFor="name">Name <abbr className="fusion-form-element-required" title="required">*</abbr></label></div>
                                       <div className="fusion-form-input-with-icon">
-                                        <i className="awb-form-icon fa-user-alt fas" /><input type="text" name="name" id="name"defaultValue="true"className="fusion-form-input" required={true} aria-required={true} placeholder="e.g. John Doe or anon1234*" data-holds-private-data="false" minLength={0} />
+                                        <i className="awb-form-icon fa-user-alt fas" /><input type="text" name="name" id="name"defaultValue="true"className="fusion-form-input" required={true} placeholder="e.g. John Doe or anon1234*" data-holds-private-data="false" minLength={0} />
                                       </div>
                                     </div>
                                     <div className="fusion-form-field fusion-form-text-field fusion-form-label-above" data-form-id={998}>

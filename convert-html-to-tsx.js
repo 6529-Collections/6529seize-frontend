@@ -144,6 +144,10 @@ const processHtmlFiles = (dir, relativePath = "") => {
         }
       });
 
+      $("[aria-required]").each((i, elem) => {
+        $(elem).removeAttr("aria-required");
+      });
+
       $("div").each((i, elem) => {
         $(elem).removeAttr("height");
         $(elem).removeAttr("width");
@@ -162,6 +166,12 @@ const processHtmlFiles = (dir, relativePath = "") => {
           altValue === null ||
           altValue === ""
         ) {
+          $(elem).attr("alt", "6529.io");
+        }
+      });
+
+      $("img").each((i, elem) => {
+        if (!$(elem).attr("alt")) {
           $(elem).attr("alt", "6529.io");
         }
       });
