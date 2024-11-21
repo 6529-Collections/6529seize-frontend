@@ -367,7 +367,7 @@ export default function RememeAddPage() {
                             href={`${
                               process.env.BASE_ENDPOINT
                                 ? process.env.BASE_ENDPOINT
-                                : "https://seize.io"
+                                : "https://6529.io"
                             }/rememes/${submissionResult.contract}/${t.id}`}
                             target="_blank"
                             rel="noreferrer">
