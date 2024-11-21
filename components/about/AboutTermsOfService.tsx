@@ -444,13 +444,6 @@ export default function AboutTermsOfService() {
               We take no responsibility for these communications, whether we
               agree with them or not, as we have no way to monitor or exercise
               control over them.
-              <br />
-              <br />
-              Our perspectives on the 6529 NFTs can be found on the{" "}
-              <a href="https://6529.io" target="_blank" rel="noreferrer">
-                6529.io
-              </a>{" "}
-              website.
             </li>
             <br />
             <br />
