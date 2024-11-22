@@ -89,6 +89,11 @@ const nextConfig = {
     config.resolve.alias.encoding = false;
     return config;
   },
+
+  experimental: {
+    workerThreads: true,
+    swcMinify: true,
+  },
 };
 
 module.exports = withBundleAnalyzer(nextConfig);
