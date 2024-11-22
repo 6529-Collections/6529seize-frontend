@@ -67,10 +67,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
       </div>
 
       <div className="tw-flex tw-flex-col lg:tw-flex-row tw-flex-1">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 20 }}
+        <div
           className={`${
             activeTab === WaveDropTab.INFO ? "tw-block" : "tw-hidden"
           } lg:tw-block lg:tw-w-[28rem] 2xl:tw-max-w-2xl 2xl:tw-w-full tw-py-4 lg:tw-py-6 lg:tw-border lg:tw-border-r-[3px] lg:tw-border-solid tw-border-iron-800 tw-border-y-0 tw-bg-iron-950 tw-overflow-y-auto tw-h-[calc(100vh-140px)] lg:tw-h-[calc(100vh-90px)] no-scrollbar tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300`}
@@ -129,18 +126,15 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
+        <div
           className={`${
             activeTab === WaveDropTab.CHAT ? "tw-flex" : "tw-hidden"
           } lg:tw-flex lg:tw-flex-1 `}
         >
           {wave && <WaveDropChat wave={wave} drop={drop} />}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
