@@ -264,7 +264,7 @@ const WaveDetailedDrop = ({
           {!shouldGroupWithPreviousDrop && (
             <WaveDetailedDropAuthorPfp drop={drop} />
           )}
-          <div
+          <div className="tw-flex tw-flex-col tw-w-full"
           /*   className={`${
               shouldGroupWithPreviousDrop ? "" : ""
             } tw-flex tw-flex-col tw-w-full`} */

@@ -93,7 +93,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           </div>
         </div>
       </Link>
-      <div className="tw-flex tw-items-center tw-gap-x-4 md:tw-gap-x-2">
+      <div className="tw-flex tw-items-center tw-gap-x-4">
         <Tippy
           content={<span className="tw-text-xs">Stream</span>}
           disabled={isMobile}
@@ -103,7 +103,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               resetWaveCount(wave.id);
               router.push(getHref(wave.id), undefined, { shallow: true });
             }}
-            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
           >
             <svg
               width="24"
@@ -113,37 +113,36 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g clipPath="url(#clip0_4088_1029)">
-                <path
-                  d="M6.62133 10.6875H1.62867C0.730594 10.6875 0 9.95691 0 9.05883V4.06617C0 3.16809 0.730594 2.4375 1.62867 2.4375H6.62133C7.51941 2.4375 8.25 3.16809 8.25 4.06617V9.05883C8.25 9.95691 7.51941 10.6875 6.62133 10.6875ZM1.62867 3.9375C1.5577 3.9375 1.5 3.9952 1.5 4.06617V9.05883C1.5 9.1298 1.5577 9.1875 1.62867 9.1875H6.62133C6.6923 9.1875 6.75 9.1298 6.75 9.05883V4.06617C6.75 3.9952 6.6923 3.9375 6.62133 3.9375H1.62867Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M6.62133 21.5625H1.62867C0.730594 21.5625 0 20.8319 0 19.9338V14.9412C0 14.0431 0.730594 13.3125 1.62867 13.3125H6.62133C7.51941 13.3125 8.25 14.0431 8.25 14.9412V19.9338C8.25 20.8319 7.51941 21.5625 6.62133 21.5625ZM1.62867 14.8125C1.5577 14.8125 1.5 14.8702 1.5 14.9412V19.9338C1.5 20.0048 1.5577 20.0625 1.62867 20.0625H6.62133C6.6923 20.0625 6.75 20.0048 6.75 19.9338V14.9412C6.75 14.8702 6.6923 14.8125 6.62133 14.8125H1.62867Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M23.25 6.1875H11.25C10.8358 6.1875 10.5 5.85169 10.5 5.4375C10.5 5.02331 10.8358 4.6875 11.25 4.6875H23.25C23.6642 4.6875 24 5.02331 24 5.4375C24 5.85169 23.6642 6.1875 23.25 6.1875Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M19.125 9H11.25C10.8358 9 10.5 8.66419 10.5 8.25C10.5 7.83581 10.8358 7.5 11.25 7.5H19.125C19.5392 7.5 19.875 7.83581 19.875 8.25C19.875 8.66419 19.5392 9 19.125 9Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M23.25 16.875H11.25C10.8358 16.875 10.5 16.5392 10.5 16.125C10.5 15.7108 10.8358 15.375 11.25 15.375H23.25C23.6642 15.375 24 15.7108 24 16.125C24 16.5392 23.6642 16.875 23.25 16.875Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M19.125 19.875H11.25C10.8358 19.875 10.5 19.5392 10.5 19.125C10.5 18.7108 10.8358 18.375 11.25 18.375H19.125C19.5392 18.375 19.875 18.7108 19.875 19.125C19.875 19.5392 19.5392 19.875 19.125 19.875Z"
-                  fill="currentColor"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_4088_1029">
-                  <rect width="24" height="24" fill="white" />
-                </clipPath>
-              </defs>
+              <rect
+                x="1"
+                y="4"
+                width="6"
+                height="6"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <rect
+                x="1"
+                y="14"
+                width="6"
+                height="6"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M11 7H23"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <path
+                d="M11 17H23"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         </Tippy>
@@ -153,7 +152,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         >
           <Link
             href={`/waves/${wave.id}`}
-            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
