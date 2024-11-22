@@ -117,7 +117,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="tw-absolute xl:tw-ml-[21.5rem] tw-inset-0 tw-z-[100]"
+              className="tw-absolute xl:tw-ml-[21.5rem] tw-inset-0 tw-z-[100] xl:tw-pl-4"
             >
               <WaveDrop
                 drop={activeDrop}
