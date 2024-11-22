@@ -1,12 +1,15 @@
 import React from 'react';
+import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
+import dynamic from "next/dynamic";
+
+const Header = dynamic(() => import("../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 const IndexPage = () => (
   <>
-    <div className="tw-w-full tw-h-10 d-flex align-items-center justify-content-center">
-      <a href="/" className="font-color decoration-hover-underline">
-        Back to 6529.io
-      </a>
-    </div>
+    <Header extraClass="header-wp" />
     <div>
   <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
   <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -109,7 +112,7 @@ Societies are made up of people – citizens, business leaders, public servants.
             <div id="post-33" className="post-33 page type-page status-publish hentry">
               <span className="entry-title rich-snippet-hidden">EDUCATION</span><span className="vcard rich-snippet-hidden"><span className="fn"><a href="/author/6529er6529-io/" title="Posts by 6529er" rel="author">6529er</a></span></span><span className="updated rich-snippet-hidden">2022-04-12T12:21:06-04:00</span>
               <div className="post-content">
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one"><h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '0.8'}}>EDUCATION IS THE MOST IMPORTANT INITIATIVE AT 6529 AND THE ONE THAT HAS TAKEN MOST OF MY TIME</h1></div>
                         <div className="fusion-text fusion-text-1">
                           <h3>WHY EDUCATION<strong><br />
