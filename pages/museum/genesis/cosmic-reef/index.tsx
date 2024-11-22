@@ -112,38 +112,38 @@ A particular order can be found in deepest space, in our oceans and forests, and
           <section id="content" className="full-width">
             <div id="post-313" className="post-313 page type-page status-publish hentry">
               <span className="entry-title rich-snippet-hidden">COSMIC REEF</span><span className="vcard rich-snippet-hidden"><span className="fn"><a href="/author/6529er6529-io/" title="Posts by 6529er" rel="author">6529er</a></span></span><span className="updated rich-snippet-hidden">2022-04-14T05:59:39-04:00</span>						<div className="post-content">
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingBottom: 0, flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
                           <h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 400, margin: 0, lineHeight: '1.1'}} />
                           <p><strong>Cosmic Reef</strong><br />
                             Leo Villareal<br />
                             Mint Date: 01/25/2022</p>
                         </div></div></div></div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col fusion-builder-column-1 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 20, paddingBottom: 0, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}>
                           <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 700, margin: 0, lineHeight: '1.1'}} />
                           <p><strong>Artist Narrative<br />
                             </strong></p>
                         </div>
-                        <div className="fusion-text fusion-text-1">
+                        <div className="fusion-text fusion-text-1" style={{color: '#000000'}}>
                           <p>A particular order can be found in deepest space, in our oceans and forests, and in all living things, including ourselves – a unified code producing endless variation. Gravity and cosmic winds shape star-forming nebulas into coral-like forms. Flowers self-organize in radial symmetry with signals hidden from the human eye. Light bends time as events unfold in our own lives.</p>
                           <p><strong>6529 Museum Notes</strong><br />
                             Leo Villareal is a well known off-chain artist. The 6529 Museum collection contains five of the top 20 rarest Cosmic Reefs.</p>
                         </div>
                       </div></div></div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-2 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4">
-                          <video src="https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-2">
+                        <div className="fusion-text fusion-text-2" style={{color: '#000000'}}>
                           <p>One of 26 Icosahedrons.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-3 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-3">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-3 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-3" style={{color: '#000000'}}>
                           <p>Token: 176</p>
                           <p><strong>Key Traits:<br />
                             </strong>Form: Icosahedron<br />
@@ -156,19 +156,19 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             25/1024 AR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-4 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4">
-                          <video src="https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-4">
+                        <div className="fusion-text fusion-text-4" style={{color: '#000000'}}>
                           <p>Buckyball is the rarest (7) and in our view most dominant attractive trait.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-5 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-5">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-5 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-5" style={{color: '#000000'}}>
                           <p>Token: 173</p>
                           <p><strong>Key Traits:<br />
                             </strong>Influence: Buckyball<br />
@@ -182,20 +182,20 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-6 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4">
-                          <video src="https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-6">
+                        <div className="fusion-text fusion-text-6" style={{color: '#000000'}}>
                           <p>A rare featuring the ‘Icosahedron' form trait coupled with the ‘Star Seed' system trait.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-7 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-7">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-7 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-7" style={{color: '#000000'}}>
                           <p>Token: 272</p>
                           <p><strong>Key Traits:<br />
                             </strong>Form: Icosahedron<br />
@@ -208,19 +208,19 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             33/1024 AR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-8 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-8 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4">
-                          <video src="https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-8">
+                        <div className="fusion-text fusion-text-8" style={{color: '#000000'}}>
                           <p>Generated with the rare ‘Icosahedrom' form trait and ‘Pyrite' influence trait.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-9 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-9">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-9 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-9" style={{color: '#000000'}}>
                           <p>Token: 380</p>
                           <p><strong>Key Traits:<br />
                             </strong>Influence: Pyrite<br />
@@ -234,20 +234,20 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-10 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-10 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4">
-                          <video src="https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-10">
+                        <div className="fusion-text fusion-text-10" style={{color: '#000000'}}>
                           <p>A mysterious central rotating symbol keeps you mesmerized in this exquisite output.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-11 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-11">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-11 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-11" style={{color: '#000000'}}>
                           <p>Token: 890</p>
                           <p><strong>Key Traits:<br />
                             </strong>System: Fertility<br />
@@ -260,19 +260,19 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             31/1024 AR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-12 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-12 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4">
-                          <video src="https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-12">
+                        <div className="fusion-text fusion-text-12" style={{color: '#000000'}}>
                           <p>A spaceship going at the speed of light formed by ‘Sun' rays and ‘Void' form traits.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-13 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-13">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-13 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-13" style={{color: '#000000'}}>
                           <p>Token: 835</p>
                           <p><strong>Key Traits:<br />
                             </strong>Form: Void<br />
@@ -286,7 +286,7 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-6 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col fusion-builder-column-14 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-14">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-6 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 20, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-14 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 0, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-14" style={{color: '#000000'}}>
                           <p><strong>AR: Artacle Rarity | ASR: Artacle Statistical Rarity | RG: Rarity Guide | RS: Rarity Studio</strong></p>
                         </div></div></div></div></div>
               </div>

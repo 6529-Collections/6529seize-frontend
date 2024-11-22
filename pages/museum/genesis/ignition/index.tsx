@@ -112,38 +112,38 @@ Launched into crypto-space for the first time, I present my genesis project, a l
           <section id="content" className="full-width">
             <div id="post-271" className="post-271 page type-page status-publish hentry">
               <span className="entry-title rich-snippet-hidden">IGNITION</span><span className="vcard rich-snippet-hidden"><span className="fn"><a href="/author/6529er6529-io/" title="Posts by 6529er" rel="author">6529er</a></span></span><span className="updated rich-snippet-hidden">2022-04-07T03:29:17-04:00</span>						<div className="post-content">
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingBottom: 0, flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
                           <h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 400, margin: 0, lineHeight: '1.1'}} />
                           <p><strong>Ignition</strong><br />
                             ge1doot<br />
                             Mint Date: 01/08/2021</p>
                         </div></div></div></div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col fusion-builder-column-1 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 20, paddingBottom: 0, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}>
                           <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 700, margin: 0, lineHeight: '1.1'}} />
                           <p><strong>Artist Narrative<br />
                             </strong></p>
                         </div>
-                        <div className="fusion-text fusion-text-1">
+                        <div className="fusion-text fusion-text-1" style={{color: '#000000'}}>
                           <p>Launched into crypto-space for the first time, I present my genesis project, a limited series of interactive 3D structures, rotating endlessly from their self-gravitational force. Each token minted is the result of a complex set of rules, an algorithm that processes the transaction hash and generates a unique piece of crypto-art. Deep space, do you copy?</p>
                           <p><strong>6529 Museum Notes</strong><br />
                             Ignition evokes spaceships for us. We particularly like the night-mode. 6529 Museum has 3 of three of the top 30 Ignitions including #2 rarity.</p>
                         </div>
                       </div></div></div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-2 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/nTiZCoWS/s2_ignition_267.mp4">
-                          <video src="https://videos.files.wordpress.com/nTiZCoWS/s2_ignition_267.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/nTiZCoWS/s2_ignition_267.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/nTiZCoWS/s2_ignition_267.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-2">
+                        <div className="fusion-text fusion-text-2" style={{color: '#000000'}}>
                           <p>This output stands out with its bold colors in front of a pure black background.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-3 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-3">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-3 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-3" style={{color: '#000000'}}>
                           <p>Token: 267</p>
                           <p><strong>Key Traits:<br />
                             </strong>Number of Lasers: 17<br />
@@ -155,19 +155,19 @@ Launched into crypto-space for the first time, I present my genesis project, a l
                             17/512 ASR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-4 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/MLBzFk9J/s2_ignition_378.mp4">
-                          <video src="https://videos.files.wordpress.com/MLBzFk9J/s2_ignition_378.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/MLBzFk9J/s2_ignition_378.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/MLBzFk9J/s2_ignition_378.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-4">
+                        <div className="fusion-text fusion-text-4" style={{color: '#000000'}}>
                           <p>Purple and black as its primary colors, on a ‘Day mode' setting makes this uncommon.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-5 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-5">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-5 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-5" style={{color: '#000000'}}>
                           <p>Token: 378</p>
                           <p><strong>Key Traits:<br />
                             </strong>Number of Lasers: 10<br />
@@ -180,20 +180,20 @@ Launched into crypto-space for the first time, I present my genesis project, a l
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-6 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/y8beBUwx/s2_ignition_201.mp4">
-                          <video src="https://videos.files.wordpress.com/y8beBUwx/s2_ignition_201.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/y8beBUwx/s2_ignition_201.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/y8beBUwx/s2_ignition_201.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-6">
+                        <div className="fusion-text fusion-text-6" style={{color: '#000000'}}>
                           <p>Colorful. Look for the 3D Ethereum symbols in pink, purple and teal colors.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-7 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-7">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-7 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-7" style={{color: '#000000'}}>
                           <p>Token: 201</p>
                           <p><strong>Key Traits:<br />
                             </strong>Number of Lasers: 16<br />
@@ -206,7 +206,7 @@ Launched into crypto-space for the first time, I present my genesis project, a l
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col fusion-builder-column-8 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-8">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 20, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-8 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 0, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-8" style={{color: '#000000'}}>
                           <p><strong>AR: Artacle Rarity | ASR: Artacle Statistical Rarity | RG: Rarity Guide | RS: Rarity Studio</strong></p>
                         </div></div></div></div></div>
               </div>

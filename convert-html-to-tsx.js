@@ -19,8 +19,16 @@ const skipPatterns = [
   /^404\.htm$/,
   /^404\/.+/,
   /^studio\//,
-  /^about.index.html$/,
-  /^about.contact.index.html$/,
+  /^6529-dubai\//,
+  /^6529-puerto-rico\//,
+  /^bridge\//,
+  /^abc1\//,
+  /^abc2\//,
+  /^collections\//,
+  /^education\//,
+  /^privacy-policy\//,
+  /^the-hamily-wagmi-allowlist\//,
+  /^about\//,
 ];
 
 // Function to determine if a file or directory should be skipped
@@ -28,36 +36,64 @@ const shouldSkip = (relativePath) => {
   return skipPatterns.some((pattern) => pattern.test(relativePath));
 };
 
-// Define class mapping: Fusion class names to Tailwind class names
-const classMapping = {
-  "fusion-layout-column": "flex flex-col",
-  fusion_builder_column: "flex flex-col",
-  "fusion-builder-column-0": "flex flex-col",
-  fusion_builder_column_1_1: "flex flex-col",
-  "1_1": "flex flex-col",
-  "fusion-flex-column": "flex flex-col",
-  // Add more mappings as needed
-};
-
-// Function to map Fusion class names to Tailwind class names
-const mapClassNames = (classAttr) => {
-  if (!classAttr) return "";
-  const classes = classAttr.split(/\s+/);
-  const mappedClasses = classes.map((cls) => classMapping[cls] || cls);
-  return mappedClasses.join(" ");
-};
-
 const cleanStyleString = (styleString) => {
+  const mappings = {
+    "--awb-bg-size": "background-size",
+    "--awb-width-large": "width",
+    "--awb-margin-top-large": "margin-top",
+    "--awb-spacing-right-large": "padding-right",
+    "--awb-margin-bottom-large": "margin-bottom",
+    "--awb-spacing-left-large": "padding-left",
+    "--awb-border-radius-top-left": "border-top-left-radius",
+    "--awb-border-radius-top-right": "border-top-right-radius",
+    "--awb-border-radius-bottom-right": "border-bottom-right-radius",
+    "--awb-border-radius-bottom-left": "border-bottom-left-radius",
+    "--awb-padding-top": "padding-top",
+    "--awb-padding-bottom": "padding-bottom",
+    "--awb-background-color": "background-color",
+    "--awb-flex-wrap": "flex-wrap",
+    "-color": "color",
+    "--awb-transition": "transition",
+    "--awb-inner-bg-box-shadow": "box-shadow",
+    "--awb-inner-border-color": "border-color",
+    "--awb-inner-border-style": "border-style",
+    "--awb-inner-border-width": "border-width",
+    "--awb-inner-border-left": "border-left",
+    "--awb-inner-border-right": "border-right",
+    "--awb-inner-border-top": "border-top",
+    "--awb-inner-border-bottom": "border-bottom",
+    "--awb-inner-bg-color-hover": "background-color",
+    "--awb-inner-border-color-hover": "border-color",
+    "--awb-inner-border-style-hover": "border-style",
+    "--awb-inner-border-color-hover": "border-color",
+    "--awb-border-radius-top-left": "border-top-left-radius",
+    "--awb-border-radius-top-right": "border-top-right-radius",
+    "--awb-border-radius-bottom-right": "border-bottom-right-radius",
+    "--awb-border-radius-bottom-left": "border-bottom-left-radius",
+    "--awb-padding-top": "padding-top",
+    "--awb-padding-bottom": "padding-bottom",
+    "--awb-background-color": "background-color",
+    "--awb-flex-wrap": "flex-wrap",
+    "--awb-bg-size": "background-size",
+    "--awb-width-large": "width",
+    "--awb-margin-top-large": "margin-top",
+    "--awb-spacing-right-large": "padding-right",
+    "--awb-margin-bottom-large": "margin-bottom",
+    "--awb-spacing-left-large": "padding-left",
+    "--awb-width-medium": "width",
+    "--awb-text-color": "color",
+  };
+
   return styleString
     .split(";")
     .map((s) => s.trim())
-    .filter((s) => !s.startsWith("-"))
     .map((s) => {
       const [property, ...valueParts] = s.split(":");
       if (!property || valueParts.length === 0) return "";
       const value = valueParts.join(":").trim();
-      return `${property.trim()}: ${value}`;
+      return `${mappings[property.trim()] ?? property.trim()}: ${value}`;
     })
+    .filter((s) => !s.startsWith("-"))
     .filter(Boolean)
     .join("; ");
 };
@@ -130,13 +166,6 @@ const processHtmlFiles = (dir, relativePath = "") => {
       $("nav.fusion-breadcrumbs").remove();
 
       $("main").attr("style", "min-height: 100vh;padding: 30px;");
-
-      // Map class names
-      $("*[class]").each((i, elem) => {
-        const classAttr = $(elem).attr("class");
-        const mappedClasses = mapClassNames(classAttr);
-        $(elem).attr("class", mappedClasses);
-      });
 
       // Clean style attributes
       $("[style]").each((i, elem) => {
@@ -289,7 +318,8 @@ const replaceVideoLinks = ($) => {
           autoplay 
           muted 
           playsinline 
-          class="tw-w-full tw-h-auto">
+          style="max-width: 300px;"
+        >
           Your browser does not support the video tag.
         </video>
       `;

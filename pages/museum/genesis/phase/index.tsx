@@ -118,38 +118,38 @@ phase is a well-loved collection with very interesting dynamics." />
           <section id="content" className="full-width">
             <div id="post-299" className="post-299 page type-page status-publish hentry">
               <span className="entry-title rich-snippet-hidden">PHASE</span><span className="vcard rich-snippet-hidden"><span className="fn"><a href="/author/6529er6529-io/" title="Posts by 6529er" rel="author">6529er</a></span></span><span className="updated rich-snippet-hidden">2022-04-14T04:55:10-04:00</span>						<div className="post-content">
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingBottom: 0, flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
                           <h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 400, margin: 0, lineHeight: '1.1'}} />
                           <p><strong>phase</strong><br />
                             Loren Bednar<br />
                             Mint Date: 20/08/2021</p>
                         </div></div></div></div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col fusion-builder-column-1 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 20, paddingBottom: 0, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}>
                           <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 700, margin: 0, lineHeight: '1.1'}} />
                           <p><strong>Artist Narrative<br />
                             </strong></p>
                         </div>
-                        <div className="fusion-text fusion-text-1">
+                        <div className="fusion-text fusion-text-1" style={{color: '#000000'}}>
                           <p>This project is a visual representation of realities that are out of phase. Interference patterns, colorful echoes, and emerging secrets are explored. Mathematical functions produce constant motion, but rarely, a peaceful scene resolves within the chaos.</p>
                           <p><strong>6529 Museum Notes</strong><br />
                             phase is a well-loved collection with very interesting dynamics. The 6529 collection has two rare phases (in the top 10 rarity) and an emergent aesthetic grail (654).</p>
                         </div>
                       </div></div></div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-2 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/10eGhwgP/abc_s4_phase_473-1.mp4">
-                          <video src="https://videos.files.wordpress.com/10eGhwgP/abc_s4_phase_473-1.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/10eGhwgP/abc_s4_phase_473-1.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/10eGhwgP/abc_s4_phase_473-1.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-2">
+                        <div className="fusion-text fusion-text-2" style={{color: '#000000'}}>
                           <p>A faint, dark and rare phase.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-3 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-3">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-3 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-3" style={{color: '#000000'}}>
                           <p>Token: 473</p>
                           <p><strong>Key Traits:<br />
                             </strong>Radial Influences: 4<br />
@@ -162,19 +162,19 @@ phase is a well-loved collection with very interesting dynamics." />
                             66/1024 ASR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-4 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/shtznIqw/abc_s4_phase_251-1.mp4">
-                          <video src="https://videos.files.wordpress.com/shtznIqw/abc_s4_phase_251-1.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/shtznIqw/abc_s4_phase_251-1.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/shtznIqw/abc_s4_phase_251-1.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-4">
+                        <div className="fusion-text fusion-text-4" style={{color: '#000000'}}>
                           <p>This rare phase is compelling from the start with flares of light crashing and receding.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-5 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-5">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-5 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-5" style={{color: '#000000'}}>
                           <p>Token: 251</p>
                           <p><strong>Key Traits:<br />
                             </strong>Palette: Journey<br />
@@ -188,20 +188,20 @@ phase is a well-loved collection with very interesting dynamics." />
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-6 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/HCrETp10/abc_s4_phase_654-1.mp4">
-                          <video src="https://videos.files.wordpress.com/HCrETp10/abc_s4_phase_654-1.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/HCrETp10/abc_s4_phase_654-1.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/HCrETp10/abc_s4_phase_654-1.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-6">
+                        <div className="fusion-text fusion-text-6" style={{color: '#000000'}}>
                           <p>654 is one of the emergent aesthetic grails of the collection. Waves of calm.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-7 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-7">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-7 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-7" style={{color: '#000000'}}>
                           <p>Token: 654</p>
                           <p><strong>Key Traits:<br />
                             </strong>Palette Stability: Calamitous<br />
@@ -214,19 +214,19 @@ phase is a well-loved collection with very interesting dynamics." />
                             160/1024 ASR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-8 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-8 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/suRCgjSk/abc_s4_phase_396-1.mp4">
-                          <video src="https://videos.files.wordpress.com/suRCgjSk/abc_s4_phase_396-1.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/suRCgjSk/abc_s4_phase_396-1.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/suRCgjSk/abc_s4_phase_396-1.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-8">
+                        <div className="fusion-text fusion-text-8" style={{color: '#000000'}}>
                           <p>Irregular and elliptical pulses of green erupt from Phase 396.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-9 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-9">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-9 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-9" style={{color: '#000000'}}>
                           <p>Token: 396</p>
                           <p><strong>Key Traits:<br />
                             </strong>Palette: Override – Green<br />
@@ -240,7 +240,7 @@ phase is a well-loved collection with very interesting dynamics." />
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col fusion-builder-column-10 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-10">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 20, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-10 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 0, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-10" style={{color: '#000000'}}>
                           <p><strong>AR: Artacle Rarity | ASR: Artacle Statistical Rarity | RG: Rarity Guide | RS: Rarity Studio</strong></p>
                         </div></div></div></div></div>
               </div>
