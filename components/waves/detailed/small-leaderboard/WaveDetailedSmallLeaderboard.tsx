@@ -45,7 +45,7 @@ export const WaveDetailedSmallLeaderboard: React.FC<
   return (
     <div className="tw-p-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
       <div className="tw-flex tw-flex-col">
-        {(memoizedDrops.length === 0 || isFetching) ? (
+        {memoizedDrops.length === 0 && !isFetching ? (
           <div className="tw-text-iron-400 tw-text-center tw-py-4">
             No drops have been made yet in this wave
           </div>

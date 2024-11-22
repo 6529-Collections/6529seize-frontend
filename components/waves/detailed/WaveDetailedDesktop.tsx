@@ -120,7 +120,6 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               className="tw-absolute xl:tw-ml-[21.5rem] tw-inset-0 tw-z-[100]"
             >
               <WaveDrop
-                wave={wave}
                 drop={activeDrop}
                 onClose={() => setActiveDrop(null)}
               />

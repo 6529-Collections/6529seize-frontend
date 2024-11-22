@@ -168,7 +168,6 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
             className="tw-absolute lg:tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
           >
             <WaveDrop
-              wave={wave}
               drop={activeDrop}
               onClose={() => setActiveDrop(null)}
             />

@@ -7,7 +7,6 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
-import { ApiWave } from "../../generated/models/ObjectSerializer";
 
 interface Props {
   children: ReactNode;
@@ -27,16 +26,6 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     enabled: !!router.query.drop,
   });
 
-  const { data: wave } = useQuery<ApiWave>({
-    queryKey: [QueryKey.WAVE, { wave_id: drop?.wave.id }],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave>({
-        endpoint: `waves/${drop?.wave.id}`,
-      }),
-    placeholderData: keepPreviousData,
-    enabled: !!drop?.wave.id,
-  });
-
   useEffect(() => {
     setShowRightSidebar(!!router.query.wave);
   }, [router.query.wave]);
@@ -53,7 +42,8 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     ? "tailwind-scope tw-relative tw-flex tw-flex-grow tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto"
     : "tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto";
 
-  const isDropOpen = drop && wave && drop.wave.id === wave.id && router.query.drop;
+  const isDropOpen =
+    drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
   return (
     <div className="tw-relative tw-flex tw-flex-col">
@@ -74,7 +64,6 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
                     stableKey: drop.id,
                     stableHash: drop.id,
                   }}
-                  wave={wave}
                   onClose={onDropClose}
                 />
               </div>

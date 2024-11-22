@@ -188,10 +188,8 @@ export const WaveChat: React.FC<WaveChatProps> = ({
             </button>
 
             <div
-              className={`${
-                !isSidebarOpen && "tw-translate-x-full lg:tw-translate-x-0"
-              } tw-transition-transform lg:tw-transform-none tw-duration-300 
-            lg:tw-fixed xl:tw-static lg:tw-right-0 lg:tw-top-0 lg:tw-h-full lg:tw-z-10`}
+              className="tw-transition-transform lg:tw-transform-none tw-duration-300 
+            lg:tw-fixed xl:tw-static lg:tw-right-0 lg:tw-top-0 lg:tw-h-full lg:tw-z-10"
             >
               <WaveDetailedRightSidebar
                 isOpen={isSidebarOpen}
