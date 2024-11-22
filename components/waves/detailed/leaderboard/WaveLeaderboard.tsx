@@ -57,7 +57,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
           isSidebarOpen ? "lg:tw-mr-[20.5rem]" : ""
         } tw-transition-all tw-duration-300`}
       >
-        <div className="tw-w-full no-scrollbar tw-overflow-y-auto tw-h-[calc(100vh-102px)] tw-pb-6   lg:tw-pl-0 lg:tw-mt-3">
+        <div className="tw-w-full no-scrollbar tw-overflow-y-auto tw-h-[calc(100vh-102px)] tw-pb-6 lg:tw-pl-0 lg:tw-mt-3">
           {children}
 
           <WaveLeaderboardTime wave={wave} />
