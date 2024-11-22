@@ -123,7 +123,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                         </div></div></div></div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 20, paddingBottom: 0, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}>
-                          <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 700, margin: 0, lineHeight: '1.1'}} />
+                          <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 700, margin: 0, lineHeight: '1.1', color: '#000000'}} />
                           <p><strong>Artist Narrative<br />
                             </strong></p>
                         </div>
@@ -136,11 +136,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                       </div></div></div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/9VHqNI5X/s5_gazers_500.mp4">
-                          <video src="https://videos.files.wordpress.com/9VHqNI5X/s5_gazers_500.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                            Your browser does not support the video tag.
-                          </video>
-                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/9VHqNI5X/s5_gazers_500.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/9VHqNI5X/s5_gazers_500.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-2" style={{color: '#000000'}}>
                           <p>The neon teal-blue outline of the circular moon makes this output.</p>
@@ -161,11 +157,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                             </strong></p>
                         </div></div></div>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-4 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/zOARe8Dx/s5_gazers_520.mp4">
-                          <video src="https://videos.files.wordpress.com/zOARe8Dx/s5_gazers_520.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                            Your browser does not support the video tag.
-                          </video>
-                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/zOARe8Dx/s5_gazers_520.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/zOARe8Dx/s5_gazers_520.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-4" style={{color: '#000000'}}>
                           <p>This Gazer features an uncommon ‘square moon.' The #1 output by rarity.</p>
@@ -188,11 +180,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-6 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/WLfZdIG4/s5_gazers_303.mp4">
-                          <video src="https://videos.files.wordpress.com/WLfZdIG4/s5_gazers_303.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                            Your browser does not support the video tag.
-                          </video>
-                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/WLfZdIG4/s5_gazers_303.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/WLfZdIG4/s5_gazers_303.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-6" style={{color: '#000000'}}>
                           <p>A relatively smaller circular moon atop layers of dark backgrounds.</p>
@@ -232,11 +220,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-10 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/laXRonAq/s5_gazers_195.mp4">
-                          <video src="https://videos.files.wordpress.com/laXRonAq/s5_gazers_195.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                            Your browser does not support the video tag.
-                          </video>
-                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/laXRonAq/s5_gazers_195.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/laXRonAq/s5_gazers_195.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-10" style={{color: '#000000'}}>
                           <p>A tiny central moon, due to it having a ‘Moon Size' value of ‘1.'</p>
@@ -257,11 +241,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                             </strong></p>
                         </div></div></div>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-12 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/dceLBAjk/s5_gazers_318.mp4">
-                          <video src="https://videos.files.wordpress.com/dceLBAjk/s5_gazers_318.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                            Your browser does not support the video tag.
-                          </video>
-                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/dceLBAjk/s5_gazers_318.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/dceLBAjk/s5_gazers_318.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-12" style={{color: '#000000'}}>
                           <p>Vivid yellows, blues and greens whiz around the crescent shaped moon.</p>
@@ -301,11 +281,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                             </strong></p>
                         </div></div></div>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-16 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/aouaWuIj/s5_gazers_585.mp4">
-                          <video src="https://videos.files.wordpress.com/aouaWuIj/s5_gazers_585.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                            Your browser does not support the video tag.
-                          </video>
-                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/aouaWuIj/s5_gazers_585.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/aouaWuIj/s5_gazers_585.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-16" style={{color: '#000000'}}>
                           <p>Highly abstract and complex colors float and morph within the central figure.</p>
@@ -327,11 +303,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-7 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-18 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/DUTz9vb1/s5_gazers_878.mp4">
-                          <video src="https://videos.files.wordpress.com/DUTz9vb1/s5_gazers_878.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                            Your browser does not support the video tag.
-                          </video>
-                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/DUTz9vb1/s5_gazers_878.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/DUTz9vb1/s5_gazers_878.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-18" style={{color: '#000000'}}>
                           <p>A tiny circular moon is produced in this output, on top of layers of green.</p>
@@ -351,11 +323,7 @@ Since the dawn of humanity, the Moon's phases have fascinated humans, influencin
                             </strong></p>
                         </div></div></div>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-20 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/sAiosh6B/s5_gazers_899.mp4">
-                          <video src="https://videos.files.wordpress.com/sAiosh6B/s5_gazers_899.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                            Your browser does not support the video tag.
-                          </video>
-                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/sAiosh6B/s5_gazers_899.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/sAiosh6B/s5_gazers_899.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-20" style={{color: '#000000'}}>
                           <p>Strong blue and purple tones of the crescent moon contrast against the dark brown.</p>
