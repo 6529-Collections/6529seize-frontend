@@ -21,7 +21,7 @@ const fetchPaginatedData = async (url) => {
 
 const getVariationsPaths = async (sitePath, apiPath) => {
   const nftPaths = (
-    await fetchPaginatedData(`https://api.staging.seize.io/sitemap/${apiPath}`)
+    await fetchPaginatedData(`https://api.6529.io/sitemap/${apiPath}`)
   ).flatMap((id) => {
     const basePath = `${sitePath}/${id}`;
     return getNftVariations(basePath);
@@ -31,7 +31,7 @@ const getVariationsPaths = async (sitePath, apiPath) => {
 
 const getPlainPaths = async (sitePath, apiPath) => {
   const plainPaths = (
-    await fetchPaginatedData(`https://api.staging.seize.io/sitemap/${apiPath}`)
+    await fetchPaginatedData(`https://api.6529.io/sitemap/${apiPath}`)
   ).map((id) => ({
     loc: `/${sitePath}/${id}`,
     changefreq: "daily",
@@ -61,7 +61,7 @@ const getNftVariations = (basePath) => {
 };
 
 module.exports = {
-  siteUrl: "https://seize.io",
+  siteUrl: "https://6529.io",
   generateRobotsTxt: true,
   changefreq: "daily",
   exclude: ["/access", "/restricted", "/nextgen/manager"],
