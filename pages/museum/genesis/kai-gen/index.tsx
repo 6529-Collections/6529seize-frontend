@@ -116,38 +116,38 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
           <section id="content" className="full-width">
             <div id="post-319" className="post-319 page type-page status-publish hentry">
               <span className="entry-title rich-snippet-hidden">KAI-GEN</span><span className="vcard rich-snippet-hidden"><span className="fn"><a href="/author/6529er6529-io/" title="Posts by 6529er" rel="author">6529er</a></span></span><span className="updated rich-snippet-hidden">2022-04-14T06:05:22-04:00</span>						<div className="post-content">
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingBottom: 0, flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one">
                           <h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 400, margin: 0, lineHeight: '1.1'}} />
                           <p><strong>Kai Gen</strong><br />
                             Takeshi Murata, Christopher Rutledge, J. Krispy<br />
                             Mint Date: 12/02/2021</p>
                         </div></div></div></div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col fusion-builder-column-1 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 20, paddingBottom: 0, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}>
                           <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 700, margin: 0, lineHeight: '1.1'}} />
                           <p><strong>Artist Narrative<br />
                             </strong></p>
                         </div>
-                        <div className="fusion-text fusion-text-1">
+                        <div className="fusion-text fusion-text-1" style={{color: '#000000'}}>
                           <p>Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground and ready to smash your city, these mutant beasties come unique and fired up. No polygons or texture maps here, just sweet ray-marching magic living right on-chain.</p>
                           <p><strong>6529 Museum Notes</strong><br />
                             Kai Gens are awesomely fun – coming to smash your city.</p>
                         </div>
                       </div></div></div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-2 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/aafuseor/kai_gen_609.mp4">
-                          <video src="https://videos.files.wordpress.com/aafuseor/kai_gen_609.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/aafuseor/kai_gen_609.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/aafuseor/kai_gen_609.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-2">
+                        <div className="fusion-text fusion-text-2" style={{color: '#000000'}}>
                           <p>The #1 rarity Kai-Gen was minted by the Museum.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-3 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-3">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-3 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-3" style={{color: '#000000'}}>
                           <p>Token: 609</p>
                           <p><strong>Key Traits:<br />
                             </strong>Body Type: Kong<br />
@@ -160,19 +160,19 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             3/2048 AR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-4 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/AkiAFwHn/kai_gen_444.mp4">
-                          <video src="https://videos.files.wordpress.com/AkiAFwHn/kai_gen_444.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/AkiAFwHn/kai_gen_444.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/AkiAFwHn/kai_gen_444.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-4">
+                        <div className="fusion-text fusion-text-4" style={{color: '#000000'}}>
                           <p>An exotic sight, this hybrid Kong/Blob monster is in a Rainbow color palette.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-5 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-5">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-5 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-5" style={{color: '#000000'}}>
                           <p>Token: 444</p>
                           <p><strong>Key Traits:<br />
                             </strong>Color Palette: Orangey<br />
@@ -186,20 +186,20 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-6 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/kyuL9Qur/kai_gen_746.mp4">
-                          <video src="https://videos.files.wordpress.com/kyuL9Qur/kai_gen_746.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/kyuL9Qur/kai_gen_746.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/kyuL9Qur/kai_gen_746.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-6">
+                        <div className="fusion-text fusion-text-6" style={{color: '#000000'}}>
                           <p>A pair of hot-vivid purple and yellow Kong monsters attack the town on a cloudy day.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-7 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-7">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-7 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-7" style={{color: '#000000'}}>
                           <p>Token: 746</p>
                           <p><strong>Key Traits:<br />
                             </strong>Body Type: Kong<br />
@@ -212,19 +212,19 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             40/2048 ASR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-8 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-8 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/Po2s8tWA/kai_gen_237.mp4">
-                          <video src="https://videos.files.wordpress.com/Po2s8tWA/kai_gen_237.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/Po2s8tWA/kai_gen_237.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/Po2s8tWA/kai_gen_237.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-8">
+                        <div className="fusion-text fusion-text-8" style={{color: '#000000'}}>
                           <p>Hybrid Kong body and Bird head and a color-changing ‘Rainbow Chrome' shader trait.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-9 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-9">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-9 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-9" style={{color: '#000000'}}>
                           <p>Token: 237</p>
                           <p><strong>Key Traits:<br />
                             </strong>Body Type: Kong<br />
@@ -238,20 +238,20 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-10 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-10 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/tHmK946P/kai_gen_114.mp4">
-                          <video src="https://videos.files.wordpress.com/tHmK946P/kai_gen_114.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/tHmK946P/kai_gen_114.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/tHmK946P/kai_gen_114.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-10">
+                        <div className="fusion-text fusion-text-10" style={{color: '#000000'}}>
                           <p>An odd hybrid monster featuring a Bird head on a Zilla body, it is not to be messed with.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-11 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-11">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-11 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-11" style={{color: '#000000'}}>
                           <p>Token: 114</p>
                           <p><strong>Key Traits:<br />
                             </strong>Body Type: Zilla<br />
@@ -264,19 +264,19 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             108/2048 AR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-12 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-12 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/8cj0VD1T/kai_gen_688.mp4">
-                          <video src="https://videos.files.wordpress.com/8cj0VD1T/kai_gen_688.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/8cj0VD1T/kai_gen_688.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/8cj0VD1T/kai_gen_688.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-12">
+                        <div className="fusion-text fusion-text-12" style={{color: '#000000'}}>
                           <p>A Blob headed and Kong body monster roams the night alone.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-13 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-13">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-13 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-13" style={{color: '#000000'}}>
                           <p>Token: 688</p>
                           <p><strong>Key Traits:<br />
                             </strong>Body Type: Zilla<br />
@@ -290,20 +290,20 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-6 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-14 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-6 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-14 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/zLD7OxnT/kai_gen_681.mp4">
-                          <video src="https://videos.files.wordpress.com/zLD7OxnT/kai_gen_681.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/zLD7OxnT/kai_gen_681.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/zLD7OxnT/kai_gen_681.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-14">
+                        <div className="fusion-text fusion-text-14" style={{color: '#000000'}}>
                           <p>A squad of bright camo-colored bird monsters is out for carnage and destruction</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-15 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-15">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-15 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-15" style={{color: '#000000'}}>
                           <p>Token: 681</p>
                           <p><strong>Key Traits:<br />
                             </strong>Color Palette: Orangey<br />
@@ -316,19 +316,19 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             586/2048 ASR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-16 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-16 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/xeFJsuEA/kai_gen_110.mp4">
-                          <video src="https://videos.files.wordpress.com/xeFJsuEA/kai_gen_110.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/xeFJsuEA/kai_gen_110.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/xeFJsuEA/kai_gen_110.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-16">
+                        <div className="fusion-text fusion-text-16" style={{color: '#000000'}}>
                           <p>An amusing pair of frog-colored Bird monsters attack the city.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-17 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-17">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-17 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-17" style={{color: '#000000'}}>
                           <p>Token: 110</p>
                           <p><strong>Key Traits:<br />
                             </strong>Color Palette: Frog<br />
@@ -342,20 +342,20 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             </strong></p>
                         </div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-7 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-18 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-7 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 0, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-18 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/747OPBoz/kai_gen_595.mp4">
-                          <video src="https://videos.files.wordpress.com/747OPBoz/kai_gen_595.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/747OPBoz/kai_gen_595.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/747OPBoz/kai_gen_595.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-18">
+                        <div className="fusion-text fusion-text-18" style={{color: '#000000'}}>
                           <p>This color-shifted Kong monster looks extremely chill while devastating the city.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-19 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-19">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-19 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-19" style={{color: '#000000'}}>
                           <p>Token: 595</p>
                           <p><strong>Key Traits:<br />
                             </strong>Color Palette: Orangey<br />
@@ -368,19 +368,19 @@ Woop Woop! Run for your life! Kai-Gen are attacking! Fresh from the underground 
                             989/2048 ASR<strong><br />
                             </strong></p>
                         </div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-20 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-20 fusion_builder_column_1_4 1_4 fusion-flex-column fusion-column-inner-bg-wrapper" style={{width: '25%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '7.68%'}}>
                       <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/qb1rsPtw/kai_gen_725.mp4">
-                          <video src="https://videos.files.wordpress.com/qb1rsPtw/kai_gen_725.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                          <video src="https://videos.files.wordpress.com/qb1rsPtw/kai_gen_725.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
                             Your browser does not support the video tag.
                           </video>
                         </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/qb1rsPtw/kai_gen_725.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
-                        <div className="fusion-text fusion-text-20">
+                        <div className="fusion-text fusion-text-20" style={{color: '#000000'}}>
                           <p>A zebra-striped Kong monster attacks just as the sun starts to set.</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-21 fusion_builder_column_1_4 1_4 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-21">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-21 fusion_builder_column_1_4 1_4 fusion-flex-column" style={{backgroundSize: 'cover', width: '25%', marginTop: 0, paddingRight: '7.68%', marginBottom: 20, paddingLeft: '7.68%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-text fusion-text-21" style={{color: '#000000'}}>
                           <p>Token: 725</p>
                           <p><strong>Key Traits:<br />
                             </strong>Eye Type: Snake<br />

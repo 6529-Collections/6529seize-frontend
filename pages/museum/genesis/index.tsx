@@ -114,21 +114,21 @@ EARLY ON-CHAIN GENERATIVE ART" />
           <section id="content" className="full-width">
             <div id="post-179" className="post-179 page type-page status-publish has-post-thumbnail hentry">
               <span className="entry-title rich-snippet-hidden">GENESIS</span><span className="vcard rich-snippet-hidden"><span className="fn"><a href="/author/6529er6529-io/" title="Posts by 6529er" rel="author">6529er</a></span></span><span className="updated rich-snippet-hidden">2022-04-16T02:05:48-04:00</span>						<div className="post-content">
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingBottom: 30, flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-0 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{paddingBottom: 30, backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 0, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one"><h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '0.8'}}>GENESIS</h1></div>
-                        <div className="fusion-text fusion-text-1">
+                        <div className="fusion-text fusion-text-1" style={{color: '#ffffff'}}>
                           <p>Genesis is the flagship gallery of the Generative collection and of the whole museum. It contains one of the top generative art collections in the world, stretching horizontally across almost every meaningful collection of early generative art.</p>
                         </div>
                         <div><a className="fusion-button button-flat fusion-button-default-size button-default fusion-button-default button-1 fusion-button-default-span fusion-button-default-type" target="_blank" rel="noopener noreferrer" href="https://oncyber.io/6529om?coords=116.87x2.8x190.55x-1.56"><span className="fusion-button-text">VISIT THE GENESIS GALLERY</span></a></div>
                       </div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-1 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-image-element " style={{textAlign: 'center'}}><span className=" fusion-imageframe imageframe-none imageframe-1 hover-type-none"><a className="fusion-no-lightbox" href="https://oncyber.io/6529om?coords=116.87x2.8x190.55x-1.56" target="_blank" aria-label="Genesis-Gallery-Screenshot" rel="noopener noreferrer"><img loading="lazy" fetchPriority="high" decoding="async" width={1300} height={644} src="/wp-content/uploads/2022/04/Genesis-Gallery-Screenshot.jpg" alt="6529.io" className="img-responsive wp-image-230" srcSet="/wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-200x99.jpg 200w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-400x198.jpg 400w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-600x297.jpg 600w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-800x396.jpg 800w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-1200x594.jpg 1200w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot.jpg 1300w" sizes="(max-width: 640px) 100vw, 1200px" /></a></span></div></div></div>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-1 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 0, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-image-element " style={{textAlign: 'center'}}><span className=" fusion-imageframe imageframe-none imageframe-1 hover-type-none"><a className="fusion-no-lightbox" href="https://oncyber.io/6529om?coords=116.87x2.8x190.55x-1.56" target="_blank" aria-label="Genesis-Gallery-Screenshot" rel="noopener noreferrer"><img loading="lazy" fetchPriority="high" decoding="async" width={1300} height={644} src="/wp-content/uploads/2022/04/Genesis-Gallery-Screenshot.jpg" alt="6529.io" className="img-responsive wp-image-230" srcSet="/wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-200x99.jpg 200w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-400x198.jpg 400w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-600x297.jpg 600w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-800x396.jpg 800w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot-1200x594.jpg 1200w, /wp-content/uploads/2022/04/Genesis-Gallery-Screenshot.jpg 1300w" sizes="(max-width: 640px) 100vw, 1200px" /></a></span></div></div></div>
                   </div></div>
-                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-2 flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-one"><h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '0.8'}}>GENESIS COLLECTION</h1></div></div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-3 fusion_builder_column_1_3 1_3 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-3 fusion-sep-none fusion-title-text fusion-title-size-three"><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>EARLY ON-CHAIN GENERATIVE ART</h3></div>
-                        <div className="fusion-text fusion-text-2">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-2 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 30, paddingBottom: 20, backgroundColor: '#ffffff', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column"><div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-one" style={{color: '#000000'}}><h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '0.8'}}>GENESIS COLLECTION</h1></div></div></div>
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-3 fusion_builder_column_1_3 1_3 fusion-flex-column" style={{backgroundSize: 'cover', width: '33.3333333333%', marginTop: 0, paddingRight: '5.76%', marginBottom: 20, paddingLeft: '5.76%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-3 fusion-sep-none fusion-title-text fusion-title-size-three" style={{color: '#000000'}}><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>EARLY ON-CHAIN GENERATIVE ART</h3></div>
+                        <div className="fusion-text fusion-text-2" style={{color: '#000000'}}>
                           <p><a href="/museum/genesis/autoglyphs/"><span style={{textDecoration: 'underline'}}><strong>Autoglyphs</strong></span></a><br />
                             Larva Labs</p>
                           <p><a href="/museum/genesis/squiggly-wtf/"><span style={{textDecoration: 'underline'}}><strong>Squiggly.wtf</strong></span></a><br />
@@ -143,9 +143,9 @@ EARLY ON-CHAIN GENERATIVE ART" />
                             Robbie Barrat</p>
                         </div>
                       </div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_3 1_3 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-4 fusion-sep-none fusion-title-text fusion-title-size-three"><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 1</h3></div>
-                        <div className="fusion-text fusion-text-3">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-4 fusion_builder_column_1_3 1_3 fusion-flex-column" style={{backgroundSize: 'cover', width: '33.3333333333%', marginTop: 0, paddingRight: '5.76%', marginBottom: 20, paddingLeft: '5.76%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-4 fusion-sep-none fusion-title-text fusion-title-size-three" style={{color: '#000000'}}><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 1</h3></div>
+                        <div className="fusion-text fusion-text-3" style={{color: '#000000'}}>
                           <p><a href="/museum/genesis/chromie-squiggle"><strong>Chromie Squiggle</strong></a><br />
                             snowfro</p>
                           <p><a href="/museum/genesis/genesis-dca"><strong>Genesis</strong></a><br />
@@ -160,9 +160,9 @@ EARLY ON-CHAIN GENERATIVE ART" />
                             luxpris</p>
                         </div>
                       </div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-5 fusion_builder_column_1_3 1_3 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-5 fusion-sep-none fusion-title-text fusion-title-size-three"><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 2</h3></div>
-                        <div className="fusion-text fusion-text-4">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-5 fusion_builder_column_1_3 1_3 fusion-flex-column" style={{backgroundSize: 'cover', width: '33.3333333333%', marginTop: 0, paddingRight: '5.76%', marginBottom: 20, paddingLeft: '5.76%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-5 fusion-sep-none fusion-title-text fusion-title-size-three" style={{color: '#000000'}}><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 2</h3></div>
+                        <div className="fusion-text fusion-text-4" style={{color: '#000000'}}>
                           <p><a href="/museum/genesis/singularity"><strong>Singularity</strong></a><br />
                             Hideki Tsukamoto</p>
                           <p><a href="/museum/genesis/ignition"><strong>Ignition</strong></a><br />
@@ -192,9 +192,9 @@ EARLY ON-CHAIN GENERATIVE ART" />
                           <p><a href="/museum/genesis/secret-surprise"><strong>Secret Surprise</strong></a></p>
                         </div>
                       </div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_3 1_3 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-6 fusion-sep-none fusion-title-text fusion-title-size-three"><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 3</h3></div>
-                        <div className="fusion-text fusion-text-5">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-6 fusion_builder_column_1_3 1_3 fusion-flex-column" style={{backgroundSize: 'cover', width: '33.3333333333%', marginTop: 0, paddingRight: '5.76%', marginBottom: 20, paddingLeft: '5.76%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-6 fusion-sep-none fusion-title-text fusion-title-size-three" style={{color: '#000000'}}><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 3</h3></div>
+                        <div className="fusion-text fusion-text-5" style={{color: '#000000'}}>
                           <p><a href="/museum/genesis/synapses"><strong>Synapses</strong></a><br />
                             Chaosconstruct</p>
                           <p><a href="/museum/genesis/algobots"><strong>Algobots</strong></a><br />
@@ -221,9 +221,9 @@ EARLY ON-CHAIN GENERATIVE ART" />
                             Tyler Hobbs</p>
                         </div>
                       </div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-7 fusion_builder_column_1_3 1_3 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-7 fusion-sep-none fusion-title-text fusion-title-size-three"><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 4</h3></div>
-                        <div className="fusion-text fusion-text-6">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-7 fusion_builder_column_1_3 1_3 fusion-flex-column" style={{backgroundSize: 'cover', width: '33.3333333333%', marginTop: 0, paddingRight: '5.76%', marginBottom: 20, paddingLeft: '5.76%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-7 fusion-sep-none fusion-title-text fusion-title-size-three" style={{color: '#000000'}}><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 4</h3></div>
+                        <div className="fusion-text fusion-text-6" style={{color: '#000000'}}>
                           <p><a href="/museum/genesis/glitch-crystal-monsters"><strong>Glitch Crystal Monsters</strong></a><br />
                             Alida Sun</p>
                           <p><a href="/museum/genesis/endless-nameless"><strong>Endless Nameless</strong></a><br />
@@ -244,9 +244,9 @@ EARLY ON-CHAIN GENERATIVE ART" />
                             Piter Pasma</p>
                         </div>
                       </div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-8 fusion_builder_column_1_3 1_3 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-8 fusion-sep-none fusion-title-text fusion-title-size-three"><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 5</h3></div>
-                        <div className="fusion-text fusion-text-7">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-8 fusion_builder_column_1_3 1_3 fusion-flex-column" style={{backgroundSize: 'cover', width: '33.3333333333%', marginTop: 0, paddingRight: '5.76%', marginBottom: 20, paddingLeft: '5.76%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-8 fusion-sep-none fusion-title-text fusion-title-size-three" style={{color: '#000000'}}><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 5</h3></div>
+                        <div className="fusion-text fusion-text-7" style={{color: '#000000'}}>
                           <p><a href="/museum/genesis/edifice"><strong>Edifice</strong></a><br />
                             Ben Kovach</p>
                           <p><a href="/museum/genesis/asemica"><strong>Asemica</strong></a><br />
@@ -264,9 +264,9 @@ EARLY ON-CHAIN GENERATIVE ART" />
                             Samsy</p>
                         </div>
                       </div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-9 fusion_builder_column_1_3 1_3 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-9 fusion-sep-none fusion-title-text fusion-title-size-three"><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 6</h3></div>
-                        <div className="fusion-text fusion-text-8">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-9 fusion_builder_column_1_3 1_3 fusion-flex-column" style={{backgroundSize: 'cover', width: '33.3333333333%', marginTop: 0, paddingRight: '5.76%', marginBottom: 20, paddingLeft: '5.76%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-9 fusion-sep-none fusion-title-text fusion-title-size-three" style={{color: '#000000'}}><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>ART BLOCKS CURATED SERIES 6</h3></div>
+                        <div className="fusion-text fusion-text-8" style={{color: '#000000'}}>
                           <p><a href="/museum/genesis/chimera"><strong>Chimera</strong></a><br />
                             mpkoz</p>
                           <p><a href="/museum/genesis/cosmic-reef"><strong>Cosmic Reef</strong></a><br />
@@ -280,9 +280,9 @@ EARLY ON-CHAIN GENERATIVE ART" />
                           <p><em>Series still in progress</em></p>
                         </div>
                       </div></div>
-                    <div className="flex flex-col flex flex-col fusion-builder-column-10 fusion_builder_column_1_3 1_3 flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
-                        <div className="fusion-title title fusion-title-10 fusion-sep-none fusion-title-text fusion-title-size-three"><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>SERIES 6529 – OTHER GENERATIVE ART</h3></div>
-                        <div className="fusion-text fusion-text-9">
+                    <div className="fusion-layout-column fusion_builder_column fusion-builder-column-10 fusion_builder_column_1_3 1_3 fusion-flex-column" style={{backgroundSize: 'cover', width: '33.3333333333%', marginTop: 0, paddingRight: '5.76%', marginBottom: 20, paddingLeft: '5.76%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-10 fusion-sep-none fusion-title-text fusion-title-size-three" style={{color: '#000000'}}><h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: 1}}>SERIES 6529 – OTHER GENERATIVE ART</h3></div>
+                        <div className="fusion-text fusion-text-9" style={{color: '#000000'}}>
                           <p><a href="/museum/genesis/incomplete-control"><strong>Incomplete Control</strong></a><br />
                             Tyler Hobbs</p>
                           <p><a href="/museum/genesis/meridian"><strong>Meridian</strong></a><br />
