@@ -62,7 +62,6 @@ const redirectMappings = [
   { url: "/privacy-policy/", target: "/about/privacy-policy" },
   { url: "/studio/", target: "/" },
   { url: "/the-hamily-wagmi-allowlist/", target: "/the-memes/74" },
-  { url: "/about/contact/", target: "/about/contact-us" },
 ];
 
 function handleRedirects(req: NextRequest): NextResponse | undefined {

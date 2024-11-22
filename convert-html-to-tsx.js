@@ -300,6 +300,7 @@ const replaceVideoLinks = ($) => {
       // Optionally remove unnecessary attributes from <a>
       $(elem).removeAttr("data-rel").removeAttr("data-caption");
     }
+    $(elem).removeAttr("width").removeAttr("height");
   });
 };
 
