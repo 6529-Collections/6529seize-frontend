@@ -104,7 +104,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
     <>
       <div
         className={`tw-flex-1 lg:tw-ml-[21.5rem]  ${
-          isSidebarOpen && isNotChatWave ? "xl:tw-mr-[20.5rem] 2xl:tw-mr-[28rem]" : ""
+          isSidebarOpen && isNotChatWave ? "xl:tw-mr-[20.5rem] 3xl:tw-mr-[28rem]" : ""
         } tw-transition-all tw-duration-300 lg:tw-pl-4`}
       >
         <div
