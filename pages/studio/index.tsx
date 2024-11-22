@@ -83,7 +83,7 @@ const IndexPage = () => (
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">STUDIO</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span className="breadcrumb_last" aria-current="page">STUDIO</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

@@ -171,7 +171,7 @@ ACK COLLECTOR BADGES COLLECTORS (69 PICKED)
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">THE GREAT RESTORATION</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/collections/">COLLECTIONS</a></span> » <span><a href="/collections/memelab/">MEME LAB</a></span> » <span className="breadcrumb_last" aria-current="page">THE GREAT RESTORATION</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

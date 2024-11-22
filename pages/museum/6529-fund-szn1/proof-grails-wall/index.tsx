@@ -99,7 +99,7 @@ Tyler Hobbs’ Wall is part of the Grails by PROOF collection. Wall is a generat
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">PROOF GRAILS – WALL</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/6529-fund-szn1/">6529 FUND SZN1</a></span> » <span className="breadcrumb_last" aria-current="page">PROOF GRAILS – WALL</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

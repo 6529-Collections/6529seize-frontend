@@ -99,7 +99,7 @@ Victor Fota, an oil painter who enhances his art with animation and digital reto
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">CONFLICTING METAPHYSICS</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/6529-fund-szn1/">6529 FUND SZN1</a></span> » <span className="breadcrumb_last" aria-current="page">CONFLICTING METAPHYSICS</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

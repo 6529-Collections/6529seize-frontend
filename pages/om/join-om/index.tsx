@@ -91,7 +91,7 @@ It is free to join. We will try to add as many folks as possible, but we can't g
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">JOIN OM GENERATION 1</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/om/">OM</a></span> » <span className="breadcrumb_last" aria-current="page">JOIN OM GENERATION 1</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

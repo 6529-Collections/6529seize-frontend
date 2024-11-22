@@ -125,6 +125,7 @@ const processHtmlFiles = (dir, relativePath = "") => {
       $("header").remove();
       $("footer").remove();
       $("div.fusion-footer").remove();
+      $("nav.fusion-breadcrumbs").remove();
 
       // Map class names
       $("*[class]").each((i, elem) => {

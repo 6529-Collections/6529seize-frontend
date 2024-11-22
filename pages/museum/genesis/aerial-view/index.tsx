@@ -101,7 +101,7 @@ My interpretation of Aerial View is a bird's Eye View over a city block with ill
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">AERIAL VIEW</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/genesis/">GENESIS</a></span> » <span className="breadcrumb_last" aria-current="page">AERIAL VIEW</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

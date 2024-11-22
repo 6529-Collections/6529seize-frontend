@@ -107,7 +107,7 @@ Construction Token is one of three collections, along with Squiggles and Genesis
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">CONSTRUCTION TOKEN</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/genesis/">GENESIS</a></span> » <span className="breadcrumb_last" aria-current="page">CONSTRUCTION TOKEN</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

@@ -99,7 +99,7 @@ In GANdinsky Image with Arrow, artist Coldie collaborates with his favorite arti
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">GANDINSKY – IMAGE WITH ARROW</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/6529-fund-szn1/">6529 FUND SZN1</a></span> » <span className="breadcrumb_last" aria-current="page">GANDINSKY – IMAGE WITH ARROW</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

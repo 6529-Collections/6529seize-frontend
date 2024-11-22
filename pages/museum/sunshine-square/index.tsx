@@ -95,7 +95,7 @@ Sunshine Square is our ode to summer.jpg and sunshine (its star and our hero). V
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">SUNSHINE SQUARE</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span className="breadcrumb_last" aria-current="page">SUNSHINE SQUARE</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

@@ -105,7 +105,7 @@ With his passion for GANs and interest in art history, Robby Barrat creates AI g
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">VIDEODROME</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/6529-fund-szn1/">6529 FUND SZN1</a></span> » <span className="breadcrumb_last" aria-current="page">VIDEODROME</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

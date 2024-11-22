@@ -80,7 +80,7 @@ const IndexPage = () => (
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title"><a href="/cdn-cgi/l/email-protection" className="__cf_email__" data-cfemail="4177747378243301777473786f282e">[email&nbsp;protected]</a></h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span className="breadcrumb_last" aria-current="page">Archives for 6529er</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

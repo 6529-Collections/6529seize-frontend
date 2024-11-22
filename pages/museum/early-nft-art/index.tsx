@@ -95,7 +95,7 @@ Early NFT Art highlights, primarily, pre-2020 art within the 6529 collection –
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">EARLY NFT ART</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span className="breadcrumb_last" aria-current="page">EARLY NFT ART</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

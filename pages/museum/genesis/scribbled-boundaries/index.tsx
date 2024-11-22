@@ -101,7 +101,7 @@ Scribbles on Scribbles on Scribbles. This series is an exploration of chaos and 
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">SCRIBBLED BOUNDARIES</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/genesis/">GENESIS</a></span> » <span className="breadcrumb_last" aria-current="page">SCRIBBLED BOUNDARIES</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

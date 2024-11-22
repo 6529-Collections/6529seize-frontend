@@ -87,7 +87,7 @@ const IndexPage = () => (
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">NFT FUND LIMITED PARTNER CONTACT FORM</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/capital/">6529 CAPITAL</a></span> » <span className="breadcrumb_last" aria-current="page">NFT FUND LIMITED PARTNER CONTACT FORM</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

@@ -101,7 +101,7 @@ Screens have been at the heart of art mass production and mass consumption for a
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">SCREENS</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/genesis/">GENESIS</a></span> » <span className="breadcrumb_last" aria-current="page">SCREENS</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

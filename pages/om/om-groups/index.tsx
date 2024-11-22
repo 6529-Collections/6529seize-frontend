@@ -105,7 +105,7 @@ Representative groups:
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">OM GROUPS</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/om/">OM</a></span> » <span className="breadcrumb_last" aria-current="page">OM GROUPS</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

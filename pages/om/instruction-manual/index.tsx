@@ -112,7 +112,7 @@ Walk close to an entrance until the instructions show up, then press “E”," /
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">6529 NFT FUND</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/om/">OM</a></span> » <span className="breadcrumb_last" aria-current="page">OM INSTRUCTION MANUAL</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

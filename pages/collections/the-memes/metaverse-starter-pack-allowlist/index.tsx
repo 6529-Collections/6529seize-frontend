@@ -137,7 +137,7 @@ AL Phase 1 Spots
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">METAVERSE STARTER PACK ALLOWLIST</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/collections/">COLLECTIONS</a></span> » <span><a href="/collections/the-memes/">THE MEMES</a></span> » <span className="breadcrumb_last" aria-current="page">METAVERSE STARTER PACK ALLOWLIST</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

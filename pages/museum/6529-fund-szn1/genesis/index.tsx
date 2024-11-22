@@ -105,7 +105,7 @@ Generative artist Daniel Calderon creates a block hash string using a set of alg
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">GENESIS</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/6529-fund-szn1/">6529 FUND SZN1</a></span> » <span className="breadcrumb_last" aria-current="page">GENESIS</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

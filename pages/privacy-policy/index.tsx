@@ -112,7 +112,7 @@ Suggested text: When visitors leave comments on the site we collect the data sho
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">PRIVACY POLICY</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span className="breadcrumb_last" aria-current="page">PRIVACY POLICY</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

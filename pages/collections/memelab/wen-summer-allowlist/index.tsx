@@ -175,7 +175,7 @@ AL Spots
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">WEN SUMMER ALLOWLIST</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/collections/">COLLECTIONS</a></span> » <span><a href="/collections/memelab/">MEME LAB</a></span> » <span className="breadcrumb_last" aria-current="page">WEN SUMMER ALLOWLIST</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>

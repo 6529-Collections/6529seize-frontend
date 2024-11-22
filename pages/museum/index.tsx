@@ -99,7 +99,7 @@ The museum also owns" />
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">6529 MUSEUM OF ART</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span className="breadcrumb_last" aria-current="page">6529 MUSEUM OF ART</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>
