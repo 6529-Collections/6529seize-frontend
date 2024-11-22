@@ -52,7 +52,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
   });
 
   return (
-    <div className="tw-w-full tw-overflow-y-auto xl:tw-pl-4">
+    <div className="tw-w-full tw-overflow-y-auto">
       <div className="lg:tw-hidden tw-inline-flex tw-w-full tw-justify-between">
         <WaveDropTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         <WaveDropClose onClose={onClose} />
