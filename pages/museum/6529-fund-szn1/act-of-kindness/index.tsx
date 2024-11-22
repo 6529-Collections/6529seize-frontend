@@ -99,13 +99,13 @@ Dangiuz, an Italian digital artist, marries the styles of Van Gogh post impressi
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">ACT OF KINDNESS</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/6529-fund-szn1/">6529 FUND SZN1</a></span> » <span className="breadcrumb_last" aria-current="page">ACT OF KINDNESS</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1330" className="post-1330 page type-page status-publish hentry">

@@ -117,13 +117,13 @@ Small amphibious creatures dwelling in the murky waters of what was once called 
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">CRYPTOADZ</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span><a href="/museum/6529-fund-szn1/">6529 FUND SZN1</a></span> » <span className="breadcrumb_last" aria-current="page">CRYPTOADZ</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1359" className="post-1359 page type-page status-publish hentry">

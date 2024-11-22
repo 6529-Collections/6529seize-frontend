@@ -95,13 +95,13 @@ It currently hosts the 6529 Museum of Art and its galleries along with the perso
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">6529 MUSEUM DISTRICT</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/om/">OM</a></span> » <span className="breadcrumb_last" aria-current="page">6529 MUSEUM DISTRICT</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-713" className="post-713 page type-page status-publish has-post-thumbnail hentry">

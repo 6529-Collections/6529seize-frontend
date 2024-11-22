@@ -139,13 +139,13 @@ AL Phase 1 Spots
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">GM OR DIE ALLOWLIST</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/collections/">COLLECTIONS</a></span> » <span><a href="/collections/the-memes/">THE MEMES</a></span> » <span><a href="/collections/the-memes/meme4-season2-card6/">MEME 4 – SEASON 2 – CARD 6</a></span> » <span className="breadcrumb_last" aria-current="page">GM OR DIE ALLOWLIST</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-2452" className="post-2452 page type-page status-publish has-post-thumbnail hentry">

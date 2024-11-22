@@ -18,7 +18,9 @@ const skipPatterns = [
   /^404\//,
   /^404\.htm$/,
   /^404\/.+/,
-  /^about\//,
+  /^studio\//,
+  /^about.index.html$/,
+  /^about.contact.index.html$/,
 ];
 
 // Function to determine if a file or directory should be skipped
@@ -125,6 +127,9 @@ const processHtmlFiles = (dir, relativePath = "") => {
       $("header").remove();
       $("footer").remove();
       $("div.fusion-footer").remove();
+      $("nav.fusion-breadcrumbs").remove();
+
+      $("main").attr("style", "min-height: 100vh;padding: 30px;");
 
       // Map class names
       $("*[class]").each((i, elem) => {
@@ -201,6 +206,7 @@ const processHtmlFiles = (dir, relativePath = "") => {
 
       // Replace apostrophes in text nodes
       replaceApostrophesInTextNodes($);
+      replaceVideoLinks($);
 
       let cleanedHtml = $.html();
 
@@ -265,6 +271,34 @@ export default ${componentName};
 
       fs.writeFileSync(tsxFilePath, componentContent);
       console.log(`Created: ${path.relative(__dirname, tsxFilePath)}\n`);
+    }
+  });
+};
+
+const replaceVideoLinks = ($) => {
+  $("a").each((i, elem) => {
+    const href = $(elem).attr("href");
+
+    // Check if href contains "videos.files"
+    if (href && href.includes("videos.files")) {
+      // Create a <video> tag with appropriate attributes
+      const videoTag = `
+        <video 
+          src="${href}" 
+          controls 
+          autoplay 
+          muted 
+          playsinline 
+          class="tw-w-full tw-h-auto">
+          Your browser does not support the video tag.
+        </video>
+      `;
+
+      // Replace the content of <a> with the <video> tag
+      $(elem).html(videoTag);
+
+      // Optionally remove unnecessary attributes from <a>
+      $(elem).removeAttr("data-rel").removeAttr("data-caption");
     }
   });
 };

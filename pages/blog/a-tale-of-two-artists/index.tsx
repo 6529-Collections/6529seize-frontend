@@ -107,7 +107,7 @@ So, it is startling to imagine that" />
       <div id="home" style={{position: 'relative', top: '-1px'}} />
       <div id="sliders-container" className="fusion-slider-visibility">
       </div>
-      <main id="main" className="clearfix ">
+      <main id="main" className="clearfix " style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row">
           <section id="content" style={{width: '100%'}}>
             <article id="post-1825" className="post post-1825 type-post status-publish format-standard has-post-thumbnail hentry category-blog">

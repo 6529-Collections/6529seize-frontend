@@ -163,13 +163,13 @@ AL Spots
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">THE NFTIMES ISSUE 1 ALLOWLIST</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/collections/">COLLECTIONS</a></span> » <span><a href="/collections/memelab/">MEME LAB</a></span> » <span className="breadcrumb_last" aria-current="page">THE NFTIMES ISSUE 1 ALLOWLIST</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-2488" className="post-2488 page type-page status-publish has-post-thumbnail hentry">

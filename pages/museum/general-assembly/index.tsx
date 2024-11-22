@@ -95,13 +95,13 @@ General Assembly is the General Assembly of the various communities in the 6529 
               <div className="fusion-page-title-captions">
                 <h1 className="entry-title">GENERAL ASSEMBLY</h1>
                 <div className="fusion-page-title-secondary">
-                  <nav className="fusion-breadcrumbs awb-yoast-breadcrumbs" ara-label="Breadcrumb"><span><span><a href="/">Home</a></span> » <span><a href="/museum/">6529 MUSEUM OF ART</a></span> » <span className="breadcrumb_last" aria-current="page">GENERAL ASSEMBLY</span></span></nav>							</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-182" className="post-182 page type-page status-publish has-post-thumbnail hentry">
