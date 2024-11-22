@@ -135,7 +135,7 @@ A Chicago-born oil painter and coder extraordinaire, Kane applies the best of bo
 ">
                           </iframe>
                         </div>
-                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}><h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '1.2'}}>GAZERS #788</h2></div>
+                        <div className="fusion-title title fusion-title-2 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}><h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '1.2', color: '#000000'}}>GAZERS #788</h2></div>
                       </div></div>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-2 fusion_builder_column_1_2 1_2 fusion-flex-column" style={{backgroundSize: 'cover', width: '50%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '3.84%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div style={{position: 'relative', paddingBottom: '100%'}}>
@@ -143,7 +143,7 @@ A Chicago-born oil painter and coder extraordinaire, Kane applies the best of bo
 ">
                           </iframe>
                         </div>
-                        <div className="fusion-title title fusion-title-3 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}><h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '1.2'}}>GAZERS #566</h2></div>
+                        <div className="fusion-title title fusion-title-3 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}><h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '1.2', color: '#000000'}}>GAZERS #566</h2></div>
                       </div></div>
                     <div className="fusion-layout-column fusion_builder_column fusion-builder-column-3 fusion_builder_column_1_2 1_2 fusion-flex-column" style={{backgroundSize: 'cover', width: '50%', marginTop: 0, paddingRight: 0, marginBottom: 20, paddingLeft: '3.84%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div style={{position: 'relative', paddingBottom: '100%'}}>
@@ -152,14 +152,14 @@ A Chicago-born oil painter and coder extraordinaire, Kane applies the best of bo
                           </iframe>
                         </div>
                         <div className="fusion-title title fusion-title-4 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}>
-                          <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '1.2'}} />
+                          <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '1.2', color: '#000000'}} />
                           <p style={{textAlign: 'left'}}>GAZERS #403</p>
                         </div>
                       </div></div>
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container has-pattern-background has-mask-background nonhundred-percent-fullwidth non-hundred-percent-height-scrolling" style={{borderTopLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0, borderBottomLeftRadius: 0, paddingTop: 40, paddingBottom: 40, backgroundColor: '#dbdbdb', flexWrap: 'wrap'}}><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="fusion-layout-column fusion_builder_column fusion-builder-column-4 fusion_builder_column_1_1 1_1 fusion-flex-column" style={{backgroundSize: 'cover', width: '100%', marginTop: 0, paddingRight: '1.92%', marginBottom: 20, paddingLeft: '1.92%'}}><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-title title fusion-title-5 fusion-sep-none fusion-title-text fusion-title-size-two" style={{color: '#000000'}}>
-                          <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 700, margin: 0, lineHeight: '1.1'}} />
+                          <h2 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{fontFamily: '"Open Sans"', fontStyle: 'normal', fontWeight: 700, margin: 0, lineHeight: '1.1', color: '#000000'}} />
                           <p><strong>Description<br />
                             </strong></p>
                         </div>

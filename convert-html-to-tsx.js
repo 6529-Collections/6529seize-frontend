@@ -233,9 +233,32 @@ const processHtmlFiles = (dir, relativePath = "") => {
         }
       });
 
+      $("div[style]").each((i, elem) => {
+        const styleAttr = $(elem).attr("style");
+        const colorMatch = styleAttr.match(/color:\s*#[0-9a-fA-F]{6}/);
+
+        if (colorMatch) {
+          const colorStyle = colorMatch[0]; // e.g., "color:#000000"
+
+          $(elem)
+            .find("h1, h2, h3, h4, h5, h6")
+            .each((j, child) => {
+              const childStyleAttr = $(child).attr("style") || "";
+
+              // Ensure not to overwrite existing styles
+              const updatedStyle = childStyleAttr
+                .split(";")
+                .filter((style) => style.trim().length > 0) // Remove empty styles
+                .concat([colorStyle]) // Add color style
+                .join("; ");
+
+              $(child).attr("style", updatedStyle);
+            });
+        }
+      });
+
       // Replace apostrophes in text nodes
       replaceApostrophesInTextNodes($);
-      replaceVideoLinks($);
 
       let cleanedHtml = $.html();
 
@@ -318,36 +341,6 @@ export default ${componentName};
       fs.writeFileSync(tsxFilePath, componentContent);
       console.log(`Created: ${path.relative(__dirname, tsxFilePath)}\n`);
     }
-  });
-};
-
-const replaceVideoLinks = ($) => {
-  $("a").each((i, elem) => {
-    const href = $(elem).attr("href");
-
-    // Check if href contains "videos.files"
-    if (href && href.includes("videos.files")) {
-      // Create a <video> tag with appropriate attributes
-      const videoTag = `
-        <video 
-          src="${href}" 
-          controls 
-          autoplay 
-          muted 
-          playsinline 
-          style="max-width: 300px;"
-        >
-          Your browser does not support the video tag.
-        </video>
-      `;
-
-      // Replace the content of <a> with the <video> tag
-      $(elem).html(videoTag);
-
-      // Optionally remove unnecessary attributes from <a>
-      $(elem).removeAttr("data-rel").removeAttr("data-caption");
-    }
-    $(elem).removeAttr("width").removeAttr("height");
   });
 };
 

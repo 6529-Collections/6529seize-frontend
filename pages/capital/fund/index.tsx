@@ -119,11 +119,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
                           <h3 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '1.3'}} />
                           <p><a href="https://deca.art/punk6529/fundszn1" target="_blank" rel="noopener"><span style={{textDecoration: 'underline'}}>6529 NFT FUND SEASON 1</span></a></p>
                           <p><a href="https://deca.art/punk6529/fundszn2" target="_blank" rel="noopener"><span style={{textDecoration: 'underline'}}>6529 NFT FUND SEASON 2</span></a></p>
-                          <p><a href="https://videos.files.wordpress.com/oXa5lrrh/casa-batllo.mp4" target="_blank" rel="noopener">
-                              <video src="https://videos.files.wordpress.com/oXa5lrrh/casa-batllo.mp4" controls autoPlay muted playsInline style={{maxWidth: 300}}>
-                                Your browser does not support the video tag.
-                              </video>
-                            </a></p>
+                          <p><a href="https://videos.files.wordpress.com/oXa5lrrh/casa-batllo.mp4" target="_blank" rel="noopener"><span style={{textDecoration: 'underline'}}>LIVING ARCHITECTURE – CASA BATLLO</span></a></p>
                         </div>
                       </div></div></div></div>
               </div>
