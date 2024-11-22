@@ -35,7 +35,7 @@ export const WaveDropLogs: React.FC<WaveDropLogsProps> = ({ drop }) => {
     <div>
       <button
         onClick={() => setIsActivityOpen(!isActivityOpen)}
-        className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
+        className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-2.5 md:tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
           isActivityOpen ? "tw-rounded-t-xl" : "tw-rounded-xl"
         }`}
       >

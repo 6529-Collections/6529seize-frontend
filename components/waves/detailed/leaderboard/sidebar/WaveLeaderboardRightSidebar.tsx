@@ -35,7 +35,7 @@ const WaveLeaderboardRightSidebar: React.FC<
 
   return (
     <motion.div
-      className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col tw-w-full lg:tw-w-[20.5rem] tw-border-l tw-border-solid tw-border-y-0 tw-border-r-0 tw-border-iron-800"
+      className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col tw-w-full lg:tw-w-[20.5rem] 3xl:tw-w-[28rem] tw-border-l tw-border-solid tw-border-y-0 tw-border-r-0 tw-border-iron-800 tw-shadow-xl"
       initial={false}
       animate={{ x: isOpen ? 0 : "100%" }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -46,7 +46,7 @@ const WaveLeaderboardRightSidebar: React.FC<
           onToggle={onToggle}
         />
       </div>
-      <div className="tw-pt-[5.6rem] xl:tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full">
+      <div className="tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full">
         <WaveLeaderboardRightSidebarTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}

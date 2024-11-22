@@ -104,8 +104,8 @@ export const WaveChat: React.FC<WaveChatProps> = ({
     <>
       <div
         className={`tw-flex-1 lg:tw-ml-[21.5rem]  ${
-          isSidebarOpen && isNotChatWave ? "lg:tw-mr-[20.5rem]" : ""
-        } tw-transition-all tw-duration-300`}
+          isSidebarOpen && isNotChatWave ? "xl:tw-mr-[20.5rem] 2xl:tw-mr-[28rem]" : ""
+        } tw-transition-all tw-duration-300 lg:tw-pl-4`}
       >
         <div
           ref={contentWrapperRef}
@@ -190,7 +190,8 @@ export const WaveChat: React.FC<WaveChatProps> = ({
             <div
               className={`${
                 !isSidebarOpen && "tw-translate-x-full lg:tw-translate-x-0"
-              } tw-transition-transform lg:tw-transform-none tw-duration-300`}
+              } tw-transition-transform lg:tw-transform-none tw-duration-300 
+            lg:tw-fixed xl:tw-static lg:tw-right-0 lg:tw-top-0 lg:tw-h-full lg:tw-z-10`}
             >
               <WaveDetailedRightSidebar
                 isOpen={isSidebarOpen}
