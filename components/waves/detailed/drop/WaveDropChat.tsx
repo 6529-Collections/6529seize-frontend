@@ -63,6 +63,7 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     });
   };
 
+
   return (
     <div className="tw-flex-1">
       <div
