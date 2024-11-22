@@ -1,12 +1,15 @@
 import React from 'react';
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import dynamic from "next/dynamic";
+
+const Header = dynamic(() => import("../../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 const IndexPage = () => (
   <>
-    <div className="tw-w-full tw-h-10 d-flex align-items-center justify-content-center">
-      <a href="/" className="font-color decoration-hover-underline">
-        Back to 6529.io
-      </a>
-    </div>
+    <Header extraClass="header-wp" />
     <div>
   <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
   <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -187,7 +190,7 @@ REPORT A BUG" />
                                         <i className="awb-form-icon fa-discord fab" /><input type="text" name="discord" id="discord"defaultValue="true"className="fusion-form-input" placeholder="@yourdiscordhandle" data-holds-private-data="false" minLength={0} />
                                       </div>
                                     </div>
-                                    <div className="fusion-form-field fusion-form-submit-field fusion-form-label-above" data-form-id={752}><div style={{textAlign: 'center'}}><button type="submit" className="fusion-button button-flat fusion-button-default-size button-default fusion-button-default button-1 fusion-button-span-yes form-form-submit button-default" data-form-number={752} tabIndex={0}><span className="fusion-button-text">Submit</span></button></div></div>
+                                    <div className="fusion-form-field fusion-form-submit-field fusion-form-label-above" data-form-id={752}><div style={{textAlign: 'center'}}><button type="submit" className="fusion-button button-flat fusion-button-default-size button-default fusion-button-default button-1 fusion-button-span-yes  form-form-submit button-default" data-form-number={752} tabIndex={0}><span className="fusion-button-text">Submit</span></button></div></div>
                                     <div className="form-submission-notices data-notice_1" id="fusion-notices-1">
                                       <div className="fusion-alert alert success alert-success fusion-alert-center fusion-form-response fusion-form-response-success awb-alert-native-link-color alert-dismissable awb-alert-close-boxed" role="alert">
                                         <div className="fusion-alert-content-wrapper">

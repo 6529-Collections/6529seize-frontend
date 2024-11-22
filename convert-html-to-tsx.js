@@ -281,16 +281,33 @@ const processHtmlFiles = (dir, relativePath = "") => {
       );
       jsxContent = jsxContent.replace(/fontFace:/g, "fontFamily:");
 
+      const headerPlaceholderPath = path
+        .relative(
+          path.dirname(tsxFilePath),
+          path.join(__dirname, "components", "header", "HeaderPlaceholder")
+        )
+        .replace(/\\/g, "/"); // Ensure paths are Unix-style for TS/JS imports
+
+      const headerPath = path
+        .relative(
+          path.dirname(tsxFilePath),
+          path.join(__dirname, "components", "header", "Header")
+        )
+        .replace(/\\/g, "/");
+
       const componentContent = `
 import React from 'react';
+import HeaderPlaceholder from "${headerPlaceholderPath}";
+import dynamic from "next/dynamic";
+
+const Header = dynamic(() => import("${headerPath}"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 const ${componentName} = () => (
   <>
-    <div className="tw-w-full tw-h-10 d-flex align-items-center justify-content-center">
-      <a href="/" className="font-color decoration-hover-underline">
-        Back to 6529.io
-      </a>
-    </div>
+    <Header extraClass="header-wp" />
     ${jsxContent}
   </>
 );

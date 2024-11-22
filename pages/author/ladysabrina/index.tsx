@@ -1,12 +1,15 @@
 import React from 'react';
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import dynamic from "next/dynamic";
+
+const Header = dynamic(() => import("../../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 const IndexPage = () => (
   <>
-    <div className="tw-w-full tw-h-10 d-flex align-items-center justify-content-center">
-      <a href="/" className="font-color decoration-hover-underline">
-        Back to 6529.io
-      </a>
-    </div>
+    <Header extraClass="header-wp" />
     <div>
   <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
   <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -105,7 +108,7 @@ const IndexPage = () => (
             <div id="posts-container" className="fusion-blog-archive fusion-blog-layout-masonry-wrapper fusion-clearfix">
               <div className="fusion-posts-container fusion-blog-layout-grid fusion-blog-layout-grid-4 isotope fusion-blog-layout-masonry fusion-no-meta-info fusion-blog-pagination fusion-blog-rollover " data-pages={1}>
                 <article className="fusion-post-grid fusion-post-masonry post fusion-grid-sizer" />
-                <article id="post-2423" className="fusion-post-masonry fusion-post-grid fusion-element-grid post fusion-clearfix post-2423 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                <article id="post-2423" className="fusion-post-masonry fusion-post-grid  fusion-element-grid post fusion-clearfix post-2423 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
                   <div className="fusion-post-wrapper">
                     <div className="fusion-masonry-element-container fusion-image-wrapper" style={{backgroundImage: 'url(/wp-content/uploads/2023/02/deekay.jpeg)', paddingTop: 'calc((100% + 38px) * 0.8 - 20px)'}} aria-haspopup="true">
                       <img loading="lazy" width={725} height={956} src="/wp-content/uploads/2023/02/deekay.jpeg" className="attachment-full size-full wp-post-image" alt="6529.io" decoding="async" fetchPriority="high" srcSet="/wp-content/uploads/2023/02/deekay-200x264.jpeg 200w, /wp-content/uploads/2023/02/deekay-400x527.jpeg 400w, /wp-content/uploads/2023/02/deekay-600x791.jpeg 600w, /wp-content/uploads/2023/02/deekay.jpeg 725w" sizes="(min-width: 2200px) 100vw, (min-width: 976px) 270px, (min-width: 864px) 360px, (min-width: 752px) 540px, (min-width: 640px) 752px, " /><div className="fusion-rollover">
@@ -134,7 +137,7 @@ const IndexPage = () => (
                     </div>
                   </div>
                 </article>
-                <article id="post-1971" className="fusion-post-masonry fusion-post-grid fusion-element-grid post fusion-clearfix post-1971 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                <article id="post-1971" className="fusion-post-masonry fusion-post-grid  fusion-element-grid post fusion-clearfix post-1971 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
                   <div className="fusion-post-wrapper">
                     <div className="fusion-masonry-element-container fusion-image-wrapper" style={{backgroundImage: 'url(/wp-content/uploads/2022/04/Fidenza-313.png)', paddingTop: 'calc((100% + 38px) * 0.8 - 20px)'}} aria-haspopup="true">
                       <img loading="lazy" width={600} height={720} src="/wp-content/uploads/2022/04/Fidenza-313.png" className="attachment-full size-full wp-post-image" alt="6529.io" decoding="async" srcSet="/wp-content/uploads/2022/04/Fidenza-313-200x240.png 200w, /wp-content/uploads/2022/04/Fidenza-313-400x480.png 400w, /wp-content/uploads/2022/04/Fidenza-313.png 600w" sizes="(min-width: 2200px) 100vw, (min-width: 976px) 270px, (min-width: 864px) 360px, (min-width: 752px) 540px, (min-width: 640px) 752px, " /><div className="fusion-rollover">
@@ -163,7 +166,7 @@ const IndexPage = () => (
                     </div>
                   </div>
                 </article>
-                <article id="post-1825" className="fusion-post-masonry fusion-post-grid fusion-element-portrait post fusion-clearfix post-1825 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
+                <article id="post-1825" className="fusion-post-masonry fusion-post-grid  fusion-element-portrait post fusion-clearfix post-1825 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
                   <div className="fusion-post-wrapper">
                     <div className="fusion-masonry-element-container fusion-image-wrapper" style={{backgroundImage: 'url(/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg)', paddingTop: 'calc((100% + 38px) * 1.6 + 4px)'}} aria-haspopup="true">
                       <img loading="lazy" width={1455} height={2560} src="/wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg" className="attachment-full size-full wp-post-image" alt="summer.jpg" decoding="async" srcSet="/wp-content/uploads/2022/10/XCOPY-summer-200x352.jpg 200w, /wp-content/uploads/2022/10/XCOPY-summer-400x704.jpg 400w, /wp-content/uploads/2022/10/XCOPY-summer-600x1056.jpg 600w, /wp-content/uploads/2022/10/XCOPY-summer-800x1408.jpg 800w, /wp-content/uploads/2022/10/XCOPY-summer-1200x2111.jpg 1200w, /wp-content/uploads/2022/10/XCOPY-summer-scaled.jpg 1455w" sizes="(min-width: 2200px) 100vw, (min-width: 976px) 270px, (min-width: 864px) 360px, (min-width: 752px) 540px, (min-width: 640px) 752px, " /><div className="fusion-rollover">

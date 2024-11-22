@@ -1,12 +1,15 @@
 import React from 'react';
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import dynamic from "next/dynamic";
+
+const Header = dynamic(() => import("../../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 const IndexPage = () => (
   <>
-    <div className="tw-w-full tw-h-10 d-flex align-items-center justify-content-center">
-      <a href="/" className="font-color decoration-hover-underline">
-        Back to 6529.io
-      </a>
-    </div>
+    <Header extraClass="header-wp" />
     <div>
   <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
   <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />

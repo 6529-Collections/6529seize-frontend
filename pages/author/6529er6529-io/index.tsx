@@ -1,12 +1,15 @@
 import React from 'react';
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import dynamic from "next/dynamic";
+
+const Header = dynamic(() => import("../../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 const IndexPage = () => (
   <>
-    <div className="tw-w-full tw-h-10 d-flex align-items-center justify-content-center">
-      <a href="/" className="font-color decoration-hover-underline">
-        Back to 6529.io
-      </a>
-    </div>
+    <Header extraClass="header-wp" />
     <div>
   <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
   <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
@@ -105,7 +108,7 @@ const IndexPage = () => (
             <div id="posts-container" className="fusion-blog-archive fusion-blog-layout-masonry-wrapper fusion-clearfix">
               <div className="fusion-posts-container fusion-blog-layout-grid fusion-blog-layout-grid-4 isotope fusion-blog-layout-masonry fusion-no-meta-info fusion-blog-pagination fusion-blog-rollover " data-pages={1}>
                 <article className="fusion-post-grid fusion-post-masonry post fusion-grid-sizer" />
-                <article id="post-1214" className="fusion-post-masonry fusion-post-grid fusion-element-landscape post fusion-clearfix post-1214 type-post status-publish format-standard has-post-thumbnail hentry category-news">
+                <article id="post-1214" className="fusion-post-masonry fusion-post-grid  fusion-element-landscape post fusion-clearfix post-1214 type-post status-publish format-standard has-post-thumbnail hentry category-news">
                   <div className="fusion-post-wrapper">
                     <div className="fusion-masonry-element-container fusion-image-wrapper" style={{backgroundImage: 'url(/wp-content/uploads/2022/04/Artboard-1-80.jpg)', paddingTop: 'calc((100% + 34px) * 0.4 - 20px)'}} aria-haspopup="true">
                       <img loading="lazy" width={1920} height={1080} src="/wp-content/uploads/2022/04/Artboard-1-80.jpg" className="attachment-full size-full wp-post-image" alt="6529.io" decoding="async" fetchPriority="high" srcSet="/wp-content/uploads/2022/04/Artboard-1-80-200x113.jpg 200w, /wp-content/uploads/2022/04/Artboard-1-80-400x225.jpg 400w, /wp-content/uploads/2022/04/Artboard-1-80-600x338.jpg 600w, /wp-content/uploads/2022/04/Artboard-1-80-800x450.jpg 800w, /wp-content/uploads/2022/04/Artboard-1-80-1200x675.jpg 1200w, /wp-content/uploads/2022/04/Artboard-1-80.jpg 1920w" sizes="(min-width: 2200px) 100vw, (min-width: 752px) 580px, (min-width: 640px) 752px, " /><div className="fusion-rollover">

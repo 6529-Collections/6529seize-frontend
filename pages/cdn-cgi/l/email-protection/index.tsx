@@ -1,12 +1,15 @@
 import React from 'react';
+import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
+import dynamic from "next/dynamic";
+
+const Header = dynamic(() => import("../../../../components/header/Header"), {
+  ssr: false,
+  loading: () => <HeaderPlaceholder />,
+});
 
 const IndexPage = () => (
   <>
-    <div className="tw-w-full tw-h-10 d-flex align-items-center justify-content-center">
-      <a href="/" className="font-color decoration-hover-underline">
-        Back to 6529.io
-      </a>
-    </div>
+    <Header extraClass="header-wp" />
     <div>
   {/*[if lt IE 7]> <html className="no-js ie6 oldie" lang="en-US"> <![endif]*/}{/*[if IE 7]>    <html className="no-js ie7 oldie" lang="en-US"> <![endif]*/}{/*[if IE 8]>    <html className="no-js ie8 oldie" lang="en-US"> <![endif]*/}{/*[if gt IE 8]><!*/}{/*<![endif]*/}
   <title>Email Protection | Cloudflare</title>
