@@ -107,7 +107,7 @@ The essence of all things digital is the bit. One or Zero. On or Off. Where digi
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-277" className="post-277 page type-page status-publish hentry">

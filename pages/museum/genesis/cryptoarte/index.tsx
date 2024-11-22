@@ -107,7 +107,7 @@ Cryptoarte pre-dates Autoglyphs as possibly the first large generative collectio
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-263" className="post-263 page type-page status-publish hentry">

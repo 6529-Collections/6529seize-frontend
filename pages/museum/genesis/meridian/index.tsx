@@ -113,7 +113,7 @@ Following up the success of his first long form collection" />
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-318" className="post-318 page type-page status-publish hentry">

@@ -97,7 +97,7 @@ We expect that in April and May 2022, we will have further developments." />
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix ">
+      <main id="main" className="clearfix " style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row">
           <section id="content" style={{width: '100%'}}>
             <div id="post-792" className="post-792 page type-page status-publish hentry">

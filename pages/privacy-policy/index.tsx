@@ -118,7 +118,7 @@ Suggested text: When visitors leave comments on the site we collect the data sho
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix ">
+      <main id="main" className="clearfix " style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row">
           <section id="content" style={{width: '100%'}}>
             <div id="post-3" className="post-3 page type-page status-publish hentry">

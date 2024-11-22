@@ -107,7 +107,7 @@ These are the legendary words of DeeKay Kwon, a South Korean artist" />
       <div id="home" style={{position: 'relative', top: '-1px'}} />
       <div id="sliders-container" className="fusion-slider-visibility">
       </div>
-      <main id="main" className="clearfix ">
+      <main id="main" className="clearfix " style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row">
           <section id="content" style={{width: '100%'}}>
             <article id="post-2423" className="post post-2423 type-post status-publish format-standard has-post-thumbnail hentry category-blog">

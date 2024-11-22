@@ -123,7 +123,7 @@ Escapism into breathtaking, surreal landscapes is achieved by a 15kb JavaScript 
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1320" className="post-1320 page type-page status-publish hentry">

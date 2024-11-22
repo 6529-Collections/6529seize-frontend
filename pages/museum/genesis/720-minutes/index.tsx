@@ -107,7 +107,7 @@ A real-time live interactive piece that also acts as a clock. 720 unique ways to
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-279" className="post-279 page type-page status-publish hentry">
@@ -132,7 +132,11 @@ A real-time live interactive piece that also acts as a clock. 720 unique ways to
                       </div></div></div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-2 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/xTfqrEbx/s2_720_minutes_395b.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/xTfqrEbx/s2_720_minutes_395b.mp4">
+                          <video src="https://videos.files.wordpress.com/xTfqrEbx/s2_720_minutes_395b.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/xTfqrEbx/s2_720_minutes_395b.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-2">
                           <p>A mesmerizing clock with a rare ‘Dark and Stormy' palette.</p>
@@ -153,7 +157,11 @@ A real-time live interactive piece that also acts as a clock. 720 unique ways to
                             </strong></p>
                         </div></div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/qq4M5dAs/s2_720_minutes_126b.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/qq4M5dAs/s2_720_minutes_126b.mp4">
+                          <video src="https://videos.files.wordpress.com/qq4M5dAs/s2_720_minutes_126b.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/qq4M5dAs/s2_720_minutes_126b.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-4">
                           <p>“See Double Colors.” One of 390 720 Minutes.</p>
@@ -176,7 +184,11 @@ A real-time live interactive piece that also acts as a clock. 720 unique ways to
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/djxqI3zR/s2_720_minutes_420b.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/djxqI3zR/s2_720_minutes_420b.mp4">
+                          <video src="https://videos.files.wordpress.com/djxqI3zR/s2_720_minutes_420b.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/djxqI3zR/s2_720_minutes_420b.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-6">
                           <p>A common and typical 720 Minutes in Pentagon shape.</p>
@@ -197,7 +209,11 @@ A real-time live interactive piece that also acts as a clock. 720 unique ways to
                             </strong></p>
                         </div></div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-8 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/pWqslkum/s2_720_minutes_691b.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/pWqslkum/s2_720_minutes_691b.mp4">
+                          <video src="https://videos.files.wordpress.com/pWqslkum/s2_720_minutes_691b.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/pWqslkum/s2_720_minutes_691b.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-8">
                           <p>Another common Pentagon 720 Minutes in a different palette.</p>

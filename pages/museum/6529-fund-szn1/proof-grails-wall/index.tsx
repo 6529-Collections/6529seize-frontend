@@ -105,7 +105,7 @@ Tyler Hobbs’ Wall is part of the Grails by PROOF collection. Wall is a generat
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1342" className="post-1342 page type-page status-publish hentry">

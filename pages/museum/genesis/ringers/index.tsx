@@ -107,7 +107,7 @@ There are an almost infinite number of ways to wrap a string around a set of peg
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-275" className="post-275 page type-page status-publish hentry">

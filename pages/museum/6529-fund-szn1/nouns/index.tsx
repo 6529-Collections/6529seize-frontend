@@ -105,7 +105,7 @@ One noun, every day, forever. The mantra of this colorful, playful, and charming
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1322" className="post-1322 page type-page status-publish hentry">

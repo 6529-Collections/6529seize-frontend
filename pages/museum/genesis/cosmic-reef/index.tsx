@@ -107,7 +107,7 @@ A particular order can be found in deepest space, in our oceans and forests, and
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-313" className="post-313 page type-page status-publish hentry">
@@ -132,7 +132,11 @@ A particular order can be found in deepest space, in our oceans and forests, and
                       </div></div></div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-2 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4">
+                          <video src="https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/mNKTswIk/s6_cosmic_176.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-2">
                           <p>One of 26 Icosahedrons.</p>
@@ -153,7 +157,11 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             </strong></p>
                         </div></div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4">
+                          <video src="https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/fK2wDCkY/s6_cosmic_178.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-4">
                           <p>Buckyball is the rarest (7) and in our view most dominant attractive trait.</p>
@@ -176,7 +184,11 @@ A particular order can be found in deepest space, in our oceans and forests, and
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4">
+                          <video src="https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/ZICKwkB1/s6_cosmic_272.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-6">
                           <p>A rare featuring the ‘Icosahedron' form trait coupled with the ‘Star Seed' system trait.</p>
@@ -197,7 +209,11 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             </strong></p>
                         </div></div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-8 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4">
+                          <video src="https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/ZaDJ3k7X/s6_cosmic_380.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-8">
                           <p>Generated with the rare ‘Icosahedrom' form trait and ‘Pyrite' influence trait.</p>
@@ -220,7 +236,11 @@ A particular order can be found in deepest space, in our oceans and forests, and
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-5 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-10 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4">
+                          <video src="https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/NmMGCp9P/s6_cosmic_890.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-10">
                           <p>A mysterious central rotating symbol keeps you mesmerized in this exquisite output.</p>
@@ -241,7 +261,11 @@ A particular order can be found in deepest space, in our oceans and forests, and
                             </strong></p>
                         </div></div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-12 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4">
+                          <video src="https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/sodF7UoP/s6_cosmic_835.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-12">
                           <p>A spaceship going at the speed of light formed by ‘Sun' rays and ‘Void' form traits.</p>

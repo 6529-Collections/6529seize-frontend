@@ -99,7 +99,7 @@ ALLOWLIST PHASE 1 AddressAL Phase 1 Spots0x13eac939d3c7ff1a985d164d1f14411505b4c
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-2476" className="post-2476 page type-page status-publish has-post-thumbnail hentry">

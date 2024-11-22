@@ -103,7 +103,7 @@ Capsule House presents a collection of 10,000 Capsule NFTS, a digital encapsulat
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1358" className="post-1358 page type-page status-publish hentry">

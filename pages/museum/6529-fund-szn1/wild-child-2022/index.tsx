@@ -105,7 +105,7 @@ Ali Sabet soaks up love, brightness, and optimism in each stroke and creates a b
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1337" className="post-1337 page type-page status-publish hentry">

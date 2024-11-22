@@ -113,7 +113,7 @@ Jeff Davis uses randomized seeds that determine the composition of each piece of
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1349" className="post-1349 page type-page status-publish hentry">

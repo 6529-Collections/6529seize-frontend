@@ -101,7 +101,7 @@ Sozet Lounge contains the Tezos art collected by the 6529 Museum. It is an exper
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-178" className="post-178 page type-page status-publish has-post-thumbnail hentry">

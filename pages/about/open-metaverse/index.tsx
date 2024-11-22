@@ -13,27 +13,51 @@ const IndexPage = () => (
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   {/* This site is optimized with the Yoast SEO plugin v23.9 - https://yoast.com/wordpress/plugins/seo/ */}
-  <title>STUDIO - 6529.io</title>
-  <link rel="canonical" href="/studio/" />
+  <title>OPEN METAVERSE - 6529.io</title>
+  <link rel="canonical" href="/about/open-metaverse/" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="STUDIO - 6529.io" />
-  <meta property="og:url" content="/studio/" />
+  <meta property="og:title" content="OPEN METAVERSE - 6529.io" />
+  <meta property="og:url" content="/about/open-metaverse/" />
   <meta property="og:site_name" content="6529.io" />
-  <meta property="article:modified_time" content="2021-10-02T12:29:23+00:00" />
+  <meta property="article:modified_time" content="2022-04-12T13:22:45+00:00" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@om100m" />
+  <meta name="twitter:label1" content="Est. reading time" />
+  <meta name="twitter:data1" content="6 minutes" />
   {/* / Yoast SEO plugin. */}
   <link rel="dns-prefetch" href="//stats.wp.com" />
   <link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
   <link rel="alternate" type="application/rss+xml" title="6529.io » Feed" href="/feed/" />
   <link rel="alternate" type="application/rss+xml" title="6529.io » Comments Feed" href="/comments/feed/" />
+  <meta name="description" content="THE TL;DR OF THE 6529 PLAN IS THE FOLLOWING: 
+NFTS
+
+ 	NFTs are crypto’s consumer moment and will have mass adoption by individuals and organizations
+ 	NFTs can represent any intangible (art, collectibles, IP, game objects, metaverse objects)
+
+STATE OF TECHNOLOGY
+
+ 	Technology architecture has been centralized
+ 	Web 1 inventions like email were decentralized interoperable protocols
+ 	Web 2 inventions" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="6529.io" />
-  <meta property="og:title" content="STUDIO - 6529.io" />
-  <meta property="og:url" content="/studio/" />
-  <meta property="article:modified_time" content="2021-10-02T12:29:23-05:00" />
+  <meta property="og:title" content="OPEN METAVERSE - 6529.io" />
+  <meta property="og:description" content="THE TL;DR OF THE 6529 PLAN IS THE FOLLOWING: 
+NFTS
+
+ 	NFTs are crypto’s consumer moment and will have mass adoption by individuals and organizations
+ 	NFTs can represent any intangible (art, collectibles, IP, game objects, metaverse objects)
+
+STATE OF TECHNOLOGY
+
+ 	Technology architecture has been centralized
+ 	Web 1 inventions like email were decentralized interoperable protocols
+ 	Web 2 inventions" />
+  <meta property="og:url" content="/about/open-metaverse/" />
+  <meta property="article:modified_time" content="2022-04-12T13:22:45-05:00" />
   <meta property="og:image" content="/wp-content/uploads/2021/09/6529-header-logo.png" />
   <meta property="og:image:width" content={"100"} />
   <meta property="og:image:height" content={"100"} />
@@ -54,11 +78,11 @@ const IndexPage = () => (
   <link rel="stylesheet" id="font-awesome-css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css?ver=6.7" type="text/css" media="all" />
   <link rel="stylesheet" id="fusion-dynamic-css-css" href="/wp-content/uploads/fusion-styles/131abea3e11386a1d10efb44f4033532.min.css?ver=3.11.11" type="text/css" media="all" />
   <link rel="https://api.w.org/" href="/wp-json/" />
-  <link rel="alternate" title="JSON" type="application/json" href="/wp-json/wp/v2/pages/24" />
+  <link rel="alternate" title="JSON" type="application/json" href="/wp-json/wp/v2/pages/34" />
   <link rel="EditURI" type="application/rsd+xml" title="RSD" href="/xmlrpc.php?rsd" />
-  <link rel="shortlink" href="/?p=24" />
-  <link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fstudio%2F" />
-  <link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fstudio%2F#038;format=xml" />
+  <link rel="shortlink" href="/?p=34" />
+  <link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fabout%2Fopen-metaverse%2F" />
+  <link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="/wp-json/oembed/1.0/embed?url=https%3A%2F%2F%2Fabout%2Fopen-metaverse%2F#038;format=xml" />
   <style id="sticky-social-icons-styles" dangerouslySetInnerHTML={{__html: "#sticky-social-icons-container{top: 160px}#sticky-social-icons-container li a{font-size: 16px; width: 54px; height:54px; }#sticky-social-icons-container.with-animation li a:hover{width: 64px; }#sticky-social-icons-container li a.fab-fa-twitter{color: #000000; background: #cecece; }#sticky-social-icons-container li a.fab-fa-twitter:hover{color: #ffffff; background: #afafaf; }@media( max-width: 415px ){#sticky-social-icons-container li a{font-size: 13.6px; width: 45.9px; height:45.9px; }}" }} />	<style dangerouslySetInnerHTML={{__html: "img#wpstats{display:none}" }} />
   <link rel="preload" href="/wp-content/themes/Avada/includes/lib/assets/fonts/icomoon/awb-icons.woff" as="font" type="font/woff" />
   <link rel="preload" href="/wp-content/themes/Avada/includes/lib/assets/fonts/fontawesome/webfonts/fa-brands-400.woff2" as="font" type="font/woff2" />
@@ -81,7 +105,7 @@ const IndexPage = () => (
           <div className="fusion-page-title-row">
             <div className="fusion-page-title-wrapper">
               <div className="fusion-page-title-captions">
-                <h1 className="entry-title">STUDIO</h1>
+                <h1 className="entry-title">OPEN METAVERSE</h1>
                 <div className="fusion-page-title-secondary">
                 </div>
               </div>
@@ -89,12 +113,60 @@ const IndexPage = () => (
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix ">
-        <div className="fusion-row">
-          <section id="content" style={{width: '100%'}}>
-            <div id="post-24" className="post-24 page type-page status-publish hentry">
-              <span className="entry-title rich-snippet-hidden">STUDIO</span><span className="vcard rich-snippet-hidden"><span className="fn"><a href="/author/6529er6529-io/" title="Posts by 6529er" rel="author">6529er</a></span></span><span className="updated rich-snippet-hidden">2021-10-02T08:29:23-04:00</span>
-              <div className="post-content">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
+        <div className="fusion-row" style={{maxWidth: '100%'}}>
+          <section id="content" className="full-width">
+            <div id="post-34" className="post-34 page type-page status-publish hentry">
+              <span className="entry-title rich-snippet-hidden">OPEN METAVERSE</span><span className="vcard rich-snippet-hidden"><span className="fn"><a href="/author/6529er6529-io/" title="Posts by 6529er" rel="author">6529er</a></span></span><span className="updated rich-snippet-hidden">2022-04-12T09:22:45-04:00</span>						<div className="post-content">
+                <div className="fusion-fullwidth fullwidth-box fusion-builder-row-1 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}><div className="flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col flex flex-col"><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                        <div className="fusion-title title fusion-title-1 fusion-sep-none fusion-title-text fusion-title-size-one"><h1 className="fusion-title-heading title-heading-left fusion-responsive-typography-calculated" style={{margin: 0, lineHeight: '0.8'}}>THE TL;DR OF THE 6529 PLAN IS THE FOLLOWING:</h1></div>
+                        <div className="fusion-text fusion-text-1">
+                          <h3>NFTS</h3>
+                          <ul>
+                            <li>NFTs are crypto's consumer moment and will have mass adoption by individuals and organizations</li>
+                            <li>NFTs can represent any intangible (art, collectibles, IP, game objects, metaverse objects)</li>
+                          </ul>
+                          <h3>STATE OF TECHNOLOGY</h3>
+                          <ul>
+                            <li>Technology architecture has been centralized</li>
+                            <li>Web 1 inventions like email were decentralized interoperable protocols</li>
+                            <li>Web 2 inventions like short and medium size messaging have become, respectively, Twitter and Facebook</li>
+                            <li>Centralization of the global social and communication infrastructure in a handful of firms is unhealthy; it creates a single point of failure societally, that someday will be captured by bad state actors.</li>
+                          </ul>
+                          <h3>METAVERSE</h3>
+                          <ul>
+                            <li>The metaverse will be hugely appealing at scale and at maturity (approximately in 2030).</li>
+                            <li>The metaverse is not some silly 3D game; It is the internet with better visualization and persistent digital objects.</li>
+                            <li>It will replace all current screen time, it will be primarily augmented reality, it will be your ambient digital reality</li>
+                            <li>Given the all-encompassing nature of the metaverse, it would be a massive societal error for this to be controlled by a small group of firms</li>
+                            <li>Those firms would become unthinkably powerful, they will inevitably lose that power to the state and this would lead to the greatest expansion of state power the world has ever known (global, constant, persistent surveillance).</li>
+                          </ul>
+                          <h3>WHAT DO NFTS AND THE METAVERSE HAVE TO DO WITH EACH OTHER?<strong><br />
+                            </strong>
+                          </h3>
+                          <ul>
+                            <li>We must ensure we take the pathway towards open, interoperable architecture for persistent digital object *now*</li>
+                            <li>Today, there are two ways to store persistent non-fungible digital objects: someone's database (closed) or an ERC-721 token (open, interoperable)</li>
+                            <li>A metaverse built on ERC-721 would allow all the benefits of a closed metaverse (and more, because there would be more competition, more innovation), while not risking a dystopian, Orwellian outcome for society.</li>
+                            <li>Practically speaking, that means onboarding as many people to NFTs as possible now, so as corporations and organizations mint (as they will) they have an incentive to mint to open standards, not to some large web 2 company's API</li>
+                            <li>At the same time, we need to ensure the state (particularly USA and EU) do not accidentally ban or make crypto and NFTs unusable, given their narrow view of crypto through an anti-money laundering lens, as opposed to an internet architecture lens</li>
+                          </ul>
+                          <h3>WHAT ARE THE OVERALL GOALS?<strong><br />
+                            </strong>
+                          </h3>
+                          <ul>
+                            <li>Get 100,000,000 people to use an NFT – that may be just barely sufficient</li>
+                            <li>Ensure policy-makers do not kill an open metaverse before it begins</li>
+                          </ul>
+                          <h3>WHAT ARE 6529'S GOALS?<strong><br />
+                            </strong>
+                          </h3>
+                          <ul>
+                            <li>Educate!</li>
+                            <li>Build infrastructure consistent with these goals</li>
+                          </ul>
+                        </div>
+                      </div></div></div></div>
               </div>
             </div>
           </section>

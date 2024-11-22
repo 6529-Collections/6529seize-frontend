@@ -107,7 +107,7 @@ The starting gun goes💥,.and it's happening. Packs of racers, proudly sporting
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-302" className="post-302 page type-page status-publish hentry">
@@ -132,7 +132,11 @@ The starting gun goes💥,.and it's happening. Packs of racers, proudly sporting
                       </div></div></div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-2 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/Y5VVpcwy/s4_geometry_runners_698-1.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/Y5VVpcwy/s4_geometry_runners_698-1.mp4">
+                          <video src="https://videos.files.wordpress.com/Y5VVpcwy/s4_geometry_runners_698-1.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/Y5VVpcwy/s4_geometry_runners_698-1.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-2">
                           <p>698 is the grail Geometry Runner. Statistically rarest and elegantly minimalist.</p>
@@ -153,7 +157,11 @@ The starting gun goes💥,.and it's happening. Packs of racers, proudly sporting
                             </strong></p>
                         </div></div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/mICLxAz2/s4_geometry_runners_887-1.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/mICLxAz2/s4_geometry_runners_887-1.mp4">
+                          <video src="https://videos.files.wordpress.com/mICLxAz2/s4_geometry_runners_887-1.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/mICLxAz2/s4_geometry_runners_887-1.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-4">
                           <p>887 is another rare ‘single' Geometry Runner.</p>
@@ -176,7 +184,11 @@ The starting gun goes💥,.and it's happening. Packs of racers, proudly sporting
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/w3UDdoYx/s4_geometry_runners_840-1.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/w3UDdoYx/s4_geometry_runners_840-1.mp4">
+                          <video src="https://videos.files.wordpress.com/w3UDdoYx/s4_geometry_runners_840-1.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{marginBottom: 20, maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/w3UDdoYx/s4_geometry_runners_840-1.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-6">
                           <p>840 is a classic Geometry Runner with an army of shapes racing for eternity.</p>

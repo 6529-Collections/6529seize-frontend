@@ -86,7 +86,7 @@ const IndexPage = () => (
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix ">
+      <main id="main" className="clearfix " style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row">
           <section id="content" className=" full-width" style={{width: '100%'}}>
             <div id="post-1214" className="fusion-archive-description post-1214 post type-post status-publish format-standard has-post-thumbnail hentry category-news">

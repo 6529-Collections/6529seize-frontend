@@ -107,7 +107,7 @@ The 6529 Gradient Collection represents the 6529 symbol in its original two star
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-106" className="post-106 page type-page status-publish has-post-thumbnail hentry">

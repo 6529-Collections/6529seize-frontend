@@ -129,7 +129,7 @@ The CryptoPunk collection forms part of the original artwork in the digital art 
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1321" className="post-1321 page type-page status-publish hentry">

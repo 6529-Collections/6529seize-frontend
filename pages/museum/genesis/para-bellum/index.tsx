@@ -107,7 +107,7 @@ Para Bellum(*) is about the conflict of emotion and gut instinct versus logic an
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-315" className="post-315 page type-page status-publish hentry">
@@ -132,7 +132,11 @@ Para Bellum(*) is about the conflict of emotion and gut instinct versus logic an
                       </div></div></div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-3 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-2 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/DrQXcHEk/s6_para-bellum_577.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/DrQXcHEk/s6_para-bellum_577.mp4">
+                          <video src="https://videos.files.wordpress.com/DrQXcHEk/s6_para-bellum_577.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/DrQXcHEk/s6_para-bellum_577.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-2">
                           <p>This abstract-looking output ranks 10 in rarity with a ‘Fadelines' layout and ‘China' color traits.</p>
@@ -153,7 +157,11 @@ Para Bellum(*) is about the conflict of emotion and gut instinct versus logic an
                             </strong></p>
                         </div></div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-4 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/yiptJTvR/s6_para-bellum_761.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/yiptJTvR/s6_para-bellum_761.mp4">
+                          <video src="https://videos.files.wordpress.com/yiptJTvR/s6_para-bellum_761.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/yiptJTvR/s6_para-bellum_761.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-4">
                           <p>#761 is a another statistically rare Para Bellum.</p>
@@ -176,7 +184,11 @@ Para Bellum(*) is about the conflict of emotion and gut instinct versus logic an
                   </div></div>
                 <div className="fusion-fullwidth fullwidth-box fusion-builder-row-4 fusion-flex-container nonhundred-percent-fullwidth non-hundred-percent-height-scrolling"><div className="fusion-builder-row fusion-row fusion-flex-align-items-flex-start fusion-flex-content-wrap" style={{maxWidth: 1248, marginLeft: 'calc(-4% / 2 )', marginRight: 'calc(-4% / 2 )'}}>
                     <div className="flex flex-col flex flex-col fusion-builder-column-6 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/Ac7qh9mT/s6_para-bellum_343.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/Ac7qh9mT/s6_para-bellum_343.mp4">
+                          <video src="https://videos.files.wordpress.com/Ac7qh9mT/s6_para-bellum_343.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/Ac7qh9mT/s6_para-bellum_343.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-6">
                           <p>#343 is a classic Para Bellum.</p>
@@ -197,7 +209,11 @@ Para Bellum(*) is about the conflict of emotion and gut instinct versus logic an
                             </strong></p>
                         </div></div></div>
                     <div className="flex flex-col flex flex-col fusion-builder-column-8 fusion_builder_column_1_4 1_4 flex flex-col fusion-column-inner-bg-wrapper">
-                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/3NPlVLXQ/s6_para-bellum_311.mp4" data-rel="iLightbox"><span className="fusion-column-inner-bg-image" /></a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
+                      <span className="fusion-column-inner-bg hover-type-none"><a className="fusion-column-anchor" href="https://videos.files.wordpress.com/3NPlVLXQ/s6_para-bellum_311.mp4">
+                          <video src="https://videos.files.wordpress.com/3NPlVLXQ/s6_para-bellum_311.mp4" controls autoPlay muted playsInline className="tw-w-full tw-h-auto">
+                            Your browser does not support the video tag.
+                          </video>
+                        </a></span><div className="fusion-column-wrapper fusion-column-has-shadow fusion-flex-justify-content-flex-start fusion-content-layout-column">
                         <div className="fusion-video fusion-selfhosted-video" style={{maxWidth: '100%'}}><div className="video-wrapper"><video playsInline={true} width="100%" style={{objectFit: 'cover'}} autoPlay={true} muted={true} loop={true} preload="auto"><source src="https://videos.files.wordpress.com/3NPlVLXQ/s6_para-bellum_311.mp4" type="video/mp4" />Sorry, your browser doesn't support embedded videos.</video></div></div>
                         <div className="fusion-text fusion-text-8">
                           <p>A rare Para Bellum with no visible text.</p>

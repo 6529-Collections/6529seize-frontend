@@ -105,7 +105,7 @@ Also, gm. VISIT TEMPLE OF GM" />
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-188" className="post-188 page type-page status-publish has-post-thumbnail hentry">

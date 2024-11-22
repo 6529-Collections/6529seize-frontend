@@ -105,7 +105,7 @@ An uncanny piece, The Trial by k-art, seeks to present art about life, taking a 
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1353" className="post-1353 page type-page status-publish hentry">

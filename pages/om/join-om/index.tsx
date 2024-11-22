@@ -97,7 +97,7 @@ It is free to join. We will try to add as many folks as possible, but we can't g
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-756" className="post-756 page type-page status-publish hentry">

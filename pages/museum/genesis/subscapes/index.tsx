@@ -113,7 +113,7 @@ Subscapes are a highly regarded collection of generative landscapes from renown"
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-287" className="post-287 page type-page status-publish hentry">

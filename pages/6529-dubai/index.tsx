@@ -84,7 +84,7 @@ Disney and DeeKay: Their Secret to Animation" />
       <div id="home" style={{position: 'relative', top: '-1px'}} />
       <div id="sliders-container" className="fusion-slider-visibility">
       </div>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-2474" className="post-2474 page type-page status-publish hentry">

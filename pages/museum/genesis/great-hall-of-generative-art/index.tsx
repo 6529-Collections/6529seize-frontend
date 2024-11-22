@@ -105,7 +105,7 @@ The 6529 Museum Great Hall is focused on independent collections by generative a
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-321" className="post-321 page type-page status-publish hentry">

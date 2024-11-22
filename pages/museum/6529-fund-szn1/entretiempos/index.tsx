@@ -141,7 +141,7 @@ Fascinated by the time scales that we operate within, Marcelo Soria-Rodriguez" /
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-1348" className="post-1348 page type-page status-publish hentry">

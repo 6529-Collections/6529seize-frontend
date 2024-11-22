@@ -107,7 +107,7 @@ Is code art? Autology is a study of not only how we interpret art, but also how 
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-307" className="post-307 page type-page status-publish hentry">

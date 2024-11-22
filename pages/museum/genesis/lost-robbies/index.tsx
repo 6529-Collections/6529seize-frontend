@@ -107,7 +107,7 @@ Robbie Barrat is the first artist to ever mint on SuperRare. Barrat explores a v
           </div>
         </div>
       </section>
-      <main id="main" className="clearfix width-100">
+      <main id="main" className="clearfix width-100" style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row" style={{maxWidth: '100%'}}>
           <section id="content" className="full-width">
             <div id="post-264" className="post-264 page type-page status-publish hentry">

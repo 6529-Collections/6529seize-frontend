@@ -103,7 +103,7 @@ There is an autonomous artist among us, a faceless, soulless creature, who, at t
       <div id="home" style={{position: 'relative', top: '-1px'}} />
       <div id="sliders-container" className="fusion-slider-visibility">
       </div>
-      <main id="main" className="clearfix ">
+      <main id="main" className="clearfix " style={{minHeight: '100vh', padding: 30}}>
         <div className="fusion-row">
           <section id="content" style={{width: '100%'}}>
             <article id="post-1971" className="post post-1971 type-post status-publish format-standard has-post-thumbnail hentry category-blog">
