@@ -9,9 +9,9 @@ env:
   BEANSTALK_APP_NAME: "seize app"
   BEANSTALK_ENV_NAME: "Seizeapp-env"
   NODE_ENV: "production"
-  API_ENDPOINT: "https://api.seize.io"
-  ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
-  BASE_ENDPOINT: "https://seize.io"
+  API_ENDPOINT: "https://api.6529.io"
+  ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
+  BASE_ENDPOINT: "https://6529.io"
   NEXTGEN_CHAIN_ID: "1"
   MOBILE_APP_SCHEME: "mobile6529"
 

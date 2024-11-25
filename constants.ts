@@ -52,15 +52,15 @@ export const OPENSEA_STORE_FRONT_CONTRACT =
 export const OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER = `0x5b3256965e7c3cf26e11fcaf296dfc8807c01073`;
 
 export const NEXTGEN_MEDIA_BASE_URL =
-  "https://media.generator.seize.io/mainnet";
+  "https://media.generator.6529.io/mainnet";
 
 export const ROYALTIES_PERCENTAGE = 0.069;
 
 export const ETHEREUM_ICON_TEXT = "Ξ";
 
-export const MEMES_MINTING_HREF = "https://thememes.seize.io";
+export const MEMES_MINTING_HREF = "https://thememes.6529.io";
 
-export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.seize.io";
+export const NEXTGEN_GENERATOR_BASE_URL = "https://generator.6529.io";
 
 export const SUBSCRIPTIONS_CHAIN = mainnet;
 

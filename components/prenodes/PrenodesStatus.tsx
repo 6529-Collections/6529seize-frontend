@@ -38,7 +38,7 @@ export default function PrenodesStatus() {
   const [totalResults, setTotalResults] = useState(0);
 
   function fetchResults() {
-    const url = `https://api.seize.io/oracle/prenodes?page=${page}&page_size=${PAGE_SIZE}`;
+    const url = `https://api.6529.io/oracle/prenodes?page=${page}&page_size=${PAGE_SIZE}`;
     fetch(url).then((response) => {
       response.json().then((response: { data: Prenode[]; count: number }) => {
         setPrenodes(response.data);

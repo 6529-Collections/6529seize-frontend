@@ -18,9 +18,9 @@ export default function AboutCopyright() {
         <Col>
           <p className="font-larger font-bolder">Introduction</p>
           <p>
-            Seize.io, a platform of 6529 Collection LLC, respects the
+            6529.io, a platform of 6529 Collection LLC, respects the
             intellectual property rights of others and expects its users to do
-            the same. It is Seize.io&apos;s policy to respond to clear notices
+            the same. It is 6529.io&apos;s policy to respond to clear notices
             of alleged copyright infringement that comply with the Digital
             Millennium Copyright Act (DMCA).
           </p>
@@ -34,7 +34,7 @@ export default function AboutCopyright() {
           <p>
             If you believe that your copyrighted work has been copied in a way
             that constitutes copyright infringement and is accessible through
-            the Seize.io service, you may notify 6529 Collection LLC&apos;s
+            the 6529.io service, you may notify 6529 Collection LLC&apos;s
             copyright agent, providing the following information:
           </p>
           <ol>
@@ -145,7 +145,7 @@ export default function AboutCopyright() {
             Collection LLC has adopted a policy of terminating, in appropriate
             circumstances and at 6529 Collection LLC&apos;s sole discretion,
             users who are deemed to be repeat infringers. 6529 Collection LLC
-            may also at its sole discretion limit access to the Seize.io and/or
+            may also at its sole discretion limit access to the 6529.io and/or
             terminate the accounts of any users who infringe any intellectual
             property rights of others, whether or not there is any repeat
             infringement.
@@ -158,7 +158,7 @@ export default function AboutCopyright() {
           <p>
             6529 Collection LLC reserves the right to modify the terms of this
             DMCA Policy at any time and for any reason. By continuing to access
-            or use the Seize.io after those revisions become effective, you
+            or use the 6529.io after those revisions become effective, you
             agree to be bound by the revised policy.
           </p>
         </Col>

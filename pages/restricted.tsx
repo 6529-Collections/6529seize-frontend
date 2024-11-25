@@ -33,7 +33,7 @@ export default function Access() {
             }is restricted`;
             setMessage(msg);
           } else {
-            setMessage("Go to seize.io");
+            setMessage("Go to 6529.io");
           }
         });
       });
