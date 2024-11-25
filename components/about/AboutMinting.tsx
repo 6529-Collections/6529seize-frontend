@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { MEMES_MINTING_HREF } from "../../constants";
+import Link from "next/link";
 
 export default function AboutMinting() {
   return (
@@ -29,9 +29,7 @@ export default function AboutMinting() {
             <br />
             <li>
               The minting website for The Memes is:{" "}
-              <a href={MEMES_MINTING_HREF} target="_blank" rel="noreferrer">
-                {MEMES_MINTING_HREF}
-              </a>
+              <Link href="/the-memes/mint">https://6529.io/the-memes/mint</Link>
             </li>
             <br />
             <li>There is no other minting website for The Memes</li>

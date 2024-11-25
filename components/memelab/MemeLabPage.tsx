@@ -1320,8 +1320,8 @@ export default function LabPage(props: Readonly<Props>) {
                   </Row>
                   <Row className="pt-2">
                     <Col>
-                      <h2>Card {nft.id} -&nbsp;</h2>
-                      <h2>{nft.name}</h2>
+                      <h2 className="float-left">Card {nft.id} -&nbsp;</h2>
+                      <h2 className="float-left">{nft.name}</h2>
                     </Col>
                   </Row>
                   <Row className="pt-3 pb-3">
