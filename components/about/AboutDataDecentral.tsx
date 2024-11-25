@@ -17,13 +17,13 @@ export default function AboutDataDecentral() {
             a decentralized manner.
           </p>
           <p>
-            Effectively all information on seize.io comes from on-chain or
+            Effectively all information on 6529.io comes from on-chain or
             public sources or is derived in transparent ways from on-chain or
             public sources. This means anyone can replicate the data available
             on this site for a website or application of their own, without
             seeking permission from us and without any dependency on us.
           </p>
-          <p>This page shares the source of all data displayed on seize.io.</p>
+          <p>This page shares the source of all data displayed on 6529.io.</p>
           <p>On-Chain (Ethereum)</p>
           <ul>
             <li>The token #</li>
@@ -70,7 +70,7 @@ export default function AboutDataDecentral() {
               will release sample code for this calculation soon)
             </li>
           </ul>
-          <p>Compiled Seize.io Data</p>
+          <p>Compiled 6529.io Data</p>
           <ul>
             <li>
               Even though everyone can compile and calculate the same data as
