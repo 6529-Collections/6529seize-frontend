@@ -13,7 +13,7 @@ interface WaveDropVotersProps {
 
 export const WaveDropVoters: React.FC<WaveDropVotersProps> = ({ drop }) => {
   const { connectedProfile } = useAuth();
-  const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isFetching } =
+  const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: drop.wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
@@ -24,7 +24,7 @@ export const WaveDropVoters: React.FC<WaveDropVotersProps> = ({ drop }) => {
     });
 
   const intersectionElementRef = useIntersectionObserver(() => {
-    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+    if (hasNextPage && !isLoading && !isFetchingNextPage) {
       fetchNextPage();
     }
   });
@@ -79,7 +79,7 @@ export const WaveDropVoters: React.FC<WaveDropVotersProps> = ({ drop }) => {
             className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900"
           >
             <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
-              {voters.length > 0 || isFetching ? (
+              {voters.length > 0 || isLoading ? (
                 <>
                   <div className="tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
                     {voters.map((voter, index) => (
@@ -90,7 +90,7 @@ export const WaveDropVoters: React.FC<WaveDropVotersProps> = ({ drop }) => {
                       />
                     ))}
                   </div>
-                  {(isFetchingNextPage || isFetching) && (
+                  {(isFetchingNextPage || isLoading) && (
                     <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
                       <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
                     </div>

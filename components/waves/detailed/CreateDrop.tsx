@@ -82,7 +82,7 @@ export default function CreateDrop({
 
   const onDropModeChange = useCallback(
     (newIsDropMode: boolean) => {
-      if (fixedDropMode) {
+      if (fixedDropMode !== DropMode.BOTH) {
         return;
       }
       if (newIsDropMode && !wave.participation.authenticated_user_eligible) {

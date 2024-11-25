@@ -13,7 +13,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
   WaveLeaderboardRightSidebarVotersProps
 > = ({ wave }) => {
   const { connectedProfile } = useAuth();
-  const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isFetching } =
+  const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
@@ -24,14 +24,14 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
     });
 
   const intersectionElementRef = useIntersectionObserver(() => {
-    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+    if (hasNextPage && !isLoading && !isFetchingNextPage) {
       fetchNextPage();
     }
   });
 
   return (
     <div className="tw-space-y-2">
-      {voters.length === 0 && !isFetching ? (
+      {voters.length === 0 && !isLoading ? (
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-10 tw-space-y-6 tw-text-iron-400">
           <div className="tw-relative tw-group">
             <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-primary-400/20 tw-via-indigo-500/10 tw-to-iron-800/10 tw-rounded-full tw-animate-[spin_4s_linear_infinite] group-hover:tw-from-primary-400/30"></div>

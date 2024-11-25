@@ -16,7 +16,7 @@ export const WaveDropLogs: React.FC<WaveDropLogsProps> = ({ drop }) => {
   const [isActivityOpen, setIsActivityOpen] = useState(false);
 
   const { connectedProfile } = useAuth();
-  const { logs, isFetchingNextPage, fetchNextPage, hasNextPage, isFetching } =
+  const { logs, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveActivityLogs({
       waveId: drop.wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
@@ -26,7 +26,7 @@ export const WaveDropLogs: React.FC<WaveDropLogsProps> = ({ drop }) => {
     });
 
   const intersectionElementRef = useIntersectionObserver(() => {
-    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+    if (hasNextPage && !isLoading && !isFetchingNextPage) {
       fetchNextPage();
     }
   });
@@ -79,7 +79,7 @@ export const WaveDropLogs: React.FC<WaveDropLogsProps> = ({ drop }) => {
             className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900"
           >
             <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
-              {logs.length > 0 || isFetching ? (
+              {logs.length > 0 || isLoading ? (
                 <div className="tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
                   {logs.map((log) => (
                     <WaveDropLog key={log.id} log={log} />

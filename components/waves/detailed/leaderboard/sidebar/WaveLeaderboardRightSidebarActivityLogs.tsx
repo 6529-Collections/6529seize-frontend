@@ -14,7 +14,7 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
   WaveLeaderboardRightSidebarActivityLogsProps
 > = ({ wave }) => {
   const { connectedProfile } = useAuth();
-  const { logs, isFetchingNextPage, fetchNextPage, hasNextPage, isFetching } =
+  const { logs, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveActivityLogs({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
@@ -24,12 +24,12 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
     });
 
   const intersectionElementRef = useIntersectionObserver(() => {
-    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+    if (hasNextPage && !isLoading && !isFetchingNextPage) {
       fetchNextPage();
     }
   });
 
-  if (logs.length === 0 && !isFetching) {
+  if (logs.length === 0 && !isLoading) {
     return (
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-mt-10 tw-space-y-6 tw-text-iron-400">
         <div className="tw-relative tw-group">
