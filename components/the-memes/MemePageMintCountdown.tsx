@@ -1,9 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import {
-  MEMES_CONTRACT,
-  MEMES_MANIFOLD_PROXY_CONTRACT,
-  MEMES_MINTING_HREF,
-} from "../../constants";
+import { MEMES_CONTRACT, MEMES_MANIFOLD_PROXY_CONTRACT } from "../../constants";
 import useManifoldClaim, {
   ManifoldClaim,
   ManifoldClaimStatus,
@@ -63,25 +59,11 @@ export default function MemePageMintCountdown(
     const buttons: MemePageMintBtn[] = [];
     if (!hideMintOnSeize) {
       buttons.push({
-        label: "Mint on Seize",
+        label: "Mint",
         link: `/the-memes/mint`,
         target: "_self",
       });
     }
-    buttons.push({
-      label: (
-        <span className="d-flex align-items-center justify-content-center gap-2">
-          Mint on Manifold{" "}
-          {!hideMintOnSeize && (
-            <span className="badge bg-white text-dark font-smaller">
-              backup
-            </span>
-          )}
-        </span>
-      ),
-      link: MEMES_MINTING_HREF,
-      target: "_blank",
-    });
     return buttons;
   };
 
