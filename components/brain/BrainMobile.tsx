@@ -8,6 +8,13 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
+import BrainMobileAbout from "./mobile/BrainMobileAbout";
+
+export enum BrainView {
+  DEFAULT = "DEFAULT",
+  WAVES = "WAVES",
+  ABOUT = "ABOUT",
+}
 
 interface Props {
   children: ReactNode;
@@ -15,7 +22,7 @@ interface Props {
 
 const BrainMobile: React.FC<Props> = ({ children }) => {
   const router = useRouter();
-  const [isWavesButtonActive, setIsWavesButtonActive] = useState(false);
+  const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
     queryFn: async () =>
@@ -51,12 +58,11 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           />
         </div>
       )}
-      <BrainMobileTabs
-        onWavesButtonClick={setIsWavesButtonActive}
-        isWavesButtonActive={isWavesButtonActive}
-      />
-      {isWavesButtonActive ? (
+      <BrainMobileTabs activeView={activeView} onViewChange={setActiveView} />
+      {activeView === BrainView.WAVES ? (
         <BrainMobileWaves activeWaveId={router.query.wave as string} />
+      ) : activeView === BrainView.ABOUT ? (
+        <BrainMobileAbout activeWaveId={router.query.wave as string} />
       ) : (
         children
       )}
