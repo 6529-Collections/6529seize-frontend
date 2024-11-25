@@ -37,7 +37,6 @@ interface Props {
   header: string;
   contract: string;
   link: string;
-  minting_link: string;
 }
 
 export default function DistributionPage(props: Readonly<Props>) {
@@ -251,21 +250,14 @@ export default function DistributionPage(props: Readonly<Props>) {
 
   function printMintingLink() {
     const nftIdNumber = parseInt(nftId ?? "");
-    if (isNaN(nftIdNumber)) {
-      return <></>;
-    }
-
-    if (areEqualAddresses(props.contract, MEMES_CONTRACT)) {
+    if (
+      !isNaN(nftIdNumber) &&
+      areEqualAddresses(props.contract, MEMES_CONTRACT)
+    ) {
       return <MemePageMintCountdown nft_id={nftIdNumber} />;
     }
 
-    return (
-      <Button
-        className="seize-btn btn-white"
-        onClick={() => window.open(props.minting_link, "_blank")}>
-        Minting Page
-      </Button>
-    );
+    return <></>;
   }
 
   function printEmpty() {
