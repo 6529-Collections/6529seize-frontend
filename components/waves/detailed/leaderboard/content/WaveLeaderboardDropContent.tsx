@@ -19,21 +19,21 @@ export const WaveLeaderboardDropContent: React.FC<
   };
 
   return (
-    <div className="tw-mb-2">
-      <div className="tw-flex tw-gap-x-6 tw-items-end tw-justify-between">
-        <WaveDetailedDropContent
-          drop={drop}
-          activePartIndex={activePartIndex}
-          setActivePartIndex={setActivePartIndex}
-          onLongPress={() => {}}
-          onDropClick={onDropClick}
-          onQuoteClick={() => {}}
-          setLongPressTriggered={() => {}}
-        />
-        {!!drop.metadata.length && (
-          <WaveDetailedDropMetadata metadata={drop.metadata} />
-        )}
-      </div>
+    <div className="tw-flex tw-gap-x-6 tw-items-end tw-justify-between">
+      <WaveDetailedDropContent
+        drop={drop}
+        activePartIndex={activePartIndex}
+        setActivePartIndex={setActivePartIndex}
+        onLongPress={() => {}}
+        onDropClick={onDropClick}
+        onQuoteClick={() => {}}
+        setLongPressTriggered={() => {}}
+      />
+      {!!drop.metadata.length && (
+       <div className="tw-mt-2">
+         <WaveDetailedDropMetadata metadata={drop.metadata} />
+       </div>
+      )}
     </div>
   );
 };

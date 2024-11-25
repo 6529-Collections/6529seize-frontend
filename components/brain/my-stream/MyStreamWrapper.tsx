@@ -14,8 +14,6 @@ import {
   ActiveDropState,
 } from "../../waves/detailed/chat/WaveChat";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import BrainDesktopDrop from "../BrainDesktopDrop";
-import { useWaveData } from "../../../hooks/useWaveData";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);

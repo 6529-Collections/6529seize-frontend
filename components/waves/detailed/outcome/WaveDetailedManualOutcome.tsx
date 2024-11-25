@@ -12,16 +12,17 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 hover:tw-border-iron-700/50">
+    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700/50">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-flex tw-items-center tw-justify-between tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-900/80 tw-transition-colors tw-duration-300 hover:tw-bg-iron-800/50"
+        className="tw-flex tw-items-center tw-justify-between tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-900/80 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-800/50"
       >
         <div className="tw-flex tw-items-center tw-gap-3">
           <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-lg tw-bg-amber-400/5">
             <svg
               className="tw-size-5 tw-text-[#D4C5AA] tw-flex-shrink-0"
               viewBox="0 0 24 24"
+              aria-hidden="true"
               fill="none"
             >
               <path
@@ -44,7 +45,7 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
           strokeWidth="2"
           stroke="currentColor"
           aria-hidden="true"
-          className="tw-size-4 tw-text-iron-400"
+          className="tw-size-4 tw-text-iron-400 tw-flex-shrink-0"
           animate={{ rotate: isOpen ? 0 : -95 }}
           transition={{ duration: 0.2 }}
         >

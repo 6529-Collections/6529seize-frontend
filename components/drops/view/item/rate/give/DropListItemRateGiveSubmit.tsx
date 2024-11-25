@@ -34,7 +34,7 @@ export default function DropListItemRateGiveSubmit({
   readonly isMobile?: boolean;
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { onDropChange } = useContext(ReactQueryWrapperContext);
+  const { onDropRateChange } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -53,7 +53,7 @@ export default function DropListItemRateGiveSubmit({
         message: `Voted successfully`,
         type: "success",
       });
-      onDropChange({
+      onDropRateChange({
         drop: response,
         giverHandle: connectedProfile?.profile?.handle ?? null,
       });

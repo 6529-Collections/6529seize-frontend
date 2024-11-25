@@ -228,7 +228,7 @@ export default function DropListItemRateGive({
         <div
           className={`${
             isMobile ? "tw-gap-x-4" : ""
-          } tw-w-full tw-inline-flex tw-items-center`}
+          } tw-w-full tw-inline-flex tw-items-center tw-gap-x-1`}
         >
           <DropListItemRateGiveChangeButton
             canVote={canVote}

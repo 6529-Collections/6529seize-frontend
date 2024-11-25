@@ -72,7 +72,7 @@ export function useWaveTopVoters({
     data,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isLoading,
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
@@ -95,12 +95,13 @@ export function useWaveTopVoters({
         params,
       });
     },
-    initialPageParam: 0,
+    initialPageParam: null,
     getNextPageParam: (lastPage, allPages) =>
       lastPage.data?.length === 20 ? allPages.length : null,
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
+    refetchInterval: 30000
   });
 
   useEffect(() => {
@@ -114,7 +115,7 @@ export function useWaveTopVoters({
     voters,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isLoading,
     isFetchingNextPage,
     refetch,
   };

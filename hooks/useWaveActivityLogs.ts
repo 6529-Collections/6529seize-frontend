@@ -73,7 +73,7 @@ export function useWaveActivityLogs({
     data,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isLoading,
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
@@ -107,6 +107,7 @@ export function useWaveActivityLogs({
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
+    refetchInterval: 30000
   });
 
   useEffect(() => {
@@ -120,7 +121,7 @@ export function useWaveActivityLogs({
     logs,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isLoading,
     isFetchingNextPage,
   };
 }

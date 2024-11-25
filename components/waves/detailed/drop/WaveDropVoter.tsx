@@ -1,38 +1,38 @@
 import React from "react";
-import { ApiWaveVoter } from "../../../../../generated/models/ApiWaveVoter";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { ApiWaveVoter } from "../../../../generated/models/ApiWaveVoter";
 import Link from "next/link";
+import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 
-interface WaveLeaderboardRightSidebarVoterProps {
+interface WaveDropVoterProps {
   readonly voter: ApiWaveVoter;
   readonly position: number;
 }
 
-export const WaveLeaderboardRightSidebarVoter: React.FC<
-  WaveLeaderboardRightSidebarVoterProps
-> = ({ voter, position }) => {
+export const WaveDropVoter: React.FC<WaveDropVoterProps> = ({ voter, position }) => {
   const hasPositiveVotes = !!voter.positive_votes_summed;
   const hasNegativeVotes = !!voter.negative_votes_summed;
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-rounded-lg tw-bg-iron-900">
+    <div className="tw-p-3 tw-flex tw-items-center tw-justify-between">
       <div className="tw-flex tw-items-center tw-gap-3">
-        <span className="tw-text-iron-400 tw-font-medium">{position}.</span>
+        <span className="tw-text-sm tw-font-medium tw-text-iron-400">
+          {position}
+        </span>
         <Link
           href={`/${voter.voter.handle}`}
-          className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300"
+          className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group hover:tw-opacity-80 tw-transition-all tw-duration-300"
         >
           {voter.voter.pfp ? (
             <img
               src={voter.voter.pfp}
               alt=""
-              className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0"
+              className="tw-size-6 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0"
             />
           ) : (
-            <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
+            <div className="tw-size-6 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
           )}
-          <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300 tw-truncate tw-max-w-28">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 group-hover:tw-text-iron-300">
             {voter.voter.handle}
           </span>
         </Link>

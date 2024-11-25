@@ -26,12 +26,12 @@ const WaveDetailedMobileAbout: React.FC<WaveDetailedMobileAboutProps> = ({
 }) => {
   const capacitor = useCapacitor();
 
-  const containerClassName = `tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-space-y-4${
+  const containerClassName = `tw-h-[calc(100vh-10rem)] tw-pb-4 lg:tw-pb-0 tw-overflow-y-auto no-scrollbar tw-space-y-4${
     capacitor.isCapacitor ? " tw-pb-[calc(4rem+80px)]" : ""
   }`;
 
   return (
-    <div className="tw-px-4 md:tw-px-2 tw-mt-4">
+    <div className="tw-px-2 lg:tw-px-0 tw-mt-4">
       <div className={containerClassName}>
         <WaveDetailedAbout
           wave={wave}

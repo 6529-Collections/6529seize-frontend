@@ -55,7 +55,6 @@ export function useWaveDrops({
 }: UseWaveDropsProps) {
   const queryClient = useQueryClient();
 
-  const [drops, setDrops] = useState<ExtendedDrop[]>([]);
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
@@ -147,17 +146,23 @@ export function useWaveDrops({
     staleTime: 60000,
   });
 
+  const processDrops = (pages: ApiWaveDropsFeed[] | undefined, previousDrops: ExtendedDrop[], isReverse: boolean) => {
+    const newDrops = pages
+      ? mapToExtendedDrops(
+          pages.map((page) => ({ wave: page.wave, drops: page.drops })),
+          previousDrops,
+          isReverse
+        )
+      : [];
+    return generateUniqueKeys(newDrops, previousDrops);
+  };
+
+  const [drops, setDrops] = useState<ExtendedDrop[]>(() => 
+    processDrops(data?.pages, [], reverse)
+  );
+
   useEffect(() => {
-    setDrops((prev) => {
-      const newDrops = data?.pages
-        ? mapToExtendedDrops(
-            data.pages.map((page) => ({ wave: page.wave, drops: page.drops })),
-            prev,
-            reverse
-          )
-        : [];
-      return generateUniqueKeys(newDrops, prev);
-    });
+    setDrops((prev) => processDrops(data?.pages, prev, reverse));
   }, [data, reverse]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);

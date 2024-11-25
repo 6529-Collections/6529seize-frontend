@@ -30,11 +30,11 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
   }, [showAll]);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 hover:tw-border-iron-700/50">
+    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700/50">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-900/80 tw-transition-colors tw-duration-300 hover:tw-bg-iron-800/50"
+        className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-900/80 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-800/50"
       >
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-3">
@@ -43,6 +43,7 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
                 className="tw-size-5 tw-flex-shrink-0 tw-text-[#A4C2DB]"
                 viewBox="0 0 24 24"
                 fill="none"
+                aria-hidden="true"
               >
                 <path
                   d="M9 6.75H15M9 12H15M9 17.25H12M3.75 19.5H20.25C21.0784 19.5 21.75 18.8284 21.75 18V6C21.75 5.17157 21.0784 4.5 20.25 4.5H3.75C2.92157 4.5 2.25 5.17157 2.25 6V18C2.25 18.8284 2.92157 19.5 3.75 19.5Z"
@@ -120,7 +121,7 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
               {!showAll && totalCount > DEFAULT_AMOUNTS_TO_SHOW && (
                 <button
                   onClick={() => setShowAll(true)}
-                  className="tw-border-0 tw-w-full tw-px-4 tw-py-2 tw-text-left tw-bg-iron-900/20 tw-text-primary-300/80 tw-text-xs hover:tw-text-primary-300 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900/30"
+                  className="tw-border-0 tw-w-full tw-px-4 tw-py-2 tw-text-left tw-bg-iron-900/20 tw-text-primary-300/80 tw-text-xs desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900/30"
                 >
                   <span>View more</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>

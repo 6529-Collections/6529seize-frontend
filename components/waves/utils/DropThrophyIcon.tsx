@@ -83,8 +83,8 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
   }
 
   return (
-    <div className="tw-font-semibold tw-text-xs tw-text-iron-300 tw-flex tw-items-center tw-size-6 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
-      <span>{formatNumberWithCommas(rank)}</span>
+    <div className="tw-font-semibold tw-text-xs tw-text-iron-300 tw-flex tw-items-center tw-h-6 tw-min-w-6 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+      <span className="tw-px-1">#{formatNumberWithCommas(rank)}</span>
     </div>
   );
 };
