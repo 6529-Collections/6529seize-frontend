@@ -51,7 +51,6 @@ export default function Footer() {
           "OM Discord"
         )}
         {printSeparator()}
-        {printLinkWithImage("https://6529.io", "/Seize_Logo_2.png", "6529.io")}
         {printSeparator()}
         {printLinkWithImage(
           "https://github.com/6529-Collections",
@@ -73,11 +72,11 @@ export default function Footer() {
         {printSeparator()}
         {printLink(`/about/${AboutSection.LICENSE}`, "License")}
         {printSeparator()}
-        {printLink("https://api.seize.io/docs", "API Documentation")}
+        {printLink("https://api.6529.io/docs", "API Documentation")}
         {printSeparator()}
         {printLink(`/about/${AboutSection.CONTACT_US}`, "Contact Us")}
         {printSeparator()}
-        {printLink("https://status.seize.io/", "Status")}
+        {printLink("https://status.6529.io/", "Status")}
       </span>
     </footer>
   );

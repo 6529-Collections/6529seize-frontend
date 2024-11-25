@@ -36,7 +36,7 @@ export default function MemeLabDistributionPage(props: any) {
           header="Meme Lab"
           contract={MEMELAB_CONTRACT}
           link="/meme-lab"
-          minting_link="https://memelab.seize.io"
+          minting_link="https://memelab.6529.io"
         />
       </main>
     </>

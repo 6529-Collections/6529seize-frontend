@@ -80,13 +80,13 @@ export default function AboutMemes() {
           <p>
             All The Memes:{" "}
             <a href={`/the-memes`} target="_blank" rel="noreferrer">
-              seize.io/the-memes
+              6529.io/the-memes
             </a>
           </p>
           <p>
             The Memes Network:{" "}
             <a href={`/network`} target="_blank" rel="noreferrer">
-              seize.io/network
+              6529.io/network
             </a>
           </p>
           <p>
@@ -95,7 +95,7 @@ export default function AboutMemes() {
               href={`/about/${AboutSection.FAQ}`}
               target="_blank"
               rel="noreferrer">
-              seize.io/about/faq
+              6529.io/about/faq
             </a>
           </p>
           <p>
@@ -113,7 +113,7 @@ export default function AboutMemes() {
               href={`/about/${AboutSection.MINTING}`}
               target="_blank"
               rel="noreferrer">
-              seize.io/about/minting
+              6529.io/about/minting
             </a>
           </p>
         </Col>
