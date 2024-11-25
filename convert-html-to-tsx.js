@@ -127,16 +127,29 @@ const replaceApostrophesInTextNodes = ($) => {
 };
 
 const adjustS3Attributes = ($) => {
-  const attributesToAdjust = ["src", "href", "content", "srcSet"];
+  const attributesToAdjust = [
+    "src",
+    "href",
+    "content",
+    "srcset",
+    "data-bg-url",
+    "poster",
+  ];
 
   attributesToAdjust.forEach((attr) => {
     $(`*[${attr}]`).each((i, elem) => {
       const attrValue = $(elem).attr(attr);
 
-      if (attr === "srcSet") {
+      if (!attrValue) return;
+
+      if (attr === "data-bg-url") {
+        console.log("i am updating", attr, attrValue);
+      }
+
+      if (attr === "srcset") {
         // Handle srcSet specifically as it contains multiple URLs
         const updatedSrcSet = attrValue
-          ?.split(",")
+          .split(",")
           .map((entry) => {
             const [url, descriptor] = entry.trim().split(/\s+/);
             if (
