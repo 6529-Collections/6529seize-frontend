@@ -3,6 +3,8 @@ const path = require("path");
 const cheerio = require("cheerio");
 const HTMLtoJSX = require("htmltojsx");
 
+const s3BaseUrl = "https://dnclu2fna0b2b.cloudfront.net";
+
 const converter = new HTMLtoJSX({
   createClass: false,
 });
@@ -124,6 +126,41 @@ const replaceApostrophesInTextNodes = ($) => {
     });
 };
 
+const adjustS3Attributes = ($) => {
+  const attributesToAdjust = ["src", "href", "content", "srcSet"];
+
+  attributesToAdjust.forEach((attr) => {
+    $(`*[${attr}]`).each((i, elem) => {
+      const attrValue = $(elem).attr(attr);
+
+      if (attr === "srcSet") {
+        // Handle srcSet specifically as it contains multiple URLs
+        const updatedSrcSet = attrValue
+          ?.split(",")
+          .map((entry) => {
+            const [url, descriptor] = entry.trim().split(/\s+/);
+            if (
+              url.startsWith("/wp-content") ||
+              url.startsWith("/wp-includes")
+            ) {
+              return `${s3BaseUrl}${url} ${descriptor || ""}`.trim();
+            }
+            return entry.trim();
+          })
+          .join(", ");
+        $(elem).attr(attr, updatedSrcSet);
+      } else if (
+        attrValue &&
+        (attrValue.startsWith("/wp-content") ||
+          attrValue.startsWith("/wp-includes"))
+      ) {
+        // Update other attributes like src, href, and content
+        $(elem).attr(attr, `${s3BaseUrl}${attrValue}`);
+      }
+    });
+  });
+};
+
 // Function to process HTML files
 const processHtmlFiles = (dir, relativePath = "") => {
   fs.readdirSync(dir).forEach((file) => {
@@ -170,6 +207,16 @@ const processHtmlFiles = (dir, relativePath = "") => {
       // Clean style attributes
       $("[style]").each((i, elem) => {
         const styleAttr = $(elem).attr("style");
+        if (
+          styleAttr.includes("/wp-content") ||
+          styleAttr.includes("/wp-includes")
+        ) {
+          const updatedStyle = styleAttr.replace(
+            /url\(['"]?(wp-content|wp-includes)\/(.*?)['"]?\)/g,
+            `url('${s3BaseUrl}/$1/$2')`
+          );
+          $(elem).attr("style", updatedStyle);
+        }
         const cleanedStyle = cleanStyleString(styleAttr);
         if (cleanedStyle.length > 0) {
           $(elem).attr("style", cleanedStyle);
@@ -259,6 +306,9 @@ const processHtmlFiles = (dir, relativePath = "") => {
 
       // Replace apostrophes in text nodes
       replaceApostrophesInTextNodes($);
+
+      // Adjust attributes
+      adjustS3Attributes($);
 
       let cleanedHtml = $.html();
 
