@@ -22,6 +22,7 @@ interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
   readonly isSmall?: boolean;
+  readonly extraClass?: string;
 }
 
 export interface HeaderLink {
@@ -733,7 +734,7 @@ export default function Header(props: Readonly<Props>) {
             : props.isSmall
             ? styles.mainContainerSmall
             : styles.mainContainer
-        }`}>
+        } ${props.extraClass}`}>
         <Row>
           <Col>
             <Container className={styles.capacitorHeaderRowContainerLandscape}>
