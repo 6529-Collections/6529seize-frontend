@@ -100,7 +100,7 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
           !isTemporaryDrop && e.key === "Enter" && handleClick()
         }
       >
-        <div className="tw-mt-1.5 tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
+        <div className="tw-mt-1.5 md:tw-mt-0 tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
           <WaveDetailedDropPartDrop
             drop={drop}
             activePart={activePart}

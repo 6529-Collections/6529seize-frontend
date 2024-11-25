@@ -36,7 +36,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
   setActiveTab,
   onDropClick,
 }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const isNotChatWave = wave.wave.type !== ApiWaveType.Chat;
   const capacitor = useCapacitor();

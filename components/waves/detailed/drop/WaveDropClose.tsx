@@ -8,7 +8,7 @@ export const WaveDropClose: React.FC<WaveDropCloseProps> = ({ onClose }) => {
   return (
     <button
     type="button"
-    className="tw-absolute tw-z-1000 tw-top-2.5 tw-right-4 tw-text-iron-300 desktop-hover:hover:tw-text-iron-400 tw-bg-transparent tw-border-0 tw-transition tw-duration-300 tw-ease-out"
+    className="tw-absolute tw-z-1000 tw-top-2.5 lg:tw-top-0 tw-right-4 tw-text-iron-300 desktop-hover:hover:tw-text-iron-400 tw-bg-transparent tw-border-0 tw-transition tw-duration-300 tw-ease-out"
     onClick={onClose}
   >
     <svg

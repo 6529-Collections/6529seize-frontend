@@ -66,7 +66,7 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2 tw-w-8 md:tw-w-10">
-      <div className="tw-text-iron-300 tw-flex tw-items-center tw-size-8 md:tw-size-10 tw-rounded-lg md:tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+      <div className="tw-text-iron-300 tw-flex tw-items-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
         {drop.rank ? (
           <span className="tw-text-sm md:tw-text-base tw-font-semibold tw-text-iron-300">
             {drop.rank}
