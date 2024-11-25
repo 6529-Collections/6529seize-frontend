@@ -90,8 +90,8 @@ export const WaveChat: React.FC<WaveChatProps> = ({
         ? "tw-h-[calc(100vh-14.7rem)]"
         : `tw-h-[calc(100vh-8.8rem)] ${
             isNotChatWave
-              ? "lg:tw-h-[calc(100vh-9.25rem)]"
-              : "lg:tw-h-[calc(100vh-7.5rem)]"
+              ? "lg:tw-h-[calc(100vh-9.7rem)]"
+              : "lg:tw-h-[calc(100vh-6.5rem)]"
           }`
     }`;
   }, [capacitor.isCapacitor, isNotChatWave]);
