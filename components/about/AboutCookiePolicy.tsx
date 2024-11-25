@@ -95,7 +95,7 @@ export default function AboutCookiePolicy() {
                   </thead>
                   <tbody>
                     <tr>
-                      <td>seize.io</td>
+                      <td>6529.io</td>
                       <td>
                         <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTGCORS"
@@ -109,7 +109,7 @@ export default function AboutCookiePolicy() {
                       <td>7 days</td>
                     </tr>
                     <tr>
-                      <td>seize.io</td>
+                      <td>6529.io</td>
                       <td>
                         <a
                           href="https://cookiepedia.co.uk/cookies/AWSALBTG"
@@ -123,13 +123,13 @@ export default function AboutCookiePolicy() {
                       <td>7 days</td>
                     </tr>
                     <tr>
-                      <td>seize.io</td>
+                      <td>6529.io</td>
                       <td>wallet-auth (JWT Authentication)</td>
                       <td>First Party</td>
                       <td>7 days</td>
                     </tr>
                     <tr>
-                      <td>seize.io</td>
+                      <td>6529.io</td>
                       <td>{CONSENT_ESSENTIAL_COOKIE}</td>
                       <td>First Party</td>
                       <td>1 year</td>
@@ -190,13 +190,13 @@ export default function AboutCookiePolicy() {
                   </thead>
                   <tbody>
                     <tr>
-                      <td>seize.io</td>
+                      <td>6529.io</td>
                       <td>{CONSENT_PERFORMANCE_COOKIE}</td>
                       <td>First Party</td>
                       <td>1 year</td>
                     </tr>
                     <tr>
-                      <td>.seize.io</td>
+                      <td>.6529.io</td>
                       <td>
                         <a
                           href="https://cookiepedia.co.uk/cookies/_ga_"
@@ -210,7 +210,7 @@ export default function AboutCookiePolicy() {
                       <td>1 year</td>
                     </tr>
                     <tr>
-                      <td>.seize.io</td>
+                      <td>.6529.io</td>
                       <td>
                         <a
                           href="https://cookiepedia.co.uk/cookies/_ga"
@@ -224,7 +224,7 @@ export default function AboutCookiePolicy() {
                       <td>1 year</td>
                     </tr>
                     <tr>
-                      <td>.seize.io</td>
+                      <td>.6529.io</td>
                       <td>
                         <a
                           href="https://cookiepedia.co.uk/cookies/_gid"

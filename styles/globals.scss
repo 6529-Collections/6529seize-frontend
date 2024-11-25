@@ -500,3 +500,54 @@ pre code {
 .inset-safe-area {
   margin-top: env(safe-area-inset-top);
 }
+
+.seize-card {
+  padding: 20px;
+  border: 1px solid transparent;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.01);
+    border: 1px solid $dark-grey;
+    cursor: pointer;
+  }
+}
+
+.header-wp {
+  @media (max-width: 1000px) {
+    .container {
+      width: 850px !important;
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .container {
+      width: 950px !important;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .container {
+      width: 1050px !important;
+    }
+  }
+
+  @media (min-width: 1300px) {
+    .container {
+      width: 1150px !important;
+    }
+  }
+
+  @media (min-width: 1400px) {
+    .container {
+      width: 1250px !important;
+    }
+  }
+
+  @media (min-width: 1500px) {
+    .container {
+      width: 1280px !important;
+    }
+  }
+}

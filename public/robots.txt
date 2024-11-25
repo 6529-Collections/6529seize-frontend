@@ -1,2 +1,9 @@
+# *
 User-agent: *
 Allow: /
+
+# Host
+Host: https://6529.io
+
+# Sitemaps
+Sitemap: https://6529.io/sitemap.xml

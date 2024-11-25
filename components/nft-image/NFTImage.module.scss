@@ -29,7 +29,7 @@
   iframe,
   video,
   model-viewer {
-    max-height: calc(90vh - $header-height) !important;
+    height: calc(90vh - $header-height) !important;
     max-width: 90vw;
   }
 }

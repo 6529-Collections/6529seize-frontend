@@ -9,9 +9,9 @@ env:
   BEANSTALK_APP_NAME: "seize app"
   BEANSTALK_ENV_NAME: "Seizeapp-env"
   NODE_ENV: "production"
-  API_ENDPOINT: "https://api.seize.io"
-  ALLOWLIST_API_ENDPOINT: "https://allowlist-api.seize.io"
-  BASE_ENDPOINT: "https://seize.io"
+  API_ENDPOINT: "https://api.6529.io"
+  ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
+  BASE_ENDPOINT: "https://6529.io"
   NEXTGEN_CHAIN_ID: "1"
   MOBILE_APP_SCHEME: "mobile6529"
 
@@ -77,12 +77,12 @@ jobs:
           --environment-name "${{ env.BEANSTALK_ENV_NAME }}" \
           --version-label "${{ env.COMMIT_SHA }}"
 
-      - name: Check Elastic Beanstalk health and readiness (60s warmup then 20 retries with 30s delay)
+      - name: Check Elastic Beanstalk health and readiness (120s warmup then 20 retries with 60s delay)
         run: |
           echo "Warmup..."
           MAX_RETRIES=20
           COUNTER=0
-          sleep 60
+          sleep 120
           while : ; do
             ENV_HEALTH=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Health' --output text)
             ENV_STATUS=$(aws elasticbeanstalk describe-environments --environment-names ${{ env.BEANSTALK_ENV_NAME }} --query 'Environments[0].Status' --output text)
@@ -97,7 +97,7 @@ jobs:
             fi
             COUNTER=$((COUNTER+1))
             echo "Waiting for environment to become healthy and ready... Attempt: $COUNTER"
-            sleep 30
+            sleep 60
           done
 
       - name: Validate Deployment
