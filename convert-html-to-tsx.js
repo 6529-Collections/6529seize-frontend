@@ -25,7 +25,7 @@ const skipPatterns = [
   /^abc1\//,
   /^abc2\//,
   /^collections\//,
-  /^education\//,
+  /^education\/something-else\//,
   /^privacy-policy\//,
   /^the-hamily-wagmi-allowlist\//,
   /^about\//,
