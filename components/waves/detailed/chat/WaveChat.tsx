@@ -152,7 +152,9 @@ export const WaveChat: React.FC<WaveChatProps> = ({
           <>
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="tw-fixed tw-right-0 tw-top-[6.25rem] tw-border-0 tw-z-50 tw-text-iron-500 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-700 tw-rounded-r-none tw-rounded-l-lg tw-size-8 tw-flex tw-items-center tw-justify-center tw-shadow-lg lg:tw-hidden"
+              className={`tw-fixed tw-right-0 tw-border-0 tw-z-[9999] tw-text-iron-500 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-700 tw-rounded-r-none tw-rounded-l-lg tw-size-8 tw-flex tw-items-center tw-justify-center tw-shadow-lg ${
+                capacitor.isCapacitor ? "tw-top-[10.5rem]" : "tw-top-[6.25rem]"
+              }`}
             >
               {isSidebarOpen ? (
                 <svg
@@ -188,8 +190,10 @@ export const WaveChat: React.FC<WaveChatProps> = ({
             </button>
 
             <div
-              className="tw-transition-transform lg:tw-transform-none tw-duration-300 
-            lg:tw-fixed xl:tw-static lg:tw-right-0 lg:tw-top-0 lg:tw-h-full lg:tw-z-10"
+              className={`tw-transition-transform lg:tw-transform-none tw-duration-300 
+              lg:tw-fixed xl:tw-static lg:tw-right-0 lg:tw-top-0 lg:tw-h-full lg:tw-z-10 ${
+                capacitor.isCapacitor ? "tw-pt-4" : ""
+              }`}
             >
               <WaveDetailedRightSidebar
                 isOpen={isSidebarOpen}
