@@ -1,12 +1,13 @@
+import React, { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { WaveHeaderPinnedSide } from "../../waves/detailed/header/WaveHeader";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import React, { useState } from "react";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import WaveHeader from "../../waves/detailed/header/WaveHeader";
 import BrainRightSidebarContent from "../right-sidebar/BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "../right-sidebar/BrainRightSidebarFollowers";
+import useCapacitor from "../../../hooks/useCapacitor";
 
 interface BrainMobileAboutProps {
   readonly activeWaveId: string | null;
@@ -32,6 +33,11 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   });
 
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
+  const capacitor = useCapacitor();
+
+  const containerClassName = `tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0${
+    capacitor.isCapacitor ? " tw-pb-[calc(4rem+88px)]" : ""
+  }`;
 
   const onFollowersClick = () => {
     if (mode === Mode.FOLLOWERS) {
@@ -42,7 +48,7 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   };
 
   return (
-    <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+    <div className={containerClassName}>
       {wave && (
         <>
           <WaveHeader

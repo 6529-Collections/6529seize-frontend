@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import useCapacitor from "../../../hooks/useCapacitor";
 import { ApiWave } from "../../../generated/models/ObjectSerializer";
 import { WaveDetailedOutcomes } from "./outcome/WaveDetailedOutcomes";
 import { WaveDetailedSmallLeaderboard } from "./small-leaderboard/WaveDetailedSmallLeaderboard";
@@ -29,6 +30,7 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
   const [activeTab, setActiveTab] = useState<WaveDetailedRightSidebarTab>(
     WaveDetailedRightSidebarTab.Leaderboard
   );
+  const capacitor = useCapacitor();
 
   const components: Record<WaveDetailedRightSidebarTab, React.ReactNode> = {
     [WaveDetailedRightSidebarTab.Leaderboard]: (
@@ -39,9 +41,14 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
     ),
   };
 
+  const containerClassName = ` ${
+    capacitor.isCapacitor ? "tw-pb-20" : ""
+  } tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col tw-w-full lg:tw-w-[20.5rem] 3xl:tw-w-
+      [28rem] tw-border-solid tw-border-l-2 tw-border-iron-800 tw-border-y-0 tw-border-b-0 tw-border-r-0`;
+
   return (
     <motion.div
-      className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col tw-w-full lg:tw-w-[20.5rem] 3xl:tw-w-[28rem] tw-border-solid tw-border-l-2 tw-border-iron-800 tw-border-y-0 tw-border-b-0 tw-border-r-0"
+      className={containerClassName}
       initial={false}
       animate={{ x: isOpen ? 0 : "100%" }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -49,7 +56,14 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
       <div className="tw-hidden lg:tw-block">
         <WaveDetailedRightSidebarToggle isOpen={isOpen} onToggle={onToggle} />
       </div>
-      <div className="tw-pt-[5.6rem] xl:tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
+      <div
+        className={` ${
+          capacitor.isCapacitor
+            ? "tw-pt-[10rem]"
+            : "tw-pt-[5.6rem] xl:tw-pt-[6.25rem]"
+        }  tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar 
+      tw-h-full`}
+      >
         <WaveDetailedRightSidebarTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}

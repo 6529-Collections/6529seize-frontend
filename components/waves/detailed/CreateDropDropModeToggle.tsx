@@ -1,27 +1,92 @@
 import Tippy from "@tippyjs/react";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
+import {
+  ChatRestriction,
+  DropPrivileges,
+  SubmissionRestriction,
+} from "../../../hooks/useDropPriviledges";
 
 interface CreateDropDropModeToggleProps {
   readonly isDropMode: boolean;
   readonly onDropModeChange: (isDropMode: boolean) => void;
-  readonly disabled?: boolean;
+  readonly privileges: DropPrivileges;
 }
 
 export const CreateDropDropModeToggle: React.FC<
   CreateDropDropModeToggleProps
-> = ({ isDropMode, onDropModeChange, disabled }) => {
+> = ({ isDropMode, onDropModeChange, privileges }) => {
+  const { chatRestriction, submissionRestriction } = privileges;
+  const isDisabled = isDropMode
+    ? chatRestriction || submissionRestriction
+    : chatRestriction || submissionRestriction;
+  const canToggle = isDropMode ? !chatRestriction : !submissionRestriction;
+
+  const getRestrictionMessage = (
+    restriction: ChatRestriction | SubmissionRestriction,
+    isChat: boolean
+  ): string => {
+    switch (restriction) {
+      case ChatRestriction.NOT_LOGGED_IN:
+      case SubmissionRestriction.NOT_LOGGED_IN:
+        return `Please log in to ${isChat ? "drop" : "chat"}`;
+      case ChatRestriction.PROXY_USER:
+      case SubmissionRestriction.PROXY_USER:
+        return `Proxy users cannot ${isChat ? "drop" : "chat"}`;
+      case ChatRestriction.NO_PERMISSION:
+      case SubmissionRestriction.NO_PERMISSION:
+        return `You don't have permission to ${isChat ? "drop" : "chat"}`;
+      case ChatRestriction.DISABLED:
+        return "Chat is currently disabled";
+      case SubmissionRestriction.NOT_STARTED:
+        return "Drop submissions haven't started yet";
+      case SubmissionRestriction.ENDED:
+        return "Drop submissions have ended";
+      default:
+        return `${isChat ? "Drop" : "Chat"} mode is unavailable`;
+    }
+  };
+
+  const tooltipContent = useMemo(() => {
+    if (!isDisabled) {
+      return (
+        <span className="tw-text-xs">
+          Switch to {isDropMode ? "Chat" : "Drop"} Mode
+        </span>
+      );
+    }
+
+    if (chatRestriction && submissionRestriction) {
+      return (
+        <div className="tw-text-xs tw-space-y-1">
+          <div>{getRestrictionMessage(chatRestriction, !isDropMode)}</div>
+          <div>{getRestrictionMessage(submissionRestriction, isDropMode)}</div>
+        </div>
+      );
+    }
+
+    const restriction = isDropMode ? chatRestriction : submissionRestriction;
+    return (
+      <span className="tw-text-xs">
+        {getRestrictionMessage(
+          restriction || ChatRestriction.NO_PERMISSION,
+          !isDropMode
+        )}
+      </span>
+    );
+  }, [isDropMode, isDisabled, chatRestriction, submissionRestriction]);
+
+
   return (
-    <Tippy
-      content={<span className="tw-text-xs">Drop Mode</span>}
-      placement="top"
-    >
+    <Tippy content={tooltipContent} placement="top">
       <div>
         <button
           type="button"
-          onClick={() => onDropModeChange(!isDropMode)}
-          disabled={disabled}
+          onClick={canToggle ? () => onDropModeChange(!isDropMode) : undefined}
+          disabled={!!isDisabled}
           className={`tw-flex-shrink-0 tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90 ${
-            disabled
+            isDisabled && isDropMode
+              ? "tw-opacity-50 tw-cursor-not-allowed tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"
+              : isDisabled
               ? "tw-opacity-50 tw-cursor-not-allowed"
               : isDropMode
               ? "tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"

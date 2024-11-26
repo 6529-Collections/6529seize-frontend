@@ -1,5 +1,5 @@
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import { WaveDetailedView } from "./WaveDetailed";
@@ -43,6 +43,14 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   const [activeView, setActiveView] = useState<WaveDetailedMobileView>(
     WaveDetailedMobileView.CHAT
   );
+
+  const [forceRender, setForceRender] = useState(0);
+
+  useLayoutEffect(() => {
+    if (activeDrop) {
+      setForceRender(prev => prev + 1);
+    }
+  }, [activeDrop]);
 
   const getIsAuthorAndNotProxy = () =>
     connectedProfile?.profile?.handle === wave.author.handle &&
@@ -158,14 +166,16 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
       <div className="lg:tw-flex lg:tw-items-start lg:tw-justify-center lg:tw-gap-x-4">
         {components[activeView]}
       </div>
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {activeDrop && (
           <motion.div
+            key={`drop-${activeDrop.id}-${forceRender}`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="tw-absolute lg:tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
+            style={{ willChange: 'transform' }}
           >
             <WaveDrop
               drop={activeDrop}
