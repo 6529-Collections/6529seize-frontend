@@ -107,7 +107,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
 
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className={`tw-fixed tw-right-0 tw-border-0 tw-z-[100] tw-text-iron-500 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-700 tw-rounded-r-none tw-rounded-l-lg tw-size-8 tw-flex tw-items-center tw-justify-center tw-shadow-lg desktop-hover:hover:tw-shadow-primary-400/20 ${
+        className={`lg:tw-hidden tw-fixed tw-right-0 tw-border-0 tw-z-[100] tw-text-iron-500 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-700 tw-rounded-r-none tw-rounded-l-lg tw-size-8 tw-flex tw-items-center tw-justify-center tw-shadow-lg desktop-hover:hover:tw-shadow-primary-400/20 ${
           capacitor.isCapacitor ? "tw-top-[10.5rem]" : "tw-top-[6.25rem]"
         }`}
       >
