@@ -38,7 +38,7 @@ export default function WaveHeader({
 
   const ringClasses = useRing
     ? "tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
-    : "";
+    : "tw-rounded-t-xl lg:tw-rounded-t-none";
 
   return (
     <div>
