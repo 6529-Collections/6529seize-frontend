@@ -144,6 +144,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
           isOpen={isSidebarOpen}
           wave={wave}
           onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          onDropClick={setActiveDrop}
         />
       </div>
     </>

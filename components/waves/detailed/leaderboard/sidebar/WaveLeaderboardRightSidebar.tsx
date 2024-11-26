@@ -5,11 +5,13 @@ import { WaveLeaderboardRightSidebarOpenToggle } from "./WaveLeaderboardRightSid
 import { WaveLeaderboardRightSidebarVoters } from "./WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "./WaveLeaderboardRightSidebarActivityLogs";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
+import { ExtendedDrop } from "../../../../../helpers/waves/wave-drops.helpers";
 
 interface WaveLeaderboardRightSidebarProps {
   readonly isOpen: boolean;
   readonly wave: ApiWave;
   readonly onToggle: () => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export enum WaveLeaderboardRightSidebarTab {
@@ -19,7 +21,7 @@ export enum WaveLeaderboardRightSidebarTab {
 
 const WaveLeaderboardRightSidebar: React.FC<
   WaveLeaderboardRightSidebarProps
-> = ({ isOpen, onToggle, wave }) => {
+> = ({ isOpen, onToggle, wave, onDropClick }) => {
   const [activeTab, setActiveTab] = useState<WaveLeaderboardRightSidebarTab>(
     WaveLeaderboardRightSidebarTab.VOTERS
   );
@@ -29,7 +31,10 @@ const WaveLeaderboardRightSidebar: React.FC<
       <WaveLeaderboardRightSidebarVoters wave={wave} />
     ),
     [WaveLeaderboardRightSidebarTab.ACTIVITY]: (
-      <WaveLeaderboardRightSidebarActivityLogs wave={wave} />
+      <WaveLeaderboardRightSidebarActivityLogs
+        wave={wave}
+        onDropClick={onDropClick}
+      />
     ),
   };
 

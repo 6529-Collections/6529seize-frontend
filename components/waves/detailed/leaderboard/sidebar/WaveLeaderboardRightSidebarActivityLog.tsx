@@ -1,20 +1,20 @@
-import React, { useState } from "react";
 import { ApiWaveLog } from "../../../../../generated/models/ApiWaveLog";
 import {
   formatNumberWithCommas,
   getTimeAgoShort,
 } from "../../../../../helpers/Helpers";
 import Link from "next/link";
+import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRightSidebarActivityLogDrop";
+import { ExtendedDrop } from "../../../../../helpers/waves/wave-drops.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   WaveLeaderboardRightSidebarActivityLogProps
-> = ({ log }) => {
-  const [showDrop, setShowDrop] = useState(false);
-
+> = ({ log, onDropClick }) => {
   return (
     <div className="tw-relative">
       <div className="tw-p-3 tw-rounded-lg tw-bg-iron-900">
@@ -39,41 +39,10 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             </span>
           </div>
 
-          <div className="tw-relative">
-            <button
-              onMouseEnter={() => setShowDrop(true)}
-              onMouseLeave={() => setShowDrop(false)}
-              className="tw-ml-auto tw-flex-shrink-0 tw-size-6 tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-md tw-bg-iron-800 tw-text-sm tw-font-semibold tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                aria-hidden="true"
-                className="tw-size-3.5 tw-flex-shrink-0"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                />
-              </svg>
-            </button>
-            {showDrop && (
-              <div className="tw-absolute tw-right-0 tw-top-full tw-mt-2 tw-w-72 tw-p-3 tw-rounded-lg tw-bg-iron-800 tw-shadow-lg tw-z-10">
-                <div className="tw-text-sm tw-text-iron-200 tw-line-clamp-3">
-                  {log.contents.content}
-                </div>
-              </div>
-            )}
-          </div>
+          <WaveLeaderboardRightSidebarActivityLogDrop
+            log={log}
+            onDropClick={onDropClick}
+          />
         </div>
         <div className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-2">
           <Link

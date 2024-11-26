@@ -3,6 +3,7 @@ import { ApiWave } from "../../../generated/models/ObjectSerializer";
 import CreateDrop from "./CreateDrop";
 import { useDropPrivileges } from "../../../hooks/useDropPriviledges";
 import { useAuth } from "../../auth/Auth";
+import DropPlaceholder from "./DropPlaceholder";
 
 export enum DropMode {
   CHAT = "CHAT",
@@ -37,18 +38,26 @@ export default function PrivilegedDropCreator({
   });
 
   if (!!submissionRestriction && !!chatRestriction) {
-    // TODO: Render something else
-    return <div>Both disabled</div>;
+    return (
+      <DropPlaceholder
+        type="both"
+        chatRestriction={chatRestriction}
+        submissionRestriction={submissionRestriction}
+      />
+    );
   }
 
   if (fixedDropMode === DropMode.CHAT && !!chatRestriction) {
-    // TODO: Render something else
-    return <div>Chat disabled</div>;
+    return <DropPlaceholder type="chat" chatRestriction={chatRestriction} />;
   }
 
   if (fixedDropMode === DropMode.PARTICIPATION && !!submissionRestriction) {
-    // TODO: Render something else
-    return <div>Submission disabled</div>;
+    return (
+      <DropPlaceholder
+        type="submission"
+        submissionRestriction={submissionRestriction}
+      />
+    );
   }
 
   return (

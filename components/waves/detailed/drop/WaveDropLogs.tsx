@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { useWaveActivityLogs } from "../../../../hooks/useWaveActivityLogs";
 import { useAuth } from "../../../auth/Auth";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
-import { WaveLeaderboardRightSidebarActivityLog } from "../leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLog";
 import { WaveDropLog } from "./WaveDropLog";
 
 interface WaveDropLogsProps {

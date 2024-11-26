@@ -39,6 +39,8 @@ import { ActiveDropAction, ActiveDropState } from "./chat/WaveChat";
 import { ApiReplyToDropResponse } from "../../../generated/models/ApiReplyToDropResponse";
 import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
 import { CreateDropSubmit } from "./CreateDropSubmit";
+import { DropPrivileges} from "../../../hooks/useDropPriviledges";
+
 
 export type CreateDropMetadataType =
   | {
@@ -68,13 +70,13 @@ interface CreateDropContentProps {
   readonly isStormMode: boolean;
   readonly isDropMode: boolean;
   readonly dropId: string | null;
-  readonly dropModeDisabled: boolean;
   readonly setDrop: React.Dispatch<
     React.SetStateAction<CreateDropConfig | null>
   >;
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly submitDrop: (dropRequest: ApiCreateDropRequest) => void;
+  readonly privileges: DropPrivileges;
 }
 
 interface MissingRequirements {
@@ -406,12 +408,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   drop,
   isStormMode,
   isDropMode,
-  dropModeDisabled,
   dropId,
   setDrop,
   setIsStormMode,
   onDropModeChange,
   submitDrop,
+  privileges,
 }) => {
   const breakpoint = useBreakpoint();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
@@ -891,7 +893,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               <CreateDropDropModeToggle
                 isDropMode={isDropMode}
                 onDropModeChange={onDropModeChange}
-                disabled={dropModeDisabled}
+                privileges={privileges}
               />
             )}
             <CreateDropSubmit

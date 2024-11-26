@@ -42,6 +42,7 @@ export default function CreateDrop({
   wave,
   dropId,
   fixedDropMode,
+  privileges,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -226,6 +227,7 @@ export default function CreateDrop({
       onDropModeChange,
       submitDrop,
       dropModeDisabled,
+      privileges,
     }),
     [
       activeDrop,
@@ -239,6 +241,7 @@ export default function CreateDrop({
       onDropModeChange,
       submitDrop,
       dropModeDisabled,
+      privileges,
     ]
   );
 

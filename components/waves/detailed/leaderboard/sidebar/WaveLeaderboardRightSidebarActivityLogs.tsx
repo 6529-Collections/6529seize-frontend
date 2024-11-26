@@ -5,14 +5,16 @@ import { useAuth } from "../../../../auth/Auth";
 import { useWaveActivityLogs } from "../../../../../hooks/useWaveActivityLogs";
 import { WaveLeaderboardRightSidebarActivityLog } from "./WaveLeaderboardRightSidebarActivityLog";
 import { useIntersectionObserver } from "../../../../../hooks/useIntersectionObserver";
+import { ExtendedDrop } from "../../../../../helpers/waves/wave-drops.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogsProps {
   readonly wave: ApiWave;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
   WaveLeaderboardRightSidebarActivityLogsProps
-> = ({ wave }) => {
+> = ({ wave, onDropClick }) => {
   const { connectedProfile } = useAuth();
   const { logs, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveActivityLogs({
@@ -67,7 +69,11 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
   return (
     <div className="tw-space-y-3">
       {logs.map((log) => (
-        <WaveLeaderboardRightSidebarActivityLog key={log.id} log={log} />
+        <WaveLeaderboardRightSidebarActivityLog
+          key={log.id}
+          log={log}
+          onDropClick={onDropClick}
+        />
       ))}
       {isFetchingNextPage && (
         <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
