@@ -58,7 +58,13 @@ const WaveLeaderboardRightSidebar: React.FC<
           onToggle={onToggle}
         />
       </div>
-      <div className={`tw-pt-[5.6rem] xl:tw-pt-[6.25rem] ${capacitor.isCapacitor ? "tw-pt-[10rem]" : ""} tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full`}>
+      <div
+        className={` ${
+          capacitor.isCapacitor
+            ? "tw-pt-[10rem]"
+            : "tw-pt-[5.6rem] xl:tw-pt-[6.25rem]"
+        } tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full`}
+      >
         <WaveLeaderboardRightSidebarTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
