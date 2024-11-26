@@ -50,6 +50,13 @@
 .logoIcon {
   height: auto;
   max-width: min(40vw, 250px);
+  position: relative;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02); /* Optional: Adds a slight zoom effect */
+    box-shadow: 0 0 20px 10px rgba(255, 215, 215, 0.3);
+  }
 }
 
 .headerRight {
@@ -321,10 +328,30 @@
 }
 
 .headerRowSmall {
-  min-height: 60px; 
+  min-height: 60px;
 }
 
 .logoIconSmall {
   height: auto;
-  max-width: min(30vw, 180px); 
+  max-width: min(30vw, 180px);
+}
+
+.submenuContainer {
+  position: relative;
+}
+
+.nestedMenu {
+  position: absolute;
+  border-top: 3px solid $font-color;
+  left: 100%;
+  top: 0;
+  display: none;
+  background-color: black;
+  padding: 0.5rem;
+  z-index: 1050;
+  min-width: 160px;
+}
+
+.submenuContainer:hover .nestedMenu {
+  display: block;
 }
