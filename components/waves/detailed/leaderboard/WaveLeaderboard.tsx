@@ -107,7 +107,9 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
 
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="tw-fixed tw-right-0 tw-top-[6.25rem] tw-border-0 tw-z-50 tw-text-iron-500 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-700 tw-rounded-r-none tw-rounded-l-lg tw-size-8 tw-flex tw-items-center tw-justify-center tw-shadow-lg desktop-hover:hover:tw-shadow-primary-400/202 lg:tw-hidden"
+        className={`tw-fixed tw-right-0 tw-border-0 tw-z-[100] tw-text-iron-500 desktop-hover:hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-700 tw-rounded-r-none tw-rounded-l-lg tw-size-8 tw-flex tw-items-center tw-justify-center tw-shadow-lg desktop-hover:hover:tw-shadow-primary-400/20 ${
+          capacitor.isCapacitor ? "tw-top-[10.5rem]" : "tw-top-[6.25rem]"
+        }`}
       >
         {isSidebarOpen ? (
           <svg
@@ -115,8 +117,8 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            aria-hidden="true"
             stroke="currentColor"
+            aria-hidden="true"
             className="tw-w-5 tw-h-5 tw-text-iron-300 tw-flex-shrink-0"
           >
             <path
@@ -143,8 +145,10 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
       </button>
 
       <div
-        className="tw-transition-transform lg:tw-transform-none tw-duration-300 
-        lg:tw-fixed xl:tw-static lg:tw-right-0 lg:tw-top-0 lg:tw-h-full lg:tw-z-10"
+        className={`tw-transition-transform lg:tw-transform-none tw-duration-300 
+        lg:tw-fixed xl:tw-static lg:tw-right-0 lg:tw-top-0 lg:tw-h-full lg:tw-z-10 ${
+          capacitor.isCapacitor ? "tw-pt-4" : ""
+        }`}
       >
         <WaveLeaderboardRightSidebar
           isOpen={isSidebarOpen}
