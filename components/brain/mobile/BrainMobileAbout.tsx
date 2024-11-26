@@ -42,7 +42,7 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   };
 
   return (
-    <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+    <div className="tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
       {wave && (
         <>
           <WaveHeader
