@@ -36,7 +36,7 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   const capacitor = useCapacitor();
 
   const containerClassName = `tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0${
-    capacitor.isCapacitor ? " tw-pb-[calc(4rem+80px)]" : ""
+    capacitor.isCapacitor ? " tw-pb-[calc(4rem+88px)]" : ""
   }`;
 
   const onFollowersClick = () => {
