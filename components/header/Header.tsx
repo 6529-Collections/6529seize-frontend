@@ -831,7 +831,6 @@ export default function Header(props: Readonly<Props>) {
                                 />
                               </NavDropdown>
                             )}
-
                             <NavDropdown
                               title="Collections"
                               align={"start"}
@@ -1026,6 +1025,12 @@ export default function Header(props: Readonly<Props>) {
                                       path: `/about/${AboutSection.MINTING}`,
                                     }}
                                   />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Nakamoto Threshold",
+                                      path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
+                                    }}
+                                  />
                                   <NavDropdown.Divider />
                                   <HeaderDesktopLink
                                     link={{
@@ -1124,12 +1129,6 @@ export default function Header(props: Readonly<Props>) {
                                 <div className={styles.nestedMenu}>
                                   <HeaderDesktopLink
                                     link={{
-                                      name: "Nakamoto Threshold",
-                                      path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-                                    }}
-                                  />
-                                  <HeaderDesktopLink
-                                    link={{
                                       name: "Data Decentralization",
                                       path: `/about/${AboutSection.DATA_DECENTR}`,
                                     }}
@@ -1146,14 +1145,14 @@ export default function Header(props: Readonly<Props>) {
                                       path: `/about/${AboutSection.LICENSE}`,
                                     }}
                                   />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Release Notes",
+                                      path: `/about/${AboutSection.RELEASE_NOTES}`,
+                                    }}
+                                  />
                                 </div>
                               </NavDropdown.Item>
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Release Notes",
-                                  path: `/about/${AboutSection.RELEASE_NOTES}`,
-                                }}
-                              />
                             </NavDropdown>
                             <HeaderUser />
                             {showWaves && <HeaderNotifications />}

@@ -333,7 +333,14 @@
 
 .logoIconSmall {
   height: auto;
-  max-width: min(30vw, 180px);
+  max-width: min(10vw, 40px);
+  position: relative;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02); /* Optional: Adds a slight zoom effect */
+    box-shadow: 0 0 20px 10px rgba(255, 215, 215, 0.3);
+  }
 }
 
 .submenuContainer {
