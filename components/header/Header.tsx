@@ -1,5 +1,13 @@
 import styles from "./Header.module.scss";
-import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Nav,
+  Navbar,
+  NavDropdown,
+  Dropdown,
+} from "react-bootstrap";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -15,9 +23,10 @@ import { useAuth } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
 import useCapacitor from "../../hooks/useCapacitor";
 import CapacitorWidget from "./capacitor/CapacitorWidget";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderQR from "./qr/HeaderQR";
+import useIsMobileScreen from "../../hooks/isMobileScreen";
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;
@@ -35,6 +44,8 @@ export default function Header(props: Readonly<Props>) {
   const capacitor = useCapacitor();
   const { address, seizeConnectOpen } = useSeizeConnectContext();
 
+  const isMobile = useIsMobileScreen();
+
   const { showWaves } = useAuth();
   const router = useRouter();
   const [consolidations, setConsolidations] = useState<string[]>([]);
@@ -47,18 +58,15 @@ export default function Header(props: Readonly<Props>) {
   const [showBurgerMenuTools, setShowBurgerMenuTools] = useState(false);
   const [showBurgerMenuBrain, setShowBurgerMenuBrain] = useState(false);
 
-  let logoSrc: string;
-  let logoWidth: number;
-  let logoHeight: number;
+  let logoSrc: string = "/6529.png";
+  let logoWidth: number = 60;
+  let logoHeight: number = 60;
   if (capacitor.isCapacitor) {
-    logoSrc =
-      "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png";
     logoWidth = 40;
     logoHeight = 40;
-  } else {
-    logoSrc =
-      "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses.png";
-    logoWidth = 319;
+  }
+  if (isMobile) {
+    logoWidth = 50;
     logoHeight = 50;
   }
 
@@ -799,32 +807,14 @@ export default function Header(props: Readonly<Props>) {
                             {showWaves && <HeaderNotifications />}
                             <HeaderSearchButton />
                           </div>
-                          {!capacitor.isCapacitor ? (
-                            <Image
-                              loading="eager"
-                              priority
-                              width="0"
-                              height="0"
-                              style={{
-                                height: "auto",
-                                width: "auto",
-                                maxHeight: "42px",
-                              }}
-                              className={`${styles.burgerMenuBtn} d-block `}
-                              src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
-                              alt="6529Seize"
-                              onClick={() => setBurgerMenuOpen(true)}
-                            />
-                          ) : (
-                            <button
-                              type="button"
-                              aria-label="Menu"
-                              title="Menu"
-                              onClick={() => setBurgerMenuOpen(true)}
-                              className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-11 tw-w-11 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out">
-                              <FontAwesomeIcon icon={faBars} height={20} />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            aria-label="Menu"
+                            title="Menu"
+                            onClick={() => setBurgerMenuOpen(true)}
+                            className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-11 tw-w-11 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                            <FontAwesomeIcon icon={faBars} height={20} />
+                          </button>
                         </div>
                         <Navbar
                           id="seize-navbar-nav"
@@ -1009,129 +999,167 @@ export default function Header(props: Readonly<Props>) {
                                   : ""
                               }`}
                               align={"start"}>
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "The Memes",
-                                  path: `/about/${AboutSection.MEMES}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Subscriptions",
-                                  path: "/about/subscriptions",
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Memes Calendar",
-                                  path: `/about/${AboutSection.MEMES_CALENDAR}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Meme Lab",
-                                  path: `/about/${AboutSection.MEME_LAB}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Gradient",
-                                  path: `/about/${AboutSection.GRADIENTS}`,
-                                }}
-                              />
-                              <NavDropdown.Divider />
+                              <NavDropdown.Item
+                                className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  NFTs
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "The Memes",
+                                      path: `/about/${AboutSection.MEMES}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Subscriptions",
+                                      path: "/about/subscriptions",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Memes Calendar",
+                                      path: `/about/${AboutSection.MEMES_CALENDAR}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Minting",
+                                      path: `/about/${AboutSection.MINTING}`,
+                                    }}
+                                  />
+                                  <NavDropdown.Divider />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Meme Lab",
+                                      path: `/about/${AboutSection.MEME_LAB}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Gradient",
+                                      path: `/about/${AboutSection.GRADIENTS}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Nakamoto Threshold",
+                                      path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
+                                    }}
+                                  />
+                                </div>
+                              </NavDropdown.Item>
                               <HeaderDesktopLink
                                 link={{
                                   name: "GDRC1",
                                   path: `/about/${AboutSection.GDRC1}`,
                                 }}
                               />
-                              <NavDropdown.Divider />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "NFT Delegation",
-                                  path: `/about/${AboutSection.NFT_DELEGATION}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Primary Address",
-                                  path: `/about/${AboutSection.PRIMARY_ADDRESS}`,
-                                }}
-                              />
-                              <NavDropdown.Divider />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "FAQ",
-                                  path: `/about/${AboutSection.FAQ}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "ENS",
-                                  path: `/about/${AboutSection.ENS}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Minting",
-                                  path: `/about/${AboutSection.MINTING}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Nakamoto Threshold",
-                                  path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "License",
-                                  path: `/about/${AboutSection.LICENSE}`,
-                                }}
-                              />
-                              <NavDropdown.Divider />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Apply",
-                                  path: `/about/${AboutSection.APPLY}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Contact Us",
-                                  path: `/about/${AboutSection.CONTACT_US}`,
-                                }}
-                              />
+                              <NavDropdown.Item
+                                className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  NFT Delegation
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "About NFTD",
+                                      path: `/about/${AboutSection.NFT_DELEGATION}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Primary Address",
+                                      path: `/about/${AboutSection.PRIMARY_ADDRESS}`,
+                                    }}
+                                  />
+                                </div>
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  Support
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <Link href={`/about/${AboutSection.FAQ}`}>
+                                    <HeaderDesktopLink
+                                      link={{
+                                        name: "FAQ",
+                                        path: `/about/${AboutSection.FAQ}`,
+                                      }}
+                                    />
+                                  </Link>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Apply",
+                                      path: `/about/${AboutSection.APPLY}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Contact Us",
+                                      path: `/about/${AboutSection.CONTACT_US}`,
+                                    }}
+                                  />
+                                </div>
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  Resources
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Nakamoto Threshold",
+                                      path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Data Decentralization",
+                                      path: `/about/${AboutSection.DATA_DECENTR}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "ENS",
+                                      path: `/about/${AboutSection.ENS}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "License",
+                                      path: `/about/${AboutSection.LICENSE}`,
+                                    }}
+                                  />
+                                </div>
+                              </NavDropdown.Item>
                               <HeaderDesktopLink
                                 link={{
                                   name: "Release Notes",
                                   path: `/about/${AboutSection.RELEASE_NOTES}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Data Decentralization",
-                                  path: `/about/${AboutSection.DATA_DECENTR}`,
-                                }}
-                              />
-                              <NavDropdown.Divider />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Terms of Service",
-                                  path: `/about/${AboutSection.TERMS_OF_SERVICE}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Privacy Policy",
-                                  path: `/about/${AboutSection.PRIVACY_POLICY}`,
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Cookie Policy",
-                                  path: `/about/${AboutSection.COOKIE_POLICY}`,
                                 }}
                               />
                             </NavDropdown>
@@ -1141,23 +1169,6 @@ export default function Header(props: Readonly<Props>) {
                             <HeaderSearchButton />
                           </Nav>
                         </Navbar>
-                        {!capacitor.isCapacitor && (
-                          <Image
-                            loading="eager"
-                            priority
-                            width="0"
-                            height="0"
-                            style={{
-                              height: "auto",
-                              width: "auto",
-                              maxHeight: "42px",
-                              paddingLeft: "15px",
-                            }}
-                            className={`d-none ${styles.dMdBlock}`}
-                            src="https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Icon.png"
-                            alt="6529Seize"
-                          />
-                        )}
                       </Container>
                     </Navbar>
                   </Container>
