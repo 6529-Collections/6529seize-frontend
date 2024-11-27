@@ -75,6 +75,7 @@ export function useWaveDrops(
         if (pageParam) {
           params.serial_no_less_than = `${pageParam}`;
         }
+
         return await commonApiFetch<ApiWaveDropsFeed>({
           endpoint: `waves/${waveId}/drops`,
           params,
@@ -130,6 +131,10 @@ export function useWaveDrops(
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: true,
   });
 
   useEffect(() => {
@@ -210,7 +215,7 @@ export function useWaveDrops(
 
   useEffect(() => {
     return () => {
-      queryClient.removeQueries({
+      queryClient.invalidateQueries({
         queryKey: [QueryKey.DROPS, { waveId }],
       });
     };
