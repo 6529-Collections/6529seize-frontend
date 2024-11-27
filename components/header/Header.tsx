@@ -113,6 +113,26 @@ export default function Header(props: Readonly<Props>) {
     }
   }, [seizeConnectOpen]);
 
+  function printMobileHr() {
+    return (
+      <Row>
+        <Col xs={{ span: 6, offset: 3 }}>
+          <hr />
+        </Col>
+      </Row>
+    );
+  }
+
+  function printMobileSubheader(name: string) {
+    return (
+      <Row>
+        <Col xs={{ span: 6, offset: 3 }}>
+          <h3 className={styles.burgerMenuSubheader}>{name}</h3>
+        </Col>
+      </Row>
+    );
+  }
+
   function printMobileRow(name: string, path: string) {
     return (
       <Row className="pt-3">
@@ -201,30 +221,10 @@ export default function Header(props: Readonly<Props>) {
               </Col>
               {showBurgerMenuBrain && (
                 <Container>
-                  <Row>
-                    <Col xs={{ span: 6, offset: 3 }}>
-                      <hr />
-                    </Col>
-                  </Row>
-                  <Row className="pt-3">
-                    <Col>
-                      <Link href="/my-stream">
-                        <h3>My Stream</h3>
-                      </Link>
-                    </Col>
-                  </Row>
-                  <Row className="pt-3">
-                    <Col>
-                      <Link href="/waves">
-                        <h3>Waves</h3>
-                      </Link>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col xs={{ span: 6, offset: 3 }}>
-                      <hr />
-                    </Col>
-                  </Row>
+                  {printMobileHr()}
+                  {printMobileRow("My Stream", "/my-stream")}
+                  {printMobileRow("Waves", "/waves")}
+                  {printMobileHr()}
                 </Container>
               )}
             </Row>
@@ -259,63 +259,13 @@ export default function Header(props: Readonly<Props>) {
             </Col>
             {showBurgerMenuCollections && (
               <Container>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/the-memes">
-                      <h3>The Memes</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/6529-gradient">
-                      <h3>Gradient</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/nextgen">
-                      <h3>
-                        <span>NextGen</span>
-                      </h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/meme-lab">
-                      <h3>Meme Lab</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/rememes">
-                      <h3>ReMemes</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
+                {printMobileHr()}
+                {printMobileRow("The Memes", "/the-memes")}
+                {printMobileRow("Gradient", "/6529-gradient")}
+                {printMobileRow("NextGen", "/nextgen")}
+                {printMobileRow("Meme Lab", "/meme-lab")}
+                {printMobileRow("ReMemes", "/rememes")}
+                {printMobileHr()}
               </Container>
             )}
           </Row>
@@ -347,82 +297,19 @@ export default function Header(props: Readonly<Props>) {
             </Col>
             {showBurgerMenuCommunity && (
               <Container>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/network">
-                      <h3>Members</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/network/activity">
-                      <h3>Activity</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/network/groups">
-                      <h3>Groups</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/nft-activity">
-                      <h3>NFT Activity</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/network/prenodes">
-                      <h3>Prenodes</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/network/metrics">
-                      <h3>Metrics</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/network/stats">
-                      <h3>Stats</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/network/levels">
-                      <h3>Levels</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
+                {printMobileHr()}
+                {printMobileRow("Members", "/network")}
+                {printMobileRow("Activity", "/network/activity")}
+                {printMobileRow("Groups", "/network/groups")}
+                {printMobileRow("NFT Activity", "/nft-activity")}
+                {printMobileHr()}
+                {printMobileRow("Prenodes", "/network/prenodes")}
+                {printMobileHr()}
+                {printMobileSubheader("Metrics")}
+                {printMobileRow("Definitions", "/network/metrics")}
+                {printMobileRow("Network Stats", "/network/stats")}
+                {printMobileRow("Levels", "/network/levels")}
+                {printMobileHr()}
               </Container>
             )}
           </Row>
@@ -454,68 +341,38 @@ export default function Header(props: Readonly<Props>) {
             </Col>
             {showBurgerMenuTools && (
               <Container>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/tools/subscriptions-report">
-                      <h3>Subscriptions Report</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/delegation/delegation-center">
-                      <h3>Delegation Center</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/emma">
-                      <h3>EMMA</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/meme-blocks">
-                      <h3>Meme Blocks</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href="/open-data">
-                      <h3>Open Data</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
+                {printMobileHr()}
+                {printMobileSubheader("NFT Delegation")}
+                {printMobileRow(
+                  "Delegation Center",
+                  "/delegation/delegation-center"
+                )}
+                {printMobileRow(
+                  "Wallet Architecture",
+                  "/delegation/wallet-architecture"
+                )}
+                {printMobileRow(
+                  "Delegation FAQs",
+                  "/delegation/delegation-faq"
+                )}
+                {printMobileRow(
+                  "Consolidation Use Cases",
+                  "/delegation/consolidation-use-cases"
+                )}
+                {printMobileRow("Wallet Checker", "/delegation/wallet-checker")}
+                {printMobileHr()}
+                {printMobileSubheader("The Memes Tools")}
+                {printMobileRow(
+                  "Memes Subscriptions",
+                  "/tools/subscriptions-report"
+                )}
                 {printMobileRow("Meme Accounting", "/meme-accounting")}
                 {printMobileRow("Meme Gas", "/meme-gas")}
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
+                {printMobileHr()}
+                {printMobileRow("EMMA", "/emma")}
+                {printMobileRow("Block Finder", "/meme-blocks")}
+                {printMobileRow("Open Data", "/open-data")}
+                {printMobileHr()}
               </Container>
             )}
           </Row>
@@ -539,181 +396,60 @@ export default function Header(props: Readonly<Props>) {
             </Col>
             {showBurgerMenuAbout && (
               <Container>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.MEMES}`}>
-                      <h3>The Memes</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.SUBSCRIPTIONS}`}>
-                      <h3>Subscriptions</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.MEMES_CALENDAR}`}>
-                      <h3>Memes Calendar</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.MEME_LAB}`}>
-                      <h3>Meme Lab</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.GRADIENTS}`}>
-                      <h3>Gradient</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.GDRC1}`}>
-                      <h3>GDRC1</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.NFT_DELEGATION}`}>
-                      <h3>NFT Delegation</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.PRIMARY_ADDRESS}`}>
-                      <h3>Primary Address</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.FAQ}`}>
-                      <h3>FAQ</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.ENS}`}>
-                      <h3>ENS</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.MINTING}`}>
-                      <h3>Minting</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.NAKAMOTO_THRESHOLD}`}>
-                      <h3>Nakamoto Threshold</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.LICENSE}`}>
-                      <h3>License</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.APPLY}`}>
-                      <h3>Apply</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.CONTACT_US}`}>
-                      <h3>Contact Us</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.RELEASE_NOTES}`}>
-                      <h3>Release Notes</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.DATA_DECENTR}`}>
-                      <h3>Data Decentralization</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.TERMS_OF_SERVICE}`}>
-                      <h3>Terms of Service</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.PRIVACY_POLICY}`}>
-                      <h3>Privacy Policy</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row className="pt-3">
-                  <Col>
-                    <Link href={`/about/${AboutSection.COOKIE_POLICY}`}>
-                      <h3>Cookie Policy</h3>
-                    </Link>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col xs={{ span: 6, offset: 3 }}>
-                    <hr />
-                  </Col>
-                </Row>
+                {printMobileHr()}
+                {printMobileSubheader("NFTs")}
+                {printMobileRow("The Memes", `/about/${AboutSection.MEMES}`)}
+                {printMobileRow(
+                  "Subscriptions",
+                  `/about/${AboutSection.SUBSCRIPTIONS}`
+                )}
+                {printMobileRow(
+                  "Memes Calendar",
+                  `/about/${AboutSection.MEMES_CALENDAR}`
+                )}
+                {printMobileRow("Minting", `/about/${AboutSection.MINTING}`)}
+                {printMobileRow(
+                  "Nakamoto Threshold",
+                  `/about/${AboutSection.NAKAMOTO_THRESHOLD}`
+                )}
+                {printMobileRow("Meme Lab", `/about/${AboutSection.MEME_LAB}`)}
+                {printMobileRow(
+                  "Gradients",
+                  `/about/${AboutSection.GRADIENTS}`
+                )}
+                {printMobileHr()}
+                {printMobileRow("GDRC1", `/about/${AboutSection.GDRC1}`)}
+                {printMobileHr()}
+                {printMobileSubheader("NFT Delegation")}
+                {printMobileRow(
+                  "About NFTD",
+                  `/about/${AboutSection.NFT_DELEGATION}`
+                )}
+                {printMobileRow(
+                  "Primary Address",
+                  `/about/${AboutSection.PRIMARY_ADDRESS}`
+                )}
+                {printMobileHr()}
+                {printMobileSubheader("Support")}
+                {printMobileRow("FAQ", `/about/${AboutSection.FAQ}`)}
+                {printMobileRow("Apply", `/about/${AboutSection.APPLY}`)}
+                {printMobileRow(
+                  "Contact Us",
+                  `/about/${AboutSection.CONTACT_US}`
+                )}
+                {printMobileHr()}
+                {printMobileSubheader("Resources")}
+                {printMobileRow(
+                  "Data Decentralization",
+                  `/about/${AboutSection.DATA_DECENTR}`
+                )}
+                {printMobileRow("ENS", `/about/${AboutSection.ENS}`)}
+                {printMobileRow("License", `/about/${AboutSection.LICENSE}`)}
+                {printMobileRow(
+                  "Release Notes",
+                  `/about/${AboutSection.RELEASE_NOTES}`
+                )}
+                {printMobileHr()}
               </Container>
             )}
           </Row>
@@ -835,14 +571,12 @@ export default function Header(props: Readonly<Props>) {
                                   path: "/6529-gradient",
                                 }}
                               />
-                              <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
                                   name: "NextGen",
                                   path: "/nextgen",
                                 }}
                               />
-                              <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
                                   name: "Meme Lab",
@@ -892,42 +626,116 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                               <NavDropdown.Divider />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Metrics",
-                                  path: "/network/metrics",
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Stats",
-                                  path: "/network/stats",
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Levels",
-                                  path: "/network/levels",
-                                }}
-                              />
+                              <NavDropdown.Item
+                                className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  Metrics
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Definitions",
+                                      path: "/network/metrics",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Network Stats",
+                                      path: "/network/stats",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Levels",
+                                      path: "/network/levels",
+                                    }}
+                                  />
+                                </div>
+                              </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown
                               title="Tools"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Subscriptions Report",
-                                  path: "/tools/subscriptions-report",
-                                }}
-                              />
-                              <NavDropdown.Divider />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Delegation Center",
-                                  path: "/delegation/delegation-center",
-                                }}
-                              />
+                              <NavDropdown.Item
+                                className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  NFT Delegation
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Delegation Center",
+                                      path: "/delegation/delegation-center",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Wallet Architecture",
+                                      path: "/delegation/wallet-architecture",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Delegation FAQs",
+                                      path: "/delegation/delegation-faq",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Consolidation Use Cases",
+                                      path: "/delegation/consolidation-use-cases",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Wallet Checker",
+                                      path: "/delegation/wallet-checker",
+                                    }}
+                                  />
+                                </div>
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  The Memes Tools
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Memes Subscriptions",
+                                      path: "/tools/subscriptions-report",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Memes Accounting",
+                                      path: "/meme-accounting",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Memes Gas",
+                                      path: "/meme-gas",
+                                    }}
+                                  />
+                                </div>
+                              </NavDropdown.Item>
                               <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
@@ -937,7 +745,7 @@ export default function Header(props: Readonly<Props>) {
                               />
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Meme Blocks",
+                                  name: "Block Finder",
                                   path: "/meme-blocks",
                                 }}
                               />
@@ -945,19 +753,6 @@ export default function Header(props: Readonly<Props>) {
                                 link={{
                                   name: "Open Data",
                                   path: "/open-data",
-                                }}
-                              />
-                              <NavDropdown.Divider />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Meme Accounting",
-                                  path: "/meme-accounting",
-                                }}
-                              />
-                              <HeaderDesktopLink
-                                link={{
-                                  name: "Meme Gas",
-                                  path: "/meme-gas",
                                 }}
                               />
                             </NavDropdown>
@@ -1025,12 +820,6 @@ export default function Header(props: Readonly<Props>) {
                                       path: `/about/${AboutSection.GRADIENTS}`,
                                     }}
                                   />
-                                  <HeaderDesktopLink
-                                    link={{
-                                      name: "Nakamoto Threshold",
-                                      path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-                                    }}
-                                  />
                                 </div>
                               </NavDropdown.Item>
                               <HeaderDesktopLink
@@ -1075,14 +864,12 @@ export default function Header(props: Readonly<Props>) {
                                   />
                                 </div>
                                 <div className={styles.nestedMenu}>
-                                  <Link href={`/about/${AboutSection.FAQ}`}>
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "FAQ",
-                                        path: `/about/${AboutSection.FAQ}`,
-                                      }}
-                                    />
-                                  </Link>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "FAQ",
+                                      path: `/about/${AboutSection.FAQ}`,
+                                    }}
+                                  />
                                   <HeaderDesktopLink
                                     link={{
                                       name: "Apply",
