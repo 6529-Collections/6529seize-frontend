@@ -298,7 +298,7 @@ export default function Header(props: Readonly<Props>) {
             {showBurgerMenuCommunity && (
               <Container>
                 {printMobileHr()}
-                {printMobileRow("Members", "/network")}
+                {printMobileRow("Identities", "/network")}
                 {printMobileRow("Activity", "/network/activity")}
                 {printMobileRow("Groups", "/network/groups")}
                 {printMobileRow("NFT Activity", "/nft-activity")}
@@ -596,7 +596,7 @@ export default function Header(props: Readonly<Props>) {
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <HeaderDesktopLink
                                 link={{
-                                  name: "Members",
+                                  name: "Identities",
                                   path: "/network",
                                 }}
                               />
