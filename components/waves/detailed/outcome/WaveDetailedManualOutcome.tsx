@@ -1,15 +1,35 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ApiWaveOutcome } from "../../../../generated/models/ApiWaveOutcome";
+import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 interface WaveDetailedManualOutcomeProps {
   readonly outcome: ApiWaveOutcome;
 }
 
+const DEFAULT_AMOUNTS_TO_SHOW = 3;
+
 export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
   outcome,
 }) => {
+
   const [isOpen, setIsOpen] = useState(false);
+  const winnersCount = outcome.distribution?.filter((d) => !!d).length ?? 0;
+  const totalCount = outcome.distribution?.length ?? 0;
+  const [showAll, setShowAll] = useState(false);
+
+  const getAmounts = (): number[] => {
+    if (showAll) {
+      return outcome.distribution?.map((d) => d ?? 0) ?? [];
+    }
+    return outcome.distribution?.slice(0, DEFAULT_AMOUNTS_TO_SHOW) ?? [];
+  };
+
+  const [amounts, setAmounts] = useState<number[]>(getAmounts());
+
+  useEffect(() => {
+    setAmounts(getAmounts());
+  }, [showAll]);
 
   return (
     <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700/50">
@@ -34,9 +54,16 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
               />
             </svg>
           </div>
-          <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
-            Manual
-          </span>
+
+          <div className="tw-text-left">
+            <span className="tw-text-iron-50 tw-text-sm tw-font-medium">
+              Manual
+            </span>
+            <div className="tw-text-xs tw-text-iron-400">
+              {formatNumberWithCommas(winnersCount)}{" "}
+              {winnersCount === 1 ? "Winner" : "Winners"}
+            </div>
+          </div>
         </div>
         <motion.svg
           xmlns="http://www.w3.org/2000/svg"
