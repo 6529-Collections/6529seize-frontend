@@ -96,7 +96,6 @@
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.4",
     "html-react-parser": "^5.1.18",
-    "htmltojsx": "^0.3.0",
     "lodash.camelcase": "^4.3.0",
     "next-unused": "^0.0.6",
     "nodemon": "^3.1.4",
