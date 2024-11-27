@@ -11,7 +11,6 @@ export enum WaveDetailedView {
   FOLLOWERS = "FOLLOWERS",
 }
 
-
 interface WaveDetailedProps {
   readonly wave: ApiWave;
 }
@@ -23,8 +22,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
     WaveDetailedView.CHAT
   );
 
-
-  const [activeWave, setActiveWave] = useState(wave);
+  const [activeWave, setActiveWave] = useState<ApiWave>(wave);
   const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);

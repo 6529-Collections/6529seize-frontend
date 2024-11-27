@@ -134,6 +134,7 @@ export * from '../models/ApiWaveMetrics';
 export * from '../models/ApiWaveMin';
 export * from '../models/ApiWaveOutcome';
 export * from '../models/ApiWaveOutcomeCredit';
+export * from '../models/ApiWaveOutcomeDistributionItem';
 export * from '../models/ApiWaveOutcomeSubType';
 export * from '../models/ApiWaveOutcomeType';
 export * from '../models/ApiWaveParticipationConfig';
@@ -173,7 +174,7 @@ import { ApiChangeProfileCicRatingResponse } from '../models/ApiChangeProfileCic
 import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
 import { ApiChangeProfileRepRatingResponse } from '../models/ApiChangeProfileRepRatingResponse';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
-import { ApiCreateDropRequest         } from '../models/ApiCreateDropRequest';
+import { ApiCreateDropRequest          } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
 import { ApiCreateMediaUploadUrlRequest } from '../models/ApiCreateMediaUploadUrlRequest';
@@ -285,6 +286,7 @@ import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
 import { ApiWaveMin } from '../models/ApiWaveMin';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
+import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
@@ -462,6 +464,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveMetrics": ApiWaveMetrics,
     "ApiWaveMin": ApiWaveMin,
     "ApiWaveOutcome": ApiWaveOutcome,
+    "ApiWaveOutcomeDistributionItem": ApiWaveOutcomeDistributionItem,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
     "ApiWaveRequiredMetadata": ApiWaveRequiredMetadata,
     "ApiWaveScope": ApiWaveScope,
