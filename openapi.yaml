@@ -3049,6 +3049,8 @@ components:
           $ref: "#/components/schemas/ApiReplyToDrop"
         drop_type:
           $ref: "#/components/schemas/ApiDropType"
+        mentions_all:
+          type: boolean
     ApiCreateGroup:
       type: object
       required:
@@ -5068,6 +5070,9 @@ components:
       type: object
       allOf:
         - $ref: "#/components/schemas/ApiCreateWaveDropRequest"
+      properties:
+        mentions_all:
+          type: boolean
     ApiUpdateProxyActionRequest:
       type: object
       properties:
@@ -5403,7 +5408,17 @@ components:
         distribution:
           type: array
           items:
-            type: number
+            $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
+    ApiWaveOutcomeDistributionItem:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: int64
+          nullable: true
+        description:
+          type: string
+          nullable: true
     ApiWaveOutcomeCredit:
       type: string
       enum:

@@ -19,9 +19,13 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
 
   const getAmounts = (): number[] => {
     if (showAll) {
-      return outcome.distribution?.map((d) => d ?? 0) ?? [];
+      return outcome.distribution?.map((d) => d.amount ?? 0) ?? [];
     }
-    return outcome.distribution?.slice(0, DEFAULT_AMOUNTS_TO_SHOW) ?? [];
+    return (
+      outcome.distribution
+        ?.slice(0, DEFAULT_AMOUNTS_TO_SHOW)
+        .map((d) => d.amount ?? 0) ?? []
+    );
   };
   const [amounts, setAmounts] = useState<number[]>(getAmounts());
 
