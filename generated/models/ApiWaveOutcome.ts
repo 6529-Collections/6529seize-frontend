@@ -11,6 +11,7 @@
  */
 
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
+import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
 import { ApiWaveOutcomeSubType } from '../models/ApiWaveOutcomeSubType';
 import { ApiWaveOutcomeType } from '../models/ApiWaveOutcomeType';
 import { HttpFile } from '../http/http';
@@ -22,7 +23,7 @@ export class ApiWaveOutcome {
     'credit'?: ApiWaveOutcomeCredit;
     'rep_category'?: string;
     'amount'?: number;
-    'distribution'?: Array<number>;
+    'distribution'?: Array<ApiWaveOutcomeDistributionItem>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -66,7 +67,7 @@ export class ApiWaveOutcome {
         {
             "name": "distribution",
             "baseName": "distribution",
-            "type": "Array<number>",
+            "type": "Array<ApiWaveOutcomeDistributionItem>",
             "format": ""
         }    ];
 

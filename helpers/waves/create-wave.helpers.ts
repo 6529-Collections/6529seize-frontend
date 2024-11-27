@@ -439,7 +439,7 @@ const getRankOutcomes = ({
         amount: outcome.winnersConfig.totalAmount,
         distribution: getOutcomesDistribution({
           winnersConfig: outcome.winnersConfig,
-        }),
+        }).map((amount) => ({ amount })),
       });
     } else if (
       outcome.type === CreateWaveOutcomeType.NIC &&
@@ -453,7 +453,7 @@ const getRankOutcomes = ({
         amount: outcome.winnersConfig.totalAmount,
         distribution: getOutcomesDistribution({
           winnersConfig: outcome.winnersConfig,
-        }),
+        }).map((amount) => ({ amount })),
       });
     }
   }
