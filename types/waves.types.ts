@@ -46,7 +46,7 @@ export interface CreateWaveDropsConfig {
 }
 
 export interface CreateWaveVotingConfig {
-  readonly type: ApiWaveCreditType;
+  readonly type: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
 }

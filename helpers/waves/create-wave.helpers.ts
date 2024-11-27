@@ -2,6 +2,7 @@ import { ApiCreateNewWave } from "../../generated/models/ApiCreateNewWave";
 import { ApiCreateWaveDropRequest } from "../../generated/models/ApiCreateWaveDropRequest";
 import { ApiIntRange } from "../../generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "../../generated/models/ApiWaveCreditScope";
+import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
 import { ApiWaveOutcome } from "../../generated/models/ApiWaveOutcome";
 import { ApiWaveOutcomeCredit } from "../../generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "../../generated/models/ApiWaveOutcomeSubType";
@@ -28,6 +29,9 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.OVERVIEW:
       return CreateWaveStep.GROUPS;
     case CreateWaveStep.GROUPS:
+      if (waveType === ApiWaveType.Chat) {
+        return CreateWaveStep.DESCRIPTION;
+      }
       return CreateWaveStep.DATES;
     case CreateWaveStep.DATES:
       return CreateWaveStep.DROPS;
@@ -68,6 +72,9 @@ export const getCreateWavePreviousStep = ({
     case CreateWaveStep.DATES:
       return CreateWaveStep.GROUPS;
     case CreateWaveStep.DROPS:
+      if (waveType === ApiWaveType.Chat) {
+        return CreateWaveStep.GROUPS;
+      }
       return CreateWaveStep.DATES;
     case CreateWaveStep.VOTING:
       return CreateWaveStep.DROPS;
@@ -80,7 +87,7 @@ export const getCreateWavePreviousStep = ({
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.VOTING;
+        return CreateWaveStep.GROUPS;
       }
       return CreateWaveStep.OUTCOMES;
     default:
@@ -312,7 +319,7 @@ export const getCreateNewWaveBody = ({
       scope: {
         group_id: config.groups.canVote,
       },
-      credit_type: config.voting.type,
+      credit_type: config.voting.type ?? ApiWaveCreditType.Tdh,
       credit_scope: ApiWaveCreditScope.Wave,
       credit_category: config.voting.category,
       creditor_id: config.voting.profileId,

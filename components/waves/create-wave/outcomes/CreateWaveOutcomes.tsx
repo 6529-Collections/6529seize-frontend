@@ -10,7 +10,7 @@ import {
 } from "../../../../types/waves.types";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
 
 export default function WavesOutcome({
   outcomes,
