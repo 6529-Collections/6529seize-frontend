@@ -51,7 +51,7 @@
   height: auto;
   max-width: min(40vw, 250px);
   position: relative;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: box-shadow 0.1s ease, transform 0.1s ease;
 
   &:hover {
     transform: scale(1.02); /* Optional: Adds a slight zoom effect */
@@ -130,6 +130,9 @@
 .burgerMenuClose {
   width: 35px;
   cursor: pointer;
+  position: fixed;
+  right: 20px;
+  top: 20px;
 }
 
 .mainNavLink {
@@ -335,7 +338,7 @@
   height: auto;
   max-width: min(10vw, 40px);
   position: relative;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: box-shadow 0.1s ease, transform 0.1s ease;
 
   &:hover {
     transform: scale(1.02); /* Optional: Adds a slight zoom effect */
@@ -361,4 +364,8 @@
 
 .submenuContainer:hover .nestedMenu {
   display: block;
+}
+
+.burgerMenuSubheader {
+  color: $font-color-h !important;
 }
