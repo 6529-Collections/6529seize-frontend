@@ -102,10 +102,6 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       await commonApiPost({ endpoint: `policies/cookies-consent`, body: {} });
       Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 365 });
       Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 365 });
-      setToast({
-        type: "success",
-        message: "Cookie policy accepted!",
-      });
       getCookieConsent();
     } catch (error) {
       console.error("Failed to post cookie consent", error);
