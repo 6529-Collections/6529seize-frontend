@@ -24,7 +24,7 @@ const calculateNIC = ({
     (outcome) => outcome.credit === ApiWaveOutcomeCredit.Cic
   );
   const nic = nicOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1] ?? 0);
+    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
   }, 0);
   return nic;
 };
@@ -43,7 +43,7 @@ const calculateRep = ({
     (outcome) => outcome.credit === ApiWaveOutcomeCredit.Rep
   );
   const rep = repOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1] ?? 0);
+    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
   }, 0);
   return rep;
 };
