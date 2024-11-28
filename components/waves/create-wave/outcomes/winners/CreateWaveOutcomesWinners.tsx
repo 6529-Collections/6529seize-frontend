@@ -82,12 +82,12 @@ export default function CreateWaveOutcomesWinners({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
-      <div className="tw-inline-flex tw-items-center tw-space-x-8">
+      {/* <div className="tw-inline-flex tw-items-center tw-space-x-8">
         <CreateWaveOutcomesWinnersCreditTypes
           activeCreditType={winnersConfig.creditValueType}
           setActiveCreditType={onCreditType}
         />
-      </div>
+      </div> */}
       {totalValueError && (
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <svg

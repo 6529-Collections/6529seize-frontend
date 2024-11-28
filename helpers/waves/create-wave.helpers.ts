@@ -202,7 +202,7 @@ const getRankOutcomes = ({
         description: outcome.title,
         distribution: getOutcomesDistribution({
           winnersConfig: outcome.winnersConfig,
-        }).map((amount) => ({ amount })),
+        }).map(() => ({ amount: null, description: outcome.title })),
       });
     } else if (
       outcome.type === CreateWaveOutcomeType.REP &&
