@@ -111,6 +111,8 @@ export default function CreateWaveOutcomesManual({
         winners[pos - 1] = 1;
       });
 
+
+
       onOutcome({
         title: value,
         type: CreateWaveOutcomeType.MANUAL,

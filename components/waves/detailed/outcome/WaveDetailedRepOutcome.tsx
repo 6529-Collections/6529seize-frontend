@@ -14,7 +14,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
 }) => {
   console.log("outcome", outcome);
   const [isOpen, setIsOpen] = useState(false);
-  const winnersCount = outcome.distribution?.filter((d) => !!d).length ?? 0;
+  const winnersCount = outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
   const totalCount = outcome.distribution?.length ?? 0;
   const [showAll, setShowAll] = useState(false);
 

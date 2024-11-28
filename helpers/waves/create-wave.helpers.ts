@@ -139,52 +139,6 @@ const getWinningThreshold = ({
   }
 };
 
-const calculatePercentages = ({
-  values,
-  totalAmount,
-}: {
-  values: number[];
-  totalAmount: number;
-}): number[] => {
-  const sum = values.reduce((acc, value) => acc + value, 0);
-  if (sum !== totalAmount) {
-    throw new Error("Total amount does not match the sum of the values.");
-  }
-
-  // Calculate raw percentages and floor them
-  let percentages = values.map((value) =>
-    Math.floor((value / totalAmount) * 100)
-  );
-
-  // Calculate remaining points to distribute (due to rounding down)
-  const remainingPoints = 100 - percentages.reduce((acc, p) => acc + p, 0);
-
-  // Distribute remaining points to the largest original values first
-  const indexesOrderedByValue = values
-    .map((value, index) => ({ value, index }))
-    .sort((a, b) => b.value - a.value)
-    .map((item) => item.index);
-
-  for (let i = 0; i < remainingPoints; i++) {
-    percentages[indexesOrderedByValue[i % indexesOrderedByValue.length]]++;
-  }
-
-  return percentages;
-};
-
-const getOutcomesDistribution = ({
-  winnersConfig,
-}: {
-  readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig;
-}): number[] =>
-  winnersConfig.creditValueType ===
-  CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
-    ? winnersConfig.winners.map((winner) => +winner.value)
-    : calculatePercentages({
-        values: winnersConfig.winners.map((winner) => winner.value),
-        totalAmount: winnersConfig.totalAmount,
-      });
-
 const getRankOutcomes = ({
   config,
 }: {
@@ -200,9 +154,10 @@ const getRankOutcomes = ({
       outcomes.push({
         type: ApiWaveOutcomeType.Manual,
         description: outcome.title,
-        distribution: getOutcomesDistribution({
-          winnersConfig: outcome.winnersConfig,
-        }).map(() => ({ amount: null, description: outcome.title })),
+        distribution: outcome.winnersConfig.winners.map((winner) => ({
+          amount: winner.value,
+          description: outcome.title,
+        })),
       });
     } else if (
       outcome.type === CreateWaveOutcomeType.REP &&
@@ -216,9 +171,10 @@ const getRankOutcomes = ({
         credit: ApiWaveOutcomeCredit.Rep,
         rep_category: outcome.category,
         amount: outcome.winnersConfig.totalAmount,
-        distribution: getOutcomesDistribution({
-          winnersConfig: outcome.winnersConfig,
-        }).map((amount) => ({ amount })),
+        distribution: outcome.winnersConfig.winners.map((winner) => ({
+          amount: winner.value,
+          description: null,
+        })),
       });
     } else if (
       outcome.type === CreateWaveOutcomeType.NIC &&
@@ -230,9 +186,10 @@ const getRankOutcomes = ({
         description: "NIC distribution",
         credit: ApiWaveOutcomeCredit.Cic,
         amount: outcome.winnersConfig.totalAmount,
-        distribution: getOutcomesDistribution({
-          winnersConfig: outcome.winnersConfig,
-        }).map((amount) => ({ amount })),
+        distribution: outcome.winnersConfig.winners.map((winner) => ({
+          amount: winner.value,
+          description: null,
+        })),
       });
     }
   }

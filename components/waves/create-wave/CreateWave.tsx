@@ -501,6 +501,7 @@ export default function CreateWave({
   };
 
   const onComplete = async () => {
+
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -562,7 +563,6 @@ export default function CreateWave({
       picture: picture?.url ?? null,
       drop: dropRequest,
     });
-
     await addWaveMutation.mutateAsync(waveBody);
   };
 
