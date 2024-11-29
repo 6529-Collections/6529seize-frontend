@@ -26,7 +26,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   const prefetchWaveData = usePrefetchWaveData();
   const { data: wave } = useWaveData(waveId);
   const isMobile = useIsMobileDevice();
-  const isDropWave = wave?.wave.type !== ApiWaveType.Chat;
+  const isDropWave = wave && wave.wave.type !== ApiWaveType.Chat;
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
     if (currentWaveId === waveId) {
