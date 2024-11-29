@@ -879,6 +879,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               type={activeDrop?.action ?? null}
               submitting={submitting}
               isStormMode={isStormMode}
+              isDropMode={isDropMode}
               canSubmit={canSubmit}
               onEditorState={handleEditorStateChange}
               onReferencedNft={onReferencedNft}
@@ -900,6 +901,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
               submitting={submitting}
               canSubmit={canSubmit}
               onDrop={onDrop}
+              isDropMode={isDropMode}
             />
           </div>
         </div>

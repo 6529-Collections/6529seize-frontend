@@ -6,6 +6,7 @@ import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import Tippy from "@tippyjs/react";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: ApiWave;
@@ -21,6 +22,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
   const isMobile = useIsMobileDevice();
+  const isDropWave = wave.wave.type !== ApiWaveType.Chat;
 
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;

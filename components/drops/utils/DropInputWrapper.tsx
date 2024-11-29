@@ -25,7 +25,7 @@ export default function DropInputWrapper({
 
       case ProfileConnectedStatus.HAVE_PROFILE:
         if (!drop.wave.authenticated_user_eligible_to_chat) {
-          return "You are not eligible to create a drop in this wave";
+          return "You are not eligible to create a post in this wave";
         }
         return null;
       default:
