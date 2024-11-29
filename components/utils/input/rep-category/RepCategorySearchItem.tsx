@@ -23,7 +23,7 @@ export default function RepCategorySearchItem({
         } tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between  tw-rounded-lg tw-relative tw-select-none tw-px-2  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
         onClick={() => onSelect(category)}
       >
-        <div className="tw-w-44 tw-truncate">
+        <div className="tw-w-full tw-truncate">
           <span className="tw-text-sm tw-font-medium ">{category}</span>
           {isSelected && (
             <svg

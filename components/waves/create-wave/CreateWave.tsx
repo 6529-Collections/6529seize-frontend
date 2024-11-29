@@ -696,8 +696,8 @@ export default function CreateWave({
                   {!selectedOutcomeType && (
                     <div className="tw-mt-auto">
                       <CreateWaveActions
-                        setStep={(step) =>
-                          onStep({ step, direction: "forward" })
+                        setStep={(step, direction) =>
+                          onStep({ step, direction })
                         }
                         step={step}
                         config={config}
