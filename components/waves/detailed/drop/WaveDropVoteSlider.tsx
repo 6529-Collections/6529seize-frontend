@@ -4,25 +4,27 @@ import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 interface WaveDropVoteSliderProps {
-  readonly wave: ApiWave;
-  readonly drop: ApiDrop;
+  readonly voteValue: number | string;
+  readonly currentVoteValue: number;
+  readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
+  readonly availableCredit: number;
 }
 
 export const WaveDropVoteSlider: React.FC<WaveDropVoteSliderProps> = ({
-  wave,
-  drop,
+  voteValue,
+  setVoteValue,
+  currentVoteValue,
+  availableCredit,
 }) => {
-  const initialValue = drop.context_profile_context?.rating ?? 0;
-  const minValue = (drop.context_profile_context?.min_rating ?? 0);
-  const maxValue = (drop.context_profile_context?.max_rating ?? 0);
+  const minValue = currentVoteValue - availableCredit;
+  const maxValue = currentVoteValue + availableCredit;
   
-  const [value, setValue] = useState(initialValue);
   const [isDragging, setIsDragging] = useState(false);
 
-  const zeroPercentage = (-minValue / (maxValue - minValue)) * 100;
-  const currentPercentage = ((value - minValue) / (maxValue - minValue)) * 100;
+  const zeroPercentage = ((0 - minValue) / (maxValue - minValue)) * 100;
+  const currentPercentage = ((Number(typeof voteValue === 'string' ? 0 : voteValue) - minValue) / (maxValue - minValue)) * 100;
   
-  const progressBarStyle = value >= 0 
+  const progressBarStyle = Number(typeof voteValue === 'string' ? 0 : voteValue) >= 0 
     ? {
         left: `${zeroPercentage}%`,
         width: `${currentPercentage - zeroPercentage}%`
@@ -32,15 +34,15 @@ export const WaveDropVoteSlider: React.FC<WaveDropVoteSliderProps> = ({
         width: `${zeroPercentage - currentPercentage}%`
       };
 
-  const colorClasses = value >= 0
+  const colorClasses = Number(typeof voteValue === 'string' ? 0 : voteValue) >= 0
     ? "tw-bg-gradient-to-r tw-from-emerald-600 tw-to-emerald-500"
     : "tw-bg-gradient-to-r tw-from-rose-600 tw-to-rose-500";
 
-  const valueColorClasses = value >= 0
+  const valueColorClasses = Number(typeof voteValue === 'string' ? 0 : voteValue) >= 0
     ? "tw-text-emerald-400"
     : "tw-text-rose-400";
 
-  const thumbBorderColor = value >= 0 ? "tw-border-emerald-600" : "tw-border-rose-600";
+  const thumbBorderColor = Number(typeof voteValue === 'string' ? 0 : voteValue) >= 0 ? "tw-border-emerald-600" : "tw-border-rose-600";
 
   return (
     <div className="tw-flex tw-items-center tw-gap-4 tw-h-9">
@@ -55,8 +57,8 @@ export const WaveDropVoteSlider: React.FC<WaveDropVoteSliderProps> = ({
             type="range"
             min={minValue}
             max={maxValue}
-            value={value}
-            onChange={(e) => setValue(Number(e.target.value))}
+            value={typeof voteValue === 'string' ? 0 : voteValue}
+            onChange={(e) => setVoteValue(Number(e.target.value))}
             onMouseDown={() => setIsDragging(true)}
             onMouseUp={() => setIsDragging(false)}
             onTouchStart={() => setIsDragging(true)}
@@ -78,7 +80,7 @@ export const WaveDropVoteSlider: React.FC<WaveDropVoteSliderProps> = ({
 
       <div className={`tw-w-32 tw-text-right tw-font-medium ${valueColorClasses} tw-transition-all tw-duration-150 
         tw-whitespace-nowrap tw-overflow-hidden tw-text-ellipsis ${isDragging ? 'tw-scale-105' : ''}`}>
-        {formatNumberWithCommas(value)} TDH
+        {formatNumberWithCommas(typeof voteValue === 'string' ? 0 : voteValue)} TDH
       </div>
     </div>
   );

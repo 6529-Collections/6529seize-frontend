@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 
 interface WaveDropVoteInputProps {
   readonly voteValue: number | string;
+  readonly currentVoteValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
   readonly availableCredit: number;
 }
 
 export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
   voteValue,
+  currentVoteValue,
   setVoteValue,
   availableCredit,
 }) => {
@@ -25,7 +27,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
 
     const value = parseInt(inputValue);
     if (isNaN(value)) return;
-    setVoteValue(Math.min(Math.max(value, -availableCredit), availableCredit));
+    setVoteValue(Math.min(Math.max(value, currentVoteValue - availableCredit), currentVoteValue + availableCredit));
   };
 
   const [isPaused, setIsPaused] = useState(false);
@@ -90,8 +92,8 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
       const roundedValue = Math.round(newValue / delta) * delta;
 
       return Math.min(
-        Math.max(roundedValue, -availableCredit),
-        availableCredit
+        Math.max(roundedValue, currentVoteValue - availableCredit),
+        currentVoteValue + availableCredit
       );
     });
   };

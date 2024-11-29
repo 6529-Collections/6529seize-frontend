@@ -55,9 +55,11 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
                 ${isSliderMode 
                   ? 'tw-opacity-100 tw-translate-y-0' 
                   : 'tw-opacity-0 tw-translate-y-2 tw-pointer-events-none'}`}>
-                <WaveDropVoteSlider 
-                  wave={wave} 
-                  drop={drop}
+                <WaveDropVoteSlider
+                  voteValue={voteValue}
+                  currentVoteValue={drop.context_profile_context?.rating ?? 0}
+                  setVoteValue={setVoteValue}
+                  availableCredit={availableCredit}
                 />
               </div>
               <div className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
@@ -66,6 +68,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
                   : 'tw-opacity-0 tw-translate-y-2 tw-pointer-events-none'}`}>
                 <WaveDropVoteInput
                   voteValue={voteValue}
+                  currentVoteValue={drop.context_profile_context?.rating ?? 0}
                   setVoteValue={setVoteValue}
                   availableCredit={availableCredit}
                 />
