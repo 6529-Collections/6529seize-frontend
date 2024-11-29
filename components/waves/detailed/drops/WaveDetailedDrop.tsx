@@ -56,24 +56,24 @@ const getColorClasses = ({
   rank,
   isDrop,
 }: {
-  readonly isActiveDrop: boolean;
-  readonly rank: number | null;
-  readonly isDrop: boolean;
+  isActiveDrop: boolean;
+  rank: number | null;
+  isDrop: boolean;
 }): string => {
   if (isActiveDrop) {
     return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
   }
   if (!isDrop) return "tw-bg-iron-950";
-  if (rank === 1) {
-    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.6)_3.5%,rgba(45,40,35,0.75)_100%)] tw-ring-1 tw-ring-inset tw-ring-[#D9A962]/20 tw-shadow-[inset_0_0_12px_rgba(217,169,98,0.05)]";
-  }
-  if (rank === 2) {
-    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.8)_3.5%,rgba(35,35,36,0.9)_100%)] tw-ring-1 tw-ring-inset tw-ring-[#DDDDDD]/20 tw-shadow-[inset_0_0_16px_rgba(221,221,221,0.08)]";
-  }
-  if (rank === 3) {
-    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.6)_3.5%,rgba(45,40,35,0.75)_100%)] tw-ring-1 tw-ring-inset tw-ring-[#D9A962]/20 tw-shadow-[inset_0_0_12px_rgba(217,169,98,0.05)]";
-  }
-  return "tw-bg-[#19191D] tw-ring-1 tw-ring-inset tw-ring-iron-800";
+
+  const rankClass = rank === 1
+    ? "tw-border tw-border-solid tw-border-[#E8D48A]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(66,56,41,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(217,169,98,0.15)] hover:tw-shadow-[inset_0_0_25px_rgba(217,169,98,0.2)]"
+    : rank === 2
+    ? "tw-border tw-border-solid tw-border-[#DDDDDD]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(45,45,50,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(192,192,192,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(192,192,192,0.15)]"
+    : rank === 3
+    ? "tw-border tw-border-solid tw-border-[#CD7F32]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(60,46,36,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(205,127,50,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(205,127,50,0.15)]"
+    : "tw-border tw-border-solid tw-border tw-border-iron-600/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.95)_0%,rgba(35,35,40,0.98)_100%)] tw-shadow-[inset_0_0_16px_rgba(255,255,255,0.03)] hover:tw-shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]";
+
+  return ` ${rankClass} tw-transition-shadow tw-duration-300`.trim();
 };
 
 const getDropClasses = (
@@ -90,10 +90,12 @@ const getDropClasses = (
     !isDrop && "tw-ring-1 tw-ring-inset tw-ring-iron-800"
   }`;
 
+  const chatDropClasses = isDrop ? "tw-rounded-lg tw-my-0.5" : "";
+
   const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop });
 
   return `${baseClasses} ${groupingClass} ${
-    location === DropLocation.MY_STREAM ? streamClasses : ""
+    location === DropLocation.MY_STREAM ? streamClasses : chatDropClasses
   } ${rankClasses}`.trim();
 };
 
@@ -215,13 +217,7 @@ const WaveDetailedDrop = ({
     };
   }, []);
 
-  const dropClasses = getDropClasses(
-    isActiveDrop,
-    groupingClass,
-    location,
-    drop.rank,
-    isDrop
-  );
+  const dropClasses = getDropClasses(isActiveDrop, groupingClass, location, drop.rank, isDrop);
 
   const onContainerClick = () => {
     if (drop.drop_type === ApiDropType.Participatory) {
@@ -231,7 +227,7 @@ const WaveDetailedDrop = ({
 
   return (
     <div
-      className={isDrop && location === DropLocation.WAVE ? "tw-py-0.5" : ""}
+      className={`${isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""} tw-w-full`}
     >
       <div
         className={dropClasses}
@@ -255,7 +251,7 @@ const WaveDetailedDrop = ({
           )}
         <div
           onClick={onContainerClick}
-          className={`tw-flex tw-gap-x-3 ${
+          className={`tw-flex tw-gap-x-3 tw-relative tw-z-10 ${
             drop.drop_type === ApiDropType.Participatory
               ? "tw-cursor-pointer"
               : ""

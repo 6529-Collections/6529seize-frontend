@@ -22,6 +22,7 @@ export class ApiCreateDropRequest {
     'wave_id': string;
     'reply_to'?: ApiReplyToDrop;
     'drop_type'?: ApiDropType;
+    'mentions_all'?: boolean;
     'title'?: string | null;
     'parts': Array<ApiCreateDropPart>;
     'referenced_nfts': Array<ApiDropReferencedNFT>;
@@ -47,6 +48,12 @@ export class ApiCreateDropRequest {
             "name": "drop_type",
             "baseName": "drop_type",
             "type": "ApiDropType",
+            "format": ""
+        },
+        {
+            "name": "mentions_all",
+            "baseName": "mentions_all",
+            "type": "boolean",
             "format": ""
         },
         {

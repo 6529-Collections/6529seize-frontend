@@ -12,16 +12,21 @@ const DEFAULT_AMOUNTS_TO_SHOW = 3;
 export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
   outcome,
 }) => {
+  console.log("outcome", outcome);
   const [isOpen, setIsOpen] = useState(false);
-  const winnersCount = outcome.distribution?.filter((d) => !!d).length ?? 0;
+  const winnersCount = outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
   const totalCount = outcome.distribution?.length ?? 0;
   const [showAll, setShowAll] = useState(false);
 
   const getAmounts = (): number[] => {
     if (showAll) {
-      return outcome.distribution?.map((d) => d ?? 0) ?? [];
+      return outcome.distribution?.map((d) => d.amount ?? 0) ?? [];
     }
-    return outcome.distribution?.slice(0, DEFAULT_AMOUNTS_TO_SHOW) ?? [];
+    return (
+      outcome.distribution
+        ?.slice(0, DEFAULT_AMOUNTS_TO_SHOW)
+        .map((d) => d.amount ?? 0) ?? []
+    );
   };
   const [amounts, setAmounts] = useState<number[]>(getAmounts());
 

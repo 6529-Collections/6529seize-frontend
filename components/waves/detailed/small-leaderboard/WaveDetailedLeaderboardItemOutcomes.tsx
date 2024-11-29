@@ -24,7 +24,7 @@ const calculateNIC = ({
     (outcome) => outcome.credit === ApiWaveOutcomeCredit.Cic
   );
   const nic = nicOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1] ?? 0);
+    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
   }, 0);
   return nic;
 };
@@ -43,9 +43,27 @@ const calculateRep = ({
     (outcome) => outcome.credit === ApiWaveOutcomeCredit.Rep
   );
   const rep = repOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1] ?? 0);
+    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
   }, 0);
   return rep;
+};
+
+const calculateManualOutcomes = ({
+  drop,
+  wave,
+}: {
+  drop: ApiDrop;
+  wave: ApiWave;
+}): string[] => {
+  const rank = drop.rank;
+  if (!rank) return [];
+  const outcomes = wave.outcomes;
+  const manualOutcomes = outcomes.filter(
+    (outcome) => outcome.type === ApiWaveOutcomeType.Manual
+  );
+  return manualOutcomes
+    .filter((outcome) => !!outcome.distribution?.[rank - 1]?.amount)
+    .map((outcome) => outcome.distribution?.[rank - 1]?.description ?? "");
 };
 
 export const WaveDetailedLeaderboardItemOutcomes: React.FC<
@@ -53,9 +71,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
 > = ({ drop, wave }) => {
   const nic = calculateNIC({ drop, wave });
   const rep = calculateRep({ drop, wave });
-  const manualOutcomes = wave.outcomes.filter(
-    (outcome) => outcome.type === ApiWaveOutcomeType.Manual && false
-  );
+  const manualOutcomes = calculateManualOutcomes({ drop, wave });
   return (
     <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-text-sm">
       {!!nic && (
@@ -77,7 +93,9 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
           <span>{nic} NIC</span>
         </div>
       )}
-      {!!nic && !!rep && <div className="tw-mt-2 tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>}
+      {!!nic && !!rep && (
+        <div className="tw-mt-2 tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+      )}
       {!!rep && (
         <div className="tw-mt-2 tw-flex tw-items-center tw-text-[#C3B5D9] tw-gap-x-1 tw-whitespace-nowrap">
           <svg
@@ -100,7 +118,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
       )}
       {manualOutcomes.map((outcome) => (
         <div
-          key={outcome.description}
+          key={outcome}
           className="tw-mt-2 tw-flex tw-items-center tw-gap-x-1"
         >
           <svg
@@ -117,9 +135,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
               strokeLinejoin="round"
             />
           </svg>
-          <span className="tw-text-iron-300">
-            {outcome.description}
-          </span>
+          <span className="tw-text-iron-300">{outcome}</span>
         </div>
       ))}
     </div>

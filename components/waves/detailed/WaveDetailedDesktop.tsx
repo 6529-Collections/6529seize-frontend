@@ -76,7 +76,9 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     ),
     [WaveDetailedView.LEADERBOARD]: (
       <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
-        <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
+        <div className="tw-ml-4">
+          <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
+        </div>
       </WaveLeaderboard>
     ),
     [WaveDetailedView.FOLLOWERS]: (
@@ -119,10 +121,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="tw-absolute xl:tw-ml-[21.5rem] tw-inset-0 tw-z-[100] xl:tw-pl-4"
             >
-              <WaveDrop
-                drop={activeDrop}
-                onClose={() => setActiveDrop(null)}
-              />
+              <WaveDrop drop={activeDrop} onClose={() => setActiveDrop(null)} />
             </motion.div>
           )}
         </AnimatePresence>

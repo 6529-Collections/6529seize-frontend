@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import {
   ApiDrop,
@@ -20,10 +20,10 @@ import { WaveDropChat } from "./WaveDropChat";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { WaveDropClose } from "./WaveDropClose";
 import { useAuth } from "../../../auth/Auth";
-import { motion } from "framer-motion";
 import { WaveDropVoters } from "./WaveDropVoters";
 import { WaveDropLogs } from "./WaveDropLogs";
 import { WaveDropTabs } from "./WaveDropTabs";
+import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
 
 interface WaveDropProps {
   readonly drop: ExtendedDrop;
@@ -73,7 +73,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
           className={`${
             activeTab === WaveDropTab.INFO ? "tw-block" : "tw-hidden"
           } lg:tw-block lg:tw-w-[28rem] 2xl:tw-max-w-2xl 2xl:tw-w-full tw-py-4 lg:tw-py-6 lg:tw-border lg:tw-border-r-[3px] lg:tw-border-solid tw-border-iron-800 tw-border-y-0 tw-bg-iron-950 tw-overflow-y-auto ${
-            capacitor.isCapacitor 
+            capacitor.isCapacitor
               ? "tw-h-[calc(100vh-14.7rem)] tw-pb-[calc(4rem+0.9375rem)]"
               : "tw-h-[calc(100vh-8.5rem)] lg:tw-h-[calc(100vh-5.625rem)]"
           } no-scrollbar tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300`}

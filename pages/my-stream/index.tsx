@@ -38,6 +38,7 @@ export async function getServerSideProps(
   const feedItemsFetched =
     context?.req.cookies[[QueryKey.FEED_ITEMS].toString()];
 
+
   if (feedItemsFetched && +feedItemsFetched < Time.now().toMillis() - 60000) {
     const waveId = (context.query.wave as string | undefined) ?? null;
     await prefetchWavesOverview({ queryClient, headers, waveId });

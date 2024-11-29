@@ -84,6 +84,7 @@
     "@playwright/test": "^1.47.0",
     "@tanstack/eslint-plugin-query": "^5.43.1",
     "@types/hammerjs": "^2.0.45",
+    "@types/jest": "^29.5.14",
     "@types/js-cookie": "^3.0.6",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.14.6",
@@ -106,7 +107,10 @@
     "style-to-object": "^1.0.8",
     "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.4.4",
-    "typescript": "^5.4.5"
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.4.5",
+    "htmltojsx": "^0.3.0",
+    "jest": "^29.7.0"
   },
   "overrides": {
     "react-i18next": {

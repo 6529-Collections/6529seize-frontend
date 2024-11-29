@@ -1,5 +1,5 @@
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import { WaveDetailedView } from "./WaveDetailed";
@@ -46,7 +46,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
 
   const [forceRender, setForceRender] = useState(0);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (activeDrop) {
       setForceRender(prev => prev + 1);
     }

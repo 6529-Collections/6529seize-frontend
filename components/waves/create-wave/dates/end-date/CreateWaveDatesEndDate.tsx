@@ -3,7 +3,7 @@ import CreateWaveDatesEndDateSelectPeriod from "./CreateWaveDatesEndDateSelectPe
 import { Period } from "../../../../../helpers/Types";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.helpers";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.validation";
 import CreateWaveDatesEndDateSetTime from "./CreateWaveDatesEndDateSetTime";
 import CreateWaveDatesEndDateHeader from "./CreateWaveDatesEndDateHeader";
 import CreateWaveDatesEndDateEndingAt from "./CreateWaveDatesEndDateEndingAt";

@@ -4,12 +4,14 @@ import PrimaryButton from "../../utils/button/PrimaryButton";
 interface CreateDropSubmitProps {
   readonly submitting: boolean;
   readonly canSubmit: boolean;
+  readonly isDropMode: boolean;
   readonly onDrop: () => void;
 }
 
 export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
   submitting,
   canSubmit,
+  isDropMode,
   onDrop,
 }) => {
   return (
@@ -19,7 +21,7 @@ export const CreateDropSubmit: React.FC<CreateDropSubmitProps> = ({
       disabled={!canSubmit}
       padding="tw-px-2.5 lg:tw-px-3.5 tw-py-2.5"
     >
-      <span className="tw-hidden lg:tw-inline">Drop</span>
+      <span className="tw-hidden lg:tw-inline">{isDropMode ? "Drop" : "Post"}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"

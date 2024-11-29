@@ -23,11 +23,7 @@ import CreateWaveDescription, {
   CreateWaveDescriptionHandles,
 } from "./description/CreateWaveDescription";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import {
-  CREATE_WAVE_VALIDATION_ERROR,
-  getCreateNewWaveBody,
-  getCreateWaveValidationErrors,
-} from "../../../helpers/waves/create-wave.helpers";
+import { getCreateNewWaveBody } from "../../../helpers/waves/create-wave.helpers";
 import { ApiCreateNewWave } from "../../../generated/models/ApiCreateNewWave";
 import { AuthContext } from "../../auth/Auth";
 import {
@@ -44,6 +40,10 @@ import { useRouter } from "next/router";
 import { ApiGroupFilterDirection } from "../../../generated/models/ApiGroupFilterDirection";
 import { ApiCreateGroup } from "../../../generated/models/ApiCreateGroup";
 import { Time } from "../../../helpers/time";
+import {
+  CREATE_WAVE_VALIDATION_ERROR,
+  getCreateWaveValidationErrors,
+} from "../../../helpers/waves/create-wave.validation";
 
 export default function CreateWave({
   profile,
@@ -501,6 +501,7 @@ export default function CreateWave({
   };
 
   const onComplete = async () => {
+
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -562,7 +563,6 @@ export default function CreateWave({
       picture: picture?.url ?? null,
       drop: dropRequest,
     });
-
     await addWaveMutation.mutateAsync(waveBody);
   };
 
@@ -696,8 +696,8 @@ export default function CreateWave({
                   {!selectedOutcomeType && (
                     <div className="tw-mt-auto">
                       <CreateWaveActions
-                        setStep={(step) =>
-                          onStep({ step, direction: "forward" })
+                        setStep={(step, direction) =>
+                          onStep({ step, direction })
                         }
                         step={step}
                         config={config}

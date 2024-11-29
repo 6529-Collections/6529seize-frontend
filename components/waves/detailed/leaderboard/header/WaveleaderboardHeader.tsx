@@ -31,7 +31,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             Leaderboard
           </h3>
           <p className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-mb-0">
-            Ranked by community votings
+            Ranked by wave votes
           </p>
         </div>
         <div className="tw-w-full">
@@ -41,7 +41,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 Leaderboard
               </h3>
               <p className="tw-whitespace-nowrap tw-text-sm tw-text-iron-400 tw-mb-0">
-                Ranked by community votings
+                Ranked by wave votes
               </p>
             </div>
             <div className="tw-ml-auto">
@@ -65,7 +65,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span>Create</span>
+                  <span>Drop</span>
                 </PrimaryButton>
               )}
             </div>
@@ -118,7 +118,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                         clipRule="evenodd"
                       />
                     </svg>
-                    <span>Create</span>
+                    <span>Drop</span>
                   </PrimaryButton>
                 </div>
               </div>

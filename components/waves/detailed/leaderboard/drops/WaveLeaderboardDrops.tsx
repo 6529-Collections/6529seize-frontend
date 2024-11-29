@@ -75,7 +75,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
               clipRule="evenodd"
             />
           </svg>
-          <span>Create</span>
+          <span>Drop</span>
         </PrimaryButton>
       </div>
     );

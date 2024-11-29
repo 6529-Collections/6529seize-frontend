@@ -4,8 +4,8 @@ import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.c
 import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { useEffect, useState } from "react";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 import { Time } from "../../../../helpers/time";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
 
 export default function CreateWaveDates({
   waveType,
