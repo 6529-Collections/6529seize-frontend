@@ -23,6 +23,7 @@ import { useAuth } from "../../../auth/Auth";
 import { WaveDropVoters } from "./WaveDropVoters";
 import { WaveDropLogs } from "./WaveDropLogs";
 import { WaveDropTabs } from "./WaveDropTabs";
+import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
 
 interface WaveDropProps {
   readonly drop: ExtendedDrop;
