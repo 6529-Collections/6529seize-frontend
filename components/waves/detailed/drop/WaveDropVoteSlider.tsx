@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
@@ -20,6 +20,48 @@ export const WaveDropVoteSlider: React.FC<WaveDropVoteSliderProps> = ({
   const maxValue = currentVoteValue + availableCredit;
   
   const [isDragging, setIsDragging] = useState(false);
+  const [snapTimeout, setSnapTimeout] = useState<NodeJS.Timeout | null>(null);
+  
+  const memeticValues: number[] = [
+    -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
+  ];
+
+  const handleSliderChange = (newValue: number) => {
+    if (isDragging) {
+      const snapThreshold = 100;
+      const nearestMemetic = memeticValues.find(meme => 
+        Math.abs(meme - newValue) < snapThreshold && 
+        meme >= minValue && 
+        meme <= maxValue
+      );
+
+      if (nearestMemetic) {
+        setVoteValue(nearestMemetic);
+        
+        if (snapTimeout) {
+          clearTimeout(snapTimeout);
+        }
+        
+        const timeout = setTimeout(() => {
+          setVoteValue(newValue);
+        }, 150);
+        
+        setSnapTimeout(timeout);
+      } else {
+        setVoteValue(newValue);
+      }
+    } else {
+      setVoteValue(newValue);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (snapTimeout) {
+        clearTimeout(snapTimeout);
+      }
+    };
+  }, [snapTimeout]);
 
   const zeroPercentage = ((0 - minValue) / (maxValue - minValue)) * 100;
   const currentPercentage = ((Number(typeof voteValue === 'string' ? 0 : voteValue) - minValue) / (maxValue - minValue)) * 100;
@@ -58,7 +100,7 @@ export const WaveDropVoteSlider: React.FC<WaveDropVoteSliderProps> = ({
             min={minValue}
             max={maxValue}
             value={typeof voteValue === 'string' ? 0 : voteValue}
-            onChange={(e) => setVoteValue(Number(e.target.value))}
+            onChange={(e) => handleSliderChange(Number(e.target.value))}
             onMouseDown={() => setIsDragging(true)}
             onMouseUp={() => setIsDragging(false)}
             onTouchStart={() => setIsDragging(true)}
