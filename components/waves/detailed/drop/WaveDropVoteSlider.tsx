@@ -70,18 +70,23 @@ export const WaveDropVoteSlider: React.FC<WaveDropVoteSliderProps> = ({
               tw-transition-all tw-duration-200 tw-ease-out ${isDragging ? 'tw-scale-110' : ''}`}
             style={{ left: `${currentPercentage}%` }}
           >
-            <div className={`tw-w-4 tw-h-4 tw-rounded-full tw-bg-gray-700 tw-border-2 ${thumbBorderColor} 
-              tw-shadow-lg tw--translate-x-1/2 tw-transition-all tw-duration-200
-              group-hover:tw-shadow-xl group-hover:tw-bg-gray-600`} 
-            />
+            <div className="tw-relative">
+              <div className={`tw-absolute tw-bottom-6 tw-left-0 tw-transform -tw-translate-x-[calc(50%+2.5px)]
+                tw-bg-gray-700 tw-rounded-md tw-py-1 tw-px-3 tw-text-xs tw-font-medium tw-whitespace-nowrap tw-min-w-[120px] tw-text-center
+                tw-transition-all tw-duration-200 ${valueColorClasses}`}>
+                <span className="tw-block">{formatNumberWithCommas(typeof voteValue === 'string' ? 0 : voteValue)} TDH</span>
+                <div className={`tw-absolute tw-w-2 tw-h-2 tw-bottom-[-4px] tw-left-[calc(50%-1px)]
+                  tw-rotate-45 tw-bg-gray-700`} />
+              </div>
+              <div className={`tw-w-4 tw-h-4 tw-rounded-full tw-bg-gray-700 tw-border-2 ${thumbBorderColor} 
+                tw-shadow-lg tw--translate-x-1/2 tw-transition-all tw-duration-200
+                group-hover:tw-shadow-xl group-hover:tw-bg-gray-600`} 
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className={`tw-w-32 tw-text-right tw-font-medium ${valueColorClasses} tw-transition-all tw-duration-150 
-        tw-whitespace-nowrap tw-overflow-hidden tw-text-ellipsis ${isDragging ? 'tw-scale-105' : ''}`}>
-        {formatNumberWithCommas(typeof voteValue === 'string' ? 0 : voteValue)} TDH
-      </div>
     </div>
   );
 };
