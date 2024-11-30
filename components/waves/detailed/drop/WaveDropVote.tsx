@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ApiDrop,
   ApiWave,
@@ -13,11 +13,10 @@ import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
 import { TabToggle } from "../../../common/TabToggle";
 
 interface WaveDropVoteProps {
-  readonly wave: ApiWave;
   readonly drop: ApiDrop;
 }
 
-export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
+export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ drop }) => {
   const availableCredit = Math.abs(
     (drop.context_profile_context?.max_rating ?? 0) -
       (drop.context_profile_context?.rating ?? 0)
@@ -51,10 +50,14 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
         <div className="tw-flex tw-gap-4">
           <div className="tw-flex-1 tw-h-[38px]">
             <div className="tw-relative tw-w-full tw-h-full">
-              <div className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
-                ${isSliderMode 
-                  ? 'tw-opacity-100 tw-translate-y-0' 
-                  : 'tw-opacity-0 tw-translate-y-2 tw-pointer-events-none'}`}>
+              <div
+                className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
+                ${
+                  isSliderMode
+                    ? "tw-opacity-100 tw-translate-y-0"
+                    : "tw-opacity-0 tw-translate-y-2 tw-pointer-events-none"
+                }`}
+              >
                 <WaveDropVoteSlider
                   voteValue={voteValue}
                   currentVoteValue={drop.context_profile_context?.rating ?? 0}
@@ -62,10 +65,14 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
                   availableCredit={availableCredit}
                 />
               </div>
-              <div className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
-                ${!isSliderMode 
-                  ? 'tw-opacity-100 tw-translate-y-0' 
-                  : 'tw-opacity-0 tw-translate-y-2 tw-pointer-events-none'}`}>
+              <div
+                className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
+                ${
+                  !isSliderMode
+                    ? "tw-opacity-100 tw-translate-y-0"
+                    : "tw-opacity-0 tw-translate-y-2 tw-pointer-events-none"
+                }`}
+              >
                 <WaveDropVoteInput
                   voteValue={voteValue}
                   currentVoteValue={drop.context_profile_context?.rating ?? 0}
@@ -94,7 +101,9 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ wave, drop }) => {
             <span>
               Your votes:{" "}
               <span className="tw-text-iron-200">
-                {formatNumberWithCommas(drop.context_profile_context?.rating ?? 0)}{" "}
+                {formatNumberWithCommas(
+                  drop.context_profile_context?.rating ?? 0
+                )}{" "}
                 TDH
               </span>
             </span>

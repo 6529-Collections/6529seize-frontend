@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import {
   ApiDrop,
@@ -23,7 +23,8 @@ import { useAuth } from "../../../auth/Auth";
 import { WaveDropVoters } from "./WaveDropVoters";
 import { WaveDropLogs } from "./WaveDropLogs";
 import { WaveDropTabs } from "./WaveDropTabs";
-import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
+import { useDrop } from "../../../../hooks/useDrop";
+import { useWaveData } from "../../../../hooks/useWaveData";
 
 interface WaveDropProps {
   readonly drop: ExtendedDrop;
@@ -42,24 +43,9 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
   const { connectedProfile } = useAuth();
   const capacitor = useCapacitor();
   const [activeTab, setActiveTab] = useState<WaveDropTab>(WaveDropTab.INFO);
-  const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: initialDrop.id }],
-    queryFn: () =>
-      commonApiFetch<ApiDrop>({
-        endpoint: `drops/${initialDrop.id}`,
-      }),
-    initialData: initialDrop,
-  });
+  const { drop } = useDrop({ dropId: initialDrop.id });
+  const { data: wave } = useWaveData(drop?.wave.id ?? null);
 
-  const { data: wave } = useQuery<ApiWave>({
-    queryKey: [QueryKey.WAVE, { wave_id: drop?.wave.id }],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave>({
-        endpoint: `waves/${drop?.wave.id}`,
-      }),
-    placeholderData: keepPreviousData,
-    enabled: !!drop?.wave.id,
-  });
 
   return (
     <div className="tw-w-full">
@@ -101,7 +87,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
                       wave.voting.authenticated_user_eligible &&
                       drop.author.handle !==
                         connectedProfile?.profile?.handle && (
-                        <WaveDropVote wave={wave} drop={drop} />
+                        <WaveDropVote drop={drop} />
                       )}
                     <WaveDropVotes drop={drop} />
                   </div>

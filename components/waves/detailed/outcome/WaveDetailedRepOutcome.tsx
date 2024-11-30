@@ -12,7 +12,7 @@ const DEFAULT_AMOUNTS_TO_SHOW = 3;
 export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
   outcome,
 }) => {
-  console.log("outcome", outcome);
+
   const [isOpen, setIsOpen] = useState(false);
   const winnersCount = outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
   const totalCount = outcome.distribution?.length ?? 0;
