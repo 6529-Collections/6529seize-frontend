@@ -425,6 +425,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [showOptions, setShowOptions] = useState(breakpoint === "MD");
   useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
+  
 
   const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
 

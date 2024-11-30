@@ -46,7 +46,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     return (
       <LayoutGroup>
         <div className="tw-relative">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             {showOptions ? (
               <motion.div
                 key="default-buttons"
