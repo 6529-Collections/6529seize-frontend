@@ -13,6 +13,7 @@ export default function CreateWaveGroups({
   groups,
   onGroupSelect,
   chatEnabled,
+  groupsCache,
   setChatEnabled,
 }: {
   readonly waveType: ApiWaveType;
@@ -22,9 +23,11 @@ export default function CreateWaveGroups({
     groupType: CreateWaveGroupConfigType;
   }) => void;
   readonly chatEnabled: boolean;
+  readonly groupsCache: Record<string, ApiGroupFull>;
   readonly setChatEnabled: (enabled: boolean) => void;
 }) {
   const isRestrictedGroup = !!groups.admin && !!groups.canView;
+
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
@@ -34,6 +37,8 @@ export default function CreateWaveGroups({
           groupType={groupType}
           waveType={waveType}
           chatEnabled={chatEnabled}
+          groupsCache={groupsCache}
+          groups={groups}
           setChatEnabled={setChatEnabled}
           onGroupSelect={(group) => onGroupSelect({ group, groupType })}
         />

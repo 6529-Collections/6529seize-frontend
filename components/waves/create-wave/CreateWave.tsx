@@ -175,6 +175,10 @@ export default function CreateWave({
     }));
   };
 
+  const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
+    {}
+  );
+
   const onGroupSelect = ({
     group,
     groupType,
@@ -182,6 +186,12 @@ export default function CreateWave({
     readonly group: ApiGroupFull | null;
     readonly groupType: CreateWaveGroupConfigType;
   }) => {
+    if (group) {
+      setGroupsCache((prev) => ({
+        ...prev,
+        [group.id]: group,
+      }));
+    }
     switch (groupType) {
       case CreateWaveGroupConfigType.CAN_VIEW:
         setConfig((prev) => ({
@@ -501,7 +511,6 @@ export default function CreateWave({
   };
 
   const onComplete = async () => {
-
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -578,6 +587,7 @@ export default function CreateWave({
       <CreateWaveGroups
         waveType={config.overview.type}
         groups={config.groups}
+        groupsCache={groupsCache}
         chatEnabled={config.chat.enabled}
         setChatEnabled={onChatEnabledChange}
         onGroupSelect={onGroupSelect}
