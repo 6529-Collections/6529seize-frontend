@@ -5,7 +5,7 @@ export default function CreateWaveDatesEndDateHeader({
 }) {
   return (
     <p className="tw-mb-0 tw-text-lg  sm:tw-text-xl tw-font-semibold tw-text-iron-50">
-      Period{" "}
+      Voting timeframe{" "}
       {endDateIsOptional && (
         <span className="tw-text-base tw-font-medium tw-text-iron-400">
           (optional)
