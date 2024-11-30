@@ -6,7 +6,6 @@ import {
   CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
 import CreateWaveOutcomesWinnersAddWinner from "./CreateWaveOutcomesWinnersAddWinner";
-import CreateWaveOutcomesWinnersCreditTypes from "./CreateWaveOutcomesWinnersCreditTypes";
 import CreateWaveOutcomesWinnersRows from "./CreateWaveOutcomesWinnersRows";
 
 export default function CreateWaveOutcomesWinners({
@@ -28,11 +27,6 @@ export default function CreateWaveOutcomesWinners({
     [CreateWaveOutcomeType.MANUAL]: "Manual",
     [CreateWaveOutcomeType.REP]: "Rep",
     [CreateWaveOutcomeType.NIC]: "NIC",
-  };
-  const onCreditType = (
-    creditType: CreateWaveOutcomeConfigWinnersCreditValueType
-  ) => {
-    setWinnersConfig({ ...winnersConfig, creditValueType: creditType });
   };
 
   const onTotalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {

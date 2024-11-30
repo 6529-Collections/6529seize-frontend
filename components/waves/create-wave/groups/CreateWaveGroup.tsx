@@ -85,6 +85,7 @@ export default function CreateWaveGroup({
         {isNotChatWave && groupType === CreateWaveGroupConfigType.CAN_CHAT && (
           <div className="tw-pl-4">
             <label className="tw-flex tw-cursor-pointer">
+              <span className="tw-sr-only">Enable chat</span>
               <div className="tw-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
                 <div
                   className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] ${

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { WaveHeaderPinnedSide } from "../../waves/detailed/header/WaveHeader";
+import WaveHeader, { WaveHeaderPinnedSide } from "../../waves/detailed/header/WaveHeader";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import WaveHeader from "../../waves/detailed/header/WaveHeader";
 import BrainRightSidebarContent from "../right-sidebar/BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "../right-sidebar/BrainRightSidebarFollowers";
 import useCapacitor from "../../../hooks/useCapacitor";

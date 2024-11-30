@@ -45,6 +45,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     router.push(getHref(wave.id), undefined, { shallow: true });
   };
 
+  const getAvatarRingClasses = () => {
+    if (isActive) return "tw-ring-2 tw-ring-primary-400";
+    if (isDropWave) return "tw-ring-2 tw-ring-blue-400/40";
+    return "tw-ring-1 tw-ring-iron-700";
+  };
+
   return (
     <div
       className={`tw-flex tw-px-5 tw-py-2 tw-group tw-transition-colors tw-duration-200 tw-ease-in-out ${
@@ -65,13 +71,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       >
         <div className="tw-relative">
           <div
-            className={`tw-relative tw-size-8 tw-rounded-full tw-overflow-hidden tw-transition tw-duration-300 group-hover:tw-brightness-110 ${
-              isActive
-                ? "tw-ring-2 tw-ring-primary-400"
-                : isDropWave
-                  ? "tw-ring-2 tw-ring-blue-400/40"
-                  : "tw-ring-1 tw-ring-iron-700"
-            }`}
+            className={`tw-relative tw-size-8 tw-rounded-full tw-overflow-hidden tw-transition tw-duration-300 group-hover:tw-brightness-110 ${getAvatarRingClasses()}`}
           >
             {wave.picture ? (
               <img

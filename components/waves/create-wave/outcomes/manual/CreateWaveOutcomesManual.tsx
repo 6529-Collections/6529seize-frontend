@@ -19,7 +19,7 @@ export default function CreateWaveOutcomesManual({
   readonly onOutcome: (outcome: CreateWaveOutcomeConfig) => void;
   readonly onCancel: () => void;
 }) {
-    // TODO: Don't let submit if no winners set
+
   const [value, setValue] = useState<string>("");
   const [maxWinners, setMaxWinners] = useState<number | null>(null);
   const [positions, setPositions] = useState<string>("");
@@ -37,6 +37,19 @@ export default function CreateWaveOutcomesManual({
     }
   };
 
+  const parseRange = (range: string): number[] | null => {
+    if (range.includes("-")) {
+      const [start, end] = range.split("-").map(num => parseInt(num));
+      if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
+        return null;
+      }
+      return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    }
+    
+    const num = parseInt(range);
+    return isNaN(num) || num < 1 ? null : [num];
+  };
+
   const parsePositions = (input: string): number[] | null => {
     const cleanInput = input.replace(/\s/g, "");
     if (!cleanInput) return null;
@@ -47,28 +60,14 @@ export default function CreateWaveOutcomesManual({
 
     try {
       const ranges = cleanInput.split(",");
-      let positions: number[] = [];
-      
-      for (const range of ranges) {
-        if (range.includes("-")) {
-          const [start, end] = range.split("-").map(num => parseInt(num));
-          if (isNaN(start) || isNaN(end) || start < 1 || end < start) {
-            return null;
-          }
-          for (let i = start; i <= end; i++) {
-            positions.push(i);
-          }
-        } else {
-          const num = parseInt(range);
-          if (isNaN(num) || num < 1) {
-            return null;
-          }
-          positions.push(num);
-        }
-      }
-      
-      positions = Array.from(new Set(positions)).sort((a, b) => a - b);
-      return positions;
+      const positions = ranges
+        .map(parseRange)
+        .filter((range): range is number[] => range !== null)
+        .flat();
+
+      return positions.length > 0
+        ? Array.from(new Set(positions)).sort((a, b) => a - b)
+        : null;
     } catch {
       return null;
     }
