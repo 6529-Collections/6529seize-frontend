@@ -32,11 +32,30 @@ export default function CommonCalendar({
   readonly selectedTimestamp: number | null;
   readonly setSelectedTimestamp: (timestamp: number) => void;
 }) {
-  const [month, setMonth] = useState(initialMonth);
-  const [year, setYear] = useState(initialYear);
+  const [month, setMonth] = useState(() => {
+    if (selectedTimestamp) {
+      return new Date(selectedTimestamp).getMonth();
+    }
+    return initialMonth;
+  });
+  
+  const [year, setYear] = useState(() => {
+    if (selectedTimestamp) {
+      return new Date(selectedTimestamp).getFullYear();
+    }
+    return initialYear;
+  });
 
   const [days, setDays] = useState(generateCalendar({ month, year }));
   useEffect(() => setDays(generateCalendar({ month, year })), [month, year]);
+
+  useEffect(() => {
+    if (selectedTimestamp) {
+      const date = new Date(selectedTimestamp);
+      setMonth(date.getMonth());
+      setYear(date.getFullYear());
+    }
+  }, [selectedTimestamp]);
 
   const setNextMonth = () => {
     if (month === 11) {

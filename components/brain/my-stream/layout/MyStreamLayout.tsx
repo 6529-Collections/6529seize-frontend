@@ -1,10 +1,15 @@
 import { ReactNode, useContext, useEffect } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
+import { useRouter } from "next/router";
+import { createBreakpoint } from "react-use";
+
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -16,13 +21,15 @@ export default function MyStreamLayout({
 }: {
   readonly children: ReactNode;
 }) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle, title, showWaves } = useContext(AuthContext);
+  const router = useRouter();
+  const breakpoint = useBreakpoint();
+  
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "My Stream" },
   ];
 
-  const { showWaves } = useContext(AuthContext);
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
 
   return (
@@ -58,7 +65,28 @@ export default function MyStreamLayout({
 
         {showWaves && (
           <div className="tw-flex-1" id="my-stream-content">
-            <Brain>{children}</Brain>
+            <Brain>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={router.pathname}
+                  initial={{ 
+                    opacity: 0,
+                    x: breakpoint === "S" ? 20 : 0 
+                  }}
+                  animate={{ 
+                    opacity: 1,
+                    x: 0 
+                  }}
+                  exit={{ 
+                    opacity: 0,
+                    x: breakpoint === "S" ? -20 : 0 
+                  }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                >
+                  {children}
+                </motion.div>
+              </AnimatePresence>
+            </Brain>
           </div>
         )}
       </div>

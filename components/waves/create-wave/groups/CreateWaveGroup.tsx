@@ -3,6 +3,7 @@ import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioB
 import {
   CreateWaveGroupConfigType,
   CreateWaveGroupStatus,
+  WaveGroupsConfig,
 } from "../../../../types/waves.types";
 import {
   CREATE_WAVE_NONE_GROUP_LABELS,
@@ -19,18 +20,43 @@ export default function CreateWaveGroup({
   chatEnabled,
   setChatEnabled,
   onGroupSelect,
+  groupsCache,
+  groups,
 }: {
   readonly waveType: ApiWaveType;
   readonly groupType: CreateWaveGroupConfigType;
   readonly chatEnabled: boolean;
   readonly setChatEnabled: (enabled: boolean) => void;
   readonly onGroupSelect: (group: ApiGroupFull | null) => void;
+  readonly groupsCache: Record<string, ApiGroupFull>;
+  readonly groups: WaveGroupsConfig;
 }) {
-  const [selected, setSelected] = useState<CreateWaveGroupStatus>(
-    CreateWaveGroupStatus.NONE
+  const getSelectedGroupId = () => {
+    switch (groupType) {
+      case CreateWaveGroupConfigType.ADMIN:
+        return groups.admin;
+      case CreateWaveGroupConfigType.CAN_VIEW:
+        return groups.canView;
+      case CreateWaveGroupConfigType.CAN_DROP:
+        return groups.canDrop;
+      case CreateWaveGroupConfigType.CAN_VOTE:
+        return groups.canVote;
+      case CreateWaveGroupConfigType.CAN_CHAT:
+        return groups.canChat;
+    }
+  };
+
+  const selectedGroupId = getSelectedGroupId();
+
+  const [selectedGroup, setSelectedGroup] = useState<ApiGroupFull | null>(
+    selectedGroupId && groupsCache[selectedGroupId]
+      ? groupsCache[selectedGroupId]
+      : null
   );
 
-  const [selectedGroup, setSelectedGroup] = useState<ApiGroupFull | null>(null);
+  const [selected, setSelected] = useState<CreateWaveGroupStatus>(
+    selectedGroup ? CreateWaveGroupStatus.GROUP : CreateWaveGroupStatus.NONE
+  );
 
   const switchSelected = (selectedType: CreateWaveGroupStatus) => {
     setSelected(selectedType);
@@ -59,6 +85,7 @@ export default function CreateWaveGroup({
         {isNotChatWave && groupType === CreateWaveGroupConfigType.CAN_CHAT && (
           <div className="tw-pl-4">
             <label className="tw-flex tw-cursor-pointer">
+              <span className="tw-sr-only">Enable chat</span>
               <div className="tw-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
                 <div
                   className={`tw-rounded-full tw-bg-gradient-to-b tw-p-[1px] ${

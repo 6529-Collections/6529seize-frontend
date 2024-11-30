@@ -44,6 +44,8 @@ import {
   CREATE_WAVE_VALIDATION_ERROR,
   getCreateWaveValidationErrors,
 } from "../../../helpers/waves/create-wave.validation";
+import { Period } from "../../../helpers/Types";
+
 
 export default function CreateWave({
   profile,
@@ -111,6 +113,17 @@ export default function CreateWave({
     })
   );
 
+  const [endDateConfig, setEndDateConfig] = useState<{time: number | null, period: Period | null}>({
+    time: null,
+    period: null
+  });
+
+  useEffect(() => {
+    if (config.dates.endDate === null) {
+      setEndDateConfig({time: null, period: null});
+    }
+  }, [config.dates.endDate]);
+
   const [submitting, setSubmitting] = useState(false);
 
   const [step, setStep] = useState<CreateWaveStep>(initialStep);
@@ -175,6 +188,10 @@ export default function CreateWave({
     }));
   };
 
+  const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
+    {}
+  );
+
   const onGroupSelect = ({
     group,
     groupType,
@@ -182,6 +199,12 @@ export default function CreateWave({
     readonly group: ApiGroupFull | null;
     readonly groupType: CreateWaveGroupConfigType;
   }) => {
+    if (group) {
+      setGroupsCache((prev) => ({
+        ...prev,
+        [group.id]: group,
+      }));
+    }
     switch (groupType) {
       case CreateWaveGroupConfigType.CAN_VIEW:
         setConfig((prev) => ({
@@ -501,7 +524,6 @@ export default function CreateWave({
   };
 
   const onComplete = async () => {
-
     setSubmitting(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -578,6 +600,7 @@ export default function CreateWave({
       <CreateWaveGroups
         waveType={config.overview.type}
         groups={config.groups}
+        groupsCache={groupsCache}
         chatEnabled={config.chat.enabled}
         setChatEnabled={onChatEnabledChange}
         onGroupSelect={onGroupSelect}
@@ -589,6 +612,8 @@ export default function CreateWave({
         dates={config.dates}
         errors={errors}
         setDates={setDates}
+        endDateConfig={endDateConfig}
+        setEndDateConfig={setEndDateConfig}
       />
     ),
     [CreateWaveStep.DROPS]: (

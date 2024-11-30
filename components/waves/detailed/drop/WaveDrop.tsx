@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import {
   ApiDrop,
@@ -23,7 +23,8 @@ import { useAuth } from "../../../auth/Auth";
 import { WaveDropVoters } from "./WaveDropVoters";
 import { WaveDropLogs } from "./WaveDropLogs";
 import { WaveDropTabs } from "./WaveDropTabs";
-import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
+import { useDrop } from "../../../../hooks/useDrop";
+import { useWaveData } from "../../../../hooks/useWaveData";
 
 interface WaveDropProps {
   readonly drop: ExtendedDrop;
@@ -42,24 +43,8 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
   const { connectedProfile } = useAuth();
   const capacitor = useCapacitor();
   const [activeTab, setActiveTab] = useState<WaveDropTab>(WaveDropTab.INFO);
-  const { data: drop } = useQuery<ApiDrop>({
-    queryKey: [QueryKey.DROP, { drop_id: initialDrop.id }],
-    queryFn: () =>
-      commonApiFetch<ApiDrop>({
-        endpoint: `drops/${initialDrop.id}`,
-      }),
-    initialData: initialDrop,
-  });
-
-  const { data: wave } = useQuery<ApiWave>({
-    queryKey: [QueryKey.WAVE, { wave_id: drop?.wave.id }],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave>({
-        endpoint: `waves/${drop?.wave.id}`,
-      }),
-    placeholderData: keepPreviousData,
-    enabled: !!drop?.wave.id,
-  });
+  const { drop } = useDrop({ dropId: initialDrop.id });
+  const { data: wave } = useWaveData(drop?.wave.id ?? null);
 
   return (
     <div className="tw-w-full">
@@ -84,39 +69,40 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
             </div>
             <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2 tw-pb-6">
               <div className="tw-px-6">
-                {drop.drop_type === ApiDropType.Participatory && (
+                {drop?.drop_type === ApiDropType.Participatory && (
                   <WaveDropPosition rank={drop.rank} />
                 )}
               </div>
 
               <div className="tw-flex-1 tw-w-full">
                 <div className="tw-px-6">
-                  <WaveDropContent drop={drop} />
+                  {drop && <WaveDropContent drop={drop} />}
                 </div>
 
                 <div className="tw-border-t tw-border-iron-800 tw-pt-3 tw-border-solid tw-border-x-0 tw-border-b-0">
                   <div className="tw-px-6 tw-flex tw-flex-col tw-gap-y-3">
                     {wave && <WaveDropTime wave={wave} />}
                     {wave &&
+                      drop &&
                       wave.voting.authenticated_user_eligible &&
-                      drop.author.handle !==
+                      drop?.author.handle !==
                         connectedProfile?.profile?.handle && (
-                        <WaveDropVote wave={wave} drop={drop} />
+                        <WaveDropVote drop={drop} />
                       )}
-                    <WaveDropVotes drop={drop} />
+                    {drop && <WaveDropVotes drop={drop} />}
                   </div>
 
                   <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-4 tw-justify-between tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-4 tw-mt-4 tw-px-6">
                     <div className="tw-flex tw-items-center tw-gap-x-2">
-                      <WaveDropAuthor drop={drop} />
+                      {drop && <WaveDropAuthor drop={drop} />}
                       <div className="tw-flex tw-gap-x-2 tw-items-center">
                         <div className="tw-w-[3px] tw-h-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
                         <p className="tw-text-sm tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-                          {getTimeAgoShort(drop.created_at)}
+                          {drop && getTimeAgoShort(drop.created_at)}
                         </p>
                       </div>
                     </div>
-                    {wave && (
+                    {wave && drop && (
                       <WaveDetailedLeaderboardItemOutcomes
                         drop={drop}
                         wave={wave}
@@ -125,8 +111,8 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
                   </div>
 
                   <div className="tw-px-6 tw-mt-6 tw-space-y-4">
-                    <WaveDropVoters drop={drop} />
-                    <WaveDropLogs drop={drop} />
+                    {drop && <WaveDropVoters drop={drop} />}
+                    {drop && <WaveDropLogs drop={drop} />}
                   </div>
                 </div>
               </div>
@@ -139,7 +125,7 @@ export const WaveDrop: React.FC<WaveDropProps> = ({
             activeTab === WaveDropTab.CHAT ? "tw-flex" : "tw-hidden"
           } lg:tw-flex lg:tw-flex-1 `}
         >
-          {wave && <WaveDropChat wave={wave} drop={drop} />}
+          {wave && drop && <WaveDropChat wave={wave} drop={drop} />}
         </div>
       </div>
     </div>

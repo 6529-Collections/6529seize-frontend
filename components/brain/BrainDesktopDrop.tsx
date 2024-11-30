@@ -1,8 +1,5 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
-import { useWaveData } from "../../hooks/useWaveData";
 import { WaveDrop } from "../waves/detailed/drop/WaveDrop";
-import { ApiWave } from "../../generated/models/ApiWave";
 
 interface Props {
   readonly drop: ExtendedDrop;

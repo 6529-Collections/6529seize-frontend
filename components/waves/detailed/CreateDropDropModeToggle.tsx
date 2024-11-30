@@ -1,5 +1,5 @@
 import Tippy from "@tippyjs/react";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   ChatRestriction,
   DropPrivileges,

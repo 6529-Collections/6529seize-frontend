@@ -27,6 +27,8 @@ const BrainContent: React.FC<BrainContentProps> = ({
 
   const { data: wave } = useWaveData(waveId);
 
+
+
   return (
     <div className={containerClassName}>
       <div className="tw-pr-2">
