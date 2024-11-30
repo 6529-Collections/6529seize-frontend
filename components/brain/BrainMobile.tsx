@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
@@ -54,6 +54,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     ),
     [BrainView.DEFAULT]: children,
   };
+
+  useEffect(() => console.log(activeView), [activeView]);
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-px-2 sm:tw-px-4 md:tw-px-6 tw-h-full">
