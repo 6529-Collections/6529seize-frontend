@@ -44,6 +44,8 @@ import {
   CREATE_WAVE_VALIDATION_ERROR,
   getCreateWaveValidationErrors,
 } from "../../../helpers/waves/create-wave.validation";
+import { Period } from "../../../helpers/Types";
+
 
 export default function CreateWave({
   profile,
@@ -110,6 +112,17 @@ export default function CreateWave({
       type: initialType,
     })
   );
+
+  const [endDateConfig, setEndDateConfig] = useState<{time: number | null, period: Period | null}>({
+    time: null,
+    period: null
+  });
+
+  useEffect(() => {
+    if (config.dates.endDate === null) {
+      setEndDateConfig({time: null, period: null});
+    }
+  }, [config.dates.endDate]);
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -599,6 +612,8 @@ export default function CreateWave({
         dates={config.dates}
         errors={errors}
         setDates={setDates}
+        endDateConfig={endDateConfig}
+        setEndDateConfig={setEndDateConfig}
       />
     ),
     [CreateWaveStep.DROPS]: (
