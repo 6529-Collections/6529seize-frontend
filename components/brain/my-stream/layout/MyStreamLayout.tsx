@@ -7,6 +7,9 @@ import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
 import { useRouter } from "next/router";
+import { createBreakpoint } from "react-use";
+
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -20,6 +23,9 @@ export default function MyStreamLayout({
 }) {
   const { setTitle, title, showWaves } = useContext(AuthContext);
   const router = useRouter();
+  const breakpoint = useBreakpoint();
+  
+  const isOnlyQueryChange = router.pathname === router.pathname && router.asPath !== router.pathname;
   
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
@@ -64,10 +70,19 @@ export default function MyStreamLayout({
             <Brain>
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={router.pathname}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
+                  key={router.asPath}
+                  initial={{ 
+                    opacity: 0,
+                    x: !isOnlyQueryChange && breakpoint === "S" ? 20 : 0 
+                  }}
+                  animate={{ 
+                    opacity: 1,
+                    x: 0 
+                  }}
+                  exit={{ 
+                    opacity: 0,
+                    x: !isOnlyQueryChange && breakpoint === "S" ? -20 : 0 
+                  }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                 >
                   {children}
