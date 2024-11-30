@@ -25,8 +25,6 @@ export default function MyStreamLayout({
   const router = useRouter();
   const breakpoint = useBreakpoint();
   
-  const isOnlyQueryChange = router.pathname === router.pathname && router.asPath !== router.pathname;
-  
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "My Stream" },
@@ -70,10 +68,10 @@ export default function MyStreamLayout({
             <Brain>
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={router.asPath}
+                  key={router.pathname}
                   initial={{ 
                     opacity: 0,
-                    x: !isOnlyQueryChange && breakpoint === "S" ? 20 : 0 
+                    x: breakpoint === "S" ? 20 : 0 
                   }}
                   animate={{ 
                     opacity: 1,
@@ -81,7 +79,7 @@ export default function MyStreamLayout({
                   }}
                   exit={{ 
                     opacity: 0,
-                    x: !isOnlyQueryChange && breakpoint === "S" ? -20 : 0 
+                    x: breakpoint === "S" ? -20 : 0 
                   }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                 >
