@@ -5,7 +5,7 @@ enum CalendarDaySate {
   NOT_ACTIVE_MONTH = "NOT_ACTIVE_MONTH",
   MANUALLY_DISABLED = "MANUALLY_DISABLED",
   AVAILABLE = "AVAILABLE",
-  ACTIVE = "ACTIVE",
+  ACTIVE = "ACTIVE"
 }
 
 export default function CommonCalendarDay({
@@ -27,14 +27,15 @@ export default function CommonCalendarDay({
     [CalendarDaySate.AVAILABLE]:
       "tw-font-normal tw-bg-iron-800 tw-text-white hover:tw-border-primary-500",
     [CalendarDaySate.ACTIVE]:
-      "tw-bg-primary-500 tw-text-white tw-font-semibold hover:tw-border-primary-500",
+      "tw-bg-primary-500 tw-text-white tw-font-semibold hover:tw-border-primary-500"
   };
 
   const getDayState = (): CalendarDaySate => {
     if (!day.isActiveMonth) {
       return CalendarDaySate.NOT_ACTIVE_MONTH;
     }
-    if (minTimestamp && day.startTimestamp < minTimestamp) {
+    if (minTimestamp && day.startTimestamp < minTimestamp && 
+        !(day.startTimestamp <= minTimestamp && day.startTimestamp + Time.days(1).toMillis() > minTimestamp)) {
       return CalendarDaySate.MANUALLY_DISABLED;
     }
     if (maxTimestamp && day.startTimestamp > maxTimestamp) {
@@ -54,10 +55,18 @@ export default function CommonCalendarDay({
 
   const canSelect = dayState === CalendarDaySate.AVAILABLE;
 
+  const handleClick = () => {
+    if (minTimestamp && day.startTimestamp <= minTimestamp && day.startTimestamp + Time.days(1).toMillis() > minTimestamp) {
+      setSelectedTimestamp(minTimestamp);
+    } else {
+      setSelectedTimestamp(day.startTimestamp);
+    }
+  };
+
   return (
     <button
       type="button"
-      onClick={() => setSelectedTimestamp(day.startTimestamp)}
+      onClick={handleClick}
       disabled={!canSelect}
       className={`${BUTTON_CLASSES[dayState]} tw-mx-auto tw-relative tw-border tw-border-transparent tw-border-solid tw-h-9 tw-w-9 sm:tw-h-8 sm:tw-w-8 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out focus:tw-z-10`}
     >
