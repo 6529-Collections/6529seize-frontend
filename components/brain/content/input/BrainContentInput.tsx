@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useWaveData } from "../../../../hooks/useWaveData";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";
@@ -27,18 +28,40 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
   if (!wave) return null;
 
   return (
-    <div
-      className={`${containerClassName} tw-overflow-y-auto tw-w-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-sticky tw-top-0 tw-z-30 tw-flex-none tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-p-4 tw-shadow-lg`}
-    >
-      <PrivilegedDropCreator
-        wave={wave}
-        activeDrop={activeDrop}
-        onCancelReplyQuote={onCancelReplyQuote}
-        key={wave.id}
-        dropId={null}
-        fixedDropMode={DropMode.BOTH}
-      />
-    </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        layout
+        initial={{ height: 0, opacity: 0 }}
+        animate={{
+          height: "auto",
+          opacity: 1,
+          transition: {
+            height: { duration: 0.2, ease: "easeOut" },
+            opacity: { duration: 0.15, delay: 0.15 }
+          }
+        }}
+        exit={{
+          height: 0,
+          opacity: 0,
+          transition: {
+            height: { duration: 0.2, delay: 0.1, ease: "easeIn" },
+            opacity: { duration: 0.1 }
+          }
+        }}
+        className="tw-overflow-hidden"
+      >
+        <div className={`${containerClassName} tw-overflow-y-auto tw-w-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-sticky tw-top-0 tw-z-30 tw-flex-none tw-rounded-xl tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-p-4 tw-shadow-lg`}>
+          <PrivilegedDropCreator
+            wave={wave}
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+            key={wave.id}
+            dropId={null}
+            fixedDropMode={DropMode.BOTH}
+          />
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
