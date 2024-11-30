@@ -1,4 +1,5 @@
 import React, { ReactNode, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import { useRouter } from "next/router";
@@ -43,6 +44,17 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   const isDropOpen =
     drop &&
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
+
+  const viewComponents: Record<BrainView, ReactNode> = {
+    [BrainView.WAVES]: (
+      <BrainMobileWaves activeWaveId={router.query.wave as string} />
+    ),
+    [BrainView.ABOUT]: (
+      <BrainMobileAbout activeWaveId={router.query.wave as string} />
+    ),
+    [BrainView.DEFAULT]: children,
+  };
+
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-px-2 sm:tw-px-4 md:tw-px-6 tw-h-full">
       {isDropOpen && (
@@ -58,13 +70,18 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         </div>
       )}
       <BrainMobileTabs activeView={activeView} onViewChange={setActiveView} />
-      {activeView === BrainView.WAVES ? (
-        <BrainMobileWaves activeWaveId={router.query.wave as string} />
-      ) : activeView === BrainView.ABOUT ? (
-        <BrainMobileAbout activeWaveId={router.query.wave as string} />
-      ) : (
-        children
-      )}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeView}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          className="tw-flex-1"
+        >
+          {viewComponents[activeView]}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
