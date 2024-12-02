@@ -33,7 +33,7 @@ interface UseWaveDropsLeaderboardProps {
   readonly reverse: boolean;
   readonly dropsSortBy: WaveDropsLeaderboardSortBy;
   readonly sortDirection: WaveDropsLeaderboardSortDirection;
-  readonly handle?: string | undefined;
+  readonly handle?: string;
 }
 
 const POLLING_DELAY = 3000;

@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useWaveData } from "../../../../hooks/useWaveData";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";

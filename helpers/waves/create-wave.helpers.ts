@@ -10,8 +10,6 @@ import { ApiWaveOutcomeType } from "../../generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import {
   CreateWaveConfig,
-  CreateWaveOutcomeConfigWinnersConfig,
-  CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
   CreateWaveStep,
   WaveSignatureType,

@@ -1,7 +1,6 @@
 import React from "react";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { DropMode } from "../../PrivilegedDropCreator";
-import PrivilegedDropCreator from "../../PrivilegedDropCreator";
+import PrivilegedDropCreator, { DropMode } from "../../PrivilegedDropCreator";
 
 interface WaveDropCreateProps {
   readonly wave: ApiWave;

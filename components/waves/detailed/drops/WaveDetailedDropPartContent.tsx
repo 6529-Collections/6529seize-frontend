@@ -5,8 +5,6 @@ import WaveDetailedDropPartContentMedias from "./WaveDetailedDropPartContentMedi
 import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
 import { ReferencedNft } from "../../../../entities/IDrop";
 import { ApiWaveMin } from "../../../../generated/models/ApiWaveMin";
-import DropPartMarkdownWithPropLogger from "../../../drops/view/part/DropPartMarkdownWithPropLogger";
-import WaveDetailedDropQuoteWithDropId from "./WaveDetailedDropQuoteWithDropId";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDetailedDropPartContentMarkdown from "./WaveDetailedDropPartContentMarkdown";
 

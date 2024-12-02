@@ -1,4 +1,3 @@
-import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropPartContentMarkdown from "../drops/WaveDetailedDropPartContentMarkdown";
 import { useEffect, useRef, useState } from "react";

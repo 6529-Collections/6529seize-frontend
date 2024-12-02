@@ -223,29 +223,25 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
               </>
             )}
             {droppingTimeState === WaveLeaderboardTimeState.IN_PROGRESS && (
-              <>
-                <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
-                  <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Dropping Ends In
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    {new Date(participationPeriodMax).toLocaleDateString()}
-                  </p>
-                </div>
-              </>
+              <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
+                <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Dropping Ends In
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  {new Date(participationPeriodMax).toLocaleDateString()}
+                </p>
+              </div>
             )}
             {droppingTimeState === WaveLeaderboardTimeState.COMPLETED && (
-              <>
-                <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
-                  <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Dropping Complete
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    Completed on{" "}
-                    {new Date(participationPeriodMax).toLocaleDateString()}
-                  </p>
-                </div>
-              </>
+              <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
+                <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Dropping Complete
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  Completed on{" "}
+                  {new Date(participationPeriodMax).toLocaleDateString()}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -329,41 +325,34 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
           </div>
           <div className="tw-w-full">
             {votingTimeState === WaveLeaderboardTimeState.UPCOMING && (
-              <>
-                <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
-                  <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Voting Starts In
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    {new Date(votingPeriodMin).toLocaleDateString()}
-                  </p>
-                </div>
-              </>
+              <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
+                <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Voting Starts In
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  {new Date(votingPeriodMin).toLocaleDateString()}
+                </p>
+              </div>
             )}
             {votingTimeState === WaveLeaderboardTimeState.IN_PROGRESS && (
-              <>
-                <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
-                  <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Voting Ends In
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    {new Date(votingPeriodMax).toLocaleDateString()}
-                  </p>
-                </div>
-              </>
+              <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
+                <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Voting Ends In
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  {new Date(votingPeriodMax).toLocaleDateString()}
+                </p>
+              </div>
             )}
             {votingTimeState === WaveLeaderboardTimeState.COMPLETED && (
-              <>
-                <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
-                  <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
-                    Voting Complete
-                  </h2>
-                  <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-                    Completed on{" "}
-                    {new Date(votingPeriodMax).toLocaleDateString()}
-                  </p>
-                </div>
-              </>
+              <div className="tw-flex tw-justify-between tw-items-center tw-w-full md:tw-flex-col md:tw-items-start">
+                <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-mb-0.5 tw-text-white/90">
+                  Voting Complete
+                </h2>
+                <p className="tw-text-xs tw-text-white/60 tw-mb-0">
+                  Completed on {new Date(votingPeriodMax).toLocaleDateString()}
+                </p>
+              </div>
             )}
           </div>
         </div>

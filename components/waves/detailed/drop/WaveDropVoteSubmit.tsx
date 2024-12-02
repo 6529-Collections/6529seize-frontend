@@ -23,7 +23,6 @@ export const WaveDropVoteSubmit: FC<WaveDropVoteSubmitProps> = ({
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { onDropRateChange } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState<boolean>(false);
-  const [success, setSuccess] = useState<boolean>(false);
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
@@ -35,7 +34,6 @@ export const WaveDropVoteSubmit: FC<WaveDropVoteSubmitProps> = ({
         },
       }),
     onSuccess: (response: ApiDrop) => {
-      setSuccess(true);
       setToast({
         message: `Voted successfully`,
         type: "success",
@@ -64,7 +62,15 @@ export const WaveDropVoteSubmit: FC<WaveDropVoteSubmitProps> = ({
   const handleSubmit = async () => {
     if (mutating || !rate) return;
     setMutating(true);
-    await rateChangeMutation.mutateAsync({ rate, category: DEFAULT_DROP_RATE_CATEGORY });
+    const { success } = await requestAuth();
+    if (!success) {
+      setMutating(false);
+      return;
+    }
+    await rateChangeMutation.mutateAsync({
+      rate,
+      category: DEFAULT_DROP_RATE_CATEGORY,
+    });
   };
 
   return (

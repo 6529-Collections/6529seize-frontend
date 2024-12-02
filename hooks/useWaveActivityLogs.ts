@@ -69,46 +69,40 @@ export function useWaveActivityLogs({
     });
   }, [waveId]);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isLoading,
-    isFetchingNextPage,
-    refetch,
-  } = useInfiniteQuery({
-    queryKey,
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        limit: WAVE_LOGS_PARAMS.limit.toString(),
-      };
-      if (dropId) {
-        params.drop_id = dropId;
-      }
-      if (logTypes) {
-        params.log_types = logTypes.join(",");
-      }
-      if (pageParam !== null) {
-        params.offset = `${pageParam}`;
-      }
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey,
+      queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+        const params: Record<string, string> = {
+          limit: WAVE_LOGS_PARAMS.limit.toString(),
+        };
+        if (dropId) {
+          params.drop_id = dropId;
+        }
+        if (logTypes) {
+          params.log_types = logTypes.join(",");
+        }
+        if (pageParam !== null) {
+          params.offset = `${pageParam}`;
+        }
 
-      const results = await commonApiFetch<ApiWaveLog[]>({
-        endpoint: `waves/${waveId}/logs`,
-        params,
-      });
+        const results = await commonApiFetch<ApiWaveLog[]>({
+          endpoint: `waves/${waveId}/logs`,
+          params,
+        });
 
-      return results;
-    },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage.length === WAVE_LOGS_PARAMS.limit
-        ? allPages.length * WAVE_LOGS_PARAMS.limit
-        : null,
-    placeholderData: keepPreviousData,
-    enabled: !!connectedProfileHandle,
-    staleTime: 60000,
-    refetchInterval: 30000
-  });
+        return results;
+      },
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, allPages) =>
+        lastPage.length === WAVE_LOGS_PARAMS.limit
+          ? allPages.length * WAVE_LOGS_PARAMS.limit
+          : null,
+      placeholderData: keepPreviousData,
+      enabled: !!connectedProfileHandle,
+      staleTime: 60000,
+      refetchInterval: 30000,
+    });
 
   useEffect(() => {
     setLogs((prev) => {

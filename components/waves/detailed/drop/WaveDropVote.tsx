@@ -1,7 +1,5 @@
 import { ApiDrop } from "../../../../generated/models/ObjectSerializer";
 import { useState } from "react";
-import DropListItemRateGiveSubmit from "../../../drops/view/item/rate/give/DropListItemRateGiveSubmit";
-import { DropVoteState } from "../../../drops/view/item/DropsListItem";
 import WaveDropVoteQuick from "./WaveDropVoteQuick";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { WaveDropVoteInput } from "./WaveDropVoteInput";
