@@ -7,6 +7,7 @@ import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { WaveDropVoteInput } from "./WaveDropVoteInput";
 import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
 import { TabToggle } from "../../../common/TabToggle";
+import { WaveDropVoteSubmit } from "./WaveDropVoteSubmit";
 
 interface WaveDropVoteProps {
   readonly drop: ApiDrop;
@@ -80,14 +81,11 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ drop }) => {
           </div>
 
           <div className="tw-flex-shrink-0 tw-flex tw-items-center">
-            <DropListItemRateGiveSubmit
+            <WaveDropVoteSubmit
               rate={Number(voteValue) || 0}
-              drop={drop}
-              voteState={DropVoteState.CANT_VOTE}
-              canVote={true}
-              availableCredit={availableCredit}
-              onSuccessfulRateChange={onSuccessfulRateChange}
-              isMobile={false}
+              dropId={drop.id}
+              onSubmit={onSuccessfulRateChange}
+
             />
           </div>
         </div>
