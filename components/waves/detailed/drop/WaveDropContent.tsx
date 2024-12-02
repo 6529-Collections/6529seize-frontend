@@ -1,8 +1,6 @@
 import React, { useState } from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
 import WaveDetailedDropContent from "../drops/WaveDetailedDropContent";
 import { ApiDrop } from "../../../../generated/models/ObjectSerializer";
-import Tippy from "@tippyjs/react";
 import { WaveDropContentMetadata } from "./WaveDropContentMetadata";
 
 interface WaveDropContentProps {

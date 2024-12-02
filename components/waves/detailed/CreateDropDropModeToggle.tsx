@@ -16,10 +16,27 @@ export const CreateDropDropModeToggle: React.FC<
   CreateDropDropModeToggleProps
 > = ({ isDropMode, onDropModeChange, privileges }) => {
   const { chatRestriction, submissionRestriction } = privileges;
-  const isDisabled = isDropMode
-    ? chatRestriction || submissionRestriction
-    : chatRestriction || submissionRestriction;
+  const isDisabled = isDropMode && (chatRestriction || submissionRestriction);
   const canToggle = isDropMode ? !chatRestriction : !submissionRestriction;
+
+  const buttonClassName = useMemo(() => {
+    const baseClasses =
+      "tw-flex-shrink-0 tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90";
+
+    if (isDisabled && isDropMode) {
+      return `${baseClasses} tw-opacity-50 tw-cursor-not-allowed tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900`;
+    }
+
+    if (isDisabled) {
+      return `${baseClasses} tw-opacity-50 tw-cursor-not-allowed`;
+    }
+
+    if (isDropMode) {
+      return `${baseClasses} tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900`;
+    }
+
+    return `${baseClasses} tw-bg-iron-800 tw-backdrop-blur-sm tw-text-iron-500 desktop-hover:hover:tw-bg-iron-700 active:tw-bg-iron-700/90 focus-visible:tw-outline-iron-700 tw-ring-1 tw-ring-iron-700/50`;
+  }, [isDisabled, isDropMode]);
 
   const getRestrictionMessage = (
     restriction: ChatRestriction | SubmissionRestriction,
@@ -75,7 +92,6 @@ export const CreateDropDropModeToggle: React.FC<
     );
   }, [isDropMode, isDisabled, chatRestriction, submissionRestriction]);
 
-
   return (
     <Tippy content={tooltipContent} placement="top">
       <div>
@@ -83,15 +99,7 @@ export const CreateDropDropModeToggle: React.FC<
           type="button"
           onClick={canToggle ? () => onDropModeChange(!isDropMode) : undefined}
           disabled={!!isDisabled}
-          className={`tw-flex-shrink-0 tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90 ${
-            isDisabled && isDropMode
-              ? "tw-opacity-50 tw-cursor-not-allowed tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"
-              : isDisabled
-              ? "tw-opacity-50 tw-cursor-not-allowed"
-              : isDropMode
-              ? "tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"
-              : "tw-bg-iron-800 tw-backdrop-blur-sm tw-text-iron-500 desktop-hover:hover:tw-bg-iron-700 active:tw-bg-iron-700/90 focus-visible:tw-outline-iron-700 tw-ring-1 tw-ring-iron-700/50"
-          }`}
+          className={buttonClassName}
         >
           <svg
             className="tw-size-4 tw-flex-shrink-0"

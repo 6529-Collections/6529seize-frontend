@@ -45,9 +45,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   return breakpoint !== "LG" ? (
     <WaveDetailedMobile
       wave={activeWave}
-      view={activeView}
       setView={setActiveView}
-      isLoading={isLoading}
       activeDrop={activeDrop}
       setActiveDrop={setActiveDrop}
       onWaveChange={handleWaveChange}

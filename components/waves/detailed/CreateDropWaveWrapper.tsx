@@ -74,10 +74,13 @@ export function CreateDropWaveWrapper({
   const containerClassName = useMemo(() => {
     const shouldApplyBottomMargin = context !== CreateDropWaveWrapperContext.SINGLE_DROP;
     
-    return capacitor.isCapacitor
-      ? `tw-max-h-[calc(100vh-14.7rem)] ${capacitor.keyboardVisible ? "" : shouldApplyBottomMargin ? "tw-mb-[3.75rem]" : ""}`
-      : "tw-max-h-[calc(100vh-8.5rem)] lg:tw-max-h-[calc(100vh-7.5rem)]";
-  }, [capacitor.isCapacitor, capacitor.keyboardVisible]);
+    if (capacitor.isCapacitor) {
+      const marginClass = !capacitor.keyboardVisible && shouldApplyBottomMargin ? "tw-mb-[3.75rem]" : "";
+      return `tw-max-h-[calc(100vh-14.7rem)] ${marginClass}`;
+    }
+    
+    return "tw-max-h-[calc(100vh-8.5rem)] lg:tw-max-h-[calc(100vh-7.5rem)]";
+  }, [capacitor.isCapacitor, capacitor.keyboardVisible, context]);
   return (
     <div
     ref={containerRef}

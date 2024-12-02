@@ -30,6 +30,15 @@ interface WaveChatProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
+const calculateHeight = (isCapacitor: boolean, isNotChatWave: boolean) => {
+  if (isCapacitor) {
+    return "tw-h-[calc(100vh-14.7rem)]";
+  }
+  return `tw-h-[calc(100vh-8.8rem)] ${
+    isNotChatWave ? "lg:tw-h-[calc(100vh-9.7rem)]" : "lg:tw-h-[calc(100vh-6.5rem)]"
+  }`;
+};
+
 export const WaveChat: React.FC<WaveChatProps> = ({
   wave,
   activeTab,
@@ -85,15 +94,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
   };
 
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col ${
-      capacitor.isCapacitor
-        ? "tw-h-[calc(100vh-14.7rem)]"
-        : `tw-h-[calc(100vh-8.8rem)] ${
-            isNotChatWave
-              ? "lg:tw-h-[calc(100vh-9.7rem)]"
-              : "lg:tw-h-[calc(100vh-6.5rem)]"
-          }`
-    }`;
+    return `tw-w-full tw-flex tw-flex-col ${calculateHeight(capacitor.isCapacitor, isNotChatWave)}`;
   }, [capacitor.isCapacitor, isNotChatWave]);
 
   if (!searchParamsDone) {

@@ -5,7 +5,10 @@ import {
 } from "../../../../generated/models/ObjectSerializer";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import WaveDropsAll from "../drops/WaveDropsAll";
-import { CreateDropWaveWrapper, CreateDropWaveWrapperContext } from "../CreateDropWaveWrapper";
+import {
+  CreateDropWaveWrapper,
+  CreateDropWaveWrapperContext,
+} from "../CreateDropWaveWrapper";
 import { ActiveDropAction, ActiveDropState } from "../chat/WaveChat";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 
@@ -63,7 +66,6 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
     });
   };
 
-
   return (
     <div className="tw-flex-1">
       <div
@@ -80,11 +82,12 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
                 activeDrop={activeDrop}
                 initialDrop={null}
                 dropId={drop.id}
-                // TODO: Implement this
                 onDropClick={() => {}}
               />
               <div className="tw-mt-auto">
-                <CreateDropWaveWrapper context={CreateDropWaveWrapperContext.SINGLE_DROP}>
+                <CreateDropWaveWrapper
+                  context={CreateDropWaveWrapperContext.SINGLE_DROP}
+                >
                   <PrivilegedDropCreator
                     activeDrop={activeDrop}
                     onCancelReplyQuote={onCancelReplyQuote}

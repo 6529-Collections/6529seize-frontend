@@ -27,6 +27,14 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
+  const isActive = wave.id === activeWaveId;
+
+  const getRingStyles = () => {
+    if (isActive) return "tw-ring-2 tw-ring-primary-400";
+    if (isDropWave) return "tw-ring-2 tw-ring-blue-400/40";
+    return "tw-ring-1 tw-ring-inset tw-ring-white/10";
+  };
+
   const handleClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     waveId: string
@@ -77,8 +85,6 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
     });
   };
 
-  const isActive = wave.id === activeWaveId;
-
   return (
     <div
       key={wave.id}
@@ -94,13 +100,7 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
       >
         <div className="tw-relative tw-mr-3">
           <div
-            className={`tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-relative ${
-              isActive
-                ? "tw-ring-2 tw-ring-primary-400"
-                : isDropWave
-                  ? "tw-ring-2 tw-ring-blue-400/40"
-                  : "tw-ring-1 tw-ring-inset tw-ring-white/10"
-            }`}
+            className={`tw-flex-shrink-0 tw-size-8 tw-rounded-full tw-relative ${getRingStyles()}`}
           >
             {wave.picture && (
               <img

@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { ApiWave } from "../../../generated/models/ObjectSerializer";

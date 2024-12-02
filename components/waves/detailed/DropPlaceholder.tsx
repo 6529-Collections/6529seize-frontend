@@ -47,10 +47,18 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
     switch (type) {
       case "chat":
         return chatRestriction === ChatRestriction.NOT_LOGGED_IN ? "user-lock" : "comment-slash";
-      case "submission":
-        return submissionRestriction === SubmissionRestriction.NOT_LOGGED_IN ? "user-lock" : 
-               submissionRestriction === SubmissionRestriction.NOT_STARTED ? "clock" :
-               submissionRestriction === SubmissionRestriction.ENDED ? "calendar-xmark" : "file-circle-xmark";
+      case "submission": {
+        switch (submissionRestriction) {
+          case SubmissionRestriction.NOT_LOGGED_IN:
+            return "user-lock";
+          case SubmissionRestriction.NOT_STARTED:
+            return "clock";
+          case SubmissionRestriction.ENDED:
+            return "calendar-xmark";
+          default:
+            return "file-circle-xmark";
+        }
+      }
       case "both":
         return "lock";
     }
