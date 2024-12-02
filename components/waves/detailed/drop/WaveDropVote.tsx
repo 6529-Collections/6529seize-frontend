@@ -1,8 +1,4 @@
-import React, { useEffect } from "react";
-import {
-  ApiDrop,
-  ApiWave,
-} from "../../../../generated/models/ObjectSerializer";
+import { ApiDrop } from "../../../../generated/models/ObjectSerializer";
 import { useState } from "react";
 import DropListItemRateGiveSubmit from "../../../drops/view/item/rate/give/DropListItemRateGiveSubmit";
 import { DropVoteState } from "../../../drops/view/item/DropsListItem";
@@ -85,7 +81,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ drop }) => {
 
           <div className="tw-flex-shrink-0 tw-flex tw-items-center">
             <DropListItemRateGiveSubmit
-              rate={+voteValue ?? 0}
+              rate={Number(voteValue) || 0}
               drop={drop}
               voteState={DropVoteState.CANT_VOTE}
               canVote={true}

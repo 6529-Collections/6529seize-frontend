@@ -1,7 +1,6 @@
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
 import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
 import { WaveChat } from "./chat/WaveChat";
@@ -12,9 +11,7 @@ import { WaveDrop } from "./drop/WaveDrop";
 
 interface WaveDetailedMobileProps {
   readonly wave: ApiWave;
-  readonly view: WaveDetailedView;
   readonly setView: (view: WaveDetailedView) => void;
-  readonly isLoading: boolean;
   readonly activeDrop: ExtendedDrop | null;
   readonly setActiveDrop: (drop: ExtendedDrop | null) => void;
   readonly onWaveChange: (wave: ApiWave) => void;
@@ -29,9 +26,7 @@ export enum WaveDetailedMobileView {
 
 const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   wave,
-  view,
   setView,
-  isLoading,
   activeDrop,
   setActiveDrop,
   onWaveChange,
@@ -98,7 +93,6 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
     [WaveDetailedMobileView.CHAT]: (
       <WaveChat
         wave={wave}
-        // TODO: Implement this
         activeTab={WaveDetailedView.CHAT}
         setActiveTab={() => {}}
         onDropClick={setActiveDrop}

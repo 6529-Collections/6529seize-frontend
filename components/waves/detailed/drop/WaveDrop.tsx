@@ -1,18 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import useCapacitor from "../../../../hooks/useCapacitor";
-import {
-  ApiDrop,
-  ApiDropType,
-  ApiWave,
-} from "../../../../generated/models/ObjectSerializer";
+import { ApiDropType } from "../../../../generated/models/ObjectSerializer";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { WaveDropPosition } from "./WaveDropPosition";
 import { WaveDropContent } from "./WaveDropContent";
 import { WaveDropTime } from "./WaveDropTime";
 import { WaveDropVote } from "./WaveDropVote";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-import { commonApiFetch } from "../../../../services/api/common-api";
 import { WaveDropVotes } from "./WaveDropVotes";
 import { WaveDropAuthor } from "./WaveDropAuthor";
 import { WaveDetailedLeaderboardItemOutcomes } from "../small-leaderboard/WaveDetailedLeaderboardItemOutcomes";

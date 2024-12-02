@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { ApiDropsLeaderboardPage } from "../../../../generated/models/ApiDropsLeaderboardPage";
 import { commonApiFetch } from "../../../../services/api/common-api";
