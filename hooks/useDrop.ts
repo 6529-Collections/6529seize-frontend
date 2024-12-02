@@ -6,7 +6,6 @@ import {
 import { ApiDrop } from "../generated/models/ApiDrop";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
-import { useEffect } from "react";
 
 interface UseDropProps {
   readonly dropId: string;
@@ -45,7 +44,6 @@ export const useDrop = ({
     enabled,
   });
 
-
   const prefetchDrop = () => {
     queryClient.prefetchQuery({
       queryKey: getDropQueryKey(dropId),
@@ -58,6 +56,6 @@ export const useDrop = ({
     drop,
     isFetching,
     prefetchDrop,
-    refetch, 
+    refetch,
   };
 };

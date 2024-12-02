@@ -19,20 +19,14 @@ export const WaveDetailedSmallLeaderboard: React.FC<
   WaveDetailedSmallLeaderboardProps
 > = ({ wave, onDropClick }) => {
   const { connectedProfile } = useContext(AuthContext);
-  const {
-    drops,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    haveNewDrops,
-  } = useWaveDropsLeaderboard({
-    waveId: wave.id,
-    connectedProfileHandle: connectedProfile?.profile?.handle,
-    reverse: true,
-    dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
-    sortDirection: WaveDropsLeaderboardSortDirection.DESC,
-  });
+  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useWaveDropsLeaderboard({
+      waveId: wave.id,
+      connectedProfileHandle: connectedProfile?.profile?.handle,
+      reverse: true,
+      dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
+      sortDirection: WaveDropsLeaderboardSortDirection.DESC,
+    });
 
   const memoizedDrops = useMemo(() => drops, [drops]);
 

@@ -1,7 +1,6 @@
 import React from "react";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { DropMode } from "../../PrivilegedDropCreator";
-import PrivilegedDropCreator from "../../PrivilegedDropCreator";
+import PrivilegedDropCreator, { DropMode } from "../../PrivilegedDropCreator";
 
 interface WaveDropCreateProps {
   readonly wave: ApiWave;
@@ -40,7 +39,8 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
       </div>
       <PrivilegedDropCreator
         wave={wave}
-        onCancelReplyQuote={onCancel}
+        onCancelReplyQuote={() => {}}
+        onAllDropsAdded={onSuccess}
         dropId={null}
         activeDrop={null}
         fixedDropMode={DropMode.PARTICIPATION}

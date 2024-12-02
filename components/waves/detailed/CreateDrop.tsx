@@ -23,11 +23,10 @@ import { ActiveDropState } from "./chat/WaveChat";
 import { DropMode } from "./PrivilegedDropCreator";
 import { DropPrivileges } from "../../../hooks/useDropPriviledges";
 
-
-
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onAllDropsAdded?: () => void;
   readonly wave: ApiWave;
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
@@ -39,6 +38,7 @@ const ANIMATION_DURATION = 0.3;
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
+  onAllDropsAdded,
   wave,
   dropId,
   fixedDropMode,
@@ -166,6 +166,7 @@ export default function CreateDrop({
     () => {
       if (queueSize === 0 && !isProcessing && hasQueueChanged) {
         waitAndInvalidateDrops();
+        onAllDropsAdded?.();
       }
     },
     [queueSize, isProcessing, hasQueueChanged],

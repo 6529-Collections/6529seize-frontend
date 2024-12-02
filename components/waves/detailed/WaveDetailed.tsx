@@ -25,19 +25,13 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeWave, setActiveWave] = useState<ApiWave>(wave);
   const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
 
-  const [isLoading, setIsLoading] = useState(false);
-
   useEffect(() => {
     setActiveWave(wave);
   }, [wave]);
 
   const handleWaveChange = (newWave: ApiWave) => {
-    setIsLoading(true);
     setActiveWave(newWave);
     setActiveView(WaveDetailedView.CHAT);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
   };
 
   const breakpoint = useBreakpoint();
@@ -49,7 +43,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
       activeDrop={activeDrop}
       setActiveDrop={setActiveDrop}
       onWaveChange={handleWaveChange}
-      setIsLoading={setIsLoading}
+      setIsLoading={() => {}}
     />
   ) : (
     <WaveDetailedDesktop
@@ -59,7 +53,7 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
       activeDrop={activeDrop}
       setActiveDrop={setActiveDrop}
       onWaveChange={handleWaveChange}
-      setIsLoading={setIsLoading}
+      setIsLoading={() => {}}
     />
   );
 }

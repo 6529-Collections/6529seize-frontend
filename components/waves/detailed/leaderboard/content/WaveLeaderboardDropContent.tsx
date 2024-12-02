@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Tippy from "@tippyjs/react";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropContent from "../../drops/WaveDetailedDropContent";
 import WaveDetailedDropMetadata from "../../drops/WaveDetailedDropMetadata";
@@ -30,9 +29,9 @@ export const WaveLeaderboardDropContent: React.FC<
         setLongPressTriggered={() => {}}
       />
       {!!drop.metadata.length && (
-       <div className="tw-mt-2">
-         <WaveDetailedDropMetadata metadata={drop.metadata} />
-       </div>
+        <div className="tw-mt-2">
+          <WaveDetailedDropMetadata metadata={drop.metadata} />
+        </div>
       )}
     </div>
   );

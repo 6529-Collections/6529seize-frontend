@@ -247,7 +247,7 @@ export default function CreateDrop({
       context_profile_context: null,
       subscribed_actions: [],
       drop_type: ApiDropType.Chat,
-      rank: null
+      rank: null,
     };
   };
 

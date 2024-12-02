@@ -1,7 +1,5 @@
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiDropWithoutWave } from "../../generated/models/ApiDropWithoutWave";
-import { ApiWave } from "../../generated/models/ApiWave";
-import { ApiWaveDropsFeed } from "../../generated/models/ApiWaveDropsFeed";
 import { ApiWaveMin } from "../../generated/models/ApiWaveMin";
 import { getStableDropKey } from "./drop.helpers";
 
