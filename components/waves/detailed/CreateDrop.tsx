@@ -35,6 +35,29 @@ interface CreateDropProps {
 
 const ANIMATION_DURATION = 0.3;
 
+const DROP_MODE_STYLES = {
+  container: `
+    tw-border tw-border-solid tw-border-emerald-500/40
+    tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(41,56,47,0.95)_100%)]
+    tw-shadow-[inset_0_0_20px_rgba(52,211,153,0.1)]
+    hover:tw-shadow-[inset_0_0_25px_rgba(52,211,153,0.15)]
+    tw-transition-all tw-duration-300
+    tw-rounded-xl
+  `,
+  pulseAnimation: `
+    tw-animate-[pulse_3s_ease-in-out_infinite]
+    tw-opacity-70
+  `,
+  indicator: `
+    tw-absolute tw-top-2 tw-right-2
+    tw-text-emerald-500 tw-text-sm
+    tw-flex tw-items-center tw-gap-1
+    tw-px-2 tw-py-1 tw-rounded-full
+    tw-bg-emerald-500/10
+    tw-border tw-border-emerald-500/20
+  `
+};
+
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
@@ -248,7 +271,14 @@ export default function CreateDrop({
 
   return (
     <>
-      <AnimatePresence>
+      <div className={`tw-relative ${isDropMode ? DROP_MODE_STYLES.container : ''}`}>
+        {isDropMode && (
+          <div className={DROP_MODE_STYLES.indicator}>
+            <i className="fas fa-sparkles" />
+            <span>Drop Mode</span>
+          </div>
+        )}
+         <AnimatePresence>
         {isStormMode && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -267,6 +297,7 @@ export default function CreateDrop({
       </AnimatePresence>
 
       <CreateDropContent {...createDropContentProps} wave={wave} />
+      </div>
     </>
   );
 }
