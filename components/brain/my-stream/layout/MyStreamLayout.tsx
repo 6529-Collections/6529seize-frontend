@@ -8,6 +8,7 @@ import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
 import { useRouter } from "next/router";
 import { createBreakpoint } from "react-use";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
@@ -24,13 +25,18 @@ export default function MyStreamLayout({
   const { setTitle, title, showWaves } = useContext(AuthContext);
   const router = useRouter();
   const breakpoint = useBreakpoint();
-  
+
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "My Stream" },
   ];
 
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
+
+  const capacitor = useCapacitor();
+  const containerClassName = `tw-relative lg:tw-mt-6 tw-pb-2 lg:tw-pb-12 tw-flex tw-flex-col tw-h-[calc(100vh-10.75rem)] lg:tw-h-full lg:tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tailwind-scope ${
+    capacitor.isCapacitor ? " tw-pb-[calc(4rem+80px)]" : ""
+  }`;
 
   return (
     <>
@@ -69,19 +75,20 @@ export default function MyStreamLayout({
               <AnimatePresence mode="wait">
                 <motion.div
                   key={router.pathname}
-                  initial={{ 
+                  initial={{
                     opacity: 0,
-                    x: breakpoint === "S" ? 20 : 0 
+                    x: breakpoint === "S" ? 20 : 0,
                   }}
-                  animate={{ 
+                  animate={{
                     opacity: 1,
-                    x: 0 
+                    x: 0,
                   }}
-                  exit={{ 
+                  exit={{
                     opacity: 0,
-                    x: breakpoint === "S" ? -20 : 0 
+                    x: breakpoint === "S" ? -20 : 0,
                   }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className={containerClassName}
                 >
                   {children}
                 </motion.div>
