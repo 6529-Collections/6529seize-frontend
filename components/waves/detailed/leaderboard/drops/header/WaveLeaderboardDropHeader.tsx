@@ -25,7 +25,9 @@ export const WaveLeaderboardDropHeader: React.FC<
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-6">
         {!!drop.rating && <WaveLeaderboardDropRaters drop={drop} />}
-        <WaveDetailedDropActionsRate drop={drop} />
+        <div className="tw-w-24">
+          <WaveDetailedDropActionsRate drop={drop} />
+        </div>
       </div>
     </div>
   );
