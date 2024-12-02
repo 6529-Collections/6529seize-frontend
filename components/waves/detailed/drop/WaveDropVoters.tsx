@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { AnimatePresence } from "framer-motion";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useWaveTopVoters } from "../../../../hooks/useWaveTopVoters";
 import { useAuth } from "../../../auth/Auth";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
