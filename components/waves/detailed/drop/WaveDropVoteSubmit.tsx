@@ -5,8 +5,6 @@ import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { DropRateChangeRequest } from "../../../../entities/IDrop";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 
 interface WaveDropVoteSubmitProps {
