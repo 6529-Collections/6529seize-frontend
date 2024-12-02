@@ -147,7 +147,7 @@ export default function WaveHeader({
                   <span className="tw-text-iron-200 tw-pr-0.5">
                     {numberWithCommas(wave.metrics.drops_count)}
                   </span>
-                  {wave.metrics.drops_count === 1 ? "Drop" : "Drops"}
+                  {wave.metrics.drops_count === 1 ? "Post" : "Posts"}
                 </span>
               </div>
             )}
