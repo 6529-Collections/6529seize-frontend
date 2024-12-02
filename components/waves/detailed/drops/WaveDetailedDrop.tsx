@@ -55,7 +55,8 @@ const RANK_STYLES = {
   1: "tw-border tw-border-solid tw-border-[#E8D48A]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(66,56,41,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(217,169,98,0.15)] hover:tw-shadow-[inset_0_0_25px_rgba(217,169,98,0.2)]",
   2: "tw-border tw-border-solid tw-border-[#DDDDDD]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(45,45,50,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(192,192,192,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(192,192,192,0.15)]",
   3: "tw-border tw-border-solid tw-border-[#CD7F32]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(60,46,36,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(205,127,50,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(205,127,50,0.15)]",
-  default: "tw-border tw-border-solid tw-border tw-border-iron-600/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.95)_0%,rgba(35,35,40,0.98)_100%)] tw-shadow-[inset_0_0_16px_rgba(255,255,255,0.03)] hover:tw-shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]"
+  default:
+    "tw-border tw-border-solid tw-border tw-border-iron-600/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.95)_0%,rgba(35,35,40,0.98)_100%)] tw-shadow-[inset_0_0_16px_rgba(255,255,255,0.03)] hover:tw-shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]",
 } as const;
 
 const getColorClasses = ({
@@ -72,7 +73,8 @@ const getColorClasses = ({
   }
   if (!isDrop) return "tw-bg-iron-950";
 
-  const rankClass = RANK_STYLES[rank as keyof typeof RANK_STYLES] ?? RANK_STYLES.default;
+  const rankClass =
+    RANK_STYLES[rank as keyof typeof RANK_STYLES] ?? RANK_STYLES.default;
   return ` ${rankClass} tw-transition-shadow tw-duration-300`.trim();
 };
 
@@ -217,7 +219,13 @@ const WaveDetailedDrop = ({
     };
   }, []);
 
-  const dropClasses = getDropClasses(isActiveDrop, groupingClass, location, drop.rank, isDrop);
+  const dropClasses = getDropClasses(
+    isActiveDrop,
+    groupingClass,
+    location,
+    drop.rank,
+    isDrop
+  );
 
   const onContainerClick = () => {
     if (drop.drop_type === ApiDropType.Participatory) {
@@ -227,7 +235,9 @@ const WaveDetailedDrop = ({
 
   return (
     <div
-      className={`${isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""} tw-w-full`}
+      className={`${
+        isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""
+      } tw-w-full`}
     >
       <div
         className={dropClasses}
@@ -260,8 +270,9 @@ const WaveDetailedDrop = ({
           {!shouldGroupWithPreviousDrop && (
             <WaveDetailedDropAuthorPfp drop={drop} />
           )}
-          <div className="tw-flex tw-flex-col tw-w-full"
-          /*   className={`${
+          <div
+            className="tw-flex tw-flex-col tw-w-full"
+            /*   className={`${
               shouldGroupWithPreviousDrop ? "" : ""
             } tw-flex tw-flex-col tw-w-full`} */
           >
