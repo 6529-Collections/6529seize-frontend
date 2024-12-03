@@ -23,7 +23,7 @@ export default function DropListItemRateGiveSubmit({
   availableCredit,
   canVote,
   onSuccessfulRateChange,
-  isMobile = false
+  isMobile = false,
 }: {
   readonly rate: number;
   readonly drop: ApiDrop;
@@ -49,10 +49,6 @@ export default function DropListItemRateGiveSubmit({
         },
       }),
     onSuccess: (response: ApiDrop) => {
-      setToast({
-        message: `Voted successfully`,
-        type: "success",
-      });
       onDropRateChange({
         drop: response,
         giverHandle: connectedProfile?.profile?.handle ?? null,
@@ -90,12 +86,28 @@ export default function DropListItemRateGiveSubmit({
     const previousRate = drop.context_profile_context?.rating ?? 0;
     const rateIncrement = rate * clickCount;
     const newRate = previousRate + rateIncrement;
+    console.log({
+      previousRate,
+      rate,
+      clickCount,
+      newRate,
+    });
 
     await rateChangeMutation.mutateAsync({
       rate: newRate,
       category: DEFAULT_DROP_RATE_CATEGORY,
     });
-  }, [canVote, rate, mutating, requestAuth, drop, clickCount, rateChangeMutation, voteState, setToast]);
+  }, [
+    canVote,
+    rate,
+    mutating,
+    requestAuth,
+    drop,
+    clickCount,
+    rateChangeMutation,
+    voteState,
+    setToast,
+  ]);
 
   useEffect(() => {
     if (clickCount > 0 && !mutating) {

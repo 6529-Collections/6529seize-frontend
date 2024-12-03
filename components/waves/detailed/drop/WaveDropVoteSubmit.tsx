@@ -34,10 +34,7 @@ export const WaveDropVoteSubmit: FC<WaveDropVoteSubmitProps> = ({
         },
       }),
     onSuccess: (response: ApiDrop) => {
-      setToast({
-        message: `Voted successfully`,
-        type: "success",
-      });
+
       onDropRateChange({
         drop: response,
         giverHandle: connectedProfile?.profile?.handle ?? null,
