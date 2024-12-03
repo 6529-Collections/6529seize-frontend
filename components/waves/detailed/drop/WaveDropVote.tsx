@@ -5,11 +5,17 @@ import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { WaveDropVoteInput } from "./WaveDropVoteInput";
 import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
 import { TabToggle } from "../../../common/TabToggle";
-import { WaveDropVoteSubmit } from "./WaveDropVoteSubmit";
+import dynamic from "next/dynamic";
+
 
 interface WaveDropVoteProps {
   readonly drop: ApiDrop;
 }
+
+const WaveDropVoteSubmit = dynamic(
+  () => import("./WaveDropVoteSubmit"),
+  { ssr: false }
+);
 
 export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ drop }) => {
   const availableCredit = Math.abs(

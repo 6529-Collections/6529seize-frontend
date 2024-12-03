@@ -1,0 +1,188 @@
+$btn-dimension: 64px;
+$positive-color: rgba(39, 174, 96, 1);
+$btn-bg: rgba(39, 174, 96, 1);
+$btn-hover: rgba(46, 204, 113, 1);
+
+@keyframes shockwave {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 2px $positive-color;
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 50px darken($positive-color, 20%), inset 0 0 10px $positive-color;
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(39, 174, 96, 0.2),
+                0 0 10px rgba(39, 174, 96, 0.2),
+                0 0 15px rgba(39, 174, 96, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(39, 174, 96, 0.4),
+                0 0 30px rgba(39, 174, 96, 0.2),
+                0 0 40px rgba(39, 174, 96, 0.1);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(39, 174, 96, 0.2),
+                0 0 10px rgba(39, 174, 96, 0.2),
+                0 0 15px rgba(39, 174, 96, 0.2);
+  }
+}
+
+@keyframes funSpin {
+  0% {
+    transform: rotate(0deg);
+    border-width: 2px;
+  }
+  20% {
+    transform: rotate(240deg);
+    border-width: 2px;
+  }
+  35% {
+    transform: rotate(480deg);
+    border-width: 2.2px;
+  }
+  45% {
+    transform: rotate(720deg);
+    border-width: 2.3px;
+  }
+  55% {
+    transform: rotate(1080deg);
+    border-width: 2.5px;
+  }
+  70% {
+    transform: rotate(1440deg);
+    border-width: 2.3px;
+  }
+  85% {
+    transform: rotate(1680deg);
+    border-width: 2.2px;
+  }
+  100% {
+    transform: rotate(1800deg);
+    border-width: 2px;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@keyframes textScaleOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes textScaleIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.voteButton {
+  position: relative;
+  border-radius: 8px;
+  width: $btn-dimension;
+  height: 40px;
+  background: $btn-bg;
+  border: none;
+  outline: none;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  animation: glow 2s infinite;
+  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.2);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
+
+  &:not(:disabled):hover {
+    background: $btn-hover;
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
+
+    &:after {
+      animation: shockwave 1s ease-in infinite;
+    }
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    animation: pulse 2s infinite;
+    background: rgba(39, 174, 96, 0.7);
+  }
+
+  &:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    border-radius: 8px;
+    width: $btn-dimension - 1px;
+    height: 39px;
+    pointer-events: none;
+  }
+}
+
+.buttonContent {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttonText {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+  &.exit {
+    animation: textScaleOut 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  }
+
+  &.enter {
+    animation: textScaleIn 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  }
+}
+
+.spinner {
+  position: absolute;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  border-right-color: white;
+  animation: spinnerEnter 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards,
+             funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
+
+  &.exit {
+    animation: spinnerExit 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  }
+}
