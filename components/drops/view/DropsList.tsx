@@ -1,11 +1,8 @@
 import { useMemo, RefObject, useCallback, memo } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-
-import WaveDetailedDrop, {
-  DropLocation,
-} from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import Drop, { DropLocation } from "../../waves/detailed/drops/Drop";
 
 type DropActionHandler = ({
   drop,
@@ -32,7 +29,7 @@ interface DropsListProps {
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
-const MemoizedWaveDetailedDrop = memo(WaveDetailedDrop);
+const MemoizedDrop = memo(Drop);
 
 const DropsList = memo(function DropsList({
   drops,
@@ -78,7 +75,7 @@ const DropsList = memo(function DropsList({
             containIntrinsicSize: "auto",
           }} */
         >
-          <MemoizedWaveDetailedDrop
+          <MemoizedDrop
             dropViewDropId={dropViewDropId}
             onReplyClick={handleReplyClick}
             drop={drop}

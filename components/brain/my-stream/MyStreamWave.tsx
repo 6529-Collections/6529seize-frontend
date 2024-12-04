@@ -5,8 +5,8 @@ import FeedWrapper from "../feed/FeedWrapper";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
-import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 
 interface MyStreamWaveProps {
   readonly waveId: string;

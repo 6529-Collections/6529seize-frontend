@@ -12,16 +12,9 @@ import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
 import { ActiveDropState } from "../chat/WaveChat";
+import { DropInteractionParams } from "./Drop";
+import { DropLocation } from "./Drop";
 
-export interface DropInteractionParams {
-  drop: ExtendedDrop;
-  partId: number;
-}
-
-export enum DropLocation {
-  MY_STREAM = "MY_STREAM",
-  WAVE = "WAVE",
-}
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,

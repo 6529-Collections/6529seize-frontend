@@ -7,17 +7,23 @@ import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
 import { TabToggle } from "../../../common/TabToggle";
 import dynamic from "next/dynamic";
 
-
+export enum WaveDropVoteSize {
+  NORMAL = "NORMAL",
+  COMPACT = "COMPACT",
+}
 interface WaveDropVoteProps {
   readonly drop: ApiDrop;
+  readonly size?: WaveDropVoteSize;
 }
 
-const WaveDropVoteSubmit = dynamic(
-  () => import("./WaveDropVoteSubmit"),
-  { ssr: false }
-);
+const WaveDropVoteSubmit = dynamic(() => import("./WaveDropVoteSubmit"), {
+  ssr: false,
+});
 
-export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ drop }) => {
+export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
+  drop,
+  size = WaveDropVoteSize.NORMAL,
+}) => {
   const availableCredit = Math.abs(
     (drop.context_profile_context?.max_rating ?? 0) -
       (drop.context_profile_context?.rating ?? 0)
@@ -111,11 +117,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({ drop }) => {
       )}
 
       <div className="tw-absolute tw-bottom-5 tw-right-5">
-        <WaveDropVoteSubmit
-          rate={Number(voteValue) || 0}
-          dropId={drop.id}
-          onSubmit={onSuccessfulRateChange}
-        />
+        <WaveDropVoteSubmit />
       </div>
     </div>
   );
