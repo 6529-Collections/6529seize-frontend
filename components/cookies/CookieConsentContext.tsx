@@ -17,6 +17,7 @@ import {
   CONSENT_PERFORMANCE_COOKIE,
 } from "../../constants";
 import { AuthContext } from "../auth/Auth";
+import EULAModal from "./EULAModal";
 
 const GTM_ID = "G-71NLVV3KY3";
 
@@ -161,6 +162,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   return (
     <CookieConsentContext.Provider value={value}>
       {children}
+      <EULAModal />
     </CookieConsentContext.Provider>
   );
 };
