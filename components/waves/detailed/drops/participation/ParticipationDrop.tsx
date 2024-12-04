@@ -16,6 +16,7 @@ import WaveDetailedDropContent from "../WaveDetailedDropContent";
 import { useCallback, useState } from "react";
 import useIsMobileDevice from "../../../../../hooks/isMobileDevice";
 import { WaveDropVote, WaveDropVoteSize } from "../../drop/WaveDropVote";
+import { ParticipationDropRatings } from "./ParticipationDropRatings";
 
 interface ParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -40,6 +41,13 @@ const RANK_STYLES = {
   3: "tw-border tw-border-solid tw-border-[#CD7F32]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(60,46,36,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(205,127,50,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(205,127,50,0.15)]",
   default:
     "tw-border tw-border-solid tw-border tw-border-iron-600/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.95)_0%,rgba(35,35,40,0.98)_100%)] tw-shadow-[inset_0_0_16px_rgba(255,255,255,0.03)] hover:tw-shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]",
+} as const;
+
+const RANK_SEPARATOR_STYLES = {
+  1: "before:tw-bg-[#E8D48A]",
+  2: "before:tw-bg-[#DDDDDD]",
+  3: "before:tw-bg-[#CD7F32]",
+  default: "before:tw-bg-iron-600",
 } as const;
 
 const getColorClasses = ({
@@ -97,51 +105,65 @@ export default function ParticipationDrop({
 
   return (
     <div
-      className={`tw-relative tw-w-full tw-rounded-lg tw-my-0.5 ${colorClasses}`}
+      className={`tw-relative tw-w-full tw-rounded-xl tw-my-2 ${colorClasses} tw-overflow-hidden tw-backdrop-blur-sm`}
     >
-      <div className="tw-p-4 tw-border-b tw-border-iron-600/40">
-        <div className="tw-flex tw-items-center tw-space-x-4">
-          <WaveDetailedDropAuthorPfp drop={drop} />
+      <div className="tw-px-6 tw-py-5">
+        <div className="tw-flex tw-items-center tw-space-x-5">
+          <div className="tw-relative tw-group">
+            <div className="tw-rounded-lg tw-overflow-hidden tw-ring-2 tw-ring-iron-700/50 group-hover:tw-ring-iron-600 tw-transition-all tw-duration-300">
+              <WaveDetailedDropAuthorPfp drop={drop} />
+            </div>
+            <div className="tw-absolute -tw-bottom-1.5 -tw-right-1.5 tw-transform group-hover:tw-scale-110 tw-transition-transform tw-duration-300">
+              <UserCICAndLevel
+                level={drop.author.level}
+                cicType={cicType}
+                size={UserCICAndLevelSize.SMALL}
+              />
+            </div>
+          </div>
           <div className="tw-flex-1">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-w-full">
-              <div className="tw-flex tw-items-center tw-gap-x-2">
-                <UserCICAndLevel
-                  level={drop.author.level}
-                  cicType={cicType}
-                  size={UserCICAndLevelSize.SMALL}
-                />
-                <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-                  <Link
-                    onClick={(e) => e.stopPropagation()}
-                    href={`/${drop.author.handle}`}
-                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-                  >
-                    {drop.author.handle}
-                  </Link>
-                </p>
-                <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0" />
-                <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-                  {getTimeAgoShort(drop.created_at)}
-                </p>
+              <div className="tw-flex tw-flex-col tw-gap-2">
+                <div className="tw-flex tw-items-center tw-gap-x-3">
+                  <p className="tw-text-lg tw-mb-0 tw-leading-none tw-font-semibold">
+                    <Link
+                      onClick={(e) => e.stopPropagation()}
+                      href={`/${drop.author.handle}`}
+                      className="tw-no-underline tw-text-iron-50 hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
+                    >
+                      {drop.author.handle}
+                    </Link>
+                  </p>
+                  {isDrop && (
+                    <div className="tw-flex tw-items-center tw-justify-center tw-h-6">
+                      <DropTrophyIcon rank={rank} />
+                    </div>
+                  )}
+                </div>
+                <div className="tw-flex tw-items-center tw-gap-x-2">
+                  <p className="tw-text-sm tw-mb-0 tw-whitespace-nowrap tw-font-medium tw-leading-none tw-text-iron-400">
+                    {getTimeAgoShort(drop.created_at)}
+                  </p>
+                  {showWaveInfo && (
+                    <>
+                      <div className="tw-size-[3px] tw-bg-iron-500 tw-rounded-full tw-flex-shrink-0" />
+                      <Link
+                        onClick={(e) => e.stopPropagation()}
+                        href={`/waves/${drop.wave.id}`}
+                        className="tw-text-sm tw-leading-none tw-font-medium tw-text-iron-400 hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+                      >
+                        {drop.wave.name}
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
-              {isDrop && <DropTrophyIcon rank={rank} />}
             </div>
-            {showWaveInfo && (
-              <div className="tw-mt-0.5">
-                <Link
-                  onClick={(e) => e.stopPropagation()}
-                  href={`/waves/${drop.wave.id}`}
-                  className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-                >
-                  {drop.wave.name}
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      <div className="tw-p-4">
+      <div className="tw-px-6 tw-pb-6">
         <WaveDetailedDropContent
           drop={drop}
           activePartIndex={activePartIndex}
@@ -154,9 +176,15 @@ export default function ParticipationDrop({
         />
       </div>
 
-      <div className="tw-p-4 tw-border-t tw-border-iron-600/40">
+      <div className="tw-px-6 tw-pt-2 tw-pb-4">
         <WaveDropVote drop={drop} size={WaveDropVoteSize.COMPACT} />
       </div>
+
+      {!!drop.raters_count && (
+        <div className="tw-px-6 tw-pb-5">
+          <ParticipationDropRatings drop={drop} />
+        </div>
+      )}
     </div>
   );
 }

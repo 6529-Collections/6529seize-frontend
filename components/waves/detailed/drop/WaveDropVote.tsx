@@ -11,6 +11,7 @@ export enum WaveDropVoteSize {
   NORMAL = "NORMAL",
   COMPACT = "COMPACT",
 }
+
 interface WaveDropVoteProps {
   readonly drop: ApiDrop;
   readonly size?: WaveDropVoteSize;
@@ -40,6 +41,24 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
     { key: "slider", label: "Slider" },
     { key: "numeric", label: "Numeric" },
   ] as const;
+
+  const isCompact = size === WaveDropVoteSize.COMPACT;
+
+  if (isCompact) {
+    return (
+      <div className="tw-flex tw-items-center tw-gap-4">
+        <div className="tw-flex-1">
+          <WaveDropVoteSlider
+            voteValue={voteValue}
+            currentVoteValue={drop.context_profile_context?.rating ?? 0}
+            setVoteValue={setVoteValue}
+            availableCredit={availableCredit}
+          />
+        </div>
+        <WaveDropVoteSubmit />
+      </div>
+    );
+  }
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800/30 tw-relative">
