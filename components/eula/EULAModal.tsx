@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { AboutSection } from "../../pages/about/[section]";
 import { useEULAConsent } from "./EULAConsentContext";
+import { useEffect } from "react";
 
 export default function EULAModal() {
   const { consent } = useEULAConsent();
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   return (
-    <div
-      className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-bg-black/60 tw-backdrop-blur tw-p-2"
-      role="dialog"
-      aria-modal="true">
-      <div className="tw-bg-iron-800 tw-rounded-lg tw-shadow-lg tw-w-full tw-max-w-lg sm:tw-w-3/4 sm:tw-max-w-4xl tw-px-6 sm:tw-px-12 tw-py-8 sm:tw-py-10">
+    <div className="tw-fixed tw-inset-0 tw-z-1000 tw-flex tw-items-center tw-justify-center tw-bg-black/60 tw-backdrop-blur tw-p-2">
+      <div className="tw-bg-iron-800 tw-rounded-lg tw-shadow-lg tw-w-full tw-max-h-full tw-overflow-y-auto tw-max-w-lg sm:tw-w-3/4 sm:tw-max-w-4xl tw-px-6 sm:tw-px-12 tw-py-8 sm:tw-py-10">
         <div className="tw-text-center tw-mb-10">
           <h3>End User License Agreement</h3>
         </div>
