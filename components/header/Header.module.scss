@@ -129,10 +129,12 @@
 
 .burgerMenuClose {
   width: 35px;
+  height: 35px;
   cursor: pointer;
   position: fixed;
   right: 20px;
   top: 20px;
+  top: calc(20px + env(safe-area-inset-top));
 }
 
 .mainNavLink {
