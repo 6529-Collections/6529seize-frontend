@@ -105,7 +105,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 import "../components/drops/create/lexical/lexical.styles.scss";
-import CookiesBanner from "../components/cookies/CookiesBanner";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
 import { Capacitor } from "@capacitor/core";
@@ -116,6 +115,7 @@ import { NotificationsProvider } from "../components/notifications/Notifications
 import Footer from "../components/footer/Footer";
 import { useRouter } from "next/router";
 import { SeizeConnectProvider } from "../components/auth/SeizeConnectContext";
+import { EULAConsentProvider } from "../components/eula/EULAConsentContext";
 
 library.add(
   faArrowUp,
@@ -296,8 +296,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
               <Auth>
                 <NotificationsProvider>
                   <CookieConsentProvider>
-                    {getLayout(<Component {...props} />)}
-                    <CookiesBanner />
+                    <EULAConsentProvider>
+                      {getLayout(<Component {...props} />)}
+                    </EULAConsentProvider>
                   </CookieConsentProvider>
                 </NotificationsProvider>
               </Auth>
@@ -306,7 +307,6 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
           {!hideFooter && <Footer />}
         </WagmiProvider>
       </Provider>
-
     </QueryClientProvider>
   );
 }

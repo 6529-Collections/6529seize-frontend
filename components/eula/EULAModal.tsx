@@ -1,27 +1,9 @@
-import styles from "./EULAModal.module.scss";
-import { Button, Modal } from "react-bootstrap";
-import useCapacitor from "../../hooks/useCapacitor";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AboutSection } from "../../pages/about/[section]";
+import { useEULAConsent } from "./EULAConsentContext";
 
 export default function EULAModal() {
-  const capacitor = useCapacitor();
-  const [show, setShow] = useState(false);
-
-  const handleAgree = () => {
-    setShow(false);
-  };
-
-  useEffect(() => {
-    if (capacitor.platform === "ios") {
-      setShow(true);
-    }
-  }, [capacitor.platform]);
-
-  if (!show) {
-    return <></>;
-  }
+  const { consent } = useEULAConsent();
 
   return (
     <div
@@ -48,7 +30,7 @@ export default function EULAModal() {
         </div>
         <div className="tw-flex tw-justify-center">
           <button
-            onClick={handleAgree}
+            onClick={consent}
             className="tw-bg-white tw-text-gray-900 tw-font-medium tw-px-8 tw-py-3 tw-rounded tw-shadow hover:tw-bg-iron-300 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-gray-300 tw-transition tw-duration-150 tw-border-none">
             Agree
           </button>
