@@ -3,7 +3,6 @@ import { useState } from "react";
 import WaveDropVoteQuick from "./WaveDropVoteQuick";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { WaveDropVoteInput } from "./WaveDropVoteInput";
-import { WaveDropVoteSlider } from "./WaveDropVoteSlider";
 import { TabToggle } from "../../../common/TabToggle";
 import dynamic from "next/dynamic";
 
@@ -18,6 +17,10 @@ interface WaveDropVoteProps {
 }
 
 const WaveDropVoteSubmit = dynamic(() => import("./WaveDropVoteSubmit"), {
+  ssr: false,
+});
+
+const WaveDropVoteSlider = dynamic(() => import("./WaveDropVoteSlider"), {
   ssr: false,
 });
 
@@ -53,9 +56,10 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
             currentVoteValue={drop.context_profile_context?.rating ?? 0}
             setVoteValue={setVoteValue}
             availableCredit={availableCredit}
+            rank={drop.rank}
           />
         </div>
-        <WaveDropVoteSubmit />
+        <WaveDropVoteSubmit position={drop.rank ?? undefined} />
       </div>
     );
   }
@@ -88,6 +92,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
                 currentVoteValue={drop.context_profile_context?.rating ?? 0}
                 setVoteValue={setVoteValue}
                 availableCredit={availableCredit}
+                rank={drop.rank}
               />
             </div>
             <div

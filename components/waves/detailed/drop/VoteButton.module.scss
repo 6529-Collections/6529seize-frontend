@@ -1,37 +1,32 @@
 $btn-dimension: 64px;
-$positive-color: rgba(39, 174, 96, 1);
-$btn-bg: rgba(39, 174, 96, 1);
-$btn-hover: rgba(46, 204, 113, 1);
 
 @keyframes shockwave {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 2px $positive-color;
+    box-shadow: 0 0 2px var(--theme-primary, rgba(255, 255, 255, 0.9));
     opacity: 1;
   }
 
   100% {
     transform: scale(1);
     opacity: 0;
-    box-shadow: 0 0 50px darken($positive-color, 20%), inset 0 0 10px $positive-color;
+    box-shadow: 0 0 50px var(--theme-secondary, rgba(255, 255, 255, 0.3)), 
+                inset 0 0 10px var(--theme-primary, rgba(255, 255, 255, 0.9));
   }
 }
 
 @keyframes glow {
   0% {
-    box-shadow: 0 0 5px rgba(39, 174, 96, 0.2),
-                0 0 10px rgba(39, 174, 96, 0.2),
-                0 0 15px rgba(39, 174, 96, 0.2);
+    box-shadow: 0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+                0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
   50% {
-    box-shadow: 0 0 20px rgba(39, 174, 96, 0.4),
-                0 0 30px rgba(39, 174, 96, 0.2),
-                0 0 40px rgba(39, 174, 96, 0.1);
+    box-shadow: 0 0 20px var(--theme-primary, rgba(255, 255, 255, 0.2)),
+                0 0 30px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
   100% {
-    box-shadow: 0 0 5px rgba(39, 174, 96, 0.2),
-                0 0 10px rgba(39, 174, 96, 0.2),
-                0 0 15px rgba(39, 174, 96, 0.2);
+    box-shadow: 0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+                0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
   }
 }
 
@@ -100,47 +95,29 @@ $btn-hover: rgba(46, 204, 113, 1);
 
 .voteButton {
   position: relative;
-  border-radius: 8px;
+  border-radius: 12px;
   width: $btn-dimension;
   height: 40px;
-  background: $btn-bg;
-  border: none;
+  background: rgba(40, 43, 47, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   outline: none;
-  color: white;
-  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
   cursor: pointer;
-  animation: glow 2s infinite;
-  box-shadow: 0 4px 15px rgba(39, 174, 96, 0.2);
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
-  perspective: 1000px;
-  will-change: transform;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 
   &:not(:disabled):hover {
-    background: $btn-hover;
-    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3);
-
-    &:after {
-      animation: shockwave 1s ease-in infinite;
-    }
+    background: rgba(45, 48, 52, 0.5);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 1);
   }
 
   &:disabled {
     cursor: not-allowed;
-    animation: pulse 2s infinite;
-    background: rgba(39, 174, 96, 0.7);
-  }
-
-  &:after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: block;
-    border-radius: 8px;
-    width: $btn-dimension - 1px;
-    height: 39px;
-    pointer-events: none;
+    opacity: 0.5;
   }
 }
 
@@ -184,5 +161,36 @@ $btn-hover: rgba(46, 204, 113, 1);
 
   &.exit {
     animation: spinnerExit 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  }
+}
+
+.theme1 {
+  color: rgba(255, 215, 0, 0.9);
+  
+  &:hover {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.25) !important;
+    color: rgba(255, 215, 0, 1) !important;
+  }
+}
+
+.theme2 {
+  background: rgba(45, 48, 52, 0.5);
+  border-color: rgba(192, 192, 192, 0.15);
+  color: rgba(192, 192, 192, 0.9);
+  
+  &:hover {
+    background: rgba(50, 53, 57, 0.6) !important;
+    box-shadow: 0 0 20px rgba(192, 192, 192, 0.3) !important;
+    border-color: rgba(192, 192, 192, 0.25) !important;
+    color: rgba(192, 192, 192, 1) !important;
+  }
+}
+
+.theme3 {
+  color: rgba(205, 127, 50, 0.9);
+  
+  &:hover {
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.25) !important;
+    color: rgba(205, 127, 50, 1) !important;
   }
 }

@@ -3,7 +3,27 @@ import mojs from "@mojs/core";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import styles from "./VoteButton.module.scss";
 
-export default function WaveDropVoteSubmit() {
+type ThemeColors = {
+  primary: string;
+  secondary: string;
+};
+
+const defaultTheme: ThemeColors = {
+  primary: "rgba(255, 255, 255, 0.9)",
+  secondary: "rgba(255, 255, 255, 0.3)"
+};
+
+const rankingThemes: { [key: number]: ThemeColors } = {
+  1: { primary: "rgba(255, 215, 0, 0.9)", secondary: "rgba(255, 215, 0, 0.3)" },
+  2: { primary: "rgba(192, 192, 192, 0.9)", secondary: "rgba(192, 192, 192, 0.3)" },
+  3: { primary: "rgba(205, 127, 50, 0.9)", secondary: "rgba(205, 127, 50, 0.3)" }
+};
+
+interface Props {
+  readonly position?: number;
+}
+
+export default function WaveDropVoteSubmit({ position }: Props) {
   const [animationTimeline, setAnimationTimeline] = useState<any>(null);
   const [triangleBurst, setTriangleBurst] = useState<any>(null);
   const [circleBurst, setCircleBurst] = useState<any>(null);
@@ -21,8 +41,9 @@ export default function WaveDropVoteSubmit() {
   const particleCount = 12;
   const totalParticlesTime = particlesDuration + (particlesDelay * particleCount) + 2500;
 
+  const theme = position && position <= 3 ? rankingThemes[position] : defaultTheme;
+
   useEffect(() => {
-    // First burst (triangles)
     setTriangleBurst(
       new mojs.Burst({
         parent: `.vote-button-container-${randomID}`,
@@ -33,7 +54,7 @@ export default function WaveDropVoteSubmit() {
           shape: "polygon",
           radius: { 8: 0 },
           scale: 1,
-          stroke: "rgba(46, 204, 113, 1)",
+          stroke: theme.primary,
           strokeWidth: 2,
           angle: 210,
           delay: 30,
@@ -45,7 +66,6 @@ export default function WaveDropVoteSubmit() {
       })
     );
 
-    // Second burst (circles)
     setCircleBurst(
       new mojs.Burst({
         parent: `.vote-button-container-${randomID}`,
@@ -54,7 +74,7 @@ export default function WaveDropVoteSubmit() {
         angle: 0,
         children: {
           shape: "circle",
-          fill: ["rgba(46, 204, 113, 1)", "rgba(39, 174, 96, 1)"],
+          fill: [theme.primary, theme.secondary],
           delay: "stagger(0, 50)",
           speed: 0.2,
           radius: { 4: 0 },
@@ -65,7 +85,6 @@ export default function WaveDropVoteSubmit() {
       })
     );
 
-    // Third burst (small particles)
     setSmallBurst(
       new mojs.Burst({
         parent: `.vote-button-container-${randomID}`,
@@ -74,7 +93,7 @@ export default function WaveDropVoteSubmit() {
         angle: 90,
         children: {
           shape: "circle",
-          fill: ["rgba(39, 174, 96, 1)", "rgba(46, 204, 113, 1)"],
+          fill: [theme.secondary, theme.primary],
           delay: `stagger(0, ${particlesDelay})`,
           speed: 0.3,
           radius: { 3: 0 },
@@ -85,7 +104,6 @@ export default function WaveDropVoteSubmit() {
       })
     );
 
-    // Button scale animation
     setScaleButton(
       new mojs.Html({
         el: `#vote-button-${randomID}`,
@@ -115,14 +133,11 @@ export default function WaveDropVoteSubmit() {
     setIsTextExiting(true);
     setLoading(true);
 
-    // Wait for text exit animation
     await new Promise(resolve => setTimeout(resolve, 300));
     setIsTextExiting(false);
 
-    // Simulate some async operation
     await new Promise(resolve => setTimeout(resolve, 5000));
 
-    // Spinner exit animation
     setIsSpinnerExiting(true);
     await new Promise(resolve => setTimeout(resolve, 300));
     
@@ -130,15 +145,12 @@ export default function WaveDropVoteSubmit() {
     setIsSpinnerExiting(false);
     setShowSuccess(true);
     
-    // After loading, play all the fancy animations
     if (animationTimeline) {
       animationTimeline.replay();
     }
 
-    // Wait for ALL particles to complete their animations
     await new Promise(resolve => setTimeout(resolve, totalParticlesTime));
 
-    // Reset back to Vote!
     setIsTextExiting(true);
     await new Promise(resolve => setTimeout(resolve, 300));
     setShowSuccess(false);
@@ -162,6 +174,8 @@ export default function WaveDropVoteSubmit() {
     );
   };
 
+  const themeClass = position && position <= 3 ? styles[`theme${position}`] : "";
+
   return (
     <div className="tailwind-scope">
       <div className={`vote-button-container-${randomID} tw-relative`}>
@@ -170,7 +184,11 @@ export default function WaveDropVoteSubmit() {
           onClick={handleClick}
           disabled={loading}
           type="button"
-          className={`${styles.voteButton} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-current tw-transition tw-duration-300 tw-ease-out`}
+          className={`${styles.voteButton} ${themeClass} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-transition tw-duration-300 tw-ease-out`}
+          style={{
+            "--theme-primary": theme.primary,
+            "--theme-secondary": theme.secondary
+          } as React.CSSProperties}
         >
           {getButtonContent()}
         </button>
