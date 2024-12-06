@@ -11,13 +11,12 @@ export const WaveLeaderboardDropRaters: React.FC<
 > = ({ drop }) => {
   const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
 
-
   const topThreeRankStyles: {
     [key: number]: string;
   } = {
-    1: "tw-text-[#E8D48A]",
-    2: "tw-text-[#dddddd]",
-    3: "tw-text-[#CD7F32]",
+    1: "tw-text-[#D9A962]",
+    2: "tw-text-[#C0C0C0]",
+    3: "tw-text-[#B87333]",
   };
 
   const rankStyle = drop.rank && drop.rank <= 3 ? topThreeRankStyles[drop.rank] : "tw-text-iron-300";

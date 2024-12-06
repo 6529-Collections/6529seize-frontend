@@ -37,7 +37,10 @@ export default function WaveDropVoteSlider({
   };
 
   const zeroPercentage = ((0 - minValue) / (maxValue - minValue)) * 100;
-  const currentPercentage = ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) / (maxValue - minValue)) * 100;
+  const currentPercentage =
+    ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) /
+      (maxValue - minValue)) *
+    100;
 
   const x = useMotionValue(currentPercentage);
   const xSmooth = useSpring(x, { damping: 20, stiffness: 300 });
@@ -47,15 +50,16 @@ export default function WaveDropVoteSlider({
     x.set(currentPercentage);
   }, [currentPercentage]);
 
-  const progressBarStyle = Number(typeof voteValue === "string" ? 0 : voteValue) >= 0
-    ? {
-        left: `${zeroPercentage}%`,
-        width: `${currentPercentage - zeroPercentage}%`,
-      }
-    : {
-        left: `${currentPercentage}%`,
-        width: `${zeroPercentage - currentPercentage}%`,
-      };
+  const progressBarStyle =
+    Number(typeof voteValue === "string" ? 0 : voteValue) >= 0
+      ? {
+          left: `${zeroPercentage}%`,
+          width: `${currentPercentage - zeroPercentage}%`,
+        }
+      : {
+          left: `${currentPercentage}%`,
+          width: `${zeroPercentage - currentPercentage}%`,
+        };
 
   return (
     <div className="tw-h-[20px] tw-flex tw-items-center">
@@ -79,7 +83,10 @@ export default function WaveDropVoteSlider({
           <motion.div
             className="tw-absolute tw-h-4 tw-w-0.5 tw-bg-iron-400/30 tw-rounded-full tw-z-5 tw-top-1/2 tw-transform -tw-translate-y-1/2"
             style={{ left: `${zeroPercentage}%` }}
-            whileHover={{ height: "20px", backgroundColor: "rgba(168, 168, 179, 0.4)" }}
+            whileHover={{
+              height: "20px",
+              backgroundColor: "rgba(168, 168, 179, 0.4)",
+            }}
             transition={{ duration: 0.2 }}
           />
 
@@ -89,10 +96,22 @@ export default function WaveDropVoteSlider({
             max={maxValue}
             value={typeof voteValue === "string" ? 0 : voteValue}
             onChange={(e) => handleSliderChange(Number(e.target.value))}
-            onMouseDown={() => setIsDragging(true)}
-            onMouseUp={() => setIsDragging(false)}
-            onTouchStart={() => setIsDragging(true)}
-            onTouchEnd={() => setIsDragging(false)}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              setIsDragging(true);
+            }}
+            onMouseUp={(e) => {
+              e.stopPropagation();
+              setIsDragging(false);
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              setIsDragging(true);
+            }}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              setIsDragging(false);
+            }}
             className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-appearance-none tw-cursor-pointer tw-opacity-0 tw-z-30"
           />
 
@@ -103,7 +122,7 @@ export default function WaveDropVoteSlider({
               top: "50%",
               x: "-50%",
               y: "-50%",
-              scale: isDragging ? 1.1 : 1
+              scale: isDragging ? 1.1 : 1,
             }}
             className="tw-absolute tw-z-20"
             initial={{ scale: 0 }}
@@ -118,7 +137,10 @@ export default function WaveDropVoteSlider({
                   tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}`}
               >
                 <span className="tw-block">
-                  {formatNumberWithCommas(typeof voteValue === "string" ? 0 : voteValue)} TDH
+                  {formatNumberWithCommas(
+                    typeof voteValue === "string" ? 0 : voteValue
+                  )}{" "}
+                  TDH
                 </span>
                 <div
                   className={`tw-absolute tw-w-2 tw-h-2 tw-bottom-[-4px] tw-left-1/2 -tw-translate-x-1/2
@@ -136,11 +158,14 @@ export default function WaveDropVoteSlider({
                   ${theme.thumb.glow} ${theme.thumb.hover}`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                animate={{ 
+                animate={{
                   scale: isDragging ? 1.1 : 1,
-                  boxShadow: isDragging ? "0 0 20px rgba(255,255,255,0.2)" : "0 0 0 rgba(255,255,255,0)"
+                  boxShadow: isDragging
+                    ? "0 0 20px rgba(255,255,255,0.2)"
+                    : "0 0 0 rgba(255,255,255,0)",
                 }}
                 transition={{ duration: 0.2 }}
+                onClick={(e) => e.stopPropagation()}
               />
             </div>
           </motion.div>
