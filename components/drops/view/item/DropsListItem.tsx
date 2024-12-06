@@ -1,21 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import DropListItemContent from "./content/DropListItemContent";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { AuthContext } from "../../../auth/Auth";
-
 import DropReply, { DropReplyProps } from "./replies/DropReply";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import DropsListItemOptions from "./options/DropsListItemOptions";
-
-export enum DropVoteState {
-  NOT_LOGGED_IN = "NOT_LOGGED_IN",
-  NO_PROFILE = "NO_PROFILE",
-  PROXY = "PROXY",
-  AUTHOR = "AUTHOR",
-  CANT_VOTE = "CANT_VOTE",
-  NO_CREDIT = "NO_CREDIT",
-  CAN_VOTE = "CAN_VOTE",
-}
+import { DropVoteState } from "../../../../hooks/drops/types";
+import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
 
 export enum DropConnectingLineType {
   NONE = "NONE",
@@ -55,67 +45,9 @@ export default function DropsListItem({
   readonly onDiscussionStateChange?: (dropId: string | null) => void;
   readonly onDropDeleted?: () => void;
 }) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { canDelete } = useDropInteractionRules(drop);
   const [isDiscussionOpen, setIsDiscussionOpen] = useState(
     initialDiscussionOpen
-  );
-
-  const getVoteState = () => {
-    if (!connectedProfile) {
-      return DropVoteState.NOT_LOGGED_IN;
-    }
-    if (!connectedProfile.profile?.handle) {
-      return DropVoteState.NO_PROFILE;
-    }
-    if (activeProfileProxy) {
-      return DropVoteState.PROXY;
-    }
-    if (connectedProfile.profile.handle === drop.author.handle) {
-      return DropVoteState.AUTHOR;
-    }
-    if (
-      !drop.context_profile_context?.max_rating ||
-      !drop.context_profile_context?.min_rating
-    ) {
-      return DropVoteState.NO_CREDIT;
-    }
-
-    return DropVoteState.CAN_VOTE;
-  };
-
-  const [voteState, setVoteState] = useState<DropVoteState>(getVoteState());
-
-  useEffect(() => {
-    setVoteState(getVoteState());
-  }, [connectedProfile, activeProfileProxy, drop]);
-
-  const getCanVote = () => voteState === DropVoteState.CAN_VOTE;
-  const [canVote, setCanVote] = useState(getCanVote());
-  useEffect(() => setCanVote(getCanVote()), [voteState]);
-
-  const getShowOptions = () => {
-    if (!connectedProfile?.profile?.handle) {
-      return false;
-    }
-    if (activeProfileProxy) {
-      return false;
-    }
-
-    if (
-      connectedProfile.profile.handle === drop.author.handle &&
-      drop.id === drop.wave.description_drop_id
-    ) {
-      return false;
-    }
-
-    return true;
-  };
-
-  const [showOptions, setShowOptions] = useState(getShowOptions());
-
-  useEffect(
-    () => setShowOptions(getShowOptions()),
-    [connectedProfile, activeProfileProxy]
   );
 
   const getReplyProps = (): DropReplyProps | null => {
@@ -167,17 +99,15 @@ export default function DropsListItem({
             <DropListItemContent
               key={randomKey}
               drop={drop}
-              voteState={voteState}
-              canVote={canVote}
               showWaveInfo={showWaveInfo}
-              smallMenuIsShown={showOptions}
+              smallMenuIsShown={canDelete}
               dropReplyDepth={dropReplyDepth}
               isDiscussionOpen={isDiscussionOpen}
               connectingLineType={connectingLineType}
               onDiscussionButtonClick={onDiscussionButtonClick}
             />
 
-            {showOptions && (
+            {canDelete && (
               <div className="tw-absolute tw-right-4 tw-top-2.5">
                 <DropsListItemOptions
                   drop={drop}

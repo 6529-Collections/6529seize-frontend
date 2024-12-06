@@ -4,7 +4,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
-import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
+import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 import FeedItems from "./FeedItems";
 
 interface FeedWrapperProps {

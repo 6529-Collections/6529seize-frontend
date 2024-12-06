@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ApiDropPart } from "../../../../../generated/models/ApiDropPart";
-import { DropVoteState } from "../../item/DropsListItem";
 import DropListItemRateGive from "../../item/rate/give/DropListItemRateGive";
 import DropPartQuoteButton from "../quote/DropPartQuoteButton";
 import DropPartDiscussionButton from "./discussion/DropPartDiscussionButton";
@@ -13,8 +12,6 @@ import { useCopyToClipboard } from "react-use";
 interface DropPartActionTriggersProps {
   readonly drop: ApiDrop;
   readonly dropPart: ApiDropPart;
-  readonly voteState: DropVoteState;
-  readonly canVote: boolean;
   readonly onDiscussionButtonClick: () => void;
   readonly onQuote: (dropPartId: number) => void;
   readonly onReplyButtonClick: () => void;
@@ -23,8 +20,6 @@ interface DropPartActionTriggersProps {
 export default function DropPartActionTriggers({
   drop,
   dropPart,
-  voteState,
-  canVote,
   onDiscussionButtonClick,
   onQuote,
   onReplyButtonClick,
@@ -86,8 +81,6 @@ export default function DropPartActionTriggers({
         </div>
         <DropListItemRateGive
           drop={drop}
-          voteState={voteState}
-          canVote={canVote}
         />
       </div>
     </div>

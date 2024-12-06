@@ -3,8 +3,8 @@ import { ApiWave } from "../../../../generated/models/ApiWave";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
-import WaveDetailedDrop, { DropLocation } from "../drops/WaveDetailedDrop";
 import { WaveHeaderPinnedSide } from "./WaveHeader";
+import Drop, { DropLocation } from "../drops/Drop";
 
 interface WaveHeaderPinnedProps {
   readonly wave: ApiWave;
@@ -95,7 +95,7 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave, side }) => {
                   : "lg:tw-max-w-[672px] tw-w-full tw-rounded-lg tw-origin-top-left"
               }`}
             >
-              <WaveDetailedDrop
+              <Drop
                 drop={{
                   ...wave.description_drop,
                   stableKey: wave.description_drop.id,

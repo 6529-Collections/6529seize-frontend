@@ -1,12 +1,13 @@
 import { useRouter } from "next/router";
 import { IFeedItemDropCreated } from "../../../../../types/feed.types";
-import WaveDetailedDrop, {
+import {
   DropInteractionParams,
   DropLocation,
-} from "../../../../waves/detailed/drops/WaveDetailedDrop";
+} from "../../../../waves/detailed/drops/Drop";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../waves/detailed/chat/WaveChat";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import Drop from "../../../../waves/detailed/drops/Drop";
 
 export default function FeedItemDropCreated({
   item,
@@ -32,7 +33,7 @@ export default function FeedItemDropCreated({
     router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
   };
   return (
-    <WaveDetailedDrop
+    <Drop
       drop={{
         ...item.item,
         stableKey: "",
