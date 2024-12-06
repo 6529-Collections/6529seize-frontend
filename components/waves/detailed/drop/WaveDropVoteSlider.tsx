@@ -62,7 +62,7 @@ export default function WaveDropVoteSlider({
         };
 
   return (
-    <div className="tw-h-[20px] tw-flex tw-items-center">
+    <div className="tw-h-[20px] tw-flex tw-items-center" onClick={(e) => e.stopPropagation()}>
       <div className="tw-relative tw-flex-1">
         <div className="tw-relative tw-h-[8px] tw-group">
           <motion.div

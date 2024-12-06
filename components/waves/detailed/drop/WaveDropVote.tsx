@@ -49,7 +49,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
 
   if (isCompact) {
     return (
-      <div className="tw-flex tw-items-center tw-gap-4">
+      <div className="tw-flex tw-items-center tw-gap-4" onClick={(e) => e.stopPropagation()}>
         <div className="tw-flex-1">
           <WaveDropVoteSlider
             voteValue={voteValue}
