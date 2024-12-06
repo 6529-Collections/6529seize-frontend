@@ -4,7 +4,7 @@ import { WaveLeaderboardDropRankIndicator } from "./WaveLeaderboardDropRankIndic
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
 import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
-import {  ApiWave } from "../../../../../generated/models/ObjectSerializer";
+import { ApiWave } from "../../../../../generated/models/ObjectSerializer";
 
 interface WaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -36,7 +36,10 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   const containerClasses = getContainerClasses();
 
   return (
-    <div className="tw-group tw-cursor-pointer" onClick={() => setActiveDrop(drop)}>
+    <div
+      className="tw-group tw-cursor-pointer"
+      onClick={() => setActiveDrop(drop)}
+    >
       <div
         className={`tw-rounded-xl tw-bg-gradient-to-b ${containerClasses} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
       >
@@ -45,7 +48,10 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
             <WaveLeaderboardDropRankIndicator drop={drop} />
             <div className="tw-flex-1">
               <WaveLeaderboardDropHeader drop={drop} />
-              <WaveLeaderboardDropContent drop={drop} setActiveDrop={setActiveDrop} />
+              <WaveLeaderboardDropContent
+                drop={drop}
+                setActiveDrop={setActiveDrop}
+              />
               <WaveLeaderboardDropFooter drop={drop} wave={wave} />
             </div>
           </div>

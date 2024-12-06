@@ -9,6 +9,7 @@ interface DropInteractionRules {
   canVote: boolean;      // determines if voting is enabled
   voteState: DropVoteState; // reason for current vote state
   canDelete: boolean;    // determines if delete is allowed
+  isAuthor: boolean;     // determines if current user is the author
 }
 
 /**
@@ -74,14 +75,17 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   // Can vote only if state is CAN_VOTE
   const canVote = voteState === DropVoteState.CAN_VOTE;
 
+  const isAuthor = !!connectedProfile?.profile?.handle && 
+    connectedProfile.profile.handle === drop.author.handle;
+
   // Delete rules
-  const canDelete = baseRules && 
-    connectedProfile.profile.handle === drop.author.handle; // must be author
+  const canDelete = baseRules && isAuthor;
 
   return {
     canShowVote,
     canVote,
     voteState,
     canDelete,
+    isAuthor,
   };
 } 

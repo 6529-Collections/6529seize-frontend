@@ -4,6 +4,7 @@ import { RatingsData } from "./types";
 import ParticipationDropRatingsTotalSection from "./ParticipationDropRatingsTotalSection";
 import ParticipationDropRatingsVoterSection from "./ParticipationDropRatingsVoterSection";
 import ParticipationDropRatingsUserSection from "./ParticipationDropRatingsUserSection";
+import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
 
 interface ParticipationDropRatingsContainerProps {
   readonly drop: ApiDrop;
@@ -29,6 +30,8 @@ export default function ParticipationDropRatingsContainer({
   const theme = getThemeColors(rank, ratingsData.totalRating < 0);
   const userTheme = getThemeColors(rank, ratingsData.userRating < 0);
 
+  const { isAuthor } = useDropInteractionRules(drop);
+
   return (
     <div className="tw-flex tw-items-center tw-justify-between">
       <div className="tw-flex tw-items-start tw-gap-8">
@@ -47,13 +50,15 @@ export default function ParticipationDropRatingsContainer({
         />
       </div>
 
-      <ParticipationDropRatingsUserSection
-        drop={drop}
-        rank={rank}
-        theme={theme}
-        userTheme={userTheme}
-        ratingsData={ratingsData}
-      />
+      {!isAuthor && (
+        <ParticipationDropRatingsUserSection
+          drop={drop}
+          rank={rank}
+          theme={theme}
+          userTheme={userTheme}
+          ratingsData={ratingsData}
+        />
+      )}
     </div>
   );
-} 
+}

@@ -1,16 +1,16 @@
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import { useDropInteractionRules } from "../../../../../hooks/drops/useDropInteractionRules";
 import { WaveDropVote, WaveDropVoteSize } from "../../drop/WaveDropVote";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 
 interface ParticipationDropFooterProps {
   readonly drop: ExtendedDrop;
-  readonly canShowVote: boolean;
 }
 
 export default function ParticipationDropFooter({
   drop,
-  canShowVote,
 }: ParticipationDropFooterProps) {
+  const { canShowVote } = useDropInteractionRules(drop);
   return (
     <>
       {canShowVote && (

@@ -6,7 +6,6 @@ import { useCallback, useState } from "react";
 import useIsMobileDevice from "../../../../../hooks/isMobileDevice";
 import WaveDetailedDropActions from "../WaveDetailedDropActions";
 import WaveDetailedDropMobileMenu from "../WaveDetailedDropMobileMenu";
-import { useDropInteractionRules } from "../../../../../hooks/drops/useDropInteractionRules";
 import ParticipationDropContainer from "./ParticipationDropContainer";
 import ParticipationDropHeader from "./ParticipationDropHeader";
 import ParticipationDropContent from "./ParticipationDropContent";
@@ -39,7 +38,7 @@ export default function ParticipationDrop({
   parentContainerRef,
 }: ParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
-  const { canShowVote } = useDropInteractionRules(drop);
+
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -82,7 +81,6 @@ export default function ParticipationDrop({
       )}
 
       <ParticipationDropHeader drop={drop} showWaveInfo={showWaveInfo} />
-
       <ParticipationDropContent
         drop={drop}
         activePartIndex={activePartIndex}
@@ -93,11 +91,8 @@ export default function ParticipationDrop({
         setLongPressTriggered={setLongPressTriggered}
         parentContainerRef={parentContainerRef}
       />
-
       <ParticipationDropMetadata metadata={drop.metadata} />
-
-      <ParticipationDropFooter drop={drop} canShowVote={canShowVote} />
-
+      <ParticipationDropFooter drop={drop} />
       <WaveDetailedDropMobileMenu
         drop={drop}
         isOpen={isSlideUp}
