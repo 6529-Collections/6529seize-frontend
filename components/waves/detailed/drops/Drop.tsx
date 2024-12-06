@@ -53,15 +53,11 @@ export default function Drop({
     return (
       <ParticipationDrop
         drop={drop}
-        previousDrop={previousDrop}
-        nextDrop={nextDrop}
         showWaveInfo={showWaveInfo}
         activeDrop={activeDrop}
         location={location}
-        dropViewDropId={dropViewDropId}
         onReply={onReply}
         onQuote={onQuote}
-        onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
         onDropClick={onDropClick}
         showReplyAndQuote={showReplyAndQuote}
