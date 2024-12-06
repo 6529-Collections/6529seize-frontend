@@ -59,7 +59,13 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
             rank={drop.rank}
           />
         </div>
-        <WaveDropVoteSubmit position={drop.rank ?? undefined} />
+        <WaveDropVoteSubmit
+          drop={drop}
+          newRating={
+            (drop.context_profile_context?.rating ?? 0) + Number(voteValue)
+          }
+          onSuccessfulRateChange={onSuccessfulRateChange}
+        />
       </div>
     );
   }
@@ -141,7 +147,13 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
       )}
 
       <div className="tw-absolute tw-bottom-5 tw-right-5">
-        <WaveDropVoteSubmit />
+        <WaveDropVoteSubmit
+          drop={drop}
+          newRating={
+            (drop.context_profile_context?.rating ?? 0) + Number(voteValue)
+          }
+          onSuccessfulRateChange={onSuccessfulRateChange}
+        />
       </div>
     </div>
   );

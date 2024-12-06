@@ -6,7 +6,8 @@ import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import dynamic from "next/dynamic";
 import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
-import { DropVoteState, VOTE_STATE_ERRORS } from "../../DropsListItem";
+import { VOTE_STATE_ERRORS } from "../../DropsListItem";
+import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
 
 const DropListItemRateGiveClap = dynamic(
   () => import("./clap/DropListItemRateGiveClap"),
@@ -19,7 +20,6 @@ const DEBOUNCE_DELAY = 300; // milliseconds
 export default function DropListItemRateGiveSubmit({
   rate,
   drop,
-  voteState,
   availableCredit,
   canVote,
   onSuccessfulRateChange,
@@ -28,7 +28,6 @@ export default function DropListItemRateGiveSubmit({
   readonly rate: number;
   readonly drop: ApiDrop;
   readonly availableCredit: number;
-  readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly onSuccessfulRateChange: () => void;
   readonly isMobile?: boolean;
@@ -38,6 +37,7 @@ export default function DropListItemRateGiveSubmit({
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { voteState } = useDropInteractionRules(drop);
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
@@ -86,12 +86,6 @@ export default function DropListItemRateGiveSubmit({
     const previousRate = drop.context_profile_context?.rating ?? 0;
     const rateIncrement = rate * clickCount;
     const newRate = previousRate + rateIncrement;
-    console.log({
-      previousRate,
-      rate,
-      clickCount,
-      newRate,
-    });
 
     await rateChangeMutation.mutateAsync({
       rate: newRate,

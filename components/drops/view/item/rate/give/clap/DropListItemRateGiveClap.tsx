@@ -4,7 +4,8 @@ import mojs from "@mojs/core";
 import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
 import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
 import LazyTippy from "../../../../../../utils/tooltip/LazyTippy";
-import { DropVoteState, VOTE_STATE_ERRORS } from "../../../DropsListItem";
+import { VOTE_STATE_ERRORS } from "../../../DropsListItem";
+import { DropVoteState } from "../../../../../../../hooks/drops/types";
 
 enum RateStatus {
   POSITIVE = "POSITIVE",

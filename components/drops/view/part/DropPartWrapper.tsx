@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import DropPartQuote from "./quote/DropPartQuote";
 import { ApiQuotedDrop } from "../../../../generated/models/ApiQuotedDrop";
-import { DropConnectingLineType, DropVoteState } from "../item/DropsListItem";
+import { DropConnectingLineType } from "../item/DropsListItem";
 import DropReplyInputWrapper from "../item/replies/input/DropReplyInputWrapper";
 import { DropPartSize } from "./DropPart";
 import DropListItemQuote from "../item/quote/DropListItemQuote";
@@ -14,8 +14,6 @@ import DropInputWrapper from "../../utils/DropInputWrapper";
 export interface DropPartWrapperProps {
   readonly drop: ApiDrop;
   readonly dropPart: ApiDropPart;
-  readonly voteState: DropVoteState;
-  readonly canVote: boolean;
   readonly dropReplyDepth: number;
   readonly isDiscussionOpen: boolean;
   readonly showWaveInfo?: boolean;
@@ -29,8 +27,6 @@ export interface DropPartWrapperProps {
 export default function DropPartWrapper({
   drop,
   dropPart,
-  voteState,
-  canVote,
   dropReplyDepth,
   isDiscussionOpen,
   showWaveInfo = true,
@@ -155,8 +151,6 @@ export default function DropPartWrapper({
             <DropPartActionTriggers
               drop={drop}
               dropPart={dropPart}
-              voteState={voteState}
-              canVote={canVote}
               onDiscussionButtonClick={onDiscussionOpen}
               onQuote={onQuote}
               onReplyButtonClick={onReplyButtonClick}

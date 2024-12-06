@@ -4,8 +4,8 @@ import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
 import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
-import { DropVoteState } from "../../DropsListItem";
 import Tippy from "@tippyjs/react";
+import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
 
 export enum RateChangeType {
   INCREASE = "INCREASE",
@@ -14,14 +14,10 @@ export enum RateChangeType {
 
 export default function DropListItemRateGive({
   drop,
-  voteState,
-  canVote,
   onRated,
   isMobile = false,
 }: {
   readonly drop: ApiDrop;
-  readonly voteState: DropVoteState;
-  readonly canVote: boolean;
   readonly onRated?: () => void;
   readonly isMobile?: boolean;
 }) {
@@ -29,6 +25,7 @@ export default function DropListItemRateGive({
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
+  const { canVote } = useDropInteractionRules(drop);
   const [onProgressRate, setOnProgressRate] = useState<number>(1);
   const availableCredit = Math.abs(
     (drop.context_profile_context?.max_rating ?? 0) -
@@ -240,7 +237,6 @@ export default function DropListItemRateGive({
           <DropListItemRateGiveSubmit
             rate={onProgressRate}
             drop={drop}
-            voteState={voteState}
             canVote={canVote}
             availableCredit={availableCredit}
             onSuccessfulRateChange={onSuccessfulRateChange}
