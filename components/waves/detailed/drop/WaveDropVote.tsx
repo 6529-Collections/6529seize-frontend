@@ -1,10 +1,10 @@
 import { ApiDrop } from "../../../../generated/models/ObjectSerializer";
 import { useState } from "react";
 import WaveDropVoteQuick from "./WaveDropVoteQuick";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { WaveDropVoteInput } from "./WaveDropVoteInput";
 import { TabToggle } from "../../../common/TabToggle";
 import dynamic from "next/dynamic";
+import { WaveDropVoteStats } from "./WaveDropVoteStats";
 
 export enum WaveDropVoteSize {
   NORMAL = "NORMAL",
@@ -114,27 +114,10 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
           </div>
         </div>
 
-        <div className="tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-400">
-          <div className="tw-flex tw-items-center tw-gap-1">
-            <span>
-              Your votes:{" "}
-              <span className="tw-text-iron-200">
-                {formatNumberWithCommas(
-                  drop.context_profile_context?.rating ?? 0
-                )}{" "}
-                TDH
-              </span>
-            </span>
-          </div>
-          <div className="tw-flex tw-items-center tw-gap-1">
-            <span>
-              Range: ±{" "}
-              <span className="tw-text-iron-200">
-                {formatNumberWithCommas(maxRating)} TDH
-              </span>
-            </span>
-          </div>
-        </div>
+        <WaveDropVoteStats
+          currentRating={drop.context_profile_context?.rating ?? 0}
+          maxRating={maxRating}
+        />
       </div>
 
       {drop.rank !== 1 && (

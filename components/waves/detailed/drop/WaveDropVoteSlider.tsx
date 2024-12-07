@@ -60,8 +60,11 @@ export default function WaveDropVoteSlider({
         };
 
   return (
-    <div className="tw-h-[20px] tw-flex tw-items-center" onClick={(e) => e.stopPropagation()}>
-      <div className="tw-relative tw-flex-1">
+    <div
+      className="tw-h-[20px] tw-flex tw-items-center"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="tw-relative tw-flex-1 tw-overflow-visible">
         <div className="tw-relative tw-h-[8px] tw-group">
           <motion.div
             className={`tw-absolute tw-inset-0 tw-rounded-full tw-z-0 tw-shadow-inner ${theme.track.background} ${theme.track.hover}`}
@@ -129,10 +132,14 @@ export default function WaveDropVoteSlider({
           >
             <div className="tw-relative">
               <div
-                className={`tw-absolute tw-bottom-6 tw-left-1/2 tw-transform -tw-translate-x-1/2
+                className={`tw-absolute tw-bottom-6 tw-left-1/2 
                   ${theme.tooltip.background} tw-rounded-lg 
                   tw-py-1.5 tw-px-3 tw-text-xs tw-font-medium tw-whitespace-nowrap tw-min-w-[120px] tw-text-center
-                  tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}`}
+                  tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}
+                  tw-transition-transform tw-duration-200 tw-ease-out`}
+                style={{
+                  transform: `translateX(calc(-50% + ${currentPercentage <= 10 ? 50 : 0}%))`
+                }}
               >
                 <span className="tw-block">
                   {formatNumberWithCommas(
@@ -154,10 +161,12 @@ export default function WaveDropVoteSlider({
                   after:tw-content-[''] after:tw-absolute after:tw-inset-0 
                   after:tw-rounded-full after:tw-transition-all after:tw-duration-200
                   ${theme.thumb.glow} ${theme.thumb.hover}`}
+                style={{
+                  scale: isDragging ? 1.1 : scale
+                }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 animate={{
-                  scale: isDragging ? 1.1 : 1,
                   boxShadow: isDragging
                     ? "0 0 20px rgba(255,255,255,0.2)"
                     : "0 0 0 rgba(255,255,255,0)",

@@ -217,7 +217,7 @@ export default function DropListItemRateGiveClap({
         fill: burstColor,
       },
     });
-  }, [rate]);
+  }, [rate,]);
 
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
   return (

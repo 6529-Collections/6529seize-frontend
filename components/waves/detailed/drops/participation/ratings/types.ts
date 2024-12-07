@@ -17,5 +17,4 @@ export interface RatingsData {
   hasRaters: boolean;
   userRating: number;
   totalRating: number;
-  availableCredit: number;
 } 
