@@ -14,16 +14,15 @@ interface WaveDropVoteQuickProps {
 interface Result {
   readonly rank: number;
   readonly value: number;
+  readonly disabled: boolean;
 }
 
 export default function WaveDropVoteQuick({
   drop,
   setValue,
 }: WaveDropVoteQuickProps) {
-  const availableCredit = Math.abs(
-    (drop.context_profile_context?.max_rating ?? 0) -
-      (drop.context_profile_context?.rating ?? 0)
-  );
+  const maxVotes = drop.context_profile_context?.max_rating ?? 0;
+  const minVotes = drop.context_profile_context?.min_rating ?? 0;
 
   const currentRank = drop.rank ?? 0;
   const pageSize = 2;
@@ -68,7 +67,8 @@ export default function WaveDropVoteQuick({
     );
     const targetsWithValues = targets.map((d) => ({
       rank: d.rank,
-      value: d.rating - drop.rating + 1,
+      value: d.rating + 1,
+      disabled: d.rating + 1 > maxVotes || d.rating + 1 < minVotes,
     }));
     setResults(targetsWithValues);
   }, [data]);
@@ -80,7 +80,7 @@ export default function WaveDropVoteQuick({
           key={`${result.rank}-${result.value}`}
           value={result.value}
           rank={result.rank}
-          availableCredit={availableCredit}
+          disabled={result.disabled}
           setValue={setValue}
         />
       ))}

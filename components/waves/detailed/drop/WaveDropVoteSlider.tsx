@@ -5,21 +5,19 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;
-  readonly currentVoteValue: number;
+  readonly minValue: number;
+  readonly maxValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
-  readonly availableCredit: number;
   readonly rank?: number | null;
 }
 
 export default function WaveDropVoteSlider({
   voteValue,
   setVoteValue,
-  currentVoteValue,
-  availableCredit,
+  minValue,
+  maxValue,
   rank = null,
 }: WaveDropVoteSliderProps) {
-  const minValue = currentVoteValue - availableCredit;
-  const maxValue = currentVoteValue + availableCredit;
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 

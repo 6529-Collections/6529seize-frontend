@@ -4,13 +4,13 @@ import React from "react";
 interface WaveDropVoteQuickButtonProps {
   readonly value: number;
   readonly rank: number;
-  readonly availableCredit: number;
+  readonly disabled: boolean;
   readonly setValue: (value: number) => void;
 }
 
 export const WaveDropVoteQuickButton: React.FC<
   WaveDropVoteQuickButtonProps
-> = ({ value, rank, availableCredit, setValue }) => {
+> = ({ value, rank, disabled, setValue }) => {
   const getColours = (rank: number): { base: string; hover: string } => {
     if (rank === 1) {
       return {
@@ -37,17 +37,16 @@ export const WaveDropVoteQuickButton: React.FC<
   };
 
   const { base: baseColors, hover: hoverColors } = getColours(rank);
-  const isDisabled = value > availableCredit;
 
   return (
-    <Tippy disabled={!isDisabled} content="You don't have enough credit">
+    <Tippy disabled={disabled} content="You don't have enough credit">
       <div>
         <button
           key={`${rank}-${value}`}
-          disabled={isDisabled}
+          disabled={disabled}
           onClick={() => setValue(value)}
           className={`tw-border-0 tw-group tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-lg tw-ring-1 tw-transition-all tw-bg-iron-950/50 ${baseColors} ${
-            isDisabled
+            disabled
               ? "tw-opacity-50 tw-cursor-not-allowed"
               : hoverColors
           }`}

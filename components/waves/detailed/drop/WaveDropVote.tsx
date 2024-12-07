@@ -28,17 +28,12 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
   drop,
   size = WaveDropVoteSize.NORMAL,
 }) => {
-  const availableCredit = Math.abs(
-    (drop.context_profile_context?.max_rating ?? 0) -
-      (drop.context_profile_context?.rating ?? 0)
-  );
+  const currentVoteValue = drop.context_profile_context?.rating ?? 0;
+  const minRating = drop.context_profile_context?.min_rating ?? 0;
+  const maxRating = drop.context_profile_context?.max_rating ?? 0;
+  const [voteValue, setVoteValue] = useState<number | string>(currentVoteValue);
 
-  const [voteValue, setVoteValue] = useState<number | string>(1);
   const [isSliderMode, setIsSliderMode] = useState(true);
-
-  const onSuccessfulRateChange = () => {
-    setVoteValue(1);
-  };
 
   const voteOptions = [
     { key: "slider", label: "Slider" },
@@ -49,29 +44,29 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
 
   if (isCompact) {
     return (
-      <div className="tw-flex tw-items-center tw-gap-4" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="tw-flex tw-items-center tw-gap-4"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="tw-flex-1">
           <WaveDropVoteSlider
             voteValue={voteValue}
-            currentVoteValue={drop.context_profile_context?.rating ?? 0}
+            minValue={minRating}
+            maxValue={maxRating}
             setVoteValue={setVoteValue}
-            availableCredit={availableCredit}
             rank={drop.rank}
           />
         </div>
-        <WaveDropVoteSubmit
-          drop={drop}
-          newRating={
-            (drop.context_profile_context?.rating ?? 0) + Number(voteValue)
-          }
-          onSuccessfulRateChange={onSuccessfulRateChange}
-        />
+        <WaveDropVoteSubmit drop={drop} newRating={Number(voteValue)} />
       </div>
     );
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800/30 tw-relative" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800/30 tw-relative"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="tw-relative">
         <div className="tw-absolute tw-top-[-12px] tw-right-[-12px]">
           <TabToggle
@@ -95,9 +90,9 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
             >
               <WaveDropVoteSlider
                 voteValue={voteValue}
-                currentVoteValue={drop.context_profile_context?.rating ?? 0}
                 setVoteValue={setVoteValue}
-                availableCredit={availableCredit}
+                minValue={minRating}
+                maxValue={maxRating}
                 rank={drop.rank}
               />
             </div>
@@ -111,9 +106,9 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
             >
               <WaveDropVoteInput
                 voteValue={voteValue}
-                currentVoteValue={drop.context_profile_context?.rating ?? 0}
+                minValue={minRating}
+                maxValue={maxRating}
                 setVoteValue={setVoteValue}
-                availableCredit={availableCredit}
               />
             </div>
           </div>
@@ -133,9 +128,9 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
           </div>
           <div className="tw-flex tw-items-center tw-gap-1">
             <span>
-              Remaining:{" "}
+              Range: ±{" "}
               <span className="tw-text-iron-200">
-                {formatNumberWithCommas(availableCredit)} TDH
+                {formatNumberWithCommas(maxRating)} TDH
               </span>
             </span>
           </div>
@@ -147,13 +142,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
       )}
 
       <div className="tw-absolute tw-bottom-5 tw-right-5">
-        <WaveDropVoteSubmit
-          drop={drop}
-          newRating={
-            (drop.context_profile_context?.rating ?? 0) + Number(voteValue)
-          }
-          onSuccessfulRateChange={onSuccessfulRateChange}
-        />
+        <WaveDropVoteSubmit drop={drop} newRating={Number(voteValue)} />
       </div>
     </div>
   );

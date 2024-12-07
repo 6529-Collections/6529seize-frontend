@@ -36,13 +36,11 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
-  readonly onSuccessfulRateChange: () => void;
 }
 
 export default function WaveDropVoteSubmit({
   drop,
   newRating,
-  onSuccessfulRateChange,
 }: Props) {
   const position = drop.rank;
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
@@ -80,7 +78,6 @@ export default function WaveDropVoteSubmit({
         drop: response,
         giverHandle: connectedProfile?.profile?.handle ?? null,
       });
-      onSuccessfulRateChange();
     },
     onError: (error) => {
       setToast({

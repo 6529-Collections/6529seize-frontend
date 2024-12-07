@@ -2,16 +2,16 @@ import React, { useEffect, useRef, useState } from "react";
 
 interface WaveDropVoteInputProps {
   readonly voteValue: number | string;
-  readonly currentVoteValue: number;
+  readonly minValue: number;
+  readonly maxValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
-  readonly availableCredit: number;
 }
 
 export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
   voteValue,
-  currentVoteValue,
   setVoteValue,
-  availableCredit,
+  minValue,
+  maxValue,
 }) => {
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
@@ -27,7 +27,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
 
     const value = parseInt(inputValue);
     if (isNaN(value)) return;
-    setVoteValue(Math.min(Math.max(value, currentVoteValue - availableCredit), currentVoteValue + availableCredit));
+    setVoteValue(Math.min(Math.max(value, minValue), maxValue));
   };
 
   const [isPaused, setIsPaused] = useState(false);
@@ -91,10 +91,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
 
       const roundedValue = Math.round(newValue / delta) * delta;
 
-      return Math.min(
-        Math.max(roundedValue, currentVoteValue - availableCredit),
-        currentVoteValue + availableCredit
-      );
+      return Math.min(Math.max(roundedValue, minValue), maxValue);
     });
   };
 
