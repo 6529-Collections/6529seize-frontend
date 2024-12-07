@@ -48,16 +48,16 @@ export default function WaveDropVoteSlider({
     x.set(currentPercentage);
   }, [currentPercentage]);
 
-  const progressBarStyle =
-    Number(typeof voteValue === "string" ? 0 : voteValue) >= 0
-      ? {
-          left: `${zeroPercentage}%`,
-          width: `${currentPercentage - zeroPercentage}%`,
-        }
-      : {
-          left: `${currentPercentage}%`,
-          width: `${zeroPercentage - currentPercentage}%`,
-        };
+  const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;
+  const progressBarStyle = numericVoteValue >= 0
+    ? {
+        left: `${zeroPercentage}%`,
+        width: `${currentPercentage - zeroPercentage}%`,
+      }
+    : {
+        left: `${currentPercentage}%`,
+        width: `${zeroPercentage - currentPercentage}%`,
+      };
 
   return (
     <div

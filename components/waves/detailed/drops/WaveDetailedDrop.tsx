@@ -12,8 +12,7 @@ import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
 import { ActiveDropState } from "../chat/WaveChat";
-import { DropInteractionParams } from "./Drop";
-import { DropLocation } from "./Drop";
+import { DropInteractionParams, DropLocation } from "./Drop";
 
 
 enum GroupingThreshold {

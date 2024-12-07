@@ -1,7 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
-import { useAuth } from "../../../../../auth/Auth";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
@@ -10,7 +9,6 @@ interface WaveLeaderboardDropRatersProps {
 export const WaveLeaderboardDropRaters: React.FC<
   WaveLeaderboardDropRatersProps
 > = ({ drop }) => {
-  const { connectedProfile } = useAuth();
   const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
   const userVote = drop.context_profile_context?.rating || 0;
   const isNegativeVote = userVote < 0;

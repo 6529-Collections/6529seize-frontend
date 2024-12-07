@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import { cicToType, getTimeAgoShort } from "../../../../../helpers/Helpers";
-import { UserCICAndLevelSize } from "../../../../user/utils/UserCICAndLevel";
-import UserCICAndLevel from "../../../../user/utils/UserCICAndLevel";
+import UserCICAndLevel, { UserCICAndLevelSize } from "../../../../user/utils/UserCICAndLevel";
 import { DropTrophyIcon } from "../../../utils/DropThrophyIcon";
 import ParticipationDropPfp from "./ParticipationDropPfp";
 import { ApiDropType } from "../../../../../generated/models/ApiDropType";
