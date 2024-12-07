@@ -27,20 +27,16 @@ export default function DropListItemRateGive({
   ];
   const { canVote } = useDropInteractionRules(drop);
   const [onProgressRate, setOnProgressRate] = useState<number>(1);
-  const availableCredit = Math.abs(
-    (drop.context_profile_context?.max_rating ?? 0) -
-      (drop.context_profile_context?.rating ?? 0)
-  );
+  const maxRating = drop.context_profile_context?.max_rating ?? 0;
+  const minRating = drop.context_profile_context?.min_rating ?? 0;
 
   useEffect(() => {
     if (!canVote) {
       setOnProgressRate(0);
       return;
     }
-    if (Math.abs(onProgressRate) > availableCredit) {
-      setOnProgressRate(
-        onProgressRate > 0 ? availableCredit : 0 - availableCredit
-      );
+    if (Math.abs(onProgressRate) > maxRating) {
+      setOnProgressRate(onProgressRate > 0 ? maxRating : minRating);
       return;
     }
     setOnProgressRate(1);
@@ -69,11 +65,11 @@ export default function DropListItemRateGive({
   };
 
   const getCorrectedNewRate = (newValue: number) => {
-    if (newValue > availableCredit) {
-      return availableCredit;
+    if (newValue > maxRating) {
+      return maxRating;
     }
-    if (newValue < 0 - availableCredit) {
-      return 0 - availableCredit;
+    if (newValue < minRating) {
+      return minRating;
     }
     return newValue;
   };
@@ -238,7 +234,6 @@ export default function DropListItemRateGive({
             rate={onProgressRate}
             drop={drop}
             canVote={canVote}
-            availableCredit={availableCredit}
             onSuccessfulRateChange={onSuccessfulRateChange}
             isMobile={isMobile}
           />

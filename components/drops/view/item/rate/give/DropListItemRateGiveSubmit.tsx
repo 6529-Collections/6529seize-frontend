@@ -20,14 +20,12 @@ const DEBOUNCE_DELAY = 300; // milliseconds
 export default function DropListItemRateGiveSubmit({
   rate,
   drop,
-  availableCredit,
   canVote,
   onSuccessfulRateChange,
   isMobile = false,
 }: {
   readonly rate: number;
   readonly drop: ApiDrop;
-  readonly availableCredit: number;
   readonly canVote: boolean;
   readonly onSuccessfulRateChange: () => void;
   readonly isMobile?: boolean;
@@ -130,7 +128,6 @@ export default function DropListItemRateGiveSubmit({
         onSubmit={onRateSubmit}
         voteState={voteState}
         canVote={canVote}
-        availableCredit={availableCredit}
         isMobile={isMobile}
       />
     </div>

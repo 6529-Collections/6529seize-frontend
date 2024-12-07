@@ -1,5 +1,6 @@
 import Tippy from "@tippyjs/react";
 import React from "react";
+import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 
 interface WaveDropVoteQuickButtonProps {
   readonly value: number;
@@ -39,7 +40,7 @@ export const WaveDropVoteQuickButton: React.FC<
   const { base: baseColors, hover: hoverColors } = getColours(rank);
 
   return (
-    <Tippy disabled={disabled} content="You don't have enough credit">
+    <Tippy disabled={!disabled} content="You don't have enough credit">
       <div>
         <button
           key={`${rank}-${value}`}
@@ -52,7 +53,7 @@ export const WaveDropVoteQuickButton: React.FC<
           }`}
         >
           <span className="tw-text-xs tw-font-medium">
-            {value} TDH to #{rank}
+            {formatNumberWithCommas(value)} TDH to #{rank}
           </span>
           <svg
             className="tw-w-3.5 tw-h-3.5 tw-opacity-0 tw-transition-all group-hover:tw-opacity-100"
