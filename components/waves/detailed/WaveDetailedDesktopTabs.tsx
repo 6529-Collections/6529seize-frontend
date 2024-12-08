@@ -1,6 +1,7 @@
 import React from "react";
 import { WaveDetailedView } from "./WaveDetailed";
 import { TabToggle } from "../../common/TabToggle";
+import Link from "next/link";
 
 interface WaveDetailedDesktopTabsProps {
   readonly activeTab: WaveDetailedView;
@@ -17,10 +18,21 @@ export const WaveDetailedDesktopTabs: React.FC<WaveDetailedDesktopTabsProps> = (
   ] as const;
 
   return (
-    <TabToggle
+   <div className="tw-flex tw-items-center tw-gap-4">
+     <TabToggle
       options={options}
       activeKey={activeTab}
       onSelect={(key) => setActiveTab(key as WaveDetailedView)}
     />
+     <div className="tw-flex tw-items-center tw-text-sm tw-text-gray-200">
+       <span>
+         Rank is in testing mode. Expect bugs and please report them to{" "}
+         <Link href="/waves/dc6e0569-e4a3-4122-bc20-ee66c76981f5" className="tw-underline tw-text-white">
+           Rank Alpha Debugging
+         </Link>{" "}
+         wave
+       </span>
+     </div>
+   </div>
   );
 };
