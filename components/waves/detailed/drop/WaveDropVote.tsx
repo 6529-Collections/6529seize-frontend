@@ -1,5 +1,5 @@
 import { ApiDrop } from "../../../../generated/models/ObjectSerializer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import WaveDropVoteQuick from "./WaveDropVoteQuick";
 import { WaveDropVoteInput } from "./WaveDropVoteInput";
 import { TabToggle } from "../../../common/TabToggle";
@@ -32,6 +32,10 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
   const [voteValue, setVoteValue] = useState<number | string>(currentVoteValue);
+
+  useEffect(() => {
+    setVoteValue(currentVoteValue);
+  }, [drop.context_profile_context?.rating]);
 
   const [isSliderMode, setIsSliderMode] = useState(true);
 

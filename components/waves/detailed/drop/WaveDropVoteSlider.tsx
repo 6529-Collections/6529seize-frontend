@@ -34,9 +34,12 @@ export default function WaveDropVoteSlider({
     setVoteValue(newValue);
   };
 
-  const zeroPercentage = ((0 - minValue) / (maxValue - minValue)) * 100;
-  const currentPercentage =
-    ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) /
+  const zeroPercentage = minValue === 0 && maxValue === 0
+    ? 50 // Center the tick when all values are 0
+    : ((0 - minValue) / (maxValue - minValue)) * 100;
+  const currentPercentage = minValue === 0 && maxValue === 0 && Number(voteValue) === 0
+    ? 50 // Center the thumb when all values are 0
+    : ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) /
       (maxValue - minValue)) *
     100;
 
