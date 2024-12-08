@@ -15,14 +15,12 @@ enum RateStatus {
 
 export default function DropListItemRateGiveClap({
   rate,
-  availableCredit,
   voteState,
   canVote,
   onSubmit,
   isMobile = false,
 }: {
   readonly rate: number;
-  readonly availableCredit: number;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly onSubmit: () => void;
@@ -219,7 +217,7 @@ export default function DropListItemRateGiveClap({
         fill: burstColor,
       },
     });
-  }, [rate, availableCredit]);
+  }, [rate,]);
 
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
   return (

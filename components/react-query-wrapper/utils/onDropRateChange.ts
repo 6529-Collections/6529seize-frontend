@@ -2,6 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { QueryKey } from "../ReactQueryWrapper";
 import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
+import { wait } from "../../../helpers/Helpers";
 
 const profileDropChangeMutation = ({
   oldData,
@@ -80,7 +81,7 @@ const invalidateQueries = ({
   }
 };
 
-export const changeDropInCache = (
+export const changeDropInCache = async (
   queryClient: QueryClient,
   drop: ApiDrop,
   giverHandle: string | null
@@ -107,6 +108,8 @@ export const changeDropInCache = (
     },
     (oldData: any) => dropsDropChangeMutation({ oldData, drop })
   );
+
+  await wait(500);
   const queriesToInvalidate = [
     { key: QueryKey.DROP_DISCUSSION, values: [{ drop_id: drop.id }] },
     { key: QueryKey.DROPS_LEADERBOARD, values: [{ waveId: drop.wave.id }] },

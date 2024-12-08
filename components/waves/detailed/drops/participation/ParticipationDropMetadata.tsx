@@ -12,8 +12,8 @@ export default function ParticipationDropMetadata({
   return (
     <div className="tw-px-6 tw-py-4 tw-border-t tw-border-iron-800/30">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-4">
-        {metadata.map((meta, index) => (
-          <div key={index} className="tw-flex tw-flex-col tw-gap-1">
+        {metadata.map((meta) => (
+          <div key={meta.data_key} className="tw-flex tw-flex-col tw-gap-1">
             <span className="tw-text-xs tw-font-medium tw-text-iron-400">
               {meta.data_key}
             </span>
@@ -25,4 +25,4 @@ export default function ParticipationDropMetadata({
       </div>
     </div>
   );
-} 
+}

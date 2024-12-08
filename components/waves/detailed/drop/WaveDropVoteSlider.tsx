@@ -5,21 +5,19 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;
-  readonly currentVoteValue: number;
+  readonly minValue: number;
+  readonly maxValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
-  readonly availableCredit: number;
   readonly rank?: number | null;
 }
 
 export default function WaveDropVoteSlider({
   voteValue,
   setVoteValue,
-  currentVoteValue,
-  availableCredit,
+  minValue,
+  maxValue,
   rank = null,
 }: WaveDropVoteSliderProps) {
-  const minValue = currentVoteValue - availableCredit;
-  const maxValue = currentVoteValue + availableCredit;
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -36,9 +34,12 @@ export default function WaveDropVoteSlider({
     setVoteValue(newValue);
   };
 
-  const zeroPercentage = ((0 - minValue) / (maxValue - minValue)) * 100;
-  const currentPercentage =
-    ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) /
+  const zeroPercentage = minValue === 0 && maxValue === 0
+    ? 50 // Center the tick when all values are 0
+    : ((0 - minValue) / (maxValue - minValue)) * 100;
+  const currentPercentage = minValue === 0 && maxValue === 0 && Number(voteValue) === 0
+    ? 50 // Center the thumb when all values are 0
+    : ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) /
       (maxValue - minValue)) *
     100;
 
@@ -50,20 +51,23 @@ export default function WaveDropVoteSlider({
     x.set(currentPercentage);
   }, [currentPercentage]);
 
-  const progressBarStyle =
-    Number(typeof voteValue === "string" ? 0 : voteValue) >= 0
-      ? {
-          left: `${zeroPercentage}%`,
-          width: `${currentPercentage - zeroPercentage}%`,
-        }
-      : {
-          left: `${currentPercentage}%`,
-          width: `${zeroPercentage - currentPercentage}%`,
-        };
+  const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;
+  const progressBarStyle = numericVoteValue >= 0
+    ? {
+        left: `${zeroPercentage}%`,
+        width: `${currentPercentage - zeroPercentage}%`,
+      }
+    : {
+        left: `${currentPercentage}%`,
+        width: `${zeroPercentage - currentPercentage}%`,
+      };
 
   return (
-    <div className="tw-h-[20px] tw-flex tw-items-center" onClick={(e) => e.stopPropagation()}>
-      <div className="tw-relative tw-flex-1">
+    <div
+      className="tw-h-[20px] tw-flex tw-items-center"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="tw-relative tw-flex-1 tw-overflow-visible">
         <div className="tw-relative tw-h-[8px] tw-group">
           <motion.div
             className={`tw-absolute tw-inset-0 tw-rounded-full tw-z-0 tw-shadow-inner ${theme.track.background} ${theme.track.hover}`}
@@ -131,10 +135,14 @@ export default function WaveDropVoteSlider({
           >
             <div className="tw-relative">
               <div
-                className={`tw-absolute tw-bottom-6 tw-left-1/2 tw-transform -tw-translate-x-1/2
+                className={`tw-absolute tw-bottom-6 tw-left-1/2 
                   ${theme.tooltip.background} tw-rounded-lg 
                   tw-py-1.5 tw-px-3 tw-text-xs tw-font-medium tw-whitespace-nowrap tw-min-w-[120px] tw-text-center
-                  tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}`}
+                  tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}
+                  tw-transition-transform tw-duration-200 tw-ease-out`}
+                style={{
+                  transform: `translateX(calc(-50% + ${currentPercentage <= 10 ? 50 : 0}%))`
+                }}
               >
                 <span className="tw-block">
                   {formatNumberWithCommas(
@@ -156,10 +164,12 @@ export default function WaveDropVoteSlider({
                   after:tw-content-[''] after:tw-absolute after:tw-inset-0 
                   after:tw-rounded-full after:tw-transition-all after:tw-duration-200
                   ${theme.thumb.glow} ${theme.thumb.hover}`}
+                style={{
+                  scale: isDragging ? 1.1 : scale
+                }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 animate={{
-                  scale: isDragging ? 1.1 : 1,
                   boxShadow: isDragging
                     ? "0 0 20px rgba(255,255,255,0.2)"
                     : "0 0 0 rgba(255,255,255,0)",

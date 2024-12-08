@@ -20,10 +20,6 @@ export default function ParticipationDropRatingsContainer({
     hasRaters: drop.top_raters && drop.top_raters.length > 0,
     userRating: drop.context_profile_context?.rating ?? 0,
     totalRating: drop.rating ?? 0,
-    availableCredit: Math.abs(
-      (drop.context_profile_context?.max_rating ?? 0) -
-        (drop.context_profile_context?.rating ?? 0)
-    ),
   };
 
   // Generate themes

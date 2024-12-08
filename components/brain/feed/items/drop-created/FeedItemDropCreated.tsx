@@ -1,13 +1,12 @@
 import { useRouter } from "next/router";
 import { IFeedItemDropCreated } from "../../../../../types/feed.types";
-import {
+import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "../../../../waves/detailed/drops/Drop";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../waves/detailed/chat/WaveChat";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import Drop from "../../../../waves/detailed/drops/Drop";
 
 export default function FeedItemDropCreated({
   item,

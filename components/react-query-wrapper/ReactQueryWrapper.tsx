@@ -1232,13 +1232,13 @@ export default function ReactQueryWrapper({
     invalidateDrops();
   };
 
-  const onDropRateChange = ({
+  const onDropRateChange = async ({
     drop,
     giverHandle,
   }: {
     readonly drop: ApiDrop;
     readonly giverHandle: string | null;
-  }) => changeDropInCache(queryClient, drop, giverHandle);
+  }) => await changeDropInCache(queryClient, drop, giverHandle);
 
   const onIdentityBulkRate = () => {
     queryClient.invalidateQueries({
