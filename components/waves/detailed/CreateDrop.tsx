@@ -1,4 +1,3 @@
-import { ActiveDropState } from "./WaveDetailedContent";
 import {
   useEffect,
   useRef,
@@ -20,11 +19,18 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
+import { ActiveDropState } from "./chat/WaveChat";
+import { DropMode } from "./PrivilegedDropCreator";
+import { DropPrivileges } from "../../../hooks/useDropPriviledges";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onAllDropsAdded?: () => void;
   readonly wave: ApiWave;
+  readonly dropId: string | null;
+  readonly fixedDropMode: DropMode;
+  readonly privileges: DropPrivileges;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -32,14 +38,74 @@ const ANIMATION_DURATION = 0.3;
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
+  onAllDropsAdded,
   wave,
+  dropId,
+  fixedDropMode,
+  privileges,
 }: CreateDropProps) {
   const { setToast } = useContext(AuthContext);
   const { waitAndInvalidateDrops } = useContext(ReactQueryWrapperContext);
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
-  const [isDropMode, setIsDropMode] = useState(false);
+
+  const getIsDropMode = () => {
+    if (fixedDropMode === DropMode.CHAT) {
+      return false;
+    }
+    if (fixedDropMode === DropMode.PARTICIPATION) {
+      return true;
+    }
+    if (wave.chat.authenticated_user_eligible) return false;
+    if (wave.participation.authenticated_user_eligible) return true;
+    if (activeDrop) return false;
+    return false;
+  };
+
+  const [isDropMode, setIsDropMode] = useState(getIsDropMode());
+  useEffect(() => setIsDropMode(getIsDropMode()), [wave, activeDrop]);
+
+  const getIsDropModeDisabled = () => {
+    if (!wave.participation.authenticated_user_eligible) return true;
+    if (activeDrop) return true;
+    return false;
+  };
+
+  const [dropModeDisabled, setDropModeDisabled] = useState(
+    getIsDropModeDisabled()
+  );
+
+  useEffect(
+    () => setDropModeDisabled(getIsDropModeDisabled()),
+    [wave, activeDrop]
+  );
+
+  const onDropModeChange = useCallback(
+    (newIsDropMode: boolean) => {
+      if (fixedDropMode !== DropMode.BOTH) {
+        return;
+      }
+      if (newIsDropMode && !wave.participation.authenticated_user_eligible) {
+        setToast({
+          message: "You are not eligible to drop in this wave",
+          type: "error",
+        });
+        return;
+      }
+
+      if (!newIsDropMode && !wave.chat.authenticated_user_eligible) {
+        setToast({
+          message: "You are not eligible to chat in this wave",
+          type: "error",
+        });
+        return;
+      }
+
+      setIsDropMode(newIsDropMode);
+    },
+    [wave]
+  );
 
   const onRemovePart = useCallback((partIndex: number) => {
     setDrop((prevDrop) => {
@@ -100,6 +166,7 @@ export default function CreateDrop({
     () => {
       if (queueSize === 0 && !isProcessing && hasQueueChanged) {
         waitAndInvalidateDrops();
+        onAllDropsAdded?.();
       }
     },
     [queueSize, isProcessing, hasQueueChanged],
@@ -155,10 +222,13 @@ export default function CreateDrop({
       drop,
       isStormMode,
       isDropMode,
+      dropId,
       setDrop,
       setIsStormMode,
-      setIsDropMode,
+      onDropModeChange,
       submitDrop,
+      dropModeDisabled,
+      privileges,
     }),
     [
       activeDrop,
@@ -166,10 +236,13 @@ export default function CreateDrop({
       drop,
       isStormMode,
       isDropMode,
+      dropId,
       setDrop,
       setIsStormMode,
-      setIsDropMode,
+      onDropModeChange,
       submitDrop,
+      dropModeDisabled,
+      privileges,
     ]
   );
 

@@ -5,13 +5,15 @@ import FeedWrapper from "../feed/FeedWrapper";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
-import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
+
 interface MyStreamWaveProps {
   readonly waveId: string;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({
@@ -19,10 +21,16 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
   activeDrop,
   onReply,
   onQuote,
+  onDropClick,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDrops(waveId, connectedProfile?.profile?.handle, false);
+    useWaveDrops({
+      waveId,
+      connectedProfileHandle: connectedProfile?.profile?.handle,
+      reverse: false,
+      dropId: null,
+    });
 
   const onBottomIntersection = (state: boolean) => {
     if (state && !isFetching && !isFetchingNextPage && hasNextPage) {
@@ -74,6 +82,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
+        onDropClick={onDropClick}
       />
     </div>
   );

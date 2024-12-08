@@ -1,9 +1,8 @@
 import { useMemo, RefObject, useCallback, memo } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-
-import WaveDetailedDrop from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import Drop, { DropLocation } from "../../waves/detailed/drops/Drop";
 
 type DropActionHandler = ({
   drop,
@@ -23,12 +22,14 @@ interface DropsListProps {
   readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement> | null;
+  readonly dropViewDropId: string | null;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
-const MemoizedWaveDetailedDrop = memo(WaveDetailedDrop);
+const MemoizedDrop = memo(Drop);
 
 const DropsList = memo(function DropsList({
   drops,
@@ -43,6 +44,8 @@ const DropsList = memo(function DropsList({
   targetDropRef,
   parentContainerRef,
   onQuoteClick,
+  onDropClick,
+  dropViewDropId,
 }: DropsListProps) {
   const handleReply = useCallback<DropActionHandler>(
     ({ drop, partId }) => onReply({ drop, partId }),
@@ -67,12 +70,13 @@ const DropsList = memo(function DropsList({
           id={`drop-${drop.serial_no}`}
           ref={serialNo === drop.serial_no ? targetDropRef : null}
           className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
-         /*  style={{
+          /*  style={{
             contentVisibility: "auto",
             containIntrinsicSize: "auto",
           }} */
         >
-          <MemoizedWaveDetailedDrop
+          <MemoizedDrop
+            dropViewDropId={dropViewDropId}
             onReplyClick={handleReplyClick}
             drop={drop}
             previousDrop={drops[i - 1] ?? null}
@@ -81,9 +85,11 @@ const DropsList = memo(function DropsList({
             activeDrop={activeDrop}
             onReply={handleReply}
             onQuote={handleQuote}
+            location={DropLocation.WAVE}
             showReplyAndQuote={showReplyAndQuote}
             onQuoteClick={onQuoteClick}
             parentContainerRef={parentContainerRef}
+            onDropClick={onDropClick}
           />
         </div>
       )),

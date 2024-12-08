@@ -1,8 +1,8 @@
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import WaveDetailed from "../../components/waves/detailed/WaveDetailed";
+import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
+import WaveDetailed from "../../../components/waves/detailed/WaveDetailed";
 import { useRouter } from "next/router";
 import {
   keepPreviousData,
@@ -12,22 +12,22 @@ import {
 import {
   QueryKey,
   ReactQueryWrapperContext,
-} from "../../components/react-query-wrapper/ReactQueryWrapper";
-import { ApiWave } from "../../generated/models/ApiWave";
-import { commonApiFetch } from "../../services/api/common-api";
+} from "../../../components/react-query-wrapper/ReactQueryWrapper";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { commonApiFetch } from "../../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { AuthContext } from "../../../components/auth/Auth";
 import {
   getCommonHeaders,
   getWave,
   getWaveDrops,
   getWavesOverview,
-} from "../../helpers/server.helpers";
+} from "../../../helpers/server.helpers";
 import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
-} from "../../components/react-query-wrapper/utils/query-utils";
-import { ApiWaveDropsFeed } from "../../generated/models/ApiWaveDropsFeed";
+} from "../../../components/react-query-wrapper/utils/query-utils";
+import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 
 interface Props {
   readonly wave: ApiWave | null;
@@ -35,7 +35,7 @@ interface Props {
   readonly waveDrops: ApiWaveDropsFeed | null;
 }
 
-const Header = dynamic(() => import("../../components/header/Header"), {
+const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
 });
@@ -150,7 +150,6 @@ export default function WavePage({ pageProps }: { readonly pageProps: Props }) {
           <Header isSmall={true} />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
-        {/* tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 */}
         <div className="tw-flex-1">{wave && <WaveDetailed wave={wave} />}</div>
       </main>
     </>

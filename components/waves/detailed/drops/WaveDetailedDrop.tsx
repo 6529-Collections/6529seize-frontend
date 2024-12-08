@@ -5,18 +5,15 @@ import WaveDetailedDropContent from "./WaveDetailedDropContent";
 import WaveDetailedDropHeader from "./WaveDetailedDropHeader";
 import WaveDetailedDropAuthorPfp from "./WaveDetailedDropAuthorPfp";
 import WaveDetailedDropRatings from "./WaveDetailedDropRatings";
-import { ActiveDropState } from "../WaveDetailedContent";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDetailedDropMetadata from "./WaveDetailedDropMetadata";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
+import { ActiveDropState } from "../chat/WaveChat";
+import { DropInteractionParams, DropLocation } from "./Drop";
 
-export interface DropInteractionParams {
-  drop: ExtendedDrop;
-  partId: number;
-}
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -46,39 +43,54 @@ const shouldGroupWithDrop = (
   return bothNotReplies || repliesInSameThread;
 };
 
-const getRankClasses = (rank: number | null): string => {
-  if (rank === null) return "tw-bg-iron-950";
-  if (rank === 1) {
-    return "tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.4)_3.5%,rgba(36,36,35,0.75)_100%)] tw-border tw-border-solid tw-border-[#E8D48A]/5";
+const RANK_STYLES = {
+  1: "tw-border tw-border-solid tw-border-[#E8D48A]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(66,56,41,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(217,169,98,0.15)] hover:tw-shadow-[inset_0_0_25px_rgba(217,169,98,0.2)]",
+  2: "tw-border tw-border-solid tw-border-[#DDDDDD]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(45,45,50,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(192,192,192,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(192,192,192,0.15)]",
+  3: "tw-border tw-border-solid tw-border-[#CD7F32]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(60,46,36,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(205,127,50,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(205,127,50,0.15)]",
+  default:
+    "tw-border tw-border-solid tw-border tw-border-iron-600/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.95)_0%,rgba(35,35,40,0.98)_100%)] tw-shadow-[inset_0_0_16px_rgba(255,255,255,0.03)] hover:tw-shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]",
+} as const;
+
+const getColorClasses = ({
+  isActiveDrop,
+  rank,
+  isDrop,
+}: {
+  isActiveDrop: boolean;
+  rank: number | null;
+  isDrop: boolean;
+}): string => {
+  if (isActiveDrop) {
+    return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
   }
-  if (rank === 2) {
-    return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.4)_3.5%,rgba(35,35,36,0.6)_100%)] tw-border tw-border-solid tw-border-[#DDDDDD]/5";
-  }
-  if (rank === 3) {
-    return "tw-bg-[linear-gradient(90.43deg,rgba(31,31,37,0.4)_3.5%,rgba(32,31,31,0.6)_100%)] tw-border tw-border-solid tw-border-[#D9A962]/5";
-  }
-  return "tw-bg-iron-900/80";
+  if (!isDrop) return "tw-bg-iron-950";
+
+  const rankClass =
+    RANK_STYLES[rank as keyof typeof RANK_STYLES] ?? RANK_STYLES.default;
+  return ` ${rankClass} tw-transition-shadow tw-duration-300`.trim();
 };
 
 const getDropClasses = (
   isActiveDrop: boolean,
   groupingClass: string,
-  border: boolean,
-  rank: number | null
+  location: DropLocation,
+  rank: number | null,
+  isDrop: boolean
 ): string => {
   const baseClasses =
     "tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
 
-  const activeClasses =
-    "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
-  const inactiveClasses = "tw-rounded-lg";
-  const borderClasses = "tw-ring-1 tw-ring-inset tw-ring-iron-800";
+  const streamClasses = `tw-rounded-xl ${
+    !isDrop && "tw-ring-1 tw-ring-inset tw-ring-iron-800"
+  }`;
 
-  const rankClasses = getRankClasses(rank);
+  const chatDropClasses = isDrop ? "tw-rounded-lg tw-my-0.5" : "";
 
-  return `${baseClasses} ${
-    isActiveDrop ? activeClasses : inactiveClasses
-  } ${groupingClass} ${border ? borderClasses : ""} ${rankClasses}`.trim();
+  const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop });
+
+  return `${baseClasses} ${groupingClass} ${
+    location === DropLocation.MY_STREAM ? streamClasses : chatDropClasses
+  } ${rankClasses}`.trim();
 };
 
 interface WaveDetailedDropProps {
@@ -88,11 +100,13 @@ interface WaveDetailedDropProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
-  readonly border?: boolean;
+  readonly location: DropLocation;
+  readonly dropViewDropId: string | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
@@ -102,11 +116,13 @@ const WaveDetailedDrop = ({
   nextDrop,
   showWaveInfo,
   activeDrop,
-  border = false,
+  location,
+  dropViewDropId,
   onReply,
   onQuote,
   onReplyClick,
   onQuoteClick,
+  onDropClick,
   showReplyAndQuote,
   parentContainerRef,
 }: WaveDetailedDropProps) => {
@@ -115,18 +131,14 @@ const WaveDetailedDrop = ({
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
-
-  const rank =
-    drop.drop_type === ApiDropType.Chat
-      ? null
-      : Math.floor(Math.random() * 5) + 1;
-
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
+  const isDrop = drop.drop_type === ApiDropType.Participatory;
 
   const shouldGroupWithPreviousDrop =
-    !rank && shouldGroupWithDrop(drop, previousDrop);
-  const shouldGroupWithNextDrop = !rank && shouldGroupWithDrop(drop, nextDrop);
+    !isDrop && shouldGroupWithDrop(drop, previousDrop);
+  const shouldGroupWithNextDrop =
+    !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
   const isMobile = useIsMobileDevice();
 
@@ -178,9 +190,8 @@ const WaveDetailedDrop = ({
   }, []);
 
   const handleDropClick = useCallback(() => {
-    if (isMobile) return;
-    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
-  }, [onReply, drop, activePartIndex, isMobile]);
+    onDropClick(drop);
+  }, [onDropClick, drop]);
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -200,37 +211,58 @@ const WaveDetailedDrop = ({
     };
   }, []);
 
-  const dropClasses = getDropClasses(isActiveDrop, groupingClass, border, rank);
+  const dropClasses = getDropClasses(
+    isActiveDrop,
+    groupingClass,
+    location,
+    drop.rank,
+    isDrop
+  );
+
+  const onContainerClick = () => {
+    if (drop.drop_type === ApiDropType.Participatory) {
+      onDropClick(drop);
+    }
+  };
 
   return (
-    <div className={rank ? "tw-px-4 tw-py-2" : ""}>
+    <div
+      className={`${
+        isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""
+      } tw-w-full`}
+    >
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
       >
-        {drop.reply_to && (
-          <WaveDetailedDropReply
-            onReplyClick={onReplyClick}
-            dropId={drop.reply_to.drop_id}
-            dropPartId={drop.reply_to.drop_part_id}
-            maybeDrop={
-              drop.reply_to.drop
-                ? { ...drop.reply_to.drop, wave: drop.wave }
-                : null
-            }
-          />
-        )}
-        <div className="tw-flex tw-gap-x-3">
+        {drop.reply_to &&
+          drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id &&
+          drop.reply_to.drop_id !== dropViewDropId && (
+            <WaveDetailedDropReply
+              onReplyClick={onReplyClick}
+              dropId={drop.reply_to.drop_id}
+              dropPartId={drop.reply_to.drop_part_id}
+              maybeDrop={
+                drop.reply_to.drop
+                  ? { ...drop.reply_to.drop, wave: drop.wave }
+                  : null
+              }
+            />
+          )}
+        <div
+          onClick={onContainerClick}
+          className={`tw-flex tw-gap-x-3 tw-relative tw-z-10 ${
+            drop.drop_type === ApiDropType.Participatory
+              ? "tw-cursor-pointer"
+              : ""
+          }`}
+        >
           {!shouldGroupWithPreviousDrop && (
             <WaveDetailedDropAuthorPfp drop={drop} />
           )}
-          <div
-            className={`${
-              shouldGroupWithPreviousDrop ? "" : "tw-mt-1"
-            } tw-flex tw-flex-col tw-w-full`}
-          >
+          <div className="tw-flex tw-flex-col tw-w-full">
             {!shouldGroupWithPreviousDrop && (
               <WaveDetailedDropHeader
                 drop={drop}
@@ -238,7 +270,6 @@ const WaveDetailedDrop = ({
                 isStorm={isStorm}
                 currentPartIndex={activePartIndex}
                 partsCount={drop.parts.length}
-                rank={rank}
               />
             )}
             <div className={shouldGroupWithPreviousDrop ? "tw-ml-[52px]" : ""}>

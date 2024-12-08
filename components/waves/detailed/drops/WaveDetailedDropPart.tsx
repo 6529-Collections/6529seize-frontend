@@ -1,6 +1,7 @@
 import React, { memo, useState, useEffect, useRef } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDetailedDropPartDrop from "./WaveDetailedDropPartDrop";
+import { ApiDropType } from "../../../../generated/models/ApiDropType";
 
 interface WaveDetailedDropPartProps {
   readonly drop: ApiDrop;
@@ -77,7 +78,7 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
     };
 
     const handleClick = () => {
-      if (isTemporaryDrop) return;
+      if (isTemporaryDrop || drop.drop_type === ApiDropType.Chat) return;
       onDropClick();
     };
 
@@ -89,7 +90,9 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         className={`tw-no-underline ${
-          isTemporaryDrop ? "tw-cursor-default" : "tw-cursor-pointer"
+          isTemporaryDrop || drop.drop_type === ApiDropType.Chat
+            ? "tw-cursor-default"
+            : "tw-cursor-pointer"
         }`}
         role={isTemporaryDrop ? undefined : "button"}
         tabIndex={isTemporaryDrop ? undefined : 0}
@@ -97,7 +100,7 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
           !isTemporaryDrop && e.key === "Enter" && handleClick()
         }
       >
-        <div className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
+        <div className="tw-mt-1.5 md:tw-mt-0 tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
           <WaveDetailedDropPartDrop
             drop={drop}
             activePart={activePart}

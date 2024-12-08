@@ -6,7 +6,8 @@ import { AuthContext } from "../../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import dynamic from "next/dynamic";
 import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
-import { DropVoteState, VOTE_STATE_ERRORS } from "../../DropsListItem";
+import { VOTE_STATE_ERRORS } from "../../DropsListItem";
+import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
 
 const DropListItemRateGiveClap = dynamic(
   () => import("./clap/DropListItemRateGiveClap"),
@@ -19,25 +20,22 @@ const DEBOUNCE_DELAY = 300; // milliseconds
 export default function DropListItemRateGiveSubmit({
   rate,
   drop,
-  voteState,
-  availableCredit,
   canVote,
   onSuccessfulRateChange,
-  isMobile = false
+  isMobile = false,
 }: {
   readonly rate: number;
   readonly drop: ApiDrop;
-  readonly availableCredit: number;
-  readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly onSuccessfulRateChange: () => void;
   readonly isMobile?: boolean;
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { onDropChange } = useContext(ReactQueryWrapperContext);
+  const { onDropRateChange } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { voteState } = useDropInteractionRules(drop);
 
   const rateChangeMutation = useMutation({
     mutationFn: async (param: { rate: number; category: string }) =>
@@ -49,11 +47,7 @@ export default function DropListItemRateGiveSubmit({
         },
       }),
     onSuccess: (response: ApiDrop) => {
-      setToast({
-        message: `Voted successfully`,
-        type: "success",
-      });
-      onDropChange({
+      onDropRateChange({
         drop: response,
         giverHandle: connectedProfile?.profile?.handle ?? null,
       });
@@ -95,7 +89,17 @@ export default function DropListItemRateGiveSubmit({
       rate: newRate,
       category: DEFAULT_DROP_RATE_CATEGORY,
     });
-  }, [canVote, rate, mutating, requestAuth, drop, clickCount, rateChangeMutation, voteState, setToast]);
+  }, [
+    canVote,
+    rate,
+    mutating,
+    requestAuth,
+    drop,
+    clickCount,
+    rateChangeMutation,
+    voteState,
+    setToast,
+  ]);
 
   useEffect(() => {
     if (clickCount > 0 && !mutating) {
@@ -124,7 +128,6 @@ export default function DropListItemRateGiveSubmit({
         onSubmit={onRateSubmit}
         voteState={voteState}
         canVote={canVote}
-        availableCredit={availableCredit}
         isMobile={isMobile}
       />
     </div>

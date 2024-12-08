@@ -79,7 +79,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           />
         </svg>
       </button>
-      <div className="tw-pt-[5.6rem] xl:tw-pt-[6.25rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
+      <div className="tw-pt-[5rem] xl:tw-pt-[6rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
         <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
           {wave && (
             <>

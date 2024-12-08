@@ -2,7 +2,7 @@ import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import DropPart, { DropPartSize } from "../../part/DropPart";
 import { useContext, useEffect, useRef, useState } from "react";
 import DropPartWrapper from "../../part/DropPartWrapper";
-import { DropConnectingLineType, DropVoteState } from "../DropsListItem";
+import { DropConnectingLineType } from "../DropsListItem";
 import DropListItemFollowAuthor from "../DropListItemFollowAuthor";
 import { AuthContext } from "../../../../auth/Auth";
 import { useRouter } from "next/router";
@@ -15,8 +15,6 @@ export enum DropContentPartType {
 
 interface DropListItemContentProps {
   readonly drop: ApiDrop;
-  readonly voteState: DropVoteState;
-  readonly canVote: boolean;
   readonly showWaveInfo?: boolean;
   readonly smallMenuIsShown: boolean;
   readonly dropReplyDepth: number;
@@ -27,8 +25,6 @@ interface DropListItemContentProps {
 
 export default function DropListItemContent({
   drop,
-  voteState,
-  canVote,
   showWaveInfo = true,
   smallMenuIsShown,
   dropReplyDepth,
@@ -104,8 +100,6 @@ export default function DropListItemContent({
         <DropPartWrapper
           dropPart={activePart}
           drop={drop}
-          voteState={voteState}
-          canVote={canVote}
           size={size}
           dropReplyDepth={dropReplyDepth}
           isDiscussionOpen={isDiscussionOpen}

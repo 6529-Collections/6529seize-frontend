@@ -1,20 +1,24 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import WaveDetailedFollowers from "./followers/WaveDetailedFollowers";
-import WaveDetailedContent from "./WaveDetailedContent";
 import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedAbout from "./WaveDetailedAbout";
-import WaveDetailedRightSidebar from "./WaveDetailedRightSidebar";
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import { WaveChat } from "./chat/WaveChat";
+import { WaveLeaderboard } from "./leaderboard/WaveLeaderboard";
+import { WaveDetailedDesktopTabs } from "./WaveDetailedDesktopTabs";
+import { WaveDrop } from "./drop/WaveDrop";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
   readonly view: WaveDetailedView;
+  readonly activeDrop: ExtendedDrop | null;
   readonly setView: (view: WaveDetailedView) => void;
   readonly onWaveChange: (wave: ApiWave) => void;
   readonly setIsLoading: (isLoading: boolean) => void;
+  readonly setActiveDrop: (drop: ExtendedDrop | null) => void;
 }
 
 const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
@@ -23,11 +27,11 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
   setView,
   onWaveChange,
   setIsLoading,
+  activeDrop,
+  setActiveDrop,
 }) => {
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
-
-  const contentWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const getIsAuthorAndNotProxy = () =>
     connectedProfile?.profile?.handle === wave.author.handle &&
@@ -61,24 +65,29 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     setShowRequiredTypes(getShowRequiredTypes());
   }, [wave, isAuthorAndNotProxy]);
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
   const components: Record<WaveDetailedView, JSX.Element> = {
-    [WaveDetailedView.CONTENT]: (
-      <WaveDetailedContent
-        key={`wave-detailed-content-${wave.id}`}
+    [WaveDetailedView.CHAT]: (
+      <WaveChat
         wave={wave}
+        activeTab={view}
+        setActiveTab={setView}
+        onDropClick={setActiveDrop}
       />
+    ),
+    [WaveDetailedView.LEADERBOARD]: (
+      <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
+        <div className="tw-ml-4">
+          <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
+        </div>
+      </WaveLeaderboard>
     ),
     [WaveDetailedView.FOLLOWERS]: (
       <WaveDetailedFollowers
         wave={wave}
-        onBackClick={() => setView(WaveDetailedView.CONTENT)}
+        onBackClick={() => setView(WaveDetailedView.CHAT)}
       />
     ),
   };
-
-  const showRightSidebar = wave.wave.type !== ApiWaveType.Chat;
 
   if (!showWaves) {
     return null;
@@ -86,60 +95,37 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
 
   return (
     <div className="tailwind-scope tw-bg-black">
-      <div className="tw-mt-3 tw-px-4">
-        <div className="tw-flex tw-items-start tw-justify-center tw-gap-x-4">
-          <div className="tw-fixed tw-inset-y-0 tw-left-0 tw-pl-4 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[21.5rem] tw-w-full">
-            <div className="tw-flex tw-flex-1 tw-flex-col">
-              <WaveDetailedAbout
-                wave={wave}
-                setView={setView}
-                showRequiredMetadata={showRequiredMetadata}
-                showRequiredTypes={showRequiredTypes}
-                onWaveChange={onWaveChange}
-                setIsLoading={setIsLoading}
-              />
-            </div>
-          </div>
-          <div
-            className={`tw-flex-1 tw-ml-[21.5rem] ${
-              isSidebarOpen && showRightSidebar ? "tw-mr-[19.5rem]" : ""
-            } tw-transition-all tw-duration-300`}
-          >
-            <div
-              ref={contentWrapperRef}
-              className="tw-rounded-xl tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={view}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {showRightSidebar && (
-                    <div className="tw-flex tw-space-x-2 tw-px-4 tw-py-1.5 tw-bg-iron-950/70 tw-backdrop-blur-md tw-border-solid tw-border-b tw-border-iron-800 tw-border-x-0 tw-border-t-0 tw-absolute tw-left-0 tw-right-0 tw-top-0 tw-z-10">
-                      <button className="tw-px-3 tw-py-1.5 tw-border-0 tw-rounded-full tw-text-xs tw-font-medium tw-bg-primary-400 tw-text-white tw-shadow-sm hover:tw-bg-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 tw-transition-colors">
-                        All
-                      </button>
-                      <button className="tw-px-3 tw-py-1.5 tw-border-0 tw-rounded-full tw-text-xs tw-font-medium tw-bg-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500 focus:tw-ring-offset-2 tw-transition-colors">
-                        Drops
-                      </button>
-                    </div>
-                  )}
-                  {components[view]}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-          {showRightSidebar && (
-            <WaveDetailedRightSidebar
-              isOpen={isSidebarOpen}
+      <div className="tw-flex tw-items-start tw-gap-x-4 tw-relative">
+        <div
+          className={`${
+            activeDrop && "tw-hidden xl:tw-block"
+          } tw-fixed tw-inset-y-0 tw-left-0 tw-pl-4 tw-overflow-y-auto no-scrollbar tw-mt-28 lg:tw-w-[21.5rem] tw-w-full`}
+        >
+          <div className="tw-flex tw-flex-1 tw-flex-col">
+            <WaveDetailedAbout
               wave={wave}
-              onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+              setView={setView}
+              showRequiredMetadata={showRequiredMetadata}
+              showRequiredTypes={showRequiredTypes}
+              onWaveChange={onWaveChange}
+              setIsLoading={setIsLoading}
             />
-          )}
+          </div>
         </div>
+        <AnimatePresence>
+          {activeDrop && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="tw-absolute xl:tw-ml-[21.5rem] tw-inset-0 tw-z-[100] xl:tw-pl-4"
+            >
+              <WaveDrop drop={activeDrop} onClose={() => setActiveDrop(null)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        {components[view]}
       </div>
     </div>
   );

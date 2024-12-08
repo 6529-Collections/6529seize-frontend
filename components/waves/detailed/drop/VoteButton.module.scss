@@ -1,0 +1,196 @@
+$btn-dimension: 64px;
+
+@keyframes shockwave {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 2px var(--theme-primary, rgba(255, 255, 255, 0.9));
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    box-shadow: 0 0 50px var(--theme-secondary, rgba(255, 255, 255, 0.3)), 
+                inset 0 0 10px var(--theme-primary, rgba(255, 255, 255, 0.9));
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+                0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+  }
+  50% {
+    box-shadow: 0 0 20px var(--theme-primary, rgba(255, 255, 255, 0.2)),
+                0 0 30px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+  }
+  100% {
+    box-shadow: 0 0 5px var(--theme-secondary, rgba(255, 255, 255, 0.1)),
+                0 0 10px var(--theme-secondary, rgba(255, 255, 255, 0.1));
+  }
+}
+
+@keyframes funSpin {
+  0% {
+    transform: rotate(0deg);
+    border-width: 2px;
+  }
+  20% {
+    transform: rotate(240deg);
+    border-width: 2px;
+  }
+  35% {
+    transform: rotate(480deg);
+    border-width: 2.2px;
+  }
+  45% {
+    transform: rotate(720deg);
+    border-width: 2.3px;
+  }
+  55% {
+    transform: rotate(1080deg);
+    border-width: 2.5px;
+  }
+  70% {
+    transform: rotate(1440deg);
+    border-width: 2.3px;
+  }
+  85% {
+    transform: rotate(1680deg);
+    border-width: 2.2px;
+  }
+  100% {
+    transform: rotate(1800deg);
+    border-width: 2px;
+  }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@keyframes textScaleOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes textScaleIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.voteButton {
+  position: relative;
+  border-radius: 12px;
+  width: $btn-dimension;
+  height: 40px;
+  background: rgba(40, 43, 47, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  outline: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  &:not(:disabled):hover {
+    background: rgba(45, 48, 52, 0.5);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 1);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.buttonContent {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttonText {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+  &.exit {
+    animation: textScaleOut 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  }
+
+  &.enter {
+    animation: textScaleIn 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  }
+}
+
+.spinner {
+  position: absolute;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  border-right-color: white;
+  animation: spinnerEnter 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards,
+             funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
+
+  &.exit {
+    animation: spinnerExit 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+  }
+}
+
+.theme1 {
+  color: rgba(255, 215, 0, 0.9);
+  
+  &:hover {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.25) !important;
+    color: rgba(255, 215, 0, 1) !important;
+  }
+}
+
+.theme2 {
+  background: rgba(45, 48, 52, 0.5);
+  border-color: rgba(192, 192, 192, 0.15);
+  color: rgba(192, 192, 192, 0.9);
+  
+  &:hover {
+    background: rgba(50, 53, 57, 0.6) !important;
+    box-shadow: 0 0 20px rgba(192, 192, 192, 0.3) !important;
+    border-color: rgba(192, 192, 192, 0.25) !important;
+    color: rgba(192, 192, 192, 1) !important;
+  }
+}
+
+.theme3 {
+  color: rgba(205, 127, 50, 0.9);
+  
+  &:hover {
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.25) !important;
+    color: rgba(205, 127, 50, 1) !important;
+  }
+}

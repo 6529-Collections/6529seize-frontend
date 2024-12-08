@@ -40,15 +40,13 @@ export interface CreateWaveDropsRequiredMetadata {
 }
 
 export interface CreateWaveDropsConfig {
-  // TODO add to API, make sure that in CHAT its always true
-  readonly allowDiscussionDrops: boolean;
   readonly noOfApplicationsAllowedPerParticipant: number | null;
   readonly requiredTypes: ApiWaveParticipationRequirement[];
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
 }
 
 export interface CreateWaveVotingConfig {
-  readonly type: ApiWaveCreditType;
+  readonly type: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
 }

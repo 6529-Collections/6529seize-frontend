@@ -1,6 +1,5 @@
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiDropWithoutWave } from "../../generated/models/ApiDropWithoutWave";
-import { ApiWaveDropsFeed } from "../../generated/models/ApiWaveDropsFeed";
 import { ApiWaveMin } from "../../generated/models/ApiWaveMin";
 import { getStableDropKey } from "./drop.helpers";
 
@@ -24,7 +23,7 @@ export const createExtendedDrop = (
 };
 
 export const processWaveDropsFeed = (
-  page: ApiWaveDropsFeed,
+  page: { readonly wave: ApiWaveMin; readonly drops: ApiDropWithoutWave[] },
   prevDrops: ExtendedDrop[]
 ): ExtendedDrop[] => {
   return page.drops.map((drop) =>
@@ -33,7 +32,7 @@ export const processWaveDropsFeed = (
 };
 
 export const mapToExtendedDrops = (
-  pages: ApiWaveDropsFeed[],
+  pages: { readonly wave: ApiWaveMin; readonly drops: ApiDropWithoutWave[] }[],
   prevDrops: ExtendedDrop[],
   reverse: boolean = false
 ): ExtendedDrop[] => {

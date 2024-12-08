@@ -58,4 +58,11 @@ export const addDropToDrops = (
     waveId: drop.wave.id,
   };
   updateDropsQuery(queryClient, { ...baseQueryParams, dropId: null }, drop);
+  if (drop.reply_to) {
+    updateDropsQuery(
+      queryClient,
+      { ...baseQueryParams, dropId: drop.reply_to.drop_id },
+      drop
+    );
+  }
 };

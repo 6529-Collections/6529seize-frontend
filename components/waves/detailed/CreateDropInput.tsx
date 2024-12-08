@@ -51,8 +51,8 @@ import NewHashtagsPlugin, {
 import { MaxLengthPlugin } from "../../drops/create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../../drops/create/lexical/plugins/DragDropPastePlugin";
 import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlugin";
-import { ActiveDropAction } from "./WaveDetailedContent";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { ActiveDropAction } from "./chat/WaveChat";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -91,6 +91,7 @@ const CreateDropInput = forwardRef<
     readonly canSubmit: boolean;
     readonly isStormMode: boolean;
     readonly submitting: boolean;
+    readonly isDropMode: boolean;
     readonly onDrop?: () => void;
     readonly onEditorState: (editorState: EditorState) => void;
     readonly onReferencedNft: (referencedNft: ReferencedNft) => void;
@@ -106,6 +107,7 @@ const CreateDropInput = forwardRef<
       type,
       canSubmit,
       isStormMode,
+      isDropMode,
       submitting,
       onEditorState,
       onReferencedNft,
@@ -154,12 +156,12 @@ const CreateDropInput = forwardRef<
 
     const getPlaceHolderText = () => {
       if (isStormMode) return "Add to the storm";
-      if (!type) return "Create a drop";
+      if (!type) return isDropMode ? "Create a drop" : "Create a post";
       switch (type) {
         case ActiveDropAction.REPLY:
-          return "Drop a reply";
+          return isDropMode ? "Drop a reply" : "Post a reply";
         case ActiveDropAction.QUOTE:
-          return "Quote a drop";
+          return isDropMode ? "Quote a drop" : "Post a quote";
         default:
           assertUnreachable(type);
           return "";

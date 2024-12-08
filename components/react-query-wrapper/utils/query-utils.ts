@@ -14,3 +14,6 @@ export const WAVE_DROPS_PARAMS = {
 export const WAVE_DEFAULT_SUBSCRIPTION_ACTIONS = Object.values(
   ApiWaveSubscriptionTargetAction
 );
+export const WAVE_LOGS_PARAMS = {
+  limit: 20,
+};

@@ -1,10 +1,10 @@
 import { useRouter } from "next/router";
 import { IFeedItemWaveCreated } from "../../../../../types/feed.types";
-import WaveDetailedDrop, {
-  DropInteractionParams,
-} from "../../../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../../../waves/detailed/WaveDetailedContent";
+
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { ActiveDropState } from "../../../../waves/detailed/chat/WaveChat";
+import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import Drop, { DropInteractionParams, DropLocation } from "../../../../waves/detailed/drops/Drop";
 
 export default function FeedItemWaveCreated({
   item,
@@ -12,12 +12,14 @@ export default function FeedItemWaveCreated({
   activeDrop,
   onReply,
   onQuote,
+  onDropClick,
 }: {
   readonly item: IFeedItemWaveCreated;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
@@ -55,7 +57,7 @@ export default function FeedItemWaveCreated({
           </span>
         </div>
 
-        <WaveDetailedDrop
+        <Drop
           drop={{
             ...item.item.description_drop,
             stableKey: "",
@@ -65,12 +67,14 @@ export default function FeedItemWaveCreated({
           nextDrop={null}
           showWaveInfo={showWaveInfo}
           activeDrop={activeDrop}
+          dropViewDropId={null}
           showReplyAndQuote={true}
-          border={true}
+          location={DropLocation.MY_STREAM}
           onReply={onReply}
           onQuote={onQuote}
           onReplyClick={onReplyClick}
           onQuoteClick={onQuoteClick}
+          onDropClick={onDropClick}
         />
       </div>
     </div>

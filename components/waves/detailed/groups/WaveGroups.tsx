@@ -11,7 +11,7 @@ interface WaveGroupsProps {
 export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
   const ringClasses = useRing
     ? "tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-xl"
-    : "";
+    : "tw-rounded-b-xl lg:tw-rounded-b-none";
 
   return (
     <div className="tw-w-full">

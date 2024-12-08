@@ -28,14 +28,14 @@ export default function UserCICAndLevel({
   };
   const CIC_SIZE_CLASSES: Record<UserCICAndLevelSize, string> = {
     [UserCICAndLevelSize.SMALL]: "-tw-top-[0.1875rem] tw-h-2 tw-w-2",
-    [UserCICAndLevelSize.MEDIUM]: "-tw-top-1 tw-h-2.5 tw-w-2.5",
+    [UserCICAndLevelSize.MEDIUM]: "-tw-top-1 tw-h-2 tw-w-2",
     [UserCICAndLevelSize.LARGE]: "-tw-top-1.5 tw-h-3 tw-w-3",
     [UserCICAndLevelSize.XLARGE]: "-tw-top-2 tw-h-4 tw-w-4",
   };
   return (
     <div className="tw-relative">
       <div
-        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-ring-1 tw-ring-${mainColor} tw-text-${mainColor}`}>
+        className={`${LEVEL_SIZE_CLASSES[size]} tw-flex tw-items-center tw-justify-center tw-leading-3 tw-font-bold tw-rounded-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-900 tw-ring-1 tw-ring-iron-700 tw-ring-inset tw-text-${mainColor}`}>
         {level}
       </div>
       <span

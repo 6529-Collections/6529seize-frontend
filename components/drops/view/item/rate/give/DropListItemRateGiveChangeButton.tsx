@@ -72,10 +72,10 @@ export default function DropListItemRateGiveChangeButton({
       onClick={(e) => e.stopPropagation()}
       disabled={!canVote}
       aria-label={ariaLabels[type]}
-      className={`tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-flex-shrink-0 ${
+      className={`tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-lg tw-ring-1 tw-ring-iron-700/50 tw-text-iron-300 tw-transition-all tw-duration-300 ${
         isMobile
           ? "tw-bg-iron-800 tw-size-10 active:tw-bg-iron-600 active:tw-scale-95"
-          : "tw-bg-iron-900 tw-size-6 hover:tw-bg-iron-800"
+          : "tw-bg-iron-900 tw-size-6 hover:tw-bg-iron-800 hover:tw-ring-iron-600/50 hover:tw-text-iron-200"
       } tw-transition-all tw-duration-150 ${buttonClasses}`}
     >
       <svg

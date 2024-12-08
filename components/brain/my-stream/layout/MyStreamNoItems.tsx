@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function MyStreamNoItems() {
   return (
-    <div className="tw-mt-8 tw-max-w-xl tw-mx-auto">
+    <div className="tw-mt-8 tw-pb-8 tw-max-w-xl tw-mx-auto">
       <div className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-p-4">
         <svg
           className="tw-h-8 tw-w-8 tw-text-primary-500"

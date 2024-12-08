@@ -1,4 +1,4 @@
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
 import { WaveOverviewConfig } from "../../../../types/waves.types";
 import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";

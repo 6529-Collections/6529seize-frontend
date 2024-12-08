@@ -1,5 +1,5 @@
 import { ApiDrop } from "../../generated/models/ApiDrop";
-import { ActiveDropAction } from "./detailed/WaveDetailedContent";
+import { ActiveDropAction } from "./detailed/chat/WaveChat";
 
 interface CreateDropReplyingProps {
   readonly drop: ApiDrop;

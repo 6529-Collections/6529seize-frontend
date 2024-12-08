@@ -20,7 +20,7 @@ export default function CreateWaveActions({
   readonly config: CreateWaveConfig;
   readonly step: CreateWaveStep;
   readonly submitting: boolean;
-  readonly setStep: (step: CreateWaveStep) => void;
+  readonly setStep: (step: CreateWaveStep, direction: "forward" | "backward") => void;
   readonly onComplete: () => Promise<void>;
 }) {
   const onNextStep = async (): Promise<void> => {
@@ -29,7 +29,7 @@ export default function CreateWaveActions({
       waveType: config.overview.type,
     });
     if (nextStep) {
-      setStep(nextStep);
+      setStep(nextStep, "forward");
       return;
     }
     await onComplete();
@@ -51,7 +51,7 @@ export default function CreateWaveActions({
     <div className="tw-mt-4 md:tw-mt-6 tw-flex tw-gap-x-4 tw-items-center tw-justify-between">
       <div className="-tw-ml-6">
         {previousStep && (
-          <CreateWaveBackStep onPreviousStep={() => setStep(previousStep)} />
+          <CreateWaveBackStep onPreviousStep={() => setStep(previousStep, "backward")} />
         )}
       </div>
       <div className="tw-ml-auto">

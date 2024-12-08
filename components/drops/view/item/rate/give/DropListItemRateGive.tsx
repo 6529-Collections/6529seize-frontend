@@ -4,8 +4,8 @@ import DropListItemRateGiveSubmit from "./DropListItemRateGiveSubmit";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import { Time } from "../../../../../../helpers/time";
 import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
-import { DropVoteState } from "../../DropsListItem";
 import Tippy from "@tippyjs/react";
+import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
 
 export enum RateChangeType {
   INCREASE = "INCREASE",
@@ -14,14 +14,10 @@ export enum RateChangeType {
 
 export default function DropListItemRateGive({
   drop,
-  voteState,
-  canVote,
   onRated,
   isMobile = false,
 }: {
   readonly drop: ApiDrop;
-  readonly voteState: DropVoteState;
-  readonly canVote: boolean;
   readonly onRated?: () => void;
   readonly isMobile?: boolean;
 }) {
@@ -29,21 +25,18 @@ export default function DropListItemRateGive({
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
+  const { canVote } = useDropInteractionRules(drop);
   const [onProgressRate, setOnProgressRate] = useState<number>(1);
-  const availableCredit = Math.abs(
-    (drop.context_profile_context?.max_rating ?? 0) -
-      (drop.context_profile_context?.rating ?? 0)
-  );
+  const maxRating = drop.context_profile_context?.max_rating ?? 0;
+  const minRating = drop.context_profile_context?.min_rating ?? 0;
 
   useEffect(() => {
     if (!canVote) {
       setOnProgressRate(0);
       return;
     }
-    if (Math.abs(onProgressRate) > availableCredit) {
-      setOnProgressRate(
-        onProgressRate > 0 ? availableCredit : 0 - availableCredit
-      );
+    if (Math.abs(onProgressRate) > maxRating) {
+      setOnProgressRate(onProgressRate > 0 ? maxRating : minRating);
       return;
     }
     setOnProgressRate(1);
@@ -72,11 +65,11 @@ export default function DropListItemRateGive({
   };
 
   const getCorrectedNewRate = (newValue: number) => {
-    if (newValue > availableCredit) {
-      return availableCredit;
+    if (newValue > maxRating) {
+      return maxRating;
     }
-    if (newValue < 0 - availableCredit) {
-      return 0 - availableCredit;
+    if (newValue < minRating) {
+      return minRating;
     }
     return newValue;
   };
@@ -228,7 +221,7 @@ export default function DropListItemRateGive({
         <div
           className={`${
             isMobile ? "tw-gap-x-4" : ""
-          } tw-w-full tw-inline-flex tw-items-center`}
+          } tw-w-full tw-inline-flex tw-items-center tw-gap-x-1`}
         >
           <DropListItemRateGiveChangeButton
             canVote={canVote}
@@ -240,9 +233,7 @@ export default function DropListItemRateGive({
           <DropListItemRateGiveSubmit
             rate={onProgressRate}
             drop={drop}
-            voteState={voteState}
             canVote={canVote}
-            availableCredit={availableCredit}
             onSuccessfulRateChange={onSuccessfulRateChange}
             isMobile={isMobile}
           />

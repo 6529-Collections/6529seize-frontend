@@ -1,10 +1,12 @@
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TypedFeedItem } from "../../../types/feed.types";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
-import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 import FeedItems from "./FeedItems";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+
 interface FeedWrapperProps {
   readonly items: TypedFeedItem[];
   readonly loading: boolean;
@@ -13,6 +15,7 @@ interface FeedWrapperProps {
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedWrapper({
@@ -23,6 +26,7 @@ export default function FeedWrapper({
   onBottomIntersection,
   onReply,
   onQuote,
+  onDropClick,
 }: FeedWrapperProps) {
   return (
     <div className="tw-relative">
@@ -33,6 +37,7 @@ export default function FeedWrapper({
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
+        onDropClick={onDropClick}
       />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">

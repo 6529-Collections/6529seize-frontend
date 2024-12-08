@@ -16,7 +16,8 @@ export default function WaveDetailedDropMetadata({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobileDevice();
 
-  const toggleDropdown = () => {
+  const toggleDropdown = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     setIsDropdownOpen(!isDropdownOpen);
   };
 
@@ -38,15 +39,16 @@ export default function WaveDetailedDropMetadata({
         <button
           type="button"
           onClick={toggleDropdown}
-          className="tw-p-0 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-iron-400 hover:tw-text-iron-500 tw-text-xs tw-font-normal"
+          className="tw-p-0 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-iron-400 desktop-hover:hover:tw-text-iron-500 tw-text-xs tw-font-normal tw-transition-all tw-duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
+            aria-hidden="true"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="tw-size-5"
+            className="tw-size-5 tw-flex-shrink-0"
           >
             <path
               strokeLinecap="round"
