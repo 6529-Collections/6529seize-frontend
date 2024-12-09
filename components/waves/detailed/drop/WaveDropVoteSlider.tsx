@@ -17,6 +17,84 @@ interface PresetMark {
   position: number;
 }
 
+const transformToLog = (value: number, minValue: number, maxValue: number): number => {
+  const absMin = Math.abs(minValue);
+  const absMax = Math.abs(maxValue);
+  const maxAbs = Math.max(absMin, absMax);
+  
+  if (value === 0) return 0;
+  
+  const sign = Math.sign(value);
+  const absValue = Math.abs(value);
+  
+  const logScale = Math.log10(maxAbs);
+  const logValue = Math.log10(absValue) / logScale;
+  
+  return sign * logValue * maxAbs;
+};
+
+const transformFromLog = (value: number, minValue: number, maxValue: number): number => {
+  const absMin = Math.abs(minValue);
+  const absMax = Math.abs(maxValue);
+  const maxAbs = Math.max(absMin, absMax);
+  
+  if (value === 0) return 0;
+  
+  const sign = Math.sign(value);
+  const absValue = Math.abs(value);
+  const normalizedValue = absValue / maxAbs;
+  
+  const logScale = Math.log10(maxAbs);
+  const result = sign * Math.pow(10, normalizedValue * logScale);
+  
+  return Math.round(result);
+};
+
+const calculatePresetMarks = (minValue: number, maxValue: number) => {
+  const zeroPoint = ((transformToLog(0, minValue, maxValue) - minValue) / (maxValue - minValue)) * 100;
+  const marks: PresetMark[] = [];
+
+  // Add 0% mark
+  marks.push({
+    percentage: 0,
+    label: "0%",
+    position: zeroPoint,
+  });
+
+  // Negative presets
+  if (minValue < 0) {
+    const negativeValues = [-75, -50, -25];
+    negativeValues.forEach(percentage => {
+      const value = -(Math.abs(minValue) * Math.abs(percentage)) / 100;
+      const logValue = transformToLog(value, minValue, maxValue);
+      const position = ((logValue - minValue) / (maxValue - minValue)) * 100;
+      marks.push({
+        percentage,
+        label: `${percentage}%`,
+        position,
+      });
+    });
+  }
+
+  // Positive presets
+  if (maxValue > 0) {
+    const positiveValues = [25, 50, 75];
+    positiveValues.forEach(percentage => {
+      const value = (maxValue * percentage) / 100;
+      const logValue = transformToLog(value, minValue, maxValue);
+      const position = ((logValue - minValue) / (maxValue - minValue)) * 100;
+      marks.push({
+        percentage,
+        label: `${percentage}%`,
+        position,
+      });
+    });
+  }
+
+  // Sort marks by position to ensure proper rendering order
+  return marks.sort((a, b) => a.position - b.position);
+};
+
 export default function WaveDropVoteSlider({
   voteValue,
   setVoteValue,
@@ -28,64 +106,7 @@ export default function WaveDropVoteSlider({
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredPreset, setHoveredPreset] = useState<number | null>(null);
 
-  const calculatePresetMarks = () => {
-    const zeroPoint = ((0 - minValue) / (maxValue - minValue)) * 100;
-    const marks: PresetMark[] = [];
-
-    // Add 0% mark
-    marks.push({
-      percentage: 0,
-      label: "0%",
-      position: zeroPoint,
-    });
-
-    // Negative presets
-    if (minValue < 0) {
-      marks.push(
-        {
-          percentage: -75,
-          label: "-75%",
-          position: zeroPoint - (75 * zeroPoint) / 100,
-        },
-        {
-          percentage: -50,
-          label: "-50%",
-          position: zeroPoint - (50 * zeroPoint) / 100,
-        },
-        {
-          percentage: -25,
-          label: "-25%",
-          position: zeroPoint - (25 * zeroPoint) / 100,
-        }
-      );
-    }
-
-    // Positive presets
-    if (maxValue > 0) {
-      marks.push(
-        {
-          percentage: 25,
-          label: "25%",
-          position: zeroPoint + (25 * (100 - zeroPoint)) / 100,
-        },
-        {
-          percentage: 50,
-          label: "50%",
-          position: zeroPoint + (50 * (100 - zeroPoint)) / 100,
-        },
-        {
-          percentage: 75,
-          label: "75%",
-          position: zeroPoint + (75 * (100 - zeroPoint)) / 100,
-        }
-      );
-    }
-
-    // Sort marks by position to ensure proper rendering order
-    return marks.sort((a, b) => a.position - b.position);
-  };
-
-  const presetMarks = calculatePresetMarks();
+  const presetMarks = calculatePresetMarks(minValue, maxValue);
 
   const getTheme = (rank: number | null): SliderTheme => {
     if (rank === 1 || rank === 2 || rank === 3) {
@@ -97,7 +118,8 @@ export default function WaveDropVoteSlider({
   const theme = getTheme(rank);
 
   const handleSliderChange = (newValue: number) => {
-    setVoteValue(newValue);
+    const transformedValue = transformFromLog(newValue, minValue, maxValue);
+    setVoteValue(transformedValue);
   };
 
   const handlePresetClick = (percentage: number) => {
@@ -112,16 +134,18 @@ export default function WaveDropVoteSlider({
     }
   };
 
+  const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;
+  const logValue = transformToLog(numericVoteValue, minValue, maxValue);
+  
   const zeroPercentage =
     minValue === 0 && maxValue === 0
-      ? 50 // Center the tick when all values are 0
+      ? 50
       : ((0 - minValue) / (maxValue - minValue)) * 100;
+      
   const currentPercentage =
-    minValue === 0 && maxValue === 0 && Number(voteValue) === 0
-      ? 50 // Center the thumb when all values are 0
-      : ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) /
-          (maxValue - minValue)) *
-        100;
+    minValue === 0 && maxValue === 0 && logValue === 0
+      ? 50
+      : ((logValue - minValue) / (maxValue - minValue)) * 100;
 
   const x = useMotionValue(currentPercentage);
   const xSmooth = useSpring(x, { damping: 20, stiffness: 300 });
@@ -131,7 +155,6 @@ export default function WaveDropVoteSlider({
     x.set(currentPercentage);
   }, [currentPercentage]);
 
-  const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;
   const progressBarStyle =
     numericVoteValue >= 0
       ? {
@@ -155,7 +178,7 @@ export default function WaveDropVoteSlider({
             type="range"
             min={minValue}
             max={maxValue}
-            value={typeof voteValue === "string" ? 0 : voteValue}
+            value={logValue}
             onChange={(e) => handleSliderChange(Number(e.target.value))}
             className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-appearance-none tw-cursor-pointer tw-opacity-0 tw-z-10"
           />
@@ -262,7 +285,7 @@ export default function WaveDropVoteSlider({
               type="range"
               min={minValue}
               max={maxValue}
-              value={typeof voteValue === "string" ? 0 : voteValue}
+              value={logValue}
               onChange={(e) => handleSliderChange(Number(e.target.value))}
               onMouseDown={(e) => {
                 e.stopPropagation();
