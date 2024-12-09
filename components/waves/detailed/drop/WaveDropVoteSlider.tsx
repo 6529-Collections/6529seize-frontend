@@ -36,26 +36,26 @@ export default function WaveDropVoteSlider({
     marks.push({
       percentage: 0,
       label: "0%",
-      position: zeroPoint
+      position: zeroPoint,
     });
 
     // Negative presets
     if (minValue < 0) {
       marks.push(
-        { 
+        {
           percentage: -75,
           label: "-75%",
-          position: zeroPoint - ((75 * (zeroPoint)) / 100)
+          position: zeroPoint - (75 * zeroPoint) / 100,
         },
-        { 
+        {
           percentage: -50,
           label: "-50%",
-          position: zeroPoint - ((50 * (zeroPoint)) / 100)
+          position: zeroPoint - (50 * zeroPoint) / 100,
         },
-        { 
+        {
           percentage: -25,
           label: "-25%",
-          position: zeroPoint - ((25 * (zeroPoint)) / 100)
+          position: zeroPoint - (25 * zeroPoint) / 100,
         }
       );
     }
@@ -63,20 +63,20 @@ export default function WaveDropVoteSlider({
     // Positive presets
     if (maxValue > 0) {
       marks.push(
-        { 
+        {
           percentage: 25,
           label: "25%",
-          position: zeroPoint + ((25 * (100 - zeroPoint)) / 100)
+          position: zeroPoint + (25 * (100 - zeroPoint)) / 100,
         },
-        { 
+        {
           percentage: 50,
           label: "50%",
-          position: zeroPoint + ((50 * (100 - zeroPoint)) / 100)
+          position: zeroPoint + (50 * (100 - zeroPoint)) / 100,
         },
-        { 
+        {
           percentage: 75,
           label: "75%",
-          position: zeroPoint + ((75 * (100 - zeroPoint)) / 100)
+          position: zeroPoint + (75 * (100 - zeroPoint)) / 100,
         }
       );
     }
@@ -112,14 +112,16 @@ export default function WaveDropVoteSlider({
     }
   };
 
-  const zeroPercentage = minValue === 0 && maxValue === 0
-    ? 50 // Center the tick when all values are 0
-    : ((0 - minValue) / (maxValue - minValue)) * 100;
-  const currentPercentage = minValue === 0 && maxValue === 0 && Number(voteValue) === 0
-    ? 50 // Center the thumb when all values are 0
-    : ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) /
-      (maxValue - minValue)) *
-    100;
+  const zeroPercentage =
+    minValue === 0 && maxValue === 0
+      ? 50 // Center the tick when all values are 0
+      : ((0 - minValue) / (maxValue - minValue)) * 100;
+  const currentPercentage =
+    minValue === 0 && maxValue === 0 && Number(voteValue) === 0
+      ? 50 // Center the thumb when all values are 0
+      : ((Number(typeof voteValue === "string" ? 0 : voteValue) - minValue) /
+          (maxValue - minValue)) *
+        100;
 
   const x = useMotionValue(currentPercentage);
   const xSmooth = useSpring(x, { damping: 20, stiffness: 300 });
@@ -130,36 +132,16 @@ export default function WaveDropVoteSlider({
   }, [currentPercentage]);
 
   const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;
-  const progressBarStyle = numericVoteValue >= 0
-    ? {
-        left: `${zeroPercentage}%`,
-        width: `${currentPercentage - zeroPercentage}%`,
-      }
-    : {
-        left: `${currentPercentage}%`,
-        width: `${zeroPercentage - currentPercentage}%`,
-      };
-
-  const getQuickPercentageButtonClass = (percentage: number, currentVoteValue: number | string) => {
-    const targetValue = Math.round(
-      percentage < 0
-        ? (Math.abs(percentage) / 100) * minValue
-        : (percentage / 100) * maxValue
-    );
-    
-    const isSelected = Number(currentVoteValue) === targetValue;
-    const isNegative = percentage < 0;
-
-    if (isSelected) {
-      return isNegative
-        ? "tw-bg-rose-500/20 tw-text-rose-300 tw-ring-1 tw-ring-rose-500/30"
-        : "tw-bg-emerald-500/20 tw-text-emerald-300 tw-ring-1 tw-ring-emerald-500/30";
-    }
-
-    return isNegative
-      ? "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-rose-300 desktop-hover:hover:tw-bg-rose-500/10"
-      : "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/10";
-  };
+  const progressBarStyle =
+    numericVoteValue >= 0
+      ? {
+          left: `${zeroPercentage}%`,
+          width: `${currentPercentage - zeroPercentage}%`,
+        }
+      : {
+          left: `${currentPercentage}%`,
+          width: `${zeroPercentage - currentPercentage}%`,
+        };
 
   return (
     <div
@@ -211,8 +193,10 @@ export default function WaveDropVoteSlider({
                 onMouseLeave={() => setHoveredPreset(null)}
               >
                 <div className="tw-absolute tw-h-4 tw-w-8 -tw-left-4" />
-                <div className="tw-h-4 tw-w-0.5 tw-bg-iron-400/30 tw-rounded-full tw-mx-auto
-                  group-hover:tw-bg-iron-400/60 tw-transition-colors tw-duration-200" />
+                <div
+                  className="tw-h-4 tw-w-0.5 tw-bg-iron-400/30 tw-rounded-full tw-mx-auto
+                  group-hover:tw-bg-iron-400/60 tw-transition-colors tw-duration-200"
+                />
               </div>
               <div className="tw-relative">
                 <motion.div
@@ -220,7 +204,11 @@ export default function WaveDropVoteSlider({
                     tw-text-[10px] tw-font-medium
                     tw-whitespace-nowrap tw-select-none
                     tw-transition-all tw-duration-200
-                    ${hoveredPreset === mark.percentage ? "tw-opacity-0" : "tw-text-iron-400 tw-opacity-60"}`}
+                    ${
+                      hoveredPreset === mark.percentage
+                        ? "tw-opacity-0"
+                        : "tw-text-iron-400 tw-opacity-60"
+                    }`}
                 >
                   {mark.label}
                 </motion.div>
@@ -229,15 +217,21 @@ export default function WaveDropVoteSlider({
                     tw-text-[10px] tw-font-medium tw-text-iron-200
                     tw-whitespace-nowrap tw-select-none
                     tw-transition-all tw-duration-200
-                    ${hoveredPreset === mark.percentage ? "tw-opacity-100" : "tw-opacity-0"}`}
+                    ${
+                      hoveredPreset === mark.percentage
+                        ? "tw-opacity-100"
+                        : "tw-opacity-0"
+                    }`}
                 >
                   {formatNumberWithCommas(
                     Math.round(
-                      mark.percentage < 0 
-                        ? -(Math.abs(minValue) * Math.abs(mark.percentage)) / 100
+                      mark.percentage < 0
+                        ? -(Math.abs(minValue) * Math.abs(mark.percentage)) /
+                            100
                         : (maxValue * mark.percentage) / 100
                     )
-                  )} TDH
+                  )}{" "}
+                  TDH
                 </motion.div>
               </div>
               {hoveredPreset === mark.percentage && (
@@ -258,10 +252,10 @@ export default function WaveDropVoteSlider({
           ))}
 
           {/* Thumb hit area */}
-          <div 
+          <div
             className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-z-30"
             style={{
-              clipPath: `circle(12px at ${currentPercentage}% 50%)`
+              clipPath: `circle(12px at ${currentPercentage}% 50%)`,
             }}
           >
             <input
@@ -313,7 +307,9 @@ export default function WaveDropVoteSlider({
                   tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}
                   tw-transition-transform tw-duration-200 tw-ease-out`}
                 style={{
-                  transform: `translateX(calc(-50% + ${currentPercentage <= 10 ? 50 : 0}%))`
+                  transform: `translateX(calc(-50% + ${
+                    currentPercentage <= 10 ? 50 : 0
+                  }%))`,
                 }}
               >
                 <span className="tw-block">
@@ -337,7 +333,7 @@ export default function WaveDropVoteSlider({
                   after:tw-rounded-full after:tw-transition-all after:tw-duration-200
                   ${theme.thumb.glow} ${theme.thumb.hover}`}
                 style={{
-                  scale: isDragging ? 1.1 : scale
+                  scale: isDragging ? 1.1 : scale,
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
