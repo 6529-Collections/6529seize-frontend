@@ -36,7 +36,7 @@ export const getMissingRequirements = (
     };
   }
   const getMissingMetadata = () =>
-    metadata.filter(isRequiredMetadataMissing).map((item) => item.key as string);
+    metadata.filter(isRequiredMetadataMissing).map((item) => item.key);
 
   const getMissingMedia = () =>
     requiredMedia.filter((media) => !files.some((file) => isMediaTypeMatching(file, media)));

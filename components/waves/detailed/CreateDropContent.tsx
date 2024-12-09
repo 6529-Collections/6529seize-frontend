@@ -484,7 +484,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   };
 
-  const { metadata, setMetadata, isValueSet, initialMetadata } = useDropMetadata({
+  const { metadata, setMetadata, initialMetadata } = useDropMetadata({
     isDropMode,
     requiredMetadata: wave.participation.required_metadata,
   });

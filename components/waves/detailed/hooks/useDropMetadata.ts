@@ -36,36 +36,52 @@ const isValueSet = (md: CreateDropMetadataType): boolean => {
   return false;
 };
 
+const createInitialDropMetadata = (requiredMetadata: UseDropMetadataProps["requiredMetadata"]) => {
+  return requiredMetadata.map((md) => ({
+    key: md.name,
+    type: md.type,
+    value: null,
+    required: true,
+  }));
+};
+
+const createEmptyMetadata = () => {
+  return [];
+};
+
+const addMissingRequiredMetadata = (
+  currentMetadata: CreateDropMetadataType[],
+  initialMetadata: CreateDropMetadataType[]
+) => {
+  const missingMetadata = initialMetadata.filter(
+    (initMd) => !currentMetadata.some((md) => md.key === initMd.key)
+  );
+  return [...currentMetadata, ...missingMetadata];
+};
+
+const removeUnsetRequiredMetadata = (metadata: CreateDropMetadataType[]) => {
+  return metadata.filter((md) => !md.required || isValueSet(md));
+};
+
 export const useDropMetadata = ({ isDropMode, requiredMetadata }: UseDropMetadataProps) => {
-  const initialMetadata = useMemo(() => {
-    return isDropMode
-      ? requiredMetadata.map((md) => ({
-          key: md.name,
-          type: md.type,
-          value: null,
-          required: true,
-        }))
-      : [];
-  }, [requiredMetadata, isDropMode]);
+  const initialMetadata = useMemo(
+    () => isDropMode ? createInitialDropMetadata(requiredMetadata) : createEmptyMetadata(),
+    [requiredMetadata, isDropMode]
+  );
 
   const [metadata, setMetadata] = useState<CreateDropMetadataType[]>(initialMetadata);
 
   useEffect(() => {
-    if (isDropMode) {
-      // Add missing required metadata from initialMetadata
-      const missingMetadata = initialMetadata.filter(
-        (initMd) => !metadata.some((md) => md.key === initMd.key)
-      );
-      if (missingMetadata.length > 0) {
-        setMetadata((prev) => [...prev, ...missingMetadata]);
-      }
-    } else {
-      // Remove required metadata that has no value set
-      setMetadata((prev) =>
-        prev.filter((md) => !md.required || isValueSet(md))
-      );
-    }
-  }, [isDropMode, initialMetadata, metadata]);
+    setMetadata((prev) => {
+      const updatedMetadata = isDropMode
+        ? addMissingRequiredMetadata(prev, initialMetadata)
+        : removeUnsetRequiredMetadata(prev);
+
+      return JSON.stringify(updatedMetadata) !== JSON.stringify(prev) 
+        ? updatedMetadata 
+        : prev;
+    });
+  }, [isDropMode, initialMetadata]);
 
   return {
     metadata,
