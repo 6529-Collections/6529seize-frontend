@@ -15,7 +15,7 @@ export default function ParticipationDropFooter({
     <>
       {canShowVote && (
         <div className="tw-px-6 tw-py-4 tw-border-t tw-border-iron-800/30">
-          <WaveDropVote drop={drop} size={WaveDropVoteSize.COMPACT} />
+          <WaveDropVote drop={drop}  />
         </div>
       )}
 

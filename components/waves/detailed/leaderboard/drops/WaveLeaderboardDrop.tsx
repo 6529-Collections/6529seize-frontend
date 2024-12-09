@@ -56,7 +56,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
 
             {canShowVote && (
               <div className="tw-pb-3 tw-pt-8">
-                <WaveDropVote drop={drop} size={WaveDropVoteSize.COMPACT} />
+                <WaveDropVote drop={drop}  />
               </div>
             )}
             <WaveLeaderboardDropFooter drop={drop} wave={wave} />
