@@ -4,6 +4,7 @@ import GroupCreateCIC from "./GroupCreateCIC";
 import GroupCreateLevel from "./GroupCreateLevel";
 import GroupCreateRep from "./GroupCreateRep";
 import GroupCreateTDH from "./GroupCreateTDH";
+import GroupCreateCollections from "./nfts/GroupCreateCollections";
 import GroupCreateNfts from "./nfts/GroupCreateNfts";
 import GroupCreateWallets, {
   GroupCreateWalletsType,
@@ -55,9 +56,11 @@ export default function GroupCreateConfig({
           <GroupCreateTDH tdh={tdh} setTDH={setTDH} />
           <GroupCreateCIC cic={cic} setCIC={setCIC} />
           <GroupCreateRep rep={rep} setRep={setRep} />
+          <GroupCreateNfts nfts={nfts} setNfts={setNfts} />
+          <GroupCreateCollections nfts={nfts} setNfts={setNfts} />
         </div>
       </div>
-      <GroupCreateNfts nfts={nfts} setNfts={setNfts} />
+
       <GroupCreateWallets
         type={GroupCreateWalletsType.INCLUDE}
         iAmIncluded={iAmIncluded}
