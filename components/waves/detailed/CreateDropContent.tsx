@@ -26,7 +26,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import CreateDropMetadata from "./CreateDropMetadata";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveMetadataType } from "../../../generated/models/ApiWaveMetadataType";
-import { ApiWaveParticipationRequirement } from "../../../generated/models/ApiWaveParticipationRequirement";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
@@ -39,8 +38,12 @@ import { ActiveDropAction, ActiveDropState } from "./chat/WaveChat";
 import { ApiReplyToDropResponse } from "../../../generated/models/ApiReplyToDropResponse";
 import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
 import { CreateDropSubmit } from "./CreateDropSubmit";
-import { DropPrivileges} from "../../../hooks/useDropPriviledges";
-
+import { DropPrivileges } from "../../../hooks/useDropPriviledges";
+import {
+  getMissingRequirements,
+  MissingRequirements,
+} from "./utils/getMissingRequirements";
+import { useDropMetadata } from "./hooks/useDropMetadata";
 
 export type CreateDropMetadataType =
   | {
@@ -77,11 +80,6 @@ interface CreateDropContentProps {
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
   readonly submitDrop: (dropRequest: ApiCreateDropRequest) => void;
   readonly privileges: DropPrivileges;
-}
-
-interface MissingRequirements {
-  metadata: string[];
-  media: ApiWaveParticipationRequirement[];
 }
 
 const useBreakpoint = createBreakpoint({ MD: 640, S: 0 });
@@ -425,7 +423,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [showOptions, setShowOptions] = useState(breakpoint === "MD");
   useEffect(() => setShowOptions(breakpoint === "MD"), [breakpoint]);
-  
 
   const isParticipatory = wave.wave.type !== ApiWaveType.Chat;
 
@@ -487,17 +484,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
   };
 
-  const initialMetadata = useMemo(() => {
-    return wave.participation.required_metadata.map((md) => ({
-      key: md.name,
-      type: md.type,
-      value: null,
-      required: true,
-    }));
-  }, [wave.participation.required_metadata]);
-
-  const [metadata, setMetadata] =
-    useState<CreateDropMetadataType[]>(initialMetadata);
+  const { metadata, setMetadata, isValueSet, initialMetadata } = useDropMetadata({
+    isDropMode,
+    requiredMetadata: wave.participation.required_metadata,
+  });
 
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
 
@@ -667,45 +657,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     }
   };
 
-  const isRequiredMetadataMissing = (item: CreateDropMetadataType): boolean => {
-    return (
-      item.required &&
-      (item.value === null || item.value === undefined || item.value === "")
-    );
-  };
-
-  const isMediaTypeMatching = (
-    file: File,
-    mediaType: ApiWaveParticipationRequirement
-  ): boolean => {
-    switch (mediaType) {
-      case ApiWaveParticipationRequirement.Image:
-        return file.type.startsWith("image/");
-      case ApiWaveParticipationRequirement.Audio:
-        return file.type.startsWith("audio/");
-      case ApiWaveParticipationRequirement.Video:
-        return file.type.startsWith("video/");
-      default:
-        return false;
-    }
-  };
-
-  const getMissingRequirements = useMemo(() => {
-    const getMissingMetadata = () =>
-      metadata
-        .filter(isRequiredMetadataMissing)
-        .map((item) => item.key as string);
-
-    const getMissingMedia = () =>
-      wave.participation.required_media.filter(
-        (media) => !files.some((file) => isMediaTypeMatching(file, media))
+  const getMissingRequirementsResult = useMemo(() => {
+    return () =>
+      getMissingRequirements(
+        isDropMode,
+        metadata,
+        files,
+        wave.participation.required_media
       );
-
-    return (): MissingRequirements => ({
-      metadata: getMissingMetadata(),
-      media: getMissingMedia(),
-    });
-  }, [metadata, files, wave.participation.required_media]);
+  }, [metadata, files, wave.participation.required_media, isDropMode]);
 
   const [missingRequirements, setMissingRequirements] =
     useState<MissingRequirements>({
@@ -714,8 +674,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     });
 
   useEffect(() => {
-    setMissingRequirements(getMissingRequirements());
-  }, [metadata, files, getMissingRequirements]);
+    setMissingRequirements(getMissingRequirementsResult());
+  }, [metadata, files, getMissingRequirementsResult]);
 
   const onDrop = async (): Promise<void> => {
     if (submitting) {
@@ -907,15 +867,17 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           </div>
         </div>
       </div>
-      <CreateDropContentRequirements
-        canSubmit={canSubmit}
-        wave={wave}
-        missingMedia={missingRequirements.media}
-        missingMetadata={missingRequirements.metadata}
-        onOpenMetadata={() => setIsMetadataOpen(true)}
-        setFiles={handleFileChange}
-        disabled={submitting}
-      />
+      {isDropMode && (
+        <CreateDropContentRequirements
+          canSubmit={canSubmit}
+          wave={wave}
+          missingMedia={missingRequirements.media}
+          missingMetadata={missingRequirements.metadata}
+          onOpenMetadata={() => setIsMetadataOpen(true)}
+          setFiles={handleFileChange}
+          disabled={submitting}
+        />
+      )}
       <AnimatePresence>
         {isMetadataOpen && (
           <motion.div
