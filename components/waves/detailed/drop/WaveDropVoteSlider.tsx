@@ -41,7 +41,6 @@ export default function WaveDropVoteSlider({
 
     // Negative presets
     if (minValue < 0) {
-      const negativeRange = Math.abs(minValue);
       marks.push(
         { 
           percentage: -75,
@@ -63,7 +62,6 @@ export default function WaveDropVoteSlider({
 
     // Positive presets
     if (maxValue > 0) {
-      const positiveRange = maxValue;
       marks.push(
         { 
           percentage: 25,
@@ -141,6 +139,27 @@ export default function WaveDropVoteSlider({
         left: `${currentPercentage}%`,
         width: `${zeroPercentage - currentPercentage}%`,
       };
+
+  const getQuickPercentageButtonClass = (percentage: number, currentVoteValue: number | string) => {
+    const targetValue = Math.round(
+      percentage < 0
+        ? (Math.abs(percentage) / 100) * minValue
+        : (percentage / 100) * maxValue
+    );
+    
+    const isSelected = Number(currentVoteValue) === targetValue;
+    const isNegative = percentage < 0;
+
+    if (isSelected) {
+      return isNegative
+        ? "tw-bg-rose-500/20 tw-text-rose-300 tw-ring-1 tw-ring-rose-500/30"
+        : "tw-bg-emerald-500/20 tw-text-emerald-300 tw-ring-1 tw-ring-emerald-500/30";
+    }
+
+    return isNegative
+      ? "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-rose-300 desktop-hover:hover:tw-bg-rose-500/10"
+      : "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/10";
+  };
 
   return (
     <div

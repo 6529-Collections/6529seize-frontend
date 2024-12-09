@@ -129,6 +129,27 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
     };
   }, []);
 
+  const getQuickPercentageButtonClass = (percentage: number, currentVoteValue: number | string) => {
+    const targetValue = Math.round(
+      percentage < 0
+        ? (Math.abs(percentage) / 100) * minValue
+        : (percentage / 100) * maxValue
+    );
+    
+    const isSelected = Number(currentVoteValue) === targetValue;
+    const isNegative = percentage < 0;
+  
+    if (isSelected) {
+      return isNegative
+        ? "tw-bg-rose-500/20 tw-text-rose-300 tw-ring-1 tw-ring-rose-500/30"
+        : "tw-bg-emerald-500/20 tw-text-emerald-300 tw-ring-1 tw-ring-emerald-500/30";
+    }
+  
+    return isNegative
+      ? "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-rose-300 desktop-hover:hover:tw-bg-rose-500/10"
+      : "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/10";
+  };
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-relative tw-w-full">
@@ -138,18 +159,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
               className={`tw-px-2 tw-h-5 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-shadow-sm ${
-                Number(voteValue) ===
-                Math.round(
-                  percentage < 0
-                    ? (Math.abs(percentage) / 100) * minValue
-                    : (percentage / 100) * maxValue
-                )
-                  ? percentage < 0
-                    ? "tw-bg-rose-500/20 tw-text-rose-300 tw-ring-1 tw-ring-rose-500/30"
-                    : "tw-bg-emerald-500/20 tw-text-emerald-300 tw-ring-1 tw-ring-emerald-500/30"
-                  : percentage < 0
-                  ? "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-rose-300 desktop-hover:hover:tw-bg-rose-500/10"
-                  : "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/10"
+                getQuickPercentageButtonClass(percentage, voteValue)
               }`}
             >
               {percentage > 0 ? "+" : ""}
