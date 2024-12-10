@@ -99,7 +99,7 @@ export default function ParticipationDropContainer({
   return (
     <div className={`${location === DropLocation.WAVE ? "tw-px-4" : ""}`}>
       <div
-        className={`tw-relative tw-w-full tw-rounded-xl ${colorClasses.container} tw-overflow-hidden tw-backdrop-blur-sm
+        className={`tw-relative tw-w-full tw-rounded-xl tw-py-6 ${colorClasses.container} tw-overflow-hidden tw-backdrop-blur-sm
           tw-transition-all tw-duration-300 tw-ease-out
           tw-shadow-lg tw-shadow-black/5
           hover:tw-shadow-xl hover:tw-shadow-black/10

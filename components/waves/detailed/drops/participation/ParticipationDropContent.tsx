@@ -25,7 +25,7 @@ export default function ParticipationDropContent({
   parentContainerRef,
 }: ParticipationDropContentProps) {
   return (
-    <div className="tw-px-6">
+    <div className="tw-px-4 md:tw-px-6">
       <div className="tw-relative tw-rounded-xl tw-overflow-hidden tw-bg-iron-950/40">
         {/* Subtle border effects */}
         <div className="tw-absolute tw-inset-0 tw-ring-1 tw-ring-inset tw-ring-iron-700/10" />

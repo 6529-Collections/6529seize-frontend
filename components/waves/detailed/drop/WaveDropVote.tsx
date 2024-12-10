@@ -81,8 +81,8 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
         </div>
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-6 tw-mt-4">
-        <div className="tw-w-full tw-h-[38px]">
+      <div className="tw-flex tw-flex-col tw-gap-6 tw-mt-6 md:tw-mt-4">
+        <div className="sm:tw-h-[38px] tw-w-full">
           <div className="tw-relative tw-w-full tw-h-full">
             <div
               className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
@@ -100,36 +100,47 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
                 rank={drop.rank}
               />
             </div>
-            <div
-              className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
+
+            <div className={`${!isSliderMode ? "tw-h-16 min-[488px]:tw-h-10 sm:tw-h-full" : ""}`}>
+              <div
+                className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
               ${
                 !isSliderMode
                   ? "tw-opacity-100 tw-translate-y-0"
                   : "tw-opacity-0 tw-translate-y-2 tw-pointer-events-none"
               }`}
-            >
-              <WaveDropVoteInput
-                voteValue={voteValue}
-                minValue={minRating}
-                maxValue={maxRating}
-                setVoteValue={setVoteValue}
-              />
+              >
+                <WaveDropVoteInput
+                  voteValue={voteValue}
+                  minValue={minRating}
+                  maxValue={maxRating}
+                  setVoteValue={setVoteValue}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <WaveDropVoteStats
-          currentRating={drop.context_profile_context?.rating ?? 0}
-          maxRating={maxRating}
-        />
-      </div>
+        <div className="tw-flex tw-flex-col md:tw-gap-y-2 tw-mt-2 md:tw-mt-0">
+          {drop.rank !== 1 && (
+            <WaveDropVoteStats
+              currentRating={drop.context_profile_context?.rating ?? 0}
+              maxRating={maxRating}
+            />
+          )}
 
-      {drop.rank !== 1 && (
-        <WaveDropVoteQuick drop={drop} setValue={setVoteValue} />
-      )}
-
-      <div className="tw-absolute tw-bottom-5 tw-right-5">
-        <WaveDropVoteSubmit drop={drop} newRating={Number(voteValue)} />
+          <div className="tw-flex tw-justify-between tw-items-center tw-mt-2 md:tw-mt-0">
+            {drop.rank === 1 ? (
+              <WaveDropVoteStats
+                currentRating={drop.context_profile_context?.rating ?? 0}
+                maxRating={maxRating}
+              />
+            ) : (
+              <WaveDropVoteQuick drop={drop} setValue={setVoteValue} />
+            )}
+            <WaveDropVoteSubmit drop={drop} newRating={Number(voteValue)} />
+          </div>
+        </div>
       </div>
     </div>
   );
