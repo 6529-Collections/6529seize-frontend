@@ -17,6 +17,7 @@ export class ApiWaveMetrics {
     'drops_count': number;
     'latest_drop_timestamp': number;
     'your_drops_count'?: number;
+    'your_participation_drops_count': number;
     'your_latest_drop_timestamp'?: number;
 
     static readonly discriminator: string | undefined = undefined;
@@ -43,6 +44,12 @@ export class ApiWaveMetrics {
         {
             "name": "your_drops_count",
             "baseName": "your_drops_count",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "your_participation_drops_count",
+            "baseName": "your_participation_drops_count",
             "type": "number",
             "format": "int64"
         },
