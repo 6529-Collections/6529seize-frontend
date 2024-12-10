@@ -68,7 +68,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
 
   return (
     <div
-      className="tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800/30 tw-relative"
+      className="tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800 tw-border-solid tw-relative"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="tw-relative">

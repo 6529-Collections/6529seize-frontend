@@ -40,8 +40,8 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
       className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
     >
       <div className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5">
-        <div className="tw-flex tw-flex-col tw-gap-5">
-          <div className="tw-flex tw-gap-5">
+        <div className="tw-flex tw-flex-col tw-gap-3">
+          <div className="tw-flex tw-gap-5 tw-items-center">
             <WaveLeaderboardDropRankIndicator drop={drop} />
             <div className="tw-flex-1">
               <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
@@ -53,7 +53,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
             </div>
           </div>
 
-          <div className="tw-pl-0">
+          <div className="tw-pl-0 tw-space-y-2">
             <div className="tw-rounded-lg tw-bg-iron-900/50 tw-p-4 tw-ring-1 tw-ring-iron-800/50">
               <WaveLeaderboardDropContent
                 drop={drop}
@@ -62,7 +62,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
             </div>
 
             {canShowVote && (
-              <div className="tw-pb-3 tw-pt-8">
+              <div className="tw-pb-3 tw-pt-4">
                 <WaveDropVote drop={drop} />
               </div>
             )}

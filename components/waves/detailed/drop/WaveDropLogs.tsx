@@ -47,7 +47,7 @@ export const WaveDropLogs: React.FC<WaveDropLogsProps> = ({ drop }) => {
           Activity Logs
         </span>
         <motion.svg
-          animate={{ rotate: isActivityOpen ? 0 : 180 }}
+          animate={{ rotate: isActivityOpen ? 0 : -90 }}
           className={`tw-w-4 tw-h-4 ${
             isActivityOpen
               ? "tw-text-primary-300"

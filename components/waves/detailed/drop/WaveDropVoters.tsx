@@ -47,7 +47,7 @@ export const WaveDropVoters: React.FC<WaveDropVotersProps> = ({ drop }) => {
           Top Voters
         </span>
         <motion.svg
-          animate={{ rotate: isVotersOpen ? 0 : 180 }}
+          animate={{ rotate: isVotersOpen ? 0 : -90 }}
           transition={{ duration: 0.3 }}
           className={`tw-w-4 tw-h-4 tw-flex-shrink-0 ${
             isVotersOpen

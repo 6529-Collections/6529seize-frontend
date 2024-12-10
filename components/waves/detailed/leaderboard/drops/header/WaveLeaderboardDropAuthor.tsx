@@ -37,7 +37,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
           />
         </div>
       </div>
-      <div className="tw-flex tw-flex-col tw-gap-y-0.5 md:tw-gap-y-1">
+      <div className="tw-flex tw-flex-col">
         <span className="tw-text-base md:tw-text-lg tw-font-semibold tw-text-iron-100 tw-leading-none group-hover:tw-text-iron-50 tw-transition-colors">
           {drop.author.handle}
         </span>

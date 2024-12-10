@@ -75,7 +75,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
   return (
     <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-3 tw-text-sm">
       {!!nic && (
-        <div className="tw-mt-2 tw-flex tw-items-center tw-text-[#A4C2DB] tw-gap-x-1 tw-whitespace-nowrap">
+        <div className="tw-flex tw-items-center tw-text-[#A4C2DB] tw-gap-x-1 tw-whitespace-nowrap">
           <svg
             className="tw-size-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
@@ -94,10 +94,10 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
         </div>
       )}
       {!!nic && !!rep && (
-        <div className="tw-mt-2 tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
       )}
       {!!rep && (
-        <div className="tw-mt-2 tw-flex tw-items-center tw-text-[#C3B5D9] tw-gap-x-1 tw-whitespace-nowrap">
+        <div className="tw-flex tw-items-center tw-text-[#C3B5D9] tw-gap-x-1 tw-whitespace-nowrap">
           <svg
             className="tw-size-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
@@ -114,7 +114,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
         </div>
       )}
       {!!manualOutcomes.length && (!!nic || !!rep) && (
-        <div className="tw-mt-2 tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
       )}
       {manualOutcomes.map((outcome) => (
         <div

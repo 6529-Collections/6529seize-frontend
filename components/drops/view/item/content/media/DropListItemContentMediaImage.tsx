@@ -66,7 +66,7 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
       className="tailwind-scope tw-cursor-default tw-relative tw-z-1000"
       onClick={handleCloseModal}
     >
-      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-60 tw-backdrop-blur-[1px]"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px]"></div>
       <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
         <div className="tw-relative tw-max-w-[95vw] tw-max-h-[95vh] tw-m-4">
           <button

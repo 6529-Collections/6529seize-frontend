@@ -35,7 +35,7 @@ const calculateHeight = (isCapacitor: boolean, isNotChatWave: boolean) => {
     return "tw-h-[calc(100vh-14.7rem)]";
   }
   return `tw-h-[calc(100vh-8.8rem)] ${
-    isNotChatWave ? "lg:tw-h-[calc(100vh-9.7rem)]" : "lg:tw-h-[calc(100vh-6.5rem)]"
+    isNotChatWave ? "lg:tw-h-[calc(100vh-9.4rem)]" : "lg:tw-h-[calc(100vh-6.5rem)]"
   }`;
 };
 
@@ -113,7 +113,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
           className="tw-overflow-hidden tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-relative"
         >
           {isNotChatWave && (
-            <div className="tw-hidden lg:tw-flex tw-items-center tw-h-12 tw-px-4 tw-bg-iron-900/50 tw-border-b tw-border-iron-800">
+            <div className="tw-hidden lg:tw-flex tw-items-center tw-h-12 tw-px-4 tw-bg-iron-900 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
               <WaveDetailedDesktopTabs
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
