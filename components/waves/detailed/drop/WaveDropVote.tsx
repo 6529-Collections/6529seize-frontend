@@ -68,7 +68,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
 
   return (
     <div
-      className="tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800 tw-border-solid tw-relative"
+      className="tw-@container tw-flex tw-flex-col tw-gap-4 tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800 tw-border-solid tw-relative"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="tw-relative">
@@ -82,7 +82,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
       </div>
 
       <div className="tw-flex tw-flex-col tw-gap-6 tw-mt-6 md:tw-mt-4">
-        <div className="sm:tw-h-[38px] tw-w-full">
+        <div className="[@container]:tw-h-[38px] [@container_(max-width:396px)]:tw-h-full tw-w-full">
           <div className="tw-relative tw-w-full tw-h-full">
             <div
               className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
@@ -101,7 +101,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
               />
             </div>
 
-            <div className={`${!isSliderMode ? "tw-h-16 min-[488px]:tw-h-10 sm:tw-h-full" : ""}`}>
+            <div className={`${!isSliderMode ? "[@container]:tw-h-10 [@container_(max-width:396px)]:tw-h-16 sm:tw-h-full" : ""}`}>
               <div
                 className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
               ${
@@ -121,7 +121,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
           </div>
         </div>
 
-        <div className="tw-flex tw-flex-col md:tw-gap-y-2 tw-mt-2 md:tw-mt-0">
+        <div className={`tw-flex tw-flex-col md:tw-gap-y-2 md:tw-mt-0 ${isSliderMode ? 'tw-mt-6' : 'tw-mt-2'}`}>
           {drop.rank !== 1 && (
             <WaveDropVoteStats
               currentRating={drop.context_profile_context?.rating ?? 0}
