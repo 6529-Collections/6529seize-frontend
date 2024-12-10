@@ -5346,6 +5346,7 @@ components:
         - subscribers_count
         - drops_count
         - latest_drop_timestamp
+        - your_participation_drops_count
       properties:
         subscribers_count:
           type: number
@@ -5357,6 +5358,9 @@ components:
           type: number
           format: int64
         your_drops_count:
+          type: number
+          format: int64
+        your_participation_drops_count:
           type: number
           format: int64
         your_latest_drop_timestamp:
