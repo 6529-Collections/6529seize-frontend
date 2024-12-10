@@ -3,7 +3,6 @@ import DropPart, { DropPartSize } from "../../part/DropPart";
 import { useContext, useEffect, useRef, useState } from "react";
 import DropPartWrapper from "../../part/DropPartWrapper";
 import { DropConnectingLineType } from "../DropsListItem";
-import DropListItemFollowAuthor from "../DropListItemFollowAuthor";
 import { AuthContext } from "../../../../auth/Auth";
 import { useRouter } from "next/router";
 import DropListItemContentWrapper from "./DropListItemContentWrapper";
@@ -134,14 +133,6 @@ export default function DropListItemContent({
             onNextPart={onNextPart}
             onPrevPart={onPrevPart}
             onContentClick={onContentClick}
-            components={{
-              authorFollow:
-                connectedProfile?.profile?.handle &&
-                connectedProfile.profile.handle !== drop.author.handle &&
-                !activeProfileProxy ? (
-                  <DropListItemFollowAuthor drop={drop} />
-                ) : undefined,
-            }}
           />
         </DropPartWrapper>
       </div>

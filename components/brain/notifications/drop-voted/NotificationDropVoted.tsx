@@ -6,12 +6,27 @@ import { INotificationDropVoted } from "../../../../types/feed.types";
 import RateClapOutlineIcon from "../../../utils/icons/RateClapOutlineIcon";
 import { getTimeAgoShort, numberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
-import DropsListItem from "../../../drops/view/item/DropsListItem";
+import Drop, {
+  DropInteractionParams,
+  DropLocation,
+} from "../../../waves/detailed/drops/Drop";
+import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";
+import { useRouter } from "next/router";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 export default function NotificationDropVoted({
   notification,
+  activeDrop,
+  onReply,
+  onQuote,
+  onDropClick,
 }: {
   readonly notification: INotificationDropVoted;
+  readonly activeDrop: ActiveDropState | null;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }) {
   const getVoteColor = (vote: number) => {
     if (vote > 0) {
@@ -21,6 +36,17 @@ export default function NotificationDropVoted({
       return "tw-text-red";
     }
     return "tw-text-iron-500";
+  };
+
+  const router = useRouter();
+  const onReplyClick = (serialNo: number) => {
+    router.push(
+      `/waves/${notification.related_drops[0].wave.id}?drop=${serialNo}/`
+    );
+  };
+
+  const onQuoteClick = (quote: ApiDrop) => {
+    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
   };
 
   return (
@@ -71,10 +97,24 @@ export default function NotificationDropVoted({
           </div>
         </div>
 
-        <DropsListItem
-          drop={notification.related_drops[0]}
-          replyToDrop={null}
+        <Drop
+          drop={{
+            ...notification.related_drops[0],
+            stableKey: "",
+            stableHash: "",
+          }}
+          previousDrop={null}
+          nextDrop={null}
           showWaveInfo={true}
+          showReplyAndQuote={true}
+          activeDrop={activeDrop}
+          location={DropLocation.MY_STREAM}
+          dropViewDropId={null}
+          onReply={onReply}
+          onQuote={onQuote}
+          onReplyClick={onReplyClick}
+          onQuoteClick={onQuoteClick}
+          onDropClick={onDropClick}
         />
       </div>
     </div>

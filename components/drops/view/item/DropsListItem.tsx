@@ -3,7 +3,6 @@ import DropListItemContent from "./content/DropListItemContent";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import DropReply, { DropReplyProps } from "./replies/DropReply";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import DropsListItemOptions from "./options/DropsListItemOptions";
 import { DropVoteState } from "../../../../hooks/drops/types";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
 
@@ -107,14 +106,6 @@ export default function DropsListItem({
               onDiscussionButtonClick={onDiscussionButtonClick}
             />
 
-            {canDelete && (
-              <div className="tw-absolute tw-right-4 tw-top-2.5">
-                <DropsListItemOptions
-                  drop={drop}
-                  onDropDeleted={onDropDeleted}
-                />
-              </div>
-            )}
           </div>
         </div>
       </div>
