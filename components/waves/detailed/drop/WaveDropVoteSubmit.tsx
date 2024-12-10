@@ -260,9 +260,9 @@ export default function WaveDropVoteSubmit({
         <button
           id={`vote-button-${randomID}`}
           onClick={handleClick}
-          disabled={isProcessing}
+          disabled={isProcessing || newRating === drop.context_profile_context?.rating}
           type="button"
-          className={`${styles.voteButton} ${themeClass} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-transition tw-duration-300 tw-ease-out`}
+          className={`${styles.voteButton} ${themeClass} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed`}
           style={
             {
               "--theme-primary": theme.primary,
