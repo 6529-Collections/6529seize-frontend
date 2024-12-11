@@ -123,7 +123,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="tw-pt-2 tw-pb-2 tw-pr-2 tw-flex-1 tw-flex tw-flex-col">
+    <div className="tw-pb-2 tw-pr-2 tw-flex-1 tw-flex tw-flex-col">
       {!items.length && !isFetching ? (
         <MyStreamNoItems />
       ) : (
