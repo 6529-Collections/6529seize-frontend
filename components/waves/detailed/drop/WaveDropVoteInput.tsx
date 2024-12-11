@@ -156,12 +156,12 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-relative tw-w-full">
-        <div className="tw-mb-2 md:tw-mb-1 tw-flex tw-flex-wrap tw-gap-1.5 md:tw-gap-1 tw-z-10">
+        <div className="tw-py-2 tw-flex tw-gap-1 tw-z-10 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           {quickPercentages.map((percentage) => (
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-px-2 tw-h-5 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-shadow-sm ${getQuickPercentageButtonClass(
+              className={`tw-px-2 tw-h-6 sm:tw-h-5 tw-text-xs sm:tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-shadow-sm ${getQuickPercentageButtonClass(
                 percentage,
                 voteValue
               )}`}
@@ -171,8 +171,8 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
             </button>
           ))}
         </div>
-        <div className="tw-inline-flex tw-items-center tw-gap-2">
-          <div className="tw-relative tw-w-full sm:tw-w-[280px]">
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <div className="tw-relative tw-w-full @[640px]:tw-w-[280px]">
             <input
               type="text"
               pattern="-?[0-9]*"

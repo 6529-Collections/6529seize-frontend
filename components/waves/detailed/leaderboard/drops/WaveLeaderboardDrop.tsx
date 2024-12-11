@@ -41,15 +41,28 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
     >
       <div className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5">
         <div className="tw-flex tw-flex-col tw-gap-3">
-          <div className="tw-flex tw-gap-5 tw-items-center">
-            <WaveLeaderboardDropRankIndicator drop={drop} />
-            <div className="tw-flex-1">
-              <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
-                <WaveLeaderboardDropHeader drop={drop} />
-                <div className="tw-flex-shrink-0">
-                  <WaveLeaderboardDropRaters drop={drop} />
+          <div className="tw-flex tw-flex-col tw-gap-5">
+            <div className="tw-flex tw-items-center tw-gap-4 sm:tw-hidden">
+              <WaveLeaderboardDropRankIndicator drop={drop} />
+              <div className="tw-flex-shrink-0">
+                <WaveLeaderboardDropRaters drop={drop} />
+              </div>
+            </div>
+            
+            <div className="tw-hidden sm:tw-flex tw-gap-5 tw-items-center">
+              <WaveLeaderboardDropRankIndicator drop={drop} />
+              <div className="tw-flex-1">
+                <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+                  <WaveLeaderboardDropHeader drop={drop} />
+                  <div className="tw-flex-shrink-0">
+                    <WaveLeaderboardDropRaters drop={drop} />
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <div className="sm:tw-hidden">
+              <WaveLeaderboardDropHeader drop={drop} />
             </div>
           </div>
 

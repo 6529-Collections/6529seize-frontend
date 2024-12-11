@@ -29,22 +29,22 @@ export const WaveLeaderboardDropRaters: React.FC<
 
   return (
     <div className="tw-flex tw-items-center tw-gap-2">
-      <div className="tw-px-4 tw-py-1.5 tw-rounded-xl tw-bg-iron-900/80 tw-ring-1 tw-ring-iron-700/50">
+      <div className="tw-px-4 tw-py-1.5 md:tw-py-1 tw-rounded-xl tw-bg-iron-900/80 tw-ring-1 tw-ring-iron-700/50">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+          <span className="tw-text-xs md:tw-text-sm tw-font-normal tw-text-iron-400">
             {formatNumberWithCommas(drop.raters_count)} {votersCountLabel}
           </span>
           <div className="tw-size-1 tw-bg-iron-700 tw-rounded-full"></div>
-          <span className={`tw-text-sm tw-font-normal ${rankStyle}`}>
+          <span className={`tw-text-xs md:tw-text-sm tw-font-normal ${rankStyle}`}>
             {formatNumberWithCommas(drop.rating)}{" "}
             <span className="tw-text-iron-400"> TDH</span>
           </span>
         </div>
       </div>
       {hasUserVoted && (
-        <div className="tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-900/80 tw-ring-1 tw-ring-iron-700/50">
+        <div className="tw-px-3 tw-py-1.5 md:tw-py-1 tw-rounded-xl tw-bg-iron-900/80 tw-ring-1 tw-ring-iron-700/50">
           <div className="tw-flex tw-items-center tw-gap-1.5">
-            <span className="tw-text-sm tw-font-medium">
+            <span className="tw-text-xs md:tw-text-sm tw-font-medium">
               <span className="tw-text-iron-400">Your vote: </span>
               <span
                 className={`${rankStyle} ${isNegativeVote && "tw-opacity-60"}`}

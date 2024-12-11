@@ -45,7 +45,7 @@ export const WaveLeaderboardRightSidebarActivityLogDrop: FC<
         onClick={handleClick}
         onMouseEnter={prefetchDrop}
         disabled={isLoading}
-        className={`tw-ml-auto tw-flex-shrink-0 tw-size-6 tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-md tw-bg-iron-800 tw-text-sm tw-font-semibold tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-ml-auto tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-md tw-bg-iron-800 tw-text-sm tw-font-semibold tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out ${
           isLoading ? "tw-opacity-50 tw-cursor-not-allowed" : ""
         }`}
       >

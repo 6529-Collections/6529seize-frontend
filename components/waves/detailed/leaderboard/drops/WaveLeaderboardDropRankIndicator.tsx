@@ -26,7 +26,7 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
       },
     };
 
-    const containerStyles = `tw-flex tw-items-center tw-gap-1 tw-px-1.5 md:tw-px-2 tw-py-0.5 md:tw-py-1 tw-rounded-lg ${
+    const containerStyles = `tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-1.5 md:tw-py-1 tw-rounded-lg ${
       rankStyles[drop.rank].container
     } tw-ring-1 tw-ring-inset tw-ring-white/5`;
 
@@ -53,7 +53,7 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
   }
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-1 tw-px-1.5 md:tw-px-2 tw-py-0.5 md:tw-py-1 tw-rounded-lg tw-bg-iron-800/50 tw-ring-1 tw-ring-inset tw-ring-white/5">
+    <div className="tw-flex tw-items-center tw-gap-1 tw-px-2 tw-py-1.5 md:tw-py-1 tw-rounded-lg tw-bg-iron-800/50 tw-ring-1 tw-ring-inset tw-ring-white/5">
       {drop.rank ? (
         <span className="tw-text-xs md:tw-text-sm tw-font-medium tw-text-iron-300">
           #{drop.rank}
@@ -66,7 +66,7 @@ export const WaveLeaderboardDropRankIndicator: React.FC<
           strokeWidth="2.5"
           stroke="currentColor"
           aria-hidden="true"
-          className="tw-size-3 md:tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
+          className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
         >
           <path
             strokeLinecap="round"
