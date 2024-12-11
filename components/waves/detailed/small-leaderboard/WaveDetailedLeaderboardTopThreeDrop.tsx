@@ -120,7 +120,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                 <WaveDetailedDropActionsRate drop={drop} />
               </div>
 
-              <div className="tw-flex-1">
+              <div className="tw-flex-1 tw-space-y-3">
                 <WaveDetailedLeaderboardItemContent
                   drop={drop}
                   onDropClick={onDropClick}
@@ -181,18 +181,13 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                         fill="currentColor"
                       ></path>
                     </svg>
-                    <span className="tw-text-xs tw-font-medium ">
+                    <span className="tw-text-xs tw-font-medium">
                       {formatNumberWithCommas(drop.rating)}
                     </span>
                   </div>
                 </div>
 
-                <div className="tw-mt-3">
-                  <WaveDetailedLeaderboardItemOutcomes
-                    drop={drop}
-                    wave={wave}
-                  />
-                </div>
+                <WaveDetailedLeaderboardItemOutcomes drop={drop} wave={wave} />
               </div>
             </div>
           </div>
