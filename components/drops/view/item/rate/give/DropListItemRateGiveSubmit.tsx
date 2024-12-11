@@ -13,7 +13,6 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.NOT_LOGGED_IN]: "Connect your wallet to rate",
   [DropVoteState.NO_PROFILE]: "Create a profile to rate",
   [DropVoteState.PROXY]: "Proxy can't rate",
-  [DropVoteState.AUTHOR]: "You can't rate your own drop",
   [DropVoteState.CANT_VOTE]: "You are not eligible to rate",
   [DropVoteState.NO_CREDIT]: "You don't have enough credit to rate",
   [DropVoteState.CAN_VOTE]: null,

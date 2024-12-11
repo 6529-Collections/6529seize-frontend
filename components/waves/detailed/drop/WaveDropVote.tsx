@@ -1,10 +1,11 @@
 import { ApiDrop } from "../../../../generated/models/ObjectSerializer";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import WaveDropVoteQuick from "./WaveDropVoteQuick";
 import { WaveDropVoteInput } from "./WaveDropVoteInput";
 import { TabToggle } from "../../../common/TabToggle";
 import dynamic from "next/dynamic";
 import { WaveDropVoteStats } from "./WaveDropVoteStats";
+import type { WaveDropVoteSubmitHandles } from "./WaveDropVoteSubmit";
 
 export enum WaveDropVoteSize {
   NORMAL = "NORMAL",
@@ -17,7 +18,7 @@ interface WaveDropVoteProps {
 }
 
 const WaveDropVoteSubmit = dynamic(() => import("./WaveDropVoteSubmit"), {
-  ssr: false,
+  ssr: false
 });
 
 const WaveDropVoteSlider = dynamic(() => import("./WaveDropVoteSlider"), {
@@ -46,6 +47,14 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
 
   const isCompact = size === WaveDropVoteSize.COMPACT;
 
+  const submitRef = useRef<WaveDropVoteSubmitHandles | null>(null);
+
+  const handleSubmit = async () => {
+    if (submitRef.current) {
+      await submitRef.current.handleClick();
+    }
+  };
+
   if (isCompact) {
     return (
       <div
@@ -61,10 +70,12 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
             rank={drop.rank}
           />
         </div>
-        <WaveDropVoteSubmit drop={drop} newRating={Number(voteValue)} />
+        <WaveDropVoteSubmit drop={drop} newRating={Number(voteValue)} ref={submitRef} />
       </div>
     );
   }
+
+
 
   return (
     <div
@@ -116,6 +127,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
                   minValue={minRating}
                   maxValue={maxRating}
                   setVoteValue={setVoteValue}
+                  onSubmit={handleSubmit}
                 />
               </div>
             </div>
@@ -141,7 +153,7 @@ export const WaveDropVote: React.FC<WaveDropVoteProps> = ({
             ) : (
               <WaveDropVoteQuick drop={drop} setValue={setVoteValue} />
             )}
-            <WaveDropVoteSubmit drop={drop} newRating={Number(voteValue)} />
+            <WaveDropVoteSubmit drop={drop} newRating={Number(voteValue)} ref={submitRef}/>
           </div>
         </div>
       </div>

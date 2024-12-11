@@ -5,6 +5,7 @@ interface WaveDropVoteInputProps {
   readonly minValue: number;
   readonly maxValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
+  readonly onSubmit: () => void;
 }
 
 export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
@@ -12,6 +13,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
   setVoteValue,
   minValue,
   maxValue,
+  onSubmit,
 }) => {
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
@@ -153,6 +155,12 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
       : "tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/10";
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      onSubmit();
+    }
+  };
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-relative tw-w-full">
@@ -180,6 +188,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
               className="tw-w-full tw-px-3 tw-h-9 tw-bg-iron-950 tw-rounded-lg tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-border-0 tw-ring-1 tw-ring-iron-700/50 focus:tw-ring-primary-400/50 desktop-hover:hover:tw-ring-primary-400/30 tw-outline-none tw-transition-all desktop-hover:hover:tw-bg-iron-950/60 focus:tw-bg-iron-950/80"
               value={voteValue}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
             />
             <div className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400 tw-pointer-events-none">
               TDH
