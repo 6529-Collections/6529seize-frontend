@@ -16,19 +16,19 @@ export const CreateDropDropModeToggle: React.FC<
   CreateDropDropModeToggleProps
 > = ({ isDropMode, onDropModeChange, privileges }) => {
   const { chatRestriction, submissionRestriction } = privileges;
-  const isDisabled = isDropMode && (chatRestriction || submissionRestriction);
+  const isDisabled = (isDropMode && chatRestriction) || (!isDropMode && submissionRestriction);
   const canToggle = isDropMode ? !chatRestriction : !submissionRestriction;
 
   const buttonClassName = useMemo(() => {
     const baseClasses =
       "tw-flex-shrink-0 tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90";
 
-    if (isDisabled && isDropMode) {
-      return `${baseClasses} tw-opacity-50 tw-cursor-not-allowed tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900`;
-    }
-
     if (isDisabled) {
-      return `${baseClasses} tw-opacity-50 tw-cursor-not-allowed`;
+      return `${baseClasses} tw-opacity-50 tw-cursor-not-allowed ${
+        isDropMode
+          ? "tw-bg-indigo-600 tw-text-white tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900"
+          : "tw-bg-iron-800 tw-backdrop-blur-sm tw-text-iron-500 tw-ring-1 tw-ring-iron-700/50"
+      }`;
     }
 
     if (isDropMode) {
@@ -58,13 +58,17 @@ export const CreateDropDropModeToggle: React.FC<
         return "Drop submissions haven't started yet";
       case SubmissionRestriction.ENDED:
         return "Drop submissions have ended";
-      default:
+      case SubmissionRestriction.MAX_DROPS_REACHED:
+        return "You have reached the maximum number of drops allowed";
+      default: {
+        const exhaustiveCheck: never = restriction;
         return `${isChat ? "Drop" : "Chat"} mode is unavailable`;
+      }
     }
   };
 
   const tooltipContent = useMemo(() => {
-    if (!isDisabled) {
+    if (!isDisabled && canToggle) {
       return (
         <span className="tw-text-xs">
           Switch to {isDropMode ? "Chat" : "Drop"} Mode
@@ -72,25 +76,21 @@ export const CreateDropDropModeToggle: React.FC<
       );
     }
 
-    if (chatRestriction && submissionRestriction) {
+    const targetRestriction = isDropMode ? chatRestriction : submissionRestriction;
+    if (targetRestriction) {
       return (
-        <div className="tw-text-xs tw-space-y-1">
-          <div>{getRestrictionMessage(chatRestriction, !isDropMode)}</div>
-          <div>{getRestrictionMessage(submissionRestriction, isDropMode)}</div>
-        </div>
+        <span className="tw-text-xs">
+          {getRestrictionMessage(targetRestriction, !isDropMode)}
+        </span>
       );
     }
 
-    const restriction = isDropMode ? chatRestriction : submissionRestriction;
     return (
       <span className="tw-text-xs">
-        {getRestrictionMessage(
-          restriction || ChatRestriction.NO_PERMISSION,
-          !isDropMode
-        )}
+        {isDropMode ? "Chat" : "Drop"} mode is unavailable
       </span>
     );
-  }, [isDropMode, isDisabled, chatRestriction, submissionRestriction]);
+  }, [isDropMode, isDisabled, canToggle, chatRestriction, submissionRestriction]);
 
   return (
     <Tippy content={tooltipContent} placement="top">
@@ -98,7 +98,7 @@ export const CreateDropDropModeToggle: React.FC<
         <button
           type="button"
           onClick={canToggle ? () => onDropModeChange(!isDropMode) : undefined}
-          disabled={!!isDisabled}
+          disabled={isDisabled}
           className={buttonClassName}
         >
           <svg
