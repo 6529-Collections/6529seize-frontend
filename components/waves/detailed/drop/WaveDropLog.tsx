@@ -32,39 +32,17 @@ export const WaveDropLog: React.FC<WaveDropLogProps> = ({ log }) => {
               {log.invoker.handle}
             </span>
           </Link>
-          <span className="tw-text-sm tw-text-iron-400">voted</span>
-          <div className="tw-flex tw-items-center tw-gap-x-0.5 tw-whitespace-nowrap">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className={`tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 ${
-                log.contents.newVote >= log.contents.oldVote
-                  ? "tw-text-green"
-                  : "tw-text-red tw-rotate-180"
-              }`}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18"
-              />
-            </svg>
-            <span
-              className={`tw-text-xs tw-font-medium ${
-                log.contents.newVote >= log.contents.oldVote
-                  ? "tw-text-green"
-                  : "tw-text-red"
-              }`}
-            >
-              {formatNumberWithCommas(
-                Math.abs(log.contents.newVote - log.contents.oldVote)
-              )}{" "}
-              TDH
+          <span className="tw-text-sm tw-text-iron-400">
+            {log.contents.oldVote === 0 ? "voted" : "changed from"}
+          </span>
+          {log.contents.oldVote !== 0 && (
+            <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
+              {formatNumberWithCommas(log.contents.oldVote)} →
             </span>
-          </div>
+          )}
+          <span className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"}`}>
+            {formatNumberWithCommas(log.contents.newVote)} TDH
+          </span>
         </div>
 
         <div className="tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap">
