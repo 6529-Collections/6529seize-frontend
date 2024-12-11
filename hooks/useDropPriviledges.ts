@@ -17,6 +17,7 @@ export enum SubmissionRestriction {
   NO_PERMISSION = "NO_PERMISSION",
   NOT_STARTED = "NOT_STARTED",
   ENDED = "ENDED",
+  MAX_DROPS_REACHED = "MAX_DROPS_REACHED"
 }
 
 export enum ChatRestriction {
@@ -34,6 +35,8 @@ export interface DropPrivilegesInput {
   readonly chatDisabled: boolean;
   readonly submissionStarts: number | null;
   readonly submissionEnds: number | null;
+  readonly maxDropsCount: number | null;
+  readonly identityDropsCount: number | null;
 }
 
 export interface DropPrivileges {
@@ -49,6 +52,8 @@ export function useDropPrivileges({
   chatDisabled,
   submissionStarts,
   submissionEnds,
+  maxDropsCount,
+  identityDropsCount,
 }: DropPrivilegesInput): DropPrivileges {
   return useMemo(() => {
     const now = Date.now();
@@ -91,6 +96,8 @@ export function useDropPrivileges({
         ? SubmissionRestriction.PROXY_USER
         : !canDrop
         ? SubmissionRestriction.NO_PERMISSION
+        : maxDropsCount !== null && identityDropsCount !== null && identityDropsCount >= maxDropsCount
+        ? SubmissionRestriction.MAX_DROPS_REACHED
         : submissionStatus !== SubmissionStatus.ACTIVE
         ? submissionStatus === SubmissionStatus.NOT_STARTED
           ? SubmissionRestriction.NOT_STARTED
@@ -114,5 +121,7 @@ export function useDropPrivileges({
     chatDisabled,
     submissionStarts,
     submissionEnds,
+    maxDropsCount,
+    identityDropsCount,
   ]);
 }
