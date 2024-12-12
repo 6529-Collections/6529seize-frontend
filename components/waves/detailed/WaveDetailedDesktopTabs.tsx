@@ -15,6 +15,7 @@ export const WaveDetailedDesktopTabs: React.FC<WaveDetailedDesktopTabsProps> = (
   const options = [
     { key: WaveDetailedView.CHAT, label: "Chat" },
     { key: WaveDetailedView.LEADERBOARD, label: "Leaderboard" },
+    { key: WaveDetailedView.OUTCOME, label: "Outcome" },
   ] as const;
 
   return (
@@ -24,10 +25,10 @@ export const WaveDetailedDesktopTabs: React.FC<WaveDetailedDesktopTabsProps> = (
       activeKey={activeTab}
       onSelect={(key) => setActiveTab(key as WaveDetailedView)}
     />
-     <div className="tw-flex tw-items-center tw-text-xs tw-text-iron-200">
+     <div className="tw-flex tw-items-center tw-text-xs tw-text-iron-300">
        <span>
          Rank is in testing mode. Please report bugs in the{" "}
-         <Link href="/waves/dc6e0569-e4a3-4122-bc20-ee66c76981f5" className="tw-underline tw-text-white">
+         <Link href="/waves/dc6e0569-e4a3-4122-bc20-ee66c76981f5" className="tw-underline tw-text-iron-300 tw-transition-all tw-duration-300 hover:tw-text-white">
            Rank Alpha Debugging
          </Link>{" "}
          wave.

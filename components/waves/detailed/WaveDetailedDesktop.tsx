@@ -10,6 +10,7 @@ import { WaveDetailedDesktopTabs } from "./WaveDetailedDesktopTabs";
 import { WaveDrop } from "./drop/WaveDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
+import { WaveOutcome } from "./outcome/WaveOutcome";
 
 interface WaveDetailedDesktopProps {
   readonly wave: ApiWave;
@@ -76,7 +77,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     ),
     [WaveDetailedView.LEADERBOARD]: (
       <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
-        <div className="tw-ml-4">
+        <div>
           <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
         </div>
       </WaveLeaderboard>
@@ -86,6 +87,17 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
         wave={wave}
         onBackClick={() => setView(WaveDetailedView.CHAT)}
       />
+    ),
+    [WaveDetailedView.OUTCOME]: (
+      <WaveOutcome 
+        wave={wave} 
+        activeTab={view}
+        setActiveTab={setView}
+      >
+        <div className="tw-mt-3">
+          <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
+        </div>
+      </WaveOutcome>
     ),
   };
 

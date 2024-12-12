@@ -35,16 +35,16 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
   }, [showAll]);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700/50">
+    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-900/80 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-800/50"
+        className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-950"
       >
         <div className="tw-flex tw-items-center tw-justify-between">
-          <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-amber-400/10">
+          <div className="tw-flex tw-items-center tw-gap-4">
+            <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-xl tw-bg-gradient-to-br tw-from-amber-400/20 tw-to-amber-600/10 tw-shadow-inner">
               <svg
-                className="tw-size-5 tw-text-[#D4C5AA] tw-flex-shrink-0"
+                className="tw-size-6 tw-text-amber-300 tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(217,119,6,0.5)]"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
                 fill="none"
@@ -59,10 +59,10 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
               </svg>
             </div>
             <div className="tw-text-left">
-              <div className="tw-text-sm tw-font-medium tw-text-iron-50">
+              <div className="tw-text-base tw-font-semibold tw-text-amber-100">
                 Manual
               </div>
-              <div className="tw-text-xs tw-text-iron-400">
+              <div className="tw-text-sm tw-text-amber-300/80">
                 {formatNumberWithCommas(winnersCount)}{" "}
                 {winnersCount === 1 ? "Winner" : "Winners"}
               </div>
@@ -88,9 +88,11 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
             </motion.svg>
           </div>
         </div>
-        <div className="tw-mt-2 tw-flex tw-flex-col tw-items-start tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2 tw-border-x-0 tw-border-b-0">
-          <div className="tw-text-iron-400 tw-text-xs tw-mb-1">Description</div>
-          <div className="tw-text-iron-300 tw-text-sm tw-overflow-x-auto tw-max-w-full tw-whitespace-nowrap tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700">
+        <div className="tw-mt-3 tw-flex tw-flex-col tw-items-start tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-3 tw-border-x-0 tw-border-b-0">
+          <div className="tw-text-iron-300 tw-text-sm tw-font-medium tw-mb-1">
+            Description
+          </div>
+          <div className="tw-text-iron-400 tw-text-sm tw-overflow-x-auto tw-max-w-full tw-whitespace-nowrap tw-scrollbar-thin tw-scrollbar-track-iron-900/50 tw-scrollbar-thumb-iron-700/50">
             {outcome.description}
           </div>
         </div>
@@ -103,19 +105,19 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="tw-overflow-hidden"
+            className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50"
           >
-            <div className="tw-divide-y tw-divide-iron-900 tw-divide-solid tw-divide-x-0 tw-overflow-x-auto tw-max-w-full tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700">
+            <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
               {amounts.map((_, i) => (
                 <div
                   key={`wave-detailed-manual-outcome-row-${i}`}
-                  className="tw-px-4 tw-py-2 tw-bg-iron-900/30 tw-min-w-max"
+                  className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-amber-500/5 hover:tw-to-transparent tw-transition-colors tw-duration-300"
                 >
-                  <div className="tw-flex tw-items-center tw-gap-3">
-                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-amber-400/5 tw-text-[#D4C5AA] tw-text-xs tw-font-medium">
+                  <div className="tw-flex tw-items-center tw-gap-4">
+                    <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-amber-400/10 tw-to-amber-600/5 tw-text-amber-200 tw-text-sm tw-font-semibold">
                       {i + 1}
                     </span>
-                    <span className="tw-whitespace-nowrap tw-text-[#D4C5AA] tw-text-sm tw-font-medium">
+                    <span className="tw-whitespace-nowrap tw-text-amber-100 tw-text-base tw-font-medium">
                       {outcome.distribution?.[i].amount
                         ? outcome.distribution?.[i].description
                         : ""}
@@ -126,7 +128,7 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
 
               {totalCount > DEFAULT_AMOUNTS_TO_SHOW && !showAll && (
                 <button
-                  className="tw-border-0 tw-w-full tw-px-4 tw-py-2 tw-text-left tw-bg-iron-900/20 tw-text-primary-300/80 tw-text-xs hover:tw-text-primary-300 tw-transition-colors tw-duration-200 hover:tw-bg-iron-900/30"
+                  className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-amber-300/80 tw-text-sm hover:tw-text-amber-300 tw-transition-all tw-duration-300"
                   onClick={() => setShowAll(true)}
                 >
                   <span>View more</span>

@@ -9,6 +9,7 @@ export enum WaveDetailedView {
   CHAT = "CHAT",
   LEADERBOARD = "LEADERBOARD",
   FOLLOWERS = "FOLLOWERS",
+  OUTCOME = "OUTCOME",
 }
 
 interface WaveDetailedProps {

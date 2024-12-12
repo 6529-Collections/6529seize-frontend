@@ -34,17 +34,17 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
   }, [showAll]);
 
   return (
-    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700/50">
+    <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-300 desktop-hover:hover:tw-border-iron-700">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-900/80 tw-transition-colors tw-duration-300 desktop-hover:hover:tw-bg-iron-800/50"
+        className="tw-w-full tw-border-0 tw-px-4 tw-py-3 tw-bg-iron-950"
       >
         <div className="tw-flex tw-items-center tw-justify-between">
-          <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-blue-400/10">
+          <div className="tw-flex tw-items-center tw-gap-4">
+            <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-xl tw-bg-gradient-to-br tw-from-[#A4C2DB]/20 tw-to-[#A4C2DB]/10 tw-shadow-inner">
               <svg
-                className="tw-size-5 tw-flex-shrink-0 tw-text-[#A4C2DB]"
+                className="tw-size-6 tw-text-[#A4C2DB] tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(164,194,219,0.5)]"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
@@ -59,16 +59,15 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
               </svg>
             </div>
             <div className="tw-text-left">
-              <div className="tw-text-sm tw-font-medium tw-text-[#A4C2DB]">
+              <div className="tw-text-base tw-font-semibold tw-text-[#A4C2DB]">
                 NIC
               </div>
-              <div className="tw-text-xs tw-text-iron-400">
+              <div className="tw-text-sm tw-text-[#A4C2DB]/80">
                 {formatNumberWithCommas(winnersCount)}{" "}
                 {winnersCount === 1 ? "Winner" : "Winners"}
               </div>
             </div>
           </div>
-
           <div className="tw-flex tw-items-center tw-gap-3">
             <div className="tw-text-right">
               <div className="tw-text-base tw-font-semibold tw-text-[#A4C2DB]">
@@ -104,28 +103,29 @@ export const WaveDetailedNICOutcome: FC<WaveDetailedNICOutcomeProps> = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="tw-overflow-hidden"
+            className="tw-overflow-hidden tw-bg-gradient-to-b tw-from-iron-900/50 tw-to-iron-950/50"
           >
-            <div className="tw-divide-y tw-divide-iron-900 tw-divide-solid tw-divide-x-0">
-              {amounts.map((amount, index) => (
+            <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
+              {amounts.map((amount, i) => (
                 <div
-                  key={`wave-detailed-nic-outcome-row-${index}`}
-                  className="tw-px-4 tw-py-2 tw-flex tw-items-center tw-justify-between tw-bg-iron-900/30"
+                  key={`wave-detailed-nic-outcome-row-${i}`}
+                  className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-[#A4C2DB]/5 hover:tw-to-transparent tw-transition-colors tw-duration-300"
                 >
-                  <div className="tw-flex tw-items-center tw-gap-3">
-                    <span className="tw-flex tw-items-center tw-justify-center tw-size-6 tw-rounded-full tw-bg-blue-400/5 tw-text-[#A4C2DB] tw-text-xs tw-font-medium">
-                      {index + 1}
+                  <div className="tw-flex tw-items-center tw-gap-4">
+                    <span className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-gradient-to-br tw-from-[#A4C2DB]/10 tw-to-[#A4C2DB]/5 tw-text-[#A4C2DB] tw-text-sm tw-font-semibold">
+                      {i + 1}
                     </span>
-                    <span className="tw-text-[#A4C2DB] tw-text-sm tw-font-medium">
+                    <span className="tw-whitespace-nowrap tw-text-[#A4C2DB] tw-text-base tw-font-medium">
                       {formatNumberWithCommas(amount)} NIC
                     </span>
                   </div>
                 </div>
               ))}
+
               {!showAll && totalCount > DEFAULT_AMOUNTS_TO_SHOW && (
                 <button
                   onClick={() => setShowAll(true)}
-                  className="tw-border-0 tw-w-full tw-px-4 tw-py-2 tw-text-left tw-bg-iron-900/20 tw-text-primary-300/80 tw-text-xs desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-900/30"
+                  className="tw-border-0 tw-w-full tw-px-4 tw-py-3 tw-text-left tw-bg-iron-900 tw-text-[#A4C2DB]/80 tw-text-sm hover:tw-text-[#A4C2DB] tw-transition-all tw-duration-300"
                 >
                   <span>View more</span>
                   <span className="tw-ml-1 tw-text-iron-400">•</span>
