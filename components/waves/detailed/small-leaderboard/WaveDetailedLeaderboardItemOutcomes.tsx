@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Tippy from "@tippyjs/react";
 
 import { ApiWave } from "../../../../generated/models/ApiWave";
@@ -96,7 +96,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
     wave,
   });
   const totalOutcomes =
-    (!!nicTotal ? 1 : 0) + (!!repTotal ? 1 : 0) + manualOutcomes.length;
+    (nicTotal ? 1 : 0) + (repTotal ? 1 : 0) + manualOutcomes.length;
 
   if (totalOutcomes === 0) {
     return null;
@@ -197,7 +197,9 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
           isMobile ? "tw-gap-4" : "tw-gap-2"
         } tw-min-w-6 tw-py-1.5 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700`}
       >
-        <span className="tw-text-sm [@container_(max-width:32rem)]:tw-text-xs tw-font-normal tw-text-iron-200">Outcome:</span>
+        <span className="tw-text-sm [@container_(max-width:32rem)]:tw-text-xs tw-font-normal tw-text-iron-200">
+          Outcome:
+        </span>
         <div className="tw-flex tw-items-center tw-gap-2">
           {!!nicTotal && (
             <svg

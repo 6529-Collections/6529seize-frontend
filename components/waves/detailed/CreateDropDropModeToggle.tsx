@@ -98,7 +98,7 @@ export const CreateDropDropModeToggle: React.FC<
         <button
           type="button"
           onClick={canToggle ? () => onDropModeChange(!isDropMode) : undefined}
-          disabled={isDisabled}
+          disabled={!!isDisabled}
           className={buttonClassName}
         >
           <svg

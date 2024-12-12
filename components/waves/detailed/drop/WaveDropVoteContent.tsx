@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { WaveDropVoteSize } from "./WaveDropVote";
 import WaveDropVoteSubmit, {
