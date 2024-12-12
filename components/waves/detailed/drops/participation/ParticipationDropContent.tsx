@@ -42,7 +42,7 @@ export default function ParticipationDropContent({
           <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-8 tw-bg-gradient-to-t tw-from-iron-950/20 tw-to-transparent" />
 
           {/* Content with padding */}
-          <div className="tw-relative tw-px-5 tw-py-4">
+          <div className="tw-relative tw-px-5 tw-pt-2 tw-pb-4">
             <WaveDetailedDropContent
               drop={drop}
               activePartIndex={activePartIndex}

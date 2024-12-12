@@ -42,7 +42,7 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
       >
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-amber-400/5">
+            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-amber-400/10">
               <svg
                 className="tw-size-5 tw-text-[#D4C5AA] tw-flex-shrink-0"
                 viewBox="0 0 24 24"

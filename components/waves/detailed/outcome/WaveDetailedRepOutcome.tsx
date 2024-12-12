@@ -43,7 +43,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
       >
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-3">
-            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-[#C3B5D9]/10">
+            <div className="tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-lg tw-bg-[#C3B5D9]/[0.15]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -51,7 +51,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
                 strokeWidth="1.5"
                 stroke="currentColor"
                 aria-hidden="true"
-                className="tw-size-5 tw-text-[#C3B5D9]"
+                className="tw-size-5 tw-text-[#C3B5D9] tw-flex-shrink-0"
               >
                 <path
                   strokeLinecap="round"
