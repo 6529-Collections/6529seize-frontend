@@ -21,7 +21,7 @@ export const WaveDropInfoContainer: React.FC<WaveDropInfoContainerProps> = ({
         capacitor.isCapacitor
           ? "tw-h-[calc(100vh-14.7rem)] tw-pb-[calc(4rem+0.9375rem)]"
           : "tw-h-[calc(100vh-8.5rem)] lg:tw-h-[calc(100vh-5.625rem)]"
-      } no-scrollbar tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300`}
+      } tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300`}
     >
       <div className="tw-h-full tw-relative tw-bg-iron-950">
         {children}

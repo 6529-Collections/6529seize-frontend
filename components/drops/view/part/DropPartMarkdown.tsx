@@ -4,7 +4,6 @@ import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
-import { DropContentPartType } from "../item/content/DropListItemContent";
 import DropListItemContentPart, {
   DropListItemContentPartProps,
 } from "../item/content/DropListItemContentPart";
@@ -28,6 +27,11 @@ export interface DropPartMarkdownProps {
   readonly partContent: string | null;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly textSize?: "sm" | "md";
+}
+
+export enum DropContentPartType {
+  MENTION = "MENTION",
+  HASHTAG = "HASHTAG",
 }
 
 function DropPartMarkdown({

@@ -113,14 +113,14 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
     <div>
       <div className="tw-space-y-3">
         <li className="tw-relative tw-flex tw-flex-col">
-          <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 desktop-hover:hover:tw-bg-iron-800/70">
+          <div className="tw-@container tw-rounded-xl tw-bg-iron-900 tw-p-4 desktop-hover:hover:tw-bg-iron-800/70">
             <div>
               <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
                 {thropyIcon(drop.rank)}
                 <WaveDetailedDropActionsRate drop={drop} />
               </div>
 
-              <div className="tw-flex-1">
+              <div className="tw-flex-1 tw-space-y-3">
                 <WaveDetailedLeaderboardItemContent
                   drop={drop}
                   onDropClick={onDropClick}
@@ -181,18 +181,13 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                         fill="currentColor"
                       ></path>
                     </svg>
-                    <span className="tw-text-xs tw-font-medium ">
+                    <span className="tw-text-xs tw-font-medium">
                       {formatNumberWithCommas(drop.rating)}
                     </span>
                   </div>
                 </div>
 
-                <div className="tw-mt-3">
-                  <WaveDetailedLeaderboardItemOutcomes
-                    drop={drop}
-                    wave={wave}
-                  />
-                </div>
+                <WaveDetailedLeaderboardItemOutcomes drop={drop} wave={wave} />
               </div>
             </div>
           </div>

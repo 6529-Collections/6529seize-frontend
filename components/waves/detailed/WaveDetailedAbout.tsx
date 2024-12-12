@@ -69,7 +69,7 @@ const WaveDetailedAbout: React.FC<WaveDetailedAboutProps> = ({
           className={`tw-size-5 tw-transition-all tw-duration-300 ${
             isExpanded
               ? "tw-rotate-180 tw-text-primary-300"
-              : "tw-text-iron-400 group-hover:tw-text-primary-300"
+              : "tw-text-iron-400 group-hover:tw-text-primary-300 tw-rotate-90"
           }`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

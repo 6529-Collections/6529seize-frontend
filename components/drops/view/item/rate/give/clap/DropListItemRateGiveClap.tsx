@@ -4,8 +4,8 @@ import mojs from "@mojs/core";
 import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
 import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
 import LazyTippy from "../../../../../../utils/tooltip/LazyTippy";
-import { VOTE_STATE_ERRORS } from "../../../DropsListItem";
 import { DropVoteState } from "../../../../../../../hooks/drops/types";
+import { VOTE_STATE_ERRORS } from "../DropListItemRateGiveSubmit";
 
 enum RateStatus {
   POSITIVE = "POSITIVE",
@@ -217,7 +217,7 @@ export default function DropListItemRateGiveClap({
         fill: burstColor,
       },
     });
-  }, [rate,]);
+  }, [rate]);
 
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
   return (

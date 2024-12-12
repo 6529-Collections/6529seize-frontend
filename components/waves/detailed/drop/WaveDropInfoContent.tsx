@@ -12,7 +12,7 @@ export const WaveDropInfoContent: React.FC<WaveDropInfoContentProps> = ({
   drop,
 }) => {
   return (
-    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2 tw-pb-6">
+    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2">
       <div className="tw-px-6">
         {drop?.drop_type === ApiDropType.Participatory && (
           <WaveDropPosition rank={drop.rank} />

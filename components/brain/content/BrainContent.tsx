@@ -29,9 +29,9 @@ const BrainContent: React.FC<BrainContentProps> = ({
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
       />
-      <div className="tw-mt-2 tw-flex-1">
+      <div className="tw-flex-1">
         {!!wave && (
-          <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2">
+          <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2 tw-mt-2">
             <h2 className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-200">
               <span>{wave.name}</span>{" "}
               <span className="tw-text-iron-400">Stream</span>

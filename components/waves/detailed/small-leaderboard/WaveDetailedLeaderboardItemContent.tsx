@@ -30,7 +30,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
       <div
         ref={contentRef}
         onClick={() => onDropClick(drop)}
-        className="tw-relative tw-cursor-pointer tw-max-h-52 tw-overflow-hidden"
+        className="tw-relative tw-cursor-pointer tw-max-h-52 tw-overflow-hidden tw-space-y-3"
       >
         {!!drop.parts[0].media.length && (
           <WaveDetailedDropPartContentMedias activePart={drop.parts[0]} />
@@ -43,7 +43,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
           onQuoteClick={() => {}}
         />
         {showGradient && (
-          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/50 tw-to-transparent" />
+          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/50 tw-to-transparent desktop-hover:group-hover:tw-from-iron-800 desktop-hover:group-hover:tw-via-iron-800/50" />
         )}
       </div>
       <div className="tw-flex tw-items-center tw-mt-3 tw-gap-x-2 tw-mb-3">
@@ -53,6 +53,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
               className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
+              aria-hidden="true"
             >
               <path
                 d="M3.75 13.5L14.25 2.25L12 10.5H20.25L9.75 21.75L12 13.5H3.75Z"
@@ -69,6 +70,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
             <svg
               className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
               viewBox="0 0 24 24"
+              aria-hidden="true"
               fill="none"
             >
               <path
@@ -86,6 +88,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
             <svg
               className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
               viewBox="0 0 24 24"
+              aria-hidden="true"
               fill="none"
             >
               <path

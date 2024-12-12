@@ -24,13 +24,13 @@ export const WaveDetailedDesktopTabs: React.FC<WaveDetailedDesktopTabsProps> = (
       activeKey={activeTab}
       onSelect={(key) => setActiveTab(key as WaveDetailedView)}
     />
-     <div className="tw-flex tw-items-center tw-text-sm tw-text-gray-200">
+     <div className="tw-flex tw-items-center tw-text-xs tw-text-iron-200">
        <span>
-         Rank is in testing mode. Expect bugs and please report them to{" "}
+         Rank is in testing mode. Please report bugs in the{" "}
          <Link href="/waves/dc6e0569-e4a3-4122-bc20-ee66c76981f5" className="tw-underline tw-text-white">
            Rank Alpha Debugging
          </Link>{" "}
-         wave
+         wave.
        </span>
      </div>
    </div>

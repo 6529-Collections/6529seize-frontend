@@ -94,10 +94,10 @@ export default function DropsListItemDeleteDropModal({
                 </div>
                 <div className="tw-mt-3 sm:tw-mt-0 sm:tw-max-w-sm tw-flex tw-flex-col">
                   <p className=" tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
-                    Delete Drop
+                    Delete Post
                   </p>
                   <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-400">
-                    Are you sure you want to delete this drop?
+                    Are you sure you want to delete this post?
                   </p>
                 </div>
               </div>

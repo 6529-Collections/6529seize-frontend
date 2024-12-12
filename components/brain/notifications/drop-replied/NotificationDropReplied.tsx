@@ -5,13 +5,38 @@ import {
 } from "../../../../helpers/image.helpers";
 import { INotificationDropReplied } from "../../../../types/feed.types";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
-import DropsListItem from "../../../drops/view/item/DropsListItem";
+import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";
+import Drop, {
+  DropInteractionParams,
+  DropLocation,
+} from "../../../waves/detailed/drops/Drop";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { useRouter } from "next/router";
+import { ApiDrop } from "../../../../generated/models/ApiDrop";
 
 export default function NotificationDropReplied({
   notification,
+  activeDrop,
+  onReply,
+  onQuote,
+  onDropClick,
 }: {
   readonly notification: INotificationDropReplied;
+  readonly activeDrop: ActiveDropState | null;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }) {
+  const router = useRouter();
+  const onReplyClick = (serialNo: number) => {
+    router.push(
+      `/waves/${notification.related_drops[1].wave.id}?drop=${serialNo}/`
+    );
+  };
+
+  const onQuoteClick = (quote: ApiDrop) => {
+    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+  };
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-flex tw-flex-col tw-space-y-3">
@@ -65,10 +90,24 @@ export default function NotificationDropReplied({
           </div>
         </div>
 
-        <DropsListItem
-          drop={notification.related_drops[1]}
-          replyToDrop={notification.related_drops[0]}
+        <Drop
+          drop={{
+            ...notification.related_drops[1],
+            stableKey: "",
+            stableHash: "",
+          }}
+          previousDrop={null}
+          nextDrop={null}
           showWaveInfo={true}
+          showReplyAndQuote={true}
+          activeDrop={activeDrop}
+          location={DropLocation.MY_STREAM}
+          dropViewDropId={null}
+          onReply={onReply}
+          onQuote={onQuote}
+          onReplyClick={onReplyClick}
+          onQuoteClick={onQuoteClick}
+          onDropClick={onDropClick}
         />
       </div>
     </div>
