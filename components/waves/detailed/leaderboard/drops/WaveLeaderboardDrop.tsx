@@ -67,7 +67,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
           </div>
 
           <div className="tw-pl-0 tw-space-y-2">
-            <div className="tw-rounded-lg tw-bg-iron-900/50 tw-p-4 tw-ring-1 tw-ring-iron-800/50">
+            <div className="tw-rounded-lg tw-bg-iron-900/50 tw-px-4 tw-pb-4 tw-pt-2 tw-ring-1 tw-ring-iron-800/50">
               <WaveLeaderboardDropContent
                 drop={drop}
                 setActiveDrop={setActiveDrop}

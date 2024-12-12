@@ -40,7 +40,7 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
   return (
     <div>
       <div className="tw-relative tw-flex tw-flex-col tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
-        <div className="tw-p-4 tw-rounded-xl desktop-hover:hover:tw-bg-iron-800/70 tw-transition tw-duration-300 tw-ease-out tw-group">
+        <div className="tw-@container tw-p-4 tw-rounded-xl desktop-hover:hover:tw-bg-iron-800/70 tw-transition tw-duration-300 tw-ease-out tw-group">
           <div>
             <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center">
               <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-size-6 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">

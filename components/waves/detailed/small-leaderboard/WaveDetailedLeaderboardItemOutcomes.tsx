@@ -197,6 +197,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
           isMobile ? "tw-gap-4" : "tw-gap-2"
         } tw-min-w-6 tw-py-1.5 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700`}
       >
+        <span className="tw-text-sm [@container_(max-width:32rem)]:tw-text-xs tw-font-normal tw-text-iron-200">Outcome:</span>
         <div className="tw-flex tw-items-center tw-gap-2">
           {!!nicTotal && (
             <svg
