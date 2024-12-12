@@ -45,7 +45,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
           />
         </div>
 
-        <div className="tw-mt-1.5 tw-grid tw-grid-cols-[auto_1fr_auto] tw-items-center tw-gap-x-2">
+        <div className="tw-mt-1.5 tw-flex tw-items-center tw-flex-wrap tw-gap-2">
           <Link
             href={`/${log.invoker.handle}`}
             className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300"
@@ -69,7 +69,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             {log.contents.oldVote === 0 ? (
               <span className="tw-text-sm tw-text-iron-400">voted</span>
             ) : (
-              <span className="tw-text-sm tw-text-iron-500">
+              <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
                 {formatNumberWithCommas(log.contents.oldVote)} →
               </span>
             )}
