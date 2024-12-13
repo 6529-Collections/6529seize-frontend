@@ -18,7 +18,7 @@ export const WaveDropsScrollBottomButton: React.FC<
       aria-label="Scroll to bottom"
     >
       <svg
-        className="tw-size-4 tw-flex-shrink-0"
+        className="tw-flex-shrink-0 tw-size-4"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
