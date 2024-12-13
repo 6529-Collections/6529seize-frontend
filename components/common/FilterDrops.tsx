@@ -14,4 +14,3 @@ const FilterPosts: React.FC = () => {
 };
 
 export default FilterPosts;
-

@@ -1,7 +1,6 @@
 import React from "react";
 import { WaveDetailedView } from "./WaveDetailed";
 import { TabToggle } from "../../common/TabToggle";
-import FilterDrops from "../../common/FilterDrops";
 
 interface WaveDetailedDesktopTabsProps {
   readonly activeTab: WaveDetailedView;
@@ -25,11 +24,11 @@ export const WaveDetailedDesktopTabs: React.FC<
         onSelect={(key) => setActiveTab(key as WaveDetailedView)}
       />
 
-      {activeTab === WaveDetailedView.CHAT && (
+      {/* {activeTab === WaveDetailedView.CHAT && (
         <div className="tw-pr-4">
           <FilterDrops />
         </div>
-      )}
+      )} */}
     </div>
   );
 };

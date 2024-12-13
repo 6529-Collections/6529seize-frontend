@@ -32,17 +32,15 @@ const BrainContent: React.FC<BrainContentProps> = ({
       />
       <div className="tw-flex-1">
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2 tw-mt-2">
-          {!!wave ? (
+          {!!wave && (
             <>
               <h2 className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-200">
                 <span>{wave.name}</span>{" "}
                 <span className="tw-text-iron-400">Stream</span>
               </h2>
               <div className="tw-flex-1 tw-h-px tw-bg-iron-900" />
-              <FilterDrops />
+              {/* <FilterDrops /> */}
             </>
-          ) : (
-            <FilterDrops />
           )}
         </div>
         <div>{children}</div>

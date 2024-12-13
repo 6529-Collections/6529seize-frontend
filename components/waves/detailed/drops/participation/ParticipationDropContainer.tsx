@@ -97,7 +97,7 @@ export default function ParticipationDropContainer({
   const colorClasses = getColorClasses({ isActiveDrop, rank, isDrop });
 
   return (
-    <div className={`${location === DropLocation.WAVE ? "tw-px-4" : ""}`}>
+    <div className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-2" : ""} `}>
       <div
         className={`tw-relative tw-w-full tw-rounded-xl tw-py-6 ${colorClasses.container} tw-overflow-hidden tw-backdrop-blur-sm
           tw-transition-all tw-duration-300 tw-ease-out
