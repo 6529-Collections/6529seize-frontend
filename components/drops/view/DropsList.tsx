@@ -107,7 +107,7 @@ const DropsList = memo(function DropsList({
   );
 
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-4">
+    <div className="tw-flex tw-flex-col">
       {isFetchingNextPage && (
         <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
           <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>

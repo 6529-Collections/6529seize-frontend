@@ -12,6 +12,7 @@ import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderPinned from "./WaveHeaderPinned";
 import { ApiWaveType } from "../../../../generated/models/ObjectSerializer";
+import Link from "next/link";
 
 export enum WaveHeaderPinnedSide {
   LEFT = "LEFT",
@@ -49,7 +50,9 @@ export default function WaveHeader({
       >
         <div
           className={`${
-            useRounded ? "tw-rounded-t-xl tw-ring-1 tw-ring-inset tw-ring-iron-800" : ""
+            useRounded
+              ? "tw-rounded-t-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
+              : ""
           } tw-overflow-hidden`}
         >
           <div
@@ -63,13 +66,18 @@ export default function WaveHeader({
         <div className="-tw-mt-6 tw-px-5 tw-flex tw-space-x-5">
           <div className="tw-flex">
             <div className="tw-relative tw-size-20">
-              <div className={`tw-absolute tw-inset-0 tw-rounded-full tw-bg-iron-900 ${
-                isDropWave ? "tw-ring-2 tw-ring-primary-400" : ""
-              }`}>
+              <div
+                className={`tw-absolute tw-inset-0 tw-rounded-full tw-bg-iron-900 ${
+                  isDropWave ? "tw-ring-2 tw-ring-primary-400" : ""
+                }`}
+              >
                 {wave.picture ? (
                   <img
                     className="tw-w-full tw-h-full tw-rounded-full tw-object-cover"
-                    src={getScaledImageUri(wave.picture, ImageScale.W_200_H_200)}
+                    src={getScaledImageUri(
+                      wave.picture,
+                      ImageScale.W_200_H_200
+                    )}
                     alt="Wave image"
                   />
                 ) : (
@@ -153,6 +161,20 @@ export default function WaveHeader({
             )}
           </div>
         </div>
+        {isDropWave && (
+          <div className="tw-flex tw-items-center tw-text-xs tw-text-iron-300 tw-px-4 tw-pb-4">
+            <span>
+              Rank is in testing mode. Please report bugs in the{" "}
+              <Link
+                href="/waves/dc6e0569-e4a3-4122-bc20-ee66c76981f5"
+                className="tw-underline tw-text-iron-50 tw-transition-all tw-duration-300"
+              >
+                Rank Alpha Debugging
+              </Link>{" "}
+              wave.
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
