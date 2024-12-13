@@ -89,11 +89,7 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
       />
     ),
     [WaveDetailedView.OUTCOME]: (
-      <WaveOutcome 
-        wave={wave} 
-        activeTab={view}
-        setActiveTab={setView}
-      >
+      <WaveOutcome wave={wave}>
         <div className="tw-mt-3">
           <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
         </div>

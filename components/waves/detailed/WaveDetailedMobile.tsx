@@ -119,13 +119,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
         setIsLoading={setIsLoading}
       />
     ),
-    [WaveDetailedMobileView.OUTCOME]: (
-      <WaveOutcome 
-        wave={wave} 
-        activeTab={WaveDetailedView.OUTCOME}
-        setActiveTab={setView}
-      />
-    ),
+    [WaveDetailedMobileView.OUTCOME]: <WaveOutcome wave={wave} />,
   };
 
   if (!showWaves) {

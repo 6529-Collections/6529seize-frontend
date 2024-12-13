@@ -7,8 +7,6 @@ import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface WaveOutcomeProps {
   readonly wave: ApiWave;
-  readonly activeTab: WaveDetailedView;
-  readonly setActiveTab: (tab: WaveDetailedView) => void;
   readonly children?: React.ReactNode;
 }
 

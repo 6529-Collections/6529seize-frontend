@@ -3,7 +3,6 @@ import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
 import { useWaveData } from "../../../hooks/useWaveData";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
-import FilterDrops from "../../common/FilterDrops";
 
 interface BrainContentProps {
   readonly children: React.ReactNode;
