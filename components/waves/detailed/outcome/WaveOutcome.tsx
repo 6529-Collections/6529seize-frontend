@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
-import { WaveDetailedView } from "../WaveDetailed";
 import { WaveDetailedOutcome } from "./WaveDetailedOutcome";
 import WaveDetailedRightSidebar from "../WaveDetailedRightSidebar";
 import useCapacitor from "../../../../hooks/useCapacitor";
