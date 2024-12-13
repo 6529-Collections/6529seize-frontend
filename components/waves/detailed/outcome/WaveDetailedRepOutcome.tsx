@@ -12,9 +12,9 @@ const DEFAULT_AMOUNTS_TO_SHOW = 3;
 export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
   outcome,
 }) => {
-
   const [isOpen, setIsOpen] = useState(false);
-  const winnersCount = outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
+  const winnersCount =
+    outcome.distribution?.filter((d) => !!d.amount).length ?? 0;
   const totalCount = outcome.distribution?.length ?? 0;
   const [showAll, setShowAll] = useState(false);
 
@@ -60,7 +60,7 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
               </svg>
             </div>
             <div className="tw-text-left">
-              <div className="tw-text-base tw-font-semibold tw-text-[#C3B5D9]">
+              <div className="tw-text-base tw-font-medium tw-text-[#C3B5D9]">
                 Rep
               </div>
               <div className="tw-text-sm tw-text-[#C3B5D9]/80">
@@ -75,6 +75,13 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
                 {formatNumberWithCommas(outcome.amount ?? 0)}
               </div>
               <div className="tw-text-xs tw-text-iron-400">total pool</div>
+            </div>
+          </div>
+        </div>
+        <div className="tw-mt-3 tw-flex tw-flex-col tw-items-start tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-3 tw-border-x-0 tw-border-b-0">
+          <div className="tw-flex tw-w-full tw-justify-between tw-items-center">
+            <div className="tw-text-iron-300 tw-text-sm tw-font-medium tw-mb-1">
+              Category
             </div>
             <motion.svg
               xmlns="http://www.w3.org/2000/svg"
@@ -93,11 +100,6 @@ export const WaveDetailedRepOutcome: FC<WaveDetailedRepOutcomeProps> = ({
                 d="m19.5 8.25-7.5 7.5-7.5-7.5"
               />
             </motion.svg>
-          </div>
-        </div>
-        <div className="tw-mt-3 tw-flex tw-flex-col tw-items-start tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-3 tw-border-x-0 tw-border-b-0">
-          <div className="tw-text-iron-300 tw-text-sm tw-font-medium tw-mb-1">
-            Category
           </div>
           <div className="tw-text-iron-400 tw-text-sm tw-overflow-x-auto tw-max-w-full tw-whitespace-nowrap tw-scrollbar-thin tw-scrollbar-track-iron-900/50 tw-scrollbar-thumb-iron-700/50">
             {outcome.rep_category}

@@ -59,7 +59,7 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
               </svg>
             </div>
             <div className="tw-text-left">
-              <div className="tw-text-base tw-font-semibold tw-text-amber-100">
+              <div className="tw-text-base tw-font-medium tw-text-amber-100">
                 Manual
               </div>
               <div className="tw-text-sm tw-text-amber-300/80">
@@ -68,7 +68,12 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
               </div>
             </div>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-3">
+        </div>
+        <div className="tw-mt-3 tw-flex tw-flex-col tw-items-start tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-3 tw-border-x-0 tw-border-b-0">
+          <div className="tw-flex tw-w-full tw-justify-between tw-items-center">
+            <div className="tw-text-iron-300 tw-text-sm tw-font-medium tw-mb-1">
+              Description
+            </div>
             <motion.svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -86,11 +91,6 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
                 d="m19.5 8.25-7.5 7.5-7.5-7.5"
               />
             </motion.svg>
-          </div>
-        </div>
-        <div className="tw-mt-3 tw-flex tw-flex-col tw-items-start tw-border-t tw-border-solid tw-border-iron-800/50 tw-pt-3 tw-border-x-0 tw-border-b-0">
-          <div className="tw-text-iron-300 tw-text-sm tw-font-medium tw-mb-1">
-            Description
           </div>
           <div className="tw-text-iron-400 tw-text-sm tw-overflow-x-auto tw-max-w-full tw-whitespace-nowrap tw-scrollbar-thin tw-scrollbar-track-iron-900/50 tw-scrollbar-thumb-iron-700/50">
             {outcome.description}
