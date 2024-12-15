@@ -43,7 +43,7 @@ export const WaveDetailedLeaderboardItemContent: React.FC<
           onQuoteClick={() => {}}
         />
         {showGradient && (
-          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/50 tw-to-transparent desktop-hover:group-hover:tw-from-iron-800 desktop-hover:group-hover:tw-via-iron-800/50" />
+          <div className="tw-absolute tw-z-[1] tw-bottom-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900/50 tw-to-transparent desktop-hover:group-hover:tw-from-iron-800 desktop-hover:group-hover:tw-via-iron-800/50" />
         )}
       </div>
       <div className="tw-flex tw-items-center tw-mt-3 tw-gap-x-2 tw-mb-3">

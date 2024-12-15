@@ -4,16 +4,18 @@ import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import { useRouter } from "next/router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiDrop } from "../../generated/models/ObjectSerializer";
+import { ApiDrop, ApiWave } from "../../generated/models/ObjectSerializer";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
+import { WaveDetailedSmallLeaderboard } from "../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
   WAVES = "WAVES",
   ABOUT = "ABOUT",
+  LEADERBOARD = "LEADERBOARD",
 }
 
 interface Props {
@@ -31,6 +33,17 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       }),
     placeholderData: keepPreviousData,
     enabled: !!router.query.drop,
+  });
+
+  const { data: wave } = useQuery<ApiWave>({
+    queryKey: [QueryKey.WAVE, { wave_id: router.query.wave as string }],
+    queryFn: async () =>
+      await commonApiFetch<ApiWave>({
+        endpoint: `waves/${router.query.wave}`,
+      }),
+    enabled: !!router.query.wave,
+    staleTime: 60000,
+    placeholderData: keepPreviousData,
   });
 
   const onDropClose = () => {
@@ -53,6 +66,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       <BrainMobileAbout activeWaveId={router.query.wave as string} />
     ),
     [BrainView.DEFAULT]: children,
+    [BrainView.LEADERBOARD]: wave ? (
+      <WaveDetailedSmallLeaderboard wave={wave} onDropClick={() => {}} />
+    ) : null,
   };
 
   return (

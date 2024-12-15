@@ -67,6 +67,18 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       activeView === BrainView.ABOUT ? "tw-bg-iron-800" : "tw-bg-iron-950"
     }`;
 
+  const getLeaderboardButtonTextClasses = () =>
+    `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+      activeView === BrainView.LEADERBOARD
+        ? "tw-text-iron-300"
+        : "tw-text-iron-400"
+    }`;
+
+  const getLeaderboardButtonClasses = () =>
+    `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
+      activeView === BrainView.LEADERBOARD ? "tw-bg-iron-800" : "tw-bg-iron-950"
+    }`;
+
   const getMyStreamHref = () => {
     if (router.pathname === "/my-stream") return router.asPath;
     return "/my-stream";
@@ -92,7 +104,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   return (
     <div className="tw-py-4">
-      <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
+      <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
         <button
           onClick={() => onViewChange(BrainView.WAVES)}
           className={getWavesButtonClasses()}
@@ -107,6 +119,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <span className={getAboutButtonTextClasses()}>About</span>
           </button>
         )}
+        <button
+          onClick={() => onViewChange(BrainView.LEADERBOARD)}
+          className={getLeaderboardButtonClasses()}
+        >
+          <span className={getLeaderboardButtonTextClasses()}>Leaderboard</span>
+        </button>
         <Link
           href={getMyStreamHref()}
           onClick={onMyStreamClick}

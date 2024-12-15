@@ -8,11 +8,17 @@ import WaveHeader, {
 } from "../../waves/detailed/header/WaveHeader";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
+import { TabToggle } from "../../common/TabToggle";
+import { WaveDetailedSmallLeaderboard } from "../../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
+import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
+import { motion } from "framer-motion";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface BrainRightSidebarProps {
   readonly isCollapsed: boolean;
   readonly setIsCollapsed: (isCollapsed: boolean) => void;
   readonly waveId: string;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 enum Mode {
@@ -20,10 +26,16 @@ enum Mode {
   FOLLOWERS = "FOLLOWERS",
 }
 
+enum SidebarTab {
+  ABOUT = "ABOUT",
+  LEADERBOARD = "LEADERBOARD",
+}
+
 const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
   isCollapsed,
   setIsCollapsed,
   waveId,
+  onDropClick,
 }) => {
   const { data: wave } = useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id: waveId }],
@@ -37,28 +49,93 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
   });
 
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
+  const [activeTab, setActiveTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
-  const onFollowersClick = () => {
-    if (mode === Mode.FOLLOWERS) {
-      setMode(Mode.CONTENT);
-    } else {
-      setMode(Mode.FOLLOWERS);
+  const onFollowersClick = () =>
+    setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
+
+  const isRankWave = wave?.wave.type === ApiWaveType.Rank;
+
+  const options = [
+    { key: SidebarTab.ABOUT, label: "About" },
+    { key: SidebarTab.LEADERBOARD, label: "Leaderboard" },
+  ] as const;
+
+  const renderContent = () => {
+    if (!wave) return null;
+
+    if (!isRankWave) {
+      return (
+        <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+          <WaveHeader
+            wave={wave}
+            onFollowersClick={onFollowersClick}
+            useRing={false}
+            useRounded={false}
+            pinnedSide={WaveHeaderPinnedSide.LEFT}
+          />
+          {mode === Mode.CONTENT ? (
+            <BrainRightSidebarContent wave={wave} />
+          ) : (
+            <BrainRightSidebarFollowers
+              wave={wave}
+              closeFollowers={() => setMode(Mode.CONTENT)}
+            />
+          )}
+        </div>
+      );
     }
+
+    return (
+      <>
+        <div className="tw-px-4 tw-mt-4">
+          <TabToggle
+            options={options}
+            activeKey={activeTab}
+            onSelect={(key) => setActiveTab(key as SidebarTab)}
+          />
+        </div>
+        {activeTab === SidebarTab.ABOUT ? (
+          <div className="tw-mt-4 tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+            <WaveHeader
+              wave={wave}
+              onFollowersClick={onFollowersClick}
+              useRing={false}
+              useRounded={false}
+              pinnedSide={WaveHeaderPinnedSide.LEFT}
+            />
+            {mode === Mode.CONTENT ? (
+              <BrainRightSidebarContent wave={wave} />
+            ) : (
+              <BrainRightSidebarFollowers
+                wave={wave}
+                closeFollowers={() => setMode(Mode.CONTENT)}
+              />
+            )}
+          </div>
+        ) : (
+          <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+        )}
+      </>
+    );
   };
 
   return (
-    <div
-      className={`tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-transition-transform tw-duration-300 tw-ease-in-out tw-z-40
-        ${isCollapsed ? "tw-translate-x-full" : "tw-translate-x-0"}
-        tw-bg-iron-950 tw-border-l tw-border-iron-800 tw-border-solid tw-border-y-0 tw-border-r-0 tw-flex tw-flex-col
-        tw-w-full lg:tw-w-[20.5rem]`}
+    <motion.div
+      className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col
+        tw-w-full lg:tw-w-[20.5rem] tw-border-l-2 tw-border-iron-800 tw-border-solid tw-border-y-0 
+        tw-border-r-0 tw-shadow-2xl"
+      initial={false}
+      animate={{ x: isCollapsed ? "100%" : 0 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       <button
         type="button"
         aria-label="Toggle sidebar"
-        className="tw-border-0 tw-absolute tw-left-2 lg:-tw-left-7 tw-z-50 tw-top-28 tw-text-iron-500 hover:tw-text-primary-400
-          tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-800 tw-rounded-r-lg lg:tw-rounded-r-none tw-rounded-l-lg tw-size-7
-          tw-flex tw-items-center tw-justify-center tw-shadow-lg hover:tw-shadow-primary-400/20"
+        className="tw-border-0 tw-absolute -tw-left-7 tw-z-50 tw-top-28 tw-text-iron-500 
+          hover:tw-text-primary-400 tw-transition-all tw-duration-300 tw-ease-in-out tw-bg-iron-800 
+          tw-rounded-l-lg tw-size-7 tw-flex tw-items-center tw-justify-center tw-shadow-lg 
+          hover:tw-shadow-primary-400/20"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <svg
@@ -66,11 +143,9 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="2"
-          aria-hidden="true"
           stroke="currentColor"
-          className={`tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-300 tw-ease-in-out ${
-            isCollapsed ? "tw-rotate-180" : ""
-          }`}
+          className={`tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-300 
+            tw-ease-in-out ${isCollapsed ? "tw-rotate-180" : ""}`}
         >
           <path
             strokeLinecap="round"
@@ -79,31 +154,14 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           />
         </svg>
       </button>
-      <div className="tw-pt-[5rem] xl:tw-pt-[6rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto horizontal-menu-hide-scrollbar tw-h-full">
-        <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
-          {wave && (
-            <>
-              <WaveHeader
-                wave={wave}
-                onFollowersClick={onFollowersClick}
-                useRing={false}
-                useRounded={false}
-                pinnedSide={WaveHeaderPinnedSide.LEFT}
-              />
-              {mode === Mode.CONTENT && (
-                <BrainRightSidebarContent wave={wave} />
-              )}
-              {mode === Mode.FOLLOWERS && (
-                <BrainRightSidebarFollowers
-                  wave={wave}
-                  closeFollowers={() => setMode(Mode.CONTENT)}
-                />
-              )}
-            </>
-          )}
-        </div>
+      <div
+        className="tw-mt-[5rem] xl:tw-mt-[6rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto 
+        tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 
+        hover:tw-scrollbar-thumb-iron-300 tw-h-full"
+      >
+        {renderContent()}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
