@@ -4,21 +4,27 @@ import React, { useContext } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
 import { BrainView } from "../BrainMobile";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import { ApiWave } from "../../../generated/models/ApiWave";
 
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
   readonly onViewChange: (view: BrainView) => void;
+  readonly wave?: ApiWave;
 }
 
 const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   activeView,
   onViewChange,
+  wave,
 }) => {
   const router = useRouter();
   const { connectedProfile } = useContext(AuthContext);
   const { haveUnreadNotifications } = useUnreadNotifications(
     connectedProfile?.profile?.handle
   );
+
+  const isRankWave = wave?.wave.type === ApiWaveType.Rank;
 
   React.useEffect(() => {
     const handleRouteChange = () => {
@@ -104,7 +110,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   return (
     <div className="tw-py-4">
-      <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
+      <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-300 tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
         <button
           onClick={() => onViewChange(BrainView.WAVES)}
           className={getWavesButtonClasses()}
@@ -112,19 +118,25 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <span className={getWavesButtonTextClasses()}>Waves</span>
         </button>
         {isWave() && (
-          <button
-            onClick={() => onViewChange(BrainView.ABOUT)}
-            className={getAboutButtonClasses()}
-          >
-            <span className={getAboutButtonTextClasses()}>About</span>
-          </button>
+          <>
+            <button
+              onClick={() => onViewChange(BrainView.ABOUT)}
+              className={getAboutButtonClasses()}
+            >
+              <span className={getAboutButtonTextClasses()}>About</span>
+            </button>
+            {isRankWave && (
+              <button
+                onClick={() => onViewChange(BrainView.LEADERBOARD)}
+                className={getLeaderboardButtonClasses()}
+              >
+                <span className={getLeaderboardButtonTextClasses()}>
+                  Leaderboard
+                </span>
+              </button>
+            )}
+          </>
         )}
-        <button
-          onClick={() => onViewChange(BrainView.LEADERBOARD)}
-          className={getLeaderboardButtonClasses()}
-        >
-          <span className={getLeaderboardButtonTextClasses()}>Leaderboard</span>
-        </button>
         <Link
           href={getMyStreamHref()}
           onClick={onMyStreamClick}

@@ -10,6 +10,8 @@ import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
 import { WaveDetailedSmallLeaderboard } from "../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
+import { ApiWaveType } from "../../generated/models/ObjectSerializer";
+import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -58,6 +60,21 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     drop &&
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
+  const isRankWave = wave?.wave.type === ApiWaveType.Rank;
+
+  const onDropClick = (drop: ExtendedDrop) => {
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.WAVES]: (
       <BrainMobileWaves activeWaveId={router.query.wave as string} />
@@ -66,9 +83,12 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       <BrainMobileAbout activeWaveId={router.query.wave as string} />
     ),
     [BrainView.DEFAULT]: children,
-    [BrainView.LEADERBOARD]: wave ? (
-      <WaveDetailedSmallLeaderboard wave={wave} onDropClick={() => {}} />
-    ) : null,
+    [BrainView.LEADERBOARD]:
+      isRankWave && wave ? (
+        <div className="tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-px-2">
+          <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+        </div>
+      ) : null,
   };
 
   return (
@@ -85,7 +105,11 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           />
         </div>
       )}
-      <BrainMobileTabs activeView={activeView} onViewChange={setActiveView} />
+      <BrainMobileTabs
+        activeView={activeView}
+        onViewChange={setActiveView}
+        wave={wave}
+      />
       <AnimatePresence mode="wait">
         <motion.div
           key={activeView}

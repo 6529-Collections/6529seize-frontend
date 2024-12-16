@@ -16,7 +16,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
   const hasNegativeVotes = !!voter.negative_votes_summed;
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-p-3 tw-rounded-lg tw-bg-iron-900">
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-w-full tw-p-3 tw-rounded-lg tw-bg-iron-900">
       <div className="tw-flex tw-items-center tw-gap-3">
         <span className="tw-text-iron-400 tw-font-medium">{position}.</span>
         <Link
@@ -32,12 +32,12 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           ) : (
             <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
           )}
-          <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300 tw-truncate tw-max-w-24">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300">
             {voter.voter.handle}
           </span>
         </Link>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-3 tw-whitespace-nowrap">
+      <div className="tw-flex tw-items-center tw-gap-3">
         <Tippy
           content={
             <div className="tw-text-sm tw-space-x-1">
