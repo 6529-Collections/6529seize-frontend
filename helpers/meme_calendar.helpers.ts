@@ -143,44 +143,6 @@ const CALENDAR_2025: YearCalendar = {
       title: "Winter SZN10",
       szn: 10,
     },
-    {
-      start: Time.fromString("2025-03-15"),
-      end: Time.fromString("2025-03-30"),
-      title: "Awakening",
-    },
-    {
-      start: Time.fromString("2025-03-31"),
-      end: Time.fromString("2025-06-13"),
-      title: "Spring SZN11",
-      szn: 11,
-    },
-    {
-      start: Time.fromString("2025-06-14"),
-      end: Time.fromString("2025-06-29"),
-      title: "Freedom",
-    },
-    {
-      start: Time.fromString("2025-06-30"),
-      end: Time.fromString("2025-09-12"),
-      title: "Summer SZN12",
-      szn: 12,
-    },
-    {
-      start: Time.fromString("2025-09-13"),
-      end: Time.fromString("2025-09-28"),
-      title: "Harvest",
-    },
-    {
-      start: Time.fromString("2025-09-29"),
-      end: Time.fromString("2025-12-12"),
-      title: "Fall SZN13",
-      szn: 13,
-    },
-    {
-      start: Time.fromString("2025-12-13"),
-      end: Time.fromString("2025-12-31"),
-      title: "The Festivities",
-    },
   ],
 };
 
