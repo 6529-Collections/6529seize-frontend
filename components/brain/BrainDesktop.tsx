@@ -8,6 +8,7 @@ import { ApiDrop } from "../../generated/models/ApiDrop";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import { SidebarTab } from "./right-sidebar/BrainRightSidebar";
 
 interface Props {
   children: ReactNode;
@@ -18,6 +19,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
     queryFn: async () =>
@@ -92,6 +94,8 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
             setIsCollapsed={setIsCollapsed}
             waveId={router.query.wave as string}
             onDropClick={onDropClick}
+            activeTab={sidebarTab}
+            setActiveTab={setSidebarTab}
           />
         )}
       </div>

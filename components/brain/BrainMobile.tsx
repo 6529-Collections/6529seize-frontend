@@ -9,9 +9,14 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
-import { WaveDetailedSmallLeaderboard } from "../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
 import { ApiWaveType } from "../../generated/models/ObjectSerializer";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import { WaveLeaderboardDrops } from "../waves/detailed/leaderboard/drops/WaveLeaderboardDrops";
+import {
+  WaveDropsLeaderboardSortBy,
+  WaveDropsLeaderboardSortDirection,
+} from "../../hooks/useWaveDropsLeaderboard";
+import BrainMobileLeaderboard from "./mobile/BrainMobileLeaderboard";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -85,9 +90,10 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     [BrainView.DEFAULT]: children,
     [BrainView.LEADERBOARD]:
       isRankWave && wave ? (
-        <div className="tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-px-2">
-          <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
-        </div>
+        <BrainMobileLeaderboard 
+          wave={wave} 
+          onDropClick={onDropClick}
+        />
       ) : null,
   };
 

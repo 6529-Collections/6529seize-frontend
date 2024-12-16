@@ -19,6 +19,8 @@ interface BrainRightSidebarProps {
   readonly setIsCollapsed: (isCollapsed: boolean) => void;
   readonly waveId: string;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly activeTab: SidebarTab;
+  readonly setActiveTab: (tab: SidebarTab) => void;
 }
 
 enum Mode {
@@ -26,7 +28,7 @@ enum Mode {
   FOLLOWERS = "FOLLOWERS",
 }
 
-enum SidebarTab {
+export enum SidebarTab {
   ABOUT = "ABOUT",
   LEADERBOARD = "LEADERBOARD",
 }
@@ -36,6 +38,8 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
   setIsCollapsed,
   waveId,
   onDropClick,
+  activeTab,
+  setActiveTab,
 }) => {
   const { data: wave } = useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id: waveId }],
@@ -49,7 +53,6 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
   });
 
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
-  const [activeTab, setActiveTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
   const onFollowersClick = () =>
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
@@ -155,7 +158,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
         </svg>
       </button>
       <div
-        className="tw-mt-[5rem] xl:tw-mt-[6rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto 
+        className="tw-mt-[6rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto 
         tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 
         hover:tw-scrollbar-thumb-iron-300 tw-h-full"
       >

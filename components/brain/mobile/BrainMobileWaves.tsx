@@ -3,10 +3,6 @@ import useCapacitor from "../../../hooks/useCapacitor";
 import BrainLeftSidebarCreateAWaveButton from "../left-sidebar/BrainLeftSidebarCreateAWaveButton";
 import BrainLeftSidebarSearchWave from "../left-sidebar/search-wave/BrainLeftSidebarSearchWave";
 import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
-import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../components/react-query-wrapper/ReactQueryWrapper";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { commonApiFetch } from "../../../services/api/common-api";
 
 interface BrainMobileWavesProps {
   readonly activeWaveId: string;
