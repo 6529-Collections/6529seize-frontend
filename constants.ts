@@ -43,6 +43,7 @@ export const WALLET_REFRESH_TOKEN_COOKIE = "wallet-refresh-token";
 export const WALLET_ROLE_COOKIE = "wallet-role";
 export const CONSENT_ESSENTIAL_COOKIE = "essential-cookies-consent";
 export const CONSENT_PERFORMANCE_COOKIE = "performance-cookies-consent";
+export const CONSENT_EULA_COOKIE = "eula-consent";
 export const PROFILE_PROXY_ACCEPTANCE_COOKIE = "profile-proxy-acceptance";
 export const NEVER_DATE = 64060588800;
 
@@ -51,8 +52,7 @@ export const OPENSEA_STORE_FRONT_CONTRACT =
 
 export const OPENSEA_STORE_FRONT_CONTRACT_DEPLOYER = `0x5b3256965e7c3cf26e11fcaf296dfc8807c01073`;
 
-export const NEXTGEN_MEDIA_BASE_URL =
-  "https://media.generator.6529.io/mainnet";
+export const NEXTGEN_MEDIA_BASE_URL = "https://media.generator.6529.io/mainnet";
 
 export const ROYALTIES_PERCENTAGE = 0.069;
 
