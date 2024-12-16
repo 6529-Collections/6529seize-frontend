@@ -43,7 +43,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     }`;
 
   const getTextClasses = (path: string) =>
-    `tw-font-semibold tw-text-sm tw-whitespace-nowrap ${
+    `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
       isLinkActive(path) ? "tw-text-iron-300" : "tw-text-iron-400"
     }`;
 
@@ -53,12 +53,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     }`;
 
   const getWavesButtonTextClasses = () =>
-    `tw-font-semibold tw-text-sm tw-whitespace-nowrap ${
+    `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
       activeView === BrainView.WAVES ? "tw-text-iron-300" : "tw-text-iron-400"
     }`;
 
   const getAboutButtonTextClasses = () =>
-    `tw-font-semibold tw-text-sm tw-whitespace-nowrap ${
+    `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
       activeView === BrainView.ABOUT ? "tw-text-iron-300" : "tw-text-iron-400"
     }`;
 

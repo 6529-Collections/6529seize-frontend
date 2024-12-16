@@ -44,7 +44,7 @@ const WaveDetailedDropRatings: React.FC<WaveDetailedDropRatingsProps> = ({
         </div>
         <span className="tw-text-iron-500 tw-text-xs tw-font-normal">
           {formatNumberWithCommas(drop.raters_count)}{" "}
-          {drop.raters_count === 1 ? "rater" : "raters"}
+          {drop.raters_count === 1 ? "liker" : "likers"}
         </span>
         <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
       </div>
@@ -52,7 +52,7 @@ const WaveDetailedDropRatings: React.FC<WaveDetailedDropRatingsProps> = ({
         {!!drop.rating && (
           <Tippy content={<span className="tw-text-xs">Total</span>}>
             <span>
-              {formatNumberWithCommas(drop.rating)} <span>ratings</span>
+              {formatNumberWithCommas(drop.rating)} <span>likes</span>
             </span>
           </Tippy>
         )}
@@ -65,7 +65,7 @@ const WaveDetailedDropRatings: React.FC<WaveDetailedDropRatingsProps> = ({
             } tw-ml-2 tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-transition tw-ease-out tw-duration-300`}
           >
             <Tippy
-              content={<span className="tw-text-xs">Your given ratings</span>}
+              content={<span className="tw-text-xs">Your given likes</span>}
             >
               <span
                 className={`${

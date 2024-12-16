@@ -8,6 +8,8 @@ import { WaveLeaderboard } from "./leaderboard/WaveLeaderboard";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
 import { WaveDrop } from "./drop/WaveDrop";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import { WaveOutcome } from "./outcome/WaveOutcome";
 
 interface WaveDetailedMobileProps {
   readonly wave: ApiWave;
@@ -22,6 +24,7 @@ export enum WaveDetailedMobileView {
   CHAT = "CHAT",
   LEADERBOARD = "LEADERBOARD",
   ABOUT = "ABOUT",
+  OUTCOME = "OUTCOME",
 }
 
 const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
@@ -32,6 +35,8 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   onWaveChange,
   setIsLoading,
 }) => {
+  const isDropWave = wave.wave.type !== ApiWaveType.Chat;
+
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
 
@@ -43,7 +48,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
 
   useEffect(() => {
     if (activeDrop) {
-      setForceRender(prev => prev + 1);
+      setForceRender((prev) => prev + 1);
     }
   }, [activeDrop]);
 
@@ -114,6 +119,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
         setIsLoading={setIsLoading}
       />
     ),
+    [WaveDetailedMobileView.OUTCOME]: <WaveOutcome wave={wave} />,
   };
 
   if (!showWaves) {
@@ -136,16 +142,30 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
         >
           Chat
         </button>
-        <button
-          onClick={() => setActiveView(WaveDetailedMobileView.LEADERBOARD)}
-          className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-b-2 ${
-            activeView === WaveDetailedMobileView.LEADERBOARD
-              ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
-              : "tw-border-transparent tw-text-iron-500 hover:tw-border-iron-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
-          }`}
-        >
-          Leaderboard
-        </button>
+        {isDropWave && (
+          <button
+            onClick={() => setActiveView(WaveDetailedMobileView.LEADERBOARD)}
+            className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-b-2 ${
+              activeView === WaveDetailedMobileView.LEADERBOARD
+                ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
+                : "tw-border-transparent tw-text-iron-500 hover:tw-border-iron-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+            }`}
+          >
+            Leaderboard
+          </button>
+        )}
+        {isDropWave && (
+          <button
+            onClick={() => setActiveView(WaveDetailedMobileView.OUTCOME)}
+            className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-b-2 ${
+              activeView === WaveDetailedMobileView.OUTCOME
+                ? "tw-border-primary-400 tw-text-iron-100 tw-whitespace-nowrap tw-font-semibold tw-py-3 tw-px-1"
+                : "tw-border-transparent tw-text-iron-500 hover:tw-border-iron-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
+            }`}
+          >
+            Outcome
+          </button>
+        )}
         <button
           onClick={() => setActiveView(WaveDetailedMobileView.ABOUT)}
           className={`tw-bg-transparent tw-text-base tw-font-semibold tw-border-b-2 tw-border-solid tw-border-x-0 tw-border-t-0 ${
@@ -169,12 +189,9 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="tw-absolute lg:tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
-            style={{ willChange: 'transform' }}
+            style={{ willChange: "transform" }}
           >
-            <WaveDrop
-              drop={activeDrop}
-              onClose={() => setActiveDrop(null)}
-            />
+            <WaveDrop drop={activeDrop} onClose={() => setActiveDrop(null)} />
           </motion.div>
         )}
       </AnimatePresence>

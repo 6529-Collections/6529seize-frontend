@@ -294,7 +294,7 @@ const WaveDetailedDrop = ({
             onQuote={handleOnQuote}
           />
         )}
-        <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2 tw-mt-1">
           {drop.metadata.length > 0 && (
             <WaveDetailedDropMetadata metadata={drop.metadata} />
           )}

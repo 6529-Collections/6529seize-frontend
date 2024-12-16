@@ -37,6 +37,8 @@ export default function PrivilegedDropCreator({
     chatDisabled: !wave.chat.enabled,
     submissionStarts: wave.participation.period?.min ?? null,
     submissionEnds: wave.participation.period?.max ?? null,
+    maxDropsCount: wave.participation.no_of_applications_allowed_per_participant ?? null,
+    identityDropsCount: wave.metrics.your_participation_drops_count ?? null,
   });
 
   if (!!submissionRestriction && !!chatRestriction) {

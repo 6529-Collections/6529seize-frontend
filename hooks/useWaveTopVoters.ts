@@ -1,4 +1,3 @@
-
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 import {
@@ -15,8 +14,8 @@ interface UseWaveTopVotersProps {
   readonly connectedProfileHandle: string | undefined;
   readonly reverse: boolean;
   readonly dropId: string | null;
-  readonly sortDirection?: 'ASC' | 'DESC';
-  readonly sort?: 'ABSOLUTE' | 'POSITIVE' | 'NEGATIVE';
+  readonly sortDirection?: "ASC" | "DESC";
+  readonly sort?: "ABSOLUTE" | "POSITIVE" | "NEGATIVE";
 }
 
 export function useWaveTopVoters({
@@ -24,8 +23,8 @@ export function useWaveTopVoters({
   connectedProfileHandle,
   reverse,
   dropId,
-  sortDirection = 'ASC',
-  sort = 'ABSOLUTE',
+  sortDirection = "ASC",
+  sort = "ABSOLUTE",
 }: UseWaveTopVotersProps) {
   const queryClient = useQueryClient();
   const [voters, setVoters] = useState<ApiWaveVoter[]>([]);
@@ -45,7 +44,7 @@ export function useWaveTopVoters({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
-          page_size: '20',
+          page_size: "20",
           sort_direction: sortDirection,
           sort: sort,
         };
@@ -62,7 +61,7 @@ export function useWaveTopVoters({
       },
       initialPageParam: null,
       getNextPageParam: (lastPage, allPages) =>
-        lastPage.data?.length === 20 ? allPages.length : null,
+        lastPage.next ? allPages.length + 1 : null,
       pages: 3,
       staleTime: 60000,
     });
@@ -79,7 +78,7 @@ export function useWaveTopVoters({
     queryKey,
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
-        page_size: '20',
+        page_size: "20",
         sort_direction: sortDirection,
         sort: sort,
       };
@@ -97,16 +96,18 @@ export function useWaveTopVoters({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage, allPages) =>
-      lastPage.data?.length === 20 ? allPages.length : null,
+      lastPage.next ? allPages.length + 1 : null,
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
-    refetchInterval: 30000
+    refetchInterval: 30000,
   });
 
   useEffect(() => {
     setVoters((prev) => {
-      const newVoters = (data?.pages ? data.pages : []).flatMap(page => page.data);
+      const newVoters = (data?.pages ? data.pages : []).flatMap(
+        (page) => page.data
+      );
       return reverse ? [...newVoters].reverse() : newVoters;
     });
   }, [data, reverse]);

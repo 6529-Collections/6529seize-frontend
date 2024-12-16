@@ -1,6 +1,6 @@
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "../../../../../hooks/drops/useDropInteractionRules";
-import { WaveDropVote, WaveDropVoteSize } from "../../drop/WaveDropVote";
+import { WaveDropVote } from "../../drop/WaveDropVote";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 
 interface ParticipationDropFooterProps {
@@ -14,16 +14,16 @@ export default function ParticipationDropFooter({
   return (
     <>
       {canShowVote && (
-        <div className="tw-px-6 tw-py-4 tw-border-t tw-border-iron-800/30">
-          <WaveDropVote drop={drop} size={WaveDropVoteSize.COMPACT} />
+        <div className="tw-px-4 md:tw-px-6 tw-pt-4 tw-border-t tw-border-iron-800/30">
+          <WaveDropVote drop={drop} />
         </div>
       )}
 
       {!!drop.raters_count && (
-        <div className="tw-px-6 tw-py-4 tw-border-t tw-border-iron-800/30">
+        <div className="tw-px-4 md:tw-px-6 tw-pt-4 tw-border-t tw-border-iron-800/30">
           <ParticipationDropRatings drop={drop} rank={drop.rank} />
         </div>
       )}
     </>
   );
-} 
+}

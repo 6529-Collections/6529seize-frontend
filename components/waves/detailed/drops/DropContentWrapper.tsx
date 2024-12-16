@@ -69,7 +69,7 @@ const DropContentWrapper: React.FC<DropContentWrapperProps> = ({
     }, 0);
   };
   return (
-    <div className="tw-relative">
+    <div className="tw-relative tw-mt-1.5">
       <div
         ref={contentRef}
         className={`tw-overflow-y-hidden tw-transition-all tw-duration-300 ${
@@ -78,15 +78,16 @@ const DropContentWrapper: React.FC<DropContentWrapperProps> = ({
       >
         {children}
         {exceedsThreshold && !isExpanded && (
-          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-24 tw-bg-gradient-to-t tw-from-gray-900 tw-to-transparent tw-flex tw-items-end tw-justify-center tw-pb-4">
+          <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-24 tw-bg-gradient-to-t tw-from-iron-900 tw-to-transparent tw-flex tw-items-end tw-justify-center tw-pb-4">
             <button
               onClick={toggleExpand}
-              className="tw-bg-gray-800 tw-text-gray-300 tw-px-4 tw-py-2 tw-rounded-full tw-shadow-md tw-border tw-border-gray-700 tw-hover:bg-gray-700 tw-hover:text-white tw-transition-colors tw-duration-200 tw-flex tw-items-center tw-space-x-2"
+              className="tw-bg-gray-800 tw-border-0 tw-text-sm tw-text-gray-300 tw-px-4 tw-py-2 tw-rounded-full tw-shadow-md desktop-hover:hover:tw-bg-gray-700 tw-hover:text-white tw-transition-colors tw-duration-200 tw-flex tw-items-center tw-space-x-2"
             >
               <span>Show full drop</span>
               <svg
-                className="tw-w-4 tw-h-4"
+                className="tw-w-4 tw-h-4 tw-flex-shrink-0"
                 fill="currentColor"
+                aria-hidden="true"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
               >

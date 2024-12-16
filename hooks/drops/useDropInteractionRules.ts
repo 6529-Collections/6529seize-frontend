@@ -31,9 +31,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     if (activeProfileProxy) {
       return DropVoteState.PROXY;
     }
-    if (connectedProfile.profile.handle === drop.author.handle) {
-      return DropVoteState.AUTHOR;
-    }
+
     if (drop.id.startsWith("temp-")) {
       return DropVoteState.CANT_VOTE;
     }
@@ -66,7 +64,6 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     DropVoteState.NOT_LOGGED_IN,
     DropVoteState.NO_PROFILE,
     DropVoteState.PROXY,
-    DropVoteState.AUTHOR,
     DropVoteState.CANT_VOTE,
   ].includes(voteState);
 

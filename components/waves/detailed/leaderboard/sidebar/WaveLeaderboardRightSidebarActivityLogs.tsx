@@ -39,11 +39,11 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-tr tw-from-iron-800/10 tw-via-indigo-500/10 tw-to-primary-400/20 tw-rounded-full tw-animate-[spin_5s_linear_infinite] desktop-hover:group-hover:tw-to-primary-400/30"></div>
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-radial tw-from-primary-300/5 tw-to-transparent tw-animate-pulse"></div>
           <svg
-            className="tw-size-10 tw-flex-shrink-0 tw-relative tw-text-white/40"
+            className="tw-size-10 tw-flex-shrink-0 tw-relative tw-text-white/60"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            strokeWidth="1.5"
+            strokeWidth="1"
             stroke="currentColor"
             aria-hidden="true"
           >
@@ -55,7 +55,7 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
           </svg>
         </div>
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
-          <span className="tw-text-lg tw-font-semibold tw-bg-gradient-to-br tw-from-iron-200 tw-via-iron-300 tw-to-iron-400 tw-bg-clip-text tw-text-transparent">
+          <span className="tw-tracking-tight tw-text-lg tw-font-semibold tw-bg-gradient-to-br tw-from-iron-200 tw-via-iron-300 tw-to-iron-400 tw-bg-clip-text tw-text-transparent">
             Be the First to Make a Vote
           </span>
           <p className="tw-text-sm tw-text-iron-500 tw-text-center tw-mb-0 tw-max-w-64">

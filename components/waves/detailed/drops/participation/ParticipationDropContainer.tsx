@@ -33,29 +33,29 @@ const getColorClasses = ({
 
   const rankStyles = {
     1: {
-      base: "tw-border tw-border-solid tw-border-amber-400/20 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(66,56,41,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(251,191,36,0.05),0_0_15px_rgba(251,191,36,0.1)]",
+      base: "tw-border tw-border-solid tw-border-amber-400/20 tw-bg-[linear-gradient(180deg,rgba(31,31,37,0.99)_0%,rgba(66,56,41,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(251,191,36,0.01)]",
       hover:
-        "hover:tw-shadow-[inset_0_0_25px_rgba(251,191,36,0.1),0_0_25px_rgba(251,191,36,0.15)] hover:tw-border-amber-400/30 hover:tw-bg-[linear-gradient(90deg,rgba(35,35,41,0.92)_0%,rgba(71,61,46,0.97)_100%)]",
+        "hover:tw-shadow-[inset_0_0_25px_rgba(251,191,36,0.03)] hover:tw-border-amber-400/25 hover:tw-bg-[linear-gradient(180deg,rgba(35,35,41,0.99)_0%,rgba(71,61,46,0.95)_100%)]",
       active:
-        "tw-border-l-4 tw-border-l-amber-400 tw-border-y tw-border-y-amber-400/20 tw-border-r tw-border-r-amber-400/20 tw-bg-[linear-gradient(90deg,rgba(66,56,41,0.95)_0%,rgba(31,31,37,0.9)_100%)] tw-shadow-[inset_0_0_30px_rgba(251,191,36,0.2)]",
+        "tw-border-l-4 tw-border-l-amber-400 tw-border-y tw-border-y-amber-400/20 tw-border-r tw-border-r-amber-400/20 tw-bg-[linear-gradient(180deg,rgba(66,56,41,0.98)_0%,rgba(31,31,37,0.95)_100%)] tw-shadow-[inset_0_0_30px_rgba(251,191,36,0.06)]",
       metadataKey: "tw-text-amber-400/70",
       metadataValue: "tw-text-amber-200/90",
     },
     2: {
-      base: "tw-border tw-border-solid tw-border-slate-400/20 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(45,45,50,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(226,232,240,0.05),0_0_15px_rgba(226,232,240,0.1)]",
+      base: "tw-border tw-border-solid tw-border-slate-400/20 tw-bg-[linear-gradient(180deg,rgba(31,31,37,0.99)_0%,rgba(56,56,66,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(226,232,240,0.01)]",
       hover:
-        "hover:tw-shadow-[inset_0_0_25px_rgba(226,232,240,0.1),0_0_25px_rgba(226,232,240,0.15)] hover:tw-border-slate-400/30 hover:tw-bg-[linear-gradient(90deg,rgba(35,35,41,0.92)_0%,rgba(50,50,55,0.97)_100%)]",
+        "hover:tw-shadow-[inset_0_0_25px_rgba(226,232,240,0.03)] hover:tw-border-slate-400/25 hover:tw-bg-[linear-gradient(180deg,rgba(35,35,41,0.99)_0%,rgba(61,61,71,0.95)_100%)]",
       active:
-        "tw-border-l-4 tw-border-l-slate-400 tw-border-y tw-border-y-slate-400/20 tw-border-r tw-border-r-slate-400/20 tw-bg-[linear-gradient(90deg,rgba(45,45,50,0.95)_0%,rgba(31,31,37,0.9)_100%)] tw-shadow-[inset_0_0_30px_rgba(226,232,240,0.2)]",
+        "tw-border-l-4 tw-border-l-slate-400 tw-border-y tw-border-y-slate-400/20 tw-border-r tw-border-r-slate-400/20 tw-bg-[linear-gradient(180deg,rgba(56,56,66,0.98)_0%,rgba(31,31,37,0.95)_100%)] tw-shadow-[inset_0_0_30px_rgba(226,232,240,0.06)]",
       metadataKey: "tw-text-slate-400/70",
       metadataValue: "tw-text-slate-200/90",
     },
     3: {
-      base: "tw-border tw-border-solid tw-border-[#CD7F32]/20 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(60,46,36,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(205,127,50,0.05),0_0_15px_rgba(205,127,50,0.1)]",
+      base: "tw-border tw-border-solid tw-border-[#CD7F32]/20 tw-bg-[linear-gradient(180deg,rgba(31,31,37,0.99)_0%,rgba(56,41,36,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(205,127,50,0.01)]",
       hover:
-        "hover:tw-shadow-[inset_0_0_25px_rgba(205,127,50,0.1),0_0_25px_rgba(205,127,50,0.15)] hover:tw-border-[#CD7F32]/30 hover:tw-bg-[linear-gradient(90deg,rgba(35,35,41,0.92)_0%,rgba(65,51,41,0.97)_100%)]",
+        "hover:tw-shadow-[inset_0_0_25px_rgba(205,127,50,0.03)] hover:tw-border-[#CD7F32]/25 hover:tw-bg-[linear-gradient(180deg,rgba(35,35,41,0.99)_0%,rgba(61,46,41,0.95)_100%)]",
       active:
-        "tw-border-l-4 tw-border-l-[#CD7F32] tw-border-y tw-border-y-[#CD7F32]/20 tw-border-r tw-border-r-[#CD7F32]/20 tw-bg-[linear-gradient(90deg,rgba(60,46,36,0.95)_0%,rgba(31,31,37,0.9)_100%)] tw-shadow-[inset_0_0_30px_rgba(205,127,50,0.2)]",
+        "tw-border-l-4 tw-border-l-[#CD7F32] tw-border-y tw-border-y-[#CD7F32]/20 tw-border-r tw-border-r-[#CD7F32]/20 tw-bg-[linear-gradient(180deg,rgba(56,41,36,0.98)_0%,rgba(31,31,37,0.95)_100%)] tw-shadow-[inset_0_0_30px_rgba(205,127,50,0.06)]",
       metadataKey: "tw-text-[#CD7F32]/70",
       metadataValue: "tw-text-[#CD7F32]/90",
     },
@@ -97,9 +97,9 @@ export default function ParticipationDropContainer({
   const colorClasses = getColorClasses({ isActiveDrop, rank, isDrop });
 
   return (
-    <div className={`${location === DropLocation.WAVE ? "tw-px-4" : ""}`}>
+    <div className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-2" : ""} `}>
       <div
-        className={`tw-relative tw-w-full tw-rounded-xl tw-my-4 ${colorClasses.container} tw-overflow-hidden tw-backdrop-blur-sm
+        className={`tw-relative tw-w-full tw-rounded-xl tw-py-6 ${colorClasses.container} tw-overflow-hidden tw-backdrop-blur-sm
           tw-transition-all tw-duration-300 tw-ease-out
           tw-shadow-lg tw-shadow-black/5
           hover:tw-shadow-xl hover:tw-shadow-black/10

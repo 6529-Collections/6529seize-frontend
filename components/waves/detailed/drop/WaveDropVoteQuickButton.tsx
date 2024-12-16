@@ -16,24 +16,24 @@ export const WaveDropVoteQuickButton: React.FC<
     if (rank === 1) {
       return {
         base: "tw-ring-[#E8D48A] tw-text-[#E8D48A]",
-        hover: "hover:tw-bg-[#E8D48A]/10 hover:tw-ring-[#E8D48A]"
+        hover: "hover:tw-bg-[#E8D48A]/10 hover:tw-ring-[#E8D48A]",
       };
     }
     if (rank === 2) {
       return {
         base: "tw-ring-[#DDDDDD] tw-text-[#DDDDDD]",
-        hover: "hover:tw-bg-[#DDDDDD]/10 hover:tw-ring-[#DDDDDD]"
+        hover: "hover:tw-bg-[#DDDDDD]/10 hover:tw-ring-[#DDDDDD]",
       };
     }
     if (rank === 3) {
       return {
         base: "tw-ring-[#D9A962] tw-text-[#D9A962]",
-        hover: "hover:tw-bg-[#D9A962]/10 hover:tw-ring-[#D9A962]"
+        hover: "hover:tw-bg-[#D9A962]/10 hover:tw-ring-[#D9A962]",
       };
     }
     return {
       base: "tw-ring-iron-700/50 tw-text-iron-300",
-      hover: "hover:tw-bg-iron-800 hover:tw-ring-iron-600"
+      hover: "hover:tw-bg-iron-800 hover:tw-ring-iron-600",
     };
   };
 
@@ -46,17 +46,15 @@ export const WaveDropVoteQuickButton: React.FC<
           key={`${rank}-${value}`}
           disabled={disabled}
           onClick={() => setValue(value)}
-          className={`tw-border-0 tw-group tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-lg tw-ring-1 tw-transition-all tw-bg-iron-950/50 ${baseColors} ${
-            disabled
-              ? "tw-opacity-50 tw-cursor-not-allowed"
-              : hoverColors
+          className={`tw-border-0 tw-group/icon tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-lg tw-ring-1 tw-transition-all tw-bg-iron-950/50 ${baseColors} ${
+            disabled ? "tw-opacity-50 tw-cursor-not-allowed" : hoverColors
           }`}
         >
           <span className="tw-text-xs tw-font-medium">
             {formatNumberWithCommas(value)} TDH to #{rank}
           </span>
           <svg
-            className="tw-w-3.5 tw-h-3.5 tw-opacity-0 tw-transition-all group-hover:tw-opacity-100"
+            className="tw-w-3.5 tw-h-3.5 desktop-hover:group-hover/icon:tw-translate-x-0.5 tw-transition-all tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"

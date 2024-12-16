@@ -71,7 +71,7 @@ export default function FeedItem({
       <div className="tw-relative tw-hidden">
         <div className="tw-h-full tw-w-[1px] tw-bg-iron-800 -tw-translate-x-8"></div>
       </div>
-      <div className="tw-w-full tw-mb-2">{getComponent()}</div>
+      <div className="tw-w-full">{getComponent()}</div>
     </div>
   );
 }

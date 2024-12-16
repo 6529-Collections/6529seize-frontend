@@ -18,6 +18,10 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
           return "You don't have permission to chat in this wave";
         case ChatRestriction.DISABLED:
           return "Chat is currently disabled for this wave";
+        default: {
+          const exhaustiveCheck: never = chatRestriction;
+          return "Chat is unavailable";
+        }
       }
     }
 
@@ -33,6 +37,12 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
           return "Submissions haven't started yet";
         case SubmissionRestriction.ENDED:
           return "Submission period has ended";
+        case SubmissionRestriction.MAX_DROPS_REACHED:
+          return "You have reached the maximum number of drops allowed";
+        default: {
+          const exhaustiveCheck: never = submissionRestriction;
+          return "Submissions are unavailable";
+        }
       }
     }
 
@@ -43,32 +53,29 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
     return "Action not available";
   };
 
-  const getIcon = () => {
-    switch (type) {
-      case "chat":
-        return chatRestriction === ChatRestriction.NOT_LOGGED_IN ? "user-lock" : "comment-slash";
-      case "submission": {
-        switch (submissionRestriction) {
-          case SubmissionRestriction.NOT_LOGGED_IN:
-            return "user-lock";
-          case SubmissionRestriction.NOT_STARTED:
-            return "clock";
-          case SubmissionRestriction.ENDED:
-            return "calendar-xmark";
-          default:
-            return "file-circle-xmark";
-        }
+  const getColor = () => {
+    if (type === "chat" && chatRestriction === ChatRestriction.NOT_LOGGED_IN) return "tw-text-primary-400";
+    if (type === "submission") {
+      switch (submissionRestriction) {
+        case SubmissionRestriction.NOT_LOGGED_IN:
+          return "tw-text-primary-400";
+        case SubmissionRestriction.NOT_STARTED:
+          return "tw-text-yellow";
+        case SubmissionRestriction.ENDED:
+          return "tw-text-red";
+        case SubmissionRestriction.MAX_DROPS_REACHED:
+          return "tw-text-red";
+        default:
+          return "tw-text-neutral-400";
       }
-      case "both":
-        return "lock";
     }
+    return "tw-text-neutral-400";
   };
 
   return (
-    <div className="tw-min-h-[48px] tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-2.5 tw-bg-neutral-900 tw-rounded-lg tw-border tw-border-neutral-800">
-      <div className="tw-flex tw-items-center tw-gap-2.5">
-        <i className={`fas fa-${getIcon()} tw-text-neutral-500 tw-text-sm`} />
-        <p className="tw-text-neutral-400 tw-text-xs">{getMessage()}</p>
+    <div className="tw-min-h-[48px] tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-bg-neutral-900/50 tw-backdrop-blur tw-rounded-xl tw-border tw-border-neutral-800/50">
+      <div className="tw-flex tw-flex-col">
+        <p className={`tw-text-sm tw-font-medium ${getColor()}`}>{getMessage()}</p>
       </div>
     </div>
   );

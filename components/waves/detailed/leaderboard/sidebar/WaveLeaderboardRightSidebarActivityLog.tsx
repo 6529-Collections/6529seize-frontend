@@ -44,10 +44,12 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             onDropClick={onDropClick}
           />
         </div>
-        <div className="tw-mt-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-2">
+
+        <div className="tw-mt-1.5 tw-flex tw-items-center tw-flex-wrap tw-gap-2">
           <Link
             href={`/${log.invoker.handle}`}
-            className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-whitespace-nowrap"
+            className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300"
+            title={`Voter: ${log.invoker.handle}`}
           >
             {log.invoker.pfp ? (
               <img
@@ -62,42 +64,28 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
               {log.invoker.handle}
             </span>
           </Link>
-          <span className="tw-text-sm tw-text-iron-400">voted</span>
-          <div className="tw-flex tw-items-center tw-gap-x-0.5 tw-whitespace-nowrap">
-            <svg
-              className={`tw-w-3.5 tw-h-3.5 ${
-                log.contents.newVote >= log.contents.oldVote
-                  ? "tw-text-green"
-                  : "tw-text-red tw-rotate-180"
-              }`}
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M12 4v16m0-16l4 4m-4-4l-4 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+
+          <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-min-w-0 tw-overflow-hidden">
+            {log.contents.oldVote === 0 ? (
+              <span className="tw-text-sm tw-text-iron-400">voted</span>
+            ) : (
+              <span className="tw-text-sm tw-text-iron-500 tw-whitespace-nowrap">
+                {formatNumberWithCommas(log.contents.oldVote)} →
+              </span>
+            )}
             <span
-              className={`tw-text-xs tw-font-medium ${
-                log.contents.newVote >= log.contents.oldVote
-                  ? "tw-text-green"
-                  : "tw-text-red"
+              className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${
+                log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
               }`}
             >
-              {formatNumberWithCommas(
-                Math.abs(log.contents.newVote - log.contents.oldVote)
-              )}{" "}
-              TDH
+              {formatNumberWithCommas(log.contents.newVote)} TDH
             </span>
           </div>
+
           <Link
             href={`/${log.drop_author?.handle}`}
-            className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-whitespace-nowrap"
+            className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300"
+            title={`Drop creator: ${log.drop_author?.handle}`}
           >
             {log.drop_author?.pfp ? (
               <img

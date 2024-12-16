@@ -17,7 +17,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
     <Link
       href={`/${drop.author.handle}`}
       onClick={(e) => e.stopPropagation()}
-      className="tw-flex tw-items-center tw-gap-x-2.5 md:tw-gap-x-3.5 tw-no-underline group"
+      className="tw-flex tw-items-center tw-gap-x-3.5 tw-no-underline group"
     >
       <div className="tw-relative">
         {drop.author.pfp ? (
@@ -37,7 +37,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
           />
         </div>
       </div>
-      <div className="tw-flex tw-flex-col tw-gap-y-0.5 md:tw-gap-y-1">
+      <div className="tw-flex tw-flex-col tw-gap-y-1.5 sm:tw-gap-y-0">
         <span className="tw-text-base md:tw-text-lg tw-font-semibold tw-text-iron-100 tw-leading-none group-hover:tw-text-iron-50 tw-transition-colors">
           {drop.author.handle}
         </span>

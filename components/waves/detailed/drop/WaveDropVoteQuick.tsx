@@ -74,7 +74,7 @@ export default function WaveDropVoteQuick({
   }, [data]);
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2">
+    <div className="tw-flex tw-items-center tw-gap-x-3">
       {results.map((result) => (
         <WaveDropVoteQuickButton
           key={`${result.rank}-${result.value}`}
