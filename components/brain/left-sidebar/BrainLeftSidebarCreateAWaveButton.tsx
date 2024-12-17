@@ -7,7 +7,7 @@ interface BrainLeftSidebarCreateAWaveButtonProps {
 
 const BrainLeftSidebarCreateAWaveButton: React.FC<BrainLeftSidebarCreateAWaveButtonProps> = () => {
   return (
-    <div className="tw-mt-2 lg:tw-mt-4">
+    <div className="lg:tw-mt-4">
       <Link
         href="/waves?new=true"
         className="tw-no-underline tw-text-primary-400 desktop-hover:hover:tw-text-primary-400 tw-w-full tw-flex tw-justify-center tw-gap-x-1.5 tw-items-center tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-bg-iron-950 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-medium desktop-hover:hover:tw-bg-iron-900 desktop-focus-visible:tw-outline desktop-focus-visible:tw-outline-2 desktop-focus-visible:tw-outline-offset-2 desktop-focus-visible:tw-outline-blue-800 tw-transition tw-duration-300 tw-ease-out"

@@ -164,7 +164,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-relative tw-w-full">
-        <div className="tw-mb-2 tw-flex tw-gap-1 tw-z-10 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+        <div className="tw-mb-2 tw-p-0.5 tw-flex tw-gap-1 tw-z-10 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           {quickPercentages.map((percentage) => (
             <button
               key={percentage}

@@ -4,16 +4,20 @@ import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import { useRouter } from "next/router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiDrop } from "../../generated/models/ObjectSerializer";
+import { ApiDrop, ApiWaveType } from "../../generated/models/ObjectSerializer";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
+import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import BrainMobileLeaderboard from "./mobile/BrainMobileLeaderboard";
+import { useWaveData } from "../../hooks/useWaveData";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
   WAVES = "WAVES",
   ABOUT = "ABOUT",
+  LEADERBOARD = "LEADERBOARD",
 }
 
 interface Props {
@@ -33,6 +37,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     enabled: !!router.query.drop,
   });
 
+  const { data: wave } = useWaveData(router.query.wave as string);
+
   const onDropClose = () => {
     const currentQuery = { ...router.query };
     delete currentQuery.drop;
@@ -45,6 +51,21 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     drop &&
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
+  const isRankWave = wave?.wave.type === ApiWaveType.Rank;
+
+  const onDropClick = (drop: ExtendedDrop) => {
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.WAVES]: (
       <BrainMobileWaves activeWaveId={router.query.wave as string} />
@@ -53,6 +74,13 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       <BrainMobileAbout activeWaveId={router.query.wave as string} />
     ),
     [BrainView.DEFAULT]: children,
+    [BrainView.LEADERBOARD]:
+      isRankWave && !!wave ? (
+        <BrainMobileLeaderboard 
+          wave={wave} 
+          onDropClick={onDropClick}
+        />
+      ) : null,
   };
 
   return (
@@ -69,7 +97,11 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           />
         </div>
       )}
-      <BrainMobileTabs activeView={activeView} onViewChange={setActiveView} />
+      <BrainMobileTabs
+        activeView={activeView}
+        onViewChange={setActiveView}
+        wave={wave}
+      />
       <AnimatePresence mode="wait">
         <motion.div
           key={activeView}
