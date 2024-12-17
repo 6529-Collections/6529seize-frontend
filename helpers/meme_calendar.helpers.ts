@@ -133,7 +133,21 @@ const CALENDAR_2024: YearCalendar = {
   ],
 };
 
+const CALENDAR_2025: YearCalendar = {
+  year: 2025,
+  title: "Year 3",
+  blocks: [
+    {
+      start: Time.fromString("2025-01-01"),
+      end: Time.fromString("2025-03-14"),
+      title: "Winter SZN10",
+      szn: 10,
+    },
+  ],
+};
+
 export const MEMES_CALENDARS: YearCalendar[] = [
+  CALENDAR_2025,
   CALENDAR_2024,
   CALENDAR_2023,
   CALENDAR_2022,
