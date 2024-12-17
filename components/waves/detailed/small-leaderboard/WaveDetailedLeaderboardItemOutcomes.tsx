@@ -105,8 +105,6 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
     }
   };
 
-  const showContent = isTouch ? isOpen : true;
-
   const { nicTotal, repTotal, manualOutcomes } = calculateOutcomeSummary({
     drop,
     wave,
