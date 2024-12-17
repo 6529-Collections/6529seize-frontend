@@ -1,4 +1,3 @@
-import styles from "./CommunityStats.module.scss";
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -307,12 +306,6 @@ export default function CommunityStats() {
                     <Table>
                       <tbody>
                         <tr>
-                          <td>Estimated days until 500M</td>
-                          <td className="text-right">
-                            {numberWithCommas(getEstimatedDaysUntil(500000000))}
-                          </td>
-                        </tr>
-                        <tr>
                           <td>Estimated days until 750M</td>
                           <td className="text-right">
                             {numberWithCommas(getEstimatedDaysUntil(750000000))}
@@ -323,6 +316,14 @@ export default function CommunityStats() {
                           <td className="text-right">
                             {numberWithCommas(
                               getEstimatedDaysUntil(1000000000)
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Estimated days until 1.5B</td>
+                          <td className="text-right">
+                            {numberWithCommas(
+                              getEstimatedDaysUntil(1500000000)
                             )}
                           </td>
                         </tr>
