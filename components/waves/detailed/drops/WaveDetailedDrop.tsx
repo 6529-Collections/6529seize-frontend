@@ -14,7 +14,6 @@ import { ApiDropType } from "../../../../generated/models/ApiDropType";
 import { ActiveDropState } from "../chat/WaveChat";
 import { DropInteractionParams, DropLocation } from "./Drop";
 
-
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
 }
@@ -238,7 +237,8 @@ const WaveDetailedDrop = ({
         onTouchMove={handleTouchMove}
       >
         {drop.reply_to &&
-          drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id &&
+          (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
+            drop.author.handle !== previousDrop?.author.handle) &&
           drop.reply_to.drop_id !== dropViewDropId && (
             <WaveDetailedDropReply
               onReplyClick={onReplyClick}
