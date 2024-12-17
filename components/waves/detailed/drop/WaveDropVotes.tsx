@@ -22,7 +22,7 @@ export const WaveDropVotes: React.FC<WaveDropVotesProps> = ({ drop }) => {
         } tw-bg-clip-text tw-text-transparent`}>
           {formatNumberWithCommas(drop.rating)}
         </span>
-        <span className="tw-text-sm tw-text-iron-400">TDH total</span>
+        <span className="tw-text-sm tw-text-iron-400">{drop.wave.voting_credit_type} total</span>
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-x-3">
         <div className="tw-flex tw-items-center -tw-space-x-1.5">

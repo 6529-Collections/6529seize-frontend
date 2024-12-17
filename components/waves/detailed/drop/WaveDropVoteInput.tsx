@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
+import { ApiWaveCreditType } from "../../../../generated/models/ObjectSerializer";
 
 interface WaveDropVoteInputProps {
   readonly voteValue: number | string;
   readonly minValue: number;
   readonly maxValue: number;
+  readonly creditType: ApiWaveCreditType;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
   readonly onSubmit: () => void;
 }
@@ -13,6 +15,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
   setVoteValue,
   minValue,
   maxValue,
+  creditType,
   onSubmit,
 }) => {
   const memeticValues: number[] = [
@@ -191,7 +194,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
               onKeyDown={handleKeyDown}
             />
             <div className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400 tw-pointer-events-none">
-              TDH
+              {creditType}
             </div>
           </div>
 

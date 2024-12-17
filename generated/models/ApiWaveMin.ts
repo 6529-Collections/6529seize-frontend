@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveMin {
@@ -20,6 +21,7 @@ export class ApiWaveMin {
     'authenticated_user_eligible_to_vote': boolean;
     'authenticated_user_eligible_to_participate': boolean;
     'authenticated_user_eligible_to_chat': boolean;
+    'voting_credit_type': ApiWaveCreditType;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -65,6 +67,12 @@ export class ApiWaveMin {
             "baseName": "authenticated_user_eligible_to_chat",
             "type": "boolean",
             "format": ""
+        },
+        {
+            "name": "voting_credit_type",
+            "baseName": "voting_credit_type",
+            "type": "ApiWaveCreditType",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -74,4 +82,6 @@ export class ApiWaveMin {
     public constructor() {
     }
 }
+
+
 

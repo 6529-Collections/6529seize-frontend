@@ -44,6 +44,7 @@ import {
   MissingRequirements,
 } from "./utils/getMissingRequirements";
 import { useDropMetadata } from "./hooks/useDropMetadata";
+import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 
 export type CreateDropMetadataType =
   | {
@@ -315,7 +316,10 @@ const getOptimisticDrop = (
     picture: string | null;
     description_drop: { id: string };
     participation: { authenticated_user_eligible: boolean };
-    voting: { authenticated_user_eligible: boolean };
+    voting: {
+      authenticated_user_eligible: boolean;
+      credit_type: ApiWaveCreditType;
+    };
     chat: { authenticated_user_eligible: boolean };
   },
   activeDrop: ActiveDropState | null,
@@ -352,6 +356,7 @@ const getOptimisticDrop = (
         wave.voting.authenticated_user_eligible,
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
+      voting_credit_type: wave.voting.credit_type,
     },
     author: {
       id: connectedProfile.profile.external_id,

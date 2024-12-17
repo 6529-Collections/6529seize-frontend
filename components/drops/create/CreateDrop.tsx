@@ -213,6 +213,7 @@ export default function CreateDrop({
           waveDetailed.voting.authenticated_user_eligible,
         authenticated_user_eligible_to_chat:
           waveDetailed.chat.authenticated_user_eligible,
+        voting_credit_type: waveDetailed.voting.credit_type,
       },
       author: {
         ...profileMin,

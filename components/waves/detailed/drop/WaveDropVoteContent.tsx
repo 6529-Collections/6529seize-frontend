@@ -56,6 +56,7 @@ export const WaveDropVoteContent: React.FC<WaveDropVoteContentProps> = ({
             voteValue={voteValue}
             minValue={minRating}
             maxValue={maxRating}
+            creditType={drop.wave.voting_credit_type}
             setVoteValue={setVoteValue}
             rank={drop.rank}
           />
@@ -101,6 +102,7 @@ export const WaveDropVoteContent: React.FC<WaveDropVoteContentProps> = ({
                 minValue={minRating}
                 maxValue={maxRating}
                 rank={drop.rank}
+                creditType={drop.wave.voting_credit_type}
               />
             </div>
 
@@ -119,6 +121,7 @@ export const WaveDropVoteContent: React.FC<WaveDropVoteContentProps> = ({
                   maxValue={maxRating}
                   setVoteValue={setVoteValue}
                   onSubmit={handleSubmit}
+                  creditType={drop.wave.voting_credit_type}
                 />
               </div>
             </div>
@@ -130,6 +133,7 @@ export const WaveDropVoteContent: React.FC<WaveDropVoteContentProps> = ({
             <WaveDropVoteStats
               currentRating={drop.context_profile_context?.rating ?? 0}
               maxRating={maxRating}
+              creditType={drop.wave.voting_credit_type}
             />
           )}
 
@@ -138,6 +142,7 @@ export const WaveDropVoteContent: React.FC<WaveDropVoteContentProps> = ({
               <WaveDropVoteStats
                 currentRating={drop.context_profile_context?.rating ?? 0}
                 maxRating={maxRating}
+                creditType={drop.wave.voting_credit_type}
               />
             ) : (
               <WaveDropVoteQuick drop={drop} setValue={setVoteValue} />

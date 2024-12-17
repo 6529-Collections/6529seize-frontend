@@ -37,7 +37,9 @@ export const WaveLeaderboardDropRaters: React.FC<
           <div className="tw-size-1 tw-bg-iron-700 tw-rounded-full"></div>
           <span className={`tw-text-xs md:tw-text-sm tw-font-normal ${rankStyle}`}>
             {formatNumberWithCommas(drop.rating)}{" "}
-            <span className="tw-text-iron-400"> TDH</span>
+            <span className="tw-text-iron-400">
+              {drop.wave.voting_credit_type}
+            </span>
           </span>
         </div>
       </div>
@@ -49,7 +51,7 @@ export const WaveLeaderboardDropRaters: React.FC<
               <span
                 className={`${rankStyle} ${isNegativeVote && "tw-opacity-60"}`}
               >
-                {formatNumberWithCommas(userVote)} TDH
+                {formatNumberWithCommas(userVote)} {drop.wave.voting_credit_type}
               </span>
             </span>
           </div>

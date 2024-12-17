@@ -79,6 +79,7 @@ export default function WaveDropVoteQuick({
         <WaveDropVoteQuickButton
           key={`${result.rank}-${result.value}`}
           value={result.value}
+          creditType={drop.wave.voting_credit_type}
           rank={result.rank}
           disabled={result.disabled}
           setValue={setValue}
