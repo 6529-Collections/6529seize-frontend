@@ -10,12 +10,14 @@ interface BrainContentInputProps {
   readonly waveId: string | null;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onDropAddedToQueue: () => void;
 }
 
 const BrainContentInput: React.FC<BrainContentInputProps> = ({
   waveId,
   activeDrop,
   onCancelReplyQuote,
+  onDropAddedToQueue,
 }) => {
   const capacitor = useCapacitor();
   const { data: wave } = useWaveData(waveId);
@@ -34,6 +36,8 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
         wave={wave}
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
+        onAllDropsAdded={onCancelReplyQuote}
+        onDropAddedToQueue={onDropAddedToQueue}
         key={wave.id}
         dropId={null}
         fixedDropMode={DropMode.BOTH}
