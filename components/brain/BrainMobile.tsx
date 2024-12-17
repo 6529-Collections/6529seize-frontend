@@ -4,19 +4,14 @@ import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import { useRouter } from "next/router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { ApiDrop, ApiWave } from "../../generated/models/ObjectSerializer";
+import { ApiDrop, ApiWaveType } from "../../generated/models/ObjectSerializer";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
-import { ApiWaveType } from "../../generated/models/ObjectSerializer";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
-import { WaveLeaderboardDrops } from "../waves/detailed/leaderboard/drops/WaveLeaderboardDrops";
-import {
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../hooks/useWaveDropsLeaderboard";
 import BrainMobileLeaderboard from "./mobile/BrainMobileLeaderboard";
+import { useWaveData } from "../../hooks/useWaveData";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -42,16 +37,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     enabled: !!router.query.drop,
   });
 
-  const { data: wave } = useQuery<ApiWave>({
-    queryKey: [QueryKey.WAVE, { wave_id: router.query.wave as string }],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave>({
-        endpoint: `waves/${router.query.wave}`,
-      }),
-    enabled: !!router.query.wave,
-    staleTime: 60000,
-    placeholderData: keepPreviousData,
-  });
+  const { data: wave } = useWaveData(router.query.wave as string);
 
   const onDropClose = () => {
     const currentQuery = { ...router.query };
@@ -89,7 +75,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     ),
     [BrainView.DEFAULT]: children,
     [BrainView.LEADERBOARD]:
-      isRankWave && wave ? (
+      isRankWave && !!wave ? (
         <BrainMobileLeaderboard 
           wave={wave} 
           onDropClick={onDropClick}

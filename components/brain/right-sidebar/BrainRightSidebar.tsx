@@ -3,16 +3,9 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import WaveHeader, {
-  WaveHeaderPinnedSide,
-} from "../../waves/detailed/header/WaveHeader";
-import BrainRightSidebarContent from "./BrainRightSidebarContent";
-import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
-import { TabToggle } from "../../common/TabToggle";
-import { WaveDetailedSmallLeaderboard } from "../../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
-import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
 import { motion } from "framer-motion";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { WaveContent } from "./WaveContent";
 
 interface BrainRightSidebarProps {
   readonly isCollapsed: boolean;
@@ -23,7 +16,7 @@ interface BrainRightSidebarProps {
   readonly setActiveTab: (tab: SidebarTab) => void;
 }
 
-enum Mode {
+export enum Mode {
   CONTENT = "CONTENT",
   FOLLOWERS = "FOLLOWERS",
 }
@@ -53,75 +46,6 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
   });
 
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
-
-  const onFollowersClick = () =>
-    setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
-
-  const isRankWave = wave?.wave.type === ApiWaveType.Rank;
-
-  const options = [
-    { key: SidebarTab.ABOUT, label: "About" },
-    { key: SidebarTab.LEADERBOARD, label: "Leaderboard" },
-  ] as const;
-
-  const renderContent = () => {
-    if (!wave) return null;
-
-    if (!isRankWave) {
-      return (
-        <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
-          <WaveHeader
-            wave={wave}
-            onFollowersClick={onFollowersClick}
-            useRing={false}
-            useRounded={false}
-            pinnedSide={WaveHeaderPinnedSide.LEFT}
-          />
-          {mode === Mode.CONTENT ? (
-            <BrainRightSidebarContent wave={wave} />
-          ) : (
-            <BrainRightSidebarFollowers
-              wave={wave}
-              closeFollowers={() => setMode(Mode.CONTENT)}
-            />
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <>
-        <div className="tw-px-4 tw-mt-4">
-          <TabToggle
-            options={options}
-            activeKey={activeTab}
-            onSelect={(key) => setActiveTab(key as SidebarTab)}
-          />
-        </div>
-        {activeTab === SidebarTab.ABOUT ? (
-          <div className="tw-mt-4 tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
-            <WaveHeader
-              wave={wave}
-              onFollowersClick={onFollowersClick}
-              useRing={false}
-              useRounded={false}
-              pinnedSide={WaveHeaderPinnedSide.LEFT}
-            />
-            {mode === Mode.CONTENT ? (
-              <BrainRightSidebarContent wave={wave} />
-            ) : (
-              <BrainRightSidebarFollowers
-                wave={wave}
-                closeFollowers={() => setMode(Mode.CONTENT)}
-              />
-            )}
-          </div>
-        ) : (
-          <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
-        )}
-      </>
-    );
-  };
 
   return (
     <motion.div
@@ -162,7 +86,16 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
         tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 
         hover:tw-scrollbar-thumb-iron-300 tw-h-full"
       >
-        {renderContent()}
+        {wave && (
+          <WaveContent
+            wave={wave}
+            mode={mode}
+            setMode={setMode}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onDropClick={onDropClick}
+          />
+        )}
       </div>
     </motion.div>
   );
