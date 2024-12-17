@@ -22,7 +22,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   const { data: wave } = useWaveData(waveId);
 
   return (
-    <div className="tw-pr-2">
+    <div className="lg:tw-pr-2">
       {showPinnedWaves && <BrainContentPinnedWaves />}
       <BrainContentInput
         waveId={waveId}
