@@ -12,6 +12,7 @@ import WaveLeaderboardRightSidebar from "./sidebar/WaveLeaderboardRightSidebar";
 import { WaveDropCreate } from "./create/WaveDropCreate";
 import { AnimatePresence, motion } from "framer-motion";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { WaveLeaderboardWinner } from "./WaveLeaderboardWinner";
 
 interface WaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -67,7 +68,9 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
         >
           {children}
 
-          <WaveLeaderboardTime wave={wave} />
+          <WaveLeaderboardWinner wave={wave} onDropClick={setActiveDrop} />
+
+       {/*    <WaveLeaderboardTime wave={wave} />
           <WaveLeaderboardHeader
             wave={wave}
             sort={sort}
@@ -102,7 +105,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             showMyDrops={showMyDrops}
             setActiveDrop={setActiveDrop}
             onCreateDrop={() => setIsCreatingDrop(true)}
-          />
+          />  */}
         </div>
       </div>
 
