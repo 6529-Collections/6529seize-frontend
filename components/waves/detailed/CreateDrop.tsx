@@ -26,6 +26,7 @@ import { DropPrivileges } from "../../../hooks/useDropPriviledges";
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: () => void;
   readonly wave: ApiWave;
   readonly dropId: string | null;
@@ -38,6 +39,7 @@ const ANIMATION_DURATION = 0.3;
 export default function CreateDrop({
   activeDrop,
   onCancelReplyQuote,
+  onDropAddedToQueue,
   onAllDropsAdded,
   wave,
   dropId,
@@ -210,7 +212,7 @@ export default function CreateDrop({
   const submitDrop = useCallback(
     (dropRequest: ApiCreateDropRequest) => {
       addToQueue(dropRequest);
-      onCancelReplyQuote();
+      onDropAddedToQueue();
     },
     [addToQueue, onCancelReplyQuote]
   );

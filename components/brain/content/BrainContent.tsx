@@ -28,6 +28,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
         waveId={waveId}
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
+        onDropAddedToQueue={onCancelReplyQuote}
       />
       <div className="tw-flex-1">
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2 tw-mt-2">

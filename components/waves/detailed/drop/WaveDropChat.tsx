@@ -91,6 +91,7 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
                   <PrivilegedDropCreator
                     activeDrop={activeDrop}
                     onCancelReplyQuote={onCancelReplyQuote}
+                    onDropAddedToQueue={onCancelReplyQuote}
                     wave={wave}
                     dropId={drop.id}
                     fixedDropMode={DropMode.BOTH}

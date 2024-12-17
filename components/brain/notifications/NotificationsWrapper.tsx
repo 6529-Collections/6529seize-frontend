@@ -65,6 +65,7 @@ export default function NotificationsWrapper({
         waveId={activeDrop?.drop?.wave?.id ?? null}
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
+        onDropAddedToQueue={() =>{}}
       />
       <div className="tw-relative">
         <NotificationItems
