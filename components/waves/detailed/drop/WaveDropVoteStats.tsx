@@ -1,13 +1,15 @@
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-
+import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 interface WaveDropVoteStatsProps {
   readonly currentRating: number;
   readonly maxRating: number;
+  readonly creditType: ApiWaveCreditType;
 }
 
 export const WaveDropVoteStats: React.FC<WaveDropVoteStatsProps> = ({
   currentRating,
   maxRating,
+  creditType,
 }) => {
   return (
     <div className="tw-mt-0.5 tw-flex tw-items-center tw-gap-3 tw-text-xs tw-text-iron-400">
@@ -15,7 +17,7 @@ export const WaveDropVoteStats: React.FC<WaveDropVoteStatsProps> = ({
         <span>
           Your votes:{" "}
           <span className="tw-text-iron-200">
-            {formatNumberWithCommas(currentRating)} TDH
+            {formatNumberWithCommas(currentRating)} {creditType}
           </span>
         </span>
       </div>
@@ -27,7 +29,7 @@ export const WaveDropVoteStats: React.FC<WaveDropVoteStatsProps> = ({
             <span className="tw-text-xs tw-font-medium tw-text-rose-400">−</span>
           </div>
           <span className="tw-text-iron-200">
-            {formatNumberWithCommas(maxRating)} TDH
+            {formatNumberWithCommas(maxRating)} {creditType}
           </span>
         </div>
       </div>

@@ -79,7 +79,6 @@ export default function ParticipationDrop({
           onQuote={handleOnQuote}
         />
       )}
-
       <ParticipationDropHeader drop={drop} showWaveInfo={showWaveInfo} />
       <ParticipationDropContent
         drop={drop}

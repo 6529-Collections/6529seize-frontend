@@ -33,7 +33,7 @@ export default function ParticipationDropRatingsVoterSection({
                 content={
                   <span className="tw-text-xs tw-font-medium">
                     {rater.profile.handle} •{" "}
-                    {formatNumberWithCommas(rater.rating)} TDH
+                    {formatNumberWithCommas(rater.rating)} {drop.wave.voting_credit_type}
                   </span>
                 }
                 interactive={true}

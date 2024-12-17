@@ -29,7 +29,9 @@ export default function NotificationIdentityMentioned({
 }) {
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
-    router.push(`/waves/${notification.related_drops[0]}?drop=${serialNo}/`);
+    router.push(
+      `/waves/${notification.related_drops[1].wave.id}?drop=${serialNo}/`
+    );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {

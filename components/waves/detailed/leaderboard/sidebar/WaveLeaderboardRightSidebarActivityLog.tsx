@@ -6,15 +6,17 @@ import {
 import Link from "next/link";
 import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRightSidebarActivityLogDrop";
 import { ExtendedDrop } from "../../../../../helpers/waves/wave-drops.helpers";
+import { ApiWaveCreditType } from "../../../../../generated/models/ApiWaveCreditType";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;
+  readonly creditType: ApiWaveCreditType;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   WaveLeaderboardRightSidebarActivityLogProps
-> = ({ log, onDropClick }) => {
+> = ({ log, creditType, onDropClick }) => {
   return (
     <div className="tw-relative">
       <div className="tw-p-3 tw-rounded-lg tw-bg-iron-900">
@@ -78,7 +80,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
                 log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"
               }`}
             >
-              {formatNumberWithCommas(log.contents.newVote)} TDH
+              {formatNumberWithCommas(log.contents.newVote)} {creditType}
             </span>
           </div>
 

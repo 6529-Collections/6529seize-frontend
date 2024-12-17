@@ -3,15 +3,17 @@ import { ApiWaveVoter } from "../../../../../generated/models/ApiWaveVoter";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import Link from "next/link";
 import Tippy from "@tippyjs/react";
+import { ApiWaveCreditType } from "../../../../../generated/models/ApiWaveCreditType";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;
   readonly position: number;
+  readonly creditType: ApiWaveCreditType;
 }
 
 export const WaveLeaderboardRightSidebarVoter: React.FC<
   WaveLeaderboardRightSidebarVoterProps
-> = ({ voter, position }) => {
+> = ({ voter, position, creditType }) => {
   const hasPositiveVotes = !!voter.positive_votes_summed;
   const hasNegativeVotes = !!voter.negative_votes_summed;
 
@@ -62,7 +64,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           </div>
         </Tippy>
         <span className="tw-text-xs tw-text-iron-400">
-          {formatNumberWithCommas(voter.absolute_votes_summed)} TDH total
+          {formatNumberWithCommas(voter.absolute_votes_summed)} {creditType} total
         </span>
       </div>
     </div>

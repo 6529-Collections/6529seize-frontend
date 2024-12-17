@@ -86,6 +86,7 @@ export const WaveDropVoters: React.FC<WaveDropVotersProps> = ({ drop }) => {
                         voter={voter}
                         key={voter.voter.id}
                         position={index + 1}
+                        creditType={drop.wave.voting_credit_type}
                       />
                     ))}
                   </div>

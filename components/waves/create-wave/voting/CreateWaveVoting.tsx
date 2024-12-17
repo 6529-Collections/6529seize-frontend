@@ -30,9 +30,6 @@ export default function CreateWaveVoting({
     [ApiWaveType.Approve]: "How Drops are Voted",
   };
 
-  const DISABLED_CREDIT_TYPES: ApiWaveCreditType[] = [
-    ApiWaveCreditType.Rep,
-  ];
 
   if (!selectedType) {
     return null;
@@ -49,7 +46,7 @@ export default function CreateWaveVoting({
             key={votingType}
             type={votingType}
             selected={selectedType}
-            disabled={DISABLED_CREDIT_TYPES.includes(votingType)}
+            disabled={false}
             label={WAVE_VOTING_LABELS[votingType]}
             onChange={onTypeChange}
           />

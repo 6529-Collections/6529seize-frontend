@@ -72,6 +72,7 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
         <WaveLeaderboardRightSidebarActivityLog
           key={log.id}
           log={log}
+          creditType={wave.voting.credit_type}
           onDropClick={onDropClick}
         />
       ))}

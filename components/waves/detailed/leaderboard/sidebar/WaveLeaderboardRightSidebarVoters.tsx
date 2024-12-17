@@ -69,6 +69,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
               voter={voter}
               key={voter.voter.id}
               position={index + 1}
+              creditType={wave.voting.credit_type}
             />
           ))}
           {isFetchingNextPage && (

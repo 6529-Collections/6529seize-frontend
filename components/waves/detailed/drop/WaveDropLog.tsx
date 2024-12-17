@@ -5,12 +5,14 @@ import {
   getTimeAgoShort,
 } from "../../../../helpers/Helpers";
 import Link from "next/link";
+import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 
 interface WaveDropLogProps {
   readonly log: ApiWaveLog;
+  readonly creditType: ApiWaveCreditType;
 }
 
-export const WaveDropLog: React.FC<WaveDropLogProps> = ({ log }) => {
+export const WaveDropLog: React.FC<WaveDropLogProps> = ({ log, creditType }) => {
   return (
     <div className="tw-p-3 tw-bg-iron-900">
       <div className="tw-flex tw-items-center tw-justify-between">
@@ -41,7 +43,7 @@ export const WaveDropLog: React.FC<WaveDropLogProps> = ({ log }) => {
             </span>
           )}
           <span className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"}`}>
-            {formatNumberWithCommas(log.contents.newVote)} TDH
+            {formatNumberWithCommas(log.contents.newVote)} {creditType}
           </span>
         </div>
 

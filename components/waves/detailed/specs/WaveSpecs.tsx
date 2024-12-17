@@ -2,6 +2,7 @@ import React from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
+import WaveRating from "./WaveRating";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;
@@ -25,34 +26,8 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
             </p>
           </div>
           <div className="tw-px-5 tw-py-5 tw-flex tw-flex-col tw-gap-y-6">
-            {/*   <div className="tw-flex tw-flex-col tw-gap-y-2">
-              <WaveCreated wave={wave} />
-              <WaveEnding wave={wave} />
-            </div> */}
             <WaveTypeIcon waveType={wave.wave.type} />
-            <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
-              <span className="tw-font-medium tw-text-iron-500">Rating</span>
-              <div className="tw-flex tw-flex-col tw-gap-y-1.5">
-                <span className="tw-font-medium tw-text-iron-200 tw-text-md">
-                  By TDH
-                </span>
-                {/* <div className="tw-bg-iron-800 tw-rounded-xl tw-flex tw-flex-col tw-gap-y-1 tw-px-4 tw-py-2">
-                  <span className="tw-font-medium tw-text-sm tw-text-iron-300">
-                    test rep no problem
-                  </span>
-                  <div className="tw-flex tw-items-center tw-gap-x-2">
-                    <img
-                      className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
-                      src="#"
-                      alt="Profile Picture"
-                    />
-                    <span className="tw-font-medium tw-text-sm tw-text-iron-50">
-                      Handle
-                    </span>
-                  </div>
-                </div> */}
-              </div>
-            </div>
+            <WaveRating wave={wave} />
             <WaveAuthor wave={wave} />
           </div>
         </div>
