@@ -83,6 +83,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
         onReply={onReply}
         onQuote={onQuote}
         onDropClick={onDropClick}
+        showInput={true}
       />
     </div>
   );

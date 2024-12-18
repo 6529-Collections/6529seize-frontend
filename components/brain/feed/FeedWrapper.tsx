@@ -17,6 +17,7 @@ interface FeedWrapperProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly showInput?: boolean;
 }
 
 export default function FeedWrapper({
@@ -28,6 +29,7 @@ export default function FeedWrapper({
   onReply,
   onQuote,
   onDropClick,
+  showInput = false
 }: FeedWrapperProps) {
   const {
     scrollContainerRef,
@@ -39,15 +41,24 @@ export default function FeedWrapper({
 
   const capacitor = useCapacitor();
   const containerClassName = useMemo(() => {
+    if (showInput) {
+      return `tw-w-full tw-flex tw-flex-col ${
+        capacitor.isCapacitor
+          ? "tw-h-[calc(100vh-21rem)]"
+          : "tw-h-[calc(100vh-21rem)] lg:tw-h-[calc(100vh-14.5rem)]"
+      }`;
+    }
     return `tw-w-full tw-flex tw-flex-col ${
       capacitor.isCapacitor
-        ? "tw-h-[calc(100vh-14.7rem)]"
-        : `tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-102px)]`
+        ? "tw-h-[calc(100vh-16rem)]"
+        : "tw-h-[calc(100vh-16rem)] lg:tw-h-[calc(100vh-8.5rem)]"
     }`;
-  }, [capacitor.isCapacitor]);
+  }, [capacitor.isCapacitor, showInput]);
+
   if (!items.length) {
     return null;
   }
+
   return (
     <div className={containerClassName}>
       <div className="tw-flex tw-flex-col tw-relative tw-overflow-y-auto">

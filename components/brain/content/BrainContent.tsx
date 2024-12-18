@@ -23,7 +23,9 @@ const BrainContent: React.FC<BrainContentProps> = ({
 
   return (
     <div className="lg:tw-pr-2">
-      {showPinnedWaves && <BrainContentPinnedWaves />}
+      <div className="lg:tw-hidden">
+        {showPinnedWaves && <BrainContentPinnedWaves />}
+      </div>
       <div className="tw-flex-1">
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2 tw-mt-2">
           {!!wave && (
@@ -48,5 +50,4 @@ const BrainContent: React.FC<BrainContentProps> = ({
     </div>
   );
 };
-
 export default BrainContent;

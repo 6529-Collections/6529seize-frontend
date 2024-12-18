@@ -73,7 +73,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
           theme="dark"
         >
           <div
-            className={`tw-relative tw-size-16 md:tw-size-14 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-all tw-duration-300 ${
+            className={`tw-relative tw-size-14 md:tw-size-12 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition-all tw-duration-300 ${
               active ? "tw-bg-indigo-900" : "tw-bg-iron-800"
             }`}
           >
@@ -119,7 +119,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               type="button"
               onClick={onRemoveClick}
               aria-label="Remove wave"
-              className="tw-border-0 tw-bg-iron-800 tw-rounded-full tw-size-5 tw-p-0 -tw-top-1 -tw-right-5 tw-absolute tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-100 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red md:hover:tw-bg-iron-700 tw-transition-all tw-duration-300"
+              className="tw-border-0 tw-bg-iron-800 tw-rounded-full tw-size-5 tw-p-0 -tw-top-1 -tw-right-4 lg:-tw-right-2 tw-absolute tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-100 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red md:hover:tw-bg-iron-700 tw-transition-all tw-duration-300"
             >
               <svg
                 className="tw-size-5 tw-flex-shrink-0"
