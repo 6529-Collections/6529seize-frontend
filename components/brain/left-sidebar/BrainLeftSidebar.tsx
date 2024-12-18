@@ -19,9 +19,6 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
         <BrainLeftSidebarSearchWave />
         <BrainLeftSidebarWaves activeWaveId={activeWaveId} />
       </div>
-      <div>
-        
-      </div>
     </div>
   );
 };
