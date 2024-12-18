@@ -19,7 +19,7 @@ const calculateHeight = (isCapacitor: boolean) => {
   if (isCapacitor) {
     return "tw-h-[calc(100vh-14.7rem)]";
   }
-  return `tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-12rem)]`;
+  return `tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-10rem)]`;
 };
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropClick }) => {
@@ -65,7 +65,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropClick }) => {
     return null;
   }
   return (
-    <div className="tw-relative tw-h-full">
+    <div className="tw-relative tw-h-full ">
       <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
         <div className={containerClassName}>
           <WaveDropsAll
