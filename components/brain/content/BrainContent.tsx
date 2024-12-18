@@ -8,6 +8,7 @@ interface BrainContentProps {
   readonly showPinnedWaves?: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly waveId?: string;
 }
 
 const BrainContent: React.FC<BrainContentProps> = ({
@@ -15,6 +16,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   showPinnedWaves = true,
   activeDrop,
   onCancelReplyQuote,
+  waveId,
 }) => {
   return (
     <div className="lg:tw-pr-2 tw-relative tw-flex tw-flex-col tw-h-full">
@@ -23,13 +25,19 @@ const BrainContent: React.FC<BrainContentProps> = ({
           <BrainContentPinnedWaves />
         </div>
       )}
-      <div className="tw-flex-1 tw-overflow-x-hidden lg:tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 xl:tw-mb-3">
+      <div
+        className={`tw-flex-1 ${
+          !waveId
+            ? " tw-overflow-x-hidden lg:tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 xl:tw-mb-2"
+            : " "
+        }`}
+      >
         <div>{children}</div>
       </div>
       <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-iron-950">
         <BrainContentInput
           activeDrop={activeDrop}
-   onCancelReplyQuote={onCancelReplyQuote}
+          onCancelReplyQuote={onCancelReplyQuote}
           onDropAddedToQueue={onCancelReplyQuote}
         />
       </div>

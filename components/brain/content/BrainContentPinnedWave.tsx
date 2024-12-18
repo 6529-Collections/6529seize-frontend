@@ -71,18 +71,17 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
           theme="dark"
         >
           <div
-            className={`tw-relative tw-h-6 tw-px-2 tw-rounded-full tw-flex tw-items-center tw-gap-1.5 tw-cursor-pointer tw-ring-1 tw-transition tw-duration-300 tw-ease-out
+            className={`
+              tw-relative tw-h-6 tw-px-2 tw-rounded-full tw-flex tw-items-center tw-gap-1.5 
+              tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out
               ${
                 active
-                  ? "tw-bg-primary-300/10 tw-ring-primary-400 tw-ring-inset tw-shadow-md"
-                  : "tw-bg-iron-800 tw-ring-iron-700 tw-ring-inset desktop-hover:hover:tw-ring-iron-600 desktop-hover:hover:tw-bg-iron-700"
-              }`}
+                  ? "tw-bg-primary-300/10 tw-ring-primary-400 tw-ring-inset tw-ring-1 tw-shadow-md"
+                  : "tw-bg-iron-800 tw-ring-iron-700 tw-ring-inset tw-ring-1 desktop-hover:hover:tw-ring-iron-600 desktop-hover:hover:tw-bg-iron-700"
+              }
+            `}
           >
-            <div
-              className={`tw-relative tw-size-4 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-overflow-hidden tw-bg-iron-900 ${
-                isDropWave ? "" : ""
-              }`}
-            >
+            <div className="tw-relative tw-size-4 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-overflow-hidden tw-bg-iron-900">
               {wave?.picture ? (
                 <img
                   src={wave.picture}
@@ -124,7 +123,6 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   d="M17 7L7 17M7 7L17 17"

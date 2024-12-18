@@ -40,7 +40,6 @@ const MyStreamWrapper: React.FC = () => {
     );
   };
 
-
   useEffect(() => {
     setActiveDrop(null);
   }, [serialisedWaveId]);
@@ -135,10 +134,12 @@ const MyStreamWrapper: React.FC = () => {
       onBottomIntersection={onBottomIntersection}
     />
   );
+
   return (
     <BrainContent
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
+      waveId={serialisedWaveId ?? undefined}
     >
       {component}
     </BrainContent>
