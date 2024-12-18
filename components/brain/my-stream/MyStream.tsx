@@ -10,7 +10,7 @@ interface MyStreamProps {
   readonly activeDrop: ActiveDropState | null;
   readonly items: TypedFeedItem[];
   readonly isFetching: boolean;
-  readonly onBottomIntersection: (state: boolean) => void;
+  readonly onTopIntersection: () => void;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
@@ -20,7 +20,7 @@ export default function MyStream({
   activeDrop,
   items,
   isFetching,
-  onBottomIntersection,
+  onTopIntersection,
   onDropClick,
 }: MyStreamProps) {
 
@@ -31,7 +31,7 @@ export default function MyStream({
         loading={isFetching}
         showWaveInfo={true}
         activeDrop={activeDrop}
-        onBottomIntersection={onBottomIntersection}
+        onTopIntersection={onTopIntersection}
         onReply={onReply}
         onQuote={onQuote}
         onDropClick={onDropClick}

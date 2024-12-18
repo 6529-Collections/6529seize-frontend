@@ -85,13 +85,15 @@ const MyStreamWrapper: React.FC = () => {
     status,
     refetch,
     isInitialQueryDone,
-  } = useMyStreamQuery();
+  } = useMyStreamQuery({ reverse: true });
 
-  const { haveNewItems } = usePollingQuery(isInitialQueryDone, items);
+  const { haveNewItems } = usePollingQuery({
+    isInitialQueryDone,
+    items,
+  });
 
-  const onBottomIntersection = (state: boolean) => {
+  const onTopIntersection = () => {
     if (
-      state &&
       status !== "pending" &&
       !isFetching &&
       !isFetchingNextPage &&
@@ -146,7 +148,7 @@ const MyStreamWrapper: React.FC = () => {
       activeDrop={activeDrop}
       items={items}
       isFetching={isFetching}
-      onBottomIntersection={onBottomIntersection}
+      onTopIntersection={onTopIntersection}
     />
   );
   return (

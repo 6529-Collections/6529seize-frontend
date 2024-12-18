@@ -28,12 +28,12 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
     useWaveDrops({
       waveId,
       connectedProfileHandle: connectedProfile?.profile?.handle,
-      reverse: false,
+      reverse: true,
       dropId: null,
     });
 
-  const onBottomIntersection = (state: boolean) => {
-    if (state && !isFetching && !isFetchingNextPage && hasNextPage) {
+  const onTopIntersection = () => {
+    if (!isFetching && !isFetchingNextPage && hasNextPage) {
       fetchNextPage();
     }
   };
@@ -79,7 +79,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({
         loading={isFetching}
         showWaveInfo={false}
         activeDrop={activeDrop}
-        onBottomIntersection={onBottomIntersection}
+        onTopIntersection={onTopIntersection}
         onReply={onReply}
         onQuote={onQuote}
         onDropClick={onDropClick}
