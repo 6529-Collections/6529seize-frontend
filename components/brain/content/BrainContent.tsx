@@ -17,19 +17,19 @@ const BrainContent: React.FC<BrainContentProps> = ({
   onCancelReplyQuote,
 }) => {
   return (
-    <div className="lg:tw-pr-2 tw-relative tw-flex tw-flex-col tw-h-full tw-pb-6">
+    <div className="lg:tw-pr-2 tw-relative tw-flex tw-flex-col tw-h-full">
       {showPinnedWaves && (
         <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-black">
           <BrainContentPinnedWaves />
         </div>
       )}
-      <div className="tw-flex-1 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+      <div className="tw-flex-1 tw-overflow-x-hidden lg:tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 xl:tw-mb-3">
         <div>{children}</div>
       </div>
       <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-iron-950">
         <BrainContentInput
           activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
+   onCancelReplyQuote={onCancelReplyQuote}
           onDropAddedToQueue={onCancelReplyQuote}
         />
       </div>
