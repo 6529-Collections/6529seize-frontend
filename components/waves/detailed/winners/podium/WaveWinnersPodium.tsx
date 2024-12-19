@@ -19,11 +19,11 @@ interface WaveWinnersPodiumProps {
 
 const PodiumPlaceholderCard = ({ height }: { height: string }) => (
   <div
-    className={`tw-flex tw-flex-col tw-items-center tw-justify-end tw-w-full ${height} tw-bg-neutral-800/50 tw-rounded-lg tw-animate-pulse`}
+    className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full ${height} tw-bg-iron-900/80 tw-rounded-xl tw-animate-pulse`}
   >
-    <div className="tw-w-16 tw-h-16 tw-mb-4 tw-rounded-full tw-bg-neutral-700/50" />
-    <div className="tw-w-24 tw-h-3 tw-mb-2 tw-rounded tw-bg-neutral-700/50" />
-    <div className="tw-w-20 tw-h-3 tw-mb-4 tw-rounded tw-bg-neutral-700/50" />
+    <div className="tw-w-14 tw-h-14 tw-mb-4 tw-rounded-xl tw-bg-iron-700/50" />
+    <div className="tw-w-24 tw-h-3 tw-mb-2 tw-rounded-xl tw-bg-iron-700/50" />
+    <div className="tw-w-20 tw-h-3 tw-mb-4 tw-rounded-xl tw-bg-iron-700/50" />
   </div>
 );
 
@@ -64,13 +64,13 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   const secondPlaceDrop = drops[1] ?? null;
   const thirdPlaceDrop = drops[2] ?? null;
 
-  if (isFetching && !drops.length) {
+  if (!isFetching && !drops.length) {
     return (
-      <div className="tw-relative tw-mx-auto tw-max-w-3xl">
-        <div className="tw-grid tw-grid-cols-3 tw-gap-x-6 tw-items-end">
-          <PodiumPlaceholderCard height="tw-h-[280px]" />
-          <PodiumPlaceholderCard height="tw-h-[320px]" />
-          <PodiumPlaceholderCard height="tw-h-[240px]" />
+      <div className="tw-relative tw-bg-iron-950/60 tw-rounded-xl tw-overflow-hidden tw-pt-6 tw-px-6">
+        <div className="tw-grid tw-grid-cols-3 tw-gap-x-6 tw-max-w-3xl tw-mx-auto tw-items-end">
+          <PodiumPlaceholderCard height="tw-h-[180px]" />
+          <PodiumPlaceholderCard height="tw-h-[220px]" />
+          <PodiumPlaceholderCard height="tw-h-[160px]" />
         </div>
       </div>
     );
@@ -107,6 +107,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   }
 
   return (
+    
     <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-6 tw-px-6 tw-bg-iron-950/60">
       <div className="tw-max-w-3xl tw-mx-auto">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-8 tw-items-end">
