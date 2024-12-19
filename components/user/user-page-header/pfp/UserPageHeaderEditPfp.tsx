@@ -1,14 +1,30 @@
-import {FormEvent, useContext, useEffect, useRef, useState} from "react";
-import {IProfileAndConsolidations} from "../../../../entities/IProfile";
-import {useClickAway, useKeyPressEvent} from "react-use";
-import UserSettingsImgSelectMeme, {MemeLite} from "../../settings/UserSettingsImgSelectMeme";
+import { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import {
+  ApiCreateOrUpdateProfileRequest,
+  IProfileAndConsolidations,
+} from "../../../../entities/IProfile";
+import { useClickAway, useKeyPressEvent } from "react-use";
+import UserSettingsImgSelectMeme, {
+  MemeLite,
+} from "../../settings/UserSettingsImgSelectMeme";
 import UserSettingsImgSelectFile from "../../settings/UserSettingsImgSelectFile";
 import UserSettingsSave from "../../settings/UserSettingsSave";
-import {AuthContext} from "../../../auth/Auth";
-import {QueryKey, ReactQueryWrapperContext,} from "../../../react-query-wrapper/ReactQueryWrapper";
-import {commonApiFetch, commonApiPostForm,} from "../../../../services/api/common-api";
-import {useMutation, useQuery} from "@tanstack/react-query";
-import {getScaledImageUri, ImageScale} from "../../../../helpers/image.helpers";
+import { AuthContext } from "../../../auth/Auth";
+import {
+  QueryKey,
+  ReactQueryWrapperContext,
+} from "../../../react-query-wrapper/ReactQueryWrapper";
+import {
+  commonApiFetch,
+  commonApiPost,
+  commonApiPostForm,
+} from "../../../../services/api/common-api";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../helpers/image.helpers";
+import { useIpfsService } from "../../../ipfs/IPFSContext";
 
 export default function UserPageHeaderEditPfp({
   profile,
@@ -20,6 +36,8 @@ export default function UserPageHeaderEditPfp({
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
+
+  const ipfsService = useIpfsService();
 
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
@@ -40,7 +58,9 @@ export default function UserPageHeaderEditPfp({
   });
 
   const [imageToShow, setImageToShow] = useState<string | null>(
-      (profile.profile?.pfp_url ? getScaledImageUri(profile.profile.pfp_url, ImageScale.W_200_H_200) : null)
+    profile.profile?.pfp_url
+      ? getScaledImageUri(profile.profile.pfp_url, ImageScale.W_200_H_200)
+      : null
   );
 
   const [selectedMeme, setSelectedMeme] = useState<MemeLite | null>(null);
@@ -69,18 +89,45 @@ export default function UserPageHeaderEditPfp({
   const updatePfp = useMutation({
     mutationFn: async (body: FormData) => {
       setSaving(true);
-      return await commonApiPostForm<{ pfp_url: string }>({
-        endpoint: `profiles/${profile.input_identity}/pfp`,
-        body: body,
-      });
+      const pfp = body.get("pfp");
+      if (pfp) {
+        if (!profile.profile?.classification) {
+          return;
+        }
+        const cid = await ipfsService.addFile(pfp as File);
+        const ipfs = `ipfs://${cid}`;
+        const ipfsBody: ApiCreateOrUpdateProfileRequest = {
+          handle: profile.profile?.handle,
+          classification: profile.profile?.classification,
+          pfp_url: ipfs,
+        };
+        if (profile.profile?.banner_1) {
+          ipfsBody.banner_1 = ipfs;
+        }
+        if (profile.profile?.banner_2) {
+          ipfsBody.banner_2 = ipfs;
+        }
+        const response = await commonApiPost<
+          ApiCreateOrUpdateProfileRequest,
+          IProfileAndConsolidations
+        >({
+          endpoint: `profiles`,
+          body: ipfsBody,
+        });
+        return response.profile?.pfp_url;
+      } else {
+        const response = await commonApiPostForm<{ pfp_url: string }>({
+          endpoint: `profiles/${profile.input_identity}/pfp`,
+          body: body,
+        });
+        return response.pfp_url;
+      }
     },
-    onSuccess: (response) => {
+    onSuccess: (pfp_url) => {
       onProfileEdit({
         profile: {
           ...profile,
-          profile: profile.profile
-            ? { ...profile.profile, pfp_url: response.pfp_url }
-            : null,
+          profile: profile.profile ? { ...profile.profile, pfp_url } : null,
         },
         previousProfile: null,
       });
@@ -139,8 +186,7 @@ export default function UserPageHeaderEditPfp({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div
             ref={modalRef}
-            className={`sm:tw-max-w-3xl md:tw-max-w-2xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}
-          >
+            className={`sm:tw-max-w-3xl md:tw-max-w-2xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}>
             <form onSubmit={onSubmit}>
               <UserSettingsImgSelectMeme
                 memes={memes ?? []}
