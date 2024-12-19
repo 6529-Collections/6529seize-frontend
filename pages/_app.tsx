@@ -116,10 +116,7 @@ import { NotificationsProvider } from "../components/notifications/Notifications
 import Footer from "../components/footer/Footer";
 import { useRouter } from "next/router";
 import { SeizeConnectProvider } from "../components/auth/SeizeConnectContext";
-import {
-  IpfsProvider,
-  useIpfsGatewayUrl,
-} from "../components/ipfs/IPFSContext";
+import { IpfsProvider, resolveIpfsUrl } from "../components/ipfs/IPFSContext";
 
 library.add(
   faArrowUp,
@@ -287,7 +284,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     const elementsWithSrc = document.querySelectorAll("[src]");
     Array.from(elementsWithSrc).forEach((el) => {
       const src = el.getAttribute("src")!;
-      const newSrc = useIpfsGatewayUrl(src);
+      const newSrc = resolveIpfsUrl(src);
       el.setAttribute("src", newSrc);
     });
   };

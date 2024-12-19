@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import IpfsService from "./IPFSService";
 
 interface IpfsContextType {
@@ -34,11 +34,11 @@ export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
     mfsPath: `/${mfsPath}`,
   });
 
-  return (
-    <IpfsContext.Provider value={{ ipfsService }}>
-      {children}
-    </IpfsContext.Provider>
-  );
+  ipfsService.init();
+
+  const value = useMemo(() => ({ ipfsService }), [ipfsService]);
+
+  return <IpfsContext.Provider value={value}>{children}</IpfsContext.Provider>;
 };
 
 export const useIpfsService = (): IpfsService => {
@@ -49,7 +49,7 @@ export const useIpfsService = (): IpfsService => {
   return context.ipfsService;
 };
 
-export const useIpfsGatewayUrl = (url: string) => {
+export const resolveIpfsUrl = (url: string) => {
   if (url.startsWith("ipfs://")) {
     const { domain, gatewayPort } = getEnv();
     return `${domain}:${gatewayPort}/ipfs/${url.slice(7)}`;

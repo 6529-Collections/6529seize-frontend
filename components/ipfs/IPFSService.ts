@@ -1,7 +1,5 @@
 import axios from "axios";
-import * as path from "path";
 import FormData from "form-data";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 
 interface IpfsServiceConfig {
   baseDomain: string;
@@ -11,21 +9,17 @@ interface IpfsServiceConfig {
 }
 
 class IpfsService {
-  private baseDomain: string;
-  private rpcPort: number;
-  private gatewayPort: number;
-  private mfsPath: string;
+  private readonly baseDomain: string;
+  private readonly rpcPort: number;
+  private readonly mfsPath: string;
 
   constructor(config: IpfsServiceConfig) {
     this.baseDomain = config.baseDomain;
     this.rpcPort = config.rpcPort;
-    this.gatewayPort = config.gatewayPort;
     this.mfsPath = config.mfsPath;
-
-    this.init();
   }
 
-  private async init() {
+  async init() {
     try {
       await axios.post(
         `${this.baseDomain}:${this.rpcPort}/api/v0/files/mkdir?arg=${this.mfsPath}&parents=true`
