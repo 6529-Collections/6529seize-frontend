@@ -70,6 +70,10 @@ const nextConfig = {
     VERSION: VERSION,
     NEXTGEN_CHAIN_ID: process.env.NEXTGEN_CHAIN_ID,
     MOBILE_APP_SCHEME: process.env.MOBILE_APP_SCHEME,
+    IPFS_DOMAIN: process.env.IPFS_DOMAIN,
+    IPFS_RPC_PORT: process.env.IPFS_RPC_PORT,
+    IPFS_GATEWAY_PORT: process.env.IPFS_GATEWAY_PORT,
+    IPFS_MFS_PATH: process.env.IPFS_MFS_PATH,
   },
   async generateBuildId() {
     return VERSION;

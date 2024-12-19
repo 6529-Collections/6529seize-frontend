@@ -116,6 +116,10 @@ import { NotificationsProvider } from "../components/notifications/Notifications
 import Footer from "../components/footer/Footer";
 import { useRouter } from "next/router";
 import { SeizeConnectProvider } from "../components/auth/SeizeConnectContext";
+import {
+  IpfsProvider,
+  useIpfsGatewayUrl,
+} from "../components/ipfs/IPFSContext";
 
 library.add(
   faArrowUp,
@@ -279,6 +283,32 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     }
   }, []);
 
+  const updateImagesSrc = () => {
+    const elementsWithSrc = document.querySelectorAll("[src]");
+    Array.from(elementsWithSrc).forEach((el) => {
+      const src = el.getAttribute("src")!;
+      const newSrc = useIpfsGatewayUrl(src);
+      el.setAttribute("src", newSrc);
+    });
+  };
+
+  useEffect(() => {
+    updateImagesSrc();
+
+    const observer = new MutationObserver(() => {
+      updateImagesSrc();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
@@ -292,21 +322,22 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         )}
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
-            <SeizeConnectProvider>
-              <Auth>
-                <NotificationsProvider>
-                  <CookieConsentProvider>
-                    {getLayout(<Component {...props} />)}
-                    <CookiesBanner />
-                  </CookieConsentProvider>
-                </NotificationsProvider>
-              </Auth>
-            </SeizeConnectProvider>
+            <IpfsProvider>
+              <SeizeConnectProvider>
+                <Auth>
+                  <NotificationsProvider>
+                    <CookieConsentProvider>
+                      {getLayout(<Component {...props} />)}
+                      <CookiesBanner />
+                    </CookieConsentProvider>
+                  </NotificationsProvider>
+                </Auth>
+              </SeizeConnectProvider>
+            </IpfsProvider>
           </ReactQueryWrapper>
           {!hideFooter && <Footer />}
         </WagmiProvider>
       </Provider>
-
     </QueryClientProvider>
   );
 }
