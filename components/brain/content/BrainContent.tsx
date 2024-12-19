@@ -1,49 +1,45 @@
 import React from "react";
 import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
-import { useWaveData } from "../../../hooks/useWaveData";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 
 interface BrainContentProps {
   readonly children: React.ReactNode;
   readonly showPinnedWaves?: boolean;
-  readonly waveId: string | null;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly waveId?: string;
 }
 
 const BrainContent: React.FC<BrainContentProps> = ({
   children,
   showPinnedWaves = true,
-  waveId,
   activeDrop,
   onCancelReplyQuote,
+  waveId,
 }) => {
-  const { data: wave } = useWaveData(waveId);
-
   return (
-    <div className="lg:tw-pr-2">
-      {showPinnedWaves && <BrainContentPinnedWaves />}
-      <BrainContentInput
-        waveId={waveId}
-        activeDrop={activeDrop}
-        onCancelReplyQuote={onCancelReplyQuote}
-        onDropAddedToQueue={onCancelReplyQuote}
-      />
-      <div className="tw-flex-1">
-        <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-2 tw-mt-2">
-          {!!wave && (
-            <>
-              <h2 className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-200">
-                <span>{wave.name}</span>{" "}
-                <span className="tw-text-iron-400">Stream</span>
-              </h2>
-              <div className="tw-flex-1 tw-h-px tw-bg-iron-900" />
-              {/* <FilterDrops /> */}
-            </>
-          )}
+    <div className="tw-relative tw-flex tw-flex-col tw-h-full">
+      {showPinnedWaves && (
+        <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+          <BrainContentPinnedWaves />
         </div>
+      )}
+      <div
+        className={`tw-flex-1 ${
+          !waveId
+            ? " tw-overflow-x-hidden lg:tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
+            : " "
+        }`}
+      >
         <div>{children}</div>
+      </div>
+      <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-iron-950">
+        <BrainContentInput
+          activeDrop={activeDrop}
+          onCancelReplyQuote={onCancelReplyQuote}
+          onDropAddedToQueue={onCancelReplyQuote}
+        />
       </div>
     </div>
   );

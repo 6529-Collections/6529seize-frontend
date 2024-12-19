@@ -1,89 +1,96 @@
-import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../auth/Auth";
-import { useWaveDrops } from "../../../hooks/useWaveDrops";
-import FeedWrapper from "../feed/FeedWrapper";
-import { TypedFeedItem } from "../../../types/feed.types";
+import React, { useMemo, useState } from "react";
+import WaveDropsAll from "../../waves/detailed/drops/WaveDropsAll";
+import { CreateDropWaveWrapper } from "../../waves/detailed/CreateDropWaveWrapper";
+import PrivilegedDropCreator, {
+  DropMode,
+} from "../../waves/detailed/PrivilegedDropCreator";
+import { useWaveData } from "../../../hooks/useWaveData";
+import useCapacitor from "../../../hooks/useCapacitor";
+import { ActiveDropAction, ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { ApiDrop } from "../../../generated/models/ObjectSerializer";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ApiFeedItemType } from "../../../generated/models/ApiFeedItemType";
-import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
-import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
-  readonly activeDrop: ActiveDropState | null;
-  readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-const MyStreamWave: React.FC<MyStreamWaveProps> = ({
-  waveId,
-  activeDrop,
-  onReply,
-  onQuote,
-  onDropClick,
-}) => {
-  const { connectedProfile } = useContext(AuthContext);
-  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
-    useWaveDrops({
-      waveId,
-      connectedProfileHandle: connectedProfile?.profile?.handle,
-      reverse: false,
-      dropId: null,
+const calculateHeight = (isCapacitor: boolean) => {
+  if (isCapacitor) {
+    return "tw-h-[calc(100vh-18.75rem)]";
+  }
+  return `tw-h-[calc(100vh-13rem)] lg:tw-h-[calc(100vh-10rem)]`;
+};
+
+const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropClick }) => {
+  const { data: wave } = useWaveData(waveId);
+  const capacitor = useCapacitor();
+
+  const containerClassName = useMemo(() => {
+    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
+      capacitor.isCapacitor
+    )}`;
+  }, [capacitor.isCapacitor]);
+
+  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  const onReply = (drop: ApiDrop, partId: number) => {
+    setActiveDrop({
+      action: ActiveDropAction.REPLY,
+      drop,
+      partId,
     });
-
-  const onBottomIntersection = (state: boolean) => {
-    if (state && !isFetching && !isFetchingNextPage && hasNextPage) {
-      fetchNextPage();
-    }
   };
 
-  const convertDropToFeedItem = (drop: ExtendedDrop): TypedFeedItem => {
-    if (drop.reply_to?.drop) {
-      return {
-        type: ApiFeedItemType.DropReplied,
-        serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
-        item: {
-          drop: {
-            ...drop.reply_to.drop,
-            wave: drop.wave,
-          },
-          reply: {
-            ...drop,
-          },
-        },
-      };
-    }
-    return {
-      type: ApiFeedItemType.DropCreated,
-      serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
-      item: drop,
-    };
+  const onQuote = (drop: ApiDrop, partId: number) => {
+    setActiveDrop({
+      action: ActiveDropAction.QUOTE,
+      drop,
+      partId,
+    });
   };
 
-  const convertDropsToFeedItems = (drops: ExtendedDrop[]): TypedFeedItem[] => {
-    return drops.map((drop) => convertDropToFeedItem(drop));
+  const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
+    onReply(drop, partId);
   };
 
-  const [items, setItems] = useState<TypedFeedItem[]>(
-    convertDropsToFeedItems(drops)
-  );
+  const handleQuote = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
+    onQuote(drop, partId);
+  };
 
-  useEffect(() => {
-    setItems(convertDropsToFeedItems(drops));
-  }, [drops]);
+  const onCancelReplyQuote = () => {
+    setActiveDrop(null);
+  };
+
+  if (!wave) {
+    return null;
+  }
   return (
-    <div className="tw-flex-shrink-0">
-      <FeedWrapper
-        items={items}
-        loading={isFetching}
-        showWaveInfo={false}
-        activeDrop={activeDrop}
-        onBottomIntersection={onBottomIntersection}
-        onReply={onReply}
-        onQuote={onQuote}
-        onDropClick={onDropClick}
-      />
+    <div className="tw-relative tw-h-full">
+      <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
+        <div className={containerClassName}>
+          <WaveDropsAll
+            waveId={waveId}
+            onReply={handleReply}
+            onQuote={handleQuote}
+            activeDrop={activeDrop}
+            initialDrop={null}
+            dropId={null}
+            onDropClick={onDropClick}
+          />
+          <div className="tw-mt-auto">
+            <CreateDropWaveWrapper>
+              <PrivilegedDropCreator
+                activeDrop={activeDrop}
+                onCancelReplyQuote={onCancelReplyQuote}
+                onDropAddedToQueue={onCancelReplyQuote}
+                wave={wave}
+                dropId={null}
+                fixedDropMode={DropMode.BOTH}
+              />
+            </CreateDropWaveWrapper>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

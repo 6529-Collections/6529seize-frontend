@@ -42,7 +42,7 @@ export default function FeedItems({
   }, [items]);
 
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-3">
+    <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-4">
       {items.map((item, i) => (
         <div key={getFeedItemKey({ item, index: i })}>
           <CommonChangeAnimation>

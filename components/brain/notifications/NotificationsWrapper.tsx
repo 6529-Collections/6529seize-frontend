@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TypedNotification } from "../../../types/feed.types";
 import CircleLoader, {
@@ -62,10 +62,9 @@ export default function NotificationsWrapper({
   return (
     <div>
       <BrainContentInput
-        waveId={activeDrop?.drop?.wave?.id ?? null}
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
-        onDropAddedToQueue={() =>{}}
+        onDropAddedToQueue={() => {}}
       />
       <div className="tw-relative">
         <NotificationItems

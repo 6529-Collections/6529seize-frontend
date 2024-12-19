@@ -75,7 +75,7 @@ export default function NotificationItem({
 
   return (
     <div className="tw-flex">
-      <div className="tw-relative">
+      <div className="tw-relative lg:tw-hidden">
         <div className="tw-h-full tw-w-[1px] tw-bg-iron-800 -tw-translate-x-8"></div>
       </div>
       <div className="tw-w-full tw-my-2">{getComponent()}</div>
