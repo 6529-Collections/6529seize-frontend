@@ -14,7 +14,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
   onSuccess,
 }) => {
   return (
-    <div className="tw-mt-4 tw-mb-4 tw-bg-iron-950 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+    <div className="tw-mb-4 tw-bg-iron-950 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800">
       <div className="tw-flex tw-justify-between tw-items-center tw-mb-3">
         <span className="tw-text-base tw-font-semibold tw-text-iron-200">
           Create a New Drop
@@ -40,6 +40,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
       <PrivilegedDropCreator
         wave={wave}
         onCancelReplyQuote={() => {}}
+        onDropAddedToQueue={() => {}}
         onAllDropsAdded={onSuccess}
         dropId={null}
         activeDrop={null}

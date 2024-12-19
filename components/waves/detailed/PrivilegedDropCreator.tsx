@@ -14,6 +14,7 @@ export enum DropMode {
 interface PrivilegedDropCreatorProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly onDropAddedToQueue: () => void;
   readonly onAllDropsAdded?: () => void;
   readonly wave: ApiWave;
   readonly dropId: string | null;
@@ -27,6 +28,7 @@ export default function PrivilegedDropCreator({
   dropId,
   fixedDropMode,
   onAllDropsAdded,
+  onDropAddedToQueue,
 }: PrivilegedDropCreatorProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
@@ -76,6 +78,7 @@ export default function PrivilegedDropCreator({
         submissionRestriction,
         chatRestriction,
       }}
+      onDropAddedToQueue={onDropAddedToQueue}
     />
   );
 }

@@ -74,14 +74,14 @@ export default function VoteBreakdownTooltip({
                 <span className="tw-text-xs tw-font-medium tw-text-rose-400">−</span>
               </div>
               <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-                {formatNumberWithCommas(votingPower)} TDH
+                {formatNumberWithCommas(votingPower)} {drop.wave.voting_credit_type}
               </span>
             </div>
           </div>
           <div className="tw-flex tw-items-center tw-justify-between">
             <span className="tw-text-xs tw-text-iron-300">Voted</span>
             <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-              {formatNumberWithCommas(Math.abs(userRating))} TDH
+              {formatNumberWithCommas(Math.abs(userRating))} {drop.wave.voting_credit_type}
             </span>
           </div>
         </div>

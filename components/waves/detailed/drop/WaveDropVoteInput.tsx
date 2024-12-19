@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
+import { ApiWaveCreditType } from "../../../../generated/models/ObjectSerializer";
 
 interface WaveDropVoteInputProps {
   readonly voteValue: number | string;
   readonly minValue: number;
   readonly maxValue: number;
+  readonly creditType: ApiWaveCreditType;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
   readonly onSubmit: () => void;
 }
@@ -13,6 +15,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
   setVoteValue,
   minValue,
   maxValue,
+  creditType,
   onSubmit,
 }) => {
   const memeticValues: number[] = [
@@ -164,7 +167,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-relative tw-w-full">
-        <div className="tw-mb-2 tw-flex tw-gap-1 tw-z-10 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+        <div className="tw-mb-2 tw-p-0.5 tw-flex tw-gap-1 tw-z-10 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           {quickPercentages.map((percentage) => (
             <button
               key={percentage}
@@ -191,7 +194,7 @@ export const WaveDropVoteInput: React.FC<WaveDropVoteInputProps> = ({
               onKeyDown={handleKeyDown}
             />
             <div className="tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-400 tw-pointer-events-none">
-              TDH
+              {creditType}
             </div>
           </div>
 

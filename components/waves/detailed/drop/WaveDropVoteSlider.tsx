@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { SliderTheme, SLIDER_THEMES } from "./types/slider.types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 
 interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;
@@ -9,6 +10,7 @@ interface WaveDropVoteSliderProps {
   readonly maxValue: number;
   readonly setVoteValue: React.Dispatch<React.SetStateAction<string | number>>;
   readonly rank?: number | null;
+  readonly creditType: ApiWaveCreditType;
 }
 
 interface PresetMark {
@@ -101,6 +103,7 @@ export default function WaveDropVoteSlider({
   minValue,
   maxValue,
   rank = null,
+  creditType,
 }: WaveDropVoteSliderProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -254,7 +257,7 @@ export default function WaveDropVoteSlider({
                         : (maxValue * mark.percentage) / 100
                     )
                   )}{" "}
-                  TDH
+                  {creditType}
                 </motion.div>
               </div>
               {hoveredPreset === mark.percentage && (
@@ -339,7 +342,7 @@ export default function WaveDropVoteSlider({
                   {formatNumberWithCommas(
                     typeof voteValue === "string" ? 0 : voteValue
                   )}{" "}
-                  TDH
+                  {creditType}
                 </span>
                 <div
                   className={`tw-absolute tw-w-2 tw-h-2 tw-bottom-[-4px] tw-left-1/2 -tw-translate-x-1/2

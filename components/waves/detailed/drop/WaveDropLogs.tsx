@@ -80,7 +80,11 @@ export const WaveDropLogs: React.FC<WaveDropLogsProps> = ({ drop }) => {
               {logs.length > 0 || isLoading ? (
                 <div className="tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
                   {logs.map((log) => (
-                    <WaveDropLog key={log.id} log={log} />
+                    <WaveDropLog
+                      key={log.id}
+                      log={log}
+                      creditType={drop.wave.voting_credit_type}
+                    />
                   ))}
                 </div>
               ) : (

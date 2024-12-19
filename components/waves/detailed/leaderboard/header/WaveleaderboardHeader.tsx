@@ -24,7 +24,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   return (
-    <div className="tw-mt-6 md:tw-mt-8 tw-flex tw-flex-col tw-gap-y-4">
+    <div className="tw-mt-6 md:tw-mt-8 tw-flex tw-flex-col tw-gap-y-4 tw-@container">
       <div className="tw-flex tw-flex-col sm:tw-flex-row tw-items-start sm:tw-items-center tw-justify-between tw-border-t tw-border-iron-700/40 tw-pb-4">
         <div className="tw-hidden md:tw-block">
           <h3 className="tw-text-xl md:tw-text-2xl tw-font-semibold tw-text-iron-200 tw-mb-0">
@@ -70,7 +70,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               )}
             </div>
           </div>
-          <div className="tw-mt-4 md:tw-mt-0 tw-flex tw-items-center tw-justify-between md:tw-justify-end tw-gap-x-4">
+          <div className="tw-mt-4 md:tw-mt-0 tw-flex tw-items-center tw-justify-between md:tw-justify-end @[800px]:tw-gap-x-4 tw-gap-x-2">
             <WaveLeaderboardSort sort={sort} setSort={setSort} />
             {connectedProfile && (
               <div className="tw-flex tw-items-center tw-gap-x-4">

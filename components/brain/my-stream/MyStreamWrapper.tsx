@@ -40,18 +40,6 @@ const MyStreamWrapper: React.FC = () => {
     );
   };
 
-  const getActiveWaveId = () => {
-    return activeDrop?.drop.wave.id ?? serialisedWaveId;
-  };
-
-  const [activeWaveId, setActiveWaveId] = useState<string | null>(
-    getActiveWaveId()
-  );
-
-  useEffect(() => {
-    setActiveWaveId(getActiveWaveId());
-  }, [activeDrop, serialisedWaveId]);
-
   useEffect(() => {
     setActiveDrop(null);
   }, [serialisedWaveId]);
@@ -133,9 +121,6 @@ const MyStreamWrapper: React.FC = () => {
   const component = serialisedWaveId ? (
     <MyStreamWave
       waveId={serialisedWaveId}
-      onReply={onReply}
-      onQuote={onQuote}
-      activeDrop={activeDrop}
       onDropClick={onDropClick}
     />
   ) : (
@@ -149,11 +134,12 @@ const MyStreamWrapper: React.FC = () => {
       onBottomIntersection={onBottomIntersection}
     />
   );
+
   return (
     <BrainContent
-      waveId={activeWaveId}
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
+      waveId={serialisedWaveId ?? undefined}
     >
       {component}
     </BrainContent>

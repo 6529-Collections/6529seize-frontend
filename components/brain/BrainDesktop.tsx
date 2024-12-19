@@ -1,12 +1,13 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
-import BrainRightSidebar from "./right-sidebar/BrainRightSidebar";
+import BrainRightSidebar, { SidebarTab } from "./right-sidebar/BrainRightSidebar";
 import { useRouter } from "next/router";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
+import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 
 interface Props {
   children: ReactNode;
@@ -16,6 +17,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
     queryFn: async () =>
@@ -38,6 +40,19 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     });
   };
 
+  const onDropClick = (drop: ExtendedDrop) => {
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const contentClasses = showRightSidebar
     ? "tailwind-scope tw-relative tw-flex tw-flex-grow tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto"
     : "tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto";
@@ -46,7 +61,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
    drop && drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
   return (
-    <div className="tw-relative tw-flex tw-flex-col">
+    <div className="tw-relative tw-min-h-screen tw-flex tw-flex-col">
       <div className={`tailwind-scope tw-relative tw-flex tw-flex-grow ${
         isDropOpen ? 'tw-w-full xl:tw-pl-6' : contentClasses
       }`}>
@@ -76,6 +91,9 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
             isCollapsed={isCollapsed}
             setIsCollapsed={setIsCollapsed}
             waveId={router.query.wave as string}
+            onDropClick={onDropClick}
+            activeTab={sidebarTab}
+            setActiveTab={setSidebarTab}
           />
         )}
       </div>

@@ -24,7 +24,7 @@ export default function ParticipationDropRatingsTotalSection({
         zIndex={1000}
       >
         <span className="tw-text-xs tw-font-medium tw-text-iron-500 tw-h-5 tw-flex tw-items-center tw-cursor-help">
-          Total TDH
+          Total {drop.wave.voting_credit_type}
         </span>
       </Tippy>
       <div className={`tw-relative tw-inline-flex ${theme.indicator}`}>

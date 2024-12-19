@@ -5,15 +5,13 @@ import BrainLeftSidebarSearchWave from "../left-sidebar/search-wave/BrainLeftSid
 import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
 
 interface BrainMobileWavesProps {
-  readonly activeWaveId: string | null;
+  readonly activeWaveId: string;
 }
 
-const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
-  activeWaveId,
-}) => {
+const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({ activeWaveId }) => {
   const capacitor = useCapacitor();
 
-  const containerClassName = `tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-space-y-4${
+  const containerClassName = `tw-h-[calc(100vh-10.75rem)] tw-overflow-y-auto no-scrollbar tw-space-y-4 tw-px-2 sm:tw-px-4 md:tw-px-6 ${
     capacitor.isCapacitor ? " tw-pb-[calc(4rem+80px)]" : ""
   }`;
 

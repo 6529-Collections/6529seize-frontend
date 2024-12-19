@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Tippy from "@tippyjs/react";
 
 import { ApiWave } from "../../../../generated/models/ApiWave";
@@ -91,6 +91,20 @@ const calculateOutcomeSummary = ({
 export const WaveDetailedLeaderboardItemOutcomes: React.FC<
   WaveDetailedLeaderboardItemOutcomesProps
 > = ({ drop, wave, isMobile = false }) => {
+  const [isTouch, setIsTouch] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsTouch('ontouchstart' in window);
+  }, []);
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isTouch) {
+      e.stopPropagation();
+      setIsOpen(!isOpen);
+    }
+  };
+
   const { nicTotal, repTotal, manualOutcomes } = calculateOutcomeSummary({
     drop,
     wave,
@@ -191,11 +205,20 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
   );
 
   return (
-    <Tippy content={tooltipContent} placement="top" animation="shift-away">
+    <Tippy 
+      content={tooltipContent} 
+      placement="top" 
+      animation="shift-away"
+      visible={isTouch ? isOpen : undefined}
+      onClickOutside={() => setIsOpen(false)}
+    >
       <button
+        onClick={handleClick}
         className={`tw-border-0 tw-rounded-lg tw-flex tw-items-center ${
           isMobile ? "tw-gap-4" : "tw-gap-2"
-        } tw-min-w-6 tw-py-1.5 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700`}
+        } tw-min-w-6 tw-py-1.5 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${
+          isTouch ? 'tw-cursor-pointer' : ''
+        }`}
       >
         <span className="tw-text-sm [@container_(max-width:32rem)]:tw-text-xs tw-font-normal tw-text-iron-200">
           Outcome:

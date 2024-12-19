@@ -1,9 +1,11 @@
 import Tippy from "@tippyjs/react";
 import React from "react";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 
 interface WaveDropVoteQuickButtonProps {
   readonly value: number;
+  readonly creditType: ApiWaveCreditType;
   readonly rank: number;
   readonly disabled: boolean;
   readonly setValue: (value: number) => void;
@@ -11,7 +13,7 @@ interface WaveDropVoteQuickButtonProps {
 
 export const WaveDropVoteQuickButton: React.FC<
   WaveDropVoteQuickButtonProps
-> = ({ value, rank, disabled, setValue }) => {
+> = ({ value, rank, disabled, setValue, creditType }) => {
   const getColours = (rank: number): { base: string; hover: string } => {
     if (rank === 1) {
       return {
@@ -51,7 +53,7 @@ export const WaveDropVoteQuickButton: React.FC<
           }`}
         >
           <span className="tw-text-xs tw-font-medium">
-            {formatNumberWithCommas(value)} TDH to #{rank}
+            {formatNumberWithCommas(value)} {creditType} to #{rank}
           </span>
           <svg
             className="tw-w-3.5 tw-h-3.5 desktop-hover:group-hover/icon:tw-translate-x-0.5 tw-transition-all tw-duration-300 tw-ease-out"
