@@ -83,10 +83,17 @@ export default function WaveDropsAll({
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
-      if (serialNo && targetDropRef.current) {
-        targetDropRef.current.scrollIntoView({
-          behavior: behavior,
-          block: "center",
+      if (serialNo && targetDropRef.current && scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        const targetElement = targetDropRef.current;
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+        
+        const scrollTop = container.scrollTop + (targetRect.top - containerRect.top) - containerRect.height / 2 + targetRect.height / 2;
+        
+        container.scrollTo({
+          top: scrollTop,
+          behavior: behavior
         });
         return true;
       }
@@ -227,7 +234,7 @@ export default function WaveDropsAll({
               Be the First to Start a Discussion
             </span>
             <p className="tw-text-sm tw-text-iron-500 tw-text-center tw-mb-0 tw-max-w-xs">
-            {dropId ? "Share your thoughts and join the discussion." : ""}
+              {dropId ? "Share your thoughts and join the discussion." : ""}
             </p>
           </div>
         </div>
