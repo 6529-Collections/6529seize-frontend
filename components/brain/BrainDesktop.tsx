@@ -61,7 +61,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
    drop && drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
   return (
-    <div className="tw-relative tw-flex tw-flex-col">
+    <div className="tw-relative tw-min-h-screen tw-flex tw-flex-col">
       <div className={`tailwind-scope tw-relative tw-flex tw-flex-grow ${
         isDropOpen ? 'tw-w-full xl:tw-pl-6' : contentClasses
       }`}>

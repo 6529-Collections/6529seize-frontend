@@ -40,6 +40,7 @@ export const WaveDropCreate: React.FC<WaveDropCreateProps> = ({
       <PrivilegedDropCreator
         wave={wave}
         onCancelReplyQuote={() => {}}
+        onDropAddedToQueue={() => {}}
         onAllDropsAdded={onSuccess}
         dropId={null}
         activeDrop={null}
