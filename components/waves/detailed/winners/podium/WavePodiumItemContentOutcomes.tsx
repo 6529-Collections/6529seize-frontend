@@ -215,9 +215,9 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
     >
       <button
         onClick={handleClick}
-        className={`tw-border-0 tw-rounded-lg tw-flex tw-items-center ${
+        className={`tw-border-0 tw-flex tw-items-center ${
           isMobile ? "tw-gap-4" : "tw-gap-2"
-        } tw-min-w-6 tw-px-3 tw-py-1.5 tw-rounded-full tw-bg-iron-800/40 tw-border tw-border-solid tw-border-iron-700/20 ${
+        } tw-px-3 tw-py-1.5 tw-rounded-full tw-bg-iron-800/40 tw-border tw-border-solid tw-border-iron-700/20 ${
           isTouch ? 'tw-cursor-pointer' : ''
         }`}
       >

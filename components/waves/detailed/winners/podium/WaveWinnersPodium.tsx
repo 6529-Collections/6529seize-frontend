@@ -10,6 +10,7 @@ import { AuthContext } from "../../../../auth/Auth";
 import { WaveWinnersPodiumFirst } from "./WaveWinnersPodiumFirst";
 import { WaveWinnersPodiumSecond } from "./WaveWinnersPodiumSecond";
 import { WaveWinnersPodiumThird } from "./WaveWinnersPodiumThird";
+import { motion } from "framer-motion";
 
 interface WaveWinnersPodiumProps {
   readonly wave: ApiWave;
@@ -25,6 +26,25 @@ const PodiumPlaceholderCard = ({ height }: { height: string }) => (
     <div className="tw-w-20 tw-h-3 tw-mb-4 tw-rounded tw-bg-neutral-700/50" />
   </div>
 );
+
+const podiumVariants = {
+  hidden: { 
+    opacity: 0, 
+    y: 20,
+    scale: 0.98
+  },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      delay: i * 0.08,
+      duration: 0.4,
+      ease: [0.2, 0.9, 0.3, 1],
+      opacity: { duration: 0.25 }
+    }
+  })
+};
 
 export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   wave,
@@ -92,22 +112,46 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
       <div className="tw-max-w-3xl tw-mx-auto">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-8 tw-items-end">
           {secondPlaceDrop && (
-            <WaveWinnersPodiumSecond
-              drop={secondPlaceDrop}
-              onDropClick={onDropClick}
-            />
+            <motion.div
+              variants={podiumVariants}
+              initial="hidden"
+              animate="visible"
+              custom={1}
+            >
+              <WaveWinnersPodiumSecond
+                drop={secondPlaceDrop}
+                wave={wave}
+                onDropClick={onDropClick}
+              />
+            </motion.div>
           )}
           {firstPlaceDrop && (
-            <WaveWinnersPodiumFirst
-              drop={firstPlaceDrop}
-              onDropClick={onDropClick}
-            />
+            <motion.div
+              variants={podiumVariants}
+              initial="hidden"
+              animate="visible"
+              custom={0}
+            >
+              <WaveWinnersPodiumFirst
+                drop={firstPlaceDrop}
+                wave={wave}
+                onDropClick={onDropClick}
+              />
+            </motion.div>
           )}
           {thirdPlaceDrop && (
-            <WaveWinnersPodiumThird
-              drop={thirdPlaceDrop}
-              onDropClick={onDropClick}
-            />
+            <motion.div
+              variants={podiumVariants}
+              initial="hidden"
+              animate="visible"
+              custom={2}
+            >
+              <WaveWinnersPodiumThird
+                drop={thirdPlaceDrop}
+                wave={wave}
+                onDropClick={onDropClick}
+              />
+            </motion.div>
           )}
         </div>
       </div>
