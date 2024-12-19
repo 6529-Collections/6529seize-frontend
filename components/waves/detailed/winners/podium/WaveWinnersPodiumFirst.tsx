@@ -100,7 +100,7 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
 
               <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
                 <div className="tw-flex tw-items-center tw-gap-1.5 tw-px-3 tw-py-1.5 tw-rounded-full tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-iron-700/20">
-                  <span className="tw-text-white tw-text-sm">
+                  <span className="tw-text-iron-200 tw-text-sm">
                     {formatNumberWithCommas(drop.raters_count)}
                   </span>
                   <span className="tw-text-iron-400 tw-text-sm">

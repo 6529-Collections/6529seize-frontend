@@ -21,7 +21,10 @@ export const WaveWinnersPodiumThird: React.FC<WaveWinnersPodiumThirdProps> = ({
   onDropClick,
 }) => {
   return (
-    <div onClick={() => onDropClick(drop)} className="tw-cursor-pointer tw-group">
+    <div
+      onClick={() => onDropClick(drop)}
+      className="tw-cursor-pointer tw-group"
+    >
       <div className="tw-flex tw-flex-col tw-items-center -tw-mx-3">
         <div className="tw-flex tw-flex-col tw-items-center tw-mb-5 tw-relative tw-z-10">
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#CD7F32]/20 tw-to-transparent tw-blur-2xl tw-scale-150" />
@@ -90,7 +93,7 @@ export const WaveWinnersPodiumThird: React.FC<WaveWinnersPodiumThirdProps> = ({
 
               <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-1.5">
                 <div className="tw-flex tw-items-center tw-gap-1.5 tw-px-2.5 tw-py-0.5 tw-rounded-full tw-bg-iron-800/50 tw-backdrop-blur-sm">
-                  <span className="tw-text-white tw-text-sm">
+                  <span className="tw-text-iron-200 tw-text-sm">
                     {formatNumberWithCommas(drop.raters_count)}
                   </span>
                   <span className="tw-text-iron-400 tw-text-sm">

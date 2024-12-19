@@ -28,10 +28,10 @@ const PodiumPlaceholderCard = ({ height }: { height: string }) => (
 );
 
 const podiumVariants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 20,
-    scale: 0.98
+    scale: 0.98,
   },
   visible: (i: number) => ({
     opacity: 1,
@@ -41,9 +41,9 @@ const podiumVariants = {
       delay: i * 0.08,
       duration: 0.4,
       ease: [0.2, 0.9, 0.3, 1],
-      opacity: { duration: 0.25 }
-    }
-  })
+      opacity: { duration: 0.25 },
+    },
+  }),
 };
 
 export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
@@ -78,30 +78,29 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
 
   if (!drops.length) {
     return (
-      <div className="tw-relative tw-mx-auto tw-max-w-3xl">
-        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-8 tw-text-center tw-border tw-border-solid tw-border-neutral-700 tw-rounded-lg">
-          <div className="tw-h-10 tw-w-10 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-bg-neutral-700/60 tw-ring-[8px] tw-ring-neutral-800/60">
-            <svg
-              className="tw-mx-auto tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M16.5 6.75h4.875c.621 0 1.125.504 1.125 1.125v12.75c0 .621-.504 1.125-1.125 1.125H2.625c-.621 0-1.125-.504-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H7.5m9 0V4.875c0-.621-.504-1.125-1.125-1.125h-6.75c-.621 0-1.125.504-1.125 1.125V6.75m9 0H7.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+      <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-px-6 tw-bg-iron-950/60">
+        <div className="tw-max-w-3xl tw-mx-auto">
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-16 tw-text-center">
+            <div className="tw-h-14 tw-w-14 tw-rounded-2xl tw-flex tw-items-center tw-justify-center tw-bg-iron-900/80 tw-backdrop-blur-sm tw-border tw-border-iron-800/60 tw-shadow-[0_0_32px_rgba(0,0,0,0.25)]">
+              <svg
+                className="tw-mx-auto tw-flex-shrink-0 tw-h-7 tw-w-7 tw-text-iron-400"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 576 512"
+              >
+                <path
+                  fill="currentColor"
+                  d="M400 0L176 0c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8L24 64C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9L192 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-26.1 0C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24L446.4 64c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112l84.4 0c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6l84.4 0c-5.1 66.3-31.1 111.2-63 142.3z"
+                />
+              </svg>
+            </div>
+            <div className="tw-mt-5 tw-text-lg tw-font-semibold tw-text-iron-200">
+              No Submissions Yet
+            </div>
+            <p className="tw-max-w-md tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+              This wave ended without any submissions
+            </p>
           </div>
-          <div className="tw-mt-4 tw-text-sm tw-font-medium tw-text-neutral-100">
-            No Submissions
-          </div>
-          <p className="tw-max-w-2xl tw-mb-0 tw-mt-1 tw-text-sm tw-text-neutral-500">
-            This wave ended without any submissions
-          </p>
         </div>
       </div>
     );
