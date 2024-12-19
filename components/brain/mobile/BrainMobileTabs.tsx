@@ -106,7 +106,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   };
 
   return (
-    <div className="tw-py-4">
+    <div className="tw-py-4 tw-px-2 sm:tw-px-4 md:tw-px-6">
       <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-300 tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
         <button
           onClick={() => onViewChange(BrainView.WAVES)}

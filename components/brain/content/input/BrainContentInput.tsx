@@ -7,20 +7,18 @@ import PrivilegedDropCreator, {
 } from "../../../waves/detailed/PrivilegedDropCreator";
 
 interface BrainContentInputProps {
-  readonly waveId: string | null;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
   readonly onDropAddedToQueue: () => void;
 }
 
 const BrainContentInput: React.FC<BrainContentInputProps> = ({
-  waveId,
   activeDrop,
   onCancelReplyQuote,
   onDropAddedToQueue,
 }) => {
   const capacitor = useCapacitor();
-  const { data: wave } = useWaveData(waveId);
+  const { data: wave } = useWaveData(activeDrop?.drop.wave?.id ?? null);
   const containerClassName = useMemo(() => {
     return capacitor.isCapacitor
       ? "tw-max-h-[calc(100vh-14.7rem)]"
