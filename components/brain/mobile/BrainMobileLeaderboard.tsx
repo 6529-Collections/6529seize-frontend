@@ -27,7 +27,7 @@ const BrainMobileLeaderboard: React.FC<BrainMobileLeaderboardProps> = ({
     : "tw-h-[calc(100vh-10.75rem)]";
 
   return (
-    <div className={`tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-none ${contentHeight}`}>
+    <div className={`tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-scrollbar-none tw-px-2 sm:tw-px-4 md:tw-px-6 ${contentHeight}`}>
       <div className="tw-space-y-4">
         <AnimatePresence>
           {isCreatingDrop && (

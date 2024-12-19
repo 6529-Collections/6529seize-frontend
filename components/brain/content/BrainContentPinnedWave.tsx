@@ -55,7 +55,9 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
 
   return (
     <div
-      className={`tw-relative tw-group ${!active ? "tw-opacity-60" : ""}`}
+      className={`tw-relative tw-group tw-transition-all tw-duration-300 ${
+        !active ? "tw-opacity-70" : ""
+      }`}
       onMouseEnter={onHover}
       onMouseLeave={onMouseLeave}
     >
@@ -72,29 +74,29 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
         >
           <div
             className={`
-              tw-relative tw-h-6 tw-px-2 tw-rounded-full tw-flex tw-items-center tw-gap-1.5 
-              tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out
+              tw-relative tw-h-6 tw-px-1.5 tw-rounded-lg tw-flex tw-items-center tw-gap-1
+              tw-cursor-pointer tw-transition-all tw-duration-300
               ${
                 active
-                  ? "tw-bg-primary-300/10 tw-ring-primary-400 tw-ring-inset tw-ring-1 tw-shadow-md"
-                  : "tw-bg-iron-800 tw-ring-iron-700 tw-ring-inset tw-ring-1 desktop-hover:hover:tw-ring-iron-600 desktop-hover:hover:tw-bg-iron-700"
+                  ? "tw-bg-primary-500/15 tw-ring-primary-400/30 tw-ring-1 tw-ring-inset"
+                  : "tw-bg-iron-900 tw-ring-iron-700 tw-ring-1 tw-ring-inset"
               }
             `}
           >
-            <div className="tw-relative tw-size-4 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-overflow-hidden tw-bg-iron-900">
+            <div className="tw-relative tw-size-3.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-overflow-hidden tw-bg-iron-900">
               {wave?.picture ? (
                 <img
                   src={wave.picture}
                   alt={wave.name || "Wave picture"}
-                  className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                  className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-cover"
                 />
               ) : (
-                <div className="tw-w-full tw-h-full tw-bg-iron-700" />
+                <div className="tw-w-full tw-h-full tw-bg-iron-800" />
               )}
             </div>
             <span
-              className={`tw-relative tw-text-[11px] tw-font-medium tw-truncate tw-max-w-[7.5rem] ${
-                active ? "tw-text-primary-300" : "tw-text-iron-200"
+              className={`tw-relative tw-text-[11px] tw-font-medium tw-truncate tw-max-w-[6rem] ${
+                active ? "tw-text-primary-400" : "tw-text-iron-200"
               }`}
             >
               {wave?.name}
@@ -116,7 +118,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               type="button"
               onClick={onRemoveClick}
               aria-label="Remove wave"
-              className="tw-relative -tw-mr-0.5 tw-border-0 tw-bg-transparent tw-p-0.5 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-0 group-hover:tw-opacity-100 hover:tw-bg-iron-700/50 hover:tw-text-red tw-transition tw-duration-300 tw-ease-out"
+              className="tw-relative -tw-mr-0.5 tw-border-0 tw-bg-transparent tw-p-0.5 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-100 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red tw-transition-all tw-duration-300"
             >
               <svg
                 className="tw-size-3 tw-flex-shrink-0"
