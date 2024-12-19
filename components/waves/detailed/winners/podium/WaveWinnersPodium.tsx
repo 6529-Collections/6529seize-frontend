@@ -88,26 +88,28 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   }
 
   return (
-    <div className="tw-relative tw-mx-auto tw-max-w-3xl">
-      <div className="tw-grid tw-grid-cols-3 tw-gap-x-6 tw-items-end">
-        {secondPlaceDrop && (
-          <WaveWinnersPodiumSecond
-            drop={secondPlaceDrop}
-            onDropClick={onDropClick}
-          />
-        )}
-        {firstPlaceDrop && (
-          <WaveWinnersPodiumFirst
-            drop={firstPlaceDrop}
-            onDropClick={onDropClick}
-          />
-        )}
-        {thirdPlaceDrop && (
-          <WaveWinnersPodiumThird
-            drop={thirdPlaceDrop}
-            onDropClick={onDropClick}
-          />
-        )}
+    <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-6 tw-px-6 tw-bg-iron-950/60">
+      <div className="tw-max-w-3xl tw-mx-auto">
+        <div className="tw-grid tw-grid-cols-3 tw-gap-x-8 tw-items-end">
+          {secondPlaceDrop && (
+            <WaveWinnersPodiumSecond
+              drop={secondPlaceDrop}
+              onDropClick={onDropClick}
+            />
+          )}
+          {firstPlaceDrop && (
+            <WaveWinnersPodiumFirst
+              drop={firstPlaceDrop}
+              onDropClick={onDropClick}
+            />
+          )}
+          {thirdPlaceDrop && (
+            <WaveWinnersPodiumThird
+              drop={thirdPlaceDrop}
+              onDropClick={onDropClick}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

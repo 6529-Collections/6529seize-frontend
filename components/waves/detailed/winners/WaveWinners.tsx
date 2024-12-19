@@ -13,11 +13,10 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   onDropClick,
 }) => {
   return (
-    <div className="tw-space-y-6 tw-mt-6">
-      <div className="tw-bg-iron-950 tw-px-6 tw-pt-6 tw-rounded-xl">
-        <WaveWinnersHeader wave={wave} />
-        <WaveWinnersPodium wave={wave} onDropClick={onDropClick} />
-      </div>
+    <div className="tw-space-y-6 tw-mt-8">
+      {/*     <WaveWinnersHeader wave={wave} /> */}
+      <WaveWinnersPodium wave={wave} onDropClick={onDropClick} />
+
       <WaveWinnersDrops wave={wave} onDropClick={onDropClick} />
     </div>
   );
