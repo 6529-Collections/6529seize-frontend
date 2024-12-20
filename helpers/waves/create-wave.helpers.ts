@@ -9,40 +9,12 @@ import { ApiWaveOutcomeSubType } from "../../generated/models/ApiWaveOutcomeSubT
 import { ApiWaveOutcomeType } from "../../generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import {
-  CreateWaveApprovalConfig,
   CreateWaveConfig,
-  CreateWaveDatesConfig,
-  CreateWaveDropsConfig,
-  CreateWaveDropsRequiredMetadata,
-  CreateWaveOutcomeConfig,
-  CreateWaveOutcomeConfigWinnersConfig,
-  CreateWaveOutcomeConfigWinnersCreditValueType,
   CreateWaveOutcomeType,
   CreateWaveStep,
-  CreateWaveVotingConfig,
-  WaveOverviewConfig,
   WaveSignatureType,
 } from "../../types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
-
-export enum CREATE_WAVE_VALIDATION_ERROR {
-  NAME_REQUIRED = "NAME_REQUIRED",
-  SUBMISSION_START_DATE_REQUIRED = "SUBMISSION_START_DATE_REQUIRED",
-  VOTING_START_DATE_REQUIRED = "VOTING_START_DATE_REQUIRED",
-  SUBMISSION_START_DATE_MUST_EQUAL_VOTING_START_DATE = "SUBMISSION_START_DATE_MUST_EQUAL_VOTING_START_DATE",
-  SUBMISSION_START_DATE_MUST_BE_BEFORE_VOTING_START_DATE = "SUBMISSION_START_DATE_MUST_BE_BEFORE_VOTING_START_DATE",
-  END_DATE_REQUIRED = "END_DATE_REQUIRED",
-  END_DATE_MUST_BE_AFTER_VOTING_START_DATE = "END_DATE_MUST_BE_AFTER_VOTING_START_DATE",
-  DROPS_REQUIRED_METADATA_NON_UNIQUE = "DROPS_REQUIRED_METADATA_NON_UNIQUE",
-  VOTING_PROFILE_ID_REQUIRED = "VOTING_PROFILE_ID_REQUIRED",
-  VOTING_PROFILE_ID_MUST_BE_EMPTY = "VOTING_PROFILE_ID_MUST_BE_EMPTY",
-  VOTING_CATEGORY_REQUIRED = "VOTING_CATEGORY_REQUIRED",
-  VOTING_CATEGORY_MUST_BE_EMPTY = "VOTING_CATEGORY_MUST_BE_EMPTY",
-  APPROVAL_THRESHOLD_REQUIRED = "APPROVAL_THRESHOLD_REQUIRED",
-  APPROVAL_THRESHOLD_TIME_REQUIRED = "APPROVAL_THRESHOLD_TIME_REQUIRED",
-  APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION = "APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION",
-  OUTCOMES_REQUIRED = "OUTCOMES_REQUIRED",
-}
 
 export const getCreateWaveNextStep = ({
   step,
@@ -55,6 +27,9 @@ export const getCreateWaveNextStep = ({
     case CreateWaveStep.OVERVIEW:
       return CreateWaveStep.GROUPS;
     case CreateWaveStep.GROUPS:
+      if (waveType === ApiWaveType.Chat) {
+        return CreateWaveStep.DESCRIPTION;
+      }
       return CreateWaveStep.DATES;
     case CreateWaveStep.DATES:
       return CreateWaveStep.DROPS;
@@ -95,6 +70,9 @@ export const getCreateWavePreviousStep = ({
     case CreateWaveStep.DATES:
       return CreateWaveStep.GROUPS;
     case CreateWaveStep.DROPS:
+      if (waveType === ApiWaveType.Chat) {
+        return CreateWaveStep.GROUPS;
+      }
       return CreateWaveStep.DATES;
     case CreateWaveStep.VOTING:
       return CreateWaveStep.DROPS;
@@ -107,221 +85,13 @@ export const getCreateWavePreviousStep = ({
       return CreateWaveStep.VOTING;
     case CreateWaveStep.DESCRIPTION:
       if (waveType === ApiWaveType.Chat) {
-        return CreateWaveStep.VOTING;
+        return CreateWaveStep.GROUPS;
       }
       return CreateWaveStep.OUTCOMES;
     default:
       assertUnreachable(step);
       return null;
   }
-};
-
-const getOverviewValidationErrors = ({
-  overview,
-}: {
-  readonly overview: WaveOverviewConfig;
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (!overview.name) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
-  }
-  return errors;
-};
-
-const getDatesValidationErrors = ({
-  waveType,
-  dates,
-}: {
-  readonly waveType: ApiWaveType;
-  readonly dates: CreateWaveDatesConfig;
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (!dates.submissionStartDate) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_START_DATE_REQUIRED);
-  }
-  if (!dates.votingStartDate) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_REQUIRED);
-  }
-  if (waveType !== ApiWaveType.Rank) {
-    if (dates.submissionStartDate !== dates.votingStartDate) {
-      errors.push(
-        CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_START_DATE_MUST_EQUAL_VOTING_START_DATE
-      );
-    }
-  } else {
-    if (dates.submissionStartDate > dates.votingStartDate) {
-      errors.push(
-        CREATE_WAVE_VALIDATION_ERROR.SUBMISSION_START_DATE_MUST_BE_BEFORE_VOTING_START_DATE
-      );
-    }
-    if (!dates.endDate) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.END_DATE_REQUIRED);
-    } else if (dates.endDate < dates.votingStartDate) {
-      errors.push(
-        CREATE_WAVE_VALIDATION_ERROR.END_DATE_MUST_BE_AFTER_VOTING_START_DATE
-      );
-    }
-  }
-  return errors;
-};
-
-const isRequiredMetadataRowsNonUnique = ({
-  requiredMetadata,
-}: {
-  requiredMetadata: CreateWaveDropsRequiredMetadata[];
-}): boolean => {
-  const keys = requiredMetadata.map((item) => item.key);
-  return new Set(keys).size !== keys.length;
-};
-
-const getDropsValidationErrors = ({
-  drops,
-}: {
-  readonly drops: CreateWaveDropsConfig;
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (!drops.requiredMetadata.length) {
-    return errors;
-  }
-  if (
-    isRequiredMetadataRowsNonUnique({
-      requiredMetadata: drops.requiredMetadata,
-    })
-  ) {
-    errors.push(
-      CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE
-    );
-  }
-  return errors;
-};
-
-const getVotingValidationErrors = ({
-  voting,
-}: {
-  readonly voting: CreateWaveVotingConfig;
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (voting.type === ApiWaveCreditType.Tdh) {
-    if (voting.profileId) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_MUST_BE_EMPTY);
-    }
-    if (voting.category) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_CATEGORY_MUST_BE_EMPTY);
-    }
-  } else {
-    if (!voting.profileId) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_PROFILE_ID_REQUIRED);
-    }
-    if (!voting.category) {
-      errors.push(CREATE_WAVE_VALIDATION_ERROR.VOTING_CATEGORY_REQUIRED);
-    }
-  }
-  return errors;
-};
-
-const getApprovalValidationErrors = ({
-  waveType,
-  approval,
-  dates,
-}: {
-  readonly waveType: ApiWaveType;
-  readonly approval: CreateWaveApprovalConfig;
-  readonly dates: CreateWaveDatesConfig;
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (waveType !== ApiWaveType.Approve) {
-    return errors;
-  }
-  if (!approval.threshold) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED);
-  }
-  if (!approval.thresholdTimeMs) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_REQUIRED);
-  }
-  if (approval.thresholdTimeMs && dates.endDate) {
-    if (approval.thresholdTimeMs > dates.endDate - dates.submissionStartDate) {
-      errors.push(
-        CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION
-      );
-    }
-  }
-  return errors;
-};
-
-const getOutcomesValidationErrors = ({
-  waveType,
-  outcomes,
-}: {
-  readonly waveType: ApiWaveType;
-  readonly outcomes: CreateWaveOutcomeConfig[];
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (waveType === ApiWaveType.Chat) {
-    return errors;
-  }
-  if (!outcomes.length) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED);
-  }
-  // TODO validate outcomes against rules
-  return errors;
-};
-
-export const getCreateWaveValidationErrors = ({
-  step,
-  config,
-}: {
-  readonly step: CreateWaveStep;
-  readonly config: CreateWaveConfig;
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  errors.push(...getOverviewValidationErrors({ overview: config.overview }));
-  if (step === CreateWaveStep.OVERVIEW) {
-    return errors;
-  }
-  if (step === CreateWaveStep.GROUPS) {
-    return errors;
-  }
-  errors.push(
-    ...getDatesValidationErrors({
-      waveType: config.overview.type,
-      dates: config.dates,
-    })
-  );
-  if (step === CreateWaveStep.DATES) {
-    return errors;
-  }
-  errors.push(
-    ...getDropsValidationErrors({
-      drops: config.drops,
-    })
-  );
-  if (step === CreateWaveStep.DROPS) {
-    return errors;
-  }
-  errors.push(...getVotingValidationErrors({ voting: config.voting }));
-  if (step === CreateWaveStep.VOTING) {
-    return errors;
-  }
-  errors.push(
-    ...getApprovalValidationErrors({
-      approval: config.approval,
-      dates: config.dates,
-      waveType: config.overview.type,
-    })
-  );
-  if (step === CreateWaveStep.APPROVAL) {
-    return errors;
-  }
-  errors.push(
-    ...getOutcomesValidationErrors({
-      outcomes: config.outcomes,
-      waveType: config.overview.type,
-    })
-  );
-  if (step === CreateWaveStep.OUTCOMES) {
-    return errors;
-  }
-  return errors;
 };
 
 const getIsVotingSignatureRequired = ({
@@ -367,52 +137,6 @@ const getWinningThreshold = ({
   }
 };
 
-const calculatePercentages = ({
-  values,
-  totalAmount,
-}: {
-  values: number[];
-  totalAmount: number;
-}): number[] => {
-  const sum = values.reduce((acc, value) => acc + value, 0);
-  if (sum !== totalAmount) {
-    throw new Error("Total amount does not match the sum of the values.");
-  }
-
-  // Calculate raw percentages and floor them
-  let percentages = values.map((value) =>
-    Math.floor((value / totalAmount) * 100)
-  );
-
-  // Calculate remaining points to distribute (due to rounding down)
-  const remainingPoints = 100 - percentages.reduce((acc, p) => acc + p, 0);
-
-  // Distribute remaining points to the largest original values first
-  const indexesOrderedByValue = values
-    .map((value, index) => ({ value, index }))
-    .sort((a, b) => b.value - a.value)
-    .map((item) => item.index);
-
-  for (let i = 0; i < remainingPoints; i++) {
-    percentages[indexesOrderedByValue[i % indexesOrderedByValue.length]]++;
-  }
-
-  return percentages;
-};
-
-const getOutcomesDistribution = ({
-  winnersConfig,
-}: {
-  readonly winnersConfig: CreateWaveOutcomeConfigWinnersConfig;
-}): number[] =>
-  winnersConfig.creditValueType ===
-  CreateWaveOutcomeConfigWinnersCreditValueType.PERCENTAGE
-    ? winnersConfig.winners.map((winner) => +winner.value)
-    : calculatePercentages({
-        values: winnersConfig.winners.map((winner) => winner.value),
-        totalAmount: winnersConfig.totalAmount,
-      });
-
 const getRankOutcomes = ({
   config,
 }: {
@@ -420,10 +144,18 @@ const getRankOutcomes = ({
 }): ApiWaveOutcome[] => {
   const outcomes: ApiWaveOutcome[] = [];
   for (const outcome of config.outcomes) {
-    if (outcome.type === CreateWaveOutcomeType.MANUAL && outcome.title) {
+    if (
+      outcome.type === CreateWaveOutcomeType.MANUAL &&
+      outcome.title &&
+      outcome.winnersConfig
+    ) {
       outcomes.push({
         type: ApiWaveOutcomeType.Manual,
         description: outcome.title,
+        distribution: outcome.winnersConfig.winners.map((winner) => ({
+          amount: winner.value,
+          description: outcome.title,
+        })),
       });
     } else if (
       outcome.type === CreateWaveOutcomeType.REP &&
@@ -437,9 +169,10 @@ const getRankOutcomes = ({
         credit: ApiWaveOutcomeCredit.Rep,
         rep_category: outcome.category,
         amount: outcome.winnersConfig.totalAmount,
-        distribution: getOutcomesDistribution({
-          winnersConfig: outcome.winnersConfig,
-        }).map((amount) => ({ amount })),
+        distribution: outcome.winnersConfig.winners.map((winner) => ({
+          amount: winner.value,
+          description: null,
+        })),
       });
     } else if (
       outcome.type === CreateWaveOutcomeType.NIC &&
@@ -451,9 +184,10 @@ const getRankOutcomes = ({
         description: "NIC distribution",
         credit: ApiWaveOutcomeCredit.Cic,
         amount: outcome.winnersConfig.totalAmount,
-        distribution: getOutcomesDistribution({
-          winnersConfig: outcome.winnersConfig,
-        }).map((amount) => ({ amount })),
+        distribution: outcome.winnersConfig.winners.map((winner) => ({
+          amount: winner.value,
+          description: null,
+        })),
       });
     }
   }
@@ -540,7 +274,7 @@ export const getCreateNewWaveBody = ({
       scope: {
         group_id: config.groups.canVote,
       },
-      credit_type: config.voting.type,
+      credit_type: config.voting.type ?? ApiWaveCreditType.Tdh,
       credit_scope: ApiWaveCreditScope.Wave,
       credit_category: config.voting.category,
       creditor_id: config.voting.profileId,
@@ -588,7 +322,7 @@ export const getCreateNewWaveBody = ({
       time_lock_ms: config.approval.thresholdTimeMs,
       admin_group: {
         group_id: config.groups.admin,
-      }
+      },
     },
     outcomes: getOutcomes({ config }),
   };

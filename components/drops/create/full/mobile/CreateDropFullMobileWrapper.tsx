@@ -24,9 +24,9 @@ export default function CreateDropFullMobileWrapper({
   const getTitle = () => {
     switch (type) {
       case CreateDropType.DROP:
-        return "Create a drop";
+        return "Create a Post";
       case CreateDropType.QUOTE:
-        return "Quote a drop";
+        return "Create a Quote";
       default:
         return "";
     }

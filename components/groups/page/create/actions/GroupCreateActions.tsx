@@ -176,7 +176,6 @@ export default function GroupCreateActions({
           <SecondaryButton onClicked={() => onCompleted()}>
             Cancel
           </SecondaryButton>
-          {/* COMPONENDIKS - PRIMARYBUTTON */}
           <div
             className={`${
               isActionsDisabled ? "" : "tw-from-primary-400 tw-to-primary-500"

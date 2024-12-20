@@ -4,8 +4,9 @@ import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItemDropReplied from "./items/drop-replied/FeedItemDropReplied";
 import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
-import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 
 export interface FeedItemProps {
   readonly item: TypedFeedItem;
@@ -13,6 +14,7 @@ export interface FeedItemProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedItem({
@@ -21,6 +23,7 @@ export default function FeedItem({
   activeDrop,
   onReply,
   onQuote,
+  onDropClick,
 }: FeedItemProps) {
   const getComponent = (): JSX.Element => {
     switch (item.type) {
@@ -32,6 +35,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
+            onDropClick={onDropClick}
           />
         );
       case ApiFeedItemType.DropCreated:
@@ -42,6 +46,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
+            onDropClick={onDropClick}
           />
         );
       case ApiFeedItemType.DropReplied:
@@ -52,6 +57,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
+            onDropClick={onDropClick}
           />
         );
       default:
@@ -65,7 +71,7 @@ export default function FeedItem({
       <div className="tw-relative tw-hidden">
         <div className="tw-h-full tw-w-[1px] tw-bg-iron-800 -tw-translate-x-8"></div>
       </div>
-      <div className="tw-w-full tw-mb-2">{getComponent()}</div>
+      <div className="tw-w-full">{getComponent()}</div>
     </div>
   );
 }

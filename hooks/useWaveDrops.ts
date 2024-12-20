@@ -1,12 +1,10 @@
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
-
 import { useCallback, useEffect, useState } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import {
   keepPreviousData,
   useInfiniteQuery,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
@@ -14,8 +12,8 @@ import {
   generateUniqueKeys,
   mapToExtendedDrops,
 } from "../helpers/waves/wave-drops.helpers";
-import { useDebounce } from "react-use";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
+import { useWavePolling } from "./useWavePolling";
 
 export enum WaveDropsSearchStrategy {
   FIND_OLDER = "FIND_OLDER",
@@ -23,9 +21,12 @@ export enum WaveDropsSearchStrategy {
   FIND_BOTH = "FIND_BOTH",
 }
 
-const POLLING_DELAY = 3000;
-const ACTIVE_POLLING_INTERVAL = 5000;
-const INACTIVE_POLLING_INTERVAL = 30000;
+interface UseWaveDropsProps {
+  readonly waveId: string;
+  readonly connectedProfileHandle: string | undefined;
+  readonly reverse: boolean;
+  readonly dropId: string | null;
+}
 
 function useTabVisibility() {
   const [isVisible, setIsVisible] = useState(!document.hidden);
@@ -40,19 +41,13 @@ function useTabVisibility() {
   return isVisible;
 }
 
-export function useWaveDrops(
-  waveId: string,
-  connectedProfileHandle: string | undefined,
-  reverse: boolean = false
-) {
+export function useWaveDrops({
+  waveId,
+  connectedProfileHandle,
+  reverse,
+  dropId,
+}: UseWaveDropsProps) {
   const queryClient = useQueryClient();
-
-  const [drops, setDrops] = useState<ExtendedDrop[]>([]);
-  const [haveNewDrops, setHaveNewDrops] = useState(false);
-  const [canPoll, setCanPoll] = useState(false);
-  const [delayedPollingResult, setDelayedPollingResult] = useState<
-    ApiWaveDropsFeed | undefined
-  >(undefined);
   const isTabVisible = useTabVisibility();
 
   const queryKey = [
@@ -60,7 +55,7 @@ export function useWaveDrops(
     {
       waveId,
       limit: WAVE_DROPS_PARAMS.limit,
-      dropId: null,
+      dropId,
     },
   ];
 
@@ -71,6 +66,9 @@ export function useWaveDrops(
         const params: Record<string, string> = {
           limit: WAVE_DROPS_PARAMS.limit.toString(),
         };
+        if (dropId) {
+          params.drop_id = dropId;
+        }
 
         if (pageParam) {
           params.serial_no_less_than = `${pageParam}`;
@@ -95,6 +93,7 @@ export function useWaveDrops(
     isFetching,
     isFetchingNextPage,
     refetch,
+    error: mainQueryError,
   } = useInfiniteQuery({
     queryKey,
     queryFn: async ({
@@ -108,6 +107,10 @@ export function useWaveDrops(
       const params: Record<string, string> = {
         limit: WAVE_DROPS_PARAMS.limit.toString(),
       };
+
+      if (dropId) {
+        params.drop_id = dropId;
+      }
       if (pageParam?.serialNo) {
         params.serial_no_limit = `${pageParam.serialNo}`;
         params.search_strategy = `${pageParam.strategy}`;
@@ -137,89 +140,37 @@ export function useWaveDrops(
     refetchIntervalInBackground: true,
   });
 
+  const processDrops = (pages: ApiWaveDropsFeed[] | undefined, previousDrops: ExtendedDrop[], isReverse: boolean) => {
+    const newDrops = pages
+      ? mapToExtendedDrops(
+          pages.map((page) => ({ wave: page.wave, drops: page.drops })),
+          previousDrops,
+          isReverse
+        )
+      : [];
+    return generateUniqueKeys(newDrops, previousDrops);
+  };
+
+  const [drops, setDrops] = useState<ExtendedDrop[]>(() => 
+    processDrops(data?.pages, [], reverse)
+  );
+
   useEffect(() => {
-    setDrops((prev) => {
-      const newDrops = data?.pages
-        ? mapToExtendedDrops(data.pages, prev, reverse)
-        : [];
-      return generateUniqueKeys(newDrops, prev);
-    });
+    setDrops((prev) => processDrops(data?.pages, prev, reverse));
   }, [data, reverse]);
 
-  useDebounce(() => setCanPoll(true), 10000, [data]);
-
-  const { data: pollingResult } = useQuery({
-    queryKey: [...queryKey, "polling"],
-    queryFn: async () => {
-      const params: Record<string, string> = {
-        limit: "1",
-      };
-      return await commonApiFetch<ApiWaveDropsFeed>({
-        endpoint: `waves/${waveId}/drops`,
-        params,
-      });
-    },
-    enabled: !haveNewDrops && canPoll,
-    refetchInterval: isTabVisible
-      ? ACTIVE_POLLING_INTERVAL
-      : INACTIVE_POLLING_INTERVAL,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchOnReconnect: true,
-    refetchIntervalInBackground: true,
-  });
-
-  useEffect(() => {
-    if (pollingResult) {
-      const timer = setTimeout(() => {
-        setDelayedPollingResult(pollingResult);
-      }, POLLING_DELAY);
-
-      return () => clearTimeout(timer);
-    }
-  }, [pollingResult]);
-
-  useEffect(() => {
-    if (delayedPollingResult !== undefined) {
-      if (delayedPollingResult.drops.length > 0) {
-        const latestPolledDrop = delayedPollingResult.drops[0];
-
-        if (drops.length > 0) {
-          const latestExistingDrop = drops.at(-1);
-
-          const polledCreatedAt = new Date(
-            latestPolledDrop.created_at
-          ).getTime();
-          const existingCreatedAt = new Date(
-            latestExistingDrop?.created_at ?? 0
-          ).getTime();
-
-          setHaveNewDrops(polledCreatedAt > existingCreatedAt);
-        } else {
-          setHaveNewDrops(true);
-        }
-      } else {
-        setHaveNewDrops(false);
-      }
-    }
-  }, [delayedPollingResult, drops]);
-
-  useEffect(() => {
-    if (!haveNewDrops) return;
-    if (!isTabVisible) return;
-    const hasTempDrop = drops.some((drop) => drop.id.startsWith("temp-"));
-    if (hasTempDrop) return;
-    refetch();
-    setHaveNewDrops(false);
-  }, [haveNewDrops, isTabVisible, drops]);
-
-  useEffect(() => {
-    return () => {
-      queryClient.invalidateQueries({
-        queryKey: [QueryKey.DROPS, { waveId }],
-      });
-    };
-  }, [waveId, queryClient]);
+  const {
+    hasNewDrops,
+    error: pollingError,
+    lastPolledData
+  } = useWavePolling(
+    queryKey,
+    waveId,
+    dropId,
+    drops,
+    isTabVisible,
+    refetch
+  );
 
   const manualFetch = useCallback(async () => {
     if (hasNextPage) {
@@ -231,10 +182,12 @@ export function useWaveDrops(
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isFetching: isFetching ,
     isFetchingNextPage,
     refetch,
-    haveNewDrops,
+    haveNewDrops: hasNewDrops,
     manualFetch,
+    error: mainQueryError || pollingError,
+    lastPolledData
   };
 }

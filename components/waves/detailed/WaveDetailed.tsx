@@ -3,10 +3,13 @@ import { useState, useEffect } from "react";
 import WaveDetailedDesktop from "./WaveDetailedDesktop";
 import { createBreakpoint } from "react-use";
 import WaveDetailedMobile from "./WaveDetailedMobile";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 export enum WaveDetailedView {
-  CONTENT = "CONTENT",
+  CHAT = "CHAT",
+  LEADERBOARD = "LEADERBOARD",
   FOLLOWERS = "FOLLOWERS",
+  OUTCOME = "OUTCOME",
 }
 
 interface WaveDetailedProps {
@@ -17,24 +20,19 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 export default function WaveDetailed({ wave }: WaveDetailedProps) {
   const [activeView, setActiveView] = useState<WaveDetailedView>(
-    WaveDetailedView.CONTENT
+    WaveDetailedView.CHAT
   );
 
-  const [activeWave, setActiveWave] = useState(wave);
-
-  const [isLoading, setIsLoading] = useState(false);
+  const [activeWave, setActiveWave] = useState<ApiWave>(wave);
+  const [activeDrop, setActiveDrop] = useState<ExtendedDrop | null>(null);
 
   useEffect(() => {
     setActiveWave(wave);
   }, [wave]);
 
   const handleWaveChange = (newWave: ApiWave) => {
-    setIsLoading(true);
     setActiveWave(newWave);
-    setActiveView(WaveDetailedView.CONTENT);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
+    setActiveView(WaveDetailedView.CHAT);
   };
 
   const breakpoint = useBreakpoint();
@@ -42,19 +40,21 @@ export default function WaveDetailed({ wave }: WaveDetailedProps) {
   return breakpoint !== "LG" ? (
     <WaveDetailedMobile
       wave={activeWave}
-      view={activeView}
       setView={setActiveView}
-      isLoading={isLoading}
+      activeDrop={activeDrop}
+      setActiveDrop={setActiveDrop}
       onWaveChange={handleWaveChange}
-      setIsLoading={setIsLoading}
+      setIsLoading={() => {}}
     />
   ) : (
     <WaveDetailedDesktop
       wave={activeWave}
       view={activeView}
       setView={setActiveView}
+      activeDrop={activeDrop}
+      setActiveDrop={setActiveDrop}
       onWaveChange={handleWaveChange}
-      setIsLoading={setIsLoading}
+      setIsLoading={() => {}}
     />
   );
 }

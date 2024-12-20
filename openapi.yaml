@@ -5346,6 +5346,7 @@ components:
         - subscribers_count
         - drops_count
         - latest_drop_timestamp
+        - your_participation_drops_count
       properties:
         subscribers_count:
           type: number
@@ -5357,6 +5358,9 @@ components:
           type: number
           format: int64
         your_drops_count:
+          type: number
+          format: int64
+        your_participation_drops_count:
           type: number
           format: int64
         your_latest_drop_timestamp:
@@ -5371,6 +5375,7 @@ components:
         - authenticated_user_eligible_to_vote
         - authenticated_user_eligible_to_participate
         - authenticated_user_eligible_to_chat
+        - voting_credit_type
       properties:
         id:
           type: string
@@ -5386,6 +5391,8 @@ components:
           type: boolean
         authenticated_user_eligible_to_chat:
           type: boolean
+        voting_credit_type:
+          $ref: '#/components/schemas/ApiWaveCreditType'
     ApiWaveOutcome:
       type: object
       required:

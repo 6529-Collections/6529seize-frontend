@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItem from "./FeedItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import { getFeedItemKey } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop, getFeedItemKey } from "../../../helpers/waves/drop.helpers";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
-import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { ActiveDropState } from "../../waves/detailed/WaveDetailedContent";
+import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+
 export interface FeedItemsProps {
   readonly items: TypedFeedItem[];
   readonly showWaveInfo: boolean;
@@ -13,6 +14,7 @@ export interface FeedItemsProps {
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedItems({
@@ -22,6 +24,7 @@ export default function FeedItems({
   onBottomIntersection,
   onReply,
   onQuote,
+  onDropClick,
 }: FeedItemsProps) {
   const getIntersectionTargetIndex = () => {
     if (items.length < 5) {
@@ -39,7 +42,7 @@ export default function FeedItems({
   }, [items]);
 
   return (
-    <div className="tw-flex tw-flex-col">
+    <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-4">
       {items.map((item, i) => (
         <div key={getFeedItemKey({ item, index: i })}>
           <CommonChangeAnimation>
@@ -49,6 +52,7 @@ export default function FeedItems({
               activeDrop={activeDrop}
               onReply={onReply}
               onQuote={onQuote}
+              onDropClick={onDropClick}
             />
           </CommonChangeAnimation>
           {!!intersectionTargetIndex && intersectionTargetIndex === i && (

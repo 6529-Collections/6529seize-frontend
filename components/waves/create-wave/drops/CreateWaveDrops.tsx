@@ -1,6 +1,6 @@
 import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
 import {
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
@@ -19,14 +19,6 @@ export default function CreateWaveDrops({
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDrops: (drops: CreateWaveDropsConfig) => void;
 }) {
-  const onAllowDiscussionDropsChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setDrops({
-      ...drops,
-      allowDiscussionDrops: e.target.checked,
-    });
-  };
 
   const onNoOfApplicationsAllowedPerParticipantChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -63,25 +55,6 @@ export default function CreateWaveDrops({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
-      {isNotChatType && (
-        <div className="tw-flex tw-items-center tw-gap-x-3">
-          <div className="tw-flex tw-h-6 tw-items-center">
-            <input
-              checked={drops.allowDiscussionDrops}
-              onChange={onAllowDiscussionDropsChange}
-              type="checkbox"
-              id="allow-discussion-drops"
-              className="tw-form-checkbox tw-w-5 tw-h-5 tw-rounded focus:tw-ring-primary-400 tw-ring-offset-gray-700 focus:tw-ring-offset-gray-700 focus:tw-ring-2 tw-bg-iron-800 tw-border-iron-650 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out"
-            />
-          </div>
-          <label
-            htmlFor="allow-discussion-drops"
-            className="tw-cursor-pointer tw-text-sm tw-font-medium tw-text-iron-300"
-          >
-            Allow discussion drops
-          </label>
-        </div>
-      )}
       {isNotChatType && (
         <div className="tw-group tw-w-full tw-relative">
           <input

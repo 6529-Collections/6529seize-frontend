@@ -6,6 +6,7 @@ import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import Tippy from "@tippyjs/react";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: ApiWave;
@@ -21,6 +22,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
   const isMobile = useIsMobileDevice();
+  const isDropWave = wave.wave.type !== ApiWaveType.Chat;
 
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
@@ -43,6 +45,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     router.push(getHref(wave.id), undefined, { shallow: true });
   };
 
+  const getAvatarRingClasses = () => {
+    if (isActive) return "tw-ring-2 tw-ring-primary-400";
+    if (isDropWave) return "tw-ring-2 tw-ring-blue-400/40";
+    return "tw-ring-1 tw-ring-iron-700";
+  };
+
   return (
     <div
       className={`tw-flex tw-px-5 tw-py-2 tw-group tw-transition-colors tw-duration-200 tw-ease-in-out ${
@@ -61,28 +69,44 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             : "tw-text-iron-200 hover:tw-text-iron-200"
         }`}
       >
-        <div
-          className={`tw-relative tw-size-8 tw-rounded-full tw-overflow-hidden tw-transition tw-duration-300 group-hover:tw-brightness-110 ${
-            isActive
-              ? "tw-ring-2 tw-ring-primary-400"
-              : "tw-ring-1 tw-ring-iron-700"
-          }`}
-        >
-          {wave.picture ? (
-            <img
-              src={wave.picture}
-              alt={wave.name}
-              className="tw-w-full tw-h-full tw-object-cover"
-            />
-          ) : (
-            <div className="tw-w-full tw-h-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700" />
+        <div className="tw-relative">
+          <div
+            className={`tw-relative tw-size-8 tw-rounded-full tw-overflow-hidden tw-transition tw-duration-300 group-hover:tw-brightness-110 ${getAvatarRingClasses()}`}
+          >
+            {wave.picture ? (
+              <img
+                src={wave.picture}
+                alt={wave.name}
+                className="tw-w-full tw-h-full tw-object-cover"
+              />
+            ) : (
+              <div className="tw-w-full tw-h-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700" />
+            )}
+            {isDropWave && (
+              <div className="tw-absolute tw-inset-0 tw-border-2 tw-border-blue-400/40 tw-rounded-full" />
+            )}
+          </div>
+          {isDropWave && (
+            <div className="tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-size-3.5 tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-full tw-shadow-lg">
+              <svg
+                className="tw-size-2.5 tw-flex-shrink-0 tw-text-[#E8D48A]"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 576 512"
+              >
+                <path
+                  fill="currentColor"
+                  d="M400 0L176 0c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8L24 64C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9L192 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-26.1 0C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24L446.4 64c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112l84.4 0c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6l84.4 0c-5.1 66.3-31.1 111.2-63 142.3z"
+                />
+              </svg>
+            </div>
+          )}
+          {!isActive && haveNewDrops && (
+            <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-px-1 tw-shadow-sm">
+              {newDropsCounts[wave.id]}
+            </div>
           )}
         </div>
-        {!isActive && haveNewDrops && (
-          <div className="tw-absolute tw-top-1 tw-left-2 tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-xs tw-animate-pulse group-hover:tw-animate-bounce">
-            {newDropsCounts[wave.id]}
-          </div>
-        )}
         <div className="tw-flex-1">
           <div className="tw-font-medium tw-text-sm">{wave.name}</div>
           <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
@@ -93,7 +117,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           </div>
         </div>
       </Link>
-      <div className="tw-flex tw-items-center tw-gap-x-4 md:tw-gap-x-2">
+      <div className="tw-flex tw-items-center tw-gap-x-4">
         <Tippy
           content={<span className="tw-text-xs">Stream</span>}
           disabled={isMobile}
@@ -103,7 +127,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               resetWaveCount(wave.id);
               router.push(getHref(wave.id), undefined, { shallow: true });
             }}
-            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
           >
             <svg
               width="24"
@@ -113,37 +137,36 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <g clipPath="url(#clip0_4088_1029)">
-                <path
-                  d="M6.62133 10.6875H1.62867C0.730594 10.6875 0 9.95691 0 9.05883V4.06617C0 3.16809 0.730594 2.4375 1.62867 2.4375H6.62133C7.51941 2.4375 8.25 3.16809 8.25 4.06617V9.05883C8.25 9.95691 7.51941 10.6875 6.62133 10.6875ZM1.62867 3.9375C1.5577 3.9375 1.5 3.9952 1.5 4.06617V9.05883C1.5 9.1298 1.5577 9.1875 1.62867 9.1875H6.62133C6.6923 9.1875 6.75 9.1298 6.75 9.05883V4.06617C6.75 3.9952 6.6923 3.9375 6.62133 3.9375H1.62867Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M6.62133 21.5625H1.62867C0.730594 21.5625 0 20.8319 0 19.9338V14.9412C0 14.0431 0.730594 13.3125 1.62867 13.3125H6.62133C7.51941 13.3125 8.25 14.0431 8.25 14.9412V19.9338C8.25 20.8319 7.51941 21.5625 6.62133 21.5625ZM1.62867 14.8125C1.5577 14.8125 1.5 14.8702 1.5 14.9412V19.9338C1.5 20.0048 1.5577 20.0625 1.62867 20.0625H6.62133C6.6923 20.0625 6.75 20.0048 6.75 19.9338V14.9412C6.75 14.8702 6.6923 14.8125 6.62133 14.8125H1.62867Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M23.25 6.1875H11.25C10.8358 6.1875 10.5 5.85169 10.5 5.4375C10.5 5.02331 10.8358 4.6875 11.25 4.6875H23.25C23.6642 4.6875 24 5.02331 24 5.4375C24 5.85169 23.6642 6.1875 23.25 6.1875Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M19.125 9H11.25C10.8358 9 10.5 8.66419 10.5 8.25C10.5 7.83581 10.8358 7.5 11.25 7.5H19.125C19.5392 7.5 19.875 7.83581 19.875 8.25C19.875 8.66419 19.5392 9 19.125 9Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M23.25 16.875H11.25C10.8358 16.875 10.5 16.5392 10.5 16.125C10.5 15.7108 10.8358 15.375 11.25 15.375H23.25C23.6642 15.375 24 15.7108 24 16.125C24 16.5392 23.6642 16.875 23.25 16.875Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M19.125 19.875H11.25C10.8358 19.875 10.5 19.5392 10.5 19.125C10.5 18.7108 10.8358 18.375 11.25 18.375H19.125C19.5392 18.375 19.875 18.7108 19.875 19.125C19.875 19.5392 19.5392 19.875 19.125 19.875Z"
-                  fill="currentColor"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0_4088_1029">
-                  <rect width="24" height="24" fill="white" />
-                </clipPath>
-              </defs>
+              <rect
+                x="1"
+                y="4"
+                width="6"
+                height="6"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <rect
+                x="1"
+                y="14"
+                width="6"
+                height="6"
+                rx="1"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M11 7H23"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <path
+                d="M11 17H23"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           </button>
         </Tippy>
@@ -153,7 +176,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         >
           <Link
             href={`/waves/${wave.id}`}
-            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
+            className="tw-size-8 md:tw-size-7 tw-rounded-lg tw-bg-iron-800 tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-bg-iron-700 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

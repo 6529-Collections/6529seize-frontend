@@ -6,7 +6,6 @@ import {
   CreateWaveOutcomeType,
 } from "../../../../../types/waves.types";
 import CreateWaveOutcomesWinnersAddWinner from "./CreateWaveOutcomesWinnersAddWinner";
-import CreateWaveOutcomesWinnersCreditTypes from "./CreateWaveOutcomesWinnersCreditTypes";
 import CreateWaveOutcomesWinnersRows from "./CreateWaveOutcomesWinnersRows";
 
 export default function CreateWaveOutcomesWinners({
@@ -28,11 +27,6 @@ export default function CreateWaveOutcomesWinners({
     [CreateWaveOutcomeType.MANUAL]: "Manual",
     [CreateWaveOutcomeType.REP]: "Rep",
     [CreateWaveOutcomeType.NIC]: "NIC",
-  };
-  const onCreditType = (
-    creditType: CreateWaveOutcomeConfigWinnersCreditValueType
-  ) => {
-    setWinnersConfig({ ...winnersConfig, creditValueType: creditType });
   };
 
   const onTotalAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,12 +76,12 @@ export default function CreateWaveOutcomesWinners({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-3">
-      <div className="tw-inline-flex tw-items-center tw-space-x-8">
+      {/* <div className="tw-inline-flex tw-items-center tw-space-x-8">
         <CreateWaveOutcomesWinnersCreditTypes
           activeCreditType={winnersConfig.creditValueType}
           setActiveCreditType={onCreditType}
         />
-      </div>
+      </div> */}
       {totalValueError && (
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <svg

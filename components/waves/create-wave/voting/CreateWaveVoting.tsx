@@ -1,6 +1,6 @@
 import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
 import { WAVE_VOTING_LABELS } from "../../../../helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
@@ -16,7 +16,7 @@ export default function CreateWaveVoting({
   setProfileId,
 }: {
   readonly waveType: ApiWaveType;
-  readonly selectedType: ApiWaveCreditType;
+  readonly selectedType: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
@@ -30,9 +30,10 @@ export default function CreateWaveVoting({
     [ApiWaveType.Approve]: "How Drops are Voted",
   };
 
-  const DISABLED_CREDIT_TYPES: ApiWaveCreditType[] = [
-    ApiWaveCreditType.Rep,
-  ];
+
+  if (!selectedType) {
+    return null;
+  }
 
   return (
     <div>
@@ -45,7 +46,7 @@ export default function CreateWaveVoting({
             key={votingType}
             type={votingType}
             selected={selectedType}
-            disabled={DISABLED_CREDIT_TYPES.includes(votingType)}
+            disabled={false}
             label={WAVE_VOTING_LABELS[votingType]}
             onChange={onTypeChange}
           />

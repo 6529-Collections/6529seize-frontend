@@ -1,10 +1,16 @@
 import { ReactNode, useContext, useEffect } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
+import { useRouter } from "next/router";
+import { createBreakpoint } from "react-use";
+import useCapacitor from "../../../../hooks/useCapacitor";
+
+const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -16,14 +22,21 @@ export default function MyStreamLayout({
 }: {
   readonly children: ReactNode;
 }) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle, title, showWaves } = useContext(AuthContext);
+  const router = useRouter();
+  const breakpoint = useBreakpoint();
+
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
     { display: "My Stream" },
   ];
 
-  const { showWaves } = useContext(AuthContext);
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
+
+  const capacitor = useCapacitor();
+  const containerClassName = `tw-relative tw-flex lg:tw-pt-5 tw-flex-col tw-h-[calc(100vh-10rem)] lg:tw-h-full lg:tw-flex-1 tw-overflow-y-auto no-scrollbar  lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tailwind-scope ${
+    capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
+  }`;
 
   return (
     <>
@@ -57,8 +70,30 @@ export default function MyStreamLayout({
         </div>
 
         {showWaves && (
-          <div className="tw-flex-1">
-            <Brain>{children}</Brain>
+          <div className="tw-flex-1" id="my-stream-content">
+            <Brain>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={router.pathname}
+                  initial={{
+                    opacity: 0,
+                    x: breakpoint === "S" ? 20 : 0,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    x: breakpoint === "S" ? -20 : 0,
+                  }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className={containerClassName}
+                >
+                  {children}
+                </motion.div>
+              </AnimatePresence>
+            </Brain>
           </div>
         )}
       </div>

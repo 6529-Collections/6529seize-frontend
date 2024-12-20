@@ -55,14 +55,29 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
     );
   };
 
-  const navigateToDropInWave = () => {
+  const goToQuoteDrop = () => {
     if (drop?.wave.id && drop?.id) {
       onQuoteClick(drop);
     }
   };
 
   return (
-    <div className="tw-bg-iron-950 tw-rounded-xl tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800">
+    <div
+      className="tw-bg-iron-950 tw-rounded-xl tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        goToQuoteDrop();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          e.stopPropagation();
+          goToQuoteDrop();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
       <div className="tw-relative tw-group tw-w-full tw-flex tw-flex-col">
         <div className="tw-flex tw-gap-x-2">
           <div className="tw-h-6 tw-w-6 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-md">
@@ -70,7 +85,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
               {renderProfilePicture()}
             </div>
           </div>
-          <div className="tw-mt-1 tw-flex tw-flex-col tw-w-full">
+          <div className="tw-flex tw-flex-col tw-w-full">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 {!!drop && (
@@ -104,22 +119,7 @@ const WaveDetailedDropQuote: React.FC<WaveDetailedDropQuoteProps> = ({
                 {drop?.wave.name}
               </Link>
             </div>
-            <div
-              className="tw-mt-0.5 tw-cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigateToDropInWave();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  navigateToDropInWave();
-                }
-              }}
-              role="button"
-              tabIndex={0}
-            >
+            <div className="tw-mt-0.5 ">
               <DropPartMarkdownWithPropLogger
                 partContent={quotedPart?.content ?? ""}
                 mentionedUsers={drop?.mentioned_users ?? []}

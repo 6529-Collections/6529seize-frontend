@@ -4,7 +4,7 @@ import { Period } from "../../../../../helpers/Types";
 import CreateWaveDatesEndDateSelectPeriodItem from "./CreateWaveDatesEndDateSelectPeriodItem";
 import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.helpers";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../../helpers/waves/create-wave.validation";
 
 export default function CreateWaveDatesEndDateSelectPeriod({
   activePeriod,
@@ -70,7 +70,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
           } tw-text-base tw-text-iron-500 tw-absolute tw-cursor-pointer peer-focus:tw-cursor-text tw-font-medium tw-duration-300 tw-transform  tw-origin-[0] tw-bg-iron-900 peer-focus:tw-bg-iron-900 tw-ml-7 tw-px-2 peer-focus:tw-px-2 peer-placeholder-shown:tw-scale-100 
           peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-top-1/2 peer-focus:tw-top-2 peer-focus:tw-scale-75 peer-focus:-tw-translate-y-4 rtl:peer-focus:tw-translate-x-1/4 rtl:peer-focus:tw-left-auto tw-start-1`}
         >
-          Choose period
+          Duration unit
         </label>
         <div className="tw-pointer-events-none tw-absolute tw-flex tw-items-center tw-inset-y-0 tw-pl-3">
           <svg

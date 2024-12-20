@@ -4,19 +4,24 @@ import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.c
 import CreateWaveDatesEndDate from "./end-date/CreateWaveDatesEndDate";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { useEffect, useState } from "react";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.helpers";
 import { Time } from "../../../../helpers/time";
+import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
+import { Period } from "../../../../helpers/Types";
 
 export default function CreateWaveDates({
   waveType,
   dates,
   errors,
   setDates,
+  endDateConfig,
+  setEndDateConfig,
 }: {
   readonly waveType: ApiWaveType;
   readonly dates: CreateWaveDatesConfig;
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
+  readonly endDateConfig: {time: number | null, period: Period | null};
+  readonly setEndDateConfig: (config: {time: number | null, period: Period | null}) => void;
 }) {
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -105,6 +110,8 @@ export default function CreateWaveDates({
         startTimestamp={dates.votingStartDate}
         errors={errors}
         onEndTimestampChange={onEndTimestampChange}
+        endDateConfig={endDateConfig}
+        setEndDateConfig={setEndDateConfig}
       />
     </div>
   );

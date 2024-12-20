@@ -4,7 +4,8 @@ import mojs from "@mojs/core";
 import { formatLargeNumber } from "../../../../../../../helpers/Helpers";
 import { getRandomObjectId } from "../../../../../../../helpers/AllowlistToolHelpers";
 import LazyTippy from "../../../../../../utils/tooltip/LazyTippy";
-import { DropVoteState, VOTE_STATE_ERRORS } from "../../../DropsListItem";
+import { DropVoteState } from "../../../../../../../hooks/drops/types";
+import { VOTE_STATE_ERRORS } from "../DropListItemRateGiveSubmit";
 
 enum RateStatus {
   POSITIVE = "POSITIVE",
@@ -14,14 +15,12 @@ enum RateStatus {
 
 export default function DropListItemRateGiveClap({
   rate,
-  availableCredit,
   voteState,
   canVote,
   onSubmit,
   isMobile = false,
 }: {
   readonly rate: number;
-  readonly availableCredit: number;
   readonly voteState: DropVoteState;
   readonly canVote: boolean;
   readonly onSubmit: () => void;
@@ -218,7 +217,7 @@ export default function DropListItemRateGiveClap({
         fill: burstColor,
       },
     });
-  }, [rate, availableCredit]);
+  }, [rate]);
 
   const svgSize = isMobile ? "tw-size-7" : "tw-h-[18px] tw-w-[18px]";
   return (
@@ -232,7 +231,7 @@ export default function DropListItemRateGiveClap({
         <button
           disabled={!rate || !canVote}
           id={`clap-${randomID}`}
-          className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-iron-950 tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
+          className={`${clapClasses} tw-border-none tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-relative tw-z-10 tw-outline-1 tw-outline-transparent tw-bg-current tw-transition tw-duration-300 tw-ease-out ${styles.clap}`}
           onClick={(e) => {
             e.stopPropagation();
             handleClick();

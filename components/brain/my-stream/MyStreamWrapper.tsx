@@ -3,13 +3,17 @@ import MyStream from "./MyStream";
 import { useRouter } from "next/router";
 import MyStreamWave from "./MyStreamWave";
 import BrainContent from "../content/BrainContent";
+import { AuthContext, TitleType } from "../../auth/Auth";
+import {
+  useMyStreamQuery,
+  usePollingQuery,
+} from "../../../hooks/useMyStreamQuery";
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../waves/detailed/WaveDetailedContent";
-import { DropInteractionParams } from "../../waves/detailed/drops/WaveDetailedDrop";
-import { AuthContext, TitleType } from "../../auth/Auth";
-import { useMyStreamQuery, usePollingQuery } from "../../../hooks/useMyStreamQuery";
+} from "../../waves/detailed/chat/WaveChat";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);
@@ -22,17 +26,19 @@ const MyStreamWrapper: React.FC = () => {
   }, [router.query]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-  const getActiveWaveId = () => {
-    return activeDrop?.drop.wave.id ?? serialisedWaveId;
+
+  const onDropClick = (drop: ExtendedDrop) => {
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
   };
-
-  const [activeWaveId, setActiveWaveId] = useState<string | null>(
-    getActiveWaveId()
-  );
-
-  useEffect(() => {
-    setActiveWaveId(getActiveWaveId());
-  }, [activeDrop, serialisedWaveId]);
 
   useEffect(() => {
     setActiveDrop(null);
@@ -115,25 +121,25 @@ const MyStreamWrapper: React.FC = () => {
   const component = serialisedWaveId ? (
     <MyStreamWave
       waveId={serialisedWaveId}
-      onReply={onReply}
-      onQuote={onQuote}
-      activeDrop={activeDrop}
+      onDropClick={onDropClick}
     />
   ) : (
     <MyStream
       onReply={onReply}
       onQuote={onQuote}
+      onDropClick={onDropClick}
       activeDrop={activeDrop}
       items={items}
       isFetching={isFetching}
       onBottomIntersection={onBottomIntersection}
     />
   );
+
   return (
     <BrainContent
-      waveId={activeWaveId}
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
+      waveId={serialisedWaveId ?? undefined}
     >
       {component}
     </BrainContent>

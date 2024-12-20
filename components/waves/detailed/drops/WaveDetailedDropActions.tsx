@@ -7,10 +7,12 @@ import WaveDetailedDropActionsOptions from "./WaveDetailedDropActionsOptions";
 import { useContext } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropFollowAuthor from "./WaveDetailedDropFollowAuthor";
+import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
 
 interface WaveDetailedDropActionsProps {
   readonly drop: ApiDrop;
   readonly activePartIndex: number;
+  readonly showVoting?: boolean;
   readonly onReply: () => void;
   readonly onQuote: () => void;
 }
@@ -18,28 +20,15 @@ interface WaveDetailedDropActionsProps {
 export default function WaveDetailedDropActions({
   drop,
   activePartIndex,
+  showVoting = true,
   onReply,
   onQuote,
 }: WaveDetailedDropActionsProps) {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-
-  const getShowOptions = () => {
-    if (!connectedProfile?.profile?.handle) {
-      return false;
-    }
-    if (activeProfileProxy) {
-      return false;
-    }
-
-    if (drop.id.startsWith("temp-")) {
-      return false;
-    }
-
-    return connectedProfile.profile.handle === drop.author.handle;
-  };
+  const { connectedProfile } = useContext(AuthContext);
+  const { canDelete } = useDropInteractionRules(drop);
 
   return (
-    <div className="tw-absolute tw-z-10 tw-right-2 tw-top-0 group-hover:tw-block tw-hidden tw-transition tw-duration-300 tw-ease-linear">
+    <div className="tw-absolute tw-z-10 tw-right-2 tw-top-1 group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-h-8 tw-flex tw-items-center tw-shadow tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
           {connectedProfile?.profile?.handle !== drop.author.handle &&
@@ -55,9 +44,9 @@ export default function WaveDetailedDropActions({
             activePartIndex={activePartIndex}
           />
           <WaveDetailedDropActionsCopyLink drop={drop} />
-          {getShowOptions() && <WaveDetailedDropActionsOptions drop={drop} />}
+          {canDelete && <WaveDetailedDropActionsOptions drop={drop} />}
         </div>
-        <WaveDetailedDropActionsRate drop={drop} />
+        {showVoting && <WaveDetailedDropActionsRate drop={drop} />}
       </div>
     </div>
   );

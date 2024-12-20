@@ -16,7 +16,7 @@ export default function CommonDropdownItemsMobileWrapper({
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-relative tw-z-50 lg:tw-hidden"
+        className="tailwind-scope tw-relative tw-z-[101] lg:tw-hidden"
         onClose={setOpen}
       >
         <Transition.Child
