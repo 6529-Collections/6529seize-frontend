@@ -15,9 +15,10 @@ interface MyStreamWaveProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-const calculateHeight = (isCapacitor: boolean) => {
+const calculateHeight = (isCapacitor: boolean, keyboardVisible: boolean) => {
   if (isCapacitor) {
-    return "tw-h-[calc(100vh-18.75rem)]";
+    const marginBottom = !keyboardVisible ? "tw-mb-[3.75rem]" : "";
+    return `tw-h-[calc(100vh-18.75rem)] ${marginBottom}`;
   }
   return `tw-h-[calc(100vh-13rem)] lg:tw-h-[calc(100vh-10rem)]`;
 };
@@ -28,9 +29,10 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropClick }) => {
 
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
-      capacitor.isCapacitor
+      capacitor.isCapacitor,
+      capacitor.keyboardVisible
     )}`;
-  }, [capacitor.isCapacitor]);
+  }, [capacitor.isCapacitor, capacitor.keyboardVisible]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const onReply = (drop: ApiDrop, partId: number) => {
