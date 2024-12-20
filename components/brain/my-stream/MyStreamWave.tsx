@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import WaveDropsAll from "../../waves/detailed/drops/WaveDropsAll";
-import { CreateDropWaveWrapper } from "../../waves/detailed/CreateDropWaveWrapper";
+import { CreateDropWaveWrapper, CreateDropWaveWrapperContext } from "../../waves/detailed/CreateDropWaveWrapper";
 import PrivilegedDropCreator, {
   DropMode,
 } from "../../waves/detailed/PrivilegedDropCreator";
@@ -78,7 +78,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropClick }) => {
             onDropClick={onDropClick}
           />
           <div className="tw-mt-auto">
-            <CreateDropWaveWrapper>
+            <CreateDropWaveWrapper context={CreateDropWaveWrapperContext.MY_STREAM}>
               <PrivilegedDropCreator
                 activeDrop={activeDrop}
                 onCancelReplyQuote={onCancelReplyQuote}

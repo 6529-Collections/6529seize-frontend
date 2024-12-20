@@ -28,7 +28,7 @@ const BrainContentPinnedWaves: React.FC = () => {
 
   return (
     <div className="tw-relative tw-h-8 tw-mb-2">
-      <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+      <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
         <div className="tw-flex tw-gap-x-3">
           {pinnedIds.map((id) => (
             <BrainContentPinnedWave
