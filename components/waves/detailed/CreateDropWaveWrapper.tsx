@@ -78,7 +78,7 @@ export function CreateDropWaveWrapper({
       context === CreateDropWaveWrapperContext.WAVE_CHAT;
 
     if (capacitor.isCapacitor) {
-      const marginClass = isMyStreamOrWaveChat ? "tw-mb-[3.75rem]" : "";
+      const marginClass = isMyStreamOrWaveChat && !capacitor.keyboardVisible ? "tw-mb-[3.75rem]" : "";
 
       return `tw-max-h-[calc(100vh-14.7rem)] ${marginClass}`;
     }
