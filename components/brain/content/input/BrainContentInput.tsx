@@ -9,13 +9,11 @@ import PrivilegedDropCreator, {
 interface BrainContentInputProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
-  readonly onDropAddedToQueue: () => void;
 }
 
 const BrainContentInput: React.FC<BrainContentInputProps> = ({
   activeDrop,
   onCancelReplyQuote,
-  onDropAddedToQueue,
 }) => {
   const capacitor = useCapacitor();
   const { data: wave } = useWaveData(activeDrop?.drop.wave?.id ?? null);
@@ -35,7 +33,7 @@ const BrainContentInput: React.FC<BrainContentInputProps> = ({
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
         onAllDropsAdded={onCancelReplyQuote}
-        onDropAddedToQueue={onDropAddedToQueue}
+        onDropAddedToQueue={() => {}}
         key={wave.id}
         dropId={null}
         fixedDropMode={DropMode.BOTH}
