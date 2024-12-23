@@ -41,5 +41,3 @@ export function getScaledImageUri(url: string, scale: ImageScale): string {
   }
   return url;
 }
-
-// https://d3lqz0a4bldqgf.cloudfront.net/waves/author_7c6be24d-87b2-11ee-9661-02424e2c14ad/50acc51a-d4f1-4b63-b549-1a721b2be0ae.webp
