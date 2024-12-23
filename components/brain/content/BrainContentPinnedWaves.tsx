@@ -33,24 +33,55 @@ const BrainContentPinnedWaves: React.FC = () => {
 
     const container = containerRef.current;
     if (container) {
-      const { scrollLeft, scrollWidth, clientWidth } = container;
-      setShowLeftArrow(scrollLeft > 0);
-      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
+      const scrollableWidth = container.scrollWidth;
+      const viewportWidth = container.offsetWidth;
+      const currentScroll = container.scrollLeft;
+      const maxScroll = scrollableWidth - viewportWidth;
+      
+      const isAtEnd = Math.abs(currentScroll - maxScroll) < 1;
+      
+      setShowLeftArrow(currentScroll > 0);
+      setShowRightArrow(maxScroll > 0 && !isAtEnd);
     }
   };
 
   useEffect(() => {
     const container = containerRef.current;
     if (container) {
+      checkScrollArrows();
+
+      const timeoutId = setTimeout(checkScrollArrows, 100);
+
+      const mutationObserver = new MutationObserver(checkScrollArrows);
+      mutationObserver.observe(container, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+      });
+
+      const resizeObserver = new ResizeObserver(checkScrollArrows);
+      resizeObserver.observe(container);
+
       container.addEventListener("scroll", checkScrollArrows);
       window.addEventListener("resize", checkScrollArrows);
-      checkScrollArrows();
+
+      const images = container.getElementsByTagName("img");
+      Array.from(images).forEach((img) => {
+        img.addEventListener("load", checkScrollArrows);
+      });
+
       return () => {
+        clearTimeout(timeoutId);
+        mutationObserver.disconnect();
+        resizeObserver.disconnect();
         container.removeEventListener("scroll", checkScrollArrows);
         window.removeEventListener("resize", checkScrollArrows);
+        Array.from(images).forEach((img) => {
+          img.removeEventListener("load", checkScrollArrows);
+        });
       };
     }
-  }, []);
+  }, [pinnedIds]);
 
   useEffect(() => {
     const { wave } = router.query;
@@ -98,7 +129,7 @@ const BrainContentPinnedWaves: React.FC = () => {
         <button
           ref={rightArrowRef}
           onClick={() => scrollHorizontally("right")}
-          className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-top-0 sm:tw-top-0.5 tw-p-0 tw-size-8 sm:tw-size-7 tw-right-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-md tw-border-none"
+          className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-right-0 tw-top-0 sm:tw-top-0.5 tw-p-0 tw-size-8 sm:tw-size-7 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-md tw-border-none"
         >
           <svg
             className="tw-size-5 sm:tw-size-4 tw-text-iron-200 group-hover:tw-text-iron-400 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
@@ -116,7 +147,7 @@ const BrainContentPinnedWaves: React.FC = () => {
           </svg>
         </button>
       )}
-      <div 
+      <div
         ref={containerRef}
         className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
       >
