@@ -11,7 +11,7 @@ export default function WaveWinnersDropHeaderVoters({
 }: WaveWinnersDropHeaderVotersProps) {
   return (
     <div className="tw-flex tw-items-center tw-gap-2">
-      <div className="tw-flex -tw-space-x-1.5">
+      <div className="tw-flex -tw-space-x-1.5 tw-items-center">
         {drop.top_raters.map((voter, index) => (
           <WaveWinnersDropHeaderVoter
             voter={voter}

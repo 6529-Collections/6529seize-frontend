@@ -36,7 +36,11 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
   return (
     <div className="tw-space-y-4">
       {memoizedDrops.map((drop) => (
-        <WaveWinnersDrop key={drop.id} drop={drop} onDropClick={onDropClick} />
+        <WaveWinnersDrop 
+          key={drop.id} 
+          drop={{ ...drop, wave }} 
+          onDropClick={onDropClick} 
+        />
       ))}
       {isFetchingNextPage && (
         <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">

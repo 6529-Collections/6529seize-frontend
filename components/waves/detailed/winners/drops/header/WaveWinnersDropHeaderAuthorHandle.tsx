@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 
@@ -9,13 +10,12 @@ export default function WaveWinnersDropHeaderAuthorHandle({
   drop,
 }: WaveWinnersDropHeaderAuthorHandleProps) {
   return (
-    <div className="tw-flex tw-items-center tw-gap-2">
-      <Link
-        href={`/${drop.author.handle}`}
-        className="tw-text-base tw-font-semibold tw-text-iron-50 tw-leading-none group-hover:tw-text-[#E8D48A]/80 tw-transition-colors tw-no-underline"
-      >
-        {drop.author.handle}
-      </Link>
-    </div>
+    <Link
+      href={`/${drop.author.handle}`}
+      onClick={(e) => e.stopPropagation()}
+      className="tw-text-base tw-no-underline tw-font-semibold tw-text-iron-50 desktop-hover:hover:tw-text-iron-400 tw-transition-all tw-duration-300 tw-ease-out"
+    >
+      {drop.author.handle}
+    </Link>
   );
 }

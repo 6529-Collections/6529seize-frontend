@@ -1,3 +1,5 @@
+import React from "react";
+import Link from "next/link";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 import { cicToType } from "../../../../../../helpers/Helpers";
 import UserCICAndLevel from "../../../../../user/utils/UserCICAndLevel";
@@ -15,23 +17,20 @@ export default function WaveWinnersDropHeaderAuthorPfp({
   drop,
 }: WaveWinnersDropHeaderAuthorPfpProps) {
   return (
-    <div className="tw-relative">
+    <Link
+      href={`/${drop.author.handle}`}
+      onClick={(e) => e.stopPropagation()}
+      className="tw-transform hover:tw-scale-105 tw-transition-all tw-duration-300"
+    >
       {drop.author.pfp ? (
         <img
-          className="tw-size-9 md:tw-size-11 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-object-contain tw-flex-shrink-0"
           src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
-          alt="User avatar"
+          alt=""
+          className="tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-iron-700/50 tw-object-cover"
         />
       ) : (
-        <div className="tw-size-9 md:tw-size-11 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-object-contain tw-flex-shrink-0" />
+        <div className="tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-iron-700/50 tw-bg-iron-900" />
       )}
-      <div className="tw-absolute -tw-top-1.5 -tw-right-1.5">
-        <UserCICAndLevel
-          level={drop.author.level}
-          cicType={cicToType(drop.author.cic)}
-          size={UserCICAndLevelSize.SMALL}
-        />
-      </div>
-    </div>
+    </Link>
   );
 }

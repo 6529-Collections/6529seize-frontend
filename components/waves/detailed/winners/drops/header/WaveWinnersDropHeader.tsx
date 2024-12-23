@@ -1,14 +1,5 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
-import { UserCICAndLevelSize } from "../../../../../user/utils/UserCICAndLevel";
-import {
-  cicToType,
-  formatNumber,
-  formatNumberWithCommas,
-  getTimeAgoShort,
-} from "../../../../../../helpers/Helpers";
-import UserCICAndLevel from "../../../../../user/utils/UserCICAndLevel";
-import Link from "next/link";
 import WaveWinnersDropHeaderTotalVotes from "./WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./WaveWinnersDropHeaderVoters";
 import WaveWinnersDropHeaderAuthorPfp from "./WaveWinnersDropHeaderAuthorPfp";
@@ -25,7 +16,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
 }) => {
   return (
     <div className="tw-flex tw-items-center tw-justify-between">
-      <div className="tw-flex tw-items-center tw-gap-3.5 tw-no-underline group">
+      <div className="tw-flex tw-items-center tw-gap-3.5 tw-no-underline group" onClick={(e) => e.stopPropagation()}>
         <div className="tw-flex tw-items-center tw-gap-4">
           <WaveWinnersDropHeaderRank drop={drop} />
           <WaveWinnersDropHeaderAuthorPfp drop={drop} />
