@@ -27,7 +27,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropClick }) => {
   const capacitor = useCapacitor();
 
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
+    return `tw-bg-iron-950 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
       capacitor.isCapacitor
     )}`;
   }, [capacitor.isCapacitor]);
