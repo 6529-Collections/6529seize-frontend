@@ -29,13 +29,13 @@ export default function WaveWinnersDropHeaderRank({
 }: WaveWinnersDropHeaderRankProps) {
   if (!drop.rank) {
     return (
-      <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-size-5 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+      <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-h-6 tw-min-w-6 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="2.5"
-          stroke="currentColor" 
+          stroke="currentColor"
           className="tw-size-3 tw-flex-shrink-0"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
@@ -46,27 +46,33 @@ export default function WaveWinnersDropHeaderRank({
 
   if (drop.rank === 1) {
     return (
-      <div className="tw-shadow-[0_4px_12px_rgba(232,212,138,0.2)] tw-ring-1 tw-bg-gradient-to-b tw-from-[#E8D48A]/30 tw-via-[#E8D48A]/10 tw-to-iron-900 tw-ring-[#E8D48A]/40 tw-rounded-lg tw-py-1 tw-px-1.5 tw-text-[#E8D48A] tw-font-bold tw-text-xs tw-flex tw-items-center tw-gap-x-1 hover:tw-from-[#E8D48A]/40 hover:tw-ring-[#E8D48A]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
+      <div className="tw-shadow-[0_4px_12px_rgba(232,212,138,0.2)] tw-ring-1 tw-bg-gradient-to-b tw-from-[#E8D48A]/30 tw-via-[#E8D48A]/10 tw-to-iron-900 tw-ring-[#E8D48A]/40 tw-rounded-lg tw-h-6 tw-px-2 tw-text-[#E8D48A] tw-font-bold tw-text-xs tw-flex tw-items-center tw-gap-x-1 hover:tw-from-[#E8D48A]/40 hover:tw-ring-[#E8D48A]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
         <TrophyIcon color="#E8D48A" />
-        <span className="tw-drop-shadow-[0_2px_3px_rgba(232,212,138,0.4)]">#{drop.rank}</span>
+        <span className="tw-drop-shadow-[0_2px_3px_rgba(232,212,138,0.4)]">
+          #{drop.rank}
+        </span>
       </div>
     );
   }
 
   if (drop.rank === 2) {
     return (
-      <div className="tw-shadow-[0_4px_12px_rgba(221,221,221,0.15)] tw-ring-1 tw-bg-gradient-to-b tw-from-[#dddddd]/25 tw-via-[#dddddd]/10 tw-to-iron-900 tw-ring-[#dddddd]/40 tw-rounded-lg tw-py-1 tw-px-1.5 tw-text-[#DDDDDD] tw-font-bold tw-text-xs tw-flex tw-items-center tw-gap-x-1 hover:tw-from-[#dddddd]/35 hover:tw-ring-[#dddddd]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
+      <div className="tw-shadow-[0_4px_12px_rgba(221,221,221,0.15)] tw-ring-1 tw-bg-gradient-to-b tw-from-[#dddddd]/25 tw-via-[#dddddd]/10 tw-to-iron-900 tw-ring-[#dddddd]/40 tw-rounded-lg tw-h-6 tw-px-2 tw-text-[#DDDDDD] tw-font-bold tw-text-xs tw-flex tw-items-center tw-gap-x-1 hover:tw-from-[#dddddd]/35 hover:tw-ring-[#dddddd]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
         <TrophyIcon color="#DDDDDD" />
-        <span className="tw-drop-shadow-[0_2px_3px_rgba(221,221,221,0.4)]">#{drop.rank}</span>
+        <span className="tw-drop-shadow-[0_2px_3px_rgba(221,221,221,0.4)]">
+          #{drop.rank}
+        </span>
       </div>
     );
   }
 
   if (drop.rank === 3) {
     return (
-      <div className="tw-shadow-[0_4px_12px_rgba(205,127,50,0.15)] tw-ring-1 tw-bg-gradient-to-b tw-from-[#CD7F32]/25 tw-via-[#CD7F32]/10 tw-to-iron-900 tw-ring-[#CD7F32]/40 tw-rounded-lg tw-py-1 tw-px-1.5 tw-text-[#CD7F32] tw-font-bold tw-text-xs tw-flex tw-items-center tw-gap-x-1 hover:tw-from-[#CD7F32]/35 hover:tw-ring-[#CD7F32]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
+      <div className="tw-shadow-[0_4px_12px_rgba(205,127,50,0.15)] tw-ring-1 tw-bg-gradient-to-b tw-from-[#CD7F32]/25 tw-via-[#CD7F32]/10 tw-to-iron-900 tw-ring-[#CD7F32]/40 tw-rounded-lg tw-h-6 tw-px-2 tw-text-[#CD7F32] tw-font-bold tw-text-xs tw-flex tw-items-center tw-gap-x-1 hover:tw-from-[#CD7F32]/35 hover:tw-ring-[#CD7F32]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
         <TrophyIcon color="#CD7F32" />
-        <span className="tw-drop-shadow-[0_2px_3px_rgba(205,127,50,0.4)]">#{drop.rank}</span>
+        <span className="tw-drop-shadow-[0_2px_3px_rgba(205,127,50,0.4)]">
+          #{drop.rank}
+        </span>
       </div>
     );
   }

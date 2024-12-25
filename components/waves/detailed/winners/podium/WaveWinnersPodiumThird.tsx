@@ -3,8 +3,8 @@ import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import {
-  getScaledImageUri,
   ImageScale,
+  getScaledImageUri,
 } from "../../../../../helpers/image.helpers";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
@@ -21,12 +21,9 @@ export const WaveWinnersPodiumThird: React.FC<WaveWinnersPodiumThirdProps> = ({
   onDropClick,
 }) => {
   return (
-    <div
-      onClick={() => onDropClick(drop)}
-      className="tw-cursor-pointer tw-group"
-    >
+    <div onClick={() => onDropClick(drop)} className="tw-cursor-pointer tw-group">
       <div className="tw-flex tw-flex-col tw-items-center -tw-mx-3">
-        <div className="tw-flex tw-flex-col tw-items-center tw-mb-5 tw-relative tw-z-10">
+        <div className="tw-flex tw-flex-col tw-items-center -tw-mb-4 tw-relative tw-z-10">
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#CD7F32]/20 tw-to-transparent tw-blur-2xl tw-scale-150" />
 
           <Link
@@ -38,10 +35,10 @@ export const WaveWinnersPodiumThird: React.FC<WaveWinnersPodiumThirdProps> = ({
               <img
                 src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
                 alt=""
-                className="tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-[#CD7F32] tw-object-cover tw-shadow-[0_0_20px_rgba(205,127,50,0.3)]"
+                className="tw-size-10 tw-rounded-xl tw-ring-2 tw-ring-[#CD7F32] tw-object-cover tw-shadow-[0_0_20px_rgba(205,127,50,0.3)]"
               />
             ) : (
-              <div className="tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-[#CD7F32] tw-shadow-[0_0_20px_rgba(205,127,50,0.3)] tw-bg-iron-900" />
+              <div className="tw-size-10 tw-rounded-xl tw-ring-2 tw-ring-[#CD7F32] tw-shadow-[0_0_20px_rgba(205,127,50,0.3)] tw-bg-iron-900" />
             )}
           </Link>
 
@@ -66,18 +63,26 @@ export const WaveWinnersPodiumThird: React.FC<WaveWinnersPodiumThirdProps> = ({
         </div>
 
         <div className="tw-relative tw-w-full">
-          <div className="tw-h-[160px] group-hover:desktop-hover:hover:tw-bg-iron-900 tw-transition-all tw-duration-300 tw-ease-out tw-bg-iron-900/80 tw-backdrop-blur-xl tw-rounded-2xl tw-border tw-border-iron-800 tw-flex tw-flex-col tw-items-center tw-justify-center tw-shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+          <div className="tw-h-[170px] tw-transition-all tw-duration-300 tw-ease-out tw-bg-iron-900/70 tw-backdrop-blur-xl tw-rounded-2xl tw-border tw-border-iron-800/60 tw-flex tw-flex-col tw-items-center tw-justify-center tw-shadow-[0_0_32px_rgba(0,0,0,0.25)] tw-relative tw-overflow-hidden group-hover:desktop-hover:tw-bg-iron-900/75 group-hover:desktop-hover:tw-border-iron-700/70 group-hover:desktop-hover:tw-shadow-[0_0_48px_rgba(0,0,0,0.35)]">
+            <div className="tw-absolute tw-inset-0">
+              <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#CD7F32]/5 tw-to-transparent group-hover:desktop-hover:tw-from-[#CD7F32]/[0.07]" />
+              <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-[#CD7F32]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#CD7F32]/25" />
+              <div className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-[#CD7F32]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#CD7F32]/25" />
+              <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-[#CD7F32]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#CD7F32]/25" />
+              <div className="tw-absolute tw-inset-y-0 tw-left-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-[#CD7F32]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#CD7F32]/25" />
+            </div>
+
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
-              className="tw-transition-all tw-no-underline tw-mb-3"
+              className="tw-transition-all tw-no-underline tw-mb-2 tw-mt-4 tw-relative"
             >
               <div className="tw-text-base tw-font-semibold tw-text-iron-200 hover:tw-text-[#CD7F32] tw-transition-colors">
                 {drop.author.handle}
               </div>
             </Link>
 
-            <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2.5">
+            <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2 tw-relative">
               <div className="tw-flex tw-items-center tw-gap-2">
                 <span
                   className={`${
@@ -91,8 +96,8 @@ export const WaveWinnersPodiumThird: React.FC<WaveWinnersPodiumThirdProps> = ({
                 </span>
               </div>
 
-              <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-1.5">
-                <div className="tw-flex tw-items-center tw-gap-1.5 tw-px-2.5 tw-py-0.5 tw-rounded-full tw-bg-iron-800/50 tw-backdrop-blur-sm">
+              <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
+                <div className="tw-flex tw-items-center tw-gap-1.5 tw-px-2.5 tw-py-0.5 tw-rounded-full tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-iron-700/20">
                   <span className="tw-text-iron-200 tw-text-sm">
                     {formatNumberWithCommas(drop.raters_count)}
                   </span>

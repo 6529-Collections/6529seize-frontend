@@ -26,7 +26,7 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
       className="tw-cursor-pointer tw-group"
     >
       <div className="tw-flex tw-flex-col tw-items-center -tw-mx-3 tw-z-10">
-        <div className="tw-flex tw-flex-col tw-items-center tw-mb-6 tw-relative tw-z-10">
+        <div className="tw-flex tw-flex-col tw-items-center -tw-mb-6 tw-relative tw-z-10">
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#E8D48A]/20 tw-to-transparent tw-blur-2xl tw-scale-150" />
           <Link
             href={`/${drop.author.handle}`}
@@ -77,14 +77,14 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
-              className="tw-transition-all tw-no-underline tw-mb-4 tw-relative"
+              className="tw-transition-all tw-no-underline tw-mb-2 tw-mt-4 tw-relative"
             >
               <div className="tw-text-xl tw-font-semibold tw-text-iron-200 hover:tw-text-[#E8D48A] tw-transition-colors">
                 {drop.author.handle}
               </div>
             </Link>
 
-            <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-4 tw-relative">
+            <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2 tw-relative">
               <div className="tw-flex tw-items-center tw-gap-2">
                 <span
                   className={`${

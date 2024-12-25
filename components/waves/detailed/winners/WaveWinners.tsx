@@ -1,5 +1,4 @@
 import React from "react";
-import { WaveWinnersHeader } from "./WaveWinnersHeader";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 
@@ -14,7 +13,6 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
 }) => {
   return (
     <div className="tw-space-y-6 tw-mt-8">
-      {/*     <WaveWinnersHeader wave={wave} /> */}
       <WaveWinnersPodium wave={wave} onDropClick={onDropClick} />
 
       <WaveWinnersDrops wave={wave} onDropClick={onDropClick} />
