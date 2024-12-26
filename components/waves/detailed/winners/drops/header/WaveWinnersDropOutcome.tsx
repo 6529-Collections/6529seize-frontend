@@ -123,7 +123,7 @@ export default function WaveWinnersDropOutcome({
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+            <span className="tw-text-sm tw-font-medium tw-text-[#A4C2DB]">
               NIC
             </span>
             <span className="tw-text-sm tw-font-semibold tw-text-[#A4C2DB]">
@@ -145,7 +145,7 @@ export default function WaveWinnersDropOutcome({
                 strokeWidth="1.5"
               />
             </svg>
-            <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+            <span className="tw-text-sm tw-font-medium tw-text-[#C3B5D9]">
               Rep
             </span>
             <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
@@ -159,7 +159,7 @@ export default function WaveWinnersDropOutcome({
             className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20"
           >
             <svg
-              className="tw-size-4 tw-text-[#D4C5AA] tw-flex-shrink-0"
+              className="tw-size-4 tw-text-amber-300/80 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -172,7 +172,7 @@ export default function WaveWinnersDropOutcome({
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="tw-text-sm tw-font-medium tw-text-[#D4C5AA]">
+            <span className="tw-text-sm tw-font-medium tw-text-amber-100">
               {outcome}
             </span>
           </div>

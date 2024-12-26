@@ -77,11 +77,11 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
-              className="tw-transition-all tw-no-underline tw-mb-2 tw-mt-4 tw-relative"
+              className="tw-transition-all tw-no-underline tw-mb-2 tw-mt-4 tw-relative tw-text-center"
             >
-              <div className="tw-text-xl tw-font-semibold tw-text-iron-200 hover:tw-text-[#E8D48A] tw-transition-colors">
+              <span className="tw-text-xl tw-font-semibold tw-text-iron-200 hover:tw-text-[#E8D48A] tw-transition-colors">
                 {drop.author.handle}
-              </div>
+              </span>
             </Link>
 
             <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2 tw-relative">
