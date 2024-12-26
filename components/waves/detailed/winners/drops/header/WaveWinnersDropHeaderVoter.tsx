@@ -1,10 +1,12 @@
 import Tippy from "@tippyjs/react";
-import { getScaledImageUri } from "../../../../../../helpers/image.helpers";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../../../helpers/image.helpers";
 import { ApiDropRater } from "../../../../../../generated/models/ApiDropRater";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import Link from "next/link";
-import { ImageScale } from "../../../../../../helpers/image.helpers";
 
 interface WaveWinnersDropHeaderVoterProps {
   readonly voter: ApiDropRater;

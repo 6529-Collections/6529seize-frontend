@@ -72,7 +72,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
 
   if (!isFetching && !drops.length) {
     return (
-      <div className="tw-relative tw-mx-auto tw-rounded-t-xl tw-overflow-hidden tw-pt-16 tw-px-6 tw-bg-iron-950/60">
+      <div className="tw-relative tw-mx-auto tw-rounded-t-xl tw-overflow-hidden tw-pt-16 tw-px-4 tw-bg-iron-950/60">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-max-w-3xl tw-mx-auto tw-items-end">
           <PodiumPlaceholderCard height="tw-h-[180px]" />
           <PodiumPlaceholderCard height="tw-h-[220px]" />
@@ -84,7 +84,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
 
   if (!drops.length) {
     return (
-      <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-px-6 tw-bg-iron-950/60">
+      <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-px-4 tw-bg-iron-950/60">
         <div className="tw-max-w-3xl tw-mx-auto">
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-16 tw-text-center">
             <div className="tw-h-14 tw-w-14 tw-rounded-2xl tw-flex tw-items-center tw-justify-center tw-bg-iron-900/80 tw-backdrop-blur-sm tw-border tw-border-iron-800/60 tw-shadow-[0_0_32px_rgba(0,0,0,0.25)]">
@@ -113,7 +113,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   }
 
   return (
-    <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-6 tw-px-6 tw-bg-iron-950/60">
+    <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-6 tw-px-4 tw-bg-iron-950/60">
       <div className="tw-max-w-3xl tw-mx-auto">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-items-end">
           <div>

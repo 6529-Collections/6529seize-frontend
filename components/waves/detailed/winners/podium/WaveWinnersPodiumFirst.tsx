@@ -65,7 +65,7 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
         </div>
 
         <div className="tw-relative tw-w-full">
-          <div className="tw-h-[220px] tw-transition-all tw-duration-300 tw-ease-out tw-bg-iron-900/70 tw-backdrop-blur-xl tw-rounded-t-2xl tw-border tw-border-iron-800/60 tw-flex tw-flex-col tw-items-center tw-justify-center tw-shadow-[0_0_32px_rgba(0,0,0,0.25)] tw-relative tw-overflow-hidden group-hover:desktop-hover:tw-bg-iron-900/75 group-hover:desktop-hover:tw-border-iron-700/70 group-hover:desktop-hover:tw-shadow-[0_0_48px_rgba(0,0,0,0.35)]">
+          <div className="tw-h-[220px] tw-transition-all tw-duration-300 tw-ease-out tw-bg-iron-900/70 tw-backdrop-blur-xl tw-rounded-2xl tw-border tw-border-iron-800/60 tw-flex tw-flex-col tw-items-center tw-justify-center tw-shadow-[0_0_32px_rgba(0,0,0,0.25)] tw-relative tw-overflow-hidden group-hover:desktop-hover:tw-bg-iron-900/75 group-hover:desktop-hover:tw-border-iron-700/70 group-hover:desktop-hover:tw-shadow-[0_0_48px_rgba(0,0,0,0.35)]">
             <div className="tw-absolute tw-inset-0">
               <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#E8D48A]/5 tw-to-transparent group-hover:desktop-hover:tw-from-[#E8D48A]/[0.07]" />
               <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-[#E8D48A]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#E8D48A]/25" />
