@@ -24,7 +24,7 @@ const PodiumPlaceholderCard = ({ height }: { height: string }) => (
       <div className="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-iron-800/80 tw-animate-pulse" />
     </div>
     <div
-      className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full ${height} tw-bg-iron-900/80 tw-rounded-t-xl tw-border tw-border-iron-800/60 tw-backdrop-blur-xl tw-pt-8`}
+      className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full ${height} tw-bg-iron-900/80 tw-rounded-2xl tw-border tw-border-iron-800/60 tw-backdrop-blur-xl tw-pt-8`}
     >
       <div className="tw-w-24 tw-h-4 tw-mb-2 tw-rounded-lg tw-bg-iron-800/80 tw-animate-pulse" />
       <div className="tw-w-20 tw-h-4 tw-mb-2 tw-rounded-lg tw-bg-iron-800/80 tw-animate-pulse" />
@@ -72,11 +72,11 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
 
   if (isFetching && !drops.length) {
     return (
-      <div className="tw-relative tw-mx-auto tw-rounded-t-xl tw-overflow-hidden tw-pt-16 tw-px-4 tw-bg-iron-950/60">
+      <div className="tw-relative tw-mx-auto tw-rounded-2xl tw-overflow-hidden tw-pt-16 tw-px-4 tw-bg-iron-950/60">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-max-w-3xl tw-mx-auto tw-items-end">
-          <PodiumPlaceholderCard height="tw-h-[180px]" />
+          <PodiumPlaceholderCard height="tw-h-[190px]" />
           <PodiumPlaceholderCard height="tw-h-[220px]" />
-          <PodiumPlaceholderCard height="tw-h-[160px]" />
+          <PodiumPlaceholderCard height="tw-h-[170px]" />
         </div>
       </div>
     );
@@ -101,7 +101,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
               </svg>
             </div>
             <div className="tw-mt-5 tw-text-lg tw-font-semibold tw-text-iron-300">
-              No Submissions Yet
+              No Winners to Display
             </div>
             <p className="tw-max-w-md tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
               This wave ended without any submissions
@@ -131,7 +131,10 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 />
               </motion.div>
             ) : (
-              <WaveWinnersPodiumPlaceholder height="tw-h-[180px]" position="second" />
+              <WaveWinnersPodiumPlaceholder
+                height="tw-h-[190px]"
+                position="second"
+              />
             )}
           </div>
           <div>
@@ -149,7 +152,10 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 />
               </motion.div>
             ) : (
-              <WaveWinnersPodiumPlaceholder height="tw-h-[220px]" position="first" />
+              <WaveWinnersPodiumPlaceholder
+                height="tw-h-[220px]"
+                position="first"
+              />
             )}
           </div>
           <div>
@@ -167,7 +173,10 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 />
               </motion.div>
             ) : (
-              <WaveWinnersPodiumPlaceholder height="tw-h-[160px]" position="third" />
+              <WaveWinnersPodiumPlaceholder
+                height="tw-h-[170px]"
+                position="third"
+              />
             )}
           </div>
         </div>
