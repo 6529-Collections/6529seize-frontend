@@ -70,7 +70,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   const secondPlaceDrop = drops[1] ?? null;
   const thirdPlaceDrop = drops[2] ?? null;
 
-  if (!isFetching && !drops.length) {
+  if (isFetching && !drops.length) {
     return (
       <div className="tw-relative tw-mx-auto tw-rounded-t-xl tw-overflow-hidden tw-pt-16 tw-px-6 tw-bg-iron-950/60">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-max-w-3xl tw-mx-auto tw-items-end">

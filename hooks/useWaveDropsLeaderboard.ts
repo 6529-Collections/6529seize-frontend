@@ -66,6 +66,7 @@ export function useWaveDropsLeaderboard({
   const queryClient = useQueryClient();
 
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
@@ -167,6 +168,7 @@ export function useWaveDropsLeaderboard({
         : [];
       return generateUniqueKeys(newDrops, prev);
     });
+    setHasInitialized(true);
   }, [data, reverse]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
@@ -190,9 +192,10 @@ export function useWaveDropsLeaderboard({
       });
     },
     enabled: !haveNewDrops && canPoll && pollingEnabled,
-    refetchInterval: isTabVisible && pollingEnabled
-      ? ACTIVE_POLLING_INTERVAL
-      : INACTIVE_POLLING_INTERVAL,
+    refetchInterval:
+      isTabVisible && pollingEnabled
+        ? ACTIVE_POLLING_INTERVAL
+        : INACTIVE_POLLING_INTERVAL,
     refetchOnWindowFocus: pollingEnabled,
     refetchOnMount: pollingEnabled,
     refetchOnReconnect: pollingEnabled,
@@ -261,7 +264,7 @@ export function useWaveDropsLeaderboard({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isFetching: isFetching || !hasInitialized,
     isFetchingNextPage,
     refetch,
     haveNewDrops,
