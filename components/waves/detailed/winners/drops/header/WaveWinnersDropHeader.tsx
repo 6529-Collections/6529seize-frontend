@@ -21,7 +21,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
           <WaveWinnersDropHeaderRank drop={drop} />
           <WaveWinnersDropHeaderAuthorPfp drop={drop} />
         </div>
-        <div className="tw-flex tw-flex-col tw-gap-y-2">
+        <div className="tw-flex tw-flex-col tw-gap-y-1.5 sm:tw-gap-y-0">
           <WaveWinnersDropHeaderAuthorHandle drop={drop} />
           <WaveWinnersDropHeaderCreated drop={drop} />
         </div>

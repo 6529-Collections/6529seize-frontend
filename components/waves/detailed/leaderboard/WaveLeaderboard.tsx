@@ -68,9 +68,9 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
         >
           {children}
 
-          <WaveWinners wave={wave} onDropClick={setActiveDrop} />
+      <WaveWinners wave={wave} onDropClick={setActiveDrop} />
 
-       {/*    <WaveLeaderboardTime wave={wave} />
+      <WaveLeaderboardTime wave={wave} />
           <WaveLeaderboardHeader
             wave={wave}
             sort={sort}
@@ -105,7 +105,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             showMyDrops={showMyDrops}
             setActiveDrop={setActiveDrop}
             onCreateDrop={() => setIsCreatingDrop(true)}
-          />  */}
+          /> 
         </div>
       </div>
 
