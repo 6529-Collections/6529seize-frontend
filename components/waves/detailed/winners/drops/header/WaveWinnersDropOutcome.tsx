@@ -3,101 +3,27 @@ import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 import { ApiWaveOutcomeCredit } from "../../../../../../generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeType } from "../../../../../../generated/models/ApiWaveOutcomeType";
 import { ApiWave } from "../../../../../../generated/models/ApiWave";
+import { useDropOutcomes } from "../../../../../../hooks/drops/useDropOutcomes";
+import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 
 interface WaveWinnersDropOutcomeProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
 }
 
-interface OutcomeSummary {
-  nicTotal: number;
-  repTotal: number;
-  manualOutcomes: string[];
-}
-
-const calculateNIC = ({
-  drop,
-  wave,
-}: {
-  drop: ExtendedDrop;
-  wave: ApiWave;
-}): number => {
-  const rank = drop.rank;
-  if (!rank || !wave?.outcomes) return 0;
-  const outcomes = wave.outcomes;
-  const nicOutcomes = outcomes.filter(
-    (outcome) => outcome.credit === ApiWaveOutcomeCredit.Cic
-  );
-  const nic = nicOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
-  }, 0);
-  return nic;
-};
-
-const calculateRep = ({
-  drop,
-  wave,
-}: {
-  drop: ExtendedDrop;
-  wave: ApiWave;
-}): number => {
-  const rank = drop.rank;
-  if (!rank || !wave?.outcomes) return 0;
-  const outcomes = wave.outcomes;
-  const repOutcomes = outcomes.filter(
-    (outcome) => outcome.credit === ApiWaveOutcomeCredit.Rep
-  );
-  const rep = repOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
-  }, 0);
-  return rep;
-};
-
-const calculateManualOutcomes = ({
-  drop,
-  wave,
-}: {
-  drop: ExtendedDrop;
-  wave: ApiWave;
-}): string[] => {
-  const rank = drop.rank;
-  if (!rank || !wave?.outcomes) return [];
-  const outcomes = wave.outcomes;
-  const manualOutcomes = outcomes.filter(
-    (outcome) => outcome.type === ApiWaveOutcomeType.Manual
-  );
-  return manualOutcomes
-    .filter((outcome) => !!outcome.distribution?.[rank - 1]?.amount)
-    .map((outcome) => outcome.distribution?.[rank - 1]?.description ?? "");
-};
-
-const calculateOutcomeSummary = ({
-  drop,
-  wave,
-}: {
-  drop: ExtendedDrop;
-  wave: ApiWave;
-}): OutcomeSummary => {
-  return {
-    nicTotal: calculateNIC({ drop, wave }),
-    repTotal: calculateRep({ drop, wave }),
-    manualOutcomes: calculateManualOutcomes({ drop, wave }),
-  };
-};
-
 export default function WaveWinnersDropOutcome({
   drop,
   wave,
 }: WaveWinnersDropOutcomeProps) {
-  const { nicTotal, repTotal, manualOutcomes } = calculateOutcomeSummary({
+  const {
+    outcomes: { nicOutcomes, repOutcomes, manualOutcomes },
+    haveOutcomes,
+  } = useDropOutcomes({
     drop,
     wave,
   });
 
-  const totalOutcomes =
-    (nicTotal ? 1 : 0) + (repTotal ? 1 : 0) + manualOutcomes.length;
-
-  if (totalOutcomes === 0) {
+  if (!haveOutcomes) {
     return null;
   }
 
@@ -107,8 +33,11 @@ export default function WaveWinnersDropOutcome({
         Outcome:
       </div>
       <div className="tw-flex tw-flex-wrap tw-gap-2">
-        {!!nicTotal && (
-          <div className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20">
+        {nicOutcomes.map((nicOutcome, i) => (
+          <div
+            key={`NIC-${i}`}
+            className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20"
+          >
             <svg
               className="tw-size-4 tw-text-[#A4C2DB] tw-flex-shrink-0"
               viewBox="0 0 24 24"
@@ -127,12 +56,15 @@ export default function WaveWinnersDropOutcome({
               NIC
             </span>
             <span className="tw-text-sm tw-font-semibold tw-text-[#A4C2DB]">
-              {nicTotal}
+              {formatNumberWithCommas(nicOutcome.value)}
             </span>
           </div>
-        )}
-        {!!repTotal && (
-          <div className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20">
+        ))}
+        {repOutcomes.map((repOutcome, i) => (
+          <div
+            key={`REP-${repOutcome.category}-${i}`}
+            className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20"
+          >
             <svg
               className="tw-size-4 tw-text-[#C3B5D9] tw-flex-shrink-0"
               viewBox="0 0 24 24"
@@ -149,13 +81,16 @@ export default function WaveWinnersDropOutcome({
               Rep
             </span>
             <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
-              {repTotal}
+              {formatNumberWithCommas(repOutcome.value)}
+            </span>
+            <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
+              {repOutcome.category}
             </span>
           </div>
-        )}
-        {manualOutcomes.map((outcome) => (
+        ))}
+        {manualOutcomes.map((outcome, i) => (
           <div
-            key={outcome}
+            key={`MANUAL-${outcome.description}-${i}`}
             className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20"
           >
             <svg
@@ -173,7 +108,7 @@ export default function WaveWinnersDropOutcome({
               />
             </svg>
             <span className="tw-text-sm tw-font-medium tw-text-amber-100">
-              {outcome}
+              {outcome.description}
             </span>
           </div>
         ))}

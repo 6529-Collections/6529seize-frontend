@@ -1,102 +1,23 @@
 import React, { useState, useEffect } from "react";
 import Tippy from "@tippyjs/react";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { ApiWaveOutcomeCredit } from "../../../../../generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeType } from "../../../../../generated/models/ApiWaveOutcomeType";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { useDropOutcomes } from "../../../../../hooks/drops/useDropOutcomes";
+import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 
 interface WavePodiumItemContentOutcomesProps {
   readonly drop: ApiDrop;
   readonly wave: ApiWave;
-  readonly isMobile?: boolean;
 }
 
-interface OutcomeSummary {
-  nicTotal: number;
-  repTotal: number;
-  manualOutcomes: string[];
-}
-
-const calculateNIC = ({
-  drop,
-  wave,
-}: {
-  drop: ApiDrop;
-  wave: ApiWave;
-}): number => {
-  const rank = drop.rank;
-  if (!rank) return 0;
-  const outcomes = wave.outcomes;
-  const nicOutcomes = outcomes.filter(
-    (outcome) => outcome.credit === ApiWaveOutcomeCredit.Cic
-  );
-  const nic = nicOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
-  }, 0);
-  return nic;
-};
-
-const calculateRep = ({
-  drop,
-  wave,
-}: {
-  drop: ApiDrop;
-  wave: ApiWave;
-}): number => {
-  const rank = drop.rank;
-  if (!rank) return 0;
-  const outcomes = wave.outcomes;
-  const repOutcomes = outcomes.filter(
-    (outcome) => outcome.credit === ApiWaveOutcomeCredit.Rep
-  );
-  const rep = repOutcomes.reduce((acc, outcome) => {
-    return acc + (outcome.distribution?.[rank - 1]?.amount ?? 0);
-  }, 0);
-  return rep;
-};
-
-const calculateManualOutcomes = ({
-  drop,
-  wave,
-}: {
-  drop: ApiDrop;
-  wave: ApiWave;
-}): string[] => {
-  const rank = drop.rank;
-  if (!rank) return [];
-  const outcomes = wave.outcomes;
-  const manualOutcomes = outcomes.filter(
-    (outcome) => outcome.type === ApiWaveOutcomeType.Manual
-  );
-  return manualOutcomes
-    .filter((outcome) => !!outcome.distribution?.[rank - 1]?.amount)
-    .map((outcome) => outcome.distribution?.[rank - 1]?.description ?? "");
-};
-
-const calculateOutcomeSummary = ({
-  drop,
-  wave,
-}: {
-  drop: ApiDrop;
-  wave: ApiWave;
-}): OutcomeSummary => {
-  return {
-    nicTotal: calculateNIC({ drop, wave }),
-    repTotal: calculateRep({ drop, wave }),
-    manualOutcomes: calculateManualOutcomes({ drop, wave }),
-  };
-};
-
-export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcomesProps> = ({
-  drop,
-  wave,
-  isMobile = false,
-}) => {
+export const WavePodiumItemContentOutcomes: React.FC<
+  WavePodiumItemContentOutcomesProps
+> = ({ drop, wave }) => {
   const [isTouch, setIsTouch] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    setIsTouch('ontouchstart' in window);
+    setIsTouch("ontouchstart" in window);
   }, []);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -106,14 +27,15 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
     }
   };
 
-  const { nicTotal, repTotal, manualOutcomes } = calculateOutcomeSummary({
+  const {
+    outcomes: { nicOutcomes, repOutcomes, manualOutcomes },
+    haveOutcomes,
+  } = useDropOutcomes({
     drop,
     wave,
   });
-  const totalOutcomes =
-    (nicTotal ? 1 : 0) + (repTotal ? 1 : 0) + manualOutcomes.length;
 
-  if (totalOutcomes === 0) {
+  if (!haveOutcomes) {
     return null;
   }
 
@@ -124,8 +46,11 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
           Outcome Details
         </span>
         <div className="tw-space-y-2">
-          {!!nicTotal && (
-            <div className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40">
+          {nicOutcomes.map((nicOutcome, i) => (
+            <div
+              key={`NIC-TOOLTIP-${i}`}
+              className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40"
+            >
               <div className="tw-flex tw-items-center tw-gap-2">
                 <svg
                   className="tw-size-4 tw-text-[#A4C2DB] tw-flex-shrink-0"
@@ -146,12 +71,15 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
                 </span>
               </div>
               <span className="tw-text-sm tw-font-semibold tw-text-[#A4C2DB]">
-                {nicTotal}
+                {formatNumberWithCommas(nicOutcome.value)}
               </span>
             </div>
-          )}
-          {!!repTotal && (
-            <div className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40">
+          ))}
+          {repOutcomes.map((repOutcome, i) => (
+            <div
+              key={`REP-TOOLTIP-${repOutcome.category}-${i}`}
+              className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40"
+            >
               <div className="tw-flex tw-items-center tw-gap-2">
                 <svg
                   className="tw-size-4 tw-text-[#C3B5D9] tw-flex-shrink-0"
@@ -170,13 +98,16 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
                 </span>
               </div>
               <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
-                {repTotal}
+                {formatNumberWithCommas(repOutcome.value)}
+              </span>
+              <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
+                {repOutcome.category}
               </span>
             </div>
-          )}
-          {manualOutcomes.map((outcome) => (
+          ))}
+          {manualOutcomes.map((outcome, i) => (
             <div
-              key={outcome}
+              key={`MANUAL-TOOLTIP-${outcome.description}-${i}`}
               className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40"
             >
               <div className="tw-flex tw-items-center tw-gap-2">
@@ -195,7 +126,7 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
                   />
                 </svg>
                 <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-                  {outcome}
+                  {outcome.description}
                 </span>
               </div>
             </div>
@@ -206,8 +137,8 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
   );
 
   return (
-    <Tippy 
-      content={tooltipContent} 
+    <Tippy
+      content={tooltipContent}
       placement="left-end"
       animation="shift-away"
       visible={isTouch ? isOpen : undefined}
@@ -224,7 +155,7 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
           Outcome
         </span>
         <div className="tw-flex tw-items-center tw-gap-1.5">
-          {!!nicTotal && (
+          {!!nicOutcomes.length && (
             <div className="tw-flex tw-items-center tw-justify-center tw-size-5 tw-rounded-full tw-bg-[#A4C2DB]/10">
               <svg
                 className="tw-size-3.5 tw-text-[#A4C2DB]"
@@ -242,7 +173,7 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
               </svg>
             </div>
           )}
-          {!!repTotal && (
+          {!!repOutcomes.length && (
             <div className="tw-flex tw-items-center tw-justify-center tw-size-5 tw-rounded-full tw-bg-[#C3B5D9]/10">
               <svg
                 className="tw-size-3.5 tw-text-[#C3B5D9]"
@@ -258,7 +189,7 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
               </svg>
             </div>
           )}
-          {manualOutcomes.length > 0 && (
+          {!!manualOutcomes.length && (
             <div className="tw-flex tw-items-center tw-justify-center tw-size-5 tw-rounded-full tw-bg-[#D4C5AA]/10">
               <svg
                 className="tw-size-3.5 tw-text-[#D4C5AA]"

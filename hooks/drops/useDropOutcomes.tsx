@@ -4,9 +4,9 @@ import { ApiWaveOutcomeCredit } from "../../generated/models/ApiWaveOutcomeCredi
 import { ApiWaveOutcomeType } from "../../generated/models/ApiWaveOutcomeType";
 
 export enum OutcomeType {
-  NIC = 'NIC',
-  REP = 'REP',
-  MANUAL = 'MANUAL'
+  NIC = "NIC",
+  REP = "REP",
+  MANUAL = "MANUAL",
 }
 
 interface NICOutcome {
@@ -26,9 +26,12 @@ interface ManualOutcome {
 }
 
 interface DropOutcomes {
-  nicOutcomes: NICOutcome[];
-  repOutcomes: REPOutcome[];
-  manualOutcomes: ManualOutcome[];
+  outcomes: {
+    nicOutcomes: NICOutcome[];
+    repOutcomes: REPOutcome[];
+    manualOutcomes: ManualOutcome[];
+  };
+  haveOutcomes: boolean;
 }
 
 export interface DropOutcomesInput {
@@ -36,44 +39,48 @@ export interface DropOutcomesInput {
   readonly wave: ApiWave;
 }
 
-export function useDropOutcomes({ drop, wave }: DropOutcomesInput): DropOutcomes {
+export function useDropOutcomes({
+  drop,
+  wave,
+}: DropOutcomesInput): DropOutcomes {
   const rank = drop.rank;
   if (!rank || !wave?.outcomes) {
     return {
-      nicOutcomes: [],
-      repOutcomes: [],
-      manualOutcomes: []
+      outcomes: { nicOutcomes: [], repOutcomes: [], manualOutcomes: [] },
+      haveOutcomes: false,
     };
   }
 
   const nicOutcomes = wave.outcomes
-    .filter(outcome => outcome.credit === ApiWaveOutcomeCredit.Cic)
-    .map(outcome => ({
+    .filter((outcome) => outcome.credit === ApiWaveOutcomeCredit.Cic)
+    .map((outcome) => ({
       type: OutcomeType.NIC as const,
-      value: outcome.distribution?.[rank - 1]?.amount ?? 0
+      value: outcome.distribution?.[rank - 1]?.amount ?? 0,
     }))
-    .filter(outcome => outcome.value > 0);
+    .filter((outcome) => outcome.value > 0);
 
   const repOutcomes = wave.outcomes
-    .filter(outcome => outcome.credit === ApiWaveOutcomeCredit.Rep)
-    .map(outcome => ({
+    .filter((outcome) => outcome.credit === ApiWaveOutcomeCredit.Rep)
+    .map((outcome) => ({
       type: OutcomeType.REP as const,
       value: outcome.distribution?.[rank - 1]?.amount ?? 0,
-      category: outcome.rep_category ?? ''
+      category: outcome.rep_category ?? "",
     }))
-    .filter(outcome => outcome.value > 0);
+    .filter((outcome) => outcome.value > 0);
 
   const manualOutcomes = wave.outcomes
-    .filter(outcome => outcome.type === ApiWaveOutcomeType.Manual)
-    .map(outcome => ({
+    .filter((outcome) => outcome.type === ApiWaveOutcomeType.Manual)
+    .map((outcome) => ({
       type: OutcomeType.MANUAL as const,
-      description: outcome.distribution?.[rank - 1]?.description ?? ''
+      description: outcome.distribution?.[rank - 1]?.description ?? "",
     }))
-    .filter(outcome => outcome.description !== '');
+    .filter((outcome) => outcome.description !== "");
 
+  const outcomes = { nicOutcomes, repOutcomes, manualOutcomes };
+  const haveOutcomes =
+    !!nicOutcomes.length || !!repOutcomes.length || !!manualOutcomes.length;
   return {
-    nicOutcomes,
-    repOutcomes,
-    manualOutcomes
+    outcomes,
+    haveOutcomes,
   };
 }
