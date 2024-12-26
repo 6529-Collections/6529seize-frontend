@@ -227,7 +227,7 @@ export default function WaveWinnersDropOutcome({
         onClick={handleClick}
         tabIndex={0}
         aria-label="View outcome details"
-        className="tw-transition-all tw-duration-200 tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-full tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-solid tw-border-iron-700/20 desktop-hover:hover:tw-bg-iron-800/60 desktop-hover:hover:tw-border-iron-700/40 desktop-hover:hover:tw-shadow-lg"
+        className="tw-transition-all tw-duration-200 tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-full tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-solid tw-border-iron-700/20 desktop-hover:hover:tw-bg-iron-800/60 desktop-hover:hover:tw-border-iron-700/40 desktop-hover:hover:tw-shadow-lg"
       >
         <span className="tw-text-sm tw-font-medium tw-text-iron-300">
           Outcome

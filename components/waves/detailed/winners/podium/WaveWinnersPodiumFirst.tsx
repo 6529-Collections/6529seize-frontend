@@ -25,7 +25,7 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
       onClick={() => onDropClick(drop)}
       className="tw-cursor-pointer tw-group"
     >
-      <div className="tw-flex tw-flex-col tw-items-center -tw-mx-3 tw-z-10">
+      <div className="tw-flex tw-flex-col tw-items-center tw-z-10">
         <div className="tw-flex tw-flex-col tw-items-center -tw-mb-6 tw-relative tw-z-10">
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#E8D48A]/20 tw-to-transparent tw-blur-2xl tw-scale-150" />
           <Link
@@ -65,7 +65,7 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
         </div>
 
         <div className="tw-relative tw-w-full">
-          <div className="tw-h-[220px] tw-transition-all tw-duration-300 tw-ease-out tw-bg-iron-900/70 tw-backdrop-blur-xl tw-rounded-2xl tw-border tw-border-iron-800/60 tw-flex tw-flex-col tw-items-center tw-justify-center tw-shadow-[0_0_32px_rgba(0,0,0,0.25)] tw-relative tw-overflow-hidden group-hover:desktop-hover:tw-bg-iron-900/75 group-hover:desktop-hover:tw-border-iron-700/70 group-hover:desktop-hover:tw-shadow-[0_0_48px_rgba(0,0,0,0.35)]">
+          <div className="tw-h-[220px] tw-transition-all tw-duration-300 tw-ease-out tw-bg-iron-900/70 tw-backdrop-blur-xl tw-rounded-t-2xl tw-border tw-border-iron-800/60 tw-flex tw-flex-col tw-items-center tw-justify-center tw-shadow-[0_0_32px_rgba(0,0,0,0.25)] tw-relative tw-overflow-hidden group-hover:desktop-hover:tw-bg-iron-900/75 group-hover:desktop-hover:tw-border-iron-700/70 group-hover:desktop-hover:tw-shadow-[0_0_48px_rgba(0,0,0,0.35)]">
             <div className="tw-absolute tw-inset-0">
               <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#E8D48A]/5 tw-to-transparent group-hover:desktop-hover:tw-from-[#E8D48A]/[0.07]" />
               <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-[#E8D48A]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#E8D48A]/25" />
@@ -99,7 +99,7 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
               </div>
 
               <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
-                <div className="tw-flex tw-items-center tw-gap-1.5 tw-px-3 tw-py-1.5 tw-rounded-full tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-iron-700/20">
+                <div className="tw-flex tw-items-center tw-gap-1.5">
                   <span className="tw-text-iron-200 tw-text-sm">
                     {formatNumberWithCommas(drop.raters_count)}
                   </span>
