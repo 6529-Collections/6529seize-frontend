@@ -208,17 +208,17 @@ export const WavePodiumItemContentOutcomes: React.FC<WavePodiumItemContentOutcom
   return (
     <Tippy 
       content={tooltipContent} 
-      placement="top"
+      placement="left-end"
       animation="shift-away"
       visible={isTouch ? isOpen : undefined}
       onClickOutside={() => setIsOpen(false)}
       arrow={false}
       duration={200}
-      className="!tw-backdrop-blur-xl"
+      className="tw-backdrop-blur-xl"
     >
       <button
         onClick={handleClick}
-        className="tw-transition-all tw-duration-200 tw-border-0 tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-full tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-solid tw-border-iron-700/20 hover:tw-bg-iron-800/60 hover:tw-border-iron-700/40 hover:tw-shadow-lg"
+        className="tw-transition-all tw-duration-200 tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-solid tw-border-iron-700/20 hover:tw-bg-iron-800/60 hover:tw-border-iron-700/40 hover:tw-shadow-lg"
       >
         <span className="tw-text-sm tw-font-medium tw-text-iron-300">
           Outcome

@@ -21,7 +21,7 @@ export const WaveWinnersPodiumPlaceholder: React.FC<WaveWinnersPodiumPlaceholder
         <div className="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-iron-900/40 tw-border tw-border-iron-800/20" />
       </div>
       <div
-        className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full ${height} tw-bg-iron-950/40 tw-rounded-2xl tw-border ${positionColors[position]} tw-backdrop-blur-sm tw-pt-8`}
+        className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full ${height} tw-bg-iron-950/40 tw-rounded-xl tw-border ${positionColors[position]} tw-backdrop-blur-sm tw-pt-8`}
       >
         <div className="tw-w-24 tw-h-4 tw-mb-2 tw-rounded-lg tw-bg-iron-900/40" />
         <div className="tw-w-20 tw-h-4 tw-mb-2 tw-rounded-lg tw-bg-iron-900/40" />

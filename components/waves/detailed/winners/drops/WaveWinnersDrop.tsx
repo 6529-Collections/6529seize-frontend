@@ -59,7 +59,7 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
         <div className="tw-flex tw-flex-col">
           <WaveWinnersDropHeader drop={drop} />
           <WaveWinnersDropContent drop={drop} />
-          <div className="tw-ml-auto tw-mt-2">
+          <div className="tw-mt-2 tw-ml-16">
             <WaveWinnersDropOutcome drop={drop} wave={drop.wave} />
           </div>
         </div>

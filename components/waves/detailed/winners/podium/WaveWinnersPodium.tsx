@@ -24,7 +24,7 @@ const PodiumPlaceholderCard = ({ height }: { height: string }) => (
       <div className="tw-w-12 tw-h-12 tw-rounded-xl tw-bg-iron-800/80 tw-animate-pulse" />
     </div>
     <div
-      className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full ${height} tw-bg-iron-900/80 tw-rounded-2xl tw-border tw-border-iron-800/60 tw-backdrop-blur-xl tw-pt-8`}
+      className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full ${height} tw-bg-iron-900/80 tw-rounded-xl tw-border tw-border-iron-800/60 tw-backdrop-blur-xl tw-pt-8`}
     >
       <div className="tw-w-24 tw-h-4 tw-mb-2 tw-rounded-lg tw-bg-iron-800/80 tw-animate-pulse" />
       <div className="tw-w-20 tw-h-4 tw-mb-2 tw-rounded-lg tw-bg-iron-800/80 tw-animate-pulse" />
@@ -72,7 +72,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
 
   if (isFetching && !drops.length) {
     return (
-      <div className="tw-relative tw-mx-auto tw-rounded-2xl tw-overflow-hidden tw-pt-16 tw-px-4 tw-bg-iron-950/60">
+      <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-16 tw-px-4 tw-bg-iron-950/60">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-max-w-3xl tw-mx-auto tw-items-end">
           <PodiumPlaceholderCard height="tw-h-[190px]" />
           <PodiumPlaceholderCard height="tw-h-[220px]" />
@@ -87,7 +87,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
       <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-px-4 tw-bg-iron-950/60">
         <div className="tw-max-w-3xl tw-mx-auto">
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-16 tw-text-center">
-            <div className="tw-h-14 tw-w-14 tw-rounded-2xl tw-flex tw-items-center tw-justify-center tw-bg-iron-900/80 tw-backdrop-blur-sm tw-border tw-border-iron-800/60 tw-shadow-[0_0_32px_rgba(0,0,0,0.25)]">
+            <div className="tw-h-14 tw-w-14 tw-rounded-xl tw-flex tw-items-center tw-justify-center tw-bg-iron-900/80 tw-backdrop-blur-sm tw-border tw-border-iron-800/60 tw-shadow-[0_0_32px_rgba(0,0,0,0.25)]">
               <svg
                 className="tw-mx-auto tw-flex-shrink-0 tw-h-7 tw-w-7 tw-text-iron-400"
                 aria-hidden="true"
