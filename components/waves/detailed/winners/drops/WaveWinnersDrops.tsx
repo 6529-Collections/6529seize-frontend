@@ -5,10 +5,12 @@ import { WaveDropsLeaderboardSortBy } from "../../../../../hooks/useWaveDropsLea
 import { AuthContext } from "../../../../auth/Auth";
 import { useWaveDropsLeaderboard } from "../../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../../hooks/useIntersectionObserver";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
+import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 
 interface WaveWinnersDropsProps {
-  readonly wave: any;
-  readonly onDropClick: (drop: any) => void;
+  readonly wave: ApiWave;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
@@ -36,10 +38,11 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
   return (
     <div className="tw-space-y-4">
       {memoizedDrops.map((drop) => (
-        <WaveWinnersDrop 
-          key={drop.id} 
-          drop={{ ...drop, wave }} 
-          onDropClick={onDropClick} 
+        <WaveWinnersDrop
+          key={drop.id}
+          drop={drop}
+          wave={wave}
+          onDropClick={onDropClick}
         />
       ))}
       {isFetchingNextPage && (

@@ -6,7 +6,8 @@ import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
 
 interface WaveWinnersDropProps {
-  readonly drop: ExtendedDrop & { wave: ApiWave };
+  readonly drop: ExtendedDrop;
+  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
@@ -41,6 +42,7 @@ const getColorClasses = (rank: number | null) => {
 
 export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
   drop,
+  wave,
   onDropClick,
 }) => {
   const colorClasses = getColorClasses(drop.rank);
@@ -60,8 +62,9 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
           <WaveWinnersDropHeader drop={drop} />
           <WaveWinnersDropContent drop={drop} />
           <div className="tw-mt-2 tw-ml-16">
-            <WaveWinnersDropOutcome drop={drop} wave={drop.wave} />
+            <WaveWinnersDropOutcome drop={drop} wave={wave} />
           </div>
+          
         </div>
       </div>
     </div>
