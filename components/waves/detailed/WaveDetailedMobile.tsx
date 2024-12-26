@@ -10,6 +10,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { WaveDrop } from "./drop/WaveDrop";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import { WaveOutcome } from "./outcome/WaveOutcome";
+import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
+
 
 interface WaveDetailedMobileProps {
   readonly wave: ApiWave;
@@ -36,6 +38,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   setIsLoading,
 }) => {
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
+  const { votingState } = useWaveState(wave);
 
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
@@ -151,7 +154,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
                 : "tw-border-transparent tw-text-iron-500 hover:tw-border-iron-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
             }`}
           >
-            Leaderboard
+            {votingState === WaveVotingState.ENDED ? "Winners" : "Leaderboard"}
           </button>
         )}
         {isDropWave && (

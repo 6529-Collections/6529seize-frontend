@@ -78,7 +78,11 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     [WaveDetailedView.LEADERBOARD]: (
       <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
         <div>
-          <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
+          <WaveDetailedDesktopTabs
+            activeTab={view}
+            wave={wave}
+            setActiveTab={setView}
+          />
         </div>
       </WaveLeaderboard>
     ),
@@ -91,7 +95,11 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
     [WaveDetailedView.OUTCOME]: (
       <WaveOutcome wave={wave}>
         <div className="tw-mt-3">
-          <WaveDetailedDesktopTabs activeTab={view} setActiveTab={setView} />
+          <WaveDetailedDesktopTabs
+            activeTab={view}
+            wave={wave}
+            setActiveTab={setView}
+          />
         </div>
       </WaveOutcome>
     ),

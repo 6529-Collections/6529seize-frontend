@@ -47,6 +47,8 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
 
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
 
+  
+
   return (
     <motion.div
       className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col
