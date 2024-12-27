@@ -324,23 +324,14 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                 <Auth>
                   <NotificationsProvider>
                     <CookieConsentProvider>
-                      {getLayout(<Component {...props} />)}
+                      <EULAConsentProvider>
+                        {getLayout(<Component {...props} />)}
+                      </EULAConsentProvider>
                     </CookieConsentProvider>
                   </NotificationsProvider>
                 </Auth>
               </SeizeConnectProvider>
             </IpfsProvider>
-            <SeizeConnectProvider>
-              <Auth>
-                <NotificationsProvider>
-                  <CookieConsentProvider>
-                    <EULAConsentProvider>
-                      {getLayout(<Component {...props} />)}
-                    </EULAConsentProvider>
-                  </CookieConsentProvider>
-                </NotificationsProvider>
-              </Auth>
-            </SeizeConnectProvider>
           </ReactQueryWrapper>
           {!hideFooter && <Footer />}
         </WagmiProvider>
