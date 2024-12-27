@@ -22,6 +22,7 @@ import CookiesBanner from "./CookiesBanner";
 const GTM_ID = "G-71NLVV3KY3";
 
 type CookieConsentContextType = {
+  showCookieConsent: boolean;
   consent: () => void;
   reject: () => void;
 };
@@ -149,7 +150,10 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
     document.head.appendChild(script2);
   };
 
-  const value = useMemo(() => ({ consent, reject }), [consent, reject]);
+  const value = useMemo(
+    () => ({ consent, reject, showCookieConsent }),
+    [consent, reject]
+  );
 
   useEffect(() => {
     getCookieConsent();

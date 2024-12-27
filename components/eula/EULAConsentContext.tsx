@@ -44,7 +44,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
   const getEULAConsent = async () => {
     try {
       const eulaConsent = Cookies.get(CONSENT_EULA_COOKIE) === "true";
-      if (!eulaConsent && capacitor.platform === "web") {
+      if (!eulaConsent && capacitor.platform === "ios") {
         const deviceId = await Device.getId();
         const response = await commonApiFetch<{ accepted_at: number }>({
           endpoint: `policies/eula-consent/${deviceId.identifier}`,
