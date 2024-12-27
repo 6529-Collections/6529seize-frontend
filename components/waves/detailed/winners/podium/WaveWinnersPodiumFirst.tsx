@@ -65,13 +65,13 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
         </div>
 
         <div className="tw-relative tw-w-full">
-          <div className="tw-h-[220px] tw-transition-all tw-duration-300 tw-ease-out tw-bg-iron-900/70 tw-backdrop-blur-xl tw-rounded-xl tw-border tw-border-iron-800/60 tw-flex tw-flex-col tw-items-center tw-justify-center tw-shadow-[0_0_32px_rgba(0,0,0,0.25)] tw-relative tw-overflow-hidden group-hover:desktop-hover:tw-bg-iron-900/75 group-hover:desktop-hover:tw-border-iron-700/70 group-hover:desktop-hover:tw-shadow-[0_0_48px_rgba(0,0,0,0.35)]">
+          <div className="tw-h-[220px] tw-transition-all tw-duration-300 tw-ease-out tw-bg-gradient-to-b tw-from-iron-900/70 tw-via-iron-900/50 tw-to-transparent tw-backdrop-blur-xl tw-rounded-xl tw-border tw-border-iron-800/60 tw-flex tw-flex-col tw-items-center tw-justify-center tw-shadow-[0_4px_24px_rgba(0,0,0,0.2)] tw-relative tw-overflow-hidden group-hover:desktop-hover:tw-from-iron-900/75 group-hover:desktop-hover:tw-via-iron-900/55 group-hover:desktop-hover:tw-to-transparent group-hover:desktop-hover:tw-border-iron-700/70 group-hover:desktop-hover:tw-shadow-[0_0_48px_rgba(0,0,0,0.35)]">
             <div className="tw-absolute tw-inset-0">
-              <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#E8D48A]/5 tw-to-transparent group-hover:desktop-hover:tw-from-[#E8D48A]/[0.07]" />
+              <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#E8D48A]/5 tw-via-[#E8D48A]/3 tw-to-transparent group-hover:desktop-hover:tw-from-[#E8D48A]/[0.07]" />
               <div className="tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-[#E8D48A]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#E8D48A]/25" />
-              <div className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-[#E8D48A]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#E8D48A]/25" />
-              <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent tw-via-[#E8D48A]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#E8D48A]/25" />
-              <div className="tw-absolute tw-inset-y-0 tw-left-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-[#E8D48A]/10 tw-to-transparent group-hover:desktop-hover:tw-via-[#E8D48A]/25" />
+              <div className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-px tw-bg-gradient-to-b tw-from-[#E8D48A]/10 tw-via-[#E8D48A]/5 tw-to-transparent group-hover:desktop-hover:tw-via-[#E8D48A]/25" />
+              <div className="tw-absolute tw-inset-y-0 tw-left-0 tw-w-px tw-bg-gradient-to-b tw-from-[#E8D48A]/10 tw-via-[#E8D48A]/5 tw-to-transparent group-hover:desktop-hover:tw-via-[#E8D48A]/25" />
+              <div className="tw-absolute tw-bottom-0 tw-h-3/4 tw-inset-x-0 tw-bg-gradient-to-t tw-from-black/20 tw-via-black/10 tw-to-transparent" />
             </div>
 
             <Link

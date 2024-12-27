@@ -9,8 +9,28 @@ interface WaveWinnersDropHeaderVotersProps {
 export default function WaveWinnersDropHeaderVoters({
   drop,
 }: WaveWinnersDropHeaderVotersProps) {
+  const hasUserVoted =
+    drop.context_profile_context?.rating !== undefined &&
+    drop.context_profile_context?.rating !== 0;
+
+  const userVote = drop.context_profile_context?.rating ?? 0;
+  const isNegativeVote = userVote < 0;
+
+  const topThreeRankStyles: { [key: number]: string } = {
+    1: "tw-text-[#E8D48A]",
+    2: "tw-text-[#DDDDDD]",
+    3: "tw-text-[#CD7F32]",
+  };
+
+  const rankStyle =
+    drop.rank && drop.rank <= 3
+      ? topThreeRankStyles[drop.rank]
+      : isNegativeVote
+      ? "tw-bg-gradient-to-r tw-from-red tw-to-red tw-bg-clip-text tw-text-transparent"
+      : "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
+
   return (
-    <div className="tw-flex tw-items-center tw-gap-2">
+    <div className="tw-flex tw-items-center tw-gap-4">
       <div className="tw-flex -tw-space-x-1.5 tw-items-center">
         {drop.top_raters.map((voter, index) => (
           <WaveWinnersDropHeaderVoter
@@ -25,6 +45,17 @@ export default function WaveWinnersDropHeaderVoters({
         {formatNumberWithCommas(drop.raters_count)}{" "}
         {drop.raters_count === 1 ? "voter" : "voters"}
       </span>
+
+      {hasUserVoted && (
+        <div className="tw-flex tw-items-center tw-gap-1.5">
+          <span className="tw-text-sm">
+            <span className="tw-text-iron-400">Your vote: </span>
+            <span className={`tw-font-semibold ${rankStyle}`}>
+              {formatNumberWithCommas(userVote)} {drop.wave.voting_credit_type}
+            </span>
+          </span>
+        </div>
+      )}
     </div>
   );
 }

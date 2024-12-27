@@ -13,7 +13,7 @@ export const WaveLeaderboardDropRaters: React.FC<
   WaveLeaderboardDropRatersProps
 > = ({ drop }) => {
   const votersCountLabel = drop.raters_count === 1 ? "voter" : "voters";
-  const userVote = drop.context_profile_context?.rating || 0;
+  const userVote = drop.context_profile_context?.rating ?? 0;
   const isNegativeVote = userVote < 0;
 
   const topThreeRankStyles: { [key: number]: string } = {

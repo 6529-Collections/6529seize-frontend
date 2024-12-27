@@ -11,33 +11,11 @@ interface WaveWinnersDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-const getColorClasses = (rank: number | null) => {
-  const rankStyles = {
-    1: {
-      base: "tw-border tw-border-solid tw-border-amber-400/10 tw-bg-[linear-gradient(180deg,rgba(31,31,37,0.98)_0%,rgba(51,46,41,0.95)_100%)] tw-shadow-[inset_0_0_16px_rgba(251,191,36,0.01)]",
-      hover:
-        "desktop-hover:hover:tw-shadow-[inset_0_0_20px_rgba(251,191,36,0.02)] desktop-hover:hover:tw-border-amber-400/15 desktop-hover:hover:tw-bg-[linear-gradient(180deg,rgba(35,35,41,0.98)_0%,rgba(56,51,46,0.95)_100%)]",
-    },
-    2: {
-      base: "tw-border tw-border-solid tw-border-slate-400/10 tw-bg-[linear-gradient(180deg,rgba(31,31,37,0.98)_0%,rgba(46,46,51,0.95)_100%)] tw-shadow-[inset_0_0_16px_rgba(226,232,240,0.01)]",
-      hover:
-        "desktop-hover:hover:tw-shadow-[inset_0_0_20px_rgba(226,232,240,0.02)] desktop-hover:hover:tw-border-slate-400/15 desktop-hover:hover:tw-bg-[linear-gradient(180deg,rgba(35,35,41,0.98)_0%,rgba(51,51,56,0.95)_100%)]",
-    },
-    3: {
-      base: "tw-border tw-border-solid tw-border-[#CD7F32]/10 tw-bg-[linear-gradient(180deg,rgba(31,31,37,0.98)_0%,rgba(46,41,36,0.95)_100%)] tw-shadow-[inset_0_0_16px_rgba(205,127,50,0.01)]",
-      hover:
-        "desktop-hover:hover:tw-shadow-[inset_0_0_20px_rgba(205,127,50,0.02)] desktop-hover:hover:tw-border-[#CD7F32]/15 desktop-hover:hover:tw-bg-[linear-gradient(180deg,rgba(35,35,41,0.98)_0%,rgba(51,46,41,0.95)_100%)]",
-    },
-    default: {
-      base: "tw-border tw-border-solid tw-border-iron-600/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.95)_0%,rgba(35,35,40,0.98)_100%)] tw-shadow-[inset_0_0_16px_rgba(255,255,255,0.03)]",
-      hover:
-        "desktop-hover:hover:tw-shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] desktop-hover:hover:tw-border-iron-500/40",
-    },
-  };
-
-  const style =
-    rankStyles[rank as keyof typeof rankStyles] ?? rankStyles.default;
-  return `${style.base} ${style.hover}`;
+const rankGradients: Record<number | "default", string> = {
+  1: "tw-from-[#E8D48A]/30 tw-via-[#D9A962]/30 tw-to-[#E8D48A]/30 desktop-hover:hover:tw-from-[#E8D48A]/40 desktop-hover:hover:tw-via-[#D9A962]/40 desktop-hover:hover:tw-to-[#E8D48A]/40 tw-shadow-[0_0_32px_rgba(232,212,138,0.1)] desktop-hover:hover:tw-shadow-[0_0_48px_rgba(232,212,138,0.15)]",
+  2: "tw-from-[#DDDDDD]/30 tw-via-[#C0C0C0]/30 tw-to-[#DDDDDD]/30 desktop-hover:hover:tw-from-[#DDDDDD]/40 desktop-hover:hover:tw-via-[#C0C0C0]/40 desktop-hover:hover:tw-to-[#DDDDDD]/40 tw-shadow-[0_0_32px_rgba(221,221,221,0.1)] desktop-hover:hover:tw-shadow-[0_0_48px_rgba(221,221,221,0.15)]",
+  3: "tw-from-[#CD7F32]/30 tw-via-[#B87333]/30 tw-to-[#CD7F32]/30 desktop-hover:hover:tw-from-[#CD7F32]/40 desktop-hover:hover:tw-via-[#B87333]/40 desktop-hover:hover:tw-to-[#CD7F32]/40 tw-shadow-[0_0_32px_rgba(205,127,50,0.1)] desktop-hover:hover:tw-shadow-[0_0_48px_rgba(205,127,50,0.15)]",
+  default: "tw-from-iron-800/50 tw-via-iron-700/30 tw-to-iron-800/50 hover:tw-from-iron-700/60 hover:tw-via-iron-600/40 hover:tw-to-iron-800/60",
 };
 
 export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
@@ -45,26 +23,25 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
   wave,
   onDropClick,
 }) => {
-  const colorClasses = getColorClasses(drop.rank);
+  const gradientClass =
+    drop.rank && drop.rank <= 3
+      ? rankGradients[drop.rank]
+      : rankGradients.default;
 
   return (
     <div
       onClick={() => onDropClick(drop)}
-      role="button"
-      className={`tw-cursor-pointer tw-relative tw-w-full tw-rounded-xl tw-py-5 tw-px-4 ${colorClasses} tw-overflow-hidden tw-backdrop-blur-sm
-        tw-transition-all tw-duration-300 tw-ease-out
-        tw-shadow-lg tw-shadow-black/5
-        desktop-hover:hover:tw-shadow-xl desktop-hover:hover:tw-shadow-black/10
-        tw-group`}
+      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
     >
-      <div>
-        <div className="tw-flex tw-flex-col">
-          <WaveWinnersDropHeader drop={drop} />
-          <WaveWinnersDropContent drop={drop} />
-          <div className="tw-mt-2 tw-ml-16">
-            <WaveWinnersDropOutcome drop={drop} wave={wave} />
+      <div className="tw-rounded-xl tw-bg-iron-950 tw-p-5">
+        <div>
+          <div className="tw-flex tw-flex-col">
+            <WaveWinnersDropHeader drop={drop} />
+            <WaveWinnersDropContent drop={drop} />
+            <div className="tw-mt-2 tw-ml-16">
+              <WaveWinnersDropOutcome drop={drop} wave={wave} />
+            </div>
           </div>
-          
         </div>
       </div>
     </div>

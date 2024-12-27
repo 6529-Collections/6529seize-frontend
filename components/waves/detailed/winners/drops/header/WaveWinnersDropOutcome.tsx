@@ -36,7 +36,7 @@ export default function WaveWinnersDropOutcome({
         {nicOutcomes.map((nicOutcome, i) => (
           <div
             key={`NIC-${i}`}
-            className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20"
+            className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700"
           >
             <svg
               className="tw-size-4 tw-text-[#A4C2DB] tw-flex-shrink-0"
@@ -52,7 +52,7 @@ export default function WaveWinnersDropOutcome({
                 strokeLinejoin="round"
               />
             </svg>
-            <span className="tw-text-sm tw-font-medium tw-text-[#A4C2DB]">
+            <span className="tw-text-sm tw-font-medium tw-text-iron-50">
               NIC
             </span>
             <span className="tw-text-sm tw-font-semibold tw-text-[#A4C2DB]">
@@ -63,7 +63,7 @@ export default function WaveWinnersDropOutcome({
         {repOutcomes.map((repOutcome, i) => (
           <div
             key={`REP-${repOutcome.category}-${i}`}
-            className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20"
+            className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700"
           >
             <svg
               className="tw-size-4 tw-text-[#C3B5D9] tw-flex-shrink-0"
@@ -77,7 +77,7 @@ export default function WaveWinnersDropOutcome({
                 strokeWidth="1.5"
               />
             </svg>
-            <span className="tw-text-sm tw-font-medium tw-text-[#C3B5D9]">
+            <span className="tw-text-sm tw-font-medium tw-text-iron-50">
               Rep
             </span>
             <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
@@ -91,7 +91,7 @@ export default function WaveWinnersDropOutcome({
         {manualOutcomes.map((outcome, i) => (
           <div
             key={`MANUAL-${outcome.description}-${i}`}
-            className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-700 tw-backdrop-blur-sm tw-border tw-border-iron-700/20"
+            className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700"
           >
             <svg
               className="tw-size-4 tw-text-amber-300/80 tw-flex-shrink-0"
