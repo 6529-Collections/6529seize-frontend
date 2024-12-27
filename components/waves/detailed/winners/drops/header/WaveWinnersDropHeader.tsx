@@ -15,21 +15,25 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
   drop,
 }) => {
   return (
-    <div className="tw-flex tw-items-center tw-justify-between">
-      <div className="tw-flex tw-items-center tw-gap-3.5 tw-no-underline group" onClick={(e) => e.stopPropagation()}>
-        <div className="tw-flex tw-items-center tw-gap-4">
-          <WaveWinnersDropHeaderRank drop={drop} />
-          <WaveWinnersDropHeaderAuthorPfp drop={drop} />
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-y-1.5 sm:tw-gap-y-0">
-          <WaveWinnersDropHeaderAuthorHandle drop={drop} />
-          <WaveWinnersDropHeaderCreated drop={drop} />
-        </div>
-      </div>
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-items-center tw-gap-3"
+    >
+      <WaveWinnersDropHeaderRank drop={drop} />
 
-      <div className="tw-flex tw-items-center tw-gap-4">
-        <WaveWinnersDropHeaderTotalVotes drop={drop} />
-        <WaveWinnersDropHeaderVoters drop={drop} />
+      <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
+        <div className="tw-flex tw-items-center tw-gap-3.5 tw-no-underline group">
+          <WaveWinnersDropHeaderAuthorPfp drop={drop} />
+          <div className="tw-flex tw-flex-col tw-gap-y-1.5 sm:tw-gap-y-0">
+            <WaveWinnersDropHeaderAuthorHandle drop={drop} />
+            <WaveWinnersDropHeaderCreated drop={drop} />
+          </div>
+        </div>
+
+        <div className="tw-justify-end tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-flex-wrap">
+          <WaveWinnersDropHeaderTotalVotes drop={drop} />
+          <WaveWinnersDropHeaderVoters drop={drop} />
+        </div>
       </div>
     </div>
   );

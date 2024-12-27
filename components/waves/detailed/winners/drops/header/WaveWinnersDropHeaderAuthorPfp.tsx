@@ -1,9 +1,6 @@
 import React from "react";
 import Link from "next/link";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
-import { cicToType } from "../../../../../../helpers/Helpers";
-import UserCICAndLevel from "../../../../../user/utils/UserCICAndLevel";
-import { UserCICAndLevelSize } from "../../../../../user/utils/UserCICAndLevel";
 import {
   getScaledImageUri,
   ImageScale,
@@ -26,10 +23,10 @@ export default function WaveWinnersDropHeaderAuthorPfp({
         <img
           src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
           alt=""
-          className="tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-iron-700/50 tw-object-cover"
+          className="tw-size-10 md:tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-iron-700/50 tw-object-cover"
         />
       ) : (
-        <div className="tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-iron-700/50 tw-bg-iron-900" />
+        <div className="tw-size-10 md:tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-iron-700/50 tw-bg-iron-900" />
       )}
     </Link>
   );

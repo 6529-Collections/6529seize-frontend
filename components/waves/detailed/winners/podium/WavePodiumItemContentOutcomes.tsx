@@ -40,7 +40,7 @@ export const WavePodiumItemContentOutcomes: React.FC<
   }
 
   const tooltipContent = (
-    <div className="tw-p-3.5 tw-space-y-3 tw-min-w-[220px] tw-backdrop-blur-xl tw-bg-iron-900/95 tw-border tw-border-iron-800/60 tw-rounded-xl tw-shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
+    <div className="tw-p-3.5 tw-space-y-3 lg:tw-min-w-[220px] tw-backdrop-blur-xl tw-bg-iron-900/95 tw-border tw-border-iron-800/60 tw-rounded-xl tw-shadow-[0_8px_32px_rgba(0,0,0,0.35)]">
       <div className="tw-space-y-2.5">
         <span className="tw-text-xs tw-font-medium tw-text-iron-400">
           Outcome Details
@@ -151,7 +151,7 @@ export const WavePodiumItemContentOutcomes: React.FC<
         onClick={handleClick}
         className="tw-transition-all tw-duration-200 tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800/40 tw-backdrop-blur-sm tw-border tw-border-solid tw-border-iron-700/20 hover:tw-bg-iron-800/60 hover:tw-border-iron-700/40 hover:tw-shadow-lg"
       >
-        <span className="tw-text-sm tw-font-medium tw-text-iron-300">
+        <span className="tw-text-sm tw-font-medium tw-text-iron-300 tw-hidden md:tw-block">
           Outcome
         </span>
         <div className="tw-flex tw-items-center tw-gap-1.5">

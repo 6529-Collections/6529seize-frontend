@@ -18,11 +18,11 @@ export default function WaveWinnersDropHeaderTotalVotes({
     ? topThreeRankStyles[drop.rank] 
     : drop.rating >= 0 
     ? "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent"
-    : "tw-bg-gradient-to-r tw-from-red tw-to-red tw-bg-clip-text tw-text-transparent";
+    : "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
 
   return (
     <div className="tw-flex tw-items-baseline tw-gap-x-1">
-      <span className={`tw-font-semibold ${style}`}>
+      <span className={`tw-font-semibold tw-text-sm ${style}`}>
         {formatNumberWithCommas(drop.rating)}
       </span>
       <span className="tw-text-iron-400 tw-text-sm">

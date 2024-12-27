@@ -113,9 +113,9 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   }
 
   return (
-    <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-6 tw-px-4 tw-bg-iron-950/60">
-      <div className="tw-max-w-3xl tw-mx-auto">
-        <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-items-end">
+    <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-6 lg:tw-px-4 tw-bg-iron-950/60">
+      <div className="md:tw-max-w-3xl tw-mx-auto">
+        <div className="tw-grid tw-grid-cols-3 tw-gap-x-2 lg:tw-gap-x-4 tw-items-end">
           <div>
             {secondPlaceDrop ? (
               <motion.div

@@ -30,7 +30,7 @@ export default function WaveWinnersDropHeaderVoters({
       : "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-4">
+    <div className="tw-flex tw-items-center tw-gap-x-3">
       <div className="tw-flex -tw-space-x-1.5 tw-items-center">
         {drop.top_raters.map((voter, index) => (
           <WaveWinnersDropHeaderVoter
@@ -47,7 +47,7 @@ export default function WaveWinnersDropHeaderVoters({
       </span>
 
       {hasUserVoted && (
-        <div className="tw-flex tw-items-center tw-gap-1.5">
+        <div className="tw-flex tw-items-center tw-gap-1">
           <span className="tw-text-sm">
             <span className="tw-text-iron-400">Your vote: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
