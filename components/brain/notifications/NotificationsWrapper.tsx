@@ -64,7 +64,6 @@ export default function NotificationsWrapper({
       <BrainContentInput
         activeDrop={activeDrop}
         onCancelReplyQuote={onCancelReplyQuote}
-        onDropAddedToQueue={() => {}}
       />
       <div className="tw-relative">
         <NotificationItems
