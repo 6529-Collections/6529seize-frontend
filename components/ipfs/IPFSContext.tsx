@@ -8,30 +8,26 @@ interface IpfsContextType {
 const IpfsContext = createContext<IpfsContextType | undefined>(undefined);
 
 const getEnv = () => {
-  const domain = process.env.IPFS_DOMAIN;
-  const rpcPort = process.env.IPFS_RPC_PORT;
-  const gatewayPort = process.env.IPFS_GATEWAY_PORT;
-  const mfsPath = process.env.IPFS_MFS_PATH;
+  const apiEndpoint = process.env.IPFS_API_ENDPOINT;
+  const gatewayEndpoint = process.env.IPFS_GATEWAY_ENDPOINT;
 
-  if (!domain || !rpcPort || !gatewayPort || !mfsPath) {
-    throw new Error(
-      "IPFS_DOMAIN, IPFS_RPC_PORT, IPFS_GATEWAY_PORT, and IPFS_MFS_PATH must be set"
-    );
+  if (!apiEndpoint || !gatewayEndpoint) {
+    throw new Error("IPFS_API_ENDPOINT and IPFS_GATEWAY_ENDPOINT must be set");
   }
 
-  return { domain, rpcPort, gatewayPort, mfsPath };
+  const mfsPath = process.env.IPFS_MFS_PATH;
+
+  return { apiEndpoint, gatewayEndpoint, mfsPath };
 };
 
 export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { domain, rpcPort, gatewayPort, mfsPath } = getEnv();
+  const { apiEndpoint, mfsPath } = getEnv();
 
   const ipfsService = new IpfsService({
-    baseDomain: domain,
-    rpcPort: parseInt(rpcPort),
-    gatewayPort: parseInt(gatewayPort),
-    mfsPath: `/${mfsPath}`,
+    apiEndpoint,
+    mfsPath,
   });
 
   ipfsService.init();
@@ -51,8 +47,8 @@ export const useIpfsService = (): IpfsService => {
 
 export const resolveIpfsUrl = (url: string) => {
   if (url.startsWith("ipfs://")) {
-    const { domain, gatewayPort } = getEnv();
-    return `${domain}:${gatewayPort}/ipfs/${url.slice(7)}`;
+    const { apiEndpoint, gatewayEndpoint } = getEnv();
+    return `${gatewayEndpoint}/ipfs/${url.slice(7)}`;
   }
   return url;
 };

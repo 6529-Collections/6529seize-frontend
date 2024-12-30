@@ -2,27 +2,27 @@ import axios from "axios";
 import FormData from "form-data";
 
 interface IpfsServiceConfig {
-  baseDomain: string;
-  rpcPort: number;
-  gatewayPort: number;
-  mfsPath: string;
+  apiEndpoint: string;
+  mfsPath?: string;
 }
 
 class IpfsService {
-  private readonly baseDomain: string;
-  private readonly rpcPort: number;
-  private readonly mfsPath: string;
+  private readonly apiEndpoint: string;
+  private readonly mfsPath?: string;
+  private readonly mfsEnabled: boolean;
 
   constructor(config: IpfsServiceConfig) {
-    this.baseDomain = config.baseDomain;
-    this.rpcPort = config.rpcPort;
+    this.apiEndpoint = config.apiEndpoint;
     this.mfsPath = config.mfsPath;
+    this.mfsEnabled = !!config.mfsPath;
   }
 
   async init() {
+    if (!this.mfsEnabled) return;
+
     try {
       await axios.post(
-        `${this.baseDomain}:${this.rpcPort}/api/v0/files/mkdir?arg=${this.mfsPath}&parents=true`
+        `${this.apiEndpoint}/api/v0/files/mkdir?arg=/${this.mfsPath}&parents=true`
       );
     } catch (error: any) {
       console.error("Failed to configure MFS:", error.message);
@@ -37,17 +37,19 @@ class IpfsService {
   }
 
   private async validateFileName(cid: string, file: File) {
+    if (!this.mfsEnabled) return;
+
     const extension = file.name.split(".").pop();
     const fileName = `${cid}.${extension}`;
 
     try {
       await axios.post(
-        `${this.baseDomain}:${this.rpcPort}/api/v0/files/stat?arg=${this.mfsPath}/${fileName}`
+        `${this.apiEndpoint}/api/v0/files/stat?arg=/${this.mfsPath}/${fileName}`
       );
       console.log(`File ${fileName} already exists.`);
     } catch (error: any) {
       await axios.post(
-        `${this.baseDomain}:${this.rpcPort}/api/v0/files/cp?arg=/ipfs/${cid}&arg=${this.mfsPath}/${fileName}`
+        `${this.apiEndpoint}/api/v0/files/cp?arg=/ipfs/${cid}&arg=/${this.mfsPath}/${fileName}`
       );
       console.log(`File added to MFS at ${this.mfsPath}/${fileName}`);
     }
@@ -58,7 +60,7 @@ class IpfsService {
       const formData = this.createFormData(file);
 
       const addResponse = await axios.post(
-        `${this.baseDomain}:${this.rpcPort}/api/v0/add?pin=true`,
+        `${this.apiEndpoint}/api/v0/add?pin=true`,
         formData
       );
 
