@@ -17,7 +17,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-items-center tw-gap-3"
+      className="tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-items-center tw-gap-x-4 tw-gap-y-4"
     >
       <WaveWinnersDropHeaderRank drop={drop} />
 
