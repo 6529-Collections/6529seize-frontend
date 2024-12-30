@@ -12,10 +12,9 @@ import { CreateDropWaveWrapper } from "../../waves/detailed/CreateDropWaveWrappe
 import PrivilegedDropCreator, {
   DropMode,
 } from "../../waves/detailed/PrivilegedDropCreator";
-import { ApiWave } from "../../../generated/models/ApiWave";
 
 interface MyStreamWaveChatProps {
-  readonly wave: ApiWave;
+  readonly waveId: string;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
@@ -27,9 +26,10 @@ const calculateHeight = (isCapacitor: boolean) => {
 };
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
-  wave,
+  waveId,
   onDropClick,
 }) => {
+  const { data: wave } = useWaveData(waveId);
   const capacitor = useCapacitor();
 
   const containerClassName = useMemo(() => {
@@ -75,7 +75,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
         <div className={containerClassName}>
           <WaveDropsAll
-            waveId={wave.id}
+            waveId={waveId}
             onReply={handleReply}
             onQuote={handleQuote}
             activeDrop={activeDrop}

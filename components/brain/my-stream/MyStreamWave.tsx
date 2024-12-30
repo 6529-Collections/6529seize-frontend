@@ -13,31 +13,32 @@ interface MyStreamWaveProps {
 }
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropClick }) => {
-  const [activeTab, setActiveTab] = useState<MyStreamWaveTab>(
-    MyStreamWaveTab.CHAT
-  );
-  const { data: wave } = useWaveData(waveId);
-  const isDropsWave = wave?.wave.type !== ApiWaveType.Chat;
-  if (!wave) {
-    return null;
-  }
+  return <MyStreamWaveChat waveId={waveId} onDropClick={onDropClick} />;
+  // const [activeTab, setActiveTab] = useState<MyStreamWaveTab>(
+  //   MyStreamWaveTab.CHAT
+  // );
+  // const { data: wave } = useWaveData(waveId);
+  // const isDropsWave = wave?.wave.type !== ApiWaveType.Chat;
+  // if (!wave) {
+  //   return null;
+  // }
 
-  return (
-    <div>
-      {isDropsWave && (
-        <MyStreamWaveTabs
-          wave={wave}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-      )}
-      <MyStreamWaveViews
-        wave={wave}
-        activeTab={activeTab}
-        onDropClick={onDropClick}
-      />
-    </div>
-  );
+  // return (
+  //   <div>
+  //     {isDropsWave && (
+  //       <MyStreamWaveTabs
+  //         wave={wave}
+  //         activeTab={activeTab}
+  //         setActiveTab={setActiveTab}
+  //       />
+  //     )}
+  //     <MyStreamWaveViews
+  //       wave={wave}
+  //       activeTab={activeTab}
+  //       onDropClick={onDropClick}
+  //     />
+  //   </div>
+  // );
 };
 
 export default MyStreamWave;
