@@ -1,14 +1,16 @@
 import { ApiWave } from "../generated/models/ApiWave";
 import { useState, useEffect } from "react";
+import { ApiWaveType } from "../generated/models/ApiWaveType";
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",
   ONGOING = "ONGOING",
-  ENDED = "ENDED"
+  ENDED = "ENDED",
 }
 
 interface UseWaveStateReturn {
   readonly votingState: WaveVotingState;
+  readonly isDropsWave: boolean;
 }
 
 const calculateVotingState = (
@@ -28,7 +30,9 @@ const calculateVotingState = (
 
   // Only min time set - either not started or ongoing
   if (minTime && !maxTime) {
-    return now < minTime ? WaveVotingState.NOT_STARTED : WaveVotingState.ONGOING;
+    return now < minTime
+      ? WaveVotingState.NOT_STARTED
+      : WaveVotingState.ONGOING;
   }
 
   // Both times set - all states possible
@@ -71,14 +75,22 @@ const calculateNextStateChangeTime = (
 
 export function useWaveState(wave: ApiWave): UseWaveStateReturn {
   const [votingState, setVotingState] = useState<WaveVotingState>(() => {
-    const minTime = wave.voting.period?.min ? new Date(wave.voting.period.min).getTime() : null;
-    const maxTime = wave.voting.period?.max ? new Date(wave.voting.period.max).getTime() : null;
+    const minTime = wave.voting.period?.min
+      ? new Date(wave.voting.period.min).getTime()
+      : null;
+    const maxTime = wave.voting.period?.max
+      ? new Date(wave.voting.period.max).getTime()
+      : null;
     return calculateVotingState(Date.now(), minTime, maxTime);
   });
 
   useEffect(() => {
-    const minTime = wave.voting.period?.min ? new Date(wave.voting.period.min).getTime() : null;
-    const maxTime = wave.voting.period?.max ? new Date(wave.voting.period.max).getTime() : null;
+    const minTime = wave.voting.period?.min
+      ? new Date(wave.voting.period.min).getTime()
+      : null;
+    const maxTime = wave.voting.period?.max
+      ? new Date(wave.voting.period.max).getTime()
+      : null;
     const now = Date.now();
 
     // Update current state
@@ -86,7 +98,12 @@ export function useWaveState(wave: ApiWave): UseWaveStateReturn {
     setVotingState(currentState);
 
     // Calculate when the next state change should occur
-    const nextChangeTime = calculateNextStateChangeTime(now, minTime, maxTime, currentState);
+    const nextChangeTime = calculateNextStateChangeTime(
+      now,
+      minTime,
+      maxTime,
+      currentState
+    );
 
     // If there's a next state change, set up a timeout
     if (nextChangeTime) {
@@ -103,6 +120,7 @@ export function useWaveState(wave: ApiWave): UseWaveStateReturn {
   }, [wave.voting.period?.min, wave.voting.period?.max]);
 
   return {
-    votingState
+    votingState,
+    isDropsWave: wave.wave.type !== ApiWaveType.Chat,
   };
-} 
+}
