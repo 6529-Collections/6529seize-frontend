@@ -17,6 +17,7 @@ import {
   getScaledImageUri,
 } from "../../../../helpers/image.helpers";
 import WaveDetailedDropContent from "../drops/WaveDetailedDropContent";
+import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 
 interface WaveWinnersSmallProps {
   readonly wave: ApiWave;
@@ -54,9 +55,9 @@ const rankColors = {
 } as const;
 
 const rankGradients: Record<number | "default", string> = {
-  1: "tw-from-[#E8D48A]/30 tw-via-[#D9A962]/30 tw-to-[#E8D48A]/30 desktop-hover:hover:tw-from-[#E8D48A]/40 desktop-hover:hover:tw-via-[#D9A962]/40 desktop-hover:hover:tw-to-[#E8D48A]/40 desktop-hover:hover:tw-shadow-[0_0_48px_rgba(232,212,138,0.15)]",
-  2: "tw-from-[#DDDDDD]/30 tw-via-[#C0C0C0]/30 tw-to-[#DDDDDD]/30 desktop-hover:hover:tw-from-[#DDDDDD]/40 desktop-hover:hover:tw-via-[#C0C0C0]/40 desktop-hover:hover:tw-to-[#DDDDDD]/40 desktop-hover:hover:tw-shadow-[0_0_48px_rgba(221,221,221,0.15)]",
-  3: "tw-from-[#CD7F32]/30 tw-via-[#B87333]/30 tw-to-[#CD7F32]/30 desktop-hover:hover:tw-from-[#CD7F32]/40 desktop-hover:hover:tw-via-[#B87333]/40 desktop-hover:hover:tw-to-[#CD7F32]/40 desktop-hover:hover:tw-shadow-[0_0_48px_rgba(205,127,50,0.15)]",
+  1: "tw-from-[#E8D48A]/30 tw-via-[#D9A962]/30 tw-to-[#E8D48A]/30 desktop-hover:hover:tw-from-[#E8D48A]/40 desktop-hover:hover:tw-via-[#D9A962]/40 desktop-hover:hover:tw-to-[#E8D48A]/40",
+  2: "tw-from-[#DDDDDD]/30 tw-via-[#C0C0C0]/30 tw-to-[#DDDDDD]/30 desktop-hover:hover:tw-from-[#DDDDDD]/40 desktop-hover:hover:tw-via-[#C0C0C0]/40 desktop-hover:hover:tw-to-[#DDDDDD]/40",
+  3: "tw-from-[#CD7F32]/30 tw-via-[#B87333]/30 tw-to-[#CD7F32]/30 desktop-hover:hover:tw-from-[#CD7F32]/40 desktop-hover:hover:tw-via-[#B87333]/40 desktop-hover:hover:tw-to-[#CD7F32]/40",
   default:
     "tw-from-iron-800 tw-via-iron-800 tw-to-iron-800 desktop-hover:hover:tw-from-iron-700 desktop-hover:hover:tw-via-iron-700 desktop-hover:hover:tw-to-iron-700",
 };
@@ -154,7 +155,6 @@ export const WaveWinnersSmall: React.FC<WaveWinnersSmallProps> = ({
           setLongPressTriggered={() => {}}
         />
       </div>
-
     );
   };
 
@@ -195,9 +195,9 @@ export const WaveWinnersSmall: React.FC<WaveWinnersSmallProps> = ({
             <div
               key={drop.id}
               onClick={() => onDropClick(drop)}
-              className={`tw-group tw-cursor-pointer tw-rounded-2xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1.5px] tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-[1.01]`}
+              className={`tw-group tw-cursor-pointer tw-rounded-2xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-scale-[1.01]`}
             >
-              <div className="tw-rounded-2xl tw-bg-iron-950 tw-p-4">
+              <div className="tw-rounded-2xl tw-bg-iron-900 tw-p-4">
                 <div className="tw-flex tw-flex-col">
                   <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
                     <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -283,7 +283,7 @@ export const WaveWinnersSmall: React.FC<WaveWinnersSmallProps> = ({
                       )}
                     </Link>
 
-                    <div className="tw-flex tw-items-baseline tw-gap-1.5 tw-min-w-0">
+                    <div className="tw-flex tw-items-center tw-gap-1.5">
                       <Link
                         href={`/${drop.author.handle}`}
                         onClick={(e) => e.stopPropagation()}
@@ -293,13 +293,19 @@ export const WaveWinnersSmall: React.FC<WaveWinnersSmallProps> = ({
                           {drop.author.handle}
                         </span>
                       </Link>
+                      <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></span>
                       <span className="tw-text-sm tw-text-iron-400 tw-flex-shrink-0">
                         {getTimeAgoShort(drop.created_at)}
                       </span>
                     </div>
                   </div>
 
-                  <DropContent drop={drop} />
+                  <div className="tw-ml-10">
+                    <DropContent drop={drop} />
+                    <div className="tw-mt-2">
+                      <WaveWinnersSmallOutcome drop={drop} wave={wave} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
