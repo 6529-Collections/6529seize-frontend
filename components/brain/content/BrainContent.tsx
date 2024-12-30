@@ -38,7 +38,6 @@ const BrainContent: React.FC<BrainContentProps> = ({
         <BrainContentInput
           activeDrop={activeDrop}
           onCancelReplyQuote={onCancelReplyQuote}
-          onDropAddedToQueue={onCancelReplyQuote}
         />
       </div>
     </div>
