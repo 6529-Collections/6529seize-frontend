@@ -21,7 +21,7 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
   onDropClick,
 }) => {
   return (
-    <div 
+    <div
       onClick={() => onDropClick(drop)}
       className="tw-cursor-pointer tw-group"
     >
@@ -77,10 +77,25 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
-              className="tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center"
+              className="tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center desktop-hover:hover:tw-text-[#E8D48A] tw-group/link"
             >
-              <span className="tw-text-sm sm:tw-text-base md:tw-text-xl tw-font-semibold tw-text-iron-200 hover:tw-text-[#E8D48A] tw-transition-colors">
+              <span className="tw-text-sm sm:tw-text-base md:tw-text-xl tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-[#E8D48A] tw-transition-colors tw-inline-flex tw-items-center">
                 {drop.author.handle}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="tw-size-3 tw-opacity-0 tw-transition-opacity tw-text-[#E8D48A] tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100 tw-absolute tw-left-[100%]"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                  />
+                </svg>
               </span>
             </Link>
 
@@ -108,7 +123,7 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
                   </span>
                 </div>
 
-                <WavePodiumItemContentOutcomes drop={drop} wave={wave}  />
+                <WavePodiumItemContentOutcomes drop={drop} wave={wave} />
               </div>
             </div>
           </div>

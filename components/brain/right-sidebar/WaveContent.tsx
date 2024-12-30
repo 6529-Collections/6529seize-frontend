@@ -6,6 +6,7 @@ import WaveHeader, {
   WaveHeaderPinnedSide,
 } from "../../waves/detailed/header/WaveHeader";
 import { WaveDetailedSmallLeaderboard } from "../../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
+import { WaveWinnersSmall } from "../../waves/detailed/winners/WaveWinnersSmall";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebar";
@@ -33,10 +34,11 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
   const { votingState } = useWaveState(wave);
+  const hasVotingEnded = votingState === WaveVotingState.ENDED;
 
   const options = [
     { key: SidebarTab.ABOUT, label: "About" },
-    { key: SidebarTab.LEADERBOARD, label: votingState === WaveVotingState.ENDED ? "Winners" : "Leaderboard", },
+    { key: SidebarTab.LEADERBOARD, label: hasVotingEnded ? "Winners" : "Leaderboard" },
   ] as const;
 
   if (!isRankWave) {
@@ -89,7 +91,13 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           )}
         </div>
       ) : (
-        <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+        <div>
+          {hasVotingEnded ? (
+            <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
+          ) : (
+            <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+          )}
+        </div>
       )}
     </>
   );

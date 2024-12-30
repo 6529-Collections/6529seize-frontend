@@ -80,12 +80,15 @@ export default function WaveWinnersDropOutcome({
             <span className="tw-text-sm tw-font-medium tw-text-iron-50">
               Rep
             </span>
-            <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
-              {formatNumberWithCommas(repOutcome.value)}
-            </span>
-            <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
-              {repOutcome.category}
-            </span>
+            <div className="tw-flex tw-items-center tw-gap-x-1.5">
+              <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
+                {formatNumberWithCommas(repOutcome.value)}
+              </span>
+              <span className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-400"></span>
+              <span className="tw-text-sm tw-font-semibold tw-text-[#C3B5D9]">
+                {repOutcome.category}
+              </span>
+            </div>
           </div>
         ))}
         {manualOutcomes.map((outcome, i) => (

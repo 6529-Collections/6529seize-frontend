@@ -4,6 +4,8 @@ import { ApiWave } from "../../../generated/models/ObjectSerializer";
 import { WaveDetailedSmallLeaderboard } from "./small-leaderboard/WaveDetailedSmallLeaderboard";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDetailedRightSidebarToggle from "./WaveDetailedRightSidebarToggle";
+import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
+import { WaveWinnersSmall } from "./winners/WaveWinnersSmall";
 
 interface WaveDetailedRightSidebarProps {
   readonly wave: ApiWave;
@@ -19,6 +21,7 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
   onDropClick,
 }) => {
   const capacitor = useCapacitor();
+  const { votingState } = useWaveState(wave);
 
   const containerClassName = `${
     capacitor.isCapacitor ? "tw-pb-20" : ""
@@ -43,7 +46,11 @@ const WaveDetailedRightSidebar: React.FC<WaveDetailedRightSidebarProps> = ({
         } tw-text-iron-500 tw-text-sm tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 
         tw-h-full`}
       >
-        <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+        {votingState === WaveVotingState.ENDED ? (
+          <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
+        ) : (
+          <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+        )}
       </div>
     </motion.div>
   );
