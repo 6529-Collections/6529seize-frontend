@@ -47,7 +47,7 @@ export const useIpfsService = (): IpfsService => {
 
 export const resolveIpfsUrl = (url: string) => {
   if (url.startsWith("ipfs://")) {
-    const { apiEndpoint, gatewayEndpoint } = getEnv();
+    const { gatewayEndpoint } = getEnv();
     return `${gatewayEndpoint}/ipfs/${url.slice(7)}`;
   }
   return url;
