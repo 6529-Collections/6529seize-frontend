@@ -331,7 +331,7 @@ export const WaveWinnersSmall: React.FC<WaveWinnersSmallProps> = ({
 
                 <div className="tw-ml-10">
                   <DropContent drop={drop} />
-                  <div className="tw-mt-2">
+                  <div className="tw-mt-2 tw-relative">
                     <WaveWinnersSmallOutcome drop={drop} wave={wave} />
                   </div>
                 </div>
