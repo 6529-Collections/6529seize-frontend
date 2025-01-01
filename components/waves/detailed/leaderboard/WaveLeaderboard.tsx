@@ -71,7 +71,9 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
           {children}
 
           {votingState === WaveVotingState.ENDED ? (
-            <WaveWinners wave={wave} onDropClick={setActiveDrop} />
+            <div className="tw-pb-4 lg:tw-pb-0">
+              <WaveWinners wave={wave} onDropClick={setActiveDrop} />
+            </div>
           ) : (
             <>
               <WaveLeaderboardTime wave={wave} />

@@ -123,7 +123,9 @@ export const WaveWinnersPodiumFirst: React.FC<WaveWinnersPodiumFirstProps> = ({
                   </span>
                 </div>
 
-                <WavePodiumItemContentOutcomes drop={drop} wave={wave} />
+                <div onClick={(e) => e.stopPropagation()}>
+                  <WavePodiumItemContentOutcomes drop={drop} wave={wave} />
+                </div>
               </div>
             </div>
           </div>

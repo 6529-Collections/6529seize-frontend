@@ -1,5 +1,35 @@
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 
+const rankColors = {
+  1: {
+    text: "tw-text-[#E8D48A]",
+    bg: "tw-bg-[#E8D48A]/20",
+    ring: "tw-ring-[#E8D48A]/40",
+    shadow: "tw-shadow-[0_4px_12px_rgba(232,212,138,0.2)]",
+    hover: "desktop-hover:hover:tw-from-[#E8D48A]/40 desktop-hover:hover:tw-ring-[#E8D48A]/50",
+    dropShadow: "tw-drop-shadow-[0_2px_3px_rgba(232,212,138,0.4)]",
+    color: "#E8D48A",
+  },
+  2: {
+    text: "tw-text-[#DDDDDD]",
+    bg: "tw-bg-[#dddddd]/20",
+    ring: "tw-ring-[#dddddd]/40",
+    shadow: "tw-shadow-[0_4px_12px_rgba(221,221,221,0.15)]",
+    hover: "desktop-hover:hover:tw-from-[#dddddd]/35 desktop-hover:hover:tw-ring-[#dddddd]/50",
+    dropShadow: "tw-drop-shadow-[0_2px_3px_rgba(221,221,221,0.4)]",
+    color: "#DDDDDD",
+  },
+  3: {
+    text: "tw-text-[#CD7F32]",
+    bg: "tw-bg-[#B87333]/20",
+    ring: "tw-ring-[#CD7F32]/40",
+    shadow: "tw-shadow-[0_4px_12px_rgba(205,127,50,0.15)]",
+    hover: "desktop-hover:hover:tw-from-[#CD7F32]/35 desktop-hover:hover:tw-ring-[#CD7F32]/50",
+    dropShadow: "tw-drop-shadow-[0_2px_3px_rgba(205,127,50,0.4)]",
+    color: "#CD7F32",
+  },
+} as const;
+
 interface TrophyIconProps {
   readonly color: string;
 }
@@ -7,7 +37,7 @@ interface TrophyIconProps {
 export function TrophyIcon({ color }: TrophyIconProps) {
   return (
     <svg
-      className={`tw-size-3.5 tw-flex-shrink-0 tw-text-[${color}]`}
+      className={`tw-size-4 tw-flex-shrink-0 tw-text-[${color}]`}
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 576 512"
@@ -29,7 +59,7 @@ export default function WaveWinnersDropHeaderRank({
 }: WaveWinnersDropHeaderRankProps) {
   if (!drop.rank) {
     return (
-      <div className=" tw-font-medium tw-text-xs md:tw-text-sm tw-text-iron-400 tw-flex tw-items-center tw-h-6 tw-min-w-6 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+      <div className="tw-font-medium tw-text-sm tw-text-iron-300 tw-flex tw-items-center tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-justify-center tw-ring-1 tw-ring-iron-700">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -44,33 +74,12 @@ export default function WaveWinnersDropHeaderRank({
     );
   }
 
-  if (drop.rank === 1) {
+  if (drop.rank && drop.rank <= 3) {
+    const rankStyle = rankColors[drop.rank as keyof typeof rankColors];
     return (
-      <div className="tw-shadow-[0_4px_12px_rgba(232,212,138,0.2)] tw-ring-1 tw-bg-[#E8D48A]/20 tw-ring-[#E8D48A]/40 tw-rounded-lg tw-h-7 tw-px-2.5 tw-text-[#E8D48A]  tw-font-medium tw-text-xs md:tw-text-sm tw-flex tw-items-center tw-gap-x-1.5 hover:tw-from-[#E8D48A]/40 hover:tw-ring-[#E8D48A]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
-        <TrophyIcon color="#E8D48A" />
-        <span className="tw-drop-shadow-[0_2px_3px_rgba(232,212,138,0.4)]">
-          #{drop.rank}
-        </span>
-      </div>
-    );
-  }
-
-  if (drop.rank === 2) {
-    return (
-      <div className="tw-shadow-[0_4px_12px_rgba(221,221,221,0.15)] tw-ring-1 tw-bg-[#dddddd]/20 tw-ring-[#dddddd]/40 tw-rounded-lg tw-h-7 tw-px-2.5 tw-text-[#DDDDDD]  tw-font-medium tw-text-xs md:tw-text-sm tw-flex tw-items-center tw-gap-x-1.5 hover:tw-from-[#dddddd]/35 hover:tw-ring-[#dddddd]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
-        <TrophyIcon color="#DDDDDD" />
-        <span className="tw-drop-shadow-[0_2px_3px_rgba(221,221,221,0.4)]">
-          #{drop.rank}
-        </span>
-      </div>
-    );
-  }
-
-  if (drop.rank === 3) {
-    return (
-      <div className="tw-shadow-[0_4px_12px_rgba(205,127,50,0.15)] tw-ring-1 tw-bg-[#B87333]/20 tw-ring-[#CD7F32]/40 tw-rounded-lg tw-h-7 tw-px-2.5 tw-text-[#CD7F32]  tw-font-medium tw-text-xs md:tw-text-sm tw-flex tw-items-center tw-gap-x-1.5 hover:tw-from-[#CD7F32]/35 hover:tw-ring-[#CD7F32]/50 tw-transition-all tw-duration-300 tw-animate-trophy-appear">
-        <TrophyIcon color="#CD7F32" />
-        <span className="tw-drop-shadow-[0_2px_3px_rgba(205,127,50,0.4)]">
+      <div className={`${rankStyle.shadow} tw-ring-1 ${rankStyle.bg} ${rankStyle.ring} tw-rounded-xl tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 ${rankStyle.text} tw-font-medium tw-text-xs tw-flex tw-items-center tw-gap-x-1.5 desktop-hover:${rankStyle.hover} tw-transition-all tw-duration-200`}>
+        <TrophyIcon color={rankStyle.color} />
+        <span className={`${rankStyle.dropShadow} tw-text-sm`}>
           #{drop.rank}
         </span>
       </div>
@@ -78,8 +87,8 @@ export default function WaveWinnersDropHeaderRank({
   }
 
   return (
-    <div className="tw-font-medium tw-text-xs md:tw-text-sm tw-text-iron-300 tw-flex tw-items-center tw-h-7 tw-min-w-7 tw-rounded-lg tw-bg-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)] tw-transition-all tw-duration-300">
-      <span className="tw-px-2">#{drop.rank}</span>
+    <div className="tw-font-medium tw-text-sm tw-text-iron-300 tw-flex tw-items-center tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-justify-center tw-ring-1 tw-ring-iron-700">
+      #{drop.rank}
     </div>
   );
 }
