@@ -82,21 +82,27 @@ const getRankGradientClasses = (rank: number) => {
   switch (rank) {
     case 1:
       return {
-        gradient: "tw-from-[#E8D48A]/[0.02] tw-via-[#E8D48A]/[0.01] tw-to-transparent",
+        gradient:
+          "tw-from-[#E8D48A]/[0.02] tw-via-[#E8D48A]/[0.01] tw-to-transparent",
         borderTop: "tw-via-[#E8D48A]/25 tw-to-transparent",
-        borderSide: "tw-from-[#E8D48A]/30 tw-via-[#E8D48A]/20 tw-to-transparent",
+        borderSide:
+          "tw-from-[#E8D48A]/30 tw-via-[#E8D48A]/20 tw-to-transparent",
       };
     case 2:
       return {
-        gradient: "tw-from-[#DDDDDD]/[0.02] tw-via-[#DDDDDD]/[0.01] tw-to-transparent",
+        gradient:
+          "tw-from-[#DDDDDD]/[0.02] tw-via-[#DDDDDD]/[0.01] tw-to-transparent",
         borderTop: "tw-via-[#DDDDDD]/25 tw-to-transparent",
-        borderSide: "tw-from-[#DDDDDD]/30 tw-via-[#DDDDDD]/20 tw-to-transparent",
+        borderSide:
+          "tw-from-[#DDDDDD]/30 tw-via-[#DDDDDD]/20 tw-to-transparent",
       };
     case 3:
       return {
-        gradient: "tw-from-[#CD7F32]/[0.02] tw-via-[#CD7F32]/[0.01] tw-to-transparent",
+        gradient:
+          "tw-from-[#CD7F32]/[0.02] tw-via-[#CD7F32]/[0.01] tw-to-transparent",
         borderTop: "tw-via-[#CD7F32]/25 tw-to-transparent",
-        borderSide: "tw-from-[#CD7F32]/30 tw-via-[#CD7F32]/20 tw-to-transparent",
+        borderSide:
+          "tw-from-[#CD7F32]/30 tw-via-[#CD7F32]/20 tw-to-transparent",
       };
     default:
       return {
@@ -183,19 +189,20 @@ export const WaveWinnersSmall: React.FC<WaveWinnersSmallProps> = ({
             ? "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent"
             : "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
 
-          const userVoteStyle = drop.rank && drop.rank <= 3 && rankStyle
-            ? rankStyle.text
-            : isNegativeVote
-            ? "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent"
-            : "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
+          const userVoteStyle =
+            drop.rank && drop.rank <= 3 && rankStyle
+              ? rankStyle.text
+              : isNegativeVote
+              ? "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent"
+              : "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
 
           return (
             <div
               key={drop.id}
               onClick={() => onDropClick(drop)}
-              className="tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden"
+              className="tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-scale-[1.01] tw-transform tw-transition-all tw-duration-300 tw-ease-out"
             >
-              <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative">
+              <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out">
                 {drop.rank && drop.rank <= 3 && rankStyle && (
                   <div className="tw-absolute tw-inset-0">
                     {(() => {
@@ -218,7 +225,7 @@ export const WaveWinnersSmall: React.FC<WaveWinnersSmallProps> = ({
                             className={`tw-absolute tw-inset-y-0 tw-left-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-${classes.borderSide} tw-to-transparent`}
                           />
                           <div className="tw-absolute tw-bottom-0 tw-h-3/4 tw-inset-x-0 tw-bg-gradient-to-t tw-from-black/20 tw-via-black/10 tw-to-transparent" />
-                          </>
+                        </>
                       );
                     })()}
                   </div>
