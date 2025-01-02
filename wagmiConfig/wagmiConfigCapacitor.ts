@@ -26,9 +26,9 @@ export const wagmiConfigCapacitor = (
       injected(),
     ],
     transports: {
-      [mainnet.id]: http(),
-      [sepolia.id]: http(),
-      [goerli.id]: http(),
+      [mainnet.id]: http("https://rpc1.6529.io"),
+      [sepolia.id]: http("https://rpc1.6529.io"),
+      [goerli.id]: http("https://rpc1.6529.io"),
     },
   });
 };
