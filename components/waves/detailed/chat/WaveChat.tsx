@@ -35,7 +35,9 @@ const calculateHeight = (isCapacitor: boolean, isNotChatWave: boolean) => {
     return "tw-h-[calc(100vh-14.7rem)]";
   }
   return `tw-h-[calc(100vh-8.8rem)] ${
-    isNotChatWave ? "lg:tw-h-[calc(100vh-9.4rem)]" : "lg:tw-h-[calc(100vh-6.5rem)]"
+    isNotChatWave
+      ? "lg:tw-h-[calc(100vh-9.4rem)]"
+      : "lg:tw-h-[calc(100vh-6.5rem)]"
   }`;
 };
 
@@ -94,7 +96,10 @@ export const WaveChat: React.FC<WaveChatProps> = ({
   };
 
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col ${calculateHeight(capacitor.isCapacitor, isNotChatWave)}`;
+    return `tw-w-full tw-flex tw-flex-col ${calculateHeight(
+      capacitor.isCapacitor,
+      isNotChatWave
+    )}`;
   }, [capacitor.isCapacitor, isNotChatWave]);
 
   if (!searchParamsDone) {
@@ -105,7 +110,9 @@ export const WaveChat: React.FC<WaveChatProps> = ({
     <>
       <div
         className={`tw-flex-1 lg:tw-ml-[21.5rem] ${
-          isSidebarOpen && isNotChatWave ? "xl:tw-mr-[20.5rem] 3xl:tw-mr-[28rem]" : ""
+          isSidebarOpen && isNotChatWave
+            ? "xl:tw-mr-[20.5rem] 3xl:tw-mr-[28rem]"
+            : ""
         } tw-transition-all tw-duration-300 lg:tw-pl-4`}
       >
         <div
@@ -115,6 +122,7 @@ export const WaveChat: React.FC<WaveChatProps> = ({
           {isNotChatWave && (
             <div className="tw-hidden lg:tw-flex tw-items-center tw-h-12 tw-bg-iron-950 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
               <WaveDetailedDesktopTabs
+                wave={wave}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
               />

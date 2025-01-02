@@ -1,5 +1,5 @@
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { WaveDrop } from "./drop/WaveDrop";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import { WaveOutcome } from "./outcome/WaveOutcome";
+import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 
 interface WaveDetailedMobileProps {
   readonly wave: ApiWave;
@@ -36,6 +37,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
   setIsLoading,
 }) => {
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
+  const { votingState } = useWaveState(wave);
 
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
@@ -44,83 +46,79 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
     WaveDetailedMobileView.CHAT
   );
 
-  const [forceRender, setForceRender] = useState(0);
-
-  useEffect(() => {
-    if (activeDrop) {
-      setForceRender((prev) => prev + 1);
-    }
-  }, [activeDrop]);
-
-  const getIsAuthorAndNotProxy = () =>
-    connectedProfile?.profile?.handle === wave.author.handle &&
-    !activeProfileProxy;
-
-  const [isAuthorAndNotProxy, setIsAuthorAndNotProxy] = useState(
-    getIsAuthorAndNotProxy()
+  const getIsAuthorAndNotProxy = useCallback(
+    () =>
+      connectedProfile?.profile?.handle === wave.author.handle &&
+      !activeProfileProxy,
+    [connectedProfile?.profile?.handle, wave.author.handle, activeProfileProxy]
   );
 
-  useEffect(
-    () => setIsAuthorAndNotProxy(getIsAuthorAndNotProxy()),
-    [connectedProfile, wave]
+  const isAuthorAndNotProxy = useMemo(
+    () => getIsAuthorAndNotProxy(),
+    [getIsAuthorAndNotProxy]
   );
 
-  const getShowRequiredMetadata = () =>
-    isAuthorAndNotProxy || !!wave.participation.required_metadata.length;
-
-  const [showRequiredMetadata, setShowRequiredMetadata] = useState(
-    getShowRequiredMetadata()
+  const showRequiredMetadata = useMemo(
+    () => isAuthorAndNotProxy || !!wave.participation.required_metadata.length,
+    [isAuthorAndNotProxy, wave.participation.required_metadata.length]
   );
 
-  const getShowRequiredTypes = () =>
-    isAuthorAndNotProxy || !!wave.participation.required_media.length;
-
-  const [showRequiredTypes, setShowRequiredTypes] = useState(
-    getShowRequiredTypes()
+  const showRequiredTypes = useMemo(
+    () => isAuthorAndNotProxy || !!wave.participation.required_media.length,
+    [isAuthorAndNotProxy, wave.participation.required_media.length]
   );
 
-  useEffect(() => {
-    setShowRequiredMetadata(getShowRequiredMetadata());
-    setShowRequiredTypes(getShowRequiredTypes());
-  }, [wave, isAuthorAndNotProxy]);
+  const handleWaveChange = useCallback(
+    (newWave: ApiWave) => {
+      setIsLoading(true);
+      onWaveChange(newWave);
+      setActiveView(WaveDetailedMobileView.CHAT);
+      setView(WaveDetailedView.CHAT);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    },
+    [onWaveChange, setView, setIsLoading]
+  );
 
-  const handleWaveChange = (newWave: ApiWave) => {
-    setIsLoading(true);
-    onWaveChange(newWave);
-    setActiveView(WaveDetailedMobileView.CHAT);
-    setView(WaveDetailedView.CHAT);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-  };
-
-  const components: Record<WaveDetailedMobileView, JSX.Element> = {
-    [WaveDetailedMobileView.CHAT]: (
-      <WaveChat
-        wave={wave}
-        activeTab={WaveDetailedView.CHAT}
-        setActiveTab={() => {}}
-        onDropClick={setActiveDrop}
-      />
-    ),
-    [WaveDetailedMobileView.LEADERBOARD]: (
-      <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
-        <div></div>
-      </WaveLeaderboard>
-    ),
-    [WaveDetailedMobileView.ABOUT]: (
-      <WaveDetailedMobileAbout
-        wave={wave}
-        showRequiredMetadata={showRequiredMetadata}
-        showRequiredTypes={showRequiredTypes}
-        setView={setView}
-        setActiveView={setActiveView}
-        onWaveChange={handleWaveChange}
-        setIsLoading={setIsLoading}
-      />
-    ),
-    [WaveDetailedMobileView.OUTCOME]: <WaveOutcome wave={wave} />,
-  };
+  const components = useMemo(
+    () => ({
+      [WaveDetailedMobileView.CHAT]: (
+        <WaveChat
+          wave={wave}
+          activeTab={WaveDetailedView.CHAT}
+          setActiveTab={() => {}}
+          onDropClick={setActiveDrop}
+        />
+      ),
+      [WaveDetailedMobileView.LEADERBOARD]: (
+        <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
+          <div></div>
+        </WaveLeaderboard>
+      ),
+      [WaveDetailedMobileView.ABOUT]: (
+        <WaveDetailedMobileAbout
+          wave={wave}
+          showRequiredMetadata={showRequiredMetadata}
+          showRequiredTypes={showRequiredTypes}
+          setView={setView}
+          setActiveView={setActiveView}
+          onWaveChange={handleWaveChange}
+          setIsLoading={setIsLoading}
+        />
+      ),
+      [WaveDetailedMobileView.OUTCOME]: <WaveOutcome wave={wave} />,
+    }),
+    [
+      wave,
+      setActiveDrop,
+      showRequiredMetadata,
+      showRequiredTypes,
+      setView,
+      handleWaveChange,
+      setIsLoading,
+    ]
+  );
 
   if (!showWaves) {
     return null;
@@ -131,6 +129,21 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
       className="tailwind-scope tw-bg-black tw-relative"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
+      <AnimatePresence mode="wait">
+        {activeDrop && (
+          <motion.div
+            key={`drop-${activeDrop.id}`}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="tw-absolute lg:tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
+            style={{ willChange: "transform" }}
+          >
+            <WaveDrop drop={activeDrop} onClose={() => setActiveDrop(null)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="tw-px-4 min-[992px]:tw-px-3 tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-border-b tw-border-iron-800 tw-border-solid tw-border-t-0 tw-border-x-0">
         <button
           onClick={() => setActiveView(WaveDetailedMobileView.CHAT)}
@@ -151,7 +164,7 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
                 : "tw-border-transparent tw-text-iron-500 hover:tw-border-iron-300 hover:tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-3 tw-px-1 tw-transition tw-duration-300 tw-ease-out"
             }`}
           >
-            Leaderboard
+            {votingState === WaveVotingState.ENDED ? "Winners" : "Leaderboard"}
           </button>
         )}
         {isDropWave && (
@@ -180,21 +193,6 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
       <div className="lg:tw-flex lg:tw-items-start lg:tw-justify-center lg:tw-gap-x-4">
         {components[activeView]}
       </div>
-      <AnimatePresence mode="wait">
-        {activeDrop && (
-          <motion.div
-            key={`drop-${activeDrop.id}-${forceRender}`}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="tw-absolute lg:tw-ml-[21.5rem] tw-inset-0 tw-z-1000"
-            style={{ willChange: "transform" }}
-          >
-            <WaveDrop drop={activeDrop} onClose={() => setActiveDrop(null)} />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

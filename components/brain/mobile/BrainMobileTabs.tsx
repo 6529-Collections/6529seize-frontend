@@ -6,6 +6,7 @@ import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
 import { BrainView } from "../BrainMobile";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import { ApiWave } from "../../../generated/models/ApiWave";
+import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboard";
 
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
@@ -39,8 +40,11 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     };
   }, [router.events, onViewChange]);
 
-  const isLinkActive = router.pathname === "/my-stream" && activeView === BrainView.DEFAULT;
-  const isNotificationsActive = router.pathname === "/my-stream/notifications" && activeView === BrainView.DEFAULT;
+  const isLinkActive =
+    router.pathname === "/my-stream" && activeView === BrainView.DEFAULT;
+  const isNotificationsActive =
+    router.pathname === "/my-stream/notifications" &&
+    activeView === BrainView.DEFAULT;
 
   const wavesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
     activeView === BrainView.WAVES ? "tw-bg-iron-800" : "tw-bg-iron-950"
@@ -56,14 +60,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   const aboutButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
     activeView === BrainView.ABOUT ? "tw-text-iron-300" : "tw-text-iron-400"
-  }`;
-
-  const leaderboardButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
-    activeView === BrainView.LEADERBOARD ? "tw-bg-iron-800" : "tw-bg-iron-950"
-  }`;
-
-  const leaderboardButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    activeView === BrainView.LEADERBOARD ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
   const myStreamLinkClasses = `tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-md ${
@@ -130,21 +126,18 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <span className={myStreamTextClasses}>My Stream</span>
         </Link>
         {isWave() && isRankWave && (
-          <button
-            onClick={() => onViewChange(BrainView.LEADERBOARD)}
-            className={leaderboardButtonClasses}
-          >
-            <span className={leaderboardButtonTextClasses}>Leaderboard</span>
-          </button>
+          <MyStreamWaveTabsLeaderboard
+            wave={wave}
+            activeView={activeView}
+            onViewChange={onViewChange}
+          />
         )}
         <Link
           href="/my-stream/notifications"
           onClick={onNotificationsClick}
           className={notificationsLinkClasses}
         >
-          <span className={notificationsTextClasses}>
-            Notifications
-          </span>
+          <span className={notificationsTextClasses}>Notifications</span>
           {haveUnreadNotifications && (
             <span className="tw-size-2 -tw-mt-2 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
           )}

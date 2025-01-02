@@ -37,7 +37,7 @@ export const WaveDetailedSmallLeaderboard: React.FC<
   });
 
   return (
-    <div className="lg:tw-p-4">
+    <div className="tw-p-4">
       <div className="tw-flex tw-flex-col">
         {memoizedDrops.length === 0 && !isFetching ? (
           <div className="tw-text-iron-400 tw-text-center tw-py-4">

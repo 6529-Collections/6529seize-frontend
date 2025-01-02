@@ -1,4 +1,4 @@
-import { Chain, http } from "viem";
+import { Chain, fallback, http } from "viem";
 import { mainnet, sepolia, goerli } from "viem/chains";
 import { createConfig } from "wagmi";
 import { walletConnect, coinbaseWallet, injected } from "wagmi/connectors";
@@ -26,9 +26,15 @@ export const wagmiConfigCapacitor = (
       injected(),
     ],
     transports: {
-      [mainnet.id]: http("https://rpc1.6529.io"),
-      [sepolia.id]: http("https://rpc1.6529.io"),
-      [goerli.id]: http("https://rpc1.6529.io"),
+      [mainnet.id]: fallback([http(), http("https://rpc1.6529.io")], {
+        retryCount: 3,
+      }),
+      [sepolia.id]: fallback([http(), http("https://rpc1.6529.io")], {
+        retryCount: 3,
+      }),
+      [goerli.id]: fallback([http(), http("https://rpc1.6529.io")], {
+        retryCount: 3,
+      }),
     },
   });
 };

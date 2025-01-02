@@ -21,14 +21,14 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
   const getPFPColor = (rank: number | null): string | null => {
     if (rank === 1) return "tw-ring-[#E8D48A]/80";
     if (rank === 2) return "tw-ring-[#DDDDDD]/80";
-    if (rank === 3) return "tw-ring-[#D9A962]/80";
+    if (rank === 3) return "tw-ring-[#CD7F32]/80";
     return null;
   };
 
   const getRankTextColor = (rank: number | null): string | null => {
     if (rank === 1) return "tw-text-[#E8D48A]";
     if (rank === 2) return "tw-text-[#DDDDDD]";
-    if (rank === 3) return "tw-text-[#D9A962]";
+    if (rank === 3) return "tw-text-[#CD7F32]";
     return null;
   };
 
@@ -54,7 +54,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
   const thropyIcon = (rank: number | null) => {
     if (rank === 1) {
       return (
-        <div className="tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#E8D48A]/30 tw-ring-[#E8D48A]/30 tw-rounded-lg tw-py-1 tw-px-2 tw-h-6 tw-min-w-6 tw-text-[#E8D48A] tw-font-semibold tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2">
+        <div className="tw-shadow-[0_4px_12px_rgba(232,212,138,0.2)] tw-ring-1 tw-bg-[#E8D48A]/20 tw-ring-[#E8D48A]/40 tw-rounded-xl tw-py-1 tw-px-2 tw-h-6 tw-min-w-6 tw-text-[#E8D48A] tw-font-semibold tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2 desktop-hover:desktop-hover:hover:tw-from-[#E8D48A]/40 desktop-hover:hover:tw-ring-[#E8D48A]/50 tw-transition-all tw-duration-200">
           <svg
             className="tw-size-4 tw-flex-shrink-0 tw-text-[#E8D48A]"
             xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +73,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
 
     if (rank === 2) {
       return (
-        <div className="tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#dddddd]/20 tw-ring-[#dddddd]/30 tw-rounded-lg tw-py-1 tw-px-2 tw-h-6 tw-min-w-6 tw-text-[#DDDDDD] tw-font-semibold tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2">
+        <div className="tw-shadow-[0_4px_12px_rgba(221,221,221,0.15)] tw-ring-1 tw-bg-[#dddddd]/20 tw-ring-[#dddddd]/40 tw-rounded-xl tw-py-1 tw-px-2 tw-h-6 tw-min-w-6 tw-text-[#DDDDDD] tw-font-semibold tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2 desktop-hover:hover:tw-from-[#dddddd]/35 desktop-hover:hover:tw-ring-[#dddddd]/50 tw-transition-all tw-duration-200">
           <svg
             className="tw-size-4 tw-flex-shrink-0 tw-text-[#DDDDDD]"
             xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +92,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
 
     if (rank === 3) {
       return (
-        <div className="tw-shadow-lg tw-ring-1 tw-bg-gradient-to-b tw-to-iron-900 tw-from-[#CD7F32]/20 tw-ring-[#CD7F32]/30 tw-rounded-lg tw-py-1 tw-px-2 tw-h-6 tw-min-w-6 tw-text-[#CD7F32] tw-font-semibold tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2">
+        <div className="tw-shadow-[0_4px_12px_rgba(205,127,50,0.15)] tw-ring-1 tw-bg-[#B87333]/20 tw-ring-[#CD7F32]/40 tw-rounded-xl tw-py-1 tw-px-2 tw-h-6 tw-min-w-6 tw-text-[#CD7F32] tw-font-semibold tw-text-sm tw-inline-flex tw-items-center tw-gap-x-2 desktop-hover:hover:tw-from-[#CD7F32]/35 desktop-hover:hover:tw-ring-[#CD7F32]/50 tw-transition-all tw-duration-200">
           <svg
             className="tw-size-4 tw-flex-shrink-0 tw-text-[#CD7F32]"
             xmlns="http://www.w3.org/2000/svg"
@@ -140,7 +140,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                           drop.rank
                         )}`}
                         src={drop.author.pfp}
-                        alt="Profile picture"
+                        alt="Picture"
                       />
                     ) : (
                       <div
