@@ -34,6 +34,7 @@ interface UseWaveDropsLeaderboardProps {
   readonly dropsSortBy: WaveDropsLeaderboardSortBy;
   readonly sortDirection: WaveDropsLeaderboardSortDirection;
   readonly handle?: string;
+  readonly pollingEnabled?: boolean;
 }
 
 const POLLING_DELAY = 3000;
@@ -60,10 +61,12 @@ export function useWaveDropsLeaderboard({
   dropsSortBy,
   sortDirection,
   handle,
+  pollingEnabled = true,
 }: UseWaveDropsLeaderboardProps) {
   const queryClient = useQueryClient();
 
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [haveNewDrops, setHaveNewDrops] = useState(false);
   const [canPoll, setCanPoll] = useState(false);
   const [delayedPollingResult, setDelayedPollingResult] = useState<
@@ -165,6 +168,7 @@ export function useWaveDropsLeaderboard({
         : [];
       return generateUniqueKeys(newDrops, prev);
     });
+    setHasInitialized(true);
   }, [data, reverse]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
@@ -187,14 +191,15 @@ export function useWaveDropsLeaderboard({
         params,
       });
     },
-    enabled: !haveNewDrops && canPoll,
-    refetchInterval: isTabVisible
-      ? ACTIVE_POLLING_INTERVAL
-      : INACTIVE_POLLING_INTERVAL,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchOnReconnect: true,
-    refetchIntervalInBackground: true,
+    enabled: !haveNewDrops && canPoll && pollingEnabled,
+    refetchInterval:
+      isTabVisible && pollingEnabled
+        ? ACTIVE_POLLING_INTERVAL
+        : INACTIVE_POLLING_INTERVAL,
+    refetchOnWindowFocus: pollingEnabled,
+    refetchOnMount: pollingEnabled,
+    refetchOnReconnect: pollingEnabled,
+    refetchIntervalInBackground: pollingEnabled,
   });
 
   useEffect(() => {
@@ -259,7 +264,7 @@ export function useWaveDropsLeaderboard({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isFetching: isFetching || !hasInitialized,
     isFetchingNextPage,
     refetch,
     haveNewDrops,

@@ -1,5 +1,4 @@
-import React from "react";
-import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 
 const rankColors = {
   1: {
@@ -35,7 +34,7 @@ interface TrophyIconProps {
   readonly color: string;
 }
 
-function TrophyIcon({ color }: TrophyIconProps) {
+export function TrophyIcon({ color }: TrophyIconProps) {
   return (
     <svg
       className={`tw-size-4 tw-flex-shrink-0 tw-text-[${color}]`}
@@ -51,12 +50,14 @@ function TrophyIcon({ color }: TrophyIconProps) {
   );
 }
 
-interface DropTrophyIconProps {
-  readonly rank: number | null;
+interface WaveWinnersDropHeaderRankProps {
+  readonly drop: ExtendedDrop;
 }
 
-export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
-  if (!rank) {
+export default function WaveWinnersDropHeaderRank({
+  drop,
+}: WaveWinnersDropHeaderRankProps) {
+  if (!drop.rank) {
     return (
       <div className="tw-font-medium tw-text-sm tw-text-iron-300 tw-flex tw-items-center tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-justify-center tw-ring-1 tw-ring-iron-700">
         <svg
@@ -73,13 +74,13 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
     );
   }
 
-  if (rank && rank <= 3) {
-    const rankStyle = rankColors[rank as keyof typeof rankColors];
+  if (drop.rank && drop.rank <= 3) {
+    const rankStyle = rankColors[drop.rank as keyof typeof rankColors];
     return (
       <div className={`${rankStyle.shadow} tw-ring-1 ${rankStyle.bg} ${rankStyle.ring} tw-rounded-xl tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 ${rankStyle.text} tw-font-medium tw-text-xs tw-flex tw-items-center tw-gap-x-1.5 desktop-hover:${rankStyle.hover} tw-transition-all tw-duration-200`}>
         <TrophyIcon color={rankStyle.color} />
         <span className={`${rankStyle.dropShadow} tw-text-sm`}>
-          #{rank}
+          #{drop.rank}
         </span>
       </div>
     );
@@ -87,7 +88,7 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
 
   return (
     <div className="tw-font-medium tw-text-sm tw-text-iron-300 tw-flex tw-items-center tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-justify-center tw-ring-1 tw-ring-iron-700">
-      #{formatNumberWithCommas(rank)}
+      #{drop.rank}
     </div>
   );
-};
+}

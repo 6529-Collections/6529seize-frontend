@@ -12,6 +12,8 @@ import WaveLeaderboardRightSidebar from "./sidebar/WaveLeaderboardRightSidebar";
 import { WaveDropCreate } from "./create/WaveDropCreate";
 import { AnimatePresence, motion } from "framer-motion";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { WaveWinners } from "../winners/WaveWinners";
+import { useWaveState, WaveVotingState } from "../../../../hooks/useWaveState";
 
 interface WaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -30,6 +32,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
   setActiveDrop,
 }) => {
   const capacitor = useCapacitor();
+  const { votingState } = useWaveState(wave);
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
     WaveLeaderboardSortType.RANK
   );
@@ -67,42 +70,50 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
         >
           {children}
 
-          <WaveLeaderboardTime wave={wave} />
-          <WaveLeaderboardHeader
-            wave={wave}
-            sort={sort}
-            setSort={setSort}
-            showMyDrops={showMyDrops}
-            setShowMyDrops={setShowMyDrops}
-            onCreateDrop={() => setIsCreatingDrop(true)}
-          />
+          {votingState === WaveVotingState.ENDED ? (
+            <div className="tw-pb-4 lg:tw-pb-0">
+              <WaveWinners wave={wave} onDropClick={setActiveDrop} />
+            </div>
+          ) : (
+            <>
+              <WaveLeaderboardTime wave={wave} />
+              <WaveLeaderboardHeader
+                wave={wave}
+                sort={sort}
+                setSort={setSort}
+                showMyDrops={showMyDrops}
+                setShowMyDrops={setShowMyDrops}
+                onCreateDrop={() => setIsCreatingDrop(true)}
+              />
 
-          <AnimatePresence>
-            {isCreatingDrop && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-              >
-                <WaveDropCreate
-                  wave={wave}
-                  onCancel={() => setIsCreatingDrop(false)}
-                  onSuccess={() => {
-                    setIsCreatingDrop(false);
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <WaveLeaderboardDrops
-            wave={wave}
-            dropsSortBy={sortBy[sort]}
-            sortDirection={sortDirection[sort]}
-            showMyDrops={showMyDrops}
-            setActiveDrop={setActiveDrop}
-            onCreateDrop={() => setIsCreatingDrop(true)}
-          />
+              <AnimatePresence>
+                {isCreatingDrop && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                  >
+                    <WaveDropCreate
+                      wave={wave}
+                      onCancel={() => setIsCreatingDrop(false)}
+                      onSuccess={() => {
+                        setIsCreatingDrop(false);
+                      }}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <WaveLeaderboardDrops
+                wave={wave}
+                dropsSortBy={sortBy[sort]}
+                sortDirection={sortDirection[sort]}
+                showMyDrops={showMyDrops}
+                setActiveDrop={setActiveDrop}
+                onCreateDrop={() => setIsCreatingDrop(true)}
+              />
+            </>
+          )}
         </div>
       </div>
 

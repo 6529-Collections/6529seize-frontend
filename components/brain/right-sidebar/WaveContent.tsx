@@ -2,11 +2,15 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TabToggle } from "../../common/TabToggle";
-import WaveHeader, { WaveHeaderPinnedSide } from "../../waves/detailed/header/WaveHeader";
+import WaveHeader, {
+  WaveHeaderPinnedSide,
+} from "../../waves/detailed/header/WaveHeader";
 import { WaveDetailedSmallLeaderboard } from "../../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
+import { WaveWinnersSmall } from "../../waves/detailed/winners/WaveWinnersSmall";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebar";
+import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -29,10 +33,15 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
 
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
+  const { votingState } = useWaveState(wave);
+  const hasVotingEnded = votingState === WaveVotingState.ENDED;
 
   const options = [
     { key: SidebarTab.ABOUT, label: "About" },
-    { key: SidebarTab.LEADERBOARD, label: "Leaderboard" },
+    {
+      key: SidebarTab.LEADERBOARD,
+      label: hasVotingEnded ? "Winners" : "Leaderboard",
+    },
   ] as const;
 
   if (!isRankWave) {
@@ -85,7 +94,16 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           )}
         </div>
       ) : (
-        <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+        <div>
+          {hasVotingEnded ? (
+            <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
+          ) : (
+            <WaveDetailedSmallLeaderboard
+              wave={wave}
+              onDropClick={onDropClick}
+            />
+          )}
+        </div>
       )}
     </>
   );

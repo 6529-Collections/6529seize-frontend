@@ -43,7 +43,7 @@ export const WaveDetailedLeaderboardDefaultDrop: React.FC<
         <div className="tw-@container tw-p-4 tw-rounded-xl desktop-hover:hover:tw-bg-iron-800/70 tw-transition tw-duration-300 tw-ease-out tw-group">
           <div>
             <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center">
-              <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-min-w-6 tw-h-6 tw-px-1 tw-rounded-lg tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
+              <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-min-w-6 tw-h-6 tw-px-2 tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
                 {drop.rank ? (
                   <span className="tw-text-iron-300 tw-text-sm">
                     #{drop.rank}
