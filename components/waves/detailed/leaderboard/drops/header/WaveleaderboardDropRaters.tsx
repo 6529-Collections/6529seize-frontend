@@ -22,12 +22,17 @@ export const WaveLeaderboardDropRaters: React.FC<
     3: "tw-text-[#CD7F32]",
   };
 
-  const rankStyle =
-    drop.rank && drop.rank <= 3
-      ? topThreeRankStyles[drop.rank]
-      : isNegativeVote
-      ? "tw-bg-gradient-to-r tw-from-red tw-to-red tw-bg-clip-text tw-text-transparent"
-      : "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
+  const getRankStyle = () => {
+    if (drop.rank && drop.rank <= 3) {
+      return topThreeRankStyles[drop.rank];
+    }
+    if (isNegativeVote) {
+      return "tw-bg-gradient-to-r tw-from-red tw-to-red tw-bg-clip-text tw-text-transparent";
+    }
+    return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
+  };
+
+  const rankStyle = getRankStyle();
 
   const hasUserVoted =
     drop.context_profile_context?.rating !== undefined &&

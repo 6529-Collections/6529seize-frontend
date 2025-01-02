@@ -19,7 +19,7 @@ const MyStreamWaveViews: React.FC<MyStreamWaveViewsProps> = ({
 }) => {
   const components: Record<MyStreamWaveTab, JSX.Element> = {
     [MyStreamWaveTab.CHAT]: (
-      <MyStreamWaveChat wave={wave} onDropClick={onDropClick} />
+      <MyStreamWaveChat waveId={wave.id} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.LEADERBOARD]: (
       <WaveLeaderboard wave={wave} setActiveDrop={onDropClick}>

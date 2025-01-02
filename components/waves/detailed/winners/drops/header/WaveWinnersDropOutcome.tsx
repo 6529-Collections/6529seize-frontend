@@ -1,7 +1,5 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
-import { ApiWaveOutcomeCredit } from "../../../../../../generated/models/ApiWaveOutcomeCredit";
-import { ApiWaveOutcomeType } from "../../../../../../generated/models/ApiWaveOutcomeType";
 import { ApiWave } from "../../../../../../generated/models/ApiWave";
 import { useDropOutcomes } from "../../../../../../hooks/drops/useDropOutcomes";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";

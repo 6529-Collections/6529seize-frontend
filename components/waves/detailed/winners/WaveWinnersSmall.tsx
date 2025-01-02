@@ -155,18 +155,33 @@ const WaveWinnerItem = memo<{
   const userVote = drop.context_profile_context?.rating ?? 0;
   const isNegativeVote = userVote < 0;
 
-  const ratingStyle = rankStyle
-    ? rankStyle.text
-    : drop.rating >= 0
-    ? "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent"
-    : "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
+  const getRatingStyle = () => {
+    if (rankStyle) {
+      return rankStyle.text;
+    }
+    
+    if (drop.rating >= 0) {
+      return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
+    }
 
-  const userVoteStyle =
-    drop.rank && drop.rank <= 3 && rankStyle
-      ? rankStyle.text
-      : isNegativeVote
-      ? "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent"
-      : "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
+    return "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
+  };
+
+  const ratingStyle = getRatingStyle();
+
+  const getUserVoteStyle = () => {
+    if (drop.rank && drop.rank <= 3 && rankStyle) {
+      return rankStyle.text;
+    }
+    
+    if (isNegativeVote) {
+      return "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
+    }
+
+    return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
+  };
+
+  const userVoteStyle = getUserVoteStyle();
 
   const handleDropClick = useCallback(() => {
     onDropClick(drop);

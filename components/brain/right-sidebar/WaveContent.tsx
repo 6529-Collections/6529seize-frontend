@@ -11,7 +11,6 @@ import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebar";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import { useEffect } from "react";
 
 interface WaveContentProps {
   readonly wave: ApiWave;

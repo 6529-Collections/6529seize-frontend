@@ -1,5 +1,5 @@
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { WaveDetailedView } from "./WaveDetailed";
 import WaveDetailedMobileAbout from "./WaveDetailedMobileAbout";
@@ -46,63 +46,79 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
     WaveDetailedMobileView.CHAT
   );
 
-  const getIsAuthorAndNotProxy = useCallback(() =>
-    connectedProfile?.profile?.handle === wave.author.handle &&
-    !activeProfileProxy, [connectedProfile?.profile?.handle, wave.author.handle, activeProfileProxy]
+  const getIsAuthorAndNotProxy = useCallback(
+    () =>
+      connectedProfile?.profile?.handle === wave.author.handle &&
+      !activeProfileProxy,
+    [connectedProfile?.profile?.handle, wave.author.handle, activeProfileProxy]
   );
 
-  const isAuthorAndNotProxy = useMemo(() => 
-    getIsAuthorAndNotProxy(), 
+  const isAuthorAndNotProxy = useMemo(
+    () => getIsAuthorAndNotProxy(),
     [getIsAuthorAndNotProxy]
   );
 
-  const showRequiredMetadata = useMemo(() =>
-    isAuthorAndNotProxy || !!wave.participation.required_metadata.length,
+  const showRequiredMetadata = useMemo(
+    () => isAuthorAndNotProxy || !!wave.participation.required_metadata.length,
     [isAuthorAndNotProxy, wave.participation.required_metadata.length]
   );
 
-  const showRequiredTypes = useMemo(() =>
-    isAuthorAndNotProxy || !!wave.participation.required_media.length,
+  const showRequiredTypes = useMemo(
+    () => isAuthorAndNotProxy || !!wave.participation.required_media.length,
     [isAuthorAndNotProxy, wave.participation.required_media.length]
   );
 
-  const handleWaveChange = useCallback((newWave: ApiWave) => {
-    setIsLoading(true);
-    onWaveChange(newWave);
-    setActiveView(WaveDetailedMobileView.CHAT);
-    setView(WaveDetailedView.CHAT);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-  }, [onWaveChange, setView, setIsLoading]);
+  const handleWaveChange = useCallback(
+    (newWave: ApiWave) => {
+      setIsLoading(true);
+      onWaveChange(newWave);
+      setActiveView(WaveDetailedMobileView.CHAT);
+      setView(WaveDetailedView.CHAT);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    },
+    [onWaveChange, setView, setIsLoading]
+  );
 
-  const components = useMemo(() => ({
-    [WaveDetailedMobileView.CHAT]: (
-      <WaveChat
-        wave={wave}
-        activeTab={WaveDetailedView.CHAT}
-        setActiveTab={() => {}}
-        onDropClick={setActiveDrop}
-      />
-    ),
-    [WaveDetailedMobileView.LEADERBOARD]: (
-      <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
-        <div></div>
-      </WaveLeaderboard>
-    ),
-    [WaveDetailedMobileView.ABOUT]: (
-      <WaveDetailedMobileAbout
-        wave={wave}
-        showRequiredMetadata={showRequiredMetadata}
-        showRequiredTypes={showRequiredTypes}
-        setView={setView}
-        setActiveView={setActiveView}
-        onWaveChange={handleWaveChange}
-        setIsLoading={setIsLoading}
-      />
-    ),
-    [WaveDetailedMobileView.OUTCOME]: <WaveOutcome wave={wave} />,
-  }), [wave, setActiveDrop, showRequiredMetadata, showRequiredTypes, setView, handleWaveChange, setIsLoading]);
+  const components = useMemo(
+    () => ({
+      [WaveDetailedMobileView.CHAT]: (
+        <WaveChat
+          wave={wave}
+          activeTab={WaveDetailedView.CHAT}
+          setActiveTab={() => {}}
+          onDropClick={setActiveDrop}
+        />
+      ),
+      [WaveDetailedMobileView.LEADERBOARD]: (
+        <WaveLeaderboard wave={wave} setActiveDrop={setActiveDrop}>
+          <div></div>
+        </WaveLeaderboard>
+      ),
+      [WaveDetailedMobileView.ABOUT]: (
+        <WaveDetailedMobileAbout
+          wave={wave}
+          showRequiredMetadata={showRequiredMetadata}
+          showRequiredTypes={showRequiredTypes}
+          setView={setView}
+          setActiveView={setActiveView}
+          onWaveChange={handleWaveChange}
+          setIsLoading={setIsLoading}
+        />
+      ),
+      [WaveDetailedMobileView.OUTCOME]: <WaveOutcome wave={wave} />,
+    }),
+    [
+      wave,
+      setActiveDrop,
+      showRequiredMetadata,
+      showRequiredTypes,
+      setView,
+      handleWaveChange,
+      setIsLoading,
+    ]
+  );
 
   if (!showWaves) {
     return null;

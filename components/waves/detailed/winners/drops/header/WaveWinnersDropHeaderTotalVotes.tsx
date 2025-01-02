@@ -14,11 +14,19 @@ export default function WaveWinnersDropHeaderTotalVotes({
     3: "tw-text-[#CD7F32]",
   };
 
-  const style = drop.rank && drop.rank <= 3 
-    ? topThreeRankStyles[drop.rank] 
-    : drop.rating >= 0 
-    ? "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent"
-    : "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
+  const getVoteStyle = (rank: number | null, rating: number) => {
+    if (rank && rank <= 3) {
+      return topThreeRankStyles[rank];
+    }
+
+    if (rating >= 0) {
+      return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
+    }
+
+    return "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
+  };
+
+  const style = getVoteStyle(drop.rank, drop.rating);
 
   return (
     <div className="tw-flex tw-items-baseline tw-gap-x-1">

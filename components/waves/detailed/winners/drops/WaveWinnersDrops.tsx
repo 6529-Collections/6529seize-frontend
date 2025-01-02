@@ -1,9 +1,11 @@
 import React, { useContext, useMemo } from "react";
 import { WaveWinnersDrop } from "./WaveWinnersDrop";
-import { WaveDropsLeaderboardSortDirection } from "../../../../../hooks/useWaveDropsLeaderboard";
-import { WaveDropsLeaderboardSortBy } from "../../../../../hooks/useWaveDropsLeaderboard";
+import {
+  useWaveDropsLeaderboard,
+  WaveDropsLeaderboardSortBy,
+  WaveDropsLeaderboardSortDirection,
+} from "../../../../../hooks/useWaveDropsLeaderboard";
 import { AuthContext } from "../../../../auth/Auth";
-import { useWaveDropsLeaderboard } from "../../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../../hooks/useIntersectionObserver";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
