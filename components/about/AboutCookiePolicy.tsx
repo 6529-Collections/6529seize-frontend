@@ -8,6 +8,7 @@ import {
 } from "../cookies/CookieConsentContext";
 import {
   CONSENT_ESSENTIAL_COOKIE,
+  CONSENT_EULA_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
 } from "../../constants";
 
@@ -131,6 +132,12 @@ export default function AboutCookiePolicy() {
                     <tr>
                       <td>6529.io</td>
                       <td>{CONSENT_ESSENTIAL_COOKIE}</td>
+                      <td>First Party</td>
+                      <td>1 year</td>
+                    </tr>
+                    <tr>
+                      <td>6529.io</td>
+                      <td>{CONSENT_EULA_COOKIE}</td>
                       <td>First Party</td>
                       <td>1 year</td>
                     </tr>

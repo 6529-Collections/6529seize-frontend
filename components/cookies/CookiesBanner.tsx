@@ -8,11 +8,7 @@ import useIsMobileDevice from "../../hooks/isMobileDevice";
 export default function CookiesBanner() {
   const isMobile = useIsMobileDevice();
   const router = useRouter();
-  const { showCookieConsent, consent, reject } = useCookieConsent();
-
-  if (!showCookieConsent) {
-    return <></>;
-  }
+  const { consent, reject } = useCookieConsent();
 
   if (["/restricted", "/access"].includes(router.pathname)) {
     return <></>;

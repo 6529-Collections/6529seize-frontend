@@ -17,6 +17,7 @@ import {
   CONSENT_PERFORMANCE_COOKIE,
 } from "../../constants";
 import { AuthContext } from "../auth/Auth";
+import CookiesBanner from "./CookiesBanner";
 
 const GTM_ID = "G-71NLVV3KY3";
 
@@ -150,8 +151,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   };
 
   const value = useMemo(
-    () => ({ showCookieConsent, consent, reject }),
-    [showCookieConsent, consent, reject]
+    () => ({ consent, reject, showCookieConsent }),
+    [consent, reject]
   );
 
   useEffect(() => {
@@ -161,6 +162,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   return (
     <CookieConsentContext.Provider value={value}>
       {children}
+      {showCookieConsent && <CookiesBanner />}
     </CookieConsentContext.Provider>
   );
 };
