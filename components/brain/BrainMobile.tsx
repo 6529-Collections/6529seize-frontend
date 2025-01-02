@@ -10,8 +10,8 @@ import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
-import BrainMobileLeaderboard from "./mobile/BrainMobileLeaderboard";
 import { useWaveData } from "../../hooks/useWaveData";
+import BrainMobileLeaderboardWrapper from "./mobile/BrainMobileLeaderboardWrapper";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -76,10 +76,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     [BrainView.DEFAULT]: children,
     [BrainView.LEADERBOARD]:
       isRankWave && !!wave ? (
-        <BrainMobileLeaderboard 
-          wave={wave} 
-          onDropClick={onDropClick}
-        />
+        <BrainMobileLeaderboardWrapper wave={wave} onDropClick={onDropClick} />
       ) : null,
   };
 

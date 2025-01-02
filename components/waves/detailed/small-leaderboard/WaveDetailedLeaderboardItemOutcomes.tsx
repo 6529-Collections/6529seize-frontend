@@ -216,7 +216,7 @@ export const WaveDetailedLeaderboardItemOutcomes: React.FC<
         onClick={handleClick}
         className={`tw-border-0 tw-rounded-lg tw-flex tw-items-center ${
           isMobile ? "tw-gap-4" : "tw-gap-2"
-        } tw-min-w-6 tw-py-1.5 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${
+        } tw-min-w-6 tw-py-1.5 tw-px-2 tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 ${
           isTouch ? 'tw-cursor-pointer' : ''
         }`}
       >
