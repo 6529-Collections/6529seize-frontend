@@ -11,6 +11,7 @@ import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebar";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
+import { useEffect } from "react";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -38,7 +39,10 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   const options = [
     { key: SidebarTab.ABOUT, label: "About" },
-    { key: SidebarTab.LEADERBOARD, label: hasVotingEnded ? "Winners" : "Leaderboard" },
+    {
+      key: SidebarTab.LEADERBOARD,
+      label: hasVotingEnded ? "Winners" : "Leaderboard",
+    },
   ] as const;
 
   if (!isRankWave) {
@@ -95,7 +99,10 @@ export const WaveContent: React.FC<WaveContentProps> = ({
           {hasVotingEnded ? (
             <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
           ) : (
-            <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+            <WaveDetailedSmallLeaderboard
+              wave={wave}
+              onDropClick={onDropClick}
+            />
           )}
         </div>
       )}
