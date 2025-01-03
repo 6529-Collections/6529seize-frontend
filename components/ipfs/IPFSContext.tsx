@@ -23,18 +23,25 @@ const getEnv = () => {
 export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { apiEndpoint, mfsPath } = getEnv();
+  try {
+    const { apiEndpoint, mfsPath } = getEnv();
 
-  const ipfsService = new IpfsService({
-    apiEndpoint,
-    mfsPath,
-  });
+    const ipfsService = new IpfsService({
+      apiEndpoint,
+      mfsPath,
+    });
 
-  ipfsService.init();
+    ipfsService.init();
 
-  const value = useMemo(() => ({ ipfsService }), [ipfsService]);
+    const value = useMemo(() => ({ ipfsService }), [ipfsService]);
 
-  return <IpfsContext.Provider value={value}>{children}</IpfsContext.Provider>;
+    return (
+      <IpfsContext.Provider value={value}>{children}</IpfsContext.Provider>
+    );
+  } catch (error) {
+    console.error("Error initializing IPFS service", error);
+    return <>{children}</>;
+  }
 };
 
 export const useIpfsService = (): IpfsService => {
@@ -46,9 +53,13 @@ export const useIpfsService = (): IpfsService => {
 };
 
 export const resolveIpfsUrl = (url: string) => {
-  if (url.startsWith("ipfs://")) {
-    const { gatewayEndpoint } = getEnv();
-    return `${gatewayEndpoint}/ipfs/${url.slice(7)}`;
+  try {
+    if (url.startsWith("ipfs://")) {
+      const { gatewayEndpoint } = getEnv();
+      return `${gatewayEndpoint}/ipfs/${url.slice(7)}`;
+    }
+  } catch (error) {
+    console.error("Error resolving IPFS URL", error);
   }
   return url;
 };
