@@ -21,6 +21,7 @@ export interface BaseTDH {
     memes_szn6: TDHBoostBreakdown;
     memes_szn7: TDHBoostBreakdown;
     memes_szn8: TDHBoostBreakdown;
+    memes_szn9: TDHBoostBreakdown;
     memes_genesis: TDHBoostBreakdown;
     memes_nakamoto: TDHBoostBreakdown;
     gradients: TDHBoostBreakdown;
