@@ -2,7 +2,7 @@ import React, { createContext, useContext, useMemo } from "react";
 import IpfsService from "./IPFSService";
 
 interface IpfsContextType {
-  ipfsService: IpfsService;
+  ipfsService: IpfsService | null;
 }
 
 const IpfsContext = createContext<IpfsContextType | undefined>(undefined);
@@ -12,7 +12,7 @@ const getEnv = () => {
   const gatewayEndpoint = process.env.IPFS_GATEWAY_ENDPOINT;
 
   if (!apiEndpoint || !gatewayEndpoint) {
-    throw new Error("Missing IPFS_API_ENDPOINT or IPFS_GATEWAY_ENDPOINTs");
+    throw new Error("Missing IPFS_API_ENDPOINT or IPFS_GATEWAY_ENDPOINT");
   }
 
   const mfsPath = process.env.IPFS_MFS_PATH;
@@ -23,30 +23,28 @@ const getEnv = () => {
 export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  let ipfsService: IpfsService | null = null;
+
   try {
     const { apiEndpoint, mfsPath } = getEnv();
-
-    const ipfsService = new IpfsService({
+    ipfsService = new IpfsService({
       apiEndpoint,
       mfsPath,
     });
 
     ipfsService.init();
-
-    const value = useMemo(() => ({ ipfsService }), [ipfsService]);
-
-    return (
-      <IpfsContext.Provider value={value}>{children}</IpfsContext.Provider>
-    );
   } catch (error) {
     console.error("Error initializing IPFS service", error);
-    return <>{children}</>;
   }
+
+  const value = useMemo(() => ({ ipfsService }), [ipfsService]);
+
+  return <IpfsContext.Provider value={value}>{children}</IpfsContext.Provider>;
 };
 
 export const useIpfsService = (): IpfsService => {
   const context = useContext(IpfsContext);
-  if (!context) {
+  if (!context || !context.ipfsService) {
     throw new Error("useIpfsService must be used within an IpfsProvider");
   }
   return context.ipfsService;
