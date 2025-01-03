@@ -280,11 +280,11 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     }
   }, []);
 
-  const updateImagesSrc = () => {
+  const updateImagesSrc = async () => {
     const elementsWithSrc = document.querySelectorAll("[src]");
-    Array.from(elementsWithSrc).forEach((el) => {
+    Array.from(elementsWithSrc).forEach(async (el) => {
       const src = el.getAttribute("src")!;
-      const newSrc = resolveIpfsUrl(src);
+      const newSrc = await resolveIpfsUrl(src);
       el.setAttribute("src", newSrc);
     });
   };
