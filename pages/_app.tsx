@@ -115,6 +115,7 @@ import { NotificationsProvider } from "../components/notifications/Notifications
 import Footer from "../components/footer/Footer";
 import { useRouter } from "next/router";
 import { SeizeConnectProvider } from "../components/auth/SeizeConnectContext";
+import { IpfsProvider, resolveIpfsUrl } from "../components/ipfs/IPFSContext";
 import { EULAConsentProvider } from "../components/eula/EULAConsentContext";
 
 library.add(
@@ -279,6 +280,32 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     }
   }, []);
 
+  const updateImagesSrc = () => {
+    const elementsWithSrc = document.querySelectorAll("[src]");
+    Array.from(elementsWithSrc).forEach((el) => {
+      const src = el.getAttribute("src")!;
+      const newSrc = resolveIpfsUrl(src);
+      el.setAttribute("src", newSrc);
+    });
+  };
+
+  useEffect(() => {
+    updateImagesSrc();
+
+    const observer = new MutationObserver(() => {
+      updateImagesSrc();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
@@ -292,17 +319,19 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         )}
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
-            <SeizeConnectProvider>
-              <Auth>
-                <NotificationsProvider>
-                  <CookieConsentProvider>
-                    <EULAConsentProvider>
-                      {getLayout(<Component {...props} />)}
-                    </EULAConsentProvider>
-                  </CookieConsentProvider>
-                </NotificationsProvider>
-              </Auth>
-            </SeizeConnectProvider>
+            <IpfsProvider>
+              <SeizeConnectProvider>
+                <Auth>
+                  <NotificationsProvider>
+                    <CookieConsentProvider>
+                      <EULAConsentProvider>
+                        {getLayout(<Component {...props} />)}
+                      </EULAConsentProvider>
+                    </CookieConsentProvider>
+                  </NotificationsProvider>
+                </Auth>
+              </SeizeConnectProvider>
+            </IpfsProvider>
           </ReactQueryWrapper>
           {!hideFooter && <Footer />}
         </WagmiProvider>
