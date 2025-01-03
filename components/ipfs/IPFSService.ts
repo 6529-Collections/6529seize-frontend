@@ -8,13 +8,13 @@ interface IpfsServiceConfig {
 
 class IpfsService {
   private readonly apiEndpoint: string;
-  private readonly mfsPath?: string;
   private readonly mfsEnabled: boolean;
+  private readonly mfsPath?: string;
 
   constructor(config: IpfsServiceConfig) {
     this.apiEndpoint = config.apiEndpoint;
-    this.mfsPath = config.mfsPath;
     this.mfsEnabled = !!config.mfsPath;
+    this.mfsPath = config.mfsPath;
   }
 
   async init() {
