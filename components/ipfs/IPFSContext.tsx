@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import IpfsService from "./IPFSService";
 
 interface IpfsContextType {
@@ -7,7 +13,7 @@ interface IpfsContextType {
 
 const IpfsContext = createContext<IpfsContextType | undefined>(undefined);
 
-const getEnv = () => {
+const getEnv = async () => {
   const apiEndpoint = process.env.IPFS_API_ENDPOINT;
   const gatewayEndpoint = process.env.IPFS_GATEWAY_ENDPOINT;
 
@@ -23,19 +29,24 @@ const getEnv = () => {
 export const IpfsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  let ipfsService: IpfsService | null = null;
+  const [ipfsService, setIpfsService] = useState<IpfsService | null>(null);
 
-  try {
-    const { apiEndpoint, mfsPath } = getEnv();
-    ipfsService = new IpfsService({
-      apiEndpoint,
-      mfsPath,
-    });
+  useEffect(() => {
+    if (ipfsService) return;
 
-    ipfsService.init();
-  } catch (error) {
-    console.error("Error initializing IPFS service", error);
-  }
+    getEnv()
+      .then((info) => {
+        const service = new IpfsService({
+          apiEndpoint: info.apiEndpoint,
+          mfsPath: info.mfsPath,
+        });
+        service.init();
+        setIpfsService(service);
+      })
+      .catch((error) => {
+        console.error("Error initializing IPFS service", error);
+      });
+  }, []);
 
   const value = useMemo(() => ({ ipfsService }), [ipfsService]);
 
@@ -50,10 +61,10 @@ export const useIpfsService = (): IpfsService => {
   return context.ipfsService;
 };
 
-export const resolveIpfsUrl = (url: string) => {
+export const resolveIpfsUrl = async (url: string) => {
   try {
     if (url.startsWith("ipfs://")) {
-      const { gatewayEndpoint } = getEnv();
+      const { gatewayEndpoint } = await getEnv();
       return `${gatewayEndpoint}/ipfs/${url.slice(7)}`;
     }
   } catch (error) {
