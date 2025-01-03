@@ -12,7 +12,7 @@ const getEnv = () => {
   const gatewayEndpoint = process.env.IPFS_GATEWAY_ENDPOINT;
 
   if (!apiEndpoint || !gatewayEndpoint) {
-    throw new Error("IPFS_API_ENDPOINT and IPFS_GATEWAY_ENDPOINT must be set");
+    throw new Error("Missing IPFS_API_ENDPOINT or IPFS_GATEWAY_ENDPOINTs");
   }
 
   const mfsPath = process.env.IPFS_MFS_PATH;
