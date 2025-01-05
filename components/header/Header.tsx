@@ -362,9 +362,13 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileRow("Wallet Checker", "/delegation/wallet-checker")}
                 {printMobileHr()}
                 {printMobileSubheader("The Memes Tools")}
-                {printMobileRow(
-                  "Memes Subscriptions",
-                  "/tools/subscriptions-report"
+                {capacitor.platform !== "ios" && (
+                  <>
+                    {printMobileRow(
+                      "Memes Subscriptions",
+                      "/tools/subscriptions-report"
+                    )}
+                  </>
                 )}
                 {printMobileRow("Meme Accounting", "/meme-accounting")}
                 {printMobileRow("Meme Gas", "/meme-gas")}
@@ -399,9 +403,13 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileHr()}
                 {printMobileSubheader("NFTs")}
                 {printMobileRow("The Memes", `/about/${AboutSection.MEMES}`)}
-                {printMobileRow(
-                  "Subscriptions",
-                  `/about/${AboutSection.SUBSCRIPTIONS}`
+                {capacitor.platform !== "ios" && (
+                  <>
+                    {printMobileRow(
+                      "Subscriptions",
+                      `/about/${AboutSection.SUBSCRIPTIONS}`
+                    )}
+                  </>
                 )}
                 {printMobileRow(
                   "Memes Calendar",
@@ -716,12 +724,14 @@ export default function Header(props: Readonly<Props>) {
                                   />
                                 </div>
                                 <div className={styles.nestedMenu}>
-                                  <HeaderDesktopLink
-                                    link={{
-                                      name: "Memes Subscriptions",
-                                      path: "/tools/subscriptions-report",
-                                    }}
-                                  />
+                                  {capacitor.platform !== "ios" && (
+                                    <HeaderDesktopLink
+                                      link={{
+                                        name: "Memes Subscriptions",
+                                        path: "/tools/subscriptions-report",
+                                      }}
+                                    />
+                                  )}
                                   <HeaderDesktopLink
                                     link={{
                                       name: "Memes Accounting",
@@ -783,12 +793,14 @@ export default function Header(props: Readonly<Props>) {
                                       path: `/about/${AboutSection.MEMES}`,
                                     }}
                                   />
-                                  <HeaderDesktopLink
-                                    link={{
-                                      name: "Subscriptions",
-                                      path: "/about/subscriptions",
-                                    }}
-                                  />
+                                  {capacitor.platform !== "ios" && (
+                                    <HeaderDesktopLink
+                                      link={{
+                                        name: "Subscriptions",
+                                        path: `/about/${AboutSection.SUBSCRIPTIONS}`,
+                                      }}
+                                    />
+                                  )}
                                   <HeaderDesktopLink
                                     link={{
                                       name: "Memes Calendar",

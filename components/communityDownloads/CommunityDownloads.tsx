@@ -1,7 +1,9 @@
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./CommunityDownloads.module.scss";
+import useCapacitor from "../../hooks/useCapacitor";
 
 export default function CommunityDownloads() {
+  const capacitor = useCapacitor();
   return (
     <Container fluid>
       <Row>
@@ -27,13 +29,15 @@ export default function CommunityDownloads() {
                   </span>
                 </a>
               </Col>
-              <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
-                <a href="/open-data/meme-subscriptions">
-                  <span className={styles.downloadLink}>
-                    Meme Subscriptions
-                  </span>
-                </a>
-              </Col>
+              {capacitor.platform !== "ios" && (
+                <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
+                  <a href="/open-data/meme-subscriptions">
+                    <span className={styles.downloadLink}>
+                      Meme Subscriptions
+                    </span>
+                  </a>
+                </Col>
+              )}
               <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
                 <a href="/open-data/rememes">
                   <span className={styles.downloadLink}>Rememes</span>
