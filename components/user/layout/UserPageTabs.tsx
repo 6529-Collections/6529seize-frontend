@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useContext, useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 import { AuthContext } from "../../auth/Auth";
+import useCapacitor from "../../../hooks/useCapacitor";
 
 export enum UserPageTabType {
   BRAIN = "BRAIN",
@@ -75,6 +76,7 @@ export const USER_PAGE_TAB_META: Record<
 
 export default function UserPageTabs() {
   const router = useRouter();
+  const capacitor = useCapacitor();
   const { showWaves } = useContext(AuthContext);
   const pathnameToTab = (pathname: string): UserPageTabType => {
     const regex = /\/\[user\]\/([^/?]+)/;
@@ -99,8 +101,12 @@ export default function UserPageTabs() {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const getTabsToShow = () => {
-    if (showWaves) return Object.values(UserPageTabType);
-    return Object.values(UserPageTabType).filter(
+    let allTabs = Object.values(UserPageTabType);
+    if (capacitor.platform === "ios") {
+      allTabs = allTabs.filter((tab) => tab !== UserPageTabType.SUBSCRIPTIONS);
+    }
+    if (showWaves) return allTabs;
+    return allTabs.filter(
       (tab) => ![UserPageTabType.BRAIN, UserPageTabType.WAVES].includes(tab)
     );
   };
@@ -113,12 +119,10 @@ export default function UserPageTabs() {
     <div className="tw-overflow-hidden tw-border-b tw-border-iron-700 tw-border-solid tw-border-x-0 tw-border-t-0">
       <div
         className="tw-flex tw-gap-x-3 lg:tw-gap-x-4 tw-overflow-x-auto horizontal-menu-hide-scrollbar"
-        aria-label="Tabs"
-      >
+        aria-label="Tabs">
         <div
           className="-tw-mb-px tw-flex tw-gap-x-3 lg:tw-gap-x-4"
-          aria-label="Tabs"
-        >
+          aria-label="Tabs">
           {tabsToShow.map((tabType) => (
             <UserPageTab
               key={tabType}
