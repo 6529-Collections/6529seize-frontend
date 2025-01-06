@@ -285,7 +285,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     Array.from(elementsWithSrc).forEach(async (el) => {
       const src = el.getAttribute("src")!;
       const newSrc = await resolveIpfsUrl(src);
-      el.setAttribute("src", newSrc);
+      if (newSrc !== src) {
+        el.setAttribute("src", newSrc);
+      }
     });
   };
 
