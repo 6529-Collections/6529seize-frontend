@@ -10,7 +10,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useAccount, useBalance, useChainId } from "wagmi";
@@ -153,7 +153,7 @@ export default function AppWalletComponent(
   }
 
   function printBalance() {
-    let balanceContent = <></>;
+    let balanceContent: ReactNode;
     if (balance.isFetching) {
       balanceContent = <DotLoader />;
     } else if (balance.data) {

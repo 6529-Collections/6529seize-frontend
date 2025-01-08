@@ -237,19 +237,6 @@ export function UnlockAppWalletModal(
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const showError = (message: string) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    setError(message);
-
-    timeoutRef.current = setTimeout(() => {
-      setError("");
-      timeoutRef.current = null;
-    }, 5000);
-  };
-
   const handleHide = () => {
     setWalletPass("");
     setError("");
@@ -265,7 +252,7 @@ export function UnlockAppWalletModal(
 
   const showUnlockError = () => {
     setUnlocking(false);
-    showError("Failed to unlock wallet");
+    showError(timeoutRef, setError, "Failed to unlock wallet");
     inputRef.current?.focus();
     inputRef.current?.select();
   };
@@ -329,7 +316,11 @@ export function UnlockAppWalletModal(
             if (/^\S*$/.test(value)) {
               setWalletPass(value);
             } else {
-              showError("Password must not contain any whitespace characters");
+              showError(
+                timeoutRef,
+                setError,
+                "Password must not contain any whitespace characters"
+              );
             }
           }}
           onKeyDown={handleKeyPress}
