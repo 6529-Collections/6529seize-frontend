@@ -174,7 +174,7 @@ export function CreateAppWalletModal(
           placeholder="******"
           value={walletPass}
           className={styles.newWalletInput}
-          onChange={(e) => {
+          onChange={(e: any) => {
             const value = e.target.value;
             if (/^\S*$/.test(value)) {
               setWalletPass(value);
