@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const ENCRYPTION_ALGORITHM = "aes-256-cbc";
+const ENCRYPTION_ALGORITHM = "aes-256-gcm";
 
 function deriveKey(password: string, salt: string): Promise<Buffer> {
   const saltBuffer = Buffer.from(salt, "hex");
@@ -30,10 +30,6 @@ function computeHmac(key: Buffer, data: string): string {
   return hmac.digest("hex");
 }
 
-function generateSalt(): string {
-  return crypto.randomBytes(16).toString("hex");
-}
-
 export async function encryptData(
   salt: string,
   data: string,
@@ -47,21 +43,19 @@ export async function encryptData(
   encrypted += cipher.final("hex");
 
   const hmacKey = key.subarray(16);
-  const hmac = computeHmac(
-    hmacKey,
-    `${salt}:${iv.toString("hex")}:${encrypted}`
-  );
+  const hmac = computeHmac(hmacKey, `${iv.toString("hex")}:${encrypted}`);
 
   // Return salt, IV, encrypted data, and HMAC
-  return `${salt}:${iv.toString("hex")}:${encrypted}:${hmac}`;
+  return `${iv.toString("hex")}:${encrypted}:${hmac}`;
 }
 
 export async function decryptData(
+  salt: string,
   encryptedData: string,
   password: string
 ): Promise<string> {
-  const [salt, ivHex, encryptedHex, hmac] = encryptedData.split(":");
-  if (!salt || !ivHex || !encryptedHex || !hmac) {
+  const [ivHex, encryptedHex, hmac] = encryptedData.split(":");
+  if (!ivHex || !encryptedHex || !hmac) {
     throw new Error("Invalid encrypted data format");
   }
 

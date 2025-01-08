@@ -260,6 +260,7 @@ export function UnlockAppWalletModal(
     const doUnlock = async () => {
       try {
         const decryptedAddress = await decryptData(
+          props.address,
           props.address_hashed,
           walletPass
         );
