@@ -13,6 +13,26 @@ export default function AppWallets() {
   const router = useRouter();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  function printWallets() {
+    if (fetchingWallets) {
+      return (
+        <Col>
+          Fetching wallets <DotLoader />
+        </Col>
+      );
+    }
+
+    if (wallets.length === 0) {
+      return <Col>No wallets found</Col>;
+    }
+
+    return wallets.map((w) => (
+      <Col xs={12} sm={6} md={4} key={w.address} className="pb-3">
+        <AppWalletCard wallet={w} />
+      </Col>
+    ));
+  }
+
   return (
     <Container className="pt-4 pb-4">
       <Row>
@@ -20,21 +40,7 @@ export default function AppWallets() {
           <span className="font-lightest">App</span> Wallets
         </h1>
       </Row>
-      <Row className="mt-4">
-        {fetchingWallets ? (
-          <Col>
-            Fetching wallets <DotLoader />
-          </Col>
-        ) : wallets.length === 0 ? (
-          <Col>No wallets found</Col>
-        ) : (
-          wallets.map((w) => (
-            <Col xs={12} sm={6} md={4} key={w.address} className="pb-3">
-              <AppWalletCard wallet={w} />
-            </Col>
-          ))
-        )}
-      </Row>
+      <Row className="mt-4">{printWallets()}</Row>
       <Row className="mt-4">
         <Col className="d-flex align-items-center gap-3">
           <CreateAppWalletModal

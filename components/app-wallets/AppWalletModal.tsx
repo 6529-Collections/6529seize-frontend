@@ -1,5 +1,5 @@
 import styles from "./AppWallet.module.scss";
-import { useCallback, useRef, useState } from "react";
+import { MutableRefObject, useCallback, useRef, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -9,6 +9,23 @@ import { useAuth } from "../auth/Auth";
 import useCapacitor from "../../hooks/useCapacitor";
 
 export const SEED_MIN_PASS_LENGTH = 6;
+
+const showError = (
+  timeoutRef: MutableRefObject<NodeJS.Timeout | null>,
+  setError: React.Dispatch<React.SetStateAction<string>>,
+  message: string
+) => {
+  if (timeoutRef.current) {
+    clearTimeout(timeoutRef.current);
+  }
+
+  setError(message);
+
+  timeoutRef.current = setTimeout(() => {
+    setError("");
+    timeoutRef.current = null;
+  }, 5000);
+};
 
 export function CreateAppWalletModal(
   props: Readonly<{
@@ -32,19 +49,6 @@ export function CreateAppWalletModal(
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const showError = (message: string) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    setError(message);
-
-    timeoutRef.current = setTimeout(() => {
-      setError("");
-      timeoutRef.current = null;
-    }, 5000);
-  };
-
   const handleHide = (refresh: boolean) => {
     setWalletName("");
     setWalletPass("");
@@ -55,6 +59,8 @@ export function CreateAppWalletModal(
   const handleCreate = useCallback(async () => {
     if (walletPass.length < SEED_MIN_PASS_LENGTH) {
       showError(
+        timeoutRef,
+        setError,
         `Password must be at least ${SEED_MIN_PASS_LENGTH} characters long`
       );
       return;
@@ -86,6 +92,8 @@ export function CreateAppWalletModal(
 
     if (walletPass.length < SEED_MIN_PASS_LENGTH) {
       showError(
+        timeoutRef,
+        setError,
         `Password must be at least ${SEED_MIN_PASS_LENGTH} characters long`
       );
       return;
@@ -127,8 +135,11 @@ export function CreateAppWalletModal(
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className={styles.modalContent}>
-        <label className="pb-1">Wallet Name</label>
+        <label className="pb-1" htmlFor="walletName">
+          Wallet Name
+        </label>
         <input
+          id="walletName"
           autoFocus
           type="text"
           placeholder="My Wallet..."
@@ -140,6 +151,8 @@ export function CreateAppWalletModal(
               setWalletName(value);
             } else {
               showError(
+                timeoutRef,
+                setError,
                 "Name can only contain alphanumeric characters and spaces"
               );
             }
@@ -166,7 +179,11 @@ export function CreateAppWalletModal(
             if (/^\S*$/.test(value)) {
               setWalletPass(value);
             } else {
-              showError("Password must not contain any whitespace characters");
+              showError(
+                timeoutRef,
+                setError,
+                "Password must not contain any whitespace characters"
+              );
             }
           }}
         />

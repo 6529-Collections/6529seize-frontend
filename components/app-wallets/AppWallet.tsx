@@ -152,6 +152,27 @@ export default function AppWalletComponent(
     );
   }
 
+  function printBalance() {
+    let balanceContent = <></>;
+    if (balance.isFetching) {
+      balanceContent = <DotLoader />;
+    } else if (balance.data) {
+      balanceContent = (
+        <>
+          {fromGWEI(Number(balance.data.value)).toLocaleString()}{" "}
+          {balance.data?.symbol}
+          {chainId === sepolia.id && (
+            <span className="font-color-h"> (sepolia)</span>
+          )}
+        </>
+      );
+    } else {
+      balanceContent = <span>Error</span>;
+    }
+
+    return <span>Balance: {balanceContent}</span>;
+  }
+
   return (
     <Container className="pt-5 pb-5">
       <Row>
@@ -183,22 +204,7 @@ export default function AppWalletComponent(
               <></>
             )}
           </h3>
-          <span>
-            Balance:{" "}
-            {balance.isFetching ? (
-              <DotLoader />
-            ) : balance.data ? (
-              <>
-                {fromGWEI(Number(balance.data.value)).toLocaleString()}{" "}
-                {balance.data?.symbol}
-                {chainId === sepolia.id && (
-                  <span className="font-color-h"> (sepolia)</span>
-                )}
-              </>
-            ) : (
-              <>Error</>
-            )}
-          </span>
+          {printBalance()}
         </Col>
       </Row>
       <Row className="pt-4">
