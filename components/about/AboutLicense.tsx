@@ -66,7 +66,7 @@ export default function AboutLicense() {
             the trademark is also owned by Yuga Labs.
           </p>
           <p>
-            Neither 6529 Collections LLC nor the artists are responsible for
+            Neither 6529 Collection LLC nor the artists are responsible for
             damages you may suffer for infringement on the rights of third
             parties.
           </p>
