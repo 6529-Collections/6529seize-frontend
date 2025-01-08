@@ -670,6 +670,13 @@ export default function Header(props: Readonly<Props>) {
                               title="Tools"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "App Wallets",
+                                  path: "/tools/app-wallets",
+                                }}
+                              />
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
