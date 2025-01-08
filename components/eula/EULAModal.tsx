@@ -59,7 +59,7 @@ export default function EULAModal() {
                   <p>
                     "Terms" or "EULA": End User License Agreement (EULA)
                     <br />
-                    "We": 6529 Collections LLC
+                    "We": 6529 Collection LLC
                     <br />
                     "6529 NFTs": The Memes, 6529 Gradient, Meme Lab, GenMemes,
                     6529 Intern and other NFTs that may be added from time to

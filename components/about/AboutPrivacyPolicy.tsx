@@ -21,7 +21,7 @@ export default function AboutPrivacyPolicy() {
         <Col>
           <>
             <p>
-              This Privacy Policy describes how 6529 Collections LLC d/b/a
+              This Privacy Policy describes how 6529 Collection LLC d/b/a
               6529.io (&quot;<b>Seize</b>&quot;, &quot;<b>we</b>&quot;, &quot;
               <b>our</b>&quot;) processes personal information that we collect
               through our digital or online properties or services that link to
@@ -548,7 +548,7 @@ export default function AboutPrivacyPolicy() {
               <li>
                 Mail:
                 <br />
-                6529 Collections LLC
+                6529 Collection LLC
                 <br />
                 2810 N Church St
                 <br />
