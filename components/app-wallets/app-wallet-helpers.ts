@@ -24,32 +24,55 @@ function generateIv() {
   return crypto.randomBytes(16); // AES uses a 16-byte IV
 }
 
-// Encryption Function with the method signature you specified
+function computeHmac(key: Buffer, data: string): string {
+  const hmac = crypto.createHmac("sha256", key);
+  hmac.update(data);
+  return hmac.digest("hex");
+}
+
+function generateSalt(): string {
+  return crypto.randomBytes(16).toString("hex");
+}
+
 export async function encryptData(
   salt: string,
   data: string,
   password: string
 ): Promise<string> {
   const key = await deriveKey(password, salt);
-  const iv = generateIv(); // Generate a random IV for each encryption
+  const iv = generateIv();
 
   const cipher = crypto.createCipheriv(ENCRYPTION_ALGORITHM, key, iv);
   let encrypted = cipher.update(data, "utf8", "hex");
   encrypted += cipher.final("hex");
 
-  // Return the IV and encrypted data as a concatenated string (separate with ':')
-  return `${iv.toString("hex")}:${encrypted}`;
+  const hmacKey = key.subarray(16);
+  const hmac = computeHmac(
+    hmacKey,
+    `${salt}:${iv.toString("hex")}:${encrypted}`
+  );
+
+  // Return salt, IV, encrypted data, and HMAC
+  return `${salt}:${iv.toString("hex")}:${encrypted}:${hmac}`;
 }
 
-// Decryption Function with the method signature you specified
 export async function decryptData(
-  salt: string,
   encryptedData: string,
   password: string
 ): Promise<string> {
-  const [ivHex, encryptedHex] = encryptedData.split(":");
+  const [salt, ivHex, encryptedHex, hmac] = encryptedData.split(":");
+  if (!salt || !ivHex || !encryptedHex || !hmac) {
+    throw new Error("Invalid encrypted data format");
+  }
+
   const iv = Buffer.from(ivHex, "hex");
   const key = await deriveKey(password, salt);
+
+  const hmacKey = key.subarray(16);
+  const computedHmac = computeHmac(hmacKey, `${salt}:${ivHex}:${encryptedHex}`);
+  if (computedHmac !== hmac) {
+    throw new Error("HMAC verification failed");
+  }
 
   const decipher = crypto.createDecipheriv(ENCRYPTION_ALGORITHM, key, iv);
   let decrypted = decipher.update(encryptedHex, "hex", "utf8");

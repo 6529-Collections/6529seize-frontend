@@ -1,5 +1,5 @@
 import styles from "./AppWallet.module.scss";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -7,7 +7,6 @@ import { decryptData } from "./app-wallet-helpers";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import useCapacitor from "../../hooks/useCapacitor";
-import { ethers } from "ethers";
 
 export const SEED_MIN_PASS_LENGTH = 6;
 
@@ -261,7 +260,6 @@ export function UnlockAppWalletModal(
     const doUnlock = async () => {
       try {
         const decryptedAddress = await decryptData(
-          props.address,
           props.address_hashed,
           walletPass
         );

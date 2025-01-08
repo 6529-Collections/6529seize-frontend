@@ -240,21 +240,22 @@ export default function AppWalletComponent(
               show={isDownloading}
               onHide={() => setIsDownloading(false)}
               onUnlock={(pass: string) => {
-                decryptData(
-                  appWallet.address,
-                  appWallet.private_key,
-                  pass
-                ).then(async (decryptedPrivateKey) => {
-                  let decryptedMnemonic = appWallet.mnemonic;
-                  if (decryptedMnemonic !== MNEMONIC_NA) {
-                    decryptedMnemonic = await decryptData(
-                      appWallet.address,
-                      appWallet.mnemonic,
-                      pass
+                decryptData(appWallet.private_key, pass).then(
+                  async (decryptedPrivateKey) => {
+                    let decryptedMnemonic = appWallet.mnemonic;
+                    if (decryptedMnemonic !== MNEMONIC_NA) {
+                      decryptedMnemonic = await decryptData(
+                        appWallet.mnemonic,
+                        pass
+                      );
+                    }
+                    doDownload(
+                      appWallet,
+                      decryptedMnemonic,
+                      decryptedPrivateKey
                     );
                   }
-                  doDownload(appWallet, decryptedMnemonic, decryptedPrivateKey);
-                });
+                );
               }}
             />
             <Tippy
@@ -308,7 +309,7 @@ export default function AppWalletComponent(
                 show={isRevealingPhrase}
                 onHide={() => setIsRevealingPhrase(false)}
                 onUnlock={(pass: string) => {
-                  decryptData(appWallet.address, appWallet.mnemonic, pass).then(
+                  decryptData(appWallet.mnemonic, pass).then(
                     (decryptedPhrase) => {
                       setPhrase(decryptedPhrase.split(" "));
                       setRevealPhrase(true);
@@ -384,14 +385,12 @@ export default function AppWalletComponent(
               show={isRevealingPrivateKey}
               onHide={() => setIsRevealingPrivateKey(false)}
               onUnlock={(pass: string) => {
-                decryptData(
-                  appWallet.address,
-                  appWallet.private_key,
-                  pass
-                ).then((decryptedPrivateKey) => {
-                  setPrivateKey(decryptedPrivateKey);
-                  setRevealPrivateKey(true);
-                });
+                decryptData(appWallet.private_key, pass).then(
+                  (decryptedPrivateKey) => {
+                    setPrivateKey(decryptedPrivateKey);
+                    setRevealPrivateKey(true);
+                  }
+                );
               }}
             />
             {revealPrivateKey && (

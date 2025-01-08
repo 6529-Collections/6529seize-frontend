@@ -1,6 +1,6 @@
 import styles from "./AppWallet.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import {
