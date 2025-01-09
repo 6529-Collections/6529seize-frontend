@@ -73,7 +73,7 @@ export default function AboutContactUs() {
             postcard, you can do so here:
             <br />
             <br />
-            6529 Collections LLC
+            6529 Collection LLC
             <br />
             2810 N Church St
             <br />
