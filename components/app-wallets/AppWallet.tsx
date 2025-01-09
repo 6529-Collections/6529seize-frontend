@@ -90,7 +90,9 @@ export default function AppWalletComponent(
     content += `Mnemonic: ${decryptedMnemonic}\n\n`;
     content += `Private Key: ${decryptedPrivateKey}\n\n`;
 
-    const fileName = `${wallet.name}-6529CORE.txt`;
+    const fileName = `${wallet.name.replace(/\s+/g, "_")}-${
+      wallet.address
+    }.txt`;
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

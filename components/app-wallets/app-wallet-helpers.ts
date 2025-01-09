@@ -19,15 +19,8 @@ function deriveKey(password: string, salt: string): Promise<Buffer> {
   });
 }
 
-// Function to generate a random IV
 function generateIv() {
-  return crypto.randomBytes(16); // AES uses a 16-byte IV
-}
-
-function computeHmac(key: Buffer, data: string): string {
-  const hmac = crypto.createHmac("sha256", key);
-  hmac.update(data);
-  return hmac.digest("hex");
+  return crypto.randomBytes(12); // Use 12 bytes for GCM IV
 }
 
 export async function encryptData(
@@ -42,11 +35,10 @@ export async function encryptData(
   let encrypted = cipher.update(data, "utf8", "hex");
   encrypted += cipher.final("hex");
 
-  const hmacKey = key.subarray(16);
-  const hmac = computeHmac(hmacKey, `${iv.toString("hex")}:${encrypted}`);
+  const authTag = cipher.getAuthTag().toString("hex"); // Retrieve the authentication tag
 
-  // Return salt, IV, encrypted data, and HMAC
-  return `${iv.toString("hex")}:${encrypted}:${hmac}`;
+  // Return IV, AuthTag, and Encrypted Data as a concatenated string
+  return `${iv.toString("hex")}:${authTag}:${encrypted}`;
 }
 
 export async function decryptData(
@@ -54,21 +46,15 @@ export async function decryptData(
   encryptedData: string,
   password: string
 ): Promise<string> {
-  const [ivHex, encryptedHex, hmac] = encryptedData.split(":");
-  if (!ivHex || !encryptedHex || !hmac) {
-    throw new Error("Invalid encrypted data format");
-  }
-
+  const [ivHex, authTagHex, encryptedHex] = encryptedData.split(":");
   const iv = Buffer.from(ivHex, "hex");
+  const authTag = Buffer.from(authTagHex, "hex");
+
   const key = await deriveKey(password, salt);
 
-  const hmacKey = key.subarray(16);
-  const computedHmac = computeHmac(hmacKey, `${salt}:${ivHex}:${encryptedHex}`);
-  if (computedHmac !== hmac) {
-    throw new Error("HMAC verification failed");
-  }
-
   const decipher = crypto.createDecipheriv(ENCRYPTION_ALGORITHM, key, iv);
+  decipher.setAuthTag(authTag); // Set the authentication tag
+
   let decrypted = decipher.update(encryptedHex, "hex", "utf8");
   decrypted += decipher.final("utf8");
 
