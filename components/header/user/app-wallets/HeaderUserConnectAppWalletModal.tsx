@@ -80,67 +80,65 @@ function AppWalletConnector(
   };
 
   return (
-    <>
-      <Button
-        onClick={() => setShowPassword(true)}
-        variant="outline-secondary"
-        className={`btn-block btn-lg d-flex align-items-center justify-content-start gap-3 mb-3 ${styles.appWalletConnectorButton}`}>
-        <AppWalletAvatar address={props.connector.id} />
-        <div className="d-flex flex-column align-items-start w-100">
-          <span className="font-color font-bolder">{props.connector.name}</span>
-          <span className="font-color font-smaller font-lighter">
-            {formatAddress(props.connector.id)}
-          </span>
-          <Collapse
-            in={showPassword}
-            onEntered={() => {
-              passwordInputRef.current?.focus();
-            }}>
-            <div className="w-100">
-              <InputGroup className="mt-2 mb-2">
-                <Form.Control
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  ref={passwordInputRef}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </InputGroup>
-              <div className="d-flex mt-2 mb-2 gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowPassword(false);
-                    setPassword("");
-                    setIsError(false);
-                  }}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  disabled={!password || isConnecting}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setIsConnecting(true);
-                    handleConnect();
-                  }}>
-                  {isConnecting ? "Connecting..." : "Connect"}
-                </Button>
-              </div>
-              {isError && (
-                <div className="text-danger d-flex w-100">
-                  Password is incorrect
-                </div>
-              )}
+    <Button
+      onClick={() => setShowPassword(true)}
+      variant="outline-secondary"
+      className={`btn-block btn-lg d-flex align-items-center justify-content-start gap-3 mb-3 ${styles.appWalletConnectorButton}`}>
+      <AppWalletAvatar address={props.connector.id} />
+      <div className="d-flex flex-column align-items-start w-100">
+        <span className="font-color font-bolder">{props.connector.name}</span>
+        <span className="font-color font-smaller font-lighter">
+          {formatAddress(props.connector.id)}
+        </span>
+        <Collapse
+          in={showPassword}
+          onEntered={() => {
+            passwordInputRef.current?.focus();
+          }}>
+          <div className="w-100">
+            <InputGroup className="mt-2 mb-2">
+              <Form.Control
+                type="password"
+                placeholder="Password"
+                value={password}
+                ref={passwordInputRef}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </InputGroup>
+            <div className="d-flex mt-2 mb-2 gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowPassword(false);
+                  setPassword("");
+                  setIsError(false);
+                }}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                disabled={!password || isConnecting}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsConnecting(true);
+                  handleConnect();
+                }}>
+                {isConnecting ? "Connecting..." : "Connect"}
+              </Button>
             </div>
-          </Collapse>
-        </div>
-      </Button>
-    </>
+            {isError && (
+              <div className="text-danger d-flex w-100">
+                Password is incorrect
+              </div>
+            )}
+          </div>
+        </Collapse>
+      </div>
+    </Button>
   );
 }

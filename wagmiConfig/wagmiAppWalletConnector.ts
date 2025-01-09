@@ -119,7 +119,7 @@ export function createAppWalletConnector(
       chainId?: number;
       isReconnecting?: boolean;
     } = {}) {
-      const chainId = maybeChainId || chains[0].id;
+      const chainId = maybeChainId ?? chains[0].id;
 
       if (!decryptedPrivateKey)
         throw new Error("Failed to decrypt private key.");
@@ -201,6 +201,9 @@ export function createAppWalletConnector(
       // Recreate client pointing to new chain
       walletClient = undefined;
       const client = await getOrCreateClient(newChainId);
+      if (!client.account?.address) {
+        throw new Error("No valid local account found after decryption.");
+      }
 
       emitter.emit("change", { chainId: newChainId });
 

@@ -15,7 +15,6 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { useAccount, useBalance, useChainId } from "wagmi";
 import { sepolia } from "viem/chains";
-import Image from "next/image";
 
 import useAppWallets, { AppWallet } from "../../hooks/useAppWallets";
 
