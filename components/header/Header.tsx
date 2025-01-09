@@ -135,7 +135,7 @@ export default function Header(props: Readonly<Props>) {
 
   function printMobileRow(name: string, path: string) {
     return (
-      <Row className="pt-3">
+      <Row className="pt-3 pb-1">
         <Col>
           <a href={path}>
             <h3>{name}</h3>
