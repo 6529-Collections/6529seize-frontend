@@ -6,7 +6,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { decryptData } from "./app-wallet-helpers";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { useAuth } from "../auth/Auth";
-import useCapacitor from "../../hooks/useCapacitor";
+import useAppWallets from "../../hooks/useAppWallets";
 
 export const SEED_MIN_PASS_LENGTH = 6;
 
@@ -38,7 +38,7 @@ export function CreateAppWalletModal(
     onHide: (refresh: boolean) => void;
   }>
 ) {
-  const { createWallet, importWallet } = useCapacitor();
+  const { createAppWallet, importAppWallet } = useAppWallets();
   const { setToast } = useAuth();
   const [walletName, setWalletName] = useState("");
   const [walletPass, setWalletPass] = useState("");
@@ -70,21 +70,20 @@ export function CreateAppWalletModal(
 
     setIsAdding(true);
 
-    createWallet(walletName, walletPass).then((success) => {
-      if (!success) {
-        setToast({
-          message: `Error creating wallet`,
-          type: "error",
-        });
-      } else {
-        setToast({
-          message: `Wallet '${walletName}' created successfully - Download Recovery File immediately!`,
-          type: "success",
-        });
-        handleHide(true);
-      }
-      setIsAdding(false);
-    });
+    const success = await createAppWallet(walletName, walletPass);
+    if (!success) {
+      setToast({
+        message: `Error creating wallet`,
+        type: "error",
+      });
+    } else {
+      setToast({
+        message: `Wallet '${walletName}' created successfully - Download Recovery File immediately!`,
+        type: "success",
+      });
+      handleHide(true);
+    }
+    setIsAdding(false);
   }, [walletName, walletPass, isAdding]);
 
   const handleImport = useCallback(async () => {
@@ -103,7 +102,7 @@ export function CreateAppWalletModal(
 
     setIsAdding(true);
 
-    const success = await importWallet(
+    const success = await importAppWallet(
       walletName,
       walletPass,
       props.import.address,

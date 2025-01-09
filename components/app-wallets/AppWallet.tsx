@@ -17,7 +17,8 @@ import { useAccount, useBalance, useChainId } from "wagmi";
 import { sepolia } from "viem/chains";
 import Image from "next/image";
 
-import useCapacitor, { AppWallet } from "../../hooks/useCapacitor";
+import useAppWallets, { AppWallet } from "../../hooks/useAppWallets";
+
 import {
   areEqualAddresses,
   fromGWEI,
@@ -28,6 +29,7 @@ import DotLoader, { Spinner } from "../dotLoader/DotLoader";
 import { UnlockAppWalletModal } from "./AppWalletModal";
 import { decryptData } from "./app-wallet-helpers";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
+import AppWalletAvatar from "./AppWalletAvatar";
 
 const MNEMONIC_NA = "N/A";
 
@@ -36,9 +38,9 @@ export default function AppWalletComponent(
     address: string;
   }>
 ) {
-  const { wallets, fetchingWallets, deleteWallet } = useCapacitor();
+  const { appWallets, fetchingAppWallets, deleteAppWallet } = useAppWallets();
 
-  const appWallet = wallets.find((w) =>
+  const appWallet = appWallets.find((w) =>
     areEqualAddresses(w.address, props.address)
   );
 
@@ -112,7 +114,7 @@ export default function AppWalletComponent(
         });
         return;
       }
-      const success = await deleteWallet(address);
+      const success = await deleteAppWallet(address);
       if (!success) {
         setToast({
           message: `Error deleting wallet`,
@@ -129,9 +131,9 @@ export default function AppWalletComponent(
     [account.address]
   );
 
-  if (fetchingWallets) {
+  if (fetchingAppWallets) {
     return (
-      <Container className="pt-5 pb-5">
+      <Container className="pt-4 pb-4">
         <Row>
           <Col className="d-flex gap-2">
             <span>Fetching wallet</span>
@@ -144,7 +146,7 @@ export default function AppWalletComponent(
 
   if (!appWallet) {
     return (
-      <Container className="pt-5 pb-5">
+      <Container className="pt-4 pb-4">
         <Row>
           <Col>
             Wallet with address <b>{props.address}</b> not found.
@@ -176,7 +178,7 @@ export default function AppWalletComponent(
   }
 
   return (
-    <Container className="pt-5 pb-5">
+    <Container className="pt-4 pb-4">
       <Row>
         <Col>
           <Link
@@ -190,15 +192,7 @@ export default function AppWalletComponent(
       <Row className="pt-4">
         <Col className="d-flex align-items-center justify-content-between">
           <h3 className="mb-0 d-flex align-items-center gap-2">
-            <Image
-              className={styles.seedWalletAvatar}
-              fetchPriority="high"
-              loading="eager"
-              height={50}
-              width={50}
-              src={`https://robohash.org/${props.address}.png`}
-              alt={props.address}
-            />
+            <AppWalletAvatar address={appWallet.address} size={50} />
             {appWallet.name}
             {appWallet.imported ? (
               <span className="font-color-h"> (imported)</span>
@@ -210,7 +204,7 @@ export default function AppWalletComponent(
         </Col>
       </Row>
       <Row className="pt-4">
-        <Col className="d-flex align-items-center gap-2 justify-content-between">
+        <Col className="d-flex align-items-center gap-2 justify-content-between flex-wrap">
           <span>
             Wallet Address:{" "}
             <span className="font-larger font-bolder">

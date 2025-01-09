@@ -1,8 +1,8 @@
 import styles from "./AppWallet.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import Link from "next/link";
-import Image from "next/image";
-import { AppWallet } from "../../hooks/useCapacitor";
+import { AppWallet } from "../../hooks/useAppWallets";
+import AppWalletAvatar from "./AppWalletAvatar";
 
 export default function AppWalletCard(
   props: Readonly<{
@@ -16,15 +16,7 @@ export default function AppWalletCard(
       <Container className={styles.seedWalletCard}>
         <Row>
           <Col className="text-break d-flex align-items-center gap-2">
-            <Image
-              className={styles.seedWalletAvatar}
-              fetchPriority="high"
-              loading="eager"
-              height={36}
-              width={36}
-              src={`https://robohash.org/${props.wallet.address}.png`}
-              alt={props.wallet.address}
-            />
+            <AppWalletAvatar address={props.wallet.address} />
             <span className="font-larger font-bolder">{props.wallet.name}</span>
             {props.wallet.imported ? (
               <span className="font-color-h"> (imported)</span>
