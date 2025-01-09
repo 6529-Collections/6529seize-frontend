@@ -342,6 +342,8 @@ export default function Header(props: Readonly<Props>) {
             {showBurgerMenuTools && (
               <Container>
                 {printMobileHr()}
+                {printMobileRow("App Wallets", "/tools/app-wallets")}
+                {printMobileHr()}
                 {printMobileSubheader("NFT Delegation")}
                 {printMobileRow(
                   "Delegation Center",
