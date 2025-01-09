@@ -135,7 +135,7 @@ export default function Header(props: Readonly<Props>) {
 
   function printMobileRow(name: string, path: string) {
     return (
-      <Row className="pt-3">
+      <Row className="pt-3 pb-1">
         <Col>
           <a href={path}>
             <h3>{name}</h3>
@@ -341,6 +341,8 @@ export default function Header(props: Readonly<Props>) {
             </Col>
             {showBurgerMenuTools && (
               <Container>
+                {printMobileHr()}
+                {printMobileRow("App Wallets", "/tools/app-wallets")}
                 {printMobileHr()}
                 {printMobileSubheader("NFT Delegation")}
                 {printMobileRow(
@@ -670,6 +672,13 @@ export default function Header(props: Readonly<Props>) {
                               title="Tools"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "App Wallets",
+                                  path: "/tools/app-wallets",
+                                }}
+                              />
+                              <NavDropdown.Divider />
                               <NavDropdown.Item
                                 className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
