@@ -13,9 +13,6 @@ interface CreateAppWalletConnectorOptions {
   appWallet: AppWallet;
 }
 
-/**
- * A custom connector that decrypts the private key on connect().
- */
 export function createAppWalletConnector(
   options: CreateAppWalletConnectorOptions
 ) {
@@ -27,7 +24,6 @@ export function createAppWalletConnector(
   let decryptedPrivateKey: string | null = null;
 
   async function getOrCreateClient(chainId: number) {
-    // If we already have a WalletClient in memory, just use it
     if (walletClient) return walletClient;
 
     if (!decryptedPrivateKey) {
@@ -38,7 +34,6 @@ export function createAppWalletConnector(
 
     const chain = chains.find((c) => c.id === chainId);
 
-    // Build the client for the current chain
     walletClient = createWalletClient({
       account,
       chain,
@@ -50,9 +45,6 @@ export function createAppWalletConnector(
     return walletClient;
   }
 
-  /**
-   * Utility: Ensure the string starts with "0x"
-   */
   function ensureHexPrefix(value: string): Hex {
     const hexValue = value.startsWith("0x") ? value : `0x${value}`;
     return hexValue as Hex;
@@ -106,12 +98,6 @@ export function createAppWalletConnector(
       // Optional initialization logic
     },
 
-    /**
-     * The main connect flow:
-     * - Prompt for password (or retrieve it), or get it from a param
-     * - Decrypt the private key
-     * - Create the wallet client
-     */
     async connect({
       chainId: maybeChainId,
       isReconnecting,
@@ -123,82 +109,54 @@ export function createAppWalletConnector(
 
       if (!decryptedPrivateKey)
         throw new Error("Failed to decrypt private key.");
-
-      // 2) Now that we have decryptedPrivateKey, create the client
       const client = await getOrCreateClient(chainId);
       if (!client.account?.address) {
         throw new Error("No valid local account found after decryption.");
       }
 
-      // 3) Emit "connect"
       emitter.emit("connect", {
         accounts: [client.account.address],
         chainId: chainId,
       });
 
-      // Return what viem/wagmi expects
       return {
         accounts: [client.account.address],
         chainId: chainId,
       };
     },
 
-    /**
-     * Clear the wallet client (and any decrypted key) from memory
-     */
     async disconnect() {
       walletClient = undefined;
       decryptedPrivateKey = null;
       emitter.emit("disconnect");
     },
 
-    /**
-     * Return the local account(s)
-     */
     async getAccounts() {
       const client = await getOrCreateClient(currentChainId);
       return client.account?.address ? [client.account.address] : [];
     },
 
-    /**
-     * Return the chainId you’re using
-     */
     async getChainId() {
       return currentChainId;
     },
 
-    /**
-     * Return the underlying provider or signer for advanced usage.
-     * Since we’re using viem, you can treat the `WalletClient` as the signer.
-     */
     async getProvider() {
       return getOrCreateClient(currentChainId);
     },
 
-    /**
-     * Return the underlying client. This is optional, but viem supports `getClient`.
-     */
     async getClient() {
       return getOrCreateClient(currentChainId);
     },
 
-    /**
-     * Check if we are "authorized". If we have a decrypted key in memory,
-     * we assume we’re authorized.
-     */
     async isAuthorized() {
       return !!decryptedPrivateKey;
     },
 
-    /**
-     * Switch chain if you want to support chain switching within the connector
-     */
     async switchChain({ chainId: newChainId }) {
       currentChainId = newChainId;
       const newChain = chains.find((c) => c.id === newChainId);
       if (!newChain) throw new Error(`Chain with id ${newChainId} not found!`);
 
-      // Recreate client pointing to new chain
       walletClient = undefined;
       const client = await getOrCreateClient(newChainId);
       if (!client.account?.address) {
@@ -210,9 +168,6 @@ export function createAppWalletConnector(
       return newChain;
     },
 
-    /**
-     * Handlers for underlying provider events (no-op for a static private key).
-     */
     onAccountsChanged(accounts) {
       emitter.emit("change", { accounts: accounts as Address[] });
     },
