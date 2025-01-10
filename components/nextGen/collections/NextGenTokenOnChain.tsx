@@ -14,7 +14,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { mainnet } from "viem/chains";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
 import Tippy from "@tippyjs/react";
-import { C } from "@tanstack/query-core/build/legacy/hydration-BZ2M_xzi";
 import useCapacitor from "../../../hooks/useCapacitor";
 
 interface Props {
