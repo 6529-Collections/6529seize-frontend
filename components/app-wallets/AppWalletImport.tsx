@@ -307,12 +307,7 @@ function ImportWallet(
     <div className="d-flex gap-2">
       <CreateAppWalletModal
         show={showImportModal}
-        onHide={(refresh: boolean) => {
-          setShowImportModal(false);
-          if (refresh) {
-            router.push("/tools/app-wallets");
-          }
-        }}
+        onHide={() => setShowImportModal(false)}
         import={{
           address: props.wallet.address,
           mnemonic: props.mnemonic,

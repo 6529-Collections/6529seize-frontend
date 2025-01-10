@@ -120,8 +120,6 @@ import {
   AppWallet,
   appWalletsEventEmitter,
   AppWalletsProvider,
-  getAllWallets,
-  useAppWallets,
 } from "../components/app-wallets/AppWalletsContext";
 
 library.add(

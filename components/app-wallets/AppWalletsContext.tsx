@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { ethers } from "ethers";
 import { encryptData } from "./app-wallet-helpers";
@@ -72,7 +78,25 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setFetchingAppWallets(true);
 
-    const wallets = await getAllWallets();
+    let wallets: AppWallet[] = [];
+    try {
+      const keysResult = await SecureStoragePlugin.keys();
+      const walletKeys = keysResult.value.filter((key) =>
+        key.startsWith(WALLET_KEY_PREFIX)
+      );
+
+      const walletValues = await Promise.all(
+        walletKeys.map(async (key) => {
+          const valueResult = await SecureStoragePlugin.get({ key });
+          return JSON.parse(valueResult.value);
+        })
+      );
+      wallets = walletValues.sort((a, b) => a.created_at - b.created_at);
+    } catch (error) {
+      console.error("Error fetching wallets:", error);
+      wallets = [];
+    }
+
     setAppWallets(wallets);
     appWalletsEventEmitter.emit("update", wallets);
     setFetchingAppWallets(false);
@@ -181,16 +205,20 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
     return result.value;
   };
 
+  const value = useMemo(
+    () => ({
+      fetchingAppWallets,
+      appWallets,
+      appWalletsSupported,
+      createAppWallet,
+      importAppWallet,
+      deleteAppWallet,
+    }),
+    [fetchingAppWallets, appWallets, appWalletsSupported]
+  );
+
   return (
-    <AppWalletsContext.Provider
-      value={{
-        fetchingAppWallets,
-        appWallets,
-        appWalletsSupported,
-        createAppWallet,
-        importAppWallet,
-        deleteAppWallet,
-      }}>
+    <AppWalletsContext.Provider value={value}>
       {children}
     </AppWalletsContext.Provider>
   );
