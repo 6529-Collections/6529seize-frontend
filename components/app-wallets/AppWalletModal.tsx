@@ -6,7 +6,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { decryptData } from "./app-wallet-helpers";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { useAuth } from "../auth/Auth";
-import useAppWallets from "../../hooks/useAppWallets";
+import { useAppWallets } from "./AppWalletsContext";
 
 export const SEED_MIN_PASS_LENGTH = 6;
 
@@ -35,7 +35,7 @@ export function CreateAppWalletModal(
       mnemonic: string;
       privateKey: string;
     };
-    onHide: (refresh: boolean) => void;
+    onHide: () => void;
   }>
 ) {
   const { createAppWallet, importAppWallet } = useAppWallets();
@@ -53,7 +53,7 @@ export function CreateAppWalletModal(
     setWalletName("");
     setWalletPass("");
     setError("");
-    props.onHide(refresh);
+    props.onHide();
   };
 
   const handleCreate = useCallback(async () => {

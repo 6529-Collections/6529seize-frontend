@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { ethers } from "ethers";
-import { encryptData } from "../components/app-wallets/app-wallet-helpers";
-import { Time } from "../helpers/time";
-import useCapacitor from "./useCapacitor";
+import { encryptData } from "./app-wallet-helpers";
+import { Time } from "../../helpers/time";
+import useCapacitor from "../../hooks/useCapacitor";
 import EventEmitter from "events";
 
 export interface AppWallet {
@@ -16,9 +16,32 @@ export interface AppWallet {
   imported: boolean;
 }
 
+interface AppWalletsContextProps {
+  fetchingAppWallets: boolean;
+  appWallets: AppWallet[];
+  appWalletsSupported: boolean;
+  createAppWallet: (name: string, pass: string) => Promise<boolean>;
+  importAppWallet: (
+    walletName: string,
+    walletPass: string,
+    address: string,
+    mnemonic: string,
+    privateKey: string
+  ) => Promise<boolean>;
+  deleteAppWallet: (address: string) => Promise<boolean>;
+}
+
+const AppWalletsContext = createContext<AppWalletsContextProps | undefined>(
+  undefined
+);
+
+export const appWalletsEventEmitter = new EventEmitter();
+
 const WALLET_KEY_PREFIX = "app-wallet_";
 
-export const useAppWallets = () => {
+export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [fetchingAppWallets, setFetchingAppWallets] = useState(true);
   const [appWallets, setAppWallets] = useState<AppWallet[]>([]);
   const [appWalletsSupported, setAppWalletsSupported] = useState(false);
@@ -33,6 +56,7 @@ export const useAppWallets = () => {
 
     try {
       await SecureStoragePlugin.keys();
+      setAppWalletsSupported(true);
     } catch (error) {
       console.error("SecureStoragePlugin is not available:", error);
       setAppWalletsSupported(false);
@@ -47,28 +71,11 @@ export const useAppWallets = () => {
     }
 
     setFetchingAppWallets(true);
-    try {
-      const keysResult = await SecureStoragePlugin.keys();
-      const walletKeys = keysResult.value.filter((key) =>
-        key.startsWith(WALLET_KEY_PREFIX)
-      );
 
-      const walletValues = await Promise.all(
-        walletKeys.map(async (key) => {
-          const valueResult = await SecureStoragePlugin.get({ key });
-          return JSON.parse(valueResult.value);
-        })
-      );
-
-      // Sort by created_at
-      walletValues.sort((a, b) => a.created_at - b.created_at);
-
-      setAppWallets(walletValues);
-    } catch (error) {
-      console.error("Error fetching wallets:", error);
-    } finally {
-      setFetchingAppWallets(false);
-    }
+    const wallets = await getAllWallets();
+    setAppWallets(wallets);
+    appWalletsEventEmitter.emit("update", wallets);
+    setFetchingAppWallets(false);
   };
 
   useEffect(() => {
@@ -80,15 +87,13 @@ export const useAppWallets = () => {
     };
 
     initialize();
-  }, []);
+  }, [appWalletsSupported]);
 
   const createAppWallet = async (
     name: string,
     pass: string
   ): Promise<boolean> => {
-    if (!appWalletsSupported) {
-      return false;
-    }
+    if (!appWalletsSupported) return false;
 
     const wallet = ethers.Wallet.createRandom();
     const encryptedAddress = await encryptData(
@@ -122,10 +127,7 @@ export const useAppWallets = () => {
       value: JSON.stringify(seedWallet),
     });
 
-    // Refetch updated list
     await fetchAppWallets();
-
-    appWalletsEventEmitter.emit("update");
 
     return result.value;
   };
@@ -137,9 +139,7 @@ export const useAppWallets = () => {
     mnemonic: string,
     privateKey: string
   ): Promise<boolean> => {
-    if (!appWalletsSupported) {
-      return false;
-    }
+    if (!appWalletsSupported) return false;
 
     const encryptedAddress = await encryptData(address, address, walletPass);
     const encryptedMnemonic = await encryptData(address, mnemonic, walletPass);
@@ -164,42 +164,65 @@ export const useAppWallets = () => {
       value: JSON.stringify(wallet),
     });
 
-    // Refetch updated list
     await fetchAppWallets();
-
-    appWalletsEventEmitter.emit("update");
 
     return result.value;
   };
 
   const deleteAppWallet = async (address: string): Promise<boolean> => {
-    if (!appWalletsSupported) {
-      return false;
-    }
+    if (!appWalletsSupported) return false;
 
     const result = await SecureStoragePlugin.remove({
       key: `${WALLET_KEY_PREFIX}${address}`,
     });
 
-    // Refetch updated list
     await fetchAppWallets();
-
-    appWalletsEventEmitter.emit("update");
 
     return result.value;
   };
 
-  return {
-    fetchingAppWallets,
-    appWallets,
-    appWalletsSupported,
-    fetchAppWallets,
-    createAppWallet,
-    importAppWallet,
-    deleteAppWallet,
-  };
+  return (
+    <AppWalletsContext.Provider
+      value={{
+        fetchingAppWallets,
+        appWallets,
+        appWalletsSupported,
+        createAppWallet,
+        importAppWallet,
+        deleteAppWallet,
+      }}>
+      {children}
+    </AppWalletsContext.Provider>
+  );
 };
 
-export default useAppWallets;
+export const useAppWallets = () => {
+  const context = useContext(AppWalletsContext);
+  if (!context) {
+    throw new Error("useAppWallets must be used within an AppWalletsProvider");
+  }
+  return context;
+};
 
-export const appWalletsEventEmitter = new EventEmitter();
+export const getAllWallets = async () => {
+  let wallets: AppWallet[] = [];
+  try {
+    const keysResult = await SecureStoragePlugin.keys();
+    const walletKeys = keysResult.value.filter((key) =>
+      key.startsWith(WALLET_KEY_PREFIX)
+    );
+
+    const walletValues = await Promise.all(
+      walletKeys.map(async (key) => {
+        const valueResult = await SecureStoragePlugin.get({ key });
+        return JSON.parse(valueResult.value);
+      })
+    );
+
+    wallets = walletValues.sort((a, b) => a.created_at - b.created_at);
+  } catch (error) {
+    console.error("Error fetching wallets:", error);
+  }
+
+  return wallets;
+};

@@ -116,7 +116,13 @@ import { useRouter } from "next/router";
 import { SeizeConnectProvider } from "../components/auth/SeizeConnectContext";
 import { IpfsProvider, resolveIpfsUrl } from "../components/ipfs/IPFSContext";
 import { EULAConsentProvider } from "../components/eula/EULAConsentContext";
-import useAppWallets, { appWalletsEventEmitter } from "../hooks/useAppWallets";
+import {
+  AppWallet,
+  appWalletsEventEmitter,
+  AppWalletsProvider,
+  getAllWallets,
+  useAppWallets,
+} from "../components/app-wallets/AppWalletsContext";
 
 library.add(
   faArrowUp,
@@ -261,7 +267,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     router.pathname.startsWith(path)
   );
 
-  const { appWallets, fetchAppWallets } = useAppWallets();
+  const [appWallets, setAppWallets] = useState<AppWallet[]>([]);
   const [wagmiConfig, setWagmiConfig] = useState<Config>(getWagmiConfig());
 
   function getWagmiConfig() {
@@ -283,8 +289,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   }, [appWallets, capacitor.isCapacitor]);
 
   useEffect(() => {
-    const handler = () => {
-      fetchAppWallets();
+    const handler = async (wallets: AppWallet[]) => {
+      console.log("appWalletsEventEmitter wallets", wallets);
+      setAppWallets(wallets);
     };
 
     appWalletsEventEmitter.on("update", handler);
@@ -342,17 +349,19 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
             <IpfsProvider>
-              <SeizeConnectProvider>
-                <Auth>
-                  <NotificationsProvider>
-                    <CookieConsentProvider>
-                      <EULAConsentProvider>
-                        {getLayout(<Component {...props} />)}
-                      </EULAConsentProvider>
-                    </CookieConsentProvider>
-                  </NotificationsProvider>
-                </Auth>
-              </SeizeConnectProvider>
+              <AppWalletsProvider>
+                <SeizeConnectProvider>
+                  <Auth>
+                    <NotificationsProvider>
+                      <CookieConsentProvider>
+                        <EULAConsentProvider>
+                          {getLayout(<Component {...props} />)}
+                        </EULAConsentProvider>
+                      </CookieConsentProvider>
+                    </NotificationsProvider>
+                  </Auth>
+                </SeizeConnectProvider>
+              </AppWalletsProvider>
             </IpfsProvider>
           </ReactQueryWrapper>
           {!hideFooter && <Footer />}

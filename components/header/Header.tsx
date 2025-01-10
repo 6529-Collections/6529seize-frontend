@@ -14,12 +14,13 @@ import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import { useAuth } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
 import useCapacitor from "../../hooks/useCapacitor";
-import useAppWallets from "../../hooks/useAppWallets";
+import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import CapacitorWidget from "./capacitor/CapacitorWidget";
 import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderQR from "./qr/HeaderQR";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+
 interface Props {
   onLoad?: () => void;
   onSetWallets?(wallets: string[]): any;

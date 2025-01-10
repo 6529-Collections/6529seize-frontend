@@ -6,16 +6,12 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
-import useAppWallets from "../../hooks/useAppWallets";
+import { useAppWallets } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
 export default function AppWallets() {
-  const {
-    appWalletsSupported,
-    fetchingAppWallets,
-    appWallets,
-    fetchAppWallets,
-  } = useAppWallets();
+  const { appWalletsSupported, fetchingAppWallets, appWallets } =
+    useAppWallets();
   const router = useRouter();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -52,12 +48,7 @@ export default function AppWallets() {
           <Col className="d-flex align-items-center gap-3">
             <CreateAppWalletModal
               show={showCreateModal}
-              onHide={(refresh: boolean) => {
-                setShowCreateModal(false);
-                if (refresh) {
-                  fetchAppWallets();
-                }
-              }}
+              onHide={() => setShowCreateModal(false)}
             />
             <Button
               variant="primary"

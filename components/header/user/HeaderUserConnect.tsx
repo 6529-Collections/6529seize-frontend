@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import HeaderUserConnectAppWalletModal from "./app-wallets/HeaderUserConnectAppWalletModal";
-import useAppWallets from "../../../hooks/useAppWallets";
+import { useAppWallets } from "../../app-wallets/AppWalletsContext";
 
 export default function HeaderUserConnect(props: Readonly<{}>) {
   const { seizeConnect } = useSeizeConnectContext();
