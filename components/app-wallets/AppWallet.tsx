@@ -119,6 +119,12 @@ export default function AppWalletComponent(
         });
         return;
       }
+      const shouldDelete = window.confirm(
+        `Are you sure you want to delete wallet '${name}'?`
+      );
+      if (!shouldDelete) {
+        return;
+      }
       const success = await deleteAppWallet(address);
       if (!success) {
         setToast({
