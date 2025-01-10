@@ -12,6 +12,8 @@ import {
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
+import { APP_WALLET_CONNECTOR_TYPE } from "../../../../wagmiConfig/wagmiAppWalletConnector";
+import { getWalletType } from "../../../../services/auth/auth.utils";
 
 export default function HeaderUserProxyDropdown({
   isOpen,
@@ -26,6 +28,7 @@ export default function HeaderUserProxyDropdown({
     address,
     isConnected,
     seizeConnect,
+    seizeConnectAppWallet,
     seizeDisconnect,
     seizeDisconnectAndLogout,
   } = useSeizeConnectContext();
@@ -58,6 +61,15 @@ export default function HeaderUserProxyDropdown({
 
   const [label, setLabel] = useState(getLabel());
   useEffect(() => setLabel(getLabel()), [profile, address]);
+
+  const onConnect = () => {
+    const walletType = getWalletType();
+    if (walletType === APP_WALLET_CONNECTOR_TYPE) {
+      seizeConnectAppWallet();
+    } else {
+      seizeConnect();
+    }
+  };
 
   return (
     <div>
@@ -148,7 +160,7 @@ export default function HeaderUserProxyDropdown({
                       </button>
                     ) : (
                       <button
-                        onClick={() => seizeConnect()}
+                        onClick={onConnect}
                         type="button"
                         aria-label="Connect"
                         title="Connect"

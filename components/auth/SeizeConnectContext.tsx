@@ -11,11 +11,14 @@ import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 import {
   getWalletAddress,
   removeAuthJwt,
+  setWalletType,
 } from "../../services/auth/auth.utils";
+import HeaderUserConnectAppWalletModal from "../header/user/app-wallets/HeaderUserConnectAppWalletModal";
 
 interface SeizeConnectContextType {
   address: string | null;
   seizeConnect: () => void;
+  seizeConnectAppWallet: () => void;
   seizeDisconnect: () => void;
   seizeDisconnectAndLogout: (reconnect?: boolean) => void;
   seizeAcceptConnection: (address: string) => void;
@@ -31,10 +34,12 @@ const SeizeConnectContext = createContext<SeizeConnectContextType | undefined>(
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const connections = useConnections();
+  const connections = useConnections().flat();
   const { disconnect } = useDisconnect();
   const { open: onConnect } = useWeb3Modal();
   const { open } = useWeb3ModalState();
+
+  const [showAppWalletModal, setShowAppWalletModal] = useState(false);
 
   const account = useAccount();
   const [connectedAddress, setConnectedAddress] = useState<string | null>(
@@ -43,11 +48,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     setConnectedAddress(account.address ?? getWalletAddress());
+    if (account.connector?.type) {
+      setWalletType(account.connector.type);
+    }
   }, [account.address]);
 
   const seizeConnect = useCallback(() => {
     onConnect({ view: "Connect" });
   }, [onConnect]);
+
+  const seizeConnectAppWallet = useCallback(() => {
+    setShowAppWalletModal(true);
+  }, [setShowAppWalletModal]);
 
   const seizeDisconnect = useCallback(() => {
     for (const connection of connections) {
@@ -82,6 +94,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     return {
       address: connectedAddress,
       seizeConnect,
+      seizeConnectAppWallet,
       seizeDisconnect,
       seizeDisconnectAndLogout,
       seizeAcceptConnection,
@@ -92,6 +105,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [
     connectedAddress,
     seizeConnect,
+    seizeConnectAppWallet,
     seizeDisconnect,
     seizeDisconnectAndLogout,
     seizeAcceptConnection,
@@ -102,6 +116,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <SeizeConnectContext.Provider value={contextValue}>
       {children}
+      <HeaderUserConnectAppWalletModal
+        open={showAppWalletModal}
+        onClose={() => setShowAppWalletModal(false)}
+      />
     </SeizeConnectContext.Provider>
   );
 };
