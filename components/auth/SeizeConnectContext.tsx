@@ -10,13 +10,14 @@ import { useAccount, useConnections, useDisconnect } from "wagmi";
 import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 import {
   getWalletAddress,
+  getWalletType,
   removeAuthJwt,
-  setWalletType,
 } from "../../services/auth/auth.utils";
 import HeaderUserConnectAppWalletModal from "../header/user/app-wallets/HeaderUserConnectAppWalletModal";
 
 interface SeizeConnectContextType {
   address: string | null;
+  walletType: string | null;
   seizeConnect: () => void;
   seizeConnectAppWallet: () => void;
   seizeDisconnect: () => void;
@@ -45,15 +46,16 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const [connectedAddress, setConnectedAddress] = useState<string | null>(
     account.address ?? getWalletAddress()
   );
+  const [walletType, setWalletType] = useState<string | null>(
+    account.connector?.type ?? getWalletType()
+  );
 
   useEffect(() => {
     setConnectedAddress(account.address ?? getWalletAddress());
   }, [account.address]);
 
   useEffect(() => {
-    if (account.connector?.type) {
-      setWalletType(account.connector.type);
-    }
+    setWalletType(account.connector?.type ?? getWalletType());
   }, [account.connector]);
 
   const seizeConnect = useCallback(() => {
@@ -96,6 +98,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const contextValue = useMemo(() => {
     return {
       address: connectedAddress,
+      walletType,
       seizeConnect,
       seizeConnectAppWallet,
       seizeDisconnect,
@@ -107,6 +110,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [
     connectedAddress,
+    walletType,
     seizeConnect,
     seizeConnectAppWallet,
     seizeDisconnect,

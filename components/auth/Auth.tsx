@@ -94,7 +94,7 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
-  const { address, isConnected, seizeDisconnectAndLogout } =
+  const { address, walletType, isConnected, seizeDisconnectAndLogout } =
     useSeizeConnectContext();
 
   const signMessage = useSignMessage();
@@ -303,7 +303,8 @@ export default function Auth({
         signerAddress,
         tokenResponse.token,
         tokenResponse.refresh_token,
-        role ?? undefined
+        role ?? undefined,
+        walletType ?? undefined
       );
       return { success: true };
     } catch {
@@ -369,7 +370,8 @@ export default function Auth({
             redeemResponse.address,
             redeemResponse.token,
             refreshToken,
-            walletRole ?? undefined
+            walletRole ?? undefined,
+            walletType ?? undefined
           );
           return true;
         }
@@ -527,8 +529,7 @@ export default function Auth({
         setActiveProfileProxy: onActiveProfileProxy,
         setTitle,
         title: pageTitle,
-      }}
-    >
+      }}>
       {children}
       <ToastContainer />
       <Modal
@@ -536,8 +537,7 @@ export default function Auth({
         onHide={() => setShowSignModal(false)}
         backdrop="static"
         keyboard={false}
-        centered
-      >
+        centered>
         <Modal.Header className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </Modal.Header>
@@ -563,15 +563,13 @@ export default function Auth({
             onClick={() => {
               setShowSignModal(false);
               seizeDisconnectAndLogout();
-            }}
-          >
+            }}>
             Cancel
           </Button>
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}
-          >
+            disabled={signMessage.isPending}>
             {signMessage.isPending ? (
               <>
                 Confirm in your wallet <DotLoader />
