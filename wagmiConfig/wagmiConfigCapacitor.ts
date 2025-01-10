@@ -3,28 +3,36 @@ import { mainnet, sepolia, goerli } from "viem/chains";
 import { createConfig } from "wagmi";
 import { walletConnect, coinbaseWallet, injected } from "wagmi/connectors";
 import { CW_PROJECT_ID } from "../constants";
+import { AppWallet } from "../components/app-wallets/AppWalletsContext";
+import { createAppWalletConnector } from "./wagmiAppWalletConnector";
 
 export const wagmiConfigCapacitor = (
   chains: [Chain, ...Chain[]],
-  metadata: any
+  metadata: any,
+  appWallets: AppWallet[]
 ) => {
+  const connectors = [
+    ...appWallets.map((wallet) =>
+      createAppWalletConnector({ appWallet: wallet })
+    ),
+    walletConnect({
+      projectId: CW_PROJECT_ID,
+      metadata,
+      showQrModal: false,
+    }),
+    coinbaseWallet({
+      appName: "6529 CORE",
+      appLogoUrl:
+        "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
+      enableMobileWalletLink: true,
+      version: "3",
+    }),
+    injected(),
+  ];
+
   return createConfig({
     chains,
-    connectors: [
-      walletConnect({
-        projectId: CW_PROJECT_ID,
-        metadata,
-        showQrModal: false,
-      }),
-      coinbaseWallet({
-        appName: "6529 CORE",
-        appLogoUrl:
-          "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-        enableMobileWalletLink: true,
-        version: "3",
-      }),
-      injected(),
-    ],
+    connectors,
     transports: {
       [mainnet.id]: fallback([http(), http("https://rpc1.6529.io")], {
         retryCount: 3,

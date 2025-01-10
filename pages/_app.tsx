@@ -100,14 +100,13 @@ import Head from "next/head";
 import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 import { NextPage, NextPageContext } from "next";
-import { ReactElement, ReactNode, useEffect } from "react";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 import "../components/drops/create/lexical/lexical.styles.scss";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
-import { Capacitor } from "@capacitor/core";
 import { wagmiConfigWeb } from "../wagmiConfig/wagmiConfigWeb";
 import { wagmiConfigCapacitor } from "../wagmiConfig/wagmiConfigCapacitor";
 import useCapacitor from "../hooks/useCapacitor";
@@ -117,6 +116,11 @@ import { useRouter } from "next/router";
 import { SeizeConnectProvider } from "../components/auth/SeizeConnectContext";
 import { IpfsProvider, resolveIpfsUrl } from "../components/ipfs/IPFSContext";
 import { EULAConsentProvider } from "../components/eula/EULAConsentContext";
+import {
+  AppWallet,
+  appWalletsEventEmitter,
+  AppWalletsProvider,
+} from "../components/app-wallets/AppWalletsContext";
 
 library.add(
   faArrowUp,
@@ -232,19 +236,6 @@ const metadata = {
 
 const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
 
-const isCapacitor = Capacitor.isNativePlatform();
-
-export const wagmiConfig: Config = isCapacitor
-  ? wagmiConfigCapacitor(chains, metadata)
-  : wagmiConfigWeb(chains, metadata);
-
-createWeb3Modal({
-  wagmiConfig,
-  projectId: CW_PROJECT_ID,
-  enableAnalytics: true,
-  themeMode: "dark",
-});
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -273,6 +264,40 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const hideFooter = ["/waves", "/my-stream"].some((path) =>
     router.pathname.startsWith(path)
   );
+
+  const [appWallets, setAppWallets] = useState<AppWallet[]>([]);
+  const [wagmiConfig, setWagmiConfig] = useState<Config>(getWagmiConfig());
+
+  function getWagmiConfig() {
+    const conf = capacitor.isCapacitor
+      ? wagmiConfigCapacitor(chains, metadata, appWallets)
+      : wagmiConfigWeb(chains, metadata);
+
+    createWeb3Modal({
+      wagmiConfig: conf,
+      projectId: CW_PROJECT_ID,
+      enableAnalytics: true,
+      themeMode: "dark",
+    });
+    return conf;
+  }
+
+  useEffect(() => {
+    setWagmiConfig(getWagmiConfig());
+  }, [appWallets, capacitor.isCapacitor]);
+
+  useEffect(() => {
+    const handler = async (wallets: AppWallet[]) => {
+      console.log("appWalletsEventEmitter wallets", wallets);
+      setAppWallets(wallets);
+    };
+
+    appWalletsEventEmitter.on("update", handler);
+
+    return () => {
+      appWalletsEventEmitter.off("update", handler);
+    };
+  }, []);
 
   useEffect(() => {
     if (capacitor.isCapacitor) {
@@ -322,17 +347,19 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
             <IpfsProvider>
-              <SeizeConnectProvider>
-                <Auth>
-                  <NotificationsProvider>
-                    <CookieConsentProvider>
-                      <EULAConsentProvider>
-                        {getLayout(<Component {...props} />)}
-                      </EULAConsentProvider>
-                    </CookieConsentProvider>
-                  </NotificationsProvider>
-                </Auth>
-              </SeizeConnectProvider>
+              <AppWalletsProvider>
+                <SeizeConnectProvider>
+                  <Auth>
+                    <NotificationsProvider>
+                      <CookieConsentProvider>
+                        <EULAConsentProvider>
+                          {getLayout(<Component {...props} />)}
+                        </EULAConsentProvider>
+                      </CookieConsentProvider>
+                    </NotificationsProvider>
+                  </Auth>
+                </SeizeConnectProvider>
+              </AppWalletsProvider>
             </IpfsProvider>
           </ReactQueryWrapper>
           {!hideFooter && <Footer />}

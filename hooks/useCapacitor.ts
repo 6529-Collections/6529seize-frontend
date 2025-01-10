@@ -17,15 +17,13 @@ const useCapacitor = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
-    if (!isCapacitor) {
-      return;
-    }
+    if (!isCapacitor) return;
 
     function isPortrait() {
       return window.matchMedia("(orientation: portrait)").matches;
     }
 
-    function handleOrientationchange() {
+    function handleOrientationChange() {
       if (isPortrait()) {
         setOrientation(CapacitorOrientationType.PORTRAIT);
       } else {
@@ -33,21 +31,19 @@ const useCapacitor = () => {
       }
     }
 
-    handleOrientationchange();
+    handleOrientationChange();
 
-    window.addEventListener("orientationchange", handleOrientationchange);
+    window.addEventListener("orientationchange", handleOrientationChange);
 
     return () => {
-      window.removeEventListener("orientationchange", handleOrientationchange);
+      window.removeEventListener("orientationchange", handleOrientationChange);
     };
-  }, []);
+  }, [isCapacitor]);
 
   useEffect(() => {
-    if (!isCapacitor) {
-      return;
-    }
+    if (!isCapacitor) return;
 
-    const addPushListeners = async () => {
+    const addKeyboardListeners = async () => {
       await Keyboard.addListener("keyboardWillShow", () => {
         setKeyboardVisible(true);
       });
@@ -56,20 +52,20 @@ const useCapacitor = () => {
       });
     };
 
-    const removePushListeners = async () => {
+    const removeKeyboardListeners = async () => {
       await Keyboard.removeAllListeners();
     };
 
-    const commonCatch = (error: any) => {
+    const onError = (error: any) => {
       console.error("Keyboard plugin error:", error);
     };
 
-    addPushListeners().catch(commonCatch);
+    addKeyboardListeners().catch(onError);
 
     return () => {
-      removePushListeners().catch(commonCatch);
+      removeKeyboardListeners().catch(onError);
     };
-  }, []);
+  }, [isCapacitor]);
 
   return {
     isCapacitor,
