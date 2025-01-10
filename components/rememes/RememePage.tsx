@@ -25,6 +25,7 @@ import NFTAttributes from "../nftAttributes/NFTAttributes";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import DotLoader from "../dotLoader/DotLoader";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
+import useCapacitor from "../../hooks/useCapacitor";
 
 interface Props {
   contract: string;
@@ -119,6 +120,7 @@ export function printMemeReferences(
 }
 
 export default function RememePage(props: Readonly<Props>) {
+  const capacitor = useCapacitor();
   const [rememe, setRememe] = useState<Rememe>();
 
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.LIVE);
@@ -295,34 +297,36 @@ export default function RememePage(props: Readonly<Props>) {
                     </Col>
                   </Row>
                 )}
-                <Row className="pt-5">
-                  <Col>
-                    <a
-                      href={`https://opensea.io/assets/ethereum/${props.contract}/${props.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <Image
-                        className={styles.marketplaceRememe}
-                        src="/opensea.png"
-                        alt="opensea"
-                        width={40}
-                        height={40}
-                      />
-                    </a>
-                    <a
-                      href={`https://x2y2.io/eth/${props.contract}/${props.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <Image
-                        className={styles.marketplaceRememe}
-                        src="/x2y2.png"
-                        alt="x2y2"
-                        width={40}
-                        height={40}
-                      />
-                    </a>
-                  </Col>
-                </Row>
+                {capacitor.platform !== "ios" && (
+                  <Row className="pt-5">
+                    <Col>
+                      <a
+                        href={`https://opensea.io/assets/ethereum/${props.contract}/${props.id}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <Image
+                          className={styles.marketplaceRememe}
+                          src="/opensea.png"
+                          alt="opensea"
+                          width={40}
+                          height={40}
+                        />
+                      </a>
+                      <a
+                        href={`https://x2y2.io/eth/${props.contract}/${props.id}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <Image
+                          className={styles.marketplaceRememe}
+                          src="/x2y2.png"
+                          alt="x2y2"
+                          width={40}
+                          height={40}
+                        />
+                      </a>
+                    </Col>
+                  </Row>
+                )}
               </Container>
             </Col>
           </Row>
