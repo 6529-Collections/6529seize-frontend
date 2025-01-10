@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useAccount, useBalance, useChainId } from "wagmi";
 import { sepolia } from "viem/chains";
 
-import useAppWallets, { AppWallet } from "../../hooks/useAppWallets";
+import { useAppWallets, AppWallet } from "./AppWalletsContext";
 
 import {
   areEqualAddresses,

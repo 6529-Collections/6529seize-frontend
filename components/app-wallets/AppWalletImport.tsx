@@ -13,7 +13,7 @@ import { ethers } from "ethers";
 import { CreateAppWalletModal } from "./AppWalletModal";
 import { useAuth } from "../auth/Auth";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
-import useAppWallets from "../../hooks/useAppWallets";
+import { useAppWallets } from "./AppWalletsContext";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
 const MNEMONIC_NA = "N/A";
@@ -307,12 +307,7 @@ function ImportWallet(
     <div className="d-flex gap-2">
       <CreateAppWalletModal
         show={showImportModal}
-        onHide={(refresh: boolean) => {
-          setShowImportModal(false);
-          if (refresh) {
-            router.push("/tools/app-wallets");
-          }
-        }}
+        onHide={() => setShowImportModal(false)}
         import={{
           address: props.wallet.address,
           mnemonic: props.mnemonic,
