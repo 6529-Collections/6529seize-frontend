@@ -48,10 +48,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     setConnectedAddress(account.address ?? getWalletAddress());
+  }, [account.address]);
+
+  useEffect(() => {
     if (account.connector?.type) {
       setWalletType(account.connector.type);
     }
-  }, [account.address]);
+  }, [account.connector]);
 
   const seizeConnect = useCallback(() => {
     onConnect({ view: "Connect" });
