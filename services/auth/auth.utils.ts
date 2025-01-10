@@ -11,7 +11,8 @@ export const setAuthJwt = (
   address: string,
   jwt: string,
   refreshToken: string,
-  role?: string
+  role?: string,
+  walletType?: string
 ) => {
   //short expiry for auth token
   Cookies.set(WALLET_AUTH_COOKIE, jwt, { expires: 7 });
@@ -22,10 +23,9 @@ export const setAuthJwt = (
   if (role) {
     Cookies.set(WALLET_ROLE_COOKIE, role, { expires: 365 });
   }
-};
-
-export const setWalletType = (type: string) => {
-  Cookies.set(WALLET_TYPE_COOKIE, type, { expires: 365 });
+  if (walletType) {
+    Cookies.set(WALLET_TYPE_COOKIE, walletType, { expires: 365 });
+  }
 };
 
 export const getWalletType = () => {
