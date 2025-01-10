@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import HeaderUserConnectAppWalletModal from "./app-wallets/HeaderUserConnectAppWalletModal";
-import useCapacitor from "../../../hooks/useCapacitor";
 import useAppWallets from "../../../hooks/useAppWallets";
 
 export default function HeaderUserConnect(props: Readonly<{}>) {

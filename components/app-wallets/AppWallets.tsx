@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
 import useAppWallets from "../../hooks/useAppWallets";
-import Link from "next/link";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
 export default function AppWallets() {
