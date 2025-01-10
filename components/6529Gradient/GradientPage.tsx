@@ -24,6 +24,7 @@ import Address from "../address/Address";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import { AuthContext } from "../auth/Auth";
 import { NftPageStats } from "../nftAttributes/NftStats";
+import useCapacitor from "../../hooks/useCapacitor";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -32,6 +33,7 @@ interface NftWithOwner extends NFT {
 
 export default function GradientPage() {
   const router = useRouter();
+  const capacitor = useCapacitor();
   const { connectedProfile } = useContext(AuthContext);
   const fullscreenElementId = "the-art-fullscreen-img";
 
@@ -226,21 +228,22 @@ export default function GradientPage() {
                     </Table>
                   </Col>
                 </Row>
-                <Row className="pt-4">
-                  <Col>
-                    <a
-                      href={`https://opensea.io/assets/ethereum/${GRADIENT_CONTRACT}/${nft.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <Image
-                        className={styles.marketplace}
-                        src="/opensea.png"
-                        alt="opensea"
-                        width={40}
-                        height={40}
-                      />
-                    </a>
-                    {/* <a
+                {capacitor.platform !== "ios" && (
+                  <Row className="pt-4">
+                    <Col>
+                      <a
+                        href={`https://opensea.io/assets/ethereum/${GRADIENT_CONTRACT}/${nft.id}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <Image
+                          className={styles.marketplace}
+                          src="/opensea.png"
+                          alt="opensea"
+                          width={40}
+                          height={40}
+                        />
+                      </a>
+                      {/* <a
                       href={`https://looksrare.org/collections/${GRADIENT_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
@@ -252,20 +255,21 @@ export default function GradientPage() {
                         height={40}
                       />
                     </a> */}
-                    <a
-                      href={`https://x2y2.io/eth/${GRADIENT_CONTRACT}/${nft.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <Image
-                        className={styles.marketplace}
-                        src="/x2y2.png"
-                        alt="x2y2"
-                        width={40}
-                        height={40}
-                      />
-                    </a>
-                  </Col>
-                </Row>
+                      <a
+                        href={`https://x2y2.io/eth/${GRADIENT_CONTRACT}/${nft.id}`}
+                        target="_blank"
+                        rel="noreferrer">
+                        <Image
+                          className={styles.marketplace}
+                          src="/x2y2.png"
+                          alt="x2y2"
+                          width={40}
+                          height={40}
+                        />
+                      </a>
+                    </Col>
+                  </Row>
+                )}
               </Container>
             </Col>
           )}
