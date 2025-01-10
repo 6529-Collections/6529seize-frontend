@@ -30,7 +30,11 @@ export default function HeaderUserConnectAppWalletModal(
       <Modal.Body>
         <div className={styles.modalTitle}>Connect App Wallet</div>
         {appConnectors.map((connector) => (
-          <AppWalletConnector key={connector.id} connector={connector} />
+          <AppWalletConnector
+            key={connector.id}
+            connector={connector}
+            onClose={props.onClose}
+          />
         ))}
         {appConnectors.length === 0 && (
           <div className="d-flex justify-content-center mt-4">
@@ -57,6 +61,7 @@ export default function HeaderUserConnectAppWalletModal(
 function AppWalletConnector(
   props: Readonly<{
     connector: Connector;
+    onClose: () => void;
   }>
 ) {
   const { connect } = useConnect();
@@ -76,6 +81,7 @@ function AppWalletConnector(
       setIsConnecting(false);
     } else {
       connect({ connector: props.connector });
+      props.onClose();
     }
   };
 

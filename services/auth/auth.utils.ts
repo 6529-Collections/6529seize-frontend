@@ -4,6 +4,7 @@ import {
   WALLET_AUTH_COOKIE,
   WALLET_ADDRESS_COOKIE,
   WALLET_ROLE_COOKIE,
+  WALLET_TYPE_COOKIE,
 } from "../../constants";
 
 export const setAuthJwt = (
@@ -21,6 +22,14 @@ export const setAuthJwt = (
   if (role) {
     Cookies.set(WALLET_ROLE_COOKIE, role, { expires: 365 });
   }
+};
+
+export const setWalletType = (type: string) => {
+  Cookies.set(WALLET_TYPE_COOKIE, type, { expires: 365 });
+};
+
+export const getWalletType = () => {
+  return Cookies.get(WALLET_TYPE_COOKIE) ?? null;
 };
 
 export const getAuthJwt = () => {
@@ -44,4 +53,5 @@ export const removeAuthJwt = () => {
   Cookies.remove(WALLET_ADDRESS_COOKIE);
   Cookies.remove(WALLET_REFRESH_TOKEN_COOKIE);
   Cookies.remove(WALLET_ROLE_COOKIE);
+  Cookies.remove(WALLET_TYPE_COOKIE);
 };
