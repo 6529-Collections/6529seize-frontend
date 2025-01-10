@@ -1,4 +1,5 @@
 import styles from "./AppWallet.module.scss";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import {
   faCircleArrowLeft,
   faCopy,
@@ -87,7 +88,7 @@ export default function AppWalletComponent(
     setMnemonicAvailable(appWallet?.mnemonic !== MNEMONIC_NA);
   }, [appWallet]);
 
-  const doDownload = (
+  const doDownload = async (
     wallet: AppWallet,
     decryptedMnemonic: string,
     decryptedPrivateKey: string
@@ -100,13 +101,16 @@ export default function AppWalletComponent(
     const fileName = `${wallet.name.replace(/\s+/g, "_")}-${
       wallet.address
     }.txt`;
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const result = await Filesystem.writeFile({
+        path: fileName,
+        data: content,
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      });
+    } catch (e) {
+      alert("Unable to write file");
+    }
   };
 
   const doDelete = useCallback(
