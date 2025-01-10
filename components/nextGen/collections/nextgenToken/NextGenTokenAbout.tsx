@@ -33,6 +33,7 @@ import EthereumIcon from "../../../user/utils/icons/EthereumIcon";
 import { displayScore } from "./NextGenTokenProperties";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import { ETHEREUM_ICON_TEXT } from "../../../../constants";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface Props {
   collection: NextGenCollection;
@@ -40,6 +41,7 @@ interface Props {
 }
 
 export default function NextgenTokenAbout(props: Readonly<Props>) {
+  const capacitor = useCapacitor();
   const account = useAccount();
   const [ownerDisplay, setOwnerDisplay] = useState<string | null>();
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
@@ -163,179 +165,181 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           </span>
         </Col>
       </Row>
-      <Row>
-        <Col className="pb-3 d-flex flex-column">
-          <span className="font-color-h">Listed:</span>
-          <span className="d-flex flex-column align-items-start gap-2 pt-1">
-            <span>
-              <Tippy
-                content={
-                  <Container>
-                    <Row>
-                      <Col>
-                        Opensea:{" "}
-                        {props.token.opensea_price > 0
-                          ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
-                          : "Not Listed"}
-                      </Col>
-                    </Row>
-                    {props.token.opensea_price > 0 && (
+      {capacitor.platform !== "ios" && (
+        <Row>
+          <Col className="pb-3 d-flex flex-column">
+            <span className="font-color-h">Listed:</span>
+            <span className="d-flex flex-column align-items-start gap-2 pt-1">
+              <span>
+                <Tippy
+                  content={
+                    <Container>
                       <Row>
-                        <Col>Royalties: {props.token.opensea_royalty}%</Col>
+                        <Col>
+                          Opensea:{" "}
+                          {props.token.opensea_price > 0
+                            ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                            : "Not Listed"}
+                        </Col>
                       </Row>
-                    )}
-                  </Container>
-                }
-                theme={"light"}
-                placement="right"
-                delay={250}>
-                <a
-                  href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="d-flex gap-2 align-items-center decoration-none">
-                  <Image
-                    className={styles.marketplace}
-                    src="/opensea.png"
-                    alt="opensea"
-                    width={24}
-                    height={24}
-                  />
-                  {props.token.opensea_price > 0 ? (
-                    <span className="d-flex gap-2 align-items-center">
-                      <span className="d-flex align-items-center">
-                        <span>{props.token.opensea_price}</span>
-                        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
-                          <EthereumIcon />
-                        </div>
-                      </span>
-                      {props.token.opensea_royalty > 0 && (
-                        <Image
-                          width={0}
-                          height={0}
-                          style={{ height: "25px", width: "auto" }}
-                          src={`/${getRoyaltyImage(
-                            props.token.opensea_royalty / 100
-                          )}`}
-                          alt={"pepe"}
-                          className="cursor-pointer"
-                        />
+                      {props.token.opensea_price > 0 && (
+                        <Row>
+                          <Col>Royalties: {props.token.opensea_royalty}%</Col>
+                        </Row>
                       )}
-                    </span>
-                  ) : (
-                    "No"
-                  )}
-                </a>
-              </Tippy>
-            </span>
-            <span>
-              <Tippy
-                content={
-                  <Container>
-                    <Row>
-                      <Col>
-                        Blur:{" "}
-                        {props.token.blur_price > 0
-                          ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
-                          : "Not Listed"}
-                      </Col>
-                    </Row>
-                  </Container>
-                }
-                theme={"light"}
-                placement="right"
-                delay={250}>
-                <a
-                  href={getBlurLink(props.token.id)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="d-flex gap-2 align-items-center decoration-none">
-                  <Image
-                    className={styles.marketplace}
-                    src="/blur.png"
-                    alt="blur"
-                    width={24}
-                    height={24}
-                  />
-                  {props.token.blur_price > 0 ? (
-                    <span className="d-flex gap-2 align-items-center">
-                      <span className="d-flex align-items-center">
-                        <span>{props.token.blur_price}</span>
-                        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
-                          <EthereumIcon />
-                        </div>
+                    </Container>
+                  }
+                  theme={"light"}
+                  placement="right"
+                  delay={250}>
+                  <a
+                    href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="d-flex gap-2 align-items-center decoration-none">
+                    <Image
+                      className={styles.marketplace}
+                      src="/opensea.png"
+                      alt="opensea"
+                      width={24}
+                      height={24}
+                    />
+                    {props.token.opensea_price > 0 ? (
+                      <span className="d-flex gap-2 align-items-center">
+                        <span className="d-flex align-items-center">
+                          <span>{props.token.opensea_price}</span>
+                          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                            <EthereumIcon />
+                          </div>
+                        </span>
+                        {props.token.opensea_royalty > 0 && (
+                          <Image
+                            width={0}
+                            height={0}
+                            style={{ height: "25px", width: "auto" }}
+                            src={`/${getRoyaltyImage(
+                              props.token.opensea_royalty / 100
+                            )}`}
+                            alt={"pepe"}
+                            className="cursor-pointer"
+                          />
+                        )}
                       </span>
-                    </span>
-                  ) : (
-                    "No"
-                  )}
-                </a>
-              </Tippy>
-            </span>
-            <span>
-              <Tippy
-                content={
-                  <Container>
-                    <Row>
-                      <Col>
-                        Magic Eden:{" "}
-                        {props.token.me_price > 0
-                          ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
-                          : "Not Listed"}
-                      </Col>
-                    </Row>
-                    {props.token.me_price > 0 && (
+                    ) : (
+                      "No"
+                    )}
+                  </a>
+                </Tippy>
+              </span>
+              <span>
+                <Tippy
+                  content={
+                    <Container>
                       <Row>
-                        <Col>Royalties: {props.token.me_royalty}%</Col>
+                        <Col>
+                          Blur:{" "}
+                          {props.token.blur_price > 0
+                            ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                            : "Not Listed"}
+                        </Col>
                       </Row>
-                    )}
-                  </Container>
-                }
-                theme={"light"}
-                placement="right"
-                delay={250}>
-                <a
-                  href={getMagicEdenLink(props.token.id)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="d-flex gap-2 align-items-center decoration-none">
-                  <Image
-                    className={styles.marketplace}
-                    src="/magiceden.svg"
-                    alt="magiceden"
-                    width={24}
-                    height={24}
-                  />
-                  {props.token.me_price > 0 ? (
-                    <span className="d-flex gap-2 align-items-center">
-                      <span className="d-flex align-items-center">
-                        <span>{props.token.me_price}</span>
-                        <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
-                          <EthereumIcon />
-                        </div>
+                    </Container>
+                  }
+                  theme={"light"}
+                  placement="right"
+                  delay={250}>
+                  <a
+                    href={getBlurLink(props.token.id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="d-flex gap-2 align-items-center decoration-none">
+                    <Image
+                      className={styles.marketplace}
+                      src="/blur.png"
+                      alt="blur"
+                      width={24}
+                      height={24}
+                    />
+                    {props.token.blur_price > 0 ? (
+                      <span className="d-flex gap-2 align-items-center">
+                        <span className="d-flex align-items-center">
+                          <span>{props.token.blur_price}</span>
+                          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                            <EthereumIcon />
+                          </div>
+                        </span>
                       </span>
-                      {props.token.me_royalty > 0 && (
-                        <Image
-                          width={0}
-                          height={0}
-                          style={{ height: "25px", width: "auto" }}
-                          src={`/${getRoyaltyImage(
-                            props.token.me_royalty / 100
-                          )}`}
-                          alt={"pepe"}
-                          className="cursor-pointer"
-                        />
+                    ) : (
+                      "No"
+                    )}
+                  </a>
+                </Tippy>
+              </span>
+              <span>
+                <Tippy
+                  content={
+                    <Container>
+                      <Row>
+                        <Col>
+                          Magic Eden:{" "}
+                          {props.token.me_price > 0
+                            ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
+                            : "Not Listed"}
+                        </Col>
+                      </Row>
+                      {props.token.me_price > 0 && (
+                        <Row>
+                          <Col>Royalties: {props.token.me_royalty}%</Col>
+                        </Row>
                       )}
-                    </span>
-                  ) : (
-                    "No"
-                  )}
-                </a>
-              </Tippy>
+                    </Container>
+                  }
+                  theme={"light"}
+                  placement="right"
+                  delay={250}>
+                  <a
+                    href={getMagicEdenLink(props.token.id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="d-flex gap-2 align-items-center decoration-none">
+                    <Image
+                      className={styles.marketplace}
+                      src="/magiceden.svg"
+                      alt="magiceden"
+                      width={24}
+                      height={24}
+                    />
+                    {props.token.me_price > 0 ? (
+                      <span className="d-flex gap-2 align-items-center">
+                        <span className="d-flex align-items-center">
+                          <span>{props.token.me_price}</span>
+                          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                            <EthereumIcon />
+                          </div>
+                        </span>
+                        {props.token.me_royalty > 0 && (
+                          <Image
+                            width={0}
+                            height={0}
+                            style={{ height: "25px", width: "auto" }}
+                            src={`/${getRoyaltyImage(
+                              props.token.me_royalty / 100
+                            )}`}
+                            alt={"pepe"}
+                            className="cursor-pointer"
+                          />
+                        )}
+                      </span>
+                    ) : (
+                      "No"
+                    )}
+                  </a>
+                </Tippy>
+              </span>
             </span>
-          </span>
-        </Col>
-      </Row>
+          </Col>
+        </Row>
+      )}
       <Row>
         <Col className="pb-3 d-flex gap-1">
           <span className="font-color-h">Collection:</span>

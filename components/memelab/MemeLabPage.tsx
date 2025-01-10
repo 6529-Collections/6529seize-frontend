@@ -48,6 +48,7 @@ import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import { printMemeReferences } from "../rememes/RememePage";
+import useCapacitor from "../../hooks/useCapacitor";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -71,6 +72,7 @@ interface Props {
 
 export default function LabPage(props: Readonly<Props>) {
   const router = useRouter();
+  const capacitor = useCapacitor();
 
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
 
@@ -549,21 +551,22 @@ export default function LabPage(props: Readonly<Props>) {
                 </Col>
               </Row>
             )}
-            <Row className="pt-4">
-              <Col>
-                <a
-                  href={`https://opensea.io/assets/ethereum/${MEMELAB_CONTRACT}/${nft.id}`}
-                  target="_blank"
-                  rel="noreferrer">
-                  <Image
-                    className={styles.marketplace}
-                    src="/opensea.png"
-                    alt="opensea"
-                    width={40}
-                    height={40}
-                  />
-                </a>
-                {/* <a
+            {capacitor.platform !== "ios" && (
+              <Row className="pt-4">
+                <Col>
+                  <a
+                    href={`https://opensea.io/assets/ethereum/${MEMELAB_CONTRACT}/${nft.id}`}
+                    target="_blank"
+                    rel="noreferrer">
+                    <Image
+                      className={styles.marketplace}
+                      src="/opensea.png"
+                      alt="opensea"
+                      width={40}
+                      height={40}
+                    />
+                  </a>
+                  {/* <a
                       href={`https://looksrare.org/collections/${MEMELAB_CONTRACT}/${nft.id}`}
                       target="_blank"
                       rel="noreferrer">
@@ -575,20 +578,21 @@ export default function LabPage(props: Readonly<Props>) {
                         height={40}
                       />
                     </a> */}
-                <a
-                  href={`https://x2y2.io/eth/${MEMELAB_CONTRACT}/${nft.id}`}
-                  target="_blank"
-                  rel="noreferrer">
-                  <Image
-                    className={styles.marketplace}
-                    src="/x2y2.png"
-                    alt="x2y2"
-                    width={40}
-                    height={40}
-                  />
-                </a>
-              </Col>
-            </Row>
+                  <a
+                    href={`https://x2y2.io/eth/${MEMELAB_CONTRACT}/${nft.id}`}
+                    target="_blank"
+                    rel="noreferrer">
+                    <Image
+                      className={styles.marketplace}
+                      src="/x2y2.png"
+                      alt="x2y2"
+                      width={40}
+                      height={40}
+                    />
+                  </a>
+                </Col>
+              </Row>
+            )}
           </Container>
         </Col>
       );
