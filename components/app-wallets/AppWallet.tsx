@@ -31,6 +31,7 @@ import { decryptData } from "./app-wallet-helpers";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
+import { Share } from "@capacitor/share";
 
 const MNEMONIC_NA = "N/A";
 
@@ -107,6 +108,13 @@ export default function AppWalletComponent(
         data: content,
         directory: Directory.Documents,
         encoding: Encoding.UTF8,
+      });
+
+      await Share.share({
+        title: "Wallet Recovery File",
+        text: `${wallet.name} - ${wallet.address}`,
+        url: result.uri,
+        dialogTitle: "Share or Save File",
       });
     } catch (e) {
       alert("Unable to write file");
