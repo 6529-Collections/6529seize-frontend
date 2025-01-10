@@ -1,4 +1,5 @@
 import styles from "./AppWallet.module.scss";
+import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import {
   faCircleArrowLeft,
   faCopy,
@@ -30,6 +31,7 @@ import { decryptData } from "./app-wallet-helpers";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
+import { Share } from "@capacitor/share";
 
 const MNEMONIC_NA = "N/A";
 
@@ -87,7 +89,7 @@ export default function AppWalletComponent(
     setMnemonicAvailable(appWallet?.mnemonic !== MNEMONIC_NA);
   }, [appWallet]);
 
-  const doDownload = (
+  const doDownload = async (
     wallet: AppWallet,
     decryptedMnemonic: string,
     decryptedPrivateKey: string
@@ -100,13 +102,23 @@ export default function AppWalletComponent(
     const fileName = `${wallet.name.replace(/\s+/g, "_")}-${
       wallet.address
     }.txt`;
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const result = await Filesystem.writeFile({
+        path: fileName,
+        data: content,
+        directory: Directory.Documents,
+        encoding: Encoding.UTF8,
+      });
+
+      await Share.share({
+        title: "Wallet Recovery File",
+        text: `${wallet.name} - ${wallet.address}`,
+        url: result.uri,
+        dialogTitle: "Share or Save File",
+      });
+    } catch (e) {
+      alert("Unable to write file");
+    }
   };
 
   const doDelete = useCallback(
