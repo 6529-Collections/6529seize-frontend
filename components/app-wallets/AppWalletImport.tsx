@@ -13,11 +13,23 @@ import { ethers } from "ethers";
 import { CreateAppWalletModal } from "./AppWalletModal";
 import { useAuth } from "../auth/Auth";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
+import useAppWallets from "../../hooks/useAppWallets";
+import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
 const MNEMONIC_NA = "N/A";
 
 export default function AppWalletImport() {
   const [isMnemonic, setIsMnemonic] = useState(true);
+
+  const { appWalletsSupported } = useAppWallets();
+
+  if (!appWalletsSupported) {
+    return (
+      <Container>
+        <AppWalletsUnsupported />
+      </Container>
+    );
+  }
 
   return (
     <>

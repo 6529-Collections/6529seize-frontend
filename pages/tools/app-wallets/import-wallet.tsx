@@ -35,7 +35,7 @@ export default function SeedWalletPage(props: any) {
   return (
     <>
       <Head>
-        <title>Import App Wallet | 6529 SEIZE</title>
+        <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="App Wallets | 6529 SEIZE" />
         <meta

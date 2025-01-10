@@ -29,6 +29,7 @@ import { UnlockAppWalletModal } from "./AppWalletModal";
 import { decryptData } from "./app-wallet-helpers";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import AppWalletAvatar from "./AppWalletAvatar";
+import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
 const MNEMONIC_NA = "N/A";
 
@@ -37,7 +38,12 @@ export default function AppWalletComponent(
     address: string;
   }>
 ) {
-  const { appWallets, fetchingAppWallets, deleteAppWallet } = useAppWallets();
+  const {
+    appWalletsSupported,
+    fetchingAppWallets,
+    appWallets,
+    deleteAppWallet,
+  } = useAppWallets();
 
   const appWallet = appWallets.find((w) =>
     areEqualAddresses(w.address, props.address)
@@ -139,6 +145,14 @@ export default function AppWalletComponent(
             <Spinner />
           </Col>
         </Row>
+      </Container>
+    );
+  }
+
+  if (!appWalletsSupported) {
+    return (
+      <Container className="pt-4 pb-4">
+        <AppWalletsUnsupported />
       </Container>
     );
   }

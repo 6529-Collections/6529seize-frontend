@@ -14,6 +14,7 @@ import HeaderSearchButton from "./header-search/HeaderSearchButton";
 import { useAuth } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
 import useCapacitor from "../../hooks/useCapacitor";
+import useAppWallets from "../../hooks/useAppWallets";
 import CapacitorWidget from "./capacitor/CapacitorWidget";
 import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
@@ -34,6 +35,7 @@ export interface HeaderLink {
 
 export default function Header(props: Readonly<Props>) {
   const capacitor = useCapacitor();
+  const { appWalletsSupported } = useAppWallets();
   const { address, seizeConnectOpen } = useSeizeConnectContext();
 
   const isMobile = useIsMobileScreen();
@@ -341,7 +343,7 @@ export default function Header(props: Readonly<Props>) {
             </Col>
             {showBurgerMenuTools && (
               <Container>
-                {capacitor.isCapacitor && (
+                {appWalletsSupported && (
                   <>
                     {printMobileHr()}
                     {printMobileRow("App Wallets", "/tools/app-wallets")}
@@ -676,7 +678,7 @@ export default function Header(props: Readonly<Props>) {
                               title="Tools"
                               align={"start"}
                               className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
-                              {capacitor.isCapacitor && (
+                              {appWalletsSupported && (
                                 <>
                                   <HeaderDesktopLink
                                     link={{
