@@ -18,7 +18,7 @@ const AppWalletImport = dynamic(
   }
 );
 
-export default function SeedWalletPage(props: any) {
+export default function AppWalletImportPage(props: any) {
   const { setTitle, title } = useContext(AuthContext);
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },

@@ -136,7 +136,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
       pass
     );
 
-    const seedWallet: AppWallet = {
+    const appWallet: AppWallet = {
       name,
       created_at: Time.now().toSeconds(),
       address: wallet.address,
@@ -148,7 +148,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const result = await SecureStoragePlugin.set({
       key: `${WALLET_KEY_PREFIX}${wallet.address}`,
-      value: JSON.stringify(seedWallet),
+      value: JSON.stringify(appWallet),
     });
 
     await fetchAppWallets();
