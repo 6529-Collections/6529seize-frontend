@@ -102,7 +102,7 @@ export default function AppWalletComponent(
       wallet.address
     }.txt`;
     try {
-      const result = await Filesystem.writeFile({
+      await Filesystem.writeFile({
         path: fileName,
         data: content,
         directory: Directory.Documents,
