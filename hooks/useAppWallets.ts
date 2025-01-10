@@ -21,11 +21,26 @@ const WALLET_KEY_PREFIX = "app-wallet_";
 export const useAppWallets = () => {
   const [fetchingAppWallets, setFetchingAppWallets] = useState(true);
   const [appWallets, setAppWallets] = useState<AppWallet[]>([]);
+  const [appWalletsSupported, setAppWalletsSupported] = useState(false);
 
   const capacitor = useCapacitor();
 
-  const fetchAppWallets = async () => {
+  const checkUnsupported = async () => {
     if (!capacitor.isCapacitor) {
+      setAppWalletsSupported(false);
+      return;
+    }
+
+    try {
+      await SecureStoragePlugin.keys();
+    } catch (error) {
+      console.error("SecureStoragePlugin is not available:", error);
+      setAppWalletsSupported(false);
+    }
+  };
+
+  const fetchAppWallets = async () => {
+    if (!appWalletsSupported) {
       setFetchingAppWallets(false);
       setAppWallets([]);
       return;
@@ -57,14 +72,21 @@ export const useAppWallets = () => {
   };
 
   useEffect(() => {
-    fetchAppWallets();
+    const initialize = async () => {
+      await checkUnsupported();
+      if (appWalletsSupported) {
+        await fetchAppWallets();
+      }
+    };
+
+    initialize();
   }, []);
 
   const createAppWallet = async (
     name: string,
     pass: string
   ): Promise<boolean> => {
-    if (!capacitor.isCapacitor) {
+    if (!appWalletsSupported) {
       return false;
     }
 
@@ -115,7 +137,7 @@ export const useAppWallets = () => {
     mnemonic: string,
     privateKey: string
   ): Promise<boolean> => {
-    if (!capacitor.isCapacitor) {
+    if (!appWalletsSupported) {
       return false;
     }
 
@@ -151,7 +173,7 @@ export const useAppWallets = () => {
   };
 
   const deleteAppWallet = async (address: string): Promise<boolean> => {
-    if (!capacitor.isCapacitor) {
+    if (!appWalletsSupported) {
       return false;
     }
 
@@ -170,6 +192,7 @@ export const useAppWallets = () => {
   return {
     fetchingAppWallets,
     appWallets,
+    appWalletsSupported,
     fetchAppWallets,
     createAppWallet,
     importAppWallet,

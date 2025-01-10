@@ -7,13 +7,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
 import useAppWallets from "../../hooks/useAppWallets";
-import useCapacitor from "../../hooks/useCapacitor";
 import Link from "next/link";
+import AppWalletsUnsupported from "./AppWalletsUnsupported";
 
 export default function AppWallets() {
-  const { fetchingAppWallets, appWallets, fetchAppWallets } = useAppWallets();
+  const {
+    appWalletsSupported,
+    fetchingAppWallets,
+    appWallets,
+    fetchAppWallets,
+  } = useAppWallets();
   const router = useRouter();
-  const capacitor = useCapacitor();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -38,19 +42,8 @@ export default function AppWallets() {
   }
 
   function printContent() {
-    if (!capacitor.isCapacitor) {
-      return (
-        <>
-          <Row className="mt-4">
-            <Col>App Wallets are not supported on this platform</Col>
-          </Row>
-          <Row className="mt-4">
-            <Col>
-              <Link href="/">TAKE ME HOME</Link>
-            </Col>
-          </Row>
-        </>
-      );
+    if (!appWalletsSupported) {
+      return <AppWalletsUnsupported />;
     }
 
     return (
