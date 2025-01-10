@@ -35,7 +35,7 @@ export function CreateAppWalletModal(
       mnemonic: string;
       privateKey: string;
     };
-    onHide: () => void;
+    onHide: (isSuccess?: boolean) => void;
   }>
 ) {
   const { createAppWallet, importAppWallet } = useAppWallets();
@@ -49,11 +49,11 @@ export function CreateAppWalletModal(
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleHide = (refresh: boolean) => {
+  const handleHide = (isSuccess?: boolean) => {
     setWalletName("");
     setWalletPass("");
     setError("");
-    props.onHide();
+    props.onHide(isSuccess);
   };
 
   const handleCreate = useCallback(async () => {
@@ -124,7 +124,7 @@ export function CreateAppWalletModal(
   return (
     <Modal
       show={props.show}
-      onHide={() => handleHide(false)}
+      onHide={() => handleHide()}
       backdrop
       keyboard={false}
       centered>
@@ -195,7 +195,7 @@ export function CreateAppWalletModal(
         </p>
       </Modal.Body>
       <Modal.Footer className={styles.modalContent}>
-        <Button variant="secondary" onClick={() => handleHide(false)}>
+        <Button variant="secondary" onClick={() => handleHide()}>
           Cancel
         </Button>
         {props.import ? (
