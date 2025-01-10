@@ -13,7 +13,7 @@ export default function AppWalletCard(
     <Link
       href={`/tools/app-wallets/${props.wallet.address}`}
       className="decoration-none">
-      <Container className={styles.seedWalletCard}>
+      <Container className={styles.appWalletCard}>
         <Row>
           <Col className="text-break d-flex align-items-center gap-2">
             <AppWalletAvatar address={props.wallet.address} />

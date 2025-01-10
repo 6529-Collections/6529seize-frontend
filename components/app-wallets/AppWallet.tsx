@@ -364,7 +364,7 @@ export default function AppWalletComponent(
       <Row className="pt-2">
         {mnemonicAvailable ? (
           phrase.map((w, i) => (
-            <SeedWalletPhraseWord
+            <AppWalletPhraseWord
               index={i + 1}
               word={w}
               hidden={!revealPhrase}
@@ -439,7 +439,7 @@ export default function AppWalletComponent(
         </Col>
       </Row>
       <Row className="pt-2">
-        <SeedWalletPhraseWord
+        <AppWalletPhraseWord
           word={privateKey}
           hidden={!revealPrivateKey}
           full_width={true}
@@ -458,7 +458,7 @@ export default function AppWalletComponent(
   );
 }
 
-export function SeedWalletPhraseWord(
+export function AppWalletPhraseWord(
   props: Readonly<{
     index?: number;
     word: string;

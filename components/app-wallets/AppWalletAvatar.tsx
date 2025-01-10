@@ -7,7 +7,7 @@ export default function AppWalletAvatar(
   const size = props.size ?? 36;
   return (
     <Image
-      className={styles.seedWalletAvatar}
+      className={styles.appWalletAvatar}
       fetchPriority="high"
       loading="eager"
       height={size}
