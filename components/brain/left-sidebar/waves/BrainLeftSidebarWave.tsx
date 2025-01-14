@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
-import Tippy from "@tippyjs/react";
-import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 
 interface BrainLeftSidebarWaveProps {
@@ -21,7 +19,6 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
-  const isMobile = useIsMobileDevice();
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
 
   const getHref = (waveId: string) => {

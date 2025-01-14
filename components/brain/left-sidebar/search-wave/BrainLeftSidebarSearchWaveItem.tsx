@@ -7,7 +7,6 @@ import {
   ImageScale,
 } from "../../../../helpers/image.helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
-import Tippy from "@tippyjs/react";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 
 interface BrainLeftSidebarSearchWaveItemProps {

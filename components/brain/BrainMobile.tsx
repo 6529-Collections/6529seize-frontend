@@ -11,7 +11,6 @@ import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useWaveData } from "../../hooks/useWaveData";
-import BrainMobileLeaderboardWrapper from "./mobile/BrainMobileLeaderboardWrapper";
 import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
 
