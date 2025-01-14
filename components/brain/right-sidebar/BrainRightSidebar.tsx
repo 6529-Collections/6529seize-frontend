@@ -24,6 +24,8 @@ export enum Mode {
 export enum SidebarTab {
   ABOUT = "ABOUT",
   LEADERBOARD = "LEADERBOARD",
+  TOP_VOTERS = "TOP_VOTERS",
+  ACTIVITY_LOG = "ACTIVITY_LOG",
 }
 
 const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
@@ -46,8 +48,6 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
   });
 
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
-
-  
 
   return (
     <motion.div

@@ -22,11 +22,11 @@ export default function FeedItemDropReplied({
 }) {
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
-    router.push(`/waves/${item.item.reply.wave.id}?drop=${serialNo}/`);
+    router.push(`/my-stream?wave=${item.item.reply.wave.id}&serialNo=${serialNo}/`);
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
   };
 
   return (

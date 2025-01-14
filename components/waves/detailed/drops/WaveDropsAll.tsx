@@ -55,6 +55,7 @@ export default function WaveDropsAll({
   const { connectedProfile, setTitle } = useContext(AuthContext);
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
+  const [disableAutoPosition, setDisableAutoPosition] = useState(false);
   const {
     drops,
     fetchNextPage,
@@ -88,12 +89,16 @@ export default function WaveDropsAll({
         const targetElement = targetDropRef.current;
         const containerRect = container.getBoundingClientRect();
         const targetRect = targetElement.getBoundingClientRect();
-        
-        const scrollTop = container.scrollTop + (targetRect.top - containerRect.top) - containerRect.height / 2 + targetRect.height / 2;
-        
+
+        const scrollTop =
+          container.scrollTop +
+          (targetRect.top - containerRect.top) -
+          containerRect.height / 2 +
+          targetRect.height / 2;
+
         container.scrollTo({
           top: scrollTop,
-          behavior: behavior
+          behavior: behavior,
         });
         return true;
       }
@@ -177,12 +182,14 @@ export default function WaveDropsAll({
 
   useEffect(() => {
     if (init && serialNo) {
+      setDisableAutoPosition(true);
       const success = scrollToSerialNo("smooth");
       if (success) {
         setSerialNo(null);
       } else {
         fetchAndScrollToDrop();
       }
+      setTimeout(() => setDisableAutoPosition(false), 1000);
     }
   }, [init, serialNo]);
 
@@ -195,7 +202,9 @@ export default function WaveDropsAll({
   const onQuoteClick = useCallback(
     (drop: ApiDrop) => {
       if (drop.wave.id !== waveId) {
-        router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
+        router.push(
+          `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`
+        );
       } else {
         setSerialNo(drop.serial_no);
       }
@@ -246,6 +255,7 @@ export default function WaveDropsAll({
             newItemsCount={newItemsCount}
             isFetchingNextPage={isFetchingNextPage}
             onTopIntersection={handleTopIntersection}
+            disableAutoPosition={disableAutoPosition}
           >
             <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
               <DropsList

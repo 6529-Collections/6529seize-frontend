@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useContext } from "react";
-import { AuthContext } from "../../auth/Auth";
-import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
+import React from "react";
 import { BrainView } from "../BrainMobile";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import { ApiWave } from "../../../generated/models/ApiWave";
@@ -20,10 +18,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   wave,
 }) => {
   const router = useRouter();
-  const { connectedProfile } = useContext(AuthContext);
-  const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.profile?.handle
-  );
 
   const isRankWave = wave?.wave.type === ApiWaveType.Rank;
   const isWave = () => !!(router.query.wave as string);
@@ -42,9 +36,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   const isLinkActive =
     router.pathname === "/my-stream" && activeView === BrainView.DEFAULT;
-  const isNotificationsActive =
-    router.pathname === "/my-stream/notifications" &&
-    activeView === BrainView.DEFAULT;
 
   const wavesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
     activeView === BrainView.WAVES ? "tw-bg-iron-800" : "tw-bg-iron-950"
@@ -70,12 +61,11 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     isLinkActive ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
-  const notificationsLinkClasses = `tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-md ${
-    isNotificationsActive ? "tw-bg-iron-800" : "tw-bg-iron-950"
+  const outcomeButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
+    activeView === BrainView.OUTCOME ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
-
-  const notificationsTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    isNotificationsActive ? "tw-text-iron-300" : "tw-text-iron-400"
+  const otucomeButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+    activeView === BrainView.OUTCOME ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
   const getMyStreamHref = () => {
@@ -94,11 +84,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const onMyStreamClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     onLinkClick("/my-stream", getMyStreamHref());
-  };
-
-  const onNotificationsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    onLinkClick("/my-stream/notifications");
   };
 
   return (
@@ -126,22 +111,20 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <span className={myStreamTextClasses}>My Stream</span>
         </Link>
         {isWave() && isRankWave && (
-          <MyStreamWaveTabsLeaderboard
-            wave={wave}
-            activeView={activeView}
-            onViewChange={onViewChange}
-          />
+          <>
+            <MyStreamWaveTabsLeaderboard
+              wave={wave}
+              activeView={activeView}
+              onViewChange={onViewChange}
+            />
+            <button
+              onClick={() => onViewChange(BrainView.OUTCOME)}
+              className={outcomeButtonClasses}
+            >
+              <span className={otucomeButtonTextClasses}>Outcome</span>
+            </button>
+          </>
         )}
-        <Link
-          href="/my-stream/notifications"
-          onClick={onNotificationsClick}
-          className={notificationsLinkClasses}
-        >
-          <span className={notificationsTextClasses}>Notifications</span>
-          {haveUnreadNotifications && (
-            <span className="tw-size-2 -tw-mt-2 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
-          )}
-        </Link>
       </div>
     </div>
   );

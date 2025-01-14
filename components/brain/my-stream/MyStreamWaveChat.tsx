@@ -1,6 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useWaveData } from "../../../hooks/useWaveData";
 import useCapacitor from "../../../hooks/useCapacitor";
 import {
   ActiveDropAction,
@@ -12,9 +11,12 @@ import { CreateDropWaveWrapper } from "../../waves/detailed/CreateDropWaveWrappe
 import PrivilegedDropCreator, {
   DropMode,
 } from "../../waves/detailed/PrivilegedDropCreator";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 
 interface MyStreamWaveChatProps {
-  readonly waveId: string;
+  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
@@ -26,11 +28,26 @@ const calculateHeight = (isCapacitor: boolean) => {
 };
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
-  waveId,
+  wave,
   onDropClick,
 }) => {
-  const { data: wave } = useWaveData(waveId);
   const capacitor = useCapacitor();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [initialDrop, setInitialDrop] = useState<number | null>(null);
+  const [searchParamsDone, setSearchParamsDone] = useState(false);
+  useEffect(() => {
+    const dropParam = searchParams.get("serialNo");
+    if (dropParam) {
+      setInitialDrop(parseInt(dropParam));
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("serialNo");
+      router.replace(newUrl.pathname + newUrl.search);
+    } else {
+      setInitialDrop(null);
+    }
+    setSearchParamsDone(true);
+  }, [searchParams, router]);
 
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
@@ -67,19 +84,21 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     setActiveDrop(null);
   };
 
-  if (!wave) {
+  if (!searchParamsDone) {
     return null;
   }
+
   return (
     <div className="tw-relative tw-h-full">
       <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
         <div className={containerClassName}>
           <WaveDropsAll
-            waveId={waveId}
+            key={wave.id}
+            waveId={wave.id}
             onReply={handleReply}
             onQuote={handleQuote}
             activeDrop={activeDrop}
-            initialDrop={null}
+            initialDrop={initialDrop}
             dropId={null}
             onDropClick={onDropClick}
           />

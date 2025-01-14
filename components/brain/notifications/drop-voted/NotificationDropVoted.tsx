@@ -41,12 +41,12 @@ export default function NotificationDropVoted({
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
     router.push(
-      `/waves/${notification.related_drops[0].wave.id}?drop=${serialNo}/`
+      `/my-stream?wave=${notification.related_drops[0].wave.id}&serialNo=${serialNo}/`
     );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
   };
 
   return (

@@ -27,8 +27,8 @@ const redirectConfig = {
   "6529-gradient": ({ id }: { id: string }) => `/6529-gradient/${id}`,
   "meme-lab": ({ id }: { id: string }) => `/meme-lab/${id}`,
   waves: ({ wave_id, drop_id }: { wave_id: string; drop_id: string }) => {
-    let base = `/waves/${wave_id}`;
-    return drop_id ? `${base}?drop=${drop_id}` : base;
+    let base = `/my-stream?wave=${wave_id}`;
+    return drop_id ? `${base}&serialNo=${drop_id}` : base;
   },
 };
 
