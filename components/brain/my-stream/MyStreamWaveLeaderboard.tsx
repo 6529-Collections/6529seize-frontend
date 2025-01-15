@@ -24,7 +24,7 @@ const calculateHeight = (isCapacitor: boolean) => {
   if (isCapacitor) {
     return "tw-h-[calc(100vh-18.75rem)]";
   }
-  return `tw-h-[calc(100vh-13rem)]`;
+  return `tw-h-[calc(100vh-11.75rem)] tw-pr-2`;
 };
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
@@ -34,7 +34,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const capacitor = useCapacitor();
 
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto ${calculateHeight(
+    return `tw-mt-4 tw-pb-4 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${calculateHeight(
       capacitor.isCapacitor
     )}`;
   }, [capacitor.isCapacitor]);

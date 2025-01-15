@@ -214,9 +214,17 @@ export default function WaveDropsAll({
 
   const memoizedDrops = useMemo(() => drops, [drops]);
 
-  return (
-    <div className="tw-flex tw-flex-col tw-relative tw-overflow-y-auto">
-      {drops.length === 0 && !isFetching ? (
+  const renderContent = () => {
+    if (isFetching && !isFetchingNextPage) {
+      return (
+        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-10">
+          <CircleLoader size={CircleLoaderSize.XXLARGE} />
+        </div>
+      );
+    }
+
+    if (drops.length === 0) {
+      return (
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-10 tw-space-y-6 tw-text-iron-400">
           <div className="tw-relative tw-group">
             <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-primary-400/20 tw-via-indigo-500/10 tw-to-iron-800/10 tw-rounded-full tw-animate-[spin_4s_linear_infinite] group-hover:tw-from-primary-400/30"></div>
@@ -247,43 +255,50 @@ export default function WaveDropsAll({
             </p>
           </div>
         </div>
-      ) : (
-        <>
-          <WaveDropsScrollContainer
-            ref={scrollContainerRef}
-            onScroll={handleScroll}
-            newItemsCount={newItemsCount}
-            isFetchingNextPage={isFetchingNextPage}
-            onTopIntersection={handleTopIntersection}
-            disableAutoPosition={disableAutoPosition}
-          >
-            <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
-              <DropsList
-                onReplyClick={setSerialNo}
-                drops={memoizedDrops}
-                showWaveInfo={false}
-                isFetchingNextPage={isFetchingNextPage}
-                onReply={onReply}
-                onQuote={onQuote}
-                showReplyAndQuote={true}
-                activeDrop={activeDrop}
-                serialNo={serialNo}
-                targetDropRef={targetDropRef}
-                onQuoteClick={onQuoteClick}
-                parentContainerRef={scrollContainerRef}
-                dropViewDropId={dropId}
-                onDropClick={onDropClick}
-              />
-            </div>
-          </WaveDropsScrollContainer>
+      );
+    }
 
-          <WaveDropsScrollBottomButton
-            isAtBottom={isAtBottom}
-            scrollToBottom={scrollToBottom}
-          />
-        </>
-      )}
+    return (
+      <>
+        <WaveDropsScrollContainer
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          newItemsCount={newItemsCount}
+          isFetchingNextPage={isFetchingNextPage}
+          onTopIntersection={handleTopIntersection}
+          disableAutoPosition={disableAutoPosition}
+        >
+          <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
+            <DropsList
+              onReplyClick={setSerialNo}
+              drops={memoizedDrops}
+              showWaveInfo={false}
+              isFetchingNextPage={isFetchingNextPage}
+              onReply={onReply}
+              onQuote={onQuote}
+              showReplyAndQuote={true}
+              activeDrop={activeDrop}
+              serialNo={serialNo}
+              targetDropRef={targetDropRef}
+              onQuoteClick={onQuoteClick}
+              parentContainerRef={scrollContainerRef}
+              dropViewDropId={dropId}
+              onDropClick={onDropClick}
+            />
+          </div>
+        </WaveDropsScrollContainer>
 
+        <WaveDropsScrollBottomButton
+          isAtBottom={isAtBottom}
+          scrollToBottom={scrollToBottom}
+        />
+      </>
+    );
+  };
+
+  return (
+    <div className="tw-flex tw-flex-col tw-h-full tw-justify-center tw-relative tw-overflow-y-auto tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-border-x tw-border-t tw-border-b-0">
+      {renderContent()}
       {isScrolling && (
         <>
           <div className="tw-absolute tw-inset-0 tw-bg-iron-900 tw-bg-opacity-50 tw-z-10" />

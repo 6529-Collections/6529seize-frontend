@@ -79,7 +79,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               ${
                 active
                   ? "tw-bg-primary-500/15 tw-ring-primary-400/30 tw-ring-1 tw-ring-inset"
-                  : "tw-bg-iron-900 tw-ring-iron-700 tw-ring-1 tw-ring-inset"
+                  : "tw-bg-iron-800 tw-ring-iron-700 tw-ring-1 tw-ring-inset"
               }
             `}
           >

@@ -17,13 +17,13 @@ export const TabToggle: React.FC<TabToggleProps> = ({
   onSelect,
 }) => {
   return (
-    <div className="tw-p-0.5 tw-relative tw-ring-1 tw-ring-inset tw-bg-iron-950/90 tw-ring-primary-800/20 tw-inline-flex tw-rounded-lg tw-w-auto tw-gap-x-0.5">
+    <div className="tw-p-0.5 tw-relative tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-primary-400/50 tw-inline-flex tw-rounded-lg tw-w-auto tw-gap-x-0.5">
       {options.map((option) => (
         <div
           key={option.key}
           className={
             activeKey === option.key
-              ? "tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-primary-500/20 tw-to-primary-600/20"
+              ? "tw-p-[1px] tw-flex tw-rounded-lg tw-bg-primary-500/20"
               : "tw-p-[1px] tw-flex tw-rounded-lg"
           }
         >
