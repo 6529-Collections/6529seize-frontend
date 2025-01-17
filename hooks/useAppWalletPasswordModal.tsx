@@ -40,17 +40,17 @@ export const useAppWalletPasswordModal = () => {
     setReject(undefined);
   };
 
-  const modal = isOpen ? (
+  const modal = (
     <UnlockAppWalletModal
       address={address}
       address_hashed={addressHashed}
-      show={true}
+      show={isOpen}
       onHide={() => handleCancel()}
       onUnlock={(pass: string) => {
         handlePasswordSubmit(pass);
       }}
     />
-  ) : null;
+  );
 
   return { requestPassword, modal };
 };

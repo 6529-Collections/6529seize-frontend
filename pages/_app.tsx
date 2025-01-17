@@ -286,33 +286,56 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   );
 
   useEffect(() => {
-    const handler = async (wallets: AppWallet[]) => {
-      const connectors: Connector[] = [];
-      wallets.forEach((w) => {
-        const c = createAppWalletConnector({ appWallet: w }, () =>
-          appWalletPasswordModal.requestPassword(w.address, w.address_hashed)
-        );
-        const cc = wagmiConfig?._internal.connectors.setup(c);
-        if (!cc) return;
-        connectors.push(cc);
-      });
+    const createConnectorForWallet = (
+      wallet: AppWallet,
+      requestPassword: (
+        address: string,
+        addressHashed: string
+      ) => Promise<string>
+    ): Connector | null => {
+      const connector = createAppWalletConnector({ appWallet: wallet }, () =>
+        requestPassword(wallet.address, wallet.address_hashed)
+      );
+      return wagmiConfig?._internal.connectors.setup(connector) ?? null;
+    };
+
+    const getNewConnectors = (
+      connectors: Connector[],
+      existingConnectors: Connector[]
+    ): Connector[] => {
+      return connectors.filter(
+        (connector) =>
+          !existingConnectors.some((existing) => existing.id === connector.id)
+      );
+    };
+
+    const appWalletsEventEmitterHandler = async (wallets: AppWallet[]) => {
+      const connectors = wallets
+        .map((wallet) =>
+          createConnectorForWallet(
+            wallet,
+            appWalletPasswordModal.requestPassword
+          )
+        )
+        .filter((connector): connector is Connector => connector !== null); // Type guard to filter out null values
+
       const existingConnectors =
         wagmiConfig?.connectors.filter(
           (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
         ) ?? [];
-      const newConnectors = connectors.filter(
-        (c) => !existingConnectors.some((e) => e.id === c.id)
-      );
+
+      const newConnectors = getNewConnectors(connectors, existingConnectors);
+
       wagmiConfig?._internal.connectors.setState([
         ...newConnectors,
         ...existingConnectors,
       ]);
     };
 
-    appWalletsEventEmitter.on("update", handler);
+    appWalletsEventEmitter.on("update", appWalletsEventEmitterHandler);
 
     return () => {
-      appWalletsEventEmitter.off("update", handler);
+      appWalletsEventEmitter.off("update", appWalletsEventEmitterHandler);
     };
   }, []);
 
