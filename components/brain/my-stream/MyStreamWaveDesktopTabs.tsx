@@ -10,20 +10,22 @@ interface MyStreamWaveDesktopTabsProps {
   readonly setActiveTab: (tab: MyStreamWaveTab) => void;
 }
 
+export const getWaveTabOptions = (votingState: WaveVotingState) => [
+  { key: MyStreamWaveTab.CHAT, label: "Chat" },
+  {
+    key: MyStreamWaveTab.LEADERBOARD,
+    label: votingState === WaveVotingState.ENDED ? "Winners" : "Leaderboard",
+  },
+  { key: MyStreamWaveTab.OUTCOME, label: "Outcome" },
+] as const;
+
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
   setActiveTab,
 }) => {
   const { votingState } = useWaveState(wave);
-  const options = [
-    { key: MyStreamWaveTab.CHAT, label: "Chat" },
-    {
-      key: MyStreamWaveTab.LEADERBOARD,
-      label: votingState === WaveVotingState.ENDED ? "Winners" : "Leaderboard",
-    },
-    { key: MyStreamWaveTab.OUTCOME, label: "Outcome" },
-  ] as const;
+  const options = getWaveTabOptions(votingState);
 
   return (
     <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full">

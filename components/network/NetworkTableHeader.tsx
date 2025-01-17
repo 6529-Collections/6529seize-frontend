@@ -11,8 +11,6 @@ interface Props {
 }
 
 export default function NetworkTableHeader({ sortState, isLoading, onSort }: Props) {
-  const [hoverOption, setHoverOption] = useState<NetworkTableSort | null>(null);
-
   const SORT_TYPE_TO_TEXT: Record<NetworkTableSort, string> = {
     [NetworkTableSort.LEVEL]: "Level",
     [NetworkTableSort.TDH]: "TDH",
@@ -29,9 +27,7 @@ export default function NetworkTableHeader({ sortState, isLoading, onSort }: Pro
       <th
         scope="col"
         className="tw-px-4 sm:tw-px-6 tw-whitespace-nowrap tw-group tw-cursor-pointer tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-        onClick={() => onSort(type)}
-        onMouseEnter={() => setHoverOption(type)}
-        onMouseLeave={() => setHoverOption(null)}>
+        onClick={() => onSort(type)}>
         <span className={`${isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"} tw-transition tw-duration-300 tw-ease-out`}>
           {SORT_TYPE_TO_TEXT[type]}
         </span>
