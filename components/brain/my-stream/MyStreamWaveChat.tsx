@@ -24,7 +24,7 @@ const calculateHeight = (isCapacitor: boolean) => {
   if (isCapacitor) {
     return "tw-h-[calc(100vh-18.75rem)]";
   }
-  return `tw-h-[calc(100vh-13rem)] lg:tw-h-[calc(100vh-10rem)]`;
+  return `tw-h-[calc(100vh-13rem)] lg:tw-h-[calc(100vh-9.5rem)] xl:tw-h-[calc(100vh-9.75rem)]`;
 };
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({

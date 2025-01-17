@@ -68,6 +68,16 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.OUTCOME ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
+  const notificationsButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
+    activeView === BrainView.NOTIFICATIONS ? "tw-bg-iron-800" : "tw-bg-iron-950"
+  }`;
+
+  const notificationsButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+    activeView === BrainView.NOTIFICATIONS
+      ? "tw-text-iron-300"
+      : "tw-text-iron-400"
+  }`;
+
   const getMyStreamHref = () => {
     if (router.pathname === "/my-stream") return router.asPath;
     return "/my-stream";
@@ -88,7 +98,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   return (
     <div className="tw-py-4 tw-px-2 sm:tw-px-4 md:tw-px-6">
-      <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-300 tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
+      <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
         <button
           onClick={() => onViewChange(BrainView.WAVES)}
           className={wavesButtonClasses}
@@ -125,6 +135,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             </button>
           </>
         )}
+        <button
+          onClick={() => onViewChange(BrainView.NOTIFICATIONS)}
+          className={notificationsButtonClasses}
+        >
+          <span className={notificationsButtonTextClasses}>Notifications</span>
+        </button>
       </div>
     </div>
   );

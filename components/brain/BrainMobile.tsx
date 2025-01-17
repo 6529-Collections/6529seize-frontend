@@ -13,6 +13,7 @@ import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useWaveData } from "../../hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
+import Notifications from "./notifications/Notifications";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -20,6 +21,7 @@ export enum BrainView {
   ABOUT = "ABOUT",
   LEADERBOARD = "LEADERBOARD",
   OUTCOME = "OUTCOME",
+  NOTIFICATIONS = "NOTIFICATIONS"
 }
 
 interface Props {
@@ -82,6 +84,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       ) : null,
     [BrainView.OUTCOME]:
       isRankWave && !!wave ? <MyStreamWaveOutcome wave={wave} /> : null,
+    [BrainView.NOTIFICATIONS]: <Notifications />,
   };
 
   return (
