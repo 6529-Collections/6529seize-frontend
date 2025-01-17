@@ -18,7 +18,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
   const hasNegativeVotes = !!voter.negative_votes_summed;
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-w-full tw-p-3 tw-rounded-lg tw-bg-iron-900">
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-gap-y-1 tw-flex-wrap tw-w-full tw-p-3 tw-rounded-lg tw-bg-iron-900">
       <div className="tw-flex tw-items-center tw-gap-3">
         <span className="tw-text-iron-400 tw-font-medium">{position}.</span>
         <Link
@@ -39,7 +39,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           </span>
         </Link>
       </div>
-      <div className="tw-flex tw-items-center tw-gap-3">
+      <div className="tw-flex tw-items-center tw-gap-x-3">
         <Tippy
           content={
             <div className="tw-text-sm tw-space-x-1">
@@ -63,7 +63,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
             )}
           </div>
         </Tippy>
-        <span className="tw-text-xs tw-text-iron-400">
+        <span className="tw-text-xs tw-text-iron-400 tw-whitespace-nowrap">
           {formatNumberWithCommas(voter.absolute_votes_summed)} {creditType} total
         </span>
       </div>

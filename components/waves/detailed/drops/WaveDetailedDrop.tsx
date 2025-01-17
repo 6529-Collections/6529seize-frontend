@@ -315,4 +315,3 @@ const WaveDetailedDrop = ({
 };
 
 export default memo(WaveDetailedDrop);
-// http://localhost:3001/waves/5ad50a5f-c427-4a61-873c-d9b7ee9d8834?drop=3834

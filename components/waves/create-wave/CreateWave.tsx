@@ -411,7 +411,7 @@ export default function CreateWave({
     onSuccess: (response) => {
       waitAndInvalidateDrops();
       onWaveCreated();
-      router.push(`/waves/${response.id}`);
+      router.push(`/my-stream?wave=${response.id}`);
       return response;
     },
     onError: (error) => {

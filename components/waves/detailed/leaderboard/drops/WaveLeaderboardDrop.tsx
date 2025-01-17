@@ -20,7 +20,7 @@ const rankGradients: Record<number | "default", string> = {
   2: "tw-from-[#DDDDDD]/20 tw-via-[#C0C0C0]/20 tw-to-[#DDDDDD]/20 desktop-hover:hover:tw-from-[#DDDDDD]/30 desktop-hover:hover:tw-via-[#C0C0C0]/30 desktop-hover:hover:tw-to-[#DDDDDD]/30",
   3: "tw-from-[#CD7F32]/20 tw-via-[#B87333]/20 tw-to-[#CD7F32]/20 desktop-hover:hover:tw-from-[#CD7F32]/30 desktop-hover:hover:tw-via-[#B87333]/30 desktop-hover:hover:tw-to-[#CD7F32]/30",
   default:
-    "tw-from-iron-800/50 tw-via-iron-700/30 tw-to-iron-800/50 hover:tw-from-iron-700/60 hover:tw-via-iron-600/40 hover:tw-to-iron-800/60",
+    "tw-from-iron-800 tw-via-iron-800 tw-to-iron-800 hover:tw-from-iron-700 hover:tw-via-iron-700 hover:tw-to-iron-700",
 };
 
 export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({

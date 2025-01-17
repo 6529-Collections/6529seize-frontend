@@ -22,15 +22,19 @@ export default function NotificationDropQuoted({
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  
+  const navigateToWave = (waveId: string, serialNo: number) => {
+    router.push(`/my-stream?wave=${waveId}&serialNo=${serialNo}/`);
+  };
+
   const onReplyClick = (serialNo: number) => {
-    router.push(
-      `/waves/${notification.related_drops[0].wave.id}?drop=${serialNo}/`
-    );
+    navigateToWave(notification.related_drops[0].wave.id, serialNo);
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+    navigateToWave(quote.wave.id, quote.serial_no);
   };
+
   return (
     <Drop
       drop={{

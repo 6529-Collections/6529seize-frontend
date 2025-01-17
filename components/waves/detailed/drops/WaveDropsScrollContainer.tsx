@@ -6,6 +6,7 @@ interface WaveDropsScrollContainerProps {
   readonly onTopIntersection: () => void;
   readonly newItemsCount: number;
   readonly isFetchingNextPage: boolean;
+  readonly disableAutoPosition?: boolean;
 }
 
 const MIN_OUT_OF_VIEW_COUNT = 30;
@@ -21,6 +22,7 @@ export const WaveDropsScrollContainer = forwardRef<
       onTopIntersection,
       newItemsCount,
       isFetchingNextPage,
+      disableAutoPosition,
     },
     ref
   ) => {
@@ -28,7 +30,12 @@ export const WaveDropsScrollContainer = forwardRef<
     const [lastScrollTop, setLastScrollTop] = useState(0);
 
     useEffect(() => {
-      if (contentRef.current && ref && "current" in ref) {
+      if (
+        !disableAutoPosition &&
+        contentRef.current &&
+        ref &&
+        "current" in ref
+      ) {
         const scrollContainer = ref.current;
         if (!scrollContainer) {
           return;
@@ -42,7 +49,7 @@ export const WaveDropsScrollContainer = forwardRef<
             scrollTop + (contentRef.current.scrollHeight - contentHeight);
         }
       }
-    }, [newItemsCount, ref]);
+    }, [newItemsCount, ref, disableAutoPosition]);
 
     const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -92,7 +99,7 @@ export const WaveDropsScrollContainer = forwardRef<
     return (
       <div
         ref={ref}
-        className="tw-pb-2 tw-bg-iron-950 tw-flex tw-flex-col-reverse tw-flex-grow no-scrollbar tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0 lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transition-all tw-duration-300"
+        className="tw-pb-2 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-border-x tw-border-t tw-border-b-0 tw-flex tw-flex-col-reverse tw-flex-grow no-scrollbar tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0 lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transition-all tw-duration-300"
         onScroll={handleScroll}
       >
         <div className="tw-flex tw-flex-col-reverse tw-flex-grow">

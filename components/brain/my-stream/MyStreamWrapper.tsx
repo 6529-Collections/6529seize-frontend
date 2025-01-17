@@ -119,10 +119,7 @@ const MyStreamWrapper: React.FC = () => {
   }, [haveNewItems]);
 
   const component = serialisedWaveId ? (
-    <MyStreamWave
-      waveId={serialisedWaveId}
-      onDropClick={onDropClick}
-    />
+    <MyStreamWave waveId={serialisedWaveId} onDropClick={onDropClick} />
   ) : (
     <MyStream
       onReply={onReply}

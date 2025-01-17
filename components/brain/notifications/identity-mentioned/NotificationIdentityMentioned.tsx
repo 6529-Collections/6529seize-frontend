@@ -28,15 +28,18 @@ export default function NotificationIdentityMentioned({
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  const navigateToDropInWave = (waveId: string, serialNo: number) => {
+    router.push(`/my-stream?wave=${waveId}&serialNo=${serialNo}/`);
+  };
+
   const onReplyClick = (serialNo: number) => {
-    router.push(
-      `/waves/${notification.related_drops[0].wave.id}?drop=${serialNo}/`
-    );
+    navigateToDropInWave(notification.related_drops[0].wave.id, serialNo);
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+    navigateToDropInWave(quote.wave.id, quote.serial_no);
   };
+
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-flex tw-flex-col tw-space-y-3">
