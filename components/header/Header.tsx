@@ -140,9 +140,9 @@ export default function Header(props: Readonly<Props>) {
     return (
       <Row className="pt-3 pb-1">
         <Col>
-          <a href={path}>
+          <Link href={path}>
             <h3>{name}</h3>
-          </a>
+          </Link>
         </Col>
       </Row>
     );
