@@ -126,6 +126,7 @@ import {
   createAppWalletConnector,
 } from "../wagmiConfig/wagmiAppWalletConnector";
 import { Capacitor } from "@capacitor/core";
+import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
 
 library.add(
   faArrowUp,
@@ -272,11 +273,13 @@ type AppPropsWithLayout = AppProps & {
 };
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
-  const { store, props } = wrapper.useWrappedStore(rest);
+  const { store, props } = wrapper.useWrappedStore({
+    ...rest,
+  });
 
   const getLayout = Component.getLayout ?? ((page) => page);
   const capacitor = useCapacitor();
-
+  const appWalletPasswordModal = useAppWalletPasswordModal();
   const router = useRouter();
   const hideFooter = ["/waves", "/my-stream"].some((path) =>
     router.pathname.startsWith(path)
@@ -285,8 +288,10 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   useEffect(() => {
     const handler = async (wallets: AppWallet[]) => {
       const connectors: Connector[] = [];
-      wallets.forEach((wallet) => {
-        const c = createAppWalletConnector({ appWallet: wallet });
+      wallets.forEach((w) => {
+        const c = createAppWalletConnector({ appWallet: w }, () =>
+          appWalletPasswordModal.requestPassword(w.address, w.address_hashed)
+        );
         const cc = wagmiConfig?._internal.connectors.setup(c);
         if (!cc) return;
         connectors.push(cc);
@@ -365,7 +370,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                     <NotificationsProvider>
                       <CookieConsentProvider>
                         <EULAConsentProvider>
-                          {getLayout(<Component {...props} />)}
+                          {getLayout(
+                            <>
+                              <Component {...props} />
+                              {appWalletPasswordModal.modal}
+                            </>
+                          )}
                         </EULAConsentProvider>
                       </CookieConsentProvider>
                     </NotificationsProvider>
