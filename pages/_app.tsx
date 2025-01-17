@@ -299,13 +299,21 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
       return wagmiConfig?._internal.connectors.setup(connector) ?? null;
     };
 
+    const isConnectorNew = (
+      connector: Connector,
+      existingConnectors: Connector[]
+    ): boolean => {
+      return !existingConnectors.some(
+        (existing) => existing.id === connector.id
+      );
+    };
+
     const getNewConnectors = (
       connectors: Connector[],
       existingConnectors: Connector[]
     ): Connector[] => {
-      return connectors.filter(
-        (connector) =>
-          !existingConnectors.some((existing) => existing.id === connector.id)
+      return connectors.filter((connector) =>
+        isConnectorNew(connector, existingConnectors)
       );
     };
 
