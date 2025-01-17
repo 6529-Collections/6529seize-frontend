@@ -6,7 +6,6 @@ import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropMobileMenuDelete from "./WaveDetailedDropMobileMenuDelete";
 import WaveDetailedDropMobileMenuFollow from "./WaveDetailedDropMobileMenuFollow";
 import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
-import { Capacitor } from "@capacitor/core";
 import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface WaveDetailedDropMobileMenuProps {

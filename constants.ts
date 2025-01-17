@@ -41,7 +41,6 @@ export const WALLET_AUTH_COOKIE = "wallet-auth";
 export const WALLET_ADDRESS_COOKIE = "wallet-address";
 export const WALLET_REFRESH_TOKEN_COOKIE = "wallet-refresh-token";
 export const WALLET_ROLE_COOKIE = "wallet-role";
-export const WALLET_TYPE_COOKIE = "wallet-type";
 export const CONSENT_ESSENTIAL_COOKIE = "essential-cookies-consent";
 export const CONSENT_PERFORMANCE_COOKIE = "performance-cookies-consent";
 export const CONSENT_EULA_COOKIE = "eula-consent";

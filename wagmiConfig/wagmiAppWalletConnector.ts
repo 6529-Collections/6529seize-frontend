@@ -14,7 +14,8 @@ interface CreateAppWalletConnectorOptions {
 }
 
 export function createAppWalletConnector(
-  options: CreateAppWalletConnectorOptions
+  options: CreateAppWalletConnectorOptions,
+  requestPasswordModal: () => Promise<string>
 ) {
   const chains = getChains();
 
@@ -107,8 +108,10 @@ export function createAppWalletConnector(
     } = {}) {
       const chainId = maybeChainId ?? chains[0].id;
 
-      if (!decryptedPrivateKey)
-        throw new Error("Failed to decrypt private key.");
+      if (!decryptedPrivateKey) {
+        const password = await requestPasswordModal();
+        await this.setPassword(password);
+      }
       const client = await getOrCreateClient(chainId);
       if (!client.account?.address) {
         throw new Error("No valid local account found after decryption.");

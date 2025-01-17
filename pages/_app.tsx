@@ -13,7 +13,7 @@ import {
 } from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { Config, Connector, WagmiProvider } from "wagmi";
+import { Connector, WagmiProvider } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -100,7 +100,7 @@ import Head from "next/head";
 import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 import { NextPage, NextPageContext } from "next";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
@@ -126,6 +126,7 @@ import {
   createAppWalletConnector,
 } from "../wagmiConfig/wagmiAppWalletConnector";
 import { Capacitor } from "@capacitor/core";
+import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
 
 library.add(
   faArrowUp,
@@ -272,42 +273,69 @@ type AppPropsWithLayout = AppProps & {
 };
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
-  const { store, props } = wrapper.useWrappedStore(rest);
+  const { store, props } = wrapper.useWrappedStore({
+    ...rest,
+  });
 
   const getLayout = Component.getLayout ?? ((page) => page);
   const capacitor = useCapacitor();
-
+  const appWalletPasswordModal = useAppWalletPasswordModal();
   const router = useRouter();
   const hideFooter = ["/waves", "/my-stream"].some((path) =>
     router.pathname.startsWith(path)
   );
 
   useEffect(() => {
-    const handler = async (wallets: AppWallet[]) => {
-      const connectors: Connector[] = [];
-      wallets.forEach((wallet) => {
-        const c = createAppWalletConnector({ appWallet: wallet });
-        const cc = wagmiConfig?._internal.connectors.setup(c);
-        if (!cc) return;
-        connectors.push(cc);
-      });
+    const createConnectorForWallet = (
+      wallet: AppWallet,
+      requestPassword: (
+        address: string,
+        addressHashed: string
+      ) => Promise<string>
+    ): Connector | null => {
+      const connector = createAppWalletConnector({ appWallet: wallet }, () =>
+        requestPassword(wallet.address, wallet.address_hashed)
+      );
+      return wagmiConfig?._internal.connectors.setup(connector) ?? null;
+    };
+
+    const getNewConnectors = (
+      connectors: Connector[],
+      existingConnectors: Connector[]
+    ): Connector[] => {
+      return connectors.filter(
+        (connector) =>
+          !existingConnectors.some((existing) => existing.id === connector.id)
+      );
+    };
+
+    const appWalletsEventEmitterHandler = async (wallets: AppWallet[]) => {
+      const connectors = wallets
+        .map((wallet) =>
+          createConnectorForWallet(
+            wallet,
+            appWalletPasswordModal.requestPassword
+          )
+        )
+        .filter((connector): connector is Connector => connector !== null); // Type guard to filter out null values
+
       const existingConnectors =
         wagmiConfig?.connectors.filter(
           (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
         ) ?? [];
-      const newConnectors = connectors.filter(
-        (c) => !existingConnectors.some((e) => e.id === c.id)
-      );
+
+      const newConnectors = getNewConnectors(connectors, existingConnectors);
+
       wagmiConfig?._internal.connectors.setState([
-        ...existingConnectors,
         ...newConnectors,
+        ...existingConnectors,
       ]);
     };
 
-    appWalletsEventEmitter.on("update", handler);
+    appWalletsEventEmitter.on("update", appWalletsEventEmitterHandler);
 
     return () => {
-      appWalletsEventEmitter.off("update", handler);
+      appWalletsEventEmitter.off("update", appWalletsEventEmitterHandler);
     };
   }, []);
 
@@ -365,7 +393,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                     <NotificationsProvider>
                       <CookieConsentProvider>
                         <EULAConsentProvider>
-                          {getLayout(<Component {...props} />)}
+                          {getLayout(
+                            <>
+                              <Component {...props} />
+                              {appWalletPasswordModal.modal}
+                            </>
+                          )}
                         </EULAConsentProvider>
                       </CookieConsentProvider>
                     </NotificationsProvider>
