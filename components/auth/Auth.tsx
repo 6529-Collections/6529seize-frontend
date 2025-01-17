@@ -34,6 +34,7 @@ import DotLoader from "../dotLoader/DotLoader";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRefreshTokenRequest";
 import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
+import { areEqualAddresses } from "../../helpers/Helpers";
 
 export enum TitleType {
   PAGE = "PAGE",
@@ -93,7 +94,7 @@ export default function Auth({
 }) {
   const { invalidateAll } = useContext(ReactQueryWrapperContext);
 
-  const { address, walletType, isConnected, seizeDisconnectAndLogout } =
+  const { address, isConnected, seizeDisconnectAndLogout } =
     useSeizeConnectContext();
 
   const signMessage = useSignMessage();
@@ -302,8 +303,7 @@ export default function Auth({
         signerAddress,
         tokenResponse.token,
         tokenResponse.refresh_token,
-        role ?? undefined,
-        walletType ?? undefined
+        role ?? undefined
       );
       return { success: true };
     } catch {
@@ -358,7 +358,7 @@ export default function Auth({
       }).catch(() => {
         return null;
       });
-      if (redeemResponse) {
+      if (redeemResponse && areEqualAddresses(redeemResponse.address, wallet)) {
         const walletRole = getWalletRole();
         const tokenRole = getRole({ jwt });
         if (
@@ -369,8 +369,7 @@ export default function Auth({
             redeemResponse.address,
             redeemResponse.token,
             refreshToken,
-            walletRole ?? undefined,
-            walletType ?? undefined
+            walletRole ?? undefined
           );
           return true;
         }

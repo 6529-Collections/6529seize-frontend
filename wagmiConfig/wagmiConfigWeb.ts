@@ -11,6 +11,7 @@ export const wagmiConfigWeb = (chains: [Chain, ...Chain[]], metadata: any) => {
     coinbasePreference: "all",
     auth: {
       email: false,
+      socials: [],
     },
   });
 };
