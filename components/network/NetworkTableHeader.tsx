@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { NetworkTableSort, NetworkTableSortState } from "./NetworkTableTypes";
 import { SortDirection } from "../../entities/ISort";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
