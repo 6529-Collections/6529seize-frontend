@@ -7,14 +7,14 @@ export const useAppWalletPasswordModal = () => {
   const [reject, setReject] = useState<(reason?: any) => void>();
 
   const [address, setAddress] = useState("");
-  const [address_hashed, setAddressHashed] = useState("");
+  const [addressHashed, setAddressHashed] = useState("");
 
   const requestPassword = (
     address: string,
-    address_hashed: string
+    addressHashed: string
   ): Promise<string> => {
     setAddress(address);
-    setAddressHashed(address_hashed);
+    setAddressHashed(addressHashed);
     setIsOpen(true);
     return new Promise<string>((resolve, reject) => {
       setResolve(() => resolve);
@@ -43,7 +43,7 @@ export const useAppWalletPasswordModal = () => {
   const modal = isOpen ? (
     <UnlockAppWalletModal
       address={address}
-      address_hashed={address_hashed}
+      address_hashed={addressHashed}
       show={true}
       onHide={() => handleCancel()}
       onUnlock={(pass: string) => {

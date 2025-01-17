@@ -7,7 +7,6 @@ import { decryptData } from "./app-wallet-helpers";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
-import { setMaxListeners } from "events";
 
 export const SEED_MIN_PASS_LENGTH = 6;
 

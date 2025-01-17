@@ -21,7 +21,7 @@ export const wagmiConfigCapacitor = (
       enableMobileWalletLink: true,
       version: "3",
     }),
-    // injected(),
+    injected(),
   ];
 
   return createConfig({
