@@ -401,12 +401,8 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                     <NotificationsProvider>
                       <CookieConsentProvider>
                         <EULAConsentProvider>
-                          {getLayout(
-                            <>
-                              <Component {...props} />
-                              {appWalletPasswordModal.modal}
-                            </>
-                          )}
+                          {getLayout(<Component {...props} />)}
+                          {appWalletPasswordModal.modal}
                         </EULAConsentProvider>
                       </CookieConsentProvider>
                     </NotificationsProvider>
