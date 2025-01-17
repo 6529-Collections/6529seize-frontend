@@ -67,6 +67,7 @@ type AuthContextType = {
   readonly title: string;
 };
 
+
 export const WAVES_MIN_ACCESS_LEVEL = 10;
 const DEFAULT_TITLE = "6529 SEIZE";
 
