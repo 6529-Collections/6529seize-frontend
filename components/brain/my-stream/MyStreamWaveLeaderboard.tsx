@@ -24,7 +24,7 @@ const calculateHeight = (isCapacitor: boolean) => {
   if (isCapacitor) {
     return "tw-h-[calc(100vh-18.75rem)]";
   }
-  return `tw-h-[calc(100vh-11.75rem)] tw-pr-2`;
+  return `tw-h-[calc(100vh-10.5rem)] lg:tw-h-[calc(100vh-11.75rem)] lg:tw-pr-2`;
 };
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
@@ -34,7 +34,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const capacitor = useCapacitor();
 
   const containerClassName = useMemo(() => {
-    return `tw-mt-4 tw-pb-4 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${calculateHeight(
+    return `lg:tw-pt-4 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${calculateHeight(
       capacitor.isCapacitor
     )}`;
   }, [capacitor.isCapacitor]);
@@ -61,47 +61,51 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   return (
     <div className={containerClassName}>
       {votingState === WaveVotingState.ENDED ? (
-        <div className="tw-pb-4 lg:tw-pb-0">
+        <div>
           <WaveWinners wave={wave} onDropClick={onDropClick} />
         </div>
       ) : (
         <>
-          <WaveLeaderboardTime wave={wave} />
-          <WaveLeaderboardHeader
-            wave={wave}
-            sort={sort}
-            setSort={setSort}
-            showMyDrops={showMyDrops}
-            setShowMyDrops={setShowMyDrops}
-            onCreateDrop={() => setIsCreatingDrop(true)}
-          />
+          <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+            <WaveLeaderboardTime wave={wave} />
+            <WaveLeaderboardHeader
+              wave={wave}
+              sort={sort}
+              setSort={setSort}
+              showMyDrops={showMyDrops}
+              setShowMyDrops={setShowMyDrops}
+              onCreateDrop={() => setIsCreatingDrop(true)}
+            />
+          </div>
 
-          <AnimatePresence>
-            {isCreatingDrop && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-              >
-                <WaveDropCreate
-                  wave={wave!}
-                  onCancel={() => setIsCreatingDrop(false)}
-                  onSuccess={() => {
-                    setIsCreatingDrop(false);
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <WaveLeaderboardDrops
-            wave={wave}
-            dropsSortBy={sortBy[sort]}
-            sortDirection={sortDirection[sort]}
-            showMyDrops={showMyDrops}
-            setActiveDrop={onDropClick}
-            onCreateDrop={() => setIsCreatingDrop(true)}
-          />
+          <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+            <AnimatePresence>
+              {isCreatingDrop && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                >
+                  <WaveDropCreate
+                    wave={wave!}
+                    onCancel={() => setIsCreatingDrop(false)}
+                    onSuccess={() => {
+                      setIsCreatingDrop(false);
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <WaveLeaderboardDrops
+              wave={wave}
+              dropsSortBy={sortBy[sort]}
+              sortDirection={sortDirection[sort]}
+              showMyDrops={showMyDrops}
+              setActiveDrop={onDropClick}
+              onCreateDrop={() => setIsCreatingDrop(true)}
+            />
+          </div>
         </>
       )}
     </div>

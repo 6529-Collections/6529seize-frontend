@@ -38,7 +38,7 @@ export default function NotificationItems({
     setIntersectionTargetIndex(getIntersectionTargetIndex());
   }, [items]);
   return (
-    <div className="tw-flex tw-flex-col">
+    <div className="tw-flex tw-flex-col tw-space-y-2">
       {items.map((item, i) => (
         <div key={item.id}>
           <NotificationItem
