@@ -12,8 +12,6 @@ export const wagmiConfigWeb = (chains: [Chain, ...Chain[]], metadata: any) => {
     auth: {
       email: false,
       socials: [],
-      showWallets: false,
-      walletFeatures: false,
     },
   });
 };
