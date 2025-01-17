@@ -10,7 +10,7 @@ import { useAppWallets } from "./AppWalletsContext";
 
 export const SEED_MIN_PASS_LENGTH = 6;
 
-export const showAppWalletError = (
+const showAppWalletError = (
   timeoutRef: MutableRefObject<NodeJS.Timeout | null>,
   setError: React.Dispatch<React.SetStateAction<string>>,
   message: string

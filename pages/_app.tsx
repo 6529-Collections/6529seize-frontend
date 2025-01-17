@@ -273,9 +273,7 @@ type AppPropsWithLayout = AppProps & {
 };
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
-  const { store, props } = wrapper.useWrappedStore({
-    ...rest,
-  });
+  const { store, props } = wrapper.useWrappedStore(rest);
 
   const getLayout = Component.getLayout ?? ((page) => page);
   const capacitor = useCapacitor();
