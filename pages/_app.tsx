@@ -304,8 +304,8 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         (c) => !existingConnectors.some((e) => e.id === c.id)
       );
       wagmiConfig?._internal.connectors.setState([
-        ...existingConnectors,
         ...newConnectors,
+        ...existingConnectors,
       ]);
     };
 
