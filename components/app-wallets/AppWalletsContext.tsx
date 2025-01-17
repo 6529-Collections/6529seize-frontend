@@ -78,24 +78,7 @@ export const AppWalletsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     setFetchingAppWallets(true);
 
-    let wallets: AppWallet[] = [];
-    try {
-      const keysResult = await SecureStoragePlugin.keys();
-      const walletKeys = keysResult.value.filter((key) =>
-        key.startsWith(WALLET_KEY_PREFIX)
-      );
-
-      const walletValues = await Promise.all(
-        walletKeys.map(async (key) => {
-          const valueResult = await SecureStoragePlugin.get({ key });
-          return JSON.parse(valueResult.value);
-        })
-      );
-      wallets = walletValues.sort((a, b) => a.created_at - b.created_at);
-    } catch (error) {
-      console.error("Error fetching wallets:", error);
-      wallets = [];
-    }
+    const wallets = await getAllWallets();
 
     setAppWallets(wallets);
     appWalletsEventEmitter.emit("update", wallets);

@@ -51,8 +51,12 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   useEffect(() => {
-    setConnectedAddress(account.address ?? getWalletAddress());
-  }, [account.address]);
+    if (account.address && account.isConnected) {
+      setConnectedAddress(account.address);
+    } else {
+      setConnectedAddress(getWalletAddress());
+    }
+  }, [account.address, account.isConnected]);
 
   useEffect(() => {
     setWalletType(account.connector?.type ?? getWalletType());

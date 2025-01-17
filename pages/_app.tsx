@@ -13,7 +13,7 @@ import {
 } from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { Config, WagmiProvider } from "wagmi";
+import { Config, Connector, WagmiProvider } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -121,6 +121,11 @@ import {
   appWalletsEventEmitter,
   AppWalletsProvider,
 } from "../components/app-wallets/AppWalletsContext";
+import {
+  APP_WALLET_CONNECTOR_TYPE,
+  createAppWalletConnector,
+} from "../wagmiConfig/wagmiAppWalletConnector";
+import { Capacitor } from "@capacitor/core";
 
 library.add(
   faArrowUp,
@@ -246,6 +251,18 @@ const queryClient = new QueryClient({
   },
 });
 
+const isCapacitor = Capacitor.isNativePlatform();
+const wagmiConfig = isCapacitor
+  ? wagmiConfigCapacitor(chains, metadata)
+  : wagmiConfigWeb(chains, metadata);
+
+createWeb3Modal({
+  wagmiConfig: wagmiConfig,
+  projectId: CW_PROJECT_ID,
+  enableAnalytics: true,
+  themeMode: "dark",
+});
+
 export type NextPageWithLayout<Props> = NextPage<Props> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
@@ -265,31 +282,26 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     router.pathname.startsWith(path)
   );
 
-  const [appWallets, setAppWallets] = useState<AppWallet[]>([]);
-  const [wagmiConfig, setWagmiConfig] = useState<Config>(getWagmiConfig());
-
-  function getWagmiConfig() {
-    const conf = capacitor.isCapacitor
-      ? wagmiConfigCapacitor(chains, metadata, appWallets)
-      : wagmiConfigWeb(chains, metadata);
-
-    createWeb3Modal({
-      wagmiConfig: conf,
-      projectId: CW_PROJECT_ID,
-      enableAnalytics: true,
-      themeMode: "dark",
-    });
-    return conf;
-  }
-
-  useEffect(() => {
-    setWagmiConfig(getWagmiConfig());
-  }, [appWallets, capacitor.isCapacitor]);
-
   useEffect(() => {
     const handler = async (wallets: AppWallet[]) => {
-      console.log("appWalletsEventEmitter wallets", wallets);
-      setAppWallets(wallets);
+      const connectors: Connector[] = [];
+      wallets.forEach((wallet) => {
+        const c = createAppWalletConnector({ appWallet: wallet });
+        const cc = wagmiConfig?._internal.connectors.setup(c);
+        if (!cc) return;
+        connectors.push(cc);
+      });
+      const existingConnectors =
+        wagmiConfig?.connectors.filter(
+          (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
+        ) ?? [];
+      const newConnectors = connectors.filter(
+        (c) => !existingConnectors.some((e) => e.id === c.id)
+      );
+      wagmiConfig?._internal.connectors.setState([
+        ...existingConnectors,
+        ...newConnectors,
+      ]);
     };
 
     appWalletsEventEmitter.on("update", handler);
