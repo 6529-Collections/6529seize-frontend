@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import useCapacitor from "../../../hooks/useCapacitor";
 import {
@@ -56,6 +56,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   }, [capacitor.isCapacitor]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  useEffect(() => setActiveDrop(null), [wave]);
+
   const onReply = (drop: ApiDrop, partId: number) => {
     setActiveDrop({
       action: ActiveDropAction.REPLY,

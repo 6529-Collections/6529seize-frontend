@@ -6,7 +6,7 @@ import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropMobileMenuDelete from "./WaveDetailedDropMobileMenuDelete";
 import WaveDetailedDropMobileMenuFollow from "./WaveDetailedDropMobileMenuFollow";
 import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
-import { Capacitor } from "@capacitor/core";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface WaveDetailedDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -86,15 +86,14 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
 
   const closeMenu = () => setOpen(false);
 
-  const isCapacitor = Capacitor.isNativePlatform();
+  const { isCapacitor } = useCapacitor();
 
   return createPortal(
     <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
       <div
         className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
           longPressTriggered && "tw-select-none"
-        } ${isCapacitor ? "tw-pb-[5rem]" : ""}`}
-      >
+        } ${isCapacitor ? "tw-pb-[5rem]" : ""}`}>
         {showReplyAndQuote && (
           <>
             <button
@@ -104,16 +103,14 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
                   : "active:tw-bg-iron-800"
               } tw-transition-colors tw-duration-200`}
               onClick={onReply}
-              disabled={isTemporaryDrop}
-            >
+              disabled={isTemporaryDrop}>
               <svg
                 className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor"
-              >
+                stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -131,14 +128,12 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
                   : "active:tw-bg-iron-800"
               } tw-transition-colors tw-duration-200`}
               onClick={onQuote}
-              disabled={isTemporaryDrop}
-            >
+              disabled={isTemporaryDrop}>
               <svg
                 className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
                 viewBox="0 0 24 24"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+                xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M4.9486 14.4306C4.45605 15.6736 3.67749 16.904 2.63489 18.0883C2.3031 18.4652 2.26098 19.0031 2.53015 19.4268C2.73742 19.7528 3.08606 19.9384 3.4552 19.9384C3.5592 19.9384 3.66504 19.9238 3.76941 19.8934C5.97913 19.2478 11.1335 16.9546 11.272 9.62448C11.3254 6.79404 9.25526 4.3624 6.55958 4.08847C5.07385 3.93978 3.5874 4.42245 2.48584 5.41818C1.38281 6.41501 0.75 7.8381 0.75 9.32309C0.75 11.8005 2.50854 13.967 4.9486 14.4306ZM3.49145 6.53109C4.19201 5.89791 5.07385 5.56063 6.00879 5.56063C6.14099 5.56063 6.27429 5.56722 6.40796 5.58114C8.33313 5.77632 9.8108 7.54 9.77198 9.59591C9.6764 14.6679 6.93018 16.9513 4.65601 17.9726C5.37561 16.9992 5.94104 15.998 6.34314 14.9832C6.49988 14.5881 6.47388 14.1465 6.27209 13.7715C6.06079 13.3781 5.68396 13.0991 5.23901 13.0057C3.50683 12.6435 2.25 11.0944 2.25 9.32308C2.25 8.26181 2.70263 7.24411 3.49145 6.53109Z"
                   fill="currentColor"
@@ -161,16 +156,14 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
               : "active:tw-bg-iron-800"
           } tw-transition-colors tw-duration-200`}
           onClick={copyToClipboard}
-          disabled={isTemporaryDrop}
-        >
+          disabled={isTemporaryDrop}>
           <svg
             className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="1.5"
-            stroke="currentColor"
-          >
+            stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -180,8 +173,7 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
           <span
             className={`tw-font-semibold tw-text-base ${
               copied ? "tw-text-primary-400" : "tw-text-iron-300"
-            }`}
-          >
+            }`}>
             {copied ? "Copied!" : "Copy link"}
           </span>
         </button>

@@ -10,7 +10,7 @@ import { useAppWallets } from "./AppWalletsContext";
 
 export const SEED_MIN_PASS_LENGTH = 6;
 
-const showError = (
+const showAppWalletError = (
   timeoutRef: MutableRefObject<NodeJS.Timeout | null>,
   setError: React.Dispatch<React.SetStateAction<string>>,
   message: string
@@ -58,7 +58,7 @@ export function CreateAppWalletModal(
 
   const handleCreate = useCallback(async () => {
     if (walletPass.length < SEED_MIN_PASS_LENGTH) {
-      showError(
+      showAppWalletError(
         timeoutRef,
         setError,
         `Password must be at least ${SEED_MIN_PASS_LENGTH} characters long`
@@ -90,7 +90,7 @@ export function CreateAppWalletModal(
     if (!props.import) return;
 
     if (walletPass.length < SEED_MIN_PASS_LENGTH) {
-      showError(
+      showAppWalletError(
         timeoutRef,
         setError,
         `Password must be at least ${SEED_MIN_PASS_LENGTH} characters long`
@@ -149,7 +149,7 @@ export function CreateAppWalletModal(
             if (/^[a-zA-Z0-9 ]*$/.test(value)) {
               setWalletName(value);
             } else {
-              showError(
+              showAppWalletError(
                 timeoutRef,
                 setError,
                 "Name can only contain alphanumeric characters and spaces"
@@ -178,7 +178,7 @@ export function CreateAppWalletModal(
             if (/^\S*$/.test(value)) {
               setWalletPass(value);
             } else {
-              showError(
+              showAppWalletError(
                 timeoutRef,
                 setError,
                 "Password must not contain any whitespace characters"
@@ -251,7 +251,7 @@ export function UnlockAppWalletModal(
 
   const showUnlockError = () => {
     setUnlocking(false);
-    showError(timeoutRef, setError, "Failed to unlock wallet");
+    showAppWalletError(timeoutRef, setError, "Failed to unlock wallet");
     inputRef.current?.focus();
     inputRef.current?.select();
   };
@@ -293,7 +293,7 @@ export function UnlockAppWalletModal(
         <Modal.Title>Unlock Wallet</Modal.Title>
       </Modal.Header>
       <Modal.Body className={styles.modalContent}>
-        <label className="pt-3 pb-1 d-flex align-items-center justify-content-between">
+        <label className="pb-1 d-flex align-items-center justify-content-between">
           <span className="unselectable">Wallet Password</span>
           <FontAwesomeIcon
             icon={passHidden ? faEyeSlash : faEye}
@@ -316,7 +316,7 @@ export function UnlockAppWalletModal(
             if (/^\S*$/.test(value)) {
               setWalletPass(value);
             } else {
-              showError(
+              showAppWalletError(
                 timeoutRef,
                 setError,
                 "Password must not contain any whitespace characters"

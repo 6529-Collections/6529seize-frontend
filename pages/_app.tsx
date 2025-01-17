@@ -13,7 +13,7 @@ import {
 } from "../constants";
 
 import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { Config, WagmiProvider } from "wagmi";
+import { Connector, WagmiProvider } from "wagmi";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 
@@ -100,7 +100,7 @@ import Head from "next/head";
 import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 import { NextPage, NextPageContext } from "next";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
@@ -121,6 +121,12 @@ import {
   appWalletsEventEmitter,
   AppWalletsProvider,
 } from "../components/app-wallets/AppWalletsContext";
+import {
+  APP_WALLET_CONNECTOR_TYPE,
+  createAppWalletConnector,
+} from "../wagmiConfig/wagmiAppWalletConnector";
+import { Capacitor } from "@capacitor/core";
+import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
 
 library.add(
   faArrowUp,
@@ -246,6 +252,18 @@ const queryClient = new QueryClient({
   },
 });
 
+const isCapacitor = Capacitor.isNativePlatform();
+const wagmiConfig = isCapacitor
+  ? wagmiConfigCapacitor(chains, metadata)
+  : wagmiConfigWeb(chains, metadata);
+
+createWeb3Modal({
+  wagmiConfig: wagmiConfig,
+  projectId: CW_PROJECT_ID,
+  enableAnalytics: true,
+  themeMode: "dark",
+});
+
 export type NextPageWithLayout<Props> = NextPage<Props> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
@@ -259,43 +277,71 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
 
   const getLayout = Component.getLayout ?? ((page) => page);
   const capacitor = useCapacitor();
-
+  const appWalletPasswordModal = useAppWalletPasswordModal();
   const router = useRouter();
   const hideFooter = ["/waves", "/my-stream"].some((path) =>
     router.pathname.startsWith(path)
   );
 
-  const [appWallets, setAppWallets] = useState<AppWallet[]>([]);
-  const [wagmiConfig, setWagmiConfig] = useState<Config>(getWagmiConfig());
-
-  function getWagmiConfig() {
-    const conf = capacitor.isCapacitor
-      ? wagmiConfigCapacitor(chains, metadata, appWallets)
-      : wagmiConfigWeb(chains, metadata);
-
-    createWeb3Modal({
-      wagmiConfig: conf,
-      projectId: CW_PROJECT_ID,
-      enableAnalytics: true,
-      themeMode: "dark",
-    });
-    return conf;
-  }
-
   useEffect(() => {
-    setWagmiConfig(getWagmiConfig());
-  }, [appWallets, capacitor.isCapacitor]);
-
-  useEffect(() => {
-    const handler = async (wallets: AppWallet[]) => {
-      console.log("appWalletsEventEmitter wallets", wallets);
-      setAppWallets(wallets);
+    const createConnectorForWallet = (
+      wallet: AppWallet,
+      requestPassword: (
+        address: string,
+        addressHashed: string
+      ) => Promise<string>
+    ): Connector | null => {
+      const connector = createAppWalletConnector({ appWallet: wallet }, () =>
+        requestPassword(wallet.address, wallet.address_hashed)
+      );
+      return wagmiConfig?._internal.connectors.setup(connector) ?? null;
     };
 
-    appWalletsEventEmitter.on("update", handler);
+    const isConnectorNew = (
+      connector: Connector,
+      existingConnectors: Connector[]
+    ): boolean => {
+      return !existingConnectors.some(
+        (existing) => existing.id === connector.id
+      );
+    };
+
+    const getNewConnectors = (
+      connectors: Connector[],
+      existingConnectors: Connector[]
+    ): Connector[] => {
+      return connectors.filter((connector) =>
+        isConnectorNew(connector, existingConnectors)
+      );
+    };
+
+    const appWalletsEventEmitterHandler = async (wallets: AppWallet[]) => {
+      const connectors = wallets
+        .map((wallet) =>
+          createConnectorForWallet(
+            wallet,
+            appWalletPasswordModal.requestPassword
+          )
+        )
+        .filter((connector): connector is Connector => connector !== null); // Type guard to filter out null values
+
+      const existingConnectors =
+        wagmiConfig?.connectors.filter(
+          (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
+        ) ?? [];
+
+      const newConnectors = getNewConnectors(connectors, existingConnectors);
+
+      wagmiConfig?._internal.connectors.setState([
+        ...newConnectors,
+        ...existingConnectors,
+      ]);
+    };
+
+    appWalletsEventEmitter.on("update", appWalletsEventEmitterHandler);
 
     return () => {
-      appWalletsEventEmitter.off("update", handler);
+      appWalletsEventEmitter.off("update", appWalletsEventEmitterHandler);
     };
   }, []);
 
@@ -354,6 +400,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                       <CookieConsentProvider>
                         <EULAConsentProvider>
                           {getLayout(<Component {...props} />)}
+                          {appWalletPasswordModal.modal}
                         </EULAConsentProvider>
                       </CookieConsentProvider>
                     </NotificationsProvider>
