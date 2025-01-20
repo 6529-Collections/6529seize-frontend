@@ -185,7 +185,7 @@ const NewHashtagsPlugin = forwardRef<
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
   const results = useHashtagLookupService(queryString);
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
   const isHashtagsOpen = () => isOpen;
 
   useImperativeHandle(ref, () => ({
@@ -259,12 +259,14 @@ const NewHashtagsPlugin = forwardRef<
       ) => {
         return anchorElementRef.current && results.length
           ? ReactDOM.createPortal(
-              <HashtagsTypeaheadMenu
-                selectedIndex={selectedIndex}
-                options={options}
-                setHighlightedIndex={setHighlightedIndex}
-                selectOptionAndCleanUp={selectOptionAndCleanUp}
-              />,
+              <div className="tw-absolute -tw-top-12 tw-left-0 tw-z-[1000]">
+                <HashtagsTypeaheadMenu
+                  selectedIndex={selectedIndex}
+                  options={options}
+                  setHighlightedIndex={setHighlightedIndex}
+                  selectOptionAndCleanUp={selectOptionAndCleanUp}
+                />
+              </div>,
               anchorElementRef.current
             )
           : null;
