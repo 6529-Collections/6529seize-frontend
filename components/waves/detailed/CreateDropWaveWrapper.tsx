@@ -79,16 +79,15 @@ export function CreateDropWaveWrapper({
 
     if (capacitor.isCapacitor) {
       const marginClass = isMyStreamOrWaveChat && !capacitor.keyboardVisible ? "tw-mb-[3.75rem]" : "";
-
-      return `tw-max-h-[calc(100vh-14.7rem)] ${marginClass}`;
+      return `tw-max-h-[calc(100vh-14.7rem)] ${marginClass} tw-z-[999]`;
     }
 
-    return "tw-max-h-[calc(100vh-8.5rem)] lg:tw-max-h-[calc(100vh-7.5rem)]";
+    return "tw-max-h-[calc(100vh-8.5rem)] lg:tw-max-h-[calc(100vh-7.5rem)] tw-z-30";
   }, [capacitor.isCapacitor, capacitor.keyboardVisible, context]);
   return (
     <div
       ref={containerRef}
-      className={`${containerClassName} tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-z-[999] tw-w-full tw-rounded-b-xl tw-flex-none tw-transition-colors tw-duration-500 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950`}
+      className={`${containerClassName} tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-w-full tw-rounded-b-xl tw-flex-none tw-transition-colors tw-duration-500 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950`}
     >
       {children}
       <div ref={fixedBottomRef}></div>
