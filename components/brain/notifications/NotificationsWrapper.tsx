@@ -75,7 +75,7 @@ export default function NotificationsWrapper({
           onDropClick={onDropClick}
         />
         {loading && (
-          <div className="tw-w-full tw-text-center tw-mt-8">
+          <div className="tw-w-full tw-text-center tw-mt-6">
             <CircleLoader size={CircleLoaderSize.XXLARGE} />
           </div>
         )}

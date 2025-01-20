@@ -3,7 +3,10 @@ import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 import Link from "next/link";
-import { getScaledImageUri, ImageScale } from "../../../../../../helpers/image.helpers";
+import {
+  getScaledImageUri,
+  ImageScale,
+} from "../../../../../../helpers/image.helpers";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
@@ -39,24 +42,25 @@ export const WaveLeaderboardDropRaters: React.FC<
     drop.context_profile_context?.rating !== 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-4">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-1.5 tw-justify-end">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
-        <span className={`tw-font-semibold ${rankStyle}`}>
+        <span className={`tw-text-sm tw-font-semibold ${rankStyle}`}>
           {formatNumberWithCommas(drop.rating)}
         </span>
-        <span className="tw-text-iron-400 tw-text-sm">
+        <span className="tw-text-iron-400 tw-text-sm tw-whitespace-nowrap">
           {drop.wave.voting_credit_type} total
         </span>
       </div>
 
-      <div className="tw-flex tw-items-center tw-gap-2">
+      <div className="tw-flex tw-items-center tw-gap-2 tw-whitespace-nowrap">
         <div className="tw-flex -tw-space-x-1.5 tw-items-center">
           {drop.top_raters.map((voter, index) => (
             <Tippy
               key={voter.profile.id}
               content={
-                <span className="tw-text-xs tw-font-medium">
-                  {voter.profile.handle} • {formatNumberWithCommas(voter.rating)}{" "}
+                <span className="tw-text-sm tw-font-medium">
+                  {voter.profile.handle} •{" "}
+                  {formatNumberWithCommas(voter.rating)}{" "}
                   {drop.wave.voting_credit_type}
                 </span>
               }
@@ -73,7 +77,10 @@ export const WaveLeaderboardDropRaters: React.FC<
                 <Link href={`/${voter.profile.handle}`}>
                   {voter.profile.pfp ? (
                     <img
-                      src={getScaledImageUri(voter.profile.pfp, ImageScale.W_AUTO_H_50)}
+                      src={getScaledImageUri(
+                        voter.profile.pfp,
+                        ImageScale.W_AUTO_H_50
+                      )}
                       alt={`${voter.profile.handle}'s Profile`}
                       className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800"
                     />
@@ -92,7 +99,7 @@ export const WaveLeaderboardDropRaters: React.FC<
 
       {hasUserVoted && (
         <div className="tw-flex tw-items-center tw-gap-1.5">
-          <span className="tw-text-sm">
+          <span className="tw-text-sm tw-whitespace-nowrap">
             <span className="tw-text-iron-400">Your vote: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
               {formatNumberWithCommas(userVote)} {drop.wave.voting_credit_type}

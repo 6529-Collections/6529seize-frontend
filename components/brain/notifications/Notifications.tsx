@@ -16,10 +16,12 @@ import {
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
+import useCapacitor from "../../../hooks/useCapacitor";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
+  const capacitor = useCapacitor();
 
   const router = useRouter();
   const { reload } = router.query;
@@ -122,9 +124,13 @@ export default function Notifications() {
     fetchNextPage();
   };
 
+  const containerClassName = `lg:tw-pr-2 tw-flex-1 tw-flex tw-flex-col tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 
+    tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6rem)] xl:tw-h-[calc(100vh-7rem)] ${
+    capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
+  }`;
+
   return (
-    <div className="lg:tw-pr-2 tw-flex-1 tw-flex tw-flex-col tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 
-    tw-h-[calc(100vh-10rem)] lg:tw-h-[calc(100vh-6rem)] xl:tw-h-[calc(100vh-7rem)]">
+    <div className={containerClassName}>
       {!items.length && !isFetching ? (
         <MyStreamNoItems />
       ) : (
