@@ -215,7 +215,7 @@ export default function WaveDropsAll({
   const memoizedDrops = useMemo(() => drops, [drops]);
 
   const renderContent = () => {
-    if (isFetching && !isFetchingNextPage) {
+    if (isFetching && !isFetchingNextPage && !drops.length) {
       return (
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-10">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
