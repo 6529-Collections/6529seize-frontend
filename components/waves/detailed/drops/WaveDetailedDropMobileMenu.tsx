@@ -93,7 +93,7 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
       <div
         className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
           longPressTriggered && "tw-select-none"
-        } ${isCapacitor ? "tw-pb-[5rem]" : ""}`}>
+        } ${isCapacitor ? "tw-pb-[10rem]" : ""}`}>
         {showReplyAndQuote && (
           <>
             <button
@@ -132,6 +132,7 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
               <svg
                 className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg">
                 <path
