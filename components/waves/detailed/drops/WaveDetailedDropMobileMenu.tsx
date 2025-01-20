@@ -6,7 +6,6 @@ import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropMobileMenuDelete from "./WaveDetailedDropMobileMenuDelete";
 import WaveDetailedDropMobileMenuFollow from "./WaveDetailedDropMobileMenuFollow";
 import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
-import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface WaveDetailedDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -86,14 +85,9 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
 
   const closeMenu = () => setOpen(false);
 
-  const { isCapacitor } = useCapacitor();
-
   return createPortal(
     <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
-      <div
-        className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
-          longPressTriggered && "tw-select-none"
-        } ${isCapacitor ? "tw-pb-[10rem]" : ""}`}>
+      <div className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${longPressTriggered && "tw-select-none"}`}>
         {showReplyAndQuote && (
           <>
             <button
