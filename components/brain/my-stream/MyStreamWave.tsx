@@ -55,7 +55,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropClick }) => {
         <div
           className={
             activeTab === MyStreamWaveTab.CHAT
-              ? "tw-absolute tw-top-0 tw-left-0 tw-z-[999999]"
+              ? "tw-absolute tw-top-0 tw-left-0 tw-z-50"
               : ""
           }
         >
