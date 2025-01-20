@@ -4,6 +4,7 @@ import WaveDetailedDropActionsReply from "./WaveDetailedDropActionsReply";
 import WaveDetailedDropActionsQuote from "./WaveDetailedDropActionsQuote";
 import WaveDetailedDropActionsCopyLink from "./WaveDetailedDropActionsCopyLink";
 import WaveDetailedDropActionsOptions from "./WaveDetailedDropActionsOptions";
+import WaveDetailedDropActionsOpen from "./WaveDetailedDropActionsOpen";
 import { useContext } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropFollowAuthor from "./WaveDetailedDropFollowAuthor";
@@ -44,6 +45,7 @@ export default function WaveDetailedDropActions({
             activePartIndex={activePartIndex}
           />
           <WaveDetailedDropActionsCopyLink drop={drop} />
+          <WaveDetailedDropActionsOpen drop={drop} />
           {canDelete && <WaveDetailedDropActionsOptions drop={drop} />}
         </div>
         {showVoting && <WaveDetailedDropActionsRate drop={drop} />}
