@@ -12,13 +12,9 @@ import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 
 interface WaveWinnersDropsProps {
   readonly wave: ApiWave;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
-  wave,
-  onDropClick,
-}) => {
+export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({ wave }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
@@ -44,7 +40,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
           key={drop.id}
           drop={drop}
           wave={wave}
-          onDropClick={onDropClick}
+          onDropClick={() => {}}
         />
       ))}
       {isFetchingNextPage && (

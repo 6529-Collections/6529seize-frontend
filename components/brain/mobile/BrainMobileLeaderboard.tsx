@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { WaveLeaderboardDrops } from "../../waves/detailed/leaderboard/drops/WaveLeaderboardDrops";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import {
   WaveDropsLeaderboardSortBy,
   WaveDropsLeaderboardSortDirection,
@@ -12,12 +11,10 @@ import useCapacitor from "../../../hooks/useCapacitor";
 
 interface BrainMobileLeaderboardProps {
   readonly wave: ApiWave;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const BrainMobileLeaderboard: React.FC<BrainMobileLeaderboardProps> = ({
   wave,
-  onDropClick,
 }) => {
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
   const capacitor = useCapacitor();
@@ -53,7 +50,6 @@ const BrainMobileLeaderboard: React.FC<BrainMobileLeaderboardProps> = ({
           dropsSortBy={WaveDropsLeaderboardSortBy.RANK}
           sortDirection={WaveDropsLeaderboardSortDirection.DESC}
           showMyDrops={false}
-          setActiveDrop={onDropClick}
           onCreateDrop={() => setIsCreatingDrop(true)}
         />
       </div>

@@ -15,7 +15,7 @@ interface FeedWrapperProps {
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedWrapper({
@@ -26,7 +26,7 @@ export default function FeedWrapper({
   onBottomIntersection,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: FeedWrapperProps) {
   return (
     <div className="tw-relative">
@@ -37,7 +37,7 @@ export default function FeedWrapper({
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
-        onDropClick={onDropClick}
+        onDropContentClick={onDropContentClick}
       />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">

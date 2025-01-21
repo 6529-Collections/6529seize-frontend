@@ -14,7 +14,7 @@ export interface FeedItemProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedItem({
@@ -23,7 +23,7 @@ export default function FeedItem({
   activeDrop,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: FeedItemProps) {
   const getComponent = (): JSX.Element => {
     switch (item.type) {
@@ -35,7 +35,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
         );
       case ApiFeedItemType.DropCreated:
@@ -46,7 +46,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
         );
       case ApiFeedItemType.DropReplied:
@@ -57,7 +57,7 @@ export default function FeedItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
         );
       default:

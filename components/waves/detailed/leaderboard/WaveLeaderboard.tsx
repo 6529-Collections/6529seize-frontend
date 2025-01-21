@@ -72,7 +72,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
 
           {votingState === WaveVotingState.ENDED ? (
             <div className="tw-pb-4 lg:tw-pb-0">
-              <WaveWinners wave={wave} onDropClick={setActiveDrop} />
+              <WaveWinners wave={wave} />
             </div>
           ) : (
             <>
@@ -109,7 +109,6 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
                 dropsSortBy={sortBy[sort]}
                 sortDirection={sortDirection[sort]}
                 showMyDrops={showMyDrops}
-                setActiveDrop={setActiveDrop}
                 onCreateDrop={() => setIsCreatingDrop(true)}
               />
             </>

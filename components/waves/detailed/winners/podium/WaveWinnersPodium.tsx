@@ -15,7 +15,6 @@ import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 
 interface WaveWinnersPodiumProps {
   readonly wave: ApiWave;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const PodiumPlaceholderCard = ({ height }: { height: string }) => (
@@ -54,7 +53,6 @@ const podiumVariants = {
 
 export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   wave,
-  onDropClick,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { drops, isFetching } = useWaveDropsLeaderboard({
@@ -127,7 +125,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 <WaveWinnersPodiumSecond
                   drop={secondPlaceDrop}
                   wave={wave}
-                  onDropClick={onDropClick}
+                  onDropClick={() => {}}
                 />
               </motion.div>
             ) : (
@@ -148,7 +146,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 <WaveWinnersPodiumFirst
                   drop={firstPlaceDrop}
                   wave={wave}
-                  onDropClick={onDropClick}
+                  onDropClick={() => {}}
                 />
               </motion.div>
             ) : (
@@ -169,7 +167,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 <WaveWinnersPodiumThird
                   drop={thirdPlaceDrop}
                   wave={wave}
-                  onDropClick={onDropClick}
+                  onDropClick={() => {}}
                 />
               </motion.div>
             ) : (

@@ -8,7 +8,7 @@ interface ParticipationDropContentProps {
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
   readonly onLongPress: () => void;
-  readonly onDropClick: () => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
@@ -19,7 +19,7 @@ export default function ParticipationDropContent({
   activePartIndex,
   setActivePartIndex,
   onLongPress,
-  onDropClick,
+  onDropContentClick,
   onQuoteClick,
   setLongPressTriggered,
   parentContainerRef,
@@ -48,7 +48,7 @@ export default function ParticipationDropContent({
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}
               onLongPress={onLongPress}
-              onDropClick={onDropClick}
+              onDropContentClick={onDropContentClick}
               onQuoteClick={onQuoteClick}
               setLongPressTriggered={setLongPressTriggered}
               parentContainerRef={parentContainerRef}

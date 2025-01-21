@@ -17,7 +17,7 @@ import { useSearchParams } from "next/navigation";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 const calculateHeight = (isCapacitor: boolean) => {
@@ -29,7 +29,7 @@ const calculateHeight = (isCapacitor: boolean) => {
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   wave,
-  onDropClick,
+  onDropContentClick,
 }) => {
   const capacitor = useCapacitor();
   const router = useRouter();
@@ -102,7 +102,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             activeDrop={activeDrop}
             initialDrop={initialDrop}
             dropId={null}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
           <div className="tw-mt-auto">
             <CreateDropWaveWrapper>

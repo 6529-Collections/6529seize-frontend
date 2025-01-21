@@ -8,7 +8,6 @@ import {
 } from "../../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../../hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
 
 interface WaveLeaderboardDropsProps {
@@ -16,7 +15,6 @@ interface WaveLeaderboardDropsProps {
   readonly dropsSortBy: WaveDropsLeaderboardSortBy;
   readonly sortDirection: WaveDropsLeaderboardSortDirection;
   readonly showMyDrops: boolean;
-  readonly setActiveDrop: (drop: ExtendedDrop) => void;
   readonly onCreateDrop: () => void;
 }
 
@@ -25,7 +23,6 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   dropsSortBy,
   sortDirection,
   showMyDrops,
-  setActiveDrop,
   onCreateDrop,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
@@ -88,7 +85,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
           key={drop.id}
           drop={drop}
           wave={wave}
-          setActiveDrop={setActiveDrop}
+          onDropClick={() => {}}
         />
       ))}
       {isFetchingNextPage && (

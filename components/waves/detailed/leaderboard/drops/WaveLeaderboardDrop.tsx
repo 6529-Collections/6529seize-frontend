@@ -12,7 +12,7 @@ import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 interface WaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
-  readonly setActiveDrop: (drop: ExtendedDrop) => void;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const rankGradients: Record<number | "default", string> = {
@@ -26,7 +26,7 @@ const rankGradients: Record<number | "default", string> = {
 export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
   drop,
   wave,
-  setActiveDrop,
+  onDropClick,
 }) => {
   const { canShowVote } = useDropInteractionRules(drop);
   const gradientClass =
@@ -36,7 +36,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
 
   return (
     <div
-      onClick={() => setActiveDrop(drop)}
+      onClick={() => onDropClick(drop)}
       className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
     >
       <div className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5">
@@ -70,7 +70,6 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
             <div className="tw-rounded-lg tw-bg-iron-900/50 tw-px-4 tw-pb-4 tw-pt-2 tw-ring-1 tw-ring-iron-800/50">
               <WaveLeaderboardDropContent
                 drop={drop}
-                setActiveDrop={setActiveDrop}
               />
             </div>
 

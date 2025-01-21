@@ -14,7 +14,7 @@ export interface FeedItemsProps {
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedItems({
@@ -24,7 +24,7 @@ export default function FeedItems({
   onBottomIntersection,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: FeedItemsProps) {
   const getIntersectionTargetIndex = () => {
     if (items.length < 5) {
@@ -52,7 +52,7 @@ export default function FeedItems({
               activeDrop={activeDrop}
               onReply={onReply}
               onQuote={onQuote}
-              onDropClick={onDropClick}
+              onDropContentClick={onDropContentClick}
             />
           </CommonChangeAnimation>
           {!!intersectionTargetIndex && intersectionTargetIndex === i && (

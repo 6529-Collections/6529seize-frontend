@@ -72,7 +72,6 @@ const WaveDetailedDesktop: React.FC<WaveDetailedDesktopProps> = ({
         wave={wave}
         activeTab={view}
         setActiveTab={setView}
-        onDropClick={setActiveDrop}
       />
     ),
     [WaveDetailedView.LEADERBOARD]: (

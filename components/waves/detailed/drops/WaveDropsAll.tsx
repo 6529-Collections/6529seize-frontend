@@ -39,7 +39,7 @@ export interface WaveDropsAllProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function WaveDropsAll({
@@ -49,7 +49,7 @@ export default function WaveDropsAll({
   onQuote,
   activeDrop,
   initialDrop,
-  onDropClick,
+  onDropContentClick,
 }: WaveDropsAllProps) {
   const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
@@ -283,7 +283,7 @@ export default function WaveDropsAll({
               onQuoteClick={onQuoteClick}
               parentContainerRef={scrollContainerRef}
               dropViewDropId={dropId}
-              onDropClick={onDropClick}
+              onDropContentClick={onDropContentClick}
             />
           </div>
         </WaveDropsScrollContainer>

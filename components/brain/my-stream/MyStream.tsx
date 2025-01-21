@@ -11,7 +11,7 @@ interface MyStreamProps {
   readonly items: TypedFeedItem[];
   readonly isFetching: boolean;
   readonly onBottomIntersection: (state: boolean) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function MyStream({
@@ -21,7 +21,7 @@ export default function MyStream({
   items,
   isFetching,
   onBottomIntersection,
-  onDropClick,
+  onDropContentClick,
 }: MyStreamProps) {
 
   return (
@@ -34,7 +34,7 @@ export default function MyStream({
         onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
-        onDropClick={onDropClick}
+        onDropContentClick={onDropContentClick}
       />
     </div>
   );
