@@ -29,11 +29,15 @@ export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
   });
 
   useEffect(() => {
-    const data = query.data?.pages.length
-      ? reverse
-        ? query.data?.pages.flat().reverse()
-        : query.data?.pages.flat()
-      : [];
+    let data: TypedFeedItem[] = [];
+    
+    if (query.data?.pages.length) {
+      data = query.data.pages.flat();
+      if (reverse) {
+        data = data.toReversed();
+      }
+    }
+
     setItems(data);
     setIsInitialQueryDone(true);
   }, [query.data, reverse]);
