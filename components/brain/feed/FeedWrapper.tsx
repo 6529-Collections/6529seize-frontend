@@ -34,8 +34,8 @@ export default function FeedWrapper({
         <div className="lg:tw-pb-2 tw-flex tw-flex-col-reverse tw-flex-grow">
           <div className="tw-flex tw-flex-col-reverse tw-flex-grow">
             <div className="tw-overflow-hidden">
-            {loading && (
-                <div className="tw-w-full tw-text-center tw-mt-4 tw-pb-6">
+              {loading && (
+                <div className="tw-w-full tw-text-center tw-mt-4 tw-pb-4">
                   <CircleLoader size={CircleLoaderSize.XXLARGE} />
                 </div>
               )}
@@ -48,7 +48,6 @@ export default function FeedWrapper({
                 onQuote={onQuote}
                 onDropClick={onDropClick}
               />
-
             </div>
           </div>
         </div>
