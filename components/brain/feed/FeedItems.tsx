@@ -30,7 +30,7 @@ export default function FeedItems({
     if (items.length < 5) {
       return null;
     }
-    return items.length - 5;
+    return 5;
   };
 
   const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
