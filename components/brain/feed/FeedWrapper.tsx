@@ -29,21 +29,29 @@ export default function FeedWrapper({
   onDropClick,
 }: FeedWrapperProps) {
   return (
-    <div className="tw-relative">
-      <FeedItems
-        items={items}
-        showWaveInfo={showWaveInfo}
-        activeDrop={activeDrop}
-        onBottomIntersection={onBottomIntersection}
-        onReply={onReply}
-        onQuote={onQuote}
-        onDropClick={onDropClick}
-      />
-      {loading && (
-        <div className="tw-w-full tw-text-center tw-mt-8">
-          <CircleLoader size={CircleLoaderSize.XXLARGE} />
+    <div className="tw-relative tw-h-full">
+      <div className="tw-w-full tw-h-full tw-flex tw-flex-col">
+        <div className="lg:tw-pb-2 tw-flex tw-flex-col-reverse tw-flex-grow">
+          <div className="tw-flex tw-flex-col-reverse tw-flex-grow">
+            <div className="tw-overflow-hidden">
+              <FeedItems
+                items={items}
+                showWaveInfo={showWaveInfo}
+                activeDrop={activeDrop}
+                onBottomIntersection={onBottomIntersection}
+                onReply={onReply}
+                onQuote={onQuote}
+                onDropClick={onDropClick}
+              />
+              {loading && (
+                <div className="tw-w-full tw-text-center tw-mt-4 tw-pb-6">
+                  <CircleLoader size={CircleLoaderSize.XXLARGE} />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -28,7 +28,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
       <div
         className={`tw-flex-1 ${
           !waveId
-            ? " tw-overflow-x-hidden lg:tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
+            ? " tw-flex tw-flex-col-reverse tw-overflow-x-hidden lg:tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
             : " "
         }`}
       >
