@@ -90,9 +90,9 @@ export function usePollingQuery(
   useEffect(() => {
     if (pollingResult && pollingResult.length > 0 && items.length > 0) {
       const latestPolledItem = pollingResult[0];
-      const latestExistingItem = items[0];
+      const latestExistingItem = reverse ? items.at(items.length - 1) : items.at(0);
       setHaveNewItems(
-        latestPolledItem.serial_no > latestExistingItem.serial_no
+        latestExistingItem ? latestPolledItem.serial_no > latestExistingItem.serial_no : true
       );
     } else if (
       pollingResult &&
@@ -103,7 +103,7 @@ export function usePollingQuery(
     } else {
       setHaveNewItems(false);
     }
-  }, [pollingResult, items]);
+  }, [pollingResult, items, reverse]);
 
   return { haveNewItems };
 }
