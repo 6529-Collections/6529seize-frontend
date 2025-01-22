@@ -9,9 +9,10 @@ import { useContext } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropFollowAuthor from "./WaveDetailedDropFollowAuthor";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveDetailedDropActionsProps {
-  readonly drop: ApiDrop;
+  readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
   readonly showVoting?: boolean;
   readonly onReply: () => void;

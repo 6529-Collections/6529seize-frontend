@@ -16,12 +16,11 @@ export enum MyStreamWaveTab {
 
 interface MyStreamWaveProps {
   readonly waveId: string;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropContentClick }) => {
+const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const { data: wave } = useWaveData(waveId);
 
@@ -40,12 +39,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId, onDropContentClick 
   }
 
   const components: Record<MyStreamWaveTab, JSX.Element> = {
-    [MyStreamWaveTab.CHAT]: (
-      <MyStreamWaveChat wave={wave} onDropContentClick={onDropContentClick} />
-    ),
-    [MyStreamWaveTab.LEADERBOARD]: (
-      <MyStreamWaveLeaderboard wave={wave}  />
-    ),
+    [MyStreamWaveTab.CHAT]: <MyStreamWaveChat wave={wave} />,
+    [MyStreamWaveTab.LEADERBOARD]: <MyStreamWaveLeaderboard wave={wave} />,
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
   };
 

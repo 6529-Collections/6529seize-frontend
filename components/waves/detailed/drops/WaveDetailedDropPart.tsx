@@ -91,7 +91,9 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         className={`tw-no-underline ${
-          isTemporaryDrop ? "tw-cursor-default" : "tw-cursor-pointer"
+          isTemporaryDrop || !onDropContentClick
+            ? "tw-cursor-default"
+            : "tw-cursor-pointer"
         }`}
         role={isTemporaryDrop ? undefined : "button"}
         tabIndex={isTemporaryDrop ? undefined : 0}

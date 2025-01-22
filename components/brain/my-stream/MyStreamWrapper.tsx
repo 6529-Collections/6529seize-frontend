@@ -14,7 +14,6 @@ import {
 } from "../../waves/detailed/chat/WaveChat";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
-import { reverse } from "lodash";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);
@@ -27,19 +26,6 @@ const MyStreamWrapper: React.FC = () => {
   }, [router.query]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
-
-  // const onDropClick = (drop: ExtendedDrop) => {
-  //   const currentQuery = { ...router.query };
-  //   currentQuery.drop = drop.id;
-  //   router.push(
-  //     {
-  //       pathname: router.pathname,
-  //       query: currentQuery,
-  //     },
-  //     undefined,
-  //     { shallow: true }
-  //   );
-  // };
 
   const onDropContentClick = (drop: ExtendedDrop) => {
     router.push(
