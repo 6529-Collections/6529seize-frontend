@@ -5,6 +5,7 @@ import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 
 export interface NotificationItemsProps {
   readonly items: TypedNotification[];
@@ -37,18 +38,21 @@ export default function NotificationItems({
   useEffect(() => {
     setIntersectionTargetIndex(getIntersectionTargetIndex());
   }, [items]);
+
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-2">
+    <div className="tw-flex tw-flex-col-reverse tw-space-y-3 tw-space-y-reverse tw-pb-4">
       {items.map((item, i) => (
         <div key={item.id}>
-          <NotificationItem
-            key={item.id}
-            notification={item}
-            activeDrop={activeDrop}
-            onReply={onReply}
-            onQuote={onQuote}
-            onDropClick={onDropClick}
-          />
+          <CommonChangeAnimation>
+            <NotificationItem
+             key={item.id}
+             notification={item}
+             activeDrop={activeDrop}
+             onReply={onReply}
+             onQuote={onQuote}
+             onDropClick={onDropClick}
+            />
+          </CommonChangeAnimation>
           {!!intersectionTargetIndex && intersectionTargetIndex === i && (
             <CommonIntersectionElement onIntersection={onBottomIntersection} />
           )}
