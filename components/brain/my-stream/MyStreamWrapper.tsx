@@ -75,7 +75,7 @@ const MyStreamWrapper: React.FC = () => {
     isInitialQueryDone,
   } = useMyStreamQuery({ reverse: true });
 
-  const { haveNewItems } = usePollingQuery(isInitialQueryDone, items);
+  const { haveNewItems } = usePollingQuery(isInitialQueryDone, items, true);
 
   const onBottomIntersection = (state: boolean) => {
     if (
