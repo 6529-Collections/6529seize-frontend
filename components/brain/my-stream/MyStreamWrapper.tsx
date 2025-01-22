@@ -14,6 +14,7 @@ import {
 } from "../../waves/detailed/chat/WaveChat";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
+import { reverse } from "lodash";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);
@@ -81,9 +82,9 @@ const MyStreamWrapper: React.FC = () => {
     status,
     refetch,
     isInitialQueryDone,
-  } = useMyStreamQuery();
+  } = useMyStreamQuery({ reverse: true });
 
-  const { haveNewItems } = usePollingQuery(isInitialQueryDone, items);
+  const { haveNewItems } = usePollingQuery(isInitialQueryDone, items, true);
 
   const onBottomIntersection = (state: boolean) => {
     if (
