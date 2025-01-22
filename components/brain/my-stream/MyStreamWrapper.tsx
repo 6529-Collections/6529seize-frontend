@@ -73,7 +73,7 @@ const MyStreamWrapper: React.FC = () => {
     status,
     refetch,
     isInitialQueryDone,
-  } = useMyStreamQuery();
+  } = useMyStreamQuery({ reverse: true });
 
   const { haveNewItems } = usePollingQuery(isInitialQueryDone, items);
 
