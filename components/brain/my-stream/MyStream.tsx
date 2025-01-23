@@ -24,7 +24,7 @@ export default function MyStream({
   onDropClick,
 }: MyStreamProps) {
   return (
-    <div className="tw-h-full">
+
       <FeedWrapper
         items={items}
         loading={isFetching}
@@ -35,6 +35,6 @@ export default function MyStream({
         onQuote={onQuote}
         onDropClick={onDropClick}
       />
-    </div>
+ 
   );
 }

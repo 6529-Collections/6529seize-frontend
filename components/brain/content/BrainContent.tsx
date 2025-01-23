@@ -18,22 +18,22 @@ const BrainContent: React.FC<BrainContentProps> = ({
   onCancelReplyQuote,
   waveId,
 }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const lastScrollPositionRef = useRef<number>(0);
+  // const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // const lastScrollPositionRef = useRef<number>(0);
 
-  useEffect(() => {
-    if (!scrollContainerRef.current) return;
+  // useEffect(() => {
+  //   if (!scrollContainerRef.current) return;
 
-    if (waveId) {
-      lastScrollPositionRef.current = scrollContainerRef.current.scrollTop;
-    } else {
-      requestAnimationFrame(() => {
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTop = lastScrollPositionRef.current;
-        }
-      });
-    }
-  }, [waveId]);
+  //   if (waveId) {
+  //     lastScrollPositionRef.current = scrollContainerRef.current.scrollTop;
+  //   } else {
+  //     requestAnimationFrame(() => {
+  //       if (scrollContainerRef.current) {
+  //         scrollContainerRef.current.scrollTop = lastScrollPositionRef.current;
+  //       }
+  //     });
+  //   }
+  // }, [waveId]);
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
@@ -42,16 +42,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
           <BrainContentPinnedWaves />
         </div>
       )}
-      <div
-        ref={scrollContainerRef}
-        className={`tw-flex-1 ${
-          !waveId
-            ? "tw-flex tw-flex-col-reverse tw-overflow-x-hidden lg:tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
-            : " "
-        }`}
-      >
-        <div>{children}</div>
-      </div>
+      {children}
       <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
         <BrainContentInput
           activeDrop={activeDrop}

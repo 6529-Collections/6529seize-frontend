@@ -37,12 +37,7 @@ export default function FeedWrapper({
   };
 
   return (
-    <div className="tw-relative tw-h-full">
-      {loading && (
-        <div className="tw-w-full tw-text-center tw-mt-4 tw-pb-4">
-          <CircleLoader size={CircleLoaderSize.XXLARGE} />
-        </div>
-      )}
+
       <FeedScrollContainer
         ref={scrollRef}
         onScrollUpNearTop={handleScrollUpNearTop}
@@ -57,6 +52,6 @@ export default function FeedWrapper({
           onDropClick={onDropClick}
         />
       </FeedScrollContainer>
-    </div>
+ 
   );
 }
