@@ -17,11 +17,10 @@ import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
 import useCapacitor from "../../../hooks/useCapacitor";
-import {
-  ActiveDropState,
-} from "../../waves/detailed/chat/WaveChat";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
+import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -77,51 +76,21 @@ export default function Notifications() {
   }, []);
 
   const {
-    data,
-    fetchNextPage,
-    hasNextPage,
+    items,
     isFetching,
     isFetchingNextPage,
-    status,
+    hasNextPage,
+    fetchNextPage,
     refetch,
-  } = useInfiniteQuery({
-    queryKey: [
-      QueryKey.IDENTITY_NOTIFICATIONS,
-      { identity: connectedProfile?.profile?.handle, limit: "10" },
-    ],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        limit: "10",
-      };
-      if (pageParam) {
-        params.id_less_than = `${pageParam}`;
-      }
-      return await commonApiFetch<TypedNotificationsResponse>({
-        endpoint: `notifications`,
-        params,
-      });
-    },
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
-    enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
+  } = useNotificationsQuery({
+    identity: connectedProfile?.profile?.handle,
+    activeProfileProxy: !!activeProfileProxy,
+    limit: "30",
+    reverse: true
   });
-
-  const [items, setItems] = useState<TypedNotification[]>([]);
-
-  useEffect(() => {
-    if (data?.pages.length) {
-      const newItems = data.pages.flatMap((page) => page.notifications).reverse();
-      setItems(newItems);
-    } else {
-      setItems([]);
-    }
-  }, [data]);
 
   const onBottomIntersection = (state: boolean) => {
     if (!state) {
-      return;
-    }
-    if (status === "pending") {
       return;
     }
     if (isFetching) {
