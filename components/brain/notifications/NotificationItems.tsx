@@ -40,7 +40,7 @@ export default function NotificationItems({
   }, [items]);
 
   return (
-    <div className="tw-flex tw-flex-col-reverse tw-space-y-3 tw-space-y-reverse tw-pb-4">
+    <div className="tw-flex tw-flex-col-reverse tw-space-y-3 tw-space-y-reverse">
       {items.map((item, i) => (
         <div key={item.id}>
           <CommonChangeAnimation>
