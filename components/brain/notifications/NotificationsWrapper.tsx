@@ -15,7 +15,6 @@ import { useRouter } from "next/router";
 interface NotificationsWrapperProps {
   readonly items: TypedNotification[];
   readonly loading: boolean;
-  readonly onBottomIntersection: (state: boolean) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (drop: ActiveDropState | null) => void;
 }
@@ -23,7 +22,6 @@ interface NotificationsWrapperProps {
 export default function NotificationsWrapper({
   items,
   loading,
-  onBottomIntersection,
   activeDrop,
   setActiveDrop,
 }: NotificationsWrapperProps) {
@@ -59,26 +57,19 @@ export default function NotificationsWrapper({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-full">
-      <div className="tw-flex-1 tw-overflow-hidden">
-        <div className="tw-flex tw-flex-col-reverse">
-          <div className="tw-relative">
-            {loading && (
-              <div className="tw-w-full tw-text-center tw-mt-4 tw-mb-4">
-                <CircleLoader size={CircleLoaderSize.XXLARGE} />
-              </div>
-            )}
-            <NotificationItems
-              items={items}
-              onBottomIntersection={onBottomIntersection}
-              activeDrop={activeDrop}
-              onReply={onReply}
-              onQuote={onQuote}
-              onDropClick={onDropClick}
-            />
-          </div>
+    <div className="tw-relative">
+      {loading && (
+        <div className="tw-w-full tw-text-center tw-mt-4 tw-mb-4">
+          <CircleLoader size={CircleLoaderSize.XXLARGE} />
         </div>
-      </div>
+      )}
+      <NotificationItems
+        items={items}
+        activeDrop={activeDrop}
+        onReply={onReply}
+        onQuote={onQuote}
+        onDropClick={onDropClick}
+      />
     </div>
   );
 }

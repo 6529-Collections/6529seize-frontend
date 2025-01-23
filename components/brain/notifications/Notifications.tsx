@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import {
   QueryKey,
@@ -21,12 +21,14 @@ import {
   ActiveDropState,
 } from "../../waves/detailed/chat/WaveChat";
 import BrainContentInput from "../content/input/BrainContentInput";
+import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
   const capacitor = useCapacitor();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
   const { reload } = router.query;
@@ -107,14 +109,12 @@ export default function Notifications() {
   const [items, setItems] = useState<TypedNotification[]>([]);
 
   useEffect(() => {
-    let newItems: TypedNotification[] = [];
-
     if (data?.pages.length) {
-      newItems = data.pages.flatMap((page) => page.notifications);
-      newItems = newItems.toReversed();
+      const newItems = data.pages.flatMap((page) => page.notifications);
+      setItems(newItems);
+    } else {
+      setItems([]);
     }
-
-    setItems(newItems);
   }, [data]);
 
   const onBottomIntersection = (state: boolean) => {
@@ -136,27 +136,32 @@ export default function Notifications() {
     fetchNextPage();
   };
 
+  const handleScrollUpNearTop = () => {
+    onBottomIntersection(true);
+  };
+
   const onCancelReplyQuote = () => {
     setActiveDrop(null);
   };
 
   return (
-    <div className="tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6rem)] min-[1200px]:tw-h-[calc(100vh-6.375rem)]">
-      <div className={`tw-flex-1 tw-flex tw-flex-col-reverse tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 ${
-        capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
-      }`}>
+    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6rem)] min-[1200px]:tw-h-[calc(100vh-6.375rem)]">
+      <div className="tw-flex-1 tw-h-full">
         {!items.length && !isFetching ? (
           <MyStreamNoItems />
         ) : (
-          <div className="tw-flex tw-flex-col-reverse">
+          <FeedScrollContainer
+            ref={scrollRef}
+            onScrollUpNearTop={handleScrollUpNearTop}
+            isFetchingNextPage={isFetching}
+          >
             <NotificationsWrapper
               items={items}
               loading={isFetching}
-              onBottomIntersection={onBottomIntersection}
               activeDrop={activeDrop}
               setActiveDrop={setActiveDrop}
             />
-          </div>
+          </FeedScrollContainer>
         )}
       </div>
       <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
