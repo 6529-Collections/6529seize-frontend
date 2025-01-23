@@ -145,7 +145,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6rem)] min-[1200px]:tw-h-[calc(100vh-6.375rem)]">
+    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)]">
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex tw-flex-col">
         {!items.length && !isFetching ? (
           <MyStreamNoItems />
