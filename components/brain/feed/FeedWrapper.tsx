@@ -1,9 +1,6 @@
 import { useRef } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TypedFeedItem } from "../../../types/feed.types";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 import FeedItems from "./FeedItems";

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React from "react";
 import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
@@ -18,22 +18,6 @@ const BrainContent: React.FC<BrainContentProps> = ({
   onCancelReplyQuote,
   waveId,
 }) => {
-  // const scrollContainerRef = useRef<HTMLDivElement>(null);
-  // const lastScrollPositionRef = useRef<number>(0);
-
-  // useEffect(() => {
-  //   if (!scrollContainerRef.current) return;
-
-  //   if (waveId) {
-  //     lastScrollPositionRef.current = scrollContainerRef.current.scrollTop;
-  //   } else {
-  //     requestAnimationFrame(() => {
-  //       if (scrollContainerRef.current) {
-  //         scrollContainerRef.current.scrollTop = lastScrollPositionRef.current;
-  //       }
-  //     });
-  //   }
-  // }, [waveId]);
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">

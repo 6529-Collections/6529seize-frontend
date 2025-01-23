@@ -1,22 +1,11 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../react-query-wrapper/ReactQueryWrapper";
-import {
-  commonApiFetch,
-  commonApiPostWithoutBodyAndResponse,
-} from "../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
-import {
-  TypedNotification,
-  TypedNotificationsResponse,
-} from "../../../types/feed.types";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
-import useCapacitor from "../../../hooks/useCapacitor";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
@@ -25,7 +14,6 @@ import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
-  const capacitor = useCapacitor();
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
