@@ -110,7 +110,7 @@ export default function Notifications() {
 
   useEffect(() => {
     if (data?.pages.length) {
-      const newItems = data.pages.flatMap((page) => page.notifications);
+      const newItems = data.pages.flatMap((page) => page.notifications).reverse();
       setItems(newItems);
     } else {
       setItems([]);
