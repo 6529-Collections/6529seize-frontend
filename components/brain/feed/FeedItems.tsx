@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItem from "./FeedItem";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
-import { ExtendedDrop, getFeedItemKey } from "../../../helpers/waves/drop.helpers";
+import {
+  ExtendedDrop,
+  getFeedItemKey,
+} from "../../../helpers/waves/drop.helpers";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
