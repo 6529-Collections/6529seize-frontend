@@ -1,7 +1,5 @@
-import { useEffect, useState } from "react";
 import { TypedFeedItem } from "../../../types/feed.types";
 import FeedItem from "./FeedItem";
-import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import {
   ExtendedDrop,
   getFeedItemKey,
@@ -14,7 +12,6 @@ export interface FeedItemsProps {
   readonly items: TypedFeedItem[];
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
-  readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -24,30 +21,14 @@ export default function FeedItems({
   items,
   showWaveInfo,
   activeDrop,
-  onBottomIntersection,
   onReply,
   onQuote,
   onDropClick,
 }: FeedItemsProps) {
-  const getIntersectionTargetIndex = () => {
-    if (items.length < 5) {
-      return null;
-    }
-    return 5;
-  };
-
-  const [intersectionTargetIndex, setIntersectionTargetIndex] = useState<
-    number | null
-  >(getIntersectionTargetIndex());
-
-  useEffect(() => {
-    setIntersectionTargetIndex(getIntersectionTargetIndex());
-  }, [items]);
-
   return (
     <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3 lg:tw-pb-1.5">
       {items.map((item, i) => (
-        <div key={getFeedItemKey({ item, index: i })}>
+        <div key={getFeedItemKey({ item, index: i })} id={`feed-item-${item.serial_no}`}>
           <CommonChangeAnimation>
             <FeedItem
               item={item}
@@ -58,9 +39,6 @@ export default function FeedItems({
               onDropClick={onDropClick}
             />
           </CommonChangeAnimation>
-          {!!intersectionTargetIndex && intersectionTargetIndex === i && (
-            <CommonIntersectionElement onIntersection={onBottomIntersection} />
-          )}
         </div>
       ))}
     </div>

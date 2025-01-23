@@ -111,6 +111,7 @@ export default function Notifications() {
 
     if (data?.pages.length) {
       newItems = data.pages.flatMap((page) => page.notifications);
+      newItems = newItems.toReversed();
     }
 
     setItems(newItems);
