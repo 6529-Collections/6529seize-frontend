@@ -26,7 +26,7 @@ export default function FeedItems({
   onDropClick,
 }: FeedItemsProps) {
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-4">
+    <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-2 lg:tw-pb-4">
       {items.map((item, i) => (
         <div key={getFeedItemKey({ item, index: i })} id={`feed-item-${item.serial_no}`}>
           <CommonChangeAnimation>
