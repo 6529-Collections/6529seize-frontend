@@ -9,7 +9,6 @@ import WaveDropsAll from "../drops/WaveDropsAll";
 import { CreateDropWaveWrapper } from "../CreateDropWaveWrapper";
 import { WaveDetailedView } from "../WaveDetailed";
 import { WaveDetailedDesktopTabs } from "../WaveDetailedDesktopTabs";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 
 export enum ActiveDropAction {

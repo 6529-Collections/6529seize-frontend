@@ -1,4 +1,3 @@
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
 import WaveDetailedDropActionsReply from "./WaveDetailedDropActionsReply";
 import WaveDetailedDropActionsQuote from "./WaveDetailedDropActionsQuote";

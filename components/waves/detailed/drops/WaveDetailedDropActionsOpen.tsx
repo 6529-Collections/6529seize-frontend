@@ -1,5 +1,4 @@
 import React from "react";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";

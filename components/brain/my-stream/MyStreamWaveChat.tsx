@@ -1,5 +1,4 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import useCapacitor from "../../../hooks/useCapacitor";
 import {
   ActiveDropAction,

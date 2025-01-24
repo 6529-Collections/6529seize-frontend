@@ -1,7 +1,6 @@
 import React, { memo, useState, useEffect, useRef } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDetailedDropPartDrop from "./WaveDetailedDropPartDrop";
-import { ApiDropType } from "../../../../generated/models/ApiDropType";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveDetailedDropPartProps {
