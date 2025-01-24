@@ -105,7 +105,7 @@ interface WaveDetailedDropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
@@ -121,7 +121,7 @@ const WaveDetailedDrop = ({
   onQuote,
   onReplyClick,
   onQuoteClick,
-  onDropClick,
+  onDropContentClick,
   showReplyAndQuote,
   parentContainerRef,
 }: WaveDetailedDropProps) => {
@@ -188,10 +188,6 @@ const WaveDetailedDrop = ({
     }
   }, []);
 
-  const handleDropClick = useCallback(() => {
-    onDropClick(drop);
-  }, [onDropClick, drop]);
-
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex].part_id });
@@ -219,8 +215,8 @@ const WaveDetailedDrop = ({
   );
 
   const onContainerClick = () => {
-    if (drop.drop_type === ApiDropType.Participatory) {
-      onDropClick(drop);
+    if (drop.drop_type === ApiDropType.Participatory && onDropContentClick) {
+      onDropContentClick(drop);
     }
   };
 
@@ -278,7 +274,7 @@ const WaveDetailedDrop = ({
                 activePartIndex={activePartIndex}
                 setActivePartIndex={setActivePartIndex}
                 onLongPress={handleLongPress}
-                onDropClick={handleDropClick}
+                onDropContentClick={onDropContentClick}
                 onQuoteClick={onQuoteClick}
                 setLongPressTriggered={setLongPressTriggered}
                 parentContainerRef={parentContainerRef}

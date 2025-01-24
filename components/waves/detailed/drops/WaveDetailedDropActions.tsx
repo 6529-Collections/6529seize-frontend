@@ -1,16 +1,17 @@
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
 import WaveDetailedDropActionsReply from "./WaveDetailedDropActionsReply";
 import WaveDetailedDropActionsQuote from "./WaveDetailedDropActionsQuote";
 import WaveDetailedDropActionsCopyLink from "./WaveDetailedDropActionsCopyLink";
 import WaveDetailedDropActionsOptions from "./WaveDetailedDropActionsOptions";
+import WaveDetailedDropActionsOpen from "./WaveDetailedDropActionsOpen";
 import { useContext } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropFollowAuthor from "./WaveDetailedDropFollowAuthor";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveDetailedDropActionsProps {
-  readonly drop: ApiDrop;
+  readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
   readonly showVoting?: boolean;
   readonly onReply: () => void;
@@ -44,6 +45,7 @@ export default function WaveDetailedDropActions({
             activePartIndex={activePartIndex}
           />
           <WaveDetailedDropActionsCopyLink drop={drop} />
+          <WaveDetailedDropActionsOpen drop={drop} />
           {canDelete && <WaveDetailedDropActionsOptions drop={drop} />}
         </div>
         {showVoting && <WaveDetailedDropActionsRate drop={drop} />}

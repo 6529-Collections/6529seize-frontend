@@ -109,7 +109,6 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
                 dropsSortBy={sortBy[sort]}
                 sortDirection={sortDirection[sort]}
                 showMyDrops={showMyDrops}
-                setActiveDrop={setActiveDrop}
                 onCreateDrop={() => setIsCreatingDrop(true)}
               />
             </>

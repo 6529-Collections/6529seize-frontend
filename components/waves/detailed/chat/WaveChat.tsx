@@ -9,7 +9,6 @@ import WaveDropsAll from "../drops/WaveDropsAll";
 import { CreateDropWaveWrapper } from "../CreateDropWaveWrapper";
 import { WaveDetailedView } from "../WaveDetailed";
 import { WaveDetailedDesktopTabs } from "../WaveDetailedDesktopTabs";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 
 export enum ActiveDropAction {
@@ -27,7 +26,6 @@ interface WaveChatProps {
   readonly wave: ApiWave;
   readonly activeTab: WaveDetailedView;
   readonly setActiveTab: (tab: WaveDetailedView) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const calculateHeight = (isCapacitor: boolean, isNotChatWave: boolean) => {
@@ -45,7 +43,6 @@ export const WaveChat: React.FC<WaveChatProps> = ({
   wave,
   activeTab,
   setActiveTab,
-  onDropClick,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -138,7 +135,6 @@ export const WaveChat: React.FC<WaveChatProps> = ({
                   activeDrop={activeDrop}
                   initialDrop={initialDrop}
                   dropId={null}
-                  onDropClick={onDropClick}
                 />
                 <div className="tw-mt-auto">
                   <CreateDropWaveWrapper>
@@ -208,8 +204,8 @@ export const WaveChat: React.FC<WaveChatProps> = ({
               <WaveDetailedRightSidebar
                 isOpen={isSidebarOpen}
                 wave={wave}
-                onDropClick={onDropClick}
                 onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+                onDropClick={() => {}}
               />
             </div>
           </>

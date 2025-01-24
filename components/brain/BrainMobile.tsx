@@ -21,7 +21,7 @@ export enum BrainView {
   ABOUT = "ABOUT",
   LEADERBOARD = "LEADERBOARD",
   OUTCOME = "OUTCOME",
-  NOTIFICATIONS = "NOTIFICATIONS"
+  NOTIFICATIONS = "NOTIFICATIONS",
 }
 
 interface Props {
@@ -43,6 +43,19 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   const { data: wave } = useWaveData(router.query.wave as string);
 
+  const onDropClick = (drop: ExtendedDrop) => {
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const onDropClose = () => {
     const currentQuery = { ...router.query };
     delete currentQuery.drop;
@@ -56,19 +69,6 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
   const isRankWave = wave?.wave.type === ApiWaveType.Rank;
-
-  const onDropClick = (drop: ExtendedDrop) => {
-    const currentQuery = { ...router.query };
-    currentQuery.drop = drop.id;
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
 
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.WAVES]: (

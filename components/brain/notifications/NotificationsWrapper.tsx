@@ -27,14 +27,9 @@ export default function NotificationsWrapper({
 }: NotificationsWrapperProps) {
   const router = useRouter();
 
-  const onDropClick = (drop: ExtendedDrop) => {
-    const currentQuery = { ...router.query };
-    currentQuery.drop = drop.id;
+  const onDropContentClick = (drop: ExtendedDrop) => {
     router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
+      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`,
       undefined,
       { shallow: true }
     );
@@ -68,7 +63,7 @@ export default function NotificationsWrapper({
         activeDrop={activeDrop}
         onReply={onReply}
         onQuote={onQuote}
-        onDropClick={onDropClick}
+        onDropContentClick={onDropContentClick}
       />
     </div>
   );

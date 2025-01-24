@@ -129,7 +129,7 @@ const DropContent = memo<DropContentProps>(({ drop, onDropClick }) => {
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
         onLongPress={() => {}}
-        onDropClick={handleDropClick}
+        onDropContentClick={handleDropClick}
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
       />

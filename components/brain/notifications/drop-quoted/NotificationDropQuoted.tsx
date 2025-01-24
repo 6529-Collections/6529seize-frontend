@@ -13,13 +13,13 @@ export default function NotificationDropQuoted({
   activeDrop,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: {
   readonly notification: INotificationDropQuoted;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
   
@@ -53,7 +53,7 @@ export default function NotificationDropQuoted({
       onQuote={onQuote}
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
-      onDropClick={onDropClick}
+      onDropContentClick={onDropContentClick}
     />
   );
 }

@@ -102,7 +102,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               dropsSortBy={sortBy[sort]}
               sortDirection={sortDirection[sort]}
               showMyDrops={showMyDrops}
-              setActiveDrop={onDropClick}
               onCreateDrop={() => setIsCreatingDrop(true)}
             />
           </div>

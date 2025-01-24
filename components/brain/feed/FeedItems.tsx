@@ -14,7 +14,7 @@ export interface FeedItemsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedItems({
@@ -23,7 +23,7 @@ export default function FeedItems({
   activeDrop,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: FeedItemsProps) {
   return (
     <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-2 lg:tw-pb-4">
@@ -36,7 +36,7 @@ export default function FeedItems({
               activeDrop={activeDrop}
               onReply={onReply}
               onQuote={onQuote}
-              onDropClick={onDropClick}
+              onDropContentClick={onDropContentClick}
             />
           </CommonChangeAnimation>
         </div>

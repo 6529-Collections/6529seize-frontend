@@ -1,5 +1,4 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import useCapacitor from "../../../hooks/useCapacitor";
 import {
   ActiveDropAction,
@@ -17,7 +16,6 @@ import { useSearchParams } from "next/navigation";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const calculateHeight = (isCapacitor: boolean) => {
@@ -28,8 +26,7 @@ const calculateHeight = (isCapacitor: boolean) => {
 };
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
-  wave,
-  onDropClick,
+  wave
 }) => {
   const capacitor = useCapacitor();
   const router = useRouter();
@@ -102,7 +99,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             activeDrop={activeDrop}
             initialDrop={initialDrop}
             dropId={null}
-            onDropClick={onDropClick}
           />
           <div className="tw-mt-auto">
             <CreateDropWaveWrapper>

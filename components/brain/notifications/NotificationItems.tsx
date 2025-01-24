@@ -10,7 +10,7 @@ export interface NotificationItemsProps {
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function NotificationItems({
@@ -18,7 +18,7 @@ export default function NotificationItems({
   activeDrop,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: NotificationItemsProps) {
   return (
     <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3">
@@ -30,7 +30,7 @@ export default function NotificationItems({
               activeDrop={activeDrop}
               onReply={onReply}
               onQuote={onQuote}
-              onDropClick={onDropClick}
+              onDropContentClick={onDropContentClick}
             />
           </CommonChangeAnimation>
         </div>

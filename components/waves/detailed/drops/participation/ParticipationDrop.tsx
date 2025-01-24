@@ -21,7 +21,7 @@ interface ParticipationDropProps {
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
@@ -34,7 +34,7 @@ export default function ParticipationDrop({
   onReply,
   onQuote,
   onQuoteClick,
-  onDropClick,
+  onDropContentClick,
   parentContainerRef,
 }: ParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
@@ -50,9 +50,7 @@ export default function ParticipationDrop({
     setIsSlideUp(true);
   }, [isMobile]);
 
-  const handleDropClick = useCallback(() => {
-    onDropClick(drop);
-  }, [onDropClick, drop]);
+
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
@@ -85,7 +83,7 @@ export default function ParticipationDrop({
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
         onLongPress={handleLongPress}
-        onDropClick={handleDropClick}
+        onDropContentClick={onDropContentClick}
         onQuoteClick={onQuoteClick}
         setLongPressTriggered={setLongPressTriggered}
         parentContainerRef={parentContainerRef}

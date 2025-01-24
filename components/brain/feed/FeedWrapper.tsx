@@ -14,7 +14,7 @@ interface FeedWrapperProps {
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedWrapper({
@@ -25,7 +25,7 @@ export default function FeedWrapper({
   onBottomIntersection,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: FeedWrapperProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -34,21 +34,19 @@ export default function FeedWrapper({
   };
 
   return (
-
-      <FeedScrollContainer
-        ref={scrollRef}
-        onScrollUpNearTop={handleScrollUpNearTop}
-        isFetchingNextPage={loading}
-      >
-        <FeedItems
-          items={items}
-          showWaveInfo={showWaveInfo}
-          activeDrop={activeDrop}
-          onReply={onReply}
-          onQuote={onQuote}
-          onDropClick={onDropClick}
-        />
-      </FeedScrollContainer>
- 
+    <FeedScrollContainer
+      ref={scrollRef}
+      onScrollUpNearTop={handleScrollUpNearTop}
+      isFetchingNextPage={loading}
+    >
+      <FeedItems
+        items={items}
+        showWaveInfo={showWaveInfo}
+        activeDrop={activeDrop}
+        onReply={onReply}
+        onQuote={onQuote}
+        onDropContentClick={onDropContentClick}
+      />
+    </FeedScrollContainer>
   );
 }
