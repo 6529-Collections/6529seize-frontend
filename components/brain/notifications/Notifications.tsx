@@ -1,27 +1,27 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../../react-query-wrapper/ReactQueryWrapper";
-import {
-  commonApiFetch,
-  commonApiPostWithoutBodyAndResponse,
-} from "../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
-import {
-  TypedNotification,
-  TypedNotificationsResponse,
-} from "../../../types/feed.types";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
+import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import BrainContentInput from "../content/input/BrainContentInput";
+import { FeedScrollContainer } from "../feed/FeedScrollContainer";
+import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 import useCapacitor from "../../../hooks/useCapacitor";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
+  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const capacitor = useCapacitor();
+
+  const containerClassName = `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)] ${
+    capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
+  }` as const;
 
   const router = useRouter();
   const { reload } = router.query;
@@ -70,46 +70,21 @@ export default function Notifications() {
   }, []);
 
   const {
-    data,
-    fetchNextPage,
-    hasNextPage,
+    items,
     isFetching,
     isFetchingNextPage,
-    status,
+    hasNextPage,
+    fetchNextPage,
     refetch,
-  } = useInfiniteQuery({
-    queryKey: [
-      QueryKey.IDENTITY_NOTIFICATIONS,
-      { identity: connectedProfile?.profile?.handle, limit: "10" },
-    ],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        limit: "10",
-      };
-      if (pageParam) {
-        params.id_less_than = `${pageParam}`;
-      }
-      return await commonApiFetch<TypedNotificationsResponse>({
-        endpoint: `notifications`,
-        params,
-      });
-    },
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
-    enabled: !!connectedProfile?.profile?.handle && !activeProfileProxy,
+  } = useNotificationsQuery({
+    identity: connectedProfile?.profile?.handle,
+    activeProfileProxy: !!activeProfileProxy,
+    limit: "30",
+    reverse: true
   });
-
-  const [items, setItems] = useState<TypedNotification[]>([]);
-
-  useEffect(() => {
-    setItems(data?.pages?.flatMap((page) => page.notifications.flat()) ?? []);
-  }, [data]);
 
   const onBottomIntersection = (state: boolean) => {
     if (!state) {
-      return;
-    }
-    if (status === "pending") {
       return;
     }
     if (isFetching) {
@@ -124,26 +99,40 @@ export default function Notifications() {
     fetchNextPage();
   };
 
-  const containerClassName = `lg:tw-pr-2 tw-flex-1 tw-flex tw-flex-col tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 
-    tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6rem)] xl:tw-h-[calc(100vh-7rem)] ${
-    capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
-  }`;
+  const handleScrollUpNearTop = () => {
+    onBottomIntersection(true);
+  };
+
+  const onCancelReplyQuote = () => {
+    setActiveDrop(null);
+  };
 
   return (
     <div className={containerClassName}>
-      {!items.length && !isFetching ? (
-        <MyStreamNoItems />
-      ) : (
-        <>
-          <div>
+      <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex">
+        {!items.length && !isFetching ? (
+          <MyStreamNoItems />
+        ) : (
+          <FeedScrollContainer
+            ref={scrollRef}
+            onScrollUpNearTop={handleScrollUpNearTop}
+            isFetchingNextPage={isFetching}
+          >
             <NotificationsWrapper
               items={items}
               loading={isFetching}
-              onBottomIntersection={onBottomIntersection}
+              activeDrop={activeDrop}
+              setActiveDrop={setActiveDrop}
             />
-          </div>{" "}
-        </>
-      )}
+          </FeedScrollContainer>
+        )}
+        <div className="tw-sticky tw-bottom-0 tw-z-[60] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+          <BrainContentInput
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+          />
+        </div>
+      </div>
     </div>
   );
 }
