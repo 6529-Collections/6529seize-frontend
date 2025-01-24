@@ -10,12 +10,18 @@ import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
+import useCapacitor from "../../../hooks/useCapacitor";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
     useContext(AuthContext);
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const capacitor = useCapacitor();
+
+  const containerClassName = `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)] ${
+    capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
+  }` as const;
 
   const router = useRouter();
   const { reload } = router.query;
@@ -102,7 +108,7 @@ export default function Notifications() {
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)]">
+    <div className={containerClassName}>
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex tw-flex-col">
         {!items.length && !isFetching ? (
           <MyStreamNoItems />
@@ -120,12 +126,12 @@ export default function Notifications() {
             />
           </FeedScrollContainer>
         )}
-      </div>
-      <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
-        <BrainContentInput
-          activeDrop={activeDrop}
-          onCancelReplyQuote={onCancelReplyQuote}
-        />
+        <div className="tw-sticky tw-bottom-0 tw-z-[60] tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+          <BrainContentInput
+            activeDrop={activeDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+          />
+        </div>
       </div>
     </div>
   );

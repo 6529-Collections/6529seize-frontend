@@ -24,17 +24,15 @@ export default function MyStream({
   onDropClick,
 }: MyStreamProps) {
   return (
-
-      <FeedWrapper
-        items={items}
-        loading={isFetching}
-        showWaveInfo={true}
-        activeDrop={activeDrop}
-        onBottomIntersection={onBottomIntersection}
-        onReply={onReply}
-        onQuote={onQuote}
-        onDropClick={onDropClick}
-      />
- 
+    <FeedWrapper
+      items={items}
+      loading={isFetching}
+      showWaveInfo={true}
+      activeDrop={activeDrop}
+      onBottomIntersection={onBottomIntersection}
+      onReply={onReply}
+      onQuote={onQuote}
+      onDropClick={onDropClick}
+    />
   );
 }
