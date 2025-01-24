@@ -8,6 +8,7 @@ interface BrainContentProps {
   readonly showPinnedWaves?: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
+  readonly waveId?: string;
 }
 
 const BrainContent: React.FC<BrainContentProps> = ({
@@ -15,6 +16,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   showPinnedWaves = true,
   activeDrop,
   onCancelReplyQuote,
+  waveId,
 }) => {
 
   return (
@@ -29,6 +31,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
         <BrainContentInput
           activeDrop={activeDrop}
           onCancelReplyQuote={onCancelReplyQuote}
+          waveId={waveId}
         />
       </div>
     </div>
