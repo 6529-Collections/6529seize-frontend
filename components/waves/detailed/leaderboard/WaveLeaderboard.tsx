@@ -72,7 +72,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
 
           {votingState === WaveVotingState.ENDED ? (
             <div className="tw-pb-4 lg:tw-pb-0">
-              <WaveWinners wave={wave} />
+              <WaveWinners wave={wave} onDropClick={setActiveDrop} />
             </div>
           ) : (
             <>

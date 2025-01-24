@@ -43,6 +43,19 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   const { data: wave } = useWaveData(router.query.wave as string);
 
+  const onDropClick = (drop: ExtendedDrop) => {
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
+
   const onDropClose = () => {
     const currentQuery = { ...router.query };
     delete currentQuery.drop;
@@ -66,7 +79,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     ),
     [BrainView.DEFAULT]: children,
     [BrainView.LEADERBOARD]:
-      isRankWave && !!wave ? <MyStreamWaveLeaderboard wave={wave} /> : null,
+      isRankWave && !!wave ? (
+        <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
+      ) : null,
     [BrainView.OUTCOME]:
       isRankWave && !!wave ? <MyStreamWaveOutcome wave={wave} /> : null,
     [BrainView.NOTIFICATIONS]: <Notifications />,

@@ -7,6 +7,7 @@ import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { createBreakpoint } from "react-use";
+import { useRouter } from "next/router";
 
 export enum MyStreamWaveTab {
   CHAT = "CHAT",
@@ -22,7 +23,21 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
+  const router = useRouter();
   const { data: wave } = useWaveData(waveId);
+
+  const onDropClick = (drop: ExtendedDrop) => {
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   const [activeTab, setActiveTab] = useState<MyStreamWaveTab>(
     MyStreamWaveTab.CHAT
@@ -40,7 +55,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
   const components: Record<MyStreamWaveTab, JSX.Element> = {
     [MyStreamWaveTab.CHAT]: <MyStreamWaveChat wave={wave} />,
-    [MyStreamWaveTab.LEADERBOARD]: <MyStreamWaveLeaderboard wave={wave} />,
+    [MyStreamWaveTab.LEADERBOARD]: (
+      <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
+    ),
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
   };
 

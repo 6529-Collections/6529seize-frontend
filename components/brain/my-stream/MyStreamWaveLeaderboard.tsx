@@ -17,6 +17,7 @@ import useCapacitor from "../../../hooks/useCapacitor";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
+  readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 const calculateHeight = (isCapacitor: boolean) => {
@@ -28,6 +29,7 @@ const calculateHeight = (isCapacitor: boolean) => {
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
+  onDropClick,
 }) => {
   const capacitor = useCapacitor();
 
@@ -60,7 +62,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     <div className={containerClassName}>
       {votingState === WaveVotingState.ENDED ? (
         <div>
-          <WaveWinners wave={wave} />
+          <WaveWinners wave={wave} onDropClick={onDropClick} />
         </div>
       ) : (
         <>
