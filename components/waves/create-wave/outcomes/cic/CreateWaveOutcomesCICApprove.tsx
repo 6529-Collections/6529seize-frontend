@@ -6,6 +6,7 @@ import {
 } from "../../../../../types/waves.types";
 import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
+import PrimaryButton from "../../../../utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesCICApprove({
   waveType,
@@ -150,13 +151,14 @@ export default function CreateWaveOutcomesCICApprove({
         >
           Cancel
         </button>
-        <button
-          onClick={onSubmit}
-          type="button"
-          className="tw-bg-primary-500 tw-border-primary-500 tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
+        <PrimaryButton
+          onClicked={onSubmit}
+          disabled={false}
+          loading={false}
+          padding="tw-px-4 tw-py-3"
         >
           Save
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );

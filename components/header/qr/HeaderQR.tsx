@@ -37,7 +37,7 @@ export default function HeaderQR() {
   }
 
   return (
-    <div className="tailwind-scope tw-relative xl:tw-mr-3 tw-self-center">
+    <div className="tailwind-scope tw-relative min-[1200px]:tw-mr-3 tw-self-center">
       <button
         type="button"
         aria-label="QR Code"
