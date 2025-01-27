@@ -61,12 +61,9 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       <button
         type="button"
         aria-label="Toggle sidebar"
-        className="tw-absolute -tw-left-8 tw-z-50 tw-top-28 tw-text-iron-700
-          tw-transition tw-duration-300 tw-ease-out tw-bg-iron-300 
-          tw-rounded-l-lg tw-size-8 tw-flex tw-items-center tw-justify-center
-          tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-100
-          desktop-hover:hover:tw-bg-iron-200 desktop-hover:hover:tw-ring-iron-200 focus:tw-outline-none focus:tw-ring-1 
-          focus:tw-ring-inset focus:tw-z-10"
+        className="tw-absolute -tw-left-[2.625rem] tw-z-50 tw-top-28 tw-bg-iron-950 tw-border tw-border-solid tw-border-r-0
+          tw-border-iron-600 tw-size-10 tw-text-iron-400 hover:tw-text-iron-50 tw-rounded-l-lg
+          focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <svg
@@ -74,9 +71,9 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           fill="none"
           aria-hidden="true"
           viewBox="0 0 24 24"
-          strokeWidth="2.5"
+          strokeWidth="2"
           stroke="currentColor"
-          className={`tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-300 
+          className={`tw-size-5 tw-transition-transform tw-duration-300 
             tw-ease-in-out ${isCollapsed ? "tw-rotate-180" : ""}`}
         >
           <path
