@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useContext } from "react";
 import { AuthContext } from "../../auth/Auth";
+import PrimaryButton from "../../utils/button/PrimaryButton";
 
 export default function DistributionPlanToolConnected() {
   const { requestAuth } = useContext(AuthContext);
@@ -33,13 +34,14 @@ export default function DistributionPlanToolConnected() {
           </li>
         </ul>
       </div>
-      <div>
-        <button
-          onClick={trySignIn}
-          type="submit"
-          className="tw-group tw-flex tw-gap-x-3 tw-items-center tw-justify-center tw-bg-primary-500 tw-px-6 tw-py-3.5 tw-font-medium tw-text-sm tw-text-white tw-border tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out">
+      <div className="tw-flex">
+        <PrimaryButton
+          onClicked={trySignIn}
+          disabled={false}
+          loading={false}
+        >
           Sign In with Web3
-        </button>
+        </PrimaryButton>
       </div>
     </div>
   );

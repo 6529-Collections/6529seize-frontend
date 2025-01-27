@@ -1,5 +1,5 @@
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
-import PrimaryButton from "../../../utils/buttons/PrimaryButton";
+import PrimaryButton from "../../../utils/button/PrimaryButton";
 import { CreateDropType } from "../CreateDrop";
 
 export default function CreateDropDesktopFooter({
@@ -27,7 +27,12 @@ export default function CreateDropDesktopFooter({
   return (
     <div className="tw-pt-4 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-700">
       <div className="tw-gap-x-3 tw-flex tw-justify-end">
-        <PrimaryButton onClick={onDrop} disabled={disabled} loading={loading}>
+        <PrimaryButton 
+          onClicked={onDrop} 
+          disabled={disabled} 
+          loading={loading}
+          padding="tw-px-4 tw-py-2.5"
+        >
           {getText()}
         </PrimaryButton>
       </div>

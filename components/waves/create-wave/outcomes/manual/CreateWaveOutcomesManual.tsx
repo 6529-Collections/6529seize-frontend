@@ -7,6 +7,7 @@ import {
 } from "../../../../../types/waves.types";
 import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import CreateWaveOutcomeWarning from "../CreateWaveOutcomeWarning";
+import PrimaryButton from "../../../../utils/button/PrimaryButton";
 
 export default function CreateWaveOutcomesManual({
   waveType,
@@ -139,7 +140,7 @@ export default function CreateWaveOutcomesManual({
   return (
     <div className="tw-col-span-full">
       <div className="tw-flex tw-flex-col tw-pt-[0.5px] tw-gap-y-5">
-        <div className={`${isApproveWave ? "md:tw-grid-cols-2" : ""} tw-grid tw-gap-x-5`}>
+        <div className={`${isApproveWave ? "md:tw-grid-cols-2" : ""} tw-grid tw-gap-x-5 tw-gap-y-4`}>
           <div>
             <div className="tw-group tw-w-full tw-relative">
               <input
@@ -284,13 +285,14 @@ export default function CreateWaveOutcomesManual({
           >
             Cancel
           </button>
-          <button
-            type="button"
-            className="tw-bg-primary-500 tw-border-primary-500 tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-relative tw-inline-flex tw-items-center tw-justify-center tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-border tw-border-solid tw-rounded-lg focus:!tw-outline focus-visible:!tw-outline-2 focus-visible:!tw-outline-offset-2 focus-visible:!tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"
-            onClick={onSubmit}
+          <PrimaryButton
+            onClicked={onSubmit}
+            disabled={false}
+            loading={false}
+            padding="tw-px-4 tw-py-3"
           >
             Save
-          </button>
+          </PrimaryButton>
         </div>
       </div>
     </div>
