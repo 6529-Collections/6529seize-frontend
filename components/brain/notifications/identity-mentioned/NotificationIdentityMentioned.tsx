@@ -5,7 +5,7 @@ import {
 } from "../../../../helpers/image.helpers";
 import { INotificationIdentityMentioned } from "../../../../types/feed.types";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
-import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";
+import { ActiveDropState } from "../../../waves/detailed/chat/dropInteractionTypes";
 import Drop, {
   DropInteractionParams,
   DropLocation,

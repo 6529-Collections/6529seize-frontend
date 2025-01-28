@@ -10,7 +10,7 @@ import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "../../../waves/detailed/drops/Drop";
-import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";
+import { ActiveDropState } from "../../../waves/detailed/chat/dropInteractionTypes";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";

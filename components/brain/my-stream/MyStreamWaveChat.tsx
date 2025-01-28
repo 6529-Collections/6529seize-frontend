@@ -3,7 +3,7 @@ import useCapacitor from "../../../hooks/useCapacitor";
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../waves/detailed/chat/WaveChat";
+} from "../../waves/detailed/chat/dropInteractionTypes";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import WaveDropsAll from "../../waves/detailed/drops/WaveDropsAll";
 import { CreateDropWaveWrapper } from "../../waves/detailed/CreateDropWaveWrapper";

@@ -9,7 +9,7 @@ import {
   CreateDropWaveWrapper,
   CreateDropWaveWrapperContext,
 } from "../CreateDropWaveWrapper";
-import { ActiveDropAction, ActiveDropState } from "../chat/WaveChat";
+import { ActiveDropAction, ActiveDropState } from "../chat/dropInteractionTypes";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 
 interface WaveDropChatProps {

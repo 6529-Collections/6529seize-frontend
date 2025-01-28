@@ -1,6 +1,6 @@
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { INotificationDropQuoted } from "../../../../types/feed.types";
-import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";
+import { ActiveDropState } from "../../../waves/detailed/chat/dropInteractionTypes";
 import Drop, {
   DropInteractionParams,
   DropLocation,

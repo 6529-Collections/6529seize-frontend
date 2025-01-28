@@ -11,7 +11,7 @@ import {
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../waves/detailed/chat/WaveChat";
+} from "../../waves/detailed/chat/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 

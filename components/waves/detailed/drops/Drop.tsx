@@ -1,5 +1,5 @@
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { ActiveDropState } from "../chat/WaveChat";
+import { ActiveDropState } from "../chat/dropInteractionTypes";
 import WaveDetailedDrop from "./WaveDetailedDrop";
 
 import { ApiDrop } from "../../../../generated/models/ApiDrop";

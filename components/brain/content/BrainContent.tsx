@@ -1,7 +1,7 @@
 import React from "react";
 import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
-import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { ActiveDropState } from "../../waves/detailed/chat/dropInteractionTypes";
 
 interface BrainContentProps {
   readonly children: React.ReactNode;

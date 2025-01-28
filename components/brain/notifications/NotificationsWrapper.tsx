@@ -7,7 +7,7 @@ import CircleLoader, {
 import {
   ActiveDropAction,
   ActiveDropState,
-} from "../../waves/detailed/chat/WaveChat";
+} from "../../waves/detailed/chat/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 import NotificationItems from "./NotificationItems";
 import { useRouter } from "next/router";

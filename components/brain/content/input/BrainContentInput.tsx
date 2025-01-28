@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import { useWaveData } from "../../../../hooks/useWaveData";
 import useCapacitor from "../../../../hooks/useCapacitor";
-import { ActiveDropState } from "../../../waves/detailed/chat/WaveChat";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ActiveDropState } from "../../../waves/detailed/chat/dropInteractionTypes";
 import PrivilegedDropCreator, {
   DropMode,
 } from "../../../waves/detailed/PrivilegedDropCreator";
