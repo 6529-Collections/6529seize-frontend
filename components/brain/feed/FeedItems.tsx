@@ -6,7 +6,7 @@ import {
 } from "../../../helpers/waves/drop.helpers";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
-import { ActiveDropState } from "../../waves/detailed/chat/dropInteractionTypes";
+import { ActiveDropState } from "../../../types/dropInteractionTypes";
 
 export interface FeedItemsProps {
   readonly items: TypedFeedItem[];

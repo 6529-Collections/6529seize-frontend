@@ -8,10 +8,7 @@ import {
   useMyStreamQuery,
   usePollingQuery,
 } from "../../../hooks/useMyStreamQuery";
-import {
-  ActiveDropAction,
-  ActiveDropState,
-} from "../../waves/detailed/chat/dropInteractionTypes";
+import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 

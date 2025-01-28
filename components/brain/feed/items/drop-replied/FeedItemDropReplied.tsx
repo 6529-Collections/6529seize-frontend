@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { IFeedItemDropReplied } from "../../../../../types/feed.types";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
-import { ActiveDropState } from "../../../../waves/detailed/chat/dropInteractionTypes";
+import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import Drop, { DropInteractionParams, DropLocation } from "../../../../waves/detailed/drops/Drop";
 

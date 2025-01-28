@@ -5,7 +5,7 @@ import {
 } from "../../../../helpers/image.helpers";
 import { INotificationDropReplied } from "../../../../types/feed.types";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
-import { ActiveDropState } from "../../../waves/detailed/chat/dropInteractionTypes";
+import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import Drop, {
   DropInteractionParams,
   DropLocation,

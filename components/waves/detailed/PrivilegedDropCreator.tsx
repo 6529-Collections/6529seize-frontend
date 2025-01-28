@@ -1,6 +1,5 @@
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiCreateDropRequest } from "../../../generated/models/ApiCreateDropRequest";
-import { ActiveDropState } from "./chat/dropInteractionTypes";
+import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { useDropPrivileges } from "../../../hooks/useDropPriviledges";
 import { useAuth } from "../../auth/Auth";
 import DropPlaceholder from "./DropPlaceholder";
