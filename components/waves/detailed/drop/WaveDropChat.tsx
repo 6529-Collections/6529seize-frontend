@@ -82,7 +82,6 @@ export const WaveDropChat: React.FC<WaveDropChatProps> = ({ wave, drop }) => {
                 activeDrop={activeDrop}
                 initialDrop={null}
                 dropId={drop.id}
-                onDropClick={() => {}}
               />
               <div className="tw-mt-auto">
                 <CreateDropWaveWrapper

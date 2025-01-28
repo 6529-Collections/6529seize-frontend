@@ -15,7 +15,7 @@ const rankGradients: Record<number | "default", string> = {
   1: "tw-from-[#E8D48A]/30 tw-via-[#D9A962]/30 tw-to-[#E8D48A]/30 desktop-hover:hover:tw-from-[#E8D48A]/40 desktop-hover:hover:tw-via-[#D9A962]/40 desktop-hover:hover:tw-to-[#E8D48A]/40 tw-shadow-[0_0_32px_rgba(232,212,138,0.1)] desktop-hover:hover:tw-shadow-[0_0_48px_rgba(232,212,138,0.15)]",
   2: "tw-from-[#DDDDDD]/30 tw-via-[#C0C0C0]/30 tw-to-[#DDDDDD]/30 desktop-hover:hover:tw-from-[#DDDDDD]/40 desktop-hover:hover:tw-via-[#C0C0C0]/40 desktop-hover:hover:tw-to-[#DDDDDD]/40 tw-shadow-[0_0_32px_rgba(221,221,221,0.1)] desktop-hover:hover:tw-shadow-[0_0_48px_rgba(221,221,221,0.15)]",
   3: "tw-from-[#CD7F32]/30 tw-via-[#B87333]/30 tw-to-[#CD7F32]/30 desktop-hover:hover:tw-from-[#CD7F32]/40 desktop-hover:hover:tw-via-[#B87333]/40 desktop-hover:hover:tw-to-[#CD7F32]/40 tw-shadow-[0_0_32px_rgba(205,127,50,0.1)] desktop-hover:hover:tw-shadow-[0_0_48px_rgba(205,127,50,0.15)]",
-  default: "tw-from-iron-800/50 tw-via-iron-700/30 tw-to-iron-800/50 hover:tw-from-iron-700/60 hover:tw-via-iron-600/40 hover:tw-to-iron-800/60",
+  default: "tw-from-iron-800 tw-via-iron-800 tw-to-iron-800 hover:tw-from-iron-700 hover:tw-via-iron-700 hover:tw-to-iron-700",
 };
 
 export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({

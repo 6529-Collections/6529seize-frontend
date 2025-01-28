@@ -65,7 +65,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
       <div className={`tailwind-scope tw-relative tw-flex tw-flex-grow ${
         isDropOpen ? 'tw-w-full xl:tw-pl-6' : contentClasses
       }`}>
-        <div className={`tw-h-screen lg:tw-h-[calc(100vh-6.25rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-transition-all tw-duration-300`}>
+        <div className={`tw-h-screen lg:tw-h-[calc(100vh-5.5rem)] min-[1200px]:tw-h-[calc(100vh-6.25rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-transition-all tw-duration-300`}>
           <BrainLeftSidebar 
             activeWaveId={router.query.wave as string}
           />

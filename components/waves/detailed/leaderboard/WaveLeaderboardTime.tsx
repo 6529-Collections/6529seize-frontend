@@ -177,7 +177,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
   return (
     <div className="tw-@container">
-      <div className="tw-mt-4 tw-grid [@container_(max-width:700px)]:tw-grid-cols-1 tw-grid-cols-2 tw-gap-4 tw-@container">
+      <div className="tw-grid [@container_(max-width:700px)]:tw-grid-cols-1 tw-grid-cols-2 tw-gap-4 tw-@container">
         {/* Dropping Phase Card */}
         <div className="tw-rounded-xl tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-p-6 [@container_(max-width:800px)]:tw-p-4 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
           <div className="tw-w-full tw-flex tw-items-center tw-gap-2 md:tw-gap-3 tw-mb-2 md:tw-mb-4">

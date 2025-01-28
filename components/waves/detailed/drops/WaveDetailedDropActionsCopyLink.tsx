@@ -19,7 +19,7 @@ const WaveDetailedDropActionsCopyLink: React.FC<
   const copyToClipboard = () => {
     if (isTemporaryDrop(drop)) return;
 
-    const dropLink = `${window.location.protocol}//${window.location.host}/waves/${drop.wave.id}?drop=${drop.serial_no}`;
+    const dropLink = `${window.location.protocol}//${window.location.host}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
     navigator.clipboard.writeText(dropLink).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

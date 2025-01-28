@@ -9,9 +9,7 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "../../../../entities/IDrop";
-import PrimaryButton, {
-  PrimaryButtonSize,
-} from "../../../utils/buttons/PrimaryButton";
+import PrimaryButton from "../../../utils/button/PrimaryButton";
 import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
 import { CreateDropType, CreateDropViewType } from "../CreateDrop";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
@@ -151,18 +149,20 @@ const CreateDropCompact = forwardRef<
               >
                 {showSubmit && (
                   <div>
-                    <PrimaryButton
-                      onClick={onDrop}
-                      disabled={!canSubmit}
-                      loading={loading}
-                      size={
-                        screenType === CreateDropScreenType.MOBILE
-                          ? PrimaryButtonSize.SMALL
-                          : PrimaryButtonSize.MEDIUM
-                      }
-                    >
-                      {getSubmitText()}
-                    </PrimaryButton>
+                    {onDrop && (
+                      <PrimaryButton
+                        onClicked={onDrop}
+                        disabled={!canSubmit}
+                        loading={loading}
+                        padding={
+                          screenType === CreateDropScreenType.MOBILE
+                            ? "tw-px-3 tw-py-2"
+                            : "tw-px-4 tw-py-2.5"
+                        }
+                      >
+                        {getSubmitText()}
+                      </PrimaryButton>
+                    )}
                   </div>
                 )}
               </CreateDropContent>

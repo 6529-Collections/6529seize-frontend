@@ -6,13 +6,12 @@ import { useContext, useEffect, useState } from "react";
 import Head from "next/head";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import PrimaryButton from "../../components/utils/button/PrimaryButton";
 
 import BlockPickerTimeWindowSelect from "../../components/block-picker/BlockPickerTimeWindowSelect";
 import BlockPickerDateSelect from "../../components/block-picker/BlockPickerDateSelect";
 import BlockPickerBlockNumberIncludes from "../../components/block-picker/BlockPickerBlockNumberIncludes";
 import { distributionPlanApiPost } from "../../services/distribution-plan-api";
-
-import AllowlistToolLoader from "../../components/allowlist-tool/common/AllowlistToolLoader";
 import BlockPickerResult from "../../components/block-picker/result/BlockPickerResult";
 import { AuthContext } from "../../components/auth/Auth";
 
@@ -255,12 +254,16 @@ export default function BlockPicker() {
               </div>
             </div>
             <div className="tw-mt-6">
-              <button
-                type="button"
-                className="tw-w-[5.25rem] tw-relative tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-ou"
-                onClick={onSubmit}>
-                {!loading ? "Submit" : <AllowlistToolLoader />}
-              </button>
+              <div className="tw-w-[5.25rem]">
+                <PrimaryButton
+                  onClicked={onSubmit}
+                  disabled={false}
+                  loading={loading}
+                  padding="tw-px-4 tw-py-3"
+                >
+                  Submit
+                </PrimaryButton>
+              </div>
             </div>
           </div>
 

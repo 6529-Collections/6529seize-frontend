@@ -15,13 +15,13 @@ export default function NotificationItem({
   activeDrop,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: {
   readonly notification: TypedNotification;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const getComponent = (): JSX.Element => {
     switch (notification.cause) {
@@ -32,7 +32,7 @@ export default function NotificationItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
         );
       case ApiNotificationCause.DropReplied:
@@ -42,7 +42,7 @@ export default function NotificationItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
         );
       case ApiNotificationCause.DropVoted:
@@ -52,7 +52,7 @@ export default function NotificationItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
         );
       case ApiNotificationCause.IdentityMentioned:
@@ -62,7 +62,7 @@ export default function NotificationItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
         );
       case ApiNotificationCause.IdentitySubscribed:
@@ -78,7 +78,7 @@ export default function NotificationItem({
       <div className="tw-relative lg:tw-hidden">
         <div className="tw-h-full tw-w-[1px] tw-bg-iron-800 -tw-translate-x-8"></div>
       </div>
-      <div className="tw-w-full tw-my-2">{getComponent()}</div>
+      <div className="tw-w-full">{getComponent()}</div>
     </div>
   );
 }

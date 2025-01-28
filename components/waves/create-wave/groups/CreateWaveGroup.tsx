@@ -111,7 +111,7 @@ export default function CreateWaveGroup({
                     <span
                       aria-hidden="true"
                       className={`tw-pointer-events-none tw-inline-block tw-size-4 tw-transform tw-rounded-full tw-bg-iron-50 tw-shadow tw-ring-0 tw-transition tw-duration-200 tw-ease-in-out  ${
-                        chatEnabled ? "tw-translate-x-5" : "tw-translate-x-0"
+                        chatEnabled ? "tw-translate-x-[18px]" : "tw-translate-x-0"
                       }`}
                     ></span>
                   </span>

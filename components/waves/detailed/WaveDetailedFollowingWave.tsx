@@ -42,7 +42,7 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
     e.preventDefault();
     resetWaveCount(waveId);
     onWaveChange();
-    router.push(`/waves/${waveId}`, undefined, { shallow: true });
+    router.push(`/my-stream?wave=${waveId}`, undefined, { shallow: true });
   };
 
   const onHover = (waveId: string) => {
@@ -93,7 +93,7 @@ const WaveDetailedFollowingWave: React.FC<WaveDetailedFollowingWaveProps> = ({
       } `}
     >
       <Link
-        href={`/waves/${wave.id}`}
+        href={`/my-stream?wave=${wave.id}`}
         onClick={(e) => handleClick(e, wave.id)}
         onMouseEnter={() => onHover(wave.id)}
         className="tw-ml-1 tw-no-underline tw-flex tw-items-center tw-text-iron-200 tw-font-medium tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out group"

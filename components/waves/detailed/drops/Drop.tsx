@@ -29,7 +29,7 @@ interface DropProps {
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
@@ -45,7 +45,7 @@ export default function Drop({
   onQuote,
   onReplyClick,
   onQuoteClick,
-  onDropClick,
+  onDropContentClick,
   showReplyAndQuote,
   parentContainerRef,
 }: DropProps) {
@@ -59,7 +59,7 @@ export default function Drop({
         onReply={onReply}
         onQuote={onQuote}
         onQuoteClick={onQuoteClick}
-        onDropClick={onDropClick}
+        onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
       />
@@ -78,7 +78,7 @@ export default function Drop({
       onQuote={onQuote}
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
-      onDropClick={onDropClick}
+      onDropContentClick={onDropContentClick}
       showReplyAndQuote={showReplyAndQuote}
       parentContainerRef={parentContainerRef}
     />

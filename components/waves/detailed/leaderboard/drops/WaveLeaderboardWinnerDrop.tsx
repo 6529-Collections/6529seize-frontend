@@ -56,7 +56,6 @@ export const WaveLeaderboardWinnerDrop: React.FC<WaveLeaderboardWinnerDropProps>
             <div className="tw-rounded-lg tw-bg-iron-900/50 tw-px-4 tw-pb-4 tw-pt-2 tw-ring-1 tw-ring-iron-800/50">
               <WaveLeaderboardDropContent
                 drop={drop}
-                setActiveDrop={onDropClick}
               />
             </div>
             <WaveLeaderboardDropFooter drop={drop} wave={wave} />

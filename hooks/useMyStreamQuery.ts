@@ -1,13 +1,40 @@
 import { useState, useEffect } from "react";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { TypedFeedItem } from "../types/feed.types";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
 
+interface UseMyStreamQueryProps {
+  readonly reverse: boolean;
+}
 
-export function useMyStreamQuery() {
+export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
+  const queryClient = useQueryClient();
   const [items, setItems] = useState<TypedFeedItem[]>([]);
   const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
+
+  queryClient.prefetchInfiniteQuery({
+    queryKey: [QueryKey.FEED_ITEMS],
+    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
+      const params: Record<string, string> = {};
+      if (pageParam) {
+        params.serial_no_less_than = `${pageParam}`;
+      }
+
+      return await commonApiFetch<TypedFeedItem[]>({
+        endpoint: `feed/`,
+        params,
+      });
+    },
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
+    pages: 3,
+    staleTime: 60000,
+  });
 
   const query = useInfiniteQuery({
     queryKey: [QueryKey.FEED_ITEMS],
@@ -26,14 +53,27 @@ export function useMyStreamQuery() {
   });
 
   useEffect(() => {
-    setItems(query.data?.pages.flat() ?? []);
+    let data: TypedFeedItem[] = [];
+
+    if (query.data?.pages.length) {
+      data = query.data.pages.flat();
+      if (reverse) {
+        data = data.toReversed();
+      }
+    }
+
+    setItems(data);
     setIsInitialQueryDone(true);
-  }, [query.data]);
+  }, [query.data, reverse]);
 
   return { ...query, items, isInitialQueryDone };
 }
 
-export function usePollingQuery(isInitialQueryDone: boolean, items: TypedFeedItem[]) {
+export function usePollingQuery(
+  isInitialQueryDone: boolean,
+  items: TypedFeedItem[],
+  reverse: boolean
+) {
   const [haveNewItems, setHaveNewItems] = useState(false);
   const [isTabVisible, setIsTabVisible] = useState(!document.hidden);
 
@@ -74,14 +114,24 @@ export function usePollingQuery(isInitialQueryDone: boolean, items: TypedFeedIte
   useEffect(() => {
     if (pollingResult && pollingResult.length > 0 && items.length > 0) {
       const latestPolledItem = pollingResult[0];
-      const latestExistingItem = items[0];
-      setHaveNewItems(latestPolledItem.serial_no > latestExistingItem.serial_no);
-    } else if (pollingResult && pollingResult.length > 0 && items.length === 0) {
+      const latestExistingItem = reverse
+        ? items.at(items.length - 1)
+        : items.at(0);
+      setHaveNewItems(
+        latestExistingItem
+          ? latestPolledItem.serial_no > latestExistingItem.serial_no
+          : true
+      );
+    } else if (
+      pollingResult &&
+      pollingResult.length > 0 &&
+      items.length === 0
+    ) {
       setHaveNewItems(true);
     } else {
       setHaveNewItems(false);
     }
-  }, [pollingResult, items]);
+  }, [pollingResult, items, reverse]);
 
   return { haveNewItems };
 }

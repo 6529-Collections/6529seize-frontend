@@ -12,22 +12,22 @@ export default function FeedItemWaveCreated({
   activeDrop,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: {
   readonly item: IFeedItemWaveCreated;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
-    router.push(`/waves/${item.item.id}?drop=${serialNo}/`);
+    router.push(`/my-stream?wave=${item.item.id}&serialNo=${serialNo}/`);
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
   };
 
   return (
@@ -74,7 +74,7 @@ export default function FeedItemWaveCreated({
           onQuote={onQuote}
           onReplyClick={onReplyClick}
           onQuoteClick={onQuoteClick}
-          onDropClick={onDropClick}
+          onDropContentClick={onDropContentClick}
         />
       </div>
     </div>

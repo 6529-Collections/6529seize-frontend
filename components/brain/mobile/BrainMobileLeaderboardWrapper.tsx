@@ -1,10 +1,10 @@
 import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import BrainMobileLeaderboard from "./BrainMobileLeaderboard";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 import { WaveWinners } from "../../waves/detailed/winners/WaveWinners";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { ExtendedDrop } from "../../../helpers/waves/wave-drops.helpers";
 
 interface BrainMobileLeaderboardWrapperProps {
   readonly wave: ApiWave;
@@ -23,12 +23,14 @@ const BrainMobileLeaderboardWrapper: React.FC<
 
   if (votingState === WaveVotingState.ENDED) {
     return (
-      <div className={`tw-overflow-y-auto ${contentHeight} tw-max-h-full no-scrollbar tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700`}>
+      <div
+        className={`tw-overflow-y-auto ${contentHeight} tw-max-h-full no-scrollbar tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700`}
+      >
         <WaveWinners wave={wave} onDropClick={onDropClick} />
       </div>
     );
   }
-  return <BrainMobileLeaderboard wave={wave} onDropClick={onDropClick} />;
+  return <BrainMobileLeaderboard wave={wave} />;
 };
 
 export default BrainMobileLeaderboardWrapper;

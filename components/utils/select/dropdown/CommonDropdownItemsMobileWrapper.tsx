@@ -16,7 +16,7 @@ export default function CommonDropdownItemsMobileWrapper({
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-relative tw-z-[101] lg:tw-hidden"
+        className="tailwind-scope tw-relative tw-z-[999] lg:tw-hidden"
         onClose={setOpen}
       >
         <Transition.Child
@@ -80,7 +80,7 @@ export default function CommonDropdownItemsMobileWrapper({
                     </div>
                   </Transition.Child>
                   <div
-                    className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-py-6"
+                    className="tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 tw-pt-6 tw-pb-8"
                     style={{ maxHeight: "calc(100vh - 8rem)" }}
                   >
                     {label && (

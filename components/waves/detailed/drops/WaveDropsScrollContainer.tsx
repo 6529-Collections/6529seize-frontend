@@ -6,6 +6,7 @@ interface WaveDropsScrollContainerProps {
   readonly onTopIntersection: () => void;
   readonly newItemsCount: number;
   readonly isFetchingNextPage: boolean;
+  readonly disableAutoPosition?: boolean;
 }
 
 const MIN_OUT_OF_VIEW_COUNT = 30;
@@ -21,6 +22,7 @@ export const WaveDropsScrollContainer = forwardRef<
       onTopIntersection,
       newItemsCount,
       isFetchingNextPage,
+      disableAutoPosition,
     },
     ref
   ) => {
@@ -28,7 +30,12 @@ export const WaveDropsScrollContainer = forwardRef<
     const [lastScrollTop, setLastScrollTop] = useState(0);
 
     useEffect(() => {
-      if (contentRef.current && ref && "current" in ref) {
+      if (
+        !disableAutoPosition &&
+        contentRef.current &&
+        ref &&
+        "current" in ref
+      ) {
         const scrollContainer = ref.current;
         if (!scrollContainer) {
           return;
@@ -42,7 +49,7 @@ export const WaveDropsScrollContainer = forwardRef<
             scrollTop + (contentRef.current.scrollHeight - contentHeight);
         }
       }
-    }, [newItemsCount, ref]);
+    }, [newItemsCount, ref, disableAutoPosition]);
 
     const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 

@@ -64,7 +64,7 @@ const rankGradients = {
   2: "tw-from-[#DDDDDD]/30 tw-via-[#C0C0C0]/30 tw-to-[#DDDDDD]/30 desktop-hover:hover:tw-from-[#DDDDDD]/40 desktop-hover:hover:tw-via-[#C0C0C0]/40 desktop-hover:hover:tw-to-[#DDDDDD]/40 desktop-hover:hover:tw-shadow-[0_0_48px_rgba(221,221,221,0.15)]",
   3: "tw-from-[#CD7F32]/30 tw-via-[#B87333]/30 tw-to-[#CD7F32]/30 desktop-hover:hover:tw-from-[#CD7F32]/40 desktop-hover:hover:tw-via-[#B87333]/40 desktop-hover:hover:tw-to-[#CD7F32]/40 desktop-hover:hover:tw-shadow-[0_0_48px_rgba(205,127,50,0.15)]",
   default:
-    "tw-from-iron-800/50 tw-via-iron-800/50 tw-to-iron-800/50 hover:tw-from-iron-700/60 hover:tw-via-iron-700/60 hover:tw-to-iron-700/60",
+    "tw-from-iron-800 tw-via-iron-800 tw-to-iron-800 hover:tw-from-iron-700 hover:tw-via-iron-700 hover:tw-to-iron-700",
 } as const;
 
 const TrophyIcon = memo(() => (
@@ -129,7 +129,7 @@ const DropContent = memo<DropContentProps>(({ drop, onDropClick }) => {
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
         onLongPress={() => {}}
-        onDropClick={handleDropClick}
+        onDropContentClick={handleDropClick}
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
       />
@@ -201,9 +201,6 @@ const WaveWinnerItem = memo<{
               return (
                 <>
                   <div
-                    className={`tw-absolute tw-inset-0 tw-bg-gradient-to-b ${classes.gradient}`}
-                  />
-                  <div
                     className={`tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent ${classes.borderTop}`}
                   />
                   <div
@@ -215,7 +212,6 @@ const WaveWinnerItem = memo<{
                   <div
                     className={`tw-absolute tw-inset-y-0 tw-left-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-${classes.borderSide} tw-to-transparent`}
                   />
-                  <div className="tw-absolute tw-bottom-0 tw-h-3/4 tw-inset-x-0 tw-bg-gradient-to-t tw-from-black/20 tw-via-black/10 tw-to-transparent" />
                 </>
               );
             })()}

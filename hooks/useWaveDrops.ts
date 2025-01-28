@@ -140,7 +140,11 @@ export function useWaveDrops({
     refetchIntervalInBackground: true,
   });
 
-  const processDrops = (pages: ApiWaveDropsFeed[] | undefined, previousDrops: ExtendedDrop[], isReverse: boolean) => {
+  const processDrops = (
+    pages: ApiWaveDropsFeed[] | undefined,
+    previousDrops: ExtendedDrop[],
+    isReverse: boolean
+  ) => {
     const newDrops = pages
       ? mapToExtendedDrops(
           pages.map((page) => ({ wave: page.wave, drops: page.drops })),
@@ -151,7 +155,7 @@ export function useWaveDrops({
     return generateUniqueKeys(newDrops, previousDrops);
   };
 
-  const [drops, setDrops] = useState<ExtendedDrop[]>(() => 
+  const [drops, setDrops] = useState<ExtendedDrop[]>(() =>
     processDrops(data?.pages, [], reverse)
   );
 
@@ -162,15 +166,8 @@ export function useWaveDrops({
   const {
     hasNewDrops,
     error: pollingError,
-    lastPolledData
-  } = useWavePolling(
-    queryKey,
-    waveId,
-    dropId,
-    drops,
-    isTabVisible,
-    refetch
-  );
+    lastPolledData,
+  } = useWavePolling(queryKey, waveId, dropId, drops, isTabVisible, refetch);
 
   const manualFetch = useCallback(async () => {
     if (hasNextPage) {
@@ -182,12 +179,12 @@ export function useWaveDrops({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching: isFetching ,
+    isFetching,
     isFetchingNextPage,
     refetch,
     haveNewDrops: hasNewDrops,
     manualFetch,
     error: mainQueryError || pollingError,
-    lastPolledData
+    lastPolledData,
   };
 }

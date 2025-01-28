@@ -64,12 +64,13 @@ const WaveDetailedDropMobileMenuDelete: React.FC<
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="tw-mt-2 tw-border-0 tw-w-full tw-flex tw-items-center tw-gap-x-4 tw-py-3 tw-px-4 tw-bg-iron-950 tw-rounded-xl active:tw-bg-red/10 tw-transition-colors tw-duration-200"
+            className="tw-mt-4 tw-border-0 tw-w-full tw-flex tw-items-center tw-gap-x-4 tw-py-3 tw-px-4 tw-bg-iron-950 tw-rounded-xl  tw-transition-colors tw-duration-200"
             onClick={() => setIsDeleteMode(true)}
           >
             <svg
               className="tw-size-5 tw-flex-shrink-0 tw-text-red"
               xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
@@ -92,7 +93,7 @@ const WaveDetailedDropMobileMenuDelete: React.FC<
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="tw-mt-2 tw-flex tw-gap-x-2"
+            className="tw-mt-4 tw-flex tw-gap-x-2"
           >
             <button
               className="tw-flex-1 tw-border-0 tw-flex tw-items-center tw-justify-center tw-py-3 tw-px-4 tw-bg-red/100 tw-rounded-xl active:tw-bg-red/90 tw-transition-colors tw-duration-200"

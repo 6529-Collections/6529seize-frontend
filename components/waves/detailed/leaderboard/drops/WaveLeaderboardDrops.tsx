@@ -8,15 +8,15 @@ import {
 } from "../../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../../hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import { useRouter } from "next/router";
 
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
   readonly dropsSortBy: WaveDropsLeaderboardSortBy;
   readonly sortDirection: WaveDropsLeaderboardSortDirection;
   readonly showMyDrops: boolean;
-  readonly setActiveDrop: (drop: ExtendedDrop) => void;
   readonly onCreateDrop: () => void;
 }
 
@@ -25,9 +25,9 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   dropsSortBy,
   sortDirection,
   showMyDrops,
-  setActiveDrop,
   onCreateDrop,
 }) => {
+  const router = useRouter();
   const { connectedProfile } = useContext(AuthContext);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
@@ -46,6 +46,19 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
       fetchNextPage();
     }
   });
+
+  const onDropClick = (drop: ExtendedDrop) => {
+    const currentQuery = { ...router.query };
+    currentQuery.drop = drop.id;
+    router.push(
+      {
+        pathname: router.pathname,
+        query: currentQuery,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   if (memoizedDrops.length === 0 && !isFetching) {
     return (
@@ -88,7 +101,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
           key={drop.id}
           drop={drop}
           wave={wave}
-          setActiveDrop={setActiveDrop}
+          onDropClick={onDropClick}
         />
       ))}
       {isFetchingNextPage && (

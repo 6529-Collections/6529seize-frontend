@@ -1,11 +1,10 @@
+import { useRef } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TypedFeedItem } from "../../../types/feed.types";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
 import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 import FeedItems from "./FeedItems";
+import { FeedScrollContainer } from "./FeedScrollContainer";
 
 interface FeedWrapperProps {
   readonly items: TypedFeedItem[];
@@ -15,7 +14,7 @@ interface FeedWrapperProps {
   readonly onBottomIntersection: (state: boolean) => void;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function FeedWrapper({
@@ -26,24 +25,28 @@ export default function FeedWrapper({
   onBottomIntersection,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: FeedWrapperProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScrollUpNearTop = () => {
+    onBottomIntersection(true);
+  };
+
   return (
-    <div className="tw-relative">
+    <FeedScrollContainer
+      ref={scrollRef}
+      onScrollUpNearTop={handleScrollUpNearTop}
+      isFetchingNextPage={loading}
+    >
       <FeedItems
         items={items}
         showWaveInfo={showWaveInfo}
         activeDrop={activeDrop}
-        onBottomIntersection={onBottomIntersection}
         onReply={onReply}
         onQuote={onQuote}
-        onDropClick={onDropClick}
+        onDropContentClick={onDropContentClick}
       />
-      {loading && (
-        <div className="tw-w-full tw-text-center tw-mt-8">
-          <CircleLoader size={CircleLoaderSize.XXLARGE} />
-        </div>
-      )}
-    </div>
+    </FeedScrollContainer>
   );
 }

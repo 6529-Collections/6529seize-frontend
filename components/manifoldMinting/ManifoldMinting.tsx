@@ -285,6 +285,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
               <MemePageMintCountdown
                 nft_id={props.token_id}
                 hide_mint_btn={true}
+                is_full_width={true}
               />
             </Col>
           </Row>

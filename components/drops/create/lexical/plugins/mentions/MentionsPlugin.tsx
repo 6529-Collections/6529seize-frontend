@@ -232,12 +232,14 @@ const NewMentionsPlugin = forwardRef<
         ) => {
           return anchorElementRef.current && identities.length
             ? ReactDOM.createPortal(
-                <MentionsTypeaheadMenu
+                <div className="tw-absolute -tw-top-12 tw-left-0 tw-z-[1000]">
+                 <MentionsTypeaheadMenu
                   selectedIndex={selectedIndex}
                   options={options}
                   setHighlightedIndex={setHighlightedIndex}
                   selectOptionAndCleanUp={selectOptionAndCleanUp}
-                />,
+                />
+               </div>,
                 anchorElementRef.current
               )
             : null;

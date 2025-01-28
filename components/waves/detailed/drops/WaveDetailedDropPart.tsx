@@ -1,13 +1,13 @@
 import React, { memo, useState, useEffect, useRef } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import WaveDetailedDropPartDrop from "./WaveDetailedDropPartDrop";
-import { ApiDropType } from "../../../../generated/models/ApiDropType";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveDetailedDropPartProps {
-  readonly drop: ApiDrop;
+  readonly drop: ExtendedDrop;
   readonly activePartIndex: number;
   readonly setActivePartIndex: (index: number) => void;
-  readonly onDropClick: () => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onLongPress: () => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
@@ -21,7 +21,7 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
     drop,
     activePartIndex,
     setActivePartIndex,
-    onDropClick,
+    onDropContentClick,
     onQuoteClick,
     onLongPress,
     setLongPressTriggered,
@@ -78,8 +78,8 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
     };
 
     const handleClick = () => {
-      if (isTemporaryDrop || drop.drop_type === ApiDropType.Chat) return;
-      onDropClick();
+      if (isTemporaryDrop || !onDropContentClick) return;
+      onDropContentClick(drop);
     };
 
     return (
@@ -90,7 +90,7 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         className={`tw-no-underline ${
-          isTemporaryDrop || drop.drop_type === ApiDropType.Chat
+          isTemporaryDrop || !onDropContentClick
             ? "tw-cursor-default"
             : "tw-cursor-pointer"
         }`}

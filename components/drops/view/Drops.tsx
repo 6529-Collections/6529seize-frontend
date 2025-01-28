@@ -115,7 +115,7 @@ export default function Drops() {
   }, [drops]);
 
   const onQuoteClick = (drop: ApiDrop) => {
-    router.push(`/waves/${drop.wave.id}?drop=${drop.serial_no}`);
+    router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`);
   };
 
   if (!drops.length && !isFetching) {
@@ -141,8 +141,6 @@ export default function Drops() {
         isFetchingNextPage={isFetchingNextPage}
         onQuoteClick={onQuoteClick}
         dropViewDropId={null}
-        // TODO: Implement this
-        onDropClick={() => {}}
       />
       <div ref={bottomRef} style={{ height: "1px" }} />
     </div>

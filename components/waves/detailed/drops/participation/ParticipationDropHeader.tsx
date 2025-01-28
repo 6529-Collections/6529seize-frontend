@@ -62,7 +62,7 @@ export default function ParticipationDropHeader({
               <div className="tw-size-[3px] tw-bg-iron-500 tw-rounded-full tw-flex-shrink-0" />
               <Link
                 onClick={(e) => e.stopPropagation()}
-                href={`/waves/${drop.wave.id}`}
+                href={`/my-stream?wave=${drop.wave.id}`}
                 className="tw-text-xs sm:tw-text-sm tw-leading-none tw-font-medium tw-text-iron-400 desktop-hover:hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
               >
                 {drop.wave.name}

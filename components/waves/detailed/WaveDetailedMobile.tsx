@@ -88,7 +88,6 @@ const WaveDetailedMobile: React.FC<WaveDetailedMobileProps> = ({
           wave={wave}
           activeTab={WaveDetailedView.CHAT}
           setActiveTab={() => {}}
-          onDropClick={setActiveDrop}
         />
       ),
       [WaveDetailedMobileView.LEADERBOARD]: (

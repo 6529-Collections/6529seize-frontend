@@ -41,7 +41,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
         <span className="tw-text-base md:tw-text-lg tw-font-semibold tw-text-iron-100 tw-leading-none group-hover:tw-text-iron-50 tw-transition-colors">
           {drop.author.handle}
         </span>
-        <span className="tw-text-xs md:tw-text-sm tw-font-medium tw-text-iron-400 tw-leading-none">
+        <span className="tw-whitespace-nowrap tw-text-xs md:tw-text-sm tw-font-medium tw-text-iron-400 tw-leading-none">
           {getTimeAgoShort(drop.created_at)}
         </span>
       </div>

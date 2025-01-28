@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import WaveDetailedDropContent from "../drops/WaveDetailedDropContent";
-import { ApiDrop } from "../../../../generated/models/ObjectSerializer";
 import { WaveDropContentMetadata } from "./WaveDropContentMetadata";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveDropContentProps {
-  readonly drop: ApiDrop;
+  readonly drop: ExtendedDrop;
 }
 
 export const WaveDropContent: React.FC<WaveDropContentProps> = ({ drop }) => {
@@ -16,7 +16,6 @@ export const WaveDropContent: React.FC<WaveDropContentProps> = ({ drop }) => {
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
         onLongPress={() => {}}
-        onDropClick={() => {}}
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
       />

@@ -20,13 +20,13 @@ export default function NotificationDropVoted({
   activeDrop,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: {
   readonly notification: INotificationDropVoted;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const getVoteColor = (vote: number) => {
     if (vote > 0) {
@@ -41,12 +41,12 @@ export default function NotificationDropVoted({
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
     router.push(
-      `/waves/${notification.related_drops[0].wave.id}?drop=${serialNo}/`
+      `/my-stream?wave=${notification.related_drops[0].wave.id}&serialNo=${serialNo}/`
     );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
   };
 
   return (
@@ -114,7 +114,7 @@ export default function NotificationDropVoted({
           onQuote={onQuote}
           onReplyClick={onReplyClick}
           onQuoteClick={onQuoteClick}
-          onDropClick={onDropClick}
+          onDropContentClick={onDropContentClick}
         />
       </div>
     </div>

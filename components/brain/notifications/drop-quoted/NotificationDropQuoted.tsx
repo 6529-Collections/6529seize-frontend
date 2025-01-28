@@ -13,24 +13,28 @@ export default function NotificationDropQuoted({
   activeDrop,
   onReply,
   onQuote,
-  onDropClick,
+  onDropContentClick,
 }: {
   readonly notification: INotificationDropQuoted;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
+  
+  const navigateToWave = (waveId: string, serialNo: number) => {
+    router.push(`/my-stream?wave=${waveId}&serialNo=${serialNo}/`);
+  };
+
   const onReplyClick = (serialNo: number) => {
-    router.push(
-      `/waves/${notification.related_drops[0].wave.id}?drop=${serialNo}/`
-    );
+    navigateToWave(notification.related_drops[0].wave.id, serialNo);
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/waves/${quote.wave.id}?drop=${quote.serial_no}/`);
+    navigateToWave(quote.wave.id, quote.serial_no);
   };
+
   return (
     <Drop
       drop={{
@@ -49,7 +53,7 @@ export default function NotificationDropQuoted({
       onQuote={onQuote}
       onReplyClick={onReplyClick}
       onQuoteClick={onQuoteClick}
-      onDropClick={onDropClick}
+      onDropContentClick={onDropContentClick}
     />
   );
 }

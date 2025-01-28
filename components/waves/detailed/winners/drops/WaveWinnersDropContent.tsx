@@ -17,7 +17,6 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
         onLongPress={() => {}}
-        onDropClick={() => {}}
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
       />

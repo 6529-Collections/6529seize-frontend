@@ -127,7 +127,7 @@ export default function WaveDetailedDropReply({
                   {drop.author.handle}
                 </Link>
                 <span
-                  className="tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer"
+                  className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer"
                   onClick={() =>
                     drop?.serial_no && onReplyClick(drop.serial_no)
                   }

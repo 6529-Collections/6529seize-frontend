@@ -166,7 +166,7 @@ export default function WaveHeader({
             <span>
               Rank is in testing mode. Please report bugs in the{" "}
               <Link
-                href="/waves/dc6e0569-e4a3-4122-bc20-ee66c76981f5"
+                href="/my-stream?wave=dc6e0569-e4a3-4122-bc20-ee66c76981f5"
                 className="tw-underline tw-text-iron-50 tw-transition-all tw-duration-300"
               >
                 Rank Alpha Debugging

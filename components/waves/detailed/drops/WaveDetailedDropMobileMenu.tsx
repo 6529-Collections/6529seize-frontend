@@ -6,7 +6,6 @@ import { AuthContext } from "../../../auth/Auth";
 import WaveDetailedDropMobileMenuDelete from "./WaveDetailedDropMobileMenuDelete";
 import WaveDetailedDropMobileMenuFollow from "./WaveDetailedDropMobileMenuFollow";
 import WaveDetailedDropActionsRate from "./WaveDetailedDropActionsRate";
-import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface WaveDetailedDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -36,7 +35,7 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
     if (longPressTriggered) return;
     if (isTemporaryDrop) return;
 
-    const dropLink = `${window.location.protocol}//${window.location.host}/waves/${drop.wave.id}?drop=${drop.serial_no}`;
+    const dropLink = `${window.location.protocol}//${window.location.host}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
 
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(dropLink).then(() => {
@@ -86,14 +85,9 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
 
   const closeMenu = () => setOpen(false);
 
-  const { isCapacitor } = useCapacitor();
-
   return createPortal(
     <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
-      <div
-        className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
-          longPressTriggered && "tw-select-none"
-        } ${isCapacitor ? "tw-pb-[5rem]" : ""}`}>
+      <div className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${longPressTriggered && "tw-select-none"}`}>
         {showReplyAndQuote && (
           <>
             <button
@@ -132,6 +126,7 @@ const WaveDetailedDropMobileMenu: FC<WaveDetailedDropMobileMenuProps> = ({
               <svg
                 className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg">
                 <path

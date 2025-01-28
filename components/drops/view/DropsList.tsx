@@ -22,7 +22,7 @@ interface DropsListProps {
   readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
-  readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement> | null;
   readonly dropViewDropId: string | null;
@@ -44,7 +44,7 @@ const DropsList = memo(function DropsList({
   targetDropRef,
   parentContainerRef,
   onQuoteClick,
-  onDropClick,
+  onDropContentClick,
   dropViewDropId,
 }: DropsListProps) {
   const handleReply = useCallback<DropActionHandler>(
@@ -89,7 +89,7 @@ const DropsList = memo(function DropsList({
             showReplyAndQuote={showReplyAndQuote}
             onQuoteClick={onQuoteClick}
             parentContainerRef={parentContainerRef}
-            onDropClick={onDropClick}
+            onDropContentClick={onDropContentClick}
           />
         </div>
       )),
