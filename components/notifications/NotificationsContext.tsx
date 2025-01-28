@@ -3,7 +3,7 @@ import {
   PushNotifications,
   PushNotificationSchema,
 } from "@capacitor/push-notifications";
-import { Device, DeviceId, DeviceInfo } from "@capacitor/device";
+import { Device, DeviceInfo } from "@capacitor/device";
 import { NextRouter, useRouter } from "next/router";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
@@ -13,6 +13,7 @@ import {
   commonApiPost,
   commonApiPostWithoutBodyAndResponse,
 } from "../../services/api/common-api";
+import { getStableDeviceId } from "./stable-device-id";
 
 type NotificationsContextType = {};
 
@@ -70,11 +71,17 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     await PushNotifications.removeAllListeners();
 
-    const deviceId = await Device.getId();
+    const stableDeviceId = await getStableDeviceId();
+
     const deviceInfo = await Device.getInfo();
 
     await PushNotifications.addListener("registration", async (token) => {
-      registerPushNotification(deviceId, deviceInfo, token.value, profile);
+      registerPushNotification(
+        stableDeviceId,
+        deviceInfo,
+        token.value,
+        profile
+      );
     });
 
     await PushNotifications.addListener("registrationError", (error) => {
@@ -115,7 +122,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 };
 
 const registerPushNotification = async (
-  deviceId: DeviceId,
+  deviceId: string,
   deviceInfo: DeviceInfo,
   token: string,
   profile?: IProfileAndConsolidations
@@ -124,7 +131,7 @@ const registerPushNotification = async (
     const response = await commonApiPost({
       endpoint: `push-notifications/register`,
       body: {
-        device_id: deviceId.identifier,
+        device_id: deviceId,
         token,
         platform: deviceInfo.platform,
         profile_id: profile?.profile?.external_id,
