@@ -17,8 +17,8 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/router";
-import { ActiveDropState } from "../chat/WaveChat";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
+import { ActiveDropState } from "../../../../types/dropInteractionTypes";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
