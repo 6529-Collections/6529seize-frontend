@@ -8,7 +8,6 @@ import { NextRouter, useRouter } from "next/router";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
-import { useAccount } from "wagmi";
 import {
   commonApiPost,
   commonApiPostWithoutBodyAndResponse,
@@ -37,21 +36,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor } = useCapacitor();
-  const { isConnected } = useAccount();
   const { connectedProfile } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (connectedProfile) {
-      initializeNotifications(connectedProfile);
-    }
+    initializeNotifications(connectedProfile ?? undefined);
   }, [connectedProfile]);
-
-  useEffect(() => {
-    if (!isConnected) {
-      initializeNotifications();
-    }
-  }, [isConnected]);
 
   const initializeNotifications = async (
     profile?: IProfileAndConsolidations
