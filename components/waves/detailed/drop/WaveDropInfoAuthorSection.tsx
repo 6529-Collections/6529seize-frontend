@@ -2,8 +2,8 @@ import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { WaveDropAuthor } from "./WaveDropAuthor";
-import { WaveDetailedLeaderboardItemOutcomes } from "../small-leaderboard/WaveDetailedLeaderboardItemOutcomes";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
+import { WaveSmallLeaderboardItemOutcomes } from "../../small-leaderboard/WaveSmallLeaderboardItemOutcomes";
 
 interface WaveDropInfoAuthorSectionProps {
   readonly drop: ExtendedDrop | undefined;
@@ -26,7 +26,7 @@ export const WaveDropInfoAuthorSection: React.FC<WaveDropInfoAuthorSectionProps>
         </div>
       </div>
       {wave && drop && (
-        <WaveDetailedLeaderboardItemOutcomes drop={drop} wave={wave} />
+        <WaveSmallLeaderboardItemOutcomes drop={drop} wave={wave} />
       )}
     </div>
   );
