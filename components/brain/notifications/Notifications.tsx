@@ -6,7 +6,7 @@ import NotificationsWrapper from "./NotificationsWrapper";
 import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
-import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";

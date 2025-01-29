@@ -19,7 +19,7 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
 import { useProgressiveDebounce } from "../../../hooks/useProgressiveDebounce";
 import { useKeyPressEvent } from "react-use";
-import { ActiveDropState } from "./chat/WaveChat";
+import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropMode } from "./PrivilegedDropCreator";
 import { DropPrivileges } from "../../../hooks/useDropPriviledges";
 
