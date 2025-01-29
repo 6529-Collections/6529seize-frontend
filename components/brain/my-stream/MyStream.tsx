@@ -1,6 +1,6 @@
 import FeedWrapper from "../feed/FeedWrapper";
 import { TypedFeedItem } from "../../../types/feed.types";
-import { ActiveDropState } from "../../waves/detailed/chat/WaveChat";
+import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
 

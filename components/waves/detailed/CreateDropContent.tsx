@@ -34,7 +34,7 @@ import { createBreakpoint } from "react-use";
 import "tippy.js/dist/tippy.css";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
-import { ActiveDropAction, ActiveDropState } from "./chat/WaveChat";
+import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ApiReplyToDropResponse } from "../../../generated/models/ApiReplyToDropResponse";
 import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
 import { CreateDropSubmit } from "./CreateDropSubmit";

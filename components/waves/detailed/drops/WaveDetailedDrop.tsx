@@ -11,7 +11,7 @@ import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDetailedDropMobileMenu from "./WaveDetailedDropMobileMenu";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
-import { ActiveDropState } from "../chat/WaveChat";
+import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "./Drop";
 
 enum GroupingThreshold {
@@ -247,9 +247,11 @@ const WaveDetailedDrop = ({
               }
             />
           )}
-        <div
+        <button
           onClick={onContainerClick}
-          className={`tw-flex tw-gap-x-3 tw-relative tw-z-10 ${
+          type="button"
+          disabled={drop.drop_type !== ApiDropType.Participatory}
+          className={`tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0 ${
             drop.drop_type === ApiDropType.Participatory
               ? "tw-cursor-pointer"
               : ""
@@ -281,7 +283,7 @@ const WaveDetailedDrop = ({
               />
             </div>
           </div>
-        </div>
+        </button>
         {!isMobile && showReplyAndQuote && (
           <WaveDetailedDropActions
             drop={drop}

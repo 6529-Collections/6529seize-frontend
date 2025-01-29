@@ -34,6 +34,7 @@ import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { MentionedUser, ReferencedNft } from "../../../entities/IDrop";
+import { ActiveDropAction } from "../../../types/dropInteractionTypes";
 import { MentionNode } from "../../drops/create/lexical/nodes/MentionNode";
 import { HashtagNode } from "../../drops/create/lexical/nodes/HashtagNode";
 import { ImageNode } from "../../drops/create/lexical/nodes/ImageNode";
@@ -52,7 +53,6 @@ import { MaxLengthPlugin } from "../../drops/create/lexical/plugins/MaxLengthPlu
 import DragDropPastePlugin from "../../drops/create/lexical/plugins/DragDropPastePlugin";
 import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { ActiveDropAction } from "./chat/WaveChat";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;

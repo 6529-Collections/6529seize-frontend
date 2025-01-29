@@ -5,6 +5,7 @@ import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpac
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import ProxyListItem from "./ProxyListItem";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import PrimaryButton from "../../../utils/button/PrimaryButton";
 
 export enum ProfileProxyListType {
   ALL = "ALL",
@@ -41,13 +42,13 @@ export default function ProxyList({
         <ProxyListFilters selected={proxyType} setSelected={setProxyType} />
         {isSelf && (
           <CommonAnimationOpacity>
-            <button
-              type="button"
-              onClick={() => onModeChange(ProxyMode.CREATE)}
-              className="tw-whitespace-nowrap w-flex tw-items-center tw-justify-center tw-relative tw-bg-primary-500 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg hover:tw-bg-primary-600 hover:tw-border-primary-600 tw-transition tw-duration-300 tw-ease-out"
+            <PrimaryButton
+              loading={false}
+              disabled={false}
+              onClicked={() => onModeChange(ProxyMode.CREATE)}
             >
               <svg
-                className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
+                className="tw-w-5 tw-h-5 -tw-ml-1"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
@@ -62,7 +63,7 @@ export default function ProxyList({
                 />
               </svg>
               <span>Assign Proxy</span>
-            </button>
+            </PrimaryButton>
           </CommonAnimationOpacity>
         )}
       </div>

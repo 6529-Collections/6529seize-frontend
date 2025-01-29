@@ -1,7 +1,7 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropReplying from "../CreateDropReplying";
-import { ActiveDropState } from "./chat/WaveChat";
+import { ActiveDropState } from "../../../types/dropInteractionTypes";
 
 interface CreateDropReplyingWrapperProps {
   readonly activeDrop: ActiveDropState | null;

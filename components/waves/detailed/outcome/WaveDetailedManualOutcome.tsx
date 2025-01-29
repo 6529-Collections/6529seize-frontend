@@ -110,7 +110,7 @@ export const WaveDetailedManualOutcome: FC<WaveDetailedManualOutcomeProps> = ({
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
               {amounts.map((_, i) => (
                 <div
-                  key={`wave-detailed-manual-outcome-row-${i}`}
+                  key={`wave-detailed-manual-outcome-${outcome.distribution?.[i].amount}-${outcome.distribution?.[i].description}`}
                   className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-amber-500/5 hover:tw-to-transparent tw-transition-colors tw-duration-300"
                 >
                   <div className="tw-flex tw-items-center tw-gap-4">

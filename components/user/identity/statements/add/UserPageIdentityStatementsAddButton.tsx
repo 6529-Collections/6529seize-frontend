@@ -3,6 +3,7 @@ import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import PrimaryButton from "../../../../utils/button/PrimaryButton";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,
@@ -14,13 +15,13 @@ export default function UserPageIdentityStatementsAddButton({
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => setIsAddStatementsOpen(!isAddStatementsOpen)}
-        className="tw-inline-flex tw-items-center tw-cursor-pointer tw-bg-primary-500 tw-px-4 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-white tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-500 hover:tw-ring-primary-600 placeholder:tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-rounded-lg tw-shadow-sm hover:tw-bg-primary-600 tw-transition tw-duration-300 tw-ease-out"
+      <PrimaryButton
+        loading={false}
+        disabled={false}
+        onClicked={() => setIsAddStatementsOpen(!isAddStatementsOpen)}
       >
         <svg
-          className="tw-h-5 tw-w-5 tw-text-white -tw-ml-1 tw-mr-1.5 tw-flex-shrink-0"
+          className="tw-h-5 tw-w-5 -tw-ml-1"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -34,7 +35,7 @@ export default function UserPageIdentityStatementsAddButton({
           />
         </svg>
         <span>Add</span>
-      </button>
+      </PrimaryButton>
 
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isAddStatementsOpen && (
