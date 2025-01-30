@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
 import { WaveLeaderboardSort } from "./WaveLeaderboardSort";
 import { WaveLeaderboardSortType } from "../WaveLeaderboard";
-import { AuthContext } from "../../../auth/Auth";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
+import { AuthContext } from "../../../../auth/Auth";
+import PrimaryButton from "../../../../utils/button/PrimaryButton";
 
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;

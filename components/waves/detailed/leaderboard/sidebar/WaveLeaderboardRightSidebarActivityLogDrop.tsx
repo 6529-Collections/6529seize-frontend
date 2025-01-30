@@ -1,7 +1,7 @@
 import { FC, useState } from "react";
-import { ApiWaveLog } from "../../../../generated/models/ApiWaveLog";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
-import { useDrop } from "../../../../hooks/useDrop";
+import { ApiWaveLog } from "../../../../../generated/models/ApiWaveLog";
+import { ExtendedDrop } from "../../../../../helpers/waves/wave-drops.helpers";
+import { useDrop } from "../../../../../hooks/useDrop";
 
 export type WaveLeaderboardRightSidebarActivityLogDropProps = {
   readonly log: ApiWaveLog;

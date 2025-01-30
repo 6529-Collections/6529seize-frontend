@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { Time } from "../../../helpers/time";
+import { ApiWave } from "../../../../generated/models/ApiWave";
+import { Time } from "../../../../helpers/time";
 
 interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;

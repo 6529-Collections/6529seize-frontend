@@ -1,11 +1,11 @@
 import React from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
 
-import { useAuth } from "../../../auth/Auth";
-import { useWaveActivityLogs } from "../../../../hooks/useWaveActivityLogs";
+import { useAuth } from "../../../../auth/Auth";
+import { useWaveActivityLogs } from "../../../../../hooks/useWaveActivityLogs";
 import { WaveLeaderboardRightSidebarActivityLog } from "./WaveLeaderboardRightSidebarActivityLog";
-import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
+import { useIntersectionObserver } from "../../../../../hooks/useIntersectionObserver";
+import { ExtendedDrop } from "../../../../../helpers/waves/wave-drops.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogsProps {
   readonly wave: ApiWave;

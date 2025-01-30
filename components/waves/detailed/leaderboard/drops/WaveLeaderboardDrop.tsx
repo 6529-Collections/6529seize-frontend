@@ -1,13 +1,13 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import { WaveLeaderboardDropRankIndicator } from "./WaveLeaderboardDropRankIndicator";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
 import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
-import { ApiWave } from "../../../../generated/models/ObjectSerializer";
-import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
+import { ApiWave } from "../../../../../generated/models/ObjectSerializer";
+import { useDropInteractionRules } from "../../../../../hooks/drops/useDropInteractionRules";
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
-import { SingleWaveDropVote } from "../../drop/SingleWaveDropVote";
+import { SingleWaveDropVote } from "../../../drop/SingleWaveDropVote";
 
 interface WaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import useCapacitor from "../../../../hooks/useCapacitor";
+import useCapacitor from "../../../../../hooks/useCapacitor";
 import { WaveLeaderboardRightSidebarTabs } from "./WaveLeaderboardRightSidebarTabs";
 import { WaveLeaderboardRightSidebarOpenToggle } from "./WaveLeaderboardRightSidebarOpenToggle";
 import { WaveLeaderboardRightSidebarVoters } from "./WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "./WaveLeaderboardRightSidebarActivityLogs";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
+import { ExtendedDrop } from "../../../../../helpers/waves/wave-drops.helpers";
 
 interface WaveLeaderboardRightSidebarProps {
   readonly isOpen: boolean;

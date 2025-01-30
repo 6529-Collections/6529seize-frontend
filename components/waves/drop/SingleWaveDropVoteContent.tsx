@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { ApiDrop } from "../../../generated/models/ObjectSerializer";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
 import SingleWaveDropVoteSubmit, {
   SingleWaveDropVoteSubmitHandles,
 } from "./SingleWaveDropVoteSubmit";
-import { TabToggle } from "../../../common/TabToggle";
 import SingleWaveDropVoteSlider from "./SingleWaveDropVoteSlider";
+import { TabToggle } from "../../common/TabToggle";
 import { SingleWaveDropVoteInput } from "./SingleWaveDropVoteInput";
 import { SingleWaveDropVoteStats } from "./SingleWaveDropVoteStats";
 import SingleWaveDropVoteQuick from "./SingleWaveDropVoteQuick";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
-  readonly size?: SingleWaveDropVoteSize;
+  readonly size: SingleWaveDropVoteSize;
 }
 
 export const SingleWaveDropVoteContent: React.FC<SingleWaveDropVoteContentProps> = ({

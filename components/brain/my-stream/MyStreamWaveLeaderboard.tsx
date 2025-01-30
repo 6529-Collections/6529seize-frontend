@@ -9,11 +9,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 import useCapacitor from "../../../hooks/useCapacitor";
-import { WaveLeaderboardSortType } from "../../waves/leaderboard/WaveLeaderboard";
-import { WaveLeaderboardTime } from "../../waves/leaderboard/WaveLeaderboardTime";
-import { WaveLeaderboardHeader } from "../../waves/leaderboard/header/WaveleaderboardHeader";
-import { WaveDropCreate } from "../../waves/leaderboard/create/WaveDropCreate";
-import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderboardDrops";
+import { WaveLeaderboardSortType } from "../../waves/detailed/leaderboard/WaveLeaderboard";
+import { WaveLeaderboardTime } from "../../waves/detailed/leaderboard/WaveLeaderboardTime";
+import { WaveLeaderboardHeader } from "../../waves/detailed/leaderboard/header/WaveleaderboardHeader";
+import { WaveDropCreate } from "../../waves/detailed/leaderboard/create/WaveDropCreate";
+import { WaveLeaderboardDrops } from "../../waves/detailed/leaderboard/drops/WaveLeaderboardDrops";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;

@@ -1,37 +1,9 @@
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ApiDropType } from "../../../generated/models/ObjectSerializer";
-import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
-import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { ApiWaveVoter } from "../../../generated/models/ApiWaveVoter";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
-
-interface WaveDropInfoContentProps {
-  readonly drop: ExtendedDrop | undefined;
-}
-
-export const WaveDropInfoContent: React.FC<WaveDropInfoContentProps> = ({
-  drop,
-}) => {
-  return (
-    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2">
-      <div className="tw-px-6">
-        {drop?.drop_type === ApiDropType.Participatory && (
-          <SingleWaveDropPosition rank={drop.rank} />
-        )}
-      </div>
-
-      <div className="tw-flex-1 tw-w-full">
-        <div className="tw-px-6">
-          {drop && <SingleWaveDropContent drop={drop} />}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 interface SingleWaveDropVoterProps {
   readonly voter: ApiWaveVoter;

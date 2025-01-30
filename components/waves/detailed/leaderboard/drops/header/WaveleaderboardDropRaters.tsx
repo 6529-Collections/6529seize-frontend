@@ -1,12 +1,12 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { ExtendedDrop } from "../../../../../../helpers/waves/drop.helpers";
+import { formatNumberWithCommas } from "../../../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 import Link from "next/link";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../helpers/image.helpers";
+} from "../../../../../../helpers/image.helpers";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;

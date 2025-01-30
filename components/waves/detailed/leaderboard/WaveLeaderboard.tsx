@@ -1,19 +1,17 @@
 import React, { useState } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 import { WaveLeaderboardTime } from "./WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "./header/WaveleaderboardHeader";
 import { WaveLeaderboardDrops } from "./drops/WaveLeaderboardDrops";
-import {
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../hooks/useWaveDropsLeaderboard";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveLeaderboardRightSidebar from "./sidebar/WaveLeaderboardRightSidebar";
 import { WaveDropCreate } from "./create/WaveDropCreate";
 import { AnimatePresence, motion } from "framer-motion";
-import useCapacitor from "../../../hooks/useCapacitor";
-import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import { WaveWinners } from "../detailed/winners/WaveWinners";
+import useCapacitor from "../../../../hooks/useCapacitor";
+import { useWaveState, WaveVotingState } from "../../../../hooks/useWaveState";
+import { WaveWinners } from "../winners/WaveWinners";
+import { WaveDropsLeaderboardSortBy, WaveDropsLeaderboardSortDirection } from "../../../../hooks/useWaveDropsLeaderboard";
+
 
 interface WaveLeaderboardProps {
   readonly wave: ApiWave;

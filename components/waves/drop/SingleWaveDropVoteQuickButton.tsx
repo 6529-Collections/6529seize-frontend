@@ -11,13 +11,9 @@ interface SingleWaveDropVoteQuickButtonProps {
   readonly setValue: (value: number) => void;
 }
 
-export const SingleWaveDropVoteQuickButton: React.FC<SingleWaveDropVoteQuickButtonProps> = ({
-  value,
-  creditType,
-  rank,
-  disabled,
-  setValue,
-}) => {
+export const SingleWaveDropVoteQuickButton: React.FC<
+  SingleWaveDropVoteQuickButtonProps
+> = ({ value, rank, disabled, setValue, creditType }) => {
   const getColours = (rank: number): { base: string; hover: string } => {
     if (rank === 1) {
       return {

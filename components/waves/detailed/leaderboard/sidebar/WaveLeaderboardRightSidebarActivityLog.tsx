@@ -1,12 +1,12 @@
-import { ApiWaveLog } from "../../../../generated/models/ApiWaveLog";
+import { ApiWaveLog } from "../../../../../generated/models/ApiWaveLog";
 import {
   formatNumberWithCommas,
   getTimeAgoShort,
-} from "../../../../helpers/Helpers";
+} from "../../../../../helpers/Helpers";
 import Link from "next/link";
 import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRightSidebarActivityLogDrop";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
-import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
+import { ExtendedDrop } from "../../../../../helpers/waves/wave-drops.helpers";
+import { ApiWaveCreditType } from "../../../../../generated/models/ApiWaveCreditType";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;

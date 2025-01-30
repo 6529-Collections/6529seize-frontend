@@ -1,8 +1,8 @@
 import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ApiDropType } from "../../../generated/models/ObjectSerializer";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
-import { ApiDropType } from "../../../generated/models/ObjectSerializer";
 
 interface SingleWaveDropInfoContentProps {
   readonly drop: ExtendedDrop | undefined;

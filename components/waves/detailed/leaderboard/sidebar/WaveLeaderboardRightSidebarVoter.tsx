@@ -1,9 +1,9 @@
 import React from "react";
-import { ApiWaveVoter } from "../../../../generated/models/ApiWaveVoter";
-import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { ApiWaveVoter } from "../../../../../generated/models/ApiWaveVoter";
+import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import Link from "next/link";
 import Tippy from "@tippyjs/react";
-import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
+import { ApiWaveCreditType } from "../../../../../generated/models/ApiWaveCreditType";
 
 interface WaveLeaderboardRightSidebarVoterProps {
   readonly voter: ApiWaveVoter;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import WaveDetailedDropContent from "../../detailed/drops/WaveDetailedDropContent";
-import WaveDetailedDropMetadata from "../../detailed/drops/WaveDetailedDropMetadata";
+import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import WaveDetailedDropContent from "../../drops/WaveDetailedDropContent";
+import WaveDetailedDropMetadata from "../../drops/WaveDetailedDropMetadata";
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
 }
@@ -19,7 +19,7 @@ export const WaveLeaderboardDropContent: React.FC<
         setActivePartIndex={setActivePartIndex}
         onLongPress={() => {}}
         onQuoteClick={() => {}}
-        setLongPressTriggered={() => {}}
+        setLongPressTriggered={() => {}}pWaveDropCreate
       />
       {!!drop.metadata.length && (
         <div className="tw-mt-2">

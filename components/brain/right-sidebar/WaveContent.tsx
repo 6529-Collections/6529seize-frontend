@@ -12,8 +12,8 @@ import { Mode, SidebarTab } from "./BrainRightSidebar";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 import { motion } from "framer-motion";
 import { WaveSmallLeaderboard } from "../../waves/small-leaderboard/WaveSmallLeaderboard";
-import { WaveLeaderboardRightSidebarVoters } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
-import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
+import { WaveLeaderboardRightSidebarVoters } from "../../waves/detailed/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
+import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/detailed/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
