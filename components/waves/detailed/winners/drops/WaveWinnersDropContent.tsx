@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import WaveDetailedDropContent from "../../drops/WaveDetailedDropContent";
+import WaveDetailedDropContent from "../../../drops/WaveDetailedDropContent";
 
 interface WaveWinnersDropContentProps {
   readonly drop: ExtendedDrop;

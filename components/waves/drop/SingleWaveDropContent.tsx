@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { SingleWaveDropContentMetadata } from "./SingleWaveDropContentMetadata";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import WaveDetailedDropContent from "../detailed/drops/WaveDetailedDropContent";
+import WaveDetailedDropContent from "../drops/WaveDetailedDropContent";
 
 interface SingleWaveDropContentProps {
   readonly drop: ExtendedDrop;

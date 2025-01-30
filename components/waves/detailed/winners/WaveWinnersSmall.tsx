@@ -16,7 +16,7 @@ import {
   ImageScale,
   getScaledImageUri,
 } from "../../../../helpers/image.helpers";
-import WaveDetailedDropContent from "../drops/WaveDetailedDropContent";
+import WaveDetailedDropContent from "../../drops/WaveDetailedDropContent";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 
 interface WaveWinnersSmallProps {

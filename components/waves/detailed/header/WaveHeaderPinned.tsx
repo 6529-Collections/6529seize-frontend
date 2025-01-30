@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
 import { WaveHeaderPinnedSide } from "./WaveHeader";
-import Drop, { DropLocation } from "../drops/Drop";
+import Drop, { DropLocation } from "../../drops/Drop";
 
 interface WaveHeaderPinnedProps {
   readonly wave: ApiWave;

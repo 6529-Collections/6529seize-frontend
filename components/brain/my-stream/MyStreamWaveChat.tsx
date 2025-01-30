@@ -5,7 +5,7 @@ import {
   ActiveDropState,
 } from "../../../types/dropInteractionTypes";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import WaveDropsAll from "../../waves/detailed/drops/WaveDropsAll";
+import WaveDropsAll from "../../waves/drops/WaveDropsAll";
 import { CreateDropWaveWrapper } from "../../waves/detailed/CreateDropWaveWrapper";
 import PrivilegedDropCreator, {
   DropMode,

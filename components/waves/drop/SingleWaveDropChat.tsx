@@ -4,7 +4,7 @@ import {
   ApiWave,
 } from "../../../generated/models/ObjectSerializer";
 import useCapacitor from "../../../hooks/useCapacitor";
-import WaveDropsAll from "../detailed/drops/WaveDropsAll";
+import WaveDropsAll from "../drops/WaveDropsAll";
 import {
   CreateDropWaveWrapper,
   CreateDropWaveWrapperContext,

@@ -7,7 +7,7 @@ import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
-import WaveDetailedDropActionsRate from "../detailed/drops/WaveDetailedDropActionsRate";
+import WaveDetailedDropActionsRate from "../drops/WaveDetailedDropActionsRate";
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
