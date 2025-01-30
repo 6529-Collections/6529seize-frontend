@@ -175,7 +175,7 @@ function HeaderQRModal({
           style={{
             maxWidth: "100%",
             height: "auto",
-            border: "20px solid #000",
+            border: "10px solid #fff",
           }}
         />
         <div className="d-flex align-items-center gap-2 mt-2">
