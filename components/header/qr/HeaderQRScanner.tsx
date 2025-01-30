@@ -14,11 +14,10 @@ export default function HeaderQRScanner() {
   const baseEndpoint = process.env.BASE_ENDPOINT ?? "https://6529.io";
 
   const { setToast } = useAuth();
-
   const capacitor = useCapacitor();
   const router = useRouter();
-  const [scanning, setScanning] = useState(false);
 
+  const [scanning, setScanning] = useState(false);
   const [scannerAvailable, setScannerAvailable] = useState(false);
 
   useEffect(() => {
@@ -77,22 +76,41 @@ export default function HeaderQRScanner() {
 
     try {
       const url = new URL(content);
+      let path = "";
+      let queryParams: Record<string, string | number> = {};
 
       if (url.protocol === `${appScheme}:` || url.origin === baseEndpoint) {
-        let path = "";
+        // Extract path
+        const schemeEndIndex = content.indexOf("://") + 3;
+        const urlWithoutScheme = content.slice(schemeEndIndex);
+        const [scope, ...pathParts] = urlWithoutScheme.split("?")[0].split("/");
 
-        if (url.protocol === `${appScheme}:`) {
-          if (url.pathname.startsWith(`/${DeepLinkScope.NAVIGATE}`)) {
-            path = url.pathname.slice(`/${DeepLinkScope.NAVIGATE}`.length);
-          } else {
-            path = url.pathname;
-          }
-        } else if (url.origin === baseEndpoint) {
-          path = url.pathname;
+        // Extract query params
+        const queryString = urlWithoutScheme.includes("?")
+          ? urlWithoutScheme.split("?")[1]
+          : "";
+        const searchParams = new URLSearchParams(queryString);
+        queryParams = Object.fromEntries(searchParams.entries());
+        queryParams["_t"] = Date.now() / 1000; // Add timestamp for freshness
+
+        switch (scope) {
+          case DeepLinkScope.NAVIGATE:
+            path = `/${pathParts.join("/")}`;
+            break;
+          case DeepLinkScope.SHARE_CONNECTION:
+            path = "/accept-connection-sharing";
+            break;
+          default:
+            console.log("Unknown Deep Link Scope", scope);
+            setToast({
+              message: "Invalid QR code",
+              type: "error",
+            });
+            return;
         }
 
-        // Ensure we don't start with a slash when pushing to router
-        router.push(path.startsWith("/") ? path : `/${path}`);
+        // Navigate to the extracted path
+        router.push({ pathname: path, query: queryParams });
       } else {
         setToast({
           message: "Invalid QR code",
@@ -100,6 +118,7 @@ export default function HeaderQRScanner() {
         });
       }
     } catch (error) {
+      console.error("Error parsing QR code:", error);
       setToast({
         message: "Invalid QR code",
         type: "error",
