@@ -4,7 +4,7 @@ import {
   ChatRestriction,
   DropPrivileges,
   SubmissionRestriction,
-} from "../../../hooks/useDropPriviledges";
+} from "../../hooks/useDropPriviledges";
 
 interface CreateDropDropModeToggleProps {
   readonly isDropMode: boolean;

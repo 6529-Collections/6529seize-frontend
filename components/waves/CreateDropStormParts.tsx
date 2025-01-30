@@ -1,14 +1,12 @@
 import React from "react";
-import { CreateDropPart, ReferencedNft } from "../../../entities/IDrop";
-import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
-import { AuthContext } from "../../auth/Auth";
-import { cicToType } from "../../../helpers/Helpers";
-import UserCICAndLevel, {
-  UserCICAndLevelSize,
-} from "../../user/utils/UserCICAndLevel";
+import { CreateDropPart, ReferencedNft } from "../../entities/IDrop";
+import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
+import { AuthContext } from "../auth/Auth";
+import { cicToType } from "../../helpers/Helpers";
 import Link from "next/link";
 import CreateDropStormPart from "./CreateDropStormPart";
 import { AnimatePresence, motion } from "framer-motion";
+import UserCICAndLevel, { UserCICAndLevelSize } from "../user/utils/UserCICAndLevel";
 
 interface CreateDropStormPartsProps {
   parts: CreateDropPart[];
@@ -34,7 +32,7 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
             {connectedProfile?.profile?.pfp_url ? (
               <img
                 src={connectedProfile.profile.pfp_url}
-                alt="Profile picture"
+                alt={connectedProfile.profile.handle || "user"}
                 className="tw-h-full tw-w-full tw-object-cover tw-rounded-lg"
               />
             ) : (

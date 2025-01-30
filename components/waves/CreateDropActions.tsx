@@ -2,7 +2,7 @@ import Tippy from "@tippyjs/react";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import React, { memo } from "react";
 import StormButton from "./StormButton";
-import useIsMobileDevice from "../../../hooks/isMobileDevice";
+import useIsMobileDevice from "../../hooks/isMobileDevice";
 
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;

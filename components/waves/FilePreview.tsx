@@ -1,7 +1,7 @@
 import React from "react";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
+} from "../distribution-plan-tool/common/CircleLoader";
 
 interface FileItem {
   file: File;

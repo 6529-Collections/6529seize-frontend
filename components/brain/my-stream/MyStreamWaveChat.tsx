@@ -6,10 +6,10 @@ import {
 } from "../../../types/dropInteractionTypes";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import WaveDropsAll from "../../waves/drops/WaveDropsAll";
-import { CreateDropWaveWrapper } from "../../waves/detailed/CreateDropWaveWrapper";
+import { CreateDropWaveWrapper } from "../../waves/CreateDropWaveWrapper";
 import PrivilegedDropCreator, {
   DropMode,
-} from "../../waves/detailed/PrivilegedDropCreator";
+} from "../../waves/PrivilegedDropCreator";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";

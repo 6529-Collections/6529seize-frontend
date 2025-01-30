@@ -1,7 +1,7 @@
 import React from "react";
-import { CreateDropPart, ReferencedNft } from "../../../entities/IDrop";
-import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
-import DropPartMarkdown from "../../drops/view/part/DropPartMarkdown";
+import { CreateDropPart, ReferencedNft } from "../../entities/IDrop";
+import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
+import DropPartMarkdown from "../drops/view/part/DropPartMarkdown";
 
 interface CreateDropStormPartProps {
   readonly partIndex: number;

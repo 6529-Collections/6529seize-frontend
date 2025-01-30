@@ -10,41 +10,39 @@ import {
   DropMetadata,
   MentionedUser,
   ReferencedNft,
-} from "../../../entities/IDrop";
+} from "../../entities/IDrop";
 import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
-import { MENTION_TRANSFORMER } from "../../drops/create/lexical/transformers/MentionTransformer";
-import { HASHTAG_TRANSFORMER } from "../../drops/create/lexical/transformers/HastagTransformer";
-import { IMAGE_TRANSFORMER } from "../../drops/create/lexical/transformers/ImageTransformer";
-import { AuthContext } from "../../auth/Auth";
-import { commonApiPost } from "../../../services/api/common-api";
-import { ApiCreateDropRequest } from "../../../generated/models/ApiCreateDropRequest";
-import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/MentionTransformer";
+import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
+import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
+import { AuthContext } from "../auth/Auth";
+import { commonApiPost } from "../../services/api/common-api";
+import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
+import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
+import { ApiDrop } from "../../generated/models/ApiDrop";
+import { getOptimisticDropId } from "../../helpers/waves/drop.helpers";
+import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropMetadata from "./CreateDropMetadata";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWaveMetadataType } from "../../../generated/models/ApiWaveMetadataType";
+import { ApiWave } from "../../generated/models/ApiWave";
+import { ApiWaveMetadataType } from "../../generated/models/ApiWaveMetadataType";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
 import "tippy.js/dist/tippy.css";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
-import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
-import { ApiReplyToDropResponse } from "../../../generated/models/ApiReplyToDropResponse";
+import { ApiDropType } from "../../generated/models/ApiDropType";
+import { ApiWaveType } from "../../generated/models/ApiWaveType";
+import { ActiveDropAction, ActiveDropState } from "../../types/dropInteractionTypes";
+import { ApiReplyToDropResponse } from "../../generated/models/ApiReplyToDropResponse";
 import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
 import { CreateDropSubmit } from "./CreateDropSubmit";
-import { DropPrivileges } from "../../../hooks/useDropPriviledges";
-import {
-  getMissingRequirements,
-  MissingRequirements,
-} from "./utils/getMissingRequirements";
-import { useDropMetadata } from "./hooks/useDropMetadata";
-import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
+import { DropPrivileges } from "../../hooks/useDropPriviledges";
+
+import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
+import { useDropMetadata } from "./detailed/hooks/useDropMetadata";
+import { getMissingRequirements, MissingRequirements } from "./detailed/utils/getMissingRequirements";
 
 export type CreateDropMetadataType =
   | {

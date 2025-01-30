@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useMemo, useRef } from "react";
-import useCapacitor from "../../../hooks/useCapacitor";
+import useCapacitor from "../../hooks/useCapacitor";
 import { useDebouncedCallback } from "use-debounce";
 
 export enum CreateDropWaveWrapperContext {

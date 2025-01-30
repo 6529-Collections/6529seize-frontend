@@ -33,25 +33,25 @@ import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
-import { MentionedUser, ReferencedNft } from "../../../entities/IDrop";
-import { ActiveDropAction } from "../../../types/dropInteractionTypes";
-import { MentionNode } from "../../drops/create/lexical/nodes/MentionNode";
-import { HashtagNode } from "../../drops/create/lexical/nodes/HashtagNode";
-import { ImageNode } from "../../drops/create/lexical/nodes/ImageNode";
-import ExampleTheme from "../../drops/create/lexical/ExampleTheme";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { MentionedUser, ReferencedNft } from "../../entities/IDrop";
+import { ActiveDropAction } from "../../types/dropInteractionTypes";
+import { MentionNode } from "../drops/create/lexical/nodes/MentionNode";
+import { HashtagNode } from "../drops/create/lexical/nodes/HashtagNode";
+import { ImageNode } from "../drops/create/lexical/nodes/ImageNode";
+import ExampleTheme from "../drops/create/lexical/ExampleTheme";
+import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
 import ClearEditorPlugin, {
   ClearEditorPluginHandles,
-} from "../../drops/create/lexical/plugins/ClearEditorPlugin";
+} from "../drops/create/lexical/plugins/ClearEditorPlugin";
 import NewMentionsPlugin, {
   NewMentionsPluginHandles,
-} from "../../drops/create/lexical/plugins/mentions/MentionsPlugin";
+} from "../drops/create/lexical/plugins/mentions/MentionsPlugin";
 import NewHashtagsPlugin, {
   NewHastagsPluginHandles,
-} from "../../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
-import { MaxLengthPlugin } from "../../drops/create/lexical/plugins/MaxLengthPlugin";
-import DragDropPastePlugin from "../../drops/create/lexical/plugins/DragDropPastePlugin";
-import EnterKeyPlugin from "../../drops/create/lexical/plugins/enter/EnterKeyPlugin";
+} from "../drops/create/lexical/plugins/hashtags/HashtagsPlugin";
+import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin";
+import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePlugin";
+import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
 export interface CreateDropInputHandles {

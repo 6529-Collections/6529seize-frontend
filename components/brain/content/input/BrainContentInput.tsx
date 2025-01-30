@@ -4,7 +4,7 @@ import useCapacitor from "../../../../hooks/useCapacitor";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import PrivilegedDropCreator, {
   DropMode,
-} from "../../../waves/detailed/PrivilegedDropCreator";
+} from "../../../waves/PrivilegedDropCreator";
 
 interface BrainContentInputProps {
   readonly activeDrop: ActiveDropState | null;

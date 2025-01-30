@@ -8,9 +8,9 @@ import WaveDropsAll from "../drops/WaveDropsAll";
 import {
   CreateDropWaveWrapper,
   CreateDropWaveWrapperContext,
-} from "../detailed/CreateDropWaveWrapper";
+} from "../CreateDropWaveWrapper";
 import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
-import PrivilegedDropCreator, { DropMode } from "../detailed/PrivilegedDropCreator";
+import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;

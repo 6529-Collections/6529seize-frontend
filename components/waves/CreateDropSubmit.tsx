@@ -1,5 +1,5 @@
 import React from "react";
-import PrimaryButton from "../../utils/button/PrimaryButton";
+import PrimaryButton from "../utils/button/PrimaryButton";
 
 interface CreateDropSubmitProps {
   readonly submitting: boolean;
