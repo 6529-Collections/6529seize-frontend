@@ -9,7 +9,11 @@ import { useAuth } from "../../auth/Auth";
 import { DeepLinkScope } from "../capacitor/CapacitorWidget";
 import Image from "next/image";
 
-export default function HeaderQRScanner() {
+export default function HeaderQRScanner({
+  onScanSuccess,
+}: {
+  onScanSuccess: () => void;
+}) {
   const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
   const baseEndpoint = process.env.BASE_ENDPOINT ?? "https://6529.io";
 
@@ -110,6 +114,7 @@ export default function HeaderQRScanner() {
         }
 
         // Navigate to the extracted path
+        onScanSuccess();
         router.push({ pathname: path, query: queryParams });
       } else {
         setToast({
