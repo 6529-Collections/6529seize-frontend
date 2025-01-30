@@ -60,10 +60,8 @@ export const CreateDropDropModeToggle: React.FC<
         return "Drop submissions have ended";
       case SubmissionRestriction.MAX_DROPS_REACHED:
         return "You have reached the maximum number of drops allowed";
-      default: {
-        const exhaustiveCheck: never = restriction;
+      default:
         return `${isChat ? "Drop" : "Chat"} mode is unavailable`;
-      }
     }
   };
 

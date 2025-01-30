@@ -19,8 +19,7 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
         case ChatRestriction.DISABLED:
           return "Chat is currently disabled for this wave";
         default: {
-          const exhaustiveCheck: never = chatRestriction;
-          return "Chat is unavailable";
+          throw new Error(`Unhandled chat restriction: ${chatRestriction}`);
         }
       }
     }
@@ -40,8 +39,7 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
         case SubmissionRestriction.MAX_DROPS_REACHED:
           return "You have reached the maximum number of drops allowed";
         default: {
-          const exhaustiveCheck: never = submissionRestriction;
-          return "Submissions are unavailable";
+          throw new Error(`Unhandled submission restriction: ${submissionRestriction}`);
         }
       }
     }

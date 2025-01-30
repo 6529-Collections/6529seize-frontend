@@ -10,6 +10,12 @@ export interface SliderTheme {
   thumb: {
     background: string;
     glow: string;
+    border: string;
+    hover: string;
+  };
+  tooltip: {
+    background: string;
+    text: string;
   };
 }
 
@@ -28,6 +34,12 @@ export const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
     thumb: {
       background: "tw-bg-gradient-to-b tw-from-[#E8D48A] tw-to-[#D9A962]",
       glow: "tw-shadow-[0_0_15px_rgba(217,169,98,0.4)]",
+      border: "tw-border-[#E8D48A]",
+      hover: "hover:tw-shadow-[0_0_20px_rgba(217,169,98,0.6)]",
+    },
+    tooltip: {
+      background: "tw-bg-[#E8D48A]",
+      text: "tw-text-iron-950",
     },
   },
   2: {
@@ -42,6 +54,12 @@ export const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
     thumb: {
       background: "tw-bg-gradient-to-b tw-from-[#DDDDDD] tw-to-[#C0C0C0]",
       glow: "tw-shadow-[0_0_15px_rgba(192,192,192,0.4)]",
+      border: "tw-border-[#DDDDDD]",
+      hover: "hover:tw-shadow-[0_0_20px_rgba(192,192,192,0.6)]",
+    },
+    tooltip: {
+      background: "tw-bg-[#DDDDDD]",
+      text: "tw-text-iron-950",
     },
   },
   3: {
@@ -56,6 +74,12 @@ export const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
     thumb: {
       background: "tw-bg-gradient-to-b tw-from-[#CD7F32] tw-to-[#B87333]",
       glow: "tw-shadow-[0_0_15px_rgba(205,127,50,0.4)]",
+      border: "tw-border-[#CD7F32]",
+      hover: "hover:tw-shadow-[0_0_20px_rgba(205,127,50,0.6)]",
+    },
+    tooltip: {
+      background: "tw-bg-[#CD7F32]",
+      text: "tw-text-iron-950",
     },
   },
   default: {
@@ -70,6 +94,12 @@ export const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
     thumb: {
       background: "tw-bg-gradient-to-b tw-from-iron-400 tw-to-iron-500",
       glow: "tw-shadow-[0_0_15px_rgba(255,255,255,0.1)]",
+      border: "tw-border-iron-400",
+      hover: "hover:tw-shadow-[0_0_20px_rgba(255,255,255,0.2)]",
+    },
+    tooltip: {
+      background: "tw-bg-iron-700",
+      text: "tw-text-iron-200",
     },
   },
 } as const; 

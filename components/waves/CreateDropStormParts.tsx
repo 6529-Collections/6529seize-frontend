@@ -62,7 +62,7 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
               <motion.div className="tw-mt-4 tw-space-y-4">
                 {parts.map((part, partIndex) => (
                   <motion.div
-                    key={partIndex}
+                    key={`storm-part-${part.content}-${partIndex}`}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}

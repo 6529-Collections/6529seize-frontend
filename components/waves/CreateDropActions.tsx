@@ -113,7 +113,6 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         accept="image/*,video/*,audio/*"
                         multiple
                         onChange={onFiles}
-                        aria-hidden="true"
                       />
                       <svg
                         className="tw-flex-shrink-0 tw-size-5 lg:tw-size-4"

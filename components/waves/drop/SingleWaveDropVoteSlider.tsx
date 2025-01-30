@@ -4,7 +4,7 @@ import { SliderTheme, SLIDER_THEMES } from "./types/slider.types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 
-interface SingleWaveDropVoteSliderProps {
+interface WaveDropVoteSliderProps {
   readonly voteValue: number | string;
   readonly minValue: number;
   readonly maxValue: number;
@@ -97,14 +97,14 @@ const calculatePresetMarks = (minValue: number, maxValue: number) => {
   return marks.sort((a, b) => a.position - b.position);
 };
 
-export default function SingleWaveDropVoteSlider({
+export default function WaveDropVoteSlider({
   voteValue,
   setVoteValue,
   minValue,
   maxValue,
   rank = null,
   creditType,
-}: SingleWaveDropVoteSliderProps) {
+}: WaveDropVoteSliderProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredPreset, setHoveredPreset] = useState<number | null>(null);
@@ -202,6 +202,39 @@ export default function SingleWaveDropVoteSlider({
             transition={{ duration: 0.4, ease: "easeOut" }}
           />
 
+          {/* Thumb hit area */}
+          <div
+            className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-z-30"
+            style={{
+              clipPath: `circle(12px at ${currentPercentage}% 50%)`,
+            }}
+          >
+            <input
+              type="range"
+              min={minValue}
+              max={maxValue}
+              value={logValue}
+              onChange={(e) => handleSliderChange(Number(e.target.value))}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                setIsDragging(true);
+              }}
+              onMouseUp={(e) => {
+                e.stopPropagation();
+                setIsDragging(false);
+              }}
+              onTouchStart={(e) => {
+                e.stopPropagation();
+                setIsDragging(true);
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+                setIsDragging(false);
+              }}
+              className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-appearance-none tw-cursor-pointer tw-opacity-0"
+            />
+          </div>
+
           {/* Ticks */}
           {presetMarks.map((mark) => (
             <div
@@ -264,18 +297,68 @@ export default function SingleWaveDropVoteSlider({
             </div>
           ))}
 
-          {/* Thumb */}
+          {/* Thumb visual */}
           <motion.div
             ref={thumbRef}
-            className={`tw-absolute tw-top-1/2 -tw-translate-y-1/2 -tw-ml-[10px] tw-z-30 tw-pointer-events-none`}
             style={{
               left: `${currentPercentage}%`,
-              scale,
+              top: "50%",
+              x: "-50%",
+              y: "-50%",
+              scale: isDragging ? 1.1 : 1,
             }}
+            className="tw-absolute tw-z-40 tw-pointer-events-none"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3, type: "spring" }}
           >
-            <div
-              className={`tw-w-5 tw-h-5 tw-rounded-full tw-shadow-lg ${theme.thumb.background} ${theme.thumb.glow}`}
-            />
+            <div className="tw-relative">
+              <div
+                className={`tw-absolute tw-bottom-6 tw-left-1/2 
+                  ${theme.tooltip.background} tw-rounded-lg 
+                  tw-py-1.5 tw-px-3 tw-text-xs tw-font-medium tw-whitespace-nowrap tw-min-w-[120px] tw-text-center
+                  tw-shadow-lg tw-border tw-border-gray-600/20 ${theme.tooltip.text}
+                  tw-transition-transform tw-duration-200 tw-ease-out`}
+                style={{
+                  transform: `translateX(calc(-50% + ${
+                    currentPercentage <= 10 ? 50 : 0
+                  }%))`,
+                }}
+              >
+                <span className="tw-block">
+                  {formatNumberWithCommas(
+                    typeof voteValue === "string" ? 0 : voteValue
+                  )}{" "}
+                  {creditType}
+                </span>
+                <div
+                  className={`tw-absolute tw-w-2 tw-h-2 tw-bottom-[-4px] tw-left-1/2 -tw-translate-x-1/2
+                    tw-rotate-45 ${theme.tooltip.background} tw-border-r tw-border-b tw-border-gray-600/20`}
+                />
+              </div>
+
+              <motion.div
+                className={`tw-w-5 tw-h-5 tw-rounded-full 
+                  tw-bg-gradient-to-b tw-from-gray-700 tw-to-gray-800
+                  tw-border-2 ${theme.thumb.border} 
+                  tw-shadow-lg tw-transition-shadow
+                  after:tw-content-[''] after:tw-absolute after:tw-inset-0 
+                  after:tw-rounded-full after:tw-transition-all after:tw-duration-200
+                  ${theme.thumb.glow} ${theme.thumb.hover}`}
+                style={{
+                  scale: isDragging ? 1.1 : scale,
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                animate={{
+                  boxShadow: isDragging
+                    ? "0 0 20px rgba(255,255,255,0.2)"
+                    : "0 0 0 rgba(255,255,255,0)",
+                }}
+                transition={{ duration: 0.2 }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
           </motion.div>
         </div>
       </div>

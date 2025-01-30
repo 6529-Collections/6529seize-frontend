@@ -55,6 +55,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
+              aria-hidden="true"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
@@ -72,7 +73,7 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
       <div className="tw-space-y-2">
         {metadata.map((item, index) => (
           <CreateDropMetadataRow
-            key={index}
+            key={`${item.key}-${index}`}
             isError={missingRequiredMetadataKeys.includes(item.key)}
             onRemove={onRemoveMetadata}
             metadata={item}
