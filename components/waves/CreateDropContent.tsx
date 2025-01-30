@@ -41,7 +41,7 @@ import { CreateDropSubmit } from "./CreateDropSubmit";
 import { DropPrivileges } from "../../hooks/useDropPriviledges";
 
 import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
-import { useDropMetadata } from "./detailed/hooks/useDropMetadata";
+import { useDropMetadata } from "./hooks/useDropMetadata";
 import { getMissingRequirements, MissingRequirements } from "./detailed/utils/getMissingRequirements";
 
 export type CreateDropMetadataType =
