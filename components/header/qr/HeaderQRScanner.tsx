@@ -8,6 +8,7 @@ import useCapacitor from "../../../hooks/useCapacitor";
 import { useAuth } from "../../auth/Auth";
 import { DeepLinkScope } from "../capacitor/CapacitorWidget";
 import Image from "next/image";
+import { areEqualURLS } from "../../../helpers/Helpers";
 
 export default function HeaderQRScanner({
   onScanSuccess,
@@ -83,15 +84,18 @@ export default function HeaderQRScanner({
       let path = "";
       let queryParams: Record<string, string | number> = {};
 
-      if (url.protocol === `${appScheme}:` || url.origin === baseEndpoint) {
-        // Extract path
-        const schemeEndIndex = content.indexOf("://") + 3;
-        const urlWithoutScheme = content.slice(schemeEndIndex);
-        const [scope, ...pathParts] = urlWithoutScheme.split("?")[0].split("/");
+      if (url.origin === baseEndpoint) {
+        const resolvedPath = url.pathname;
+        onScanSuccess();
+        router.push(resolvedPath);
+        return;
+      } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
+        const resolvedUrl = content.replace(`${appScheme}://`, "");
+        const [scope, ...pathParts] = resolvedUrl.split("?")[0].split("/");
 
         // Extract query params
-        const queryString = urlWithoutScheme.includes("?")
-          ? urlWithoutScheme.split("?")[1]
+        const queryString = resolvedUrl.includes("?")
+          ? resolvedUrl.split("?")[1]
           : "";
         const searchParams = new URLSearchParams(queryString);
         queryParams = Object.fromEntries(searchParams.entries());
@@ -149,6 +153,8 @@ export default function HeaderQRScanner({
 function HeaderQRScannerIcon() {
   return (
     <Image
+      priority
+      loading="eager"
       src="/barcode-scanner.png"
       alt="QR Scanner"
       width={20}
