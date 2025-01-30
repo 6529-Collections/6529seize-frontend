@@ -13,7 +13,7 @@ import { areEqualURLS } from "../../../helpers/Helpers";
 export default function HeaderQRScanner({
   onScanSuccess,
 }: {
-  onScanSuccess: () => void;
+  readonly onScanSuccess: () => void;
 }) {
   const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
   const baseEndpoint = process.env.BASE_ENDPOINT ?? "https://6529.io";
