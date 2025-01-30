@@ -108,7 +108,7 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
             <div className="tw-divide-y tw-divide-iron-800/30 tw-divide-solid tw-divide-x-0">
               {amounts.map((amount, i) => (
                 <div
-                  key={`wave-nic-outcome-row-${i}`}
+                  key={`wave-nic-outcome-${amount}-${i}`}
                   className="tw-px-4 tw-py-3 tw-bg-gradient-to-r hover:tw-from-[#A4C2DB]/5 hover:tw-to-transparent tw-transition-colors tw-duration-300"
                 >
                   <div className="tw-flex tw-items-center tw-gap-4">

@@ -47,9 +47,9 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
           Outcome Details
         </span>
         <div className="tw-space-y-2">
-          {nicOutcomes.map((nicOutcome, i) => (
+          {nicOutcomes.map((nicOutcome) => (
             <div
-              key={`NIC-TOOLTIP-${i}`}
+              key={`NIC-${nicOutcome.value}`}
               className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40"
             >
               <div className="tw-flex tw-items-center tw-gap-2">
@@ -76,9 +76,9 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
               </span>
             </div>
           ))}
-          {repOutcomes.map((repOutcome, i) => (
+          {repOutcomes.map((repOutcome) => (
             <div
-              key={`REP-TOOLTIP-${repOutcome.category}-${i}`}
+              key={`REP-${repOutcome.category}-${repOutcome.value}`}
               className="tw-p-2 tw-flex tw-flex-col tw-gap-y-1 tw-rounded-lg tw-bg-iron-800/40"
             >
               <div className="tw-flex tw-items-center tw-justify-between">
@@ -108,9 +108,9 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
               </span>
             </div>
           ))}
-          {manualOutcomes.map((outcome, i) => (
+          {manualOutcomes.map((outcome) => (
             <div
-              key={`MANUAL-TOOLTIP-${outcome.description}-${i}`}
+              key={`MANUAL-${outcome.description}`}
               className="tw-flex tw-items-center tw-justify-between tw-p-2 tw-rounded-lg tw-bg-iron-800/40"
             >
               <div className="tw-flex tw-items-center tw-gap-2">

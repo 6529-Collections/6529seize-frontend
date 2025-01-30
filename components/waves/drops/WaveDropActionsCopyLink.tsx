@@ -28,12 +28,18 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
 
   const isDisabled = isTemporaryDrop(drop);
 
+  const getLinkText = () => {
+    if (isDisabled) return "Unavailable";
+    if (copied) return "Copied!";
+    return "Copy link";
+  };
+
   return (
     <Tippy
       content={
         <div className="tw-text-center">
           <span className="tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out">
-            {isDisabled ? "Unavailable" : copied ? "Copied!" : "Copy link"}
+            {getLinkText()}
           </span>
         </div>
       }

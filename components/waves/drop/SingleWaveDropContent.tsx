@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { SingleWaveDropContentMetadata } from "./SingleWaveDropContentMetadata";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import WaveDetailedDropContent from "../drops/WaveDropContent";
+import WaveDropContent from "../drops/WaveDropContent";
 
 interface SingleWaveDropContentProps {
   readonly drop: ExtendedDrop;
@@ -11,7 +11,7 @@ export const SingleWaveDropContent: React.FC<SingleWaveDropContentProps> = ({ dr
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   return (
     <div className="tw-mb-2 tw-flex tw-flex-col">
-      <WaveDetailedDropContent
+      <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}

@@ -31,9 +31,9 @@ export default function WaveWinnersDropOutcome({
         Outcome:
       </div>
       <div className="tw-flex tw-flex-wrap tw-gap-2">
-        {nicOutcomes.map((nicOutcome, i) => (
+        {nicOutcomes.map((nicOutcome) => (
           <div
-            key={`NIC-${i}`}
+            key={`NIC-${nicOutcome.value}`}
             className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700"
           >
             <svg
@@ -58,9 +58,9 @@ export default function WaveWinnersDropOutcome({
             </span>
           </div>
         ))}
-        {repOutcomes.map((repOutcome, i) => (
+        {repOutcomes.map((repOutcome) => (
           <div
-            key={`REP-${repOutcome.category}-${i}`}
+            key={`REP-${repOutcome.category}-${repOutcome.value}`}
             className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700"
           >
             <svg
@@ -89,9 +89,9 @@ export default function WaveWinnersDropOutcome({
             </div>
           </div>
         ))}
-        {manualOutcomes.map((outcome, i) => (
+        {manualOutcomes.map((outcome) => (
           <div
-            key={`MANUAL-${outcome.description}-${i}`}
+            key={`MANUAL-${outcome.description}`}
             className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700"
           >
             <svg

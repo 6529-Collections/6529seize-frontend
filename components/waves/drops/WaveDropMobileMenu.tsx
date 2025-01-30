@@ -101,6 +101,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
               <svg
                 className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
                 xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
