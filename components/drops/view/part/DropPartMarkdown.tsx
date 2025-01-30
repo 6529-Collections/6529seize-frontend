@@ -13,8 +13,8 @@ import { Tweet } from "react-tweet";
 import Link from "next/link";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
-import WaveDetailedDropQuoteWithDropId from "../../../waves/drops/WaveDetailedDropQuoteWithDropId";
-import WaveDetailedDropQuoteWithSerialNo from "../../../waves/drops/WaveDetailedDropQuoteWithSerialNo";
+import WaveDetailedDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
+import WaveDetailedDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import {
   parseSeizeLink,

@@ -7,7 +7,7 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import WaveDetailedDropActionsRate from "../drops/WaveDetailedDropActionsRate";
+import WaveDetailedDropActionsRate from "../drops/WaveDropActionsRate";
 
 interface WaveDetailedLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;

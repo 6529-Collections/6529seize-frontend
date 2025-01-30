@@ -1,22 +1,22 @@
 import React, { useContext, useState, memo, useCallback } from "react";
-import { ApiWave } from "../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import {
   useWaveDropsLeaderboard,
   WaveDropsLeaderboardSortBy,
   WaveDropsLeaderboardSortDirection,
-} from "../../../hooks/useWaveDropsLeaderboard";
-import { AuthContext } from "../../auth/Auth";
+} from "../../../../hooks/useWaveDropsLeaderboard";
+import { AuthContext } from "../../../auth/Auth";
 import Link from "next/link";
 import {
   formatNumberWithCommas,
   getTimeAgoShort,
-} from "../../../helpers/Helpers";
+} from "../../../../helpers/Helpers";
 import {
   ImageScale,
   getScaledImageUri,
-} from "../../../helpers/image.helpers";
-import WaveDetailedDropContent from "../drops/WaveDropContent";
+} from "../../../../helpers/image.helpers";
+import WaveDetailedDropContent from "../../drops/WaveDropContent";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 
 interface WaveWinnersSmallProps {

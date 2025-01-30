@@ -16,7 +16,7 @@ const ParticipationDropPfp: React.FC<ParticipationDropPfpProps> = ({
             <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
               <img
                 src={drop.author.pfp}
-                alt="Profile picture"
+                alt={`${drop.author.handle}'s avatar`}
                 className="tw-bg-transparent tw-h-full tw-w-full tw-object-cover"
               />
             </div>

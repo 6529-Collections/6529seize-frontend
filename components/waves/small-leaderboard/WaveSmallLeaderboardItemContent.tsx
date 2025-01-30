@@ -1,8 +1,8 @@
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useEffect, useRef, useState } from "react";
 import Tippy from "@tippyjs/react";
-import WaveDetailedDropPartContentMedias from "../drops/WaveDetailedDropPartContentMedias";
-import WaveDetailedDropPartContentMarkdown from "../drops/WaveDetailedDropPartContentMarkdown";
+import WaveDetailedDropPartContentMedias from "../drops/WaveDropPartContentMedias";
+import WaveDetailedDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
 
 interface WaveSmallLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;

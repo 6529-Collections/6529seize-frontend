@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import WaveDetailedDropContent from "../../drops/WaveDropContent";
-import WaveDetailedDropMetadata from "../../drops/WaveDropMetadata";
+import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import WaveDetailedDropContent from "../../../drops/WaveDropContent";
+import WaveDetailedDropMetadata from "../../../drops/WaveDropMetadata";
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
 }

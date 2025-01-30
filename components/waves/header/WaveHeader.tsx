@@ -78,7 +78,7 @@ export default function WaveHeader({
                       wave.picture,
                       ImageScale.W_200_H_200
                     )}
-                    alt="Wave image"
+                    alt={wave.name}
                   />
                 ) : (
                   <div className="tw-w-full tw-h-full tw-rounded-full tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-800" />
@@ -147,7 +147,7 @@ export default function WaveHeader({
                         item.contributor_pfp,
                         ImageScale.W_AUTO_H_50
                       )}
-                      alt="Profile image"
+                      alt={`${item.contributor_identity} avatar`}
                     />
                   ))}
                 </div>

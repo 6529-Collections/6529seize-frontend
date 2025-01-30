@@ -53,7 +53,7 @@ export default function ParticipationDropRatingsVoterSection({
                           rater.profile.pfp,
                           ImageScale.W_AUTO_H_50
                         )}
-                        alt={`${rater.profile.handle}'s Profile Picture`}
+                        alt={`${rater.profile.handle}'s avatar`}
                         className={`tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 ${theme.ring} tw-bg-iron-900`}
                       />
                     </Link>

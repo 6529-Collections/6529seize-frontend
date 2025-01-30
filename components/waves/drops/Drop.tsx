@@ -1,6 +1,6 @@
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import WaveDetailedDrop from "./WaveDetailedDrop";
+import WaveDrop from "./WaveDrop";
 
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
@@ -66,7 +66,7 @@ export default function Drop({
     );
   }
   return (
-    <WaveDetailedDrop
+    <WaveDrop
       drop={drop}
       previousDrop={previousDrop}
       nextDrop={nextDrop}

@@ -4,8 +4,8 @@ import { DropInteractionParams, DropLocation } from "../Drop";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useCallback, useState } from "react";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
-import WaveDetailedDropActions from "../WaveDetailedDropActions";
-import WaveDetailedDropMobileMenu from "../WaveDetailedDropMobileMenu";
+import WaveDropActions from "../WaveDropActions";
+import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import ParticipationDropContainer from "./ParticipationDropContainer";
 import ParticipationDropHeader from "./ParticipationDropHeader";
 import ParticipationDropContent from "./ParticipationDropContent";
@@ -69,7 +69,7 @@ export default function ParticipationDrop({
       location={location}
     >
       {!isMobile && showReplyAndQuote && (
-        <WaveDetailedDropActions
+        <WaveDropActions
           drop={drop}
           activePartIndex={activePartIndex}
           showVoting={false}
@@ -90,7 +90,7 @@ export default function ParticipationDrop({
       />
       <ParticipationDropMetadata metadata={drop.metadata} />
       <ParticipationDropFooter drop={drop} />
-      <WaveDetailedDropMobileMenu
+      <WaveDropMobileMenu
         drop={drop}
         isOpen={isSlideUp}
         longPressTriggered={longPressTriggered}

@@ -1,5 +1,5 @@
 import React from "react";
-import { DropTrophyIcon } from "../utils/DropThrophyIcon";
+import { DropTrophyIcon } from "../DropThrophyIcon";
 
 interface SingleWaveDropPositionProps {
   readonly rank: number | null;

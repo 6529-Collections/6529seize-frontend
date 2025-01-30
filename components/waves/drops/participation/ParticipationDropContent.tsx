@@ -1,6 +1,6 @@
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import WaveDetailedDropContent from "../WaveDetailedDropContent";
+import WaveDetailedDropContent from "../WaveDropContent";
 import React from "react";
 
 interface ParticipationDropContentProps {

@@ -4,7 +4,7 @@ import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
-import { DropTrophyIcon } from "../../utils/DropThrophyIcon";
+import { DropTrophyIcon } from "../../DropThrophyIcon";
 import ParticipationDropPfp from "./ParticipationDropPfp";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
 
