@@ -51,7 +51,7 @@ export default function HeaderQR() {
   );
 }
 
-export function HeaderQRModal({
+function HeaderQRModal({
   show,
   onClose,
 }: {
