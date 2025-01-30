@@ -59,7 +59,14 @@ export default function HeaderQRScanner() {
       console.error("QR Scan failed:", error);
       setScanning(false);
       setToast({
-        message: "Scan failed. Please try again.",
+        message: (
+          <>
+            <p>Scan failed. Please try again.</p>
+            <p className="tw-font-light">
+              Make sure you have the latest version of the app installed.
+            </p>
+          </>
+        ),
         type: "error",
       });
     }
