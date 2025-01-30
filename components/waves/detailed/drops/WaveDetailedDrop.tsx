@@ -214,12 +214,6 @@ const WaveDetailedDrop = ({
     isDrop
   );
 
-  const onContainerClick = () => {
-    if (drop.drop_type === ApiDropType.Participatory && onDropContentClick) {
-      onDropContentClick(drop);
-    }
-  };
-
   return (
     <div
       className={`${
@@ -247,16 +241,7 @@ const WaveDetailedDrop = ({
               }
             />
           )}
-        <button
-          onClick={onContainerClick}
-          type="button"
-          disabled={drop.drop_type !== ApiDropType.Participatory}
-          className={`tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0 ${
-            drop.drop_type === ApiDropType.Participatory
-              ? "tw-cursor-pointer"
-              : ""
-          }`}
-        >
+        <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
           {!shouldGroupWithPreviousDrop && (
             <WaveDetailedDropAuthorPfp drop={drop} />
           )}
@@ -283,7 +268,7 @@ const WaveDetailedDrop = ({
               />
             </div>
           </div>
-        </button>
+        </div>
         {!isMobile && showReplyAndQuote && (
           <WaveDetailedDropActions
             drop={drop}

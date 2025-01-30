@@ -185,7 +185,12 @@ function DropPartMarkdown({
   };
 
   const renderTweetEmbed = (tweetId: string, href: string) => (
-    <Link className="tw-no-underline" target="_blank" href={href}>
+    <Link
+      className="tw-no-underline"
+      target="_blank"
+      href={href}
+      data-theme="dark"
+    >
       <Tweet id={tweetId} />
     </Link>
   );
@@ -348,11 +353,7 @@ function DropPartMarkdown({
           </code>
         ),
         a: (params) => aHrefRenderer(params),
-        img: (params) => (
-          <DropPartMarkdownImage
-            src={params.src ?? ""}
-          />
-        ),
+        img: (params) => <DropPartMarkdownImage src={params.src ?? ""} />,
         blockquote: (params) => (
           <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
             {customRenderer({

@@ -78,6 +78,10 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
     };
 
     const handleClick = () => {
+      if (window.getSelection()?.toString()) {
+        return;
+      }
+      console.log('clicking')
       if (isTemporaryDrop || !onDropContentClick) return;
       onDropContentClick(drop);
     };
@@ -94,10 +98,10 @@ const WaveDetailedDropPart: React.FC<WaveDetailedDropPartProps> = memo(
             ? "tw-cursor-default"
             : "tw-cursor-pointer"
         }`}
-        role={isTemporaryDrop ? undefined : "button"}
-        tabIndex={isTemporaryDrop ? undefined : 0}
+        role={isTemporaryDrop || !onDropContentClick ? undefined : "button"}
+        tabIndex={isTemporaryDrop || !onDropContentClick ? undefined : 0}
         onKeyDown={(e) =>
-          !isTemporaryDrop && e.key === "Enter" && handleClick()
+          !isTemporaryDrop  && e.key === "Enter" && handleClick()
         }
       >
         <div className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
