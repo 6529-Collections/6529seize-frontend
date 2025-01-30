@@ -16,7 +16,7 @@ import {
   ImageScale,
   getScaledImageUri,
 } from "../../../helpers/image.helpers";
-import WaveDetailedDropContent from "../drops/WaveDropContent";
+import WaveDropContent from "../drops/WaveDropContent";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 
 interface WaveWinnersSmallProps {
@@ -124,7 +124,7 @@ const DropContent = memo<DropContentProps>(({ drop, onDropClick }) => {
 
   return (
     <div>
-      <WaveDetailedDropContent
+      <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}

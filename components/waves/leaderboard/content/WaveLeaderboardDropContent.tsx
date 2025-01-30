@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import WaveDetailedDropContent from "../../drops/WaveDropContent";
-import WaveDetailedDropMetadata from "../../drops/WaveDropMetadata";
+import WaveDropContent from "../../drops/WaveDropContent";
+import WaveDropMetadata from "../../drops/WaveDropMetadata";
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
 }
@@ -13,7 +13,7 @@ export const WaveLeaderboardDropContent: React.FC<
 
   return (
     <div className="tw-flex tw-gap-x-6 tw-items-end tw-justify-between">
-      <WaveDetailedDropContent
+      <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
@@ -23,7 +23,7 @@ export const WaveLeaderboardDropContent: React.FC<
       />
       {!!drop.metadata.length && (
         <div className="tw-mt-2">
-          <WaveDetailedDropMetadata metadata={drop.metadata} />
+          <WaveDropMetadata metadata={drop.metadata} />
         </div>
       )}
     </div>

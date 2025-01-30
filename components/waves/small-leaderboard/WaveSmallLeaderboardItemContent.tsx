@@ -1,8 +1,8 @@
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useEffect, useRef, useState } from "react";
 import Tippy from "@tippyjs/react";
-import WaveDetailedDropPartContentMedias from "../drops/WaveDropPartContentMedias";
-import WaveDetailedDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
+import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
+import WaveDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
 
 interface WaveSmallLeaderboardItemContentProps {
   readonly drop: ExtendedDrop;
@@ -33,9 +33,9 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         className="tw-relative tw-cursor-pointer tw-max-h-52 tw-overflow-hidden tw-space-y-3"
       >
         {!!drop.parts[0].media.length && (
-          <WaveDetailedDropPartContentMedias activePart={drop.parts[0]} />
+          <WaveDropPartContentMedias activePart={drop.parts[0]} />
         )}
-        <WaveDetailedDropPartContentMarkdown
+        <WaveDropPartContentMarkdown
           mentionedUsers={drop.mentioned_users}
           referencedNfts={drop.referenced_nfts}
           part={drop.parts[0]}

@@ -7,16 +7,16 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import WaveDetailedDropActionsRate from "../drops/WaveDropActionsRate";
+import WaveDropActionsRate from "../drops/WaveDropActionsRate";
 
-interface WaveDetailedLeaderboardTopThreeDropProps {
+interface WaveSmallLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
-  WaveDetailedLeaderboardTopThreeDropProps
+export const WaveSmallLeaderboardTopThreeDrop: React.FC<
+  WaveSmallLeaderboardTopThreeDropProps
 > = ({ drop, wave, onDropClick }) => {
   const getPFPColor = (rank: number | null): string | null => {
     if (rank === 1) return "tw-ring-[#E8D48A]/80";
@@ -120,7 +120,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
             <div>
               <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
                 {thropyIcon(drop.rank)}
-                <WaveDetailedDropActionsRate drop={drop} />
+                <WaveDropActionsRate drop={drop} />
               </div>
 
               <div className="tw-flex-1 tw-space-y-3">

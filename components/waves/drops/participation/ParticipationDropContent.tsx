@@ -1,7 +1,7 @@
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import WaveDetailedDropContent from "../WaveDropContent";
 import React from "react";
+import WaveDropContent from "../WaveDropContent";
 
 interface ParticipationDropContentProps {
   readonly drop: ExtendedDrop;
@@ -43,7 +43,7 @@ export default function ParticipationDropContent({
 
           {/* Content with padding */}
           <div className="tw-relative tw-px-5 tw-pt-2 tw-pb-4">
-            <WaveDetailedDropContent
+            <WaveDropContent
               drop={drop}
               activePartIndex={activePartIndex}
               setActivePartIndex={setActivePartIndex}

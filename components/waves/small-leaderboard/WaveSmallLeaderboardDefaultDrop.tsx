@@ -7,7 +7,7 @@ import { cicToType, formatNumberWithCommas } from "../../../helpers/Helpers";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
-import WaveDetailedDropActionsRate from "../drops/WaveDropActionsRate";
+import WaveDropActionsRate from "../drops/WaveDropActionsRate";
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
@@ -64,7 +64,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<WaveSmallLeaderboardDefau
                   </svg>
                 )}
               </div>
-              <WaveDetailedDropActionsRate drop={drop} />
+              <WaveDropActionsRate drop={drop} />
             </div>
 
             <div className="tw-flex-1">
