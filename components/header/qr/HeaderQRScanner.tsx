@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useAuth } from "../../auth/Auth";
+import { DeepLinkScope } from "../capacitor/CapacitorWidget";
 
 export default function HeaderQRScanner() {
   const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
@@ -66,15 +67,31 @@ export default function HeaderQRScanner() {
   const handleQRCode = (content: string) => {
     console.log("Scanned:", content);
 
-    if (
-      content.startsWith(`${appScheme}://`) ||
-      content.startsWith(baseEndpoint)
-    ) {
-      const path = content
-        .replace(new RegExp(`^${appScheme}:\\/\\/`), "")
-        .replace(new RegExp(`^${baseEndpoint}`), "");
-      router.push(`/${path}`);
-    } else {
+    try {
+      const url = new URL(content);
+
+      if (url.protocol === `${appScheme}:` || url.origin === baseEndpoint) {
+        let path = "";
+
+        if (url.protocol === `${appScheme}:`) {
+          if (url.pathname.startsWith(`/${DeepLinkScope.NAVIGATE}`)) {
+            path = url.pathname.slice(`/${DeepLinkScope.NAVIGATE}`.length);
+          } else {
+            path = url.pathname;
+          }
+        } else if (url.origin === baseEndpoint) {
+          path = url.pathname;
+        }
+
+        // Ensure we don't start with a slash when pushing to router
+        router.push(path.startsWith("/") ? path : `/${path}`);
+      } else {
+        setToast({
+          message: "Invalid QR code",
+          type: "error",
+        });
+      }
+    } catch (error) {
       setToast({
         message: "Invalid QR code",
         type: "error",
