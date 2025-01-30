@@ -1,5 +1,5 @@
 import React from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import Link from "next/link";
 
 interface WaveRatingRepProps {
@@ -22,7 +22,7 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
             <img
               className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
               src={wave.voting.creditor.pfp}
-              alt="Creditor Profile Picture"
+              alt={wave.voting.creditor.handle}
             />
           ) : (
             <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />

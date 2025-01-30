@@ -1,9 +1,9 @@
 import { useState } from "react";
-import PencilIcon from "../../../../../../utils/icons/PencilIcon";
+import PencilIcon from "../../../../../utils/icons/PencilIcon";
 import WaveGroupEdit from "./WaveGroupEdit";
-import { ApiWave } from "../../../../../../../generated/models/ApiWave";
+import { ApiWave } from "../../../../../../generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
-import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../../../generated/models/ApiUpdateWaveRequest";
 
 export default function WaveGroupEditButton({
   wave,

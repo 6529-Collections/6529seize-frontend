@@ -1,7 +1,7 @@
 import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import WaveSpecs from "../../waves/detailed/specs/WaveSpecs";
-import WaveGroups from "../../waves/detailed/groups/WaveGroups";
+import WaveSpecs from "../../waves/specs/WaveSpecs";
+import WaveGroups from "../../waves/groups/WaveGroups";
 
 interface BrainRightSidebarContentProps {
   readonly wave: ApiWave;

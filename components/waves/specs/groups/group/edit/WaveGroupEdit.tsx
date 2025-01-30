@@ -1,13 +1,12 @@
-import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
-import { ApiWave } from "../../../../../../../generated/models/ApiWave";
-import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
-import { convertWaveToUpdateWave } from "../../../../../../../helpers/waves/waves.helpers";
-import CommonAnimationOpacity from "../../../../../../utils/animation/CommonAnimationOpacity";
-import CommonAnimationWrapper from "../../../../../../utils/animation/CommonAnimationWrapper";
+import { ApiGroupFull } from "../../../../../../generated/models/ApiGroupFull";
+import { ApiWave } from "../../../../../../generated/models/ApiWave";
+import SelectGroupModalWrapper from "../../../../../utils/select-group/SelectGroupModalWrapper";
 import { WaveGroupType } from "../WaveGroup";
-import WaveGroupRemoveModal from "./WaveGroupRemoveModal";
+import { convertWaveToUpdateWave } from "../../../../../../helpers/waves/waves.helpers";
+import { assertUnreachable } from "../../../../../../helpers/AllowlistToolHelpers";
+import { ApiUpdateWaveRequest } from "../../../../../../generated/models/ApiUpdateWaveRequest";
 
-export default function WaveGroupRemove({
+export default function WaveGroupEdit({
   wave,
   type,
   isEditOpen,
@@ -20,7 +19,11 @@ export default function WaveGroupRemove({
   readonly setIsEditOpen: (isOpen: boolean) => void;
   readonly onEdit: (body: ApiUpdateWaveRequest) => Promise<void>;
 }) {
-  const getBody = (): ApiUpdateWaveRequest => {
+  const getBody = ({
+    group,
+  }: {
+    readonly group: ApiGroupFull;
+  }): ApiUpdateWaveRequest => {
     const originalBody = convertWaveToUpdateWave(wave);
     switch (type) {
       case WaveGroupType.VIEW:
@@ -30,7 +33,7 @@ export default function WaveGroupRemove({
             ...originalBody.visibility,
             scope: {
               ...originalBody.visibility.scope,
-              group_id: null,
+              group_id: group.id,
             },
           },
         };
@@ -41,7 +44,7 @@ export default function WaveGroupRemove({
             ...originalBody.participation,
             scope: {
               ...originalBody.participation.scope,
-              group_id: null,
+              group_id: group.id,
             },
           },
         };
@@ -52,7 +55,7 @@ export default function WaveGroupRemove({
             ...originalBody.voting,
             scope: {
               ...originalBody.voting.scope,
-              group_id: null,
+              group_id: group.id,
             },
           },
         };
@@ -63,7 +66,7 @@ export default function WaveGroupRemove({
             ...originalBody.chat,
             scope: {
               ...originalBody.chat.scope,
-              group_id: null,
+              group_id: group.id,
             },
           },
         };
@@ -74,7 +77,7 @@ export default function WaveGroupRemove({
             ...originalBody.wave,
             admin_group: {
               ...originalBody.wave.admin_group,
-              group_id: null,
+              group_id: group.id,
             },
           },
         };
@@ -84,26 +87,16 @@ export default function WaveGroupRemove({
     }
   };
 
-  const onRemove = async (): Promise<void> => {
-    const body = getBody();
+  const onGroupSelect = async (group: ApiGroupFull): Promise<void> => {
+    const body = getBody({ group });
     await onEdit(body);
   };
 
   return (
-    <CommonAnimationWrapper mode="sync" initial={true}>
-      {isEditOpen && (
-        <CommonAnimationOpacity
-          key="modal"
-          elementClasses="tw-absolute tw-z-50"
-          elementRole="dialog"
-          onClicked={(e) => e.stopPropagation()}
-        >
-          <WaveGroupRemoveModal
-            closeModal={() => setIsEditOpen(false)}
-            removeGroup={onRemove}
-          />
-        </CommonAnimationOpacity>
-      )}
-    </CommonAnimationWrapper>
+    <SelectGroupModalWrapper
+      isOpen={isEditOpen}
+      onClose={() => setIsEditOpen(false)}
+      onGroupSelect={onGroupSelect}
+    />
   );
 }

@@ -1,10 +1,10 @@
-import { ApiWaveScope } from "../../../../../../generated/models/ApiWaveScope";
+import { ApiWaveScope } from "../../../../../generated/models/ApiWaveScope";
 import WaveGroupTitle from "./WaveGroupTitle";
 import WaveGroupEditButtons from "./edit/WaveGroupEditButtons";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../../../auth/Auth";
-import { ApiWave } from "../../../../../../generated/models/ApiWave";
-import { canEditWave } from "../../../../../../helpers/waves/waves.helpers";
+import { AuthContext } from "../../../../auth/Auth";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
+import { canEditWave } from "../../../../../helpers/waves/waves.helpers";
 import WaveGroupScope from "./WaveGroupScope";
 
 export enum WaveGroupType {

@@ -188,10 +188,10 @@ const WaveWinnerItem = memo<{
   }, [drop, onDropClick]);
 
   return (
-    <div
-      key={drop.id}
+    <button
+      type="button"
       onClick={handleDropClick}
-      className="tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-scale-[1.01] tw-transform tw-transition-all tw-duration-300 tw-ease-out"
+      className="tw-w-full tw-text-left tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-scale-[1.01] tw-transform tw-transition-all tw-duration-300 tw-ease-out"
     >
       <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out">
         {drop.rank && drop.rank <= 3 && rankStyle && (
@@ -282,7 +282,7 @@ const WaveWinnerItem = memo<{
             {drop.author.pfp ? (
               <img
                 src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
-                alt="Picture"
+                alt={`${drop.author.handle}'s profile`}
                 className="tw-size-7 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-object-cover"
               />
             ) : (
@@ -314,7 +314,7 @@ const WaveWinnerItem = memo<{
           </div>
         </div>
       </div>
-    </div>
+    </button>
   );
 });
 WaveWinnerItem.displayName = "WaveWinnerItem";

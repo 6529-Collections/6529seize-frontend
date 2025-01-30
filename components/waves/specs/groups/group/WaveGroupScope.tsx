@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ApiGroup } from "../../../../../../generated/models/ApiGroup";
+import { ApiGroup } from "../../../../../generated/models/ApiGroup";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../../../helpers/image.helpers";
+} from "../../../../../helpers/image.helpers";
 
 export default function WaveGroupScope({
   group,
@@ -24,7 +24,7 @@ export default function WaveGroupScope({
         <img
           className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
           src={getScaledImageUri(group.author.pfp, ImageScale.W_AUTO_H_50)}
-          alt="Profile Picture"
+          alt={group.author.handle}
         />
       ) : (
         <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />

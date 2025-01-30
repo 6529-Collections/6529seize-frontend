@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWave } from "../../../generated/models/ApiWave";
 import {
   getScaledImageUri,
   ImageScale,
-} from "../../../../helpers/image.helpers";
+} from "../../../helpers/image.helpers";
 
 export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {
   return (
@@ -17,7 +17,7 @@ export default function WaveAuthor({ wave }: { readonly wave: ApiWave }) {
           <img
             className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
             src={getScaledImageUri(wave.author.pfp, ImageScale.W_AUTO_H_50)}
-            alt="Profile Picture"
+            alt={`${wave.author.handle}`}
           />
         ) : (
           <div className="tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ApiWave } from "../../../../../../../generated/models/ApiWave";
+import { ApiWave } from "../../../../../../generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
 import WaveGroupRemove from "./WaveGroupRemove";
-import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
+import { ApiUpdateWaveRequest } from "../../../../../../generated/models/ApiUpdateWaveRequest";
 
 export default function WaveGroupRemoveButton({
   wave,
@@ -25,6 +25,7 @@ export default function WaveGroupRemoveButton({
           className="tw-flex-shrink-0 tw-size-5 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
           viewBox="0 0 24 24"
           fill="none"
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path

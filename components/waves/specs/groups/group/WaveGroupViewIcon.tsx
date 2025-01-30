@@ -4,6 +4,7 @@ export default function WaveGroupViewIcon() {
       className="tw-mr-2 tw-flex-shrink-0 tw-size-5 tw-text-iron-300"
       viewBox="0 0 24 24"
       fill="none"
+      aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path

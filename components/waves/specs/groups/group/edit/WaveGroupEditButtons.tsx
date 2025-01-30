@@ -1,14 +1,14 @@
 import { useContext, useState } from "react";
-import { ApiWave } from "../../../../../../../generated/models/ApiWave";
+import { ApiWave } from "../../../../../../generated/models/ApiWave";
 import { WaveGroupType } from "../WaveGroup";
 import { useMutation } from "@tanstack/react-query";
-import { commonApiPost } from "../../../../../../../services/api/common-api";
-import { ReactQueryWrapperContext } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
-import { AuthContext } from "../../../../../../auth/Auth";
+import { commonApiPost } from "../../../../../../services/api/common-api";
+import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "../../../../../auth/Auth";
 import WaveGroupEditButton from "./WaveGroupEditButton";
 import WaveGroupRemoveButton from "./WaveGroupRemoveButton";
-import { ApiUpdateWaveRequest } from "../../../../../../../generated/models/ApiUpdateWaveRequest";
-import CircleLoader from "../../../../../../distribution-plan-tool/common/CircleLoader";
+import { ApiUpdateWaveRequest } from "../../../../../../generated/models/ApiUpdateWaveRequest";
+import CircleLoader from "../../../../../distribution-plan-tool/common/CircleLoader";
 
 export default function WaveGroupEditButtons({
   haveGroup,

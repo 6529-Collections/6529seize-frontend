@@ -1,5 +1,5 @@
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { getTimeAgo } from "../../../../helpers/Helpers";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { getTimeAgo } from "../../../helpers/Helpers";
 
 export default function WaveCreated({ wave }: { readonly wave: ApiWave }) {
   const created = getTimeAgo(wave.created_at);

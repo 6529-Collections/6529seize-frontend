@@ -140,7 +140,7 @@ export const WaveDetailedLeaderboardTopThreeDrop: React.FC<
                           drop.rank
                         )}`}
                         src={drop.author.pfp}
-                        alt="Picture"
+                        alt={drop.author.handle}
                       />
                     ) : (
                       <div
