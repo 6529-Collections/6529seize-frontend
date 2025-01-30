@@ -157,4 +157,4 @@ export const SingleWaveDropVoteContent: React.FC<SingleWaveDropVoteContentProps>
       </div>
     </div>
   );
-}; 
+};

@@ -103,6 +103,7 @@ export const CreateDropDropModeToggle: React.FC<
             className="tw-size-4 tw-flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
