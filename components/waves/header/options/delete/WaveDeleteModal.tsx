@@ -77,6 +77,7 @@ export default function WaveDeleteModal({
                       className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-red tw-transition tw-duration-300 tw-ease-out"
                       viewBox="0 0 24 24"
                       fill="none"
+                      aria-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path

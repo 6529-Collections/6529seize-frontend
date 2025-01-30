@@ -1,7 +1,6 @@
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import WaveDrop from "./WaveDrop";
-
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import ParticipationDrop from "./participation/ParticipationDrop";

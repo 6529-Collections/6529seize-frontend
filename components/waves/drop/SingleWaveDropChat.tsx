@@ -34,31 +34,11 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({ wave, dr
     partId: 1,
   });
 
-  const onReply = (drop: ApiDrop, partId: number) => {
-    setActiveDrop({
-      action: ActiveDropAction.REPLY,
-      drop,
-      partId,
-    });
+  const handleDropAction = ({ drop, partId, action }: { drop: ApiDrop; partId: number; action: ActiveDropAction }) => {
+    setActiveDrop({ action, drop, partId });
   };
 
-  const onQuote = (drop: ApiDrop, partId: number) => {
-    setActiveDrop({
-      action: ActiveDropAction.QUOTE,
-      drop,
-      partId,
-    });
-  };
-
-  const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
-    onReply(drop, partId);
-  };
-
-  const handleQuote = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
-    onQuote(drop, partId);
-  };
-
-  const onCancelReplyQuote = () => {
+  const resetActiveDrop = () => {
     setActiveDrop({
       action: ActiveDropAction.REPLY,
       drop: drop,
@@ -77,8 +57,12 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({ wave, dr
             <div className={containerClassName}>
               <WaveDropsAll
                 waveId={wave.id}
-                onReply={handleReply}
-                onQuote={handleQuote}
+                onReply={({ drop, partId }: { drop: ApiDrop; partId: number }) => 
+                  handleDropAction({ drop, partId, action: ActiveDropAction.REPLY })
+                }
+                onQuote={({ drop, partId }: { drop: ApiDrop; partId: number }) => 
+                  handleDropAction({ drop, partId, action: ActiveDropAction.QUOTE })
+                }
                 activeDrop={activeDrop}
                 initialDrop={null}
                 dropId={drop.id}
@@ -89,8 +73,8 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({ wave, dr
                 >
                   <PrivilegedDropCreator
                     activeDrop={activeDrop}
-                    onCancelReplyQuote={onCancelReplyQuote}
-                    onDropAddedToQueue={onCancelReplyQuote}
+                    onCancelReplyQuote={resetActiveDrop}
+                    onDropAddedToQueue={resetActiveDrop}
                     wave={wave}
                     dropId={drop.id}
                     fixedDropMode={DropMode.BOTH}
