@@ -20,6 +20,7 @@ import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderQR from "./qr/HeaderQR";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+import HeaderQRScanner from "./qr/HeaderQRScanner";
 
 interface Props {
   onLoad?: () => void;
@@ -188,8 +189,13 @@ export default function Header(props: Readonly<Props>) {
           <Row className="pt-4 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader}`}>
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader} gap-2`}>
                 <HeaderUser />
+                <HeaderQRScanner
+                  onScanSuccess={() => {
+                    setBurgerMenuOpen(false);
+                  }}
+                />
               </h3>
             </Col>
           </Row>

@@ -6,7 +6,7 @@ export interface SeizeLinkInfo {
 
 export function parseSeizeLink(href: string): SeizeLinkInfo | null {
   const regex =
-    /\/waves\/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})(?:\?drop=(\d+)$|\?drop=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}))/;
+    /\/my-stream\?wave=([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})&serialNo=(\d+)$/;
 
   const match = href.match(regex);
   if (!match) return null;
