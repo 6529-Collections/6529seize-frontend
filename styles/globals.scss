@@ -18,7 +18,6 @@
   }
 }
 
-
 #seize-web3-network-switch {
   display: none;
 }
@@ -550,5 +549,26 @@ pre code {
     .container {
       width: 1280px !important;
     }
+  }
+}
+
+@media (max-width: 440px) {
+  a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq,
+  a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq * {
+    white-space: pre-wrap !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+
+  .tweet-body_root__ChzUj {
+    font-size: 1rem !important;
+  }
+
+  a.tw-no-underline .tweet-actions_actions__UDw7H,
+  a.tw-no-underline .tweet-actions_actions__UDw7H * {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
   }
 }
