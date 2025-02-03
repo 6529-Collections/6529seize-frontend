@@ -188,8 +188,7 @@ const WaveWinnerItem = memo<{
   }, [drop, onDropClick]);
 
   return (
-    <button
-      type="button"
+    <div
       onClick={handleDropClick}
       className="tw-w-full tw-text-left tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-scale-[1.01] tw-transform tw-transition-all tw-duration-300 tw-ease-out"
     >
@@ -314,7 +313,7 @@ const WaveWinnerItem = memo<{
           </div>
         </div>
       </div>
-    </button>
+    </div>
   );
 });
 WaveWinnerItem.displayName = "WaveWinnerItem";
