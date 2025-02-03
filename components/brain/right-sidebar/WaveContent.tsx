@@ -4,16 +4,16 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TabToggle } from "../../common/TabToggle";
 import WaveHeader, {
   WaveHeaderPinnedSide,
-} from "../../waves/detailed/header/WaveHeader";
-import { WaveDetailedSmallLeaderboard } from "../../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
-import { WaveWinnersSmall } from "../../waves/detailed/winners/WaveWinnersSmall";
+} from "../../waves/header/WaveHeader";
+import { WaveWinnersSmall } from "../../waves/winners/WaveWinnersSmall";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebar";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import { WaveLeaderboardRightSidebarVoters } from "../../waves/detailed/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
-import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/detailed/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
 import { motion } from "framer-motion";
+import { WaveSmallLeaderboard } from "../../waves/small-leaderboard/WaveSmallLeaderboard";
+import { WaveLeaderboardRightSidebarVoters } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
+import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -74,7 +74,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
         {hasVotingEnded ? (
           <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
         ) : (
-          <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+          <WaveSmallLeaderboard wave={wave} onDropClick={onDropClick} />
         )}
       </div>
     ),

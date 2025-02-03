@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import WaveDetailedFollowingWavesSort from "../../../waves/detailed/WaveDetailedFollowingWavesSort";
 import { ApiWavesOverviewType } from "../../../../generated/models/ApiWavesOverviewType";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "../../../react-query-wrapper/utils/query-utils";
 import { useWavesOverview } from "../../../../hooks/useWavesOverview";
@@ -8,6 +7,7 @@ import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { AuthContext } from "../../../auth/Auth";
 import { useNewDropsCount } from "../../../../hooks/useNewDropsCount";
+import WaveFollowingWavesSort from "../../../waves/WaveFollowingWavesSort";
 
 interface BrainLeftSidebarWavesListProps {
   readonly activeWaveId: string | null;
@@ -68,7 +68,7 @@ const BrainLeftSidebarWavesList: React.FC<
               />
             )}
           </div>
-          <WaveDetailedFollowingWavesSort
+          <WaveFollowingWavesSort
             selectedOption={selectedSort}
             setSelectedOption={setSelectedSort}
           />

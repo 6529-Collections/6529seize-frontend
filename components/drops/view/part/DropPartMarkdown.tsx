@@ -13,8 +13,8 @@ import { Tweet } from "react-tweet";
 import Link from "next/link";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
-import WaveDetailedDropQuoteWithDropId from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithDropId";
-import WaveDetailedDropQuoteWithSerialNo from "../../../waves/detailed/drops/WaveDetailedDropQuoteWithSerialNo";
+import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
+import WaveDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import {
   parseSeizeLink,
@@ -239,7 +239,7 @@ function DropPartMarkdown({
 
     if (serialNo) {
       return (
-        <WaveDetailedDropQuoteWithSerialNo
+        <WaveDropQuoteWithSerialNo
           serialNo={parseInt(serialNo)}
           waveId={waveId}
           onQuoteClick={onQuoteClick}
@@ -247,7 +247,7 @@ function DropPartMarkdown({
       );
     } else if (dropId) {
       return (
-        <WaveDetailedDropQuoteWithDropId
+        <WaveDropQuoteWithDropId
           dropId={dropId}
           partId={1}
           maybeDrop={null}

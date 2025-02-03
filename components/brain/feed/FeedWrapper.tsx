@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TypedFeedItem } from "../../../types/feed.types";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
+import { DropInteractionParams } from "../../waves/drops/Drop";
 import FeedItems from "./FeedItems";
 import { FeedScrollContainer } from "./FeedScrollContainer";
 

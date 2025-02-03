@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
-import { WaveDetailedOutcome } from "../../waves/detailed/outcome/WaveDetailedOutcome";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { WaveOutcome } from "../../waves/outcome/WaveOutcome";
 
 interface MyStreamWaveOutcomeProps {
   readonly wave: ApiWave;
@@ -26,7 +26,7 @@ const MyStreamWaveOutcome: React.FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
     <div className={containerClassName}>
       <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-space-y-4">
         {wave.outcomes.map((outcome, index) => (
-          <WaveDetailedOutcome
+          <WaveOutcome
             key={`${outcome.credit}-${outcome.type}-${index}`}
             outcome={outcome}
           />

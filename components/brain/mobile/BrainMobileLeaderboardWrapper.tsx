@@ -2,7 +2,7 @@ import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import BrainMobileLeaderboard from "./BrainMobileLeaderboard";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import { WaveWinners } from "../../waves/detailed/winners/WaveWinners";
+import { WaveWinners } from "../../waves/winners/WaveWinners";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { ExtendedDrop } from "../../../helpers/waves/wave-drops.helpers";
 
