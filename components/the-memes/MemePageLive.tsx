@@ -341,7 +341,7 @@ export function MemePageLiveSubMenu(props: {
             related to The Meme Cards.
           </Col>
         </Row>
-        {printMemeReferences(memeLabNfts, memeLabNftsLoaded, true)}
+        {printMemeReferences(memeLabNfts, "meme-lab", memeLabNftsLoaded, true)}
         <Row className="pt-3" ref={rememesTarget}>
           <Col className="d-flex flex-wrap align-items-center justify-content-between">
             <h1 className="mb-0 pt-2">

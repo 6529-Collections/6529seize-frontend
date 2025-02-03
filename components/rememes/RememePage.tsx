@@ -40,6 +40,7 @@ enum Tabs {
 
 export function printMemeReferences(
   memes: NFT[],
+  routerPath: string,
   memesLoaded: boolean = true,
   hideTitle: boolean = false
 ) {
@@ -66,7 +67,7 @@ export function printMemeReferences(
                     md={{ span: 3 }}
                     lg={{ span: 3 }}>
                     <a
-                      href={`/the-memes/${nft.id}`}
+                      href={`/${routerPath}/${nft.id}`}
                       className="decoration-none scale-hover">
                       <Container fluid className="no-padding">
                         <Row>
@@ -174,7 +175,7 @@ export default function RememePage(props: Readonly<Props>) {
       case Tabs.METADATA:
         return printMetadata();
       case Tabs.REFERENCES:
-        return printMemeReferences(memes);
+        return printMemeReferences(memes, "the-memes");
     }
   }
 
