@@ -1,8 +1,8 @@
 import React from "react";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;
