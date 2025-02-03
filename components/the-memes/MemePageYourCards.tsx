@@ -7,11 +7,6 @@ import {
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { DBResponse } from "../../entities/IDBResponse";
-import { fetchUrl } from "../../services/6529api";
-import NFTImage from "../nft-image/NFTImage";
 import { Transaction } from "../../entities/ITransaction";
 import { ConsolidatedTDH } from "../../entities/ITDH";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
