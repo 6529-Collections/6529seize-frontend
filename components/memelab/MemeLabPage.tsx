@@ -336,7 +336,13 @@ export default function LabPage(props: Readonly<Props>) {
         </Row>
         <Row>
           {activeTab === MEME_FOCUS.LIVE && (
-            <>{printMemeReferences(originalMemes, originalMemesLoaded)}</>
+            <>
+              {printMemeReferences(
+                originalMemes,
+                "the-memes",
+                originalMemesLoaded
+              )}
+            </>
           )}
           {activeTab === MEME_FOCUS.YOUR_CARDS && <>{printYourCardsSub()}</>}
         </Row>
