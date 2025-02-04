@@ -15,7 +15,7 @@ interface Props {
 
 export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
   const { data: drop } = useQuery<ApiDrop>({
