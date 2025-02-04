@@ -57,7 +57,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
           isDisabled
             ? "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
             : "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
-        } tw-bg-transparent tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
+        } tw-bg-transparent tw-flex-shrink-0 tw-size-8 sm:tw-size-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
         onClick={(e) => {
           e.stopPropagation();
           onClick();
@@ -65,7 +65,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
         aria-label={`${isPrevious ? "Previous" : "Next"} part`}
       >
         <svg
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+          className="tw-size-5 sm:tw-size-4 tw-flex-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           aria-hidden="true"
@@ -88,32 +88,43 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   };
 
   return (
-    <div className="tw-w-full tw-flex tw-justify-between tw-space-x-3 tw-transition tw-duration-300 tw-ease-out">
-      {isStorm && renderNavigationButton("previous")}
-      <div
-        className="tw-h-full tw-w-full"
-        ref={contentRef}
-      >
-        <motion.div
-          key={activePartIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <WaveDropPartContentMarkdown
-            mentionedUsers={memoizedMentionedUsers}
-            referencedNfts={memoizedReferencedNfts}
-            part={activePart}
-            wave={wave}
-            onQuoteClick={onQuoteClick}
-          />
-        </motion.div>
-        {!!activePart.media.length && (
-          <WaveDropPartContentMedias activePart={activePart} />
-        )}
+    <div className="tw-w-full">
+      <div className="tw-flex tw-flex-col md:tw-flex-row tw-w-full tw-justify-between md:tw-gap-x-3">
+        <div className="tw-flex tw-justify-between tw-space-x-3 md:tw-hidden tw-mb-3">
+          {isStorm && (
+            <>
+              {renderNavigationButton("previous")}
+              {renderNavigationButton("next")}
+            </>
+          )}
+        </div>
+        <div className="tw-hidden md:tw-block">
+          {isStorm && renderNavigationButton("previous")}
+        </div>
+        <div className="tw-h-full tw-w-full" ref={contentRef}>
+          <motion.div
+            key={activePartIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <WaveDropPartContentMarkdown
+              mentionedUsers={memoizedMentionedUsers}
+              referencedNfts={memoizedReferencedNfts}
+              part={activePart}
+              wave={wave}
+              onQuoteClick={onQuoteClick}
+            />
+          </motion.div>
+          {!!activePart.media.length && (
+            <WaveDropPartContentMedias activePart={activePart} />
+          )}
+        </div>
+        <div className="tw-hidden md:tw-block">
+          {isStorm && renderNavigationButton("next")}
+        </div>
       </div>
-      {isStorm && renderNavigationButton("next")}
     </div>
   );
 };

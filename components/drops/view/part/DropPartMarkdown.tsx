@@ -185,14 +185,16 @@ function DropPartMarkdown({
   };
 
   const renderTweetEmbed = (tweetId: string, href: string) => (
-    <Link
-      className="tw-no-underline"
-      target="_blank"
-      href={href}
-      data-theme="dark"
-    >
-      <Tweet id={tweetId} />
-    </Link>
+    <div className="tweet-card">
+      <Link
+        className="tw-no-underline"
+        target="_blank"
+        href={href}
+        data-theme="dark"
+      >
+        <Tweet id={tweetId} />
+      </Link>
+    </div>
   );
 
   const isValidLink = (href: string): boolean => {
