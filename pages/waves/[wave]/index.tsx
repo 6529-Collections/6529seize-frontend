@@ -5,7 +5,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 
   return {
     redirect: {
-      destination: `/my_stream?wave_id=${wave}`,
+      destination: `/my-stream?wave=${wave}`,
       permanent: false,
     },
   }
