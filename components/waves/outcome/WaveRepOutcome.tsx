@@ -101,7 +101,7 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
               />
             </motion.svg>
           </div>
-          <div className="tw-text-iron-400 tw-text-sm tw-overflow-x-auto tw-max-w-full tw-whitespace-nowrap tw-scrollbar-thin tw-scrollbar-track-iron-900/50 tw-scrollbar-thumb-iron-700/50">
+          <div className="tw-text-iron-400 tw-text-sm tw-overflow-x-auto tw-max-w-full tw-whitespace-nowrap tw-scrollbar-thin tw-scrollbar-track-iron-900/50 tw-scrollbar-thumb-iron-600/50">
             {outcome.rep_category}
           </div>
         </div>
