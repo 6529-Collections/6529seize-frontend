@@ -1,4 +1,5 @@
 import React, { ReactNode, useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
 import BrainRightSidebar, {
   SidebarTab,
@@ -32,7 +33,12 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   });
 
   useEffect(() => {
-    setShowRightSidebar(!!router.query.wave);
+    if (router.query.wave) {
+      setShowRightSidebar(true);
+    } else {
+      setShowRightSidebar(false);
+      setIsCollapsed(false);
+    }
   }, [router.query.wave]);
 
   const onDropClose = () => {
@@ -60,25 +66,25 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     drop &&
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
-  const mainContentClasses =
-    showRightSidebar && !isCollapsed
-      ? "tw-max-w-[calc(100%-20.5rem)]"
-      : "tw-max-w-full";
-
-  const contentClasses = `tw-relative tw-flex tw-flex-grow tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto tw-transition-all tw-duration-300`;
+  const contentClasses = `tw-relative tw-flex tw-flex-grow tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto
+    ${showRightSidebar && !isCollapsed && !isDropOpen ? 'xl:tw-mr-[21rem] xl:tw-ml-6' : ''}`;
 
   return (
     <div className="tw-relative tw-min-h-screen tw-flex tw-flex-col">
-      <div
-        className={`tw-relative tw-flex tw-flex-grow ${mainContentClasses} tw-transition-all tw-duration-300`}
-      >
-        <div className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}>
+      <div className="tw-relative tw-flex tw-flex-grow">
+        <div 
+          className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}
+          style={{ transition: 'none' }}
+        >
           <div className="tw-h-screen lg:tw-h-[calc(100vh-5.5rem)] min-[1200px]:tw-h-[calc(100vh-6.25rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4">
             <BrainLeftSidebar activeWaveId={router.query.wave as string} />
             <div className="tw-flex-grow xl:tw-relative">
               {children}
               {isDropOpen && (
-                <div className="tw-absolute tw-inset-0 tw-z-[1000]">
+                <div 
+                  className="tw-absolute tw-inset-0 tw-z-[1000]"
+                  style={{ transition: 'none' }}
+                >
                   <BrainDesktopDrop
                     drop={{
                       ...drop,
@@ -92,18 +98,18 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
             </div>
           </div>
         </div>
-
-        {showRightSidebar && !isDropOpen && (
-          <BrainRightSidebar
-            isCollapsed={isCollapsed}
-            setIsCollapsed={setIsCollapsed}
-            waveId={router.query.wave as string}
-            onDropClick={onDropClick}
-            activeTab={sidebarTab}
-            setActiveTab={setSidebarTab}
-          />
-        )}
       </div>
+
+      {showRightSidebar && !isDropOpen && router.query.wave && (
+        <BrainRightSidebar
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          waveId={router.query.wave as string}
+          onDropClick={onDropClick}
+          activeTab={sidebarTab}
+          setActiveTab={setSidebarTab}
+        />
+      )}
     </div>
   );
 };
