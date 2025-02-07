@@ -30,6 +30,11 @@ export const BrainLeftSidebarViewChange: React.FC<
         : "tw-text-iron-400 hover:tw-text-iron-300"
     }`;
 
+  const onNotificationsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    router.push('/my-stream/notifications', undefined, { shallow: true });
+  };
+
   return (
     <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-h-10 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-relative">
       <div
@@ -44,6 +49,7 @@ export const BrainLeftSidebarViewChange: React.FC<
       </Link>
       <Link
         href="/my-stream/notifications"
+        onClick={onNotificationsClick}
         className={getLinkClasses("/my-stream/notifications")}
       >
         <span className="tw-font-semibold tw-text-sm">Notifications</span>
