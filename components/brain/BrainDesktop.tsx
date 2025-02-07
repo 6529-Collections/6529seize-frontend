@@ -67,25 +67,29 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
   const contentClasses = `tw-relative tw-flex tw-flex-grow tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto
-    ${showRightSidebar && !isCollapsed && !isDropOpen ? 'xl:tw-mr-[21rem] xl:tw-ml-3 min-[1800px]:tw-mx-auto' : ''}`;
+    ${
+      showRightSidebar && !isCollapsed && !isDropOpen
+        ? "xl:tw-mr-[21rem] xl:tw-ml-3 min-[1800px]:tw-mx-auto"
+        : ""
+    }`;
 
   return (
     <div className="tw-relative tw-min-h-screen tw-flex tw-flex-col">
       <div className="tw-relative tw-flex tw-flex-grow">
-        <motion.div 
+        <motion.div
           layout={!isDropOpen}
           className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}
           transition={{ duration: 0.3 }}
-          style={{ transition: 'none' }}
+          style={{ transition: "none" }}
         >
           <div className="tw-h-screen lg:tw-h-[calc(100vh-5.5rem)] min-[1200px]:tw-h-[calc(100vh-6.25rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4">
             <BrainLeftSidebar activeWaveId={router.query.wave as string} />
             <div className="tw-flex-grow xl:tw-relative">
               {children}
               {isDropOpen && (
-                <div 
+                <div
                   className="tw-absolute tw-inset-0 tw-z-[1000]"
-                  style={{ transition: 'none' }}
+                  style={{ transition: "none" }}
                 >
                   <BrainDesktopDrop
                     drop={{
@@ -102,20 +106,17 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
         </motion.div>
       </div>
 
-      {/* Right sidebar with animations */}
-      <AnimatePresence mode="sync">
-        {showRightSidebar && !isDropOpen && router.query.wave && (
-          <BrainRightSidebar
-            key="right-sidebar"
-            isCollapsed={isCollapsed}
-            setIsCollapsed={setIsCollapsed}
-            waveId={router.query.wave as string}
-            onDropClick={onDropClick}
-            activeTab={sidebarTab}
-            setActiveTab={setSidebarTab}
-          />
-        )}
-      </AnimatePresence>
+      {showRightSidebar && !isDropOpen && router.query.wave && (
+        <BrainRightSidebar
+          key="right-sidebar"
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          waveId={router.query.wave as string}
+          onDropClick={onDropClick}
+          activeTab={sidebarTab}
+          setActiveTab={setSidebarTab}
+        />
+      )}
     </div>
   );
 };

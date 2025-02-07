@@ -1,7 +1,6 @@
 import { ReactNode, useContext, useEffect } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
 import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
@@ -23,8 +22,6 @@ export default function MyStreamLayout({
   readonly children: ReactNode;
 }) {
   const { setTitle, title, showWaves } = useContext(AuthContext);
-  const router = useRouter();
-  const breakpoint = useBreakpoint();
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },

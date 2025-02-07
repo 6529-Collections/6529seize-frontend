@@ -117,22 +117,14 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <>
-      <div className="tw-px-2 tw-mt-4">
+      <div className="tw-px-4 tw-mt-4">
         <TabToggle
           options={options}
           activeKey={activeTab}
           onSelect={(key) => setActiveTab(key as SidebarTab)}
         />
       </div>
-      <motion.div
-        key={activeTab}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        {rankWaveComponents[activeTab]}
-      </motion.div>
+      <div>{rankWaveComponents[activeTab]}</div>
     </>
   );
 };

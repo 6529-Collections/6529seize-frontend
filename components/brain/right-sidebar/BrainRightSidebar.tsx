@@ -67,9 +67,12 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       <button
         type="button"
         aria-label="Toggle sidebar"
-        className="tw-absolute -tw-left-8 tw-z-50 tw-top-28 tw-bg-iron-300 tw-border tw-border-solid tw-border-r-0
-          tw-border-iron-300 tw-size-8 tw-text-iron-700 hover:tw-text-iron-900 tw-rounded-l-lg
-          focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
+        className={`tw-absolute tw-z-50 tw-top-28 tw-bg-iron-300 desktop-hover:hover:tw-opacity-80 tw-border tw-border-solid
+          tw-border-iron-300 tw-size-7 tw-text-iron-700 desktop-hover:hover:tw-text-iron-900
+          focus:tw-outline-none tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300 tw-ease-out
+          ${isCollapsed ? 
+            "tw-border-r-0 -tw-left-8 tw-rounded-l-lg" : 
+            "tw-border-l-0 -tw-left-4 tw-rounded-lg"}`}
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <svg
