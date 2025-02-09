@@ -102,7 +102,7 @@ const BrainContentPinnedWaves: React.FC = () => {
   };
 
   return (
-    <div className="tw-relative tw-h-8 tw-mb-2">
+    <div className="tw-relative tw-h-8 tw-mb-2 tw-mr-2">
       {showLeftArrow && (
         <button
           ref={leftArrowRef}

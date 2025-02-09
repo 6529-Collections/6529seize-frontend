@@ -69,7 +69,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const contentClasses = `tw-relative tw-flex tw-flex-grow tw-w-full min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto
     ${
       showRightSidebar && !isCollapsed && !isDropOpen
-        ? "xl:tw-mr-[21rem] xl:tw-ml-3 min-[1800px]:tw-mx-auto"
+        ? "xl:tw-mr-[21rem] xl:tw-ml-3 min-[1600px]:tw-max-w-full min-[1920px]:tw-mx-auto min-[1920px]:tw-max-w-[1280px]"
         : ""
     }`;
 

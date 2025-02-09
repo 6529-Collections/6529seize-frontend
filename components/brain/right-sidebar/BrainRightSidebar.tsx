@@ -72,7 +72,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           focus:tw-outline-none tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300 tw-ease-out
           ${isCollapsed ? 
             "tw-border-r-0 -tw-left-8 tw-rounded-l-lg" : 
-            "tw-border-l-0 -tw-left-4 tw-rounded-lg"}`}
+            "tw-border-l-0 -tw-left-5 tw-rounded-lg"}`}
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <svg

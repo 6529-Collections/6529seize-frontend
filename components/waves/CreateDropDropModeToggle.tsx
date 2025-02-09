@@ -35,7 +35,7 @@ export const CreateDropDropModeToggle: React.FC<
       return `${baseClasses} tw-bg-indigo-600 tw-text-white desktop-hover:hover:tw-bg-indigo-500 active:tw-bg-indigo-700 focus-visible:tw-outline-indigo-500 tw-ring-2 tw-ring-indigo-400/40 tw-ring-offset-1 tw-ring-offset-iron-900`;
     }
 
-    return `${baseClasses} tw-bg-iron-800 tw-backdrop-blur-sm tw-text-iron-500 desktop-hover:hover:tw-bg-iron-700 active:tw-bg-iron-700/90 focus-visible:tw-outline-iron-700 tw-ring-1 tw-ring-iron-700/50`;
+    return `${baseClasses} tw-bg-iron-700 tw-backdrop-blur-sm tw-text-iron-500 desktop-hover:hover:tw-bg-iron-700/70 active:tw-bg-iron-700/90 focus-visible:tw-outline-iron-700 tw-ring-1 tw-ring-iron-700/50`;
   }, [isDisabled, isDropMode]);
 
   const getRestrictionMessage = (
