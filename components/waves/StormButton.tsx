@@ -33,8 +33,8 @@ const StormButton: React.FC<StormButtonProps> = ({
           type="button"
           className={`tw-flex tw-items-center tw-justify-center tw-flex-shrink-0  tw-rounded-full tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 ${
             canAddPart && !submitting
-              ? "tw-cursor-pointer tw-text-iron-400 hover:tw-text-primary-400 hover:tw-bg-primary-300/20 tw-bg-iron-800"
-              : "tw-cursor-default tw-text-iron-600 hover:tw-text-iron-600 tw-bg-iron-900"
+              ? "tw-cursor-pointer tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 desktop-hover:hover:tw-bg-primary-300/20 tw-bg-iron-700"
+              : "tw-cursor-default tw-text-iron-600 desktop-hover:hover:tw-text-iron-600 tw-bg-iron-900"
           }`}
         >
           <svg

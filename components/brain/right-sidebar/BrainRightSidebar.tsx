@@ -1,9 +1,9 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-import { motion } from "framer-motion";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveContent } from "./WaveContent";
 
@@ -52,18 +52,27 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
   return (
     <motion.div
       className="tw-fixed tw-right-0 tw-top-0 tw-h-screen tw-z-40 tw-bg-iron-950 tw-flex tw-flex-col
-        tw-w-full lg:tw-w-[20.5rem] tw-border-l-2 tw-border-iron-800 tw-border-solid tw-border-y-0 
-        tw-border-r-0 tw-shadow-2xl"
+        tw-w-[20.5rem] tw-border-l-2 tw-border-iron-800 tw-border-solid tw-border-y-0 
+        tw-border-r-0 tw-shadow-2xl
+        lg:tw-bg-opacity-95 xl:tw-bg-opacity-100
+        lg:tw-backdrop-blur xl:tw-backdrop-blur-none"
       initial={false}
       animate={{ x: isCollapsed ? "100%" : 0 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
+      transition={{
+        duration: 0.2,
+        ease: [0.4, 0, 0.2, 1],
+        x: { duration: 0.2 },
+      }}
     >
       <button
         type="button"
         aria-label="Toggle sidebar"
-        className="tw-absolute -tw-left-[2.625rem] tw-z-50 tw-top-28 tw-bg-iron-950 tw-border tw-border-solid tw-border-r-0
-          tw-border-iron-600 tw-size-10 tw-text-iron-400 hover:tw-text-iron-50 tw-rounded-l-lg
-          focus:tw-outline-none tw-flex tw-items-center tw-justify-center"
+        className={`tw-absolute tw-z-50 tw-top-28 tw-bg-primary-500 desktop-hover:hover:tw-opacity-80 tw-border tw-border-solid
+          tw-border-primary-400 tw-size-7 tw-text-white desktop-hover:hover:tw-text-white tw-ring-1 tw-ring-white/20
+          focus:tw-outline-none tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300 tw-ease-out
+          ${isCollapsed ? 
+            "tw-border-r-0 -tw-left-8 tw-rounded-l-lg" : 
+            "tw-border-l-0 -tw-left-5 tw-rounded-lg"}`}
         onClick={() => setIsCollapsed(!isCollapsed)}
       >
         <svg
