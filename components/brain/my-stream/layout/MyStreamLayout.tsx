@@ -5,7 +5,6 @@ import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
-import { useRouter } from "next/router";
 import { createBreakpoint } from "react-use";
 import useCapacitor from "../../../../hooks/useCapacitor";
 
