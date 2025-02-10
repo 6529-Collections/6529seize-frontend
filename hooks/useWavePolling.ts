@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import { commonApiFetch } from "../services/api/common-api";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
+import useCapacitor from "./useCapacitor";
 
 interface PollingState {
   hasNewDrops: boolean;
@@ -42,6 +43,8 @@ export function useWavePolling(
   onNewDrops: () => void,
   config: UseWavePollingConfig = {}
 ) {
+  const { isCapacitor } = useCapacitor();
+
   const { pollingDelay, activePollingInterval, inactivePollingInterval } = {
     ...DEFAULT_CONFIG,
     ...config,
@@ -66,19 +69,24 @@ export function useWavePolling(
           params,
         });
       } catch (error) {
-        setPollingState(prev => ({ 
-          ...prev, 
-          lastError: error instanceof Error ? error : new Error('Unknown error occurred') 
+        setPollingState((prev) => ({
+          ...prev,
+          lastError:
+            error instanceof Error
+              ? error
+              : new Error("Unknown error occurred"),
         }));
         throw error;
       }
     },
     enabled: !pollingState.hasNewDrops && !!waveId,
-    refetchInterval: isTabVisible ? activePollingInterval : inactivePollingInterval,
+    refetchInterval: isTabVisible
+      ? activePollingInterval
+      : inactivePollingInterval,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: !isCapacitor,
     retry: 3,
   });
 
@@ -87,7 +95,7 @@ export function useWavePolling(
 
     const timeoutId = setTimeout(() => {
       if (pollingResult.drops.length === 0) {
-        setPollingState(prev => ({ ...prev, hasNewDrops: false }));
+        setPollingState((prev) => ({ ...prev, hasNewDrops: false }));
         return;
       }
 
@@ -95,21 +103,23 @@ export function useWavePolling(
       const latestExistingDrop = drops.at(-1);
 
       if (!latestExistingDrop) {
-        setPollingState({ 
-          hasNewDrops: true, 
+        setPollingState({
+          hasNewDrops: true,
           lastPolledData: pollingResult,
-          lastError: undefined 
+          lastError: undefined,
         });
         return;
       }
 
       const polledCreatedAt = new Date(latestPolledDrop.created_at).getTime();
-      const existingCreatedAt = new Date(latestExistingDrop.created_at).getTime();
+      const existingCreatedAt = new Date(
+        latestExistingDrop.created_at
+      ).getTime();
 
       setPollingState({
         hasNewDrops: polledCreatedAt > existingCreatedAt,
         lastPolledData: pollingResult,
-        lastError: undefined
+        lastError: undefined,
       });
     }, pollingDelay);
 
@@ -118,15 +128,15 @@ export function useWavePolling(
 
   useEffect(() => {
     if (!pollingState.hasNewDrops || !isTabVisible) return;
-    
+
     const hasTempDrop = drops.some((drop) => drop.id.startsWith("temp-"));
     if (hasTempDrop) return;
 
     onNewDrops();
-    setPollingState(prev => ({ 
-      ...prev, 
+    setPollingState((prev) => ({
+      ...prev,
       hasNewDrops: false,
-      lastError: undefined 
+      lastError: undefined,
     }));
   }, [pollingState.hasNewDrops, isTabVisible, drops, onNewDrops]);
 
@@ -134,6 +144,6 @@ export function useWavePolling(
     hasNewDrops: pollingState.hasNewDrops,
     isPolling: !error && !pollingState.hasNewDrops,
     error: error || pollingState.lastError,
-    lastPolledData: pollingState.lastPolledData
+    lastPolledData: pollingState.lastPolledData,
   };
-} 
+}

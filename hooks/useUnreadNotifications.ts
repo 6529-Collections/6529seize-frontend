@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ApiNotificationsResponse } from "../generated/models/ApiNotificationsResponse";
 import { commonApiFetch } from "../services/api/common-api";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
