@@ -14,6 +14,7 @@ import {
 } from "../helpers/waves/wave-drops.helpers";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { useWavePolling } from "./useWavePolling";
+import useCapacitor from "./useCapacitor";
 
 export enum WaveDropsSearchStrategy {
   FIND_OLDER = "FIND_OLDER",
@@ -47,6 +48,7 @@ export function useWaveDrops({
   reverse,
   dropId,
 }: UseWaveDropsProps) {
+  const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
   const isTabVisible = useTabVisibility();
 
@@ -137,7 +139,7 @@ export function useWaveDrops({
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: !isCapacitor,
   });
 
   const processDrops = (

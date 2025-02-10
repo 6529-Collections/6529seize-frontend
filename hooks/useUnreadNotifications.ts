@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { ApiNotificationsResponse } from "../generated/models/ApiNotificationsResponse";
-
 import { commonApiFetch } from "../services/api/common-api";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import useCapacitor from "./useCapacitor";
 
 export function useUnreadNotifications(handle: string | undefined) {
+  const { isCapacitor } = useCapacitor();
+
   const { data: notifications } = useQuery<ApiNotificationsResponse>({
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
@@ -23,7 +25,7 @@ export function useUnreadNotifications(handle: string | undefined) {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: !isCapacitor,
   });
 
   const [haveUnreadNotifications, setHaveUnreadNotifications] = useState(false);
