@@ -8,22 +8,7 @@ import useCapacitor from "./useCapacitor";
 export function useUnreadNotifications(handle: string | undefined) {
   const { isCapacitor } = useCapacitor();
 
-  const [refetchEnabled, setRefetchEnabled] = useState(
-    !document.hidden || !isCapacitor
-  );
-  const refetchIntervalRef = useRef<number | undefined>(30000);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      setRefetchEnabled(!document.hidden || !isCapacitor);
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
-
-  const { data: notifications, refetch } = useQuery<ApiNotificationsResponse>({
+  const { data: notifications } = useQuery<ApiNotificationsResponse>({
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
       { identity: handle, limit: "1" },
@@ -36,10 +21,11 @@ export function useUnreadNotifications(handle: string | undefined) {
         },
       }),
     enabled: !!handle,
-    refetchInterval: refetchEnabled ? refetchIntervalRef.current : false,
+    refetchInterval: 30000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
+    refetchIntervalInBackground: !isCapacitor,
   });
 
   const [haveUnreadNotifications, setHaveUnreadNotifications] = useState(false);
