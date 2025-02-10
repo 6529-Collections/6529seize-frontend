@@ -40,7 +40,6 @@ export function useUnreadNotifications(handle: string | undefined) {
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    refetchIntervalInBackground: false,
   });
 
   const [haveUnreadNotifications, setHaveUnreadNotifications] = useState(false);
