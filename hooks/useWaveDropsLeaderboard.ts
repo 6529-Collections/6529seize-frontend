@@ -16,6 +16,7 @@ import {
 import { useDebounce } from "react-use";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
+import useCapacitor from "./useCapacitor";
 
 export enum WaveDropsLeaderboardSortBy {
   RANK = "RANK",
@@ -63,6 +64,7 @@ export function useWaveDropsLeaderboard({
   handle,
   pollingEnabled = true,
 }: UseWaveDropsLeaderboardProps) {
+  const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
 
   const [drops, setDrops] = useState<ExtendedDrop[]>([]);
@@ -199,7 +201,7 @@ export function useWaveDropsLeaderboard({
     refetchOnWindowFocus: pollingEnabled,
     refetchOnMount: pollingEnabled,
     refetchOnReconnect: pollingEnabled,
-    refetchIntervalInBackground: pollingEnabled,
+    refetchIntervalInBackground: !isCapacitor && pollingEnabled,
   });
 
   useEffect(() => {

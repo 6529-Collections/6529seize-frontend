@@ -9,6 +9,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import { formatNameForUrl } from "../../nextgen_helpers";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface Props {
   collection: NextGenCollection;
@@ -127,7 +128,9 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
 function SwiperAutoplayButton() {
   const swiper = useSwiper();
 
-  const [paused, setPaused] = useState(false);
+  const { isCapacitor } = useCapacitor();
+
+  const [paused, setPaused] = useState(isCapacitor);
 
   useEffect(() => {
     if (paused) {

@@ -1539,214 +1539,207 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   function printLocks() {
     return (
       <Container className="no-padding">
-        <>
-          <Row className="pt-5 pb-2">
-            <Col>
-              <h4>
-                Locks{" "}
-                <Tippy
-                  content={
-                    "Lock Wallet or Use Case to stop accepting incoming delegations"
-                  }
-                  placement={"right"}
-                  theme={"light"}>
-                  <FontAwesomeIcon
-                    className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
-                </Tippy>
-              </h4>
-            </Col>
-          </Row>
-          <Row className="pt-2 pb-2">
-            <Col>
-              <button
-                className={`${styles.lockDelegationBtn} ${
-                  collectionLockReadGlobal?.data
-                    ? styles.lockDelegationBtnDisabled
-                    : ""
-                }`}
-                onClick={() => {
-                  const title = `${
-                    collectionLockRead.data ? `Unlocking` : `Locking`
-                  } Wallet`;
-                  let message = "Confirm in your wallet...";
-                  if (chainsMatch()) {
-                    collectionLockWrite.writeContract({
-                      address: DELEGATION_CONTRACT.contract,
-                      abi: DELEGATION_ABI,
-                      chainId: DELEGATION_CONTRACT.chain_id,
-                      args: [
-                        props.collection.contract,
-                        !collectionLockRead.data,
-                      ],
-                      functionName: "setCollectionLock",
-                    });
-                  } else {
-                    message = getSwitchToHtml();
-                  }
-                  setToast({ title, message });
-                }}>
+        <Row className="pt-5 pb-2">
+          <Col>
+            <h4>
+              Locks{" "}
+              <Tippy
+                content={
+                  "Lock Wallet or Use Case to stop accepting incoming delegations"
+                }
+                placement={"right"}
+                theme={"light"}>
                 <FontAwesomeIcon
-                  icon={collectionLockRead.data ? "lock" : "lock-open"}
-                  className={styles.buttonIcon}
-                />
-                {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
-                {collectionLockReadGlobal?.data &&
-                !areEqualAddresses(
-                  props.collection.contract,
-                  DELEGATION_ALL_ADDRESS
-                )
+                  className={styles.infoIcon}
+                  icon="info-circle"></FontAwesomeIcon>
+              </Tippy>
+            </h4>
+          </Col>
+        </Row>
+        <Row className="pt-2 pb-2">
+          <Col>
+            <button
+              className={`${styles.lockDelegationBtn} ${
+                collectionLockReadGlobal?.data
+                  ? styles.lockDelegationBtnDisabled
+                  : ""
+              }`}
+              onClick={() => {
+                const title = `${
+                  collectionLockRead.data ? `Unlocking` : `Locking`
+                } Wallet`;
+                let message = "Confirm in your wallet...";
+                if (chainsMatch()) {
+                  collectionLockWrite.writeContract({
+                    address: DELEGATION_CONTRACT.contract,
+                    abi: DELEGATION_ABI,
+                    chainId: DELEGATION_CONTRACT.chain_id,
+                    args: [props.collection.contract, !collectionLockRead.data],
+                    functionName: "setCollectionLock",
+                  });
+                } else {
+                  message = getSwitchToHtml();
+                }
+                setToast({ title, message });
+              }}>
+              <FontAwesomeIcon
+                icon={collectionLockRead.data ? "lock" : "lock-open"}
+                className={styles.buttonIcon}
+              />
+              {collectionLockRead.data ? "Unlock" : "Lock"} Wallet
+              {collectionLockReadGlobal?.data &&
+              !areEqualAddresses(
+                props.collection.contract,
+                DELEGATION_ALL_ADDRESS
+              )
+                ? ` *`
+                : ``}
+              {(collectionLockWrite.isPending ||
+                waitCollectionLockWrite.isLoading) && <Spinner />}
+            </button>
+          </Col>
+        </Row>
+        <Row className="pt-3 pb-2">
+          <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
+            <Form.Select
+              disabled={!!collectionLockRead.data}
+              className={`${styles.formInputLockUseCase} ${
+                collectionLockRead.data || collectionLockReadGlobal?.data
+                  ? styles.formInputDisabled
+                  : ""
+              }`}
+              value={lockUseCaseValue}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                setLockUseCaseValue(value);
+                if (value === CONSOLIDATION_USE_CASE.use_case) {
+                  setLockUseCaseIndex(18);
+                } else if (value === SUB_DELEGATION_USE_CASE.use_case) {
+                  setLockUseCaseIndex(17);
+                } else if (value === PRIMARY_ADDRESS_USE_CASE.use_case) {
+                  setLockUseCaseIndex(16);
+                } else {
+                  setLockUseCaseIndex(value - 1);
+                }
+                useCaseLockWrite.reset();
+              }}>
+              <option value={0}>
+                Lock/Unlock Use Case
+                {collectionLockRead.data || collectionLockReadGlobal?.data
                   ? ` *`
                   : ``}
-                {(collectionLockWrite.isPending ||
-                  waitCollectionLockWrite.isLoading) && <Spinner />}
-              </button>
-            </Col>
-          </Row>
-          <Row className="pt-3 pb-2">
-            <Col xs={12} sm={12} md={4} lg={4} className="pt-2 pb-2">
-              <Form.Select
-                disabled={!!collectionLockRead.data}
-                className={`${styles.formInputLockUseCase} ${
-                  collectionLockRead.data || collectionLockReadGlobal?.data
-                    ? styles.formInputDisabled
-                    : ""
-                }`}
-                value={lockUseCaseValue}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  setLockUseCaseValue(value);
-                  if (value === CONSOLIDATION_USE_CASE.use_case) {
-                    setLockUseCaseIndex(18);
-                  } else if (value === SUB_DELEGATION_USE_CASE.use_case) {
-                    setLockUseCaseIndex(17);
-                  } else if (value === PRIMARY_ADDRESS_USE_CASE.use_case) {
-                    setLockUseCaseIndex(16);
-                  } else {
-                    setLockUseCaseIndex(value - 1);
-                  }
-                  useCaseLockWrite.reset();
-                }}>
-                <option value={0}>
-                  Lock/Unlock Use Case
-                  {collectionLockRead.data || collectionLockReadGlobal?.data
+              </option>
+              {ALL_USE_CASES.map((uc, index) => {
+                if (uc.use_case != 1) {
+                  const asteriskDisplay = useCaseLockStatusesGlobal.data?.[
+                    index
+                  ]
                     ? ` *`
-                    : ``}
-                </option>
-                {ALL_USE_CASES.map((uc, index) => {
-                  if (uc.use_case != 1) {
-                    const asteriskDisplay = useCaseLockStatusesGlobal.data?.[
-                      index
-                    ]
-                      ? ` *`
-                      : ``;
-                    const lockDisplay =
-                      useCaseLockStatuses.data?.[index] ||
-                      useCaseLockStatusesGlobal.data?.[index] ||
-                      collectionLockRead.data
-                        ? ` - LOCKED${asteriskDisplay}`
-                        : ` - UNLOCKED`;
-                    return (
-                      <option
-                        key={`collection-delegation-select-use-case-${uc.use_case}`}
-                        value={uc.use_case}>
-                        #{uc.use_case} - {uc.display}
-                        {lockDisplay}
-                      </option>
-                    );
-                  }
-                })}
-              </Form.Select>
-            </Col>
-            {lockUseCaseValue != 0 && (
-              <Col
-                xs={12}
-                sm={12}
-                md={8}
-                lg={8}
-                className="pt-2 pb-2 d-flex align-items-center">
-                {!useCaseLockStatusesGlobal.data ||
-                (useCaseLockStatusesGlobal?.data &&
-                  (useCaseLockStatusesGlobal?.data[
-                    lockUseCaseIndex
-                  ] as any as boolean) === false) ? (
-                  <button
-                    className={`${styles.lockUseCaseBtn}`}
-                    onClick={() => {
-                      const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
-                      const title = `${
-                        useCaseLockStatuses?.data?.[lockUseCaseIndex]
-                          ? "Unlocking"
-                          : "Locking"
-                      } Wallet on Use Case #${useCase.use_case} - ${
-                        useCase.display
-                      }`;
-                      let message = "Confirm in your wallet...";
+                    : ``;
+                  const lockDisplay =
+                    useCaseLockStatuses.data?.[index] ||
+                    useCaseLockStatusesGlobal.data?.[index] ||
+                    collectionLockRead.data
+                      ? ` - LOCKED${asteriskDisplay}`
+                      : ` - UNLOCKED`;
+                  return (
+                    <option
+                      key={`collection-delegation-select-use-case-${uc.use_case}`}
+                      value={uc.use_case}>
+                      #{uc.use_case} - {uc.display}
+                      {lockDisplay}
+                    </option>
+                  );
+                }
+              })}
+            </Form.Select>
+          </Col>
+          {lockUseCaseValue != 0 && (
+            <Col
+              xs={12}
+              sm={12}
+              md={8}
+              lg={8}
+              className="pt-2 pb-2 d-flex align-items-center">
+              {!useCaseLockStatusesGlobal.data ||
+              (useCaseLockStatusesGlobal?.data &&
+                (useCaseLockStatusesGlobal?.data[
+                  lockUseCaseIndex
+                ] as any as boolean) === false) ? (
+                <button
+                  className={`${styles.lockUseCaseBtn}`}
+                  onClick={() => {
+                    const useCase = DELEGATION_USE_CASES[lockUseCaseIndex];
+                    const title = `${
+                      useCaseLockStatuses?.data?.[lockUseCaseIndex]
+                        ? "Unlocking"
+                        : "Locking"
+                    } Wallet on Use Case #${useCase.use_case} - ${
+                      useCase.display
+                    }`;
+                    let message = "Confirm in your wallet...";
 
-                      if (chainsMatch()) {
-                        useCaseLockWrite.writeContract({
-                          address: DELEGATION_CONTRACT.contract,
-                          abi: DELEGATION_ABI,
-                          chainId: DELEGATION_CONTRACT.chain_id,
-                          args: [
-                            props.collection.contract,
-                            lockUseCaseValue,
-                            !useCaseLockStatuses.data?.[lockUseCaseIndex],
-                          ],
-                          functionName: "setCollectionUsecaseLock",
-                        });
-                      } else {
-                        message = getSwitchToHtml();
-                      }
-                      setToast({ title, message });
-                    }}>
-                    <FontAwesomeIcon
-                      icon={
-                        useCaseLockStatuses.data?.[lockUseCaseIndex]
-                          ? "lock"
-                          : "lock-open"
-                      }
-                      className={styles.buttonIcon}
-                    />
-                    {useCaseLockStatuses.data?.[lockUseCaseIndex]
-                      ? "Unlock"
-                      : "Lock"}{" "}
-                    Use Case
-                    {(useCaseLockWrite.isPending ||
-                      waitUseCaseLockWrite.isLoading) && <Spinner />}
-                  </button>
-                ) : (
-                  <div>
-                    <span className={styles.hint}>* Note:</span> Unlock use case
-                    in{" "}
-                    <a href={`/delegation/${ANY_COLLECTION_PATH}`}>
-                      All Collections
-                    </a>
-                  </div>
-                )}
-              </Col>
-            )}
+                    if (chainsMatch()) {
+                      useCaseLockWrite.writeContract({
+                        address: DELEGATION_CONTRACT.contract,
+                        abi: DELEGATION_ABI,
+                        chainId: DELEGATION_CONTRACT.chain_id,
+                        args: [
+                          props.collection.contract,
+                          lockUseCaseValue,
+                          !useCaseLockStatuses.data?.[lockUseCaseIndex],
+                        ],
+                        functionName: "setCollectionUsecaseLock",
+                      });
+                    } else {
+                      message = getSwitchToHtml();
+                    }
+                    setToast({ title, message });
+                  }}>
+                  <FontAwesomeIcon
+                    icon={
+                      useCaseLockStatuses.data?.[lockUseCaseIndex]
+                        ? "lock"
+                        : "lock-open"
+                    }
+                    className={styles.buttonIcon}
+                  />
+                  {useCaseLockStatuses.data?.[lockUseCaseIndex]
+                    ? "Unlock"
+                    : "Lock"}{" "}
+                  Use Case
+                  {(useCaseLockWrite.isPending ||
+                    waitUseCaseLockWrite.isLoading) && <Spinner />}
+                </button>
+              ) : (
+                <div>
+                  <span className={styles.hint}>* Note:</span> Unlock use case
+                  in{" "}
+                  <a href={`/delegation/${ANY_COLLECTION_PATH}`}>
+                    All Collections
+                  </a>
+                </div>
+              )}
+            </Col>
+          )}
+        </Row>
+        {collectionLockRead.data ? (
+          <Row className="pb-3">
+            <Col>
+              <span className={styles.hint}>* Note:</span> Unlock Wallet to
+              lock/unlock specific use cases
+            </Col>
           </Row>
-          {collectionLockRead.data && (
-            <Row className="pb-3">
-              <Col>
-                <span className={styles.hint}>* Note:</span> Unlock Wallet to
-                lock/unlock specific use cases
-              </Col>
-            </Row>
-          )}
-          {collectionLockReadGlobal?.data && (
-            <Row className="pb-3">
-              <Col>
-                <span className={styles.hint}>* Note:</span> Unlock Wallet on{" "}
-                <a href={`/delegation/${ANY_COLLECTION_PATH}`}>
-                  All Collections
-                </a>{" "}
-                to lock/unlock specific collections and use cases
-              </Col>
-            </Row>
-          )}
-        </>
+        ) : null}
+        {collectionLockReadGlobal?.data ? (
+          <Row className="pb-3">
+            <Col>
+              <span className={styles.hint}>* Note:</span> Unlock Wallet on{" "}
+              <a href={`/delegation/${ANY_COLLECTION_PATH}`}>All Collections</a>{" "}
+              to lock/unlock specific collections and use cases
+            </Col>
+          </Row>
+        ) : null}
       </Container>
     );
   }

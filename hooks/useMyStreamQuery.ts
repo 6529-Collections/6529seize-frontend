@@ -7,6 +7,7 @@ import {
 import { TypedFeedItem } from "../types/feed.types";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
+import useCapacitor from "./useCapacitor";
 
 interface UseMyStreamQueryProps {
   readonly reverse: boolean;
@@ -74,6 +75,7 @@ export function usePollingQuery(
   items: TypedFeedItem[],
   reverse: boolean
 ) {
+  const { isCapacitor } = useCapacitor();
   const [haveNewItems, setHaveNewItems] = useState(false);
   const [isTabVisible, setIsTabVisible] = useState(!document.hidden);
 
@@ -102,7 +104,7 @@ export function usePollingQuery(
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    refetchIntervalInBackground: true,
+    refetchIntervalInBackground: !isCapacitor,
   });
 
   useEffect(() => {
