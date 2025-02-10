@@ -8,7 +8,7 @@ import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useRouter } from "next/router";
 import DropPartContent from "./DropPartContent";
-import DropContentWrapper from "../../../waves/detailed/drops/DropContentWrapper";
+import DropContentWrapper from "../../../waves/drops/DropContentWrapper";
 
 export enum DropPartSize {
   SMALL = "SMALL",

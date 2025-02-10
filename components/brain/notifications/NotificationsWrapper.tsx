@@ -5,7 +5,7 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
-import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
+import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
 import { useRouter } from "next/router";
 

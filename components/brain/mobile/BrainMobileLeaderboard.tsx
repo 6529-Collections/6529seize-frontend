@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { WaveLeaderboardDrops } from "../../waves/detailed/leaderboard/drops/WaveLeaderboardDrops";
+import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderboardDrops";
 import {
   WaveDropsLeaderboardSortBy,
   WaveDropsLeaderboardSortDirection,
 } from "../../../hooks/useWaveDropsLeaderboard";
 import { motion, AnimatePresence } from "framer-motion";
-import { WaveDropCreate } from "../../waves/detailed/leaderboard/create/WaveDropCreate";
+import { WaveDropCreate } from "../../waves/leaderboard/create/WaveDropCreate";
 import useCapacitor from "../../../hooks/useCapacitor";
 
 interface BrainMobileLeaderboardProps {

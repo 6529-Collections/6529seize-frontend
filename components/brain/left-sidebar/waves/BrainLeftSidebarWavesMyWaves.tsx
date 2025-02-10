@@ -44,7 +44,7 @@ const BrainLeftSidebarWavesMyWaves: React.FC<
             </p>
           </div>
         </div>
-        <div className="tw-mt-2 tw-max-h-96 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-700 tw-scrollbar-track-iron-900">
+        <div className="tw-mt-2 tw-max-h-96 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
             {memoizedWaves.map((wave) => (
               <BrainLeftSidebarWave

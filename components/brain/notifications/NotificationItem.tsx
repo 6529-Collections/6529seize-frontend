@@ -3,7 +3,7 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TypedNotification } from "../../../types/feed.types";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
+import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
 import NotificationDropReplied from "./drop-replied/NotificationDropReplied";
 import NotificationDropVoted from "./drop-voted/NotificationDropVoted";

@@ -1,6 +1,6 @@
 import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import WaveDetailedFollowers from "../../waves/detailed/followers/WaveDetailedFollowers";
+import WaveFollowersList from "../../waves/followers/WaveFollowersList";
 
 interface BrainRightSidebarFollowersProps {
   readonly wave: ApiWave;
@@ -11,7 +11,7 @@ const BrainRightSidebarFollowers: React.FC<BrainRightSidebarFollowersProps> = ({
   wave,
   closeFollowers,
 }) => {
-  return <WaveDetailedFollowers wave={wave} onBackClick={closeFollowers} />;
+  return <WaveFollowersList wave={wave} onBackClick={closeFollowers} />;
 };
 
 export default BrainRightSidebarFollowers;

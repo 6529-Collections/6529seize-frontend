@@ -10,7 +10,7 @@ import {
 } from "../../../hooks/useMyStreamQuery";
 import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
+import { DropInteractionParams } from "../../waves/drops/Drop";
 
 const MyStreamWrapper: React.FC = () => {
   const { setTitle } = useContext(AuthContext);

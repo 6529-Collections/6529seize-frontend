@@ -3,7 +3,7 @@ import { IFeedItemDropCreated } from "../../../../../types/feed.types";
 import Drop, {
   DropInteractionParams,
   DropLocation,
-} from "../../../../waves/detailed/drops/Drop";
+} from "../../../../waves/drops/Drop";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";

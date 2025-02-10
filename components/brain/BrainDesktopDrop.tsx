@@ -1,5 +1,5 @@
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
-import { WaveDrop } from "../waves/detailed/drop/WaveDrop";
+import { SingleWaveDrop } from "../waves/drop/SingleWaveDrop";
 
 interface Props {
   readonly drop: ExtendedDrop;
@@ -9,7 +9,7 @@ interface Props {
 const BrainDesktopDrop: React.FC<Props> = ({ drop, onClose }) => {
   return (
     <div className="tw-absolute tw-inset-0 tw-z-1000">
-      <WaveDrop drop={drop} onClose={onClose} />
+      <SingleWaveDrop drop={drop} onClose={onClose} />
     </div>
   );
 };

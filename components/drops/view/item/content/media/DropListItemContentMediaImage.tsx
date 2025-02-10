@@ -115,7 +115,7 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
 
   return (
     <>
-      <div className="tw-max-w-lg tw-relative">
+      <div className="sm:tw-max-w-lg tw-relative">
         {isLoading && (
           <div
             className="tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"

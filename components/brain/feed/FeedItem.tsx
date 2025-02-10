@@ -6,7 +6,7 @@ import FeedItemDropCreated from "./items/drop-created/FeedItemDropCreated";
 import FeedItemWaveCreated from "./items/wave-created/FeedItemWaveCreated";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { DropInteractionParams } from "../../waves/detailed/drops/Drop";
+import { DropInteractionParams } from "../../waves/drops/Drop";
 
 export interface FeedItemProps {
   readonly item: TypedFeedItem;

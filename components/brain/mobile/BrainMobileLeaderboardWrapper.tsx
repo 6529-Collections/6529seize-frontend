@@ -2,7 +2,7 @@ import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import BrainMobileLeaderboard from "./BrainMobileLeaderboard";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import { WaveWinners } from "../../waves/detailed/winners/WaveWinners";
+import { WaveWinners } from "../../waves/winners/WaveWinners";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { ExtendedDrop } from "../../../helpers/waves/wave-drops.helpers";
 
@@ -24,7 +24,7 @@ const BrainMobileLeaderboardWrapper: React.FC<
   if (votingState === WaveVotingState.ENDED) {
     return (
       <div
-        className={`tw-overflow-y-auto ${contentHeight} tw-max-h-full no-scrollbar tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-700`}
+        className={`tw-overflow-y-auto ${contentHeight} tw-max-h-full no-scrollbar tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600`}
       >
         <WaveWinners wave={wave} onDropClick={onDropClick} />
       </div>

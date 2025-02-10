@@ -4,16 +4,15 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TabToggle } from "../../common/TabToggle";
 import WaveHeader, {
   WaveHeaderPinnedSide,
-} from "../../waves/detailed/header/WaveHeader";
-import { WaveDetailedSmallLeaderboard } from "../../waves/detailed/small-leaderboard/WaveDetailedSmallLeaderboard";
-import { WaveWinnersSmall } from "../../waves/detailed/winners/WaveWinnersSmall";
+} from "../../waves/header/WaveHeader";
+import { WaveWinnersSmall } from "../../waves/winners/WaveWinnersSmall";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebar";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import { WaveLeaderboardRightSidebarVoters } from "../../waves/detailed/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
-import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/detailed/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
-import { motion } from "framer-motion";
+import { WaveSmallLeaderboard } from "../../waves/small-leaderboard/WaveSmallLeaderboard";
+import { WaveLeaderboardRightSidebarVoters } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
+import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -74,7 +73,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
         {hasVotingEnded ? (
           <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
         ) : (
-          <WaveDetailedSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+          <WaveSmallLeaderboard wave={wave} onDropClick={onDropClick} />
         )}
       </div>
     ),
@@ -117,22 +116,14 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <>
-      <div className="tw-px-2 tw-mt-4">
+      <div className="tw-px-4 tw-mt-4">
         <TabToggle
           options={options}
           activeKey={activeTab}
           onSelect={(key) => setActiveTab(key as SidebarTab)}
         />
       </div>
-      <motion.div
-        key={activeTab}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        {rankWaveComponents[activeTab]}
-      </motion.div>
+      <div>{rankWaveComponents[activeTab]}</div>
     </>
   );
 };
