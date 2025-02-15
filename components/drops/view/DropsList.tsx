@@ -3,6 +3,7 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import Drop, { DropLocation } from "../../waves/drops/Drop";
+import VirtualScrollWrapper from "../../waves/drops/VirtualScrollWrapper";
 
 type DropActionHandler = ({
   drop,
@@ -13,6 +14,7 @@ type DropActionHandler = ({
 }) => void;
 
 interface DropsListProps {
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
   readonly drops: ExtendedDrop[];
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
@@ -32,6 +34,7 @@ interface DropsListProps {
 const MemoizedDrop = memo(Drop);
 
 const DropsList = memo(function DropsList({
+  scrollContainerRef,
   drops,
   showWaveInfo,
   activeDrop,
@@ -70,27 +73,25 @@ const DropsList = memo(function DropsList({
           id={`drop-${drop.serial_no}`}
           ref={serialNo === drop.serial_no ? targetDropRef : null}
           className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
-          /*  style={{
-            contentVisibility: "auto",
-            containIntrinsicSize: "auto",
-          }} */
         >
-          <MemoizedDrop
-            dropViewDropId={dropViewDropId}
-            onReplyClick={handleReplyClick}
-            drop={drop}
-            previousDrop={drops[i - 1] ?? null}
-            nextDrop={drops[i + 1] ?? null}
-            showWaveInfo={showWaveInfo}
-            activeDrop={activeDrop}
-            onReply={handleReply}
-            onQuote={handleQuote}
-            location={DropLocation.WAVE}
-            showReplyAndQuote={showReplyAndQuote}
-            onQuoteClick={onQuoteClick}
-            parentContainerRef={parentContainerRef}
-            onDropContentClick={onDropContentClick}
-          />
+          <VirtualScrollWrapper scrollContainerRef={scrollContainerRef}>
+            <MemoizedDrop
+              dropViewDropId={dropViewDropId}
+              onReplyClick={handleReplyClick}
+              drop={drop}
+              previousDrop={drops[i - 1] ?? null}
+              nextDrop={drops[i + 1] ?? null}
+              showWaveInfo={showWaveInfo}
+              activeDrop={activeDrop}
+              onReply={handleReply}
+              onQuote={handleQuote}
+              location={DropLocation.WAVE}
+              showReplyAndQuote={showReplyAndQuote}
+              onQuoteClick={onQuoteClick}
+              parentContainerRef={parentContainerRef}
+              onDropContentClick={onDropContentClick}
+            />
+          </VirtualScrollWrapper>
         </div>
       )),
     [
