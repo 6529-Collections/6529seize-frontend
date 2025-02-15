@@ -2,10 +2,9 @@ import React, {
   useState,
   useRef,
   useEffect,
-  useLayoutEffect,
   ReactNode,
-  useCallback
-} from 'react';
+  useCallback,
+} from "react";
 
 /**
  * Props for VirtualScrollWrapper
@@ -15,14 +14,14 @@ interface VirtualScrollWrapperProps {
    * A manual delay in milliseconds to wait after media loads
    * before measuring (to account for any last-minute layout changes).
    */
-  delay?: number;
+  readonly delay?: number;
 
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement>
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
 
   /**
    * The child components to be rendered or virtualized.
    */
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
 /**
@@ -49,7 +48,7 @@ interface VirtualScrollWrapperProps {
 export default function VirtualScrollWrapper({
   delay = 3000,
   scrollContainerRef,
-  children
+  children,
 }: VirtualScrollWrapperProps) {
   /**
    * allMediaLoaded: Tracks whether all media elements inside
@@ -94,7 +93,7 @@ export default function VirtualScrollWrapper({
     if (!container) return;
 
     // Select all images and videos
-    const mediaElements = container.querySelectorAll('img, video');
+    const mediaElements = container.querySelectorAll("img, video");
 
     // If none found, we consider them all "loaded" immediately
     if (mediaElements.length === 0) {
@@ -122,22 +121,22 @@ export default function VirtualScrollWrapper({
       // For images, media.complete indicates loaded
       // For videos, readyState >= 3 means can play without buffering
       const isAlreadyLoaded =
-        (tagName === 'img' && (media as HTMLImageElement).complete) ||
-        (tagName === 'video' && (media as HTMLVideoElement).readyState >= 3);
+        (tagName === "img" && (media as HTMLImageElement).complete) ||
+        (tagName === "video" && (media as HTMLVideoElement).readyState >= 3);
 
       if (isAlreadyLoaded) {
         handleLoadOrError();
       } else {
-        media.addEventListener('load', handleLoadOrError);
-        media.addEventListener('error', handleLoadOrError);
+        media.addEventListener("load", handleLoadOrError);
+        media.addEventListener("error", handleLoadOrError);
       }
     });
 
     // Cleanup event listeners
     return () => {
       mediaElements.forEach((media) => {
-        media.removeEventListener('load', handleLoadOrError);
-        media.removeEventListener('error', handleLoadOrError);
+        media.removeEventListener("load", handleLoadOrError);
+        media.removeEventListener("error", handleLoadOrError);
       });
     };
   }, [children]);
@@ -165,7 +164,7 @@ export default function VirtualScrollWrapper({
    */
   useEffect(() => {
     // Avoid running Intersection Observer on the server
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -179,9 +178,9 @@ export default function VirtualScrollWrapper({
         }
       },
       {
-        rootMargin: '1000px 0px 1000px 0px',
+        rootMargin: "1000px 0px 1000px 0px",
         threshold: 0.0,
-        root: scrollContainerRef.current
+        root: scrollContainerRef.current,
       }
     );
 
@@ -208,7 +207,7 @@ export default function VirtualScrollWrapper({
    * 4. If we haven't measured yet (measuredHeight === null),
    *    also render children so we can measure them.
    */
-  const isServer = typeof window === 'undefined';
+  const isServer = typeof window === "undefined";
   const shouldRenderChildren = isServer || isInView || measuredHeight === null;
 
   return (
@@ -218,7 +217,7 @@ export default function VirtualScrollWrapper({
       ) : (
         <div
           style={{
-            height: measuredHeight ?? 'auto'
+            height: measuredHeight ?? "auto",
           }}
         />
       )}
