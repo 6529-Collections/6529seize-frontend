@@ -270,6 +270,7 @@ export default function WaveDropsAll({
         >
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
             <DropsList
+              scrollContainerRef={scrollContainerRef}
               onReplyClick={setSerialNo}
               drops={memoizedDrops}
               showWaveInfo={false}
