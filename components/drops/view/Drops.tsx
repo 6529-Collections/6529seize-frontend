@@ -118,6 +118,8 @@ export default function Drops() {
     router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`);
   };
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   if (!drops.length && !isFetching) {
     return (
       <div className="tw-text-sm tw-italic tw-text-iron-500">
@@ -127,8 +129,9 @@ export default function Drops() {
   }
 
   return (
-    <div className="tw-overflow-hidden">
+    <div className="tw-overflow-hidden" ref={scrollContainerRef}>
       <DropsList
+        scrollContainerRef={scrollContainerRef}
         drops={drops}
         showWaveInfo={true}
         onReply={() => {}}
