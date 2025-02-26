@@ -28,6 +28,8 @@ export const WaveDropsScrollContainer = forwardRef<
   ) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const [lastScrollTop, setLastScrollTop] = useState(0);
+    const previousHeightRef = useRef<number>(0);
+    const previousNewItemsCountRef = useRef<number>(0);
 
     useEffect(() => {
       if (
@@ -40,16 +42,31 @@ export const WaveDropsScrollContainer = forwardRef<
         if (!scrollContainer) {
           return;
         }
-        const contentHeight = contentRef.current.scrollHeight;
-        const scrollTop = scrollContainer.scrollTop;
-        const clientHeight = scrollContainer.clientHeight;
 
-        if (scrollTop + clientHeight < contentHeight) {
-          scrollContainer.scrollTop =
-            scrollTop + (contentRef.current.scrollHeight - contentHeight);
+        // Only adjust scroll if new items were added
+        if (newItemsCount > previousNewItemsCountRef.current) {
+          const currentHeight = contentRef.current.scrollHeight;
+          const heightDifference = currentHeight - previousHeightRef.current;
+          
+          // Only adjust if there's a height change and we're not at the bottom
+          if (heightDifference > 0 && scrollContainer.scrollTop > 0) {
+            // Maintain the same view by adjusting scroll position by the height difference
+            scrollContainer.scrollTop += heightDifference;
+          }
+          
+          previousHeightRef.current = currentHeight;
+          previousNewItemsCountRef.current = newItemsCount;
         }
       }
     }, [newItemsCount, ref, disableAutoPosition]);
+
+    // Store initial height after first render
+    useEffect(() => {
+      if (contentRef.current) {
+        previousHeightRef.current = contentRef.current.scrollHeight;
+        previousNewItemsCountRef.current = newItemsCount;
+      }
+    }, []);
 
     const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
