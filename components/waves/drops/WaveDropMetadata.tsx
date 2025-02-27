@@ -9,9 +9,7 @@ interface WaveDropMetadataProps {
   readonly metadata: DropMetadata[];
 }
 
-export default function WaveDropMetadata({
-  metadata,
-}: WaveDropMetadataProps) {
+export default function WaveDropMetadata({ metadata }: WaveDropMetadataProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobileDevice();
@@ -25,7 +23,7 @@ export default function WaveDropMetadata({
   useKeyPressEvent("Escape", () => setIsDropdownOpen(false));
 
   return (
-    <div className="tw-relative" ref={dropdownRef}>
+    <div className="tw-relative tw-mt-1.5" ref={dropdownRef}>
       <Tippy
         content={
           <div className="tw-text-center">
@@ -39,7 +37,7 @@ export default function WaveDropMetadata({
         <button
           type="button"
           onClick={toggleDropdown}
-          className="tw-p-0 tw-bg-transparent tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-iron-400 desktop-hover:hover:tw-text-iron-500 tw-text-xs tw-font-normal tw-transition-all tw-duration-300"
+          className="tw-size-6 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-lg tw-border-0 tw-flex tw-items-center tw-justify-center tw-text-iron-300 desktop-hover:hover:tw-text-iron-50 tw-text-xs tw-font-normal tw-transition-all tw-duration-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +46,7 @@ export default function WaveDropMetadata({
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="tw-size-5 tw-flex-shrink-0"
+            className="tw-size-4 tw-flex-shrink-0"
           >
             <path
               strokeLinecap="round"
@@ -65,7 +63,7 @@ export default function WaveDropMetadata({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="tw-absolute tw-bottom-full tw-right-0 tw-mb-2 tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-md tw-shadow-lg tw-z-10 tw-min-w-52 tw-max-w-72 tw-w-max"
+            className="tw-absolute tw-bottom-full tw-left-0 tw-mb-2 tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-rounded-md tw-shadow-lg tw-z-10 tw-min-w-52 tw-max-w-72 tw-w-max"
           >
             <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-2 tw-px-2 tw-text-xs tw-text-iron-300">
               {metadata.map((item) => (

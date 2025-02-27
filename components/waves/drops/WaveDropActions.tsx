@@ -29,7 +29,7 @@ export default function WaveDropActions({
   const { canDelete } = useDropInteractionRules(drop);
 
   return (
-    <div className="tw-absolute tw-z-10 tw-right-2 tw-top-1 group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out">
+    <div className="tw-absolute tw-z-10 tw-right-2 tw-top-0 group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-h-8 tw-flex tw-items-center tw-shadow tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
           {connectedProfile?.profile?.handle !== drop.author.handle &&

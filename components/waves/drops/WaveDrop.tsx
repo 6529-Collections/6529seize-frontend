@@ -60,9 +60,9 @@ const getColorClasses = ({
   isDrop: boolean;
 }): string => {
   if (isActiveDrop) {
-    return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0";
+    return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0 tw-mt-1";
   }
-  if (!isDrop) return "tw-bg-iron-950";
+  if (!isDrop) return "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900/50";
 
   const rankClass =
     RANK_STYLES[rank as keyof typeof RANK_STYLES] ?? RANK_STYLES.default;
@@ -242,10 +242,8 @@ const WaveDrop = ({
             />
           )}
         <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
-          {!shouldGroupWithPreviousDrop && (
-            <WaveDropAuthorPfp drop={drop} />
-          )}
-          <div className="tw-flex tw-flex-col tw-w-full">
+          {!shouldGroupWithPreviousDrop && <WaveDropAuthorPfp drop={drop} />}
+          <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-1">
             {!shouldGroupWithPreviousDrop && (
               <WaveDropHeader
                 drop={drop}
@@ -255,7 +253,7 @@ const WaveDrop = ({
                 partsCount={drop.parts.length}
               />
             )}
-            <div className={shouldGroupWithPreviousDrop ? "tw-ml-[52px]" : ""}>
+            <div className={shouldGroupWithPreviousDrop ? "tw-ml-[52px] tw-py-0.5" : ""}>
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}
@@ -277,10 +275,11 @@ const WaveDrop = ({
             onQuote={handleOnQuote}
           />
         )}
-        <div className="tw-flex tw-w-full tw-justify-end tw-items-center tw-gap-x-2 tw-mt-1">
+        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-ml-[52px]">
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}
+
           {!!drop.raters_count && <WaveDropRatings drop={drop} />}
         </div>
         <WaveDropMobileMenu
@@ -297,4 +296,4 @@ const WaveDrop = ({
   );
 };
 
-export default memo(WaveDrop); 
+export default memo(WaveDrop);
