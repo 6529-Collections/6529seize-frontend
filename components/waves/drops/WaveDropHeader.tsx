@@ -63,7 +63,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           <DropTrophyIcon rank={drop.rank} />
         )}
       </div>
-      <div className="tw-mt-0.5">
+      <div>
         {showWaveInfo && (
           <Link
             onClick={(e) => handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)}
@@ -76,8 +76,8 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
       </div>
 
       {isStorm && (
-        <div className="tw-mt-2 tw-inline-flex tw-relative">
-          <span className="tw-text-xs tw-text-iron-50">
+        <div className="tw-inline-flex tw-relative tw-mt-2">
+          <span className="tw-text-xs tw-text-iron-50 tw-mb-1.5">
             {currentPartIndex + 1} /{" "}
             <span className="tw-text-iron-400">{partsCount}</span>
           </span>

@@ -31,7 +31,7 @@ const WaveDropPartContentMarkdown: React.FC<WaveDropPartContentMarkdownProps> = 
         onQuoteClick={onQuoteClick}
       />
       {part.quoted_drop?.drop_id && (
-        <div className="tw-mt-3">
+        <div className="tw-mt-1.5">
           <WaveDropQuoteWithDropId
             dropId={part.quoted_drop.drop_id}
             partId={part.quoted_drop.drop_part_id}
@@ -49,3 +49,4 @@ const WaveDropPartContentMarkdown: React.FC<WaveDropPartContentMarkdownProps> = 
 };
 
 export default WaveDropPartContentMarkdown;
+
