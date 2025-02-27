@@ -46,6 +46,7 @@ export default function UserFollowBtn({
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
+  
   const { data: subscriptions, isFetching } =
     useQuery<ApiIdentitySubscriptionActions>({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS, handle],
