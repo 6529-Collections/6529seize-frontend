@@ -52,11 +52,6 @@ export default function UserFollowBtn({
   // Check if this is the user's own profile
   const isOwnProfile = connectedProfile?.profile?.handle?.toLowerCase() === handle.toLowerCase();
   
-  // Don't render the button if this is the user's own profile
-  if (isOwnProfile) {
-    return null;
-  }
-  
   const { data: subscriptions, isFetching } =
     useQuery<ApiIdentitySubscriptionActions>({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS, handle],
@@ -64,6 +59,8 @@ export default function UserFollowBtn({
         await commonApiFetch<ApiIdentitySubscriptionActions>({
           endpoint: `/identities/${handle}/subscriptions`,
         }),
+      // Disable the query if it's the user's own profile
+      enabled: !isOwnProfile,
     });
 
   const getFollowing = () => !!subscriptions?.actions.length;
@@ -173,6 +170,11 @@ export default function UserFollowBtn({
     }
     await followMutation.mutateAsync();
   };
+
+  // Don't render the button if this is the user's own profile
+  if (isOwnProfile) {
+    return null;
+  }
 
   return (
     <button
