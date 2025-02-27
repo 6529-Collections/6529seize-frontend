@@ -48,7 +48,14 @@ export default function UserPageHeader({
   const user = (router.query.user as string).toLowerCase();
   const { address } = useAccount();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
+  
+  // Initialize with a check to prevent button flash
+  const initialIsMyProfile = connectedProfile?.profile?.handle && profile.profile?.handle 
+    ? connectedProfile.profile.handle.toLowerCase() === profile.profile.handle.toLowerCase()
+    : false;
+  
+  const [isMyProfile, setIsMyProfile] = useState<boolean>(initialIsMyProfile);
+  
   useEffect(() => {
     setIsMyProfile(amIUser({ 
       profile, 
@@ -129,13 +136,9 @@ export default function UserPageHeader({
                 </UserPageHeaderPfpWrapper>
               </div>
               <div className="tw-mt-4">
-                {connectedProfile?.profile?.handle &&
-                  !activeProfileProxy &&
-                  !isMyProfile &&
-                  profile.profile?.handle &&
-                  connectedProfile.profile.handle.toLowerCase() !== profile.profile.handle.toLowerCase() && (
-                    <UserFollowBtn handle={profile.profile.handle} />
-                  )}
+                {!isMyProfile && profile.profile?.handle && connectedProfile?.profile?.handle && (
+                  <UserFollowBtn handle={profile.profile.handle} />
+                )}
               </div>
             </div>
 

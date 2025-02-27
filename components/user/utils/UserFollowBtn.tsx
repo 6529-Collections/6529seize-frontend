@@ -44,11 +44,8 @@ export default function UserFollowBtn({
   };
 
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
-  const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
+  const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
-  
-  // Check if this is the user's own profile
-  const isOwnProfile = connectedProfile?.profile?.handle?.toLowerCase() === handle.toLowerCase();
   
   const { data: subscriptions, isFetching } =
     useQuery<ApiIdentitySubscriptionActions>({
@@ -57,8 +54,6 @@ export default function UserFollowBtn({
         await commonApiFetch<ApiIdentitySubscriptionActions>({
           endpoint: `/identities/${handle}/subscriptions`,
         }),
-      // Disable the query if it's the user's own profile
-      enabled: !isOwnProfile,
     });
 
   const getFollowing = () => !!subscriptions?.actions.length;
@@ -73,16 +68,6 @@ export default function UserFollowBtn({
 
   const followMutation = useMutation({
     mutationFn: async () => {
-      // Prevent self-following
-      if (isOwnProfile) {
-        throw new Error("You cannot follow yourself");
-      }
-      
-      // Additional check to prevent self-following
-      if (connectedProfile?.profile?.handle?.toLowerCase() === handle.toLowerCase()) {
-        throw new Error("You cannot follow yourself");
-      }
-      
       await commonApiPost<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
@@ -138,24 +123,6 @@ export default function UserFollowBtn({
   });
 
   const onFollow = async (): Promise<void> => {
-    // Prevent self-following
-    if (isOwnProfile) {
-      setToast({
-        message: "You cannot follow yourself",
-        type: "error",
-      });
-      return;
-    }
-    
-    // Additional check to prevent self-following
-    if (connectedProfile?.profile?.handle?.toLowerCase() === handle.toLowerCase()) {
-      setToast({
-        message: "You cannot follow yourself",
-        type: "error",
-      });
-      return;
-    }
-    
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
@@ -168,11 +135,6 @@ export default function UserFollowBtn({
     }
     await followMutation.mutateAsync();
   };
-
-  // Don't render the button if this is the user's own profile
-  if (isOwnProfile) {
-    return null;
-  }
 
   return (
     <button
