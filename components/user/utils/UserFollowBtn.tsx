@@ -15,7 +15,6 @@ import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/A
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
-import { useAccount } from "wagmi";
 
 export enum UserFollowBtnSize {
   SMALL = "SMALL",
@@ -46,7 +45,6 @@ export default function UserFollowBtn({
 
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
-  const { address } = useAccount();
   const [mutating, setMutating] = useState<boolean>(false);
   
   // Check if this is the user's own profile

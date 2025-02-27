@@ -603,7 +603,7 @@ export const amIUser = ({
 }: {
   profile: IProfileAndConsolidations;
   address: string | undefined;
-  connectedHandle?: string | undefined;
+  connectedHandle?: string;
 }): boolean => {
   if (connectedHandle && profile.profile?.handle) {
     if (connectedHandle.toLowerCase() === profile.profile.handle.toLowerCase()) {
