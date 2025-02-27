@@ -109,7 +109,6 @@ module.exports = {
     require('tailwind-scrollbar')({ nocompatible: true }),
     require("@tailwindcss/container-queries"),
     function ({ addVariant }) {
-      addVariant("not-first", "&:not(:first-child)");
       addVariant('desktop-hover', '@media (hover: hover) and (pointer: fine)');
     },
   ],

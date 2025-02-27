@@ -90,17 +90,19 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
   return (
     <div className="tw-w-full">
       <div className="tw-flex tw-flex-col md:tw-flex-row tw-w-full tw-justify-between md:tw-gap-x-3">
-        <div className="tw-flex tw-justify-between tw-space-x-3 md:tw-hidden tw-mb-3">
-          {isStorm && (
-            <>
-              {renderNavigationButton("previous")}
-              {renderNavigationButton("next")}
-            </>
-          )}
-        </div>
-        <div className="tw-hidden md:tw-block">
-          {isStorm && renderNavigationButton("previous")}
-        </div>
+        {isStorm && (
+          <div className="tw-flex tw-justify-between tw-space-x-3 md:tw-hidden tw-mb-3">
+            {renderNavigationButton("previous")}
+            {renderNavigationButton("next")}
+          </div>
+        )}
+
+        {isStorm && (
+          <div className="tw-hidden md:tw-block">
+            {renderNavigationButton("previous")}
+          </div>
+        )}
+
         <div className="tw-h-full tw-w-full" ref={contentRef}>
           <motion.div
             key={activePartIndex}
@@ -121,9 +123,12 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
             <WaveDropPartContentMedias activePart={activePart} />
           )}
         </div>
-        <div className="tw-hidden md:tw-block">
-          {isStorm && renderNavigationButton("next")}
-        </div>
+
+        {isStorm && (
+          <div className="tw-hidden md:tw-block">
+            {renderNavigationButton("next")}
+          </div>
+        )}
       </div>
     </div>
   );

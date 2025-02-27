@@ -63,7 +63,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
 
   return (
     <div
-      className="tw-bg-iron-950 tw-rounded-xl tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-cursor-pointer"
+      className="tw-mt-1 tw-bg-iron-950 tw-rounded-xl tw-px-3 tw-py-3 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-cursor-pointer"
       onClick={(e) => {
         e.stopPropagation();
         goToQuoteDrop();
@@ -119,7 +119,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
                 {drop?.wave.name}
               </Link>
             </div>
-            <div className="tw-mt-0.5 ">
+            <div className="tw-mt-0.5">
               <DropPartMarkdownWithPropLogger
                 partContent={quotedPart?.content ?? ""}
                 mentionedUsers={drop?.mentioned_users ?? []}

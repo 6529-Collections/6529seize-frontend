@@ -69,7 +69,7 @@ const DropContentWrapper: React.FC<DropContentWrapperProps> = ({
     }, 0);
   };
   return (
-    <div className="tw-relative tw-mt-1.5">
+    <div className="tw-relative">
       <div
         ref={contentRef}
         className={`tw-overflow-y-hidden tw-transition-all tw-duration-300 ${
