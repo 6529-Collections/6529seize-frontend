@@ -49,10 +49,13 @@ export default function UserPageHeader({
   const { address } = useAccount();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
-  useEffect(
-    () => setIsMyProfile(amIUser({ profile, address })),
-    [profile, address]
-  );
+  useEffect(() => {
+    setIsMyProfile(amIUser({ 
+      profile, 
+      address,
+      connectedHandle: connectedProfile?.profile?.handle 
+    }));
+  }, [profile, address, connectedProfile?.profile?.handle]);
 
   const getCanEdit = (): boolean => {
     return !!(profile.profile?.handle && isMyProfile && !activeProfileProxy);
@@ -129,7 +132,8 @@ export default function UserPageHeader({
                 {connectedProfile?.profile?.handle &&
                   !activeProfileProxy &&
                   !isMyProfile &&
-                  profile.profile?.handle && (
+                  profile.profile?.handle &&
+                  connectedProfile.profile.handle.toLowerCase() !== profile.profile.handle.toLowerCase() && (
                     <UserFollowBtn handle={profile.profile.handle} />
                   )}
               </div>

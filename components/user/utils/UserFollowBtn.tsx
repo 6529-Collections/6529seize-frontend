@@ -15,6 +15,7 @@ import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/A
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
+import { useAccount } from "wagmi";
 
 export enum UserFollowBtnSize {
   SMALL = "SMALL",
@@ -44,8 +45,18 @@ export default function UserFollowBtn({
   };
 
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
-  const { setToast, requestAuth } = useContext(AuthContext);
+  const { setToast, requestAuth, connectedProfile } = useContext(AuthContext);
+  const { address } = useAccount();
   const [mutating, setMutating] = useState<boolean>(false);
+  
+  // Check if this is the user's own profile
+  const isOwnProfile = connectedProfile?.profile?.handle?.toLowerCase() === handle.toLowerCase();
+  
+  // Don't render the button if this is the user's own profile
+  if (isOwnProfile) {
+    return null;
+  }
+  
   const { data: subscriptions, isFetching } =
     useQuery<ApiIdentitySubscriptionActions>({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS, handle],
@@ -67,6 +78,16 @@ export default function UserFollowBtn({
 
   const followMutation = useMutation({
     mutationFn: async () => {
+      // Prevent self-following
+      if (isOwnProfile) {
+        throw new Error("You cannot follow yourself");
+      }
+      
+      // Additional check to prevent self-following
+      if (connectedProfile?.profile?.handle?.toLowerCase() === handle.toLowerCase()) {
+        throw new Error("You cannot follow yourself");
+      }
+      
       await commonApiPost<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
@@ -122,6 +143,24 @@ export default function UserFollowBtn({
   });
 
   const onFollow = async (): Promise<void> => {
+    // Prevent self-following
+    if (isOwnProfile) {
+      setToast({
+        message: "You cannot follow yourself",
+        type: "error",
+      });
+      return;
+    }
+    
+    // Additional check to prevent self-following
+    if (connectedProfile?.profile?.handle?.toLowerCase() === handle.toLowerCase()) {
+      setToast({
+        message: "You cannot follow yourself",
+        type: "error",
+      });
+      return;
+    }
+    
     setMutating(true);
     const { success } = await requestAuth();
     if (!success) {
