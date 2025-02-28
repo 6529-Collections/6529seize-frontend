@@ -10,7 +10,7 @@ interface WaveDropRatingsProps {
 
 const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-3 tw-rounded-lg tw-shadow-sm tw-bg-iron-900/20 tw-border tw-border-solid tw-border-primary-300/5">
+    <div className="tw-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-bg-iron-900/40 tw-border tw-border-solid tw-border-primary-300/5">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-items-center -tw-space-x-2">
           {drop.top_raters.map((rater) => (
@@ -29,7 +29,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
                     ImageScale.W_AUTO_H_50
                   )}
                   alt={`${rater.profile.handle}'s avatar`}
-                  className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black/50 tw-bg-iron-700"
+                  className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-black/50 tw-ring-1 tw-bg-iron-700"
                 />
               ) : (
                 <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black/50 tw-bg-iron-700" />
