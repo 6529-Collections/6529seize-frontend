@@ -1,5 +1,5 @@
-import React from 'react';
-import DropPartMarkdown, { DropPartMarkdownProps } from './DropPartMarkdown';
+import React from "react";
+import DropPartMarkdown, { DropPartMarkdownProps } from "./DropPartMarkdown";
 
 function areArraysEqual(arr1: any[], arr2: any[]): boolean {
   if (arr1.length !== arr2.length) return false;
@@ -13,13 +13,21 @@ function areArraysEqual(arr1: any[], arr2: any[]): boolean {
   return true;
 }
 
-function areEqual(prevProps: DropPartMarkdownProps, nextProps: DropPartMarkdownProps) {
-  const propsToCheck: (keyof DropPartMarkdownProps)[] = ['mentionedUsers', 'referencedNfts', 'partContent', 'textSize'];
-  
+function areEqual(
+  prevProps: DropPartMarkdownProps,
+  nextProps: DropPartMarkdownProps
+) {
+  const propsToCheck: (keyof DropPartMarkdownProps)[] = [
+    "mentionedUsers",
+    "referencedNfts",
+    "partContent",
+    "textSize",
+  ];
+
   for (const key of propsToCheck) {
     const prevValue = prevProps[key];
     const nextValue = nextProps[key];
-    
+
     if (prevValue !== nextValue) {
       if (Array.isArray(prevValue) && Array.isArray(nextValue)) {
         if (!areArraysEqual(prevValue, nextValue)) {
@@ -30,7 +38,7 @@ function areEqual(prevProps: DropPartMarkdownProps, nextProps: DropPartMarkdownP
       }
     }
   }
-  
+
   return true;
 }
 
