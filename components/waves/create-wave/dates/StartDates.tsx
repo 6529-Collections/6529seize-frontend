@@ -86,7 +86,7 @@ export default function StartDates({
         </div>
       }
     >
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2  tw-px-5 tw-pb-5 tw-pt-2">
         <div className="tw-col-span-1">
           <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
             {CREATE_WAVE_START_DATE_LABELS[waveType]}

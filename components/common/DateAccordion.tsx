@@ -26,9 +26,9 @@ export default function DateAccordion({
     >
       <div
         onClick={onToggle}
-        className="tw-px-5 tw-py-5 desktop-hover:hover:tw-bg-iron-800/50 tw-transition-colors tw-duration-200"
+        className="tw-px-5 tw-h-16 tw-cursor-pointer tw-flex tw-items-center tw-w-full desktop-hover:hover:tw-bg-iron-800/50 tw-transition-colors tw-duration-200"
       >
-        <div className="tw-flex tw-items-center tw-justify-between tw-cursor-pointer">
+        <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <motion.div
               animate={isExpanded ? { rotate: 0 } : { rotate: 180 }}
@@ -39,11 +39,10 @@ export default function DateAccordion({
                 className="tw-size-4 tw-text-primary-400"
               />
             </motion.div>
-            <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+            <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
               {title}
             </p>
           </div>
-
           {!isExpanded && collapsedContent}
         </div>
       </div>
@@ -55,7 +54,7 @@ export default function DateAccordion({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-            className="tw-overflow-hidden tw-p-5"
+            className="tw-overflow-hidden"
           >
             {children}
           </motion.div>

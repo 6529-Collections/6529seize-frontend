@@ -12,6 +12,8 @@ interface RollingEndDateProps {
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
   readonly isRollingMode: boolean;
   readonly setIsRollingMode: (isRolling: boolean) => void;
+  readonly isExpanded: boolean;
+  readonly setIsExpanded: (expanded: boolean) => void;
 }
 
 export default function RollingEndDate({
@@ -19,10 +21,11 @@ export default function RollingEndDate({
   setDates,
   isRollingMode,
   setIsRollingMode,
+  isExpanded,
+  setIsExpanded,
 }: RollingEndDateProps) {
   const [endDateHours, setEndDateHours] = useState(0);
   const [endDateMinutes, setEndDateMinutes] = useState(0);
-  const [isExpanded, setIsExpanded] = useState(true);
 
   const formatEndDateTime = () => {
     if (!dates.endDate) return null;
@@ -50,8 +53,8 @@ export default function RollingEndDate({
           <span>Rolling End Date</span>
           <CommonSwitch
             label=""
-            isOn={!isRollingMode}
-            setIsOn={(value) => setIsRollingMode(!value)}
+            isOn={isRollingMode}
+            setIsOn={setIsRollingMode}
           />
         </div>
       }
@@ -69,7 +72,7 @@ export default function RollingEndDate({
         )
       }
     >
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2  tw-px-5 tw-pb-5 tw-pt-2">
         <div className="tw-col-span-1">
           {isRollingMode && (
             <>

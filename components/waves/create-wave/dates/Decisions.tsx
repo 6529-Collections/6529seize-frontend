@@ -94,7 +94,7 @@ export default function Decisions({
         )
       }
     >
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2" onClick={onInteraction}>
+      <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2  tw-px-5 tw-pb-5 tw-pt-2" onClick={onInteraction}>
         <div className="tw-col-span-1">
           <CommonCalendar
             initialMonth={new Date().getMonth()}

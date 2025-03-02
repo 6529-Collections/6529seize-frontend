@@ -27,8 +27,14 @@ export default function CreateWaveDates({
   const [isRollingMode, setIsRollingMode] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     start: true,
-    decisions: false,
+    decisions: true,
     rolling: false
+  });
+
+  // Track which sections have been auto-collapsed already
+  const [autoCollapsedSections, setAutoCollapsedSections] = useState({
+    start: false,
+    decisions: false
   });
 
   const toggleSection = (sectionName: 'start' | 'decisions' | 'rolling') => {
@@ -36,6 +42,36 @@ export default function CreateWaveDates({
       ...prev,
       [sectionName]: !prev[sectionName]
     }));
+  };
+
+  // Handler for when user interacts with Decisions section
+  const handleDecisionsInteraction = () => {
+    // Only auto-collapse Start section if it hasn't been auto-collapsed before
+    if (!autoCollapsedSections.start) {
+      setExpandedSections(prev => ({
+        ...prev,
+        start: false
+      }));
+      setAutoCollapsedSections(prev => ({
+        ...prev,
+        start: true
+      }));
+    }
+  };
+
+  // Handler for when user interacts with Rolling End Date section
+  const handleRollingInteraction = () => {
+    // Only auto-collapse Decisions section if it hasn't been auto-collapsed before
+    if (!autoCollapsedSections.decisions) {
+      setExpandedSections(prev => ({
+        ...prev,
+        decisions: false
+      }));
+      setAutoCollapsedSections(prev => ({
+        ...prev,
+        decisions: true
+      }));
+    }
   };
 
   return (
@@ -57,14 +93,19 @@ export default function CreateWaveDates({
         setEndDateConfig={setEndDateConfig}
         isExpanded={expandedSections.decisions}
         setIsExpanded={() => toggleSection('decisions')}
-        onInteraction={() => {}}
+        onInteraction={handleDecisionsInteraction}
       />
 
       <RollingEndDate
         dates={dates}
         setDates={setDates}
         isRollingMode={isRollingMode}
-        setIsRollingMode={setIsRollingMode}
+        setIsRollingMode={(isRolling) => {
+          setIsRollingMode(isRolling);
+          handleRollingInteraction();
+        }}
+        isExpanded={expandedSections.rolling}
+        setIsExpanded={() => toggleSection('rolling')}
       />
     </div>
   );
