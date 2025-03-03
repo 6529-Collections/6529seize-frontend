@@ -112,33 +112,36 @@ export default function Decisions({
     }
   };
 
+  const renderCollapsedContent = () => {
+    // Only show collapsed content when there's an end date set
+    if (!dates.endDate) return null;
+
+    return (
+      <div className="tw-flex tw-items-center tw-bg-[#24242B] tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
+        <FontAwesomeIcon
+          icon={faCalendarPlus}
+          className="tw-mr-2 tw-size-4 tw-text-primary-400"
+        />
+        <div>
+          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
+            Decision Points
+          </p>
+          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
+            {decisionPoints.length > 0
+              ? `${decisionPoints.length + 1} points configured`
+              : "First point configured"}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <DateAccordion
       title="Decisions"
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
-      collapsedContent={
-        dates.endDate && (
-          <div className="tw-flex tw-items-center tw-bg-[#24242B] tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
-            <FontAwesomeIcon
-              icon={faCalendarPlus}
-              className="tw-mr-2 tw-size-4 tw-text-primary-400"
-            />
-            <div>
-              <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
-                Decision Points
-              </p>
-              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
-                {decisionPoints.length > 0
-                  ? `${decisionPoints.length} point${
-                      decisionPoints.length !== 1 ? "s" : ""
-                    } configured`
-                  : "No decision points"}
-              </p>
-            </div>
-          </div>
-        )
-      }
+      collapsedContent={renderCollapsedContent()}
     >
       <div
         className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2"
@@ -191,7 +194,7 @@ export default function Decisions({
                         <p className="tw-mb-0 tw-text-sm tw-font-medium">
                           <span className="tw-text-iron-400">
                             First decision point:
-                          </span>
+                          </span>{" "}
                           <span className="tw-text-iron-50">
                             {firstPointText}
                           </span>

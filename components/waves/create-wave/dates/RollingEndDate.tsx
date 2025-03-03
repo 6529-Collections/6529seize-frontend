@@ -107,7 +107,7 @@ export default function RollingEndDate({
     </div>
   );
 
-  const handleToggleRollingMode = (value: boolean) => {
+  const handleToggleSwitch = (value: boolean) => {
     setIsRollingMode(value);
     
     if (value) {
@@ -130,6 +130,7 @@ export default function RollingEndDate({
                 className="tw-relative tw-cursor-pointer"
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
+                onClick={(e) => e.stopPropagation()}
               >
                 <FontAwesomeIcon
                   icon={faInfoCircle}
@@ -142,11 +143,13 @@ export default function RollingEndDate({
                 )}
               </div>
             </div>
-            <CommonSwitch
-              label=""
-              isOn={isRollingMode}
-              setIsOn={handleToggleRollingMode}
-            />
+            <div onClick={(e) => e.stopPropagation()}>
+              <CommonSwitch
+                label=""
+                isOn={isRollingMode}
+                setIsOn={handleToggleSwitch}
+              />
+            </div>
           </div>
         }
         isExpanded={isRollingMode && isExpanded}
