@@ -4,12 +4,13 @@ import {
   faCalendarPlus,
   faTrashCan,
 } from "@fortawesome/free-regular-svg-icons";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { Period } from "../../../../helpers/Types";
 import DateAccordion from "../../../common/DateAccordion";
 import TimePicker from "../../../common/TimePicker";
-import DecisionPointDropdown from "../../../../components/waves/create-wave/dates/DecisionPointDropdown";
+import DecisionPointDropdown from "./DecisionPointDropdown";
 
 interface DecisionsProps {
   readonly dates: CreateWaveDatesConfig;
@@ -37,11 +38,11 @@ export default function Decisions({
 }: DecisionsProps) {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
-  const [additionalTime, setAdditionalTime] = useState(1);
-  const [timeframeUnit, setTimeframeUnit] = useState<Period>(Period.DAYS);
   const [decisionPoints, setDecisionPoints] = useState<
-    Array<{ time: number; period: Period }>
+    { time: number; period: Period }[]
   >([]);
+  const [additionalTime, setAdditionalTime] = useState<number>(1);
+  const [timeframeUnit, setTimeframeUnit] = useState<Period>(Period.DAYS);
 
   const formatDate = (date: Date) =>
     date.toLocaleString("en-US", {
@@ -56,40 +57,34 @@ export default function Decisions({
   const { formattedPoints, firstPointText } = useMemo(() => {
     if (!dates.endDate) return { formattedPoints: [], firstPointText: null };
 
-    const firstDate = new Date(dates.endDate);
-    firstDate.setHours(hours, minutes);
-    const firstPointText = formatDate(firstDate);
+    const endDate = new Date(dates.endDate);
+    endDate.setHours(hours);
+    endDate.setMinutes(minutes);
+    const firstPointText = formatDate(endDate);
 
-    if (!decisionPoints.length) return { formattedPoints: [], firstPointText };
+    const points = decisionPoints.map((point, index) => {
+      const { time, period } = point;
+      const pointDate = new Date(endDate);
 
-    let currentDate = firstDate;
-    const points = decisionPoints.map((point, i) => {
-      const nextDate = new Date(currentDate);
-      switch (point.period) {
-        case Period.MINUTES:
-          nextDate.setMinutes(nextDate.getMinutes() + point.time);
-          break;
+      switch (period) {
         case Period.HOURS:
-          nextDate.setHours(nextDate.getHours() + point.time);
+          pointDate.setHours(pointDate.getHours() - time);
           break;
         case Period.DAYS:
-          nextDate.setDate(nextDate.getDate() + point.time);
+          pointDate.setDate(pointDate.getDate() - time);
+          break;
+        case Period.WEEKS:
+          pointDate.setDate(pointDate.getDate() - time * 7);
           break;
         case Period.MONTHS:
-          nextDate.setMonth(nextDate.getMonth() + point.time);
+          pointDate.setMonth(pointDate.getMonth() - time);
           break;
       }
-      currentDate = nextDate;
-
-      const suffix =
-        point.time === 1
-          ? point.period.toLowerCase().slice(0, -1)
-          : point.period.toLowerCase();
 
       return {
-        index: i + 2,
-        date: formatDate(nextDate),
-        timeAdded: `${point.time} ${suffix}`,
+        index,
+        date: pointDate,
+        formattedDate: formatDate(pointDate),
       };
     });
 
@@ -124,44 +119,23 @@ export default function Decisions({
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={
         dates.endDate && (
-          <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-2 tw-justify-end">
-            {/* First decision point */}
-            <div className="tw-flex tw-items-center">
-              <div className="tw-flex tw-items-center tw-justify-center tw-w-5 tw-h-5 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-2">
-                1
-              </div>
-              <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-                {firstPointText}
+          <div className="tw-flex tw-items-center tw-bg-[#24242B] tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
+            <FontAwesomeIcon
+              icon={faCalendarPlus}
+              className="tw-mr-2 tw-size-4 tw-text-primary-400"
+            />
+            <div>
+              <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
+                Decision Points
+              </p>
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
+                {decisionPoints.length > 0
+                  ? `${decisionPoints.length} point${
+                      decisionPoints.length !== 1 ? "s" : ""
+                    } configured`
+                  : "No decision points"}
               </p>
             </div>
-
-            {/* Show up to 3 more decision points */}
-            {formattedPoints.slice(0, 3).map((point) => (
-              <div key={point.index} className="tw-flex tw-items-center">
-                <div className="tw-flex tw-items-center tw-justify-center tw-w-5 tw-h-5 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-2">
-                  {point.index}
-                </div>
-                <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-                  {point.date}
-                </p>
-              </div>
-            ))}
-
-            {/* If there are more than 4 total points, show an indicator */}
-            {formattedPoints.length > 3 && (
-              <div className="tw-flex tw-items-center">
-                <div className="tw-flex tw-items-center tw-justify-center tw-h-5 tw-px-2 tw-rounded-full tw-bg-primary-500/10 tw-text-primary-400 tw-text-xs tw-font-medium">
-                  <div className="tw-flex tw-space-x-0.5 tw-mr-1">
-                    <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-primary-400"></div>
-                    <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-primary-400"></div>
-                    <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-primary-400"></div>
-                  </div>
-                  <span className="tw-text-xs">
-                    {formattedPoints.length - 3} more
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
         )
       }
@@ -171,6 +145,9 @@ export default function Decisions({
         onClick={onInteraction}
       >
         <div className="tw-col-span-1">
+          <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
+            Set end date
+          </p>
           <CommonCalendar
             initialMonth={new Date().getMonth()}
             initialYear={new Date().getFullYear()}
@@ -184,6 +161,9 @@ export default function Decisions({
         </div>
 
         <div className="tw-col-span-1">
+          <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
+            Set end time
+          </p>
           <TimePicker
             hours={hours}
             minutes={minutes}
@@ -197,95 +177,103 @@ export default function Decisions({
         {dates.endDate && (
           <div className="tw-col-span-2">
             <div className="tw-flex tw-flex-col tw-gap-y-2">
-              <div className="tw-h-12 tw-flex tw-items-center tw-px-3 tw-bg-[#24242B] tw-rounded-lg tw-mb-2 hover:tw-bg-[#26262E] tw-transition-colors tw-duration-200">
-                <div className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
-                  1
+              {dates.endDate && (
+                <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-4 tw-mb-4">
+                  <h3 className="tw-text-iron-100 tw-text-base tw-font-medium tw-mb-3">
+                    Decision Points
+                  </h3>
+                  <div className="tw-mb-4 tw-relative">
+                    <div className="tw-flex tw-items-center tw-justify-between tw-h-12 tw-px-3 tw-bg-[#24242B] tw-rounded-lg hover:tw-bg-[#26262E] tw-transition-colors tw-duration-200">
+                      <div className="tw-flex tw-items-center">
+                        <div className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
+                          1
+                        </div>
+                        <p className="tw-mb-0 tw-text-sm tw-font-medium">
+                          <span className="tw-text-iron-400">
+                            First decision point:
+                          </span>
+                          <span className="tw-text-iron-50">
+                            {firstPointText}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {formattedPoints.map((point, index) => (
+                    <div key={index} className="tw-mb-4 tw-relative">
+                      <div className="tw-flex tw-items-center tw-justify-between tw-h-12 tw-px-3 tw-bg-[#24242B] tw-rounded-lg hover:tw-bg-[#26262E] tw-transition-colors tw-duration-200 tw-group">
+                        <div className="tw-flex tw-items-center">
+                          <div className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
+                            {index + 2}
+                          </div>
+                          <p className="tw-mb-0 tw-text-sm tw-font-medium">
+                            <span className="tw-text-iron-400">
+                              Decision point {index + 2}:
+                            </span>{" "}
+                            <span className="tw-text-iron-50">
+                              {point.formattedDate}
+                            </span>
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeletePoint(index, e)}
+                          className="tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-200 tw-bg-transparent tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-red tw-size-8 tw-rounded-full desktop-hover:hover:tw-bg-[#32323C]"
+                          aria-label="Delete decision point"
+                        >
+                          <FontAwesomeIcon
+                            icon={faTrashCan}
+                            className="tw-size-4 tw-flex-shrink-0"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="tw-flex tw-items-center tw-mb-2">
+                <div className="tw-flex tw-items-center tw-justify-center tw-size-7 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
+                  <FontAwesomeIcon
+                    icon={faCalendarPlus}
+                    className="tw-size-3.5 tw-flex-shrink-0"
+                  />
                 </div>
                 <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-                  First decision point:{" "}
-                  <span className="tw-text-iron-300 tw-font-normal">
-                    {firstPointText}
-                  </span>
+                  Add decision point
                 </p>
               </div>
 
-              {formattedPoints.map((point, index) => (
-                <div
-                  key={index}
-                  className="tw-h-12 tw-flex tw-items-center tw-justify-between tw-px-3 tw-bg-[#24242B] tw-rounded-lg tw-mb-2 tw-group hover:tw-bg-[#26262E] tw-transition-colors tw-duration-200"
-                >
-                  <div className="tw-flex tw-items-center">
-                    <div className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
-                      {point.index}
-                    </div>
-                    <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-                      Decision point {point.index}:{" "}
-                      <span className="tw-text-iron-300 tw-font-normal">
-                        {point.date}
-                      </span>
-                      <span className="tw-text-primary-400 tw-text-sm tw-ml-2">
-                        (+{point.timeAdded})
-                      </span>
-                    </p>
-                  </div>
-                  <button
-                    onClick={(e) => handleDeletePoint(index, e)}
-                    className="tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-200 tw-bg-transparent tw-border-0 tw-text-iron-400 desktop-hover:hover:tw-text-red tw-size-8 tw-rounded-full desktop-hover:hover:tw-bg-[#32323C]"
-                    aria-label="Delete decision point"
-                  >
-                    <FontAwesomeIcon
-                      icon={faTrashCan}
-                      className="tw-size-4 tw-flex-shrink-0"
+              <div className="tw-flex tw-items-center">
+                <div className="tw-flex tw-items-stretch tw-rounded-lg tw-flex-1 tw-w-full">
+                  <div className="tw-w-24 tw-bg-iron-900 tw-rounded-l-lg tw-ring-1 tw-ring-iron-700 tw-ring-inset focus-within:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                    <input
+                      type="number"
+                      min="1"
+                      value={additionalTime}
+                      onChange={(e) =>
+                        setAdditionalTime(
+                          e.target.value === ""
+                            ? 0
+                            : parseInt(e.target.value, 10)
+                        )
+                      }
+                      className="tw-w-full tw-h-full tw-px-4 tw-py-4 tw-bg-transparent tw-border-0 tw-text-primary-400 tw-font-medium tw-caret-primary-300 focus:tw-outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
                     />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Always show the "Add next decision point" section when dates.endDate exists */}
-        {dates.endDate && (
-          <div className="tw-col-span-2 tw-mt-6">
-            <div className="tw-flex tw-items-center tw-mb-4">
-              <FontAwesomeIcon
-                icon={faCalendarPlus}
-                className="tw-mr-3 tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
-              />
-              <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-                Add next decision point
-              </p>
-            </div>
-
-            <div className="tw-flex tw-items-center tw-justify-between">
-              <div className="tw-flex tw-items-stretch tw-rounded-lg tw-flex-1 tw-w-full">
-                <div className="tw-w-24 tw-bg-iron-900 tw-rounded-l-lg tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-ring-inset focus-within:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
-                  <input
-                    type="number"
-                    min="1"
-                    value={additionalTime}
-                    onChange={(e) => {
-                      const value =
-                        e.target.value === ""
-                          ? ""
-                          : parseInt(e.target.value, 10);
-                      setAdditionalTime(value as number);
-                    }}
-                    className="tw-w-full tw-h-full tw-px-4 tw-py-4 tw-bg-transparent tw-border-0 tw-text-primary-400 tw-font-medium tw-caret-primary-300 focus:tw-outline-none"
+                  </div>
+                  <DecisionPointDropdown
+                    value={timeframeUnit}
+                    onChange={(value) => setTimeframeUnit(value)}
                   />
                 </div>
-                <DecisionPointDropdown
-                  value={timeframeUnit}
-                  onChange={(value) => setTimeframeUnit(value)}
-                />
+
+                <button
+                  onClick={handleAddTimeframe}
+                  disabled={!additionalTime}
+                  className="tw-ml-3 tw-flex-shrink-0 tw-bg-primary-500 hover:tw-bg-primary-600 disabled:tw-bg-iron-700 disabled:tw-cursor-not-allowed tw-text-white tw-rounded-lg tw-px-4 tw-py-2.5 tw-text-sm tw-transition-all tw-duration-200 tw-border-0"
+                >
+                  Add
+                </button>
               </div>
-              <button
-                onClick={handleAddTimeframe}
-                disabled={!additionalTime}
-                className="tw-ml-3 tw-flex-shrink-0 tw-bg-primary-500 hover:tw-bg-primary-600 disabled:tw-bg-iron-700 disabled:tw-cursor-not-allowed tw-text-white tw-rounded-lg tw-px-4 tw-py-2.5 tw-text-sm tw-transition-all tw-duration-200 tw-border-0"
-              >
-                Add
-              </button>
             </div>
           </div>
         )}

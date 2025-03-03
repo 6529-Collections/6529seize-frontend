@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { Period } from "../../../../helpers/Types";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
@@ -27,16 +27,15 @@ export default function CreateWaveDates({
   const [isRollingMode, setIsRollingMode] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     start: true,
-    decisions: true,
-    rolling: false
+    decisions: false,
+    rolling: false,
   });
-
-  // Track which sections have been auto-collapsed already
   const [autoCollapsedSections, setAutoCollapsedSections] = useState({
     start: false,
-    decisions: false
+    decisions: false,
   });
 
+  // Toggle a section's expanded state
   const toggleSection = (sectionName: 'start' | 'decisions' | 'rolling') => {
     setExpandedSections(prev => ({
       ...prev,
