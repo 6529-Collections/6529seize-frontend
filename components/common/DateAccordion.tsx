@@ -26,7 +26,7 @@ export default function DateAccordion({
     >
       <div
         onClick={onToggle}
-        className="tw-px-5 tw-h-16 tw-cursor-pointer tw-flex tw-items-center tw-w-full desktop-hover:hover:tw-bg-iron-800/50 tw-transition-colors tw-duration-200"
+        className="tw-px-5 tw-h-16 tw-cursor-pointer tw-flex tw-items-center tw-justify-between tw-w-full desktop-hover:hover:tw-bg-iron-800/50 tw-transition-colors tw-duration-200"
       >
         <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
           <div className="tw-flex tw-items-center tw-gap-x-3">
@@ -54,7 +54,6 @@ export default function DateAccordion({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-            className="tw-overflow-hidden"
           >
             {children}
           </motion.div>

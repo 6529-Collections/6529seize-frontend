@@ -46,6 +46,66 @@ export default function RollingEndDate({
 
   const formattedEndDate = dates.endDate ? formatEndDateTime() : null;
 
+  const renderCollapsedContent = () => {
+    if (dates.endDate && isRollingMode) {
+      return (
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <div className="tw-h-4 tw-w-[1px] tw-bg-iron-700/50" />
+          <div className="tw-flex tw-items-center tw-gap-x-1.5">
+            <FontAwesomeIcon icon={faCalendarAlt} className="tw-size-4 tw-flex-shrink-0 tw-text-primary-400" />
+            <p className="tw-mb-0 tw-text-sm tw-text-iron-300">{formattedEndDate}</p>
+          </div>
+        </div>
+      )
+    }
+    
+    return (
+      <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-h-4 tw-w-[1px] tw-bg-iron-700/50" />
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-400 tw-italic">Click to set rolling end date</p>
+      </div>
+    )
+  }
+
+  const handleDateSelection = (timestamp: number) => {
+    setDates({...dates, endDate: timestamp});
+    setIsRollingMode(true);
+  }
+
+  const handleTimeChange = (h: number, m: number) => {
+    setEndDateHours(h);
+    setEndDateMinutes(m);
+    setIsRollingMode(true);
+  }
+
+  const renderExpandedContent = () => (
+    <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
+      <div className="tw-col-span-1">
+        <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">Select end date</p>
+        <div className="tw-bg-[#24242B] tw-rounded-xl tw-shadow-md tw-ring-1 tw-ring-iron-700/50 tw-p-4">
+          <CommonCalendar
+            initialMonth={new Date().getMonth()}
+            initialYear={new Date().getFullYear()}
+            selectedTimestamp={dates.endDate}
+            minTimestamp={dates.submissionStartDate}
+            maxTimestamp={null}
+            setSelectedTimestamp={handleDateSelection}
+          />
+        </div>
+      </div>
+      
+      <div className="tw-col-span-1">
+        <div className="tw-mt-9">
+          <TimePicker 
+            hours={endDateHours} 
+            minutes={endDateMinutes} 
+            onTimeChange={handleTimeChange} 
+          />
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <DateAccordion
       title={
@@ -60,52 +120,9 @@ export default function RollingEndDate({
       }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
-      collapsedContent={
-        dates.endDate && (
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            <div className="tw-h-4 tw-w-[1px] tw-bg-iron-700/50" />
-            <div className="tw-flex tw-items-center tw-gap-x-1.5">
-              <FontAwesomeIcon icon={faCalendarAlt} className="tw-size-3.5 tw-text-primary-400" />
-              <p className="tw-mb-0 tw-text-sm tw-text-iron-300">{formattedEndDate}</p>
-            </div>
-          </div>
-        )
-      }
+      collapsedContent={renderCollapsedContent()}
     >
-      <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2  tw-px-5 tw-pb-5 tw-pt-2">
-        <div className="tw-col-span-1">
-          {isRollingMode && (
-            <>
-              <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">Select end date</p>
-              <div className="tw-bg-[#24242B] tw-rounded-xl tw-shadow-md tw-ring-1 tw-ring-iron-700/50 tw-p-4">
-                <CommonCalendar
-                  initialMonth={new Date().getMonth()}
-                  initialYear={new Date().getFullYear()}
-                  selectedTimestamp={dates.endDate}
-                  minTimestamp={dates.submissionStartDate}
-                  maxTimestamp={null}
-                  setSelectedTimestamp={(timestamp) => setDates({...dates, endDate: timestamp})}
-                />
-              </div>
-            </>
-          )}
-        </div>
-        
-        <div className="tw-col-span-1">
-          {isRollingMode && (
-            <div className="tw-mt-9">
-              <TimePicker 
-                hours={endDateHours} 
-                minutes={endDateMinutes} 
-                onTimeChange={(h, m) => {
-                  setEndDateHours(h);
-                  setEndDateMinutes(m);
-                }} 
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      {renderExpandedContent()}
     </DateAccordion>
   );
 } 

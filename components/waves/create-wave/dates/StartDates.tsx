@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDay, faVoteYea } from "@fortawesome/free-solid-svg-icons";
+import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.constants";
@@ -26,7 +26,9 @@ export default function StartDates({
   isExpanded,
   setIsExpanded,
 }: StartDatesProps) {
-  const [minVotingTimestamp, setMinVotingTimestamp] = useState<number | null>(null);
+  const [minVotingTimestamp, setMinVotingTimestamp] = useState<number | null>(
+    null
+  );
   const isRankWave = waveType === ApiWaveType.Rank;
 
   useEffect(() => {
@@ -38,7 +40,9 @@ export default function StartDates({
     setDates({
       ...dates,
       submissionStartDate: adjustedTimestamp,
-      votingStartDate: isRankWave ? Math.max(dates.votingStartDate, adjustedTimestamp) : adjustedTimestamp,
+      votingStartDate: isRankWave
+        ? Math.max(dates.votingStartDate, adjustedTimestamp)
+        : adjustedTimestamp,
     });
   };
 
@@ -68,18 +72,32 @@ export default function StartDates({
       collapsedContent={
         <div className="tw-flex tw-items-center tw-space-x-6">
           <div className="tw-flex tw-items-center tw-bg-[#24242B] tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
-            <FontAwesomeIcon icon={faCalendarDay} className="tw-mr-2 tw-size-4 tw-text-primary-400" />
+            <FontAwesomeIcon
+              icon={faCalendarDays}
+              className="tw-mr-2 tw-size-4 tw-text-primary-400"
+            />
             <div>
-              <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Submission Start</p>
-              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">{submissionDateFormatted}</p>
+              <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
+                Submission Start
+              </p>
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
+                {submissionDateFormatted}
+              </p>
             </div>
           </div>
           {isRankWave && (
             <div className="tw-flex tw-items-center tw-bg-[#24242B] tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
-              <FontAwesomeIcon icon={faVoteYea} className="tw-mr-2 tw-size-4 tw-text-primary-400" />
+              <FontAwesomeIcon
+                icon={faCalendarDays}
+                className="tw-mr-2 tw-size-4 tw-text-primary-400"
+              />
               <div>
-                <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Voting Start</p>
-                <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">{votingDateFormatted}</p>
+                <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
+                  Voting Start
+                </p>
+                <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
+                  {votingDateFormatted}
+                </p>
               </div>
             </div>
           )}
@@ -123,4 +141,4 @@ export default function StartDates({
       </div>
     </DateAccordion>
   );
-} 
+}
