@@ -154,11 +154,11 @@ export default function Decisions({
           />
           {isRollingMode ? (
             <span className="tw-text-xs tw-ml-2 tw-px-2 tw-py-0.5 tw-rounded tw-bg-blue-500/20 tw-text-blue-400">
-              Rolling Mode
+              Recurring Cycles
             </span>
           ) : (
             <span className="tw-text-xs tw-ml-2 tw-px-2 tw-py-0.5 tw-rounded tw-bg-green-500/20 tw-text-green-400">
-              Standard Mode
+              Fixed Schedule
             </span>
           )}
         </div>
@@ -170,16 +170,14 @@ export default function Decisions({
       <div className="tw-px-5 tw-pt-0.5">
         <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-my-3">
           <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-            <strong>Winners Announcements are key milestones when creators are selected and showcased.</strong> 
-            These are exciting moments that participants anticipate in your wave's journey.
-            All submissions remain in the competition pool at each announcement point.
+            <strong>Winner announcements</strong> are when creators are selected and showcased. 
+            Set your first announcement date, then add additional ones if needed.
+            {dates.subsequentDecisions.length === 0 && 
+              <span className="tw-text-primary-300"> With a fixed schedule, the last announcement marks your wave's end date.</span>
+            }
           </p>
-          <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
-            <strong>Examples:</strong> Announce top 3 creators every Friday, select weekly winners on Mondays, 
-            or run a 3-week contest with winners announced each Sunday. In standard mode, your wave ends after the final announcement.
-          </p>
-          <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-primary-300/70">
-            <strong>Tip:</strong> The first announcement must occur after submission/voting begins. In standard mode, the final announcement marks the end of your wave.
+          <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400 tw-italic">
+            Examples: Weekly Friday winners, monthly selections, or quarterly showcases.
           </p>
         </div>
       </div>
@@ -212,10 +210,10 @@ export default function Decisions({
               <div className="tw-flex tw-justify-between tw-items-center">
                 <div className="tw-flex-1">
                   <h3 className="tw-text-iron-100 tw-text-base tw-font-medium tw-mb-1">
-                    Recurring Winner Announcements
+                    Repeating Announcement Cycles
                   </h3>
                   <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
-                    Enable this if you want your winner announcements to repeat in cycles until a final end date
+                    Enable to repeat this announcement pattern until your wave ends
                   </p>
                 </div>
                 <div>
@@ -230,10 +228,7 @@ export default function Decisions({
               {(dates.isRolling || isRollingMode) && (
                 <div className="tw-bg-primary-500/10 tw-rounded-lg tw-p-3 tw-mt-3">
                   <p className="tw-mb-0 tw-text-xs tw-text-iron-300">
-                    <strong>Recurring mode enabled.</strong> Your wave will repeat the same pattern of winner announcements until reaching the final end date.
-                  </p>
-                  <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-primary-300">
-                    Please set your wave's final end date in the "Wave End Date" section below.
+                    <strong>Recurring cycles enabled.</strong> Your pattern of winner announcements will repeat until your wave's end date.
                   </p>
                 </div>
               )}

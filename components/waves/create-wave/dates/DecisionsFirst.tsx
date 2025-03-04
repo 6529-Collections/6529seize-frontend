@@ -116,44 +116,55 @@ export default function DecisionsFirst({
   };
 
   return (
-    <>
-      <div className="tw-col-span-1">
-        <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-3">
-          <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-            First Winners Announcement
+    <div className="tw-col-span-2">
+      <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-3">
+        <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
+          First Winners Announcement
+        </p>
+        <TooltipIconButton 
+          icon={faInfoCircle} 
+          tooltipText="This is when you'll announce the first set of winners for your wave. It must occur after voting begins. This is when creators will find out if they've won and their work will be showcased."
+          tooltipPosition="right"
+          tooltipWidth="tw-w-72"
+        />
+      </div>
+      
+      <div className="tw-flex tw-flex-col md:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-p-3 tw-bg-iron-800/30 tw-rounded-lg md:tw-h-[390px]">
+        {/* Date selection */}
+        <div className="tw-w-full md:tw-w-[280px]">
+          <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+            Select Date:
           </p>
-          <TooltipIconButton 
-            icon={faInfoCircle} 
-            tooltipText="This is when you'll announce the first set of winners for your wave. It must occur after voting begins. This is when creators will find out if they've won and their work will be showcased."
-            tooltipPosition="right"
-            tooltipWidth="tw-w-72"
+          <CommonCalendar
+            initialMonth={new Date(selectedTimestamp).getMonth()}
+            initialYear={new Date(selectedTimestamp).getFullYear()}
+            selectedTimestamp={selectedTimestamp}
+            minTimestamp={minTimestamp}
+            maxTimestamp={null}
+            setSelectedTimestamp={handleDateSelection}
           />
         </div>
-        <CommonCalendar
-          initialMonth={new Date(selectedTimestamp).getMonth()}
-          initialYear={new Date(selectedTimestamp).getFullYear()}
-          selectedTimestamp={selectedTimestamp}
-          minTimestamp={minTimestamp}
-          maxTimestamp={null}
-          setSelectedTimestamp={handleDateSelection}
-        />
+        
+        {/* Time selection */}
+        <div className="tw-w-full md:tw-w-80 tw-flex tw-flex-col">
+          <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+            Select Time:
+          </p>
+          <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center">
+            <TimePicker
+              hours={getHours()}
+              minutes={getMinutes()}
+              onTimeChange={onTimeChange}
+              minTime={
+                // Only apply min time constraint if the selected date is the same as min timestamp date
+                minTimestamp && new Date(selectedTimestamp).toDateString() === new Date(minTimestamp).toDateString() 
+                  ? minTimeObj 
+                  : null
+              }
+            />
+          </div>
+        </div>
       </div>
-      <div className="tw-col-span-1">
-        <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-          First Winners Time
-        </p>
-        <TimePicker
-          hours={getHours()}
-          minutes={getMinutes()}
-          onTimeChange={onTimeChange}
-          minTime={
-            // Only apply min time constraint if the selected date is the same as min timestamp date
-            minTimestamp && new Date(selectedTimestamp).toDateString() === new Date(minTimestamp).toDateString() 
-              ? minTimeObj 
-              : null
-          }
-        />
-      </div>
-    </>
+    </div>
   );
 }
