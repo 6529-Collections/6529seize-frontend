@@ -15,7 +15,7 @@ export default function DecisionsFirst({
   minTimestamp,
 }: DecisionsFirstProps) {
   const [selectedTimestamp, setSelectedTimestamp] = useState(firstDecisionTime);
-  
+
   // Update local state if the prop changes
   useEffect(() => {
     setSelectedTimestamp(firstDecisionTime);
@@ -28,10 +28,12 @@ export default function DecisionsFirst({
       const date = new Date(minTimestamp);
       date.setHours(23, 59, 0, 0);
       const newTimestamp = date.getTime();
-      
+
       // Only update if it's a new day or the timestamp wasn't already set manually
-      if (firstDecisionTime === minTimestamp || 
-          new Date(firstDecisionTime).toDateString() !== date.toDateString()) {
+      if (
+        firstDecisionTime === minTimestamp ||
+        new Date(firstDecisionTime).toDateString() !== date.toDateString()
+      ) {
         setSelectedTimestamp(newTimestamp);
         setFirstDecisionTime(newTimestamp);
       }
@@ -46,20 +48,23 @@ export default function DecisionsFirst({
     return new Date(selectedTimestamp).getMinutes();
   }, [selectedTimestamp]);
 
-  const onTimeChange = useCallback((hours: number, minutes: number) => {
-    const date = new Date(selectedTimestamp);
-    date.setHours(hours, minutes, 0, 0);
-    const newTimestamp = date.getTime();
-    setSelectedTimestamp(newTimestamp);
-    setFirstDecisionTime(newTimestamp);
-  }, [selectedTimestamp, setFirstDecisionTime]);
-  
+  const onTimeChange = useCallback(
+    (hours: number, minutes: number) => {
+      const date = new Date(selectedTimestamp);
+      date.setHours(hours, minutes, 0, 0);
+      const newTimestamp = date.getTime();
+      setSelectedTimestamp(newTimestamp);
+      setFirstDecisionTime(newTimestamp);
+    },
+    [selectedTimestamp, setFirstDecisionTime]
+  );
+
   const handleDateSelection = (timestamp: number) => {
     // Preserve the time from the current selection
     const currentDate = new Date(selectedTimestamp);
     const newDate = new Date(timestamp);
     newDate.setHours(currentDate.getHours(), currentDate.getMinutes(), 0, 0);
-    
+
     const newTimestamp = newDate.getTime();
     setSelectedTimestamp(newTimestamp);
     setFirstDecisionTime(newTimestamp);
@@ -69,7 +74,7 @@ export default function DecisionsFirst({
     <>
       <div className="tw-col-span-1">
         <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-          First Decision Date
+          First Announcement Date
         </p>
         <CommonCalendar
           initialMonth={new Date(selectedTimestamp).getMonth()}
@@ -82,7 +87,7 @@ export default function DecisionsFirst({
       </div>
       <div className="tw-col-span-1">
         <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-          First Decision Time
+          First Announcement Time
         </p>
         <TimePicker
           hours={getHours()}

@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarPlus, faTrashCan } from "@fortawesome/free-regular-svg-icons";
+import {
+  faCalendarPlus,
+  faTrashCan,
+} from "@fortawesome/free-regular-svg-icons";
 import { Period } from "../../../../helpers/Types";
 import DecisionPointDropdown from "./DecisionPointDropdown";
-import { calculateDecisionTimes, formatDate } from "../services/waveDecisionService";
+import {
+  calculateDecisionTimes,
+  formatDate,
+} from "../services/waveDecisionService";
 
 interface SubsequentDecisionsProps {
   readonly firstDecisionTime: number;
@@ -42,13 +48,13 @@ export default function SubsequentDecisions({
 
   const handleAddTimeframe = () => {
     if (additionalTime <= 0) return;
-    
+
     // Convert to milliseconds
     const intervalMs = periodToMs(additionalTime, timeframeUnit);
-    
+
     // Add to the array
     setSubsequentDecisions([...subsequentDecisions, intervalMs]);
-    
+
     // Reset input
     setAdditionalTime(1);
   };
@@ -61,14 +67,17 @@ export default function SubsequentDecisions({
   };
 
   // Calculate the actual dates for display
-  const decisionDates = calculateDecisionTimes(firstDecisionTime, subsequentDecisions);
-  
+  const decisionDates = calculateDecisionTimes(
+    firstDecisionTime,
+    subsequentDecisions
+  );
+
   return (
     <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-4 tw-mb-4">
       <h3 className="tw-text-iron-100 tw-text-base tw-font-medium tw-mb-3">
-        Decision Points
+        Announcements
       </h3>
-      
+
       {/* First Decision Point (can't be deleted) */}
       <div className="tw-mb-4 tw-relative">
         <div className="tw-flex tw-items-center tw-justify-between tw-h-12 tw-px-3 tw-bg-[#24242B] tw-rounded-lg hover:tw-bg-[#26262E] tw-transition-colors tw-duration-200">
@@ -77,9 +86,7 @@ export default function SubsequentDecisions({
               1
             </div>
             <p className="tw-mb-0 tw-text-sm tw-font-medium">
-              <span className="tw-text-iron-400">
-                First decision point:
-              </span>{" "}
+              <span className="tw-text-iron-400">First decision point:</span>{" "}
               <span className="tw-text-iron-50">
                 {formatDate(firstDecisionTime)}
               </span>
@@ -87,7 +94,7 @@ export default function SubsequentDecisions({
           </div>
         </div>
       </div>
-      
+
       {/* Subsequent Decision Points */}
       {subsequentDecisions.map((_, index) => (
         <div key={index} className="tw-mb-4 tw-relative">
@@ -118,7 +125,7 @@ export default function SubsequentDecisions({
           </div>
         </div>
       ))}
-      
+
       {/* Add New Decision Point */}
       <div>
         <div className="tw-flex tw-items-center tw-mb-2">
@@ -142,9 +149,7 @@ export default function SubsequentDecisions({
                 value={additionalTime}
                 onChange={(e) =>
                   setAdditionalTime(
-                    e.target.value === ""
-                      ? 0
-                      : parseInt(e.target.value, 10)
+                    e.target.value === "" ? 0 : parseInt(e.target.value, 10)
                   )
                 }
                 className="tw-w-full tw-h-full tw-px-4 tw-py-4 tw-bg-transparent tw-border-0 tw-text-primary-400 tw-font-medium tw-caret-primary-300 focus:tw-outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"

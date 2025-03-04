@@ -81,7 +81,7 @@ export default function Decisions({
 
   return (
     <DateAccordion
-      title="Decisions"
+      title="Winner Announcements"
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={renderCollapsedContent()}

@@ -124,7 +124,7 @@ export default function StartDates({
         {isRankWave && (
           <div className="tw-col-span-1">
             <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
-              Voting start date
+              Voting Begins
             </p>
             <div className="tw-mt-2">
               <CommonCalendar

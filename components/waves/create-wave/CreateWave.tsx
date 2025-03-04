@@ -180,6 +180,7 @@ export default function CreateWave({
       picture: picture?.url ?? null,
       drop: dropRequest,
     });
+
     await addWaveMutation.mutateAsync(waveBody);
   };
 
