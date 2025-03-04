@@ -38,7 +38,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
     }
   });
   return (
-    <div className="tw-space-y-4">
+    <div className="tw-space-y-3">
       {memoizedDrops.map((drop) => (
         <WaveWinnersDrop
           key={drop.id}
