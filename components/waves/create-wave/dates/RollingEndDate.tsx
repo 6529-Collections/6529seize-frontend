@@ -68,7 +68,7 @@ export default function RollingEndDate({
           className="tw-mr-2 tw-size-4 tw-text-primary-400"
         />
         <div>
-          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Recurring Cycles End Date</p>
+          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Wave End Date</p>
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
             {formatDate(dates.endDate)}
           </p>
@@ -177,17 +177,17 @@ export default function RollingEndDate({
         title={
           <div className="tw-flex tw-items-center tw-justify-between tw-flex-1 tw-gap-x-4">
             <div className="tw-flex tw-items-center tw-gap-x-2">
-              <span>Recurring Announcements</span>
+              <span>Wave End Date</span>
               <TooltipIconButton 
                 icon={faInfoCircle} 
-                tooltipText="Without recurring cycles, your wave will end after the last announcement. When you enable recurring cycles, after reaching the last announcement, the system automatically starts a new cycle. You must set an end date to prevent the wave from running indefinitely."
+                tooltipText="Set whether your wave runs once and ends, or repeats in regular cycles. With recurring winners enabled, your wave will continue with the same announcement pattern until the final end date you select."
                 tooltipPosition="bottom"
                 tooltipWidth="tw-w-80"
               />
             </div>
             <div onClick={(e) => e.stopPropagation()}>
               <CommonSwitch
-                label="Make announcements repeat in cycles"
+                label="Enable recurring winner announcements"
                 isOn={dates.isRolling || isRollingMode}
                 setIsOn={handleToggleSwitch}
               />
@@ -206,7 +206,12 @@ export default function RollingEndDate({
         <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
           <div className="tw-col-span-1">
             <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-              Recurring Cycles End Date
+              Wave Final End Date
+            </p>
+            <p className="tw-text-xs tw-text-iron-400 tw-mb-2">
+              {isRollingMode ? 
+                "This is when your wave will permanently end, after completing all recurring winner announcements" : 
+                "In standard mode, your wave automatically ends after the final winner announcement"}
             </p>
             <CommonCalendar
               initialMonth={initialDate.getMonth()}
@@ -221,6 +226,9 @@ export default function RollingEndDate({
             <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
               End Time
             </p>
+            <p className="tw-text-xs tw-text-iron-400 tw-mb-2">
+              Set the exact time when your wave will end on the selected date
+            </p>
             <TimePicker
               hours={endDateHours}
               minutes={endDateMinutes}
@@ -228,19 +236,28 @@ export default function RollingEndDate({
             />
             
             <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-mt-4">
-              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">How Recurring Cycles Work</p>
-              <p className="tw-mb-2 tw-text-xs tw-text-iron-400">
-                <strong>Without recurring cycles:</strong> Your wave will end after the last announcement you configured.<br/><br/>
-                <strong>With recurring cycles:</strong> After the last announcement, the system automatically starts a new cycle 
-                from the first interval. This continues until the end date you set above. Without an end date, your wave would 
-                run indefinitely.
-              </p>
+              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">Wave Duration Settings</p>
+              
+              <div className="tw-flex tw-justify-between tw-items-start tw-mb-3">
+                <div className="tw-flex-1 tw-pr-2">
+                  <p className="tw-mb-2 tw-text-xs tw-font-medium tw-text-iron-300">Standard Mode (Default)</p>
+                  <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
+                    Your wave runs once and automatically ends after the final winners announcement.
+                  </p>
+                </div>
+                <div className="tw-flex-1 tw-pl-2 tw-border-l tw-border-iron-700">
+                  <p className="tw-mb-2 tw-text-xs tw-font-medium tw-text-primary-300">Recurring Mode</p>
+                  <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
+                    Your wave repeats the same pattern of winner announcements until reaching the final end date you've selected.
+                  </p>
+                </div>
+              </div>
               
               {/* Display total decisions count when end date is set */}
               {dates.endDate && (
-                <div className="tw-bg-primary-500/10 tw-rounded-lg tw-p-2 tw-mt-2">
+                <div className="tw-bg-primary-500/10 tw-rounded-lg tw-p-2 tw-mt-3">
                   <p className="tw-flex tw-items-center tw-justify-between tw-mb-0 tw-text-xs">
-                    <span className="tw-text-iron-200">Total announcements before end date:</span>
+                    <span className="tw-text-iron-200">Total winner announcements before end date:</span>
                     <span className="tw-text-primary-400 tw-font-semibold">
                       {calculateTotalDecisions()} announcements
                     </span>

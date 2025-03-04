@@ -71,10 +71,10 @@ export default function Decisions({
         />
         <div>
           <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
-            Results Announcements
+            Winners Announcements
           </p>
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
-            {totalDecisionPoints} announcement{totalDecisionPoints !== 1 ? 's' : ''} configured
+            {totalDecisionPoints} winner announcement{totalDecisionPoints !== 1 ? 's' : ''} configured
           </p>
         </div>
       </div>
@@ -85,12 +85,22 @@ export default function Decisions({
     <DateAccordion
       title={
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <span>Results Announcements</span>
+          <span>Winners Announcements</span>
           <TooltipIconButton 
             icon={faInfoCircle} 
-            tooltipText="Schedule when your wave's results will be announced. Without recurring announcements, the last announcement will be the end date of your wave."
+            tooltipText="Schedule when winners from your wave will be announced. These are key moments in your wave's lifecycle and determine when creators receive recognition. Without recurring cycles, the last announcement will mark the end of your wave."
             tooltipPosition="bottom"
+            tooltipWidth="tw-w-80"
           />
+          {isRollingMode ? (
+            <span className="tw-text-xs tw-ml-2 tw-px-2 tw-py-0.5 tw-rounded tw-bg-blue-500/20 tw-text-blue-400">
+              Rolling Mode
+            </span>
+          ) : (
+            <span className="tw-text-xs tw-ml-2 tw-px-2 tw-py-0.5 tw-rounded tw-bg-green-500/20 tw-text-green-400">
+              Standard Mode
+            </span>
+          )}
         </div>
       }
       isExpanded={isExpanded}
@@ -100,8 +110,16 @@ export default function Decisions({
       <div className="tw-px-5 tw-pt-0.5">
         <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-my-3">
           <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-            Results announcements determine when winners will be announced during your wave. 
-            In standard mode, the last announcement marks the end of your wave.
+            <strong>Winners Announcements are key milestones when creators are selected and showcased.</strong> 
+            These are exciting moments that participants anticipate in your wave's journey.
+            All submissions remain in the competition pool at each announcement point.
+          </p>
+          <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+            <strong>Examples:</strong> Announce top 3 creators every Friday, select weekly winners on Mondays, 
+            or run a 3-week contest with winners announced each Sunday. In standard mode, your wave ends after the final announcement.
+          </p>
+          <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-primary-300/70">
+            <strong>Tip:</strong> The first announcement must occur after submission/voting begins. In standard mode, the final announcement marks the end of your wave.
           </p>
         </div>
       </div>

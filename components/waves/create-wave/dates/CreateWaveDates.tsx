@@ -146,17 +146,20 @@ export default function CreateWaveDates({
         onInteraction={handleDecisionsInteraction}
       />
 
-      <RollingEndDate
-        dates={dates}
-        setDates={setDates}
-        isRollingMode={isRollingMode}
-        setIsRollingMode={(isRolling) => {
-          setIsRollingMode(isRolling);
-          handleRollingInteraction();
-        }}
-        isExpanded={expandedSections.rolling}
-        setIsExpanded={() => toggleSection('rolling')}
-      />
+      {/* Only show RollingEndDate when there are at least 2 winner announcements (first + at least 1 subsequent) */}
+      {dates.subsequentDecisions.length > 0 && (
+        <RollingEndDate
+          dates={dates}
+          setDates={setDates}
+          isRollingMode={isRollingMode}
+          setIsRollingMode={(isRolling) => {
+            setIsRollingMode(isRolling);
+            handleRollingInteraction();
+          }}
+          isExpanded={expandedSections.rolling}
+          setIsExpanded={() => toggleSection('rolling')}
+        />
+      )}
     </div>
   );
 }

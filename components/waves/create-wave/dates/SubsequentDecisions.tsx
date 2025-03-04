@@ -76,8 +76,15 @@ export default function SubsequentDecisions({
     <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-4 tw-mb-4">
       <div className="tw-flex tw-items-center tw-justify-between">
         <h3 className="tw-text-iron-100 tw-text-base tw-font-medium tw-mb-3">
-          Results Announcements
+          Winners Announcements
         </h3>
+      </div>
+
+      {/* Explanation about sequence */}
+      <div className="tw-bg-iron-900/50 tw-rounded tw-p-2.5 tw-mb-4">
+        <p className="tw-text-xs tw-text-iron-300 tw-mb-0">
+          These announcements create a sequence where winners are selected. Each date builds upon the previous one, with the schedule shown below.
+        </p>
       </div>
 
       {/* First Decision Point (can't be deleted) */}
@@ -88,7 +95,7 @@ export default function SubsequentDecisions({
               1
             </div>
             <p className="tw-mb-0 tw-text-sm tw-font-medium">
-              <span className="tw-text-iron-400">First results announcement:</span>{" "}
+              <span className="tw-text-iron-400">First winners announcement:</span>{" "}
               <span className="tw-text-iron-50">
                 {formatDate(firstDecisionTime)}
               </span>
@@ -97,8 +104,15 @@ export default function SubsequentDecisions({
         </div>
       </div>
 
+      {/* Visualization of the timeline connection */}
+      {subsequentDecisions.length > 0 && (
+        <div className="tw-ml-3 tw-mb-1 tw-flex tw-flex-col tw-items-center">
+          <div className="tw-h-6 tw-w-px tw-bg-primary-500/30"></div>
+        </div>
+      )}
+
       {/* Subsequent Decision Points */}
-      {subsequentDecisions.map((_, index) => (
+      {subsequentDecisions.map((interval, index) => (
         <div key={index} className="tw-mb-4 tw-relative">
           <div className="tw-flex tw-items-center tw-justify-between tw-h-12 tw-px-3 tw-bg-[#24242B] tw-rounded-lg hover:tw-bg-[#26262E] tw-transition-colors tw-duration-200 tw-group">
             <div className="tw-flex tw-items-center">
@@ -107,10 +121,19 @@ export default function SubsequentDecisions({
               </div>
               <p className="tw-mb-0 tw-text-sm tw-font-medium">
                 <span className="tw-text-iron-400">
-                  Results announcement {index + 2}:
+                  Winners announcement {index + 2}:
                 </span>{" "}
                 <span className="tw-text-iron-50">
                   {formatDate(decisionDates[index + 1])}
+                </span>
+                <span className="tw-text-iron-400 tw-text-xs tw-ml-2">
+                  (+{interval >= periodToMs(1, Period.WEEKS) ? 
+                      `${Math.round(interval / periodToMs(1, Period.WEEKS))} weeks` : 
+                      interval >= periodToMs(1, Period.DAYS) ? 
+                      `${Math.round(interval / periodToMs(1, Period.DAYS))} days` : 
+                      interval >= periodToMs(1, Period.HOURS) ? 
+                      `${Math.round(interval / periodToMs(1, Period.HOURS))} hours` : 
+                      `${Math.round(interval / periodToMs(1, Period.MINUTES))} minutes`} after previous)
                 </span>
               </p>
             </div>
@@ -129,7 +152,7 @@ export default function SubsequentDecisions({
       ))}
 
       {/* Add New Decision Point */}
-      <div>
+      <div className="tw-mt-6 tw-border-t tw-border-iron-700/50 tw-pt-4">
         <div className="tw-flex tw-items-center tw-mb-2">
           <div className="tw-flex tw-items-center tw-justify-center tw-size-7 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
             <FontAwesomeIcon
@@ -138,7 +161,13 @@ export default function SubsequentDecisions({
             />
           </div>
           <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-            Add another results announcement
+            Add another winners announcement
+          </p>
+        </div>
+
+        <div className="tw-ml-10 tw-mb-2">
+          <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
+            Schedule the next announcement to occur after the previous one:
           </p>
         </div>
 
@@ -155,6 +184,7 @@ export default function SubsequentDecisions({
                   )
                 }
                 className="tw-w-full tw-h-full tw-px-4 tw-py-4 tw-bg-transparent tw-border-0 tw-text-primary-400 tw-font-medium tw-caret-primary-300 focus:tw-outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
+                aria-label="Time value"
               />
             </div>
             <DecisionPointDropdown
@@ -171,6 +201,19 @@ export default function SubsequentDecisions({
             Add
           </button>
         </div>
+
+        {/* Preview next announcement if settings are valid */}
+        {subsequentDecisions.length > 0 && decisionDates.length > 1 && additionalTime > 0 && (
+          <div className="tw-mt-3 tw-ml-10 tw-bg-iron-900/70 tw-rounded tw-p-2 tw-border-l-2 tw-border-primary-500/30">
+            <p className="tw-text-xs tw-text-iron-400 tw-mb-0.5">
+              <strong>Preview:</strong> With current settings, adding the next announcement would create:
+            </p>
+            <p className="tw-text-xs tw-text-iron-300 tw-mb-0">
+              Winners Announcement #{subsequentDecisions.length + 2} on <span className="tw-text-primary-400 tw-font-medium">{formatDate(new Date(decisionDates[decisionDates.length - 1]).getTime() + periodToMs(additionalTime, timeframeUnit))}</span>
+              <span className="tw-text-iron-500"> (+{additionalTime} {timeframeUnit.toLowerCase()} after previous announcement)</span>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

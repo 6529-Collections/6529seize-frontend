@@ -120,12 +120,13 @@ export default function DecisionsFirst({
       <div className="tw-col-span-1">
         <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-3">
           <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-            First Results Announcement
+            First Winners Announcement
           </p>
           <TooltipIconButton 
             icon={faInfoCircle} 
-            tooltipText="This is the first time you'll announce results for your wave. It must occur after voting begins."
+            tooltipText="This is when you'll announce the first set of winners for your wave. It must occur after voting begins. This is when creators will find out if they've won and their work will be showcased."
             tooltipPosition="right"
+            tooltipWidth="tw-w-72"
           />
         </div>
         <CommonCalendar
@@ -139,7 +140,7 @@ export default function DecisionsFirst({
       </div>
       <div className="tw-col-span-1">
         <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-          First Results Time
+          First Winners Time
         </p>
         <TimePicker
           hours={getHours()}
