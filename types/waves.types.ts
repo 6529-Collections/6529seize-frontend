@@ -66,6 +66,9 @@ export interface CreateWaveDatesConfig {
   readonly submissionStartDate: number;
   readonly votingStartDate: number;
   readonly endDate: number | null;
+  readonly firstDecisionTime: number;
+  readonly subsequentDecisions: number[];
+  readonly isRolling: boolean;
 }
 
 export interface CreateWaveApprovalConfig {

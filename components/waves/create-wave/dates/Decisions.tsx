@@ -11,6 +11,7 @@ import { Period } from "../../../../helpers/Types";
 import DateAccordion from "../../../common/DateAccordion";
 import TimePicker from "../../../common/TimePicker";
 import DecisionPointDropdown from "./DecisionPointDropdown";
+import DecisionsFirst from "./DecisionsFirst";
 
 interface DecisionsProps {
   readonly dates: CreateWaveDatesConfig;
@@ -136,6 +137,8 @@ export default function Decisions({
     );
   };
 
+  // TODO: calculate end date based on first decision time and decision points and isRolling
+
   return (
     <DateAccordion
       title="Decisions"
@@ -147,35 +150,12 @@ export default function Decisions({
         className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2"
         onClick={onInteraction}
       >
-        <div className="tw-col-span-1">
-          <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-            Set end date
-          </p>
-          <CommonCalendar
-            initialMonth={new Date().getMonth()}
-            initialYear={new Date().getFullYear()}
-            selectedTimestamp={dates.endDate}
-            minTimestamp={dates.submissionStartDate}
-            maxTimestamp={null}
-            setSelectedTimestamp={(timestamp) =>
-              setDates({ ...dates, endDate: timestamp })
-            }
-          />
-        </div>
-
-        <div className="tw-col-span-1">
-          <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-            Set end time
-          </p>
-          <TimePicker
-            hours={hours}
-            minutes={minutes}
-            onTimeChange={(h, m) => {
-              setHours(h);
-              setMinutes(m);
-            }}
-          />
-        </div>
+        <DecisionsFirst
+          firstDecisionTime={dates.firstDecisionTime}
+          setFirstDecisionTime={(time) =>
+            setDates({ ...dates, firstDecisionTime: time })
+          }
+        />
 
         {dates.endDate && (
           <div className="tw-col-span-2">

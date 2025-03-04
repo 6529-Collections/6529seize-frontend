@@ -10,6 +10,7 @@ import { ApiWaveOutcomeType } from "../../generated/models/ApiWaveOutcomeType";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import {
   CreateWaveConfig,
+  CreateWaveDatesConfig,
   CreateWaveOutcomeType,
   CreateWaveStep,
   WaveSignatureType,
@@ -257,6 +258,33 @@ const getOutcomes = ({
   }
 };
 
+/**
+ * Calculates the end date based on the given dates configuration
+ * @param dates The CreateWaveDatesConfig object
+ * @returns The calculated end date in milliseconds
+ * @throws Error if isRolling is true and no end date is provided
+ */
+export const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
+  // If endDate is explicitly set, use it
+  if (dates.endDate) {
+    return dates.endDate;
+  }
+  
+  // If subsequentDecisions is empty, end date is firstDecisionTime
+  if (dates.subsequentDecisions.length === 0) {
+    return dates.firstDecisionTime;
+  }
+  
+  // If isRolling is false, end date is the sum of firstDecisionTime and all subsequentDecisions
+  if (!dates.isRolling) {
+    return dates.firstDecisionTime + 
+      dates.subsequentDecisions.reduce((sum, current) => sum + current, 0);
+  }
+  
+  // If isRolling is true and no endDate is set, throw an error
+  throw new Error("End date must be explicitly set when isRolling is true");
+};
+
 export const getCreateNewWaveBody = ({
   drop,
   picture,
@@ -266,6 +294,8 @@ export const getCreateNewWaveBody = ({
   readonly picture: string | null;
   readonly config: CreateWaveConfig;
 }): ApiCreateNewWave => {
+  const endDate = calculateEndDate(config.dates);
+  
   return {
     name: config.overview.name,
     description_drop: drop,
@@ -281,7 +311,7 @@ export const getCreateNewWaveBody = ({
       signature_required: getIsVotingSignatureRequired({ config }),
       period: {
         min: config.dates.votingStartDate,
-        max: config.dates.endDate,
+        max: endDate,
       },
     },
     visibility: {
@@ -305,7 +335,7 @@ export const getCreateNewWaveBody = ({
       signature_required: getIsParticipationSignatureRequired({ config }),
       period: {
         min: config.dates.submissionStartDate,
-        max: config.dates.endDate,
+        max: endDate,
       },
     },
     chat: {
@@ -322,6 +352,11 @@ export const getCreateNewWaveBody = ({
       time_lock_ms: config.approval.thresholdTimeMs,
       admin_group: {
         group_id: config.groups.admin,
+      },
+      decisions_strategy: {
+        first_decision_time: config.dates.firstDecisionTime,
+        subsequent_decisions: config.dates.subsequentDecisions,
+        is_rolling: config.dates.isRolling,
       },
     },
     outcomes: getOutcomes({ config }),

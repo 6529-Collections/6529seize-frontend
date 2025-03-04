@@ -12,6 +12,7 @@
 
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
 import { ApiWaveType } from '../models/ApiWaveType';
 import { HttpFile } from '../http/http';
 
@@ -27,6 +28,7 @@ export class ApiCreateWaveConfig {
     */
     'time_lock_ms': number | null;
     'admin_group': ApiCreateNewWaveScope | null;
+    'decisions_strategy': ApiWaveDecisionsStrategy | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -59,6 +61,12 @@ export class ApiCreateWaveConfig {
             "name": "admin_group",
             "baseName": "admin_group",
             "type": "ApiCreateNewWaveScope",
+            "format": ""
+        },
+        {
+            "name": "decisions_strategy",
+            "baseName": "decisions_strategy",
+            "type": "ApiWaveDecisionsStrategy",
             "format": ""
         }    ];
 

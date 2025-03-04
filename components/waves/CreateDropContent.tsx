@@ -317,6 +317,7 @@ const getOptimisticDrop = (
     voting: {
       authenticated_user_eligible: boolean;
       credit_type: ApiWaveCreditType;
+      period?: { min: number | null; max: number | null };
     };
     chat: { authenticated_user_eligible: boolean };
   },
@@ -355,6 +356,8 @@ const getOptimisticDrop = (
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
       voting_credit_type: wave.voting.credit_type,
+      voting_period_start: wave.voting.period?.min ?? null,
+      voting_period_end: wave.voting.period?.max ?? null,
     },
     author: {
       id: connectedProfile.profile.external_id,
