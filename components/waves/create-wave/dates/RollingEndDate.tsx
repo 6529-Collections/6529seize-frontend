@@ -6,7 +6,12 @@ import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import DateAccordion from "../../../common/DateAccordion";
 import TimePicker from "../../../common/TimePicker";
-import { calculateDecisionTimes, formatDate } from "../services/waveDecisionService";
+import { 
+  calculateDecisionTimes, 
+  calculateEndDateForCycles,
+  countTotalDecisions,
+  formatDate 
+} from "../services/waveDecisionService";
 
 interface RollingEndDateProps {
   readonly dates: CreateWaveDatesConfig;
@@ -96,6 +101,16 @@ export default function RollingEndDate({
     }
   };
   
+  // Calculate total decisions that will occur
+  const calculateTotalDecisions = () => {
+    if (!dates.endDate) return 0;
+    return countTotalDecisions(
+      dates.firstDecisionTime,
+      dates.subsequentDecisions,
+      dates.endDate
+    );
+  };
+  
   // Set up or clear rolling mode
   const handleToggleSwitch = (value: boolean) => {
     // Can't enable rolling mode without subsequent decisions
@@ -110,12 +125,17 @@ export default function RollingEndDate({
     if (value) {
       // When turning on rolling mode:
       // 1. Set isRolling flag
-      // 2. Make sure we have an end date (default to a week after last decision if none)
-      const minEndDate = calculateMinEndDate();
-      const oneWeekAfter = minEndDate + (7 * 24 * 60 * 60 * 1000);
-      const newEndDate = dates.endDate && dates.endDate > minEndDate 
+      // 2. Calculate end date for 2 complete decision cycles
+      const twoCompleteRoundsEndDate = calculateEndDateForCycles(
+        dates.firstDecisionTime, 
+        dates.subsequentDecisions,
+        2 // Two complete rounds
+      );
+      
+      // Use the calculated date or keep existing if already set and valid
+      const newEndDate = (dates.endDate && dates.endDate > calculateMinEndDate())
         ? dates.endDate 
-        : oneWeekAfter;
+        : twoCompleteRoundsEndDate;
         
       setDates({
         ...dates,
@@ -220,11 +240,23 @@ export default function RollingEndDate({
             
             <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-mt-4">
               <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">Rolling Mode Explanation</p>
-              <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+              <p className="tw-mb-2 tw-text-xs tw-text-iron-400">
                 In rolling mode, decision intervals repeat in cycles. When the last decision point is reached, 
                 the system continues from the first interval again. This creates a regular cadence of decisions 
                 that continues until the end date.
               </p>
+              
+              {/* Display total decisions count when end date is set */}
+              {dates.endDate && (
+                <div className="tw-bg-primary-500/10 tw-rounded-lg tw-p-2 tw-mt-2">
+                  <p className="tw-flex tw-items-center tw-justify-between tw-mb-0 tw-text-xs">
+                    <span className="tw-text-iron-200">Total decisions before end date:</span>
+                    <span className="tw-text-primary-400 tw-font-semibold">
+                      {calculateTotalDecisions()} decisions
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

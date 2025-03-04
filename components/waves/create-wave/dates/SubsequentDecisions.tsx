@@ -25,7 +25,6 @@ export default function SubsequentDecisions({
     const hour = 60 * minute;
     const day = 24 * hour;
     const week = 7 * day;
-    const month = 30 * day; // approximate
 
     switch (period) {
       case Period.MINUTES:
@@ -36,8 +35,6 @@ export default function SubsequentDecisions({
         return time * day;
       case Period.WEEKS:
         return time * week;
-      case Period.MONTHS:
-        return time * month;
       default:
         return 0;
     }

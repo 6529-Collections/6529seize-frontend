@@ -19,7 +19,7 @@ export default function DecisionPointDropdown({
   const [iconScope, animateIcon] = useAnimate();
 
   const options = [
-    { value: Period.MONTHS, label: 'Months' },
+    { value: Period.WEEKS, label: 'Weeks' },
     { value: Period.DAYS, label: 'Days' },
     { value: Period.HOURS, label: 'Hours' },
     { value: Period.MINUTES, label: 'Minutes' }

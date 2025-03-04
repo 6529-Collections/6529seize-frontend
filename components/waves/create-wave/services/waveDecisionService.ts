@@ -126,11 +126,8 @@ export const msToTimePeriod = (ms: number): { value: number, unit: string } => {
   const hour = 60 * minute;
   const day = 24 * hour;
   const week = 7 * day;
-  const month = 30 * day;
   
-  if (ms % month === 0 && ms >= month) {
-    return { value: ms / month, unit: 'months' };
-  } else if (ms % week === 0 && ms >= week) {
+  if (ms % week === 0 && ms >= week) {
     return { value: ms / week, unit: 'weeks' };
   } else if (ms % day === 0 && ms >= day) {
     return { value: ms / day, unit: 'days' };
@@ -139,4 +136,78 @@ export const msToTimePeriod = (ms: number): { value: number, unit: string } => {
   } else {
     return { value: ms / minute, unit: 'minutes' };
   }
+};
+
+/**
+ * Calculates the total number of decision points that will occur in rolling mode
+ * @param firstDecisionTime The timestamp of the first decision
+ * @param subsequentDecisions Array of intervals between decisions in ms
+ * @param endDate The timestamp of the end date
+ * @returns The number of decision points that will occur
+ */
+export const countTotalDecisions = (
+  firstDecisionTime: number,
+  subsequentDecisions: number[],
+  endDate: number
+): number => {
+  if (subsequentDecisions.length === 0) {
+    // If no subsequent decisions, just check if first decision is before end date
+    return firstDecisionTime <= endDate ? 1 : 0;
+  }
+
+  // Calculate the length of one complete cycle
+  const cycleLength = subsequentDecisions.reduce((sum, interval) => sum + interval, 0);
+  
+  // Remaining time after first decision until end date
+  const remainingTime = endDate - firstDecisionTime;
+  
+  if (remainingTime <= 0) {
+    // End date is before or at first decision time
+    return 0;
+  }
+
+  // Calculate how many complete cycles fit in the remaining time
+  const completeCycles = Math.floor(remainingTime / cycleLength);
+  
+  // Calculate total decisions from complete cycles
+  let totalDecisions = 1 + (completeCycles * subsequentDecisions.length); // 1 is for first decision
+  
+  // Check if there are partial cycles
+  let timeInPartialCycle = remainingTime % cycleLength;
+  let cumulativeTime = 0;
+  
+  // Count decisions in the partial cycle
+  for (const interval of subsequentDecisions) {
+    cumulativeTime += interval;
+    if (cumulativeTime <= timeInPartialCycle) {
+      totalDecisions++;
+    } else {
+      break;
+    }
+  }
+  
+  return totalDecisions;
+};
+
+/**
+ * Calculates the end date for a specified number of decision cycles
+ * @param firstDecisionTime The timestamp of the first decision
+ * @param subsequentDecisions Array of intervals between decisions in ms
+ * @param cycles Number of complete cycles to include
+ * @returns End date timestamp after the specified number of cycles
+ */
+export const calculateEndDateForCycles = (
+  firstDecisionTime: number,
+  subsequentDecisions: number[],
+  cycles: number
+): number => {
+  if (subsequentDecisions.length === 0) {
+    return firstDecisionTime; // If no subsequent decisions, end date is first decision
+  }
+  
+  // Calculate the length of one complete cycle
+  const cycleLength = subsequentDecisions.reduce((sum, interval) => sum + interval, 0);
+  
+  // Calculate end date after specified number of cycles
+  return firstDecisionTime + (cycleLength * cycles);
 };
