@@ -170,7 +170,7 @@ export const CREATE_WAVE_NONE_GROUP_LABELS: Record<
 
 export const CREATE_WAVE_START_DATE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Chat]: "Start date",
-  [ApiWaveType.Rank]: "Submissions open",
+  [ApiWaveType.Rank]: "Submission Period Starts",
   [ApiWaveType.Approve]: "Start date",
 };
 

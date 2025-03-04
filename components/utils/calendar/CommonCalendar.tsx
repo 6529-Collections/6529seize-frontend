@@ -76,7 +76,7 @@ export default function CommonCalendar({
   };
 
   return (
-    <div className="tw-mt-3 tw-py-3 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-600">
+    <div className="tw-py-3 tw-relative tw-rounded-lg tw-bg-iron-900 tw-shadow tw-ring-1 tw-ring-iron-700">
       <button
         onClick={setPreviousMonth}
         type="button"

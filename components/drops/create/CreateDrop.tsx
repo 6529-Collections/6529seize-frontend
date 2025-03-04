@@ -214,6 +214,8 @@ export default function CreateDrop({
         authenticated_user_eligible_to_chat:
           waveDetailed.chat.authenticated_user_eligible,
         voting_credit_type: waveDetailed.voting.credit_type,
+        voting_period_start: waveDetailed.voting.period?.min ?? null,
+        voting_period_end: waveDetailed.voting.period?.max ?? null,
       },
       author: {
         ...profileMin,
