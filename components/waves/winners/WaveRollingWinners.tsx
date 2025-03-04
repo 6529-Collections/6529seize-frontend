@@ -3,7 +3,6 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
-import { WaveWinnersDrop } from "./drops/WaveWinnersDrop";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
 
@@ -73,10 +72,7 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
   return (
     <div className="tw-space-y-2">
       {sortedDecisionPoints.map((point, index) => (
-        <div
-          key={point.id}
-          className="tw-bg-iron-900 tw-rounded-xl"
-        >
+        <div key={point.id} className="tw-bg-iron-900 tw-rounded-xl">
           <button
             onClick={() => toggleExpanded(point.id)}
             className="tw-w-full tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-bg-transparent tw-border-0 hover:tw-bg-iron-800/50 tw-transition-colors tw-group"
