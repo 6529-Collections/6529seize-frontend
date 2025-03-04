@@ -83,59 +83,63 @@ export default function SubsequentDecisions({
       {/* Explanation about sequence */}
       <div className="tw-bg-iron-900/50 tw-rounded tw-p-2.5 tw-mb-4">
         <p className="tw-text-xs tw-text-iron-300 tw-mb-0">
-          These announcements create a sequence where winners are selected. Each date builds upon the previous one, with the schedule shown below.
+          <span className="tw-text-primary-400 tw-font-medium">Timeline of announcements:</span> Define when winners will be selected throughout your wave. Each announcement builds on the previous one in sequence.
         </p>
       </div>
 
       {/* First Decision Point (can't be deleted) */}
-      <div className="tw-mb-4 tw-relative">
-        <div className="tw-flex tw-items-center tw-justify-between tw-h-12 tw-px-3 tw-bg-[#24242B] tw-rounded-lg hover:tw-bg-[#26262E] tw-transition-colors tw-duration-200">
+      <div className="tw-relative">
+        <div className="tw-flex tw-items-center tw-justify-between tw-h-14 tw-px-4 tw-bg-[#24242B] tw-rounded-lg tw-border-l-4 tw-border-primary-500 tw-shadow-md">
           <div className="tw-flex tw-items-center">
-            <div className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
+            <div className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-full tw-bg-primary-500 tw-text-black tw-text-xs tw-font-bold tw-mr-3">
               1
             </div>
-            <p className="tw-mb-0 tw-text-sm tw-font-medium">
-              <span className="tw-text-iron-400">First winners announcement:</span>{" "}
-              <span className="tw-text-iron-50">
+            <div>
+              <div className="tw-text-xs tw-text-primary-300 tw-font-medium tw-mb-0.5">First Winners Announcement</div>
+              <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
                 {formatDate(firstDecisionTime)}
-              </span>
-            </p>
+                <span className="tw-text-xs tw-text-iron-400 tw-ml-1">
+                  ({new Date(firstDecisionTime).toLocaleDateString(undefined, {weekday: 'long'})})
+                </span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Visualization of the timeline connection */}
       {subsequentDecisions.length > 0 && (
-        <div className="tw-ml-3 tw-mb-1 tw-flex tw-flex-col tw-items-center">
-          <div className="tw-h-6 tw-w-px tw-bg-primary-500/30"></div>
+        <div className="tw-ml-5 tw-my-1 tw-flex tw-items-center">
+          <div className="tw-h-0.5 tw-w-3 tw-bg-primary-500/30"></div>
+          <div className="tw-text-xs tw-text-iron-400 tw-px-2 tw-py-1 tw-bg-iron-900/30 tw-rounded">+{
+            subsequentDecisions[0] >= periodToMs(1, Period.WEEKS) ? 
+            `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.WEEKS))} week${Math.round(subsequentDecisions[0] / periodToMs(1, Period.WEEKS)) !== 1 ? 's' : ''}` : 
+            subsequentDecisions[0] >= periodToMs(1, Period.DAYS) ? 
+            `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.DAYS))} day${Math.round(subsequentDecisions[0] / periodToMs(1, Period.DAYS)) !== 1 ? 's' : ''}` : 
+            subsequentDecisions[0] >= periodToMs(1, Period.HOURS) ? 
+            `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.HOURS))} hour${Math.round(subsequentDecisions[0] / periodToMs(1, Period.HOURS)) !== 1 ? 's' : ''}` : 
+            `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.MINUTES))} minute${Math.round(subsequentDecisions[0] / periodToMs(1, Period.MINUTES)) !== 1 ? 's' : ''}`
+          }</div>
         </div>
       )}
 
       {/* Subsequent Decision Points */}
       {subsequentDecisions.map((interval, index) => (
-        <div key={index} className="tw-mb-4 tw-relative">
-          <div className="tw-flex tw-items-center tw-justify-between tw-h-12 tw-px-3 tw-bg-[#24242B] tw-rounded-lg hover:tw-bg-[#26262E] tw-transition-colors tw-duration-200 tw-group">
+        <div key={index} className="tw-relative">
+          <div className="tw-flex tw-items-center tw-justify-between tw-h-14 tw-px-4 tw-bg-[#24242B] tw-rounded-lg tw-border-l-4 tw-border-primary-400/70 tw-shadow-sm tw-group">
             <div className="tw-flex tw-items-center">
-              <div className="tw-flex tw-items-center tw-justify-center tw-w-6 tw-h-6 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
+              <div className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-full tw-bg-primary-400/70 tw-text-black tw-text-xs tw-font-bold tw-mr-3">
                 {index + 2}
               </div>
-              <p className="tw-mb-0 tw-text-sm tw-font-medium">
-                <span className="tw-text-iron-400">
-                  Winners announcement {index + 2}:
-                </span>{" "}
-                <span className="tw-text-iron-50">
+              <div>
+                <div className="tw-text-xs tw-text-primary-300/90 tw-font-medium tw-mb-0.5">Winners Announcement #{index + 2}</div>
+                <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
                   {formatDate(decisionDates[index + 1])}
-                </span>
-                <span className="tw-text-iron-400 tw-text-xs tw-ml-2">
-                  (+{interval >= periodToMs(1, Period.WEEKS) ? 
-                      `${Math.round(interval / periodToMs(1, Period.WEEKS))} weeks` : 
-                      interval >= periodToMs(1, Period.DAYS) ? 
-                      `${Math.round(interval / periodToMs(1, Period.DAYS))} days` : 
-                      interval >= periodToMs(1, Period.HOURS) ? 
-                      `${Math.round(interval / periodToMs(1, Period.HOURS))} hours` : 
-                      `${Math.round(interval / periodToMs(1, Period.MINUTES))} minutes`} after previous)
-                </span>
-              </p>
+                  <span className="tw-text-xs tw-text-iron-400 tw-ml-1">
+                    ({new Date(decisionDates[index + 1]).toLocaleDateString(undefined, {weekday: 'long'})})
+                  </span>
+                </p>
+              </div>
             </div>
             <button
               onClick={(e) => handleDeleteDecision(index, e)}
@@ -148,30 +152,45 @@ export default function SubsequentDecisions({
               />
             </button>
           </div>
+          
+          {/* Display connector for next item if not the last one */}
+          {index < subsequentDecisions.length - 1 && (
+            <div className="tw-ml-5 tw-my-1 tw-flex tw-items-center">
+              <div className="tw-h-0.5 tw-w-3 tw-bg-primary-400/30"></div>
+              <div className="tw-text-xs tw-text-iron-400 tw-px-2 tw-py-1 tw-bg-iron-900/30 tw-rounded">+{
+                subsequentDecisions[index + 1] >= periodToMs(1, Period.WEEKS) ? 
+                `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.WEEKS))} week${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.WEEKS)) !== 1 ? 's' : ''}` : 
+                subsequentDecisions[index + 1] >= periodToMs(1, Period.DAYS) ? 
+                `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.DAYS))} day${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.DAYS)) !== 1 ? 's' : ''}` : 
+                subsequentDecisions[index + 1] >= periodToMs(1, Period.HOURS) ? 
+                `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.HOURS))} hour${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.HOURS)) !== 1 ? 's' : ''}` : 
+                `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.MINUTES))} minute${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.MINUTES)) !== 1 ? 's' : ''}`
+              }</div>
+            </div>
+          )}
         </div>
       ))}
 
       {/* Add New Decision Point */}
-      <div className="tw-mt-6 tw-border-t tw-border-iron-700/50 tw-pt-4">
-        <div className="tw-flex tw-items-center tw-mb-2">
-          <div className="tw-flex tw-items-center tw-justify-center tw-size-7 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
+      <div className="tw-mt-6 tw-bg-iron-900/40 tw-border tw-border-iron-700/30 tw-rounded-lg tw-p-4">
+        <div className="tw-flex tw-items-center tw-mb-3">
+          <div className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
             <FontAwesomeIcon
               icon={faCalendarPlus}
-              className="tw-size-3.5 tw-flex-shrink-0"
+              className="tw-size-4 tw-flex-shrink-0"
             />
           </div>
-          <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-            Add another winners announcement
-          </p>
+          <div>
+            <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
+              Schedule Next Winners Announcement
+            </p>
+            <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
+              Define how long after the previous announcement the next one will occur
+            </p>
+          </div>
         </div>
 
-        <div className="tw-ml-10 tw-mb-2">
-          <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
-            Schedule the next announcement to occur after the previous one:
-          </p>
-        </div>
-
-        <div className="tw-flex tw-items-center">
+        <div className="tw-flex tw-items-center tw-bg-iron-950/30 tw-rounded-lg tw-p-3">
           <div className="tw-flex tw-items-stretch tw-rounded-lg tw-flex-1 tw-w-full">
             <div className="tw-w-24 tw-bg-iron-900 tw-rounded-l-lg tw-ring-1 tw-ring-iron-700 tw-ring-inset focus-within:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
               <input
@@ -198,20 +217,37 @@ export default function SubsequentDecisions({
             disabled={!additionalTime}
             className="tw-ml-3 tw-flex-shrink-0 tw-bg-primary-500 hover:tw-bg-primary-600 disabled:tw-bg-iron-700 disabled:tw-cursor-not-allowed tw-text-white tw-rounded-lg tw-px-4 tw-py-2.5 tw-text-sm tw-transition-all tw-duration-200 tw-border-0"
           >
-            Add
+            Add to Timeline
           </button>
         </div>
 
         {/* Preview next announcement if settings are valid */}
-        {subsequentDecisions.length > 0 && decisionDates.length > 1 && additionalTime > 0 && (
-          <div className="tw-mt-3 tw-ml-10 tw-bg-iron-900/70 tw-rounded tw-p-2 tw-border-l-2 tw-border-primary-500/30">
-            <p className="tw-text-xs tw-text-iron-400 tw-mb-0.5">
-              <strong>Preview:</strong> With current settings, adding the next announcement would create:
-            </p>
-            <p className="tw-text-xs tw-text-iron-300 tw-mb-0">
-              Winners Announcement #{subsequentDecisions.length + 2} on <span className="tw-text-primary-400 tw-font-medium">{formatDate(new Date(decisionDates[decisionDates.length - 1]).getTime() + periodToMs(additionalTime, timeframeUnit))}</span>
-              <span className="tw-text-iron-500"> (+{additionalTime} {timeframeUnit.toLowerCase()} after previous announcement)</span>
-            </p>
+        {additionalTime > 0 && (
+          <div className="tw-mt-4 tw-bg-primary-500/10 tw-rounded-lg tw-p-3 tw-border-l-4 tw-border-primary-500/30">
+            <div className="tw-flex tw-items-center">
+              <div className="tw-w-8 tw-h-8 tw-flex-shrink-0 tw-rounded-full tw-bg-primary-500/20 tw-flex tw-items-center tw-justify-center tw-mr-3">
+                <span className="tw-text-xs tw-font-bold tw-text-primary-400">
+                  {subsequentDecisions.length + 2}
+                </span>
+              </div>
+              <div>
+                <div className="tw-text-xs tw-text-primary-300 tw-font-medium">
+                  <span className="tw-opacity-60">Preview:</span> Next Announcement Date
+                </div>
+                <p className="tw-text-sm tw-font-medium tw-text-iron-50 tw-mb-0">
+                  {formatDate(subsequentDecisions.length > 0 
+                    ? new Date(decisionDates[decisionDates.length - 1]).getTime() + periodToMs(additionalTime, timeframeUnit)
+                    : new Date(firstDecisionTime).getTime() + periodToMs(additionalTime, timeframeUnit)
+                  )}
+                  <span className="tw-text-xs tw-text-iron-300 tw-ml-2">
+                    ({new Date(subsequentDecisions.length > 0 
+                      ? new Date(decisionDates[decisionDates.length - 1]).getTime() + periodToMs(additionalTime, timeframeUnit)
+                      : new Date(firstDecisionTime).getTime() + periodToMs(additionalTime, timeframeUnit)
+                    ).toLocaleDateString(undefined, {weekday: 'long'})})
+                  </span>
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
