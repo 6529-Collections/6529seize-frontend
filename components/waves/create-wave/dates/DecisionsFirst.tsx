@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import TimePicker from "../../../common/TimePicker";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import TooltipIconButton from "../../../common/TooltipIconButton";
 
 interface DecisionsFirstProps {
   readonly firstDecisionTime: number;
@@ -73,9 +75,16 @@ export default function DecisionsFirst({
   return (
     <>
       <div className="tw-col-span-1">
-        <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-          First Announcement Date
-        </p>
+        <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-3">
+          <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
+            First Results Announcement
+          </p>
+          <TooltipIconButton 
+            icon={faInfoCircle} 
+            tooltipText="This is the first time you'll announce results for your wave. It must occur after voting begins."
+            tooltipPosition="right"
+          />
+        </div>
         <CommonCalendar
           initialMonth={new Date(selectedTimestamp).getMonth()}
           initialYear={new Date(selectedTimestamp).getFullYear()}
@@ -87,7 +96,7 @@ export default function DecisionsFirst({
       </div>
       <div className="tw-col-span-1">
         <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-          First Announcement Time
+          First Results Time
         </p>
         <TimePicker
           hours={getHours()}

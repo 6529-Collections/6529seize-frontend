@@ -66,7 +66,7 @@ export default function StartDates({
 
   return (
     <DateAccordion
-      title="Start Dates"
+      title="Wave Timeline"
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={
@@ -78,7 +78,7 @@ export default function StartDates({
             />
             <div>
               <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
-                Submission Start
+                Drops Submission Opens
               </p>
               <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
                 {submissionDateFormatted}
@@ -93,7 +93,7 @@ export default function StartDates({
               />
               <div>
                 <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
-                  Voting Start
+                  Drops Voting Begins
                 </p>
                 <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
                   {votingDateFormatted}
@@ -124,7 +124,7 @@ export default function StartDates({
         {isRankWave && (
           <div className="tw-col-span-1">
             <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
-              Voting Begins
+              Drops Voting Begins
             </p>
             <div className="tw-mt-2">
               <CommonCalendar

@@ -74,9 +74,11 @@ export default function SubsequentDecisions({
 
   return (
     <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-4 tw-mb-4">
-      <h3 className="tw-text-iron-100 tw-text-base tw-font-medium tw-mb-3">
-        Announcements
-      </h3>
+      <div className="tw-flex tw-items-center tw-justify-between">
+        <h3 className="tw-text-iron-100 tw-text-base tw-font-medium tw-mb-3">
+          Results Announcements
+        </h3>
+      </div>
 
       {/* First Decision Point (can't be deleted) */}
       <div className="tw-mb-4 tw-relative">
@@ -86,7 +88,7 @@ export default function SubsequentDecisions({
               1
             </div>
             <p className="tw-mb-0 tw-text-sm tw-font-medium">
-              <span className="tw-text-iron-400">First decision point:</span>{" "}
+              <span className="tw-text-iron-400">First results announcement:</span>{" "}
               <span className="tw-text-iron-50">
                 {formatDate(firstDecisionTime)}
               </span>
@@ -105,7 +107,7 @@ export default function SubsequentDecisions({
               </div>
               <p className="tw-mb-0 tw-text-sm tw-font-medium">
                 <span className="tw-text-iron-400">
-                  Decision point {index + 2}:
+                  Results announcement {index + 2}:
                 </span>{" "}
                 <span className="tw-text-iron-50">
                   {formatDate(decisionDates[index + 1])}
@@ -136,7 +138,7 @@ export default function SubsequentDecisions({
             />
           </div>
           <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-            Add decision point
+            Add another results announcement
           </p>
         </div>
 

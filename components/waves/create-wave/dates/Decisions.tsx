@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarPlus } from "@fortawesome/free-regular-svg-icons";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { Period } from "../../../../helpers/Types";
 import DateAccordion from "../../../common/DateAccordion";
 import DecisionsFirst from "./DecisionsFirst";
 import SubsequentDecisions from "./SubsequentDecisions";
 import { calculateDecisionTimes, formatDate } from "../services/waveDecisionService";
+import TooltipIconButton from "../../../common/TooltipIconButton";
 
 interface DecisionsProps {
   readonly dates: CreateWaveDatesConfig;
@@ -69,10 +71,10 @@ export default function Decisions({
         />
         <div>
           <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
-            Decision Points
+            Results Announcements
           </p>
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
-            {totalDecisionPoints} point{totalDecisionPoints !== 1 ? 's' : ''} configured
+            {totalDecisionPoints} announcement{totalDecisionPoints !== 1 ? 's' : ''} configured
           </p>
         </div>
       </div>
@@ -81,13 +83,30 @@ export default function Decisions({
 
   return (
     <DateAccordion
-      title="Winner Announcements"
+      title={
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <span>Results Announcements</span>
+          <TooltipIconButton 
+            icon={faInfoCircle} 
+            tooltipText="Schedule when your wave's results will be announced. Without recurring announcements, the last announcement will be the end date of your wave."
+            tooltipPosition="bottom"
+          />
+        </div>
+      }
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={renderCollapsedContent()}
     >
+      <div className="tw-px-5 tw-pt-0.5">
+        <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-my-3">
+          <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
+            Results announcements determine when winners will be announced during your wave. 
+            In standard mode, the last announcement marks the end of your wave.
+          </p>
+        </div>
+      </div>
       <div
-        className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2"
+        className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5"
         onClick={onInteraction}
       >
         {/* First Decision Date and Time */}

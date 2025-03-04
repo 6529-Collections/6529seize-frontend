@@ -6,6 +6,7 @@ import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import DateAccordion from "../../../common/DateAccordion";
 import TimePicker from "../../../common/TimePicker";
+import TooltipIconButton from "../../../common/TooltipIconButton";
 import { 
   calculateDecisionTimes, 
   calculateEndDateForCycles,
@@ -67,7 +68,7 @@ export default function RollingEndDate({
           className="tw-mr-2 tw-size-4 tw-text-primary-400"
         />
         <div>
-          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">End Date</p>
+          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Recurring Cycles End Date</p>
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
             {formatDate(dates.endDate)}
           </p>
@@ -176,29 +177,17 @@ export default function RollingEndDate({
         title={
           <div className="tw-flex tw-items-center tw-justify-between tw-flex-1 tw-gap-x-4">
             <div className="tw-flex tw-items-center tw-gap-x-2">
-              <span>Rolling End Date</span>
-              <div 
-                className="tw-relative tw-cursor-pointer"
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <FontAwesomeIcon
-                  icon={faInfoCircle}
-                  className="tw-text-iron-400 tw-size-4"
-                />
-                {showTooltip && (
-                  <div className="tw-absolute tw-left-0 tw-top-6 tw-w-64 tw-p-3 tw-bg-iron-900 tw-text-iron-100 tw-text-xs tw-rounded-lg tw-shadow-lg tw-z-10">
-                    Rolling mode means that decisions repeat in cycles. When you reach the last decision point, 
-                    the system starts again from the first interval, continuing until the end date. 
-                    This requires at least one decision interval.
-                  </div>
-                )}
-              </div>
+              <span>Recurring Announcements</span>
+              <TooltipIconButton 
+                icon={faInfoCircle} 
+                tooltipText="Without recurring cycles, your wave will end after the last announcement. When you enable recurring cycles, after reaching the last announcement, the system automatically starts a new cycle. You must set an end date to prevent the wave from running indefinitely."
+                tooltipPosition="bottom"
+                tooltipWidth="tw-w-80"
+              />
             </div>
             <div onClick={(e) => e.stopPropagation()}>
               <CommonSwitch
-                label=""
+                label="Make announcements repeat in cycles"
                 isOn={dates.isRolling || isRollingMode}
                 setIsOn={handleToggleSwitch}
               />
@@ -217,7 +206,7 @@ export default function RollingEndDate({
         <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
           <div className="tw-col-span-1">
             <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-              Rolling End Date
+              Recurring Cycles End Date
             </p>
             <CommonCalendar
               initialMonth={initialDate.getMonth()}
@@ -239,20 +228,21 @@ export default function RollingEndDate({
             />
             
             <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-mt-4">
-              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">Rolling Mode Explanation</p>
+              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">How Recurring Cycles Work</p>
               <p className="tw-mb-2 tw-text-xs tw-text-iron-400">
-                In rolling mode, decision intervals repeat in cycles. When the last decision point is reached, 
-                the system continues from the first interval again. This creates a regular cadence of decisions 
-                that continues until the end date.
+                <strong>Without recurring cycles:</strong> Your wave will end after the last announcement you configured.<br/><br/>
+                <strong>With recurring cycles:</strong> After the last announcement, the system automatically starts a new cycle 
+                from the first interval. This continues until the end date you set above. Without an end date, your wave would 
+                run indefinitely.
               </p>
               
               {/* Display total decisions count when end date is set */}
               {dates.endDate && (
                 <div className="tw-bg-primary-500/10 tw-rounded-lg tw-p-2 tw-mt-2">
                   <p className="tw-flex tw-items-center tw-justify-between tw-mb-0 tw-text-xs">
-                    <span className="tw-text-iron-200">Total decisions before end date:</span>
+                    <span className="tw-text-iron-200">Total announcements before end date:</span>
                     <span className="tw-text-primary-400 tw-font-semibold">
-                      {calculateTotalDecisions()} decisions
+                      {calculateTotalDecisions()} announcements
                     </span>
                   </p>
                 </div>
