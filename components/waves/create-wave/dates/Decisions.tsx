@@ -7,13 +7,15 @@ import { Period } from "../../../../helpers/Types";
 import DateAccordion from "../../../common/DateAccordion";
 import DecisionsFirst from "./DecisionsFirst";
 import SubsequentDecisions from "./SubsequentDecisions";
-import { calculateDecisionTimes, formatDate } from "../services/waveDecisionService";
+import { calculateDecisionTimes, calculateEndDateForCycles, formatDate } from "../services/waveDecisionService";
 import TooltipIconButton from "../../../common/TooltipIconButton";
+import CommonSwitch from "../../../utils/switch/CommonSwitch";
 
 interface DecisionsProps {
   readonly dates: CreateWaveDatesConfig;
   readonly setDates: (dates: CreateWaveDatesConfig) => void;
   readonly isRollingMode: boolean;
+  readonly setIsRollingMode: (isRolling: boolean) => void;
   readonly endDateConfig: { time: number | null; period: Period | null };
   readonly setEndDateConfig: (config: {
     time: number | null;
@@ -28,6 +30,7 @@ export default function Decisions({
   dates,
   setDates,
   isRollingMode,
+  setIsRollingMode,
   endDateConfig,
   setEndDateConfig,
   isExpanded,
@@ -59,6 +62,63 @@ export default function Decisions({
           endDate: lastDecisionTime 
         });
       }
+    }
+  };
+
+  // Handle the recurring mode toggle
+  const handleToggleSwitch = (value: boolean) => {
+    // Can't enable rolling mode without subsequent decisions
+    if (value && dates.subsequentDecisions.length === 0) {
+      alert("You need to add at least one decision interval before enabling recurring mode");
+      return;
+    }
+    
+    // Update rolling mode state
+    setIsRollingMode(value);
+    
+    if (value) {
+      // When turning on rolling mode:
+      // 1. Set isRolling flag
+      // 2. Calculate end date for 2 complete decision cycles
+      const twoCompleteRoundsEndDate = calculateEndDateForCycles(
+        dates.firstDecisionTime, 
+        dates.subsequentDecisions,
+        2 // Two complete rounds
+      );
+      
+      // Use the calculated date or keep existing if already set and valid
+      const minEndDate = dates.subsequentDecisions.length > 0 ? 
+        calculateDecisionTimes(dates.firstDecisionTime, dates.subsequentDecisions)[dates.subsequentDecisions.length] :
+        dates.firstDecisionTime;
+        
+      const newEndDate = (dates.endDate && dates.endDate > minEndDate)
+        ? dates.endDate 
+        : twoCompleteRoundsEndDate;
+        
+      setDates({
+        ...dates,
+        isRolling: true,
+        endDate: newEndDate
+      });
+    } else {
+      // When turning off rolling mode:
+      // 1. Clear isRolling flag
+      // 2. Set end date to the last decision point
+      let newEndDate = dates.firstDecisionTime;
+      
+      if (dates.subsequentDecisions.length > 0) {
+        const decisionTimes = calculateDecisionTimes(
+          dates.firstDecisionTime, 
+          dates.subsequentDecisions
+        );
+        newEndDate = decisionTimes[decisionTimes.length - 1];
+      }
+      
+      setDates({
+        ...dates,
+        isRolling: false,
+        endDate: newEndDate
+      });
     }
   };
 
@@ -144,6 +204,42 @@ export default function Decisions({
             setSubsequentDecisions={handleUpdateSubsequentDecisions}
           />
         </div>
+        
+        {/* Recurring Mode Toggle - Only show when at least one subsequent decision exists */}
+        {dates.subsequentDecisions.length > 0 && (
+          <div className="tw-col-span-2 tw-mt-3">
+            <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-4">
+              <div className="tw-flex tw-justify-between tw-items-center">
+                <div className="tw-flex-1">
+                  <h3 className="tw-text-iron-100 tw-text-base tw-font-medium tw-mb-1">
+                    Recurring Winner Announcements
+                  </h3>
+                  <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+                    Enable this if you want your winner announcements to repeat in cycles until a final end date
+                  </p>
+                </div>
+                <div>
+                  <CommonSwitch
+                    label="Enable recurring cycles"
+                    isOn={dates.isRolling || isRollingMode}
+                    setIsOn={handleToggleSwitch}
+                  />
+                </div>
+              </div>
+              
+              {(dates.isRolling || isRollingMode) && (
+                <div className="tw-bg-primary-500/10 tw-rounded-lg tw-p-3 tw-mt-3">
+                  <p className="tw-mb-0 tw-text-xs tw-text-iron-300">
+                    <strong>Recurring mode enabled.</strong> Your wave will repeat the same pattern of winner announcements until reaching the final end date.
+                  </p>
+                  <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-primary-300">
+                    Please set your wave's final end date in the "Wave End Date" section below.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </DateAccordion>
   );
