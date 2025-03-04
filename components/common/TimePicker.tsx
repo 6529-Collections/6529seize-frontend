@@ -5,6 +5,7 @@ interface TimePickerProps {
   readonly hours: number;
   readonly minutes: number;
   readonly onTimeChange: (hours: number, minutes: number) => void;
+  readonly minTime?: { hours: number; minutes: number } | null;
 }
 
 interface TimeOption {
@@ -17,6 +18,7 @@ export default function TimePicker({
   hours,
   minutes,
   onTimeChange,
+  minTime = null,
 }: TimePickerProps) {
   const timeOptions: TimeOption[] = [
     { label: "12 AM", hours: 0, minutes: 0 },
@@ -29,11 +31,27 @@ export default function TimePicker({
     { label: "11:59 PM", hours: 23, minutes: 59 },
   ];
 
-  const toggleAmPm = () =>
-    onTimeChange(hours >= 12 ? hours - 12 : hours + 12, minutes);
+  const toggleAmPm = () => {
+    const newHours = hours >= 12 ? hours - 12 : hours + 12;
+    if (isTimeDisabled(newHours, minutes)) return;
+    onTimeChange(newHours, minutes);
+  }
+  
   const isPm = hours >= 12;
   
   const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+  
+  // Check if a time is disabled based on minTime
+  const isTimeDisabled = (h: number, m: number) => {
+    if (!minTime) return false;
+    
+    // Compare hours first
+    if (h < minTime.hours) return true;
+    // If hours are equal, compare minutes
+    if (h === minTime.hours && m < minTime.minutes) return true;
+    
+    return false;
+  };
 
   return (
     <div className="tw-py-4 tw-relative tw-rounded-xl tw-bg-[#24242B] tw-shadow-md tw-ring-1 tw-ring-iron-700/50">
@@ -62,7 +80,10 @@ export default function TimePicker({
                   const newHours = isPm ? 
                     (val === 12 ? 12 : val + 12) : 
                     (val === 12 ? 0 : val);
-                  onTimeChange(newHours, minutes);
+                  
+                  if (!isTimeDisabled(newHours, minutes)) {
+                    onTimeChange(newHours, minutes);
+                  }
                 }}
                 className="tw-w-full tw-bg-[#2A2A33] tw-border-0 tw-text-white tw-rounded-lg tw-p-2 tw-ring-1 tw-ring-iron-700/30 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
                 placeholder="HH"
@@ -78,7 +99,10 @@ export default function TimePicker({
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
                   if (isNaN(val)) return;
-                  onTimeChange(hours, val);
+                  
+                  if (!isTimeDisabled(hours, val)) {
+                    onTimeChange(hours, val);
+                  }
                 }}
                 className="tw-w-full tw-bg-[#2A2A33] tw-border-0 tw-text-white tw-rounded-lg tw-p-2 tw-ring-1 tw-ring-iron-700/30 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
                 placeholder="MM"
@@ -94,19 +118,25 @@ export default function TimePicker({
         </div>
 
         <div className="tw-grid tw-grid-cols-3 tw-gap-1.5">
-          {timeOptions.map((option) => (
-            <button
-              key={option.label}
-              onClick={() => onTimeChange(option.hours, option.minutes)}
-              className={`tw-p-1.5 tw-text-xs sm:tw-text-sm tw-rounded-lg tw-transition-all tw-duration-200 tw-border-0 tw-shadow-sm hover:tw-shadow-md hover:tw-translate-y-[-1px] ${
-                hours === option.hours && minutes === option.minutes
-                  ? "tw-bg-primary-500 hover:tw-bg-primary-600 tw-text-white tw-ring-2 tw-ring-primary-400/30"
-                  : "tw-bg-[#2A2A33] tw-text-iron-50 hover:tw-bg-[#32323C]"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
+          {timeOptions.map((option) => {
+            const disabled = isTimeDisabled(option.hours, option.minutes);
+            return (
+              <button
+                key={option.label}
+                onClick={() => !disabled && onTimeChange(option.hours, option.minutes)}
+                disabled={disabled}
+                className={`tw-p-1.5 tw-text-xs sm:tw-text-sm tw-rounded-lg tw-transition-all tw-duration-200 tw-border-0 tw-shadow-sm hover:tw-shadow-md hover:tw-translate-y-[-1px] ${
+                  hours === option.hours && minutes === option.minutes
+                    ? "tw-bg-primary-500 hover:tw-bg-primary-600 tw-text-white tw-ring-2 tw-ring-primary-400/30"
+                    : disabled
+                      ? "tw-bg-[#2A2A33] tw-text-iron-600 tw-opacity-50 tw-cursor-not-allowed"
+                      : "tw-bg-[#2A2A33] tw-text-iron-50 hover:tw-bg-[#32323C]"
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
