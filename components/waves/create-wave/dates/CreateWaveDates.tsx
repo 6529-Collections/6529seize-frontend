@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { Period } from "../../../../helpers/Types";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
@@ -6,6 +6,11 @@ import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-w
 import StartDates from "./StartDates";
 import Decisions from "./Decisions";
 import RollingEndDate from "./RollingEndDate";
+import { 
+  adjustDatesAfterSubmissionChange, 
+  calculateEndDate,
+  validateDateSequence 
+} from "../services/waveDecisionService";
 
 interface CreateWaveDatesProps {
   readonly waveType: ApiWaveType;
@@ -24,16 +29,49 @@ export default function CreateWaveDates({
   endDateConfig,
   setEndDateConfig,
 }: CreateWaveDatesProps) {
-  const [isRollingMode, setIsRollingMode] = useState(false);
+  // Initialize rolling mode from dates config
+  const [isRollingMode, setIsRollingMode] = useState(dates.isRolling);
   const [expandedSections, setExpandedSections] = useState({
     start: true,
     decisions: false,
-    rolling: false,
+    rolling: dates.isRolling, // Open rolling section if rolling is enabled
   });
   const [autoCollapsedSections, setAutoCollapsedSections] = useState({
     start: false,
     decisions: false,
   });
+  
+  // Keep local state in sync with dates prop
+  useEffect(() => {
+    setIsRollingMode(dates.isRolling);
+    if (dates.isRolling && !expandedSections.rolling) {
+      setExpandedSections(prev => ({
+        ...prev,
+        rolling: true
+      }));
+    }
+  }, [dates.isRolling]);
+  
+  // Validate dates whenever they change
+  useEffect(() => {
+    const validationErrors = validateDateSequence(dates);
+    if (validationErrors.length > 0) {
+      console.warn("Date validation errors:", validationErrors);
+      // Note: We're not setting errors state here since that would display errors
+      // before the user has finished inputting all dates
+    }
+    
+    // Ensure end date is calculated correctly for non-rolling mode
+    if (!dates.isRolling) {
+      const calculatedEndDate = calculateEndDate(dates);
+      if (calculatedEndDate !== dates.endDate) {
+        setDates({
+          ...dates,
+          endDate: calculatedEndDate
+        });
+      }
+    }
+  }, [dates.submissionStartDate, dates.votingStartDate, dates.firstDecisionTime, dates.subsequentDecisions, dates.isRolling]);
 
   // Toggle a section's expanded state
   const toggleSection = (sectionName: 'start' | 'decisions' | 'rolling') => {
@@ -72,13 +110,26 @@ export default function CreateWaveDates({
       }));
     }
   };
+  
+  // Handle date changes with proper adjustments
+  const handleDateUpdate = (newDates: CreateWaveDatesConfig) => {
+    // Ensure valid date sequence
+    if (newDates.submissionStartDate !== dates.submissionStartDate) {
+      // If submission date changed, adjust other dates if needed
+      const adjustedDates = adjustDatesAfterSubmissionChange(dates, newDates.submissionStartDate);
+      setDates(adjustedDates);
+    } else {
+      // Otherwise just update as provided
+      setDates(newDates);
+    }
+  };
 
   return (
     <div className="tw-space-y-4">
       <StartDates
         waveType={waveType}
         dates={dates}
-        setDates={setDates}
+        setDates={handleDateUpdate}
         errors={errors}
         isExpanded={expandedSections.start}
         setIsExpanded={() => toggleSection('start')}

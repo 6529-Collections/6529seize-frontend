@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
@@ -6,6 +6,7 @@ import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import DateAccordion from "../../../common/DateAccordion";
 import TimePicker from "../../../common/TimePicker";
+import { calculateDecisionTimes, formatDate } from "../services/waveDecisionService";
 
 interface RollingEndDateProps {
   readonly dates: CreateWaveDatesConfig;
@@ -24,28 +25,32 @@ export default function RollingEndDate({
   isExpanded,
   setIsExpanded,
 }: RollingEndDateProps) {
-  const [endDateHours, setEndDateHours] = useState(0);
-  const [endDateMinutes, setEndDateMinutes] = useState(0);
+  // Initialize with current end date values or defaults
+  const initialDate = dates.endDate ? new Date(dates.endDate) : new Date();
+  const [endDateHours, setEndDateHours] = useState(initialDate.getHours());
+  const [endDateMinutes, setEndDateMinutes] = useState(initialDate.getMinutes());
   const [showTooltip, setShowTooltip] = useState(false);
-
-  const formatEndDateTime = () => {
-    if (!dates.endDate) return "Not set";
-
-    const date = new Date(dates.endDate);
-    const formattedDate = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 || 12;
-    const formattedMinutes = minutes.toString().padStart(2, "0");
-
-    return `${formattedDate} at ${formattedHours}:${formattedMinutes} ${ampm}`;
+  
+  // Determine minimum allowed end date based on decisions
+  const calculateMinEndDate = (): number => {
+    // If no subsequent decisions, minimum is the first decision
+    if (dates.subsequentDecisions.length === 0) {
+      return dates.firstDecisionTime;
+    }
+    
+    // Otherwise, minimum is after at least one cycle of decisions
+    const decisionTimes = calculateDecisionTimes(dates.firstDecisionTime, dates.subsequentDecisions);
+    return decisionTimes[decisionTimes.length - 1];
   };
+  
+  // Update local state when dates change
+  useEffect(() => {
+    if (dates.endDate) {
+      const date = new Date(dates.endDate);
+      setEndDateHours(date.getHours());
+      setEndDateMinutes(date.getMinutes());
+    }
+  }, [dates.endDate]);
 
   const renderCollapsedContent = () => {
     if (!dates.endDate || !isRollingMode) return null;
@@ -59,7 +64,7 @@ export default function RollingEndDate({
         <div>
           <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">End Date</p>
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
-            {formatEndDateTime()}
+            {formatDate(dates.endDate)}
           </p>
         </div>
       </div>
@@ -70,7 +75,10 @@ export default function RollingEndDate({
     const date = new Date(timestamp);
     date.setHours(endDateHours);
     date.setMinutes(endDateMinutes);
-    setDates({ ...dates, endDate: date.getTime() });
+    setDates({ 
+      ...dates, 
+      endDate: date.getTime() 
+    });
   };
 
   const handleTimeChange = (h: number, m: number) => {
@@ -81,40 +89,63 @@ export default function RollingEndDate({
       const date = new Date(dates.endDate);
       date.setHours(h);
       date.setMinutes(m);
-      setDates({ ...dates, endDate: date.getTime() });
+      setDates({ 
+        ...dates, 
+        endDate: date.getTime() 
+      });
     }
   };
-
-  const renderExpandedContent = () => (
-    <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
-      <div className="tw-col-span-1">
-        <CommonCalendar
-          initialMonth={new Date().getMonth()}
-          initialYear={new Date().getFullYear()}
-          selectedTimestamp={dates.endDate}
-          minTimestamp={dates.submissionStartDate}
-          maxTimestamp={null}
-          setSelectedTimestamp={handleDateSelection}
-        />
-      </div>
-      <div className="tw-col-span-1">
-        <TimePicker
-          hours={endDateHours}
-          minutes={endDateMinutes}
-          onTimeChange={handleTimeChange}
-        />
-      </div>
-    </div>
-  );
-
+  
+  // Set up or clear rolling mode
   const handleToggleSwitch = (value: boolean) => {
+    // Can't enable rolling mode without subsequent decisions
+    if (value && dates.subsequentDecisions.length === 0) {
+      alert("You need to add at least one decision interval before enabling rolling mode");
+      return;
+    }
+    
+    // Update rolling mode in component and in dates config
     setIsRollingMode(value);
     
     if (value) {
-      // When turning on rolling mode, always expand the accordion
+      // When turning on rolling mode:
+      // 1. Set isRolling flag
+      // 2. Make sure we have an end date (default to a week after last decision if none)
+      const minEndDate = calculateMinEndDate();
+      const oneWeekAfter = minEndDate + (7 * 24 * 60 * 60 * 1000);
+      const newEndDate = dates.endDate && dates.endDate > minEndDate 
+        ? dates.endDate 
+        : oneWeekAfter;
+        
+      setDates({
+        ...dates,
+        isRolling: true,
+        endDate: newEndDate
+      });
+      
+      // 3. Expand the accordion
       setIsExpanded(true);
     } else {
-      // When turning off rolling mode, always collapse the accordion
+      // When turning off rolling mode:
+      // 1. Clear isRolling flag
+      // 2. Set end date to the last decision point
+      let newEndDate = dates.firstDecisionTime;
+      
+      if (dates.subsequentDecisions.length > 0) {
+        const decisionTimes = calculateDecisionTimes(
+          dates.firstDecisionTime, 
+          dates.subsequentDecisions
+        );
+        newEndDate = decisionTimes[decisionTimes.length - 1];
+      }
+      
+      setDates({
+        ...dates,
+        isRolling: false,
+        endDate: newEndDate
+      });
+      
+      // 3. Collapse the accordion
       setIsExpanded(false);
     }
   };
@@ -138,7 +169,9 @@ export default function RollingEndDate({
                 />
                 {showTooltip && (
                   <div className="tw-absolute tw-left-0 tw-top-6 tw-w-64 tw-p-3 tw-bg-iron-900 tw-text-iron-100 tw-text-xs tw-rounded-lg tw-shadow-lg tw-z-10">
-                    A rolling end date allows the wave to end based on decision points rather than a fixed date. Toggle this on to enable dynamic end date calculation.
+                    Rolling mode means that decisions repeat in cycles. When you reach the last decision point, 
+                    the system starts again from the first interval, continuing until the end date. 
+                    This requires at least one decision interval.
                   </div>
                 )}
               </div>
@@ -146,22 +179,55 @@ export default function RollingEndDate({
             <div onClick={(e) => e.stopPropagation()}>
               <CommonSwitch
                 label=""
-                isOn={isRollingMode}
+                isOn={dates.isRolling || isRollingMode}
                 setIsOn={handleToggleSwitch}
               />
             </div>
           </div>
         }
-        isExpanded={isRollingMode && isExpanded}
+        isExpanded={(dates.isRolling || isRollingMode) && isExpanded}
         onToggle={() => {
-          if (isRollingMode) {
+          if (dates.isRolling || isRollingMode) {
             setIsExpanded(!isExpanded);
           }
         }}
         collapsedContent={renderCollapsedContent()}
-        showChevron={isRollingMode}
+        showChevron={dates.isRolling || isRollingMode}
       >
-        {renderExpandedContent()}
+        <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
+          <div className="tw-col-span-1">
+            <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
+              Rolling End Date
+            </p>
+            <CommonCalendar
+              initialMonth={initialDate.getMonth()}
+              initialYear={initialDate.getFullYear()}
+              selectedTimestamp={dates.endDate ?? initialDate.getTime()}
+              minTimestamp={calculateMinEndDate()}
+              maxTimestamp={null}
+              setSelectedTimestamp={handleDateSelection}
+            />
+          </div>
+          <div className="tw-col-span-1">
+            <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
+              End Time
+            </p>
+            <TimePicker
+              hours={endDateHours}
+              minutes={endDateMinutes}
+              onTimeChange={handleTimeChange}
+            />
+            
+            <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-mt-4">
+              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">Rolling Mode Explanation</p>
+              <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
+                In rolling mode, decision intervals repeat in cycles. When the last decision point is reached, 
+                the system continues from the first interval again. This creates a regular cadence of decisions 
+                that continues until the end date.
+              </p>
+            </div>
+          </div>
+        </div>
       </DateAccordion>
     </div>
   );
