@@ -21,6 +21,23 @@ export default function DecisionsFirst({
     setSelectedTimestamp(firstDecisionTime);
   }, [firstDecisionTime]);
 
+  // Set default to 11:59 PM if minTimestamp changes
+  useEffect(() => {
+    if (minTimestamp) {
+      // Create a date from minTimestamp and set to 11:59 PM
+      const date = new Date(minTimestamp);
+      date.setHours(23, 59, 0, 0);
+      const newTimestamp = date.getTime();
+      
+      // Only update if it's a new day or the timestamp wasn't already set manually
+      if (firstDecisionTime === minTimestamp || 
+          new Date(firstDecisionTime).toDateString() !== date.toDateString()) {
+        setSelectedTimestamp(newTimestamp);
+        setFirstDecisionTime(newTimestamp);
+      }
+    }
+  }, [minTimestamp, setFirstDecisionTime, firstDecisionTime]);
+
   const getHours = useCallback(() => {
     return new Date(selectedTimestamp).getHours();
   }, [selectedTimestamp]);
