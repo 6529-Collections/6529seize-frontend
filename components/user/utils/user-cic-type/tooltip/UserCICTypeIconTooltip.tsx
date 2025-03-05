@@ -10,15 +10,15 @@ import {
   cicToType,
   formatNumberWithCommas,
 } from "../../../../../helpers/Helpers";
-import { useAccount } from "wagmi";
 import { CIC_META } from "../../user-cic-status/UserCICStatus";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 
 export default function UserCICTypeIconTooltip({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const { address } = useAccount();
+  const { address } = useSeizeConnectContext();
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
 
   const [cicType, setCicType] = useState<CICType>(

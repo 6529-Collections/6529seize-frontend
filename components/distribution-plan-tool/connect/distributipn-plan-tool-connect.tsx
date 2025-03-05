@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
 import {
   assertUnreachable,
   isEthereumAddress,
 } from "../../../helpers/AllowlistToolHelpers";
 import DistributionPlanToolNotConnected from "./distribution-plan-tool-not-connected";
 import DistributionPlanToolConnected from "./distribution-plan-tool-connected";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 enum DistributionPlanAuth {
   NOT_CONNECTED = "NOT_CONNECTED",
   CONNECTED = "CONNECTED",
 }
 export default function DistributionPlanToolConnect() {
-  const { address } = useAccount();
+  const { address } = useSeizeConnectContext();
   const [authStatus, setAuthStatus] = useState<DistributionPlanAuth>(
     DistributionPlanAuth.NOT_CONNECTED
   );

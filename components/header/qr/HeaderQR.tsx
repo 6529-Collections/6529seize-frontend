@@ -1,5 +1,9 @@
 import styles from "./HeaderQR.module.scss";
-import { faCopy, faQrcode } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCopy,
+  faExternalLink,
+  faQrcode,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -14,6 +18,7 @@ import {
 } from "../../../services/auth/auth.utils";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import Tippy from "@tippyjs/react";
+import { useElectron } from "../../../hooks/useElectron";
 
 const QRCode = require("qrcode");
 
@@ -25,6 +30,7 @@ enum Mode {
 enum SubMode {
   BROWSER,
   APP,
+  CORE,
 }
 
 export default function HeaderQR() {
@@ -63,11 +69,15 @@ function HeaderQRModal({
   const isMobile = useIsMobileDevice();
 
   const [activeTab, setActiveTab] = useState<Mode>(Mode.SHARE);
-  const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.BROWSER);
+  const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.APP);
 
   const [navigateBrowserUrl, setNavigateBrowserUrl] = useState<string>("");
   const [navigateAppUrl, setNavigateAppUrl] = useState<string>("");
-  const [shareConnectionUrl, setShareConnectionUrl] = useState<string>("");
+  const [shareConnectionAppUrl, setShareConnectionAppUrl] =
+    useState<string>("");
+  const [navigateCoreUrl, setNavigateCoreUrl] = useState<string>("");
+  const [shareConnectionCoreUrl, setShareConnectionCoreUrl] =
+    useState<string>("");
 
   const [navigateBrowserSrc, setNavigateBrowserSrc] = useState<string>("");
   const [navigateAppSrc, setNavigateAppSrc] = useState<string>("");
@@ -86,20 +96,29 @@ function HeaderQRModal({
     }
 
     const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
+    const coreScheme = process.env.CORE_SCHEME ?? "core6529";
 
     const browserUrl = `${window.location.origin}${routerPath}`;
     const appUrl = `${appScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
+    const coreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}${routerPath}`;
 
     setNavigateBrowserUrl(browserUrl);
     setNavigateAppUrl(appUrl);
+    setNavigateCoreUrl(coreUrl);
 
-    let shareConnectionUrl = "";
+    let shareConnectionAppUrl = "";
+    let shareConnectionCoreUrl = "";
+
     if (refreshToken && walletAddress) {
-      shareConnectionUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?token=${refreshToken}&address=${walletAddress}`;
+      shareConnectionAppUrl = `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?token=${refreshToken}&address=${walletAddress}`;
+      shareConnectionCoreUrl = `${coreScheme}://${DeepLinkScope.NAVIGATE}/accept-connection-sharing?token=${refreshToken}&address=${walletAddress}`;
+
       if (role) {
-        shareConnectionUrl += `&role=${role}`;
+        shareConnectionAppUrl += `&role=${role}`;
+        shareConnectionCoreUrl += `&role=${role}`;
       }
-      setShareConnectionUrl(shareConnectionUrl);
+      setShareConnectionAppUrl(shareConnectionAppUrl);
+      setShareConnectionCoreUrl(shareConnectionCoreUrl);
     } else {
       setShareConnectionSrc("");
     }
@@ -116,8 +135,8 @@ function HeaderQRModal({
       }
     );
 
-    if (shareConnectionUrl) {
-      QRCode.toDataURL(shareConnectionUrl, { width: 500, margin: 0 }).then(
+    if (shareConnectionAppUrl) {
+      QRCode.toDataURL(shareConnectionAppUrl, { width: 500, margin: 0 }).then(
         (dataUrl: string) => {
           setShareConnectionSrc(dataUrl);
         }
@@ -137,64 +156,136 @@ function HeaderQRModal({
         setNavigateBrowserSrc("");
         setNavigateAppSrc("");
         setShareConnectionSrc("");
-        setActiveTab(Mode.NAVIGATE);
-        setActiveSubTab(SubMode.BROWSER);
+        setActiveTab(Mode.SHARE);
+        setActiveSubTab(SubMode.APP);
       }, 150);
       return () => clearTimeout(timer);
     }
   }, [show]);
 
   function printImage() {
-    let url = "";
-    let src = "";
-    let alt = "";
-    if (activeTab === Mode.NAVIGATE) {
-      if (activeSubTab === SubMode.BROWSER) {
-        url = navigateBrowserUrl;
-        src = navigateBrowserSrc;
-        alt = "Browser Link - QR Code";
-      } else {
-        url = navigateAppUrl;
-        src = navigateAppSrc;
-        alt = "Mobile App Link - QR Code";
-      }
-    } else if (activeTab === Mode.SHARE) {
-      url = shareConnectionUrl;
-      src = shareConnectionSrc;
-      alt = "Share Connection - QR Code";
-    }
-
-    return (
-      <>
+    const renderQRCodeImage = (
+      src: string,
+      alt: string,
+      additionalStyle: Record<string, string> = {}
+    ) => {
+      const defaultStyle = { maxWidth: "100%", height: "auto" };
+      return (
         <Image
           src={src}
           alt={alt}
           width={1000}
           height={1000}
           className="unselectable"
-          style={{
-            maxWidth: "100%",
-            height: "auto",
-            border: "10px solid #fff",
-          }}
+          style={{ ...defaultStyle, ...additionalStyle }}
         />
-        <div className="d-flex align-items-center gap-2 mt-2">
-          <div className={styles.url}>{url}</div>
-          <Tippy
-            placement="top"
-            content={urlCopied ? "Copied!" : "Copy URL"}
-            hideOnClick={isMobile}>
-            <FontAwesomeIcon
-              icon={faCopy}
-              className={`${styles.urlCopy} ${urlCopied ? styles.copied : ""}`}
-              onClick={() => {
-                navigator.clipboard.writeText(url);
-                setUrlCopied(true);
-                setTimeout(() => setUrlCopied(false), 500);
-              }}
+      );
+    };
+
+    const renderCoreLink = (url: string) => {
+      const squareStyle = {
+        width: "100%",
+        maxWidth: "1000px",
+        aspectRatio: "1 / 1",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      };
+
+      return (
+        <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
+          <a
+            href={url}
+            className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
+            <Image
+              src="/6529Core.png"
+              alt="6529 Core"
+              width={150}
+              height={150}
+              className="unselectable"
             />
-          </Tippy>
+            <Button
+              variant="primary"
+              className="tw-flex tw-items-center tw-gap-2 tw-w-full">
+              <FontAwesomeIcon icon={faExternalLink} />
+              <div className="no-wrap">Open in 6529 Core</div>
+            </Button>
+          </a>
         </div>
+      );
+    };
+
+    let content = null;
+    let url = "";
+
+    if (activeTab === Mode.NAVIGATE) {
+      switch (activeSubTab) {
+        case SubMode.BROWSER:
+          url = navigateBrowserUrl;
+          content = renderQRCodeImage(
+            navigateBrowserSrc,
+            "Browser Link - QR Code",
+            { border: "10px solid #fff" }
+          );
+          break;
+        case SubMode.APP:
+          url = navigateAppUrl;
+          content = renderQRCodeImage(
+            navigateAppSrc,
+            "Mobile App Link - QR Code"
+          );
+          break;
+        case SubMode.CORE:
+          url = navigateCoreUrl;
+          content = renderCoreLink(navigateCoreUrl);
+          break;
+        default:
+          break;
+      }
+    } else if (activeTab === Mode.SHARE) {
+      // For SHARE mode, only APP and CORE are valid.
+      switch (activeSubTab) {
+        case SubMode.APP:
+          url = shareConnectionAppUrl;
+          content = renderQRCodeImage(
+            shareConnectionSrc,
+            "Share Connection - QR Code"
+          );
+          break;
+        case SubMode.CORE:
+          content = renderCoreLink(shareConnectionCoreUrl);
+          url = shareConnectionCoreUrl;
+          break;
+        default:
+          content = <span>Invalid submode for SHARE</span>;
+          break;
+      }
+    }
+
+    return (
+      <>
+        {content}
+        {url && (
+          <div className="d-flex align-items-center gap-2 mt-2">
+            <div className={styles.url}>{url}</div>
+            <Tippy
+              placement="top"
+              content={urlCopied ? "Copied!" : "Copy URL"}
+              hideOnClick={isMobile}>
+              <FontAwesomeIcon
+                icon={faCopy}
+                className={`${styles.urlCopy} ${
+                  urlCopied ? styles.copied : ""
+                }`}
+                onClick={() => {
+                  navigator.clipboard.writeText(url);
+                  setUrlCopied(true);
+                  setTimeout(() => setUrlCopied(false), 500);
+                }}
+              />
+            </Tippy>
+          </div>
+        )}
       </>
     );
   }
@@ -228,23 +319,25 @@ function ModalMenu({
   readonly activeSubTab: SubMode;
   readonly onTabChange: (tab: Mode, subTab: SubMode) => void;
 }) {
+  const isElectron = useElectron();
+
   return (
     <div className="pt-2 pb-3 d-flex flex-column">
       <div className="d-flex gap-2">
-        <Button
-          className={activeTab === Mode.NAVIGATE ? styles.disabledMenuBtn : ""}
-          variant={activeTab === Mode.NAVIGATE ? "light" : "outline-light"}
-          onClick={() => onTabChange(Mode.NAVIGATE, activeSubTab)}>
-          Current URL
-        </Button>
         {isShareConnection && (
           <Button
             className={activeTab === Mode.SHARE ? styles.disabledMenuBtn : ""}
             variant={activeTab === Mode.SHARE ? "light" : "outline-light"}
-            onClick={() => onTabChange(Mode.SHARE, activeSubTab)}>
+            onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}>
             Share Connection
           </Button>
         )}
+        <Button
+          className={activeTab === Mode.NAVIGATE ? styles.disabledMenuBtn : ""}
+          variant={activeTab === Mode.NAVIGATE ? "light" : "outline-light"}
+          onClick={() => onTabChange(Mode.NAVIGATE, SubMode.BROWSER)}>
+          Current URL
+        </Button>
       </div>
 
       <div className="mt-3 d-flex gap-2">
@@ -262,13 +355,33 @@ function ModalMenu({
               onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}>
               <span className="font-smaller">Mobile App</span>
             </Button>
+            {!isElectron && (
+              <Button
+                variant={
+                  activeSubTab === SubMode.CORE ? "light" : "outline-light"
+                }
+                onClick={() => onTabChange(Mode.NAVIGATE, SubMode.CORE)}>
+                <span className="font-smaller">6529 Core</span>
+              </Button>
+            )}
           </>
         ) : (
-          <Button variant="light" className="btn-block" disabled>
-            <span className="font-smaller">
-              Scan with a device that has the 6529 Mobile app installed
-            </span>
-          </Button>
+          <>
+            <Button
+              variant={activeSubTab === SubMode.APP ? "light" : "outline-light"}
+              onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}>
+              <span className="font-smaller">Mobile App</span>
+            </Button>
+            {!isElectron && (
+              <Button
+                variant={
+                  activeSubTab === SubMode.CORE ? "light" : "outline-light"
+                }
+                onClick={() => onTabChange(Mode.SHARE, SubMode.CORE)}>
+                <span className="font-smaller">6529 Core</span>
+              </Button>
+            )}
+          </>
         )}
       </div>
     </div>

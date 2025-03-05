@@ -1,16 +1,16 @@
 import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import UserPageIdentityStatementsAddButton from "../add/UserPageIdentityStatementsAddButton";
-import { useAccount } from "wagmi";
 import { createPossessionStr } from "../../../../../helpers/Helpers";
 import { AuthContext } from "../../../../auth/Auth";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 
 export default function UserPageIdentityAddStatementsHeader({
   profile,
 }: {
   readonly profile: IProfileAndConsolidations;
 }) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
 

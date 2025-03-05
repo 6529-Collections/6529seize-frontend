@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { DELEGATION_CONTRACT } from "../../constants";
 import { sepolia } from "wagmi/chains";
-import { useAccount, useEnsName } from "wagmi";
+import { useEnsName } from "wagmi";
 import {
   ANY_COLLECTION,
   GRADIENTS_COLLECTION,
@@ -20,6 +20,7 @@ import DelegationHTML from "./html/DelegationHTML";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 import { useRouter } from "next/router";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 export enum DelegationCenterSection {
   CENTER = "delegation-center",
@@ -52,9 +53,9 @@ interface Props {
 
 export default function DelegationCenterMenu(props: Readonly<Props>) {
   const router = useRouter();
-  const accountResolution = useAccount();
+  const accountResolution = useSeizeConnectContext();
   const ensResolution = useEnsName({
-    address: accountResolution.address,
+    address: accountResolution.address as `0x${string}`,
     chainId: 1,
   });
 

@@ -1,12 +1,12 @@
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { useAccount } from "wagmi";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageWaves from "./UserPageWaves";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 export default function UserPageWavesWrapper({
   profile: initialProfile,
@@ -16,7 +16,7 @@ export default function UserPageWavesWrapper({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
-  const { address } = useAccount();
+  const { address } = useSeizeConnectContext();
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
 

@@ -14,7 +14,7 @@ import {
 } from "../../services/auth/auth.utils";
 
 interface SeizeConnectContextType {
-  address: string | null;
+  address: string | undefined;
   seizeConnect: () => void;
   seizeDisconnect: () => void;
   seizeDisconnectAndLogout: (reconnect?: boolean) => void;
@@ -37,15 +37,15 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const { open } = useWeb3ModalState();
 
   const account = useAccount();
-  const [connectedAddress, setConnectedAddress] = useState<string | null>(
-    account.address ?? getWalletAddress()
+  const [connectedAddress, setConnectedAddress] = useState<string | undefined>(
+    account.address ?? getWalletAddress() ?? undefined
   );
 
   useEffect(() => {
     if (account.address && account.isConnected) {
       setConnectedAddress(account.address);
     } else {
-      setConnectedAddress(getWalletAddress());
+      setConnectedAddress(getWalletAddress() ?? undefined);
     }
   }, [account.address, account.isConnected]);
 
@@ -69,7 +69,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         });
       }
       removeAuthJwt();
-      setConnectedAddress(null);
+      setConnectedAddress(undefined);
 
       if (reconnect) {
         seizeConnect();
