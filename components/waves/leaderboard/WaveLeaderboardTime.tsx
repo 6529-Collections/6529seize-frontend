@@ -608,9 +608,14 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
               {/* Title and Date */}
               <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
-                <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-text-white/90 tw-mb-0">
-                  Next winner announcement in
-                </h2>
+                <div className="tw-flex tw-items-center">
+                  <h2 className="tw-text-sm tw-font-medium tw-text-white/90 tw-mb-0">
+                    Next winner announcement in
+                  </h2>
+                  <span className="tw-ml-2 tw-text-xs tw-font-semibold tw-text-white/80">
+                    {nextDecisionTimeLeft.days}d {nextDecisionTimeLeft.hours}h {nextDecisionTimeLeft.minutes}m
+                  </span>
+                </div>
                 <div className="tw-flex tw-items-center tw-gap-2">
                   {/* Date Badge */}
                   <span className="tw-text-xs tw-text-white/60 tw-bg-white/5 tw-rounded-md tw-px-2 tw-py-0.5">
@@ -687,56 +692,6 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
               </div>
             )}
 
-            {/* Timeline visualization - Only shown when collapsed */}
-            {!isDecisionDetailsOpen && (
-              <div className="tw-mt-3 tw-relative">
-                {/* Simple Timeline */}
-                <div className="tw-relative tw-py-2">
-                  {/* Horizontal connecting line */}
-                  <div className="tw-absolute tw-h-0.5 tw-bg-white/10 tw-top-1/2 tw-left-0 tw-right-0 tw-transform -tw-translate-y-1/2"></div>
-
-                  {/* Connected timeline points */}
-                  {upcomingDecisions.map((decision, index) => (
-                    <div
-                      key={decision.id}
-                      className="tw-absolute tw-transform -tw-translate-y-1/2 tw-flex tw-flex-col tw-items-center"
-                      style={{
-                        left: `${Math.min(
-                          (100 * (index + 1)) / (upcomingDecisions.length + 1),
-                          100
-                        )}%`,
-                        top: "50%",
-                      }}
-                    >
-                      {/* Dot - Blue for next, white for others, no animation */}
-                      {index === 0 ? (
-                        <div className="tw-relative tw-flex tw-h-3 tw-w-3">
-                          <span className="tw-relative tw-inline-flex tw-rounded-full tw-h-3 tw-w-3 tw-bg-primary-500"></span>
-                        </div>
-                      ) : (
-                        <div className="tw-size-2.5 tw-rounded-full tw-bg-white/20"></div>
-                      )}
-                    </div>
-                  ))}
-
-                  {/* Rolling wave indicator */}
-                  {isRollingWave && (
-                    <div
-                      className="tw-absolute tw-transform -tw-translate-y-1/2 tw-flex tw-items-center tw-justify-center"
-                      style={{
-                        right: "-4px",
-                        top: "50%",
-                      }}
-                    >
-                      <FontAwesomeIcon
-                        icon={faRepeat}
-                        className="tw-text-white/30 tw-text-sm tw-size-4"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Expanded Section */}
             {isDecisionDetailsOpen && (
