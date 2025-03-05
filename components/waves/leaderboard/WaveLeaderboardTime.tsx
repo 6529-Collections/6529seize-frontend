@@ -612,9 +612,11 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                   <h2 className="tw-text-sm tw-font-medium tw-text-white/90 tw-mb-0">
                     Next winner announcement in
                   </h2>
-                  <span className="tw-ml-2 tw-text-xs tw-font-semibold tw-text-white/80">
-                    {nextDecisionTimeLeft.days}d {nextDecisionTimeLeft.hours}h {nextDecisionTimeLeft.minutes}m
-                  </span>
+                  {!isDecisionDetailsOpen && (
+                    <span className="tw-ml-2 tw-text-xs tw-font-semibold tw-text-white/80">
+                      {nextDecisionTimeLeft.days}<span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">DAYS</span> {nextDecisionTimeLeft.hours}<span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">HOURS</span> {nextDecisionTimeLeft.minutes}<span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">MIN</span>
+                    </span>
+                  )}
                 </div>
                 <div className="tw-flex tw-items-center tw-gap-2">
                   {/* Date Badge */}
@@ -648,7 +650,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
             {/* Time boxes - Shown when section is expanded */}
             {isDecisionDetailsOpen && (
-              <div className="tw-flex tw-items-center tw-gap-1.5 tw-mt-2.5">
+              <div className="tw-flex tw-items-center tw-gap-1.5 tw-mt-4">
                 <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
                   <div className="tw-flex tw-justify-center tw-items-baseline">
                     <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
@@ -692,18 +694,13 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
               </div>
             )}
 
-
             {/* Expanded Section */}
             {isDecisionDetailsOpen && (
-              <div className="tw-mt-4 tw-pt-4 tw-border-t tw-border-white/10 tw-border-solid tw-border-x-0 tw-border-b-0">
+              <div className="tw-mt-4">
                 {/* Wave End Date moved to bottom as requested */}
 
                 {/* Detailed Horizontal Timeline */}
                 <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-white/10">
-                  <h3 className="tw-text-sm tw-font-medium tw-text-white/90 tw-mb-3">
-                    Upcoming Winner Announcements
-                  </h3>
-
                   {/* Vertical Timeline */}
                   <div className="tw-relative tw-py-2">
                     {/* Timeline Structure */}
@@ -737,7 +734,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                             </div>
 
                             {/* Content */}
-                            <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
+                            <div className="tw-flex tw-justify-between tw-items-center tw-w-full tw-mt-0.5">
                               <div>
                                 <p
                                   className={`tw-text-xs tw-font-medium ${
@@ -784,42 +781,6 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                         ))}
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {/* Wave End Date - Moved to bottom as requested */}
-                <div className="tw-mt-3 tw-py-2 tw-px-3 tw-bg-white/5 tw-rounded-md">
-                  <div className="tw-flex tw-items-center tw-justify-between">
-                    <div className="tw-flex tw-items-center tw-gap-1.5">
-                      <FontAwesomeIcon
-                        icon={faClock}
-                        className="tw-text-white/40 tw-text-xs tw-size-4"
-                      />
-                      <span className="tw-text-xs tw-text-white/60">
-                        Wave continues until{" "}
-                        {new Date(votingPeriodMax).toLocaleDateString(
-                          undefined,
-                          {
-                            month: "long",
-                            day: "numeric",
-                            year: "numeric",
-                          }
-                        )}
-                      </span>
-                    </div>
-
-                    {/* Small recurring indicator for rolling waves */}
-                    {isRollingWave && (
-                      <div className="tw-flex tw-items-center tw-gap-1">
-                        <FontAwesomeIcon
-                          icon={faRepeat}
-                          className="tw-text-white/40 tw-text-xs"
-                        />
-                        <span className="tw-text-xs tw-text-white/60">
-                          Recurring
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
