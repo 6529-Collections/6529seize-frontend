@@ -1,7 +1,8 @@
+import React, { useMemo, useEffect } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { TabToggle } from "../../common/TabToggle";
+import { TabToggleWithOverflow } from "../../common/TabToggleWithOverflow";
 import WaveHeader, {
   WaveHeaderPinnedSide,
 } from "../../waves/header/WaveHeader";
@@ -23,6 +24,11 @@ interface WaveContentProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
+interface TabOption {
+  key: SidebarTab;
+  label: string;
+}
+
 export const WaveContent: React.FC<WaveContentProps> = ({
   wave,
   mode,
@@ -35,18 +41,43 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
 
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
-  const { votingState } = useWaveState(wave);
-  const hasVotingEnded = votingState === WaveVotingState.ENDED;
+  const { hasFirstDecisionPassed, votingState } = useWaveState(wave);
+  
+  // Handle tab validity when wave state changes
+  useEffect(() => {
+    // If on Leaderboard tab and voting has ended, switch to About
+    if (activeTab === SidebarTab.LEADERBOARD && votingState === WaveVotingState.ENDED) {
+      setActiveTab(SidebarTab.ABOUT);
+    }
+    // If on Winners tab and first decision hasn't passed, switch to About
+    else if (activeTab === SidebarTab.WINNERS && !hasFirstDecisionPassed) {
+      setActiveTab(SidebarTab.ABOUT);
+    }
+  }, [votingState, hasFirstDecisionPassed, activeTab, setActiveTab]);
 
-  const options = [
-    { key: SidebarTab.ABOUT, label: "About" },
-    {
-      key: SidebarTab.LEADERBOARD,
-      label: hasVotingEnded ? "Winners" : "Leaderboard",
-    },
-    { key: SidebarTab.TOP_VOTERS, label: "Voters" },
-    { key: SidebarTab.ACTIVITY_LOG, label: "Activity" },
-  ] as const;
+  // Generate tab options based on wave state
+  const options = useMemo(() => {
+    const tabs: TabOption[] = [
+      { key: SidebarTab.ABOUT, label: "About" },
+    ];
+    
+    // Show Leaderboard tab always except when voting has ended
+    if (votingState !== WaveVotingState.ENDED) {
+      tabs.push({ key: SidebarTab.LEADERBOARD, label: "Leaderboard" });
+    }
+    
+    // Show Winners tab if first decision has passed
+    if (hasFirstDecisionPassed) {
+      tabs.push({ key: SidebarTab.WINNERS, label: "Winners" });
+    }
+    
+    tabs.push(
+      { key: SidebarTab.TOP_VOTERS, label: "Voters" },
+      { key: SidebarTab.ACTIVITY_LOG, label: "Activity" }
+    );
+    
+    return tabs;
+  }, [hasFirstDecisionPassed, votingState]);
 
   const rankWaveComponents: Record<SidebarTab, JSX.Element> = {
     [SidebarTab.ABOUT]: (
@@ -70,11 +101,12 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ),
     [SidebarTab.LEADERBOARD]: (
       <div>
-        {hasVotingEnded ? (
-          <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
-        ) : (
-          <WaveSmallLeaderboard wave={wave} onDropClick={onDropClick} />
-        )}
+        <WaveSmallLeaderboard wave={wave} onDropClick={onDropClick} />
+      </div>
+    ),
+    [SidebarTab.WINNERS]: (
+      <div>
+        <WaveWinnersSmall wave={wave} onDropClick={onDropClick} />
       </div>
     ),
     [SidebarTab.TOP_VOTERS]: (
@@ -116,11 +148,12 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <>
-      <div className="tw-px-4 tw-mt-4">
-        <TabToggle
+      <div className="tw-px-3 tw-mt-4 tw-mb-2">
+        <TabToggleWithOverflow
           options={options}
           activeKey={activeTab}
           onSelect={(key) => setActiveTab(key as SidebarTab)}
+          maxVisibleTabs={3} // Show 3 tabs before overflow
         />
       </div>
       <div>{rankWaveComponents[activeTab]}</div>

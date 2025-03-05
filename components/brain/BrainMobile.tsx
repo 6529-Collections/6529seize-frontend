@@ -14,12 +14,14 @@ import { useWaveData } from "../../hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
 import Notifications from "./notifications/Notifications";
+import { WaveWinners } from "../waves/winners/WaveWinners";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
   WAVES = "WAVES",
   ABOUT = "ABOUT",
   LEADERBOARD = "LEADERBOARD",
+  WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
   NOTIFICATIONS = "NOTIFICATIONS",
 }
@@ -42,6 +44,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   });
 
   const { data: wave } = useWaveData(router.query.wave as string);
+  
+  const { votingState, hasFirstDecisionPassed } = useWaveState(wave || undefined);
 
   const onDropClick = (drop: ExtendedDrop) => {
     const currentQuery = { ...router.query };
@@ -69,6 +73,20 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
   const isRankWave = wave?.wave.type === ApiWaveType.Rank;
+  
+  // Handle tab visibility changes
+  useEffect(() => {
+    if (!wave) return;
+    
+    // If on Leaderboard tab and voting has ended, switch to Default
+    if (activeView === BrainView.LEADERBOARD && votingState === WaveVotingState.ENDED) {
+      setActiveView(BrainView.DEFAULT);
+    } 
+    // If on Winners tab and first decision hasn't passed, switch to Default
+    else if (activeView === BrainView.WINNERS && !hasFirstDecisionPassed) {
+      setActiveView(BrainView.DEFAULT);
+    }
+  }, [wave, votingState, hasFirstDecisionPassed, activeView]);
 
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.WAVES]: (
@@ -81,6 +99,12 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     [BrainView.LEADERBOARD]:
       isRankWave && !!wave ? (
         <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
+      ) : null,
+    [BrainView.WINNERS]:
+      isRankWave && !!wave ? (
+        <div className="tw-px-2 sm:tw-px-4 tw-pt-4">
+          <WaveWinners wave={wave} onDropClick={onDropClick} />
+        </div>
       ) : null,
     [BrainView.OUTCOME]:
       isRankWave && !!wave ? <MyStreamWaveOutcome wave={wave} /> : null,

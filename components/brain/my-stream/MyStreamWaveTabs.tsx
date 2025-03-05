@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 import { TabToggle } from "../../common/TabToggle";
+import { MyStreamWaveTab } from "./MyStreamWave";
 
 interface MyStreamWaveTabsProps {
   readonly wave: ApiWave;
@@ -9,10 +10,9 @@ interface MyStreamWaveTabsProps {
   readonly setActiveTab: (tab: MyStreamWaveTab) => void;
 }
 
-export enum MyStreamWaveTab {
-  CHAT = "CHAT",
-  LEADERBOARD = "LEADERBOARD",
-  OUTCOME = "OUTCOME",
+interface TabOption {
+  key: MyStreamWaveTab;
+  label: string;
 }
 
 export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
@@ -20,15 +20,30 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
   setActiveTab,
   wave,
 }) => {
-  const { votingState } = useWaveState(wave);
-  const options = [
-    { key: MyStreamWaveTab.CHAT, label: "Chat" },
-    {
-      key: MyStreamWaveTab.LEADERBOARD,
-      label: votingState === WaveVotingState.ENDED ? "Winners" : "Leaderboard",
-    },
-    { key: MyStreamWaveTab.OUTCOME, label: "Outcome" },
-  ] as const;
+  const { votingState, hasFirstDecisionPassed } = useWaveState(wave);
+  
+  // Generate tab options based on wave state
+  const options = useMemo(() => {
+    const tabs: TabOption[] = [
+      { key: MyStreamWaveTab.CHAT, label: "Chat" }
+    ];
+    
+    // Show Leaderboard tab always except when voting has ended
+    if (votingState !== WaveVotingState.ENDED) {
+      tabs.push({ key: MyStreamWaveTab.LEADERBOARD, label: "Leaderboard" });
+    }
+    
+    // Show Winners tab if first decision has passed
+    if (hasFirstDecisionPassed) {
+      tabs.push({ key: MyStreamWaveTab.WINNERS, label: "Winners" });
+    }
+    
+    // Always show Outcome tab
+    tabs.push({ key: MyStreamWaveTab.OUTCOME, label: "Outcome" });
+    
+    return tabs;
+  }, [votingState, hasFirstDecisionPassed]);
+  
   return (
     <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full">
       <TabToggle
