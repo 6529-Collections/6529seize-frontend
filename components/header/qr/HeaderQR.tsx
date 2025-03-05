@@ -2,7 +2,7 @@ import styles from "./HeaderQR.module.scss";
 import {
   faCopy,
   faExternalLink,
-  faQrcode,
+  faShareNodes,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
@@ -51,7 +51,7 @@ export default function HeaderQR() {
         title="QR Code"
         onClick={() => setShowQRModal(true)}
         className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-light-400 tw-transition tw-duration-300 tw-ease-out">
-        <FontAwesomeIcon icon={faQrcode} height={18} />
+        <FontAwesomeIcon icon={faShareNodes} height={18} />
       </button>
       <HeaderQRModal show={showQRModal} onClose={() => setShowQRModal(false)} />
     </div>
