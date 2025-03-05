@@ -158,18 +158,16 @@ function HeaderQRModal({
   }, [show]);
 
   useEffect(() => {
+    setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
+    setActiveSubTab(isAuthenticated ? SubMode.APP : SubMode.BROWSER);
+
     if (!show) {
       const timer = setTimeout(() => {
         setNavigateBrowserSrc("");
         setNavigateAppSrc("");
         setShareConnectionSrc("");
-        setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
-        setActiveSubTab(isAuthenticated ? SubMode.APP : SubMode.BROWSER);
       }, 150);
       return () => clearTimeout(timer);
-    } else {
-      setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
-      setActiveSubTab(isAuthenticated ? SubMode.APP : SubMode.BROWSER);
     }
   }, [show]);
 
