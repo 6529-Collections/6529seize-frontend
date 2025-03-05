@@ -74,9 +74,7 @@ function HeaderQRModal({
   const [activeTab, setActiveTab] = useState<Mode>(
     isAuthenticated ? Mode.SHARE : Mode.NAVIGATE
   );
-  const [activeSubTab, setActiveSubTab] = useState<SubMode>(
-    isAuthenticated ? SubMode.APP : SubMode.BROWSER
-  );
+  const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.APP);
 
   const [navigateBrowserUrl, setNavigateBrowserUrl] = useState<string>("");
   const [navigateAppUrl, setNavigateAppUrl] = useState<string>("");
@@ -159,7 +157,7 @@ function HeaderQRModal({
 
   useEffect(() => {
     setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
-    setActiveSubTab(isAuthenticated ? SubMode.APP : SubMode.BROWSER);
+    setActiveSubTab(SubMode.APP);
 
     if (!show) {
       const timer = setTimeout(() => {
@@ -343,7 +341,7 @@ function ModalMenu({
         <Button
           className={activeTab === Mode.NAVIGATE ? styles.disabledMenuBtn : ""}
           variant={activeTab === Mode.NAVIGATE ? "light" : "outline-light"}
-          onClick={() => onTabChange(Mode.NAVIGATE, SubMode.BROWSER)}>
+          onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}>
           Current URL
         </Button>
       </div>
@@ -352,16 +350,16 @@ function ModalMenu({
         {activeTab === Mode.NAVIGATE ? (
           <>
             <Button
+              variant={activeSubTab === SubMode.APP ? "light" : "outline-light"}
+              onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}>
+              <span className="font-smaller">Mobile App</span>
+            </Button>
+            <Button
               variant={
                 activeSubTab === SubMode.BROWSER ? "light" : "outline-light"
               }
               onClick={() => onTabChange(Mode.NAVIGATE, SubMode.BROWSER)}>
               <span className="font-smaller">Browser</span>
-            </Button>
-            <Button
-              variant={activeSubTab === SubMode.APP ? "light" : "outline-light"}
-              onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}>
-              <span className="font-smaller">Mobile App</span>
             </Button>
             {!isElectron && (
               <Button
