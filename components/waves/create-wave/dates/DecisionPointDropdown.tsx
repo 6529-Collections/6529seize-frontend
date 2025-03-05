@@ -21,8 +21,7 @@ export default function DecisionPointDropdown({
   const options = [
     { value: Period.WEEKS, label: 'Weeks' },
     { value: Period.DAYS, label: 'Days' },
-    { value: Period.HOURS, label: 'Hours' },
-    { value: Period.MINUTES, label: 'Minutes' }
+    { value: Period.HOURS, label: 'Hours' }
   ];
 
   const selectedOption = options.find(option => option.value === value) || options[0];

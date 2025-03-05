@@ -26,8 +26,6 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
 
-  useEffect(() => console.log(wave), [wave]);
-
   const onDropClick = (drop: ExtendedDrop) => {
     const currentQuery = { ...router.query };
     currentQuery.drop = drop.id;

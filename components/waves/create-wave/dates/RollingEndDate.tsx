@@ -6,6 +6,7 @@ import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import DateAccordion from "../../../common/DateAccordion";
 import TimePicker from "../../../common/TimePicker";
+import TooltipIconButton from "../../../common/TooltipIconButton";
 import { 
   calculateDecisionTimes, 
   calculateEndDateForCycles,
@@ -67,7 +68,7 @@ export default function RollingEndDate({
           className="tw-mr-2 tw-size-4 tw-text-primary-400"
         />
         <div>
-          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">End Date</p>
+          <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">Recurring Winners End Date</p>
           <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
             {formatDate(dates.endDate)}
           </p>
@@ -111,41 +112,11 @@ export default function RollingEndDate({
     );
   };
   
-  // Set up or clear rolling mode
+  // This function is simpler now since the main toggle is in the Decisions component
   const handleToggleSwitch = (value: boolean) => {
-    // Can't enable rolling mode without subsequent decisions
-    if (value && dates.subsequentDecisions.length === 0) {
-      alert("You need to add at least one decision interval before enabling rolling mode");
-      return;
-    }
-    
-    // Update rolling mode in component and in dates config
     setIsRollingMode(value);
     
-    if (value) {
-      // When turning on rolling mode:
-      // 1. Set isRolling flag
-      // 2. Calculate end date for 2 complete decision cycles
-      const twoCompleteRoundsEndDate = calculateEndDateForCycles(
-        dates.firstDecisionTime, 
-        dates.subsequentDecisions,
-        2 // Two complete rounds
-      );
-      
-      // Use the calculated date or keep existing if already set and valid
-      const newEndDate = (dates.endDate && dates.endDate > calculateMinEndDate())
-        ? dates.endDate 
-        : twoCompleteRoundsEndDate;
-        
-      setDates({
-        ...dates,
-        isRolling: true,
-        endDate: newEndDate
-      });
-      
-      // 3. Expand the accordion
-      setIsExpanded(true);
-    } else {
+    if (!value) {
       // When turning off rolling mode:
       // 1. Clear isRolling flag
       // 2. Set end date to the last decision point
@@ -164,9 +135,6 @@ export default function RollingEndDate({
         isRolling: false,
         endDate: newEndDate
       });
-      
-      // 3. Collapse the accordion
-      setIsExpanded(false);
     }
   };
 
@@ -174,90 +142,84 @@ export default function RollingEndDate({
     <div className="tw-relative">
       <DateAccordion
         title={
-          <div className="tw-flex tw-items-center tw-justify-between tw-flex-1 tw-gap-x-4">
-            <div className="tw-flex tw-items-center tw-gap-x-2">
-              <span>Rolling End Date</span>
-              <div 
-                className="tw-relative tw-cursor-pointer"
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <FontAwesomeIcon
-                  icon={faInfoCircle}
-                  className="tw-text-iron-400 tw-size-4"
-                />
-                {showTooltip && (
-                  <div className="tw-absolute tw-left-0 tw-top-6 tw-w-64 tw-p-3 tw-bg-iron-900 tw-text-iron-100 tw-text-xs tw-rounded-lg tw-shadow-lg tw-z-10">
-                    Rolling mode means that decisions repeat in cycles. When you reach the last decision point, 
-                    the system starts again from the first interval, continuing until the end date. 
-                    This requires at least one decision interval.
-                  </div>
-                )}
-              </div>
-            </div>
-            <div onClick={(e) => e.stopPropagation()}>
-              <CommonSwitch
-                label=""
-                isOn={dates.isRolling || isRollingMode}
-                setIsOn={handleToggleSwitch}
-              />
-            </div>
+          <div className="tw-flex tw-items-center tw-gap-x-2">
+            <span>Recurring Winners End Date</span>
+            <TooltipIconButton 
+              icon={faInfoCircle} 
+              tooltipText="Set the final end date for your wave with recurring winner announcements. Your wave will continue the same pattern of announcements until reaching this date."
+              tooltipPosition="bottom"
+              tooltipWidth="tw-w-80"
+            />
           </div>
         }
-        isExpanded={(dates.isRolling || isRollingMode) && isExpanded}
-        onToggle={() => {
-          if (dates.isRolling || isRollingMode) {
-            setIsExpanded(!isExpanded);
-          }
-        }}
+        isExpanded={isExpanded}
+        onToggle={() => setIsExpanded(!isExpanded)}
         collapsedContent={renderCollapsedContent()}
-        showChevron={dates.isRolling || isRollingMode}
       >
-        <div className="tw-grid tw-grid-cols-1 tw-gap-y-4 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
-          <div className="tw-col-span-1">
+        <div className="tw-px-5 tw-pt-2 tw-pb-5">
+          {/* Date and Time Selection Container */}
+          <div className="tw-col-span-2">
             <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-              Rolling End Date
+              Wave Final End Date
             </p>
-            <CommonCalendar
-              initialMonth={initialDate.getMonth()}
-              initialYear={initialDate.getFullYear()}
-              selectedTimestamp={dates.endDate ?? initialDate.getTime()}
-              minTimestamp={calculateMinEndDate()}
-              maxTimestamp={null}
-              setSelectedTimestamp={handleDateSelection}
-            />
-          </div>
-          <div className="tw-col-span-1">
-            <p className="tw-mb-3 tw-text-base tw-font-medium tw-text-iron-50">
-              End Time
-            </p>
-            <TimePicker
-              hours={endDateHours}
-              minutes={endDateMinutes}
-              onTimeChange={handleTimeChange}
-            />
             
-            <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-mt-4">
-              <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">Rolling Mode Explanation</p>
-              <p className="tw-mb-2 tw-text-xs tw-text-iron-400">
-                In rolling mode, decision intervals repeat in cycles. When the last decision point is reached, 
-                the system continues from the first interval again. This creates a regular cadence of decisions 
-                that continues until the end date.
-              </p>
+            <div className="tw-flex tw-flex-col md:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-p-3 tw-bg-iron-800/30 tw-rounded-lg md:tw-h-[390px]">
+              {/* Date selection */}
+              <div className="tw-w-full md:tw-w-[280px]">
+                <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+                  Select Date:
+                </p>
+                <CommonCalendar
+                  initialMonth={initialDate.getMonth()}
+                  initialYear={initialDate.getFullYear()}
+                  selectedTimestamp={dates.endDate ?? initialDate.getTime()}
+                  minTimestamp={calculateMinEndDate()}
+                  maxTimestamp={null}
+                  setSelectedTimestamp={handleDateSelection}
+                />
+              </div>
               
-              {/* Display total decisions count when end date is set */}
-              {dates.endDate && (
-                <div className="tw-bg-primary-500/10 tw-rounded-lg tw-p-2 tw-mt-2">
-                  <p className="tw-flex tw-items-center tw-justify-between tw-mb-0 tw-text-xs">
-                    <span className="tw-text-iron-200">Total decisions before end date:</span>
-                    <span className="tw-text-primary-400 tw-font-semibold">
-                      {calculateTotalDecisions()} decisions
-                    </span>
-                  </p>
+              {/* Time selection */}
+              <div className="tw-w-full md:tw-w-80 tw-flex tw-flex-col">
+                <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
+                  Select Time:
+                </p>
+                <div className="tw-flex-1 tw-flex tw-items-center tw-justify-center">
+                  <TimePicker
+                    hours={endDateHours}
+                    minutes={endDateMinutes}
+                    onTimeChange={handleTimeChange}
+                  />
                 </div>
-              )}
+              </div>
             </div>
+          </div>
+          
+          {/* Explanatory text - moved below the calendar and time picker */}
+          <div className="tw-mt-4 tw-bg-iron-800/30 tw-rounded-lg tw-p-3">
+            <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">Recurring Winners End Date</p>
+            
+            <p className="tw-text-xs tw-text-iron-400 tw-mb-3">
+              Since you've enabled recurring winner announcements, you need to set when your wave will permanently end. Your wave will continue repeating the same pattern of winner announcements until this final end date.
+            </p>
+            
+            <p className="tw-text-xs tw-text-iron-400 tw-mb-3">
+              {isRollingMode ? 
+                "This is when your wave will permanently end, after completing all recurring winner announcements." : 
+                "In standard mode, your wave automatically ends after the final winner announcement."}
+            </p>
+            
+            {/* Display total decisions count when end date is set */}
+            {dates.endDate && (
+              <div className="tw-bg-primary-500/10 tw-rounded-lg tw-p-2 tw-mt-3">
+                <p className="tw-flex tw-items-center tw-justify-between tw-mb-0 tw-text-xs">
+                  <span className="tw-text-iron-200">Total winner announcements before end date:</span>
+                  <span className="tw-text-primary-400 tw-font-semibold">
+                    {calculateTotalDecisions()} announcements
+                  </span>
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </DateAccordion>

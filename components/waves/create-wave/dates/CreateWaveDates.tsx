@@ -139,6 +139,16 @@ export default function CreateWaveDates({
         dates={dates}
         setDates={setDates}
         isRollingMode={isRollingMode}
+        setIsRollingMode={(isRolling) => {
+          setIsRollingMode(isRolling);
+          // Expand the rolling section when enabled
+          if (isRolling && !expandedSections.rolling) {
+            setExpandedSections(prev => ({
+              ...prev,
+              rolling: true
+            }));
+          }
+        }}
         endDateConfig={endDateConfig}
         setEndDateConfig={setEndDateConfig}
         isExpanded={expandedSections.decisions}
@@ -146,17 +156,20 @@ export default function CreateWaveDates({
         onInteraction={handleDecisionsInteraction}
       />
 
-      <RollingEndDate
-        dates={dates}
-        setDates={setDates}
-        isRollingMode={isRollingMode}
-        setIsRollingMode={(isRolling) => {
-          setIsRollingMode(isRolling);
-          handleRollingInteraction();
-        }}
-        isExpanded={expandedSections.rolling}
-        setIsExpanded={() => toggleSection('rolling')}
-      />
+      {/* Only show RollingEndDate when there are multiple announcements AND rolling mode is enabled */}
+      {dates.subsequentDecisions.length > 0 && (isRollingMode || dates.isRolling) && (
+        <RollingEndDate
+          dates={dates}
+          setDates={setDates}
+          isRollingMode={isRollingMode}
+          setIsRollingMode={(isRolling) => {
+            setIsRollingMode(isRolling);
+            handleRollingInteraction();
+          }}
+          isExpanded={expandedSections.rolling}
+          setIsExpanded={() => toggleSection('rolling')}
+        />
+      )}
     </div>
   );
 }

@@ -169,9 +169,9 @@ export const CREATE_WAVE_NONE_GROUP_LABELS: Record<
 };
 
 export const CREATE_WAVE_START_DATE_LABELS: Record<ApiWaveType, string> = {
-  [ApiWaveType.Chat]: "Start date",
-  [ApiWaveType.Rank]: "Submission Period Starts",
-  [ApiWaveType.Approve]: "Start date",
+  [ApiWaveType.Chat]: "Drops Submission Opens",
+  [ApiWaveType.Rank]: "Drops Submission Opens",
+  [ApiWaveType.Approve]: "Drops Submission Opens",
 };
 
 export const CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS: Record<
