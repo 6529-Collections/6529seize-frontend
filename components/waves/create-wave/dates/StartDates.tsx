@@ -125,17 +125,7 @@ export default function StartDates({
           )}
         </div>
       }
-    >
-      {/* Introduction Text */}
-      <div className="tw-px-5 tw-pt-0.5">
-        <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-3 tw-my-3">
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
-            <strong>The Wave Timeline defines the key phases of your wave.</strong> These dates determine when creators can submit work,
-            when voting begins, and when winners will be announced.
-          </p>
-        </div>
-      </div>
-      
+    >      
       {/* Calendar Selection */}
       <div className="tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-pt-2">
         <div className="tw-col-span-1">

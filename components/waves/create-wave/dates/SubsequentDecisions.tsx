@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarPlus,
@@ -24,6 +24,13 @@ export default function SubsequentDecisions({
 }: SubsequentDecisionsProps) {
   const [additionalTime, setAdditionalTime] = useState<number>(1);
   const [timeframeUnit, setTimeframeUnit] = useState<Period>(Period.DAYS);
+  
+  // Reset the timeframe unit to HOURS if it was previously set to MINUTES
+  useEffect(() => {
+    if (timeframeUnit === Period.MINUTES) {
+      setTimeframeUnit(Period.HOURS);
+    }
+  }, [timeframeUnit]);
 
   // Convert from Period to milliseconds
   const periodToMs = (time: number, period: Period): number => {
@@ -116,9 +123,7 @@ export default function SubsequentDecisions({
             `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.WEEKS))} week${Math.round(subsequentDecisions[0] / periodToMs(1, Period.WEEKS)) !== 1 ? 's' : ''}` : 
             subsequentDecisions[0] >= periodToMs(1, Period.DAYS) ? 
             `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.DAYS))} day${Math.round(subsequentDecisions[0] / periodToMs(1, Period.DAYS)) !== 1 ? 's' : ''}` : 
-            subsequentDecisions[0] >= periodToMs(1, Period.HOURS) ? 
-            `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.HOURS))} hour${Math.round(subsequentDecisions[0] / periodToMs(1, Period.HOURS)) !== 1 ? 's' : ''}` : 
-            `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.MINUTES))} minute${Math.round(subsequentDecisions[0] / periodToMs(1, Period.MINUTES)) !== 1 ? 's' : ''}`
+            `${Math.round(subsequentDecisions[0] / periodToMs(1, Period.HOURS))} hour${Math.round(subsequentDecisions[0] / periodToMs(1, Period.HOURS)) !== 1 ? 's' : ''}`
           }</div>
         </div>
       )}
@@ -162,9 +167,7 @@ export default function SubsequentDecisions({
                 `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.WEEKS))} week${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.WEEKS)) !== 1 ? 's' : ''}` : 
                 subsequentDecisions[index + 1] >= periodToMs(1, Period.DAYS) ? 
                 `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.DAYS))} day${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.DAYS)) !== 1 ? 's' : ''}` : 
-                subsequentDecisions[index + 1] >= periodToMs(1, Period.HOURS) ? 
-                `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.HOURS))} hour${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.HOURS)) !== 1 ? 's' : ''}` : 
-                `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.MINUTES))} minute${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.MINUTES)) !== 1 ? 's' : ''}`
+                `${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.HOURS))} hour${Math.round(subsequentDecisions[index + 1] / periodToMs(1, Period.HOURS)) !== 1 ? 's' : ''}`
               }</div>
             </div>
           )}

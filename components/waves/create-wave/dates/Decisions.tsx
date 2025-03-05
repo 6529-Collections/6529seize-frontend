@@ -129,13 +129,20 @@ export default function Decisions({
           icon={faCalendarPlus}
           className="tw-mr-2 tw-size-4 tw-text-primary-400"
         />
-        <div>
+        <div className="tw-flex tw-flex-col">
           <p className="tw-mb-0 tw-text-xs tw-text-iron-300/70">
-            Winners Announcements
+            Winners
           </p>
-          <p className="tw-mb-0 tw-text-sm tw-font-medium tw-text-iron-50">
-            {totalDecisionPoints} winner announcement{totalDecisionPoints !== 1 ? 's' : ''} configured
-          </p>
+          <div className="tw-flex tw-items-center">
+            <span className="tw-text-sm tw-font-medium tw-text-iron-50">
+              {totalDecisionPoints} announcement{totalDecisionPoints !== 1 ? 's' : ''}
+            </span>
+            {isRollingMode && (
+              <span className="tw-text-xs tw-ml-2 tw-px-1.5 tw-rounded tw-bg-blue-500/20 tw-text-blue-400">
+                Recurring
+              </span>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -152,15 +159,7 @@ export default function Decisions({
             tooltipPosition="bottom"
             tooltipWidth="tw-w-80"
           />
-          {isRollingMode ? (
-            <span className="tw-text-xs tw-ml-2 tw-px-2 tw-py-0.5 tw-rounded tw-bg-blue-500/20 tw-text-blue-400">
-              Recurring Cycles
-            </span>
-          ) : (
-            <span className="tw-text-xs tw-ml-2 tw-px-2 tw-py-0.5 tw-rounded tw-bg-green-500/20 tw-text-green-400">
-              Fixed Schedule
-            </span>
-          )}
+          {/* Badge moved to collapsed content for more compact display */}
         </div>
       }
       isExpanded={isExpanded}
