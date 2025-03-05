@@ -8,10 +8,13 @@ import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { createBreakpoint } from "react-use";
 import { useRouter } from "next/router";
+import { WaveWinners } from "../../waves/winners/WaveWinners";
+import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 
 export enum MyStreamWaveTab {
   CHAT = "CHAT",
   LEADERBOARD = "LEADERBOARD",
+  WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
 }
 
@@ -25,6 +28,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
+
+  const { votingState, hasFirstDecisionPassed } = useWaveState(wave || undefined);
 
   const onDropClick = (drop: ExtendedDrop) => {
     const currentQuery = { ...router.query };
@@ -43,11 +48,25 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     MyStreamWaveTab.CHAT
   );
 
+  // Update active tab when wave type, voting state, or decision state changes
   useEffect(() => {
-    if (wave?.wave.type === ApiWaveType.Chat) {
+    if (!wave) return;
+    
+    // Always switch to Chat for Chat-type waves
+    if (wave.wave.type === ApiWaveType.Chat) {
+      setActiveTab(MyStreamWaveTab.CHAT);
+      return;
+    }
+    
+    // Handle tab validity based on wave state
+    if (activeTab === MyStreamWaveTab.LEADERBOARD && votingState === WaveVotingState.ENDED) {
+      // If on Leaderboard tab and voting has ended, switch to Chat
+      setActiveTab(MyStreamWaveTab.CHAT);
+    } else if (activeTab === MyStreamWaveTab.WINNERS && !hasFirstDecisionPassed) {
+      // If on Winners tab and first decision hasn't passed, switch to Chat
       setActiveTab(MyStreamWaveTab.CHAT);
     }
-  }, [breakpoint, wave?.wave.type]);
+  }, [breakpoint, wave?.wave.type, votingState, hasFirstDecisionPassed, activeTab]);
 
   if (!wave) {
     return null;
@@ -57,6 +76,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     [MyStreamWaveTab.CHAT]: <MyStreamWaveChat wave={wave} />,
     [MyStreamWaveTab.LEADERBOARD]: (
       <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
+    ),
+    [MyStreamWaveTab.WINNERS]: (
+      <WaveWinners wave={wave} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
   };

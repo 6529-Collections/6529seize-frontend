@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { TabToggle } from "../../common/TabToggle";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
@@ -10,22 +10,39 @@ interface MyStreamWaveDesktopTabsProps {
   readonly setActiveTab: (tab: MyStreamWaveTab) => void;
 }
 
-export const getWaveTabOptions = (votingState: WaveVotingState) => [
-  { key: MyStreamWaveTab.CHAT, label: "Chat" },
-  {
-    key: MyStreamWaveTab.LEADERBOARD,
-    label: votingState === WaveVotingState.ENDED ? "Winners" : "Leaderboard",
-  },
-  { key: MyStreamWaveTab.OUTCOME, label: "Outcome" },
-] as const;
+interface TabOption {
+  key: MyStreamWaveTab;
+  label: string;
+}
 
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
   setActiveTab,
 }) => {
-  const { votingState } = useWaveState(wave);
-  const options = getWaveTabOptions(votingState);
+  const { votingState, hasFirstDecisionPassed } = useWaveState(wave);
+  
+  // Generate tab options based on wave state
+  const options = useMemo(() => {
+    const tabs: TabOption[] = [
+      { key: MyStreamWaveTab.CHAT, label: "Chat" }
+    ];
+    
+    // Show Leaderboard tab always except when voting has ended
+    if (votingState !== WaveVotingState.ENDED) {
+      tabs.push({ key: MyStreamWaveTab.LEADERBOARD, label: "Leaderboard" });
+    }
+    
+    // Show Winners tab if first decision has passed
+    if (hasFirstDecisionPassed) {
+      tabs.push({ key: MyStreamWaveTab.WINNERS, label: "Winners" });
+    }
+    
+    // Always show Outcome tab
+    tabs.push({ key: MyStreamWaveTab.OUTCOME, label: "Outcome" });
+    
+    return tabs;
+  }, [votingState, hasFirstDecisionPassed]);
 
   return (
     <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full">

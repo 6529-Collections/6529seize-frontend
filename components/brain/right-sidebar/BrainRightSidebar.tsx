@@ -24,6 +24,7 @@ export enum Mode {
 export enum SidebarTab {
   ABOUT = "ABOUT",
   LEADERBOARD = "LEADERBOARD",
+  WINNERS = "WINNERS",
   TOP_VOTERS = "TOP_VOTERS",
   ACTIVITY_LOG = "ACTIVITY_LOG",
 }
