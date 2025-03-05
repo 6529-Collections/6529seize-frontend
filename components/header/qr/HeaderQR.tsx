@@ -19,6 +19,7 @@ import {
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import Tippy from "@tippyjs/react";
 import { useElectron } from "../../../hooks/useElectron";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 const QRCode = require("qrcode");
 
@@ -68,8 +69,14 @@ function HeaderQRModal({
 
   const isMobile = useIsMobileDevice();
 
-  const [activeTab, setActiveTab] = useState<Mode>(Mode.SHARE);
-  const [activeSubTab, setActiveSubTab] = useState<SubMode>(SubMode.APP);
+  const { isAuthenticated } = useSeizeConnectContext();
+
+  const [activeTab, setActiveTab] = useState<Mode>(
+    isAuthenticated ? Mode.SHARE : Mode.NAVIGATE
+  );
+  const [activeSubTab, setActiveSubTab] = useState<SubMode>(
+    isAuthenticated ? SubMode.APP : SubMode.BROWSER
+  );
 
   const [navigateBrowserUrl, setNavigateBrowserUrl] = useState<string>("");
   const [navigateAppUrl, setNavigateAppUrl] = useState<string>("");
@@ -156,10 +163,13 @@ function HeaderQRModal({
         setNavigateBrowserSrc("");
         setNavigateAppSrc("");
         setShareConnectionSrc("");
-        setActiveTab(Mode.SHARE);
-        setActiveSubTab(SubMode.APP);
+        setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
+        setActiveSubTab(isAuthenticated ? SubMode.APP : SubMode.BROWSER);
       }, 150);
       return () => clearTimeout(timer);
+    } else {
+      setActiveTab(isAuthenticated ? Mode.SHARE : Mode.NAVIGATE);
+      setActiveSubTab(isAuthenticated ? SubMode.APP : SubMode.BROWSER);
     }
   }, [show]);
 
