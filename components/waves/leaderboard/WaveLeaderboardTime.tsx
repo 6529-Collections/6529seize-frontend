@@ -426,7 +426,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
           {droppingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
             <div className="tw-flex tw-items-center tw-gap-1.5">
               <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                <div className="tw-flex tw-justify-center tw-items-center">
+                <div className="tw-flex tw-justify-center tw-items-baseline">
                   <span className="tw-text-base md:tw-text-xl [@container]:tw-text-xl [@container_(max-width:80px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight">
                     {droppingTimeLeft.days}
                   </span>
@@ -436,7 +436,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 </div>
               </div>
               <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                <div className="tw-flex tw-justify-center tw-items-center">
+                <div className="tw-flex tw-justify-center tw-items-baseline">
                   <span className="tw-text-base md:tw-text-xl [@container]:tw-text-xl [@container_(max-width:80px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight">
                     {droppingTimeLeft.hours}
                   </span>
@@ -446,7 +446,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 </div>
               </div>
               <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                <div className="tw-flex tw-justify-center tw-items-center">
+                <div className="tw-flex tw-justify-center tw-items-baseline">
                   <span className="tw-text-base md:tw-text-xl [@container]:tw-text-xl [@container_(max-width:80px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight">
                     {droppingTimeLeft.minutes}
                   </span>
@@ -456,7 +456,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 </div>
               </div>
               <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                <div className="tw-flex tw-justify-center tw-items-center">
+                <div className="tw-flex tw-justify-center tw-items-baseline">
                   <span className="tw-text-base md:tw-text-xl [@container]:tw-text-xl [@container_(max-width:80px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight">
                     {droppingTimeLeft.seconds}
                   </span>
@@ -533,7 +533,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
           {votingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
             <div className="tw-flex tw-items-center tw-gap-1.5">
               <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                <div className="tw-flex tw-justify-center tw-items-center">
+                <div className="tw-flex tw-justify-center tw-items-baseline">
                   <span className="tw-text-base md:tw-text-xl [@container]:tw-text-xl [@container_(max-width:80px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight">
                     {votingTimeLeft.days}
                   </span>
@@ -543,7 +543,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 </div>
               </div>
               <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                <div className="tw-flex tw-justify-center tw-items-center">
+                <div className="tw-flex tw-justify-center tw-items-baseline">
                   <span className="tw-text-base md:tw-text-xl [@container]:tw-text-xl [@container_(max-width:80px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight">
                     {votingTimeLeft.hours}
                   </span>
@@ -553,7 +553,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 </div>
               </div>
               <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                <div className="tw-flex tw-justify-center tw-items-center">
+                <div className="tw-flex tw-justify-center tw-items-baseline">
                   <span className="tw-text-base md:tw-text-xl [@container]:tw-text-xl [@container_(max-width:80px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight">
                     {votingTimeLeft.minutes}
                   </span>
@@ -563,7 +563,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                 </div>
               </div>
               <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                <div className="tw-flex tw-justify-center tw-items-center">
+                <div className="tw-flex tw-justify-center tw-items-baseline">
                   <span className="tw-text-base md:tw-text-xl [@container]:tw-text-xl [@container_(max-width:80px)]:tw-text-base tw-font-medium tw-text-white/90 tw-tracking-tight">
                     {votingTimeLeft.seconds}
                   </span>
@@ -645,7 +645,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
             {isDecisionDetailsOpen && (
               <div className="tw-flex tw-items-center tw-gap-1.5 tw-mt-2.5">
                 <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <div className="tw-flex tw-justify-center tw-items-center">
+                  <div className="tw-flex tw-justify-center tw-items-baseline">
                     <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
                       {nextDecisionTimeLeft.days}
                     </span>
@@ -655,7 +655,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                   </div>
                 </div>
                 <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <div className="tw-flex tw-justify-center tw-items-center">
+                  <div className="tw-flex tw-justify-center tw-items-baseline">
                     <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
                       {nextDecisionTimeLeft.hours}
                     </span>
@@ -665,7 +665,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                   </div>
                 </div>
                 <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <div className="tw-flex tw-justify-center tw-items-center">
+                  <div className="tw-flex tw-justify-center tw-items-baseline">
                     <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
                       {nextDecisionTimeLeft.minutes}
                     </span>
@@ -675,7 +675,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                   </div>
                 </div>
                 <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <div className="tw-flex tw-justify-center tw-items-center">
+                  <div className="tw-flex tw-justify-center tw-items-baseline">
                     <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
                       {nextDecisionTimeLeft.seconds}
                     </span>
@@ -740,7 +740,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
             {/* Expanded Section */}
             {isDecisionDetailsOpen && (
-              <div className="tw-mt-4 tw-pt-4 tw-border-t tw-border-white/10 tw-border-solid tw-border-x-0">
+              <div className="tw-mt-4 tw-pt-4 tw-border-t tw-border-white/10 tw-border-solid tw-border-x-0 tw-border-b-0">
                 {/* Wave End Date moved to bottom as requested */}
 
                 {/* Detailed Horizontal Timeline */}
