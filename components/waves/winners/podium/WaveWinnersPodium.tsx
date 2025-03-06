@@ -115,7 +115,6 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
               >
                 <WaveWinnersPodiumSecond
                   winner={secondPlaceWinner}
-                  wave={wave}
                   onDropClick={onDropClick}
                 />
               </motion.div>
@@ -136,7 +135,6 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
               >
                 <WaveWinnersPodiumFirst
                   winner={firstPlaceWinner}
-                  wave={wave}
                   onDropClick={onDropClick}
                 />
               </motion.div>
@@ -157,7 +155,6 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
               >
                 <WaveWinnersPodiumThird
                   winner={thirdPlaceWinner}
-                  wave={wave}
                   onDropClick={onDropClick}
                 />
               </motion.div>

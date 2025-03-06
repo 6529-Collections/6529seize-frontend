@@ -7,18 +7,15 @@ import {
   getScaledImageUri,
 } from "../../../../helpers/image.helpers";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
-import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersPodiumSecondProps {
   readonly winner: ApiWaveDecisionWinner;
-  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveWinnersPodiumSecond: React.FC<WaveWinnersPodiumSecondProps> = ({
   winner,
-  wave,
   onDropClick,
 }) => {
   return (
@@ -126,7 +123,7 @@ export const WaveWinnersPodiumSecond: React.FC<WaveWinnersPodiumSecondProps> = (
                   </span>
                 </div>
 
-                <WavePodiumItemContentOutcomes winner={winner} wave={wave} />
+                <WavePodiumItemContentOutcomes winner={winner} />
               </div>
             </div>
           </div>
