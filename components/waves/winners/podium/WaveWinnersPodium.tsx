@@ -6,15 +6,13 @@ import { WaveWinnersPodiumSecond } from "./WaveWinnersPodiumSecond";
 import { WaveWinnersPodiumThird } from "./WaveWinnersPodiumThird";
 import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
-import { NormalizedWinner } from "../../../../helpers/waves/winners-normalizer";
+import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersPodiumProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly normalizedWinners?: NormalizedWinner[];
-  // We'll keep this prop for compatibility during transition
-  readonly usePrefetchedData?: boolean;
-  readonly isLoading?: boolean;
+  readonly winners: ApiWaveDecisionWinner[];
+  readonly isLoading: boolean;
 }
 
 const PodiumPlaceholderCard = ({ height }: { height: string }) => (
@@ -54,17 +52,12 @@ const podiumVariants = {
 export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   wave,
   onDropClick,
-  normalizedWinners = [],
-  isLoading = false,
+  winners,
+  isLoading,
 }) => {
-  // Convert normalized winners to drops for rendering
-  const drops = useMemo(() => {
-    return normalizedWinners.map(winner => winner.drop);
-  }, [normalizedWinners]);
-
-  const firstPlaceDrop = drops[0] ?? null;
-  const secondPlaceDrop = drops[1] ?? null;
-  const thirdPlaceDrop = drops[2] ?? null;
+  const firstPlaceWinner = winners[0] ?? null;
+  const secondPlaceWinner = winners[1] ?? null;
+  const thirdPlaceWinner = winners[2] ?? null;
 
   if (isLoading) {
     return (
@@ -78,7 +71,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
     );
   }
 
-  if (!drops.length) {
+  if (!winners.length) {
     return (
       <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-px-4 tw-bg-iron-950/60">
         <div className="tw-max-w-3xl tw-mx-auto">
@@ -113,7 +106,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
       <div className="md:tw-max-w-3xl tw-mx-auto">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-2 lg:tw-gap-x-4 tw-items-end">
           <div>
-            {secondPlaceDrop ? (
+            {secondPlaceWinner ? (
               <motion.div
                 variants={podiumVariants}
                 initial="hidden"
@@ -121,7 +114,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 custom={1}
               >
                 <WaveWinnersPodiumSecond
-                  drop={secondPlaceDrop}
+                  winner={secondPlaceWinner}
                   wave={wave}
                   onDropClick={onDropClick}
                 />
@@ -134,7 +127,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
             )}
           </div>
           <div>
-            {firstPlaceDrop ? (
+            {firstPlaceWinner ? (
               <motion.div
                 variants={podiumVariants}
                 initial="hidden"
@@ -142,7 +135,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 custom={0}
               >
                 <WaveWinnersPodiumFirst
-                  drop={firstPlaceDrop}
+                  winner={firstPlaceWinner}
                   wave={wave}
                   onDropClick={onDropClick}
                 />
@@ -155,7 +148,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
             )}
           </div>
           <div>
-            {thirdPlaceDrop ? (
+            {thirdPlaceWinner ? (
               <motion.div
                 variants={podiumVariants}
                 initial="hidden"
@@ -163,7 +156,7 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 custom={2}
               >
                 <WaveWinnersPodiumThird
-                  drop={thirdPlaceDrop}
+                  winner={thirdPlaceWinner}
                   wave={wave}
                   onDropClick={onDropClick}
                 />

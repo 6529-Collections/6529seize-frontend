@@ -8,32 +8,37 @@ import {
 } from "../../../../helpers/image.helpers";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import { ApiWave } from "../../../../generated/models/ApiWave";
+import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersPodiumSecondProps {
-  readonly drop: ExtendedDrop;
+  readonly winner: ApiWaveDecisionWinner;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
 export const WaveWinnersPodiumSecond: React.FC<WaveWinnersPodiumSecondProps> = ({
-  drop,
+  winner,
   wave,
   onDropClick,
 }) => {
   return (
-    <div onClick={() => onDropClick(drop)} className="tw-cursor-pointer tw-group">
+    <div onClick={() => onDropClick({
+      ...winner.drop,
+      stableKey: winner.drop.id,
+      stableHash: winner.drop.id,
+    })} className="tw-cursor-pointer tw-group">
       <div className="tw-flex tw-flex-col tw-items-center">
         <div className="tw-flex tw-flex-col tw-items-center -tw-mb-2 tw-relative tw-z-10">
           <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-b tw-from-[#dddddd]/20 tw-to-transparent tw-blur-2xl tw-scale-150" />
 
           <Link
-            href={`/${drop.author.handle}`}
+            href={`/${winner.drop.author.handle}`}
             onClick={(e) => e.stopPropagation()}
             className="tw-transform hover:tw-scale-105 tw-transition-all tw-duration-300"
           >
-            {drop.author.pfp ? (
+            {winner.drop.author.pfp ? (
               <img
-                src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
+                src={getScaledImageUri(winner.drop.author.pfp, ImageScale.W_AUTO_H_50)}
                 alt=""
                 className="tw-size-9 md:tw-size-11 tw-rounded-xl tw-ring-2 tw-ring-[#dddddd] tw-object-cover tw-shadow-[0_0_20px_rgba(148,163,184,0.3)]"
               />
@@ -73,12 +78,12 @@ export const WaveWinnersPodiumSecond: React.FC<WaveWinnersPodiumSecondProps> = (
             </div>
 
             <Link
-              href={`/${drop.author.handle}`}
+              href={`/${winner.drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
               className="tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center desktop-hover:hover:tw-text-[#dddddd] tw-group/link"
             >
               <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-[#dddddd] tw-transition-colors tw-inline-flex tw-items-center">
-                {drop.author.handle}
+                {winner.drop.author.handle}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -101,27 +106,27 @@ export const WaveWinnersPodiumSecond: React.FC<WaveWinnersPodiumSecondProps> = (
               <div className="tw-flex tw-items-center tw-gap-x-1">
                 <span
                   className={`${
-                    drop.rating >= 0 ? "tw-text-[#dddddd]" : "tw-text-[#ff4466]"
+                    winner.drop.rating >= 0 ? "tw-text-[#dddddd]" : "tw-text-[#ff4466]"
                   } tw-font-semibold tw-text-sm sm:tw-text-base`}
                 >
-                  {formatNumberWithCommas(drop.rating)}
+                  {formatNumberWithCommas(winner.drop.rating)}
                 </span>
                 <span className="tw-text-iron-400 tw-text-xs sm:tw-text-sm">
-                  {drop.wave.voting_credit_type}
+                  {winner.drop.wave.voting_credit_type}
                 </span>
               </div>
 
               <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
                 <div className="tw-flex tw-items-center tw-gap-1">
                   <span className="tw-text-iron-200 tw-text-xs sm:tw-text-sm">
-                    {formatNumberWithCommas(drop.raters_count)}
+                    {formatNumberWithCommas(winner.drop.raters_count)}
                   </span>
                   <span className="tw-text-iron-400 tw-text-xs sm:tw-text-sm">
-                    {drop.raters_count === 1 ? "voter" : "voters"}
+                    {winner.drop.raters_count === 1 ? "voter" : "voters"}
                   </span>
                 </div>
 
-                <WavePodiumItemContentOutcomes drop={drop} wave={wave} />
+                <WavePodiumItemContentOutcomes winner={winner} wave={wave} />
               </div>
             </div>
           </div>

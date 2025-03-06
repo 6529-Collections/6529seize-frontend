@@ -5,46 +5,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
-import { NormalizedDecisionPoint } from "../../../helpers/waves/winners-normalizer";
+import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
 
 interface WaveRollingWinnersProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  readonly decisionPoints?: NormalizedDecisionPoint[];
+  readonly decisionPoints: ApiWaveDecision[];
 }
 
 export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
   wave,
   onDropClick,
-  decisionPoints = [],
+  decisionPoints,
 }) => {
-  // Helper to check if a decision point is in the future (used for filtering)
-  const isUpcoming = (point: NormalizedDecisionPoint) => {
-    return new Date(point.date) > new Date();
-  };
-
-  // Filter to show only past winners and sort them
-  const sortedDecisionPoints = useMemo(() => {
-    if (!decisionPoints || decisionPoints.length === 0) {
-      return [];
-    }
-    
-    // Filter out future decision points and sort by rank
-    const pastWinners = [...decisionPoints].filter(
-      (point) => !isUpcoming(point)
-    );
-    return pastWinners.sort((a, b) => b.rank - a.rank);
-  }, [decisionPoints]);
-
   const [expandedPoints, setExpandedPoints] = useState<Set<string>>(new Set());
-
-  // Open the first item by default when decision points are loaded
-  React.useEffect(() => {
-    if (sortedDecisionPoints.length > 0 && expandedPoints.size === 0) {
-      setExpandedPoints(new Set([sortedDecisionPoints[0]?.id]));
-    }
-  }, [sortedDecisionPoints, expandedPoints]);
-
   const toggleExpanded = (pointId: string) => {
     setExpandedPoints((prev) => {
       const newSet = new Set(prev);
@@ -54,7 +28,7 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
   };
 
   // Display message when no decision points are available
-  if (sortedDecisionPoints.length === 0) {
+  if (decisionPoints.length === 0) {
     return (
       <div className="tw-space-y-2 tw-mt-4 tw-pb-4 tw-max-h-[calc(100vh-200px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
         <div className="tw-p-6 tw-text-center tw-bg-iron-900 tw-rounded-lg tw-border tw-border-iron-800">
@@ -71,8 +45,12 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
               />
             </svg>
           </div>
-          <p className="tw-text-lg tw-font-semibold tw-text-iron-300">No Decision Points Available</p>
-          <p className="tw-text-sm tw-text-iron-400 tw-mt-2">There are no past decision points to display for this wave.</p>
+          <p className="tw-text-lg tw-font-semibold tw-text-iron-300">
+            No Decision Points Available
+          </p>
+          <p className="tw-text-sm tw-text-iron-400 tw-mt-2">
+            There are no past decision points to display for this wave.
+          </p>
         </div>
       </div>
     );
@@ -80,13 +58,13 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
 
   return (
     <div className="tw-space-y-2 tw-mt-4 tw-pb-4 tw-max-h-[calc(100vh-200px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
-      {sortedDecisionPoints.map((point, index) => (
+      {decisionPoints.map((point, index) => (
         <div
-          key={point.id}
+          key={`decision-point-${index}`}
           className="tw-rounded-lg tw-bg-iron-900 tw-border tw-border-iron-800"
         >
           <button
-            onClick={() => toggleExpanded(point.id)}
+            onClick={() => toggleExpanded(`decision-point-${index}`)}
             className="tw-w-full tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-bg-iron-900 hover:tw-bg-iron-800/50 tw-transition-colors tw-rounded-xl tw-group tw-border-0"
           >
             <div className="tw-flex tw-items-center tw-gap-3">
@@ -94,18 +72,22 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
                 className="tw-flex-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800 
                   tw-flex tw-items-center tw-justify-center"
               >
-                <span className={`tw-text-xs tw-font-medium ${index === 0 ? "tw-text-primary-400" : "tw-text-iron-400"}`}>
-                  {point.rank}
+                <span
+                  className={`tw-text-xs tw-font-medium ${
+                    index === 0 ? "tw-text-primary-400" : "tw-text-iron-400"
+                  }`}
+                >
+                  {index + 1}
                 </span>
               </div>
 
               <div className="tw-flex tw-items-center">
                 <span className="tw-text-sm tw-font-medium tw-text-white/90">
-                  {point.label || "Winner Announcement"}
+                  {`Winner Announcement`}
                 </span>
 
                 <span className="tw-text-xs tw-text-iron-400 tw-ml-2">
-                  {format(new Date(point.date), "MMM d, yyyy")}
+                  {format(new Date(point.decision_time), "MMM d, yyyy")}
                 </span>
               </div>
             </div>
@@ -115,7 +97,7 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
                 className={`tw-h-7 tw-w-7 tw-rounded-full tw-flex tw-items-center tw-justify-center 
                   tw-bg-iron-800 tw-transition-all
                   ${
-                    expandedPoints.has(point.id)
+                    expandedPoints.has(`decision-point-${index}`)
                       ? "tw-rotate-180 tw-bg-primary-900/50"
                       : ""
                   }`}
@@ -139,7 +121,7 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
           </button>
 
           <AnimatePresence>
-            {expandedPoints.has(point.id) && (
+            {expandedPoints.has(`decision-point-${index}`) && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
@@ -147,15 +129,15 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
                 transition={{ duration: 0.25, ease: "easeOut" }}
               >
                 <div className="tw-space-y-4 tw-bg-black tw-rounded-b-xl tw-border-t tw-border-iron-800">
-                  <WaveWinnersPodium 
-                    wave={wave} 
-                    onDropClick={onDropClick} 
+                  <WaveWinnersPodium
+                    wave={wave}
+                    onDropClick={onDropClick}
                     normalizedWinners={point.winners}
                     isLoading={false}
                   />
-                  <WaveWinnersDrops 
-                    wave={wave} 
-                    onDropClick={onDropClick} 
+                  <WaveWinnersDrops
+                    wave={wave}
+                    onDropClick={onDropClick}
                     normalizedWinners={point.winners}
                     isLoading={false}
                     hasInfiniteLoading={false}

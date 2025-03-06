@@ -1,23 +1,23 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
 import { useDropOutcomes } from "../../../../../hooks/drops/useDropOutcomes";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
+import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersDropOutcomeProps {
-  readonly drop: ExtendedDrop;
+  readonly winner: ApiWaveDecisionWinner;
   readonly wave: ApiWave;
 }
 
 export default function WaveWinnersDropOutcome({
-  drop,
+  winner,
   wave,
 }: WaveWinnersDropOutcomeProps) {
   const {
     outcomes: { nicOutcomes, repOutcomes, manualOutcomes },
     haveOutcomes,
   } = useDropOutcomes({
-    drop,
+    drop: winner.drop,
     wave,
   });
 
