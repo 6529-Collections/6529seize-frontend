@@ -585,10 +585,10 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
       {isMultiDecisionWave && nextDecisionTime && (
         <div className="tw-mt-3">
           {/* Next Voting Card */}
-          <div className="tw-rounded-lg tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-px-4 tw-py-3 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
+          <div className="tw-rounded-lg tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
             {/* Main Header Row */}
             <div
-              className="tw-flex tw-items-center tw-gap-x-3 tw-gap-y-2 tw-cursor-pointer"
+              className="tw-flex tw-items-center tw-gap-x-3 tw-gap-y-2 tw-cursor-pointer tw-rounded-lg  tw-px-4 tw-py-3 tw-bg-transparent desktop-hover:hover:tw-bg-white/[0.02] tw-transition tw-duration-300 tw-ease-out"
               onClick={() => setIsDecisionDetailsOpen(!isDecisionDetailsOpen)}
             >
               {/* Icon - Calendar for regular multi-decision wave, Recurring for rolling wave */}
@@ -614,7 +614,18 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
                   </h2>
                   {!isDecisionDetailsOpen && (
                     <span className="tw-ml-2 tw-text-xs tw-font-semibold tw-text-white/80">
-                      {nextDecisionTimeLeft.days}<span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">DAYS</span> {nextDecisionTimeLeft.hours}<span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">HOURS</span> {nextDecisionTimeLeft.minutes}<span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">MIN</span>
+                      {nextDecisionTimeLeft.days}
+                      <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                        DAYS
+                      </span>{" "}
+                      {nextDecisionTimeLeft.hours}
+                      <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                        HOURS
+                      </span>{" "}
+                      {nextDecisionTimeLeft.minutes}
+                      <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                        MIN
+                      </span>
                     </span>
                   )}
                 </div>
@@ -648,143 +659,147 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
               </div>
             </div>
 
-            {/* Time boxes - Shown when section is expanded */}
-            {isDecisionDetailsOpen && (
-              <div className="tw-flex tw-items-center tw-gap-1.5 tw-mt-4">
-                <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <div className="tw-flex tw-justify-center tw-items-baseline">
-                    <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
-                      {nextDecisionTimeLeft.days}
-                    </span>
-                    <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                      {nextDecisionTimeLeft.days === 1 ? "day" : "days"}
-                    </span>
+            
+              {/* Time boxes - Shown when section is expanded */}
+              {isDecisionDetailsOpen && (
+                <div className="tw-flex tw-items-center tw-gap-1.5 tw-px-4 tw-pt-2">
+                  <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+                    <div className="tw-flex tw-justify-center tw-items-baseline">
+                      <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
+                        {nextDecisionTimeLeft.days}
+                      </span>
+                      <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                        {nextDecisionTimeLeft.days === 1 ? "day" : "days"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+                    <div className="tw-flex tw-justify-center tw-items-baseline">
+                      <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
+                        {nextDecisionTimeLeft.hours}
+                      </span>
+                      <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                        {nextDecisionTimeLeft.hours === 1 ? "hr" : "hrs"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+                    <div className="tw-flex tw-justify-center tw-items-baseline">
+                      <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
+                        {nextDecisionTimeLeft.minutes}
+                      </span>
+                      <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                        min
+                      </span>
+                    </div>
+                  </div>
+                  <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+                    <div className="tw-flex tw-justify-center tw-items-baseline">
+                      <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
+                        {nextDecisionTimeLeft.seconds}
+                      </span>
+                      <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
+                        sec
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <div className="tw-flex tw-justify-center tw-items-baseline">
-                    <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
-                      {nextDecisionTimeLeft.hours}
-                    </span>
-                    <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                      {nextDecisionTimeLeft.hours === 1 ? "hr" : "hrs"}
-                    </span>
-                  </div>
-                </div>
-                <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <div className="tw-flex tw-justify-center tw-items-baseline">
-                    <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
-                      {nextDecisionTimeLeft.minutes}
-                    </span>
-                    <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                      min
-                    </span>
-                  </div>
-                </div>
-                <div className="tw-flex-1 tw-@container tw-group tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <div className="tw-flex tw-justify-center tw-items-baseline">
-                    <span className="tw-text-sm md:tw-text-base [@container]:tw-text-base [@container_(max-width:80px)]:tw-text-sm tw-font-medium tw-text-white/90 tw-tracking-tight">
-                      {nextDecisionTimeLeft.seconds}
-                    </span>
-                    <span className="tw-ml-1 tw-text-[10px] md:tw-text-xs tw-uppercase tw-tracking-wide tw-text-white/40 tw-font-medium">
-                      sec
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+              )}
 
-            {/* Expanded Section */}
-            {isDecisionDetailsOpen && (
-              <div className="tw-mt-4">
-                {/* Wave End Date moved to bottom as requested */}
+              {/* Expanded Section */}
+              {isDecisionDetailsOpen && (
+                <div className="tw-mt-2 tw-px-4 tw-pb-3">
+                  {/* Wave End Date moved to bottom as requested */}
 
-                {/* Detailed Horizontal Timeline */}
-                <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-white/10">
-                  {/* Vertical Timeline */}
-                  <div className="tw-relative tw-py-2">
-                    {/* Timeline Structure */}
-                    <div className="tw-ml-2.5 tw-relative">
-                      {/* Vertical Connecting Line */}
-                      <div className="tw-absolute tw-w-0.5 tw-bg-white/10 tw-top-0 tw-bottom-0 tw-left-0"></div>
+                  {/* Detailed Horizontal Timeline */}
+                  <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-white/10">
+                    {/* Vertical Timeline */}
+                    <div className="tw-relative tw-py-2">
+                      {/* Timeline Structure */}
+                      <div className="tw-ml-2.5 tw-relative">
+                        {/* Vertical Connecting Line */}
+                        <div className="tw-absolute tw-w-0.5 tw-bg-white/10 tw-top-0 tw-bottom-0 tw-left-0"></div>
 
-                      {/* Timeline Nodes - Vertical */}
-                      <div className="tw-flex tw-flex-col tw-gap-4">
-                        {upcomingDecisions.map((decision, index) => (
-                          <div
-                            key={decision.id}
-                            className="tw-flex tw-items-start tw-relative tw-pl-5"
-                          >
-                            {/* Node */}
+                        {/* Timeline Nodes - Vertical */}
+                        <div className="tw-flex tw-flex-col tw-gap-4">
+                          {upcomingDecisions.map((decision, index) => (
                             <div
-                              className={`tw-absolute tw-left-0 tw-top-1 tw-transform -tw-translate-x-1/2 tw-flex tw-items-center tw-justify-center ${
-                                index === 0 ? "tw-w-4 tw-h-4" : "tw-w-3 tw-h-3"
-                              }`}
+                              key={decision.id}
+                              className="tw-flex tw-items-start tw-relative tw-pl-5"
                             >
-                              {index === 0 && (
-                                <span className="tw-animate-ping tw-absolute tw-inline-flex tw-h-full tw-w-full tw-rounded-full tw-bg-primary-400/40"></span>
-                              )}
-                              <span
-                                className={`tw-relative tw-inline-flex tw-rounded-full ${
+                              {/* Node */}
+                              <div
+                                className={`tw-absolute tw-left-0 tw-top-1 tw-transform -tw-translate-x-1/2 tw-flex tw-items-center tw-justify-center ${
                                   index === 0
-                                    ? "tw-w-4 tw-h-4 tw-bg-primary-400"
-                                    : "tw-w-3 tw-h-3 tw-border tw-border-white/20 tw-bg-iron-700"
+                                    ? "tw-w-4 tw-h-4"
+                                    : "tw-w-3 tw-h-3"
                                 }`}
-                              ></span>
-                            </div>
-
-                            {/* Content */}
-                            <div className="tw-flex tw-justify-between tw-items-center tw-w-full tw-mt-0.5">
-                              <div>
-                                <p
-                                  className={`tw-text-xs tw-font-medium ${
+                              >
+                                {index === 0 && (
+                                  <span className="tw-animate-ping tw-absolute tw-inline-flex tw-h-full tw-w-full tw-rounded-full tw-bg-primary-400/40"></span>
+                                )}
+                                <span
+                                  className={`tw-relative tw-inline-flex tw-rounded-full ${
                                     index === 0
-                                      ? "tw-text-white/90"
-                                      : "tw-text-white/60"
+                                      ? "tw-w-4 tw-h-4 tw-bg-primary-400"
+                                      : "tw-w-3 tw-h-3 tw-border tw-border-white/20 tw-bg-iron-700"
                                   }`}
-                                >
+                                ></span>
+                              </div>
+
+                              {/* Content */}
+                              <div className="tw-flex tw-justify-between tw-items-center tw-w-full tw-mt-0.5">
+                                <div>
+                                  <p
+                                    className={`tw-text-xs tw-font-medium ${
+                                      index === 0
+                                        ? "tw-text-white/90"
+                                        : "tw-text-white/60"
+                                    }`}
+                                  >
+                                    {new Date(
+                                      decision.timestamp
+                                    ).toLocaleDateString(undefined, {
+                                      weekday: "short",
+                                      month: "short",
+                                      day: "numeric",
+                                    })}
+                                    {index === 0 && (
+                                      <span className="tw-ml-1.5 tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-primary-400">
+                                        Next
+                                      </span>
+                                    )}
+                                  </p>
+                                </div>
+
+                                <div className="tw-text-right tw-text-xs tw-tabular-nums tw-text-white/50 tw-font-mono">
                                   {new Date(
                                     decision.timestamp
-                                  ).toLocaleDateString(undefined, {
-                                    weekday: "short",
-                                    month: "short",
-                                    day: "numeric",
+                                  ).toLocaleTimeString(undefined, {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
                                   })}
-                                  {index === 0 && (
-                                    <span className="tw-ml-1.5 tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-primary-400">
-                                      Next
-                                    </span>
-                                  )}
-                                </p>
+                                </div>
                               </div>
 
-                              <div className="tw-text-right tw-text-xs tw-tabular-nums tw-text-white/50 tw-font-mono">
-                                {new Date(
-                                  decision.timestamp
-                                ).toLocaleTimeString(undefined, {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </div>
+                              {/* Optional rolling indicator for first item */}
+                              {index === 0 && isRollingWave && (
+                                <div className="tw-absolute tw-left-0 tw-top-1 tw-transform -tw-translate-x-7">
+                                  <FontAwesomeIcon
+                                    icon={faRepeat}
+                                    className="tw-text-xs tw-text-white/30"
+                                  />
+                                </div>
+                              )}
                             </div>
-
-                            {/* Optional rolling indicator for first item */}
-                            {index === 0 && isRollingWave && (
-                              <div className="tw-absolute tw-left-0 tw-top-1 tw-transform -tw-translate-x-7">
-                                <FontAwesomeIcon
-                                  icon={faRepeat}
-                                  className="tw-text-xs tw-text-white/30"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+           
           </div>
         </div>
       )}
