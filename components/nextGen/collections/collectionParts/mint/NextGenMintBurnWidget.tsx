@@ -18,7 +18,7 @@ import {
   Status,
   TokensPerAddress,
 } from "../../../nextgen_entities";
-import { useAccount, useChainId, useWriteContract } from "wagmi";
+import { useChainId, useWriteContract } from "wagmi";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../../../../services/6529api";
 import { getNftsForContractAndOwner } from "../../../../../services/alchemy-api";
@@ -44,7 +44,7 @@ interface Props {
 }
 
 export default function NextGenMintBurnWidget(props: Readonly<Props>) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
   const chainId = useChainId();
   const { seizeConnect } = useSeizeConnectContext();
 

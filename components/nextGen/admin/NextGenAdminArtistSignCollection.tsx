@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   useCollectionIndex,
@@ -15,6 +14,7 @@ import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 interface Props {
   close: () => void;
@@ -23,7 +23,7 @@ interface Props {
 export default function NextGenAdminArtistSignCollection(
   props: Readonly<Props>
 ) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   const collectionIndex = useCollectionIndex();
   const parsedCollectionIndex = useParsedCollectionIndex(collectionIndex);

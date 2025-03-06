@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import styles from "./NextGenAdmin.module.scss";
 import { useRouter } from "next/router";
@@ -41,6 +40,7 @@ import NextGenAdminUpdateCollection, {
 } from "./NextGenAdminUpdateCollection";
 import NextGenAdminUploadAL from "./NextGenAdminUploadAL";
 import HeaderUserConnect from "../../header/user/HeaderUserConnect";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 enum Focus {
   GLOBAL = "global",
@@ -101,7 +101,7 @@ export function printAdminErrors(errors: string[]) {
 }
 export default function NextGenAdmin() {
   const router = useRouter();
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const createCollectionFunctionAdmin = useFunctionAdmin(

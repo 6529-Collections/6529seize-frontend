@@ -2,7 +2,6 @@ import styles from "./Prenodes.module.scss";
 import { useEffect, useState } from "react";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import Pagination from "../pagination/Pagination";
-import { useAccount } from "wagmi";
 import { Time } from "../../helpers/time";
 import {
   faCheckCircle,
@@ -14,6 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { getDateDisplay } from "../../helpers/Helpers";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 interface Prenode {
   ip: string;
@@ -30,7 +30,7 @@ interface Prenode {
 const PAGE_SIZE = 20;
 
 export default function PrenodesStatus() {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   const [page, setPage] = useState<number>(1);
 

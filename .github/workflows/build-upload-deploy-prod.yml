@@ -14,6 +14,7 @@ env:
   BASE_ENDPOINT: "https://6529.io"
   NEXTGEN_CHAIN_ID: "1"
   MOBILE_APP_SCHEME: "mobile6529"
+  CORE_SCHEME: "core6529"
   IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
   IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
 

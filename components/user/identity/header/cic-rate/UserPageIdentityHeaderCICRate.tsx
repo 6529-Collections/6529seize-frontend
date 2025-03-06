@@ -9,7 +9,6 @@ import {
   commonApiFetch,
   commonApiPost,
 } from "../../../../../services/api/common-api";
-import { useAccount } from "wagmi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   QueryKey,
@@ -20,6 +19,7 @@ import UserRateAdjustmentHelper from "../../../utils/rate/UserRateAdjustmentHelp
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 import { ApiProfileProxyActionType } from "../../../../../generated/models/ApiProfileProxyActionType";
 import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
@@ -30,7 +30,7 @@ export default function UserPageIdentityHeaderCICRate({
   readonly profile: IProfileAndConsolidations;
   readonly isTooltip: boolean;
 }) {
-  const { address } = useAccount();
+  const { address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
 
@@ -278,8 +278,7 @@ export default function UserPageIdentityHeaderCICRate({
         isTooltip
           ? ""
           : "tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-p-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800"
-      } `}
-    >
+      } `}>
       <UserPageIdentityHeaderCICRateStats
         isTooltip={isTooltip}
         profile={profile}
@@ -290,19 +289,16 @@ export default function UserPageIdentityHeaderCICRate({
       />
       <form
         onSubmit={onSubmit}
-        className={`${isTooltip ? "tw-mt-4" : "tw-mt-6"}`}
-      >
+        className={`${isTooltip ? "tw-mt-4" : "tw-mt-6"}`}>
         <div
           className={`${
             isTooltip ? "" : "tw-flex-wrap"
-          } tw-flex tw-items-end tw-gap-3`}
-        >
+          } tw-flex tw-items-end tw-gap-3`}>
           <div className="tw-w-full sm:tw-w-auto">
             <label
               className={`${
                 isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
-              } tw-block tw-text-sm tw-font-normal tw-text-iron-400 tw-break-all`}
-            >
+              } tw-block tw-text-sm tw-font-normal tw-text-iron-400 tw-break-all`}>
               Your total NIC Rating of {profile.input_identity}:
             </label>
             <div className="tw-w-full tw-relative tw-flex tw-mt-1.5">
@@ -311,8 +307,7 @@ export default function UserPageIdentityHeaderCICRate({
                   className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
                   viewBox="0 0 24 24"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                  xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M12 5V19M5 12H19"
                     stroke="currentColor"
@@ -325,8 +320,7 @@ export default function UserPageIdentityHeaderCICRate({
                   className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
                   viewBox="0 0 24 24"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                  xmlns="http://www.w3.org/2000/svg">
                   <path
                     d="M5 12H19"
                     stroke="currentColor"
@@ -360,8 +354,7 @@ export default function UserPageIdentityHeaderCICRate({
                     ? "hover:tw-bg-primary-600 hover:tw-border-primary-600"
                     : "tw-cursor-not-allowed tw-opacity-50"
                 } tw-w-full sm:tw-w-auto  tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white 
-              tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}
-              >
+              tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}>
                 {mutating ? (
                   <div className="tw-w-8">
                     <CircleLoader />

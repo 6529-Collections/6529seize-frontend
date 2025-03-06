@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { NFT } from "../../entities/INFT";
 import { fetchUrl, postData } from "../../services/6529api";
 import RememeAddComponent, { ProcessedRememe } from "./RememeAddComponent";
-import { useAccount, useSignMessage } from "wagmi";
+import { useSignMessage } from "wagmi";
 import { DBResponse } from "../../entities/IDBResponse";
 import { ConsolidatedTDH } from "../../entities/ITDH";
 import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
@@ -21,9 +21,9 @@ interface CheckList {
 }
 
 export default function RememeAddPage() {
-  const accountResolution = useAccount();
   const { connectedProfile } = useAuth();
-  const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
+  const { address, isConnected, seizeConnect, seizeConnectOpen } =
+    useSeizeConnectContext();
 
   const seizeSettings = useSeizeSettings();
 
@@ -59,7 +59,7 @@ export default function RememeAddPage() {
       } else {
         const isDeployer = areEqualAddresses(
           addRememe.contract.contractDeployer,
-          accountResolution.address
+          address
         );
 
         if (isDeployer) {
@@ -130,7 +130,7 @@ export default function RememeAddPage() {
     if (signMessage.isSuccess && signMessage.data) {
       setSubmitting(true);
       postData(`${process.env.API_ENDPOINT}/api/rememes/add`, {
-        address: accountResolution.address,
+        address: address,
         signature: signMessage.data,
         rememe: buildRememeObject(),
       }).then((response) => {
@@ -257,7 +257,7 @@ export default function RememeAddPage() {
                     </ul>
                   )}
                 </span>
-                {accountResolution.isConnected ? (
+                {isConnected ? (
                   <span className="d-flex flex-column gap-2">
                     <Button
                       className="seize-btn"
@@ -266,7 +266,7 @@ export default function RememeAddPage() {
                         !addRememe.valid ||
                         (!userTDH &&
                           !areEqualAddresses(
-                            accountResolution.address,
+                            address,
                             addRememe.contract.contractDeployer
                           )) ||
                         checkList.some((c) => !c.status) ||

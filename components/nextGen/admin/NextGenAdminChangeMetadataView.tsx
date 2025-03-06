@@ -1,5 +1,5 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useAccount, useReadContract } from "wagmi";
+import { useReadContract } from "wagmi";
 import { useEffect, useState } from "react";
 import {
   FunctionSelectors,
@@ -21,13 +21,14 @@ import {
   NextGenCollectionIdFormGroup,
   NextGenAdminHeadingRow,
 } from "./NextGenAdminShared";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 interface Props {
   close: () => void;
 }
 
 export default function NextGenAdminChangeMetadataView(props: Readonly<Props>) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(

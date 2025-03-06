@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -22,6 +21,7 @@ import {
   NextGenAdminScriptsFormGroup,
   NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 export enum UpdateType {
   UPDATE_INFO,
@@ -38,7 +38,7 @@ const UPDATE_INFO_INDEX = 1000000;
 const UPDATE_BASE_URI_INDEX = 999999;
 
 export default function NextGenAdminUpdateCollection(props: Readonly<Props>) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(

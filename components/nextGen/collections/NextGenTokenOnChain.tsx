@@ -1,5 +1,5 @@
 import styles from "./NextGen.module.scss";
-import { useAccount, useReadContract, useEnsName } from "wagmi";
+import { useReadContract, useEnsName } from "wagmi";
 import { Col, Container, Row } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -15,6 +15,7 @@ import { mainnet } from "viem/chains";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
 import Tippy from "@tippyjs/react";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 interface Props {
   collection: NextGenCollection;
@@ -23,7 +24,7 @@ interface Props {
 
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   const [owner, setOwner] = useState<`0x${string}`>();
   const [ownerENS, setOwnerENS] = useState<string>();

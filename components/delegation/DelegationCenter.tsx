@@ -1,6 +1,5 @@
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import Image from "next/image";
 
 import { SUPPORTED_COLLECTIONS } from "../../pages/delegation/[...section]";
@@ -21,7 +20,7 @@ interface Props {
 
 export default function DelegationCenterComponent(props: Readonly<Props>) {
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
-  const accountResolution = useAccount();
+  const accountResolution = useSeizeConnectContext();
   const { seizeConnect, seizeConnectOpen } = useSeizeConnectContext();
   const [openConnect, setOpenConnect] = useState(false);
 

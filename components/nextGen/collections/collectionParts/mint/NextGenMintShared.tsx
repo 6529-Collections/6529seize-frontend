@@ -2,7 +2,8 @@ import styles from "../../NextGen.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import { Form, Row, Col } from "react-bootstrap";
-import { useAccount, useEnsName } from "wagmi";
+import { useEnsName } from "wagmi";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 
 export function NextGenMintAddressOption(props: Readonly<{ address: string }>) {
   const ens = useEnsName({
@@ -25,7 +26,7 @@ export function NextGenMintingFor(
     setMintForAddress: (address: string) => void;
   }>
 ) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   return (
     <Form.Group as={Row} className="pb-2">
