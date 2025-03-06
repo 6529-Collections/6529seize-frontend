@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import BrainMobileTabs from "./mobile/BrainMobileTabs";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
@@ -15,6 +15,7 @@ import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
 import Notifications from "./notifications/Notifications";
 import { WaveWinners } from "../waves/winners/WaveWinners";
+import { useWaveState, WaveVotingState } from "../../hooks/useWaveState";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",

@@ -16,6 +16,7 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.CANT_VOTE]: "You are not eligible to rate",
   [DropVoteState.NO_CREDIT]: "You don't have enough credit to rate",
   [DropVoteState.CAN_VOTE]: null,
+  [DropVoteState.IS_WINNER]: null,
 };
 
 const DropListItemRateGiveClap = dynamic(
