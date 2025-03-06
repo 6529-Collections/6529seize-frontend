@@ -11,6 +11,7 @@
  */
 
 import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
 import { ApiWaveScope } from '../models/ApiWaveScope';
 import { ApiWaveType } from '../models/ApiWaveType';
 import { HttpFile } from '../http/http';
@@ -28,6 +29,7 @@ export class ApiWaveConfig {
     'time_lock_ms': number | null;
     'admin_group': ApiWaveScope;
     'authenticated_user_eligible_for_admin': boolean;
+    'decisions_strategy': ApiWaveDecisionsStrategy | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -66,6 +68,12 @@ export class ApiWaveConfig {
             "name": "authenticated_user_eligible_for_admin",
             "baseName": "authenticated_user_eligible_for_admin",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "decisions_strategy",
+            "baseName": "decisions_strategy",
+            "type": "ApiWaveDecisionsStrategy",
             "format": ""
         }    ];
 

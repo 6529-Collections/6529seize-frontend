@@ -21,6 +21,8 @@ export class ApiWaveMin {
     'authenticated_user_eligible_to_vote': boolean;
     'authenticated_user_eligible_to_participate': boolean;
     'authenticated_user_eligible_to_chat': boolean;
+    'voting_period_start': number | null;
+    'voting_period_end': number | null;
     'voting_credit_type': ApiWaveCreditType;
 
     static readonly discriminator: string | undefined = undefined;
@@ -67,6 +69,18 @@ export class ApiWaveMin {
             "baseName": "authenticated_user_eligible_to_chat",
             "type": "boolean",
             "format": ""
+        },
+        {
+            "name": "voting_period_start",
+            "baseName": "voting_period_start",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "voting_period_end",
+            "baseName": "voting_period_end",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "voting_credit_type",
