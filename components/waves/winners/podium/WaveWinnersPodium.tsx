@@ -1,21 +1,20 @@
-import React, { useContext } from "react";
+import React, { useMemo } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortDirection,
-  WaveDropsLeaderboardSortBy,
-} from "../../../../hooks/useWaveDropsLeaderboard";
-import { AuthContext } from "../../../auth/Auth";
 import { WaveWinnersPodiumFirst } from "./WaveWinnersPodiumFirst";
 import { WaveWinnersPodiumSecond } from "./WaveWinnersPodiumSecond";
 import { WaveWinnersPodiumThird } from "./WaveWinnersPodiumThird";
 import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
+import { NormalizedWinner } from "../../../../helpers/waves/winners-normalizer";
 
 interface WaveWinnersPodiumProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly normalizedWinners?: NormalizedWinner[];
+  // We'll keep this prop for compatibility during transition
+  readonly usePrefetchedData?: boolean;
+  readonly isLoading?: boolean;
 }
 
 const PodiumPlaceholderCard = ({ height }: { height: string }) => (
@@ -55,22 +54,19 @@ const podiumVariants = {
 export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
   wave,
   onDropClick,
+  normalizedWinners = [],
+  isLoading = false,
 }) => {
-  const { connectedProfile } = useContext(AuthContext);
-  const { drops, isFetching } = useWaveDropsLeaderboard({
-    waveId: wave.id,
-    connectedProfileHandle: connectedProfile?.profile?.handle,
-    reverse: false,
-    dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
-    sortDirection: WaveDropsLeaderboardSortDirection.ASC,
-    pollingEnabled: false,
-  });
+  // Convert normalized winners to drops for rendering
+  const drops = useMemo(() => {
+    return normalizedWinners.map(winner => winner.drop);
+  }, [normalizedWinners]);
 
   const firstPlaceDrop = drops[0] ?? null;
   const secondPlaceDrop = drops[1] ?? null;
   const thirdPlaceDrop = drops[2] ?? null;
 
-  if (isFetching && !drops.length) {
+  if (isLoading) {
     return (
       <div className="tw-relative tw-mx-auto tw-rounded-xl tw-overflow-hidden tw-pt-16 tw-px-4 tw-bg-iron-950/60">
         <div className="tw-grid tw-grid-cols-3 tw-gap-x-4 tw-max-w-3xl tw-mx-auto tw-items-end">
