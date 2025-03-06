@@ -95,7 +95,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
               ? options.find(opt => opt.key === activeKey)?.label
               : "More"}
             <span className={`tw-ml-0.5 tw-inline-flex ${isOverflowOpen ? "tw-rotate-180" : ""} tw-transition-transform tw-duration-200`}>
-              <svg width="8" height="4" viewBox="0 0 8 4" fill="none" xmlns="http://www.w3.org/2000/svg" className="tw-opacity-70">
+              <svg aria-hidden="true" width="8" height="4" viewBox="0 0 8 4" fill="none" xmlns="http://www.w3.org/2000/svg" className="tw-opacity-70">
                 <path d="M4 4L0 0H8L4 4Z" fill="currentColor" />
               </svg>
             </span>
@@ -109,7 +109,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
                   <button
                     key={option.key}
                     onClick={() => handleSelect(option.key)}
-                    className={`tw-block tw-w-full tw-px-2 tw-py-1 tw-text-left tw-text-xs tw-rounded-md tw-font-medium tw-transition-colors ${
+                    className={`tw-block tw-w-full tw-px-2 tw-py-1 tw-text-left tw-text-xs tw-rounded-md tw-bg-transparent tw-border-0 tw-font-medium tw-transition-colors ${
                       activeKey === option.key
                         ? "tw-bg-primary-500/10 tw-text-primary-300"
                         : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
