@@ -1,25 +1,41 @@
 import React from "react";
-import { ApiWave } from "../../../../../generated/models/ApiWave";
-import { useDropOutcomes } from "../../../../../hooks/drops/useDropOutcomes";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
+import { ApiWaveOutcomeCredit } from "../../../../../generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeType } from "../../../../../generated/models/ApiWaveOutcomeType";
+import { OutcomeType } from "../../../../../hooks/drops/useDropOutcomes";
 
 interface WaveWinnersDropOutcomeProps {
   readonly winner: ApiWaveDecisionWinner;
-  readonly wave: ApiWave;
 }
 
 export default function WaveWinnersDropOutcome({
   winner,
-  wave,
 }: WaveWinnersDropOutcomeProps) {
-  const {
-    outcomes: { nicOutcomes, repOutcomes, manualOutcomes },
-    haveOutcomes,
-  } = useDropOutcomes({
-    drop: winner.drop,
-    wave,
-  });
+  // Transform awards into outcome format
+  const nicOutcomes = winner.awards
+    .filter(award => award.credit === ApiWaveOutcomeCredit.Cic && award.amount && award.amount > 0)
+    .map(award => ({
+      type: OutcomeType.NIC as const,
+      value: award.amount || 0
+    }));
+
+  const repOutcomes = winner.awards
+    .filter(award => award.credit === ApiWaveOutcomeCredit.Rep && award.amount && award.amount > 0)
+    .map(award => ({
+      type: OutcomeType.REP as const,
+      value: award.amount || 0,
+      category: award.rep_category || ""
+    }));
+
+  const manualOutcomes = winner.awards
+    .filter(award => award.type === ApiWaveOutcomeType.Manual && award.description)
+    .map(award => ({
+      type: OutcomeType.MANUAL as const,
+      description: award.description || ""
+    }));
+
+  const haveOutcomes = nicOutcomes.length > 0 || repOutcomes.length > 0 || manualOutcomes.length > 0;
 
   if (!haveOutcomes) {
     return null;

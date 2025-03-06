@@ -5,11 +5,14 @@ import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "../../../../helpers/image.helpers";
 import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
+import { motion } from "framer-motion";
+import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 
 interface WavePodiumItemProps {
-  readonly winner: ApiWaveDecisionWinner;
+  readonly winner?: ApiWaveDecisionWinner;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly position: "first" | "second" | "third";
+  readonly customAnimationIndex?: number;
 }
 
 // Configuration for position-specific styling with CSS ready classes for Tailwind
@@ -82,19 +85,67 @@ const positionStyles = {
   }
 };
 
+// Animation variants for the podium items
+const podiumVariants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+    scale: 0.98,
+  },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      delay: i * 0.08,
+      duration: 0.4,
+      ease: [0.2, 0.9, 0.3, 1],
+      opacity: { duration: 0.25 },
+    },
+  }),
+};
+
+// Height mapping for different positions
+const heightMap = {
+  first: "tw-h-[220px]",
+  second: "tw-h-[190px]",
+  third: "tw-h-[170px]",
+};
+
 export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
   winner,
   onDropClick,
-  position
+  position,
+  customAnimationIndex
 }) => {
   const styles = positionStyles[position];
+  
+  // If no winner provided, render placeholder
+  if (!winner) {
+    return (
+      <WaveWinnersPodiumPlaceholder
+        height={heightMap[position]}
+        position={position}
+      />
+    );
+  }
+  
   const drop = winner.drop as ExtendedDrop;
+  const animationIndex = customAnimationIndex !== undefined 
+    ? customAnimationIndex 
+    : position === "first" ? 0 : position === "second" ? 1 : 2;
   
   return (
-    <div
-      onClick={() => onDropClick(drop)}
-      className="tw-cursor-pointer tw-group"
+    <motion.div
+      variants={podiumVariants}
+      initial="hidden"
+      animate="visible"
+      custom={animationIndex}
     >
+      <div
+        onClick={() => onDropClick(drop)}
+        className="tw-cursor-pointer tw-group"
+      >
       <div className="tw-flex tw-flex-col tw-items-center">
         <div className={`tw-flex tw-flex-col tw-items-center ${styles.marginBottom} tw-relative tw-z-10`}>
           <div className={`tw-absolute tw-inset-0 ${styles.bgGradient}`} />
@@ -202,5 +253,6 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
         </div>
       </div>
     </div>
+    </motion.div>
   );
 };

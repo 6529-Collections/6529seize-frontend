@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,17 +8,21 @@ import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
 import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
 
 interface WaveRollingWinnersProps {
-  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly decisionPoints: ApiWaveDecision[];
+  readonly wave: ApiWave;
 }
 
 export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
-  wave,
   onDropClick,
   decisionPoints,
+  wave,
 }) => {
-  const [expandedPoints, setExpandedPoints] = useState<Set<string>>(new Set());
+  // Initialize with the first accordion item open by default
+  const [expandedPoints, setExpandedPoints] = useState<Set<string>>(() => {
+    // When there are decision points, open the first one by default
+    return new Set(decisionPoints.length > 0 ? ['decision-point-0'] : []);
+  });
   const toggleExpanded = (pointId: string) => {
     setExpandedPoints((prev) => {
       const newSet = new Set(prev);
@@ -130,17 +134,15 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
               >
                 <div className="tw-space-y-4 tw-bg-black tw-rounded-b-xl tw-border-t tw-border-iron-800">
                   <WaveWinnersPodium
-                    wave={wave}
                     onDropClick={onDropClick}
-                    normalizedWinners={point.winners}
+                    winners={point.winners}
                     isLoading={false}
                   />
                   <WaveWinnersDrops
-                    wave={wave}
                     onDropClick={onDropClick}
-                    normalizedWinners={point.winners}
+                    winners={point.winners}
                     isLoading={false}
-                    hasInfiniteLoading={false}
+                    wave={wave}
                   />
                 </div>
               </motion.div>

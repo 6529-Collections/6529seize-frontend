@@ -29,14 +29,13 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
     <div className="tw-space-y-4 lg:tw-space-y-6 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
       {isMultiDecisionWave ? (
         <WaveRollingWinners
-          wave={wave}
           onDropClick={onDropClick}
           decisionPoints={decisionPoints}
+          wave={wave}
         />
       ) : (
         <div className="tw-space-y-2 tw-mt-4 tw-pb-4 tw-max-h-[calc(100vh-200px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           <WaveWinnersPodium
-            wave={wave}
             onDropClick={onDropClick}
             winners={decisionPoints[0]?.winners || []}
             isLoading={isDecisionsLoading}
@@ -44,7 +43,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           <WaveWinnersDrops
             wave={wave}
             onDropClick={onDropClick}
-            winners={decisionPoints[0]?.winners.slice(3) || []}
+            winners={decisionPoints[0]?.winners|| []}
             isLoading={isDecisionsLoading}
           />
         </div>

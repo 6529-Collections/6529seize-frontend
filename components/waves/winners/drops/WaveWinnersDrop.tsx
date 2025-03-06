@@ -43,7 +43,7 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
           <WaveWinnersDropHeader winner={winner} />
           <WaveWinnersDropContent winner={winner} />
           <div className="tw-mt-2 md:tw-ml-16">
-            <WaveWinnersDropOutcome winner={winner} wave={wave} />
+            <WaveWinnersDropOutcome winner={winner} />
           </div>
         </div>
       </div>
