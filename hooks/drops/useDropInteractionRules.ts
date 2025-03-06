@@ -10,6 +10,8 @@ interface DropInteractionRules {
   voteState: DropVoteState; // reason for current vote state
   canDelete: boolean; // determines if delete is allowed
   isAuthor: boolean; // determines if current user is the author
+  isWinner: boolean; // determines if drop is a winner
+  winningRank?: number; // rank of the winning drop if applicable
 }
 
 /**
@@ -19,6 +21,10 @@ interface DropInteractionRules {
  */
 export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+
+  // Check if this is a winner drop
+  const isWinner = drop.drop_type === ApiDropType.Winner;
+  const winningRank = isWinner ? drop.rank : undefined;
 
   // Determine vote state in order of precedence
   const getVoteState = (): DropVoteState => {
@@ -30,6 +36,11 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     }
     if (activeProfileProxy) {
       return DropVoteState.PROXY;
+    }
+
+    // Check for winner state before other checks
+    if (isWinner) {
+      return DropVoteState.IS_WINNER;
     }
 
     if (drop.id.startsWith("temp-")) {
@@ -60,6 +71,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     !drop.id.startsWith("temp-"); // must not be temporary drop
 
   // Rules for showing vote UI - show if it's not certain system states
+  // We DO want to show the vote UI for winners (but in a disabled state)
   const canShowVote = ![
     DropVoteState.NOT_LOGGED_IN,
     DropVoteState.NO_PROFILE,
@@ -67,7 +79,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     DropVoteState.CANT_VOTE,
   ].includes(voteState);
 
-  // Can vote only if state is CAN_VOTE
+  // Can vote only if state is CAN_VOTE (not IS_WINNER or other states)
   const canVote = voteState === DropVoteState.CAN_VOTE;
 
   const isAuthor =
@@ -83,5 +95,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     voteState,
     canDelete,
     isAuthor,
+    isWinner,
+    ...(isWinner && winningRank ? { winningRank } : {}),
   };
 }

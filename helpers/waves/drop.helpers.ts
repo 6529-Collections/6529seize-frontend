@@ -57,6 +57,18 @@ const findClosestMatch = (newDrop: ApiDrop, existingDrops: ExtendedDrop[]): Exte
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
 
+/**
+ * Convert an ApiDrop to ExtendedDrop by adding stable keys
+ */
+export const convertApiDropToExtendedDrop = (drop: ApiDrop): ExtendedDrop => {
+  const { key, hash } = getStableDropKey(drop);
+  return {
+    ...drop,
+    stableKey: key,
+    stableHash: hash
+  };
+};
+
 export const getDropKey = ({
   drop,
   returnOriginal,
