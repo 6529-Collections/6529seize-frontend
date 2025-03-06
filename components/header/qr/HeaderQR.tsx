@@ -178,6 +178,8 @@ function HeaderQRModal({
       const defaultStyle = { maxWidth: "100%", height: "auto" };
       return (
         <Image
+          priority
+          loading="eager"
           src={src}
           alt={alt}
           width={1000}
@@ -204,6 +206,8 @@ function HeaderQRModal({
             href={url}
             className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
             <Image
+              priority
+              loading="eager"
               src="/6529Core.png"
               alt="6529 Core"
               width={150}
