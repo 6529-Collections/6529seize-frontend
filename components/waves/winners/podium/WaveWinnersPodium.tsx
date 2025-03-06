@@ -1,12 +1,10 @@
 import React, { useMemo } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { WaveWinnersPodiumFirst } from "./WaveWinnersPodiumFirst";
-import { WaveWinnersPodiumSecond } from "./WaveWinnersPodiumSecond";
-import { WaveWinnersPodiumThird } from "./WaveWinnersPodiumThird";
 import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
+import { WavePodiumItem } from "./WavePodiumItem";
 
 interface WaveWinnersPodiumProps {
   readonly wave: ApiWave;
@@ -113,9 +111,10 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 animate="visible"
                 custom={1}
               >
-                <WaveWinnersPodiumSecond
+                <WavePodiumItem
                   winner={secondPlaceWinner}
                   onDropClick={onDropClick}
+                  position="second"
                 />
               </motion.div>
             ) : (
@@ -133,9 +132,10 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 animate="visible"
                 custom={0}
               >
-                <WaveWinnersPodiumFirst
+                <WavePodiumItem
                   winner={firstPlaceWinner}
                   onDropClick={onDropClick}
+                  position="first"
                 />
               </motion.div>
             ) : (
@@ -153,9 +153,10 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
                 animate="visible"
                 custom={2}
               >
-                <WaveWinnersPodiumThird
+                <WavePodiumItem
                   winner={thirdPlaceWinner}
                   onDropClick={onDropClick}
+                  position="third"
                 />
               </motion.div>
             ) : (
