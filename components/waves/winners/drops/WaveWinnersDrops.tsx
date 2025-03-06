@@ -27,11 +27,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
 
   // Empty state handling
   if (!winners.length) {
-    return (
-      <div className="tw-text-center tw-py-4 tw-text-iron-400">
-        No winners to display
-      </div>
-    );
+    return <></>
   }
 
   return (

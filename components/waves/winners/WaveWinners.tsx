@@ -1,4 +1,4 @@
-import React, { useContext, useReducer, useEffect } from "react";
+import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
@@ -32,6 +32,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           onDropClick={onDropClick}
           decisionPoints={decisionPoints}
           wave={wave}
+          isLoading={isDecisionsLoading}
         />
       ) : (
         <div className="tw-space-y-2 tw-mt-4 tw-pb-4 tw-max-h-[calc(100vh-200px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
@@ -43,7 +44,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           <WaveWinnersDrops
             wave={wave}
             onDropClick={onDropClick}
-            winners={decisionPoints[0]?.winners|| []}
+            winners={decisionPoints[0]?.winners || []}
             isLoading={isDecisionsLoading}
           />
         </div>
