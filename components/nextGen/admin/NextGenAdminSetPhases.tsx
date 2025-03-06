@@ -1,6 +1,5 @@
 import styles from "./NextGenAdmin.module.scss";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
 import {
@@ -26,6 +25,7 @@ import {
   NextgenAllowlistCollection,
 } from "../../../entities/INextgen";
 import { commonApiFetch } from "../../../services/api/common-api";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 interface Props {
   close: () => void;
 }
@@ -33,7 +33,7 @@ interface Props {
 const MARKLE_ZERO_PATTERN = /^0x0+$/;
 
 export default function NextGenAdminSetPhases(props: Readonly<Props>) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   const globalAdmin = useGlobalAdmin(account.address as string);
   const functionAdmin = useFunctionAdmin(

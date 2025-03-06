@@ -3,11 +3,11 @@ import {
   IProfileAndConsolidations,
 } from "../../../../../entities/IProfile";
 import UserPageIdentityStatementsStatement from "./UserPageIdentityStatementsStatement";
-import { useAccount } from "wagmi";
 import { useContext, useEffect, useState } from "react";
 import { amIUser } from "../../../../../helpers/Helpers";
 import CommonSkeletonLoader from "../../../../utils/animation/CommonSkeletonLoader";
 import { AuthContext } from "../../../../auth/Auth";
+import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 
 export default function UserPageIdentityStatementsStatementsList({
   statements,
@@ -20,7 +20,7 @@ export default function UserPageIdentityStatementsStatementsList({
   readonly noItemsMessage: string;
   readonly loading: boolean;
 }) {
-  const { address } = useAccount();
+  const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
   const [isMyProfile, setIsMyProfile] = useState<boolean>(false);
 

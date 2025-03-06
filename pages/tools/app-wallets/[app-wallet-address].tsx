@@ -12,7 +12,7 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-const AppWallet = dynamic(
+const AppWalletComponent = dynamic(
   () => import("../../../components/app-wallets/AppWallet"),
   {
     ssr: false,
@@ -55,7 +55,7 @@ export default function AppWalletPage(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <AppWallet address={address} />
+        <AppWalletComponent address={address} />
       </main>
     </>
   );

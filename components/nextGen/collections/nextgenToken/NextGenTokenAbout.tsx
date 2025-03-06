@@ -13,7 +13,6 @@ import {
   printMintDate,
 } from "../../../../helpers/Helpers";
 import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
 import {
   CICType,
   IProfileAndConsolidations,
@@ -34,6 +33,7 @@ import { displayScore } from "./NextGenTokenProperties";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import { ETHEREUM_ICON_TEXT } from "../../../../constants";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 
 interface Props {
   collection: NextGenCollection;
@@ -42,7 +42,7 @@ interface Props {
 
 export default function NextgenTokenAbout(props: Readonly<Props>) {
   const capacitor = useCapacitor();
-  const account = useAccount();
+  const account = useSeizeConnectContext();
   const [ownerDisplay, setOwnerDisplay] = useState<string | null>();
   const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
   const [level, setLevel] = useState(-1);

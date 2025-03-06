@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { useAccount } from "wagmi";
 import UserPageSetUpProfile from "./UserPageSetUpProfile";
+import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 
 export default function UserPageSetUpProfileWrapper({
   profile,
@@ -10,7 +10,7 @@ export default function UserPageSetUpProfileWrapper({
   readonly profile: IProfileAndConsolidations;
   readonly children: ReactNode;
 }) {
-  const { address } = useAccount();
+  const { address } = useSeizeConnectContext();
 
   const getShowSetUpProfile = () => {
     if (!address) return false;
