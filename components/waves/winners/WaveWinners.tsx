@@ -22,10 +22,10 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
       {isMultiDecisionWave ? (
         <WaveRollingWinners wave={wave} onDropClick={onDropClick} />
       ) : (
-        <>
+        <div className="tw-space-y-2 tw-mt-4 tw-pb-4 tw-max-h-[calc(100vh-200px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           <WaveWinnersPodium wave={wave} onDropClick={onDropClick} />
           <WaveWinnersDrops wave={wave} onDropClick={onDropClick} />
-        </>
+        </div>
       )}
     </div>
   );
