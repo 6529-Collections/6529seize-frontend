@@ -80,17 +80,17 @@ export default function SubsequentDecisions({
   );
 
   return (
-    <div className="tw-bg-iron-800/30 tw-rounded-lg tw-p-4 tw-mb-4">
+    <div className="tw-border tw-border-iron-700/40 tw-rounded-lg tw-p-4 tw-mb-4 tw-shadow-md">
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h3 className="tw-text-iron-100 tw-text-base tw-font-medium tw-mb-3">
-          Winners Announcements
+        <h3 className="tw-text-iron-50 tw-text-lg tw-font-semibold tw-mb-3">
+          Additional Announcements
         </h3>
       </div>
 
       {/* Explanation about sequence */}
-      <div className="tw-bg-iron-900/50 tw-rounded tw-p-2.5 tw-mb-4">
+      <div className="tw-border-b tw-border-iron-700/30 tw-pb-3 tw-mb-4">
         <p className="tw-text-xs tw-text-iron-300 tw-mb-0">
-          <span className="tw-text-primary-400 tw-font-medium">Timeline of announcements:</span> Define when winners will be selected throughout your wave. Each announcement builds on the previous one in sequence.
+          <span className="tw-text-primary-400 tw-font-medium">Timeline:</span> Define when winners will be selected throughout your wave.
         </p>
       </div>
 
@@ -188,7 +188,7 @@ export default function SubsequentDecisions({
               Schedule Next Winners Announcement
             </p>
             <p className="tw-text-xs tw-text-iron-400 tw-mb-0">
-              Define how long after the previous announcement the next one will occur
+              Set time between announcements
             </p>
           </div>
         </div>

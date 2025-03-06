@@ -21,7 +21,7 @@ export default function DateAccordion({
 }: DateAccordionProps) {
   return (
     <motion.div
-      className="tw-bg-iron-800/20 tw-rounded-xl tw-ring-1 tw-ring-iron-700/50 tw-shadow-sm"
+      className="tw-bg-iron-900 tw-rounded-xl tw-ring-1 tw-ring-iron-700/50 tw-shadow-sm"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -42,7 +42,7 @@ export default function DateAccordion({
                 className={`tw-size-4 ${showChevron ? 'tw-text-primary-400' : 'tw-text-iron-700'} tw-transition-all tw-duration-200`}
               />
             </motion.div>
-            <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+            <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-300">
               {title}
             </p>
           </div>

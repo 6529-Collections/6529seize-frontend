@@ -118,7 +118,7 @@ export default function DecisionsFirst({
   return (
     <div className="tw-col-span-2">
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-mb-3">
-        <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
+        <p className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-50">
           First Winners Announcement
         </p>
         <TooltipIconButton 
@@ -129,9 +129,9 @@ export default function DecisionsFirst({
         />
       </div>
       
-      <div className="tw-flex tw-flex-col md:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-p-3 tw-bg-iron-800/30 tw-rounded-lg md:tw-h-[390px]">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-y-8 tw-gap-x-10 md:tw-grid-cols-2">
         {/* Date selection */}
-        <div className="tw-w-full md:tw-w-[280px]">
+        <div className="tw-w-full">
           <p className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-300">
             Select Date:
           </p>

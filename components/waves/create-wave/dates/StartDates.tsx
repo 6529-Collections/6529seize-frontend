@@ -92,8 +92,8 @@ export default function StartDates({
       isExpanded={isExpanded}
       onToggle={() => setIsExpanded(!isExpanded)}
       collapsedContent={
-        <div className="tw-flex tw-items-center tw-space-x-6">
-          <div className="tw-flex tw-items-center tw-bg-[#24242B] tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
+        <div className="tw-flex tw-items-center tw-space-x-4">
+          <div className="tw-flex tw-items-center tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
             <FontAwesomeIcon
               icon={faCalendarDays}
               className="tw-mr-2 tw-size-4 tw-text-primary-400"
@@ -108,7 +108,7 @@ export default function StartDates({
             </div>
           </div>
           {isRankWave && (
-            <div className="tw-flex tw-items-center tw-bg-[#24242B] tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
+            <div className="tw-flex tw-items-center tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
               <FontAwesomeIcon
                 icon={faCalendarDays}
                 className="tw-mr-2 tw-size-4 tw-text-primary-400"
@@ -132,10 +132,10 @@ export default function StartDates({
           <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
             {CREATE_WAVE_START_DATE_LABELS[waveType]}
           </p>
-          <p className="tw-text-xs tw-text-iron-400 tw-mb-2">
-            This is when creators can begin submitting their work to your wave
+          <p className="tw-text-xs tw-text-iron-400 tw-mt-1">
+            Creators begin submitting work to your wave
           </p>
-          <div className="tw-mt-2">
+          <div className="tw-mt-4">
             <CommonCalendar
               initialMonth={new Date().getMonth()}
               initialYear={new Date().getFullYear()}
@@ -152,10 +152,10 @@ export default function StartDates({
             <p className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-50">
               Drops Voting Begins
             </p>
-            <p className="tw-text-xs tw-text-iron-400 tw-mb-2">
-              This is when community members can start voting on submissions
+            <p className="tw-text-xs tw-text-iron-400 tw-mt-1">
+              Community voting on wave submissions begins
             </p>
-            <div className="tw-mt-2">
+            <div className="tw-mt-4">
               <CommonCalendar
                 initialMonth={new Date().getMonth()}
                 initialYear={new Date().getFullYear()}
