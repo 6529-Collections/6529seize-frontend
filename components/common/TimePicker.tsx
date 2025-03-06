@@ -1,6 +1,3 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock } from "@fortawesome/free-regular-svg-icons";
-
 interface TimePickerProps {
   readonly hours: number;
   readonly minutes: number;
@@ -35,37 +32,27 @@ export default function TimePicker({
     const newHours = hours >= 12 ? hours - 12 : hours + 12;
     if (isTimeDisabled(newHours, minutes)) return;
     onTimeChange(newHours, minutes);
-  }
-  
+  };
+
   const isPm = hours >= 12;
-  
+
   const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-  
+
   // Check if a time is disabled based on minTime
   const isTimeDisabled = (h: number, m: number) => {
     if (!minTime) return false;
-    
+
     // Compare hours first
     if (h < minTime.hours) return true;
     // If hours are equal, compare minutes
     if (h === minTime.hours && m < minTime.minutes) return true;
-    
+
     return false;
   };
 
   return (
-    <div className="tw-py-4 tw-relative tw-rounded-xl tw-bg-[#24242B] tw-shadow-md tw-ring-1 tw-ring-iron-700/50">
+    <div className="tw-py-4 tw-relative tw-rounded-lg tw-bg-iron-800/60 tw-shadow-md tw-ring-1 tw-ring-iron-700/50">
       <div className="tw-px-5">
-        <div className="tw-flex tw-items-center tw-mb-4">
-          <FontAwesomeIcon
-            icon={faClock}
-            className="tw-mr-3 tw-size-5 tw-text-primary-400"
-          />
-          <p className="tw-mb-0 tw-text-base tw-font-medium tw-text-iron-50">
-            Select time
-          </p>
-        </div>
-
         <div className="tw-flex tw-items-center tw-mb-5">
           <div className="tw-flex tw-items-center tw-space-x-2 tw-flex-1">
             <div className="tw-w-20 tw-relative">
@@ -77,10 +64,14 @@ export default function TimePicker({
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
                   if (isNaN(val)) return;
-                  const newHours = isPm ? 
-                    (val === 12 ? 12 : val + 12) : 
-                    (val === 12 ? 0 : val);
-                  
+                  const newHours = isPm
+                    ? val === 12
+                      ? 12
+                      : val + 12
+                    : val === 12
+                    ? 0
+                    : val;
+
                   if (!isTimeDisabled(newHours, minutes)) {
                     onTimeChange(newHours, minutes);
                   }
@@ -99,7 +90,7 @@ export default function TimePicker({
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
                   if (isNaN(val)) return;
-                  
+
                   if (!isTimeDisabled(hours, val)) {
                     onTimeChange(hours, val);
                   }
@@ -123,14 +114,16 @@ export default function TimePicker({
             return (
               <button
                 key={option.label}
-                onClick={() => !disabled && onTimeChange(option.hours, option.minutes)}
+                onClick={() =>
+                  !disabled && onTimeChange(option.hours, option.minutes)
+                }
                 disabled={disabled}
                 className={`tw-p-1.5 tw-text-xs sm:tw-text-sm tw-rounded-lg tw-transition-all tw-duration-200 tw-border-0 tw-shadow-sm hover:tw-shadow-md hover:tw-translate-y-[-1px] ${
                   hours === option.hours && minutes === option.minutes
                     ? "tw-bg-primary-500 hover:tw-bg-primary-600 tw-text-white tw-ring-2 tw-ring-primary-400/30"
                     : disabled
-                      ? "tw-bg-[#2A2A33] tw-text-iron-600 tw-opacity-50 tw-cursor-not-allowed"
-                      : "tw-bg-[#2A2A33] tw-text-iron-50 hover:tw-bg-[#32323C]"
+                    ? "tw-bg-[#2A2A33] tw-text-iron-600 tw-opacity-50 tw-cursor-not-allowed"
+                    : "tw-bg-[#2A2A33] tw-text-iron-50 hover:tw-bg-[#32323C]"
                 }`}
               >
                 {option.label}

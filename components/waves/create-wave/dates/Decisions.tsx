@@ -124,7 +124,7 @@ export default function Decisions({
 
   const renderCollapsedContent = () => {
     return (
-      <div className="tw-flex tw-items-center tw-bg-[#24242B] tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
+      <div className="tw-flex tw-items-center tw-bg-iron-700/40 tw-px-3 tw-py-2 tw-rounded-lg tw-shadow-md hover:tw-translate-y-[-1px] tw-transition-transform tw-duration-200">
         <FontAwesomeIcon
           icon={faCalendarPlus}
           className="tw-mr-2 tw-size-4 tw-text-primary-400"
@@ -168,7 +168,7 @@ export default function Decisions({
     >
       <div className="tw-px-5 tw-pt-2 tw-pb-1">
         <div className="tw-border-b tw-border-iron-700/50 tw-pb-3 tw-mb-3">
-          <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
+        <p className="tw-mb-0 tw-text-sm tw-text-iron-300">
             <strong>Winner announcements</strong> for showcasing selected creators. Set your first date, then add more if needed.
             {dates.subsequentDecisions.length === 0 && 
               <span className="tw-text-primary-300"> With a fixed schedule, the last announcement marks your wave's end date.</span>
@@ -180,7 +180,7 @@ export default function Decisions({
         </div>
       </div>
       <div
-        className="tw-grid tw-grid-cols-1 tw-gap-y-6 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5"
+        className="tw-grid tw-grid-cols-1 tw-gap-y-6 tw-gap-x-10 md:tw-grid-cols-2 tw-px-5 tw-pb-5 tw-divide-y tw-divide-solid tw-divide-x-0 tw-divide-iron-700"
         onClick={onInteraction}
       >
         {/* First Decision Date and Time */}
@@ -203,14 +203,14 @@ export default function Decisions({
         
         {/* Recurring Mode Toggle - Only show when at least one subsequent decision exists */}
         {dates.subsequentDecisions.length > 0 && (
-          <div className="tw-col-span-2 tw-mt-3">
-            <div className="tw-border tw-border-iron-700/50 tw-rounded-lg tw-p-4 tw-shadow-md">
+          <div className="tw-col-span-2">
+            <div className="tw-border tw-border-iron-700/50 tw-rounded-lg tw-mt-5 tw-mb-2 tw-shadow-md">
               <div className="tw-flex tw-justify-between tw-items-center">
                 <div className="tw-flex-1">
                   <h3 className="tw-text-iron-50 tw-text-base tw-font-semibold tw-mb-1">
                     Repeating Announcement Cycles
                   </h3>
-                  <p className="tw-mb-0 tw-text-xs tw-text-iron-300">
+                  <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
                     Repeat this pattern until your wave ends
                   </p>
                 </div>
