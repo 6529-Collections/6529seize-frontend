@@ -1,27 +1,27 @@
 import React from "react";
 import Link from "next/link";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../../helpers/image.helpers";
+import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersDropHeaderAuthorPfpProps {
-  readonly drop: ExtendedDrop;
+  readonly winner: ApiWaveDecisionWinner;
 }
 
 export default function WaveWinnersDropHeaderAuthorPfp({
-  drop,
+  winner,
 }: WaveWinnersDropHeaderAuthorPfpProps) {
   return (
     <Link
-      href={`/${drop.author.handle}`}
+      href={`/${winner.drop.author.handle}`}
       onClick={(e) => e.stopPropagation()}
       className="tw-transform hover:tw-scale-105 tw-transition-all tw-duration-300"
     >
-      {drop.author.pfp ? (
+      {winner.drop.author.pfp ? (
         <img
-          src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
+          src={getScaledImageUri(winner.drop.author.pfp, ImageScale.W_AUTO_H_50)}
           alt=""
           className="tw-size-10 md:tw-size-12 tw-rounded-xl tw-ring-2 tw-ring-iron-700/50 tw-object-cover"
         />

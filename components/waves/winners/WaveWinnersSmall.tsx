@@ -1,4 +1,4 @@
-import React, { useContext, useState, memo, useCallback } from "react";
+import React, { useContext, useState, memo, useCallback, useEffect } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import {
@@ -18,6 +18,9 @@ import {
 } from "../../../helpers/image.helpers";
 import WaveDropContent from "../drops/WaveDropContent";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
+import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
+import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
+import { format } from "date-fns";
 
 interface WaveWinnersSmallProps {
   readonly wave: ApiWave;
@@ -321,15 +324,56 @@ WaveWinnerItem.displayName = "WaveWinnerItem";
 export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
   ({ wave, onDropClick }) => {
     const { connectedProfile } = useContext(AuthContext);
-    const { drops } = useWaveDropsLeaderboard({
+    const { isMultiDecisionWave } = useDecisionPoints(wave);
+    const [activeDecisionPoint, setActiveDecisionPoint] = useState<string | null>(null);
+    
+    // Fetch data for single decision waves (using leaderboard)
+    const { 
+      drops: leaderboardDrops,
+      isFetching: isLeaderboardFetching 
+    } = useWaveDropsLeaderboard({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
       dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
       sortDirection: WaveDropsLeaderboardSortDirection.ASC,
       reverse: false,
+      pollingEnabled: false,
+      enabled: !isMultiDecisionWave
     });
 
-    if (!drops?.length) {
+    // Fetch data for multi-decision waves (using decisions endpoint)
+    const {
+      decisionPoints,
+      isLoading: isDecisionsLoading,
+    } = useWaveDecisions({
+      wave,
+      enabled: isMultiDecisionWave
+    });
+
+    // Set first decision point as active when loaded
+    useEffect(() => {
+      if (isMultiDecisionWave && decisionPoints?.length > 0 && !activeDecisionPoint) {
+        setActiveDecisionPoint(decisionPoints[0].id);
+      }
+    }, [isMultiDecisionWave, decisionPoints, activeDecisionPoint]);
+
+    // Loading state
+    if ((isMultiDecisionWave && isDecisionsLoading) || (!isMultiDecisionWave && isLeaderboardFetching)) {
+      return (
+        <div className="tw-p-3">
+          <div className="tw-animate-pulse tw-space-y-4">
+            <div className="tw-h-6 tw-bg-iron-800 tw-rounded-md tw-w-1/3"></div>
+            <div className="tw-space-y-3">
+              <div className="tw-h-24 tw-bg-iron-800 tw-rounded-xl"></div>
+              <div className="tw-h-24 tw-bg-iron-800 tw-rounded-xl"></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Single decision wave with no drops
+    if (!isMultiDecisionWave && !leaderboardDrops?.length) {
       return (
         <div className="tw-p-3">
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-8">
@@ -344,6 +388,47 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
       );
     }
 
+    // Multi-decision wave with no decision points
+    if (isMultiDecisionWave && (!decisionPoints || decisionPoints.length === 0)) {
+      return (
+        <div className="tw-p-3">
+          <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-8">
+            <div className="tw-mt-4 tw-text-base tw-font-semibold tw-text-iron-300">
+              No Decision Points Available
+            </div>
+            <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+              There are no past decision points to display
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // For single decision waves, just render the drops
+    if (!isMultiDecisionWave) {
+      return (
+        <div className="tw-p-3">
+          <div className="tw-flex tw-items-center tw-justify-between tw-px-1">
+            <h2 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
+              Winners
+            </h2>
+          </div>
+
+          <div className="tw-space-y-3 tw-mt-3">
+            {leaderboardDrops.map((drop) => (
+              <WaveWinnerItem
+                key={drop.id}
+                drop={drop}
+                wave={wave}
+                onDropClick={onDropClick}
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // For multi-decision waves, add a decision point selector
     return (
       <div className="tw-p-3">
         <div className="tw-flex tw-items-center tw-justify-between tw-px-1">
@@ -351,16 +436,35 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
             Winners
           </h2>
         </div>
+        
+        {/* Decision point selector */}
+        <div className="tw-mt-3 tw-mb-4">
+          <select 
+            className="tw-w-full tw-px-3 tw-py-2 tw-rounded-lg tw-bg-iron-800 tw-border tw-border-iron-700 tw-text-sm tw-text-iron-100"
+            value={activeDecisionPoint || ''}
+            onChange={(e) => setActiveDecisionPoint(e.target.value)}
+          >
+            {decisionPoints.map((point) => (
+              <option key={point.id} value={point.id}>
+                {point.label} - {format(new Date(point.date), "MMM d, yyyy")}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <div className="tw-space-y-3 tw-mt-3">
-          {drops.map((drop) => (
-            <WaveWinnerItem
-              key={drop.id}
-              drop={drop}
-              wave={wave}
-              onDropClick={onDropClick}
-            />
-          ))}
+        {/* Show winners for selected decision point */}
+        <div className="tw-space-y-3">
+          {activeDecisionPoint && 
+            decisionPoints
+              .find(point => point.id === activeDecisionPoint)
+              ?.winners.map(winner => (
+                <WaveWinnerItem
+                  key={winner.drop.id}
+                  drop={winner.drop}
+                  wave={wave}
+                  onDropClick={onDropClick}
+                />
+              ))}
         </div>
       </div>
     );

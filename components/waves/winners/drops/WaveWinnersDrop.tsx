@@ -4,9 +4,9 @@ import { WaveWinnersDropHeader } from "./header/WaveWinnersDropHeader";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
 import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
 import { ApiWave } from "../../../../generated/models/ApiWave";
-
+import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 interface WaveWinnersDropProps {
-  readonly drop: ExtendedDrop;
+  readonly winner: ApiWaveDecisionWinner;
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
@@ -20,26 +20,30 @@ const rankGradients: Record<number | "default", string> = {
 };
 
 export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
-  drop,
+  winner,
   wave,
   onDropClick,
 }) => {
   const gradientClass =
-    drop.rank && drop.rank <= 3
-      ? rankGradients[drop.rank]
+    winner.place && winner.place <= 3
+      ? rankGradients[winner.place]
       : rankGradients.default;
 
   return (
     <div
-      onClick={() => onDropClick(drop)}
+      onClick={() => onDropClick({
+        ...winner.drop,
+        stableKey: winner.drop.id,
+        stableHash: winner.drop.id,
+      })}
       className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
     >
       <div className="tw-rounded-xl tw-bg-iron-950 tw-p-5">
         <div className="tw-flex tw-flex-col">
-          <WaveWinnersDropHeader drop={drop} />
-          <WaveWinnersDropContent drop={drop} />
+          <WaveWinnersDropHeader winner={winner} />
+          <WaveWinnersDropContent winner={winner} />
           <div className="tw-mt-2 md:tw-ml-16">
-            <WaveWinnersDropOutcome drop={drop} wave={wave} />
+            <WaveWinnersDropOutcome winner={winner} />
           </div>
         </div>
       </div>

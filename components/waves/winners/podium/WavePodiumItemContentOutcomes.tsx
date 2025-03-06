@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Tippy from "@tippyjs/react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { useDropOutcomes } from "../../../../hooks/drops/useDropOutcomes";
+import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
+import { ApiWaveOutcomeCredit } from "../../../../generated/models/ApiWaveOutcomeCredit";
+import { ApiWaveOutcomeType } from "../../../../generated/models/ApiWaveOutcomeType";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import { OutcomeType } from "../../../../hooks/drops/useDropOutcomes";
 
 interface WavePodiumItemContentOutcomesProps {
-  readonly drop: ApiDrop;
-  readonly wave: ApiWave;
+  readonly winner: ApiWaveDecisionWinner;
 }
 
 export const WavePodiumItemContentOutcomes: React.FC<
   WavePodiumItemContentOutcomesProps
-> = ({ drop, wave }) => {
+> = ({ winner }) => {
   const [isTouch, setIsTouch] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -27,13 +27,34 @@ export const WavePodiumItemContentOutcomes: React.FC<
     }
   };
 
-  const {
-    outcomes: { nicOutcomes, repOutcomes, manualOutcomes },
-    haveOutcomes,
-  } = useDropOutcomes({
-    drop,
-    wave,
-  });
+  // Transform awards into the same format that useDropOutcomes provided
+  const { nicOutcomes, repOutcomes, manualOutcomes, haveOutcomes } = useMemo(() => {
+    const nicOutcomes = winner.awards
+      .filter(award => award.credit === ApiWaveOutcomeCredit.Cic && award.amount && award.amount > 0)
+      .map(award => ({
+        type: OutcomeType.NIC as const,
+        value: award.amount || 0
+      }));
+
+    const repOutcomes = winner.awards
+      .filter(award => award.credit === ApiWaveOutcomeCredit.Rep && award.amount && award.amount > 0)
+      .map(award => ({
+        type: OutcomeType.REP as const,
+        value: award.amount || 0,
+        category: award.rep_category || ""
+      }));
+
+    const manualOutcomes = winner.awards
+      .filter(award => award.type === ApiWaveOutcomeType.Manual && award.description)
+      .map(award => ({
+        type: OutcomeType.MANUAL as const,
+        description: award.description
+      }));
+
+    const haveOutcomes = !!nicOutcomes.length || !!repOutcomes.length || !!manualOutcomes.length;
+    
+    return { nicOutcomes, repOutcomes, manualOutcomes, haveOutcomes };
+  }, [winner.awards]);
 
   if (!haveOutcomes) {
     return null;

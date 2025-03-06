@@ -1,16 +1,16 @@
+import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 import { getTimeAgoShort } from "../../../../../helpers/Helpers";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 
 interface WaveWinnersDropHeaderCreatedProps {
-  readonly drop: ExtendedDrop;
+  readonly winner: ApiWaveDecisionWinner;
 }
 
 export default function WaveWinnersDropHeaderCreated({
-  drop,
+  winner,
 }: WaveWinnersDropHeaderCreatedProps) {
   return (
     <span className="tw-text-xs md:tw-text-sm tw-font-medium tw-text-iron-400 tw-leading-none">
-    {getTimeAgoShort(drop.created_at)}
-  </span>
+      {getTimeAgoShort(winner.drop.created_at)}
+    </span>
   );
 }

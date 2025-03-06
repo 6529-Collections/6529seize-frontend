@@ -1,4 +1,4 @@
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 
 const rankColors = {
   1: {
@@ -51,13 +51,13 @@ export function TrophyIcon({ color }: TrophyIconProps) {
 }
 
 interface WaveWinnersDropHeaderRankProps {
-  readonly drop: ExtendedDrop;
+  readonly winner: ApiWaveDecisionWinner;
 }
 
 export default function WaveWinnersDropHeaderRank({
-  drop,
+  winner,
 }: WaveWinnersDropHeaderRankProps) {
-  if (!drop.rank) {
+  if (!winner.place) {
     return (
       <div className="tw-font-medium tw-text-sm tw-text-iron-300 tw-flex tw-items-center tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-justify-center tw-ring-1 tw-ring-iron-700">
         <svg
@@ -74,13 +74,13 @@ export default function WaveWinnersDropHeaderRank({
     );
   }
 
-  if (drop.rank && drop.rank <= 3) {
-    const rankStyle = rankColors[drop.rank as keyof typeof rankColors];
+  if (winner.place && winner.place <= 3) {
+    const rankStyle = rankColors[winner.place as keyof typeof rankColors];
     return (
       <div className={`${rankStyle.shadow} tw-ring-1 ${rankStyle.bg} ${rankStyle.ring} tw-rounded-xl tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 ${rankStyle.text} tw-font-medium tw-text-xs tw-flex tw-items-center tw-gap-x-1.5 desktop-hover:${rankStyle.hover} tw-transition-all tw-duration-200`}>
         <TrophyIcon color={rankStyle.color} />
         <span className={`${rankStyle.dropShadow} tw-text-sm`}>
-          #{drop.rank}
+          #{winner.place}
         </span>
       </div>
     );
@@ -88,7 +88,7 @@ export default function WaveWinnersDropHeaderRank({
 
   return (
     <div className="tw-font-medium tw-text-sm tw-text-iron-300 tw-flex tw-items-center tw-h-7 tw-min-w-[2.5rem] tw-px-2.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-justify-center tw-ring-1 tw-ring-iron-700">
-      #{drop.rank}
+      #{winner.place}
     </div>
   );
 }
