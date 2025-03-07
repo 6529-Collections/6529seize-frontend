@@ -259,17 +259,63 @@ const getOutcomes = ({
 };
 
 /**
+ * Calculates the last decision time that will occur in a rolling wave before the given end date
+ * @param firstDecisionTime The timestamp of the first decision
+ * @param subsequentDecisions Array of intervals between decisions in ms
+ * @param userEndDate The user-specified end date
+ * @returns The timestamp of the last decision that will occur before the end date
+ */
+export const calculateLastDecisionTime = (
+  firstDecisionTime: number,
+  subsequentDecisions: number[],
+  userEndDate: number
+): number => {
+  // If no subsequent decisions, just return the first decision time
+  if (subsequentDecisions.length === 0) {
+    return firstDecisionTime;
+  }
+  
+  // Calculate the total length of one decision cycle
+  const cycleLength = subsequentDecisions.reduce((sum, interval) => sum + interval, 0);
+  
+  // Calculate time remaining after first decision until end date
+  const timeRemainingAfterFirst = userEndDate - firstDecisionTime;
+  
+  // If end date is before or at first decision time, return first decision time
+  if (timeRemainingAfterFirst <= 0) {
+    return firstDecisionTime;
+  }
+  
+  // Calculate how many complete cycles fit in the remaining time
+  const completeCycles = Math.floor(timeRemainingAfterFirst / cycleLength);
+  
+  // Start with the time after all complete cycles
+  let lastDecisionTime = firstDecisionTime + (completeCycles * cycleLength);
+  
+  // Calculate time for partial cycle
+  const remainingTime = timeRemainingAfterFirst % cycleLength;
+  
+  // Process partial cycle - find the last decision that fits
+  let accumulatedTime = 0;
+  for (const interval of subsequentDecisions) {
+    accumulatedTime += interval;
+    if (accumulatedTime <= remainingTime) {
+      lastDecisionTime += interval;
+    } else {
+      break;
+    }
+  }
+  
+  return lastDecisionTime;
+};
+
+/**
  * Calculates the end date based on the given dates configuration
  * @param dates The CreateWaveDatesConfig object
  * @returns The calculated end date in milliseconds
  * @throws Error if isRolling is true and no end date is provided
  */
 export const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
-  // If endDate is explicitly set, use it
-  if (dates.endDate) {
-    return dates.endDate;
-  }
-  
   // If subsequentDecisions is empty, end date is firstDecisionTime
   if (dates.subsequentDecisions.length === 0) {
     return dates.firstDecisionTime;
@@ -281,8 +327,23 @@ export const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
       dates.subsequentDecisions.reduce((sum, current) => sum + current, 0);
   }
   
-  // If isRolling is true and no endDate is set, throw an error
-  throw new Error("End date must be explicitly set when isRolling is true");
+  // If isRolling is true, we need to calculate the last decision time
+  if (dates.isRolling) {
+    // Need an end date for rolling waves
+    if (!dates.endDate) {
+      throw new Error("End date must be explicitly set when isRolling is true");
+    }
+    
+    // Calculate the last decision time that will occur before the user-specified end date
+    return calculateLastDecisionTime(
+      dates.firstDecisionTime,
+      dates.subsequentDecisions,
+      dates.endDate
+    );
+  }
+  
+  // This should never happen if all cases are covered
+  return dates.endDate || dates.firstDecisionTime;
 };
 
 export const getCreateNewWaveBody = ({
