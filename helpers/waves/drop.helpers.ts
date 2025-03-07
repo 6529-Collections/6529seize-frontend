@@ -8,8 +8,6 @@ import { ApiFeedItemType } from "../../generated/models/ApiFeedItemType";
 export interface ExtendedDrop extends ApiDrop {
   stableKey: string;
   stableHash: string;
-  decision_round?: number;
-  position_in_rank?: number;
 }
 
 export const getStableDropKey = (drop: ApiDrop, existingDrops: ExtendedDrop[] = []): { key: string, hash: string } => {

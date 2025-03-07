@@ -4,6 +4,8 @@ import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
 import BrainRightSidebar, {
   SidebarTab,
 } from "./right-sidebar/BrainRightSidebar";
+import { MyStreamWaveTab } from "./my-stream/MyStreamWave";
+import { ContentTabProvider, useContentTab } from "./ContentTabContext";
 import { useRouter } from "next/router";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -21,6 +23,9 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
+  
+  // Get content tab state from context
+  const { activeContentTab, setActiveContentTab } = useContentTab();
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
@@ -83,7 +88,9 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
           style={{ transition: "none" }}
         >
           <div className="tw-h-screen lg:tw-h-[calc(100vh-5.5rem)] min-[1200px]:tw-h-[calc(100vh-6.25rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4">
-            <BrainLeftSidebar activeWaveId={router.query.wave as string} />
+            <BrainLeftSidebar 
+              activeWaveId={router.query.wave as string}
+            />
             <div className="tw-flex-grow xl:tw-relative">
               {children}
               {isDropOpen && (
@@ -121,4 +128,10 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   );
 };
 
-export default BrainDesktop;
+const BrainDesktopWithProvider: React.FC<Props> = (props) => (
+  <ContentTabProvider>
+    <BrainDesktop {...props} />
+  </ContentTabProvider>
+);
+
+export default BrainDesktopWithProvider;

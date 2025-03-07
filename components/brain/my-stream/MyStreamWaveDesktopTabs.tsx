@@ -45,7 +45,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   }, [votingState, hasFirstDecisionPassed]);
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full">
+    <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full tw-hidden">
+      {/* Temporarily hide the tabs as they are now in the left sidebar */}
       <TabToggle
         options={options}
         activeKey={activeTab}

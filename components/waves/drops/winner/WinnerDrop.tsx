@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../Drop";
@@ -14,35 +15,33 @@ import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WinnerDropBadge from "./WinnerDropBadge";
 
-// Get rank-specific colors
 const getRankColorsByRank = (
   rank: number | null
 ): {
   borderColor: string;
   textColor: string;
 } => {
-  // Convert rank to a number to ensure proper comparison
   const rankNumber =
     typeof rank === "string" ? parseInt(rank as string, 10) : rank;
 
   if (rankNumber === 1) {
     return {
-      borderColor: "#E8D48A", // Gold
+      borderColor: "#fbbf24",
       textColor: "#E8D48A",
     };
   } else if (rankNumber === 2) {
     return {
-      borderColor: "#DDDDDD", // Silver
+      borderColor: "#94a3b8",
       textColor: "#DDDDDD",
     };
   } else if (rankNumber === 3) {
     return {
-      borderColor: "#CD7F32", // Bronze
-      textColor: "#CD7F32",
+      borderColor: "#CD7F32",
+      textColor: "#CD7F32", 
     };
   } else {
     return {
-      borderColor: "#7F8A93", // Gray for all other ranks
+      borderColor: "#60606C",
       textColor: "#7F8A93",
     };
   }
@@ -85,20 +84,14 @@ const WinnerDrop = ({
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
 
-  // For winner drops, we should always show the rank-specific border
-  // Forcing isActiveDrop to false ensures the colored border is always visible
-  const isActiveDrop = false; // Override activeDrop?.drop.id === drop.id
+  const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isMobile = useIsMobileDevice();
 
-  const round = drop.decision_round || 1;
-  const position = drop.position_in_rank || 1;
+  const effectiveRank = drop.winning_context?.place ?? (drop.rank !== null && drop.rank !== undefined ? drop.rank : position);
+  
+  const decisionTime = drop.winning_context?.decision_time;
 
-  // Make sure we have a rank value to work with (fallback to position if rank is missing)
-  const effectiveRank =
-    drop.rank !== null && drop.rank !== undefined ? drop.rank : position;
-
-  // Get colors based on effective rank
   const colors = getRankColorsByRank(effectiveRank);
 
   const handleLongPress = useCallback(() => {
@@ -124,16 +117,20 @@ const WinnerDrop = ({
       }`}
     >
       <div
-        className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-transition-all tw-duration-300 tw-rounded-lg
-          tw-bg-iron-950/80 tw-backdrop-blur-sm tw-border-0 tw-overflow-hidden tw-group`}
+        className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group
+          ${isActiveDrop ? "tw-bg-[#3CCB7F]/5" : "tw-bg-iron-950 tw-backdrop-blur-sm"}`}
         style={{
-          borderLeft: `2px solid ${colors.borderColor}`,
-          borderTop: `1px solid ${colors.borderColor}20`,
-          borderRight: `1px solid ${colors.borderColor}20`,
-          borderBottom: `1px solid ${colors.borderColor}20`,
+          border: "1px solid transparent",
+          borderLeft: "2px solid transparent",
+          boxShadow: isActiveDrop 
+            ? "inset 2px 0 0 rgba(60,203,127,0.7)" 
+            : `inset 2px 0 0 ${colors.borderColor}, 
+               inset 0 1px 0 ${colors.borderColor}30, 
+               inset -1px 0 0 ${colors.borderColor}30, 
+               inset 0 -1px 0 ${colors.borderColor}30`,
+          transition: "box-shadow 0.2s ease, background-color 0.2s ease"
         }}
       >
-        {/* Reply reference if needed */}
         {drop.reply_to && drop.reply_to.drop_id !== dropViewDropId && (
           <WaveDropReply
             onReplyClick={onReplyClick}
@@ -150,25 +147,32 @@ const WinnerDrop = ({
         <div className="tw-flex tw-gap-x-3 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-relative tw-z-10">
           <WaveDropAuthorPfp drop={drop} />
 
-          {/* Content area */}
-          <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-1">
-            {/* Header with winner badge */}
-            <div className="tw-flex tw-items-center tw-justify-between">
-              <WaveDropHeader
-                drop={drop}
-                showWaveInfo={showWaveInfo}
-                isStorm={isStorm}
-                currentPartIndex={activePartIndex}
-                partsCount={drop.parts.length}
-              />
+          <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
+            <div className="tw-flex tw-gap-x-6 tw-items-start">
+              <div className="tw-flex tw-flex-col tw-gap-1">
+                <WaveDropHeader
+                  drop={drop}
+                  showWaveInfo={false}
+                  isStorm={isStorm}
+                  currentPartIndex={activePartIndex}
+                  partsCount={drop.parts.length}
+                />
+                {showWaveInfo && (
+                  <Link
+                    href={`/my-stream?wave=${drop.wave.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+                  >
+                    {drop.wave.name}
+                  </Link>
+                )}
+              </div>
               <WinnerDropBadge
                 rank={effectiveRank}
-                round={round}
-                position={position}
+                decisionTime={decisionTime}
               />
             </div>
 
-            {/* Drop content */}
             <div>
               <WaveDropContent
                 drop={drop}
@@ -184,7 +188,6 @@ const WinnerDrop = ({
           </div>
         </div>
 
-        {/* Bottom action buttons */}
         {!isMobile && showReplyAndQuote && (
           <WaveDropActions
             drop={drop}
@@ -194,7 +197,6 @@ const WinnerDrop = ({
           />
         )}
 
-        {/* Metadata and ratings */}
         <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-ml-[3.25rem] tw-mt-1.5">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             {drop.metadata.length > 0 && (
@@ -205,7 +207,6 @@ const WinnerDrop = ({
         </div>
       </div>
 
-      {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}
         isOpen={isSlideUp}

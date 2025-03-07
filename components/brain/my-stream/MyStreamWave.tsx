@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useContentTab } from "../ContentTabContext";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
 import MyStreamWaveDesktopTabs from "./MyStreamWaveDesktopTabs";
@@ -44,9 +45,12 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     );
   };
 
-  const [activeTab, setActiveTab] = useState<MyStreamWaveTab>(
-    MyStreamWaveTab.CHAT
-  );
+  // Get the active tab from global context
+  const { activeContentTab, setActiveContentTab } = useContentTab();
+  
+  // Convert the string tab to enum type
+  const activeTab = activeContentTab as MyStreamWaveTab;
+  const setActiveTab = (tab: MyStreamWaveTab) => setActiveContentTab(tab);
 
   // Update active tab when wave type, voting state, or decision state changes
   useEffect(() => {
