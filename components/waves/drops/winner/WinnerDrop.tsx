@@ -118,16 +118,16 @@ const WinnerDrop = ({
     >
       <div
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group
-          ${isActiveDrop ? "tw-bg-[#3CCB7F]/5" : "tw-bg-iron-950 tw-backdrop-blur-sm"}`}
+          ${isActiveDrop ? "tw-bg-[#3CCB7F]/5" : "tw-bg-iron-900/40"}`}
         style={{
           border: "1px solid transparent",
           borderLeft: "2px solid transparent",
           boxShadow: isActiveDrop 
             ? "inset 2px 0 0 rgba(60,203,127,0.7)" 
             : `inset 2px 0 0 ${colors.borderColor}, 
-               inset 0 1px 0 ${colors.borderColor}30, 
-               inset -1px 0 0 ${colors.borderColor}30, 
-               inset 0 -1px 0 ${colors.borderColor}30`,
+               inset 0 1px 0 ${colors.borderColor}20, 
+               inset -1px 0 0 ${colors.borderColor}20, 
+               inset 0 -1px 0 ${colors.borderColor}20`,
           transition: "box-shadow 0.2s ease, background-color 0.2s ease"
         }}
       >

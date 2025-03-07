@@ -36,7 +36,7 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
         stableKey: winner.drop.id,
         stableHash: winner.drop.id,
       })}
-      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
+      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1px] tw-transition-shadow tw-duration-300 tw-ease-out`}
     >
       <div className="tw-rounded-xl tw-bg-iron-950 tw-p-5">
         <div className="tw-flex tw-flex-col">

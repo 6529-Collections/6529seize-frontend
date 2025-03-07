@@ -29,14 +29,21 @@ export function useWaveDecisions({ wave, enabled = true }: UseWaveDecisionsProps
     staleTime: 60000 // Adjust based on how frequently decisions update
   });
 
-
-
-
-  return {
-    decisionPoints: data?.data.map(data => ({
+  // Sort decisions by round number (if available) in ascending order
+  const sortedDecisionPoints = data?.data
+    .map(data => ({
       ...data,
       winners: data.winners.sort((a, b) => a.place - b.place)
-    })) || [],
+    }))
+    .sort((a, b) => {
+      // Extract round numbers from decision_name if possible
+      const roundA = a.decision_name ? parseInt(a.decision_name.match(/\d+/)?.[0] || "0") : 0;
+      const roundB = b.decision_name ? parseInt(b.decision_name.match(/\d+/)?.[0] || "0") : 0;
+      return roundA - roundB; // Sort in ascending order (1, 2, 3...)
+    }) || [];
+
+  return {
+    decisionPoints: sortedDecisionPoints,
     isError,
     error,
     refetch,

@@ -9,6 +9,7 @@ import { WaveWinnersRoundContent } from "./WaveWinnersRoundContent";
 interface WaveRollingWinnersItemProps {
   readonly point: ApiWaveDecision;
   readonly index: number;
+  readonly totalRounds: number;
   readonly isExpanded: boolean;
   readonly toggleExpanded: () => void;
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -18,6 +19,7 @@ interface WaveRollingWinnersItemProps {
 export const WaveRollingWinnersItem: React.FC<WaveRollingWinnersItemProps> = ({
   point,
   index,
+  totalRounds,
   isExpanded,
   toggleExpanded,
   onDropClick,
@@ -30,6 +32,7 @@ export const WaveRollingWinnersItem: React.FC<WaveRollingWinnersItemProps> = ({
       <WaveRollingWinnersItemHeader
         point={point}
         index={index}
+        totalRounds={totalRounds}
         isExpanded={isExpanded}
         toggleExpanded={toggleExpanded}
       />

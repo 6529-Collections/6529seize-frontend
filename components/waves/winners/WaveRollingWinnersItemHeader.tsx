@@ -5,6 +5,7 @@ import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
 interface WaveRollingWinnersItemHeaderProps {
   readonly point: ApiWaveDecision;
   readonly index: number;
+  readonly totalRounds: number;
   readonly isExpanded: boolean;
   readonly toggleExpanded: () => void;
 }
@@ -12,6 +13,7 @@ interface WaveRollingWinnersItemHeaderProps {
 export const WaveRollingWinnersItemHeader: React.FC<WaveRollingWinnersItemHeaderProps> = ({
   point,
   index,
+  totalRounds,
   isExpanded,
   toggleExpanded,
 }) => {
@@ -27,7 +29,7 @@ export const WaveRollingWinnersItemHeader: React.FC<WaveRollingWinnersItemHeader
         >
           <span
             className={`tw-text-xs tw-font-medium ${
-              index === 0 ? "tw-text-primary-400" : "tw-text-iron-400"
+              index === totalRounds - 1 ? "tw-text-primary-400" : "tw-text-iron-400"
             }`}
           >
             {index + 1}

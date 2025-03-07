@@ -72,7 +72,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         />
         
         {hasFirstDecisionPassed && (
-          <div className="tw-mt-2 tw-mb-4 tw-bg-primary-500/10 tw-px-4 tw-py-3 tw-rounded-lg tw-border tw-border-primary-500/20">
+          <div className="tw-mt-2 tw-mb-4 tw-bg-primary-400/20 tw-px-4 tw-py-3 tw-rounded-lg tw-border tw-border-primary-500/20">
             <div className="tw-flex tw-items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -82,8 +82,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               >
                 <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5z" clipRule="evenodd" />
               </svg>
-              <p className="tw-mb-0 tw-text-sm tw-text-primary-200">
-                <strong>Winners announced!</strong> Check the Winners tab to see the results.
+              <p className="tw-mb-0 tw-text-sm tw-text-primary-300">
+                <strong>Winners announced!</strong> <span className="tw-text-iron-200">Check the Winners tab to see the results.</span>
               </p>
             </div>
           </div>

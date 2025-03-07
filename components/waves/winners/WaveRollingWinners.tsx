@@ -21,8 +21,9 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
 }) => {
   // Instead of a Set, use a single string to track the currently open item
   const [expandedPointId, setExpandedPointId] = useState<string | null>(() => {
-    // When there are decision points, open the first one by default
-    return decisionPoints.length > 0 ? 'decision-point-0' : null;
+    // Open the latest decision point (highest round number) by default
+    const latestIndex = decisionPoints.length - 1;
+    return decisionPoints.length > 0 ? `decision-point-${latestIndex}` : null;
   });
   
   const toggleExpanded = (pointId: string) => {
@@ -44,18 +45,25 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
   }
 
   return (
-    <div className="tw-space-y-2 tw-mt-4 tw-pb-4 tw-max-h-[calc(100vh-200px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-none">
-      {decisionPoints.map((point, index) => (
-        <WaveRollingWinnersItem
-          key={`decision-point-${index}`}
-          point={point}
-          index={index}
-          isExpanded={expandedPointId === `decision-point-${index}`}
-          toggleExpanded={() => toggleExpanded(`decision-point-${index}`)}
-          onDropClick={onDropClick}
-          wave={wave}
-        />
-      ))}
+    <div className="tw-space-y-2 tw-mt-2 tw-pb-4 tw-max-h-[calc(100vh-160px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-none">
+      {/* Reverse the display order to show latest rounds at the top */}
+      {[...decisionPoints].reverse().map((point, index) => {
+        // Calculate the actual index for the key and other uses
+        const actualIndex = decisionPoints.length - 1 - index;
+        
+        return (
+          <WaveRollingWinnersItem
+            key={`decision-point-${actualIndex}`}
+            point={point}
+            index={actualIndex}
+            totalRounds={decisionPoints.length}
+            isExpanded={expandedPointId === `decision-point-${actualIndex}`}
+            toggleExpanded={() => toggleExpanded(`decision-point-${actualIndex}`)}
+            onDropClick={onDropClick}
+            wave={wave}
+          />
+        );
+      })}
     </div>
   );
 };

@@ -96,14 +96,32 @@ export default function ParticipationDropContainer({
   const rank = drop.rank;
   const colorClasses = getColorClasses({ isActiveDrop, rank, isDrop });
 
+  // Get border color based on rank
+  const getBorderColor = (rank: number | null): string => {
+    if (rank === 1) return "#fbbf24";
+    if (rank === 2) return "#94a3b8";
+    if (rank === 3) return "#CD7F32"; 
+    return "#60606C"; // default for 4th or higher
+  };
+
+  const borderColor = getBorderColor(rank);
+
   return (
-    <div className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-2" : ""} `}>
+    <div className={`${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""} tw-w-full`}>
       <div
-        className={`tw-relative tw-w-full tw-rounded-xl tw-py-6 ${colorClasses.container} tw-overflow-hidden tw-backdrop-blur-sm
-          tw-transition-all tw-duration-300 tw-ease-out
-          tw-shadow-lg tw-shadow-black/5
-          desktop-hover:hover:tw-shadow-xl desktop-hover:hover:tw-shadow-black/10
-          tw-group`}
+        className={`tw-relative tw-w-full tw-flex tw-flex-col tw-rounded-lg tw-overflow-hidden tw-group
+          ${isActiveDrop ? "tw-bg-[#3CCB7F]/5" : "tw-bg-iron-900/40"}`}
+        style={{
+          border: "1px solid transparent",
+          borderLeft: "2px solid transparent",
+          boxShadow: isActiveDrop 
+            ? "inset 2px 0 0 rgba(60,203,127,0.7)" 
+            : `inset 2px 0 0 ${borderColor}, 
+               inset 0 1px 0 ${borderColor}20, 
+               inset -1px 0 0 ${borderColor}20, 
+               inset 0 -1px 0 ${borderColor}20`,
+          transition: "box-shadow 0.2s ease, background-color 0.2s ease"
+        }}
       >
         {children}
       </div>
