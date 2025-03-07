@@ -88,7 +88,7 @@ const WinnerDrop = ({
   const isStorm = drop.parts.length > 1;
   const isMobile = useIsMobileDevice();
 
-  const effectiveRank = drop.winning_context?.place ?? (drop.rank !== null && drop.rank !== undefined ? drop.rank : position);
+  const effectiveRank = drop.winning_context?.place ?? drop.rank;
   
   const decisionTime = drop.winning_context?.decision_time;
 
