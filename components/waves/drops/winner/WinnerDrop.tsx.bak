@@ -17,29 +17,35 @@ import WinnerDropBadge from "./WinnerDropBadge";
 // Get rank-specific colors
 const getRankColorsByRank = (rank: number | null): { 
   borderColor: string,
+  shadowColor: string,
   textColor: string
 } => {
   // Convert rank to a number to ensure proper comparison
   const rankNumber = typeof rank === 'string' ? parseInt(rank as string, 10) : rank;
   
+  // Handle specific rank values
   if (rankNumber === 1) {
     return {
       borderColor: "#E8D48A", // Gold
+      shadowColor: "rgba(232,212,138,0.3)",
       textColor: "#E8D48A"
     };
   } else if (rankNumber === 2) {
     return {
       borderColor: "#DDDDDD", // Silver
+      shadowColor: "rgba(221,221,221,0.3)",
       textColor: "#DDDDDD"
     };
   } else if (rankNumber === 3) {
     return {
       borderColor: "#CD7F32", // Bronze
+      shadowColor: "rgba(205,127,50,0.3)",
       textColor: "#CD7F32"
     };
   } else {
     return {
       borderColor: "#7F8A93", // Gray for all other ranks
+      shadowColor: "rgba(127,138,147,0.2)",
       textColor: "#7F8A93"
     };
   }
@@ -79,20 +85,18 @@ const WinnerDrop = ({
   parentContainerRef,
 }: WinnerDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
-  // For winner drops, we should always show the rank-specific border
-  // Forcing isActiveDrop to false ensures the colored border is always visible
-  const isActiveDrop = false; // Override activeDrop?.drop.id === drop.id
+  const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
   const isMobile = useIsMobileDevice();
 
   const round = drop.decision_round || 1;
   const position = drop.position_in_rank || 1;
   
-  // Make sure we have a rank value to work with (fallback to position if rank is missing)
-  const effectiveRank = drop.rank !== null && drop.rank !== undefined ? drop.rank : position;
+  // Debug log to check rank and active state
+  console.log(`WinnerDrop: id=${drop.id}, rank=${drop.rank}, isActiveDrop=${isActiveDrop}`);
   
-  // Get colors based on effective rank
-  const colors = getRankColorsByRank(effectiveRank);
+  // Get colors based on rank
+  const colors = getRankColorsByRank(drop.rank);
 
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[activePartIndex].part_id });
@@ -112,14 +116,12 @@ const WinnerDrop = ({
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-transition-all tw-duration-300 tw-rounded-lg
           ${
             isActiveDrop
-              ? "tw-bg-[#3CCB7F]/5 tw-border-l-2 tw-border-l-[#3CCB7F]/70 tw-border-solid tw-border-y-0 tw-border-r-0"
-              : "tw-bg-iron-950/80 tw-backdrop-blur-sm tw-border-0" /* Remove default borders so we can apply custom ones */
+              ? "tw-bg-[#3CCB7F]/5 tw-border-l-2 tw-border-l-[#3CCB7F]/70 tw-border-solid tw-border-y-0 tw-border-r-0 tw-shadow-[0_0_6px_rgba(60,203,127,0.2)]"
+              : "tw-bg-iron-950/80 tw-backdrop-blur-sm"
           }`}
         style={{
           borderLeft: isActiveDrop ? undefined : `2px solid ${colors.borderColor}`,
-          borderTop: isActiveDrop ? undefined : `1px solid ${colors.borderColor}20`,
-          borderRight: isActiveDrop ? undefined : `1px solid ${colors.borderColor}20`,
-          borderBottom: isActiveDrop ? undefined : `1px solid ${colors.borderColor}20`
+          boxShadow: isActiveDrop ? undefined : `0 0 8px ${colors.shadowColor}`
         }}
       >
         {/* Reply reference if needed */}
@@ -155,7 +157,7 @@ const WinnerDrop = ({
                 partsCount={drop.parts.length}
               />
               <WinnerDropBadge 
-                rank={effectiveRank} 
+                rank={drop.rank} 
                 round={round}
                 position={position}
               />

@@ -11,14 +11,19 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   round = 1,
   position = 1
 }) => {
-  if (!rank) return null;
+  // If rank is null or undefined, use position as fallback
+  const effectiveRank = rank !== null && rank !== undefined ? rank : position;
+  if (!effectiveRank) return null;
+  
+  // Convert rank to a number to ensure proper comparison
+  const rankNumber = typeof effectiveRank === 'string' ? parseInt(effectiveRank as string, 10) : effectiveRank;
   
   // Colors for each rank
   let accentColor = "";
   let bgColor = "";
   let rankText = "";
   
-  switch (rank) {
+  switch (rankNumber) {
     case 1:
       accentColor = "#E8D48A"; // Gold
       bgColor = "rgba(232,212,138,0.1)";
@@ -37,7 +42,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
     default:
       accentColor = "#7F8A93"; // Gray for all other ranks
       bgColor = "rgba(127,138,147,0.1)";
-      rankText = `${rank}th`;
+      rankText = `${rankNumber}th`;
   }
   
   return (
