@@ -25,7 +25,7 @@ export default function UserPageWavesWrapper({
       return;
     }
     if (connectedProfile || !address) {
-      router.push(`${user}/rep`);
+      router.push(`/${user}/rep`);
     }
   }, [connectedProfile, activeProfileProxy, address, showWaves]);
 

@@ -323,6 +323,7 @@ export const getCreateNewWaveBody = ({
       admin_group: {
         group_id: config.groups.admin,
       },
+      decisions_strategy: null,
     },
     outcomes: getOutcomes({ config }),
   };
