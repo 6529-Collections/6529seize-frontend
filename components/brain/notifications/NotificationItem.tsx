@@ -9,6 +9,8 @@ import NotificationDropReplied from "./drop-replied/NotificationDropReplied";
 import NotificationDropVoted from "./drop-voted/NotificationDropVoted";
 import NotificationIdentityMentioned from "./identity-mentioned/NotificationIdentityMentioned";
 import NotificationIdentitySubscribed from "./identity-subscribed/NotificationIdentitySubscribed";
+import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
+import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 
 export default function NotificationItem({
   notification,
@@ -67,6 +69,18 @@ export default function NotificationItem({
         );
       case ApiNotificationCause.IdentitySubscribed:
         return <NotificationIdentitySubscribed notification={notification} />;
+      case ApiNotificationCause.WaveCreated:
+        return <NotificationWaveCreated notification={notification} />;
+      case ApiNotificationCause.AllDrops:
+        return (
+          <NotificationAllDrops
+            notification={notification}
+            activeDrop={activeDrop}
+            onReply={onReply}
+            onQuote={onQuote}
+            onDropContentClick={onDropContentClick}
+          />
+        );
       default:
         assertUnreachable(notification);
         return <div />;

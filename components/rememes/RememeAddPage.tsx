@@ -12,8 +12,8 @@ import { areEqualAddresses, numberWithCommas } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuth } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
-import { ApiSeizeSettings } from "../../generated/models/ApiSeizeSettings";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useSeizeSettings } from "../../contexts/SeizeSettingsContext";
 
 interface CheckList {
   status: boolean;
@@ -25,7 +25,7 @@ export default function RememeAddPage() {
   const { address, isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();
 
-  const [seizeSettings, setSeizeSettings] = useState<ApiSeizeSettings>();
+  const seizeSettings = useSeizeSettings();
 
   const signMessage = useSignMessage();
   const [memes, setMemes] = useState<NFT[]>([]);
@@ -51,7 +51,7 @@ export default function RememeAddPage() {
   useEffect(() => {
     const mychecklist: CheckList[] = [];
     if (addRememe) {
-      if (!seizeSettings || !seizeSettings.rememes_submission_tdh_threshold) {
+      if (!seizeSettings?.rememes_submission_tdh_threshold) {
         mychecklist.push({
           status: false,
           note: "Something went wrong fetching global settings",
@@ -106,14 +106,6 @@ export default function RememeAddPage() {
       (response: DBResponse) => {
         setMemes(response.data);
         setMemesLoaded(true);
-      }
-    );
-  }, []);
-
-  useEffect(() => {
-    fetchUrl(`${process.env.API_ENDPOINT}/api/settings`).then(
-      (settings: ApiSeizeSettings) => {
-        setSeizeSettings(settings);
       }
     );
   }, []);

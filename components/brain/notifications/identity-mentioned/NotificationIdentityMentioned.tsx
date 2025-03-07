@@ -42,7 +42,7 @@ export default function NotificationIdentityMentioned({
 
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
-      <div className="tw-w-full tw-flex tw-flex-col tw-space-y-3">
+      <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
         <div className="tw-inline-flex tw-items-center">
           <div className="sm:tw-hidden tw-mr-2 tw-size-6 md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
@@ -52,8 +52,7 @@ export default function NotificationIdentityMentioned({
               aria-hidden="true"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor"
-            >
+              stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -80,8 +79,7 @@ export default function NotificationIdentityMentioned({
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">
               <Link
                 href={`/${notification.related_drops[0].author.handle}`}
-                className="tw-no-underline tw-font-semibold"
-              >
+                className="tw-no-underline tw-font-semibold">
                 {notification.related_drops[0].author.handle}
               </Link>{" "}
               mentioned you

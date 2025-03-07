@@ -127,6 +127,7 @@ import {
 } from "../wagmiConfig/wagmiAppWalletConnector";
 import { Capacitor } from "@capacitor/core";
 import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
+import { SeizeSettingsProvider } from "../contexts/SeizeSettingsContext";
 
 library.add(
   faArrowUp,
@@ -392,22 +393,24 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         )}
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
-            <IpfsProvider>
-              <AppWalletsProvider>
-                <SeizeConnectProvider>
-                  <Auth>
-                    <NotificationsProvider>
-                      <CookieConsentProvider>
-                        <EULAConsentProvider>
-                          {getLayout(<Component {...props} />)}
-                          {appWalletPasswordModal.modal}
-                        </EULAConsentProvider>
-                      </CookieConsentProvider>
-                    </NotificationsProvider>
-                  </Auth>
-                </SeizeConnectProvider>
-              </AppWalletsProvider>
-            </IpfsProvider>
+            <SeizeSettingsProvider>
+              <IpfsProvider>
+                <AppWalletsProvider>
+                  <SeizeConnectProvider>
+                    <Auth>
+                      <NotificationsProvider>
+                        <CookieConsentProvider>
+                          <EULAConsentProvider>
+                            {getLayout(<Component {...props} />)}
+                            {appWalletPasswordModal.modal}
+                          </EULAConsentProvider>
+                        </CookieConsentProvider>
+                      </NotificationsProvider>
+                    </Auth>
+                  </SeizeConnectProvider>
+                </AppWalletsProvider>
+              </IpfsProvider>
+            </SeizeSettingsProvider>
           </ReactQueryWrapper>
           {!hideFooter && <Footer />}
         </WagmiProvider>

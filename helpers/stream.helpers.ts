@@ -329,7 +329,6 @@ export const prefetchAuthenticatedNotifications = async ({
 }) => {
   const handle = await getHandleFromJwt(headers);
 
-
   if (!handle) return;
   await Promise.all([
     prefetchAuthenticatedNotificationsItems({

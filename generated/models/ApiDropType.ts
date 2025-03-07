@@ -14,5 +14,6 @@ import { HttpFile } from '../http/http';
 
 export enum ApiDropType {
     Chat = 'CHAT',
-    Participatory = 'PARTICIPATORY'
+    Participatory = 'PARTICIPATORY',
+    Winner = 'WINNER'
 }
