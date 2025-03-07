@@ -78,6 +78,7 @@ export default function NotificationItem({
             activeDrop={activeDrop}
             onReply={onReply}
             onQuote={onQuote}
+            onDropContentClick={onDropContentClick}
           />
         );
       default:

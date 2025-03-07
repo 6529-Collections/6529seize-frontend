@@ -74,6 +74,7 @@ export default function NotificationAllDrops({
         </>
       );
     }
+
     return (
       <>
         new drop from{" "}
