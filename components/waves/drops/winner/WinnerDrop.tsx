@@ -104,7 +104,7 @@ const WinnerDrop = ({
 
   return (
     <div
-      className={`tw-w-full tw-my-2 ${
+      className={`tw-w-full ${
         location === DropLocation.WAVE ? "tw-px-4" : ""
       }`}
     >
