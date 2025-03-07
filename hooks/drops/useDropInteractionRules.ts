@@ -12,6 +12,7 @@ interface DropInteractionRules {
   canDelete: boolean; // determines if delete is allowed
   isAuthor: boolean; // determines if current user is the author
   isWinner: boolean; // determines if drop is a winner
+  isVotingEnded: boolean; // determines if the voting period has ended for this drop's wave
   winningRank?: number; // rank of the winning drop if applicable
 }
 
@@ -105,6 +106,12 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
 
   // Delete rules
   const canDelete = baseRules && isAuthor;
+  
+  // Check if voting has ended by comparing current time with voting period end time
+  const now = Time.currentMillis();
+  const isVotingEnded = drop.wave.voting_period_end 
+    ? now > drop.wave.voting_period_end 
+    : false;
 
   return {
     canShowVote,
@@ -113,6 +120,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     canDelete,
     isAuthor,
     isWinner,
+    isVotingEnded,
     ...(isWinner && winningRank ? { winningRank } : {}),
   };
 }
