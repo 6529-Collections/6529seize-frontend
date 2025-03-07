@@ -1,26 +1,31 @@
 import React from "react";
-import { TimeLeft } from "../../../../helpers/waves/time.utils";
-import { WaveLeaderboardTimeState } from "../../../../helpers/waves/time.types";
+import { ApiWave } from "../../../../generated/models/ApiWave";
+import { useWave } from "../../../../hooks/useWave";
 import { TimePhaseIcon } from "./TimePhaseIcon";
 import { TimePhaseStatus, TimePhaseTitle } from "./TimePhaseStatus";
 import { TimeCountdownDisplay } from "./TimeCountdownDisplay";
 
 interface VotingPhaseCardProps {
-  readonly votingTimeState: WaveLeaderboardTimeState;
-  readonly votingTimeLeft: TimeLeft;
-  readonly votingPeriodMin: number;
-  readonly votingPeriodMax: number;
+  readonly wave: ApiWave;
 }
 
 /**
  * Card component for voting phase
  */
 export const VotingPhaseCard: React.FC<VotingPhaseCardProps> = ({
-  votingTimeState,
-  votingTimeLeft,
-  votingPeriodMin,
-  votingPeriodMax,
+  wave,
 }) => {
+  // Using the useWave hook with default options (timers enabled)
+  // This component needs timers for real-time countdown display
+  const waveData = useWave(wave);
+  
+  const {
+    phase: votingTimeState,
+    timeLeft: votingTimeLeft,
+    startTime: votingPeriodMin,
+    endTime: votingPeriodMax
+  } = waveData.voting.time;
+
   return (
     <div className="tw-rounded-lg tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-px-4 tw-py-3 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-gap-y-2 tw-mb-3.5">
@@ -35,17 +40,17 @@ export const VotingPhaseCard: React.FC<VotingPhaseCardProps> = ({
             phaseType="Voting" 
           />
           <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-            {votingTimeState === WaveLeaderboardTimeState.UPCOMING &&
+            {votingTimeState === "UPCOMING" &&
               new Date(votingPeriodMin).toLocaleDateString()}
-            {votingTimeState === WaveLeaderboardTimeState.IN_PROGRESS &&
+            {votingTimeState === "IN_PROGRESS" &&
               new Date(votingPeriodMax).toLocaleDateString()}
-            {votingTimeState === WaveLeaderboardTimeState.COMPLETED &&
+            {votingTimeState === "COMPLETED" &&
               new Date(votingPeriodMax).toLocaleDateString()}
           </p>
         </div>
       </div>
 
-      {votingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
+      {votingTimeState !== "COMPLETED" ? (
         <TimeCountdownDisplay timeLeft={votingTimeLeft} />
       ) : (
         <TimePhaseStatus 

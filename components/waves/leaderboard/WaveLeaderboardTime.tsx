@@ -1,6 +1,5 @@
 import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useWaveTimeState } from "../../../hooks/waves/useWaveTimeState";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { DroppingPhaseCard } from "./time/DroppingPhaseCard";
 import { VotingPhaseCard } from "./time/VotingPhaseCard";
@@ -20,18 +19,8 @@ interface WaveLeaderboardTimeProps {
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
 }) => {
-  // Use custom hooks for state management
-  const {
-    droppingTimeState,
-    droppingTimeLeft,
-    participationPeriodMin,
-    participationPeriodMax,
-    votingTimeState,
-    votingTimeLeft,
-    votingPeriodMin,
-    votingPeriodMax,
-  } = useWaveTimeState(wave);
-
+  // We still need useDecisionPoints for decision timeline functionality
+  // This will eventually be integrated into useWave in the future
   const {
     isMultiDecisionWave,
     isRollingWave,
@@ -56,41 +45,21 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
           />
 
           <div className="tw-flex tw-items-center">
-            <CompactDroppingPhaseCard
-              droppingTimeState={droppingTimeState}
-              droppingTimeLeft={droppingTimeLeft}
-              participationPeriodMin={participationPeriodMin}
-              participationPeriodMax={participationPeriodMax}
-            />
+            <CompactDroppingPhaseCard wave={wave} />
 
             {/* Center dot separator */}
             <div className="tw-mt-1">
               <div className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-white/20"></div>
             </div>
 
-            <CompactVotingPhaseCard
-              votingTimeState={votingTimeState}
-              votingTimeLeft={votingTimeLeft}
-              votingPeriodMin={votingPeriodMin}
-              votingPeriodMax={votingPeriodMax}
-            />
+            <CompactVotingPhaseCard wave={wave} />
           </div>
         </>
       ) : (
         <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-          <DroppingPhaseCard
-            droppingTimeState={droppingTimeState}
-            droppingTimeLeft={droppingTimeLeft}
-            participationPeriodMin={participationPeriodMin}
-            participationPeriodMax={participationPeriodMax}
-          />
+          <DroppingPhaseCard wave={wave} />
 
-          <VotingPhaseCard
-            votingTimeState={votingTimeState}
-            votingTimeLeft={votingTimeLeft}
-            votingPeriodMin={votingPeriodMin}
-            votingPeriodMax={votingPeriodMax}
-          />
+          <VotingPhaseCard wave={wave} />
         </div>
       )}
     </div>

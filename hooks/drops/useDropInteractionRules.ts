@@ -24,7 +24,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
 
   // Check if this is a winner drop
   const isWinner = drop.drop_type === ApiDropType.Winner;
-  const winningRank = isWinner ? drop.rank : undefined;
+  const winningRank = isWinner ? drop.winning_context?.place : undefined;
 
   // Determine vote state in order of precedence
   const getVoteState = (): DropVoteState => {

@@ -1,8 +1,7 @@
 import React from "react";
-import { WaveLeaderboardTimeState } from "../../../../helpers/waves/time.types";
 
 interface TimePhaseStatusProps {
-  readonly phaseState: WaveLeaderboardTimeState;
+  readonly phaseState: string;
   readonly phaseType: "Dropping" | "Voting";
 }
 
@@ -13,7 +12,7 @@ export const TimePhaseStatus: React.FC<TimePhaseStatusProps> = ({
   phaseState,
   phaseType,
 }) => {
-  if (phaseState === WaveLeaderboardTimeState.COMPLETED) {
+  if (phaseState === "COMPLETED") {
     return (
       <div className="tw-text-xs tw-text-white/60 tw-bg-white/5 tw-rounded-md tw-py-1.5 tw-px-2.5 tw-text-center">
         The {phaseType.toLowerCase()} phase has ended
@@ -33,11 +32,11 @@ export const TimePhaseTitle: React.FC<TimePhaseStatusProps> = ({
 }) => {
   return (
     <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-text-white/90 tw-mb-0">
-      {phaseState === WaveLeaderboardTimeState.UPCOMING &&
+      {phaseState === "UPCOMING" &&
         `${phaseType} Starts In`}
-      {phaseState === WaveLeaderboardTimeState.IN_PROGRESS &&
+      {phaseState === "IN_PROGRESS" &&
         `${phaseType} Ends In`}
-      {phaseState === WaveLeaderboardTimeState.COMPLETED &&
+      {phaseState === "COMPLETED" &&
         `${phaseType} Complete`}
     </h2>
   );
