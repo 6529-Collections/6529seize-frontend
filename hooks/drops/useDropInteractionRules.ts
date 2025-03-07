@@ -70,13 +70,14 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     !activeProfileProxy && // must not be using proxy
     !drop.id.startsWith("temp-"); // must not be temporary drop
 
-  // Rules for showing vote UI - show if it's not certain system states
-  // We DO want to show the vote UI for winners (but in a disabled state)
+  // Rules for showing vote UI - show only if none of these states are active
+  // We DO NOT want to show the vote UI for winners anymore
   const canShowVote = ![
     DropVoteState.NOT_LOGGED_IN,
     DropVoteState.NO_PROFILE,
     DropVoteState.PROXY,
     DropVoteState.CANT_VOTE,
+    DropVoteState.IS_WINNER, // Added IS_WINNER to hide voting UI for winner drops
   ].includes(voteState);
 
   // Can vote only if state is CAN_VOTE (not IS_WINNER or other states)
