@@ -2299,6 +2299,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: voter_identity
+          in: query
+          description: Filter drops where given identity has voted
+          required: false
+          schema:
+            type: string
+        - name: author_identity
+          in: query
+          description: Filter drops by given author
+          required: false
+          schema:
+            type: string
         - name: page_size
           in: query
           description: Default is 50
@@ -2334,12 +2346,6 @@ paths:
             enum:
               - RANK
               - CREATION_TIME
-        - name: author_identity
-          in: query
-          description: Identity of author to filter by
-          required: false
-          schema:
-            type: string
       responses:
         "200":
           description: successful operation
@@ -3296,7 +3302,6 @@ components:
         - chat
         - wave
         - outcomes
-        - decisions_strategy
       properties:
         name:
           description: The name of the wave
@@ -3523,6 +3528,8 @@ components:
           type: number
           format: int64
           nullable: true
+        winning_context:
+          $ref: "#/components/schemas/ApiDropWinningContext"
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
         reply_to:
@@ -3801,6 +3808,7 @@ components:
       enum:
         - CHAT
         - PARTICIPATORY
+        - WINNER
     ApiDropVote:
       type: object
       required:
@@ -3850,6 +3858,8 @@ components:
           type: number
           format: int64
           nullable: true
+        winning_context:
+          $ref: "#/components/schemas/ApiDropWinningContext"
         reply_to:
           $ref: "#/components/schemas/ApiReplyToDropResponse"
         author:
@@ -4493,6 +4503,8 @@ components:
         - DROP_QUOTED
         - DROP_REPLIED
         - DROP_VOTED
+        - WAVE_CREATED
+        - ALL_DROPS
     ApiNotificationsResponse:
       type: object
       required:
@@ -5302,6 +5314,7 @@ components:
         - admin_group
         - authenticated_user_eligible_for_admin
         - decisions_strategy
+        - next_decision_time
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
@@ -5337,6 +5350,10 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiWaveDecisionsStrategy"
+        next_decision_time:
+          type: number
+          format: int64
+          nullable: true
     ApiWaveContributorOverview:
       required:
         - contributor_identity
@@ -5435,18 +5452,39 @@ components:
             decisions (see description of subsequent_decisions). Also if true
             then there needs to be at least one element in subsequent_decisions
             array.
+    ApiDropWinningContext:
+      type: object
+      required:
+        - place
+        - awards
+        - decision_time
+      properties:
+        place:
+          type: integer
+          format: int64
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionAward"
+        decision_time:
+          type: integer
+          format: int64
     ApiWaveDecisionWinner:
       type: object
       required:
         - place
-        - award
+        - awards
         - drop
       properties:
         place:
           type: integer
           format: int64
-        award:
-          $ref: "#/components/schemas/ApiWaveDecisionAward"
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionAward"
+        drop:
+          $ref: "#/components/schemas/ApiDrop"
     ApiWaveDropsFeed:
       type: object
       required:

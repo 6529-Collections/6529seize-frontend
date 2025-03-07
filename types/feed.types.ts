@@ -34,11 +34,10 @@ export type IFeedItemDropVotedItem = {
   readonly vote: ApiDropVote;
 };
 
-
 export type TypedFeedItem =
   | IFeedItemWaveCreated
   | IFeedItemDropCreated
-  | IFeedItemDropReplied
+  | IFeedItemDropReplied;
 
 export type INotificationIdentitySubscribed = {
   readonly id: number;
@@ -98,12 +97,37 @@ export type INotificationDropReplied = {
   };
 };
 
+export type INotificationWaveCreated = {
+  readonly id: number;
+  readonly cause: ApiNotificationCause.WaveCreated;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ApiProfileMin;
+  readonly additional_context: {
+    readonly wave_id: string;
+  };
+};
+
+export type INotificationAllDrops = {
+  readonly id: number;
+  readonly cause: ApiNotificationCause.AllDrops;
+  readonly created_at: number;
+  readonly read_at: number | null;
+  readonly related_identity: ApiProfileMin;
+  readonly related_drops: Array<ApiDrop>;
+  readonly additional_context: {
+    readonly vote: number;
+  };
+};
+
 export type TypedNotification =
   | INotificationIdentitySubscribed
   | INotificationIdentityMentioned
   | INotificationDropVoted
   | INotificationDropQuoted
-  | INotificationDropReplied;
+  | INotificationDropReplied
+  | INotificationWaveCreated
+  | INotificationAllDrops;
 
 export interface TypedNotificationsResponse
   extends Omit<ApiNotificationsResponse, "notifications"> {
