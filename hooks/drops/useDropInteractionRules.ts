@@ -3,6 +3,7 @@ import { AuthContext } from "../../components/auth/Auth";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiDropType } from "../../generated/models/ApiDropType";
 import { DropVoteState } from "./types";
+import { Time } from "../../helpers/time";
 
 interface DropInteractionRules {
   canShowVote: boolean; // determines if voting UI should be visible
@@ -24,7 +25,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
 
   // Check if this is a winner drop
   const isWinner = drop.drop_type === ApiDropType.Winner;
-  const winningRank = isWinner ? drop.rank : undefined;
+  const winningRank = isWinner ? drop.winning_context?.place : undefined;
 
   // Determine vote state in order of precedence
   const getVoteState = (): DropVoteState => {
@@ -41,6 +42,19 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     // Check for winner state before other checks
     if (isWinner) {
       return DropVoteState.IS_WINNER;
+    }
+
+    // Check if voting period has started or ended
+    const now = Time.currentMillis();
+    
+    // Check if voting period hasn't started yet
+    if (drop.wave.voting_period_start && now < drop.wave.voting_period_start) {
+      return DropVoteState.VOTING_NOT_STARTED;
+    }
+    
+    // Check if voting period has ended
+    if (drop.wave.voting_period_end && now > drop.wave.voting_period_end) {
+      return DropVoteState.VOTING_ENDED;
     }
 
     if (drop.id.startsWith("temp-")) {
@@ -71,13 +85,15 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     !drop.id.startsWith("temp-"); // must not be temporary drop
 
   // Rules for showing vote UI - show only if none of these states are active
-  // We DO NOT want to show the vote UI for winners anymore
+  // Hide voting UI in various cases
   const canShowVote = ![
     DropVoteState.NOT_LOGGED_IN,
     DropVoteState.NO_PROFILE,
     DropVoteState.PROXY,
     DropVoteState.CANT_VOTE,
-    DropVoteState.IS_WINNER, // Added IS_WINNER to hide voting UI for winner drops
+    DropVoteState.IS_WINNER, // Hide for winner drops
+    DropVoteState.VOTING_NOT_STARTED, // Hide when voting hasn't started yet
+    DropVoteState.VOTING_ENDED, // Hide when voting period has ended
   ].includes(voteState);
 
   // Can vote only if state is CAN_VOTE (not IS_WINNER or other states)

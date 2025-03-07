@@ -1,12 +1,9 @@
 import React from "react";
-import { TimeLeft } from "../../../../helpers/waves/time.utils";
-import { WaveLeaderboardTimeState } from "../../../../helpers/waves/time.types";
+import { ApiWave } from "../../../../generated/models/ApiWave";
+import { useWave } from "../../../../hooks/useWave";
 
 interface CompactVotingPhaseCardProps {
-  readonly votingTimeState: WaveLeaderboardTimeState;
-  readonly votingTimeLeft: TimeLeft;
-  readonly votingPeriodMin: number;
-  readonly votingPeriodMax: number;
+  readonly wave: ApiWave;
 }
 
 /**
@@ -14,18 +11,26 @@ interface CompactVotingPhaseCardProps {
  * Simplified as descriptive text with minimal styling
  */
 export const CompactVotingPhaseCard: React.FC<CompactVotingPhaseCardProps> = ({
-  votingTimeState,
-  votingTimeLeft,
-  votingPeriodMin,
-  votingPeriodMax,
+  wave
 }) => {
+  // Using the useWave hook with default options (timers enabled)
+  // This component needs timers for real-time countdown display
+  const waveData = useWave(wave);
+  
+  const {
+    phase: votingTimeState,
+    timeLeft: votingTimeLeft,
+    startTime: votingPeriodMin,
+    endTime: votingPeriodMax
+  } = waveData.voting.time;
+
   return (
     <div className="tw-px-2 tw-py-1.5">
-      {votingTimeState !== WaveLeaderboardTimeState.COMPLETED ? (
+      {votingTimeState !== "COMPLETED" ? (
         <div className="tw-flex tw-items-center tw-justify-between tw-flex-nowrap">
           <span className="tw-font-normal">
             <span className="tw-text-xs tw-text-iron-400">
-              {votingTimeState === WaveLeaderboardTimeState.UPCOMING
+              {votingTimeState === "UPCOMING"
                 ? "Voting starts in"
                 : "Voting ends in"}
             </span>{" "}
@@ -34,7 +39,7 @@ export const CompactVotingPhaseCard: React.FC<CompactVotingPhaseCardProps> = ({
               {votingTimeLeft.hours}h {votingTimeLeft.minutes}m
             </span>
             <span className="tw-text-xs tw-text-iron-400 tw-px-1.5 tw-whitespace-nowrap tw-ml-2">
-              {votingTimeState === WaveLeaderboardTimeState.UPCOMING
+              {votingTimeState === "UPCOMING"
                 ? new Date(votingPeriodMin).toLocaleDateString(undefined, {
                     month: "short",
                     day: "numeric",

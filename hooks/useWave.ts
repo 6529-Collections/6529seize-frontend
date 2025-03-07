@@ -99,13 +99,42 @@ function calculateLastDecisionTime(wave: ApiWave | null | undefined): number {
 }
 
 /**
+ * Configuration options for useWave hook
+ */
+export interface UseWaveOptions {
+  /** Enable all timers (participation and voting) */
+  enableTimers?: boolean;
+  /** Enable participation timer specifically */
+  enableParticipationTimer?: boolean;
+  /** Enable voting timer specifically */
+  enableVotingTimer?: boolean;
+}
+
+/**
  * Unified hook for wave data and functionality.
  * This will gradually replace useWaveState, useWaveTimeState, and useDecisionPoints.
  * 
  * @param wave The wave to analyze
+ * @param options Configuration options for the hook
  * @returns Object containing wave data and functionality
  */
-export function useWave(wave: ApiWave | null | undefined) {
+export function useWave(wave: ApiWave | null | undefined, options?: UseWaveOptions) {
+  // Set default options if not provided
+  const defaultOptions: UseWaveOptions = {
+    enableTimers: true,
+    enableParticipationTimer: true,
+    enableVotingTimer: true
+  };
+  
+  const opts = {
+    ...defaultOptions,
+    ...options
+  };
+  
+  // If enableTimers is explicitly set to false, it overrides the individual timer settings
+  const enableParticipationTimer = opts.enableTimers !== false && opts.enableParticipationTimer !== false;
+  const enableVotingTimer = opts.enableTimers !== false && opts.enableVotingTimer !== false;
+  
   // Basic state information - internally using the enum for compatibility
   const [votingPhaseInternal, setVotingPhaseInternal] = useState<WaveVotingState>(WaveVotingState.NOT_STARTED);
   
@@ -208,83 +237,109 @@ export function useWave(wave: ApiWave | null | undefined) {
     setVotingPhaseInternal(newVotingPhase);
   }, [wave]);
   
-  // Update participation phase and time left (from useWaveTimeState)
+  // Helper function for one-time calculation of participation time state
+  const calculateParticipationTimeState = (): { 
+    phase: PhaseState, 
+    timeLeft: TimeLeft 
+  } => {
+    const now = Time.currentMillis();
+    
+    // Determine phase state
+    let newPhaseState: PhaseState;
+    if (participationStartTime > now) {
+      newPhaseState = "UPCOMING";
+    } else if (participationEndTime < now) {
+      newPhaseState = "COMPLETED";
+    } else {
+      newPhaseState = "IN_PROGRESS";
+    }
+    
+    // Calculate time left
+    let timeLeft: TimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    if (newPhaseState !== "COMPLETED") {
+      const targetTime = newPhaseState === "UPCOMING" ? participationStartTime : participationEndTime;
+      timeLeft = calculateTimeLeft(targetTime);
+    }
+    
+    return { phase: newPhaseState, timeLeft };
+  };
+  
+  // Helper function for one-time calculation of voting time state
+  const calculateVotingTimeState = (): {
+    phase: PhaseState,
+    timeLeft: TimeLeft
+  } => {
+    const now = Time.currentMillis();
+    
+    // Determine phase state
+    let newPhaseState: PhaseState;
+    if (votingStartTime > now) {
+      newPhaseState = "UPCOMING";
+    } else if (actualVotingEndTime < now) {
+      newPhaseState = "COMPLETED";
+    } else {
+      newPhaseState = "IN_PROGRESS";
+    }
+    
+    // Calculate time left
+    let timeLeft: TimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    if (newPhaseState !== "COMPLETED") {
+      const targetTime = newPhaseState === "UPCOMING" ? votingStartTime : actualVotingEndTime;
+      timeLeft = calculateTimeLeft(targetTime);
+    }
+    
+    return { phase: newPhaseState, timeLeft };
+  };
+  
+  // Initial calculation of time states without timers
   useEffect(() => {
     if (!wave) return;
     
+    // Initial calculations if timers are disabled
+    if (!enableParticipationTimer) {
+      const { phase, timeLeft } = calculateParticipationTimeState();
+      setParticipationPhase(phase);
+      setParticipationTimeLeft(timeLeft);
+    }
+    
+    if (!enableVotingTimer) {
+      const { phase, timeLeft } = calculateVotingTimeState();
+      setVotingTimePhase(phase);
+      setVotingTimeLeft(timeLeft);
+    }
+  }, [wave, enableParticipationTimer, enableVotingTimer, participationStartTime, participationEndTime, votingStartTime, actualVotingEndTime]);
+  
+  // Update participation phase and time left (from useWaveTimeState)
+  useEffect(() => {
+    if (!wave || !enableParticipationTimer) return;
+    
     const updateParticipationTime = () => {
-      const now = Time.currentMillis();
-      
-      // Determine phase state
-      let newPhaseState: PhaseState;
-      if (participationStartTime > now) {
-        newPhaseState = "UPCOMING";
-      } else if (participationEndTime < now) {
-        newPhaseState = "COMPLETED";
-      } else {
-        newPhaseState = "IN_PROGRESS";
-      }
-      
-      setParticipationPhase(newPhaseState);
-      
-      // Calculate time left
-      let targetTime = 0;
-      if (newPhaseState === "UPCOMING") {
-        targetTime = participationStartTime;
-      } else if (newPhaseState === "IN_PROGRESS") {
-        targetTime = participationEndTime;
-      } else {
-        setParticipationTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-      
-      setParticipationTimeLeft(calculateTimeLeft(targetTime));
+      const { phase, timeLeft } = calculateParticipationTimeState();
+      setParticipationPhase(phase);
+      setParticipationTimeLeft(timeLeft);
     };
     
     updateParticipationTime();
     const timer = setInterval(updateParticipationTime, 1000);
     
     return () => clearInterval(timer);
-  }, [wave, participationStartTime, participationEndTime]);
+  }, [wave, enableParticipationTimer, participationStartTime, participationEndTime]);
   
   // Update voting time phase and time left (from useWaveTimeState)
   useEffect(() => {
-    if (!wave) return;
+    if (!wave || !enableVotingTimer) return;
     
     const updateVotingTime = () => {
-      const now = Time.currentMillis();
-      
-      // Determine phase state using the actual voting end time
-      let newPhaseState: PhaseState;
-      if (votingStartTime > now) {
-        newPhaseState = "UPCOMING";
-      } else if (actualVotingEndTime < now) {
-        newPhaseState = "COMPLETED";
-      } else {
-        newPhaseState = "IN_PROGRESS";
-      }
-      
-      setVotingTimePhase(newPhaseState);
-      
-      // Calculate time left using the actual voting end time
-      let targetTime = 0;
-      if (newPhaseState === "UPCOMING") {
-        targetTime = votingStartTime;
-      } else if (newPhaseState === "IN_PROGRESS") {
-        targetTime = actualVotingEndTime;
-      } else {
-        setVotingTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-        return;
-      }
-      
-      setVotingTimeLeft(calculateTimeLeft(targetTime));
+      const { phase, timeLeft } = calculateVotingTimeState();
+      setVotingTimePhase(phase);
+      setVotingTimeLeft(timeLeft);
     };
     
     updateVotingTime();
     const timer = setInterval(updateVotingTime, 1000);
     
     return () => clearInterval(timer);
-  }, [wave, votingStartTime, actualVotingEndTime]);
+  }, [wave, enableVotingTimer, votingStartTime, actualVotingEndTime]);
   
   // --- useWaveTimeState integration - END ---
   
