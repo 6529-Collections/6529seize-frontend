@@ -3,7 +3,6 @@ import { ApiCreateWaveDropRequest } from "../../generated/models/ApiCreateWaveDr
 import { ApiIntRange } from "../../generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "../../generated/models/ApiWaveCreditScope";
 import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
-import { ApiWaveDecisionsStrategy } from "../../generated/models/ApiWaveDecisionsStrategy";
 import { ApiWaveOutcome } from "../../generated/models/ApiWaveOutcome";
 import { ApiWaveOutcomeCredit } from "../../generated/models/ApiWaveOutcomeCredit";
 import { ApiWaveOutcomeSubType } from "../../generated/models/ApiWaveOutcomeSubType";

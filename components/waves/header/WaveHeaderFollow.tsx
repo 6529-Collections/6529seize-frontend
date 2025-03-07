@@ -130,19 +130,11 @@ export default function WaveHeaderFollow({
     await followMutation.mutateAsync();
   };
 
-  return (
-    <button
-      onClick={onFollow}
-      disabled={mutating}
-      type="button"
-      className={`${BUTTON_CLASSES[size]} ${
-        following
-          ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
-          : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
-      } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
-      {mutating ? (
-        <CircleLoader size={LOADER_SIZES[size]} />
-      ) : following ? (
+  const printIcon = () => {
+    if (mutating) {
+      return <CircleLoader size={LOADER_SIZES[size]} />;
+    } else if (following) {
+      return (
         <svg
           className="tw-h-3 tw-w-3"
           viewBox="0 0 17 15"
@@ -156,7 +148,9 @@ export default function WaveHeaderFollow({
             fill="currentColor"
           />
         </svg>
-      ) : (
+      );
+    } else {
+      return (
         <svg
           className={SVG_CLASSES[size]}
           viewBox="0 0 24 24"
@@ -171,7 +165,21 @@ export default function WaveHeaderFollow({
             strokeLinejoin="round"
           />
         </svg>
-      )}
+      );
+    }
+  };
+
+  return (
+    <button
+      onClick={onFollow}
+      disabled={mutating}
+      type="button"
+      className={`${BUTTON_CLASSES[size]} ${
+        following
+          ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
+          : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
+      } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
+      {printIcon()}
       <span>{label}</span>
     </button>
   );

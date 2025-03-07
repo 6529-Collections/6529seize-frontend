@@ -57,7 +57,7 @@ export default function NotificationAllDrops({
         "reset rating to 0"
       ) : (
         <>
-          rated
+          rated{" "}
           <span
             className={`${getNotificationVoteColor(
               notification.additional_context.vote

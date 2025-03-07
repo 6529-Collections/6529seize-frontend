@@ -3,8 +3,7 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAt, faBullhorn } from "@fortawesome/free-solid-svg-icons";
-import { Button } from "react-bootstrap";
-import { ButtonGroup } from "react-bootstrap";
+import { Button, ButtonGroup } from "react-bootstrap";
 import { useWaveNotificationSubscription } from "../../../hooks/useWaveNotificationSubscription";
 import {
   commonApiDelete,
@@ -100,6 +99,25 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
     refetch();
   }, [wave.subscribed_actions.length, refetch]);
 
+  const printSubtext = () => {
+    if (following) {
+      return (
+        <div className="tw-text-xs tw-text-iron-400">
+          You must follow this wave to change notification settings.
+        </div>
+      );
+    }
+    if (disableSelection) {
+      return (
+        <div className="tw-text-xs tw-text-iron-400">
+          &apos;All&apos; notifications are not available for waves with{" "}
+          {seizeSettings.all_drops_notifications_subscribers_limit.toLocaleString()}{" "}
+          or more followers.
+        </div>
+      );
+    }
+  };
+
   return (
     <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
       <span className="tw-font-medium tw-text-iron-500">
@@ -146,17 +164,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
           </Button>
         </ButtonGroup>
       )}
-      {!following ? (
-        <div className="tw-text-xs tw-text-iron-400">
-          You must follow this wave to change notification settings.
-        </div>
-      ) : disableSelection ? (
-        <div className="tw-text-xs tw-text-iron-400">
-          &apos;All&apos; notifications are not available for waves with{" "}
-          {seizeSettings.all_drops_notifications_subscribers_limit.toLocaleString()}{" "}
-          or more followers.
-        </div>
-      ) : null}
+      {printSubtext()}
     </div>
   );
 }

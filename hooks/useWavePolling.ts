@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import {
   commonApiFetch,
-  commonApiPost,
   commonApiPostWithoutBodyAndResponse,
 } from "../services/api/common-api";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
