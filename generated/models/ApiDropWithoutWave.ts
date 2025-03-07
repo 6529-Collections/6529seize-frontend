@@ -18,6 +18,7 @@ import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropType } from '../models/ApiDropType';
+import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { HttpFile } from '../http/http';
@@ -30,6 +31,7 @@ export class ApiDropWithoutWave {
     'serial_no': number;
     'drop_type': ApiDropType;
     'rank': number | null;
+    'winning_context'?: ApiDropWinningContext;
     'reply_to'?: ApiReplyToDropResponse;
     'author': ApiProfileMin;
     /**
@@ -81,6 +83,12 @@ export class ApiDropWithoutWave {
             "baseName": "rank",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "winning_context",
+            "baseName": "winning_context",
+            "type": "ApiDropWinningContext",
+            "format": ""
         },
         {
             "name": "reply_to",
