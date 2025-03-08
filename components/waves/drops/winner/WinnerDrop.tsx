@@ -37,7 +37,7 @@ const getRankColorsByRank = (
   } else if (rankNumber === 3) {
     return {
       borderColor: "#CD7F32",
-      textColor: "#CD7F32", 
+      textColor: "#CD7F32",
     };
   } else {
     return {
@@ -89,7 +89,7 @@ const WinnerDrop = ({
   const isMobile = useIsMobileDevice();
 
   const effectiveRank = drop.winning_context?.place ?? drop.rank;
-  
+
   const decisionTime = drop.winning_context?.decision_time;
 
   const colors = getRankColorsByRank(effectiveRank);
@@ -118,17 +118,22 @@ const WinnerDrop = ({
     >
       <div
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group
-          ${isActiveDrop ? "tw-bg-[#3CCB7F]/5" : "tw-bg-iron-900/40"}`}
+          ${isActiveDrop 
+            ? "tw-bg-[#3CCB7F]/5" 
+            : location === DropLocation.WAVE 
+              ? "tw-bg-iron-900/60" 
+              : "tw-bg-iron-950"
+          }`}
         style={{
           border: "1px solid transparent",
           borderLeft: "2px solid transparent",
-          boxShadow: isActiveDrop 
-            ? "inset 2px 0 0 rgba(60,203,127,0.7)" 
+          boxShadow: isActiveDrop
+            ? "inset 2px 0 0 rgba(60,203,127,0.7)"
             : `inset 2px 0 0 ${colors.borderColor}, 
                inset 0 1px 0 ${colors.borderColor}20, 
                inset -1px 0 0 ${colors.borderColor}20, 
                inset 0 -1px 0 ${colors.borderColor}20`,
-          transition: "box-shadow 0.2s ease, background-color 0.2s ease"
+          transition: "box-shadow 0.2s ease, background-color 0.2s ease",
         }}
       >
         {drop.reply_to && drop.reply_to.drop_id !== dropViewDropId && (
@@ -146,9 +151,8 @@ const WinnerDrop = ({
 
         <div className="tw-flex tw-gap-x-3 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-relative tw-z-10">
           <WaveDropAuthorPfp drop={drop} />
-
           <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
-            <div className="tw-flex tw-gap-x-6 tw-items-start">
+            <div className="tw-flex tw-gap-x-4 tw-items-start">
               <div className="tw-flex tw-flex-col tw-gap-1">
                 <WaveDropHeader
                   drop={drop}
@@ -172,7 +176,6 @@ const WinnerDrop = ({
                 decisionTime={decisionTime}
               />
             </div>
-
             <div>
               <WaveDropContent
                 drop={drop}
@@ -187,7 +190,6 @@ const WinnerDrop = ({
             </div>
           </div>
         </div>
-
         {!isMobile && showReplyAndQuote && (
           <WaveDropActions
             drop={drop}
@@ -196,7 +198,6 @@ const WinnerDrop = ({
             onQuote={handleOnQuote}
           />
         )}
-
         <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-ml-[3.25rem] tw-mt-1.5">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             {drop.metadata.length > 0 && (
@@ -206,7 +207,6 @@ const WinnerDrop = ({
           </div>
         </div>
       </div>
-
       <WaveDropMobileMenu
         drop={drop}
         isOpen={isSlideUp}

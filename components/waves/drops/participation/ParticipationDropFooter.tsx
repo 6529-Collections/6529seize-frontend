@@ -14,13 +14,13 @@ export default function ParticipationDropFooter({
   return (
     <>
       {canShowVote && (
-        <div className="tw-px-4 md:tw-px-6 tw-pt-4 tw-border-t tw-border-iron-800/30">
+        <div className="tw-px-4 tw-ml-[3.25rem] tw-pt-4 tw-pb-4 tw-border-t tw-border-iron-800/30">
           <SingleWaveDropVote drop={drop} />
         </div>
       )}
 
       {!!drop.raters_count && (
-        <div className="tw-px-4 md:tw-px-6 tw-pt-4 tw-border-t tw-border-iron-800/30">
+        <div className="tw-px-4 tw-ml-[3.25rem] tw-pb-4 tw-border-t tw-border-iron-800/30">
           <ParticipationDropRatings drop={drop} rank={drop.rank} />
         </div>
       )}

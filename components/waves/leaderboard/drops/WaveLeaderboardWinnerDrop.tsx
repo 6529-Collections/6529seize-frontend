@@ -18,43 +18,38 @@ export const WaveLeaderboardWinnerDrop: React.FC<WaveLeaderboardWinnerDropProps>
   wave,
   onDropClick,
 }) => {
-  const gradientClass = "tw-from-[#E8D48A]/20 tw-via-[#D9A962]/20 tw-to-[#E8D48A]/20 desktop-hover:hover:tw-from-[#E8D48A]/30 desktop-hover:hover:tw-via-[#D9A962]/30 desktop-hover:hover:tw-to-[#E8D48A]/30";
+  // Winner drop always uses rank 1 (gold) styling
+  const borderColor = "#fbbf24"; // Gold color
 
   return (
     <div
       onClick={() => onDropClick(drop)}
-      className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-gradient-to-b ${gradientClass} tw-p-[1px] tw-transition tw-duration-300 tw-ease-out`}
+      className="tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full"
     >
-      <div className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5">
+      <div 
+        className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5"
+        style={{
+          border: "1px solid transparent",
+          borderLeft: "2px solid transparent",
+          boxShadow: `inset 2px 0 0 ${borderColor}, 
+                     inset 0 1px 0 ${borderColor}20, 
+                     inset -1px 0 0 ${borderColor}20, 
+                     inset 0 -1px 0 ${borderColor}20`,
+          transition: "box-shadow 0.2s ease, background-color 0.2s ease"
+        }}>
         <div className="tw-flex tw-flex-col tw-gap-3">
-          <div className="tw-flex tw-flex-col tw-gap-5">
-            <div className="tw-flex tw-items-center tw-gap-4 sm:tw-hidden">
-              <WaveLeaderboardDropRankIndicator drop={drop} />
+          <div className="tw-flex tw-flex-col tw-gap-3">
+            <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+              <WaveLeaderboardDropHeader drop={drop} />
               <div className="tw-flex-shrink-0">
                 <WaveLeaderboardDropRaters drop={drop} />
               </div>
             </div>
-            
-            <div className="tw-hidden sm:tw-flex tw-gap-5 tw-items-center">
-              <WaveLeaderboardDropRankIndicator drop={drop} />
-              <div className="tw-flex-1">
-                <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
-                  <WaveLeaderboardDropHeader drop={drop} />
-                  <div className="tw-flex-shrink-0">
-                    <WaveLeaderboardDropRaters drop={drop} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="sm:tw-hidden">
-              <WaveLeaderboardDropHeader drop={drop} />
-            </div>
           </div>
 
           <div className="tw-pl-0 tw-space-y-2">
-            <div className="tw-rounded-lg tw-bg-iron-900/50 tw-px-4 tw-pb-4 tw-pt-2 tw-ring-1 tw-ring-iron-800/50">
-              <WaveLeaderboardDropContent
+            <div className="tw-rounded-lg tw-pb-2">
+              <WaveLeaderboardDropContent 
                 drop={drop}
               />
             </div>

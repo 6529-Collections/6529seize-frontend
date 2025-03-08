@@ -9,8 +9,8 @@ export default function WaveWinnersDropHeaderCreated({
   winner,
 }: WaveWinnersDropHeaderCreatedProps) {
   return (
-    <span className="tw-text-xs md:tw-text-sm tw-font-medium tw-text-iron-400 tw-leading-none">
+    <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
       {getTimeAgoShort(winner.drop.created_at)}
-    </span>
+    </p>
   );
 }

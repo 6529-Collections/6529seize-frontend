@@ -59,16 +59,16 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             {getTimeAgoShort(drop.created_at)}
           </p>
         </div>
-        {drop.drop_type === ApiDropType.Participatory && (
-          <DropTrophyIcon rank={drop.rank} />
-        )}
+        {/* Trophy icon removed */}
       </div>
       <div>
         {showWaveInfo && (
           <Link
-            onClick={(e) => handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)}
+            onClick={(e) =>
+              handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)
+            }
             href={`/my-stream?wave=${drop.wave.id}`}
-            className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+            className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
           >
             {drop.wave.name}
           </Link>

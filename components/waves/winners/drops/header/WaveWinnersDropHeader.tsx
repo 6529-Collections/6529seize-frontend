@@ -1,8 +1,6 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import WaveWinnersDropHeaderTotalVotes from "./WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./WaveWinnersDropHeaderVoters";
-import WaveWinnersDropHeaderAuthorPfp from "./WaveWinnersDropHeaderAuthorPfp";
 import WaveWinnersDropHeaderRank from "./WaveWinnersDropHeaderRank";
 import WaveWinnersDropHeaderAuthorHandle from "./WaveWinnersDropHeaderAuthorHandle";
 import WaveWinnersDropHeaderCreated from "./WaveWinnersDropHeaderCreated";
@@ -18,20 +16,21 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-items-center tw-gap-x-4 tw-gap-y-4"
+      className="tw-flex tw-justify-between tw-w-full"
     >
-      <WaveWinnersDropHeaderRank winner={winner} />
-
-      <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
-        <div className="tw-flex tw-items-center tw-gap-3.5 tw-no-underline group">
-          <WaveWinnersDropHeaderAuthorPfp winner={winner} />
-          <div className="tw-flex tw-flex-col tw-gap-y-1.5 sm:tw-gap-y-0">
-            <WaveWinnersDropHeaderAuthorHandle winner={winner} />
-            <WaveWinnersDropHeaderCreated winner={winner} />
+      <div className="tw-flex tw-items-center tw-gap-x-2 tw-w-full">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <WaveWinnersDropHeaderAuthorHandle winner={winner} />
+          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+          <WaveWinnersDropHeaderCreated winner={winner} />
+          <div className="tw-ml-2">
+            <WaveWinnersDropHeaderRank winner={winner} />
           </div>
         </div>
+      </div>
 
-        <div className="tw-justify-end tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2 tw-flex-wrap">
+      <div className="tw-flex tw-items-center tw-whitespace-nowrap">
+        <div className="tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2">
           <WaveWinnersDropHeaderTotalVotes winner={winner} />
           <WaveWinnersDropHeaderVoters winner={winner} />
         </div>

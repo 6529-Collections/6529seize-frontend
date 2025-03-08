@@ -14,28 +14,43 @@ export default function WaveWinnersDropOutcome({
 }: WaveWinnersDropOutcomeProps) {
   // Transform awards into outcome format
   const nicOutcomes = winner.awards
-    .filter(award => award.credit === ApiWaveOutcomeCredit.Cic && award.amount && award.amount > 0)
-    .map(award => ({
+    .filter(
+      (award) =>
+        award.credit === ApiWaveOutcomeCredit.Cic &&
+        award.amount &&
+        award.amount > 0
+    )
+    .map((award) => ({
       type: OutcomeType.NIC as const,
-      value: award.amount || 0
+      value: award.amount || 0,
     }));
 
   const repOutcomes = winner.awards
-    .filter(award => award.credit === ApiWaveOutcomeCredit.Rep && award.amount && award.amount > 0)
-    .map(award => ({
+    .filter(
+      (award) =>
+        award.credit === ApiWaveOutcomeCredit.Rep &&
+        award.amount &&
+        award.amount > 0
+    )
+    .map((award) => ({
       type: OutcomeType.REP as const,
       value: award.amount || 0,
-      category: award.rep_category || ""
+      category: award.rep_category || "",
     }));
 
   const manualOutcomes = winner.awards
-    .filter(award => award.type === ApiWaveOutcomeType.Manual && award.description)
-    .map(award => ({
+    .filter(
+      (award) => award.type === ApiWaveOutcomeType.Manual && award.description
+    )
+    .map((award) => ({
       type: OutcomeType.MANUAL as const,
-      description: award.description || ""
+      description: award.description || "",
     }));
 
-  const haveOutcomes = nicOutcomes.length > 0 || repOutcomes.length > 0 || manualOutcomes.length > 0;
+  const haveOutcomes =
+    nicOutcomes.length > 0 ||
+    repOutcomes.length > 0 ||
+    manualOutcomes.length > 0;
 
   if (!haveOutcomes) {
     return null;
