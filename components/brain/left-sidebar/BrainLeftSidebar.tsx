@@ -38,11 +38,12 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
         <BrainLeftSidebarViewChange />
 
         {activeWaveId && contentFilterOptions.length > 1 && (
-          <div>
+          <div className="tw-w-full">
             <TabToggle
               options={contentFilterOptions}
               activeKey={activeContentTab}
               onSelect={(key) => setActiveContentTab(key as MyStreamWaveTab)}
+              fullWidth={true}
             />
           </div>
         )}
