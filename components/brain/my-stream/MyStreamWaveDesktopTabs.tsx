@@ -1,8 +1,8 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { TabToggle } from "../../common/TabToggle";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import { MyStreamWaveTab } from "./MyStreamWave";
+import { MyStreamWaveTab } from "../../../types/waves.types";
+import { useContentTab } from "../ContentTabContext";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -20,29 +20,22 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   wave,
   setActiveTab,
 }) => {
-  const { votingState, hasFirstDecisionPassed } = useWaveState(wave);
+  // Use the available tabs from context instead of recalculating
+  const { availableTabs } = useContentTab();
   
-  // Generate tab options based on wave state
-  const options = useMemo(() => {
-    const tabs: TabOption[] = [
-      { key: MyStreamWaveTab.CHAT, label: "Chat" }
-    ];
-    
-    // Show Leaderboard tab always except when voting has ended
-    if (votingState !== WaveVotingState.ENDED) {
-      tabs.push({ key: MyStreamWaveTab.LEADERBOARD, label: "Leaderboard" });
-    }
-    
-    // Show Winners tab if first decision has passed
-    if (hasFirstDecisionPassed) {
-      tabs.push({ key: MyStreamWaveTab.WINNERS, label: "Winners" });
-    }
-    
-    // Always show Outcome tab
-    tabs.push({ key: MyStreamWaveTab.OUTCOME, label: "Outcome" });
-    
-    return tabs;
-  }, [votingState, hasFirstDecisionPassed]);
+  // Map enum values to label names
+  const tabLabels: Record<MyStreamWaveTab, string> = {
+    [MyStreamWaveTab.CHAT]: "Chat",
+    [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
+    [MyStreamWaveTab.WINNERS]: "Winners",
+    [MyStreamWaveTab.OUTCOME]: "Outcome",
+  };
+  
+  // Generate options based on available tabs
+  const options: TabOption[] = availableTabs.map(tab => ({
+    key: tab,
+    label: tabLabels[tab]
+  }));
 
   return (
     <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full tw-hidden">

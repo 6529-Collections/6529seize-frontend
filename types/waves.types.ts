@@ -4,6 +4,13 @@ import { ApiWaveParticipationRequirement } from "../generated/models/ApiWavePart
 import { ApiWavesOverviewType } from "../generated/models/ApiWavesOverviewType";
 import { ApiWaveType } from "../generated/models/ApiWaveType";
 
+export enum MyStreamWaveTab {
+  CHAT = "CHAT",
+  LEADERBOARD = "LEADERBOARD",
+  WINNERS = "WINNERS",
+  OUTCOME = "OUTCOME",
+}
+
 export enum WaveSignatureType {
   NONE = "NONE",
   DROPS = "DROPS",
