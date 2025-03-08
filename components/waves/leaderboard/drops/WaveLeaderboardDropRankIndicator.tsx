@@ -1,5 +1,7 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 
 interface WaveLeaderboardDropRankIndicatorProps {
   readonly drop: ExtendedDrop;
@@ -8,17 +10,62 @@ interface WaveLeaderboardDropRankIndicatorProps {
 export const WaveLeaderboardDropRankIndicator: React.FC<
   WaveLeaderboardDropRankIndicatorProps
 > = ({ drop }) => {
-  const getBadgeClass = (rank: number | null) => {
-    if (!rank) return "tw-text-iron-400 tw-bg-iron-800/40 tw-border-iron-700/30";
-    if (rank === 1) return "tw-text-[#E8D48A] tw-bg-[#E8D48A]/10 tw-border-[#E8D48A]/30";
-    if (rank === 2) return "tw-text-[#DDDDDD] tw-bg-[#DDDDDD]/10 tw-border-[#DDDDDD]/30";
-    if (rank === 3) return "tw-text-[#CD7F32] tw-bg-[#CD7F32]/10 tw-border-[#CD7F32]/30";
-    return "tw-text-iron-300 tw-bg-iron-800/40 tw-border-iron-700/30";
-  };
+  const rankNumber = drop.rank;
+  
+  // Get rank text (1st, 2nd, 3rd, etc.)
+  let rankText = "";
+  if (rankNumber) {
+    switch (rankNumber) {
+      case 1:
+        rankText = "1st";
+        break;
+      case 2:
+        rankText = "2nd";
+        break;
+      case 3:
+        rankText = "3rd";
+        break;
+      default:
+        rankText = `${rankNumber}th`;
+    }
+  } else {
+    rankText = "-";
+  }
+
+  // Colors for each rank
+  let accentColor = "";
+  let bgColor = "";
+
+  switch (rankNumber) {
+    case 1:
+      accentColor = "#fbbf24"; // Gold
+      bgColor = "rgba(251,191,36,0.1)";
+      break;
+    case 2:
+      accentColor = "#94a3b8"; // Silver
+      bgColor = "rgba(148,163,184,0.1)";
+      break;
+    case 3:
+      accentColor = "#CD7F32"; // Bronze
+      bgColor = "rgba(205,127,50,0.1)";
+      break;
+    default:
+      accentColor = "#848490"; // Default for 4th or higher
+      bgColor = "rgba(96,96,108,0.1)";
+  }
 
   return (
-    <div className={`tw-rounded-md tw-py-1 tw-px-2 tw-h-6 tw-font-medium tw-text-xs tw-inline-flex tw-items-center tw-gap-x-1 tw-border ${getBadgeClass(drop.rank)}`}>
-      {drop.rank ? `#${drop.rank}` : "-"}
+    <div
+      className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-text-xs"
+      style={{
+        backgroundColor: bgColor,
+        color: accentColor,
+        border: `1px solid ${accentColor}40`,
+      }}
+    >
+      <span className="tw-px-1.5 tw-py-0.5 tw-flex tw-items-center">
+        {rankText}
+      </span>
     </div>
   );
 };

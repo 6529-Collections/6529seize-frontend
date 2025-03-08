@@ -19,7 +19,7 @@ const rankColors: Record<number | "default", string> = {
   1: "#fbbf24", // Gold
   2: "#94a3b8", // Silver
   3: "#CD7F32", // Bronze
-  default: "#60606C", // Default for 4th or higher
+  default: "#848490", // Default for 4th or higher
 };
 
 export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
@@ -58,10 +58,8 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
             </div>
           </div>
 
-          <div className="tw-pl-0 tw-space-y-2">
-            <div className="tw-rounded-lg tw-pb-2">
-              <WaveLeaderboardDropContent drop={drop} />
-            </div>
+          <div className="tw-ml-[3.35rem] tw-space-y-2">
+            <WaveLeaderboardDropContent drop={drop} />
 
             {canShowVote && (
               <div className="tw-pb-3 tw-pt-2">
