@@ -21,16 +21,16 @@ export const WaveRollingWinnersItemHeader: React.FC<
           <div className="tw-flex-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <span
               className={`tw-text-xs tw-font-medium ${
-                index === totalRounds - 1
+                index === 0
                   ? "tw-text-primary-400"
                   : "tw-text-iron-400"
               }`}
             >
-              {index + 1}
+              {totalRounds - index}
             </span>
           </div>
           <span className="tw-text-sm tw-font-medium tw-text-white/90">
-            Winners Round {index + 1}
+            Winners Round {totalRounds - index}
           </span>
         </div>
         <div className="tw-flex tw-items-center">
@@ -60,18 +60,18 @@ export const WaveRollingWinnersItemHeader: React.FC<
       <div className="tw-flex-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
         <span
           className={`tw-text-xs tw-font-medium ${
-            index === totalRounds - 1
+            index === 0
               ? "tw-text-primary-400"
               : "tw-text-iron-400"
           }`}
         >
-          {index + 1}
+          {totalRounds - index}
         </span>
       </div>
 
       <div className="tw-flex tw-items-center">
         <span className="tw-text-sm tw-font-medium tw-text-white/90">
-          Winners Round {index + 1}
+          Winners Round {totalRounds - index}
         </span>
 
         <div className="tw-flex tw-items-center tw-gap-1.5 tw-ml-2">

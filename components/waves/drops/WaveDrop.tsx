@@ -68,7 +68,10 @@ const getColorClasses = ({
       location === DropLocation.WAVE
         ? "desktop-hover:hover:tw-bg-iron-900/50"
         : "";
-    return `tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 ${hoverClass}`;
+    const ringClasses = location !== DropLocation.WAVE 
+      ? "tw-ring-1 tw-ring-inset tw-ring-iron-800" 
+      : "";
+    return `tw-bg-iron-950 ${ringClasses} ${hoverClass}`;
   }
 
   const rankClass =
@@ -147,7 +150,7 @@ const WaveDrop = ({
   const isMobile = useIsMobileDevice();
 
   const getGroupingClass = () => {
-    if (shouldGroupWithPreviousDrop) return "tw-pb-2";
+    if (shouldGroupWithPreviousDrop) return "";
     if (shouldGroupWithNextDrop) return "tw-pt-4";
     return "tw-py-4";
   };

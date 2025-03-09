@@ -3,7 +3,8 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
-import { WaveRollingWinners } from "./WaveRollingWinners";
+import { WaveWinnersTimeline } from "./WaveWinnersTimeline";
+import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
 
@@ -28,12 +29,16 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   return (
     <div className="tw-space-y-4 lg:tw-space-y-6 sm:tw-px-2 lg:tw-px-0">
       {isMultiDecisionWave ? (
-        <WaveRollingWinners
-          onDropClick={onDropClick}
-          decisionPoints={decisionPoints}
-          wave={wave}
-          isLoading={isDecisionsLoading}
-        />
+        isDecisionsLoading ? (
+          <WaveWinnersTimelineLoading />
+        ) : (
+          <WaveWinnersTimeline
+            onDropClick={onDropClick}
+            decisionPoints={decisionPoints}
+            wave={wave}
+            isLoading={isDecisionsLoading}
+          />
+        )
       ) : (
         <div className="tw-space-y-2 tw-mt-4 tw-pb-4 tw-max-h-[calc(100vh-140px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           <WaveWinnersPodium
