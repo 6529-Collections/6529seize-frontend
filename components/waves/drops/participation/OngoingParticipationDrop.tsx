@@ -78,7 +78,7 @@ export default function OngoingParticipationDrop({
       )}
       <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-px-4 tw-pt-4">
         <WaveDropAuthorPfp drop={drop} />
-        <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-1">
+        <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-1.5">
           <ParticipationDropHeader drop={drop} showWaveInfo={showWaveInfo} />
         </div>
       </div>

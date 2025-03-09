@@ -82,7 +82,7 @@ export default function EndedParticipationDrop({
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group tw-transition-colors tw-duration-200 tw-ease-linear
           ${
             isActiveDrop
-              ? "tw-bg-[#3CCB7F]/5"
+              ? "tw-bg-[#3CCB7F]/10"
               : location === DropLocation.WAVE
                 ? "tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-iron-800"
                 : "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800"

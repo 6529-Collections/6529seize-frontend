@@ -103,7 +103,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       ) : null,
     [BrainView.WINNERS]:
       isRankWave && !!wave ? (
-        <div className="tw-px-2 sm:tw-px-4 tw-pt-4">
+        <div className="tw-px-2 sm:tw-px-4">
           <WaveWinners wave={wave} onDropClick={onDropClick} />
         </div>
       ) : null,

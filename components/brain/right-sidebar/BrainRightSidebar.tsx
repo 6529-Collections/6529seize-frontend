@@ -68,7 +68,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       <button
         type="button"
         aria-label="Toggle sidebar"
-        className={`tw-absolute tw-z-50 tw-top-28 tw-bg-primary-500 desktop-hover:hover:tw-opacity-80 tw-border tw-border-solid
+        className={`tw-absolute tw-z-50 tw-top-[6.5rem] min-[1200px]:tw-top-[7.25rem] tw-bg-primary-500 desktop-hover:hover:tw-opacity-80 tw-border tw-border-solid
           tw-border-primary-400 tw-size-7 tw-text-white desktop-hover:hover:tw-text-white tw-ring-1 tw-ring-white/20
           focus:tw-outline-none tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300 tw-ease-out
           ${isCollapsed ? 

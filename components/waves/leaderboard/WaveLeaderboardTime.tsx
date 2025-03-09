@@ -44,7 +44,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
             setIsDecisionDetailsOpen={setIsDecisionDetailsOpen}
           />
 
-          <div className="tw-flex tw-items-center">
+          <div className="tw-flex tw-items-center tw-flex-wrap tw-mt-2 tw-gap-y-1">
             <CompactDroppingPhaseCard wave={wave} />
 
             {/* Center dot separator */}

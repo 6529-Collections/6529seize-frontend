@@ -25,7 +25,7 @@ export const CompactVotingPhaseCard: React.FC<CompactVotingPhaseCardProps> = ({
   } = waveData.voting.time;
 
   return (
-    <div className="tw-px-2 tw-py-1.5">
+    <div className="tw-px-2">
       {votingTimeState !== "COMPLETED" ? (
         <div className="tw-flex tw-items-center tw-justify-between tw-flex-nowrap">
           <span className="tw-font-normal">

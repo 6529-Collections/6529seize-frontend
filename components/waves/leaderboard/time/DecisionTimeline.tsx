@@ -47,48 +47,48 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
           <div className="tw-flex-shrink-0 tw-size-6 md:tw-size-8 tw-rounded-md tw-bg-gradient-to-br tw-from-emerald-300/10 tw-to-emerald-400/5 tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10">
             <FontAwesomeIcon
               icon={faClock}
-              className="tw-text-sm md:tw-text-base tw-size-4 tw-text-emerald-400/80"
+              className="tw-text-sm md:tw-text-base tw-size-4 tw-text-emerald-400/80 tw-flex-shrink-0"
             />
           </div>
 
           {/* Title and Countdown on same line */}
           <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
             <div className="tw-flex tw-items-center tw-gap-x-3">
-              <h2 className="tw-text-sm tw-text-white/90 tw-font-semibold tw-whitespace-nowrap tw-mb-0">
-                Next winner announcement in:
+              <h2 className="tw-text-xs sm:tw-text-sm tw-text-white/90 tw-font-semibold tw-whitespace-nowrap tw-mb-0">
+                Next winner <span className="tw-hidden sm:tw-inline">announcement in</span>:
               </h2>
 
               {/* Inline Countdown - Compact but prominent */}
               <div className="tw-flex tw-items-center">
                 <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <span className="tw-text-base tw-font-semibold tw-text-white/90">
+                  <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white/90">
                     {nextDecisionTimeLeft.days}
                   </span>
-                  <span className="tw-text-xs tw-uppercase tw-text-white/40 tw-ml-1">
+                  <span className="tw-text-[10px] sm:tw-text-xs tw-uppercase tw-text-white/40 tw-ml-1">
                     days
                   </span>
                 </div>
                 <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <span className="tw-text-base tw-font-semibold tw-text-white/90">
+                  <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white/90">
                     {nextDecisionTimeLeft.hours}
                   </span>
-                  <span className="tw-text-xs tw-uppercase tw-text-white/900 tw-ml-1">
+                  <span className="tw-text-[10px] sm:tw-text-xs tw-uppercase tw-text-white/900 tw-ml-1">
                     hrs
                   </span>
                 </div>
                 <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <span className="tw-text-base tw-font-semibold tw-text-white/90">
+                  <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white/90">
                     {nextDecisionTimeLeft.minutes}
                   </span>
-                  <span className="tw-text-xs tw-uppercase tw-text-white/40 tw-ml-1">
+                  <span className="tw-text-[10px] sm:tw-text-xs tw-uppercase tw-text-white/40 tw-ml-1">
                     min
                   </span>
                 </div>
                 <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
-                  <span className="tw-text-base tw-font-semibold tw-text-white/90">
+                  <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white/90">
                     {nextDecisionTimeLeft.seconds}
                   </span>
-                  <span className="tw-text-xs tw-uppercase tw-text-white/40 tw-ml-1">
+                  <span className="tw-text-[10px] sm:tw-text-xs tw-uppercase tw-text-white/40 tw-ml-1">
                     sec
                   </span>
                 </div>

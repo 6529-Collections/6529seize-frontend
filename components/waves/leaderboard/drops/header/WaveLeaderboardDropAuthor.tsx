@@ -5,7 +5,7 @@ import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../../user/utils/UserCICAndLevel";
-import { WaveLeaderboardDropRankIndicator } from "../WaveLeaderboardDropRankIndicator";
+import WinnerDropBadge from "../../../../waves/drops/winner/WinnerDropBadge";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -39,30 +39,33 @@ export const WaveLeaderboardDropAuthor: React.FC<
           )}
         </div>
       </Link>
+      <div className="tw-flex tw-items-center tw-gap-x-4">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <UserCICAndLevel
+            level={drop.author.level}
+            cicType={cicToType(drop.author.cic)}
+            size={UserCICAndLevelSize.SMALL}
+          />
+          <Link
+            href={`/${drop.author.handle}`}
+            onClick={(e) => e.stopPropagation()}
+            className="tw-no-underline"
+          >
+            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+              {drop.author.handle}
+            </span>
+          </Link>
 
-      <div className="tw-flex tw-items-center tw-gap-x-2">
-        <UserCICAndLevel
-          level={drop.author.level}
-          cicType={cicToType(drop.author.cic)}
-          size={UserCICAndLevelSize.SMALL}
-        />
-        <Link
-          href={`/${drop.author.handle}`}
-          onClick={(e) => e.stopPropagation()}
-          className="tw-no-underline"
-        >
-          <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-            {drop.author.handle}
+          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+
+          <span className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+            {getTimeAgoShort(drop.created_at)}
           </span>
-        </Link>
-
-        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-
-        <span className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-          {getTimeAgoShort(drop.created_at)}
-        </span>
-
-        <WaveLeaderboardDropRankIndicator drop={drop} />
+        </div>
+        <WinnerDropBadge
+          rank={drop.rank}
+          decisionTime={drop.winning_context?.decision_time}
+        />
       </div>
     </div>
   );

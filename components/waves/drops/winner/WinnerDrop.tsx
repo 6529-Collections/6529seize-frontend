@@ -119,7 +119,7 @@ const WinnerDrop = ({
       <div
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group
           ${isActiveDrop 
-            ? "tw-bg-[#3CCB7F]/5" 
+            ? "tw-bg-[#3CCB7F]/10" 
             : location === DropLocation.WAVE 
               ? "tw-bg-iron-900/60" 
               : "tw-bg-iron-950"
@@ -152,29 +152,29 @@ const WinnerDrop = ({
         <div className="tw-flex tw-gap-x-3 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-relative tw-z-10">
           <WaveDropAuthorPfp drop={drop} />
           <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
-            <div className="tw-flex tw-gap-x-4 tw-items-start">
-              <div className="tw-flex tw-flex-col tw-gap-1">
-                <WaveDropHeader
-                  drop={drop}
-                  showWaveInfo={false}
-                  isStorm={isStorm}
-                  currentPartIndex={activePartIndex}
-                  partsCount={drop.parts.length}
-                />
-                {showWaveInfo && (
-                  <Link
-                    href={`/my-stream?wave=${drop.wave.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-                  >
-                    {drop.wave.name}
-                  </Link>
-                )}
-              </div>
-              <WinnerDropBadge
-                rank={effectiveRank}
-                decisionTime={decisionTime}
+            <div className="tw-flex tw-flex-col tw-gap-1">
+              <WaveDropHeader
+                drop={drop}
+                showWaveInfo={false}
+                isStorm={isStorm}
+                currentPartIndex={activePartIndex}
+                partsCount={drop.parts.length}
+                badge={
+                  <WinnerDropBadge
+                    rank={effectiveRank}
+                    decisionTime={decisionTime}
+                  />
+                }
               />
+              {showWaveInfo && (
+                <Link
+                  href={`/my-stream?wave=${drop.wave.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+                >
+                  {drop.wave.name}
+                </Link>
+              )}
             </div>
             <div>
               <WaveDropContent

@@ -18,51 +18,51 @@ interface WavePodiumItemProps {
 // Configuration for position-specific styling with CSS ready classes for Tailwind
 const positionStyles = {
   first: {
-    color: "#E8D48A",
+    color: "#fbbf24", // amber-400 - Gold from WinnerDropBadge
     height: "tw-h-[220px]",
     pfpSize: "tw-size-12 md:tw-size-14",
     marginBottom: "-tw-mb-6",
-    textColor: "tw-text-[#E8D48A]",
-    ring: "tw-ring-[#E8D48A]",
-    shadow: "tw-shadow-[0_0_20px_rgba(232,212,138,0.3)]",
+    textColor: "tw-text-[#fbbf24]",
+    ring: "tw-ring-[#fbbf24]",
+    shadow: "tw-shadow-[0_0_20px_rgba(251,191,36,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base md:tw-text-xl",
     ratingFontSize: "tw-text-sm sm:tw-text-base md:tw-text-2xl",
     positionText: "1st",
-    bgGradient: "tw-bg-gradient-to-b tw-from-[#E8D48A]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
+    bgGradient: "tw-bg-gradient-to-b tw-from-[#fbbf24]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
     gradient: {
-      from: "tw-from-[#E8D48A]/5",
-      via: "tw-via-[#E8D48A]/3",
-      hover: "group-hover:desktop-hover:tw-from-[#E8D48A]/[0.07]",
-      top: "tw-via-[#E8D48A]/10", 
-      hover25: "group-hover:desktop-hover:tw-via-[#E8D48A]/25",
-      sides: "tw-from-[#E8D48A]/10 tw-via-[#E8D48A]/5",
-      sidesHover: "group-hover:desktop-hover:tw-via-[#E8D48A]/25"
+      from: "tw-from-[#fbbf24]/5",
+      via: "tw-via-[#fbbf24]/3",
+      hover: "group-hover:desktop-hover:tw-from-[#fbbf24]/[0.07]",
+      top: "tw-via-[#fbbf24]/10", 
+      hover25: "group-hover:desktop-hover:tw-via-[#fbbf24]/25",
+      sides: "tw-from-[#fbbf24]/10 tw-via-[#fbbf24]/5",
+      sidesHover: "group-hover:desktop-hover:tw-via-[#fbbf24]/25"
     }
   },
   second: {
-    color: "#dddddd",
+    color: "#94a3b8", // slate-400 - Silver from WinnerDropBadge
     height: "tw-h-[190px]",
     pfpSize: "tw-size-9 md:tw-size-11",
     marginBottom: "-tw-mb-2",
-    textColor: "tw-text-[#dddddd]",
-    ring: "tw-ring-[#dddddd]",
+    textColor: "tw-text-[#94a3b8]",
+    ring: "tw-ring-[#94a3b8]",
     shadow: "tw-shadow-[0_0_20px_rgba(148,163,184,0.3)]",
     autorFontSize: "tw-text-sm sm:tw-text-base",
     ratingFontSize: "tw-text-sm sm:tw-text-base",
     positionText: "2nd",
-    bgGradient: "tw-bg-gradient-to-b tw-from-[#dddddd]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
+    bgGradient: "tw-bg-gradient-to-b tw-from-[#94a3b8]/20 tw-to-transparent tw-blur-2xl tw-scale-150",
     gradient: {
-      from: "tw-from-[#dddddd]/5",
-      via: "tw-via-[#dddddd]/3",
-      hover: "group-hover:desktop-hover:tw-from-[#dddddd]/[0.07]",
-      top: "tw-via-[#dddddd]/10",
-      hover25: "group-hover:desktop-hover:tw-via-[#dddddd]/25",
-      sides: "tw-from-[#dddddd]/10 tw-via-[#dddddd]/5",
-      sidesHover: "group-hover:desktop-hover:tw-via-[#dddddd]/25"
+      from: "tw-from-[#94a3b8]/5",
+      via: "tw-via-[#94a3b8]/3",
+      hover: "group-hover:desktop-hover:tw-from-[#94a3b8]/[0.07]",
+      top: "tw-via-[#94a3b8]/10",
+      hover25: "group-hover:desktop-hover:tw-via-[#94a3b8]/25",
+      sides: "tw-from-[#94a3b8]/10 tw-via-[#94a3b8]/5",
+      sidesHover: "group-hover:desktop-hover:tw-via-[#94a3b8]/25"
     }
   },
   third: {
-    color: "#CD7F32",
+    color: "#CD7F32", // Bronze (same in both components)
     height: "tw-h-[170px]",
     pfpSize: "tw-size-9 md:tw-size-11",
     marginBottom: "-tw-mb-2",

@@ -72,7 +72,7 @@ export const SingleWaveDropVoteContent: React.FC<SingleWaveDropVoteContentProps>
 
   return (
     <div
-      className="tw-@container tw-flex tw-flex-col tw-gap-4 tw-p-4 md:tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800 tw-border-solid tw-relative"
+      className="tw-@container tw-flex tw-flex-col tw-gap-4 tw-p-4 md:tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-shadow tw-backdrop-blur-lg tw-border tw-border-iron-800 tw-border-solid tw-relative"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="tw-relative">

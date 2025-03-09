@@ -7,6 +7,7 @@ import UserCICAndLevel, {
 import { DropTrophyIcon } from "../../DropThrophyIcon";
 import ParticipationDropPfp from "./ParticipationDropPfp";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
+import WinnerDropBadge from "../winner/WinnerDropBadge";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;
@@ -21,7 +22,7 @@ export default function ParticipationDropHeader({
 
   return (
     <>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-w-full">
+      <div className="tw-flex tw-items-center tw-gap-x-4 tw-w-full">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <UserCICAndLevel
@@ -46,18 +47,23 @@ export default function ParticipationDropHeader({
             {getTimeAgoShort(drop.created_at)}
           </p>
         </div>
-      </div>
-      <div>
-        {showWaveInfo && (
-          <Link
-            onClick={(e) => e.stopPropagation()}
-            href={`/my-stream?wave=${drop.wave.id}`}
-            className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-          >
-            {drop.wave.name}
-          </Link>
+
+        {drop.rank && (
+          <WinnerDropBadge
+            rank={drop.rank}
+            decisionTime={drop.winning_context?.decision_time}
+          />
         )}
       </div>
+      {showWaveInfo && (
+        <Link
+          onClick={(e) => e.stopPropagation()}
+          href={`/my-stream?wave=${drop.wave.id}`}
+          className="tw-mb-0 tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+        >
+          {drop.wave.name}
+        </Link>
+      )}
     </>
   );
 }

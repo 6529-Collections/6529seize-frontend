@@ -1,6 +1,5 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { WaveLeaderboardDropRankIndicator } from "./WaveLeaderboardDropRankIndicator";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
 import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
@@ -18,25 +17,13 @@ export const WaveLeaderboardWinnerDrop: React.FC<WaveLeaderboardWinnerDropProps>
   wave,
   onDropClick,
 }) => {
-  // Winner drop always uses rank 1 (gold) styling
-  const borderColor = "#fbbf24"; // Gold color
-
   return (
     <div
       onClick={() => onDropClick(drop)}
       className="tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full"
     >
       <div 
-        className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5"
-        style={{
-          border: "1px solid transparent",
-          borderLeft: "2px solid transparent",
-          boxShadow: `inset 2px 0 0 ${borderColor}, 
-                     inset 0 1px 0 ${borderColor}20, 
-                     inset -1px 0 0 ${borderColor}20, 
-                     inset 0 -1px 0 ${borderColor}20`,
-          transition: "box-shadow 0.2s ease, background-color 0.2s ease"
-        }}>
+        className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-transparent tw-border-l-2 tw-transition-all tw-duration-200 tw-ease-out tw-shadow-[inset_2px_0_0_#fbbf24,inset_0_1px_0_rgba(251,191,36,0.13),inset_-1px_0_0_rgba(251,191,36,0.13),inset_0_-1px_0_rgba(251,191,36,0.13)]">
         <div className="tw-flex tw-flex-col tw-gap-3">
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">

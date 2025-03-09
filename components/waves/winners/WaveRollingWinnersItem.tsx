@@ -27,7 +27,7 @@ export const WaveRollingWinnersItem: React.FC<WaveRollingWinnersItemProps> = ({
 }) => {
   return (
     <div
-      className="tw-rounded-lg tw-bg-iron-900 tw-border tw-border-iron-800"
+      className="tw-rounded-lg tw-bg-iron-900"
     >
       <WaveRollingWinnersItemHeader
         point={point}
@@ -38,7 +38,7 @@ export const WaveRollingWinnersItem: React.FC<WaveRollingWinnersItemProps> = ({
       />
       
       <AnimatedAccordionContent isVisible={isExpanded}>
-        <div className="tw-space-y-4 tw-bg-black tw-rounded-b-xl tw-border-t tw-border-iron-800">
+        <div className="tw-space-y-4 tw-bg-black">
           <WaveWinnersRoundContent
             winners={point.winners}
             onDropClick={onDropClick}

@@ -64,8 +64,11 @@ const getColorClasses = ({
     return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0 tw-mt-1";
   }
   if (!isDrop) {
-    const hoverClass = location === DropLocation.WAVE ? "desktop-hover:hover:tw-bg-iron-900/50" : "";
-    return `tw-bg-iron-950 ${hoverClass}`;
+    const hoverClass =
+      location === DropLocation.WAVE
+        ? "desktop-hover:hover:tw-bg-iron-900/50"
+        : "";
+    return `tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 ${hoverClass}`;
   }
 
   const rankClass =
@@ -144,7 +147,7 @@ const WaveDrop = ({
   const isMobile = useIsMobileDevice();
 
   const getGroupingClass = () => {
-    if (shouldGroupWithPreviousDrop) return "";
+    if (shouldGroupWithPreviousDrop) return "tw-pb-2";
     if (shouldGroupWithNextDrop) return "tw-pt-4";
     return "tw-py-4";
   };
@@ -255,7 +258,13 @@ const WaveDrop = ({
                 partsCount={drop.parts.length}
               />
             )}
-            <div className={shouldGroupWithPreviousDrop ? "tw-ml-[3.25rem] tw-py-[0.15625rem]" : ""}>
+            <div
+              className={
+                shouldGroupWithPreviousDrop
+                  ? "tw-ml-[3.25rem] tw-py-[0.15625rem]"
+                  : ""
+              }
+            >
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}

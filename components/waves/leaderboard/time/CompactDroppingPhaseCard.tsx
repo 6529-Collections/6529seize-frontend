@@ -25,7 +25,7 @@ export const CompactDroppingPhaseCard: React.FC<CompactDroppingPhaseCardProps> =
   } = waveData.participation;
 
   return (
-    <div className="tw-px-2 tw-py-1.5">
+    <div className="tw-px-2">
       {droppingTimeState !== "COMPLETED" ? (
         <div className="tw-flex tw-items-center tw-justify-between tw-flex-nowrap">
           <span className="tw-font-normal">

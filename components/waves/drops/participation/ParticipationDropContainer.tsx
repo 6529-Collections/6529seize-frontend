@@ -111,7 +111,7 @@ export default function ParticipationDropContainer({
       <div
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-rounded-lg tw-overflow-hidden tw-group
           ${isActiveDrop 
-            ? "tw-bg-[#3CCB7F]/5" 
+            ? "tw-bg-[#3CCB7F]/10" 
             : location === DropLocation.WAVE 
               ? "tw-bg-iron-900/60" 
               : "tw-bg-iron-950"
