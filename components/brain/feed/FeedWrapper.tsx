@@ -34,19 +34,22 @@ export default function FeedWrapper({
   };
 
   return (
-    <FeedScrollContainer
-      ref={scrollRef}
-      onScrollUpNearTop={handleScrollUpNearTop}
-      isFetchingNextPage={loading}
-    >
-      <FeedItems
-        items={items}
-        showWaveInfo={showWaveInfo}
-        activeDrop={activeDrop}
-        onReply={onReply}
-        onQuote={onQuote}
-        onDropContentClick={onDropContentClick}
-      />
-    </FeedScrollContainer>
+    <div className="tw-h-full">
+      <FeedScrollContainer
+        ref={scrollRef}
+        onScrollUpNearTop={handleScrollUpNearTop}
+        isFetchingNextPage={loading}
+        className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-pr-2"
+      >
+        <FeedItems
+          items={items}
+          showWaveInfo={showWaveInfo}
+          activeDrop={activeDrop}
+          onReply={onReply}
+          onQuote={onQuote}
+          onDropContentClick={onDropContentClick}
+        />
+      </FeedScrollContainer>
+    </div>
   );
 }

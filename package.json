@@ -24,6 +24,7 @@
     "@capacitor/push-notifications": "^6.0.2",
     "@capacitor/share": "^6.0.2",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@google/model-viewer": "^3.5.0",

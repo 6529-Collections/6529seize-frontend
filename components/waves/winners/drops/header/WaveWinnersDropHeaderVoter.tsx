@@ -4,19 +4,19 @@ import {
   ImageScale,
 } from "../../../../../helpers/image.helpers";
 import { ApiDropRater } from "../../../../../generated/models/ApiDropRater";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import Link from "next/link";
 
 interface WaveWinnersDropHeaderVoterProps {
   readonly voter: ApiDropRater;
-  readonly drop: ExtendedDrop;
+  readonly winner: ApiWaveDecisionWinner;
   readonly index: number;
 }
 
 export default function WaveWinnersDropHeaderVoter({
   voter,
-  drop,
+  winner,
   index,
 }: WaveWinnersDropHeaderVoterProps) {
   return (
@@ -25,7 +25,7 @@ export default function WaveWinnersDropHeaderVoter({
       content={
         <span className="tw-text-xs tw-font-medium">
           {voter.profile.handle} • {formatNumberWithCommas(voter.rating)}{" "}
-          {drop.wave.voting_credit_type}
+          {winner.drop.wave.voting_credit_type}
         </span>
       }
       interactive={true}
@@ -36,7 +36,7 @@ export default function WaveWinnersDropHeaderVoter({
     >
       <div
         className="tw-relative tw-transition-transform hover:tw-scale-110 hover:tw-z-10"
-        style={{ zIndex: drop.top_raters.length - index }}
+        style={{ zIndex: winner.drop.top_raters.length - index }}
       >
         <Link href={`/${voter.profile.handle}`}>
           {voter.profile.pfp ? (

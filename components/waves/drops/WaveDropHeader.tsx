@@ -14,6 +14,7 @@ interface WaveDropHeaderProps {
   readonly currentPartIndex: number;
   readonly partsCount: number;
   readonly showWaveInfo: boolean;
+  readonly badge?: React.ReactNode;
 }
 
 const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
@@ -22,6 +23,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   currentPartIndex,
   partsCount,
   showWaveInfo,
+  badge,
 }) => {
   const router = useRouter();
   const cicType = cicToType(drop.author.cic);
@@ -34,7 +36,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 
   return (
     <>
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-w-full">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <UserCICAndLevel
@@ -58,17 +60,18 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
             {getTimeAgoShort(drop.created_at)}
           </p>
+          
+          {badge && <div className="tw-ml-4">{badge}</div>}
         </div>
-        {drop.drop_type === ApiDropType.Participatory && (
-          <DropTrophyIcon rank={drop.rank} />
-        )}
       </div>
       <div>
         {showWaveInfo && (
           <Link
-            onClick={(e) => handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)}
+            onClick={(e) =>
+              handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)
+            }
             href={`/my-stream?wave=${drop.wave.id}`}
-            className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
+            className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
           >
             {drop.wave.name}
           </Link>

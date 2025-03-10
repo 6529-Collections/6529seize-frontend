@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useContentTab } from "../ContentTabContext";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
 import MyStreamWaveDesktopTabs from "./MyStreamWaveDesktopTabs";
@@ -8,12 +9,9 @@ import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { createBreakpoint } from "react-use";
 import { useRouter } from "next/router";
-
-export enum MyStreamWaveTab {
-  CHAT = "CHAT",
-  LEADERBOARD = "LEADERBOARD",
-  OUTCOME = "OUTCOME",
-}
+import { WaveWinners } from "../../waves/winners/WaveWinners";
+import { MyStreamWaveTab } from "../../../types/waves.types";
+import { useWaveState } from "../../../hooks/useWaveState";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -25,6 +23,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
+  
+  // Get wave state information
+  const { votingState, hasFirstDecisionPassed } = useWaveState(wave || undefined);
 
   const onDropClick = (drop: ExtendedDrop) => {
     const currentQuery = { ...router.query };
@@ -39,15 +40,20 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     );
   };
 
-  const [activeTab, setActiveTab] = useState<MyStreamWaveTab>(
-    MyStreamWaveTab.CHAT
-  );
+  // Get the active tab and utilities from global context
+  const { activeContentTab, setActiveContentTab, updateAvailableTabs } = useContentTab();
 
+  // Update available tabs when wave changes
+  useEffect(() => {
+    updateAvailableTabs(wave, votingState, hasFirstDecisionPassed);
+  }, [wave, votingState, hasFirstDecisionPassed, updateAvailableTabs]);
+
+  // Always switch to Chat for Chat-type waves
   useEffect(() => {
     if (wave?.wave.type === ApiWaveType.Chat) {
-      setActiveTab(MyStreamWaveTab.CHAT);
+      setActiveContentTab(MyStreamWaveTab.CHAT);
     }
-  }, [breakpoint, wave?.wave.type]);
+  }, [wave?.wave.type, setActiveContentTab]);
 
   if (!wave) {
     return null;
@@ -58,6 +64,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     [MyStreamWaveTab.LEADERBOARD]: (
       <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
     ),
+    [MyStreamWaveTab.WINNERS]: (
+      <WaveWinners wave={wave} onDropClick={onDropClick} />
+    ),
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
   };
 
@@ -66,19 +75,19 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       {breakpoint !== "S" && wave.wave.type !== ApiWaveType.Chat && (
         <div
           className={
-            activeTab === MyStreamWaveTab.CHAT
+            activeContentTab === MyStreamWaveTab.CHAT
               ? "tw-absolute tw-top-0 tw-left-0 tw-z-50"
               : ""
           }
         >
           <MyStreamWaveDesktopTabs
-            activeTab={activeTab}
+            activeTab={activeContentTab}
             wave={wave}
-            setActiveTab={setActiveTab}
+            setActiveTab={setActiveContentTab}
           />
         </div>
       )}
-      {components[activeTab]}
+      {components[activeContentTab]}
     </div>
   );
 };

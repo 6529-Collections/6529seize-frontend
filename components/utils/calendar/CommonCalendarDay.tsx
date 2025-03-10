@@ -23,11 +23,11 @@ export default function CommonCalendarDay({
 }) {
   const BUTTON_CLASSES: Record<CalendarDaySate, string> = {
     [CalendarDaySate.NOT_ACTIVE_MONTH]: "tw-bg-transparent tw-text-iron-400",
-    [CalendarDaySate.MANUALLY_DISABLED]: "tw-bg-iron-600 tw-text-iron-300",
+    [CalendarDaySate.MANUALLY_DISABLED]: "tw-bg-iron-600 tw-text-iron-400",
     [CalendarDaySate.AVAILABLE]:
-      "tw-font-normal tw-bg-iron-800 tw-text-white hover:tw-border-primary-500",
+      "tw-font-normal tw-bg-iron-700 tw-text-white hover:tw-bg-iron-700 hover:tw-border-primary-400 hover:tw-shadow-md",
     [CalendarDaySate.ACTIVE]:
-      "tw-bg-primary-500 tw-text-white tw-font-semibold hover:tw-border-primary-500"
+      "tw-bg-primary-500 tw-text-white tw-font-semibold tw-shadow-lg tw-shadow-primary-500/20 tw-ring-2 tw-ring-primary-400/50"
   };
 
   const getDayState = (): CalendarDaySate => {

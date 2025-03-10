@@ -7,6 +7,7 @@ interface WaveDropsScrollContainerProps {
   readonly newItemsCount: number;
   readonly isFetchingNextPage: boolean;
   readonly disableAutoPosition?: boolean;
+  readonly className?: string;
 }
 
 const MIN_OUT_OF_VIEW_COUNT = 30;
@@ -23,6 +24,7 @@ export const WaveDropsScrollContainer = forwardRef<
       newItemsCount,
       isFetchingNextPage,
       disableAutoPosition,
+      className = "",
     },
     ref
   ) => {
@@ -116,7 +118,8 @@ export const WaveDropsScrollContainer = forwardRef<
     return (
       <div
         ref={ref}
-        className="tw-pb-2 tw-bg-iron-950 tw-flex tw-flex-col-reverse tw-flex-grow no-scrollbar tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0 lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transition-all tw-duration-300"
+        style={{ overflowAnchor: "none" }}
+        className={`tw-pb-2 tw-bg-iron-950 tw-flex tw-flex-col-reverse tw-flex-grow no-scrollbar tw-overflow-y-auto tw-divide-y tw-divide-iron-800 tw-divide-solid tw-divide-x-0 lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transition-all tw-duration-300 ${className}`}
         onScroll={handleScroll}
       >
         <div className="tw-flex tw-flex-col-reverse tw-flex-grow">

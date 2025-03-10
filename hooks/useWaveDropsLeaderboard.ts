@@ -36,6 +36,7 @@ interface UseWaveDropsLeaderboardProps {
   readonly sortDirection: WaveDropsLeaderboardSortDirection;
   readonly handle?: string;
   readonly pollingEnabled?: boolean;
+  readonly enabled?: boolean;
 }
 
 const POLLING_DELAY = 3000;
@@ -63,6 +64,7 @@ export function useWaveDropsLeaderboard({
   sortDirection,
   handle,
   pollingEnabled = true,
+  enabled = true,
 }: UseWaveDropsLeaderboardProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -88,6 +90,9 @@ export function useWaveDropsLeaderboard({
   ];
 
   useEffect(() => {
+    // Only prefetch if enabled
+    if (!enabled) return;
+    
     queryClient.prefetchInfiniteQuery({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
@@ -116,7 +121,7 @@ export function useWaveDropsLeaderboard({
       pages: 3,
       staleTime: 60000,
     });
-  }, [waveId, dropsSortBy]);
+  }, [waveId, dropsSortBy, enabled]);
 
   const {
     data,
@@ -152,7 +157,7 @@ export function useWaveDropsLeaderboard({
     initialPageParam: null,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
     placeholderData: keepPreviousData,
-    enabled: !!connectedProfileHandle,
+    enabled: enabled && !!connectedProfileHandle,
     staleTime: 60000,
   });
 
@@ -193,15 +198,15 @@ export function useWaveDropsLeaderboard({
         params,
       });
     },
-    enabled: !haveNewDrops && canPoll && pollingEnabled,
+    enabled: enabled && !haveNewDrops && canPoll && pollingEnabled,
     refetchInterval:
-      isTabVisible && pollingEnabled
+      isTabVisible && pollingEnabled && enabled
         ? ACTIVE_POLLING_INTERVAL
         : INACTIVE_POLLING_INTERVAL,
-    refetchOnWindowFocus: pollingEnabled,
-    refetchOnMount: pollingEnabled,
-    refetchOnReconnect: pollingEnabled,
-    refetchIntervalInBackground: !isCapacitor && pollingEnabled,
+    refetchOnWindowFocus: pollingEnabled && enabled,
+    refetchOnMount: pollingEnabled && enabled,
+    refetchOnReconnect: pollingEnabled && enabled,
+    refetchIntervalInBackground: !isCapacitor && pollingEnabled && enabled,
   });
 
   useEffect(() => {

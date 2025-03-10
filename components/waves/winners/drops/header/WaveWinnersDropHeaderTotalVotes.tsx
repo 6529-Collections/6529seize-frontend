@@ -1,12 +1,12 @@
-import { ApiDrop } from "../../../../../generated/models/ApiDrop";
+import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 
 interface WaveWinnersDropHeaderTotalVotesProps {
-  readonly drop: ApiDrop;
+  readonly winner: ApiWaveDecisionWinner;
 }
 
 export default function WaveWinnersDropHeaderTotalVotes({
-  drop,
+  winner,
 }: WaveWinnersDropHeaderTotalVotesProps) {
   const topThreeRankStyles: { [key: number]: string } = {
     1: "tw-text-[#E8D48A]",
@@ -26,15 +26,15 @@ export default function WaveWinnersDropHeaderTotalVotes({
     return "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
   };
 
-  const style = getVoteStyle(drop.rank, drop.rating);
+  const style = getVoteStyle(winner.place, winner.drop.rating);
 
   return (
     <div className="tw-flex tw-items-baseline tw-gap-x-1">
       <span className={`tw-font-semibold tw-text-sm ${style}`}>
-        {formatNumberWithCommas(drop.rating)}
+        {formatNumberWithCommas(winner.drop.rating)}
       </span>
       <span className="tw-text-iron-400 tw-text-sm">
-        {drop.wave.voting_credit_type} total
+        {winner.drop.wave.voting_credit_type} total
       </span>
     </div>
   );

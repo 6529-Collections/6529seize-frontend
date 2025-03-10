@@ -4,6 +4,13 @@ import { ApiWaveParticipationRequirement } from "../generated/models/ApiWavePart
 import { ApiWavesOverviewType } from "../generated/models/ApiWavesOverviewType";
 import { ApiWaveType } from "../generated/models/ApiWaveType";
 
+export enum MyStreamWaveTab {
+  CHAT = "CHAT",
+  LEADERBOARD = "LEADERBOARD",
+  WINNERS = "WINNERS",
+  OUTCOME = "OUTCOME",
+}
+
 export enum WaveSignatureType {
   NONE = "NONE",
   DROPS = "DROPS",
@@ -66,6 +73,9 @@ export interface CreateWaveDatesConfig {
   readonly submissionStartDate: number;
   readonly votingStartDate: number;
   readonly endDate: number | null;
+  readonly firstDecisionTime: number;
+  readonly subsequentDecisions: number[];
+  readonly isRolling: boolean;
 }
 
 export interface CreateWaveApprovalConfig {

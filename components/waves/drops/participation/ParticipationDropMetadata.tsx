@@ -10,7 +10,7 @@ export default function ParticipationDropMetadata({
   if (!metadata || metadata.length === 0) return null;
 
   return (
-    <div className="tw-px-6 tw-pt-4 tw-border-t tw-border-iron-800/30">
+    <div className="tw-px-4 tw-ml-[3.25rem] tw-pt-4 tw-border-t tw-border-iron-800/30">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-4">
         {metadata.map((meta) => (
           <div key={meta.data_key} className="tw-flex tw-flex-col tw-gap-1">
