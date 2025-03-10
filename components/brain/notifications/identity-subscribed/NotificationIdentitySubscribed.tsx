@@ -15,7 +15,7 @@ export default function NotificationIdentitySubscribed({
   readonly notification: INotificationIdentitySubscribed;
 }) {
   return (
-    <div className="tw-w-full tw-inline-flex tw-justify-between">
+    <div className="tw-w-full tw-inline-flex tw-justify-between gap-2">
       <div className="tw-flex tw-gap-x-2 tw-items-center">
         <div className="tw-h-7 tw-w-7">
           {notification.related_identity.pfp ? (
@@ -34,16 +34,14 @@ export default function NotificationIdentitySubscribed({
         <span className="tw-text-sm tw-font-normal tw-text-iron-50">
           <Link
             href={`/${notification.related_identity.handle}`}
-            className="tw-no-underline tw-font-semibold"
-          >
+            className="tw-no-underline tw-font-semibold">
             {notification.related_identity.handle}
           </Link>{" "}
-          started following you
-        </span>
-
-        <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-        <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-          {getTimeAgoShort(notification.created_at)}
+          started following you{" "}
+          <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+            <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+            {getTimeAgoShort(notification.created_at)}
+          </span>
         </span>
       </div>
       <UserFollowBtn

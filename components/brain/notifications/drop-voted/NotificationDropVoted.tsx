@@ -88,11 +88,11 @@ export default function NotificationDropVoted({
                 )} tw-pl-1 tw-font-medium`}>
                 {notification.additional_context.vote > 0 && "+"}
                 {numberWithCommas(notification.additional_context.vote)}
+              </span>{" "}
+              <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+                <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+                {getTimeAgoShort(notification.created_at)}
               </span>
-            </span>
-            <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-            <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-              {getTimeAgoShort(notification.created_at)}
             </span>
           </div>
         </div>
