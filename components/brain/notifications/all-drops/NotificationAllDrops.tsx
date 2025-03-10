@@ -44,9 +44,9 @@ export default function NotificationAllDrops({
   const getContent = () => {
     const userLink = (
       <Link
-        href={`/${notification.related_drops[0].author.handle}`}
+        href={`/${notification.related_identity.handle}`}
         className="tw-no-underline tw-font-semibold">
-        {notification.related_drops[0].author.handle}
+        {notification.related_identity.handle}
       </Link>
     );
 
@@ -110,10 +110,10 @@ export default function NotificationAllDrops({
 
           <div className="tw-flex tw-gap-x-2 tw-items-center">
             <div className="tw-h-7 tw-w-7">
-              {notification.related_drops[0].author.pfp ? (
+              {notification.related_identity.pfp ? (
                 <img
                   src={getScaledImageUri(
-                    notification.related_drops[0].author.pfp,
+                    notification.related_identity.pfp,
                     ImageScale.W_AUTO_H_50
                   )}
                   alt="#"
