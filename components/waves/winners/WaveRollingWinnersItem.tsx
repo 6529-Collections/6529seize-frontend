@@ -4,7 +4,7 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveRollingWinnersItemHeader } from "./WaveRollingWinnersItemHeader";
 import { AnimatedAccordionContent } from "../../common/AnimatedAccordionContent";
-import { WaveWinnersRoundContent } from "./WaveWinnersRoundContent";
+import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 
 interface WaveRollingWinnersItemProps {
   readonly point: ApiWaveDecision;
@@ -25,6 +25,8 @@ export const WaveRollingWinnersItem: React.FC<WaveRollingWinnersItemProps> = ({
   onDropClick,
   wave,
 }) => {
+  const hasWinners = point.winners.length > 0;
+  
   return (
     <div
       className="tw-rounded-lg tw-bg-iron-900"
@@ -39,12 +41,14 @@ export const WaveRollingWinnersItem: React.FC<WaveRollingWinnersItemProps> = ({
       
       <AnimatedAccordionContent isVisible={isExpanded}>
         <div className="tw-space-y-4 tw-bg-black">
-          <WaveWinnersRoundContent
-            winners={point.winners}
-            onDropClick={onDropClick}
-            wave={wave}
-            isLoading={false}
-          />
+          {hasWinners ? (
+            <WaveWinnersDrops
+              winners={point.winners}
+              onDropClick={onDropClick}
+              wave={wave}
+              isLoading={false}
+            />
+          ) : null}
         </div>
       </AnimatedAccordionContent>
     </div>

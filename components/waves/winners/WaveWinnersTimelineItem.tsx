@@ -2,9 +2,9 @@ import React from "react";
 import { format } from "date-fns";
 import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
 import { AnimatedAccordionContent } from "../../common/AnimatedAccordionContent";
-import { WaveWinnersRoundContent } from "./WaveWinnersRoundContent";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 
 interface WaveWinnersTimelineItemProps {
   readonly point: ApiWaveDecision;
@@ -114,13 +114,15 @@ export const WaveWinnersTimelineItem: React.FC<
 
         {isInteractive && (
           <AnimatedAccordionContent isVisible={isExpanded}>
-            <div className="tw-px-5 tw-pb-4 tw-space-y-4 tw-bg-black">
-              <WaveWinnersRoundContent
-                winners={point.winners}
-                onDropClick={onDropClick}
-                wave={wave}
-                isLoading={false}
-              />
+            <div className="tw-pb-4 tw-space-y-4 tw-bg-black">
+              {hasWinners ? (
+                <WaveWinnersDrops
+                  winners={point.winners}
+                  onDropClick={onDropClick}
+                  wave={wave}
+                  isLoading={false}
+                />
+              ) : null}
             </div>
           </AnimatedAccordionContent>
         )}

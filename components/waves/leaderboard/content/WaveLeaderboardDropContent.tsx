@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDropContent from "../../drops/WaveDropContent";
 import WaveDropMetadata from "../../drops/WaveDropMetadata";
+import { useRouter } from "next/router";
+
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
 }
@@ -9,7 +11,16 @@ interface WaveLeaderboardDropContentProps {
 export const WaveLeaderboardDropContent: React.FC<
   WaveLeaderboardDropContentProps
 > = ({ drop }) => {
+  const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
+
+  const onDropContentClick = (drop: ExtendedDrop) => {
+    router.push(
+      `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`,
+      undefined,
+      { shallow: true }
+    );
+  };
 
   return (
     <div className="tw-flex tw-gap-x-6 tw-items-end tw-justify-between">
@@ -17,6 +28,7 @@ export const WaveLeaderboardDropContent: React.FC<
         drop={drop}
         activePartIndex={activePartIndex}
         setActivePartIndex={setActivePartIndex}
+        onDropContentClick={onDropContentClick}
         onLongPress={() => {}}
         onQuoteClick={() => {}}
         setLongPressTriggered={() => {}}
