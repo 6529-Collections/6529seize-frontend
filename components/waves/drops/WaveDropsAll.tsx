@@ -267,6 +267,7 @@ export default function WaveDropsAll({
           isFetchingNextPage={isFetchingNextPage}
           onTopIntersection={handleTopIntersection}
           disableAutoPosition={disableAutoPosition}
+          className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
         >
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
             <DropsList
