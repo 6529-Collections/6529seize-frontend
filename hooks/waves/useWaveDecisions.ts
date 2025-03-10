@@ -35,12 +35,7 @@ export function useWaveDecisions({ wave, enabled = true }: UseWaveDecisionsProps
       ...data,
       winners: data.winners.sort((a, b) => a.place - b.place)
     }))
-    .sort((a, b) => {
-      // Extract round numbers from decision_name if possible
-      const roundA = a.decision_name ? parseInt(a.decision_name.match(/\d+/)?.[0] || "0") : 0;
-      const roundB = b.decision_name ? parseInt(b.decision_name.match(/\d+/)?.[0] || "0") : 0;
-      return roundA - roundB; // Sort in ascending order (1, 2, 3...)
-    }) || [];
+    .sort((a, b) => a.decision_time - b.decision_time) || [];
 
   return {
     decisionPoints: sortedDecisionPoints,
