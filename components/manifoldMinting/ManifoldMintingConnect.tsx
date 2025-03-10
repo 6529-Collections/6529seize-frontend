@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { Col, Container, Form, Row } from "react-bootstrap";
-import { useAccount, useEnsAddress, useEnsName } from "wagmi";
+import { useEnsAddress, useEnsName } from "wagmi";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import {
   areEqualAddresses,
@@ -11,13 +11,14 @@ import { AuthContext } from "../auth/Auth";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../user/utils/UserCICAndLevel";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
     onMintFor: (address: string) => void;
   }>
 ) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
 
   const [mintForFren, setMintForFren] = useState<boolean>(false);

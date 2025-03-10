@@ -1,6 +1,6 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
-import { useAccount, useReadContract, useSignMessage } from "wagmi";
+import { useReadContract, useSignMessage } from "wagmi";
 import { useEffect, useRef, useState } from "react";
 import {
   FunctionSelectors,
@@ -26,13 +26,14 @@ import {
   NextGenAdminHeadingRow,
   NextGenAdminStatusFormGroup,
 } from "./NextGenAdminShared";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 interface Props {
   close: () => void;
 }
 
 export default function NextGenAdminInitializeBurn(props: Readonly<Props>) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
   const signMessage = useSignMessage();
   const uuid = useRef(uuidv4()).current;
 

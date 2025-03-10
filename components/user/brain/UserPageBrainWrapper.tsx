@@ -6,7 +6,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageDrops from "./UserPageDrops";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { useAccount } from "wagmi";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 export default function UserPageBrainWrapper({
   profile: initialProfile,
@@ -16,7 +16,7 @@ export default function UserPageBrainWrapper({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
-  const { address } = useAccount();
+  const { address } = useSeizeConnectContext();
   const { connectedProfile, activeProfileProxy, showWaves } =
     useContext(AuthContext);
 

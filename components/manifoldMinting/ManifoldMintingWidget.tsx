@@ -5,7 +5,6 @@ import { ManifoldMerkleProof } from "./manifold-types";
 import DotLoader from "../dotLoader/DotLoader";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
 import {
-  useAccount,
   useReadContract,
   useReadContracts,
   useWaitForTransactionReceipt,
@@ -23,6 +22,7 @@ import {
   ManifoldPhase,
 } from "../../hooks/useManifoldClaim";
 import { Time } from "../../helpers/time";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 export default function ManifoldMintingWidget(
   props: Readonly<{
@@ -35,7 +35,7 @@ export default function ManifoldMintingWidget(
     setMintForAddress: (address: string) => void;
   }>
 ) {
-  const connectedAddress = useAccount();
+  const connectedAddress = useSeizeConnectContext();
   const [mintForAddress, setMintForAddress] = useState<string>("");
 
   const [isError, setIsError] = useState<boolean>(false);

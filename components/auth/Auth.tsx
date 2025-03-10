@@ -159,17 +159,13 @@ export default function Auth({
   }, [profileProxies, connectedProfile]);
 
   function reset() {
-    removeAuthJwt();
     invalidateAll();
     setActiveProfileProxy(null);
     seizeDisconnectAndLogout();
   }
 
   useEffect(() => {
-    if (!address) {
-      reset();
-      return;
-    } else {
+    if (address) {
       validateJwt({
         jwt: getAuthJwt(),
         wallet: address,
@@ -345,19 +341,11 @@ export default function Auth({
       if (!refreshToken || !walletAddress) {
         return false;
       }
-      const redeemResponse = await commonApiPost<
-        ApiRedeemRefreshTokenRequest,
-        ApiRedeemRefreshTokenResponse
-      >({
-        endpoint: "auth/redeem-refresh-token",
-        body: {
-          address: walletAddress,
-          token: refreshToken,
-          role: role ?? undefined,
-        },
-      }).catch(() => {
-        return null;
-      });
+      const redeemResponse = await redeemRefreshTokenWithRetries(
+        walletAddress,
+        refreshToken,
+        role
+      );
       if (redeemResponse && areEqualAddresses(redeemResponse.address, wallet)) {
         const walletRole = getWalletRole();
         const tokenRole = getRole({ jwt });
@@ -402,6 +390,42 @@ export default function Auth({
       decodedJwt.exp > Date.now() / 1000
     );
   };
+
+  async function redeemRefreshTokenWithRetries(
+    walletAddress: string,
+    refreshToken: string,
+    role: string | null,
+    retryCount = 3
+  ): Promise<ApiRedeemRefreshTokenResponse | null> {
+    let attempt = 0;
+    let lastError: unknown = null;
+
+    while (attempt < retryCount) {
+      attempt++;
+      try {
+        const redeemResponse = await commonApiPost<
+          ApiRedeemRefreshTokenRequest,
+          ApiRedeemRefreshTokenResponse
+        >({
+          endpoint: "auth/redeem-refresh-token",
+          body: {
+            address: walletAddress,
+            token: refreshToken,
+            role: role ?? undefined,
+          },
+        });
+        return redeemResponse;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    console.error(
+      `Refresh token failed after ${retryCount} attempts`,
+      lastError
+    );
+    return null;
+  }
 
   const requestAuth = async (): Promise<{ success: boolean }> => {
     if (!address) {
@@ -527,8 +551,7 @@ export default function Auth({
         setActiveProfileProxy: onActiveProfileProxy,
         setTitle,
         title: pageTitle,
-      }}
-    >
+      }}>
       {children}
       <ToastContainer />
       <Modal
@@ -536,8 +559,7 @@ export default function Auth({
         onHide={() => setShowSignModal(false)}
         backdrop="static"
         keyboard={false}
-        centered
-      >
+        centered>
         <Modal.Header className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </Modal.Header>
@@ -563,15 +585,13 @@ export default function Auth({
             onClick={() => {
               setShowSignModal(false);
               seizeDisconnectAndLogout();
-            }}
-          >
+            }}>
             Cancel
           </Button>
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}
-          >
+            disabled={signMessage.isPending}>
             {signMessage.isPending ? (
               <>
                 Confirm in your wallet <DotLoader />

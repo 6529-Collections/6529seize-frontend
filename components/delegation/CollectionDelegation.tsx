@@ -9,12 +9,12 @@ import {
   Form,
 } from "react-bootstrap";
 import {
-  useAccount,
   useReadContract,
   useReadContracts,
   useWriteContract,
   useEnsName,
   useWaitForTransactionReceipt,
+  useChainId,
 } from "wagmi";
 import { Fragment, useEffect, useRef, useState } from "react";
 
@@ -51,6 +51,7 @@ import UpdateDelegationComponent from "./UpdateDelegation";
 import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import { Spinner } from "../dotLoader/DotLoader";
+import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -208,8 +209,8 @@ function getDelegationsFromData(data: any) {
 
 export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const toastRef = useRef<HTMLDivElement>(null);
-  const accountResolution = useAccount();
-  const networkResolution = accountResolution.chain;
+  const accountResolution = useSeizeConnectContext();
+  const networkResolution = useChainId();
   const ensResolution = useEnsName({
     address: accountResolution.address as `0x${string}`,
     chainId: 1,
@@ -259,7 +260,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     useState(false);
 
   function chainsMatch() {
-    return networkResolution?.id === DELEGATION_CONTRACT.chain_id;
+    return networkResolution === DELEGATION_CONTRACT.chain_id;
   }
 
   useEffect(() => {
@@ -276,7 +277,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   const retrieveOutgoingDelegations = useReadContracts({
     contracts: getActiveDelegationsReadParams(
-      accountResolution.address,
+      accountResolution.address as `0x${string}`,
       props.collection.contract,
       "retrieveDelegationAddressesTokensIDsandExpiredDates"
     ),
@@ -298,7 +299,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   const retrieveOutgoingConsolidations = useReadContracts({
     contracts: getConsolidationReadParams(
-      accountResolution.address,
+      accountResolution.address as `0x${string}`,
       props.collection.contract,
       outgoingDelegations[CONSOLIDATION_USE_CASE.index]
     ),
@@ -327,7 +328,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   const retrieveIncomingDelegations = useReadContracts({
     contracts: getActiveDelegationsReadParams(
-      accountResolution.address,
+      accountResolution.address as `0x${string}`,
       props.collection.contract,
       "retrieveDelegatorsTokensIDsandExpiredDates"
     ),
@@ -349,7 +350,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
 
   const retrieveIncomingConsolidations = useReadContracts({
     contracts: getConsolidationReadParams(
-      accountResolution.address,
+      accountResolution.address as `0x${string}`,
       props.collection.contract,
       incomingDelegations[CONSOLIDATION_USE_CASE.index]
     ),
@@ -384,7 +385,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
     : {
         contracts: getReadParams(
           DELEGATION_ALL_ADDRESS,
-          accountResolution.address,
+          accountResolution.address as `0x${string}`,
           "retrieveCollectionUseCaseLockStatus"
         ),
         query: {
@@ -400,7 +401,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
   const useCaseLockStatuses = useReadContracts({
     contracts: getReadParams(
       props.collection.contract,
-      accountResolution.address,
+      accountResolution.address as `0x${string}`,
       "retrieveCollectionUseCaseLockStatus",
       ALL_USE_CASES
     ),

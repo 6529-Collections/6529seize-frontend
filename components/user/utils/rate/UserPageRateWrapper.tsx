@@ -1,4 +1,3 @@
-import { useAccount } from "wagmi";
 import {
   IProfileAndConsolidations,
   RateMatter,
@@ -9,6 +8,7 @@ import { AuthContext } from "../../../auth/Auth";
 import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
+import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 
 const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.NIC]: "NIC rate",
@@ -34,7 +34,7 @@ export default function UserPageRateWrapper({
   readonly type: RateMatter;
   readonly children: React.ReactNode;
 }) {
-  const { address } = useAccount();
+  const { address } = useSeizeConnectContext();
   const { activeProfileProxy, connectedProfile } = useContext(AuthContext);
 
   const getIsProxyAndHaveAllowance = (): boolean => {

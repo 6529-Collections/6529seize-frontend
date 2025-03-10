@@ -1,5 +1,4 @@
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 import { FunctionSelectors } from "../nextgen_contracts";
 import NextGenContractWriteStatus from "../NextGenContractWriteStatus";
@@ -17,6 +16,7 @@ import {
   NextGenAdminHeadingRow,
   NextGenAdminTextFormGroup,
 } from "./NextGenAdminShared";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 export enum ADMIN_TYPE {
   GLOBAL = "GLOBAL",
@@ -30,7 +30,7 @@ interface Props {
 }
 
 export default function NextGenAdminRegisterAdmin(props: Readonly<Props>) {
-  const account = useAccount();
+  const account = useSeizeConnectContext();
 
   const [collectionID, setCollectionID] = useState("");
   const [address, setAddress] = useState("");
