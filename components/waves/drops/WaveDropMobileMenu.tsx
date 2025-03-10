@@ -35,7 +35,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     if (longPressTriggered) return;
     if (isTemporaryDrop) return;
 
-    const dropLink = `${window.location.protocol}//${window.location.host}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
+    const dropLink = `${process.env.BASE_ENDPOINT}/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`;
 
     if (navigator?.clipboard?.writeText) {
       navigator.clipboard.writeText(dropLink).then(() => {
@@ -87,7 +87,10 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
 
   return createPortal(
     <CommonDropdownItemsMobileWrapper isOpen={isOpen} setOpen={setOpen}>
-      <div className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${longPressTriggered && "tw-select-none"}`}>
+      <div
+        className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
+          longPressTriggered && "tw-select-none"
+        }`}>
         {showReplyAndQuote && (
           <>
             <button
@@ -175,21 +178,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         </button>
 
         {!isAuthor && (
-          <WaveDropMobileMenuFollow
-            drop={drop}
-            onFollowChange={closeMenu}
-          />
+          <WaveDropMobileMenuFollow drop={drop} onFollowChange={closeMenu} />
         )}
-        <WaveDropActionsRate
-          drop={drop}
-          isMobile={true}
-          onRated={closeMenu}
-        />
+        <WaveDropActionsRate drop={drop} isMobile={true} onRated={closeMenu} />
         {showOptions && (
-          <WaveDropMobileMenuDelete
-            drop={drop}
-            onDropDeleted={closeMenu}
-          />
+          <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
         )}
       </div>
     </CommonDropdownItemsMobileWrapper>,
