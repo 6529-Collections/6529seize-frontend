@@ -26,6 +26,9 @@ export const useDecisionPoints = (wave: ApiWave) => {
     wave.wave.next_decision_time || null
   );
 
+  // Track all decision points for multi-decision waves (past and upcoming)
+  const [allDecisions, setAllDecisions] = useState<DecisionPoint[]>([]);
+  
   // Track upcoming decision points for multi-decision waves
   const [upcomingDecisions, setUpcomingDecisions] = useState<DecisionPoint[]>(
     []
@@ -87,26 +90,38 @@ export const useDecisionPoints = (wave: ApiWave) => {
         }
       }
 
-      // Filter to only show future decision points
+      // Mark decisions as past or future
       const now = Time.currentMillis();
-      const futureDecisions = decisions.filter((d) => d.timestamp > now);
+      
+      // Store all decisions with status indicator
+      const decisionsWithStatus = decisions.map(d => ({
+        ...d,
+        isPast: d.timestamp <= now
+      }));
+      
+      // Store all decisions for the timeline
+      setAllDecisions(decisionsWithStatus);
+      
+      // Filter to get only future decisions
+      const futureDecisions = decisionsWithStatus.filter((d) => !d.isPast);
 
       // Calculate current cycle for rolling waves
       if (isRollingWave && decisions.length > 0) {
-        const passedDecisions = decisions.filter(
-          (d) => d.timestamp <= now
-        ).length;
+        const passedDecisions = decisionsWithStatus.filter(d => d.isPast).length;
         const decisionsPerCycle = subsequentDecisions.length + 1; // First + subsequent
         const currentCycleNumber =
           Math.floor(passedDecisions / decisionsPerCycle) + 1;
         setCurrentCycle(currentCycleNumber);
       }
 
-      setUpcomingDecisions(futureDecisions.slice(0, 3)); // Show up to 3 future decision points
+      setUpcomingDecisions(futureDecisions.slice(0, 3)); // Store up to 3 future decision points
 
       // Set the next decision time
       if (futureDecisions.length > 0) {
         setNextDecisionTime(futureDecisions[0].timestamp);
+      } else {
+        // No future decisions but we still want to show the timeline
+        setNextDecisionTime(null);
       }
     }
   }, [wave, isMultiDecisionWave, isRollingWave]);
@@ -162,6 +177,7 @@ export const useDecisionPoints = (wave: ApiWave) => {
     setIsDecisionDetailsOpen,
     nextDecisionTime,
     upcomingDecisions,
+    allDecisions,
     currentCycle,
     nextDecisionTimeLeft,
   };

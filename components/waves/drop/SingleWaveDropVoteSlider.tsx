@@ -253,8 +253,8 @@ export default function WaveDropVoteSlider({
               >
                 <div className="tw-absolute tw-h-4 tw-w-8 -tw-left-4" />
                 <div
-                  className="tw-h-4 tw-w-0.5 tw-bg-iron-400/30 tw-rounded-full tw-mx-auto
-                  group-hover:tw-bg-iron-400/60 tw-transition-colors tw-duration-200"
+                  className="tw-h-4 tw-w-0.5 tw-bg-iron-300/40 tw-rounded-full tw-mx-auto
+                  group-hover:tw-bg-iron-300/70 tw-transition-colors tw-duration-200"
                 />
               </div>
               <div className="tw-relative">
@@ -266,14 +266,14 @@ export default function WaveDropVoteSlider({
                     ${
                       hoveredPreset === mark.percentage
                         ? "tw-opacity-0"
-                        : "tw-text-iron-400 tw-opacity-60"
+                        : "tw-text-iron-300 tw-opacity-70"
                     }`}
                 >
                   {mark.label}
                 </motion.div>
                 <motion.div
                   className={`tw-absolute tw-top-1 tw-left-1/2 -tw-translate-x-1/2 
-                    tw-text-[10px] tw-font-medium tw-text-iron-200
+                    tw-text-[10px] tw-font-medium tw-text-iron-100
                     tw-whitespace-nowrap tw-select-none
                     tw-transition-all tw-duration-200
                     ${

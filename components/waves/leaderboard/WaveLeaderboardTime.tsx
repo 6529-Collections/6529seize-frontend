@@ -28,6 +28,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     setIsDecisionDetailsOpen,
     nextDecisionTime,
     upcomingDecisions,
+    allDecisions,
     nextDecisionTimeLeft,
   } = useDecisionPoints(wave);
 
@@ -39,6 +40,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
             nextDecisionTime={nextDecisionTime}
             nextDecisionTimeLeft={nextDecisionTimeLeft}
             upcomingDecisions={upcomingDecisions}
+            allDecisions={allDecisions}
             isRollingWave={isRollingWave}
             isDecisionDetailsOpen={isDecisionDetailsOpen}
             setIsDecisionDetailsOpen={setIsDecisionDetailsOpen}

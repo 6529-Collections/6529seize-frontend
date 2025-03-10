@@ -80,18 +80,19 @@ export default function OngoingParticipationDrop({
         <WaveDropAuthorPfp drop={drop} />
         <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-1.5">
           <ParticipationDropHeader drop={drop} showWaveInfo={showWaveInfo} />
+          <ParticipationDropContent
+            drop={drop}
+            activePartIndex={activePartIndex}
+            setActivePartIndex={setActivePartIndex}
+            onLongPress={handleLongPress}
+            onDropContentClick={onDropContentClick}
+            onQuoteClick={onQuoteClick}
+            setLongPressTriggered={setLongPressTriggered}
+            parentContainerRef={parentContainerRef}
+          />
         </div>
       </div>
-      <ParticipationDropContent
-        drop={drop}
-        activePartIndex={activePartIndex}
-        setActivePartIndex={setActivePartIndex}
-        onLongPress={handleLongPress}
-        onDropContentClick={onDropContentClick}
-        onQuoteClick={onQuoteClick}
-        setLongPressTriggered={setLongPressTriggered}
-        parentContainerRef={parentContainerRef}
-      />
+
       <div className="tw-flex tw-w-full tw-flex-col">
         <ParticipationDropMetadata metadata={drop.metadata} />
         <ParticipationDropFooter drop={drop} />

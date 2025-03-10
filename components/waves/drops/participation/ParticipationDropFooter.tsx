@@ -2,6 +2,7 @@ import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
 import { SingleWaveDropVote } from "../../drop/SingleWaveDropVote";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
+import { format } from "date-fns";
 
 interface ParticipationDropFooterProps {
   readonly drop: ExtendedDrop;
@@ -24,6 +25,10 @@ export default function ParticipationDropFooter({
           <ParticipationDropRatings drop={drop} rank={drop.rank} />
         </div>
       )}
+      
+      <div className="tw-px-4 tw-ml-[3.25rem] tw-pb-3 tw-text-[11px] tw-text-iron-500 tw-border-t tw-border-iron-800/30">
+        {format(new Date(drop.created_at), "h:mm a · MMM d, yyyy")}
+      </div>
     </>
   );
 }

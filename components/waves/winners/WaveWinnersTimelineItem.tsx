@@ -33,11 +33,13 @@ export const WaveWinnersTimelineItem: React.FC<
   return (
     <div className="tw-relative">
       {/* Timeline connector dot */}
-      <div className="tw-absolute tw-left-[-13px] tw-top-2.5">
+      <div className={`tw-absolute tw-left-[-13px] ${hasWinners ? 'tw-top-4' : 'tw-top-1'}`}>
         <div className="tw-size-4 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-bg-iron-800">
           <div
             className={`tw-rounded-full ${
-              hasWinners ? "tw-bg-green tw-size-2.5" : "tw-bg-iron-700 tw-size-2"
+              hasWinners
+                ? "tw-bg-green tw-size-2.5"
+                : "tw-bg-iron-700 tw-size-2"
             }`}
           ></div>
         </div>
@@ -60,7 +62,7 @@ export const WaveWinnersTimelineItem: React.FC<
           onClick={toggleExpanded}
           disabled={!isInteractive}
           className={`tw-w-full tw-text-left tw-px-5 ${
-            hasWinners ? "tw-py-3" : "tw-py-2"
+            hasWinners ? "tw-py-3" : ""
           } tw-flex tw-items-center tw-justify-between tw-bg-transparent tw-border-0 ${
             isInteractive ? "tw-cursor-pointer" : "tw-cursor-default"
           }`}

@@ -25,7 +25,7 @@ export default function ParticipationDropContent({
   parentContainerRef,
 }: ParticipationDropContentProps) {
   return (
-    <div className="tw-px-4 tw-ml-[3.25rem] tw-mt-1">
+    <div className="tw-mt-1">
       <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}
