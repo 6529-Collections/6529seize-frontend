@@ -30,7 +30,7 @@ export default function NotificationWaveCreated({
   });
 
   return (
-    <div className="tw-w-full tw-inline-flex tw-justify-between">
+    <div className="tw-w-full tw-inline-flex tw-justify-between gap-2">
       <div className="tw-flex tw-gap-x-2 tw-items-center">
         <div className="tw-h-7 tw-w-7">
           {notification.related_identity.pfp ? (
@@ -57,12 +57,11 @@ export default function NotificationWaveCreated({
             href={`/my-stream?wave=${notification.additional_context.wave_id}`}
             className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
             {wave?.name}
-          </Link>
-        </span>
-
-        <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-        <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-          {getTimeAgoShort(notification.created_at)}
+          </Link>{" "}
+          <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+            <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+            {getTimeAgoShort(notification.created_at)}
+          </span>
         </span>
       </div>
       {wave && (
@@ -70,8 +69,6 @@ export default function NotificationWaveCreated({
           wave={wave}
           subscribeToAllDrops={true}
           size={WaveFollowBtnSize.SMALL}
-          followLabel="Subscribe"
-          followingLabel="Subscribed"
         />
       )}
     </div>

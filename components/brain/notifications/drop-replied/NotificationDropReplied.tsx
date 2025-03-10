@@ -81,11 +81,11 @@ export default function NotificationDropReplied({
                 className="tw-no-underline tw-font-semibold">
                 {notification.related_drops[1].author.handle}
               </Link>{" "}
-              replied
-            </span>
-            <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-            <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-              {getTimeAgoShort(notification.created_at)}
+              replied{" "}
+              <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+                <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+                {getTimeAgoShort(notification.created_at)}
+              </span>
             </span>
           </div>
         </div>

@@ -124,11 +124,11 @@ export default function NotificationAllDrops({
               )}
             </div>
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-              {getContent()}
-            </span>
-            <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-            <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-              {getTimeAgoShort(notification.created_at)}
+              {getContent()}{" "}
+              <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+                <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+                {getTimeAgoShort(notification.created_at)}
+              </span>
             </span>
           </div>
         </div>
