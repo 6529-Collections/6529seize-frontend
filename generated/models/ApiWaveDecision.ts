@@ -10,30 +10,31 @@
  * Do not edit the class manually.
  */
 
+import { ApiWaveDecisionWinner } from '../models/ApiWaveDecisionWinner';
 import { HttpFile } from '../http/http';
 
-export class ApiSeizeSettings {
-    'rememes_submission_tdh_threshold': number;
-    'all_drops_notifications_subscribers_limit': number;
+export class ApiWaveDecision {
+    'decision_time': number;
+    'winners': Array<ApiWaveDecisionWinner>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "rememes_submission_tdh_threshold",
-            "baseName": "rememes_submission_tdh_threshold",
+            "name": "decision_time",
+            "baseName": "decision_time",
             "type": "number",
-            "format": "int64"
+            "format": "int62"
         },
         {
-            "name": "all_drops_notifications_subscribers_limit",
-            "baseName": "all_drops_notifications_subscribers_limit",
-            "type": "number",
-            "format": "int64"
+            "name": "winners",
+            "baseName": "winners",
+            "type": "Array<ApiWaveDecisionWinner>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiSeizeSettings.attributeTypeMap;
+        return ApiWaveDecision.attributeTypeMap;
     }
 
     public constructor() {

@@ -3,8 +3,8 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../helpers/image.helpers";
-import { INotificationIdentityMentioned } from "../../../../types/feed.types";
-import { getTimeAgoShort } from "../../../../helpers/Helpers";
+import { INotificationAllDrops } from "../../../../types/feed.types";
+import { getTimeAgoShort, numberWithCommas } from "../../../../helpers/Helpers";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import Drop, {
   DropInteractionParams,
@@ -13,31 +13,78 @@ import Drop, {
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { getNotificationVoteColor } from "../drop-voted/NotificationDropVoted";
 
-export default function NotificationIdentityMentioned({
+export default function NotificationAllDrops({
   notification,
   activeDrop,
   onReply,
   onQuote,
   onDropContentClick,
 }: {
-  readonly notification: INotificationIdentityMentioned;
+  readonly notification: INotificationAllDrops;
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
   const router = useRouter();
-  const navigateToDropInWave = (waveId: string, serialNo: number) => {
-    router.push(`/my-stream?wave=${waveId}&serialNo=${serialNo}/`);
-  };
-
   const onReplyClick = (serialNo: number) => {
-    navigateToDropInWave(notification.related_drops[0].wave.id, serialNo);
+    router.push(
+      `/my-stream?wave=${notification.related_drops[0].wave.id}&serialNo=${serialNo}/`
+    );
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    navigateToDropInWave(quote.wave.id, quote.serial_no);
+    router.push(
+      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+    );
+  };
+
+  const getContent = () => {
+    const userLink = (
+      <Link
+        href={`/${notification.related_identity.handle}`}
+        className="tw-no-underline tw-font-semibold">
+        {notification.related_identity.handle}
+      </Link>
+    );
+
+    if (typeof notification.additional_context.vote === "number") {
+      const isReset = notification.additional_context.vote === 0;
+
+      const voteText = isReset ? (
+        "reset rating to 0"
+      ) : (
+        <>
+          rated{" "}
+          <span
+            className={`${getNotificationVoteColor(
+              notification.additional_context.vote
+            )} tw-pl-1 tw-font-medium`}>
+            {notification.additional_context.vote > 0 && "+"}
+            {numberWithCommas(notification.additional_context.vote)}
+          </span>
+        </>
+      );
+
+      return (
+        <>
+          {userLink} {voteText}
+        </>
+      );
+    }
+
+    return (
+      <>
+        new drop from{" "}
+        <Link
+          href={`/${notification.related_drops[0].author.handle}`}
+          className="tw-no-underline tw-font-semibold">
+          {notification.related_drops[0].author.handle}
+        </Link>
+      </>
+    );
   };
 
   return (
@@ -56,17 +103,17 @@ export default function NotificationIdentityMentioned({
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M16 7.99999V13C16 13.7956 16.3161 14.5587 16.8787 15.1213C17.4413 15.6839 18.2043 16 19 16C19.7956 16 20.5587 15.6839 21.1213 15.1213C21.6839 14.5587 22 13.7956 22 13V12C21.9999 9.74302 21.2362 7.55247 19.8333 5.78452C18.4303 4.01658 16.4705 2.77521 14.2726 2.26229C12.0747 1.74936 9.76793 1.99503 7.72734 2.95936C5.68676 3.92368 4.03239 5.54995 3.03325 7.57371C2.03411 9.59748 1.74896 11.8997 2.22416 14.1061C2.69936 16.3125 3.90697 18.2932 5.65062 19.7263C7.39428 21.1593 9.57143 21.9603 11.8281 21.9991C14.0847 22.0379 16.2881 21.3122 18.08 19.94M16 12C16 14.2091 14.2091 16 12 16C9.79086 16 8 14.2091 8 12C8 9.79085 9.79086 7.99999 12 7.99999C14.2091 7.99999 16 9.79085 16 12Z"
+                d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
               />
             </svg>
           </div>
 
           <div className="tw-flex tw-gap-x-2 tw-items-center">
             <div className="tw-h-7 tw-w-7">
-              {notification.related_drops[0].author.pfp ? (
+              {notification.related_identity.pfp ? (
                 <img
                   src={getScaledImageUri(
-                    notification.related_drops[0].author.pfp,
+                    notification.related_identity.pfp,
                     ImageScale.W_AUTO_H_50
                   )}
                   alt="#"
@@ -77,12 +124,7 @@ export default function NotificationIdentityMentioned({
               )}
             </div>
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-              <Link
-                href={`/${notification.related_drops[0].author.handle}`}
-                className="tw-no-underline tw-font-semibold">
-                {notification.related_drops[0].author.handle}
-              </Link>{" "}
-              mentioned you{" "}
+              {getContent()}{" "}
               <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
                 <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
                 {getTimeAgoShort(notification.created_at)}
