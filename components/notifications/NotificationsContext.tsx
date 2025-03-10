@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import {
   PushNotifications,
   PushNotificationSchema,
@@ -14,7 +14,9 @@ import {
 } from "../../services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
 
-type NotificationsContextType = {};
+type NotificationsContextType = {
+  removeAllDeliveredNotifications: () => Promise<void>;
+};
 
 const NotificationsContext = createContext<
   NotificationsContextType | undefined
@@ -87,8 +89,15 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     await PushNotifications.addListener(
       "pushNotificationActionPerformed",
-      (action) => {
-        handlePushNotificationAction(router, action.notification, profile);
+      async (action) => {
+        await handlePushNotificationAction(
+          router,
+          action.notification,
+          profile
+        );
+        await PushNotifications.removeDeliveredNotifications({
+          notifications: [action.notification],
+        });
       }
     );
 
@@ -102,7 +111,16 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const value = useMemo(() => ({}), []);
+  const removeAllDeliveredNotifications = async () => {
+    await PushNotifications.removeAllDeliveredNotifications();
+  };
+
+  const value = useMemo(
+    () => ({
+      removeAllDeliveredNotifications,
+    }),
+    []
+  );
 
   return (
     <NotificationsContext.Provider value={value}>
@@ -198,4 +216,14 @@ const resolveRedirectUrl = (notificationData: any) => {
     console.error("Error resolving redirect URL", error);
     return null;
   }
+};
+
+export const useNotificationsContext = () => {
+  const context = useContext(NotificationsContext);
+  if (!context) {
+    throw new Error(
+      "useNotificationsContext must be used within a NotificationsProvider"
+    );
+  }
+  return context;
 };
