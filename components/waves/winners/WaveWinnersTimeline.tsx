@@ -3,7 +3,7 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
 import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
-import { WaveWinnersTimelineNode } from "./WaveWinnersTimelineNode";
+import { WaveWinnersTimelineItem } from "./WaveWinnersTimelineItem";
 import { format } from "date-fns";
 
 interface WaveWinnersTimelineProps {
@@ -45,7 +45,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   });
 
   return (
-    <div className="tw-mt-2 tw-max-h-[calc(100vh-148px)] min-[1200px]:tw-max-h-[calc(100vh-160px)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-bg-black">
+    <div className="tw-mt-2 tw-pb-4 tw-max-h-[calc(100vh-148px)] min-[1200px]:tw-max-h-[calc(100vh-160px)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-bg-black">
       <div className="tw-relative">
         {/* Timeline vertical line */}
         <div className="tw-absolute tw-left-[19px] tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-700/80 tw-backdrop-blur-sm"></div>
@@ -65,17 +65,17 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
               return (
                 <div key={dateKey} className="tw-relative">
                   {/* Date header */}
-                  <div className="tw-mb-4 tw-flex tw-items-center">
+                  <div className="tw-mb-4 tw-flex tw-items-center tw-ml-3.5">
                     <div className="tw-relative">
                       <div className="tw-size-2.5 tw-rounded-full tw-bg-iron-600 tw-mr-4 tw-z-10 tw-relative"></div>
                       <div className="tw-absolute tw-top-0 tw-left-0 tw-size-2.5 tw-rounded-full tw-bg-iron-500 tw-opacity-40 tw-blur-[2px]"></div>
                     </div>
-                    <h3 className="tw-text-sm tw-text-iron-350 tw-font-medium tw-border-b tw-border-iron-700/40 tw-pb-0.5">
+                    <h3 className="tw-text-sm tw-text-iron-350 tw-font-medium tw-border-b tw-border-iron-700/40 tw-mb-0">
                       {formattedDate}
                     </h3>
                   </div>
 
-                  <div className="tw-space-y-3 tw-ml-10">
+                  <div className="tw-space-y-3 tw-ml-6">
                     {points.map((point) => {
                       // Use the original index to determine the round number
                       const roundIndex = decisionPoints.findIndex(
@@ -86,7 +86,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
                       const hasWinners = point.winners.length > 0;
 
                       return (
-                        <WaveWinnersTimelineNode
+                        <WaveWinnersTimelineItem
                           key={nodeId}
                           point={point}
                           roundNumber={roundNumber}
