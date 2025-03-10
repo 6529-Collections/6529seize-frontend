@@ -2,7 +2,7 @@ import { useMemo, useState, useCallback, useEffect } from "react";
 import { ApiWave } from "../../generated/models/ApiWave";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import { useWaveState, WaveVotingState } from "../useWaveState";
-import { MyStreamWaveTab } from "../../components/brain/my-stream/MyStreamWave";
+import { MyStreamWaveTab } from "../../types/waves.types";
 
 /**
  * Hook for managing wave tabs - which ones are visible, which is active
