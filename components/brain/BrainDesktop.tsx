@@ -4,7 +4,6 @@ import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
 import BrainRightSidebar, {
   SidebarTab,
 } from "./right-sidebar/BrainRightSidebar";
-import { MyStreamWaveTab } from "./my-stream/MyStreamWave";
 import { ContentTabProvider, useContentTab } from "./ContentTabContext";
 import { useRouter } from "next/router";
 import BrainDesktopDrop from "./BrainDesktopDrop";
