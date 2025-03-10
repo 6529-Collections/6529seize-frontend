@@ -43,10 +43,10 @@ const shouldGroupWithDrop = (
 };
 
 const RANK_STYLES = {
-  1: "tw-border-l-2 tw-border-[#E8D48A]/40 tw-border-y-0 tw-border-r-0",
-  2: "tw-border-l-2 tw-border-[#DDDDDD]/40 tw-border-y-0 tw-border-r-0",
-  3: "tw-border-l-2 tw-border-[#CD7F32]/40 tw-border-y-0 tw-border-r-0",
-  default: "tw-border-l-2 tw-border-iron-600/40 tw-border-y-0 tw-border-r-0",
+  1: "tw-border-l tw-border-[#E8D48A]/40 tw-border-y-0 tw-border-r-0",
+  2: "tw-border-l tw-border-[#DDDDDD]/40 tw-border-y-0 tw-border-r-0",
+  3: "tw-border-l tw-border-[#CD7F32]/40 tw-border-y-0 tw-border-r-0",
+  default: "tw-border-l tw-border-iron-600/40 tw-border-y-0 tw-border-r-0",
 } as const;
 
 const getColorClasses = ({
@@ -61,7 +61,7 @@ const getColorClasses = ({
   location: DropLocation;
 }): string => {
   if (isActiveDrop) {
-    return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0 tw-mt-1";
+    return "tw-bg-[#3CCB7F]/10 tw-border-l tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0 tw-mt-1";
   }
   if (!isDrop) {
     const hoverClass =

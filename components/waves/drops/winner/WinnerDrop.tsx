@@ -31,8 +31,8 @@ const getRankColorsByRank = (
     };
   } else if (rankNumber === 2) {
     return {
-      borderColor: "#94a3b8",
-      textColor: "#DDDDDD",
+      borderColor: "#C0C0C0",
+      textColor: "#E8E8E8",
     };
   } else if (rankNumber === 3) {
     return {
@@ -45,6 +45,24 @@ const getRankColorsByRank = (
       textColor: "#7F8A93",
     };
   }
+};
+
+const getDropStyles = (
+  isActiveDrop: boolean,
+  colors: { borderColor: string; textColor: string }
+) => {
+  if (isActiveDrop) {
+    return {
+      boxShadow: "inset 1.5px 0 0 rgba(60,203,127,0.7)",
+    };
+  }
+
+  return {
+    boxShadow: `inset 1.5px 0 0 ${colors.borderColor}, 
+                inset 0 1px 0 ${colors.borderColor}20, 
+                inset -1.5px 0 0 ${colors.borderColor}20, 
+                inset 0 -1.5px 0 ${colors.borderColor}20`,
+  };
 };
 
 interface WinnerDropProps {
@@ -118,21 +136,17 @@ const WinnerDrop = ({
     >
       <div
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group
-          ${isActiveDrop 
-            ? "tw-bg-[#3CCB7F]/10" 
-            : location === DropLocation.WAVE 
-              ? "tw-bg-iron-900/60" 
+          ${
+            isActiveDrop
+              ? "tw-bg-[#3CCB7F]/10"
+              : location === DropLocation.WAVE
+              ? "tw-bg-iron-900/60"
               : "tw-bg-iron-950"
           }`}
         style={{
           border: "1px solid transparent",
-          borderLeft: "2px solid transparent",
-          boxShadow: isActiveDrop
-            ? "inset 2px 0 0 rgba(60,203,127,0.7)"
-            : `inset 2px 0 0 ${colors.borderColor}, 
-               inset 0 1px 0 ${colors.borderColor}20, 
-               inset -1px 0 0 ${colors.borderColor}20, 
-               inset 0 -1px 0 ${colors.borderColor}20`,
+          borderLeft: "1.5px solid transparent",
+          ...getDropStyles(isActiveDrop, colors),
           transition: "box-shadow 0.2s ease, background-color 0.2s ease",
         }}
       >

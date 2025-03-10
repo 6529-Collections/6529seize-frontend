@@ -40,7 +40,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           />
         )
       ) : (
-        <div className="tw-space-y-2 tw-mt-4 tw-pb-4 tw-max-h-[calc(100vh-140px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+        <div className="tw-space-y-2 tw-mt-2 tw-pb-4 tw-max-h-[calc(100vh-146px)] min-[1200px]:tw-max-h-[calc(100vh-160px)] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
           <WaveWinnersPodium
             onDropClick={onDropClick}
             winners={decisionPoints[0]?.winners || []}
