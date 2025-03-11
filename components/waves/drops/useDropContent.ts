@@ -3,11 +3,11 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
-import { 
-  MediaItem, 
-  ProcessedContent, 
-  isVideoMimeType, 
-  processContent 
+import {
+  MediaItem,
+  ProcessedContent,
+  isVideoMimeType,
+  processContent,
 } from "./media-utils";
 
 interface UseDropContentResult {
@@ -44,7 +44,10 @@ export const useDropContent = (
   // Process content from drop
   const getContent = (): ProcessedContent => {
     if (isFetching && !maybeDrop) {
-      return { segments: [{ type: 'text', content: 'Loading...' }], apiMedia: [] };
+      return {
+        segments: [{ type: "text", content: "Loading..." }],
+        apiMedia: [],
+      };
     }
 
     if (error) {
@@ -54,8 +57,8 @@ export const useDropContent = (
       const errorMsg = regex.test(JSON.stringify(error))
         ? "This drop has been deleted by the author"
         : "Error loading drop";
-        
-      return { segments: [{ type: 'text', content: errorMsg }], apiMedia: [] };
+
+      return { segments: [{ type: "text", content: errorMsg }], apiMedia: [] };
     }
 
     if (!drop) {
@@ -68,17 +71,19 @@ export const useDropContent = (
     }
 
     // Process any API media
-    const apiMedia = (part.media || []).map(media => ({
+    const apiMedia = (part.media || []).map((media) => ({
       alt: "Media",
       url: media.url,
-      type: (isVideoMimeType(media.mime_type) ? 'video' : 'image') as ('video' | 'image')
+      type: (isVideoMimeType(media.mime_type) ? "video" : "image") as
+        | "video"
+        | "image",
     }));
 
     // Handle media-only case (no text content)
     if (!part.content) {
-      return { 
-        segments: apiMedia.length ? [] : [{ type: 'text', content: 'Media' }],
-        apiMedia 
+      return {
+        segments: apiMedia.length ? [] : [{ type: "text", content: "Media" }],
+        apiMedia,
       };
     }
 
@@ -93,9 +98,9 @@ export const useDropContent = (
   }, [drop, dropPartId, isFetching, error]);
 
   return {
-    drop,
+    drop: drop ?? null,
     content,
     isLoading: isFetching && !maybeDrop,
-    error
+    error,
   };
 };
