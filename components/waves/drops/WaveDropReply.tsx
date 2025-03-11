@@ -37,20 +37,31 @@ export default function WaveDropReply({
     return text.replace(/@\[([^\]]+)\]/g, "@$1");
   };
 
-  const replaceImageLinks = (text: string): string => {
-    const imagePattern = /!\[([^\]]*)\]\([^\)]+\)/g;
-    return text.replace(imagePattern, "[external link]");
+  const extractImageLinks = (text: string): { text: string; images: Array<{ alt: string; url: string }> } => {
+    const imagePattern = /!\[([^\]]*)\]\(([^\)]+)\)/g;
+    const images: Array<{ alt: string; url: string }> = [];
+    
+    // First collect all images
+    let match;
+    const textCopy = text.slice();
+    while ((match = imagePattern.exec(text)) !== null) {
+      images.push({ alt: match[1], url: match[2] });
+    }
+    
+    // Then remove all image syntax
+    const newText = text.replace(imagePattern, '');
+    
+    return { text: newText.trim(), images };
   };
 
-  const modifyContent = (content: string): string => {
-    let modifiedContent = removeSquareBrackets(content);
-    modifiedContent = replaceImageLinks(modifiedContent);
-    return modifiedContent;
+  const modifyContent = (content: string): { text: string; images: Array<{ alt: string; url: string }> } => {
+    const withoutBrackets = removeSquareBrackets(content);
+    return extractImageLinks(withoutBrackets);
   };
 
-  const getContent = (): string => {
+  const getContent = (): { text: string; images: Array<{ alt: string; url: string }> } => {
     if (isFetching && !maybeDrop) {
-      return "Loading...";
+      return { text: "Loading...", images: [] };
     }
 
     if (error) {
@@ -58,28 +69,28 @@ export default function WaveDropReply({
         /Drop [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12} not found/;
 
       if (regex.test(JSON.stringify(error))) {
-        return "This drop has been deleted by the author";
+        return { text: "This drop has been deleted by the author", images: [] };
       }
-      return "Error loading drop";
+      return { text: "Error loading drop", images: [] };
     }
 
     if (!drop) {
-      return "";
+      return { text: "", images: [] };
     }
 
     const part = drop.parts.find((part) => part.part_id === dropPartId);
     if (!part) {
-      return "";
+      return { text: "", images: [] };
     }
 
     if (!part.content) {
-      return "Media";
+      return { text: "Media", images: [] };
     }
 
     return modifyContent(part.content);
   };
 
-  const [content, setContent] = useState<string>(getContent());
+  const [content, setContent] = useState<{ text: string; images: Array<{ alt: string; url: string }> }>(getContent());
 
   useEffect(() => {
     setContent(getContent());
@@ -138,12 +149,20 @@ export default function WaveDropReply({
               {drop.author.handle}
             </Link>
             <span
-              className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer"
+              className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-flex tw-items-center tw-gap-1"
               onClick={() =>
                 drop?.serial_no && onReplyClick(drop.serial_no)
               }
             >
-              {content}
+              {content.text}
+              {content.images.map((img, i) => (
+                <img 
+                  key={i}
+                  src={img.url} 
+                  alt={img.alt} 
+                  className="tw-inline tw-h-4 tw-w-4 tw-object-cover tw-rounded" 
+                />
+              ))}
             </span>
           </p>
         </div>
