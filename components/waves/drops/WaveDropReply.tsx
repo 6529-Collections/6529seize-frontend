@@ -191,7 +191,7 @@ export default function WaveDropReply({
     const apiMedia = (part.media || []).map(media => ({
       alt: "Media",
       url: media.url,
-      type: isVideoMimeType(media.mime_type) ? 'video' : 'image' as const
+      type: (isVideoMimeType(media.mime_type) ? 'video' : 'image') as ('video' | 'image')
     }));
 
     // Handle media-only case (no text content)
