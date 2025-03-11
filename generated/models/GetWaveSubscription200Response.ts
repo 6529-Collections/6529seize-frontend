@@ -10,38 +10,23 @@
  * Do not edit the class manually.
  */
 
-import { ApiWaveDecisionAward } from '../models/ApiWaveDecisionAward';
 import { HttpFile } from '../http/http';
 
-export class ApiDropWinningContext {
-    'place': number;
-    'awards': Array<ApiWaveDecisionAward>;
-    'decision_time': number;
+export class GetWaveSubscription200Response {
+    'subscribed'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "place",
-            "baseName": "place",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "awards",
-            "baseName": "awards",
-            "type": "Array<ApiWaveDecisionAward>",
+            "name": "subscribed",
+            "baseName": "subscribed",
+            "type": "boolean",
             "format": ""
-        },
-        {
-            "name": "decision_time",
-            "baseName": "decision_time",
-            "type": "number",
-            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropWinningContext.attributeTypeMap;
+        return GetWaveSubscription200Response.attributeTypeMap;
     }
 
     public constructor() {
