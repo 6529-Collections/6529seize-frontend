@@ -38,28 +38,68 @@ export default function WaveDropReply({
   };
 
   const extractMediaLinks = (text: string): { 
-    text: string; 
-    media: Array<{ 
+    segments: Array<{
+      type: 'text' | 'media';
+      content: string;
+      mediaInfo?: { 
+        alt: string; 
+        url: string; 
+        type: 'image' | 'video';
+      };
+    }>;
+    apiMedia: Array<{ 
       alt: string; 
       url: string; 
       type: 'image' | 'video';
-    }> 
+    }>;
   } => {
     const mediaPattern = /!\[([^\]]*)\]\(([^\)]+)\)/g;
-    const media: Array<{ alt: string; url: string; type: 'image' | 'video' }> = [];
+    const segments: Array<{
+      type: 'text' | 'media';
+      content: string;
+      mediaInfo?: { 
+        alt: string; 
+        url: string; 
+        type: 'image' | 'video';
+      };
+    }> = [];
     
-    // First collect all media
+    // Break text into segments of text and media
+    let lastIndex = 0;
     let match;
-    while ((match = mediaPattern.exec(text)) !== null) {
+    let workingText = text;
+    
+    while ((match = mediaPattern.exec(workingText)) !== null) {
+      // Add text segment before this match if there is any
+      if (match.index > lastIndex) {
+        const textSegment = workingText.substring(lastIndex, match.index);
+        if (textSegment.trim()) {
+          segments.push({ type: 'text', content: textSegment.trim() });
+        }
+      }
+      
+      // Add media segment
       const url = match[2];
       const type = isVideoUrl(url) ? 'video' : 'image';
-      media.push({ alt: match[1], url, type });
+      segments.push({ 
+        type: 'media', 
+        content: match[0],
+        mediaInfo: { alt: match[1], url, type }
+      });
+      
+      lastIndex = match.index + match[0].length;
     }
     
-    // Then remove all media syntax
-    const newText = text.replace(mediaPattern, '');
+    // Add remaining text after last match
+    if (lastIndex < workingText.length) {
+      const textSegment = workingText.substring(lastIndex);
+      if (textSegment.trim()) {
+        segments.push({ type: 'text', content: textSegment.trim() });
+      }
+    }
     
-    return { text: newText.trim(), media };
+    // Return empty array for apiMedia as we'll add that separately
+    return { segments, apiMedia: [] };
   };
   
   const isVideoUrl = (url: string): boolean => {
@@ -85,67 +125,92 @@ export default function WaveDropReply({
     return videoPatterns.some(pattern => lowercaseUrl.includes(pattern));
   };
 
-  const modifyContent = (content: string): { 
-    text: string; 
-    media: Array<{ alt: string; url: string; type: 'image' | 'video' }> 
+  const modifyContent = (content: string, apiMedia: Array<{ alt: string; url: string; type: 'image' | 'video' }> = []): { 
+    segments: Array<{
+      type: 'text' | 'media';
+      content: string;
+      mediaInfo?: { 
+        alt: string; 
+        url: string; 
+        type: 'image' | 'video';
+      };
+    }>;
+    apiMedia: Array<{ 
+      alt: string; 
+      url: string; 
+      type: 'image' | 'video';
+    }>;
   } => {
     const withoutBrackets = removeSquareBrackets(content);
-    return extractMediaLinks(withoutBrackets);
+    const result = extractMediaLinks(withoutBrackets);
+    result.apiMedia = apiMedia;
+    return result;
   };
 
   const getContent = (): { 
-    text: string; 
-    media: Array<{ alt: string; url: string; type: 'image' | 'video' }> 
+    segments: Array<{
+      type: 'text' | 'media';
+      content: string;
+      mediaInfo?: { 
+        alt: string; 
+        url: string; 
+        type: 'image' | 'video';
+      };
+    }>;
+    apiMedia: Array<{ 
+      alt: string; 
+      url: string; 
+      type: 'image' | 'video';
+    }>;
   } => {
     if (isFetching && !maybeDrop) {
-      return { text: "Loading...", media: [] };
+      return { segments: [{ type: 'text', content: 'Loading...' }], apiMedia: [] };
     }
 
     if (error) {
       const regex =
         /Drop [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12} not found/;
 
-      if (regex.test(JSON.stringify(error))) {
-        return { text: "This drop has been deleted by the author", media: [] };
-      }
-      return { text: "Error loading drop", media: [] };
+      const errorMsg = regex.test(JSON.stringify(error))
+        ? "This drop has been deleted by the author"
+        : "Error loading drop";
+        
+      return { segments: [{ type: 'text', content: errorMsg }], apiMedia: [] };
     }
 
     if (!drop) {
-      return { text: "", media: [] };
+      return { segments: [], apiMedia: [] };
     }
 
     const part = drop.parts.find((part) => part.part_id === dropPartId);
     if (!part) {
-      return { text: "", media: [] };
+      return { segments: [], apiMedia: [] };
     }
 
-    // Handle media from API if content is missing
+    // Process any API media
+    const apiMedia = (part.media || []).map(media => ({
+      alt: "Media",
+      url: media.url,
+      type: isVideoMimeType(media.mime_type) ? 'video' : 'image' as const
+    }));
+
+    // Handle media-only case (no text content)
     if (!part.content) {
-      const apiMedia = part.media || [];
-      const processedMedia = apiMedia.map(media => ({
-        alt: "Media",
-        url: media.url,
-        type: isVideoMimeType(media.mime_type) ? 'video' : 'image' as const
-      }));
-      
       return { 
-        text: processedMedia.length ? "" : "Media", 
-        media: processedMedia 
+        segments: apiMedia.length ? [] : [{ type: 'text', content: 'Media' }],
+        apiMedia 
       };
     }
 
-    return modifyContent(part.content);
+    // Handle case with both text and possibly embedded media
+    return modifyContent(part.content, apiMedia);
   };
 
   const isVideoMimeType = (mimeType: string): boolean => {
     return mimeType.startsWith('video/');
   };
 
-  const [content, setContent] = useState<{ 
-    text: string; 
-    media: Array<{ alt: string; url: string; type: 'image' | 'video' }> 
-  }>(getContent());
+  const [content, setContent] = useState(getContent());
 
   useEffect(() => {
     setContent(getContent());
@@ -204,23 +269,47 @@ export default function WaveDropReply({
               {drop.author.handle}
             </Link>
             <span
-              className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-flex tw-items-center tw-gap-1"
+              className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-flex tw-items-center tw-flex-wrap tw-gap-1"
               onClick={() =>
                 drop?.serial_no && onReplyClick(drop.serial_no)
               }
             >
-              {content.text}
-              {content.media.map((media, i) => (
+              {/* Render segments in their original order */}
+              {content.segments.map((segment, i) => (
+                segment.type === 'text' ? (
+                  <span key={`segment-${i}`}>{segment.content}</span>
+                ) : segment.mediaInfo ? (
+                  segment.mediaInfo.type === 'image' ? (
+                    <img 
+                      key={`segment-${i}`}
+                      src={segment.mediaInfo.url} 
+                      alt={segment.mediaInfo.alt} 
+                      className="tw-inline tw-h-4 tw-w-4 tw-object-cover tw-rounded" 
+                    />
+                  ) : (
+                    <span 
+                      key={`segment-${i}`}
+                      className="tw-inline-flex tw-items-center tw-justify-center tw-h-4 tw-w-auto tw-px-1 tw-bg-iron-800 tw-rounded tw-text-xs tw-text-iron-400"
+                      title={segment.mediaInfo.alt}
+                    >
+                      ▶
+                    </span>
+                  )
+                ) : null
+              ))}
+              
+              {/* Render API media at the end */}
+              {content.apiMedia.map((media, i) => (
                 media.type === 'image' ? (
                   <img 
-                    key={i}
+                    key={`api-media-${i}`}
                     src={media.url} 
                     alt={media.alt} 
                     className="tw-inline tw-h-4 tw-w-4 tw-object-cover tw-rounded" 
                   />
                 ) : (
                   <span 
-                    key={i} 
+                    key={`api-media-${i}`}
                     className="tw-inline-flex tw-items-center tw-justify-center tw-h-4 tw-w-auto tw-px-1 tw-bg-iron-800 tw-rounded tw-text-xs tw-text-iron-400"
                     title={media.alt}
                   >
