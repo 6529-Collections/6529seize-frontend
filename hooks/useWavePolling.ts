@@ -96,7 +96,7 @@ export function useWavePolling(
   const readAllForWave = async () => {
     try {
       await commonApiPostWithoutBodyAndResponse({
-        endpoint: `notifications/wave:${waveId}/read`,
+        endpoint: `notifications/wave/${waveId}/read`,
       });
     } catch (error) {
       console.error("Failed to mark feed as read:", error);

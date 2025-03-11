@@ -40,7 +40,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
 
   useEffect(() => {
     if (data) {
-      setIsAllEnabled(data.subscribed_to_all_drops);
+      setIsAllEnabled(data.subscribed);
     } else {
       setIsAllEnabled(false);
     }
@@ -51,7 +51,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
       try {
         setLoadingMentions(true);
         await commonApiDelete({
-          endpoint: `notifications/subscribe-to-all-drops/${wave.id}`,
+          endpoint: `notifications/wave-subscription/${wave.id}`,
         });
         await refetch();
         setLoadingMentions(false);
@@ -73,7 +73,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
       try {
         setLoadingAll(true);
         await commonApiPost({
-          endpoint: `notifications/subscribe-to-all-drops/${wave.id}`,
+          endpoint: `notifications/wave-subscription/${wave.id}`,
           body: {},
         });
         await refetch();

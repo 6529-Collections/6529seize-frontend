@@ -8,8 +8,8 @@ export function useWaveNotificationSubscription(wave: ApiWave) {
   return useQuery({
     queryKey: ["wave-notification-subscription", wave.id],
     queryFn: () => {
-      return commonApiFetch<{ subscribed_to_all_drops: boolean }>({
-        endpoint: `notifications/subscribe-to-all-drops/${wave.id}`,
+      return commonApiFetch<{ subscribed: boolean }>({
+        endpoint: `notifications/wave-subscription/${wave.id}`,
       });
     },
     enabled:

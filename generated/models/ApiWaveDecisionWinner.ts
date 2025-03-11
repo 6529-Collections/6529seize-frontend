@@ -10,14 +10,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiDrop } from '../models/ApiDrop';
 import { ApiWaveDecisionAward } from '../models/ApiWaveDecisionAward';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveDecisionWinner {
     'place': number;
-    'awards': Array<ApiWaveDecisionAward>;
-    'drop': ApiDrop;
+    'award': ApiWaveDecisionAward;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,15 +27,9 @@ export class ApiWaveDecisionWinner {
             "format": "int64"
         },
         {
-            "name": "awards",
-            "baseName": "awards",
-            "type": "Array<ApiWaveDecisionAward>",
-            "format": ""
-        },
-        {
-            "name": "drop",
-            "baseName": "drop",
-            "type": "ApiDrop",
+            "name": "award",
+            "baseName": "award",
+            "type": "ApiWaveDecisionAward",
             "format": ""
         }    ];
 
