@@ -120,11 +120,26 @@ export default function WaveDropReply({
       return { text: "", media: [] };
     }
 
+    // Handle media from API if content is missing
     if (!part.content) {
-      return { text: "Media", media: [] };
+      const apiMedia = part.media || [];
+      const processedMedia = apiMedia.map(media => ({
+        alt: "Media",
+        url: media.url,
+        type: isVideoMimeType(media.mime_type) ? 'video' : 'image' as const
+      }));
+      
+      return { 
+        text: processedMedia.length ? "" : "Media", 
+        media: processedMedia 
+      };
     }
 
     return modifyContent(part.content);
+  };
+
+  const isVideoMimeType = (mimeType: string): boolean => {
+    return mimeType.startsWith('video/');
   };
 
   const [content, setContent] = useState<{ 
