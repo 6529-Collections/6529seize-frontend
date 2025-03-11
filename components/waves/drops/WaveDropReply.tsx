@@ -37,31 +37,68 @@ export default function WaveDropReply({
     return text.replace(/@\[([^\]]+)\]/g, "@$1");
   };
 
-  const extractImageLinks = (text: string): { text: string; images: Array<{ alt: string; url: string }> } => {
-    const imagePattern = /!\[([^\]]*)\]\(([^\)]+)\)/g;
-    const images: Array<{ alt: string; url: string }> = [];
+  const extractMediaLinks = (text: string): { 
+    text: string; 
+    media: Array<{ 
+      alt: string; 
+      url: string; 
+      type: 'image' | 'video';
+    }> 
+  } => {
+    const mediaPattern = /!\[([^\]]*)\]\(([^\)]+)\)/g;
+    const media: Array<{ alt: string; url: string; type: 'image' | 'video' }> = [];
     
-    // First collect all images
+    // First collect all media
     let match;
-    const textCopy = text.slice();
-    while ((match = imagePattern.exec(text)) !== null) {
-      images.push({ alt: match[1], url: match[2] });
+    while ((match = mediaPattern.exec(text)) !== null) {
+      const url = match[2];
+      const type = isVideoUrl(url) ? 'video' : 'image';
+      media.push({ alt: match[1], url, type });
     }
     
-    // Then remove all image syntax
-    const newText = text.replace(imagePattern, '');
+    // Then remove all media syntax
+    const newText = text.replace(mediaPattern, '');
     
-    return { text: newText.trim(), images };
+    return { text: newText.trim(), media };
+  };
+  
+  const isVideoUrl = (url: string): boolean => {
+    // Check file extension
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.wmv', '.flv', '.mkv'];
+    const lowercaseUrl = url.toLowerCase();
+    
+    // Check if URL ends with a video extension
+    if (videoExtensions.some(ext => lowercaseUrl.endsWith(ext))) {
+      return true;
+    }
+    
+    // Check for video hosting services
+    const videoPatterns = [
+      'youtube.com/watch', 
+      'youtu.be/', 
+      'vimeo.com/', 
+      'dailymotion.com/', 
+      'twitch.tv/',
+      'player.vimeo.com'
+    ];
+    
+    return videoPatterns.some(pattern => lowercaseUrl.includes(pattern));
   };
 
-  const modifyContent = (content: string): { text: string; images: Array<{ alt: string; url: string }> } => {
+  const modifyContent = (content: string): { 
+    text: string; 
+    media: Array<{ alt: string; url: string; type: 'image' | 'video' }> 
+  } => {
     const withoutBrackets = removeSquareBrackets(content);
-    return extractImageLinks(withoutBrackets);
+    return extractMediaLinks(withoutBrackets);
   };
 
-  const getContent = (): { text: string; images: Array<{ alt: string; url: string }> } => {
+  const getContent = (): { 
+    text: string; 
+    media: Array<{ alt: string; url: string; type: 'image' | 'video' }> 
+  } => {
     if (isFetching && !maybeDrop) {
-      return { text: "Loading...", images: [] };
+      return { text: "Loading...", media: [] };
     }
 
     if (error) {
@@ -69,28 +106,31 @@ export default function WaveDropReply({
         /Drop [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12} not found/;
 
       if (regex.test(JSON.stringify(error))) {
-        return { text: "This drop has been deleted by the author", images: [] };
+        return { text: "This drop has been deleted by the author", media: [] };
       }
-      return { text: "Error loading drop", images: [] };
+      return { text: "Error loading drop", media: [] };
     }
 
     if (!drop) {
-      return { text: "", images: [] };
+      return { text: "", media: [] };
     }
 
     const part = drop.parts.find((part) => part.part_id === dropPartId);
     if (!part) {
-      return { text: "", images: [] };
+      return { text: "", media: [] };
     }
 
     if (!part.content) {
-      return { text: "Media", images: [] };
+      return { text: "Media", media: [] };
     }
 
     return modifyContent(part.content);
   };
 
-  const [content, setContent] = useState<{ text: string; images: Array<{ alt: string; url: string }> }>(getContent());
+  const [content, setContent] = useState<{ 
+    text: string; 
+    media: Array<{ alt: string; url: string; type: 'image' | 'video' }> 
+  }>(getContent());
 
   useEffect(() => {
     setContent(getContent());
@@ -155,13 +195,23 @@ export default function WaveDropReply({
               }
             >
               {content.text}
-              {content.images.map((img, i) => (
-                <img 
-                  key={i}
-                  src={img.url} 
-                  alt={img.alt} 
-                  className="tw-inline tw-h-4 tw-w-4 tw-object-cover tw-rounded" 
-                />
+              {content.media.map((media, i) => (
+                media.type === 'image' ? (
+                  <img 
+                    key={i}
+                    src={media.url} 
+                    alt={media.alt} 
+                    className="tw-inline tw-h-4 tw-w-4 tw-object-cover tw-rounded" 
+                  />
+                ) : (
+                  <span 
+                    key={i} 
+                    className="tw-inline-flex tw-items-center tw-justify-center tw-h-4 tw-w-auto tw-px-1 tw-bg-iron-800 tw-rounded tw-text-xs tw-text-iron-400"
+                    title={media.alt}
+                  >
+                    ▶
+                  </span>
+                )
               ))}
             </span>
           </p>
