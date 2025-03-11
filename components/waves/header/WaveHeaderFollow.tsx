@@ -61,7 +61,7 @@ export default function WaveHeaderFollow({
       });
       if (subscribeToAllDrops) {
         await commonApiPost({
-          endpoint: `notifications/subscribe-to-all-drops/${wave.id}`,
+          endpoint: `notifications/wave-subscription/${wave.id}`,
           body: {},
         });
       }
