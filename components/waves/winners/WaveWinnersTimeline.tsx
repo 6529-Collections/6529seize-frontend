@@ -45,7 +45,12 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   });
 
   return (
-    <div className="tw-pt-2 lg:tw-pt-4 tw-pb-4 tw-max-h-[calc(100vh-146px)] min-[1200px]:tw-max-h-[calc(100vh-158px)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-bg-black">
+    <div className={`tw-pt-2 lg:tw-pt-4 tw-pb-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-bg-black ${
+          // Check if this is the Memes wave and adjust height accordingly
+          wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58"
+            ? "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-13rem)] min-[1200px]:tw-h-[calc(100vh-15.5rem)]"
+            : "tw-h-[calc(100vh-9.5rem)] min-[1200px]:tw-h-[calc(100vh-10rem)]"
+        }`}>
       <div className="tw-relative">
         {/* Timeline vertical line */}
         <div className="tw-absolute tw-left-2.5 sm:tw-left-[19px] tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-700/80 tw-backdrop-blur-sm"></div>

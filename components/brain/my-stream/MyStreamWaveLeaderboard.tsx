@@ -23,10 +23,19 @@ interface MyStreamWaveLeaderboardProps {
   readonly setSubmittingArtFromParent?: boolean;
 }
 
-const calculateHeight = (isCapacitor: boolean) => {
+const calculateHeight = (isCapacitor: boolean, isMemesWave: boolean) => {
   if (isCapacitor) {
-    return "tw-h-[calc(100vh-18rem)]";
+    return isMemesWave 
+      ? "tw-h-[calc(100vh-21rem)]"  // More space for Memes wave header
+      : "tw-h-[calc(100vh-18rem)]";
   }
+  
+  if (isMemesWave) {
+    // Account for the title and button in Memes waves
+    return `tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-13rem)] min-[1200px]:tw-h-[calc(100vh-15.5rem)]`;
+  }
+  
+  // Original heights for non-Memes waves
   return `tw-h-[calc(100vh-9rem)] min-[1200px]:tw-h-[calc(100vh-9.5rem)] lg:tw-pr-2`;
 };
 
@@ -40,9 +49,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const { isMemesWave } = useWave(wave);
   const containerClassName = useMemo(() => {
     return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${calculateHeight(
-      capacitor.isCapacitor
+      capacitor.isCapacitor,
+      isMemesWave
     )}`;
-  }, [capacitor.isCapacitor]);
+  }, [capacitor.isCapacitor, isMemesWave]);
 
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
     WaveLeaderboardSortType.RANK

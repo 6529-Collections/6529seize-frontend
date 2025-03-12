@@ -109,7 +109,7 @@ export default function Notifications() {
 
   return (
     <div className={containerClassName}>
-      <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex">
+      <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
         {!items.length && !isFetching ? (
           <MyStreamNoItems />
         ) : (

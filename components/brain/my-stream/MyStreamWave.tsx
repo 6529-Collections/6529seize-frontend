@@ -107,6 +107,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
                 {/* PrimaryButton on far right */}
                 <PrimaryButton
+                  padding="tw-px-3 tw-py-2"
                   loading={false}
                   disabled={false}
                   onClicked={() => {
