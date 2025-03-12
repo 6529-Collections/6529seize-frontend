@@ -18,11 +18,20 @@ interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
 
-const calculateHeight = (isCapacitor: boolean) => {
+const calculateHeight = (isCapacitor: boolean, isMemesWave: boolean) => {
   if (isCapacitor) {
-    return "tw-h-[calc(100vh-18rem)]";
+    return isMemesWave 
+      ? "tw-h-[calc(100vh-21rem)]"  // More space for Memes wave header
+      : "tw-h-[calc(100vh-18rem)]";
   }
-  return `tw-h-[calc(100vh-11.875rem)] lg:tw-h-[calc(100vh-9.125rem)] min-[1200px]:tw-h-[calc(100vh-9.875rem)]`;
+  
+  if (isMemesWave) {
+    // Account for the title and button in Memes waves
+    return `tw-max-h-[calc(100vh-15rem)] lg:tw-max-h-[calc(100vh-13rem)] min-[1200px]:tw-max-h-[calc(100vh-242px)]`;
+  }
+  
+  // Original heights for non-Memes waves
+  return `tw-max-h-[calc(100vh-11.875rem)] lg:tw-max-h-[calc(100vh-9.125rem)] min-[1200px]:tw-max-h-[calc(100vh-9.875rem)]`;
 };
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
@@ -46,11 +55,15 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     setSearchParamsDone(true);
   }, [searchParams, router]);
 
+  // Check if this is the specific Memes wave
+  const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+  
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
-      capacitor.isCapacitor
+      capacitor.isCapacitor,
+      isMemesWave
     )}`;
-  }, [capacitor.isCapacitor]);
+  }, [capacitor.isCapacitor, isMemesWave]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);

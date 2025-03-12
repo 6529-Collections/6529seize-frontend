@@ -95,7 +95,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               )}
             </div>
             <span
-              className={`tw-relative tw-text-[11px] tw-font-medium tw-truncate tw-max-w-[6rem] ${
+              className={`tw-relative tw-text-[11px] tw-font-medium tw-whitespace-nowrap ${
                 active ? "tw-text-primary-400" : "tw-text-iron-200"
               }`}
             >

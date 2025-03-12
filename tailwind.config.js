@@ -85,15 +85,26 @@ module.exports = {
           '100%': { 
             'background-position': '0% 50%'
           }
+        },
+        'gradient-x': {
+          '0%, 100%': {
+            'background-position': '0% 50%'
+          },
+          '50%': {
+            'background-position': '100% 50%'
+          }
         }
       },
       animation: {
         'loading-bar': 'loading-bar 1.5s infinite',
         'trophy-appear': 'trophy-appear 0.3s ease-out forwards',
-        'gradient-shift': 'gradient-shift 8s ease infinite'
+        'gradient-shift': 'gradient-shift 8s ease infinite',
+        'gradient-x': 'gradient-x 3s ease infinite',
+        'spin-slow': 'spin 15s linear infinite'
       },
       backgroundSize: {
-        'gradient-pos': '200% 200%'
+        'gradient-pos': '200% 200%',
+        '200': '200% 200%'
       }
     },
   },

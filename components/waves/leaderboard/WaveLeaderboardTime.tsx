@@ -1,26 +1,28 @@
 import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
-import { DroppingPhaseCard } from "./time/DroppingPhaseCard";
-import { VotingPhaseCard } from "./time/VotingPhaseCard";
-import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
-import { CompactVotingPhaseCard } from "./time/CompactVotingPhaseCard";
-import { DecisionTimeline } from "./time/DecisionTimeline";
-import { WaveLeaderboardTimeState } from "../../../helpers/waves/time.types";
+import { AnimatePresence } from "framer-motion";
+import { faClock } from "@fortawesome/free-regular-svg-icons";
+import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
+import { ExpandedTimelineContent } from "./time/ExpandedTimelineContent";
+import { isTimeZero } from "../../../helpers/waves/time.utils";
+// Import only CompactDroppingPhaseCard and CompactVotingPhaseCard
+// but comment them out for now
+// import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
+// import { CompactVotingPhaseCard } from "./time/CompactVotingPhaseCard";
 
 interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
 }
 
 /**
- * Component for displaying wave time information including dropping,
- * voting phases and decision timeline
+ * Component for displaying wave time information focusing on next winner announcement
+ * in a compact format with expandable timeline
  */
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
 }) => {
-  // We still need useDecisionPoints for decision timeline functionality
-  // This will eventually be integrated into useWave in the future
+  // Using decision points hooks
   const {
     isMultiDecisionWave,
     isRollingWave,
@@ -32,38 +34,46 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     nextDecisionTimeLeft,
   } = useDecisionPoints(wave);
 
+  // Check if we have an upcoming next decision
+  const hasNextDecision = 
+    !!nextDecisionTime && 
+    !!nextDecisionTimeLeft && 
+    !isTimeZero(nextDecisionTimeLeft);
+
   return (
-    <div>
-      {isMultiDecisionWave ? (
-        <>
-          <DecisionTimeline
-            nextDecisionTime={nextDecisionTime}
-            nextDecisionTimeLeft={nextDecisionTimeLeft}
-            upcomingDecisions={upcomingDecisions}
-            allDecisions={allDecisions}
-            isRollingWave={isRollingWave}
-            isDecisionDetailsOpen={isDecisionDetailsOpen}
-            setIsDecisionDetailsOpen={setIsDecisionDetailsOpen}
-          />
+    <div className="tw-mb-4">
+      {/* Main container */}
+      <div className="tw-rounded-lg tw-bg-iron-950 tw-overflow-hidden">
+        {/* Header section with title, countdown and date */}
+        <TimelineToggleHeader
+          icon={faClock}
+          isOpen={isDecisionDetailsOpen}
+          setIsOpen={setIsDecisionDetailsOpen}
+          hasNextDecision={hasNextDecision}
+          nextDecisionTime={nextDecisionTime}
+          timeLeft={nextDecisionTimeLeft}
+        />
 
-          <div className="tw-flex tw-items-center tw-flex-wrap tw-mt-2 tw-gap-y-1">
-            <CompactDroppingPhaseCard wave={wave} />
+        {/* Expandable timeline section */}
+        <AnimatePresence>
+          {isDecisionDetailsOpen && (
+            <ExpandedTimelineContent
+              decisions={allDecisions}
+              nextDecisionTime={nextDecisionTime}
+            />
+          )}
+        </AnimatePresence>
+      </div>
 
-            {/* Center dot separator */}
-            <div className="tw-mt-1">
-              <div className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-white/20"></div>
-            </div>
-
-            <CompactVotingPhaseCard wave={wave} />
-          </div>
-        </>
-      ) : (
-        <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-          <DroppingPhaseCard wave={wave} />
-
-          <VotingPhaseCard wave={wave} />
+      {/* Commented out phase cards 
+      <div className="tw-flex tw-items-center tw-flex-wrap tw-mt-2 tw-gap-y-1">
+        <CompactDroppingPhaseCard wave={wave} />
+        <div className="tw-mt-1">
+          <div className="tw-h-1.5 tw-w-1.5 tw-rounded-full tw-bg-white/20"></div>
         </div>
-      )}
+        <CompactVotingPhaseCard wave={wave} />
+      </div>
+      */}
     </div>
   );
 };
