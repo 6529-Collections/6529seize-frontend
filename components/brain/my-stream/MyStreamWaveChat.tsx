@@ -27,11 +27,11 @@ const calculateHeight = (isCapacitor: boolean, isMemesWave: boolean) => {
   
   if (isMemesWave) {
     // Account for the title and button in Memes waves
-    return `tw-max-h-[calc(100vh-15rem)] lg:tw-max-h-[calc(100vh-13rem)] min-[1200px]:tw-max-h-[calc(100vh-242px)]`;
+    return `tw-max-h-[calc(100vh-15rem)] lg:tw-max-h-[calc(100vh-13rem)] min-[1200px]:tw-max-h-[calc(100vh-248px)]`;
   }
   
   // Original heights for non-Memes waves
-  return `tw-max-h-[calc(100vh-11.875rem)] lg:tw-max-h-[calc(100vh-9.125rem)] min-[1200px]:tw-max-h-[calc(100vh-9.875rem)]`;
+  return `tw-max-h-[calc(100vh-11.875rem)] lg:tw-max-h-[calc(100vh-9.125rem)] min-[1200px]:tw-max-h-[calc(100vh-188px)]`;
 };
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
