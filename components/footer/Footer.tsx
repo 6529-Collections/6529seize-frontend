@@ -51,7 +51,6 @@ export default function Footer() {
           "OM Discord"
         )}
         {printSeparator()}
-        {printSeparator()}
         {printLinkWithImage(
           "https://github.com/6529-Collections",
           "/github_w.png",
