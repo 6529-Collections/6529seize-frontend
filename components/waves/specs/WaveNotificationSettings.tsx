@@ -100,7 +100,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
   }, [wave.subscribed_actions.length, refetch]);
 
   const printSubtext = () => {
-    if (following) {
+    if (!following) {
       return (
         <div className="tw-text-xs tw-text-iron-400">
           You must follow this wave to change notification settings.
