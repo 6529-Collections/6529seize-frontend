@@ -2,7 +2,7 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { DecisionPoint } from "../../../../helpers/waves/time.types";
-import { TimeLeft } from "../../../../helpers/waves/time.utils";
+import { TimeLeft, isTimeZero } from "../../../../helpers/waves/time.utils";
 import { TimeCountdownDisplay } from "./TimeCountdownDisplay";
 import { faRepeat } from "@fortawesome/free-solid-svg-icons";
 import { AnimatedAccordionContent } from "../../../../components/common/AnimatedAccordionContent";
@@ -46,7 +46,9 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
           </div>
           <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
             <div className="tw-flex tw-items-center tw-gap-x-3">
-              {nextDecisionTime ? (
+              {nextDecisionTime &&
+              nextDecisionTimeLeft &&
+              !isTimeZero(nextDecisionTimeLeft) ? (
                 <>
                   <h2 className="tw-text-xs sm:tw-text-sm tw-text-white/90 tw-font-semibold tw-whitespace-nowrap tw-mb-0">
                     Next winner{" "}
@@ -56,7 +58,7 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
                     :
                   </h2>
                   <div className="tw-flex tw-items-center">
-                    <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+                    <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-solid tw-border-primary-300/10 tw-whitespace-nowrap">
                       <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white/90">
                         {nextDecisionTimeLeft.days}
                       </span>
@@ -64,15 +66,15 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
                         days
                       </span>
                     </div>
-                    <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+                    <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-solid tw-border-primary-300/10 tw-whitespace-nowrap">      
                       <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white/90">
                         {nextDecisionTimeLeft.hours}
                       </span>
-                      <span className="tw-text-[10px] sm:tw-text-xs tw-uppercase tw-text-white/900 tw-ml-1">
+                      <span className="tw-text-[10px] sm:tw-text-xs tw-uppercase tw-text-white/40 tw-ml-1">
                         hrs
                       </span>
                     </div>
-                    <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+                    <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-solid tw-border-primary-300/10 tw-whitespace-nowrap">
                       <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white/90">
                         {nextDecisionTimeLeft.minutes}
                       </span>
@@ -80,7 +82,7 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
                         min
                       </span>
                     </div>
-                    <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-primary-300/10 tw-whitespace-nowrap">
+                    <div className="tw-mx-0.5 tw-bg-gradient-to-br tw-from-primary-300/5 tw-to-primary-400/5 tw-backdrop-blur-sm tw-px-2 tw-py-1 tw-rounded-md tw-border tw-border-solid tw-border-primary-300/10 tw-whitespace-nowrap">
                       <span className="tw-text-sm sm:tw-text-base tw-font-semibold tw-text-white/90">
                         {nextDecisionTimeLeft.seconds}
                       </span>
@@ -128,7 +130,9 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
           <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <h2 className="tw-text-sm tw-text-white/90 tw-font-semibold tw-mb-0">
-                {nextDecisionTime
+                {nextDecisionTime &&
+                nextDecisionTimeLeft &&
+                !isTimeZero(nextDecisionTimeLeft)
                   ? "Next winner announcement"
                   : "Announcement history"}
               </h2>
@@ -153,19 +157,30 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
         </div>
       )}
 
-      <AnimatedAccordionContent isVisible={isDecisionDetailsOpen && !!nextDecisionTime} duration={0.3}>
+      <AnimatedAccordionContent
+        isVisible={
+          isDecisionDetailsOpen &&
+          !!nextDecisionTime &&
+          !!nextDecisionTimeLeft &&
+          !isTimeZero(nextDecisionTimeLeft)
+        }
+        duration={0.3}
+      >
         <div className="tw-px-4 tw-pt-2">
           <TimeCountdownDisplay timeLeft={nextDecisionTimeLeft} size="small" />
         </div>
       </AnimatedAccordionContent>
 
-      <AnimatedAccordionContent isVisible={isDecisionDetailsOpen} duration={0.3}>
+      <AnimatedAccordionContent
+        isVisible={isDecisionDetailsOpen}
+        duration={0.3}
+      >
         <div className="tw-mt-2 tw-px-4 tw-pb-3">
-          <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-white/10">
+          <div className="tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10">
             <div className="tw-relative tw-py-2">
               <div className="tw-ml-2.5 tw-relative">
                 <div className="tw-absolute tw-w-0.5 tw-bg-white/10 tw-top-0 tw-bottom-0 tw-left-2"></div>
-                <div className="tw-flex tw-flex-col tw-gap-4 tw-max-h-[300px] tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-pl-2">
+                <div className="tw-flex tw-flex-col tw-gap-4 tw-pr-2 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-pl-2">
                   {allDecisions.map((decision, index) => (
                     <div
                       key={decision.id}
@@ -188,7 +203,7 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
                             nextDecisionTime &&
                             decision.timestamp === nextDecisionTime
                               ? "tw-w-4 tw-h-4 tw-bg-primary-400"
-                              : "tw-w-3 tw-h-3 tw-border tw-border-white/20 tw-bg-iron-700"
+                              : "tw-w-3 tw-h-3 tw-border tw-border-solid tw-border-white/20 tw-bg-iron-700"
                           }`}
                         ></span>
                       </div>

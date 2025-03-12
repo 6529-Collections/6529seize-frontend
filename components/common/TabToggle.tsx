@@ -19,34 +19,28 @@ export const TabToggle: React.FC<TabToggleProps> = ({
   fullWidth = false, // Default to false for backwards compatibility
 }) => {
   return (
-    <div className={`tw-p-0.5 tw-relative tw-ring-1 tw-ring-inset tw-bg-iron-950 tw-ring-primary-400/50 tw-rounded-lg tw-gap-x-0.5 ${
-      fullWidth ? "tw-flex tw-w-full" : "tw-inline-flex tw-w-auto"
-    }`}>
+    <div
+      className={`tw-flex tw-gap-x-1 ${
+        fullWidth ? "tw-w-full" : "tw-w-auto"
+      }`}
+    >
       {options.map((option) => (
-        <div
+        <button
           key={option.key}
-          className={`${
-            activeKey === option.key
-              ? "tw-p-[1px] tw-flex tw-rounded-md tw-bg-primary-500/20"
-              : "tw-p-[1px] tw-flex tw-rounded-md"
+          onClick={() => onSelect(option.key)}
+          className={`tw-whitespace-nowrap tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-border-0 tw-bg-transparent tw-transition-all tw-duration-200 ${
+            fullWidth
+              ? "tw-flex-1 tw-text-center tw-justify-center tw-flex"
+              : ""
           } ${
-            fullWidth ? "tw-flex-1" : ""
+            activeKey === option.key
+              ? "tw-text-primary-300 tw-border-b-2 tw-border-primary-400"
+              : "tw-text-iron-400 hover:tw-text-iron-200"
           }`}
         >
-          <button
-            onClick={() => onSelect(option.key)}
-            className={`tw-whitespace-nowrap tw-flex-1 tw-px-2.5 tw-py-1 tw-text-xs tw-leading-4 tw-font-medium tw-border-0 tw-rounded-md tw-transition-all tw-duration-300 tw-ease-out ${
-              fullWidth ? "tw-text-center tw-justify-center tw-flex" : ""
-            } ${
-              activeKey === option.key
-                ? "tw-bg-primary-500/10 tw-text-primary-300"
-                : "tw-bg-iron-950 desktop-hover:hover:tw-bg-primary-500/5 tw-text-iron-400 desktop-hover:hover:tw-text-primary-300"
-            }`}
-          >
-            {option.label}
-          </button>
-        </div>
+          {option.label}
+        </button>
       ))}
     </div>
   );
-}; 
+};

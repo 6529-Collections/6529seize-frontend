@@ -38,7 +38,7 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
         <BrainLeftSidebarViewChange />
 
         {activeWaveId && contentFilterOptions.length > 1 && (
-          <div className="tw-w-full">
+          <div className="tw-w-full tw-hidden">
             <TabToggle
               options={contentFilterOptions}
               activeKey={activeContentTab}
