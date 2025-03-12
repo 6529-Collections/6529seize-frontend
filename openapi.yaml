@@ -1013,6 +1013,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiNotificationsResponse"
+  /notifications/read:
+    post:
+      tags:
+        - Notifications
+      summary: Mark all notifications as read
+      operationId: markAllNotificationsAsRead
+      responses:
+        "200":
+          description: successful operation
   /notifications/{id}/read:
     post:
       tags:
@@ -1029,6 +1038,85 @@ paths:
       responses:
         "201":
           description: successful operation
+  /notifications/wave/{wave_id}/read:
+    post:
+      tags:
+        - Notifications
+      summary: Mark wave notifications as read
+      operationId: markWaveNotificationsAsRead
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+  /notifications/wave-subscription/{wave_id}:
+    get:
+      tags:
+        - Notifications
+      summary: Get wave subscription
+      operationId: getWaveSubscription
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscribed:
+                    type: boolean
+    post:
+      tags:
+        - Notifications
+      summary: Subscribe to wave notifications
+      operationId: subscribeToWaveNotifications
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscribed:
+                    type: boolean
+    delete:
+      tags:
+        - Notifications
+      summary: Unsubscribe from wave notifications
+      operationId: unsubscribeFromWaveNotifications
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscribed:
+                    type: boolean
   /blocks:
     get:
       tags:
@@ -1959,6 +2047,61 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiTransactionPage"
+  /waves/{id}/decisions:
+    get:
+      tags:
+        - Waves
+      summary: Get already decided wave decision outcomes
+      operationId: getWaveDecisions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ASC
+              - DESC
+            default: DESC
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - decision_time
+            default: decision_time
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 2000
+            default: 100
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveDecisionsPage"
+        "404":
+          description: Wave not found
   /wave-media/prep:
     post:
       tags:
@@ -3241,6 +3384,7 @@ components:
         - chat
         - wave
         - outcomes
+        - decisions_strategy
       properties:
         name:
           description: The name of the wave
@@ -3367,6 +3511,7 @@ components:
         - winning_thresholds
         - max_winners
         - admin_group
+        - decisions_strategy
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
@@ -3398,6 +3543,10 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        decisions_strategy:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiWaveDecisionsStrategy"
     ApiCreateWaveDropRequest:
       type: object
       required:
@@ -4059,6 +4208,45 @@ components:
           minimum: 0
           format: int64
           nullable: true
+    ApiIdentity:
+      type: object
+      required:
+        - id
+        - handle
+        - normalised_handle
+        - pfp
+        - cic
+        - rep
+        - level
+        - tdh
+        - display
+        - primary_wallet
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        normalised_handle:
+          type: string
+        pfp:
+          type: string
+          nullable: true
+        cic:
+          type: integer
+          format: int65
+        rep:
+          type: integer
+          format: int65
+        level:
+          type: integer
+          format: int65
+        tdh:
+          type: integer
+          format: int65
+        display:
+          type: string
+        primary_wallet:
+          type: string
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -4283,7 +4471,9 @@ components:
       required:
         - id
         - image
+        - image_compact
         - animation
+        - animation_compact
       properties:
         id:
           type: string
@@ -4391,6 +4581,8 @@ components:
         - DROP_QUOTED
         - DROP_REPLIED
         - DROP_VOTED
+        - WAVE_CREATED
+        - ALL_DROPS
     ApiNotificationsResponse:
       type: object
       required:
@@ -4623,45 +4815,6 @@ components:
         next:
           type: string
           nullable: true
-    ApiIdentity:
-      type: object
-      required:
-        - id
-        - handle
-        - normalised_handle
-        - pfp
-        - cic
-        - rep
-        - level
-        - tdh
-        - display
-        - primary_wallet
-      properties:
-        id:
-          type: string
-        handle:
-          type: string
-        normalised_handle:
-          type: string
-        pfp:
-          type: string
-          nullable: true
-        cic:
-          type: integer
-          format: int65
-        rep:
-          type: integer
-          format: int65
-        level:
-          type: integer
-          format: int65
-        tdh:
-          type: integer
-          format: int65
-        display:
-          type: string
-        primary_wallet:
-          type: string
     ApiProfileMin:
       type: object
       required:
@@ -4955,8 +5108,12 @@ components:
       type: object
       required:
         - rememes_submission_tdh_threshold
+        - all_drops_notifications_subscribers_limit
       properties:
         rememes_submission_tdh_threshold:
+          type: integer
+          format: int64
+        all_drops_notifications_subscribers_limit:
           type: integer
           format: int64
     ApiTargetAndSubscriptionActions:
@@ -5234,6 +5391,7 @@ components:
         - max_winners
         - admin_group
         - authenticated_user_eligible_for_admin
+        - decisions_strategy
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
@@ -5265,6 +5423,10 @@ components:
           $ref: "#/components/schemas/ApiWaveScope"
         authenticated_user_eligible_for_admin:
           type: boolean
+        decisions_strategy:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiWaveDecisionsStrategy"
     ApiWaveContributorOverview:
       required:
         - contributor_identity
@@ -5287,6 +5449,94 @@ components:
       enum:
         - TDH
         - REP
+    ApiWaveDecision:
+      type: object
+      required:
+        - decision_time
+        - winners
+      properties:
+        decision_time:
+          type: integer
+          format: int62
+        winners:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionWinner"
+    ApiWaveDecisionAward:
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          $ref: "#/components/schemas/ApiWaveOutcomeType"
+        subtype:
+          $ref: "#/components/schemas/ApiWaveOutcomeSubType"
+        description:
+          type: string
+        credit:
+          $ref: "#/components/schemas/ApiWaveOutcomeCredit"
+        rep_category:
+          type: string
+        amount:
+          type: number
+          format: int64
+    ApiWaveDecisionsPage:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/ApiPageBase"
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecision"
+    ApiWaveDecisionsStrategy:
+      type: object
+      required:
+        - first_decision_time
+        - subsequent_decisions
+        - is_rolling
+      properties:
+        first_decision_time:
+          type: number
+          format: int64
+          description: >-
+            When the first decision will be made. All subsequent decision times
+            will be calculated based on this.
+        subsequent_decisions:
+          type: array
+          items:
+            type: number
+            format: int64
+            minimum: 1
+          description: >-
+            Each element in this array represents the milliseconds passed from
+            previous decision when new decision is made. When is_rolling=true
+            then after last decision, the next decision will be made again
+            first-element-of-the-array milliseconds later than the previous one.
+            And it will continue like this forever.
+        is_rolling:
+          type: boolean
+          description: >-
+            If false then there will be length(subsequent_decisions) + 1
+            decisions in total. If true then there will be infinite number of
+            decisions (see description of subsequent_decisions). Also if true
+            then there needs to be at least one element in subsequent_decisions
+            array.
+    ApiWaveDecisionWinner:
+      type: object
+      required:
+        - place
+        - award
+        - drop
+      properties:
+        place:
+          type: integer
+          format: int64
+        award:
+          $ref: "#/components/schemas/ApiWaveDecisionAward"
     ApiWaveDropsFeed:
       type: object
       required:
@@ -5375,6 +5625,8 @@ components:
         - authenticated_user_eligible_to_vote
         - authenticated_user_eligible_to_participate
         - authenticated_user_eligible_to_chat
+        - voting_period_start
+        - voting_period_end
         - voting_credit_type
       properties:
         id:
@@ -5391,8 +5643,16 @@ components:
           type: boolean
         authenticated_user_eligible_to_chat:
           type: boolean
+        voting_period_start:
+          type: number
+          format: int64
+          nullable: true
+        voting_period_end:
+          type: number
+          format: int64
+          nullable: true
         voting_credit_type:
-          $ref: '#/components/schemas/ApiWaveCreditType'
+          $ref: "#/components/schemas/ApiWaveCreditType"
     ApiWaveOutcome:
       type: object
       required:
@@ -5416,6 +5676,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveOutcomeDistributionItem"
+    ApiWaveOutcomeCredit:
+      type: string
+      enum:
+        - REP
+        - CIC
     ApiWaveOutcomeDistributionItem:
       type: object
       properties:
@@ -5426,11 +5691,6 @@ components:
         description:
           type: string
           nullable: true
-    ApiWaveOutcomeCredit:
-      type: string
-      enum:
-        - REP
-        - CIC
     ApiWaveOutcomeSubType:
       type: string
       enum:

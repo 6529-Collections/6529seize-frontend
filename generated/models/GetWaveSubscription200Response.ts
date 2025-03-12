@@ -12,12 +12,24 @@
 
 import { HttpFile } from '../http/http';
 
-export enum ApiNotificationCause {
-    IdentitySubscribed = 'IDENTITY_SUBSCRIBED',
-    IdentityMentioned = 'IDENTITY_MENTIONED',
-    DropQuoted = 'DROP_QUOTED',
-    DropReplied = 'DROP_REPLIED',
-    DropVoted = 'DROP_VOTED',
-    WaveCreated = 'WAVE_CREATED',
-    AllDrops = 'ALL_DROPS'
+export class GetWaveSubscription200Response {
+    'subscribed'?: boolean;
+
+    static readonly discriminator: string | undefined = undefined;
+
+    static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "subscribed",
+            "baseName": "subscribed",
+            "type": "boolean",
+            "format": ""
+        }    ];
+
+    static getAttributeTypeMap() {
+        return GetWaveSubscription200Response.attributeTypeMap;
+    }
+
+    public constructor() {
+    }
 }
+

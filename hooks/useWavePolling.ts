@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
-import { commonApiFetch } from "../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPostWithoutBodyAndResponse,
+} from "../services/api/common-api";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import useCapacitor from "./useCapacitor";
 
@@ -90,6 +93,16 @@ export function useWavePolling(
     retry: 3,
   });
 
+  const readAllForWave = async () => {
+    try {
+      await commonApiPostWithoutBodyAndResponse({
+        endpoint: `notifications/wave/${waveId}/read`,
+      });
+    } catch (error) {
+      console.error("Failed to mark feed as read:", error);
+    }
+  };
+
   useEffect(() => {
     if (!pollingResult) return;
 
@@ -101,6 +114,8 @@ export function useWavePolling(
 
       const latestPolledDrop = pollingResult.drops[0];
       const latestExistingDrop = drops.at(-1);
+
+      readAllForWave();
 
       if (!latestExistingDrop) {
         setPollingState({

@@ -21,9 +21,11 @@ export default function NotificationItems({
   onDropContentClick,
 }: NotificationItemsProps) {
   return (
-    <div className="tw-flex tw-flex-col tw-space-y-3 tw-pb-3">
+    <div className="tw-flex tw-flex-col tw-space-y-6 tw-pb-5">
       {items.map((notification, i) => (
-        <div key={`notification-${notification.id}-${i}`} id={`feed-item-${notification.id}`}>
+        <div
+          key={`notification-${notification.id}-${i}`}
+          id={`feed-item-${notification.id}`}>
           <CommonChangeAnimation>
             <NotificationItem
               notification={notification}

@@ -11,6 +11,7 @@ import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { useNotificationsContext } from "../../notifications/NotificationsContext";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -19,9 +20,12 @@ export default function Notifications() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const capacitor = useCapacitor();
 
-  const containerClassName = `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)] ${
-    capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
-  }` as const;
+  const { removeAllDeliveredNotifications } = useNotificationsContext();
+
+  const containerClassName =
+    `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)] ${
+      capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
+    }` as const;
 
   const router = useRouter();
   const { reload } = router.query;
@@ -52,10 +56,11 @@ export default function Notifications() {
   const markAllAsReadMutation = useMutation({
     mutationFn: async () =>
       await commonApiPostWithoutBodyAndResponse({
-        endpoint: `notifications/all/read`,
+        endpoint: `notifications/read`,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       invalidateNotifications();
+      await removeAllDeliveredNotifications();
     },
     onError: (error) => {
       setToast({
@@ -80,7 +85,7 @@ export default function Notifications() {
     identity: connectedProfile?.profile?.handle,
     activeProfileProxy: !!activeProfileProxy,
     limit: "30",
-    reverse: true
+    reverse: true,
   });
 
   const onBottomIntersection = (state: boolean) => {
@@ -116,8 +121,7 @@ export default function Notifications() {
           <FeedScrollContainer
             ref={scrollRef}
             onScrollUpNearTop={handleScrollUpNearTop}
-            isFetchingNextPage={isFetching}
-          >
+            isFetchingNextPage={isFetching}>
             <NotificationsWrapper
               items={items}
               loading={isFetching}
