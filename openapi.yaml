@@ -3390,6 +3390,7 @@ components:
         - chat
         - wave
         - outcomes
+        - decisions_strategy
       properties:
         name:
           description: The name of the wave
