@@ -13,22 +13,26 @@ import PrivilegedDropCreator, {
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
+import { useElectron } from "../../../hooks/useElectron";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
 
-const calculateHeight = (isCapacitor: boolean) => {
+const calculateHeight = (isCapacitor: boolean, isElectron: boolean) => {
   if (isCapacitor) {
     return "tw-h-[calc(100vh-18rem)]";
+  }
+  if (isElectron) {
+    return "tw-h-[calc(100vh-12.5rem)]";
   }
   return `tw-h-[calc(100vh-11.875rem)] lg:tw-h-[calc(100vh-9.125rem)] min-[1200px]:tw-h-[calc(100vh-9.875rem)]`;
 };
 
-const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
-  wave
-}) => {
+const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const capacitor = useCapacitor();
+  const isElectron = useElectron();
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
@@ -48,9 +52,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
 
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
-      capacitor.isCapacitor
+      capacitor.isCapacitor,
+      isElectron
     )}`;
-  }, [capacitor.isCapacitor]);
+  }, [capacitor.isCapacitor, isElectron]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);

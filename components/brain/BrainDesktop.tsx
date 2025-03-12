@@ -12,6 +12,7 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import Cookies from "js-cookie";
+import { useElectron } from "../../hooks/useElectron";
 
 interface Props {
   readonly children: ReactNode;
@@ -27,6 +28,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   });
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
+  const isElectron = useElectron();
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
@@ -82,6 +84,10 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
         : ""
     }`;
 
+  const heightClass = isElectron
+    ? "tw-h-[calc(100vh-8.25rem)]"
+    : "lg:tw-h-[calc(100vh-5.5rem)] min-[1200px]:tw-h-[calc(100vh-6.25rem)]";
+
   return (
     <div className="tw-relative tw-min-h-screen tw-flex tw-flex-col">
       <div className="tw-relative tw-flex tw-flex-grow">
@@ -90,7 +96,8 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
           className={isDropOpen ? "tw-w-full xl:tw-pl-6" : contentClasses}
           transition={{ duration: 0.3 }}
           style={{ transition: "none" }}>
-          <div className="tw-h-screen lg:tw-h-[calc(100vh-5.5rem)] min-[1200px]:tw-h-[calc(100vh-6.25rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4">
+          <div
+            className={`${heightClass} tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4`}>
             <BrainLeftSidebar activeWaveId={router.query.wave as string} />
             <div className="tw-flex-grow xl:tw-relative">
               {children}
