@@ -48,8 +48,8 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       rankText = "1st";
       break;
     case 2:
-      accentColor = "#94a3b8"; // slate-400 - Silver from ParticipationDrop
-      bgColor = "rgba(148,163,184,0.1)";
+      accentColor = "#CAD5E3"; // slate-400 - Silver from ParticipationDrop
+      bgColor = "rgba(202, 213, 227,0.1)";
       rankText = "2nd";
       break;
     case 3:

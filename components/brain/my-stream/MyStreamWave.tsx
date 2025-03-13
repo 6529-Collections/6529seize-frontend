@@ -88,44 +88,50 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     <div className="tw-relative">
       {breakpoint !== "S" && (
         <div>
-          <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-sticky tw-top-0 tw-z-50">
-            <MyStreamWaveDesktopTabs
-              activeTab={activeContentTab}
-              wave={wave}
-              setActiveTab={setActiveContentTab}
-            />
-          </div>
-
-          {/* Title and Submit to Memes button - only for Memes wave types, across all tabs */}
-          {isMemesWave && (
-            <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-mt-4 tw-mb-3">
-              <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between">
-                {/* Title on far left */}
-                <h2 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-whitespace-nowrap tw-flex-shrink-0">
-                  {wave.name}
-                </h2>
-
-                {/* PrimaryButton on far right */}
-                <PrimaryButton
-                  padding="tw-px-3 tw-py-2"
-                  loading={false}
-                  disabled={false}
-                  onClicked={() => {
-                    // Switch to leaderboard tab and trigger art submission
-                    setActiveContentTab(MyStreamWaveTab.LEADERBOARD);
-                    setTriggerArtSubmission(true);
-
-                    // Reset trigger after a delay to allow it to be triggered again later
-                    setTimeout(() => {
-                      setTriggerArtSubmission(false);
-                    }, 500);
-                  }}
-                >
-                  Submit to Memes
-                </PrimaryButton>
+          <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-w-full tw-mb-2">
+            {/* Combined row with tabs, title, and action button */}
+            <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-3">
+              <div>
+                {!isMemesWave && (
+                  <MyStreamWaveDesktopTabs
+                    activeTab={activeContentTab}
+                    wave={wave}
+                    setActiveTab={setActiveContentTab}
+                  />
+                )}
               </div>
+
+              {/* Right side: Tabs and action button for memes wave */}
+              {isMemesWave && (
+                <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-4">
+                  <MyStreamWaveDesktopTabs
+                    activeTab={activeContentTab}
+                    wave={wave}
+                    setActiveTab={setActiveContentTab}
+                  />
+                  <div className="tw-flex-shrink-0">
+                    <PrimaryButton
+                      padding="tw-px-2.5 tw-py-2"
+                      loading={false}
+                      disabled={false}
+                      onClicked={() => {
+                        // Switch to leaderboard tab and trigger art submission
+                        setActiveContentTab(MyStreamWaveTab.LEADERBOARD);
+                        setTriggerArtSubmission(true);
+
+                        // Reset trigger after a delay to allow it to be triggered again later
+                        setTimeout(() => {
+                          setTriggerArtSubmission(false);
+                        }, 500);
+                      }}
+                    >
+                      Submit to Memes
+                    </PrimaryButton>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
       <div>{components[activeContentTab]}</div>

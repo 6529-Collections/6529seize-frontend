@@ -81,7 +81,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   const rankWaveComponents: Record<SidebarTab, JSX.Element> = {
     [SidebarTab.ABOUT]: (
-      <div className="tw-mt-4 tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
+      <div className="tw-h-full tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0">
         <WaveHeader
           wave={wave}
           onFollowersClick={onFollowersClick}
@@ -148,7 +148,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
 
   return (
     <>
-      <div className="tw-px-3 tw-mt-4 tw-mb-2">
+      <div className="tw-mt-4 tw-pl-2.5 tw-pb-[1px]">
         <TabToggleWithOverflow
           options={options}
           activeKey={activeTab}

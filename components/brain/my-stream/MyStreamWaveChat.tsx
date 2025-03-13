@@ -18,7 +18,8 @@ interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
 
-const calculateHeight = (isCapacitor: boolean, isMemesWave: boolean) => {
+// Height calculations based on wave type and viewport size
+const calculateHeight = (isCapacitor: boolean, isMemesWave: boolean, isSimpleWave: boolean) => {
   if (isCapacitor) {
     return isMemesWave 
       ? "tw-h-[calc(100vh-21rem)]"  // More space for Memes wave header
@@ -26,13 +27,17 @@ const calculateHeight = (isCapacitor: boolean, isMemesWave: boolean) => {
   }
   
   if (isMemesWave) {
-    // Account for the title and button in Memes waves
-    // Using rem units to match other components, and fixed height instead of max-height
-    return `tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-13rem)] min-[1200px]:tw-h-[calc(100vh-16.25rem)]`;
+    // Values for memes wave with title + tabs + submit button
+    return `tw-h-[calc(100vh-11.5rem)] lg:tw-h-[calc(100vh-11.875rem)] min-[1200px]:tw-h-[calc(100vh-12.875rem)]`;
   }
   
-  // Original heights for non-Memes waves, using fixed height instead of max-height
-  return `tw-h-[calc(100vh-11.875rem)] lg:tw-h-[calc(100vh-9.125rem)] min-[1200px]:tw-h-[calc(100vh-11.75rem)]`;
+  if (isSimpleWave) {
+    // Heights for simple waves without tabs - more vertical space
+    return `tw-h-[calc(100vh-11.5rem)] lg:tw-h-[calc(100vh-8.75rem)] min-[1200px]:tw-h-[calc(100vh-9.5rem)]`;
+  }
+  
+  // Heights for standard waves with tabs
+  return `tw-h-[calc(100vh-11.5rem)] lg:tw-h-[calc(100vh-10.625rem)] min-[1200px]:tw-h-[calc(100vh-11.375rem)]`;
 };
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
@@ -59,12 +64,30 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   // Check if this is the specific Memes wave
   const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
   
+  // Check if this is a wave with at least one decision point
+  const hasDecisionPoints = !!wave.wave.decisions_strategy?.first_decision_time;
+  
+  // Check if this is a multi-decision wave
+  const hasMultipleDecisions = 
+    !!wave.wave.decisions_strategy?.subsequent_decisions && 
+    wave.wave.decisions_strategy.subsequent_decisions.length > 0;
+  
+  // Check if this is a rolling wave
+  const isRollingWave = 
+    !!wave.wave.decisions_strategy?.is_rolling;
+  
+  // Determine if this is a "simple wave" (no decision points at all, not rolling, not memes)
+  // Simple waves shouldn't show tabs at all
+  const isSimpleWave = !hasDecisionPoints && !hasMultipleDecisions && !isRollingWave && !isMemesWave;
+  
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${calculateHeight(
+    // Ensure the container is always scrollable and has scroll shadows
+    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow ${calculateHeight(
       capacitor.isCapacitor,
-      isMemesWave
+      isMemesWave,
+      isSimpleWave
     )}`;
-  }, [capacitor.isCapacitor, isMemesWave]);
+  }, [capacitor.isCapacitor, isMemesWave, isSimpleWave]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);

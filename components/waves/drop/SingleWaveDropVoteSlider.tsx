@@ -171,11 +171,11 @@ export default function WaveDropVoteSlider({
 
   return (
     <div
-      className="tw-h-[20px] tw-flex tw-items-center"
+      className="tw-h-[16px] tw-flex tw-items-center"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
-        <div className="tw-relative tw-h-[8px] tw-group">
+        <div className="tw-relative tw-h-[6px] tw-group">
           {/* Base range input for track clicks */}
           <input
             type="range"
@@ -206,7 +206,7 @@ export default function WaveDropVoteSlider({
           <div
             className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-z-30"
             style={{
-              clipPath: `circle(12px at ${currentPercentage}% 50%)`,
+              clipPath: `circle(10px at ${currentPercentage}% 50%)`,
             }}
           >
             <input
@@ -258,46 +258,46 @@ export default function WaveDropVoteSlider({
                 />
               </div>
               <div className="tw-relative">
-                <motion.div
-                  className={`tw-absolute tw-top-1 tw-left-1/2 -tw-translate-x-1/2 
-                    tw-text-[10px] tw-font-medium
-                    tw-whitespace-nowrap tw-select-none
-                    tw-transition-all tw-duration-200
-                    ${
-                      hoveredPreset === mark.percentage
-                        ? "tw-opacity-0"
-                        : "tw-text-iron-300 tw-opacity-70"
-                    }`}
+                {/* Just show percentage labels below ticks */}
+                <div className={`tw-absolute tw-top-1 tw-left-1/2 -tw-translate-x-1/2 
+                  tw-text-[10px] tw-font-medium tw-text-iron-300 tw-opacity-70
+                  tw-whitespace-nowrap tw-select-none`}
                 >
                   {mark.label}
-                </motion.div>
-                <motion.div
-                  className={`tw-absolute tw-top-1 tw-left-1/2 -tw-translate-x-1/2 
-                    tw-text-[10px] tw-font-medium tw-text-iron-100
-                    tw-whitespace-nowrap tw-select-none
-                    tw-transition-all tw-duration-200
-                    ${
-                      hoveredPreset === mark.percentage
-                        ? "tw-opacity-100"
-                        : "tw-opacity-0"
-                    }`}
-                >
-                  {formatNumberWithCommas(
-                    mark.percentage === 0
-                      ? 0
-                      : mark.percentage < 0
-                      ? Math.round(
-                          -(Math.abs(minValue) * Math.abs(mark.percentage)) / 100
-                        )
-                      : Math.round((maxValue * mark.percentage) / 100)
-                  )}{" "}
-                  {creditType}
-                </motion.div>
+                </div>
+                
+                {/* Better tooltip that shows on hover */}
+                {hoveredPreset === mark.percentage && (
+                  <div className="tw-absolute tw-bottom-6 tw-left-1/2 -tw-translate-x-1/2 
+                    tw-bg-iron-800/90 tw-border tw-border-iron-700
+                    tw-rounded-md tw-px-2 tw-py-1 tw-shadow-lg tw-z-50">
+                    <div className="tw-inline-flex tw-items-center tw-gap-1">
+                      <span className="tw-text-[10px] tw-font-medium tw-text-iron-100">
+                        {formatNumberWithCommas(
+                          mark.percentage === 0
+                            ? 0
+                            : mark.percentage < 0
+                            ? Math.round(
+                                -(Math.abs(minValue) * Math.abs(mark.percentage)) / 100
+                              )
+                            : Math.round((maxValue * mark.percentage) / 100)
+                        )}
+                      </span>
+                      <span className="tw-text-[10px] tw-font-medium tw-text-iron-100">
+                        {creditType}
+                      </span>
+                    </div>
+                    <div className="tw-absolute tw-w-1.5 tw-h-1.5 tw-bottom-[-3px] 
+                      tw-left-1/2 -tw-translate-x-1/2 tw-rotate-45 
+                      tw-bg-iron-800/90 tw-border-r tw-border-b tw-border-iron-700">
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
 
-          {/* Thumb visual */}
+          {/* Thumb visual - Compact */}
           <motion.div
             ref={thumbRef}
             style={{
@@ -338,7 +338,7 @@ export default function WaveDropVoteSlider({
               </div>
 
               <motion.div
-                className={`tw-w-5 tw-h-5 tw-rounded-full 
+                className={`tw-w-4 tw-h-4 tw-rounded-full 
                   tw-bg-gradient-to-b tw-from-gray-700 tw-to-gray-800
                   tw-border-2 ${theme.thumb.border} 
                   tw-shadow-lg tw-transition-shadow
@@ -352,7 +352,7 @@ export default function WaveDropVoteSlider({
                 whileTap={{ scale: 0.95 }}
                 animate={{
                   boxShadow: isDragging
-                    ? "0 0 20px rgba(255,255,255,0.2)"
+                    ? "0 0 15px rgba(255,255,255,0.2)"
                     : "0 0 0 rgba(255,255,255,0)",
                 }}
                 transition={{ duration: 0.2 }}

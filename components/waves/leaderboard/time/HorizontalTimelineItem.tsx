@@ -5,6 +5,7 @@ import { HorizontalTimelineDot } from "./HorizontalTimelineDot";
 interface HorizontalTimelineItemProps {
   readonly decision: DecisionPoint;
   readonly isNext: boolean;
+  readonly flexGrow?: boolean;
 }
 
 /**
@@ -12,13 +13,16 @@ interface HorizontalTimelineItemProps {
  */
 export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
   decision,
-  isNext
+  isNext,
+  flexGrow = false
 }) => {
   const isPast = !!decision.isPast;
   
   return (
     <div
-      className="tw-relative tw-flex tw-flex-col tw-items-center tw-z-10 tw-flex-shrink-0 tw-w-[80px]"
+      className={`tw-relative tw-flex tw-flex-col tw-items-center tw-z-10 ${
+        flexGrow ? "tw-flex-1" : "tw-flex-shrink-0 tw-w-[80px]"
+      }`}
     >
       {/* Dot indicator ABOVE the line */}
       <div className="tw-mb-3 tw-z-10">

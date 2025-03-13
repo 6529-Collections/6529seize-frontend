@@ -112,7 +112,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               />
             )}
 
-            {hasFirstDecisionPassed && (
+           {/*  {hasFirstDecisionPassed && (
               <div className="tw-mt-2 tw-mb-4 tw-bg-primary-400/20 tw-px-4 tw-py-3 tw-rounded-lg tw-border tw-border-primary-500/20">
                 <div className="tw-flex tw-items-center">
                   <svg
@@ -136,7 +136,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
                   </p>
                 </div>
               </div>
-            )}
+            )} */}
           </>
         )}
       </div>
