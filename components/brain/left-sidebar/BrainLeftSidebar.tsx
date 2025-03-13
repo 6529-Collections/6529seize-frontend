@@ -5,6 +5,7 @@ import BrainLeftSidebarWaves from "./waves/BrainLeftSidebarWaves";
 import { TabToggle } from "../../common/TabToggle";
 import { useContentTab } from "../ContentTabContext";
 import { MyStreamWaveTab } from "../../../types/waves.types";
+import { useElectron } from "../../../hooks/useElectron";
 
 interface BrainLeftSidebarProps {
   readonly activeWaveId: string | null;
@@ -14,7 +15,8 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   activeWaveId,
 }) => {
   // Get content tab state from context
-  const { activeContentTab, setActiveContentTab, availableTabs } = useContentTab();
+  const { activeContentTab, setActiveContentTab, availableTabs } =
+    useContentTab();
 
   // Map enum values to label names
   const tabLabels: Record<MyStreamWaveTab, string> = {
@@ -26,14 +28,19 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
 
   // Generate options based on available tabs
   const contentFilterOptions = useMemo(() => {
-    return availableTabs.map(tab => ({
+    return availableTabs.map((tab) => ({
       key: tab,
-      label: tabLabels[tab]
+      label: tabLabels[tab],
     }));
   }, [availableTabs]);
+  const isElectron = useElectron();
+  const heightClass = isElectron
+    ? "lg:tw-h-[calc(100vh-7.5rem)]"
+    : "lg:tw-h-[calc(100vh-5.5rem)]";
 
   return (
-    <div className="tw-flex-shrink-0 tw-relative tw-flex tw-flex-col h-screen lg:tw-h-[calc(100vh-5.5rem)] tw-overflow-y-auto lg:tw-w-80 tw-w-full no-scrollbar">
+    <div
+      className={`${heightClass} tw-flex-shrink-0 tw-relative tw-flex tw-flex-col h-screen tw-overflow-y-auto lg:tw-w-80 tw-w-full no-scrollbar`}>
       <div className="tw-pt-4 tw-pb-4 tw-flex-1 tw-px-4 md:tw-px-2 lg:tw-px-0 tw-gap-y-4 tw-flex-col tw-flex">
         <BrainLeftSidebarViewChange />
 
