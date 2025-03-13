@@ -10,7 +10,7 @@ import { AuthContext, TitleType } from "../../auth/Auth";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
-import { WaveDropsScrollContainer } from "./WaveDropsScrollContainer";
+import { WaveDropsNonReverseContainer } from "./WaveDropsNonReverseContainer";
 import { useWaveDrops } from "../../../hooks/useWaveDrops";
 import { useScrollBehavior } from "../../../hooks/useScrollBehavior";
 import CircleLoader, {
@@ -122,6 +122,16 @@ export default function WaveDropsAll({
       });
     };
   }, [haveNewDrops]);
+  
+  // Auto-scroll to bottom on initial load
+  useEffect(() => {
+    if (drops.length > 0 && scrollContainerRef.current && !initialDrop) {
+      // Need setTimeout to ensure all content is rendered before scrolling
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [drops.length > 0]);
 
   const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
@@ -260,12 +270,12 @@ export default function WaveDropsAll({
 
     return (
       <>
-        <WaveDropsScrollContainer
+        <WaveDropsNonReverseContainer
           ref={scrollContainerRef}
           onScroll={handleScroll}
           newItemsCount={newItemsCount}
           isFetchingNextPage={isFetchingNextPage}
-          onTopIntersection={handleTopIntersection}
+          onBottomIntersection={handleTopIntersection}
           disableAutoPosition={disableAutoPosition}
         >
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
@@ -287,7 +297,7 @@ export default function WaveDropsAll({
               onDropContentClick={onDropContentClick}
             />
           </div>
-        </WaveDropsScrollContainer>
+        </WaveDropsNonReverseContainer>
 
         <WaveDropsScrollBottomButton
           isAtBottom={isAtBottom}
