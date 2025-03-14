@@ -166,14 +166,24 @@ export default function WaveDropsAll({
       });
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
+      
+      // Check if the last drop is a temp drop (your own post)
       const lastDrop = drops[drops.length - 1];
       if (lastDrop.id.startsWith("temp-")) {
-        setSerialNo(lastDrop.serial_no);
+        // For user's own new drop, scroll to bottom
+        if (isAtBottom) {
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+        } else {
+          // If not at bottom, use the serialNo approach to scroll to the specific drop
+          setSerialNo(lastDrop.serial_no);
+        }
       }
     } else {
       smallestSerialNo.current = null;
     }
-  }, [drops]);
+  }, [drops, isAtBottom, scrollToBottom]);
 
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo) return;
