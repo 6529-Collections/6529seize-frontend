@@ -170,12 +170,12 @@ function HeaderQRModal({
   }, [show]);
 
   function printImage() {
-    const renderQRCodeImage = (
-      src: string,
-      alt: string,
-      additionalStyle: Record<string, string> = {}
-    ) => {
-      const defaultStyle = { maxWidth: "100%", height: "auto" };
+    const renderQRCodeImage = (src: string, alt: string) => {
+      const defaultStyle = {
+        maxWidth: "100%",
+        height: "auto",
+        border: "5px solid #fff",
+      };
       return (
         <Image
           priority
@@ -185,7 +185,7 @@ function HeaderQRModal({
           width={1000}
           height={1000}
           className="unselectable"
-          style={{ ...defaultStyle, ...additionalStyle }}
+          style={{ ...defaultStyle }}
         />
       );
     };
@@ -234,8 +234,7 @@ function HeaderQRModal({
           url = navigateBrowserUrl;
           content = renderQRCodeImage(
             navigateBrowserSrc,
-            "Browser Link - QR Code",
-            { border: "10px solid #fff" }
+            "Browser Link - QR Code"
           );
           break;
         case SubMode.APP:
