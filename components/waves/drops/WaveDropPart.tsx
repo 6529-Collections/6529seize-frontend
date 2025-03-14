@@ -81,7 +81,6 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
       if (window.getSelection()?.toString()) {
         return;
       }
-      console.log('clicking')
       if (isTemporaryDrop || !onDropContentClick) return;
       onDropContentClick(drop);
     };
@@ -104,7 +103,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
           !isTemporaryDrop  && e.key === "Enter" && handleClick()
         }
       >
-        <div className="tw-relative tw-overflow-hidden tw-transform tw-transition-all tw-duration-300 tw-ease-out">
+        <div className="tw-relative tw-overflow-hidden  tw-transition-all tw-duration-300 tw-ease-out">
           <WaveDropPartDrop
             drop={drop}
             activePart={activePart}

@@ -7,6 +7,7 @@ import UserCICAndLevel, {
 import { DropTrophyIcon } from "../../DropThrophyIcon";
 import ParticipationDropPfp from "./ParticipationDropPfp";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
+import { PreserveOrientation } from "../WaveDropsNonReverseContainer";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;
@@ -49,7 +50,9 @@ export default function ParticipationDropHeader({
           </p>
           {drop.drop_type === ApiDropType.Participatory && (
             <div className="tw-flex tw-items-center tw-justify-center tw-h-6">
-              <DropTrophyIcon rank={drop.rank} />
+              <PreserveOrientation>
+                <DropTrophyIcon rank={drop.rank} />
+              </PreserveOrientation>
             </div>
           )}
         </div>

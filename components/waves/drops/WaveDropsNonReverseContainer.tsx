@@ -1,5 +1,19 @@
 import React, { forwardRef, useRef, useEffect, useState } from "react";
 
+// Helper component to counter the double rotation for problematic elements
+export const PreserveOrientation: React.FC<{children: React.ReactNode, className?: string}> = ({ 
+  children,
+  className = ""
+}) => {
+  return (
+    <div className={`tw-transform tw-rotate-180 ${className}`} style={{ direction: 'rtl' }}>
+      <div className="tw-transform tw-rotate-180" style={{ direction: 'ltr' }}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
 interface WaveDropsNonReverseContainerProps {
   readonly children: React.ReactNode;
   readonly onScroll: () => void;
