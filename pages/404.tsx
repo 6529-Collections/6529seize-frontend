@@ -36,7 +36,7 @@ export default function Seize404() {
 
       <main className={styles.main}>
         <Header />
-        <div className={`${styles.mainContainer} ${styles.pageNotFound}`}>
+        <div className={styles.pageNotFound}>
           <Image
             width="0"
             height="0"

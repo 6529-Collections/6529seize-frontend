@@ -137,7 +137,9 @@ export default function CapacitorWidget() {
       className={`${styles.capacitorWidget} ${
         capacitor.orientation === CapacitorOrientationType.LANDSCAPE
           ? styles.capacitorWidgetLandscape
-          : styles.capacitorWidgetPortrait
+          : `${styles.capacitorWidgetPortrait} ${
+              capacitor.platform === "ios" ? "tw-h-[85px]" : ""
+            }`
       }`}>
       <span className="d-flex align-items-center gap-3">
         <button
