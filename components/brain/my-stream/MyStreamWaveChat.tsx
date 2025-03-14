@@ -57,7 +57,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       capacitor.platform,
       isElectron
     )}`;
-  }, [capacitor.isCapacitor, isElectron]);
+  }, [capacitor.platform, isElectron]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);
