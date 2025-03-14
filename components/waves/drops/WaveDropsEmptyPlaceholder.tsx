@@ -1,7 +1,7 @@
 import React from "react";
 
 interface WaveDropsEmptyPlaceholderProps {
-  dropId: string | null;
+  readonly dropId: string | null;
 }
 
 export default function WaveDropsEmptyPlaceholder({

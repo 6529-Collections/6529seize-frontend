@@ -4,7 +4,7 @@ import CircleLoader, {
 } from "../../distribution-plan-tool/common/CircleLoader";
 
 interface WaveDropsScrollingOverlayProps {
-  isVisible: boolean;
+  readonly isVisible: boolean;
 }
 
 export default function WaveDropsScrollingOverlay({
