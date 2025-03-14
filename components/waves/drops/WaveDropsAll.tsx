@@ -63,6 +63,7 @@ export default function WaveDropsAll({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
+    refetch,
   } = useWaveDrops({
     waveId,
     connectedProfileHandle: connectedProfile?.profile?.handle,
@@ -122,6 +123,26 @@ export default function WaveDropsAll({
       });
     };
   }, [haveNewDrops]);
+  
+  // Auto-scroll to bottom when new drops are available and user is already at bottom
+  const [isHandlingNewDrops, setIsHandlingNewDrops] = useState(false);
+  
+  useEffect(() => {
+    if (haveNewDrops && isAtBottom && !isHandlingNewDrops && !isFetching) {
+      setIsHandlingNewDrops(true);
+      refetch()
+        .then(() => {
+          setTimeout(() => {
+            scrollToBottom();
+            setIsHandlingNewDrops(false);
+          }, 100); // Small delay to ensure DOM is updated
+        })
+        .catch(() => {
+          // In case of error, still reset the handling state
+          setIsHandlingNewDrops(false);
+        });
+    }
+  }, [haveNewDrops, isAtBottom, isHandlingNewDrops, isFetching, refetch, scrollToBottom]);
   
   // Auto-scroll to bottom on initial load
   useEffect(() => {
@@ -204,10 +225,10 @@ export default function WaveDropsAll({
   }, [init, serialNo]);
 
   const handleTopIntersection = useCallback(() => {
-    if (hasNextPage && !isFetching && !isFetchingNextPage) {
+    if (hasNextPage && !isFetching && !isFetchingNextPage && !isHandlingNewDrops) {
       fetchNextPage();
     }
-  }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage, isHandlingNewDrops]);
 
   const onQuoteClick = useCallback(
     (drop: ApiDrop) => {
