@@ -3,8 +3,7 @@ import React, { forwardRef, useRef, useEffect, useState } from "react";
 interface WaveDropsNonReverseContainerProps {
   readonly children: React.ReactNode;
   readonly onScroll: () => void;
-  readonly onBottomIntersection: () => void; // Called when user scrolls near top to load older content
-  readonly onTopIntersection?: () => void; // For loading newer content
+  readonly onTopIntersection: () => void;
   readonly newItemsCount: number;
   readonly isFetchingNextPage: boolean;
   readonly disableAutoPosition?: boolean;
@@ -22,7 +21,6 @@ export const WaveDropsNonReverseContainer = forwardRef<
     {
       children,
       onScroll,
-      onBottomIntersection,
       onTopIntersection,
       newItemsCount,
       isFetchingNextPage,
@@ -75,7 +73,7 @@ export const WaveDropsNonReverseContainer = forwardRef<
           // Only trigger if intersection is happening and we're not already fetching
           if (entry.isIntersecting && !isFetchingNextPage) {
             // In a chat, this loads older messages when scrolling up
-            onBottomIntersection();
+            onTopIntersection();
           }
         },
         {
@@ -96,7 +94,7 @@ export const WaveDropsNonReverseContainer = forwardRef<
           topSentinel.parentNode.removeChild(topSentinel);
         }
       };
-    }, [ref, isFetchingNextPage, onBottomIntersection]);
+    }, [ref, isFetchingNextPage, onTopIntersection]);
 
     // Store initial height after first render
     useEffect(() => {
@@ -147,7 +145,7 @@ export const WaveDropsNonReverseContainer = forwardRef<
           // Check if we're near the top of the container
           // Load more content when within 1000px of the top for a smoother experience
           if (currentScrollTop < 1000 && !isFetchingNextPage) {
-            onBottomIntersection();
+            onTopIntersection();
           }
         }
 

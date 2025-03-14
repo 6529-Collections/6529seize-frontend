@@ -274,7 +274,7 @@ export default function WaveDropsAll({
           onScroll={handleScroll}
           newItemsCount={newItemsCount}
           isFetchingNextPage={isFetchingNextPage}
-          onBottomIntersection={handleTopIntersection}
+          onTopIntersection={handleTopIntersection}
           disableAutoPosition={disableAutoPosition}
         >
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
