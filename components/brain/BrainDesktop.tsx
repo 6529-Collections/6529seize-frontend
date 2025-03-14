@@ -49,7 +49,9 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   }, [router.query.wave]);
 
   useEffect(() => {
-    Cookies.set(SIDEBAR_COLLAPSED_COOKIE, isCollapsed);
+    Cookies.set(SIDEBAR_COLLAPSED_COOKIE, isCollapsed, {
+      expires: 365,
+    });
   }, [isCollapsed]);
 
   const onDropClose = () => {

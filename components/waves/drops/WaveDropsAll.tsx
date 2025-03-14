@@ -20,6 +20,8 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
+import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -54,6 +56,8 @@ export default function WaveDropsAll({
 }: WaveDropsAllProps) {
   const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
+
+  const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
   const [disableAutoPosition, setDisableAutoPosition] = useState(false);
@@ -186,6 +190,13 @@ export default function WaveDropsAll({
     }
   }, [drops, isAtBottom, scrollToBottom]);
 
+  useEffect(() => {
+    void removeWaveDeliveredNotifications(waveId);
+    void commonApiPostWithoutBodyAndResponse({
+      endpoint: `notifications/wave/${waveId}/read`,
+    }).catch((error) => console.error("Failed to mark feed as read:", error));
+  }, [waveId]);
+
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo) return;
     let found = false;
@@ -275,8 +286,7 @@ export default function WaveDropsAll({
           newItemsCount={newItemsCount}
           isFetchingNextPage={isFetchingNextPage}
           onTopIntersection={handleTopIntersection}
-          disableAutoPosition={disableAutoPosition}
-        >
+          disableAutoPosition={disableAutoPosition}>
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
             <DropsList
               scrollContainerRef={scrollContainerRef}
