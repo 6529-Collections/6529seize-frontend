@@ -65,7 +65,7 @@ export default function ConsolidationUseCases() {
       <main className={`${styles.main} ${styles.tdhMain}`}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={styles.mainContainer}>
+        <Container fluid>
           <Row>
             <Col>
               <Container className="pt-4">

@@ -47,9 +47,7 @@ export default function Buidl() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container
-          fluid
-          className={`${styles.mainContainer} ${styles.pageNotFound} text-center`}>
+        <Container fluid className={`${styles.pageNotFound} text-center`}>
           <Row>
             <Col>
               <Image

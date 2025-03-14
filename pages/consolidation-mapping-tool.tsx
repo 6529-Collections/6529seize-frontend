@@ -74,7 +74,7 @@ export default function ConsolidationMappingToolPage() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={`${styles.mainContainer}`}>
+        <Container fluid>
           <Row>
             <Col>
               <Container>

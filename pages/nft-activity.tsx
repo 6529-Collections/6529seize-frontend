@@ -51,9 +51,7 @@ export default function TheMemesPage() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container
-          fluid
-          className={`${styles.mainContainer} ${styles.leaderboardContainer}`}>
+        <Container fluid className={styles.leaderboardContainer}>
           <Row>
             <Col>
               <LatestActivity page={1} pageSize={50} showMore={true} />
