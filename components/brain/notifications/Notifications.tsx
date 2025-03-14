@@ -24,7 +24,11 @@ export default function Notifications() {
 
   const containerClassName =
     `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)] ${
-      capacitor.isCapacitor ? "tw-pb-[70px]" : ""
+      capacitor.platform === "ios"
+        ? "tw-pb-[calc(4rem+82px)]"
+        : capacitor.platform === "android"
+        ? "tw-pb-[70px]"
+        : ""
     }` as const;
 
   const router = useRouter();
