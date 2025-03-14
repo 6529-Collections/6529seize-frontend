@@ -67,8 +67,7 @@ type AuthContextType = {
   readonly title: string;
 };
 
-// TODO: change it to 5
-export const WAVES_MIN_ACCESS_LEVEL = 0;
+export const WAVES_MIN_ACCESS_LEVEL = 5;
 const DEFAULT_TITLE = "6529 SEIZE";
 
 export const AuthContext = createContext<AuthContextType>({
