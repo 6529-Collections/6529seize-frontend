@@ -110,6 +110,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     </div>
   );
 
+
   return (
     <>
       <div className="tw-relative tw-w-full sm:tw-max-w-lg tw-mt-2 tw-flex">
@@ -149,4 +150,3 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
 };
 
 export default React.memo(DropPartMarkdownImage);
-
