@@ -55,15 +55,11 @@ export default function Header(props: Readonly<Props>) {
   const [showBurgerMenuBrain, setShowBurgerMenuBrain] = useState(false);
 
   let logoSrc: string = "/6529.png";
-  let logoWidth: number = 60;
-  let logoHeight: number = 60;
-  if (capacitor.isCapacitor) {
+  let logoWidth: number = 50;
+  let logoHeight: number = 50;
+  if (capacitor.isCapacitor || isMobile) {
     logoWidth = 40;
     logoHeight = 40;
-  }
-  if (isMobile) {
-    logoWidth = 50;
-    logoHeight = 50;
   }
 
   useEffect(() => {
@@ -490,7 +486,7 @@ export default function Header(props: Readonly<Props>) {
         className={`${
           capacitor.isCapacitor
             ? styles.capacitorMainContainer
-            : props.isSmall
+            : props.isSmall || isMobile
             ? styles.mainContainerSmall
             : styles.mainContainer
         } ${props.extraClass}`}>
@@ -501,7 +497,7 @@ export default function Header(props: Readonly<Props>) {
                 className={
                   capacitor.isCapacitor
                     ? styles.capacitorHeaderRow
-                    : props.isSmall
+                    : props.isSmall || isMobile
                     ? styles.headerRowSmall
                     : styles.headerRow
                 }>
@@ -518,7 +514,9 @@ export default function Header(props: Readonly<Props>) {
                       loading="eager"
                       priority
                       className={
-                        props.isSmall ? styles.logoIconSmall : styles.logoIcon
+                        props.isSmall || capacitor.isCapacitor || isMobile
+                          ? styles.logoIconSmall
+                          : styles.logoIcon
                       }
                       src={logoSrc}
                       alt="6529Seize"
