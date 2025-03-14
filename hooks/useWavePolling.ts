@@ -7,6 +7,7 @@ import {
 } from "../services/api/common-api";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import useCapacitor from "./useCapacitor";
+import { useNotificationsContext } from "../components/notifications/NotificationsContext";
 
 interface PollingState {
   hasNewDrops: boolean;
@@ -47,6 +48,8 @@ export function useWavePolling(
   config: UseWavePollingConfig = {}
 ) {
   const { isCapacitor } = useCapacitor();
+
+  const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   const { pollingDelay, activePollingInterval, inactivePollingInterval } = {
     ...DEFAULT_CONFIG,
@@ -95,6 +98,7 @@ export function useWavePolling(
 
   const readAllForWave = async () => {
     try {
+      await removeWaveDeliveredNotifications(waveId);
       await commonApiPostWithoutBodyAndResponse({
         endpoint: `notifications/wave/${waveId}/read`,
       });

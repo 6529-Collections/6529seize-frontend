@@ -149,7 +149,7 @@ export default function WaveDropsAll({
   }, [drops]);
 
   useEffect(() => {
-    removeWaveDeliveredNotifications(waveId);
+    void removeWaveDeliveredNotifications(waveId);
     void commonApiPostWithoutBodyAndResponse({
       endpoint: `notifications/wave/${waveId}/read`,
     }).catch((error) => console.error("Failed to mark feed as read:", error));
