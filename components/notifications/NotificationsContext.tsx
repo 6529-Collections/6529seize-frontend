@@ -15,6 +15,7 @@ import {
 import { getStableDeviceId } from "./stable-device-id";
 
 type NotificationsContextType = {
+  removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
   removeAllDeliveredNotifications: () => Promise<void>;
 };
 
@@ -111,6 +112,19 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const removeWaveDeliveredNotifications = async (waveId: string) => {
+    if (isCapacitor) {
+      const deliveredNotifications =
+        await PushNotifications.getDeliveredNotifications();
+      const waveNotifications = deliveredNotifications.notifications.filter(
+        (notification) => notification.data.wave_id === waveId
+      );
+      await PushNotifications.removeDeliveredNotifications({
+        notifications: waveNotifications,
+      });
+    }
+  };
+
   const removeAllDeliveredNotifications = async () => {
     if (isCapacitor) {
       await PushNotifications.removeAllDeliveredNotifications();
@@ -119,6 +133,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const value = useMemo(
     () => ({
+      removeWaveDeliveredNotifications,
       removeAllDeliveredNotifications,
     }),
     []
