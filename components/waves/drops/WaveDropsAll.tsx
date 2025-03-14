@@ -19,6 +19,8 @@ import CircleLoader, {
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -53,6 +55,8 @@ export default function WaveDropsAll({
 }: WaveDropsAllProps) {
   const router = useRouter();
   const { connectedProfile, setTitle } = useContext(AuthContext);
+
+  const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
   const [disableAutoPosition, setDisableAutoPosition] = useState(false);
@@ -143,6 +147,13 @@ export default function WaveDropsAll({
       smallestSerialNo.current = null;
     }
   }, [drops]);
+
+  useEffect(() => {
+    void removeWaveDeliveredNotifications(waveId);
+    void commonApiPostWithoutBodyAndResponse({
+      endpoint: `notifications/wave/${waveId}/read`,
+    }).catch((error) => console.error("Failed to mark feed as read:", error));
+  }, [waveId]);
 
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo) return;
@@ -237,8 +248,7 @@ export default function WaveDropsAll({
               viewBox="0 0 24 24"
               strokeWidth="1"
               stroke="currentColor"
-              aria-hidden="true"
-            >
+              aria-hidden="true">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -266,8 +276,7 @@ export default function WaveDropsAll({
           newItemsCount={newItemsCount}
           isFetchingNextPage={isFetchingNextPage}
           onTopIntersection={handleTopIntersection}
-          disableAutoPosition={disableAutoPosition}
-        >
+          disableAutoPosition={disableAutoPosition}>
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
             <DropsList
               scrollContainerRef={scrollContainerRef}
