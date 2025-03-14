@@ -8,10 +8,8 @@ export enum CapacitorOrientationType {
 }
 
 const useCapacitor = () => {
-  // const isCapacitor = Capacitor.isNativePlatform();
-  // const platform = Capacitor.getPlatform();
-  const isCapacitor = true;
-  const platform = "ios";
+  const isCapacitor = Capacitor.isNativePlatform();
+  const platform = Capacitor.getPlatform();
 
   const [orientation, setOrientation] = useState<CapacitorOrientationType>(
     CapacitorOrientationType.PORTRAIT
