@@ -130,14 +130,17 @@ export default function HeaderUserProxyDropdown({
                       />
                     ))}
                   </div>
-                  <HeaderUserProxyDropdownChains />
+                  <HeaderUserProxyDropdownChains onSwitchChain={onClose} />
                   <div className="tw-h-full tw-px-2 tw-pt-2">
                     {isConnected ? (
                       <button
-                        onClick={() => seizeDisconnect()}
+                        onClick={() => {
+                          seizeDisconnect();
+                          onClose();
+                        }}
                         type="button"
-                        aria-label="Connect"
-                        title="Connect"
+                        aria-label="Disconnect"
+                        title="Disconnect"
                         className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                         <FontAwesomeIcon
                           icon={faDoorOpen}
@@ -148,7 +151,10 @@ export default function HeaderUserProxyDropdown({
                       </button>
                     ) : (
                       <button
-                        onClick={() => seizeConnect()}
+                        onClick={() => {
+                          seizeConnect();
+                          onClose();
+                        }}
                         type="button"
                         aria-label="Connect"
                         title="Connect"
@@ -175,8 +181,8 @@ export default function HeaderUserProxyDropdown({
                     <button
                       onClick={() => seizeDisconnectAndLogout()}
                       type="button"
-                      aria-label="Disconnect"
-                      title="Disconnect"
+                      aria-label="Disconnect & Logout"
+                      title="Disconnect & Logout"
                       className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
                       <FontAwesomeIcon
                         icon={faRightFromBracket}

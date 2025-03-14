@@ -192,7 +192,7 @@ export default function About(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={styles.mainContainer}>
+        <Container fluid>
           <Row>
             <Col>
               <Container className="pt-4">
