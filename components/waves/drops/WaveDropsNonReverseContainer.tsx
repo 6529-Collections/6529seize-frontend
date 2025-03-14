@@ -3,7 +3,7 @@ import React, { forwardRef, useRef, useEffect, useState } from "react";
 interface WaveDropsNonReverseContainerProps {
   readonly children: React.ReactNode;
   readonly onScroll: () => void;
-  readonly onBottomIntersection: () => void; // For loading older content
+  readonly onBottomIntersection: () => void; // Called when user scrolls near top to load older content
   readonly onTopIntersection?: () => void; // For loading newer content
   readonly newItemsCount: number;
   readonly isFetchingNextPage: boolean;
@@ -11,8 +11,8 @@ interface WaveDropsNonReverseContainerProps {
 }
 
 /**
- * A non-reversed scroll container that uses standard top-to-bottom layout
- * but visually appears reversed through CSS transforms
+ * A standard scroll container that uses normal top-to-bottom layout
+ * for displaying content like chat messages
  */
 export const WaveDropsNonReverseContainer = forwardRef<
   HTMLDivElement,
@@ -48,27 +48,27 @@ export const WaveDropsNonReverseContainer = forwardRef<
         return;
       }
 
-      // For a chat interface, we only need a single sentinel element at the bottom
-      // Since we only load older messages when scrolling up (logical top in our visual layout)
-      const bottomSentinel = document.createElement("div");
-      bottomSentinel.id = "wave-drops-older-content-sentinel";
-      bottomSentinel.style.height = "5px";
-      bottomSentinel.style.width = "100%";
-      bottomSentinel.style.position = "relative";
+      // For a chat interface, we need a sentinel element at the top
+      // to detect when we should load older messages when scrolling up
+      const topSentinel = document.createElement("div");
+      topSentinel.id = "wave-drops-older-content-sentinel";
+      topSentinel.style.height = "5px";
+      topSentinel.style.width = "100%";
+      topSentinel.style.position = "relative";
 
-      // Add sentinel at the "bottom" (logical top, but in our visual layout it's at the bottom)
+      // Add sentinel at the top of the container
       // This is where older content will load
       if (contentRef.current.firstChild) {
         contentRef.current.insertBefore(
-          bottomSentinel,
+          topSentinel,
           contentRef.current.firstChild
         );
       } else {
-        contentRef.current.appendChild(bottomSentinel);
+        contentRef.current.appendChild(topSentinel);
       }
 
-      // Create intersection observer for bottom (older content)
-      const bottomObserver = new IntersectionObserver(
+      // Create intersection observer for top (older content)
+      const topObserver = new IntersectionObserver(
         (entries) => {
           const [entry] = entries;
 
@@ -82,18 +82,18 @@ export const WaveDropsNonReverseContainer = forwardRef<
           root: ref.current,
           // Much larger margin to detect early - 1000px should load content
           // well before the user reaches the top
-          rootMargin: "1000px 0px 0px 0px",
+          rootMargin: "2000px 0px 0px 0px",
           threshold: 0,
         }
       );
 
-      bottomObserver.observe(bottomSentinel);
+      topObserver.observe(topSentinel);
 
       return () => {
-        bottomObserver.disconnect();
+        topObserver.disconnect();
 
-        if (bottomSentinel.parentNode) {
-          bottomSentinel.parentNode.removeChild(bottomSentinel);
+        if (topSentinel.parentNode) {
+          topSentinel.parentNode.removeChild(topSentinel);
         }
       };
     }, [ref, isFetchingNextPage, onBottomIntersection]);
@@ -137,15 +137,14 @@ export const WaveDropsNonReverseContainer = forwardRef<
       throttleTimeoutRef.current = setTimeout(() => {
         onScroll();
 
-        // In a non-reversed layout, scrolling down means checking if we're near the bottom
+        // Determine if we're scrolling up or down
         const direction = currentScrollTop > lastScrollTop ? "down" : "up";
         setLastScrollTop(currentScrollTop);
 
         // In a chat interface, we only load older content when scrolling up
-        // Since we've used CSS transform to visually reverse direction,
-        // scrolling up (to older content) is detected as direction === "up"
+        // as older messages are rendered at the top of the container
         if (direction === "up") {
-          // Check if we're near top (that's where older content is in the logical structure)
+          // Check if we're near the top of the container
           // Load more content when within 1000px of the top for a smoother experience
           if (currentScrollTop < 1000 && !isFetchingNextPage) {
             onBottomIntersection();
