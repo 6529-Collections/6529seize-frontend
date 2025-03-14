@@ -78,7 +78,12 @@ export function CreateDropWaveWrapper({
       context === CreateDropWaveWrapperContext.WAVE_CHAT;
 
     if (capacitor.isCapacitor) {
-      const marginClass = isMyStreamOrWaveChat && !capacitor.keyboardVisible ? "tw-mb-[3.75rem]" : "";
+      const marginClass =
+        isMyStreamOrWaveChat &&
+        !capacitor.keyboardVisible &&
+        capacitor.platform === "ios"
+          ? "tw-mb-[3.75rem]"
+          : "";
       return `tw-max-h-[calc(100vh-14.7rem)] ${marginClass} tw-z-[998]`;
     }
 
@@ -87,8 +92,7 @@ export function CreateDropWaveWrapper({
   return (
     <div
       ref={containerRef}
-      className={`${containerClassName} tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-w-full tw-rounded-b-xl tw-flex-none tw-transition-colors tw-duration-500 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 lg:tw-border-x lg:tw-border-b tw-border-iron-800 tw-bg-iron-950`}
-    >
+      className={`${containerClassName} tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-py-4 tw-px-4 tw-top-0 tw-sticky tw-w-full tw-rounded-b-xl tw-flex-none tw-transition-colors tw-duration-500 tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 lg:tw-border-x lg:tw-border-b tw-border-iron-800 tw-bg-iron-950`}>
       {children}
       <div ref={fixedBottomRef}></div>
     </div>

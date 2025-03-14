@@ -19,9 +19,11 @@ interface MyStreamWaveLeaderboardProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-const calculateHeight = (isCapacitor: boolean) => {
-  if (isCapacitor) {
+const calculateHeight = (platform: string) => {
+  if (platform === "ios") {
     return "tw-h-[calc(100vh-18rem)]";
+  } else if (platform === "android") {
+    return "tw-h-[calc(100vh-16.5rem)]";
   }
   return `tw-h-[calc(100vh-9rem)] min-[1200px]:tw-h-[calc(100vh-9.5rem)] lg:tw-pr-2`;
 };
@@ -35,10 +37,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 
   const containerClassName = useMemo(() => {
     return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${calculateHeight(
-      capacitor.isCapacitor
+      capacitor.platform
     )}`;
-  }, [capacitor.isCapacitor]);
-  
+  }, [capacitor.platform]);
+
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
     WaveLeaderboardSortType.RANK
   );
@@ -70,7 +72,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           setShowMyDrops={setShowMyDrops}
           onCreateDrop={() => setIsCreatingDrop(true)}
         />
-        
+
         {hasFirstDecisionPassed && (
           <div className="tw-mt-2 tw-mb-4 tw-bg-primary-400/20 tw-px-4 tw-py-3 tw-rounded-lg tw-border tw-border-primary-500/20">
             <div className="tw-flex tw-items-center">
@@ -78,12 +80,18 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="tw-size-5 tw-text-primary-300 tw-mr-2"
-              >
-                <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5z" clipRule="evenodd" />
+                className="tw-size-5 tw-text-primary-300 tw-mr-2">
+                <path
+                  fillRule="evenodd"
+                  d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5z"
+                  clipRule="evenodd"
+                />
               </svg>
               <p className="tw-mb-0 tw-text-sm tw-text-primary-300">
-                <strong>Winners announced!</strong> <span className="tw-text-iron-200">Check the Winners tab to see the results.</span>
+                <strong>Winners announced!</strong>{" "}
+                <span className="tw-text-iron-200">
+                  Check the Winners tab to see the results.
+                </span>
               </p>
             </div>
           </div>
@@ -97,8 +105,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-            >
+              transition={{ duration: 0.2, ease: "easeInOut" }}>
               <WaveDropCreate
                 wave={wave!}
                 onCancel={() => setIsCreatingDrop(false)}
