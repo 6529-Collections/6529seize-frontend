@@ -19,9 +19,11 @@ interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
 
-const calculateHeight = (isCapacitor: boolean, isElectron: boolean) => {
-  if (isCapacitor) {
+const calculateHeight = (platform: string, isElectron: boolean) => {
+  if (platform === "ios") {
     return "tw-h-[calc(100vh-18rem)]";
+  } else if (platform === "android") {
+    return "tw-h-[calc(100vh-16.5rem)]";
   }
   if (isElectron) {
     return "tw-h-[calc(100vh-12.5rem)]";
@@ -52,7 +54,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
 
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
-      capacitor.isCapacitor,
+      capacitor.platform,
       isElectron
     )}`;
   }, [capacitor.isCapacitor, isElectron]);

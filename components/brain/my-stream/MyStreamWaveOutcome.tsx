@@ -7,9 +7,11 @@ interface MyStreamWaveOutcomeProps {
   readonly wave: ApiWave;
 }
 
-const calculateHeight = (isCapacitor: boolean) => {
-  if (isCapacitor) {
+const calculateHeight = (platform: string) => {
+  if (platform === "ios") {
     return "tw-h-[calc(100vh-18rem)]";
+  } else if (platform === "android") {
+    return "tw-h-[calc(100vh-16.5rem)]";
   }
   return `tw-h-[calc(100vh-10.25rem)] min-[1200px]:tw-h-[calc(100vh-11.5rem)] lg:tw-pr-2`;
 };
@@ -19,7 +21,7 @@ const MyStreamWaveOutcome: React.FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
 
   const containerClassName = useMemo(() => {
     return `lg:tw-pt-4 tw-pb-4 tw-w-full tw-flex tw-flex-col tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ${calculateHeight(
-      capacitor.isCapacitor
+      capacitor.platform
     )}`;
   }, [capacitor.isCapacitor]);
   return (
