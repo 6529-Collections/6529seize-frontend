@@ -2,6 +2,7 @@ import React, {
   createContext,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   ReactNode,
@@ -86,6 +87,17 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     Set<string>
   >(new Set());
 
+  // Track element readiness for measurements
+  const [elementsReady, setElementsReady] = useState({
+    header: false,
+    pinned: false,
+    tabs: false,
+    bottom: false
+  });
+
+  // Frame ID for requestAnimationFrame
+  const frameIdRef = useRef<number | null>(null);
+
   // Function to register a component that needs height
   // Memoize to maintain stable function identity across renders
   const registerHeightDependent = useCallback((id: string) => {
@@ -105,6 +117,22 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return newSet;
     });
   }, []);
+
+  // Use useLayoutEffect to check DOM elements as soon as they're available
+  useLayoutEffect(() => {
+    // Function to check if an element ref is ready for measurement
+    const checkRefReady = (ref: React.RefObject<HTMLDivElement>, key: keyof typeof elementsReady) => {
+      if (ref.current && !elementsReady[key]) {
+        setElementsReady(prev => ({...prev, [key]: true}));
+      }
+    };
+    
+    // Check all refs
+    checkRefReady(headerRef, 'header');
+    checkRefReady(pinnedRef, 'pinned');
+    checkRefReady(tabsRef, 'tabs');
+    checkRefReady(bottomRef, 'bottom');
+  }, [headerRef.current, pinnedRef.current, tabsRef.current, bottomRef.current, elementsReady]);
 
   // Use ResizeObserver to measure elements and calculate spaces
   useEffect(() => {
@@ -148,53 +176,73 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       const totalOccupiedSpace =
         headerHeight + pinnedHeight + tabsHeight + bottomHeight;
 
-      const calculatedContentSpace = viewportHeight - totalOccupiedSpace;
-
-      // Log the measurements for debugging
-      console.log("[LayoutContext] Space calculations:", {
-        viewportHeight,
-        headerHeight,
-        pinnedHeight,
-        tabsHeight,
-        bottomHeight,
-        totalOccupiedSpace,
-        calculatedContentSpace,
-      });
-
-      // Update state with calculated spaces
-      setSpaces({
-        headerSpace: headerHeight,
-        bottomSpace: bottomHeight,
-        pinnedSpace: pinnedHeight,
-        tabsSpace: tabsHeight,
-        contentSpace: calculatedContentSpace,
-        measurementsComplete: true,
-      });
+      // Ensure content space is at least 0 to prevent negative values
+      const calculatedContentSpace = Math.max(0, viewportHeight - totalOccupiedSpace);
+      
+      // Avoid unnecessary rerenders by checking if values have changed
+      const hasChanged = 
+        spaces.headerSpace !== headerHeight ||
+        spaces.bottomSpace !== bottomHeight ||
+        spaces.pinnedSpace !== pinnedHeight ||
+        spaces.tabsSpace !== tabsHeight ||
+        spaces.contentSpace !== calculatedContentSpace ||
+        !spaces.measurementsComplete;
+        
+      // Only update state if values have changed
+      if (hasChanged) {
+        setSpaces({
+          headerSpace: headerHeight,
+          bottomSpace: bottomHeight,
+          pinnedSpace: pinnedHeight,
+          tabsSpace: tabsHeight,
+          contentSpace: calculatedContentSpace,
+          measurementsComplete: true,
+        });
+      }
     };
 
-    // Create ResizeObserver
+    // Create ResizeObserver with RAF for efficiency
     const resizeObserver = new ResizeObserver(() => {
-      calculateSpaces();
+      // Cancel any pending frame to prevent excessive calculations
+      if (frameIdRef.current !== null) {
+        cancelAnimationFrame(frameIdRef.current);
+      }
+      // Schedule new calculation on next animation frame
+      frameIdRef.current = requestAnimationFrame(calculateSpaces);
     });
 
-    // Observe elements
-    if (headerRef.current) resizeObserver.observe(headerRef.current);
-    if (pinnedRef.current) resizeObserver.observe(pinnedRef.current);
-    if (tabsRef.current) resizeObserver.observe(tabsRef.current);
-    if (bottomRef.current) resizeObserver.observe(bottomRef.current);
+    // Handle window resize with debouncing via RAF
+    const handleResize = () => {
+      if (frameIdRef.current !== null) {
+        cancelAnimationFrame(frameIdRef.current);
+      }
+      frameIdRef.current = requestAnimationFrame(calculateSpaces);
+    };
 
-    // Also observe window resize
-    window.addEventListener("resize", calculateSpaces);
+    // Only set up observers and listeners when elements are ready
+    if (elementsReady.header || elementsReady.pinned || elementsReady.tabs || elementsReady.bottom) {
+      // Observe elements that are ready
+      if (headerRef.current) resizeObserver.observe(headerRef.current);
+      if (pinnedRef.current) resizeObserver.observe(pinnedRef.current);
+      if (tabsRef.current) resizeObserver.observe(tabsRef.current);
+      if (bottomRef.current) resizeObserver.observe(bottomRef.current);
 
-    // Initial calculation
-    calculateSpaces();
+      // Also observe window resize
+      window.addEventListener("resize", handleResize);
+
+      // Initial calculation using RAF for timing
+      frameIdRef.current = requestAnimationFrame(calculateSpaces);
+    }
 
     // Cleanup
     return () => {
+      if (frameIdRef.current !== null) {
+        cancelAnimationFrame(frameIdRef.current);
+      }
       resizeObserver.disconnect();
-      window.removeEventListener("resize", calculateSpaces);
+      window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [elementsReady, spaces]);
 
   // Create context value
   const contextValue: LayoutContextType = {

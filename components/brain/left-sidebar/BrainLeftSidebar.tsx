@@ -15,23 +15,21 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   activeWaveId,
 }) => {
   // Get content tab state from context
-  const { activeContentTab, setActiveContentTab, availableTabs } = useContentTab();
-  
+  const { activeContentTab, setActiveContentTab, availableTabs } =
+    useContentTab();
+
   // Access layout context for dynamic height calculation
   const { spaces } = useLayout();
-  
+
   // Instead of calculating height, we'll use flex properties to fill parent container
   const sidebarStyle = useMemo(() => {
     // Since parent container has proper height constraint,
     // We can rely on flex properties to fill available space
-    
+
     // Remove explicit height calculation
     // Use minHeight for safety but let parent container constrain
-    const minHeight = '100%';
-    
-    // Log for debugging
-    console.log('[BrainLeftSidebar] Using flex fill approach');
-    
+    const minHeight = "100%";
+
     return { minHeight };
   }, []);
 
@@ -45,14 +43,14 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
 
   // Generate options based on available tabs
   const contentFilterOptions = useMemo(() => {
-    return availableTabs.map(tab => ({
+    return availableTabs.map((tab) => ({
       key: tab,
-      label: tabLabels[tab]
+      label: tabLabels[tab],
     }));
   }, [availableTabs, tabLabels]);
 
   return (
-    <div 
+    <div
       className="tw-flex-shrink-0 tw-flex tw-flex-col tw-overflow-y-auto lg:tw-w-80 tw-w-full tw-h-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
       style={sidebarStyle}
     >

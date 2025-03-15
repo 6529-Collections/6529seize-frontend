@@ -44,13 +44,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     // Use flexbox display to create proper flow
     const display = 'flex';
     
-    // Log the measurements for debugging
-    console.log('[BrainDesktop] Container style:', {
-      headerSpace: spaces.headerSpace,
-      height,
-      display
-    });
-    
+   
     return { height, display };
   }, [spaces.measurementsComplete, spaces.headerSpace]);
 

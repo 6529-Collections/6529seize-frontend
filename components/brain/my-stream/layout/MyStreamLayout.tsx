@@ -36,12 +36,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       if (spacer && headerRef.current) {
         const headerHeight = headerRef.current.offsetHeight;
         spacer.style.height = `${headerHeight}px`;
-        
-        // Log header height for debugging
-        console.log('[MyStreamLayout] Updated header spacer height:', {
-          headerHeight,
-          spacerHeight: spacer.style.height
-        });
+    
       }
     };
     
