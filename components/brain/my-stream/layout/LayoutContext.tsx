@@ -626,8 +626,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
               // Observe with high priority for tabs
               resizeObserver.observe(tabsRef.current, { box: 'border-box' });
               
-              // Set up a mutation observer specifically for tabs
-              const tabsMutationObserver = new MutationObserver(() => {
+              // Set up a mutation observer specifically for tabs - this catches content changes
+              const tabsMutationObserver = new MutationObserver(() => {                
                 // Force recalculation when tab DOM changes
                 if (frameIdRef.current !== null) {
                   cancelAnimationFrame(frameIdRef.current);
@@ -644,7 +644,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
               });
               
               // Add to cleanup
-              resizeEventListeners.push(["tabsMutation", () => tabsMutationObserver.disconnect()]);
+              resizeEventListeners.push(
+                ["tabsMutation", () => tabsMutationObserver.disconnect()]
+              );
             } catch (e) {
               console.error("Error observing tabs element:", e);
             }
@@ -760,6 +762,39 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [elementsReady]); // Removed spaces dependency, retained error handling
 
+  // More focused monitoring for tab changes
+  useEffect(() => {
+    // If we don't have access to tab element yet, skip
+    if (!tabsRef.current) return;
+    
+    console.log("DEBUG: Setting up focused tab monitor");
+    
+    // Set up interval with moderate frequency (not too aggressive)
+    const tabCheckInterval = setInterval(() => {
+      if (tabsRef.current) {
+        const currentHeight = tabsRef.current.getBoundingClientRect().height;
+        
+        // Only trigger if we detect actual change from the last calculation
+        if (Math.abs(currentHeight - (spaces.tabsSpace || 0)) > 1) {
+          console.log("DEBUG: Tab height change detected in interval", { 
+            height: currentHeight,
+            prevHeight: spaces.tabsSpace
+          });
+          
+          if (frameIdRef.current !== null) {
+            cancelAnimationFrame(frameIdRef.current);
+          }
+          
+          frameIdRef.current = requestAnimationFrame(calculateSpaces);
+        }
+      }
+    }, 250); // Check every 250ms - fast enough for responsiveness, not too fast to waste resources
+    
+    return () => {
+      clearInterval(tabCheckInterval);
+    };
+  }, [calculateSpaces, spaces.tabsSpace]);
+
   // Effect for initialization and browser detection
   useEffect(() => {
     // Set mounted flag
@@ -823,6 +858,31 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, []);
 
+  // Setup persistent monitoring for tabs that survives component remounts
+  useEffect(() => {
+    // Don't run this effect until refs are ready
+    if (!tabsRef.current) return;
+    
+    console.log("DEBUG: Setting up persistent tab monitoring");
+    
+    // Create a polling interval that checks tab height regularly
+    const tabHeightInterval = setInterval(() => {
+      if (!tabsRef.current) return;
+      
+      const currentHeight = tabsRef.current.getBoundingClientRect().height;
+      console.log("DEBUG: Tab height poll", { height: currentHeight, time: new Date().toISOString() });
+      
+      // Force a layout calculation - this will run regardless of observer state
+      if (frameIdRef.current !== null) {
+        cancelAnimationFrame(frameIdRef.current);
+      }
+      frameIdRef.current = requestAnimationFrame(calculateSpaces);
+    }, 250); // Check every 250ms
+    
+    // Clean up on unmount
+    return () => clearInterval(tabHeightInterval);
+  }, [calculateSpaces]);
+  
   // Function to handle iOS Safari viewport inconsistencies
   const calibrateIOSViewport = useCallback(() => {
     if (!isMountedRef.current) return;
