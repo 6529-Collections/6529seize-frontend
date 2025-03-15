@@ -46,6 +46,13 @@ interface LayoutContextType {
 
   // Unregister a component
   unregisterHeightDependent: (id: string) => void;
+  
+  // Version number that increments when height measurements change
+  // Components can use this to detect when they should recalculate
+  measurementVersion: number;
+  
+  // Get list of registered height-dependent component IDs
+  getDependentComponents: () => Set<string>;
 }
 
 // Default context values
@@ -67,6 +74,8 @@ const LayoutContext = createContext<LayoutContextType>({
   bottomRef: { current: null },
   registerHeightDependent: () => {},
   unregisterHeightDependent: () => {},
+  measurementVersion: 0,
+  getDependentComponents: () => new Set<string>(),
 });
 
 // Provider component
@@ -86,6 +95,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   const [heightDependentComponents, setHeightDependentComponents] = useState<
     Set<string>
   >(new Set());
+  
+  // Version counter for measurement changes - increments when measurements change
+  const [measurementVersion, setMeasurementVersion] = useState(0);
 
   // Track element readiness for measurements
   const [elementsReady, setElementsReady] = useState({
@@ -103,6 +115,18 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   
   // Create an AbortController for reliable cancellation of async operations
   const abortControllerRef = useRef<AbortController>(new AbortController());
+  
+  // iOS Safari detection
+  const isIOSSafari = useRef(false);
+  
+  // iOS Safari viewport adjustment value - tracks the difference between visual and reported viewport
+  const iosViewportAdjustment = useRef(0);
+  
+  // Function to get the current height-dependent components
+  // Memoized to maintain stable identity
+  const getDependentComponents = useCallback(() => {
+    return heightDependentComponents;
+  }, [heightDependentComponents]);
 
   // Function to register a component that needs height
   // Memoize to maintain stable function identity across renders
@@ -197,6 +221,39 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       mutationObserver.disconnect();
     };
   }, [checkRefsReady]);
+  
+  // Notify height-dependent components when measurements change
+  useEffect(() => {
+    // Skip if no dependent components or measurements aren't complete
+    if (heightDependentComponents.size === 0 || !spaces.measurementsComplete) {
+      return;
+    }
+    
+    // If we have dependent components, dispatch a custom event that components can listen for
+    // This is a lightweight notification mechanism that doesn't require additional renders
+    if (isMountedRef.current && spaces.measurementsComplete) {
+      // Create a custom event with measurement data
+      const event = new CustomEvent('layout-measurements-changed', {
+        detail: {
+          spaces,
+          version: measurementVersion,
+          components: Array.from(heightDependentComponents)
+        },
+        bubbles: false
+      });
+      
+      // Dispatch on window so components can listen from anywhere
+      window.dispatchEvent(event);
+      
+      // Optional: Log for debugging in development
+      if (process.env.NODE_ENV === 'development') {
+        console.log(
+          `Layout measurements updated (v${measurementVersion}), ` +
+          `notifying ${heightDependentComponents.size} components`
+        );
+      }
+    }
+  }, [spaces, measurementVersion, heightDependentComponents]);
   
   // Add special handling for mobile virtual keyboards and other mobile-specific issues
   useEffect(() => {
@@ -329,8 +386,24 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     // Function to calculate spaces - uses functional state update to avoid space dependency
     const calculateSpaces = () => {
-      // Get viewport height
-      const viewportHeight = window.innerHeight;
+      // Get viewport height with iOS Safari adjustment if needed
+      let viewportHeight = window.innerHeight;
+      
+      // Apply iOS Safari viewport adjustment if detected
+      if (isIOSSafari.current) {
+        // Apply the calibrated adjustment - this accounts for the iOS Safari UI elements
+        viewportHeight -= iosViewportAdjustment.current;
+        
+        // Extra adjustment for iPhone in landscape mode where toolbar auto-hides
+        if (window.orientation !== undefined && Math.abs(window.orientation as number) === 90) {
+          // Check if likely in fullscreen mode (toolbar hidden) based on ratio
+          const aspectRatio = window.innerWidth / viewportHeight;
+          if (aspectRatio > 2) {
+            // Add small buffer for landscape fullscreen mode
+            viewportHeight -= 20;
+          }
+        }
+      }
 
       // Default values in case we can't measure
       let headerHeight = 0;
@@ -401,6 +474,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
             
           // Only update state if values have changed
           if (hasChanged) {
+            // Since measurements changed, increment the version counter
+            // This happens outside the state update to avoid multiple renders
+            if (isMountedRef.current) {
+              setMeasurementVersion(prev => prev + 1);
+            }
+            
             return {
               headerSpace: headerHeight,
               bottomSpace: bottomHeight,
@@ -613,28 +692,102 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [elementsReady]); // Removed spaces dependency, retained error handling
 
-  // Add effect for cleanup on unmount 
+  // Effect for initialization and browser detection
   useEffect(() => {
     // Set mounted flag
     isMountedRef.current = true;
     
-    // Return cleanup function - crucial for preventing race conditions
+    // Detect iOS Safari
+    const ua = window.navigator.userAgent;
+    const iOS = /iPad|iPhone|iPod/.test(ua) || 
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad OS 13+ detection
+    const isSafari = /Safari/.test(ua) && !/Chrome/.test(ua) && !/Firefox/.test(ua);
+    isIOSSafari.current = iOS && isSafari;
+    
+    // For iOS Safari, set up special viewport handling
+    if (isIOSSafari.current) {
+      // Initial calibration for iOS Safari viewport
+      calibrateIOSViewport();
+      
+      // Set up listeners specific to iOS Safari
+      window.addEventListener('orientationchange', calibrateIOSViewport);
+      window.addEventListener('resize', calibrateIOSViewport);
+      
+      // Check periodically for viewport changes on iOS
+      // This handles cases where the toolbar/address bar appears/disappears
+      const iosIntervalId = setInterval(calibrateIOSViewport, 500);
+      
+      // Return cleanup that includes iOS specific cleanup
+      return () => {
+        // Mark component as unmounted
+        isMountedRef.current = false;
+        
+        // Abort any pending async operations
+        abortControllerRef.current.abort();
+        
+        // Create a new AbortController for next mount
+        abortControllerRef.current = new AbortController();
+        
+        // Cancel any pending animation frames
+        if (frameIdRef.current !== null) {
+          cancelAnimationFrame(frameIdRef.current);
+          frameIdRef.current = null;
+        }
+        
+        // Clean up iOS Safari specific handlers
+        window.removeEventListener('orientationchange', calibrateIOSViewport);
+        window.removeEventListener('resize', calibrateIOSViewport);
+        clearInterval(iosIntervalId);
+      };
+    }
+    
+    // Regular cleanup for non-iOS browsers
     return () => {
-      // Mark component as unmounted
       isMountedRef.current = false;
-      
-      // Abort any pending async operations
       abortControllerRef.current.abort();
-      
-      // Create a new AbortController for next mount (just in case of React 18 strict mode remounts)
       abortControllerRef.current = new AbortController();
-      
-      // Cancel any pending animation frames one final time
       if (frameIdRef.current !== null) {
         cancelAnimationFrame(frameIdRef.current);
         frameIdRef.current = null;
       }
     };
+  }, []);
+  
+  // Function to handle iOS Safari viewport inconsistencies
+  const calibrateIOSViewport = useCallback(() => {
+    if (!isMountedRef.current) return;
+    
+    // Create a test element to measure the true visible viewport
+    // This technique avoids the iOS Safari viewport reporting issues
+    const testElement = document.createElement('div');
+    testElement.style.position = 'fixed';
+    testElement.style.height = '100vh';
+    testElement.style.width = '0';
+    testElement.style.top = '0';
+    
+    // Add to DOM temporarily
+    document.documentElement.appendChild(testElement);
+    
+    // Get the actual visible height vs what iOS Safari reports
+    const realViewportHeight = testElement.getBoundingClientRect().height;
+    const reportedHeight = window.innerHeight;
+    
+    // Calculate the adjustment needed
+    const adjustment = reportedHeight - realViewportHeight;
+    
+    // Only update if the adjustment changed significantly
+    if (Math.abs(adjustment - iosViewportAdjustment.current) > 20) {
+      iosViewportAdjustment.current = adjustment;
+      
+      // Trigger a recalculation with the new adjustment
+      if (frameIdRef.current !== null) {
+        cancelAnimationFrame(frameIdRef.current);
+      }
+      frameIdRef.current = requestAnimationFrame(calculateSpaces);
+    }
+    
+    // Remove test element
+    document.documentElement.removeChild(testElement);
   }, []);
 
   // Create context value
@@ -646,6 +799,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     bottomRef,
     registerHeightDependent,
     unregisterHeightDependent,
+    measurementVersion,
+    getDependentComponents,
   };
 
   return (
