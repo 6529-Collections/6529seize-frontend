@@ -78,9 +78,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     componentId: `wave-chat-${wave.id}`,
   });
 
-  useEffect(() => {
-    console.log("heightStyle", heightStyle);
-  }, [heightStyle]);
 
   // Create container class based on wave type
   const containerClassName = useMemo(() => {
