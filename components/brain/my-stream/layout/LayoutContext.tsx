@@ -621,31 +621,77 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
             }
           }
 
+          // For tabs, we need a more reliable observation strategy
+          // because React reconciliation can break ResizeObserver connections
           if (tabsRef.current) {
             try {
-              // Observe with high priority for tabs
+              // 1. Use the shared ResizeObserver as a baseline
               resizeObserver.observe(tabsRef.current, { box: 'border-box' });
               
-              // Set up a mutation observer specifically for tabs - this catches content changes
+              // 2. Set up a deep mutation observer that catches ANY content or attribute changes
               const tabsMutationObserver = new MutationObserver(() => {                
-                // Force recalculation when tab DOM changes
-                if (frameIdRef.current !== null) {
-                  cancelAnimationFrame(frameIdRef.current);
-                }
-                frameIdRef.current = requestAnimationFrame(calculateSpaces);
+                // Delay calculation slightly to ensure DOM has settled
+                setTimeout(() => {
+                  if (frameIdRef.current !== null) {
+                    cancelAnimationFrame(frameIdRef.current);
+                  }
+                  frameIdRef.current = requestAnimationFrame(calculateSpaces);
+                }, 0);
               });
               
-              // Watch for tab content changes 
+              // Watch for tab content changes - include everything possible
               tabsMutationObserver.observe(tabsRef.current, { 
                 attributes: true,
                 childList: true, 
                 subtree: true,
-                characterData: true
+                characterData: true,
+                attributeOldValue: true
               });
               
-              // Add to cleanup
+              // 3. Set up DOM attribute observation for the specific element
+              // This observer focuses on attributes that might affect height
+              const tabsAttributeObserver = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                  // Check if the mutation is relevant to layout
+                  if (
+                    mutation.type === 'attributes' && 
+                    (mutation.attributeName === 'style' || 
+                     mutation.attributeName === 'class' ||
+                     mutation.attributeName === 'hidden')
+                  ) {
+                    if (frameIdRef.current !== null) {
+                      cancelAnimationFrame(frameIdRef.current);
+                    }
+                    frameIdRef.current = requestAnimationFrame(calculateSpaces);
+                    break;
+                  }
+                }
+              });
+              
+              // Watch the specific element for attribute changes
+              tabsAttributeObserver.observe(tabsRef.current, { 
+                attributes: true,
+                attributeFilter: ['style', 'class', 'hidden']
+              });
+              
+              // 4. Create a parent observer that handles the case where the entire 
+              // tabs container is affected by parent layout changes
+              if (tabsRef.current.parentElement) {
+                const parentObserver = new ResizeObserver(() => {
+                  if (frameIdRef.current !== null) {
+                    cancelAnimationFrame(frameIdRef.current);
+                  }
+                  frameIdRef.current = requestAnimationFrame(calculateSpaces);
+                });
+                
+                parentObserver.observe(tabsRef.current.parentElement);
+                resizeEventListeners.push(["tabsParent", () => parentObserver.disconnect()]);
+              }
+              
+              // Add all observers to cleanup
               resizeEventListeners.push(
-                ["tabsMutation", () => tabsMutationObserver.disconnect()]
+                ["tabsMutation", () => tabsMutationObserver.disconnect()],
+                ["tabsAttribute", () => tabsAttributeObserver.disconnect()]
               );
             } catch (e) {
               console.error("Error observing tabs element:", e);
@@ -762,38 +808,29 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [elementsReady]); // Removed spaces dependency, retained error handling
 
-  // More focused monitoring for tab changes
+  // Use a React-focused approach to handle component lifecycle issues
   useEffect(() => {
-    // If we don't have access to tab element yet, skip
+    // Return if no tabs element
     if (!tabsRef.current) return;
     
-    console.log("DEBUG: Setting up focused tab monitor");
-    
-    // Set up interval with moderate frequency (not too aggressive)
-    const tabCheckInterval = setInterval(() => {
-      if (tabsRef.current) {
-        const currentHeight = tabsRef.current.getBoundingClientRect().height;
-        
-        // Only trigger if we detect actual change from the last calculation
-        if (Math.abs(currentHeight - (spaces.tabsSpace || 0)) > 1) {
-          console.log("DEBUG: Tab height change detected in interval", { 
-            height: currentHeight,
-            prevHeight: spaces.tabsSpace
-          });
-          
-          if (frameIdRef.current !== null) {
-            cancelAnimationFrame(frameIdRef.current);
-          }
-          
-          frameIdRef.current = requestAnimationFrame(calculateSpaces);
-        }
+    // Create a ResizeObserver that's dedicated to this effect
+    // This ensures it's recreated properly when React updates components
+    const dedicatedTabsObserver = new ResizeObserver((entries) => {
+      // Force immediate recalculation when tab size changes
+      if (frameIdRef.current !== null) {
+        cancelAnimationFrame(frameIdRef.current);
       }
-    }, 250); // Check every 250ms - fast enough for responsiveness, not too fast to waste resources
+      frameIdRef.current = requestAnimationFrame(calculateSpaces);
+    });
     
+    // Ensure we're observing the current tab element
+    dedicatedTabsObserver.observe(tabsRef.current, { box: 'border-box' });
+    
+    // Clean up this observer when the effect runs again or unmounts
     return () => {
-      clearInterval(tabCheckInterval);
+      dedicatedTabsObserver.disconnect();
     };
-  }, [calculateSpaces, spaces.tabsSpace]);
+  }, [calculateSpaces, tabsRef.current]); // Recreate when tabsRef.current changes
 
   // Effect for initialization and browser detection
   useEffect(() => {
