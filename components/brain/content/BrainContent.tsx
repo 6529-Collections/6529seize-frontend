@@ -21,7 +21,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
       {showPinnedWaves && (
-        <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+        <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-mt-4">
           <BrainContentPinnedWaves />
         </div>
       )}

@@ -7,7 +7,6 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import useCapacitor from "../../../hooks/useCapacitor";
 import { WaveLeaderboardSortType } from "../../waves/leaderboard/WaveLeaderboard";
 import { WaveLeaderboardTime } from "../../waves/leaderboard/WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "../../waves/leaderboard/header/WaveleaderboardHeader";
@@ -16,6 +15,7 @@ import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderbo
 import { useWave } from "../../../hooks/useWave";
 import PrimaryButton from "../../utils/button/PrimaryButton";
 import MemesArtSubmission from "../../waves/memes/MemesArtSubmission";
+import { WaveView, useWaveViewHeight } from "../../../hooks/useWaveViewHeight";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -23,36 +23,24 @@ interface MyStreamWaveLeaderboardProps {
   readonly setSubmittingArtFromParent?: boolean;
 }
 
-const calculateHeight = (isCapacitor: boolean, isMemesWave: boolean) => {
-  if (isCapacitor) {
-    return isMemesWave 
-      ? "tw-h-[calc(100vh-21rem)]"  // More space for Memes wave header
-      : "tw-h-[calc(100vh-18rem)]";
-  }
-  
-  if (isMemesWave) {
-    // Account for the title and button in Memes waves
-    return `tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-13rem)] min-[1200px]:tw-h-[calc(100vh-15.5rem)]`;
-  }
-  
-  // Original heights for non-Memes waves
-  return `tw-h-[calc(100vh-9rem)] min-[1200px]:tw-h-[calc(100vh-9.5rem)] lg:tw-pr-2`;
-};
+// Removed in favor of useWaveViewHeight hook
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
   setSubmittingArtFromParent,
 }) => {
-  const capacitor = useCapacitor();
   const { hasFirstDecisionPassed } = useWaveState(wave);
   const { isMemesWave } = useWave(wave);
+  
+  // Use the hook to calculate height
+  const viewHeight = useWaveViewHeight(WaveView.LEADERBOARD, {
+    isMemesWave
+  });
+  
   const containerClassName = useMemo(() => {
-    return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${calculateHeight(
-      capacitor.isCapacitor,
-      isMemesWave
-    )}`;
-  }, [capacitor.isCapacitor, isMemesWave]);
+    return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${viewHeight} lg:tw-pr-2`;
+  }, [viewHeight]);
 
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
     WaveLeaderboardSortType.RANK

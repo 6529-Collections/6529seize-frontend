@@ -84,11 +84,20 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const isMemesWave =
     wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
 
+  // Check if this is a simple wave (no decision points, not rolling, not memes)
+  const hasDecisionPoints = !!wave.wave.decisions_strategy?.first_decision_time;
+  const hasMultipleDecisions = 
+    !!wave.wave.decisions_strategy?.subsequent_decisions && 
+    wave.wave.decisions_strategy.subsequent_decisions.length > 0;
+  const isRollingWave = !!wave.wave.decisions_strategy?.is_rolling;
+  const isSimpleWave = !hasDecisionPoints && !hasMultipleDecisions && !isRollingWave && !isMemesWave;
+
   return (
     <div className="tw-relative">
-      {breakpoint !== "S" && (
+      {/* Don't render tab container at all for simple waves */}
+      {breakpoint !== "S" && !isSimpleWave && (
         <div>
-          <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-w-full tw-mb-2">
+          <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-w-full">
             {/* Combined row with tabs, title, and action button */}
             <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-3">
               <div>
@@ -103,7 +112,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
               {/* Right side: Tabs and action button for memes wave */}
               {isMemesWave && (
-                <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-4">
+                <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-4 tw-mb-2">
                   <MyStreamWaveDesktopTabs
                     activeTab={activeContentTab}
                     wave={wave}

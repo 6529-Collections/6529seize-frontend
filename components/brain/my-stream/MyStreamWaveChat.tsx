@@ -1,5 +1,4 @@
 import React, { useMemo, useState, useEffect } from "react";
-import useCapacitor from "../../../hooks/useCapacitor";
 import {
   ActiveDropAction,
   ActiveDropState,
@@ -13,37 +12,15 @@ import PrivilegedDropCreator, {
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
+import { WaveView, useWaveViewHeight } from "../../../hooks/useWaveViewHeight";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
 
-// Height calculations based on wave type and viewport size
-const calculateHeight = (isCapacitor: boolean, isMemesWave: boolean, isSimpleWave: boolean) => {
-  if (isCapacitor) {
-    return isMemesWave 
-      ? "tw-h-[calc(100vh-21rem)]"  // More space for Memes wave header
-      : "tw-h-[calc(100vh-18rem)]";
-  }
-  
-  if (isMemesWave) {
-    // Values for memes wave with title + tabs + submit button
-    return `tw-h-[calc(100vh-11.5rem)] lg:tw-h-[calc(100vh-11.875rem)] min-[1200px]:tw-h-[calc(100vh-12.875rem)]`;
-  }
-  
-  if (isSimpleWave) {
-    // Heights for simple waves without tabs - more vertical space
-    return `tw-h-[calc(100vh-11.5rem)] lg:tw-h-[calc(100vh-8.75rem)] min-[1200px]:tw-h-[calc(100vh-9.5rem)]`;
-  }
-  
-  // Heights for standard waves with tabs
-  return `tw-h-[calc(100vh-11.5rem)] lg:tw-h-[calc(100vh-10.625rem)] min-[1200px]:tw-h-[calc(100vh-11.375rem)]`;
-};
-
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   wave
 }) => {
-  const capacitor = useCapacitor();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
@@ -80,14 +57,18 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   // Simple waves shouldn't show tabs at all
   const isSimpleWave = !hasDecisionPoints && !hasMultipleDecisions && !isRollingWave && !isMemesWave;
   
+  // Use the new hook to calculate height
+  const viewHeight = useWaveViewHeight(WaveView.CHAT, {
+    isMemesWave,
+    isSimpleWave
+  });
+  
   const containerClassName = useMemo(() => {
     // Ensure the container is always scrollable and has scroll shadows
-    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow ${calculateHeight(
-      capacitor.isCapacitor,
-      isMemesWave,
-      isSimpleWave
-    )}`;
-  }, [capacitor.isCapacitor, isMemesWave, isSimpleWave]);
+    // Add margin-bottom for simple waves to eliminate blank space
+    const marginClass = isSimpleWave ? 'tw-mb-8' : '';
+    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow ${viewHeight} ${marginClass}`;
+  }, [viewHeight, isSimpleWave]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);

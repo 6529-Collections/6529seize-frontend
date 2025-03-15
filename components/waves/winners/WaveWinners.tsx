@@ -7,6 +7,7 @@ import { WaveWinnersTimeline } from "./WaveWinnersTimeline";
 import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
+import { WaveView, useWaveViewHeight } from "../../../hooks/useWaveViewHeight";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;
@@ -18,6 +19,14 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   onDropClick,
 }) => {
   const { isMultiDecisionWave } = useDecisionPoints(wave);
+  
+  // Check if this is the Memes wave
+  const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+  
+  // Use the hook to calculate height
+  const viewHeight = useWaveViewHeight(WaveView.WINNERS, {
+    isMemesWave
+  });
 
   // Fetch data using decisions endpoint for all waves
   const { decisionPoints: decisionPoints, isFetching: isDecisionsLoading } =
@@ -40,12 +49,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           />
         )
       ) : (
-        <div className={`tw-space-y-2 tw-mt-2 tw-pb-4 tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 ${
-          // Check if this is the Memes wave and adjust height accordingly
-          wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58"
-            ? "tw-h-[calc(100vh-15rem)] lg:tw-h-[calc(100vh-13rem)] min-[1200px]:tw-h-[calc(100vh-15.5rem)]"
-            : "tw-h-[calc(100vh-9.5rem)] min-[1200px]:tw-h-[calc(100vh-10rem)]"
-        }`}>
+        <div className={`tw-space-y-2 tw-mt-2 tw-pb-4 tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 ${viewHeight}`}>
           <WaveWinnersPodium
             onDropClick={onDropClick}
             winners={decisionPoints[0]?.winners || []}
