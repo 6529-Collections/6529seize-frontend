@@ -100,14 +100,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
           </div>
         </div>
 
-        {/* Create a spacer div to offset the sticky header */}
-        {/* Use default height of 102px to prevent layout shift during loading */}
-        <div id="header-spacer" style={{
-          height: headerRef.current ? headerRef.current.offsetHeight + 'px' : '102px',
-          width: '100%',
-          transition: 'height 0.15s ease-out' // Smooth transition for any height adjustment
-        }} />
-
         {/* Main content with proper spacing */}
         {showWaves && (
           <div className="tw-flex-1" id="my-stream-content">

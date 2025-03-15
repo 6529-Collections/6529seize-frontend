@@ -5,11 +5,13 @@ import { ContentView, useContentHeight } from "../../../hooks/useContentHeight";
 
 interface MyStreamWaveOutcomeProps {
   readonly wave: ApiWave;
+  // Stable measurements from parent
+  readonly tabsHeight?: number;
 }
 
 // Removed in favor of useWaveViewHeight hook
 
-const MyStreamWaveOutcome: React.FC<MyStreamWaveOutcomeProps> = ({ wave }) => {
+const MyStreamWaveOutcome: React.FC<MyStreamWaveOutcomeProps> = ({ wave, tabsHeight }) => {
   // Check if this is the specific Memes wave
   const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
   

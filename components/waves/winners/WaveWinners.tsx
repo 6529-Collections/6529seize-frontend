@@ -12,11 +12,14 @@ import { ContentView, useContentHeight } from "../../../hooks/useContentHeight";
 interface WaveWinnersProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  // Stable measurements from parent
+  readonly tabsHeight?: number;
 }
 
 export const WaveWinners: React.FC<WaveWinnersProps> = ({
   wave,
   onDropClick,
+  tabsHeight,
 }) => {
   const { isMultiDecisionWave } = useDecisionPoints(wave);
   

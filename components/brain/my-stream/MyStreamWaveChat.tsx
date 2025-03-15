@@ -12,16 +12,16 @@ import PrivilegedDropCreator, {
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
-// We're now using only the dynamic height calculation
-import { ContentView, useContentHeight } from "../../../hooks/useContentHeight";
 import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
-  // New explicit props for wave types to avoid duplicate logic
+  // Wave type props
   readonly isMemesWave?: boolean;
   readonly isRollingWave?: boolean;
   readonly isSimpleWave?: boolean;
+  // Stable measurements from parent
+  readonly tabsHeight?: number;
 }
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
@@ -29,12 +29,21 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   isMemesWave: propsIsMemesWave,
   isRollingWave: propsIsRollingWave,
   isSimpleWave: propsIsSimpleWave,
+  tabsHeight,
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const [searchParamsDone, setSearchParamsDone] = useState(false);
+  
+  // Track mount status
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // Handle URL parameters
   useEffect(() => {
@@ -81,25 +90,36 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     const heightClass = "tw-flex-grow";
 
     return `${baseStyles} ${heightClass}`;
-  }, [isSimpleWave]);
+  }, []);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);
 
+  // Log when stable tabsHeight value is received
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && tabsHeight !== undefined) {
+      console.log(`[MyStreamWaveChat] Received stable tabs height: ${tabsHeight}px for wave ${wave.id}`);
+    }
+  }, [tabsHeight, wave.id]);
+
   const onReply = (drop: ApiDrop, partId: number) => {
-    setActiveDrop({
-      action: ActiveDropAction.REPLY,
-      drop,
-      partId,
-    });
+    if (mountedRef.current) {
+      setActiveDrop({
+        action: ActiveDropAction.REPLY,
+        drop,
+        partId,
+      });
+    }
   };
 
   const onQuote = (drop: ApiDrop, partId: number) => {
-    setActiveDrop({
-      action: ActiveDropAction.QUOTE,
-      drop,
-      partId,
-    });
+    if (mountedRef.current) {
+      setActiveDrop({
+        action: ActiveDropAction.QUOTE,
+        drop,
+        partId,
+      });
+    }
   };
 
   const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
@@ -111,18 +131,33 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   };
 
   const onCancelReplyQuote = () => {
-    setActiveDrop(null);
+    if (mountedRef.current) {
+      setActiveDrop(null);
+    }
   };
 
   if (!searchParamsDone) {
     return null;
   }
 
+  // Calculate height styles - prefer tabs-based subtraction when available
+  const heightStyle = tabsHeight !== undefined 
+    ? { 
+        height: `calc(100% - ${tabsHeight}px)`,
+        maxHeight: `calc(100% - ${tabsHeight}px)`
+      }
+    : spaces.measurementsComplete 
+      ? { 
+          height: spaces.contentSpace, 
+          maxHeight: spaces.contentSpace 
+        }
+      : {};
+
   return (
     <div
       ref={containerRef}
-      className={`wave-chat-container ${containerClassName}`}
-      style={{ height: spaces.contentSpace, maxHeight: spaces.contentSpace }}
+      className={`${containerClassName}`}
+      style={heightStyle}
       data-wave-type={
         isRollingWave
           ? "rolling"
@@ -132,6 +167,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           ? "simple"
           : "standard"
       }
+      data-tabs-height={tabsHeight}
     >
       <WaveDropsAll
         key={wave.id}

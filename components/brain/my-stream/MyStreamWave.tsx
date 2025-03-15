@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useContentTab } from "../ContentTabContext";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
@@ -14,6 +14,7 @@ import { MyStreamWaveTab } from "../../../types/waves.types";
 import { useWaveState } from "../../../hooks/useWaveState";
 import PrimaryButton from "../../utils/button/PrimaryButton";
 import { useLayout } from "./layout/LayoutContext";
+import { useLayoutStabilizer } from "../../../hooks/useLayoutStabilizer";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -26,15 +27,58 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
   const { tabsRef } = useLayout();
+  
+  // Track mount status to prevent post-unmount updates
+  const mountedRef = useRef(true);
+  
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // Get wave state information
   const { votingState, hasFirstDecisionPassed, isRollingWave } = useWaveState(
     wave || undefined
   );
-
+  
+  // Create a stable key for proper remounting
+  const stableWaveKey = `wave-${waveId}`;
+  
+  // Get the active tab and utilities from global context
+  const { activeContentTab, setActiveContentTab, updateAvailableTabs } =
+    useContentTab();
+  
+  // Measurement function that gets the tabs height
+  const measureTabsHeight = useCallback(() => {
+    if (tabsRef.current) {
+      try {
+        const height = tabsRef.current.getBoundingClientRect().height;
+        return height > 0 ? height : null;
+      } catch (e) {
+        console.error("[MyStreamWave] Error measuring tabs height:", e);
+        return null;
+      }
+    }
+    return null;
+  }, [tabsRef]);
+  
   // State to trigger art submission from the parent component
   const [triggerArtSubmission, setTriggerArtSubmission] = useState(false);
 
+  // Update available tabs when wave changes
+  useEffect(() => {
+    updateAvailableTabs(wave, votingState, hasFirstDecisionPassed);
+  }, [wave, votingState, hasFirstDecisionPassed, updateAvailableTabs]);
+
+  // Always switch to Chat for Chat-type waves
+  useEffect(() => {
+    if (wave?.wave?.type === ApiWaveType.Chat) {
+      setActiveContentTab(MyStreamWaveTab.CHAT);
+    }
+  }, [wave?.wave?.type, setActiveContentTab]);
+  
+  // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
     const currentQuery = { ...router.query };
     currentQuery.drop = drop.id;
@@ -48,38 +92,60 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     );
   };
 
-  // Get the active tab and utilities from global context
-  const { activeContentTab, setActiveContentTab, updateAvailableTabs } =
-    useContentTab();
-
-  // Update available tabs when wave changes
-  useEffect(() => {
-    updateAvailableTabs(wave, votingState, hasFirstDecisionPassed);
-  }, [wave, votingState, hasFirstDecisionPassed, updateAvailableTabs]);
-
-  // Always switch to Chat for Chat-type waves
-  useEffect(() => {
-    if (wave?.wave.type === ApiWaveType.Chat) {
-      setActiveContentTab(MyStreamWaveTab.CHAT);
-    }
-  }, [wave?.wave.type, setActiveContentTab]);
-
+  // Early return if no wave data
   if (!wave) {
     return null;
   }
 
-  // Check if this is the specific Memes wave
-  const isMemesWave =
-    wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
-
-  // Check if this is a simple wave (no decision points, not rolling, not memes)
-  const hasDecisionPoints = !!wave.wave.decisions_strategy?.first_decision_time;
-  const hasMultipleDecisions = 
-    !!wave.wave.decisions_strategy?.subsequent_decisions && 
-    wave.wave.decisions_strategy.subsequent_decisions.length > 0;
+  // Wave type checks - done once, after we know wave exists
+  const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+  const hasDecisionPoints = Boolean(wave.wave.decisions_strategy?.first_decision_time);
+  const hasMultipleDecisions = Boolean(
+    wave.wave.decisions_strategy?.subsequent_decisions && 
+    wave.wave.decisions_strategy.subsequent_decisions.length > 0
+  );
   const isSimpleWave = !hasDecisionPoints && !hasMultipleDecisions && !isRollingWave && !isMemesWave;
+  
+  // Use the layout stabilizer to get stable measurements
+  // This needs to have access to isMemesWave, isSimpleWave, and activeContentTab
+  const { 
+    height: stableTabsHeight, 
+    stable: isMeasurementStable,
+    forceUpdate: forceTabMeasurementUpdate
+  } = useLayoutStabilizer({
+    measureFn: measureTabsHeight,
+    deps: [waveId, wave.id, isRollingWave, isMemesWave, isSimpleWave, activeContentTab], 
+    defaultHeight: 56, // Default tabs height
+    debug: process.env.NODE_ENV === 'development',
+  });
+  
+  // Force layout recalculation when tab changes
+  useEffect(() => {
+    if (tabsRef.current) {
+      // Give the DOM time to update
+      const timerId = setTimeout(() => {
+        if (mountedRef.current) {
+          forceTabMeasurementUpdate();
+        }
+      }, 50);
+      
+      return () => clearTimeout(timerId);
+    }
+  }, [activeContentTab, tabsRef, forceTabMeasurementUpdate]);
+  
+  // Log stabilized measurements in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && isMeasurementStable) {
+      console.log(`[MyStreamWave] Stable measurements for wave ${waveId}:`, {
+        tabsHeight: stableTabsHeight,
+        isSimpleWave,
+        activeTab: activeContentTab,
+        isMemesWave,
+      });
+    }
+  }, [isMeasurementStable, stableTabsHeight, waveId, isSimpleWave, activeContentTab, isMemesWave]);
 
-  // Create component instances with wave-specific props
+  // Create component instances with wave-specific props and stable measurements
   const components: Record<MyStreamWaveTab, JSX.Element> = {
     [MyStreamWaveTab.CHAT]: (
       <MyStreamWaveChat 
@@ -87,6 +153,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         isRollingWave={isRollingWave}
         isMemesWave={isMemesWave}
         isSimpleWave={isSimpleWave}
+        // Pass stable tabs height for consistent layout
+        tabsHeight={isMeasurementStable ? stableTabsHeight : undefined}
       />
     ),
     [MyStreamWaveTab.LEADERBOARD]: (
@@ -94,17 +162,30 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         wave={wave}
         onDropClick={onDropClick}
         setSubmittingArtFromParent={triggerArtSubmission}
+        // Pass stable tabs height for consistent layout
+        tabsHeight={isMeasurementStable ? stableTabsHeight : undefined}
       />
     ),
     [MyStreamWaveTab.WINNERS]: (
-      <WaveWinners wave={wave} onDropClick={onDropClick} />
+      <WaveWinners 
+        wave={wave} 
+        onDropClick={onDropClick}
+        // Pass stable tabs height for consistent layout
+        tabsHeight={isMeasurementStable ? stableTabsHeight : undefined}
+      />
     ),
-    [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
+    [MyStreamWaveTab.OUTCOME]: (
+      <MyStreamWaveOutcome 
+        wave={wave}
+        // Pass stable tabs height for consistent layout
+        tabsHeight={isMeasurementStable ? stableTabsHeight : undefined}
+      />
+    ),
   };
 
   return (
-    <div className="tw-relative tw-flex tw-flex-col tw-h-full">
-      {/* Don't render tab container at all for simple waves */}
+    <div className="tw-relative tw-flex tw-flex-col tw-h-full" key={stableWaveKey}>
+      {/* Don't render tab container for simple waves */}
       {breakpoint !== "S" && !isSimpleWave && (
         <div className="tw-flex-shrink-0" ref={tabsRef} id="tabs-container">
           <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-w-full">
@@ -140,7 +221,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
                         // Reset trigger after a delay to allow it to be triggered again later
                         setTimeout(() => {
-                          setTriggerArtSubmission(false);
+                          if (mountedRef.current) {
+                            setTriggerArtSubmission(false);
+                          }
                         }, 500);
                       }}
                     >
@@ -152,6 +235,16 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* Add a spacer for simple waves to ensure content consistency */}
+      {isSimpleWave && isMeasurementStable && (
+        <div 
+          className="tw-flex-shrink-0" 
+          style={{ height: `${stableTabsHeight}px` }}
+          aria-hidden="true"
+          data-testid="simple-wave-spacer"
+        />
       )}
       
       {/* Use flex-grow to allow content to take remaining space */}
