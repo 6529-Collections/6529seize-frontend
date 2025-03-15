@@ -15,7 +15,7 @@ import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderbo
 import { useWave } from "../../../hooks/useWave";
 import PrimaryButton from "../../utils/button/PrimaryButton";
 import MemesArtSubmission from "../../waves/memes/MemesArtSubmission";
-import { WaveView, useWaveViewHeight } from "../../../hooks/useWaveViewHeight";
+import { ContentView, useContentHeight } from "../../../hooks/useContentHeight";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -33,14 +33,16 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const { hasFirstDecisionPassed } = useWaveState(wave);
   const { isMemesWave } = useWave(wave);
   
-  // Use the hook to calculate height
-  const viewHeight = useWaveViewHeight(WaveView.LEADERBOARD, {
-    isMemesWave
+  // Use the content height hook
+  const { heightStyle, ready } = useContentHeight({
+    view: ContentView.LEADERBOARD,
+    isMemesWave,
+    componentId: `wave-leaderboard-${wave.id}`
   });
   
   const containerClassName = useMemo(() => {
-    return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${viewHeight} lg:tw-pr-2`;
-  }, [viewHeight]);
+    return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow lg:tw-pr-2`;
+  }, []);
 
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
     WaveLeaderboardSortType.RANK
@@ -70,7 +72,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   };
 
   return (
-    <div className={containerClassName}>
+    <div className={containerClassName} style={heightStyle}>
       {/* Main content container */}
       <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
         {/* Title and button now moved to parent component */}

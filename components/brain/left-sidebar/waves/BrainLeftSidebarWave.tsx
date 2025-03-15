@@ -39,6 +39,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     resetWaveCount(wave.id);
+    // Navigate to the new wave
     router.push(getHref(wave.id), undefined, { shallow: true });
   };
 

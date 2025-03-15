@@ -2,6 +2,7 @@ import React from "react";
 import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
+import { useLayout } from "../my-stream/layout/LayoutContext";
 
 interface BrainContentProps {
   readonly children: React.ReactNode;
@@ -18,17 +19,26 @@ const BrainContent: React.FC<BrainContentProps> = ({
   onCancelReplyQuote,
   waveId,
 }) => {
+  // Get layout context references for measuring
+  const { pinnedRef, bottomRef } = useLayout();
+
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
       {showPinnedWaves && (
-        <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-mt-4">
+        <div 
+          ref={pinnedRef}
+          className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
+        >
           <BrainContentPinnedWaves />
         </div>
       )}
-      <div className="tw-flex-1 tw-overflow-hidden tw-h-full">
+      <div className="tw-flex-1 tw-overflow-hidden">
         <div className="tw-h-full">{children}</div>
       </div>
-      <div className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+      <div 
+        ref={bottomRef}
+        className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
+      >
         <BrainContentInput
           activeDrop={activeDrop}
           onCancelReplyQuote={onCancelReplyQuote}

@@ -110,10 +110,16 @@ const MyStreamWrapper: React.FC = () => {
     };
   }, [haveNewItems]);
 
+  // Add a key prop based on wave ID to force component remount on wave change
+  // This breaks the update cycle and ensures clean state when navigating between waves
   const component = serialisedWaveId ? (
-    <MyStreamWave waveId={serialisedWaveId} />
+    <MyStreamWave 
+      key={`wave-${serialisedWaveId}`} 
+      waveId={serialisedWaveId} 
+    />
   ) : (
     <MyStream
+      key="my-stream-feed"
       onReply={onReply}
       onQuote={onQuote}
       onDropContentClick={onDropContentClick}

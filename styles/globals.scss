@@ -591,3 +591,45 @@ pre code {
     overflow-wrap: normal !important;
   }
 }
+
+/* Dynamic height fixes for wave chat container */
+.wave-chat-container {
+  /* Ensure scrolling works properly */
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  
+  /* Make sure height is respected */
+  flex-grow: 1 !important;
+  flex-shrink: 1 !important;
+  position: relative !important;
+  
+  /* Set min-height to prevent collapse */
+  min-height: 400px !important;
+  
+  /* Set max-height to prevent overflow */
+  max-height: calc(100vh - 170px) !important;
+  
+  /* Wave type specific styles */
+  &[data-wave-type="rolling"] {
+    min-height: 500px !important;
+    max-height: calc(100vh - 140px) !important;
+  }
+  
+  &[data-wave-type="memes"] {
+    min-height: 500px !important;
+    max-height: calc(100vh - 140px) !important;
+  }
+  
+  /* Ensure scrolling shadows work with flex layout */
+  &.scroll-shadow {
+    background-attachment: local, local, scroll, scroll !important;
+  }
+  
+  /* Ensure content is always visible */
+  .tw-mt-auto {
+    position: sticky !important;
+    bottom: 0 !important;
+    background-color: #000 !important;
+    z-index: 10 !important;
+  }
+}

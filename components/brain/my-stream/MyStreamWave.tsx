@@ -26,7 +26,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { data: wave } = useWaveData(waveId);
 
   // Get wave state information
-  const { votingState, hasFirstDecisionPassed } = useWaveState(
+  const { votingState, hasFirstDecisionPassed, isRollingWave } = useWaveState(
     wave || undefined
   );
 
@@ -66,8 +66,27 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     return null;
   }
 
+  // Check if this is the specific Memes wave
+  const isMemesWave =
+    wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+
+  // Check if this is a simple wave (no decision points, not rolling, not memes)
+  const hasDecisionPoints = !!wave.wave.decisions_strategy?.first_decision_time;
+  const hasMultipleDecisions = 
+    !!wave.wave.decisions_strategy?.subsequent_decisions && 
+    wave.wave.decisions_strategy.subsequent_decisions.length > 0;
+  const isSimpleWave = !hasDecisionPoints && !hasMultipleDecisions && !isRollingWave && !isMemesWave;
+
+  // Create component instances with wave-specific props
   const components: Record<MyStreamWaveTab, JSX.Element> = {
-    [MyStreamWaveTab.CHAT]: <MyStreamWaveChat wave={wave} />,
+    [MyStreamWaveTab.CHAT]: (
+      <MyStreamWaveChat 
+        wave={wave} 
+        isRollingWave={isRollingWave}
+        isMemesWave={isMemesWave}
+        isSimpleWave={isSimpleWave}
+      />
+    ),
     [MyStreamWaveTab.LEADERBOARD]: (
       <MyStreamWaveLeaderboard
         wave={wave}
@@ -81,22 +100,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
   };
 
-  const isMemesWave =
-    wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
-
-  // Check if this is a simple wave (no decision points, not rolling, not memes)
-  const hasDecisionPoints = !!wave.wave.decisions_strategy?.first_decision_time;
-  const hasMultipleDecisions = 
-    !!wave.wave.decisions_strategy?.subsequent_decisions && 
-    wave.wave.decisions_strategy.subsequent_decisions.length > 0;
-  const isRollingWave = !!wave.wave.decisions_strategy?.is_rolling;
-  const isSimpleWave = !hasDecisionPoints && !hasMultipleDecisions && !isRollingWave && !isMemesWave;
-
   return (
-    <div className="tw-relative">
+    <div className="tw-relative tw-flex tw-flex-col tw-h-full">
       {/* Don't render tab container at all for simple waves */}
       {breakpoint !== "S" && !isSimpleWave && (
-        <div>
+        <div className="tw-flex-shrink-0">
           <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-w-full">
             {/* Combined row with tabs, title, and action button */}
             <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-3">
@@ -112,7 +120,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
 
               {/* Right side: Tabs and action button for memes wave */}
               {isMemesWave && (
-                <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-4 tw-mb-2">
+                <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-4">
                   <MyStreamWaveDesktopTabs
                     activeTab={activeContentTab}
                     wave={wave}
@@ -143,7 +151,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
           </div>
         </div>
       )}
-      <div>{components[activeContentTab]}</div>
+      
+      {/* Use flex-grow to allow content to take remaining space */}
+      <div className="tw-flex-grow tw-overflow-hidden">
+        {components[activeContentTab]}
+      </div>
     </div>
   );
 };

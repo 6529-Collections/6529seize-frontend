@@ -7,6 +7,7 @@ import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
 import { createBreakpoint } from "react-use";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { LayoutProvider, useLayout } from "./LayoutContext";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
@@ -15,12 +16,10 @@ const Header = dynamic(() => import("../../../header/Header"), {
   loading: () => <HeaderPlaceholder />,
 });
 
-export default function MyStreamLayout({
-  children,
-}: {
-  readonly children: ReactNode;
-}) {
+// Main layout content that uses the Layout context
+function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   const { setTitle, title, showWaves } = useContext(AuthContext);
+  const { headerRef } = useLayout();
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
@@ -28,9 +27,49 @@ export default function MyStreamLayout({
   ];
 
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
+  
+  // Update header spacer height and context when header changes
+  useEffect(() => {
+    // Function to update spacer and ensure context measurements are accurate
+    const updateSpacerAndContext = () => {
+      const spacer = document.getElementById('header-spacer');
+      if (spacer && headerRef.current) {
+        const headerHeight = headerRef.current.offsetHeight;
+        spacer.style.height = `${headerHeight}px`;
+        
+        // Log header height for debugging
+        console.log('[MyStreamLayout] Updated header spacer height:', {
+          headerHeight,
+          spacerHeight: spacer.style.height
+        });
+      }
+    };
+    
+    // Initial update - run immediately and then again after a short delay to ensure DOM is ready
+    // This helps replace the default 102px with the actual measurement as soon as possible
+    updateSpacerAndContext();
+    setTimeout(updateSpacerAndContext, 100);
+    
+    // Set up observers to watch for header height and window size changes
+    const resizeObserver = new ResizeObserver(updateSpacerAndContext);
+    if (headerRef.current) {
+      resizeObserver.observe(headerRef.current);
+    }
+    
+    // Also watch window resize
+    window.addEventListener('resize', updateSpacerAndContext);
+    
+    return () => {
+      if (headerRef.current) {
+        resizeObserver.disconnect();
+      }
+      window.removeEventListener('resize', updateSpacerAndContext);
+    };
+  }, [headerRef]);
 
   const capacitor = useCapacitor();
-  const containerClassName = `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-6.375rem)] lg:tw-h-full lg:tw-flex-1 tailwind-scope  ${
+  // Use flexbox instead of fixed height
+  const containerClassName = `tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope ${
     capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
   }`;
 
@@ -58,15 +97,25 @@ export default function MyStreamLayout({
       </Head>
 
       <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black">
-        <div>
+        {/* Header with sticky positioning and high z-index */}
+        <div ref={headerRef} className="tw-sticky tw-top-0 tw-z-50 tw-bg-black">
           <Header isSmall={true} />
-          <div className="tw-z-50">
+          <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />
           </div>
         </div>
 
+        {/* Create a spacer div to offset the sticky header */}
+        {/* Use default height of 102px to prevent layout shift during loading */}
+        <div id="header-spacer" style={{
+          height: headerRef.current ? headerRef.current.offsetHeight + 'px' : '102px',
+          width: '100%',
+          transition: 'height 0.15s ease-out' // Smooth transition for any height adjustment
+        }} />
+
+        {/* Main content with proper spacing */}
         {showWaves && (
-          <div className="tw-flex-1" id="my-stream-content">
+          <div className="tw-flex-1 tw-pt-3" id="my-stream-content">
             <Brain>
               <div className={containerClassName}>{children}</div>
             </Brain>
@@ -74,5 +123,18 @@ export default function MyStreamLayout({
         )}
       </div>
     </>
+  );
+}
+
+// Wrapper component that provides the LayoutContext
+export default function MyStreamLayout({
+  children,
+}: {
+  readonly children: ReactNode;
+}) {
+  return (
+    <LayoutProvider>
+      <MyStreamLayoutContent>{children}</MyStreamLayoutContent>
+    </LayoutProvider>
   );
 }

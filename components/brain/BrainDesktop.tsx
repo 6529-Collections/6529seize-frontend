@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
 import BrainRightSidebar, {
@@ -12,6 +12,7 @@ import { ApiDrop } from "../../generated/models/ApiDrop";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import { useLayout } from "./my-stream/layout/LayoutContext";
 
 interface Props {
   readonly children: ReactNode;
@@ -25,6 +26,33 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   
   // Get content tab state from context
   const { activeContentTab, setActiveContentTab } = useContentTab();
+  
+  // Access layout context for dynamic height calculation
+  const { spaces } = useLayout();
+  
+  // Calculate content container height by explicitly subtracting header height from viewport
+  const contentContainerStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      // Default fallback if measurements aren't complete yet
+      return {};
+    }
+    
+    // Set explicit height that accounts for header
+    // This container will establish the height constraint for all children
+    const height = `calc(100vh - ${spaces.headerSpace}px)`;
+    
+    // Use flexbox display to create proper flow
+    const display = 'flex';
+    
+    // Log the measurements for debugging
+    console.log('[BrainDesktop] Container style:', {
+      headerSpace: spaces.headerSpace,
+      height,
+      display
+    });
+    
+    return { height, display };
+  }, [spaces.measurementsComplete, spaces.headerSpace]);
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
@@ -78,7 +106,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     }`;
 
   return (
-    <div className="tw-relative tw-min-h-screen tw-flex tw-flex-col">
+    <div className="tw-relative tw-flex tw-flex-col">
       <div className="tw-relative tw-flex tw-flex-grow">
         <motion.div
           layout={!isDropOpen}
@@ -86,11 +114,14 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
           transition={{ duration: 0.3 }}
           style={{ transition: "none" }}
         >
-          <div className="tw-h-screen lg:tw-h-[calc(100vh-5.625rem)] min-[1200px]:tw-h-[calc(100vh-6.375rem)] tw-flex-grow tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4">
+          <div 
+            className="tw-flex tw-flex-col lg:tw-flex-row tw-justify-between tw-gap-x-6 tw-gap-y-4 tw-w-full tw-overflow-hidden"
+            style={contentContainerStyle}
+          >
             <BrainLeftSidebar 
               activeWaveId={router.query.wave as string}
             />
-            <div className="tw-flex-grow xl:tw-relative">
+            <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full">
               {children}
               {isDropOpen && (
                 <div

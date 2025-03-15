@@ -38,6 +38,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     onMouseLeave();
+    // Navigate to the new wave
     router.push(getHref(waveId), undefined, { shallow: true });
   };
 
