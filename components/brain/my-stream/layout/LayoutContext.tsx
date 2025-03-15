@@ -720,11 +720,14 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
             // Remove global error handler and other listeners
             resizeEventListeners.forEach(([event, handler]) => {
-              if (event === "tabsMutation" && typeof handler === "function") {
-                // Call the cleanup function for the tabs mutation observer
-                handler();
+              if (event === "tabsMutation" || event === "tabsAttribute" || event === "tabsParent") {
+                // Call the cleanup function for custom observers
+                if (typeof handler === "function") {
+                  (handler as Function)();
+                }
               } else {
-                window.removeEventListener(event, handler);
+                // For standard event listeners
+                window.removeEventListener(event, handler as EventListener);
               }
             });
 
