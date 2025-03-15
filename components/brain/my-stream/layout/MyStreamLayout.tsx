@@ -110,7 +110,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
 
         {/* Main content with proper spacing */}
         {showWaves && (
-          <div className="tw-flex-1 tw-pt-3" id="my-stream-content">
+          <div className="tw-flex-1" id="my-stream-content">
             <Brain>
               <div className={containerClassName}>{children}</div>
             </Brain>

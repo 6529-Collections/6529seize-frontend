@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
 // We're now using only the dynamic height calculation
 import { ContentView, useContentHeight } from "../../../hooks/useContentHeight";
+import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
@@ -69,15 +70,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       !isRollingWave &&
       !isMemesWave);
 
-  // Use our dynamic content height hook
-  const { heightStyle, ready } = useContentHeight({
-    view: ContentView.CHAT,
-    isMemesWave,
-    isRollingWave,
-    isSimpleWave,
-    componentId: `wave-chat-${wave.id}`,
-  });
-
+  const { spaces } = useLayout();
 
   // Create container class based on wave type
   const containerClassName = useMemo(() => {
@@ -129,7 +122,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     <div
       ref={containerRef}
       className={`wave-chat-container ${containerClassName}`}
-      style={heightStyle}
+      style={{ height: spaces.contentSpace, maxHeight: spaces.contentSpace }}
       data-wave-type={
         isRollingWave
           ? "rolling"

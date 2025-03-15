@@ -24,9 +24,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
   
-  // Get content tab state from context
-  const { activeContentTab, setActiveContentTab } = useContentTab();
-  
+ 
   // Access layout context for dynamic height calculation
   const { spaces } = useLayout();
   
