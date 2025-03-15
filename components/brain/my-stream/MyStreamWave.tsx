@@ -13,6 +13,7 @@ import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { useWaveState } from "../../../hooks/useWaveState";
 import PrimaryButton from "../../utils/button/PrimaryButton";
+import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -24,6 +25,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
+  const { tabsRef } = useLayout();
 
   // Get wave state information
   const { votingState, hasFirstDecisionPassed, isRollingWave } = useWaveState(
@@ -104,7 +106,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
       {/* Don't render tab container at all for simple waves */}
       {breakpoint !== "S" && !isSimpleWave && (
-        <div className="tw-flex-shrink-0">
+        <div className="tw-flex-shrink-0" ref={tabsRef}>
           <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-w-full">
             {/* Combined row with tabs, title, and action button */}
             <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-3">

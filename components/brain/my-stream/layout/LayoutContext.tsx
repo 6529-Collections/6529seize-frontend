@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState, ReactNod
 
 // Define the different spaces that need to be measured
 interface LayoutSpaces {
-  // Space used by persistent UI elements (header, breadcrumb, tabs, etc)
+  // Space used by persistent UI elements (header, breadcrumb, etc)
   headerSpace: number;
   
   // Space used by bottom elements (input area, actions, etc)
@@ -10,6 +10,9 @@ interface LayoutSpaces {
   
   // Space used by dynamic elements (pinned waves, etc)
   pinnedSpace: number;
+  
+  // Space used by tab elements when present
+  tabsSpace: number;
   
   // Available space for content
   contentSpace: number;
@@ -26,6 +29,7 @@ interface LayoutContextType {
   // References to measure elements
   headerRef: React.RefObject<HTMLDivElement>;
   pinnedRef: React.RefObject<HTMLDivElement>;
+  tabsRef: React.RefObject<HTMLDivElement>;
   bottomRef: React.RefObject<HTMLDivElement>;
   
   // Register a component that needs height
@@ -40,6 +44,7 @@ const defaultSpaces: LayoutSpaces = {
   headerSpace: 0,
   bottomSpace: 0,
   pinnedSpace: 0,
+  tabsSpace: 0,
   contentSpace: 0,
   measurementsComplete: false,
 };
@@ -49,6 +54,7 @@ const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
   headerRef: { current: null },
   pinnedRef: { current: null },
+  tabsRef: { current: null },
   bottomRef: { current: null },
   registerHeightDependent: () => {},
   unregisterHeightDependent: () => {},
@@ -59,6 +65,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   // Refs for measuring elements
   const headerRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef<HTMLDivElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   
   // State for calculated spaces
@@ -97,6 +104,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       // Default values in case we can't measure
       let headerHeight = 0;
       let pinnedHeight = 0;
+      let tabsHeight = 0;
       let bottomHeight = 0;
       
       // Measure header space if ref exists
@@ -111,6 +119,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         pinnedHeight = rect.height;
       }
       
+      // Measure tabs space if ref exists
+      if (tabsRef.current) {
+        const rect = tabsRef.current.getBoundingClientRect();
+        tabsHeight = rect.height;
+      }
+      
       // Measure bottom space if ref exists
       if (bottomRef.current) {
         const rect = bottomRef.current.getBoundingClientRect();
@@ -119,7 +133,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       
       // Calculate total occupied space - must include header for calculations
       // Even with the spacer div, components need accurate measurements
-      const totalOccupiedSpace = headerHeight + pinnedHeight + bottomHeight;
+      const totalOccupiedSpace = headerHeight + pinnedHeight + tabsHeight + bottomHeight;
       
       // Calculate content space based on all measurements
       // This ensures proper height calculation for nested components
@@ -130,6 +144,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         viewportHeight,
         headerHeight,
         pinnedHeight,
+        tabsHeight,
         bottomHeight,
         totalOccupiedSpace,
         calculatedContentSpace
@@ -140,6 +155,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         headerSpace: headerHeight,
         bottomSpace: bottomHeight,
         pinnedSpace: pinnedHeight,
+        tabsSpace: tabsHeight,
         contentSpace: calculatedContentSpace,
         measurementsComplete: true,
       });
@@ -153,6 +169,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     // Observe elements
     if (headerRef.current) resizeObserver.observe(headerRef.current);
     if (pinnedRef.current) resizeObserver.observe(pinnedRef.current);
+    if (tabsRef.current) resizeObserver.observe(tabsRef.current);
     if (bottomRef.current) resizeObserver.observe(bottomRef.current);
     
     // Also observe window resize
@@ -173,6 +190,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     spaces,
     headerRef,
     pinnedRef,
+    tabsRef,
     bottomRef,
     registerHeightDependent,
     unregisterHeightDependent,
