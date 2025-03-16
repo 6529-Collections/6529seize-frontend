@@ -13,9 +13,6 @@ interface LayoutSpaces {
   // Space used by persistent UI elements (header, breadcrumb, etc)
   headerSpace: number;
 
-  // Space used by bottom elements (input area, actions, etc)
-  bottomSpace: number;
-
   // Space used by dynamic elements (pinned waves, etc)
   pinnedSpace: number;
 
@@ -38,13 +35,11 @@ interface LayoutContextType {
   headerRef: React.RefObject<HTMLDivElement>;
   pinnedRef: React.RefObject<HTMLDivElement>;
   tabsRef: React.RefObject<HTMLDivElement>;
-  bottomRef: React.RefObject<HTMLDivElement>;
 }
 
 // Default context values
 const defaultSpaces: LayoutSpaces = {
   headerSpace: 0,
-  bottomSpace: 0,
   pinnedSpace: 0,
   tabsSpace: 0,
   contentSpace: 0,
@@ -57,7 +52,6 @@ const LayoutContext = createContext<LayoutContextType>({
   headerRef: { current: null },
   pinnedRef: { current: null },
   tabsRef: { current: null },
-  bottomRef: { current: null },
 });
 
 // Provider component
@@ -68,7 +62,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   const headerRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
 
   // State for calculated spaces
   const [spaces, setSpaces] = useState<LayoutSpaces>(defaultSpaces);
@@ -79,7 +72,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     let headerHeight = 0;
     let pinnedHeight = 0;
     let tabsHeight = 0;
-    let bottomHeight = 0;
 
     // Measure header space if ref exists
     if (headerRef.current) {
@@ -99,15 +91,10 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       tabsHeight = rect.height;
     }
 
-    // Measure bottom space if ref exists
-    if (bottomRef.current) {
-      const rect = bottomRef.current.getBoundingClientRect();
-      bottomHeight = rect.height;
-    }
 
     // Calculate total occupied space
     const totalOccupiedSpace =
-      headerHeight + pinnedHeight + tabsHeight + bottomHeight;
+      headerHeight + pinnedHeight + tabsHeight
 
     // Ensure content space is at least 0 to prevent negative values
     const calculatedContentSpace = Math.max(
@@ -117,7 +104,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
     setSpaces({
       headerSpace: headerHeight,
-      bottomSpace: bottomHeight,
       pinnedSpace: pinnedHeight,
       tabsSpace: tabsHeight,
       contentSpace: calculatedContentSpace,
@@ -136,7 +122,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (headerRef.current) resizeObserver.observe(headerRef.current);
     if (pinnedRef.current) resizeObserver.observe(pinnedRef.current);
     if (tabsRef.current) resizeObserver.observe(tabsRef.current);
-    if (bottomRef.current) resizeObserver.observe(bottomRef.current);
 
     // Also listen for window resize
     window.addEventListener("resize", calculateSpaces);
@@ -157,7 +142,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     headerRef,
     pinnedRef,
     tabsRef,
-    bottomRef,
   };
 
   return (

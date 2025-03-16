@@ -20,7 +20,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
   waveId,
 }) => {
   // Get layout context references for measuring
-  const { pinnedRef, bottomRef } = useLayout();
+  const { pinnedRef } = useLayout();
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
@@ -36,7 +36,6 @@ const BrainContent: React.FC<BrainContentProps> = ({
         <div className="tw-h-full">{children}</div>
       </div>
       <div 
-        ref={bottomRef}
         className="tw-sticky tw-bottom-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
       >
         <BrainContentInput

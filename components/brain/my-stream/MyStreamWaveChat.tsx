@@ -25,14 +25,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const [searchParamsDone, setSearchParamsDone] = useState(false);
 
-  // Track mount status
-  const mountedRef = useRef(true);
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
   // Handle URL parameters
   useEffect(() => {
     const dropParam = searchParams.get("serialNo");
@@ -46,23 +38,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     }
     setSearchParamsDone(true);
   }, [searchParams, router]);
-
-  // Use props if provided, otherwise calculate wave types
-  const isMemesWave =
-    wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
-
-  const isRollingWave = wave.wave.decisions_strategy?.is_rolling;
-
-  const hasDecisionPoints = !!wave.wave.decisions_strategy?.first_decision_time;
-  const hasMultipleDecisions =
-    !!wave.wave.decisions_strategy?.subsequent_decisions &&
-    wave.wave.decisions_strategy.subsequent_decisions.length > 0;
-
-  const isSimpleWave =
-    !hasDecisionPoints &&
-    !hasMultipleDecisions &&
-    !isRollingWave &&
-    !isMemesWave;
 
   const { spaces } = useLayout();
 
@@ -81,23 +56,19 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   useEffect(() => setActiveDrop(null), [wave]);
 
   const onReply = (drop: ApiDrop, partId: number) => {
-    if (mountedRef.current) {
-      setActiveDrop({
-        action: ActiveDropAction.REPLY,
-        drop,
-        partId,
-      });
-    }
+    setActiveDrop({
+      action: ActiveDropAction.REPLY,
+      drop,
+      partId,
+    });
   };
 
   const onQuote = (drop: ApiDrop, partId: number) => {
-    if (mountedRef.current) {
-      setActiveDrop({
-        action: ActiveDropAction.QUOTE,
-        drop,
-        partId,
-      });
-    }
+    setActiveDrop({
+      action: ActiveDropAction.QUOTE,
+      drop,
+      partId,
+    });
   };
 
   const handleReply = ({ drop, partId }: { drop: ApiDrop; partId: number }) => {
@@ -109,9 +80,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   };
 
   const onCancelReplyQuote = () => {
-    if (mountedRef.current) {
-      setActiveDrop(null);
-    }
+    setActiveDrop(null);
   };
 
   // Calculate height style using tabsSpace from LayoutContext
@@ -121,20 +90,19 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       return {};
     }
 
-    // If we have tabsSpace, use it for calculation
-    if (spaces.tabsSpace > 0) {
-      return {
-        height: `calc(100% - ${spaces.tabsSpace}px)`,
-        maxHeight: `calc(100% - ${spaces.tabsSpace}px)`,
-      };
-    }
+    console.log(spaces.headerSpace, spaces.pinnedSpace, spaces.tabsSpace);
 
-    // Otherwise use contentSpace directly
+    // If we have tabsSpace, use it for calculation
     return {
-      height: spaces.contentSpace,
-      maxHeight: spaces.contentSpace,
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px)`,
     };
-  }, [spaces.measurementsComplete, spaces.contentSpace, spaces.tabsSpace]);
+  }, [
+    spaces.measurementsComplete,
+    spaces.tabsSpace,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+  ]);
 
   if (!searchParamsDone) {
     return null;
