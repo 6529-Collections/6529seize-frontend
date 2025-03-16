@@ -13,7 +13,7 @@ export const TimeUnitDisplay: React.FC<TimeUnitDisplayProps> = ({
   label 
 }) => {
   return (
-    <div className="tw-bg-primary-300/5 tw-border tw-border-primary-300/10 tw-rounded tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium">
+    <div className="tw-bg-iron-800 tw-border tw-border-iron-800 tw-border-solid tw-rounded tw-px-1.5 tw-py-0.5 tw-text-xs tw-font-medium">
       <span className="tw-text-iron-100">
         {value}
       </span>

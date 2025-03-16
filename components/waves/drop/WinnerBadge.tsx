@@ -14,7 +14,7 @@ export const WinnerBadge: React.FC<WinnerBadgeProps> = ({ drop }) => {
   if (!winningRank) return null;
 
   return (
-    <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
+    <div className="tw-flex tw-flex-col tw-gap-y-2 tw-items-start">
       <div className="tw-py-2">
         <WinnerDropBadge
           rank={winningRank}

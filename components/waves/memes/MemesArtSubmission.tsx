@@ -109,7 +109,7 @@ const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
   };
 
   return (
-    <div className="tw-mt-6 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-h-full">
+    <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-h-full">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

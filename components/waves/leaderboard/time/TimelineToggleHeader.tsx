@@ -26,7 +26,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
 }) => {
   return (
     <div
-      className="tw-px-3 tw-py-2 tw-group tw-bg-iron-950 tw-flex tw-items-center tw-justify-between tw-cursor-pointer desktop-hover:hover:tw-bg-iron-900 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-px-3 tw-py-2 tw-group tw-bg-iron-900 tw-flex tw-items-center tw-justify-between tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
       onClick={() => setIsOpen(!isOpen)}
     >
       {/* Left side with title and countdown boxes */}

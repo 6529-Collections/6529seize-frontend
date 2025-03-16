@@ -45,7 +45,7 @@ export const WaveRollingWinners: React.FC<WaveRollingWinnersProps> = ({
   }
 
   return (
-    <div className="tw-space-y-2 tw-mt-2 tw-pb-4 tw-max-h-[calc(100vh-146px)] min-[1200px]:tw-max-h-[calc(100vh-156px)] lg:tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
+    <div className="tw-space-y-2 tw-mt-2 tw-pb-4 lg:tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
       {/* Reverse the display order to show latest rounds at the top */}
       {[...decisionPoints].reverse().map((point, index) => {
         // Calculate the actual index for the key and other uses
