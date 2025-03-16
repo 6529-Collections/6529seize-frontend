@@ -20,19 +20,16 @@ interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly setSubmittingArtFromParent?: boolean;
-  // Stable measurements from parent
-  readonly tabsHeight?: number;
 }
 
 const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
   setSubmittingArtFromParent,
-  tabsHeight,
 }) => {
   const { hasFirstDecisionPassed } = useWaveState(wave);
   const { isMemesWave } = useWave(wave);
-  const { spaces } = useLayout(); // Get layout spaces from context
+  const { leaderboardContainerStyle } = useLayout(); // Get pre-calculated style from context
 
   // Track mount status
   const mountedRef = useRef(true);
@@ -74,43 +71,12 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     [WaveLeaderboardSortType.RECENT]: WaveDropsLeaderboardSortDirection.ASC,
   };
 
-  // Calculate height styles - prefer tabs-based subtraction when available
-  // Fall back to spaces.contentSpace if tabsHeight is undefined and measurements are complete
-  const heightStyle = useMemo(() => {
-    // First priority: Use tabsHeight prop if provided
-    if (tabsHeight !== undefined) {
-      return {
-        height: `calc(100% - ${tabsHeight}px)`,
-        maxHeight: `calc(100% - ${tabsHeight}px)`,
-      };
-    }
-    
-    // Second priority: Use spaces.contentSpace if measurements are complete
-    if (spaces.measurementsComplete) {
-      return {
-        height: spaces.contentSpace,
-        maxHeight: spaces.contentSpace,
-      };
-    }
-    
-    // Fallback: Empty object if no measurements available
-    return {};
-  }, [tabsHeight, spaces.measurementsComplete, spaces.contentSpace]);
-
-
-  // Prepare debug attributes only in development mode
-  const debugAttributes = process.env.NODE_ENV === 'development' 
-    ? {
-        'data-tabs-height': tabsHeight,
-        'data-measurements-complete': spaces.measurementsComplete ? 'true' : 'false'
-      } 
-    : {};
+  // No need for custom height calculation - using leaderboardContainerStyle from LayoutContext
 
   return (
     <div
       className={containerClassName}
-      style={heightStyle}
-      {...debugAttributes}
+      style={leaderboardContainerStyle}
     >
       {/* Main content container */}
       <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">

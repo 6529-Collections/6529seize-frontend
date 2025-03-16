@@ -45,6 +45,7 @@ interface LayoutContextType {
   contentContainerStyle: React.CSSProperties;
   chatContainerStyle: React.CSSProperties;
   winnersContainerStyle: React.CSSProperties;
+  leaderboardContainerStyle: React.CSSProperties;
 }
 
 // Default context values
@@ -64,6 +65,7 @@ const LayoutContext = createContext<LayoutContextType>({
   contentContainerStyle: {}, // Empty style object as default
   chatContainerStyle: {}, // Empty style object as default
   winnersContainerStyle: {}, // Empty style object as default
+  leaderboardContainerStyle: {}, // Empty style object as default
 });
 
 // Provider component
@@ -273,6 +275,24 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace
   ]);
+  
+  // Calculate the leaderboard container style - same calculation as chat/winners
+  const leaderboardContainerStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace
+  ]);
 
   // Create context value
   const contextValue: LayoutContextType = {
@@ -281,6 +301,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     contentContainerStyle,
     chatContainerStyle,
     winnersContainerStyle,
+    leaderboardContainerStyle,
   };
 
   return (
