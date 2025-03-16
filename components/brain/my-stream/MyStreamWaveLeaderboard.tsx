@@ -29,7 +29,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 }) => {
   const { hasFirstDecisionPassed } = useWaveState(wave);
   const { isMemesWave } = useWave(wave);
-  const { leaderboardContainerStyle } = useLayout(); // Get pre-calculated style from context
+  const { waveViewStyle } = useLayout(); // Get pre-calculated style from context
 
   // Track mount status
   const mountedRef = useRef(true);
@@ -76,7 +76,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   return (
     <div
       className={containerClassName}
-      style={leaderboardContainerStyle}
+      style={waveViewStyle}
     >
       {/* Main content container */}
       <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">

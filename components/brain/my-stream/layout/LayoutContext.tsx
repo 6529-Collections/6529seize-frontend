@@ -41,12 +41,11 @@ interface LayoutContextType {
   // Registration system
   registerRef: (refType: LayoutRefType, element: HTMLDivElement | null) => void;
   
-  // Pre-calculated styles
+  // Pre-calculated styles for main containers
   contentContainerStyle: React.CSSProperties;
-  chatContainerStyle: React.CSSProperties;
-  winnersContainerStyle: React.CSSProperties;
-  leaderboardContainerStyle: React.CSSProperties;
-  outcomeContainerStyle: React.CSSProperties;
+  
+  // Unified style for all wave views (chat, winners, leaderboard, outcome)
+  waveViewStyle: React.CSSProperties;
 }
 
 // Default context values
@@ -64,10 +63,7 @@ const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
   registerRef: () => {}, // No-op for default value
   contentContainerStyle: {}, // Empty style object as default
-  chatContainerStyle: {}, // Empty style object as default
-  winnersContainerStyle: {}, // Empty style object as default
-  leaderboardContainerStyle: {}, // Empty style object as default
-  outcomeContainerStyle: {}, // Empty style object as default
+  waveViewStyle: {}, // Empty style object as default
 });
 
 // Provider component
@@ -242,62 +238,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
   
-  // Calculate the chat container style based on header, pinned, tabs and spacer space
-  const chatContainerStyle = useMemo(() => {
-    if (!spaces.measurementsComplete) {
-      return {};
-    }
-    
-    return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`
-    };
-  }, [
-    spaces.measurementsComplete,
-    spaces.headerSpace,
-    spaces.pinnedSpace,
-    spaces.tabsSpace,
-    spaces.spacerSpace
-  ]);
-  
-  // Calculate the winners container style - exact same as chat container for consistency
-  const winnersContainerStyle = useMemo(() => {
-    if (!spaces.measurementsComplete) {
-      return {};
-    }
-    
-    return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`
-    };
-  }, [
-    spaces.measurementsComplete,
-    spaces.headerSpace,
-    spaces.pinnedSpace,
-    spaces.tabsSpace,
-    spaces.spacerSpace
-  ]);
-  
-  // Calculate the leaderboard container style - same calculation as chat/winners
-  const leaderboardContainerStyle = useMemo(() => {
-    if (!spaces.measurementsComplete) {
-      return {};
-    }
-    
-    return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`
-    };
-  }, [
-    spaces.measurementsComplete,
-    spaces.headerSpace,
-    spaces.pinnedSpace,
-    spaces.tabsSpace,
-    spaces.spacerSpace
-  ]);
-  
-  // Calculate the outcome container style - same calculation as other views
-  const outcomeContainerStyle = useMemo(() => {
+  // Calculate a unified wave view style for all view types (chat, winners, leaderboard, outcome)
+  // This replaces the individual style calculations that were all identical
+  const waveViewStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
       return {};
     }
@@ -319,10 +262,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces,
     registerRef,
     contentContainerStyle,
-    chatContainerStyle,
-    winnersContainerStyle,
-    leaderboardContainerStyle,
-    outcomeContainerStyle,
+    waveViewStyle
   };
 
   return (

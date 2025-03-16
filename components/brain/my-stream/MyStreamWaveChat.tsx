@@ -39,7 +39,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     setSearchParamsDone(true);
   }, [searchParams, router]);
 
-  const { chatContainerStyle } = useLayout();
+  const { waveViewStyle } = useLayout();
 
   // Create container class based on wave type
   const containerClassName = useMemo(() => {
@@ -93,7 +93,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     <div
       ref={containerRef}
       className={`${containerClassName}`}
-      style={chatContainerStyle}
+      style={waveViewStyle}
     >
       <WaveDropsAll
         key={wave.id}
