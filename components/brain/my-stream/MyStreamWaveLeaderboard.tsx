@@ -42,14 +42,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     };
   }, []);
 
-  // Log when stable tabsHeight value is received
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development" && tabsHeight !== undefined) {
-      console.log(
-        `[MyStreamWaveLeaderboard] Using tabs height: ${tabsHeight}px for wave ${wave.id}`
-      );
-    }
-  }, [tabsHeight, wave.id]);
 
   const containerClassName = useMemo(() => {
     return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow lg:tw-pr-2`;
@@ -84,28 +76,41 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 
   // Calculate height styles - prefer tabs-based subtraction when available
   // Fall back to spaces.contentSpace if tabsHeight is undefined and measurements are complete
-  const heightStyle =
-    tabsHeight !== undefined
-      ? {
-          height: `calc(100% - ${tabsHeight}px)`,
-          maxHeight: `calc(100% - ${tabsHeight}px)`,
-        }
-      : spaces.measurementsComplete
-      ? {
-          height: spaces.contentSpace,
-          maxHeight: spaces.contentSpace,
-        }
-      : {};
+  const heightStyle = useMemo(() => {
+    // First priority: Use tabsHeight prop if provided
+    if (tabsHeight !== undefined) {
+      return {
+        height: `calc(100% - ${tabsHeight}px)`,
+        maxHeight: `calc(100% - ${tabsHeight}px)`,
+      };
+    }
+    
+    // Second priority: Use spaces.contentSpace if measurements are complete
+    if (spaces.measurementsComplete) {
+      return {
+        height: spaces.contentSpace,
+        maxHeight: spaces.contentSpace,
+      };
+    }
+    
+    // Fallback: Empty object if no measurements available
+    return {};
+  }, [tabsHeight, spaces.measurementsComplete, spaces.contentSpace]);
 
+
+  // Prepare debug attributes only in development mode
+  const debugAttributes = process.env.NODE_ENV === 'development' 
+    ? {
+        'data-tabs-height': tabsHeight,
+        'data-measurements-complete': spaces.measurementsComplete ? 'true' : 'false'
+      } 
+    : {};
 
   return (
     <div
       className={containerClassName}
       style={heightStyle}
-      data-tabs-height={tabsHeight}
-      data-measurements-complete={
-        spaces.measurementsComplete ? "true" : "false"
-      }
+      {...debugAttributes}
     >
       {/* Main content container */}
       <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
