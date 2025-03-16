@@ -80,7 +80,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);
 
-
   const onReply = (drop: ApiDrop, partId: number) => {
     if (mountedRef.current) {
       setActiveDrop({
@@ -121,22 +120,22 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     if (!spaces.measurementsComplete) {
       return {};
     }
-    
+
     // If we have tabsSpace, use it for calculation
     if (spaces.tabsSpace > 0) {
       return {
         height: `calc(100% - ${spaces.tabsSpace}px)`,
-        maxHeight: `calc(100% - ${spaces.tabsSpace}px)`
+        maxHeight: `calc(100% - ${spaces.tabsSpace}px)`,
       };
     }
-    
+
     // Otherwise use contentSpace directly
     return {
       height: spaces.contentSpace,
-      maxHeight: spaces.contentSpace
+      maxHeight: spaces.contentSpace,
     };
   }, [spaces.measurementsComplete, spaces.contentSpace, spaces.tabsSpace]);
-  
+
   if (!searchParamsDone) {
     return null;
   }
@@ -146,15 +145,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       ref={containerRef}
       className={`${containerClassName}`}
       style={heightStyle}
-      data-wave-type={
-        isRollingWave
-          ? "rolling"
-          : isMemesWave
-          ? "memes"
-          : isSimpleWave
-          ? "simple"
-          : "standard"
-      }
     >
       <WaveDropsAll
         key={wave.id}
