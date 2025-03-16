@@ -20,18 +20,34 @@ const Header = dynamic(() => import("../../../header/Header"), {
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   const { setTitle, title, showWaves } = useContext(AuthContext);
   const { registerRef } = useLayout();
-  
-  // Local ref for component-specific needs
+
+  // Local refs for component-specific needs
   const headerElementRef = useRef<HTMLDivElement | null>(null);
+  const spacerElementRef = useRef<HTMLDivElement | null>(null);
+
+  // Callback ref for registration with LayoutContext (header)
+  const setHeaderRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      // Update local ref
+      headerElementRef.current = element;
+
+      // Register with LayoutContext
+      registerRef("header", element);
+    },
+    [registerRef]
+  );
   
-  // Callback ref for registration with LayoutContext
-  const setHeaderRef = useCallback((element: HTMLDivElement | null) => {
-    // Update local ref
-    headerElementRef.current = element;
-    
-    // Register with LayoutContext
-    registerRef('header', element);
-  }, [registerRef]);
+  // Callback ref for registration with LayoutContext (spacer)
+  const setSpacerRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      // Update local ref
+      spacerElementRef.current = element;
+
+      // Register with LayoutContext
+      registerRef("spacer", element);
+    },
+    [registerRef]
+  );
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
@@ -70,14 +86,19 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       </Head>
 
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
-        <div ref={setHeaderRef} className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
+        <div
+          ref={setHeaderRef}
+          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black"
+        >
           <Header isSmall={true} />
           <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />
           </div>
         </div>
+
         {showWaves && (
           <div className="tw-flex-1" id="my-stream-content">
+            <div ref={setSpacerRef} className="tw-h-4"></div>
             <Brain>
               <div className={containerClassName}>{children}</div>
             </Brain>

@@ -39,7 +39,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     setSearchParamsDone(true);
   }, [searchParams, router]);
 
-  const { spaces } = useLayout();
+  const { chatContainerStyle } = useLayout();
 
   // Create container class based on wave type
   const containerClassName = useMemo(() => {
@@ -83,26 +83,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     setActiveDrop(null);
   };
 
-  // Calculate height style using tabsSpace from LayoutContext
-  const heightStyle = useMemo(() => {
-    // Default empty object for when measurements aren't complete
-    if (!spaces.measurementsComplete) {
-      return {};
-    }
-
-    console.log(spaces.headerSpace, spaces.pinnedSpace, spaces.tabsSpace);
-
-    // If we have tabsSpace, use it for calculation
-    return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px)`,
-    };
-  }, [
-    spaces.measurementsComplete,
-    spaces.tabsSpace,
-    spaces.headerSpace,
-    spaces.pinnedSpace,
-  ]);
+  // We don't need to calculate height style anymore as we're using chatContainerStyle from LayoutContext
 
   if (!searchParamsDone) {
     return null;
@@ -112,7 +93,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     <div
       ref={containerRef}
       className={`${containerClassName}`}
-      style={heightStyle}
+      style={chatContainerStyle}
     >
       <WaveDropsAll
         key={wave.id}

@@ -6,6 +6,7 @@ import React, {
   useState,
   ReactNode,
   useCallback,
+  useMemo,
 } from "react";
 
 // Define the different spaces that need to be measured
@@ -18,6 +19,9 @@ interface LayoutSpaces {
 
   // Space used by tab elements when present
   tabsSpace: number;
+  
+  // Space used by spacer elements
+  spacerSpace: number;
 
   // Available space for content
   contentSpace: number;
@@ -28,7 +32,7 @@ interface LayoutSpaces {
 
 // Context type definition
 // Define valid ref types for type safety
-export type LayoutRefType = 'header' | 'pinned' | 'tabs'
+export type LayoutRefType = 'header' | 'pinned' | 'tabs' | 'spacer'
 
 interface LayoutContextType {
   // Calculated spaces
@@ -36,6 +40,10 @@ interface LayoutContextType {
   
   // Registration system
   registerRef: (refType: LayoutRefType, element: HTMLDivElement | null) => void;
+  
+  // Pre-calculated styles
+  contentContainerStyle: React.CSSProperties;
+  chatContainerStyle: React.CSSProperties;
 }
 
 // Default context values
@@ -43,6 +51,7 @@ const defaultSpaces: LayoutSpaces = {
   headerSpace: 0,
   pinnedSpace: 0,
   tabsSpace: 0,
+  spacerSpace: 0,
   contentSpace: 0,
   measurementsComplete: false,
 };
@@ -51,6 +60,8 @@ const defaultSpaces: LayoutSpaces = {
 const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
   registerRef: () => {}, // No-op for default value
+  contentContainerStyle: {}, // Empty style object as default
+  chatContainerStyle: {}, // Empty style object as default
 });
 
 // Provider component
@@ -62,6 +73,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     header: null,
     pinned: null,
     tabs: null,
+    spacer: null,
   });
 
   // Keep track of the ResizeObserver instance
@@ -107,11 +119,13 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     let headerHeight = 0;
     let pinnedHeight = 0;
     let tabsHeight = 0;
+    let spacerHeight = 0;
 
     // Get elements from refMap (source of truth)
     const headerElement = refMap.current.header;
     const pinnedElement = refMap.current.pinned;
     const tabsElement = refMap.current.tabs;
+    const spacerElement = refMap.current.spacer;
 
     // Measure header space if element exists
     if (headerElement) {
@@ -143,10 +157,19 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       }
     }
     
+    // Measure spacer element if it exists
+    if (spacerElement) {
+      try {
+        const rect = spacerElement.getBoundingClientRect();
+        spacerHeight = rect.height;
+      } catch (e) {
+        console.error("Error measuring spacer element:", e);
+      }
+    }
 
     // Calculate total occupied space
     const totalOccupiedSpace =
-      headerHeight + pinnedHeight + tabsHeight
+      headerHeight + pinnedHeight + tabsHeight + spacerHeight;
 
     // Ensure content space is at least 0 to prevent negative values
     const calculatedContentSpace = Math.max(
@@ -158,6 +181,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       headerSpace: headerHeight,
       pinnedSpace: pinnedHeight,
       tabsSpace: tabsHeight,
+      spacerSpace: spacerHeight,
       contentSpace: calculatedContentSpace,
       measurementsComplete: true,
     });
@@ -199,11 +223,43 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     calculateSpacesRef.current = calculateSpaces;
   }, [calculateSpaces]);
+  
+  // Calculate the content container style based on header space
+  const contentContainerStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px)`,
+      display: 'flex'
+    };
+  }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
+  
+  // Calculate the chat container style based on header, pinned, tabs and spacer space
+  const chatContainerStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace
+  ]);
 
   // Create context value
   const contextValue: LayoutContextType = {
     spaces,
     registerRef,
+    contentContainerStyle,
+    chatContainerStyle,
   };
 
   return (
