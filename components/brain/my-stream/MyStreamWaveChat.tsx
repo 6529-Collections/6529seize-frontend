@@ -64,7 +64,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     !isRollingWave &&
     !isMemesWave;
 
-  const { getWaveChatStyle } = useLayout();
+  const { spaces } = useLayout();
 
   // Create container class based on wave type
   const containerClassName = useMemo(() => {
@@ -115,12 +115,31 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     }
   };
 
+  // Calculate height style using tabsSpace from LayoutContext
+  const heightStyle = useMemo(() => {
+    // Default empty object for when measurements aren't complete
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    // If we have tabsSpace, use it for calculation
+    if (spaces.tabsSpace > 0) {
+      return {
+        height: `calc(100% - ${spaces.tabsSpace}px)`,
+        maxHeight: `calc(100% - ${spaces.tabsSpace}px)`
+      };
+    }
+    
+    // Otherwise use contentSpace directly
+    return {
+      height: spaces.contentSpace,
+      maxHeight: spaces.contentSpace
+    };
+  }, [spaces.measurementsComplete, spaces.contentSpace, spaces.tabsSpace]);
+  
   if (!searchParamsDone) {
     return null;
   }
-
-  // Get height style from LayoutContext (now directly uses tabsRef internally)
-  const heightStyle = getWaveChatStyle();
 
   return (
     <div

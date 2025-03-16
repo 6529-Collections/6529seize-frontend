@@ -6,8 +6,6 @@ import React, {
   useState,
   ReactNode,
   useCallback,
-  useMemo,
-  CSSProperties,
 } from "react";
 
 // Define the different spaces that need to be measured
@@ -41,12 +39,6 @@ interface LayoutContextType {
   pinnedRef: React.RefObject<HTMLDivElement>;
   tabsRef: React.RefObject<HTMLDivElement>;
   bottomRef: React.RefObject<HTMLDivElement>;
-
-  // Calculated style for the content container
-  contentContainerStyle: CSSProperties;
-  
-  // Calculated style for the wave chat container (reads tabsRef internally)
-  getWaveChatStyle: () => CSSProperties;
 }
 
 // Default context values
@@ -66,8 +58,6 @@ const LayoutContext = createContext<LayoutContextType>({
   pinnedRef: { current: null },
   tabsRef: { current: null },
   bottomRef: { current: null },
-  contentContainerStyle: {},
-  getWaveChatStyle: () => ({}),
 });
 
 // Provider component
@@ -161,58 +151,13 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [calculateSpaces]);
 
-  // Calculate content container style using the calculated spaces
-  const contentContainerStyle = useMemo(() => {
-    if (!spaces.measurementsComplete) {
-      // Default fallback if measurements aren't complete yet
-      return {};
-    }
-    
-    // Set explicit height that accounts for header
-    // This container will establish the height constraint for all children
-    const height = `calc(100vh - ${spaces.headerSpace}px)`;
-    
-    // Use flexbox display to create proper flow
-    const display = 'flex';
-    
-    return { height, display };
-  }, [spaces.measurementsComplete, spaces.headerSpace]);
-
-  // Function to get wave chat container style - now uses tabsRef directly
-  const getWaveChatStyle = useCallback(() => {
-    // If measurements are complete
-    if (spaces.measurementsComplete) {
-      // If we have tabs, use their height
-      if (tabsRef.current) {
-        const tabsHeight = tabsRef.current.getBoundingClientRect().height;
-        if (tabsHeight > 0) {
-          return {
-            height: `calc(100% - ${tabsHeight}px)`,
-            maxHeight: `calc(100% - ${tabsHeight}px)`
-          };
-        }
-      }
-      
-      // Otherwise use contentSpace directly
-      return {
-        height: spaces.contentSpace,
-        maxHeight: spaces.contentSpace
-      };
-    }
-    
-    // Return empty object if measurements aren't complete
-    return {};
-  }, [spaces.measurementsComplete, spaces.contentSpace, tabsRef]);
-
-  // Create context value
+  // Create context value - now much simpler with just refs and spaces
   const contextValue: LayoutContextType = {
     spaces,
     headerRef,
     pinnedRef,
     tabsRef,
     bottomRef,
-    contentContainerStyle,
-    getWaveChatStyle,
   };
 
   return (
