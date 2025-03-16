@@ -33,13 +33,8 @@ export type LayoutRefType = 'header' | 'pinned' | 'tabs'
 interface LayoutContextType {
   // Calculated spaces
   spaces: LayoutSpaces;
-
-  // References to measure elements (kept for backward compatibility)
-  headerRef: React.RefObject<HTMLDivElement>;
-  pinnedRef: React.RefObject<HTMLDivElement>;
-  tabsRef: React.RefObject<HTMLDivElement>;
   
-  // New registration system
+  // Registration system
   registerRef: (refType: LayoutRefType, element: HTMLDivElement | null) => void;
 }
 
@@ -55,9 +50,6 @@ const defaultSpaces: LayoutSpaces = {
 // Create context
 const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
-  headerRef: { current: null },
-  pinnedRef: { current: null },
-  tabsRef: { current: null },
   registerRef: () => {}, // No-op for default value
 });
 
@@ -65,17 +57,12 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // Internal ref storage (source of truth) - not exposed directly
+  // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
     header: null,
     pinned: null,
     tabs: null,
   });
-
-  // External refs for backward compatibility
-  const headerRef = useRef<HTMLDivElement>(null);
-  const pinnedRef = useRef<HTMLDivElement>(null);
-  const tabsRef = useRef<HTMLDivElement>(null);
 
   // Keep track of the ResizeObserver instance
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
@@ -91,24 +78,17 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     // Skip if element is the same (no change)
     if (refMap.current[refType] === element) return;
     
+    // Get the previous element before updating
+    const previousElement = refMap.current[refType];
+    
     // Store in our internal map (source of truth)
     refMap.current[refType] = element;
-    
-    // Update legacy refs for backward compatibility
-    if (refType === 'header' && headerRef.current !== element) {
-      headerRef.current = element;
-    } else if (refType === 'pinned' && pinnedRef.current !== element) {
-      pinnedRef.current = element;
-    } else if (refType === 'tabs' && tabsRef.current !== element) {
-      tabsRef.current = element;
-    }
     
     // Handle observer management
     if (resizeObserverRef.current) {
       // Unobserve old element if it exists and isn't the new element
-      const oldElement = refMap.current[refType];
-      if (oldElement && oldElement !== element) {
-        resizeObserverRef.current.unobserve(oldElement);
+      if (previousElement) {
+        resizeObserverRef.current.unobserve(previousElement);
       }
       
       // Observe new element if it exists
@@ -197,31 +177,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       }
     });
     
-    // For backward compatibility, also observe through the legacy refs
-    // This ensures things work during the transition period
-    if (headerRef.current) {
-      resizeObserverRef.current.observe(headerRef.current);
-      // Also register it in our refMap if not already there
-      if (!refMap.current.header) {
-        refMap.current.header = headerRef.current;
-      }
-    }
-    
-    if (pinnedRef.current) {
-      resizeObserverRef.current.observe(pinnedRef.current);
-      // Also register it in our refMap if not already there
-      if (!refMap.current.pinned) {
-        refMap.current.pinned = pinnedRef.current;
-      }
-    }
-    
-    if (tabsRef.current) {
-      resizeObserverRef.current.observe(tabsRef.current);
-      // Also register it in our refMap if not already there
-      if (!refMap.current.tabs) {
-        refMap.current.tabs = tabsRef.current;
-      }
-    }
+    // Nothing needed here - we'll observe elements as they're registered
 
     // Also listen for window resize
     window.addEventListener("resize", calculateSpaces);
@@ -247,11 +203,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   // Create context value
   const contextValue: LayoutContextType = {
     spaces,
-    // Provide legacy refs for backward compatibility
-    headerRef,
-    pinnedRef,
-    tabsRef,
-    // Provide the new registration function
     registerRef,
   };
 
