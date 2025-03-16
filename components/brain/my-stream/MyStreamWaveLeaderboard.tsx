@@ -97,18 +97,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         }
       : {};
 
-  // Add logging to help debug height calculations
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[MyStreamWaveLeaderboard] Layout measurements:", {
-        complete: spaces.measurementsComplete,
-        contentSpace: spaces.contentSpace,
-        headerSpace: spaces.headerSpace,
-        tabsSpace: spaces.tabsSpace,
-        headerContentGap: spaces.headerContentGap,
-      });
-    }
-  }, [spaces.measurementsComplete, spaces.contentSpace]);
 
   return (
     <div

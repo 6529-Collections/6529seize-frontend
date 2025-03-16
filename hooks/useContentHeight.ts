@@ -30,19 +30,9 @@ export function useContentHeight(options: ContentHeightOptions): {
   heightStyle: React.CSSProperties;
   ready: boolean;
 } {
-  const { spaces, registerHeightDependent, unregisterHeightDependent } =
-    useLayout();
+  const { spaces } = useLayout();
   const [heightStyle, setHeightStyle] = useState<React.CSSProperties>({});
   const [ready, setReady] = useState(false);
-
-  // Register this component as dependent on height calculations
-  useEffect(() => {
-    registerHeightDependent(options.componentId);
-
-    return () => {
-      unregisterHeightDependent(options.componentId);
-    };
-  }, [options.componentId, registerHeightDependent, unregisterHeightDependent]);
 
   // Calculate height based on layout spaces and options
   useEffect(() => {

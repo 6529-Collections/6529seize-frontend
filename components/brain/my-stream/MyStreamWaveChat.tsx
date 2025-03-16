@@ -16,27 +16,15 @@ import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
-  // Wave type props
-  readonly isMemesWave?: boolean;
-  readonly isRollingWave?: boolean;
-  readonly isSimpleWave?: boolean;
-  // Stable measurements from parent
-  readonly tabsHeight?: number;
 }
 
-const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
-  wave,
-  isMemesWave: propsIsMemesWave,
-  isRollingWave: propsIsRollingWave,
-  isSimpleWave: propsIsSimpleWave,
-  tabsHeight,
-}) => {
+const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const [searchParamsDone, setSearchParamsDone] = useState(false);
-  
+
   // Track mount status
   const mountedRef = useRef(true);
   useEffect(() => {
@@ -61,11 +49,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
 
   // Use props if provided, otherwise calculate wave types
   const isMemesWave =
-    propsIsMemesWave ??
     wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
 
-  const isRollingWave =
-    propsIsRollingWave ?? !!wave.wave.decisions_strategy?.is_rolling;
+  const isRollingWave = wave.wave.decisions_strategy?.is_rolling;
 
   const hasDecisionPoints = !!wave.wave.decisions_strategy?.first_decision_time;
   const hasMultipleDecisions =
@@ -73,13 +59,12 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     wave.wave.decisions_strategy.subsequent_decisions.length > 0;
 
   const isSimpleWave =
-    propsIsSimpleWave ??
-    (!hasDecisionPoints &&
-      !hasMultipleDecisions &&
-      !isRollingWave &&
-      !isMemesWave);
+    !hasDecisionPoints &&
+    !hasMultipleDecisions &&
+    !isRollingWave &&
+    !isMemesWave;
 
-  const { spaces } = useLayout();
+  const { getWaveChatStyle } = useLayout();
 
   // Create container class based on wave type
   const containerClassName = useMemo(() => {
@@ -95,12 +80,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);
 
-  // Log when stable tabsHeight value is received
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development' && tabsHeight !== undefined) {
-      console.log(`[MyStreamWaveChat] Received stable tabs height: ${tabsHeight}px for wave ${wave.id}`);
-    }
-  }, [tabsHeight, wave.id]);
 
   const onReply = (drop: ApiDrop, partId: number) => {
     if (mountedRef.current) {
@@ -140,18 +119,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     return null;
   }
 
-  // Calculate height styles - prefer tabs-based subtraction when available
-  const heightStyle = tabsHeight !== undefined 
-    ? { 
-        height: `calc(100% - ${tabsHeight}px)`,
-        maxHeight: `calc(100% - ${tabsHeight}px)`
-      }
-    : spaces.measurementsComplete 
-      ? { 
-          height: spaces.contentSpace, 
-          maxHeight: spaces.contentSpace 
-        }
-      : {};
+  // Get height style from LayoutContext (now directly uses tabsRef internally)
+  const heightStyle = getWaveChatStyle();
 
   return (
     <div
@@ -167,7 +136,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           ? "simple"
           : "standard"
       }
-      data-tabs-height={tabsHeight}
     >
       <WaveDropsAll
         key={wave.id}

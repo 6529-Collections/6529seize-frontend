@@ -27,9 +27,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   ];
 
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
-  
-  // We're using the headerContentGap defined in LayoutContext (16px)
-  // for spacing calculations. No physical spacer element is needed.
 
   const capacitor = useCapacitor();
   // Use flexbox instead of fixed height
