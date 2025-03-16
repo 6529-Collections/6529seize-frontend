@@ -22,6 +22,9 @@ interface LayoutSpaces {
   
   // Space used by spacer elements
   spacerSpace: number;
+  
+  // Space used by mobile tabs
+  mobileTabsSpace: number;
 
   // Available space for content
   contentSpace: number;
@@ -32,7 +35,7 @@ interface LayoutSpaces {
 
 // Context type definition
 // Define valid ref types for type safety
-export type LayoutRefType = 'header' | 'pinned' | 'tabs' | 'spacer'
+export type LayoutRefType = 'header' | 'pinned' | 'tabs' | 'spacer' | 'mobileTabs'
 
 interface LayoutContextType {
   // Calculated spaces
@@ -54,6 +57,7 @@ const defaultSpaces: LayoutSpaces = {
   pinnedSpace: 0,
   tabsSpace: 0,
   spacerSpace: 0,
+  mobileTabsSpace: 0,
   contentSpace: 0,
   measurementsComplete: false,
 };
@@ -76,6 +80,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     pinned: null,
     tabs: null,
     spacer: null,
+    mobileTabs: null,
   });
 
   // Keep track of the ResizeObserver instance
@@ -122,12 +127,14 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     let pinnedHeight = 0;
     let tabsHeight = 0;
     let spacerHeight = 0;
+    let mobileTabsHeight = 0;
 
     // Get elements from refMap (source of truth)
     const headerElement = refMap.current.header;
     const pinnedElement = refMap.current.pinned;
     const tabsElement = refMap.current.tabs;
     const spacerElement = refMap.current.spacer;
+    const mobileTabsElement = refMap.current.mobileTabs;
 
     // Measure header space if element exists
     if (headerElement) {
@@ -168,10 +175,20 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
         console.error("Error measuring spacer element:", e);
       }
     }
+    
+    // Measure mobile tabs element if it exists
+    if (mobileTabsElement) {
+      try {
+        const rect = mobileTabsElement.getBoundingClientRect();
+        mobileTabsHeight = rect.height;
+      } catch (e) {
+        console.error("Error measuring mobile tabs element:", e);
+      }
+    }
 
     // Calculate total occupied space
     const totalOccupiedSpace =
-      headerHeight + pinnedHeight + tabsHeight + spacerHeight;
+      headerHeight + pinnedHeight + tabsHeight + spacerHeight + mobileTabsHeight;
 
     // Ensure content space is at least 0 to prevent negative values
     const calculatedContentSpace = Math.max(
@@ -184,6 +201,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       pinnedSpace: pinnedHeight,
       tabsSpace: tabsHeight,
       spacerSpace: spacerHeight,
+      mobileTabsSpace: mobileTabsHeight,
       contentSpace: calculatedContentSpace,
       measurementsComplete: true,
     });
@@ -245,16 +263,18 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
     
+    
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
     spaces.pinnedSpace,
     spaces.tabsSpace,
-    spaces.spacerSpace
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace
   ]);
 
   // Create context value
