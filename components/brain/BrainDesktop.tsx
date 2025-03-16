@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState, useMemo } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
 import BrainRightSidebar, {
@@ -24,20 +24,8 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
   
-  // Access layout context for dynamic height calculation
-  const { spaces } = useLayout();
-  
-  // Calculate content container style locally
-  const contentContainerStyle = useMemo(() => {
-    if (!spaces.measurementsComplete) {
-      return {};
-    }
-    
-    return {
-      height: `calc(100vh - ${spaces.headerSpace}px)`,
-      display: 'flex'
-    };
-  }, [spaces.measurementsComplete, spaces.headerSpace]);
+  // Access layout context for pre-calculated styles
+  const { contentContainerStyle } = useLayout();
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],

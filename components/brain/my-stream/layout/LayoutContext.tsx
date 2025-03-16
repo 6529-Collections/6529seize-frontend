@@ -6,6 +6,7 @@ import React, {
   useState,
   ReactNode,
   useCallback,
+  useMemo,
 } from "react";
 
 // Define the different spaces that need to be measured
@@ -36,6 +37,10 @@ interface LayoutContextType {
   
   // Registration system
   registerRef: (refType: LayoutRefType, element: HTMLDivElement | null) => void;
+  
+  // Pre-calculated styles
+  contentContainerStyle: React.CSSProperties;
+  chatContainerStyle: React.CSSProperties;
 }
 
 // Default context values
@@ -51,6 +56,8 @@ const defaultSpaces: LayoutSpaces = {
 const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
   registerRef: () => {}, // No-op for default value
+  contentContainerStyle: {}, // Empty style object as default
+  chatContainerStyle: {}, // Empty style object as default
 });
 
 // Provider component
@@ -199,11 +206,42 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     calculateSpacesRef.current = calculateSpaces;
   }, [calculateSpaces]);
+  
+  // Calculate the content container style based on header space
+  const contentContainerStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px)`,
+      display: 'flex'
+    };
+  }, [spaces.measurementsComplete, spaces.headerSpace]);
+  
+  // Calculate the chat container style based on header, pinned and tabs space
+  const chatContainerStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace
+  ]);
 
   // Create context value
   const contextValue: LayoutContextType = {
     spaces,
     registerRef,
+    contentContainerStyle,
+    chatContainerStyle,
   };
 
   return (
