@@ -5,7 +5,6 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { DropTrophyIcon } from "../DropThrophyIcon";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 interface WaveDropHeaderProps {

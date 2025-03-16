@@ -112,7 +112,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
 
           {/* Overflow dropdown */}
           {isOverflowOpen && (
-            <div className="tw-absolute tw-right-0 tw-z-10 tw-mt-2 tw-w-36 tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-primary-400/20 tw-shadow-lg">
+            <div className="tw-absolute tw-right-0 tw-z-20 tw-mt-2 tw-w-36 tw-rounded-md tw-bg-iron-900 tw-ring-1 tw-ring-primary-400/20 tw-shadow-lg">
               <div className="tw-py-1">
                 {overflowTabs.map((option) => (
                   <button

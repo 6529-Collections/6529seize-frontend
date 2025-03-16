@@ -13,8 +13,8 @@ import { WaveLeaderboardHeader } from "../../waves/leaderboard/header/Waveleader
 import { WaveDropCreate } from "../../waves/leaderboard/create/WaveDropCreate";
 import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderboardDrops";
 import { useWave } from "../../../hooks/useWave";
-import PrimaryButton from "../../utils/button/PrimaryButton";
 import MemesArtSubmission from "../../waves/memes/MemesArtSubmission";
+import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -32,7 +32,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 }) => {
   const { hasFirstDecisionPassed } = useWaveState(wave);
   const { isMemesWave } = useWave(wave);
-  
+  const { spaces } = useLayout(); // Get layout spaces from context
+
   // Track mount status
   const mountedRef = useRef(true);
   useEffect(() => {
@@ -40,16 +41,18 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       mountedRef.current = false;
     };
   }, []);
-  
+
   // Log when stable tabsHeight value is received
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development' && tabsHeight !== undefined) {
-      console.log(`[MyStreamWaveLeaderboard] Using tabs height: ${tabsHeight}px for wave ${wave.id}`);
+    if (process.env.NODE_ENV === "development" && tabsHeight !== undefined) {
+      console.log(
+        `[MyStreamWaveLeaderboard] Using tabs height: ${tabsHeight}px for wave ${wave.id}`
+      );
     }
   }, [tabsHeight, wave.id]);
-  
+
   const containerClassName = useMemo(() => {
-    return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow lg:tw-pr-2`;
+    return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow lg:tw-pr-2`;
   }, []);
 
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
@@ -80,18 +83,41 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   };
 
   // Calculate height styles - prefer tabs-based subtraction when available
-  const heightStyle = tabsHeight !== undefined 
-    ? { 
-        height: `calc(100% - ${tabsHeight}px)`,
-        maxHeight: `calc(100% - ${tabsHeight}px)`
-      }
-    : {};
+  // Fall back to spaces.contentSpace if tabsHeight is undefined and measurements are complete
+  const heightStyle =
+    tabsHeight !== undefined
+      ? {
+          height: `calc(100% - ${tabsHeight}px)`,
+          maxHeight: `calc(100% - ${tabsHeight}px)`,
+        }
+      : spaces.measurementsComplete
+      ? {
+          height: spaces.contentSpace,
+          maxHeight: spaces.contentSpace,
+        }
+      : {};
+
+  // Add logging to help debug height calculations
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("[MyStreamWaveLeaderboard] Layout measurements:", {
+        complete: spaces.measurementsComplete,
+        contentSpace: spaces.contentSpace,
+        headerSpace: spaces.headerSpace,
+        tabsSpace: spaces.tabsSpace,
+        headerContentGap: spaces.headerContentGap,
+      });
+    }
+  }, [spaces.measurementsComplete, spaces.contentSpace]);
 
   return (
-    <div 
-      className={containerClassName} 
+    <div
+      className={containerClassName}
       style={heightStyle}
       data-tabs-height={tabsHeight}
+      data-measurements-complete={
+        spaces.measurementsComplete ? "true" : "false"
+      }
     >
       {/* Main content container */}
       <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
@@ -122,7 +148,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               />
             )}
 
-           {/* Winners announcement banner removed as requested */}
+            {/* Winners announcement banner removed as requested */}
           </>
         )}
       </div>

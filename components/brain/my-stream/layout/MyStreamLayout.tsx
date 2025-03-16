@@ -28,39 +28,8 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
 
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
   
-  // Update header spacer height and context when header changes
-  useEffect(() => {
-    // Function to update spacer and ensure context measurements are accurate
-    const updateSpacerAndContext = () => {
-      const spacer = document.getElementById('header-spacer');
-      if (spacer && headerRef.current) {
-        const headerHeight = headerRef.current.offsetHeight;
-        spacer.style.height = `${headerHeight}px`;
-    
-      }
-    };
-    
-    // Initial update - run immediately and then again after a short delay to ensure DOM is ready
-    // This helps replace the default 102px with the actual measurement as soon as possible
-    updateSpacerAndContext();
-    setTimeout(updateSpacerAndContext, 100);
-    
-    // Set up observers to watch for header height and window size changes
-    const resizeObserver = new ResizeObserver(updateSpacerAndContext);
-    if (headerRef.current) {
-      resizeObserver.observe(headerRef.current);
-    }
-    
-    // Also watch window resize
-    window.addEventListener('resize', updateSpacerAndContext);
-    
-    return () => {
-      if (headerRef.current) {
-        resizeObserver.disconnect();
-      }
-      window.removeEventListener('resize', updateSpacerAndContext);
-    };
-  }, [headerRef]);
+  // We're using the headerContentGap defined in LayoutContext (16px)
+  // for spacing calculations. No physical spacer element is needed.
 
   const capacitor = useCapacitor();
   // Use flexbox instead of fixed height
@@ -91,16 +60,13 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       `}</style>
       </Head>
 
-      <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black">
-        {/* Header with sticky positioning and high z-index */}
-        <div ref={headerRef} className="tw-sticky tw-top-0 tw-z-50 tw-bg-black">
+      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
+        <div ref={headerRef} className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
           <Header isSmall={true} />
           <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />
           </div>
         </div>
-
-        {/* Main content with proper spacing */}
         {showWaves && (
           <div className="tw-flex-1" id="my-stream-content">
             <Brain>

@@ -23,6 +23,9 @@ interface LayoutSpaces {
   // Space used by tab elements when present
   tabsSpace: number;
 
+  // Fixed gap space between header and content (16px)
+  headerContentGap: number;
+
   // Available space for content
   contentSpace: number;
 
@@ -61,6 +64,7 @@ const defaultSpaces: LayoutSpaces = {
   bottomSpace: 0,
   pinnedSpace: 0,
   tabsSpace: 0,
+  headerContentGap: 16, // Gap is handled by header-spacer DOM element, but we keep the value for reference
   contentSpace: 0,
   measurementsComplete: false,
 };
@@ -192,10 +196,13 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       }
     }
 
-    // Calculate total occupied space - must include header for calculations
-    // Even with the spacer div, components need accurate measurements
+    // Fixed 16px gap between header and content
+    const headerContentGap = 16;
+    
+    // Calculate total occupied space including the 16px gap
+    // The gap is purely logical and not represented by a physical DOM element
     const totalOccupiedSpace =
-      headerHeight + pinnedHeight + tabsHeight + bottomHeight;
+      headerHeight + pinnedHeight + tabsHeight + bottomHeight + headerContentGap;
 
     // Ensure content space is at least 0 to prevent negative values
     const calculatedContentSpace = Math.max(
@@ -237,6 +244,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
             bottomSpace: bottomHeight,
             pinnedSpace: pinnedHeight,
             tabsSpace: tabsHeight,
+            headerContentGap: headerContentGap,
             contentSpace: calculatedContentSpace,
             measurementsComplete: true,
           };

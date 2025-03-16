@@ -92,34 +92,29 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     );
   };
 
-  // Early return if no wave data
-  if (!wave) {
-    return null;
-  }
-
-  // Wave type checks - done once, after we know wave exists
-  const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
-  const hasDecisionPoints = Boolean(wave.wave.decisions_strategy?.first_decision_time);
+  // Initialize wave type variables with default values
+  const isMemesWave = wave?.id?.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58" || false;
+  const hasDecisionPoints = Boolean(wave?.wave?.decisions_strategy?.first_decision_time);
   const hasMultipleDecisions = Boolean(
-    wave.wave.decisions_strategy?.subsequent_decisions && 
-    wave.wave.decisions_strategy.subsequent_decisions.length > 0
+    wave?.wave?.decisions_strategy?.subsequent_decisions && 
+    wave?.wave?.decisions_strategy?.subsequent_decisions.length > 0
   );
-  const isSimpleWave = !hasDecisionPoints && !hasMultipleDecisions && !isRollingWave && !isMemesWave;
-  
+  const isSimpleWave = wave ? (!hasDecisionPoints && !hasMultipleDecisions && !isRollingWave && !isMemesWave) : false;
+
   // Use the layout stabilizer to get stable measurements
-  // This needs to have access to isMemesWave, isSimpleWave, and activeContentTab
+  // Important: This must be called on every render, regardless of wave being available
   const { 
     height: stableTabsHeight, 
     stable: isMeasurementStable,
     forceUpdate: forceTabMeasurementUpdate
   } = useLayoutStabilizer({
     measureFn: measureTabsHeight,
-    deps: [waveId, wave.id, isRollingWave, isMemesWave, isSimpleWave, activeContentTab], 
+    deps: [waveId, wave?.id, isRollingWave, isMemesWave, isSimpleWave, activeContentTab], 
     defaultHeight: 56, // Default tabs height
     debug: process.env.NODE_ENV === 'development',
   });
   
-  // Force layout recalculation when tab changes
+  // Force layout recalculation when tab changes - must be called before early return
   useEffect(() => {
     if (tabsRef.current) {
       // Give the DOM time to update
@@ -133,7 +128,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     }
   }, [activeContentTab, tabsRef, forceTabMeasurementUpdate]);
   
-  // Log stabilized measurements in development
+  // Log stabilized measurements in development - must be called before early return
   useEffect(() => {
     if (process.env.NODE_ENV === 'development' && isMeasurementStable) {
       console.log(`[MyStreamWave] Stable measurements for wave ${waveId}:`, {
@@ -144,6 +139,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       });
     }
   }, [isMeasurementStable, stableTabsHeight, waveId, isSimpleWave, activeContentTab, isMemesWave]);
+  
+  // Early return if no wave data - all hooks must be called before this
+  if (!wave) {
+    return null;
+  }
 
   // Create component instances with wave-specific props and stable measurements
   const components: Record<MyStreamWaveTab, JSX.Element> = {

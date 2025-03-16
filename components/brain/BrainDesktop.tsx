@@ -42,9 +42,11 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     // Use flexbox display to create proper flow
     const display = 'flex';
     
-   
-    return { height, display };
-  }, [spaces.measurementsComplete, spaces.headerSpace]);
+    // Add marginTop for visual spacing - matches the headerContentGap in LayoutContext
+    const marginTop = `${spaces.headerContentGap}px`;
+    
+    return { height, display, marginTop };
+  }, [spaces.measurementsComplete, spaces.headerSpace, spaces.headerContentGap]);
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],

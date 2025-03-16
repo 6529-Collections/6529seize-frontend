@@ -8,6 +8,7 @@ import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemConte
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import WaveDropActionsRate from "../drops/WaveDropActionsRate";
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 
 interface WaveSmallLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
@@ -58,12 +59,13 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
     return "tw-text-iron-400 tw-bg-iron-800/40 tw-border-iron-700/30";
   };
 
-  const thropyIcon = (rank: number | null) => {
-    if (rank && rank <= 3) {
+  const trophyIcon = (rank: number | null, decisionTime?: number) => {
+    if (rank) {
       return (
-        <div className={`tw-rounded-md tw-py-1 tw-px-2 tw-h-6 tw-font-medium tw-text-xs tw-inline-flex tw-items-center tw-gap-x-1 tw-border ${getBadgeColor(rank)}`}>
-          <span>#{rank}</span>
-        </div>
+        <WinnerDropBadge 
+          rank={rank}
+          decisionTime={decisionTime}
+        />
       );
     }
     return <></>;
@@ -74,10 +76,9 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
       <div className="tw-space-y-3">
         <li className="tw-relative tw-flex tw-flex-col">
           <div 
-            className="tw-@container tw-rounded-xl tw-bg-iron-900 tw-p-4"
+            className="tw-@container tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out"
             style={{
               border: "1px solid transparent",
-              borderLeft: "2px solid transparent",
               boxShadow: `inset 2px 0 0 ${drop.rank && drop.rank <= 3 ? getRankTextColor(drop.rank)?.replace('tw-text-', '').trim() : "#60606C"}, 
                          inset 0 1px 0 ${drop.rank && drop.rank <= 3 ? getRankTextColor(drop.rank)?.replace('tw-text-', '').trim() : "#60606C"}20, 
                          inset -1px 0 0 ${drop.rank && drop.rank <= 3 ? getRankTextColor(drop.rank)?.replace('tw-text-', '').trim() : "#60606C"}20, 
@@ -86,7 +87,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
             }}>
             <div>
               <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
-                {thropyIcon(drop.rank)}
+                {trophyIcon(drop.rank, drop.winning_context?.decision_time)}
                 <WaveDropActionsRate drop={drop} />
               </div>
 
