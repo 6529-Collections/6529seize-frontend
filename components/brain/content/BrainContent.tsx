@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import BrainContentPinnedWaves from "./BrainContentPinnedWaves";
 import BrainContentInput from "./input/BrainContentInput";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
@@ -19,14 +19,27 @@ const BrainContent: React.FC<BrainContentProps> = ({
   onCancelReplyQuote,
   waveId,
 }) => {
-  // Get layout context references for measuring
-  const { pinnedRef } = useLayout();
+  // Get layout context registration function for measuring
+  const { registerRef } = useLayout();
+  
+  // Local refs for component-specific needs
+  const pinnedElementRef = useRef<HTMLDivElement | null>(null);
+  
+  // Callback refs for registration with LayoutContext
+  const setPinnedRef = useCallback((element: HTMLDivElement | null) => {
+    // Update local ref
+    pinnedElementRef.current = element;
+    
+    // Register with LayoutContext
+    registerRef('pinned', element);
+  }, [registerRef]);
+  
 
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
       {showPinnedWaves && (
         <div 
-          ref={pinnedRef}
+          ref={setPinnedRef}
           className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
         >
           <BrainContentPinnedWaves />

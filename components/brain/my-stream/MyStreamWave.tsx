@@ -25,7 +25,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
-  const { tabsRef } = useLayout();
+  const { registerRef } = useLayout();
   
   // Track mount status to prevent post-unmount updates
   const mountedRef = useRef(true);
@@ -48,11 +48,23 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { activeContentTab, setActiveContentTab, updateAvailableTabs } =
     useContentTab();
   
+  // Reference to store tabs element for local measurements
+  const tabsElementRef = useRef<HTMLDivElement | null>(null);
+  
+  // Callback function to set tabs element reference
+  const setTabsRef = useCallback((element: HTMLDivElement | null) => {
+    // Update local ref
+    tabsElementRef.current = element;
+    
+    // Register with LayoutContext
+    registerRef('tabs', element);
+  }, [registerRef]);
+  
   // Measurement function that gets the tabs height
   const measureTabsHeight = useCallback(() => {
-    if (tabsRef.current) {
+    if (tabsElementRef.current) {
       try {
-        const height = tabsRef.current.getBoundingClientRect().height;
+        const height = tabsElementRef.current.getBoundingClientRect().height;
         return height > 0 ? height : null;
       } catch (e) {
         console.error("[MyStreamWave] Error measuring tabs height:", e);
@@ -60,7 +72,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       }
     }
     return null;
-  }, [tabsRef]);
+  }, []);
   
   // State to trigger art submission from the parent component
   const [triggerArtSubmission, setTriggerArtSubmission] = useState(false);
@@ -139,7 +151,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     <div className="tw-relative tw-flex tw-flex-col tw-h-full" key={stableWaveKey}>
       {/* Don't render tab container for simple waves */}
       {breakpoint !== "S" && !isSimpleWave && (
-        <div className="tw-flex-shrink-0" ref={tabsRef} id="tabs-container">
+        <div className="tw-flex-shrink-0" ref={setTabsRef} id="tabs-container">
           <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-w-full">
             {/* Combined row with tabs, title, and action button */}
             <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-3">

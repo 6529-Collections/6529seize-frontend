@@ -27,14 +27,20 @@ interface LayoutSpaces {
 }
 
 // Context type definition
+// Define valid ref types for type safety
+export type LayoutRefType = 'header' | 'pinned' | 'tabs'
+
 interface LayoutContextType {
   // Calculated spaces
   spaces: LayoutSpaces;
 
-  // References to measure elements
+  // References to measure elements (kept for backward compatibility)
   headerRef: React.RefObject<HTMLDivElement>;
   pinnedRef: React.RefObject<HTMLDivElement>;
   tabsRef: React.RefObject<HTMLDivElement>;
+  
+  // New registration system
+  registerRef: (refType: LayoutRefType, element: HTMLDivElement | null) => void;
 }
 
 // Default context values
@@ -52,19 +58,68 @@ const LayoutContext = createContext<LayoutContextType>({
   headerRef: { current: null },
   pinnedRef: { current: null },
   tabsRef: { current: null },
+  registerRef: () => {}, // No-op for default value
 });
 
 // Provider component
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // Refs for measuring elements
+  // Internal ref storage (source of truth) - not exposed directly
+  const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
+    header: null,
+    pinned: null,
+    tabs: null,
+  });
+
+  // External refs for backward compatibility
   const headerRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef<HTMLDivElement>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
 
+  // Keep track of the ResizeObserver instance
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+
   // State for calculated spaces
   const [spaces, setSpaces] = useState<LayoutSpaces>(defaultSpaces);
+
+  // Create refs for callback functions to solve circular dependency
+  const calculateSpacesRef = useRef<() => void>(() => {});
+  
+  // Registration function for components to register their elements
+  const registerRef = useCallback((refType: LayoutRefType, element: HTMLDivElement | null) => {
+    // Skip if element is the same (no change)
+    if (refMap.current[refType] === element) return;
+    
+    // Store in our internal map (source of truth)
+    refMap.current[refType] = element;
+    
+    // Update legacy refs for backward compatibility
+    if (refType === 'header' && headerRef.current !== element) {
+      headerRef.current = element;
+    } else if (refType === 'pinned' && pinnedRef.current !== element) {
+      pinnedRef.current = element;
+    } else if (refType === 'tabs' && tabsRef.current !== element) {
+      tabsRef.current = element;
+    }
+    
+    // Handle observer management
+    if (resizeObserverRef.current) {
+      // Unobserve old element if it exists and isn't the new element
+      const oldElement = refMap.current[refType];
+      if (oldElement && oldElement !== element) {
+        resizeObserverRef.current.unobserve(oldElement);
+      }
+      
+      // Observe new element if it exists
+      if (element) {
+        resizeObserverRef.current.observe(element);
+      }
+    }
+    
+    // Trigger a recalculation using the ref
+    requestAnimationFrame(() => calculateSpacesRef.current());
+  }, []);
 
   // Calculate spaces based on current measurements
   const calculateSpaces = useCallback(() => {
@@ -73,24 +128,41 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     let pinnedHeight = 0;
     let tabsHeight = 0;
 
-    // Measure header space if ref exists
-    if (headerRef.current) {
-      const rect = headerRef.current.getBoundingClientRect();
-      headerHeight = rect.height;
+    // Get elements from refMap (source of truth)
+    const headerElement = refMap.current.header;
+    const pinnedElement = refMap.current.pinned;
+    const tabsElement = refMap.current.tabs;
+
+    // Measure header space if element exists
+    if (headerElement) {
+      try {
+        const rect = headerElement.getBoundingClientRect();
+        headerHeight = rect.height;
+      } catch (e) {
+        console.error("Error measuring header element:", e);
+      }
     }
 
-    // Measure pinned space if ref exists
-    if (pinnedRef.current) {
-      const rect = pinnedRef.current.getBoundingClientRect();
-      pinnedHeight = rect.height;
+    // Measure pinned space if element exists
+    if (pinnedElement) {
+      try {
+        const rect = pinnedElement.getBoundingClientRect();
+        pinnedHeight = rect.height;
+      } catch (e) {
+        console.error("Error measuring pinned element:", e);
+      }
     }
 
-    // Measure tabs space if ref exists
-    if (tabsRef.current) {
-      const rect = tabsRef.current.getBoundingClientRect();
-      tabsHeight = rect.height;
+    // Measure tabs space if element exists
+    if (tabsElement) {
+      try {
+        const rect = tabsElement.getBoundingClientRect();
+        tabsHeight = rect.height;
+      } catch (e) {
+        console.error("Error measuring tabs element:", e);
+      }
     }
-
+    
 
     // Calculate total occupied space
     const totalOccupiedSpace =
@@ -113,15 +185,43 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   // Set up ResizeObserver to monitor elements and recalculate on changes
   useEffect(() => {
-    // Create ResizeObserver
-    const resizeObserver = new ResizeObserver(() => {
+    // Create ResizeObserver and store it in the ref
+    resizeObserverRef.current = new ResizeObserver(() => {
       requestAnimationFrame(calculateSpaces);
     });
-
-    // Observe relevant elements if they exist
-    if (headerRef.current) resizeObserver.observe(headerRef.current);
-    if (pinnedRef.current) resizeObserver.observe(pinnedRef.current);
-    if (tabsRef.current) resizeObserver.observe(tabsRef.current);
+    
+    // Observe all existing elements in our refMap
+    Object.entries(refMap.current).forEach(([_, element]) => {
+      if (element) {
+        resizeObserverRef.current?.observe(element);
+      }
+    });
+    
+    // For backward compatibility, also observe through the legacy refs
+    // This ensures things work during the transition period
+    if (headerRef.current) {
+      resizeObserverRef.current.observe(headerRef.current);
+      // Also register it in our refMap if not already there
+      if (!refMap.current.header) {
+        refMap.current.header = headerRef.current;
+      }
+    }
+    
+    if (pinnedRef.current) {
+      resizeObserverRef.current.observe(pinnedRef.current);
+      // Also register it in our refMap if not already there
+      if (!refMap.current.pinned) {
+        refMap.current.pinned = pinnedRef.current;
+      }
+    }
+    
+    if (tabsRef.current) {
+      resizeObserverRef.current.observe(tabsRef.current);
+      // Also register it in our refMap if not already there
+      if (!refMap.current.tabs) {
+        refMap.current.tabs = tabsRef.current;
+      }
+    }
 
     // Also listen for window resize
     window.addEventListener("resize", calculateSpaces);
@@ -131,17 +231,28 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
     // Cleanup function
     return () => {
-      resizeObserver.disconnect();
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+        resizeObserverRef.current = null;
+      }
       window.removeEventListener("resize", calculateSpaces);
     };
   }, [calculateSpaces]);
+  
+  // Update the ref with the latest calculateSpaces function
+  useEffect(() => {
+    calculateSpacesRef.current = calculateSpaces;
+  }, [calculateSpaces]);
 
-  // Create context value - now much simpler with just refs and spaces
+  // Create context value
   const contextValue: LayoutContextType = {
     spaces,
+    // Provide legacy refs for backward compatibility
     headerRef,
     pinnedRef,
     tabsRef,
+    // Provide the new registration function
+    registerRef,
   };
 
   return (
