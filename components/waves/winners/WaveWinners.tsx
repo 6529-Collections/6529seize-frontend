@@ -7,31 +7,24 @@ import { WaveWinnersTimeline } from "./WaveWinnersTimeline";
 import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
-import { ContentView, useContentHeight } from "../../../hooks/useContentHeight";
+import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
-  // Stable measurements from parent
-  readonly tabsHeight?: number;
 }
 
 export const WaveWinners: React.FC<WaveWinnersProps> = ({
   wave,
   onDropClick,
-  tabsHeight,
 }) => {
   const { isMultiDecisionWave } = useDecisionPoints(wave);
   
   // Check if this is the Memes wave
   const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
   
-  // Use the content height hook
-  const { heightStyle, ready } = useContentHeight({
-    view: ContentView.WINNERS,
-    isMemesWave,
-    componentId: `wave-winners-${wave.id}`
-  });
+  // Use layout context for container style
+  const { winnersContainerStyle } = useLayout();
 
   // Fetch data using decisions endpoint for all waves
   const { decisionPoints: decisionPoints, isFetching: isDecisionsLoading } =
@@ -41,7 +34,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
     });
 
   return (
-    <div className="tw-space-y-4 lg:tw-space-y-6 sm:tw-px-2 lg:tw-px-0">
+    <div className="tw-space-y-4 lg:tw-space-y-6 sm:tw-px-2 lg:tw-px-0 " style={winnersContainerStyle}>
       {isMultiDecisionWave ? (
         isDecisionsLoading ? (
           <WaveWinnersTimelineLoading />
@@ -54,7 +47,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           />
         )
       ) : (
-        <div className="tw-space-y-2 tw-mt-2 tw-pb-6 lg:tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-flex-grow" style={heightStyle}>
+        <div className="tw-space-y-2 tw-mt-2 tw-pb-6 lg:tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-flex-grow" >
           <WaveWinnersPodium
             onDropClick={onDropClick}
             winners={decisionPoints[0]?.winners || []}
