@@ -5,7 +5,6 @@ import BrainLeftSidebarWaves from "./waves/BrainLeftSidebarWaves";
 import { TabToggle } from "../../common/TabToggle";
 import { useContentTab } from "../ContentTabContext";
 import { MyStreamWaveTab } from "../../../types/waves.types";
-import { useLayout } from "../my-stream/layout/LayoutContext";
 
 interface BrainLeftSidebarProps {
   readonly activeWaveId: string | null;
@@ -17,9 +16,6 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   // Get content tab state from context
   const { activeContentTab, setActiveContentTab, availableTabs } =
     useContentTab();
-
-  // Access layout context for dynamic height calculation
-  const { spaces } = useLayout();
 
   // Instead of calculating height, we'll use flex properties to fill parent container
   const sidebarStyle = useMemo(() => {

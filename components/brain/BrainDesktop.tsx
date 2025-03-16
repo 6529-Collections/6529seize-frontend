@@ -24,29 +24,20 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
   
- 
   // Access layout context for dynamic height calculation
   const { spaces } = useLayout();
   
-  // Calculate content container height by explicitly subtracting header height from viewport
+  // Calculate content container style locally
   const contentContainerStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
-      // Default fallback if measurements aren't complete yet
       return {};
     }
     
-    // Set explicit height that accounts for header
-    // This container will establish the height constraint for all children
-    const height = `calc(100vh - ${spaces.headerSpace}px)`;
-    
-    // Use flexbox display to create proper flow
-    const display = 'flex';
-    
-    // Add marginTop for visual spacing - matches the headerContentGap in LayoutContext
-    const marginTop = `${spaces.headerContentGap}px`;
-    
-    return { height, display, marginTop };
-  }, [spaces.measurementsComplete, spaces.headerSpace, spaces.headerContentGap]);
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px)`,
+      display: 'flex'
+    };
+  }, [spaces.measurementsComplete, spaces.headerSpace]);
 
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],

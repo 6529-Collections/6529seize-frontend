@@ -134,7 +134,6 @@ const MyStreamWrapper: React.FC = () => {
     <BrainContent
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
-      waveId={serialisedWaveId ?? undefined}
     >
       {component}
     </BrainContent>

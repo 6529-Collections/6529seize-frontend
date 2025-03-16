@@ -1,4 +1,4 @@
-import { ReactNode, useContext, useEffect } from "react";
+import { ReactNode, useCallback, useContext, useEffect, useRef } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
@@ -19,7 +19,19 @@ const Header = dynamic(() => import("../../../header/Header"), {
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   const { setTitle, title, showWaves } = useContext(AuthContext);
-  const { headerRef } = useLayout();
+  const { registerRef } = useLayout();
+  
+  // Local ref for component-specific needs
+  const headerElementRef = useRef<HTMLDivElement | null>(null);
+  
+  // Callback ref for registration with LayoutContext
+  const setHeaderRef = useCallback((element: HTMLDivElement | null) => {
+    // Update local ref
+    headerElementRef.current = element;
+    
+    // Register with LayoutContext
+    registerRef('header', element);
+  }, [registerRef]);
 
   const breadcrumbs: Crumb[] = [
     { display: "Home", href: "/" },
@@ -27,9 +39,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   ];
 
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
-  
-  // We're using the headerContentGap defined in LayoutContext (16px)
-  // for spacing calculations. No physical spacer element is needed.
 
   const capacitor = useCapacitor();
   // Use flexbox instead of fixed height
@@ -61,7 +70,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       </Head>
 
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
-        <div ref={headerRef} className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
+        <div ref={setHeaderRef} className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
           <Header isSmall={true} />
           <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />
