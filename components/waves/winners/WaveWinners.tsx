@@ -34,7 +34,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
     });
 
   return (
-    <div className="tw-space-y-4 lg:tw-space-y-6 sm:tw-px-2 lg:tw-px-0 " style={winnersContainerStyle}>
+    <div className="tw-space-y-4 lg:tw-space-y-6 sm:tw-px-2 lg:tw-px-0 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300" style={winnersContainerStyle}>
       {isMultiDecisionWave ? (
         isDecisionsLoading ? (
           <WaveWinnersTimelineLoading />
@@ -47,7 +47,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           />
         )
       ) : (
-        <div className="tw-space-y-2 tw-mt-2 tw-pb-6 lg:tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-flex-grow" >
+        <div className="tw-space-y-2 tw-mt-2 tw-pb-6 lg:tw-pr-2 tw-flex-grow">
           <WaveWinnersPodium
             onDropClick={onDropClick}
             winners={decisionPoints[0]?.winners || []}
