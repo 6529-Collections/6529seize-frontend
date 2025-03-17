@@ -5,11 +5,9 @@ import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
-import { createBreakpoint } from "react-use";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { LayoutProvider, useLayout } from "./LayoutContext";
 
-const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -19,7 +17,7 @@ const Header = dynamic(() => import("../../../header/Header"), {
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   const { setTitle, title, showWaves } = useContext(AuthContext);
-  const { registerRef } = useLayout();
+  const { registerRef, spaces } = useLayout();
 
   // Local refs for component-specific needs
   const headerElementRef = useRef<HTMLDivElement | null>(null);
@@ -96,7 +94,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
           </div>
         </div>
 
-        {showWaves && (
+        {showWaves && spaces.measurementsComplete && (
           <div className="tw-flex-1" id="my-stream-content">
             <div ref={setSpacerRef} className="tw-h-4"></div>
             <Brain>
