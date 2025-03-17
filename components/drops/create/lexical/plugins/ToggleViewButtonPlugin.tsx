@@ -1,14 +1,17 @@
 export default function ToggleViewButtonPlugin({
   onViewClick,
+  absolute = false,
 }: {
   readonly onViewClick: () => void;
+  readonly absolute?: boolean;
 }) {
+  const absolutePosition = absolute ? "tw-absolute tw-top-1.5 tw-right-2" : "";
   return (
     <button
       onClick={onViewClick}
       type="button"
       aria-label="Expand view"
-      className="tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300">
+      className={`${absolutePosition} tw-cursor-pointer tw-flex tw-items-center tw-justify-center tw-p-2 tw-group tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300`}>
       <svg
         className="tw-h-5 tw-w-5"
         viewBox="0 0 24 24"
