@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import PrimaryButton from "../../utils/button/PrimaryButton";
 import MemesArtSubmissionTraits from "./MemesArtSubmissionTraits";
@@ -9,6 +9,7 @@ interface MemesArtSubmissionProps {
   readonly onSubmit: (artwork: {
     imageUrl: string;
     traits: TraitsData;
+    signature: string; // Wallet signature for terms agreement
   }) => void;
 }
 
@@ -67,10 +68,156 @@ interface TraitsData {
   typeCardNumber: number;
 }
 
+// Terms that users must agree to in Step 1
+const termsItems = [
+  {
+    id: "cc0",
+    text: "I agree that my work will be released under CC0 (Creative Commons Zero) and I waive all copyright and related rights to my submission."
+  },
+  {
+    id: "original",
+    text: "I confirm this is my original work and I have the right to submit it."
+  },
+  {
+    id: "sanctions",
+    text: "I am not subject to sanctions or restrictions that would prevent me from participating."
+  },
+  {
+    id: "economics",
+    text: "I understand the economics of The Memes, including how royalties are distributed and how I may benefit if my work is selected."
+  },
+  {
+    id: "rights",
+    text: "I understand that if my work is selected, anyone can use, modify, distribute, and sell it without asking permission."
+  },
+  {
+    id: "selection",
+    text: "I understand that submission does not guarantee selection, and the community will vote on submissions."
+  }
+];
+
+// Step 1 Component - Agreement to terms
+const AgreementStep: React.FC<{
+  agreements: Record<string, boolean>;
+  setAgreements: (agreements: Record<string, boolean>) => void;
+  onContinue: () => void;
+  isSigningWallet: boolean;
+}> = ({ agreements, setAgreements, onContinue, isSigningWallet }) => {
+  const allAgreed = termsItems.every(item => agreements[item.id]);
+
+  const toggleAgreement = (id: string) => {
+    setAgreements({
+      ...agreements,
+      [id]: !agreements[id]
+    });
+  };
+
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-6">
+      <div className="tw-text-iron-100 tw-text-sm">
+        Before submitting your artwork to The Memes, please review and agree to the following terms:
+      </div>
+      
+      <div className="tw-flex tw-flex-col tw-gap-4 tw-bg-iron-900/40 tw-rounded-lg tw-p-5 tw-border tw-border-iron-800/50">
+        {termsItems.map(item => (
+          <div key={item.id} className="tw-flex tw-items-start tw-gap-3">
+            <div className="tw-flex-shrink-0 tw-mt-0.5">
+              <button
+                onClick={() => toggleAgreement(item.id)}
+                className={`tw-w-5 tw-h-5 tw-rounded tw-border ${
+                  agreements[item.id]
+                    ? "tw-bg-primary-500 tw-border-primary-600"
+                    : "tw-bg-iron-800/70 tw-border-iron-700"
+                } tw-flex tw-items-center tw-justify-center tw-transition-colors`}
+              >
+                {agreements[item.id] && (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="tw-w-3 tw-h-3 tw-text-white" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            <div className="tw-text-xs tw-text-iron-300">{item.text}</div>
+          </div>
+        ))}
+      </div>
+      
+      <div className="tw-mt-4 tw-flex tw-justify-center">
+        <PrimaryButton
+          onClicked={onContinue}
+          loading={isSigningWallet}
+          disabled={!allAgreed}
+          padding="tw-px-6 tw-py-2.5"
+        >
+          {isSigningWallet ? "Signing with wallet..." : "I Agree & Continue"}
+        </PrimaryButton>
+      </div>
+    </div>
+  );
+};
+
+// Stepper component
+const Stepper: React.FC<{ currentStep: number, totalSteps: number }> = ({ currentStep, totalSteps }) => {
+  return (
+    <div className="tw-flex tw-items-center tw-justify-between tw-mb-8 tw-w-full tw-max-w-md tw-mx-auto">
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <React.Fragment key={index}>
+          {/* Step circle */}
+          <div className="tw-flex tw-flex-col tw-items-center">
+            <div
+              className={`tw-w-8 tw-h-8 tw-rounded-full tw-flex tw-items-center tw-justify-center ${
+                index < currentStep
+                  ? "tw-bg-primary-500 tw-text-white"
+                  : index === currentStep
+                  ? "tw-bg-primary-400 tw-text-white"
+                  : "tw-bg-iron-800 tw-text-iron-400"
+              } tw-transition-colors`}
+            >
+              {index < currentStep ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="tw-w-4 tw-h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                index + 1
+              )}
+            </div>
+            <div className="tw-text-xs tw-mt-1 tw-text-iron-400">
+              {index === 0 ? "Terms" : "Artwork"}
+            </div>
+          </div>
+          
+          {/* Connector line between steps (except after the last step) */}
+          {index < totalSteps - 1 && (
+            <div 
+              className={`tw-h-[2px] tw-flex-1 tw-max-w-[100px] ${
+                index < currentStep ? "tw-bg-primary-500" : "tw-bg-iron-800"
+              }`}
+            />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
+
 const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
   onCancel,
   onSubmit,
 }) => {
+  // Step tracking
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isSigningWallet, setIsSigningWallet] = useState(false);
+  const [walletSignature, setWalletSignature] = useState("");
+  
+  // Terms agreements
+  const [agreements, setAgreements] = useState<Record<string, boolean>>(
+    termsItems.reduce((acc, item) => ({
+      ...acc,
+      [item.id]: false
+    }), {})
+  );
+  
+  // Artwork state
   const [artworkUploaded, setArtworkUploaded] = useState(false);
   const [artworkUrl, setArtworkUrl] = useState("");
   
@@ -154,10 +301,39 @@ const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
     reader.readAsDataURL(file);
   };
 
+  // Mock function to simulate wallet signing
+  // In a real implementation, this would connect to the user's wallet
+  const signWithWallet = async () => {
+    setIsSigningWallet(true);
+    
+    try {
+      // Simulate wallet signing delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // In a real implementation, this would be the actual signature from the wallet
+      const mockSignature = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+      setWalletSignature(mockSignature);
+      
+      // Move to the next step
+      setCurrentStep(1);
+    } catch (error) {
+      console.error("Error signing with wallet:", error);
+      // Handle error (could show error message to user)
+    } finally {
+      setIsSigningWallet(false);
+    }
+  };
+
+  const handleContinueFromTerms = () => {
+    // Sign the terms with the wallet
+    signWithWallet();
+  };
+
   const handleSubmit = () => {
     onSubmit({
       imageUrl: artworkUrl,
-      traits: traits
+      traits: traits,
+      signature: walletSignature
     });
   };
 
@@ -193,29 +369,44 @@ const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
           >
             Submit Artwork to Memes
           </motion.h3>
+          
+          {/* Stepper */}
+          <Stepper currentStep={currentStep} totalSteps={2} />
 
-          {/* File Selection Component */}
-          <MemesArtSubmissionFile
-            artworkUploaded={artworkUploaded}
-            artworkUrl={artworkUrl}
-            setArtworkUploaded={setArtworkUploaded}
-            handleFileSelect={handleFileSelect}
-          />
+          {/* Step Content */}
+          {currentStep === 0 ? (
+            <AgreementStep 
+              agreements={agreements}
+              setAgreements={setAgreements}
+              onContinue={handleContinueFromTerms}
+              isSigningWallet={isSigningWallet}
+            />
+          ) : (
+            <div className="tw-flex tw-flex-col tw-gap-8">
+              {/* File Selection Component */}
+              <MemesArtSubmissionFile
+                artworkUploaded={artworkUploaded}
+                artworkUrl={artworkUrl}
+                setArtworkUploaded={setArtworkUploaded}
+                handleFileSelect={handleFileSelect}
+              />
 
-          {/* Traits Component */}
-          <MemesArtSubmissionTraits traits={traits} setTraits={setTraits} />
+              {/* Traits Component */}
+              <MemesArtSubmissionTraits traits={traits} setTraits={setTraits} />
 
-          {/* Submit Button */}
-          <div className="tw-mt-8 tw-flex tw-justify-center">
-            <PrimaryButton
-              onClicked={handleSubmit}
-              loading={false}
-              disabled={!artworkUploaded}
-              padding="tw-px-6 tw-py-2.5"
-            >
-              Submit to Memes
-            </PrimaryButton>
-          </div>
+              {/* Submit Button */}
+              <div className="tw-mt-4 tw-flex tw-justify-center">
+                <PrimaryButton
+                  onClicked={handleSubmit}
+                  loading={false}
+                  disabled={!artworkUploaded}
+                  padding="tw-px-6 tw-py-2.5"
+                >
+                  Submit to Memes
+                </PrimaryButton>
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
