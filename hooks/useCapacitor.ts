@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 
 export enum CapacitorOrientationType {
@@ -19,17 +19,16 @@ const useCapacitor = () => {
   useEffect(() => {
     if (!isCapacitor) return;
 
-    function isPortrait() {
-      return window.matchMedia("(orientation: portrait)").matches;
-    }
+    const isPortrait = () =>
+      window.matchMedia("(orientation: portrait)").matches;
 
-    function handleOrientationChange() {
-      if (isPortrait()) {
-        setOrientation(CapacitorOrientationType.PORTRAIT);
-      } else {
-        setOrientation(CapacitorOrientationType.LANDSCAPE);
-      }
-    }
+    const handleOrientationChange = () => {
+      setOrientation(
+        isPortrait()
+          ? CapacitorOrientationType.PORTRAIT
+          : CapacitorOrientationType.LANDSCAPE
+      );
+    };
 
     handleOrientationChange();
 
@@ -43,27 +42,34 @@ const useCapacitor = () => {
   useEffect(() => {
     if (!isCapacitor) return;
 
+    let keyboardShowListener: PluginListenerHandle | undefined;
+    let keyboardHideListener: PluginListenerHandle | undefined;
+
     const addKeyboardListeners = async () => {
-      await Keyboard.addListener("keyboardWillShow", () => {
-        setKeyboardVisible(true);
-      });
-      await Keyboard.addListener("keyboardWillHide", () => {
-        setKeyboardVisible(false);
-      });
+      try {
+        keyboardShowListener = await Keyboard.addListener(
+          "keyboardWillShow",
+          () => {
+            setKeyboardVisible(true);
+          }
+        );
+
+        keyboardHideListener = await Keyboard.addListener(
+          "keyboardWillHide",
+          () => {
+            setKeyboardVisible(false);
+          }
+        );
+      } catch (error) {
+        console.error("Keyboard plugin error:", error);
+      }
     };
 
-    const removeKeyboardListeners = async () => {
-      await Keyboard.removeAllListeners();
-    };
-
-    const onError = (error: any) => {
-      console.error("Keyboard plugin error:", error);
-    };
-
-    addKeyboardListeners().catch(onError);
+    addKeyboardListeners();
 
     return () => {
-      removeKeyboardListeners().catch(onError);
+      keyboardShowListener?.remove();
+      keyboardHideListener?.remove();
     };
   }, [isCapacitor]);
 
