@@ -45,7 +45,8 @@ import {
   getCreateWaveValidationErrors,
 } from "../../../helpers/waves/create-wave.validation";
 import { Period } from "../../../helpers/Types";
-
+import useCapacitor from "../../../hooks/useCapacitor";
+import useIsMobileScreen from "../../../hooks/isMobileScreen";
 
 export default function CreateWave({
   profile,
@@ -55,6 +56,8 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const router = useRouter();
+  const isMobile = useIsMobileScreen();
+  const { isIos, keyboardVisible } = useCapacitor();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { waitAndInvalidateDrops, onWaveCreated } = useContext(
     ReactQueryWrapperContext
@@ -113,14 +116,17 @@ export default function CreateWave({
     })
   );
 
-  const [endDateConfig, setEndDateConfig] = useState<{time: number | null, period: Period | null}>({
+  const [endDateConfig, setEndDateConfig] = useState<{
+    time: number | null;
+    period: Period | null;
+  }>({
     time: null,
-    period: null
+    period: null,
   });
 
   useEffect(() => {
     if (config.dates.endDate === null) {
-      setEndDateConfig({time: null, period: null});
+      setEndDateConfig({ time: null, period: null });
     }
   }, [config.dates.endDate]);
 
@@ -680,28 +686,28 @@ export default function CreateWave({
           <button
             onClick={onBack}
             type="button"
-            className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
-          >
+            className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50">
             <svg
               className="tw-flex-shrink-0 tw-w-5 tw-h-5"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M20 12H4M4 12L10 18M4 12L10 6"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
-                strokeLinejoin="round"
-              ></path>
+                strokeLinejoin="round"></path>
             </svg>
             <span>Back</span>
           </button>
-          <h1 className="tw-mb-0">
+          <div
+            className={`tw-mb-0 tw-font-bold ${
+              isMobile ? "tw-text-3xl" : "tw-text-5xl"
+            }`}>
             Create Wave {!!config.overview.name && `"${config.overview.name}"`}
-          </h1>
+          </div>
         </div>
         <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
           <div className="tw-1/4">
@@ -711,7 +717,10 @@ export default function CreateWave({
               onStep={(step) => onStep({ step, direction: "backward" })}
             />
           </div>
-          <div className="tw-flex-1">
+          <div
+            className={`tw-flex-1 ${
+              isIos && !keyboardVisible ? "tw-mb-10" : ""
+            }`}>
             <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
               <div className="tw-relative tw-h-full">
                 <div className="tw-flex tw-flex-col tw-h-full">

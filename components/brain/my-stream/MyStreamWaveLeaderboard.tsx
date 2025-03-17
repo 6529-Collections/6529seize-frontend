@@ -20,10 +20,16 @@ interface MyStreamWaveLeaderboardProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-const calculateHeight = (platform: string) => {
+const calculateHeight = (platform: string, keyboardVisible: boolean) => {
   if (platform === "ios") {
+    if (keyboardVisible) {
+      return "tw-h-[calc(100vh-16rem)]";
+    }
     return "tw-h-[calc(100vh-18rem)]";
   } else if (platform === "android") {
+    if (keyboardVisible) {
+      return "tw-h-[calc(100vh-12.5rem)]";
+    }
     return "tw-h-[calc(100vh-16.5rem)]";
   }
   return `tw-h-[calc(100vh-10.25rem)] min-[1200px]:tw-h-[calc(100vh-11.5rem)] lg:tw-pr-2`;
@@ -37,9 +43,10 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 
   const containerClassName = useMemo(() => {
     return `lg:tw-pt-4 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${calculateHeight(
-      capacitor.platform
+      capacitor.platform,
+      capacitor.keyboardVisible
     )}`;
-  }, [capacitor.isCapacitor]);
+  }, [capacitor.platform, capacitor.keyboardVisible]);
   const { votingState } = useWaveState(wave);
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
     WaveLeaderboardSortType.RANK

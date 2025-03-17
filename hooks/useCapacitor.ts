@@ -11,6 +11,9 @@ const useCapacitor = () => {
   const isCapacitor = Capacitor.isNativePlatform();
   const platform = Capacitor.getPlatform();
 
+  const isIos = platform === "ios";
+  const isAndroid = platform === "android";
+
   const [orientation, setOrientation] = useState<CapacitorOrientationType>(
     CapacitorOrientationType.PORTRAIT
   );
@@ -76,6 +79,8 @@ const useCapacitor = () => {
   return {
     isCapacitor,
     platform,
+    isIos,
+    isAndroid,
     orientation,
     keyboardVisible,
   };

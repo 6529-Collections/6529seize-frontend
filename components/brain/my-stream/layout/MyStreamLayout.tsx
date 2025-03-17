@@ -31,9 +31,9 @@ export default function MyStreamLayout({
 
   const capacitor = useCapacitor();
   const containerClassName = `lg:tw-pt-4 tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-full lg:tw-flex-1 tailwind-scope  ${
-    capacitor.platform === "ios"
+    capacitor.isIos
       ? "tw-pb-[calc(4rem+80px)]"
-      : capacitor.platform === "android"
+      : capacitor.isAndroid
       ? "tw-pb-[70px]"
       : ""
   }`;

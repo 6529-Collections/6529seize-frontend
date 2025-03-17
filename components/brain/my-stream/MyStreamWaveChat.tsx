@@ -19,10 +19,20 @@ interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
 
-const calculateHeight = (platform: string, isElectron: boolean) => {
+const calculateHeight = (
+  platform: string,
+  keyboardVisible: boolean,
+  isElectron: boolean
+) => {
   if (platform === "ios") {
+    if (keyboardVisible) {
+      return "tw-h-[calc(100vh-16rem)]";
+    }
     return "tw-h-[calc(100vh-18rem)]";
   } else if (platform === "android") {
+    if (keyboardVisible) {
+      return "tw-h-[calc(100vh-12.5rem)]";
+    }
     return "tw-h-[calc(100vh-16.5rem)]";
   }
   if (isElectron) {
@@ -55,9 +65,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const containerClassName = useMemo(() => {
     return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
       capacitor.platform,
+      capacitor.keyboardVisible,
       isElectron
     )}`;
-  }, [capacitor.platform, isElectron]);
+  }, [capacitor.platform, capacitor.keyboardVisible, isElectron]);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);
