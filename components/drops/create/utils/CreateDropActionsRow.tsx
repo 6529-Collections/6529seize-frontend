@@ -1,6 +1,5 @@
 import { useContext } from "react";
 import { AuthContext } from "../../../auth/Auth";
-import ToggleViewButtonPlugin from "../lexical/plugins/ToggleViewButtonPlugin";
 
 export default function CreateDropActionsRow({
   canAddPart,
