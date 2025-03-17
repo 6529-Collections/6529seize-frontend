@@ -54,6 +54,7 @@ import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePl
 import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
+import useCapacitor from "../../hooks/useCapacitor";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -117,6 +118,7 @@ const CreateDropInput = forwardRef<
     },
     ref
   ) => {
+    const { isCapacitor } = useCapacitor();
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -228,14 +230,12 @@ const CreateDropInput = forwardRef<
                 contentEditable={
                   <div className="tw-relative">
                     <ContentEditable
-                      className={`tw-pr-[40px] tw-max-h-[40vh] editor-input-one-liner tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+                      className={`tw-max-h-[40vh] editor-input-one-liner tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
         tw-pl-3 tw-py-2.5 tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 ${
           submitting ? "tw-opacity-50 tw-cursor-default" : ""
-        }`}
+        } ${!isCapacitor ? "tw-pr-[40px]" : ""}`}
                     />
-                    <div className="tw-absolute tw-py-2 tw-right-2 tw-top-0 tw-h-full tw-flex tw-items-start tw-justify-center">
-                      <CreateDropEmojiPicker />
-                    </div>
+                    <CreateDropEmojiPicker />
                   </div>
                 }
                 placeholder={

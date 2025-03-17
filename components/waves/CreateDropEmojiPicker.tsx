@@ -6,8 +6,10 @@ import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
+import useCapacitor from "../../hooks/useCapacitor";
 
 const CreateDropEmojiPicker: FC = () => {
+  const { isCapacitor } = useCapacitor();
   const [editor] = useLexicalComposerContext();
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -59,8 +61,12 @@ const CreateDropEmojiPicker: FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showPicker]);
 
+  if (isCapacitor) {
+    return null;
+  }
+
   return (
-    <>
+    <div className="tw-absolute tw-py-2 tw-right-2 tw-top-0 tw-h-full tw-flex tw-items-start tw-justify-center">
       <button
         ref={buttonRef}
         className="tw-border-none tw-rounded tw-bg-transparent hover:tw-bg-[rgb(40,40,40)] tw-text-xl tw-opacity-50 hover:tw-opacity-100 tw-transition tw-duration-150"
@@ -83,7 +89,7 @@ const CreateDropEmojiPicker: FC = () => {
           </div>,
           document.body
         )}
-    </>
+    </div>
   );
 };
 

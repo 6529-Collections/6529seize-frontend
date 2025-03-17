@@ -64,6 +64,7 @@ import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import EnterKeyPlugin from "../lexical/plugins/enter/EnterKeyPlugin";
 import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
 import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -153,6 +154,7 @@ const CreateDropContent = forwardRef<
     const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
     const showToggleViewButton = viewType === CreateDropViewType.COMPACT;
+    const { isCapacitor } = useCapacitor();
 
     const getPlaceHolderText = () => {
       switch (type) {
@@ -272,6 +274,9 @@ const CreateDropContent = forwardRef<
               />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
+              {isCapacitor && showToggleViewButton && (
+                <ToggleViewButtonPlugin onViewClick={onViewClick} />
+              )}
               <ListPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <TabIndentationPlugin />
@@ -299,6 +304,7 @@ const CreateDropContent = forwardRef<
           setFiles={setFiles}
           breakIntoStorm={breakIntoStorm}
           toggleViewButton={
+            !isCapacitor &&
             showToggleViewButton && (
               <ToggleViewButtonPlugin onViewClick={onViewClick} />
             )
