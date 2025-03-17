@@ -15,7 +15,7 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
   const containerClassName = `tw-h-[calc(100vh-9.5rem)] tw-overflow-y-auto no-scrollbar tw-space-y-4 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-pt-2 ${
     capacitor.isIos
       ? "tw-pb-[calc(4rem+80px)]"
-      : capacitor.isAndroid
+      : capacitor.isAndroid && !capacitor.keyboardVisible
       ? "tw-pb-[70px]"
       : ""
   }`;
