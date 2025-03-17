@@ -164,9 +164,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
               {/* Right side: Tabs and action button for memes wave */}
               {isMemesWave && (
                 <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-4">
-                  <h2 className="tw-text-xl tw-font-semibold">
-                    Weekly Rolling Wave Long-Term and cool
-                  </h2>
+                  <div className="tw-text-xl tw-font-semibold">
+                    Weekly Rolling Wave
+                  </div>
                   <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-4">
                     <MyStreamWaveDesktopTabs
                       activeTab={activeContentTab}
@@ -193,6 +193,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
                           className="tw-w-4 tw-h-4 tw-flex-shrink-0"
                           viewBox="0 0 24 24"
                           fill="none"
+                          aria-hidden="true"
                           xmlns="http://www.w3.org/2000/svg"
                         >
                           <path
