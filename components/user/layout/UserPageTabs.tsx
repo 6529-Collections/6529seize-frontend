@@ -102,7 +102,7 @@ export default function UserPageTabs() {
 
   const getTabsToShow = () => {
     let allTabs = Object.values(UserPageTabType);
-    if (capacitor.platform === "ios") {
+    if (capacitor.isIos) {
       allTabs = allTabs.filter((tab) => tab !== UserPageTabType.SUBSCRIPTIONS);
     }
     if (showWaves) return allTabs;

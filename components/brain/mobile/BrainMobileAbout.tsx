@@ -37,9 +37,9 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   const capacitor = useCapacitor();
 
   const containerClassName = `tw-h-[calc(100vh-9.5rem)] tw-px-2 sm:tw-px-4 md:tw-px-6 tw-overflow-y-auto no-scrollbar tw-divide-y tw-divide-solid tw-divide-iron-800 tw-divide-x-0${
-    capacitor.platform === "ios"
+    capacitor.isIos
       ? "tw-pb-[calc(4rem+80px)]"
-      : capacitor.platform === "android"
+      : capacitor.isAndroid
       ? "tw-pb-[70px]"
       : ""
   }`;
