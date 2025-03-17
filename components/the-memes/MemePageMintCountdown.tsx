@@ -55,7 +55,6 @@ export default function MemePageMintCountdown(
   };
 
   const getButtons = () => {
-    const hideMintOnSeize = platform === "ios";
     const buttons: MemePageMintBtn[] = [];
     if (!isIos) {
       buttons.push({
