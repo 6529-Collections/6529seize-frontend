@@ -93,6 +93,7 @@ export default function UserPageHeaderEditName({
     const body: ApiCreateOrUpdateProfileRequest = {
       handle: userName,
       classification: profile.profile?.classification,
+      pfp_url: profile.profile?.pfp_url,
     };
 
     if (profile.profile?.banner_1) {
@@ -101,6 +102,10 @@ export default function UserPageHeaderEditName({
 
     if (profile.profile?.banner_2) {
       body.banner_2 = profile.profile?.banner_2;
+    }
+
+    if (profile.profile?.pfp_url) {
+      body.pfp_url = profile.profile?.pfp_url;
     }
 
     await updateUser.mutateAsync(body);

@@ -110,6 +110,10 @@ export default function UserPageSetUpProfile({
       classification,
     };
 
+    if (profile.profile?.pfp_url) {
+      body.pfp_url = profile.profile?.pfp_url;
+    }
+
     await updateUser.mutateAsync(body);
   };
 

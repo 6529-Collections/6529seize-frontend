@@ -96,6 +96,10 @@ export default function UserPageHeaderEditClassification({
       body.banner_2 = profile.profile.banner_2;
     }
 
+    if (profile.profile?.pfp_url) {
+      body.pfp_url = profile.profile?.pfp_url;
+    }
+
     await updateUser.mutateAsync(body);
   };
 

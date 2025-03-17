@@ -102,10 +102,10 @@ export default function UserPageHeaderEditPfp({
           pfp_url: ipfs,
         };
         if (profile.profile?.banner_1) {
-          ipfsBody.banner_1 = ipfs;
+          ipfsBody.banner_1 = profile.profile?.banner_1;
         }
         if (profile.profile?.banner_2) {
-          ipfsBody.banner_2 = ipfs;
+          ipfsBody.banner_2 = profile.profile?.banner_2;
         }
         const response = await commonApiPost<
           ApiCreateOrUpdateProfileRequest,
