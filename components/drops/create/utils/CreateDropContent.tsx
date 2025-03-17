@@ -275,7 +275,7 @@ const CreateDropContent = forwardRef<
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
               {isCapacitor && showToggleViewButton && (
-                <ToggleViewButtonPlugin onViewClick={onViewClick} />
+                <ToggleViewButtonPlugin onViewClick={onViewClick} absolute />
               )}
               <ListPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
