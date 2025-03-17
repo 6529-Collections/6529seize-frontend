@@ -7,6 +7,7 @@ interface WaveDropsNonReverseContainerProps {
   readonly newItemsCount: number;
   readonly isFetchingNextPage: boolean;
   readonly disableAutoPosition?: boolean;
+  readonly onUserScroll?: (direction: 'up' | 'down', isAtBottom: boolean) => void;
 }
 
 /**
@@ -25,6 +26,7 @@ export const WaveDropsNonReverseContainer = forwardRef<
       newItemsCount,
       isFetchingNextPage,
       disableAutoPosition,
+      onUserScroll,
     },
     ref
   ) => {
@@ -137,6 +139,17 @@ export const WaveDropsNonReverseContainer = forwardRef<
 
         // Determine if we're scrolling up or down
         const direction = currentScrollTop > lastScrollTop ? "down" : "up";
+        
+        // Calculate if we're at the bottom for user scroll detection
+        const isCurrentlyAtBottom = Math.abs(
+          currentScrollTop - (currentTarget.scrollHeight - currentTarget.clientHeight)
+        ) < 5;
+        
+        // Report user scroll with direction and bottom status
+        if (onUserScroll) {
+          onUserScroll(direction, isCurrentlyAtBottom);
+        }
+        
         setLastScrollTop(currentScrollTop);
 
         // In a chat interface, we only load older content when scrolling up
