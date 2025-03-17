@@ -75,6 +75,7 @@ export default function DropListItemContentNft({
   const nftHref = getNftHref();
   const target = getTarget();
 
+
   return (
     <Link
       onClick={(e) => e.stopPropagation()}

@@ -53,6 +53,7 @@ import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin
 import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePlugin";
 import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -219,28 +220,29 @@ const CreateDropInput = forwardRef<
     }, []);
 
     return (
-      <div
-        className="tailwind-scope"
-        ref={editorRef}
-      >
+      <div className="tailwind-scope" ref={editorRef}>
         <LexicalComposer initialConfig={editorConfig}>
           <div className="tw-flex tw-items-end tw-gap-x-3">
             <div className="tw-relative tw-w-full">
               <RichTextPlugin
                 contentEditable={
-                  <ContentEditable
-                    className={`tw-max-h-[40vh] editor-input-one-liner tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
-                    tw-pl-3 tw-py-2.5 tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 ${
-                      submitting ? "tw-opacity-50 tw-cursor-default" : ""
-                    }`}
-                  />
+                  <div className="tw-relative">
+                    <ContentEditable
+                      className={`tw-pr-[40px] tw-max-h-[40vh] editor-input-one-liner tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-950 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+        tw-pl-3 tw-py-2.5 tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 ${
+          submitting ? "tw-opacity-50 tw-cursor-default" : ""
+        }`}
+                    />
+                    <div className="tw-absolute tw-py-2 tw-right-2 tw-top-0 tw-h-full tw-flex tw-items-start tw-justify-center">
+                      <CreateDropEmojiPicker />
+                    </div>
+                  </div>
                 }
                 placeholder={
                   <span
                     className={`editor-placeholder ${
                       submitting ? "tw-opacity-50" : ""
-                    }`}
-                  >
+                    }`}>
                     {getPlaceHolderText()}
                   </span>
                 }

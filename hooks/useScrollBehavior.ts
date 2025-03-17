@@ -7,8 +7,11 @@ export const useScrollBehavior = () => {
 
   const scrollToBottom = useCallback(() => {
     if (scrollContainerRef.current) {
+      // In our non-reversed container, bottom is the actual bottom
+      const scrollHeight = scrollContainerRef.current.scrollHeight;
+      const clientHeight = scrollContainerRef.current.clientHeight;
       scrollContainerRef.current.scrollTo({
-        top: 0,
+        top: scrollHeight - clientHeight,
         behavior: "smooth",
       });
     }
@@ -16,9 +19,9 @@ export const useScrollBehavior = () => {
 
   const scrollToTop = useCallback(() => {
     if (scrollContainerRef.current) {
-      const scrollHeight = scrollContainerRef.current.scrollHeight;
+      // In our non-reversed container, top is the actual top
       scrollContainerRef.current.scrollTo({
-        top: -scrollHeight,
+        top: 0,
         behavior: "smooth",
       });
     }
@@ -28,8 +31,11 @@ export const useScrollBehavior = () => {
     const container = scrollContainerRef.current;
     if (container) {
       const { scrollTop, scrollHeight, clientHeight } = container;
-      const newIsAtBottom = scrollTop === 0;
-      const newIsAtTop = scrollTop === scrollHeight - clientHeight;
+      
+      // In our non-reversed container, these are flipped from the previous logic
+      const newIsAtBottom = Math.abs(scrollTop - (scrollHeight - clientHeight)) < 5;
+      const newIsAtTop = scrollTop === 0;
+      
       setIsAtBottom(newIsAtBottom);
       setIsAtTop(newIsAtTop);
     }

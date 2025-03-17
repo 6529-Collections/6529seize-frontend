@@ -63,6 +63,7 @@ import CreateDropActionsRow from "./CreateDropActionsRow";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import EnterKeyPlugin from "../lexical/plugins/enter/EnterKeyPlugin";
 import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
+import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -236,14 +237,19 @@ const CreateDropContent = forwardRef<
             <div className="tw-relative tw-w-full">
               <RichTextPlugin
                 contentEditable={
-                  <ContentEditable
-                    className={`${
-                      viewType === CreateDropViewType.COMPACT
-                        ? "editor-input-one-liner tw-pr-12"
-                        : "editor-input-multi-liner"
-                    } tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
+                  <div className="tw-relative">
+                    <ContentEditable
+                      className={`${
+                        viewType === CreateDropViewType.COMPACT
+                          ? "editor-input-one-liner tw-pr-12"
+                          : "editor-input-multi-liner"
+                      } tw-resize-none tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-iron-900 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-md tw-leading-6 tw-transition tw-duration-300 tw-ease-out 
                   tw-pl-3 tw-py-3`}
-                  />
+                    />
+                    <div className="tw-absolute tw-py-2 tw-right-2 tw-top-0 tw-h-full tw-flex tw-items-start tw-justify-center">
+                      <CreateDropEmojiPicker />
+                    </div>
+                  </div>
                 }
                 placeholder={
                   <span className="editor-placeholder">
@@ -266,9 +272,9 @@ const CreateDropContent = forwardRef<
               />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
-              {showToggleViewButton && (
+              {/* {showToggleViewButton && (
                 <ToggleViewButtonPlugin onViewClick={onViewClick} />
-              )}
+              )} */}
               <ListPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <TabIndentationPlugin />
@@ -295,6 +301,11 @@ const CreateDropContent = forwardRef<
           isStormMode={isStormMode}
           setFiles={setFiles}
           breakIntoStorm={breakIntoStorm}
+          toggleViewButton={
+            showToggleViewButton && (
+              <ToggleViewButtonPlugin onViewClick={onViewClick} />
+            )
+          }
         />
         {(!!missingMedia.length || !!missingMetadata.length) && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">
