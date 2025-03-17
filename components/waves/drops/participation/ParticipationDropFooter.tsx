@@ -21,7 +21,7 @@ export default function ParticipationDropFooter({
       )}
 
       {!!drop.raters_count && (
-        <div className="tw-px-4 tw-ml-[3.25rem] tw-pb-4 tw-border-t tw-border-iron-800/30">
+        <div className="tw-px-4 tw-ml-[3.25rem] tw-pb-4">
           <ParticipationDropRatings drop={drop} rank={drop.rank} />
         </div>
       )}

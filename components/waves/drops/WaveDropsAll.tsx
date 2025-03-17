@@ -325,7 +325,7 @@ export default function WaveDropsAll({
           isFetchingNextPage={isFetchingNextPage}
           onTopIntersection={handleTopIntersection}
           disableAutoPosition={disableAutoPosition}
-          onUserScroll={handleUserScroll}>
+        >
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
             <DropsList
               scrollContainerRef={scrollContainerRef}

@@ -24,7 +24,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   return (
-    <div className="tw-mt-6 md:tw-mt-8 tw-flex tw-flex-col tw-gap-y-4 tw-@container">
+    <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-y-4 tw-@container">
       <div className="tw-flex tw-flex-col sm:tw-flex-row tw-items-start sm:tw-items-center tw-justify-between tw-border-t tw-border-iron-700/40 tw-pb-4">
         <div className="tw-hidden md:tw-block">
           <h3 className="tw-text-xl md:tw-text-2xl tw-font-semibold tw-text-iron-200 tw-mb-0">

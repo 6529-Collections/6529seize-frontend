@@ -96,7 +96,7 @@ export const WaveRollingWinnersItemHeader: React.FC<
   return (
     <button
       onClick={toggleExpanded}
-      className="tw-w-full tw-flex tw-items-start sm:tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-bg-iron-900 hover:tw-bg-iron-800/50 tw-transition-colors tw-rounded-xl tw-group tw-border-0 tw-relative"
+      className="tw-w-full tw-flex tw-items-start sm:tw-items-center tw-justify-between tw-px-4 tw-py-3 tw-bg-iron-900 hover:tw-bg-iron-800/50 tw-transition-colors tw-rounded-lg tw-group tw-border-0 tw-relative"
     >
       {mobileView}
       {desktopView}

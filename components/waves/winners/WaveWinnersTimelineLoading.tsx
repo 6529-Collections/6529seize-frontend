@@ -35,20 +35,19 @@ export const WaveWinnersTimelineLoading: React.FC = () => {
         <div className="tw-absolute tw-left-[18px] tw-top-0 tw-bottom-0 tw-w-[3px] tw-bg-gradient-to-b tw-from-iron-900 tw-via-iron-700/20 tw-to-iron-900 tw-opacity-40 tw-blur-sm"></div>
         
         <div className="tw-space-y-8">
-          {/* Date headers with loading nodes */}
-          {[1, 2].map((dateGroup) => (
-            <div key={dateGroup} className="tw-relative">
-              {/* Date header loading */}
-              <div className="tw-mb-4 tw-flex tw-items-center">
-                <div className="tw-size-2.5 tw-rounded-full tw-bg-iron-600/80 tw-mr-4 tw-animate-pulse"></div>
-                <div className="tw-h-4 tw-w-36 tw-bg-iron-800/80 tw-rounded-md tw-animate-pulse"></div>
-              </div>
-              
-              <div className="tw-space-y-6 tw-ml-10">
-                {Array.from({ length: dateGroup === 1 ? 3 : 2 }).map((_, i) => renderLoadingNode(i))}
-              </div>
+          {/* Single date group with 3 loading nodes */}
+          <div className="tw-relative">
+            {/* Date header loading */}
+            <div className="tw-mb-4 tw-flex tw-items-center">
+              <div className="tw-size-2.5 tw-rounded-full tw-bg-iron-600/80 tw-mr-4 tw-animate-pulse"></div>
+              <div className="tw-h-4 tw-w-36 tw-bg-iron-800/80 tw-rounded-md tw-animate-pulse"></div>
             </div>
-          ))}
+            
+            <div className="tw-space-y-6 tw-ml-10">
+              {/* Show only 3 loading nodes */}
+              {Array.from({ length: 3 }).map((_, i) => renderLoadingNode(i))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -45,86 +45,90 @@ export const WaveWinnersTimelineItem: React.FC<
         </div>
       </div>
 
-      <div
-        className={`tw-rounded-lg tw-overflow-hidden ${
-          hasWinners ? "tw-bg-iron-900" : ""
-        } ${
-          hasWinners && isInteractive
-            ? "tw-transition-colors hover:tw-bg-iron-800/70 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-mx-4"
-            : ""
-        } ${
-          hasWinners
-            ? "tw-border-l-2 tw-border-green/40 tw-border-y-0 tw-border-r-0"
-            : ""
-        }`}
-      >
-        <button
-          onClick={toggleExpanded}
-          disabled={!isInteractive}
-          className={`tw-w-full tw-text-left tw-px-5 ${
-            hasWinners ? "tw-py-3" : ""
-          } tw-flex tw-items-center tw-justify-between tw-bg-transparent tw-border-0 ${
-            isInteractive ? "tw-cursor-pointer" : "tw-cursor-default"
+      <div>
+        <div
+          className={`tw-rounded-lg ${
+            hasWinners ? "tw-bg-iron-900" : ""
+          } ${
+            hasWinners && isInteractive
+              ? "tw-transition-colors hover:tw-bg-iron-800/70 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-mx-4"
+              : ""
+          } ${
+            hasWinners
+              ? "tw-border-l-2 tw-border-green/40 tw-border-y-0 tw-border-r-0"
+              : ""
           }`}
         >
-          <div className="tw-flex tw-flex-col">
-            <div className="tw-flex tw-items-center tw-gap-3">
-              <span
-                className={`tw-text-base tw-font-medium ${
-                  hasWinners ? "tw-text-white/90" : "tw-text-iron-400"
-                }`}
-              >
-                Winners Round {roundNumber}
-              </span>
-              <span className="tw-text-sm tw-text-iron-400">{time}</span>
-              {hasWinners ? (
-                <span className="tw-inline-flex tw-items-center tw-py-0.5 tw-px-2 tw-rounded-md tw-bg-iron-800 tw-text-xs tw-font-medium tw-text-green">
-                  {point.winners.length} winner
-                  {point.winners.length !== 1 ? "s" : ""}
+          <button
+            onClick={toggleExpanded}
+            disabled={!isInteractive}
+            className={`tw-w-full tw-text-left tw-px-5 ${
+              hasWinners ? "tw-py-3" : ""
+            } tw-flex tw-items-center tw-justify-between tw-bg-transparent tw-border-0 ${
+              isInteractive ? "tw-cursor-pointer" : "tw-cursor-default"
+            }`}
+          >
+            <div className="tw-flex tw-flex-col">
+              <div className="tw-flex tw-items-center tw-gap-3">
+                <span
+                  className={`tw-text-base tw-font-medium ${
+                    hasWinners ? "tw-text-white/90" : "tw-text-iron-400"
+                  }`}
+                >
+                  Winners Round {roundNumber}
                 </span>
-              ) : (
-                <span className="tw-text-xs tw-text-iron-500">
-                  No winners in this round
-                </span>
-              )}
+                <span className="tw-text-sm tw-text-iron-400">{time}</span>
+                {hasWinners ? (
+                  <span className="tw-inline-flex tw-items-center tw-py-0.5 tw-px-2 tw-rounded-md tw-bg-iron-800 tw-text-xs tw-font-medium tw-text-green">
+                    {point.winners.length} winner
+                    {point.winners.length !== 1 ? "s" : ""}
+                  </span>
+                ) : (
+                  <span className="tw-text-xs tw-text-iron-500">
+                    No winners in this round
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
 
-          {isInteractive && (
-            <div
-              className={`tw-h-7 tw-w-7 tw-rounded-full tw-flex tw-items-center tw-justify-center 
-              tw-bg-iron-800 tw-transition-all
-              ${isExpanded ? "tw-rotate-180 tw-bg-iron-700" : ""}`}
-            >
-              <svg
-                className="tw-size-4 tw-text-iron-300 tw-flex-shrink-0"
-                fill="none"
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            {isInteractive && (
+              <div
+                className={`tw-h-7 tw-w-7 tw-rounded-full tw-flex tw-items-center tw-justify-center 
+                tw-bg-iron-800 tw-transition-all
+                ${isExpanded ? "tw-rotate-180 tw-bg-iron-700" : ""}`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-          )}
-        </button>
+                <svg
+                  className="tw-size-4 tw-text-iron-300 tw-flex-shrink-0"
+                  fill="none"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            )}
+          </button>
+        </div>
 
         {isInteractive && (
           <AnimatedAccordionContent isVisible={isExpanded}>
-            <div className="tw-pb-4 tw-space-y-4 tw-bg-black">
-              {hasWinners ? (
-                <WaveWinnersDrops
-                  winners={point.winners}
-                  onDropClick={onDropClick}
-                  wave={wave}
-                  isLoading={false}
-                />
-              ) : null}
+            <div className="tw-rounded-lg tw-overflow-hidden tw-mx-4">
+              <div className="tw-pb-4 tw-space-y-4 tw-bg-black tw-mt-3">
+                {hasWinners ? (
+                  <WaveWinnersDrops
+                    winners={point.winners}
+                    onDropClick={onDropClick}
+                    wave={wave}
+                    isLoading={false}
+                  />
+                ) : null}
+              </div>
             </div>
           </AnimatedAccordionContent>
         )}

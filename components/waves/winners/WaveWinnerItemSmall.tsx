@@ -6,8 +6,8 @@ import { formatNumberWithCommas, getTimeAgoShort } from "../../../helpers/Helper
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
-import { TrophyIcon } from "./icons/TrophyIcon";
-import { rankColors, getRankGradientClasses } from "./utils/rankingStyles";
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import { getRankGradientClasses } from "./utils/rankingStyles";
 
 interface WaveWinnerItemSmallProps {
   readonly drop: ExtendedDrop;
@@ -20,11 +20,6 @@ export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
   ({ drop, onDropClick, wave, rank }) => {
     // Use provided rank or fall back to drop.rank
     const effectiveRank = rank ?? drop.rank;
-    
-    const rankStyle =
-      effectiveRank && effectiveRank <= 3
-        ? rankColors[effectiveRank as keyof typeof rankColors]
-        : null;
 
     const hasUserVoted =
       drop.context_profile_context?.rating !== undefined &&
@@ -33,11 +28,15 @@ export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
     const userVote = drop.context_profile_context?.rating ?? 0;
     const isNegativeVote = userVote < 0;
 
+    // Gets the text color to use for rank-based styling (same as in WaveSmallLeaderboardTopThreeDrop)
+    const getRankTextColor = (rank: number | null): string | null => {
+      if (rank === 1) return "#E8D48A";
+      if (rank === 2) return "#DDDDDD";
+      if (rank === 3) return "#CD7F32";
+      return "#60606C";
+    };
+    
     const getRatingStyle = () => {
-      if (rankStyle) {
-        return rankStyle.text;
-      }
-      
       if (drop.rating >= 0) {
         return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
       }
@@ -48,10 +47,6 @@ export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
     const ratingStyle = getRatingStyle();
 
     const getUserVoteStyle = () => {
-      if (effectiveRank && effectiveRank <= 3 && rankStyle) {
-        return rankStyle.text;
-      }
-      
       if (isNegativeVote) {
         return "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
       }
@@ -70,49 +65,18 @@ export const WaveWinnerItemSmall = memo<WaveWinnerItemSmallProps>(
         onClick={handleDropClick}
         className="tw-w-full tw-text-left tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-scale-[1.01] tw-transform tw-transition-all tw-duration-300 tw-ease-out"
       >
-        <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out">
-          {effectiveRank && effectiveRank <= 3 && rankStyle && (
-            <div className="tw-absolute tw-inset-0">
-              {(() => {
-                const classes = getRankGradientClasses(effectiveRank);
-                return (
-                  <>
-                    <div
-                      className={`tw-absolute tw-inset-x-0 tw-top-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent ${classes.borderTop}`}
-                    />
-                    <div
-                      className={`tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-px tw-bg-gradient-to-r tw-from-transparent ${classes.borderTop}`}
-                    />
-                    <div
-                      className={`tw-absolute tw-inset-y-0 tw-right-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-${classes.borderSide} tw-to-transparent`}
-                    />
-                    <div
-                      className={`tw-absolute tw-inset-y-0 tw-left-0 tw-w-px tw-bg-gradient-to-b tw-from-transparent tw-via-${classes.borderSide} tw-to-transparent`}
-                    />
-                  </>
-                );
-              })()}
-            </div>
-          )}
+        <div 
+          className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out"
+          >
           <div className="tw-flex tw-flex-col tw-relative">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
               <div className="tw-flex tw-items-center tw-gap-x-3">
                 {effectiveRank && (
                   <div>
-                    {rankStyle ? (
-                      <div
-                        className={`${rankStyle.shadow} tw-ring-1 ${rankStyle.bg} ${rankStyle.ring} tw-rounded-xl tw-h-7 tw-w-full tw-px-2.5 ${rankStyle.text} tw-font-medium tw-text-xs tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 desktop-hover:${rankStyle.hover} tw-transition-all tw-duration-200`}
-                      >
-                        <TrophyIcon />
-                        <span className={`${rankStyle.dropShadow} tw-text-sm`}>
-                          #{effectiveRank}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="tw-font-medium tw-text-sm tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-h-7 tw-w-full tw-px-2.5 tw-rounded-xl tw-bg-iron-800 tw-backdrop-blur-sm tw-ring-1 tw-ring-iron-700">
-                        #{effectiveRank}
-                      </div>
-                    )}
+                    <WinnerDropBadge 
+                      rank={effectiveRank}
+                      // Not passing decisionTime to keep the badge compact
+                    />
                   </div>
                 )}
               </div>

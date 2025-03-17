@@ -31,7 +31,7 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
   }
 
   return (
-    <div className="tw-space-y-3 tw-pt-4">
+    <div className="tw-space-y-3">
       {winners.map((winner) => (
         <WaveWinnersDrop
           key={winner.drop.id}

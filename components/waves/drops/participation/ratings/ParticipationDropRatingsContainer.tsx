@@ -27,7 +27,7 @@ export default function ParticipationDropRatingsContainer({
 
   return (
     <div className="tw-flex tw-items-center tw-justify-between">
-      <div className="tw-flex tw-items-start tw-gap-8">
+      <div className="tw-flex tw-items-center tw-gap-x-6">
         <ParticipationDropRatingsTotalSection
           drop={drop}
           rank={rank}
