@@ -35,8 +35,7 @@ export default function NotificationIdentitySubscribed({
         <span className="tw-text-sm tw-font-normal tw-text-iron-50">
           <Link
             href={`/${notification.related_identity.handle}`}
-            className="tw-no-underline tw-font-semibold"
-          >
+            className="tw-no-underline tw-font-semibold">
             {notification.related_identity.handle}
           </Link>{" "}
           started following you

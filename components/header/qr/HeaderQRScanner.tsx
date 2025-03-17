@@ -27,7 +27,6 @@ export default function HeaderQRScanner({
 
   useEffect(() => {
     if (typeof CapacitorBarcodeScanner?.scanBarcode === "function") {
-      console.log("CapacitorBarcodeScanner is available");
       setScannerAvailable(true);
     } else {
       console.log("CapacitorBarcodeScanner is not available");

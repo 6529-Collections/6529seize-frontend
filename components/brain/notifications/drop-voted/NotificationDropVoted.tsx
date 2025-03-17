@@ -15,6 +15,16 @@ import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
+export const getNotificationVoteColor = (vote: number) => {
+  if (vote > 0) {
+    return "tw-text-green";
+  }
+  if (vote < 0) {
+    return "tw-text-red";
+  }
+  return "tw-text-iron-500";
+};
+
 export default function NotificationDropVoted({
   notification,
   activeDrop,
@@ -28,16 +38,6 @@ export default function NotificationDropVoted({
   readonly onQuote: (param: DropInteractionParams) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }) {
-  const getVoteColor = (vote: number) => {
-    if (vote > 0) {
-      return "tw-text-green";
-    }
-    if (vote < 0) {
-      return "tw-text-red";
-    }
-    return "tw-text-iron-500";
-  };
-
   const router = useRouter();
   const onReplyClick = (serialNo: number) => {
     router.push(
@@ -46,7 +46,9 @@ export default function NotificationDropVoted({
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
+    router.push(
+      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+    );
   };
 
   return (
@@ -76,23 +78,21 @@ export default function NotificationDropVoted({
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">
               <Link
                 href={`/${notification.related_identity.handle}`}
-                className="tw-no-underline tw-font-semibold"
-              >
+                className="tw-no-underline tw-font-semibold">
                 {notification.related_identity.handle}
               </Link>{" "}
               rated
               <span
-                className={`${getVoteColor(
+                className={`${getNotificationVoteColor(
                   notification.additional_context.vote
-                )} tw-pl-1 tw-font-medium`}
-              >
+                )} tw-pl-1 tw-font-medium`}>
                 {notification.additional_context.vote > 0 && "+"}
                 {numberWithCommas(notification.additional_context.vote)}
+              </span>{" "}
+              <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+                <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+                {getTimeAgoShort(notification.created_at)}
               </span>
-            </span>
-            <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-            <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-              {getTimeAgoShort(notification.created_at)}
             </span>
           </div>
         </div>

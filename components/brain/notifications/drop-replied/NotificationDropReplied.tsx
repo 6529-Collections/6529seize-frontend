@@ -35,11 +35,13 @@ export default function NotificationDropReplied({
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
+    router.push(
+      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+    );
   };
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
-      <div className="tw-w-full tw-flex tw-flex-col tw-space-y-3">
+      <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
         <div className="tw-inline-flex tw-items-center">
           <div className="sm:tw-hidden tw-mr-2 tw-size-6 md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
@@ -49,8 +51,7 @@ export default function NotificationDropReplied({
               aria-hidden="true"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor"
-            >
+              stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -77,15 +78,14 @@ export default function NotificationDropReplied({
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">
               <Link
                 href={`/${notification.related_drops[1].author.handle}`}
-                className="tw-no-underline tw-font-semibold"
-              >
+                className="tw-no-underline tw-font-semibold">
                 {notification.related_drops[1].author.handle}
               </Link>{" "}
-              replied
-            </span>
-            <div className="tw-w-1 tw-h-1 tw-rounded-full tw-bg-iron-600"></div>
-            <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
-              {getTimeAgoShort(notification.created_at)}
+              replied{" "}
+              <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+                <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+                {getTimeAgoShort(notification.created_at)}
+              </span>
             </span>
           </div>
         </div>

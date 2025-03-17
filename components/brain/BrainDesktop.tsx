@@ -13,14 +13,20 @@ import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useLayout } from "./my-stream/layout/LayoutContext";
+import Cookies from "js-cookie";
 
 interface Props {
   readonly children: ReactNode;
 }
 
+const SIDEBAR_COLLAPSED_COOKIE = "brain-right-sidebar-collapsed";
+
 export const BrainDesktop: React.FC<Props> = ({ children }) => {
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const cookie = Cookies.get(SIDEBAR_COLLAPSED_COOKIE);
+    return cookie ? JSON.parse(cookie) : false;
+  });
   const [showRightSidebar, setShowRightSidebar] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
   
@@ -42,9 +48,14 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
       setShowRightSidebar(true);
     } else {
       setShowRightSidebar(false);
-      setIsCollapsed(false);
     }
   }, [router.query.wave]);
+
+  useEffect(() => {
+    Cookies.set(SIDEBAR_COLLAPSED_COOKIE, isCollapsed, {
+      expires: 365,
+    });
+  }, [isCollapsed]);
 
   const onDropClose = () => {
     const currentQuery = { ...router.query };
@@ -99,8 +110,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
               {isDropOpen && (
                 <div
                   className="tw-absolute tw-inset-0 tw-z-[1000]"
-                  style={{ transition: "none" }}
-                >
+                  style={{ transition: "none" }}>
                   <BrainDesktopDrop
                     drop={{
                       ...drop,

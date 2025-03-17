@@ -34,7 +34,10 @@ import { createBreakpoint } from "react-use";
 import "tippy.js/dist/tippy.css";
 import { ApiDropType } from "../../generated/models/ApiDropType";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
-import { ActiveDropAction, ActiveDropState } from "../../types/dropInteractionTypes";
+import {
+  ActiveDropAction,
+  ActiveDropState,
+} from "../../types/dropInteractionTypes";
 import { ApiReplyToDropResponse } from "../../generated/models/ApiReplyToDropResponse";
 import { CreateDropDropModeToggle } from "./CreateDropDropModeToggle";
 import { CreateDropSubmit } from "./CreateDropSubmit";
@@ -42,7 +45,10 @@ import { DropPrivileges } from "../../hooks/useDropPriviledges";
 
 import { ApiWaveCreditType } from "../../generated/models/ApiWaveCreditType";
 import { useDropMetadata } from "./hooks/useDropMetadata";
-import { getMissingRequirements, MissingRequirements } from "./utils/getMissingRequirements";
+import {
+  getMissingRequirements,
+  MissingRequirements,
+} from "./utils/getMissingRequirements";
 
 export type CreateDropMetadataType =
   | {
@@ -890,8 +896,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+            transition={{ duration: 0.3 }}>
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}
