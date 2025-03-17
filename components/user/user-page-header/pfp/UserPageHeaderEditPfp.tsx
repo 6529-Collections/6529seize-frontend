@@ -107,6 +107,9 @@ export default function UserPageHeaderEditPfp({
         if (profile.profile?.banner_2) {
           ipfsBody.banner_2 = ipfs;
         }
+        if (profile.profile?.pfp_url) {
+          ipfsBody.pfp_url = profile.profile?.pfp_url;
+        }
         const response = await commonApiPost<
           ApiCreateOrUpdateProfileRequest,
           IProfileAndConsolidations
