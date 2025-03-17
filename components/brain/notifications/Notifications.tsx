@@ -26,7 +26,7 @@ export default function Notifications() {
     `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)] ${
       capacitor.isIos
         ? "tw-pb-[calc(4rem+80px)]"
-        : capacitor.isAndroid
+        : capacitor.isAndroid && !capacitor.keyboardVisible
         ? "tw-pb-[70px]"
         : ""
     }` as const;
