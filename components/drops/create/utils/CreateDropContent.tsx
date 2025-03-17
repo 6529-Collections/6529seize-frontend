@@ -272,9 +272,6 @@ const CreateDropContent = forwardRef<
               />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
-              {/* {showToggleViewButton && (
-                <ToggleViewButtonPlugin onViewClick={onViewClick} />
-              )} */}
               <ListPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <TabIndentationPlugin />
