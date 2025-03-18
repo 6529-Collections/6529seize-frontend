@@ -21,6 +21,7 @@ import {
   SeizeLinkInfo,
 } from "../../../../helpers/SeizeLinkParser";
 import { EMOJI_MAP } from "../../../../6529-emoji";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -40,14 +41,15 @@ function DropPartMarkdown({
   referencedNfts,
   partContent,
   onQuoteClick,
-  textSize = "md",
+  textSize,
 }: DropPartMarkdownProps) {
+  const isMobile = useIsMobileScreen();
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
-        return "tw-text-sm";
+        return isMobile ? "tw-text-xs" : "tw-text-sm";
       default:
-        return "tw-text-md";
+        return isMobile ? "tw-text-sm" : "tw-text-md";
     }
   })();
 

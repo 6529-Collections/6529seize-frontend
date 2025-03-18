@@ -75,7 +75,7 @@ export default function CommunityNerdPage(props: any) {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container fluid className={styles.mainContainer}>
+        <Container fluid>
           <Row>
             <Col>
               <Leaderboard focus={focus} setFocus={setFocus} />

@@ -36,7 +36,7 @@
   z-index: 10;
 }
 
-.capacitorHeaderRowContainerLandscape {
+.rowContainer {
   padding-right: max(
     calc(env(safe-area-inset-left) - calc(var(--bs-gutter-x) * 0.5)),
     calc(var(--bs-gutter-x) * 0.5)
@@ -327,12 +327,12 @@
   font-size: larger;
   z-index: 600;
   position: relative;
-  min-height: 60px;
+  min-height: 70px;
   background-color: $bg-color-1;
 }
 
 .headerRowSmall {
-  min-height: 60px;
+  min-height: 70px;
 }
 
 .logoIconSmall {
