@@ -230,13 +230,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
 
         {/* Voting section - spanning both columns */}
         {canShowVote && (
-          <div className="tw-p-5 tw-border-t tw-border-iron-800/50">
-            <div className="tw-flex tw-items-center tw-justify-between">
-              <h4 className="tw-text-sm tw-font-medium tw-text-iron-300 tw-uppercase tw-tracking-wider">
-                Vote for this artwork
-              </h4>
-              <SingleWaveDropVote drop={drop} />
-            </div>
+          <div className="tw-px-5 tw-pb-5 tw-pt-5 tw-mt-5 tw-border-t tw-border-iron-800/50 tw-border-solid tw-border-x-0 tw-border-b-0">
+            <h4 className="tw-text-xs tw-font-medium tw-text-iron-300 tw-uppercase tw-tracking-wider">
+              Vote for this artwork
+            </h4>
+            <SingleWaveDropVote drop={drop} />
           </div>
         )}
       </div>
