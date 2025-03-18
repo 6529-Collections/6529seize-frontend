@@ -27,17 +27,10 @@ const CreateDropEmojiPicker: FC = () => {
       emojiText = `:${emoji.id}:`;
     }
     if (emojiText) {
-      editor.update(
-        () => {
-          const emojiNode = $createTextNode(emojiText);
-          $insertNodes([emojiNode]);
-        },
-        {
-          onUpdate: () => {
-            setTimeout(() => editor.focus(), 100);
-          },
-        }
-      );
+      editor.update(() => {
+        const emojiNode = $createTextNode(emojiText);
+        $insertNodes([emojiNode]);
+      });
     }
     setShowPicker(false);
   };
@@ -62,7 +55,6 @@ const CreateDropEmojiPicker: FC = () => {
         !buttonRef.current.contains(event.target as Node)
       ) {
         setShowPicker(false);
-        setTimeout(() => editor.focus(), 100);
       }
     };
 
@@ -113,13 +105,7 @@ const CreateDropEmojiPicker: FC = () => {
       {isMobile && (
         <MobileWrapperDialog
           isOpen={showPicker}
-          onClose={() => {
-            setShowPicker(false);
-            setTimeout(() => editor.focus(), 100);
-          }}
-          onBeforeLeave={() => {
-            setTimeout(() => editor.focus(), 100);
-          }}>
+          onClose={() => setShowPicker(false)}>
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
             <Picker
               theme="dark"
