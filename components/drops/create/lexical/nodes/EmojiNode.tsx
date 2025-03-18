@@ -52,10 +52,9 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
   }
 
   decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
-    const emojiCategory = EMOJI_MAP.find((cat) =>
-      cat.emojis.find((e) => e.id === this.__emojiId)
+    const emoji = EMOJI_MAP.flatMap((cat) => cat.emojis).find(
+      (e) => e.id === this.__emojiId
     );
-    const emoji = emojiCategory?.emojis.find((e) => e.id === this.__emojiId);
 
     if (!emoji) {
       return <span>{`:${this.__emojiId}:`}</span>;
