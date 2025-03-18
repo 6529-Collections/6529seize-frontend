@@ -13,7 +13,6 @@ import { WaveDropCreate } from "../../waves/leaderboard/create/WaveDropCreate";
 import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderboardDrops";
 import { useWave } from "../../../hooks/useWave";
 import { useLayout } from "./layout/LayoutContext";
-import MemesLeaderboardDrops from "../../memes/drops/MemesLeaderboardDrops";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -109,27 +108,17 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Leaderboard drops - use Memes-specific component for Memes wave */}
-        {isMemesWave ? (
-          <div className="tw-mt-2">
-            <MemesLeaderboardDrops
-              wave={wave}
-              onDropClick={onDropClick}
-            />
-          </div>
-        ) : (
-          <WaveLeaderboardDrops
-            wave={wave}
-            dropsSortBy={sortBy[sort]}
-            sortDirection={sortDirection[sort]}
-            showMyDrops={showMyDrops}
-            onCreateDrop={() => {
-              if (mountedRef.current) {
-                setIsCreatingDrop(true);
-              }
-            }}
-          />
-        )}
+        <WaveLeaderboardDrops
+          wave={wave}
+          dropsSortBy={sortBy[sort]}
+          sortDirection={sortDirection[sort]}
+          showMyDrops={showMyDrops}
+          onCreateDrop={() => {
+            if (mountedRef.current) {
+              setIsCreatingDrop(true);
+            }
+          }}
+        />
       </div>
     </div>
   );
