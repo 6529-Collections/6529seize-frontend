@@ -5,6 +5,7 @@ import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
 import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
 import { WaveWinnersTimelineItem } from "./WaveWinnersTimelineItem";
 import { format } from "date-fns";
+import { WaveWinnersLoading } from "./podium/WaveWinnersLoading";
 
 interface WaveWinnersTimelineProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -27,11 +28,6 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
     });
   };
 
-  // Display message when no winners are available
-  if (decisionPoints.length === 0) {
-    return <WaveWinnersEmpty />;
-  }
-
   // Group decision points by date for better visual organization
   const groupedByDate: Record<string, ApiWaveDecision[]> = {};
 
@@ -43,6 +39,15 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
     }
     groupedByDate[dateKey].push(point);
   });
+
+  if (isLoading) {
+    return <WaveWinnersLoading />;
+  }
+
+  // Display message when no winners are available
+  if (decisionPoints.length === 0) {
+    return <WaveWinnersEmpty />;
+  }
 
   return (
     <div className="tw-pt-2 lg:tw-pt-4 tw-pb-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-bg-black">
