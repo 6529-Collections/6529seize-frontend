@@ -8,9 +8,9 @@ import WaveLeaderboardRightSidebar from "./sidebar/WaveLeaderboardRightSidebar";
 import { WaveDropCreate } from "./create/WaveDropCreate";
 import { AnimatePresence, motion } from "framer-motion";
 import useCapacitor from "../../../hooks/useCapacitor";
-import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 import { WaveWinners } from "../winners/WaveWinners";
 import { WaveDropsLeaderboardSortBy, WaveDropsLeaderboardSortDirection } from "../../../hooks/useWaveDropsLeaderboard";
+import { useWaveTimers } from "../../../hooks/useWaveTimers";
 
 
 interface WaveLeaderboardProps {
@@ -30,7 +30,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
   setActiveDrop,
 }) => {
   const capacitor = useCapacitor();
-  const { votingState } = useWaveState(wave);
+  const { voting: { isCompleted } } = useWaveTimers(wave);
   const [sort, setSort] = useState<WaveLeaderboardSortType>(
     WaveLeaderboardSortType.RANK
   );
@@ -68,7 +68,7 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
         >
           {children}
 
-          {votingState === WaveVotingState.ENDED ? (
+          {isCompleted ? (
             <div className="tw-pb-4 lg:tw-pb-0">
               <WaveWinners wave={wave} onDropClick={setActiveDrop} />
             </div>

@@ -172,13 +172,11 @@ export const useDecisionPoints = (wave: ApiWave) => {
 
   return {
     isMultiDecisionWave,
-    isRollingWave,
     isDecisionDetailsOpen,
     setIsDecisionDetailsOpen,
     nextDecisionTime,
     upcomingDecisions,
     allDecisions,
-    currentCycle,
     nextDecisionTimeLeft,
   };
 };

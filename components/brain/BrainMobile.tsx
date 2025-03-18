@@ -15,7 +15,7 @@ import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
 import Notifications from "./notifications/Notifications";
 import { WaveWinners } from "../waves/winners/WaveWinners";
-import { useWaveState, WaveVotingState } from "../../hooks/useWaveState";
+import { useWaveTimers } from "../../hooks/useWaveTimers";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -45,8 +45,10 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   });
 
   const { data: wave } = useWaveData(router.query.wave as string);
-  
-  const { votingState, hasFirstDecisionPassed } = useWaveState(wave || undefined);
+  const {
+    voting: { isCompleted },
+    decisions: { firstDecisionDone },
+  } = useWaveTimers(wave);
 
   const onDropClick = (drop: ExtendedDrop) => {
     const currentQuery = { ...router.query };
@@ -74,20 +76,20 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
 
   const isRankWave = wave?.wave.type === ApiWaveType.Rank;
-  
+
   // Handle tab visibility changes
   useEffect(() => {
     if (!wave) return;
-    
+
     // If on Leaderboard tab and voting has ended, switch to Default
-    if (activeView === BrainView.LEADERBOARD && votingState === WaveVotingState.ENDED) {
-      setActiveView(BrainView.DEFAULT);
-    } 
-    // If on Winners tab and first decision hasn't passed, switch to Default
-    else if (activeView === BrainView.WINNERS && !hasFirstDecisionPassed) {
+    if (activeView === BrainView.LEADERBOARD && isCompleted) {
       setActiveView(BrainView.DEFAULT);
     }
-  }, [wave, votingState, hasFirstDecisionPassed, activeView]);
+    // If on Winners tab and first decision hasn't passed, switch to Default
+    else if (activeView === BrainView.WINNERS && !firstDecisionDone) {
+      setActiveView(BrainView.DEFAULT);
+    }
+  }, [wave, isCompleted, firstDecisionDone, activeView]);
 
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.WAVES]: (

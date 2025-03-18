@@ -4,8 +4,6 @@ import { Time } from "../helpers/time";
 import { calculateLastDecisionTime } from "../helpers/waves/time.utils";
 
 export function useWave(wave: ApiWave | null | undefined) {
-
-
   // Extract time period boundaries or default to current time
   const participationStartTime =
     wave?.participation.period?.min ?? Time.currentMillis();
@@ -34,7 +32,11 @@ export function useWave(wave: ApiWave | null | undefined) {
       startTime: participationStartTime,
       endTime: participationEndTime,
     },
-
+    decisions: {
+      multiDecision: !!wave?.wave.decisions_strategy?.subsequent_decisions.length
+    },
+    isChatWave: wave?.wave.type === "CHAT",
+    isRankWave: wave?.wave.type === "RANK",
     isMemesWave:
       wave?.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58",
   };

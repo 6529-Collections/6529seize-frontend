@@ -19,10 +19,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   onDropClick,
 }) => {
   const { isMultiDecisionWave } = useDecisionPoints(wave);
-  
-  // Check if this is the Memes wave
-  const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
-  
+   
   // Use layout context for container style
   const { waveViewStyle } = useLayout();
 

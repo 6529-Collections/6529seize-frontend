@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { useContentTab } from "../ContentTabContext";
+import { useContentTab, WaveVotingState } from "../ContentTabContext";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
 import MyStreamWaveDesktopTabs from "./MyStreamWaveDesktopTabs";
@@ -11,10 +11,11 @@ import { createBreakpoint } from "react-use";
 import { useRouter } from "next/router";
 import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
-import { useWaveState } from "../../../hooks/useWaveState";
 import { useLayout } from "./layout/LayoutContext";
 import MemesArtSubmissionModal from "../../waves/memes/MemesArtSubmissionModal";
 import PrimaryButton from "../../utils/button/PrimaryButton";
+import { useWave } from "../../../hooks/useWave";
+import { useWaveTimers } from "../../../hooks/useWaveTimers";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -26,6 +27,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
+  const { isMemesWave, isChatWave } = useWave(wave);
+  const {
+    voting: { isUpcoming, isCompleted, isInProgress },
+    decisions: { firstDecisionDone },
+  } = useWaveTimers(wave);
   const { registerRef } = useLayout();
 
   // Track mount status to prevent post-unmount updates
@@ -36,11 +42,6 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       mountedRef.current = false;
     };
   }, []);
-
-  // Get wave state information
-  const { votingState, hasFirstDecisionPassed, isRollingWave } = useWaveState(
-    wave || undefined
-  );
 
   // Create a stable key for proper remounting
   const stableWaveKey = `wave-${waveId}`;
@@ -65,27 +66,25 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     [registerRef]
   );
 
-  // Measurement function that gets the tabs height
-  const measureTabsHeight = useCallback(() => {
-    if (tabsElementRef.current) {
-      try {
-        const height = tabsElementRef.current.getBoundingClientRect().height;
-        return height > 0 ? height : null;
-      } catch (e) {
-        console.error("[MyStreamWave] Error measuring tabs height:", e);
-        return null;
-      }
-    }
-    return null;
-  }, []);
-
   // State to trigger art submission from the parent component
   const [triggerArtSubmission, setTriggerArtSubmission] = useState(false);
 
   // Update available tabs when wave changes
   useEffect(() => {
-    updateAvailableTabs(wave, votingState, hasFirstDecisionPassed);
-  }, [wave, votingState, hasFirstDecisionPassed, updateAvailableTabs]);
+    const votingState = isUpcoming
+      ? WaveVotingState.NOT_STARTED
+      : isCompleted
+      ? WaveVotingState.ENDED
+      : WaveVotingState.ONGOING;
+    updateAvailableTabs(wave, votingState, firstDecisionDone);
+  }, [
+    wave,
+    isUpcoming,
+    isCompleted,
+    isInProgress,
+    firstDecisionDone,
+    updateAvailableTabs,
+  ]);
 
   // Always switch to Chat for Chat-type waves
   useEffect(() => {
@@ -107,23 +106,6 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       { shallow: true }
     );
   };
-
-  // Initialize wave type variables with default values
-  const isMemesWave =
-    wave?.id?.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58" || false;
-  const hasDecisionPoints = Boolean(
-    wave?.wave?.decisions_strategy?.first_decision_time
-  );
-  const hasMultipleDecisions = Boolean(
-    wave?.wave?.decisions_strategy?.subsequent_decisions &&
-      wave?.wave?.decisions_strategy?.subsequent_decisions.length > 0
-  );
-  const isSimpleWave = wave
-    ? !hasDecisionPoints &&
-      !hasMultipleDecisions &&
-      !isRollingWave &&
-      !isMemesWave
-    : false;
 
   // Early return if no wave data - all hooks must be called before this
   if (!wave) {
@@ -154,7 +136,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         key={stableWaveKey}
       >
         {/* Don't render tab container for simple waves */}
-        {breakpoint !== "S" && !isSimpleWave && (
+        {breakpoint !== "S" && !isChatWave && (
           <div
             className="tw-flex-shrink-0"
             ref={setTabsRef}

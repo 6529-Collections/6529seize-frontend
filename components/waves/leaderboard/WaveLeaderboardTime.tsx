@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
 import { ExpandedTimelineContent } from "./time/ExpandedTimelineContent";
 import { isTimeZero } from "../../../helpers/waves/time.utils";
 import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
 import { CompactVotingPhaseCard } from "./time/CompactVotingPhaseCard";
+import { useWave } from "../../../hooks/useWave";
 
 interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
@@ -22,30 +23,15 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 }) => {
   // Using decision points hooks
   const {
-    isMultiDecisionWave,
-    isRollingWave,
     isDecisionDetailsOpen,
     setIsDecisionDetailsOpen,
     nextDecisionTime,
-    upcomingDecisions,
     allDecisions,
     nextDecisionTimeLeft,
   } = useDecisionPoints(wave);
+  const { decisions: { multiDecision } } = useWave(wave);
 
   const [hasNextDecision, setHasNextDecision] = useState(false);
-  
-  // Check if this is a memes wave
-  const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
-  
-  // Check if this is a wave with at least one decision point
-  const hasDecisionPoints = !!wave.wave.decisions_strategy?.first_decision_time;
-  
-  // Get wave type - showing compact cards for simple rank waves
-  const isRankWave = wave.wave.type === "RANK";
-  
-  // Only show timeline for multi-decision waves, the memes wave, or waves with past decisions
-  const shouldShowTimeline = isMultiDecisionWave || isMemesWave || 
-    (hasDecisionPoints && nextDecisionTime === null && allDecisions.some(d => d.isPast));
 
   useEffect(() => {
     setHasNextDecision(
@@ -57,7 +43,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
   return (
     <div className="tw-mb-4">
-      {shouldShowTimeline ? (
+      {multiDecision ? (
         // For multi-decision and memes waves: Show expandable timeline
         <div className="tw-rounded-lg tw-bg-iron-950 tw-overflow-hidden">
           {/* Timeline header with title and countdown */}

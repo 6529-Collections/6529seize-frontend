@@ -6,7 +6,6 @@ import {
 } from "../../../hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useWaveState } from "../../../hooks/useWaveState";
 import { WaveLeaderboardSortType } from "../../waves/leaderboard/WaveLeaderboard";
 import { WaveLeaderboardTime } from "../../waves/leaderboard/WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "../../waves/leaderboard/header/WaveleaderboardHeader";
@@ -25,7 +24,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   wave,
   onDropClick,
 }) => {
-  const { hasFirstDecisionPassed } = useWaveState(wave);
   const { isMemesWave } = useWave(wave);
   const { waveViewStyle } = useLayout(); // Get pre-calculated style from context
 

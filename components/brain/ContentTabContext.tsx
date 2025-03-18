@@ -1,14 +1,19 @@
 import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
 import { MyStreamWaveTab } from '../../types/waves.types';
 import { ApiWave } from '../../generated/models/ApiWave';
-import { WaveVotingState } from '../../hooks/useWaveState';
 import { ApiWaveType } from '../../generated/models/ApiWaveType';
+
+export enum WaveVotingState {
+  NOT_STARTED = "NOT_STARTED",
+  ONGOING = "ONGOING",
+  ENDED = "ENDED",
+}
 
 interface ContentTabContextType {
   activeContentTab: MyStreamWaveTab;
   setActiveContentTab: (tab: MyStreamWaveTab) => void;
   availableTabs: MyStreamWaveTab[];
-  updateAvailableTabs: (wave: ApiWave | undefined, votingState?: WaveVotingState, hasFirstDecisionPassed?: boolean) => void;
+  updateAvailableTabs: (wave: ApiWave | undefined, votingState?: WaveVotingState, firstDecisionDone?: boolean) => void;
 }
 
 // Create the context with a default value
