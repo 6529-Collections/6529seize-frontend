@@ -5,6 +5,8 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WinnerDrop from "./winner/WinnerDrop";
+import MemeParticipationDrop from "../../memes/drops/MemeParticipationDrop";
+import MemeWinnerDrop from "../../memes/drops/MemeWinnerDrop";
 
 export interface DropInteractionParams {
   drop: ExtendedDrop;
@@ -49,7 +51,29 @@ export default function Drop({
   showReplyAndQuote,
   parentContainerRef,
 }: DropProps) {
+  // Check if this is a drop from the Memes wave
+  const isMemesWave = drop.wave?.id?.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+
   if (drop.drop_type === ApiDropType.Participatory) {
+    // Use the specialized Memes version for the Memes wave
+    if (isMemesWave) {
+      return (
+        <MemeParticipationDrop
+          drop={drop}
+          showWaveInfo={showWaveInfo}
+          activeDrop={activeDrop}
+          location={location}
+          onReply={onReply}
+          onQuote={onQuote}
+          onQuoteClick={onQuoteClick}
+          onDropContentClick={onDropContentClick}
+          showReplyAndQuote={showReplyAndQuote}
+          parentContainerRef={parentContainerRef}
+        />
+      );
+    }
+    
+    // Use the regular version for other waves
     return (
       <ParticipationDrop
         drop={drop}
@@ -65,6 +89,29 @@ export default function Drop({
       />
     );
   } else if (drop.drop_type === ApiDropType.Winner) {
+    // Use the specialized Memes version for the Memes wave
+    if (isMemesWave) {
+      return (
+        <MemeWinnerDrop
+          drop={drop}
+          previousDrop={previousDrop}
+          nextDrop={nextDrop}
+          showWaveInfo={showWaveInfo}
+          activeDrop={activeDrop}
+          location={location}
+          dropViewDropId={dropViewDropId}
+          onReply={onReply}
+          onQuote={onQuote}
+          onReplyClick={onReplyClick}
+          onQuoteClick={onQuoteClick}
+          onDropContentClick={onDropContentClick}
+          showReplyAndQuote={showReplyAndQuote}
+          parentContainerRef={parentContainerRef}
+        />
+      );
+    }
+    
+    // Use the regular version for other waves
     return (
       <WinnerDrop
         drop={drop}

@@ -41,6 +41,9 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       return;
     }
 
+    // Check if this is the Memes wave
+    const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+
     // Chat-type waves only show chat tab
     if (wave.wave.type === ApiWaveType.Chat) {
       setAvailableTabs([MyStreamWaveTab.CHAT]);
@@ -49,6 +52,26 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       if (activeContentTab !== MyStreamWaveTab.CHAT) {
         setActiveContentTabRaw(MyStreamWaveTab.CHAT);
       }
+      return;
+    }
+    
+    // For Memes wave - don't set default tab, let it use standard behavior
+    if (isMemesWave) {
+      const tabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
+      
+      if (hasFirstDecisionPassed) {
+        tabs.push(MyStreamWaveTab.WINNERS);
+      }
+      
+      tabs.push(MyStreamWaveTab.OUTCOME);
+      
+      setAvailableTabs(tabs);
+      
+      // Only switch if the current tab is not available
+      if (!tabs.includes(activeContentTab)) {
+        setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+      }
+      
       return;
     }
     

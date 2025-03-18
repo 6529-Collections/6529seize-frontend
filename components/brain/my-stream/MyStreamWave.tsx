@@ -13,7 +13,8 @@ import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { useWaveState } from "../../../hooks/useWaveState";
 import { useLayout } from "./layout/LayoutContext";
-import MemesArtSubmissionModal from '../../waves/memes/MemesArtSubmissionModal';
+import MemesArtSubmissionModal from "../../waves/memes/MemesArtSubmissionModal";
+import PrimaryButton from "../../utils/button/PrimaryButton";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -133,10 +134,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const components: Record<MyStreamWaveTab, JSX.Element> = {
     [MyStreamWaveTab.CHAT]: <MyStreamWaveChat wave={wave} />,
     [MyStreamWaveTab.LEADERBOARD]: (
-      <MyStreamWaveLeaderboard
-        wave={wave}
-        onDropClick={onDropClick}
-      />
+      <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.WINNERS]: (
       <WaveWinners wave={wave} onDropClick={onDropClick} />
@@ -157,7 +155,11 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       >
         {/* Don't render tab container for simple waves */}
         {breakpoint !== "S" && !isSimpleWave && (
-          <div className="tw-flex-shrink-0" ref={setTabsRef} id="tabs-container">
+          <div
+            className="tw-flex-shrink-0"
+            ref={setTabsRef}
+            id="tabs-container"
+          >
             <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-w-full">
               {/* Combined row with tabs, title, and action button */}
               <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-x-3">
@@ -168,25 +170,22 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
                     setActiveTab={setActiveContentTab}
                   />
                 )}
-                {/* Right side: Tabs and action button for memes wave */}
+                {/* Memes wave specific layout */}
                 {isMemesWave && (
-                  <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-1">
-                    <div className="tw-text-2xl tw-font-semibold">
-                      Weekly Rolling Wave (Long-Term)
-                    </div>
-                    <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-4">
-                      <MyStreamWaveDesktopTabs
-                        activeTab={activeContentTab}
-                        wave={wave}
-                        setActiveTab={setActiveContentTab}
-                      />
-                      <div className="tw-flex-shrink-0 tw-mb-2">
-                        <button
-                          className="tw-bg-transparent tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white tw-font-semibold tw-py-2 tw-px-2.5 tw-text-sm tw-rounded-lg tw-transition-all tw-duration-200 focus:tw-outline-none active:tw-scale-98 tw-flex tw-items-center tw-gap-2"
-                          onClick={handleMemesSubmit}
+                  <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-3 tw-mt-2">
+                    {/* Title and Submit button */}
+                    <div className="tw-flex tw-items-center tw-justify-between">
+                      <h1 className="tw-text-2xl tw-font-semibold tw-text-iron-100 tw-mb-0">
+                        Weekly Rolling Wave (Long-Term)
+                      </h1>
+                      <div className="tw-flex-shrink-0">
+                        <PrimaryButton
+                          loading={false}
+                          disabled={false}
+                          onClicked={handleMemesSubmit}
                         >
                           <svg
-                            className="tw-w-4 tw-h-4 tw-flex-shrink-0"
+                            className="tw-w-5 tw-h-5 tw-flex-shrink-0"
                             viewBox="0 0 24 24"
                             fill="none"
                             aria-hidden="true"
@@ -214,10 +213,16 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
                               strokeLinejoin="round"
                             />
                           </svg>
-                          <span>Submit to Memes</span>
-                        </button>
+                          <span>Submit Art for The Memes</span>
+                        </PrimaryButton>
                       </div>
                     </div>
+
+                    <MyStreamWaveDesktopTabs
+                      activeTab={activeContentTab}
+                      wave={wave}
+                      setActiveTab={setActiveContentTab}
+                    />
                   </div>
                 )}
               </div>
