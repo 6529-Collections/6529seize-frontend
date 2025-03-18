@@ -9,6 +9,7 @@ import {
   $setSelection,
   TextNode,
   LexicalEditor,
+  NodeMutation,
 } from "lexical";
 import { EmojiNode } from "../../nodes/EmojiNode";
 
@@ -107,24 +108,33 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
 const EmojiPlugin = () => {
   const [editor] = useLexicalComposerContext();
 
+  const handleMutation = (
+    mutation: Map<string, NodeMutation>,
+    editor: LexicalEditor
+  ): void => {
+    editor.update(() => {
+      mutation.forEach((type, key) => {
+        if (shouldTransform(type, key)) {
+          transformEmojiTextToNode(editor);
+        }
+      });
+    });
+  };
+
+  const shouldTransform = (type: NodeMutation, key: string): boolean => {
+    if (type !== "created" && type !== "updated") return false;
+
+    const node = $getNodeByKey(key);
+    return (
+      node instanceof TextNode && EMOJI_TEST_REGEX.test(node.getTextContent())
+    );
+  };
+
   useEffect(() => {
     transformEmojiTextToNode(editor);
 
     return editor.registerMutationListener(TextNode, (mutation) => {
-      editor.update(() => {
-        mutation.keys().forEach((key) => {
-          const type = mutation.get(key);
-          if (type === "created" || type === "updated") {
-            const node = $getNodeByKey(key);
-            if (node instanceof TextNode) {
-              const textContent = node.getTextContent();
-              if (EMOJI_TEST_REGEX.test(textContent)) {
-                transformEmojiTextToNode(editor);
-              }
-            }
-          }
-        });
-      });
+      handleMutation(mutation, editor);
     });
   }, [editor]);
 

@@ -21,7 +21,6 @@ import {
   SeizeLinkInfo,
 } from "../../../../helpers/SeizeLinkParser";
 import { EMOJI_MAP } from "../../../../6529-emoji";
-import { EMOJI_MATCH_REGEX } from "../../create/lexical/plugins/emoji/EmojiPlugin";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -109,10 +108,11 @@ function DropPartMarkdown({
           const randomId = getRandomObjectId();
           return <DropListItemContentPart key={randomId} part={partProps} />;
         } else {
-          const parts = part.split(EMOJI_MATCH_REGEX);
+          const emojiRegex = /(:\w+:)/g;
+          const parts = part.split(emojiRegex);
 
           return parts.map((part) =>
-            part.match(EMOJI_MATCH_REGEX) ? (
+            part.match(emojiRegex) ? (
               <span key={getRandomObjectId()}>{renderEmoji(part)}</span>
             ) : (
               <span key={getRandomObjectId()}>{part}</span>

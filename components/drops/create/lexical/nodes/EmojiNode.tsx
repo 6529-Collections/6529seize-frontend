@@ -39,8 +39,6 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
     return true;
   }
 
-  selectionTransform(_selection: RangeSelection) {}
-
   createDOM(_config: EditorConfig): HTMLElement {
     const span = document.createElement("span");
     return span;
