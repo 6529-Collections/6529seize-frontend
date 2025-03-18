@@ -65,11 +65,9 @@ interface MemesArtSubmissionModalProps {
   }) => void;
 }
 
-export const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-}) => {
+export const MemesArtSubmissionModal: React.FC<
+  MemesArtSubmissionModalProps
+> = ({ isOpen, onClose, onSubmit }) => {
   if (!isOpen) return null;
 
   return createPortal(
@@ -79,14 +77,11 @@ export const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = (
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="tw-fixed tw-inset-0 tw-z-50 tw-overflow-y-auto tw-bg-iron-950/90 tw-flex tw-flex-col"
+          className="tw-fixed tw-inset-0 tw-z-50 tw-bg-iron-700/80 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center"
         >
-          <div className="tw-h-full tw-w-full tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-            <div className="tw-container tw-mx-auto tw-h-full">
-              <MemesArtSubmission
-                onCancel={onClose}
-                onSubmit={onSubmit}
-              />
+          <div className="tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-xl">
+            <div className="tw-max-h-[95vh]  tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+              <MemesArtSubmission onCancel={onClose} onSubmit={onSubmit} />
             </div>
           </div>
         </motion.div>

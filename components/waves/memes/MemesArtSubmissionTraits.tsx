@@ -23,7 +23,7 @@ const MEME_NAME_OPTIONS = [
 export interface Traits {
   // Text fields
   artist: string;
-  palette: string;
+  palette: string; // Only "Color" or "Black and White"
   style: string;
   jewel: string;
   superpower: string;
@@ -39,6 +39,8 @@ export interface Traits {
   sibling: string;
   food: string;
   drink: string;
+  bonus: string; // Changed from boolean to string
+  boost: string; // Changed from boolean to string
 
   // Boolean fields
   punk6529: boolean;
@@ -51,8 +53,6 @@ export interface Traits {
   threeD: boolean;
   pepe: boolean;
   gm: boolean;
-  bonus: boolean;
-  boost: boolean;
   summer: boolean;
   tulip: boolean;
 
@@ -155,11 +155,12 @@ function TextTrait({
   return (
     <div
       className={`tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors
+     
      `}
     >
-      <div className="tw-flex tw-flex-col tw-gap-1.5">
+      <div className="tw-flex tw-justify-between tw-items-center tw-gap-x-6">
         <label
-          className={`tw-text-xs tw-font-medium ${
+          className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${
             readOnly ? "tw-text-iron-400" : "tw-text-iron-300"
           }`}
         >
@@ -175,7 +176,7 @@ function TextTrait({
             ${
               readOnly
                 ? "tw-bg-iron-950 tw-ring-iron-950 tw-opacity-80 tw-cursor-not-allowed tw-text-iron-500"
-                : "tw-bg-iron-900/80 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400"
+                : "tw-bg-iron-900 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400"
             } tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500`}
         />
       </div>
@@ -195,11 +196,12 @@ function NumberTrait({
   return (
     <div
       className={`tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors
+     
 `}
     >
-      <div className="tw-flex tw-flex-col tw-gap-1.5">
+      <div className="tw-flex tw-justify-between tw-items-center tw-gap-x-6">
         <label
-          className={`tw-text-xs tw-font-medium ${
+          className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${
             readOnly ? "tw-text-iron-400" : "tw-text-iron-300"
           }`}
         >
@@ -232,9 +234,12 @@ function DropdownTrait({
   options,
 }: DropdownTraitProps) {
   return (
-    <div className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors">
-      <div className="tw-flex tw-flex-col tw-gap-1.5">
-        <label className="tw-text-xs tw-font-medium tw-text-iron-300">
+    <div
+      className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors
+     "
+    >
+      <div className="tw-flex tw-justify-between tw-items-center tw-gap-x-6">
+        <label className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-300">
           {label}
         </label>
         <select
@@ -298,10 +303,10 @@ function MemesArtSubmissionTraits({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2">
-      <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100">
+      <div className="tw-text-xl tw-font-semibold tw-text-iron-100">
         Artwork Traits
-      </h3>
-      <div className="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-4">
+      </div>
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-2">
         <TextTrait
           label="Artist"
           value={traits.artist || userProfile}
@@ -427,15 +432,15 @@ function MemesArtSubmissionTraits({
           value={traits.gm || false}
           onChange={handleBooleanChange("gm")}
         />
-        <BooleanTrait
+        <TextTrait
           label="Bonus"
-          value={traits.bonus || false}
-          onChange={handleBooleanChange("bonus")}
+          value={traits.bonus || ""}
+          onChange={handleTextChange("bonus")}
         />
-        <BooleanTrait
+        <TextTrait
           label="Boost"
-          value={traits.boost || false}
-          onChange={handleBooleanChange("boost")}
+          value={traits.boost || ""}
+          onChange={handleTextChange("boost")}
         />
         <BooleanTrait
           label="Summer"
@@ -447,10 +452,11 @@ function MemesArtSubmissionTraits({
           value={traits.tulip || false}
           onChange={handleBooleanChange("tulip")}
         />
-        <TextTrait
+        <DropdownTrait
           label="Palette"
           value={traits.palette || ""}
           onChange={handleTextChange("palette")}
+          options={["Color", "Black and White"]}
         />
         <TextTrait
           label="Style"

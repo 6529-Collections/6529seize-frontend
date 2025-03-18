@@ -16,6 +16,8 @@ interface MemesArtSubmissionProps {
 // Type definition matching the one in MemesArtSubmissionTraits.tsx
 interface TraitsData {
   // Text fields
+  title: string;
+  description: string;
   artist: string;
   palette: string;
   style: string;
@@ -77,12 +79,12 @@ const AgreementStep: React.FC<{
 }> = ({ agreements, setAgreements, onContinue, isSigningWallet }) => {
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
-      <div className="tw-text-iron-100 tw-text-sm">
+      <div className="tw-text-iron-300 tw-text-sm">
         Before submitting your artwork to The Memes, please review and agree to
         the following terms:
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-4 tw-bg-iron-900/40 tw-rounded-lg tw-p-5 tw-border tw-border-iron-800/50 tw-border-solid">
+      <div className="tw-flex tw-flex-col tw-gap-4 tw-bg-iron-900 tw-rounded-lg tw-p-5 tw-border tw-border-iron-800/50 tw-border-solid">
         <button
           onClick={() => setAgreements(!agreements)}
           className="tw-flex tw-items-start tw-gap-3 tw-w-full tw-text-left hover:tw-opacity-80 tw-transition-opacity tw-bg-transparent tw-border-0"
@@ -112,7 +114,7 @@ const AgreementStep: React.FC<{
               )}
             </div>
           </div>
-          <div className="tw-text-xs tw-text-iron-300">
+          <div className="tw-text-sm tw-text-iron-300">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
             eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </div>
@@ -208,6 +210,8 @@ const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
   // Initialize all traits with default values
   const [traits, setTraits] = useState<TraitsData>({
     // Initialize text fields
+    title: "",
+    description: "",
     artist: "",
     palette: "",
     style: "",
@@ -315,9 +319,17 @@ const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
   };
 
   const handleSubmit = () => {
+    // Make sure title and description are included as metadata
+    // They are stored separately in the UI for prominence, but should be included
+    // in the metadata when submitting
     onSubmit({
       imageUrl: artworkUrl,
-      traits: traits,
+      traits: {
+        ...traits,
+        // Ensure title and description are non-empty with fallbacks
+        title: traits.title || "Artwork Title",
+        description: traits.description || "Artwork for The Memes collection."
+      },
       signature: walletSignature,
     });
   };
@@ -325,7 +337,7 @@ const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
   return (
     <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-h-full">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <div className="tw-w-full tw-bg-gradient-to-b tw-from-iron-950 tw-via-iron-950/95 tw-to-iron-900/90 tw-rounded-xl tw-p-8 tw-relative tw-border tw-border-iron-800/30 tw-backdrop-blur">
+        <div className="tw-w-full tw-bg-iron-950 tw-rounded-xl tw-p-8 tw-relative tw-border tw-border-iron-800/30 tw-backdrop-blur">
           {/* Ambient background effect */}
           <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-overflow-hidden">
             <div className="tw-absolute tw-w-1/2 tw-h-1/2 tw-bg-primary-500/4 tw-blur-3xl -tw-top-1/4 -tw-right-1/4" />
@@ -337,7 +349,7 @@ const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
           <motion.button
             whileHover={{ scale: 1.05 }}
             onClick={onCancel}
-            className="tw-absolute tw-bg-transparent tw-border-0 tw-right-6 tw-top-6 tw-z-20 tw-text-iron-400 tw-text-sm tw-font-medium hover:tw-text-iron-100 tw-transition-colors"
+            className="tw-absolute tw-bg-transparent tw-border-0 tw-right-8 tw-top-10 tw-z-20 tw-text-iron-400 tw-text-sm tw-font-medium hover:tw-text-iron-100 tw-transition-colors"
           >
             Cancel
           </motion.button>
@@ -372,6 +384,47 @@ const MemesArtSubmission: React.FC<MemesArtSubmissionProps> = ({
                   setArtworkUploaded={setArtworkUploaded}
                   handleFileSelect={handleFileSelect}
                 />
+
+                {/* Artwork Title and Description */}
+                <div className="tw-mt-6 tw-mb-4">
+                  <div className="tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4">
+                    Artwork Details
+                  </div>
+                  <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-max-w-md">
+                    <div className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors">
+                      <div className="tw-flex tw-items-center tw-gap-4">
+                        <label className="tw-text-xs tw-font-medium tw-min-w-[140px] tw-flex-shrink-0 tw-text-iron-300">
+                          Artwork Title
+                        </label>
+                        <input
+                          type="text"
+                          value={traits.title || ""}
+                          onChange={(e) => setTraits({...traits, title: e.target.value})}
+                          placeholder="Enter artwork title"
+                          className="tw-form-input tw-w-full tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+                            tw-bg-iron-900/80 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400
+                            tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors">
+                      <div className="tw-flex tw-items-center tw-gap-4">
+                        <label className="tw-text-xs tw-font-medium tw-min-w-[140px] tw-flex-shrink-0 tw-text-iron-300">
+                          Description
+                        </label>
+                        <textarea
+                          value={traits.description || ""}
+                          onChange={(e) => setTraits({...traits, description: e.target.value})}
+                          placeholder="Enter artwork description"
+                          rows={3}
+                          className="tw-form-textarea tw-w-full tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+                            tw-bg-iron-900/80 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400
+                            tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Traits Component */}
                 <MemesArtSubmissionTraits
