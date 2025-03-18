@@ -235,6 +235,9 @@ const CreateDropContent = forwardRef<
 
     return (
       <div className="tailwind-scope">
+        {showToggleViewButton && (
+          <ToggleViewButtonPlugin onViewClick={onViewClick} />
+        )}
         <LexicalComposer initialConfig={editorConfig}>
           <div className="tw-flex tw-items-end tw-gap-x-3">
             <div className="tw-relative tw-w-full">
@@ -304,11 +307,6 @@ const CreateDropContent = forwardRef<
           isStormMode={isStormMode}
           setFiles={setFiles}
           breakIntoStorm={breakIntoStorm}
-          toggleViewButton={
-            showToggleViewButton && (
-              <ToggleViewButtonPlugin onViewClick={onViewClick} />
-            )
-          }
         />
         {(!!missingMedia.length || !!missingMetadata.length) && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-x-6">

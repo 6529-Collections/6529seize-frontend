@@ -6,13 +6,11 @@ export default function CreateDropActionsRow({
   isStormMode,
   setFiles,
   breakIntoStorm,
-  toggleViewButton,
 }: {
   readonly canAddPart: boolean;
   readonly isStormMode: boolean;
   readonly setFiles: (files: File[]) => void;
   readonly breakIntoStorm: () => void;
-  readonly toggleViewButton: React.ReactNode;
 }) {
   const { setToast } = useContext(AuthContext);
   return (
@@ -59,7 +57,6 @@ export default function CreateDropActionsRow({
             <span className="tw-text-sm tw-font-medium">Upload Media</span>
           </div>
         </label>
-        {toggleViewButton}
       </div>
       {canAddPart && (
         <button
