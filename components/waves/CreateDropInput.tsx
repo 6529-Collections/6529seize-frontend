@@ -219,10 +219,7 @@ const CreateDropInput = forwardRef<
     }, []);
 
     return (
-      <div
-        className="tailwind-scope"
-        ref={editorRef}
-      >
+      <div className="tailwind-scope" ref={editorRef}>
         <LexicalComposer initialConfig={editorConfig}>
           <div className="tw-flex tw-items-end tw-gap-x-3">
             <div className="tw-relative tw-w-full">
@@ -239,8 +236,7 @@ const CreateDropInput = forwardRef<
                   <span
                     className={`editor-placeholder ${
                       submitting ? "tw-opacity-50" : ""
-                    }`}
-                  >
+                    }`}>
                     {getPlaceHolderText()}
                   </span>
                 }

@@ -30,9 +30,12 @@ export default function MyStreamLayout({
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
 
   const capacitor = useCapacitor();
-  const containerClassName = `lg:tw-pt-4 tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-full lg:tw-flex-1 tailwind-scope  ${
-    capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
-  }`;
+  let containerClassName = `tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope`;
+  if (capacitor.isIos) {
+    containerClassName = `${containerClassName} tw-h-[calc(100vh-9.5rem)] tw-pb-[calc(4rem+80px)]`;
+  } else if (capacitor.isAndroid && !capacitor.keyboardVisible) {
+    containerClassName = `${containerClassName} tw-h-[calc(100vh-9.5rem)] tw-pb-[calc(4rem+10px)]`;
+  }
 
   return (
     <>

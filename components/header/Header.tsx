@@ -55,15 +55,21 @@ export default function Header(props: Readonly<Props>) {
   const [showBurgerMenuBrain, setShowBurgerMenuBrain] = useState(false);
 
   let logoSrc: string = "/6529.png";
-  let logoWidth: number = 60;
-  let logoHeight: number = 60;
-  if (capacitor.isCapacitor) {
+  let logoWidth: number = 50;
+  let logoHeight: number = 50;
+  if (capacitor.isCapacitor || isMobile) {
     logoWidth = 40;
     logoHeight = 40;
   }
-  if (isMobile) {
-    logoWidth = 50;
-    logoHeight = 50;
+
+  let containerClassName = styles.mainContainer;
+  let rowClassName = styles.headerRow;
+  if (capacitor.isCapacitor) {
+    containerClassName = styles.capacitorMainContainer;
+    rowClassName = styles.capacitorHeaderRow;
+  } else if (props.isSmall || isMobile) {
+    containerClassName = styles.mainContainerSmall;
+    rowClassName = styles.headerRowSmall;
   }
 
   useEffect(() => {
@@ -485,26 +491,11 @@ export default function Header(props: Readonly<Props>) {
     <>
       {printBurgerMenu()}
       {capacitor.isCapacitor && <CapacitorWidget />}
-      <Container
-        fluid
-        className={`${
-          capacitor.isCapacitor
-            ? styles.capacitorMainContainer
-            : props.isSmall
-            ? styles.mainContainerSmall
-            : styles.mainContainer
-        } ${props.extraClass}`}>
+      <Container fluid className={`${containerClassName} ${props.extraClass}`}>
         <Row>
           <Col>
-            <Container className={styles.capacitorHeaderRowContainerLandscape}>
-              <Row
-                className={
-                  capacitor.isCapacitor
-                    ? styles.capacitorHeaderRow
-                    : props.isSmall
-                    ? styles.headerRowSmall
-                    : styles.headerRow
-                }>
+            <Container className={styles.rowContainer}>
+              <Row className={rowClassName}>
                 <Col
                   xs={{ span: 8 }}
                   sm={{ span: 8 }}
@@ -518,7 +509,9 @@ export default function Header(props: Readonly<Props>) {
                       loading="eager"
                       priority
                       className={
-                        props.isSmall ? styles.logoIconSmall : styles.logoIcon
+                        props.isSmall || capacitor.isCapacitor || isMobile
+                          ? styles.logoIconSmall
+                          : styles.logoIcon
                       }
                       src={logoSrc}
                       alt="6529Seize"
