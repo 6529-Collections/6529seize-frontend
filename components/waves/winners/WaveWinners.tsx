@@ -4,10 +4,9 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import { WaveWinnersPodium } from "./podium/WaveWinnersPodium";
 import { WaveWinnersTimeline } from "./WaveWinnersTimeline";
-import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
-import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
 import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";
+import { useWave } from "../../../hooks/useWave";
 
 interface WaveWinnersProps {
   readonly wave: ApiWave;
@@ -18,8 +17,10 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   wave,
   onDropClick,
 }) => {
-  const { isMultiDecisionWave } = useDecisionPoints(wave);
-   
+  const {
+    decisions: { multiDecision },
+  } = useWave(wave);
+
   // Use layout context for container style
   const { waveViewStyle } = useLayout();
 
@@ -31,18 +32,17 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
     });
 
   return (
-    <div className="tw-space-y-4 lg:tw-space-y-6 sm:tw-px-2 lg:tw-px-0 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300" style={waveViewStyle}>
-      {isMultiDecisionWave ? (
-        isDecisionsLoading ? (
-          <WaveWinnersTimelineLoading />
-        ) : (
-          <WaveWinnersTimeline
-            onDropClick={onDropClick}
-            decisionPoints={decisionPoints}
-            wave={wave}
-            isLoading={isDecisionsLoading}
-          />
-        )
+    <div
+      className="tw-space-y-4 lg:tw-space-y-6 sm:tw-px-2 lg:tw-px-0 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
+      style={waveViewStyle}
+    >
+      {multiDecision ? (
+        <WaveWinnersTimeline
+          onDropClick={onDropClick}
+          decisionPoints={decisionPoints}
+          wave={wave}
+          isLoading={isDecisionsLoading}
+        />
       ) : (
         <div className="tw-space-y-2 tw-mt-2 tw-pb-6 lg:tw-pr-2 tw-flex-grow">
           <WaveWinnersPodium

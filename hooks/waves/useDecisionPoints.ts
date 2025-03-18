@@ -17,9 +17,7 @@ export const useDecisionPoints = (wave: ApiWave) => {
   const isRollingWave =
     isMultiDecisionWave && !!wave.wave.decisions_strategy?.is_rolling;
 
-  // Track expanded/collapsed state for decision details
-  const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
-    useState<boolean>(false);
+
 
   // Track next decision point time for multi-decision waves
   const [nextDecisionTime, setNextDecisionTime] = useState<number | null>(
@@ -171,9 +169,6 @@ export const useDecisionPoints = (wave: ApiWave) => {
   ]);
 
   return {
-    isMultiDecisionWave,
-    isDecisionDetailsOpen,
-    setIsDecisionDetailsOpen,
     nextDecisionTime,
     upcomingDecisions,
     allDecisions,

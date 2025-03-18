@@ -1,17 +1,15 @@
 import React, { useState, memo, useEffect } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop, convertApiDropToExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
 import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
-import { ApiWaveDecisionWinner } from "../../../generated/models/ApiWaveDecisionWinner";
 
 // Import extracted components
 import { WaveWinnerItemSmall } from "./WaveWinnerItemSmall";
 import { WaveWinnersSmallLoading } from "./WaveWinnersSmallLoading";
 import { WaveWinnersSmallEmpty } from "./WaveWinnersSmallEmpty";
 import { WaveWinnersSmallDecisionSelector } from "./WaveWinnersSmallDecisionSelector";
+import { useWave } from "../../../hooks/useWave";
 
 interface WaveWinnersSmallProps {
   readonly wave: ApiWave;
@@ -26,7 +24,7 @@ interface EnhancedDecisionPoint extends ApiWaveDecision {
 
 export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
   ({ wave, onDropClick }) => {
-    const { isMultiDecisionWave } = useDecisionPoints(wave);
+    const { decisions: { multiDecision } } = useWave(wave);
     const [activeDecisionPoint, setActiveDecisionPoint] = useState<string | null>(null);
     
     // Fetch data using decisions endpoint for all waves - same approach as WaveWinners
@@ -61,12 +59,12 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
 
     // Empty state
     if (!decisionPoints || decisionPoints.length === 0) {
-      return <WaveWinnersSmallEmpty isMultiDecision={isMultiDecisionWave} />;
+      return <WaveWinnersSmallEmpty isMultiDecision={multiDecision} />;
     }
 
 
     // For single decision waves, just render the first decision point's drops
-    if (!isMultiDecisionWave) {
+    if (!multiDecision) {
       const winners = decisionPoints[0]?.winners || [];
 
       return (

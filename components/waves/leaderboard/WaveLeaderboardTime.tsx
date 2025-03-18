@@ -22,14 +22,15 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
 }) => {
   // Using decision points hooks
+  const { nextDecisionTime, allDecisions, nextDecisionTimeLeft } =
+    useDecisionPoints(wave);
   const {
-    isDecisionDetailsOpen,
-    setIsDecisionDetailsOpen,
-    nextDecisionTime,
-    allDecisions,
-    nextDecisionTimeLeft,
-  } = useDecisionPoints(wave);
-  const { decisions: { multiDecision } } = useWave(wave);
+    decisions: { multiDecision },
+  } = useWave(wave);
+
+  // Track expanded/collapsed state for decision details
+  const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
+    useState<boolean>(false);
 
   const [hasNextDecision, setHasNextDecision] = useState(false);
 
