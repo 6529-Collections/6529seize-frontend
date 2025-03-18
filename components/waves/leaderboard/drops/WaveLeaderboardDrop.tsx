@@ -18,9 +18,7 @@ export const WaveLeaderboardDrop: React.FC<WaveLeaderboardDropProps> = ({
 }) => {
   const { isMemesWave } = useWave(wave);
   if (isMemesWave) {
-    return (
-      <MemesLeaderboardDrop drop={drop} wave={wave} onDropClick={onDropClick} />
-    );
+    return <MemesLeaderboardDrop drop={drop} onDropClick={onDropClick} />;
   }
   return (
     <DefaultWaveLeaderboardDrop

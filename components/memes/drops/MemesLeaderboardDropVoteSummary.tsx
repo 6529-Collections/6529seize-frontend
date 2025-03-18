@@ -1,0 +1,78 @@
+import React from "react";
+import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import Link from "next/link";
+import Tippy from "@tippyjs/react";
+import { ApiDropRater } from "../../../generated/models/ApiDropRater";
+
+
+interface MemesLeaderboardDropVoteSummaryProps {
+  readonly rating: number;
+  readonly creditType: string;
+  readonly ratersCount: number;
+  readonly topVoters: ApiDropRater[];
+}
+
+export const MemesLeaderboardDropVoteSummary: React.FC<MemesLeaderboardDropVoteSummaryProps> = ({
+  rating,
+  creditType,
+  ratersCount,
+  topVoters,
+}) => {
+  const isPositive = (rating || 0) >= 0;
+
+  return (
+    <div className="tw-flex tw-items-center tw-justify-between tw-px-1">
+      <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
+        <span
+          className={`tw-text-xl tw-font-semibold tw-bg-gradient-to-r ${
+            isPositive
+              ? "tw-from-emerald-400 tw-to-emerald-500"
+              : "tw-from-rose-400 tw-to-rose-500"
+          } tw-bg-clip-text tw-text-transparent`}
+        >
+          {formatNumberWithCommas(rating || 0)}
+        </span>
+        <span className="tw-text-sm tw-text-iron-400">
+          {creditType} total
+        </span>
+      </div>
+      <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-x-3">
+        <div className="tw-flex tw-items-center -tw-space-x-1.5">
+          {topVoters.map((voter) => (
+            <Tippy
+              key={voter.profile.handle}
+              content={`${
+                voter.profile.handle
+              } - ${formatNumberWithCommas(voter.rating)}`}
+            >
+              <Link
+                href={`/${voter.profile.handle}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {voter.profile.pfp ? (
+                  <img
+                    className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950"
+                    src={voter.profile.pfp}
+                    alt="Recent voter"
+                  />
+                ) : (
+                  <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" />
+                )}
+              </Link>
+            </Tippy>
+          ))}
+        </div>
+        <div className="tw-flex tw-items-baseline tw-gap-x-1">
+          <span className="tw-text-base tw-font-medium tw-text-iron-100">
+            {formatNumberWithCommas(ratersCount || 0)}
+          </span>
+          <span className="tw-text-sm tw-text-iron-400">
+            {ratersCount === 1 ? "voter" : "voters"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MemesLeaderboardDropVoteSummary;

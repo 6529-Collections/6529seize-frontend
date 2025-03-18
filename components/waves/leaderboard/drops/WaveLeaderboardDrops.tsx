@@ -42,7 +42,6 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
       handle: showMyDrops ? connectedProfile?.profile?.handle : undefined,
     });
 
-  const memoizedDrops = useMemo(() => drops, [drops]);
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
@@ -63,17 +62,17 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     );
   };
 
-  if (isFetching && memoizedDrops.length === 0) {
+  if (isFetching && drops.length === 0) {
     return <WaveLeaderboardLoading />;
   }
 
-  if (memoizedDrops.length === 0) {
+  if (drops.length === 0) {
     return <WaveLeaderboardEmptyState onCreateDrop={onCreateDrop} wave={wave} />;
   }
 
   return (
     <div className="tw-space-y-4">
-      {memoizedDrops.map((drop) => (
+      {drops.map((drop) => (
         <WaveLeaderboardDrop
           key={drop.id}
           drop={drop}
