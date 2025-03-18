@@ -165,6 +165,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
                           loading={false}
                           disabled={false}
                           onClicked={handleMemesSubmit}
+                          padding="tw-px-2.5 tw-py-2"
                         >
                           <svg
                             className="tw-w-5 tw-h-5 tw-flex-shrink-0"

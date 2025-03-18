@@ -55,24 +55,7 @@ export default function Drop({
   const isMemesWave = drop.wave?.id?.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
 
   if (drop.drop_type === ApiDropType.Participatory) {
-    // Use the specialized Memes version for the Memes wave
-    if (isMemesWave) {
-      return (
-        <MemeParticipationDrop
-          drop={drop}
-          showWaveInfo={showWaveInfo}
-          activeDrop={activeDrop}
-          location={location}
-          onReply={onReply}
-          onQuote={onQuote}
-          onQuoteClick={onQuoteClick}
-          onDropContentClick={onDropContentClick}
-          showReplyAndQuote={showReplyAndQuote}
-          parentContainerRef={parentContainerRef}
-        />
-      );
-    }
-    
+  
     // Use the regular version for other waves
     return (
       <ParticipationDrop
