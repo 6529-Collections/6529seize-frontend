@@ -4,7 +4,7 @@ import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
 interface TimePhaseIconProps {
-  readonly phaseState: string;
+  readonly isCompleted: boolean;
   readonly color: "emerald" | "violet" | "blue";
 }
 
@@ -12,7 +12,7 @@ interface TimePhaseIconProps {
  * Icon component for time phases
  */
 export const TimePhaseIcon: React.FC<TimePhaseIconProps> = ({
-  phaseState,
+  isCompleted,
   color,
 }) => {
   const containerClasses = {
@@ -31,7 +31,7 @@ export const TimePhaseIcon: React.FC<TimePhaseIconProps> = ({
 
   return (
     <div className={`${containerClasses.base} ${containerClasses[color]}`}>
-      {phaseState === "COMPLETED" ? (
+      {isCompleted ? (
         <FontAwesomeIcon
           icon={faCheck}
           className={`${iconClasses.base} ${iconClasses[color]}`}
