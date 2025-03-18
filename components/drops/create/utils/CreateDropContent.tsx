@@ -157,7 +157,6 @@ const CreateDropContent = forwardRef<
     const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
     const showToggleViewButton = viewType === CreateDropViewType.COMPACT;
-    const { isCapacitor } = useCapacitor();
 
     const getPlaceHolderText = () => {
       switch (type) {

@@ -12,12 +12,11 @@ import {
 } from "lexical";
 import { EmojiNode } from "../../nodes/EmojiNode";
 
-const EMOJI_TEST_REGEX = /:([a-zA-Z0-9_]+):/;
-const EMOJI_MATCH_REGEX = /:([a-zA-Z0-9_]+):/g;
+export const EMOJI_TEST_REGEX = /:(\w+)/;
+export const EMOJI_MATCH_REGEX = /:(\w+):/g;
 
 function transformEmojiTextToNode(editor: LexicalEditor) {
   editor.update(() => {
-    // Current selection info
     const selectionBefore = $getSelection();
     let anchorNodeKey: string | null = null;
     let anchorOffset = 0;
@@ -34,7 +33,7 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
     textNodes.forEach((node) => {
       const textContent = node.getTextContent();
       if (!EMOJI_TEST_REGEX.test(textContent)) {
-        return; // no emoji pattern, skip
+        return;
       }
 
       const matches = Array.from(textContent.matchAll(EMOJI_MATCH_REGEX));
@@ -46,14 +45,12 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
       const newNodes: (TextNode | EmojiNode)[] = [];
       let cursorNode: TextNode | null = null;
 
-      // Go through each :emoji: match
       matches.forEach((match) => {
-        const emojiText = match[0]; // e.g. ":smile:"
-        const emojiId = match[1]; // e.g. "smile"
+        const emojiText = match[0];
+        const emojiId = match[1];
         const startIndex = match.index!;
         const endIndex = startIndex + emojiText.length;
 
-        // 1) Text before the match
         if (startIndex > lastIndex) {
           const beforeStr = textContent.slice(lastIndex, startIndex);
           if (beforeStr.length > 0) {
@@ -61,15 +58,12 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
           }
         }
 
-        // 2) The emoji node
         const emojiNode = new EmojiNode(emojiId);
         newNodes.push(emojiNode);
 
-        // 3) Trailing empty text node (for the cursor if user typed here)
         const trailingTextNode = new TextNode("");
         newNodes.push(trailingTextNode);
 
-        // If the old cursor was inside this matched range, remember to place it here
         if (
           anchorNodeKey === node.getKey() &&
           anchorOffset >= startIndex &&
@@ -81,11 +75,8 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
         lastIndex = endIndex;
       });
 
-      // Finally, leftover text after the last match
       if (lastIndex < textContent.length) {
         const afterStr = textContent.slice(lastIndex);
-        // Append leftover text to the last new node if it's a TextNode
-        // or create a new text node
         let lastCreated = newNodes[newNodes.length - 1];
         if (lastCreated instanceof TextNode) {
           lastCreated.setTextContent(lastCreated.getTextContent() + afterStr);
@@ -94,17 +85,14 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
         }
       }
 
-      // Insert new nodes after the original node
       let prev: TextNode | EmojiNode = node;
       newNodes.forEach((n) => {
         prev.insertAfter(n);
         prev = n;
       });
 
-      // Remove the old node
       node.remove();
 
-      // If we identified a "cursorNode", set the selection to that node offset 0
       if (cursorNode) {
         const cursorTextNodeKey = (cursorNode as TextNode).getKey();
         const newSelection = $createRangeSelection();
