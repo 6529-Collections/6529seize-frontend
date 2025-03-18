@@ -7,7 +7,7 @@ interface WinnerDropBadgeProps {
   rank: number | null;
   round?: number;
   position?: number; // Position within the same rank (e.g., 2nd #1 place winner)
-  decisionTime?: number; // Add decision time parameter
+  decisionTime: number | null; // Add decision time parameter
 }
 
 const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
