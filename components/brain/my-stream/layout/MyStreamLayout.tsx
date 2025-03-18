@@ -57,9 +57,9 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   let containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
   if (capacitor.isIos) {
-    containerClassName += "tw-pb-[calc(4rem+80px)]";
+    containerClassName = `${containerClassName} tw-pb-[calc(4rem+80px)]`;
   } else if (capacitor.isAndroid && !capacitor.keyboardVisible) {
-    containerClassName += "tw-pb-[70px]";
+    containerClassName = `${containerClassName} tw-pb-[70px]`;
   }
 
   return (
