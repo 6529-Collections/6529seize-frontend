@@ -10,10 +10,10 @@ import { WaveWinnersSmall } from "../../waves/winners/WaveWinnersSmall";
 import BrainRightSidebarContent from "./BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import { Mode, SidebarTab } from "./BrainRightSidebar";
-import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 import { WaveSmallLeaderboard } from "../../waves/small-leaderboard/WaveSmallLeaderboard";
 import { WaveLeaderboardRightSidebarVoters } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
 import { WaveLeaderboardRightSidebarActivityLogs } from "../../waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
+import { useWaveTimers } from "../../../hooks/useWaveTimers";
 
 interface WaveContentProps {
   readonly wave: ApiWave;
@@ -41,19 +41,19 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
 
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
-  const { hasFirstDecisionPassed, votingState } = useWaveState(wave);
+  const { voting: { isCompleted }, decisions: { firstDecisionDone } } = useWaveTimers(wave);
   
   // Handle tab validity when wave state changes
   useEffect(() => {
     // If on Leaderboard tab and voting has ended, switch to About
-    if (activeTab === SidebarTab.LEADERBOARD && votingState === WaveVotingState.ENDED) {
+    if (activeTab === SidebarTab.LEADERBOARD && isCompleted) {
       setActiveTab(SidebarTab.ABOUT);
     }
     // If on Winners tab and first decision hasn't passed, switch to About
-    else if (activeTab === SidebarTab.WINNERS && !hasFirstDecisionPassed) {
+    else if (activeTab === SidebarTab.WINNERS && !firstDecisionDone) {
       setActiveTab(SidebarTab.ABOUT);
     }
-  }, [votingState, hasFirstDecisionPassed, activeTab, setActiveTab]);
+  }, [isCompleted, firstDecisionDone, activeTab, setActiveTab]);
 
   // Generate tab options based on wave state
   const options = useMemo(() => {
@@ -62,12 +62,12 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ];
     
     // Show Leaderboard tab always except when voting has ended
-    if (votingState !== WaveVotingState.ENDED) {
+    if (!isCompleted) {
       tabs.push({ key: SidebarTab.LEADERBOARD, label: "Leaderboard" });
     }
     
     // Show Winners tab if first decision has passed
-    if (hasFirstDecisionPassed) {
+    if (firstDecisionDone) {
       tabs.push({ key: SidebarTab.WINNERS, label: "Winners" });
     }
     
@@ -77,7 +77,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     );
     
     return tabs;
-  }, [hasFirstDecisionPassed, votingState]);
+  }, [isCompleted, firstDecisionDone]);
 
   const rankWaveComponents: Record<SidebarTab, JSX.Element> = {
     [SidebarTab.ABOUT]: (
