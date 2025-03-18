@@ -63,7 +63,6 @@ import CreateDropActionsRow from "./CreateDropActionsRow";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import EnterKeyPlugin from "../lexical/plugins/enter/EnterKeyPlugin";
 import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
-import useCapacitor from "../../../../hooks/useCapacitor";
 import { EmojiNode } from "../lexical/nodes/EmojiNode";
 import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
 import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";

@@ -5,7 +5,6 @@ import {
   LexicalEditor,
   EditorConfig,
   NodeKey,
-  RangeSelection,
 } from "lexical";
 import { EMOJI_MAP } from "../../../../../6529-emoji";
 

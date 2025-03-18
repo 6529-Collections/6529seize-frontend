@@ -12,7 +12,6 @@ module.exports = {
   prefix: "tw-",
   corePlugins: {
     preflight: false,
-    transform: true,
   },
   theme: {
     extend: {
