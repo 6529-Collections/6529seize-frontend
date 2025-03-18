@@ -2,7 +2,6 @@ export default function ToggleViewButtonPlugin({
   onViewClick,
 }: {
   readonly onViewClick: () => void;
-  readonly absolute?: boolean;
 }) {
   return (
     <button
