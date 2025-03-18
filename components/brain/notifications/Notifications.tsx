@@ -24,9 +24,9 @@ export default function Notifications() {
 
   let containerClassName = `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)]`;
   if (capacitor.isIos) {
-    containerClassName += "tw-pb-[calc(4rem+80px)]";
+    containerClassName = `${containerClassName} tw-pb-[calc(4rem+80px)]`;
   } else if (capacitor.isAndroid && !capacitor.keyboardVisible) {
-    containerClassName += "tw-pb-[70px]";
+    containerClassName = `${containerClassName} tw-pb-[70px]`;
   }
 
   const router = useRouter();

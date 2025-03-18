@@ -32,9 +32,9 @@ export default function MyStreamLayout({
   const capacitor = useCapacitor();
   let containerClassName = `lg:tw-pt-4 tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-full lg:tw-flex-1 tailwind-scope`;
   if (capacitor.isIos) {
-    containerClassName += "tw-pb-[calc(4rem+80px)]";
+    containerClassName = `${containerClassName} tw-pb-[calc(4rem+80px)]`;
   } else if (capacitor.isAndroid && !capacitor.keyboardVisible) {
-    containerClassName += "tw-pb-[70px]";
+    containerClassName = `${containerClassName} tw-pb-[70px]`;
   }
 
   return (
