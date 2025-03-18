@@ -8,7 +8,6 @@ import { AuthContext } from "../../../auth/Auth";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { LayoutProvider, useLayout } from "./LayoutContext";
 
-
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -34,7 +33,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     },
     [registerRef]
   );
-  
+
   // Callback ref for registration with LayoutContext (spacer)
   const setSpacerRef = useCallback(
     (element: HTMLDivElement | null) => {
@@ -55,10 +54,13 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
 
   const capacitor = useCapacitor();
-  // Use flexbox instead of fixed height
-  const containerClassName = `tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope ${
-    capacitor.isCapacitor ? "tw-pb-[calc(4rem+88px)]" : ""
-  }`;
+  let containerClassName =
+    "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
+  if (capacitor.isIos) {
+    containerClassName += "tw-pb-[calc(4rem+80px)]";
+  } else if (capacitor.isAndroid && !capacitor.keyboardVisible) {
+    containerClassName += "tw-pb-[70px]";
+  }
 
   return (
     <>
@@ -86,8 +88,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
         <div
           ref={setHeaderRef}
-          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black"
-        >
+          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
           <Header isSmall={true} />
           <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />

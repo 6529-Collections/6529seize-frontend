@@ -62,6 +62,16 @@ export default function Header(props: Readonly<Props>) {
     logoHeight = 40;
   }
 
+  let containerClassName = styles.mainContainer;
+  let rowClassName = styles.headerRow;
+  if (capacitor.isCapacitor) {
+    containerClassName = styles.capacitorMainContainer;
+    rowClassName = styles.capacitorHeaderRow;
+  } else if (props.isSmall || isMobile) {
+    containerClassName = styles.mainContainerSmall;
+    rowClassName = styles.headerRowSmall;
+  }
+
   useEffect(() => {
     function handleResize() {
       setShowBurgerMenuCollections(false);
@@ -481,26 +491,11 @@ export default function Header(props: Readonly<Props>) {
     <>
       {printBurgerMenu()}
       {capacitor.isCapacitor && <CapacitorWidget />}
-      <Container
-        fluid
-        className={`${
-          capacitor.isCapacitor
-            ? styles.capacitorMainContainer
-            : props.isSmall || isMobile
-            ? styles.mainContainerSmall
-            : styles.mainContainer
-        } ${props.extraClass}`}>
+      <Container fluid className={`${containerClassName} ${props.extraClass}`}>
         <Row>
           <Col>
-            <Container className={styles.capacitorHeaderRowContainerLandscape}>
-              <Row
-                className={
-                  capacitor.isCapacitor
-                    ? styles.capacitorHeaderRow
-                    : props.isSmall || isMobile
-                    ? styles.headerRowSmall
-                    : styles.headerRow
-                }>
+            <Container className={styles.rowContainer}>
+              <Row className={rowClassName}>
                 <Col
                   xs={{ span: 8 }}
                   sm={{ span: 8 }}

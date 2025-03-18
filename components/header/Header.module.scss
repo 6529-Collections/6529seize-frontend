@@ -36,7 +36,7 @@
   z-index: 10;
 }
 
-.capacitorHeaderRowContainerLandscape {
+.rowContainer {
   padding-right: max(
     calc(env(safe-area-inset-left) - calc(var(--bs-gutter-x) * 0.5)),
     calc(var(--bs-gutter-x) * 0.5)
