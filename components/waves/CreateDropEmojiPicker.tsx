@@ -27,10 +27,17 @@ const CreateDropEmojiPicker: FC = () => {
       emojiText = `:${emoji.id}:`;
     }
     if (emojiText) {
-      editor.update(() => {
-        const emojiNode = $createTextNode(emojiText);
-        $insertNodes([emojiNode]);
-      });
+      editor.update(
+        () => {
+          const emojiNode = $createTextNode(emojiText);
+          $insertNodes([emojiNode]);
+        },
+        {
+          onUpdate: () => {
+            setTimeout(() => editor.focus(), 100);
+          },
+        }
+      );
     }
     setShowPicker(false);
   };
@@ -55,6 +62,7 @@ const CreateDropEmojiPicker: FC = () => {
         !buttonRef.current.contains(event.target as Node)
       ) {
         setShowPicker(false);
+        setTimeout(() => editor.focus(), 100);
       }
     };
 
@@ -67,16 +75,14 @@ const CreateDropEmojiPicker: FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showPicker]);
 
-  if (isCapacitor) {
-    return null;
-  }
-
   return (
     <>
       <div className="tw-absolute tw-py-2 tw-right-2 tw-top-0 tw-h-full tw-flex tw-items-start tw-justify-center">
         <button
           ref={buttonRef}
-          className="tw-border-none tw-rounded tw-bg-transparent hover:tw-bg-[rgb(40,40,40)] tw-text-xl tw-opacity-50 hover:tw-opacity-100 tw-transition tw-duration-150"
+          className={`tw-border-none tw-rounded tw-bg-transparent hover:tw-bg-[rgb(40,40,40)] tw-opacity-50 hover:tw-opacity-100 tw-transition tw-duration-150 ${
+            isCapacitor ? "tw-text-sm tw-py-1" : "tw-text-xl"
+          }`}
           onClick={() => setShowPicker(!showPicker)}>
           🙂
         </button>
@@ -93,7 +99,12 @@ const CreateDropEmojiPicker: FC = () => {
                 zIndex: 1000,
               }}
               className="tw-shadow-lg tw-rounded-lg tw-border tw-bg-iron-800 tw-p-[1px]">
-              <Picker data={data} onEmojiSelect={addEmoji} custom={EMOJI_MAP} />
+              <Picker
+                theme="dark"
+                data={data}
+                onEmojiSelect={addEmoji}
+                custom={EMOJI_MAP}
+              />
             </div>,
             document.body
           )}
@@ -102,9 +113,20 @@ const CreateDropEmojiPicker: FC = () => {
       {isMobile && (
         <MobileWrapperDialog
           isOpen={showPicker}
-          onClose={() => setShowPicker(false)}>
+          onClose={() => {
+            setShowPicker(false);
+            setTimeout(() => editor.focus(), 100);
+          }}
+          onBeforeLeave={() => {
+            setTimeout(() => editor.focus(), 100);
+          }}>
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-            <Picker data={data} onEmojiSelect={addEmoji} custom={EMOJI_MAP} />
+            <Picker
+              theme="dark"
+              data={data}
+              onEmojiSelect={addEmoji}
+              custom={EMOJI_MAP}
+            />
           </div>
         </MobileWrapperDialog>
       )}

@@ -111,7 +111,7 @@ function DropPartMarkdown({
         } else {
           const parts = part.split(EMOJI_MATCH_REGEX);
 
-          return parts.map((part, index) =>
+          return parts.map((part) =>
             part.match(EMOJI_MATCH_REGEX) ? (
               <span key={getRandomObjectId()}>{renderEmoji(part)}</span>
             ) : (

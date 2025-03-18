@@ -61,7 +61,7 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
         const emojiNode = new EmojiNode(emojiId);
         newNodes.push(emojiNode);
 
-        const trailingTextNode = new TextNode("");
+        const trailingTextNode = new TextNode(" ");
         newNodes.push(trailingTextNode);
 
         if (

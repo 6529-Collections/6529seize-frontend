@@ -11,12 +11,14 @@ export default function MobileWrapperDialog({
   title,
   isOpen,
   onClose,
+  onBeforeLeave,
   onAfterLeave,
   children,
 }: {
   readonly title?: string;
   readonly isOpen: boolean;
   readonly onClose: () => void;
+  readonly onBeforeLeave?: () => void;
   readonly onAfterLeave?: () => void;
   readonly children: React.ReactNode;
 }) {
@@ -24,7 +26,7 @@ export default function MobileWrapperDialog({
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-relative tw-z-50 lg:tw-hidden"
+        className="tailwind-scope tw-relative tw-z-[1000] lg:tw-hidden"
         onClose={onClose}>
         <TransitionChild
           as={Fragment}
@@ -34,6 +36,7 @@ export default function MobileWrapperDialog({
           leave="tw-ease-in-out tw-duration-500"
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
+          beforeLeave={onBeforeLeave}
           afterLeave={onAfterLeave}>
           <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-transition-opacity" />
         </TransitionChild>
