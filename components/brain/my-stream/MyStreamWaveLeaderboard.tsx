@@ -39,7 +39,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     };
   }, []);
 
-
   const containerClassName = useMemo(() => {
     return `lg:tw-pt-2 tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow lg:tw-pr-2`;
   }, []);
@@ -74,10 +73,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   // No need for custom height calculation - using leaderboardContainerStyle from LayoutContext
 
   return (
-    <div
-      className={containerClassName}
-      style={waveViewStyle}
-    >
+    <div className={containerClassName} style={waveViewStyle}>
       {/* Main content container */}
       <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
         {/* Title and button now moved to parent component */}
@@ -121,8 +117,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-              >
+                transition={{ duration: 0.2, ease: "easeInOut" }}>
                 <WaveDropCreate
                   wave={wave!}
                   onCancel={() => {

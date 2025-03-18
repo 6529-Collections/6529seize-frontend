@@ -93,8 +93,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     <div
       ref={containerRef}
       className={`${containerClassName}`}
-      style={waveViewStyle}
-    >
+      style={waveViewStyle}>
       <WaveDropsAll
         key={wave.id}
         waveId={wave.id}
