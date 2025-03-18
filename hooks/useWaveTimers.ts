@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { ApiWave } from "../generated/models/ApiWave";
 import { Time } from "../helpers/time";
-import { TimeLeft, calculateTimeLeft } from "../helpers/waves/time.utils";
-import { PhaseState } from "./useWave";
+import { TimeLeft, calculateTimeLeft, calculateLastDecisionTime } from "../helpers/waves/time.utils";
+
+
+export type PhaseState = "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
 
 /**
  * Timer results interface
@@ -10,7 +12,6 @@ import { PhaseState } from "./useWave";
 export interface WaveTimersResult {
   // Participation time information
   participation: {
-    phase: PhaseState;
     timeLeft: TimeLeft;
     isUpcoming: boolean;
     isInProgress: boolean;
@@ -19,94 +20,11 @@ export interface WaveTimersResult {
   
   // Voting time information
   voting: {
-    phase: PhaseState;
     timeLeft: TimeLeft;
     isUpcoming: boolean;
     isInProgress: boolean;
     isCompleted: boolean;
   };
-}
-
-/**
- * Calculates the timestamp of the last decision point in a wave.
- * This considers the wave type (single decision, multi-decision, or rolling)
- * and determines when voting will actually end.
- */
-function calculateLastDecisionTime(wave: ApiWave | null | undefined): number {
-  if (!wave) return 0;
-
-  // Get basic decision strategy data
-  const firstDecisionTime = wave.wave.decisions_strategy?.first_decision_time;
-  const subsequentDecisions =
-    wave.wave.decisions_strategy?.subsequent_decisions || [];
-  const isRolling = wave.wave.decisions_strategy?.is_rolling || false;
-  const votingEndTime = wave.voting.period?.max || Time.currentMillis();
-
-  // If no first decision time is set, use the voting end time
-  if (!firstDecisionTime) return votingEndTime;
-
-  // Case 1: Single decision wave (no subsequent decisions)
-  if (subsequentDecisions.length === 0) {
-    // For single decision waves, the end time is the first decision time
-    // But make sure it's not after the voting end time
-    return Math.min(firstDecisionTime, votingEndTime);
-  }
-
-  // Case 2: Multi-decision waves (fixed number of decisions)
-  if (!isRolling) {
-    // Calculate the last decision time by adding all intervals
-    let lastDecisionTime = firstDecisionTime;
-    for (const interval of subsequentDecisions) {
-      lastDecisionTime += interval;
-    }
-    // But make sure it's not after the voting end time
-    return Math.min(lastDecisionTime, votingEndTime);
-  }
-
-  // Case 3: Rolling waves (decisions repeat until end time)
-  // For rolling waves, we need to calculate how many decision cycles
-  // will occur before the voting end time
-
-  // Calculate the total length of one decision cycle
-  const cycleLength = subsequentDecisions.reduce(
-    (sum, interval) => sum + interval,
-    0
-  );
-
-  // If the first decision is after the end time, there are no decisions
-  if (firstDecisionTime > votingEndTime) {
-    return votingEndTime;
-  }
-
-  // Calculate time remaining after first decision
-  const timeRemainingAfterFirst = votingEndTime - firstDecisionTime;
-
-  // If there's no complete cycle, calculate the last decision within this partial cycle
-  if (timeRemainingAfterFirst <= 0) {
-    return firstDecisionTime;
-  }
-
-  // Calculate complete cycles that fit within the remaining time
-  const completeCycles = Math.floor(timeRemainingAfterFirst / cycleLength);
-
-  // Calculate time for partial cycle
-  const remainingTime = timeRemainingAfterFirst % cycleLength;
-
-  // Start with the time after all complete cycles
-  let lastDecisionTime = firstDecisionTime + completeCycles * cycleLength;
-
-  // Process partial cycle - find the last decision that fits
-  let accumulatedTime = 0;
-  for (const interval of subsequentDecisions) {
-    accumulatedTime += interval;
-    if (accumulatedTime <= remainingTime) {
-      lastDecisionTime += interval;
-    } else {
-      break;
-    }
-  }
-
-  return lastDecisionTime;
 }
 
 /**
@@ -253,14 +171,12 @@ export function useWaveTimers(
 
   return {
     participation: {
-      phase: participationPhase,
       timeLeft: participationTimeLeft,
       isUpcoming: participationPhase === "UPCOMING",
       isInProgress: participationPhase === "IN_PROGRESS",
       isCompleted: participationPhase === "COMPLETED",
     },
     voting: {
-      phase: votingTimePhase,
       timeLeft: votingTimeLeft,
       isUpcoming: votingTimePhase === "UPCOMING",
       isInProgress: votingTimePhase === "IN_PROGRESS",

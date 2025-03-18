@@ -4,6 +4,7 @@ import { useWave } from "../../../../hooks/useWave";
 import { TimePhaseIcon } from "./TimePhaseIcon";
 import { TimePhaseStatus, TimePhaseTitle } from "./TimePhaseStatus";
 import { TimeCountdownDisplay } from "./TimeCountdownDisplay";
+import { useWaveTimers } from "../../../../hooks/useWaveTimers";
 
 interface DroppingPhaseCardProps {
   readonly wave: ApiWave;
@@ -17,44 +18,49 @@ export const DroppingPhaseCard: React.FC<DroppingPhaseCardProps> = ({
 }) => {
   // Using the useWave hook with default options (timers enabled)
   // This component needs timers for real-time countdown display
-  const waveData = useWave(wave);
-  
   const {
-    phase: droppingTimeState,
-    timeLeft: droppingTimeLeft,
-    startTime: participationPeriodMin,
-    endTime: participationPeriodMax
-  } = waveData.participation;
+    participation: { startTime, endTime },
+  } = useWave(wave);
+
+  const {
+    participation: { isUpcoming, isCompleted, isInProgress, timeLeft },
+  } = useWaveTimers(wave);
+
+
 
   return (
     <div className="tw-rounded-lg tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-px-4 tw-py-3 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-gap-y-2 tw-mb-3.5">
         <TimePhaseIcon 
-          phaseState={droppingTimeState} 
+          isCompleted={isCompleted} 
           color="emerald" 
         />
 
         <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
           <TimePhaseTitle 
-            phaseState={droppingTimeState} 
+            isCompleted={isCompleted} 
+            isUpcoming={isUpcoming}
+            isInProgress={isInProgress}
             phaseType="Dropping" 
           />
           <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-            {droppingTimeState === "UPCOMING" &&
-              new Date(participationPeriodMin).toLocaleDateString()}
-            {droppingTimeState === "IN_PROGRESS" &&
-              new Date(participationPeriodMax).toLocaleDateString()}
-            {droppingTimeState === "COMPLETED" &&
-              new Date(participationPeriodMax).toLocaleDateString()}
+            {isUpcoming &&
+              new Date(startTime).toLocaleDateString()}
+            {isInProgress &&
+              new Date(endTime).toLocaleDateString()}
+            {isCompleted &&
+              new Date(endTime).toLocaleDateString()}
           </p>
         </div>
       </div>
 
-      {droppingTimeState !== "COMPLETED" ? (
-        <TimeCountdownDisplay timeLeft={droppingTimeLeft} />
+      {!isCompleted ? (
+        <TimeCountdownDisplay timeLeft={timeLeft} />
       ) : (
         <TimePhaseStatus 
-          phaseState={droppingTimeState} 
+          isCompleted={isCompleted} 
+          isUpcoming={isUpcoming}
+          isInProgress={isInProgress}
           phaseType="Dropping" 
         />
       )}

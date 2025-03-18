@@ -14,7 +14,7 @@ export const CompactDroppingPhaseCard: React.FC<
   CompactDroppingPhaseCardProps
 > = ({ wave }) => {
   const {
-    participation: { phase, timeLeft },
+    participation: { isCompleted, isUpcoming, timeLeft },
   } = useWaveTimers(wave);
   const {
     participation: { startTime, endTime },
@@ -22,18 +22,18 @@ export const CompactDroppingPhaseCard: React.FC<
 
   return (
     <div className="tw-px-2">
-      {phase !== "COMPLETED" ? (
+      {!isCompleted ? (
         <div className="tw-flex tw-items-center tw-justify-between tw-flex-nowrap">
           <span className="tw-font-normal">
             <span className="tw-text-xs tw-text-iron-400">
-              {phase === "UPCOMING" ? "Dropping starts in" : "Dropping ends in"}
+              {isUpcoming ? "Dropping starts in" : "Dropping ends in"}
             </span>{" "}
             <span className="tw-text-xs tw-font-mono tw-text-iron-300 tw-tracking-tight tw-ml-1">
               {timeLeft.days > 0 && `${timeLeft.days}d `}
               {timeLeft.hours}h {timeLeft.minutes}m
             </span>
             <span className="tw-text-xs tw-text-iron-400 tw-px-1.5 tw-whitespace-nowrap tw-ml-2">
-              {phase === "UPCOMING"
+              {isUpcoming
                 ? new Date(startTime).toLocaleDateString(undefined, {
                     month: "short",
                     day: "numeric",
