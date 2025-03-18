@@ -243,6 +243,8 @@ const CreateDropContent = forwardRef<
                 contentEditable={
                   <div className="tw-relative">
                     <ContentEditable
+                      spellCheck={true}
+                      autoCorrect="on"
                       className={`${
                         viewType === CreateDropViewType.COMPACT
                           ? "editor-input-one-liner tw-pr-12"
