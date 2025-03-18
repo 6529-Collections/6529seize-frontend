@@ -77,10 +77,10 @@ export const MemesArtSubmissionModal: React.FC<
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="tw-fixed tw-inset-0 tw-z-50 tw-bg-iron-700/80 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center"
+          className="tailwind-scope tw-fixed tw-inset-0 tw-z-50 tw-bg-iron-700/80 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center"
         >
-          <div className="tw-w-full tw-max-w-5xl tw-overflow-hidden tw-rounded-xl">
-            <div className="tw-max-h-[95vh]  tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
+          <div className="tw-w-full tw-max-w-4xl tw-overflow-hidden tw-rounded-xl">
+            <div className="tw-max-h-[95vh] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
               <MemesArtSubmission onCancel={onClose} onSubmit={onSubmit} />
             </div>
           </div>

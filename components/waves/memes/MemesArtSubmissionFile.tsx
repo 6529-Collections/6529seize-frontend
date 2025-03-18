@@ -17,7 +17,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
   return (
     <motion.div
       whileHover={{ scale: 1.002 }}
-      className="tw-relative tw-w-full tw-h-[400px] tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 tw-rounded-xl tw-overflow-hidden tw-group tw-cursor-pointer hover:tw-border hover:tw-border-iron-700/80 tw-transition-all tw-duration-300 tw-mb-8"
+      className="tw-relative tw-w-full tw-h-[400px] tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950 tw-rounded-xl tw-overflow-hidden tw-group tw-cursor-pointer hover:tw-border hover:tw-border-iron-700/80 tw-transition-all tw-duration-300"
     >
       {!artworkUploaded ? (
         <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-6">
