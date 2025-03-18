@@ -25,15 +25,12 @@ import { faExpand, faImage } from "@fortawesome/free-solid-svg-icons";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
-  readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement>;
 }
 
 /**
@@ -42,34 +39,30 @@ interface MemeParticipationDropProps {
  */
 export default function MemeParticipationDrop({
   drop,
-  showWaveInfo,
   activeDrop,
   showReplyAndQuote,
   location,
   onReply,
   onQuote,
-  onQuoteClick,
   onDropContentClick,
-  parentContainerRef,
 }: MemeParticipationDropProps) {
   const { canShowVote } = useDropInteractionRules(drop);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
 
-  const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const isMobile = useIsMobileDevice();
 
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.key === "title")?.value || "Artwork Title";
+    drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
+    "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.key === "description")?.value ||
+    drop.metadata?.find((m) => m.data_key === "description")?.data_value ||
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
-  const artworkMedia =
-    drop.media && drop.media.length > 0 ? drop.media[0].url : null;
+  const artworkMedia = drop.parts.at(0)?.media.at(0)?.url;
 
   // Get top voters for votes display
   const firstThreeVoters = drop.top_raters?.slice(0, 3) || [];
@@ -103,18 +96,16 @@ export default function MemeParticipationDrop({
 
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
-    onReply({ drop, partId: drop.parts[activePartIndex].part_id });
-  }, [onReply, drop, activePartIndex]);
+    onReply({ drop, partId: drop.parts[0].part_id });
+  }, [onReply, drop]);
 
   const handleOnQuote = useCallback(() => {
     setIsSlideUp(false);
-    onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
-  }, [onQuote, drop, activePartIndex]);
+    onQuote({ drop, partId: drop.parts[0].part_id });
+  }, [onQuote, drop]);
 
   const handleViewLarger = () => {
-    if (onDropContentClick) {
-      onDropContentClick(drop);
-    }
+    console.log("view larger");
   };
 
   return (
@@ -193,10 +184,10 @@ export default function MemeParticipationDrop({
                       </div>
                       <div className="tw-flex tw-items-baseline tw-gap-x-1">
                         <span className="tw-text-base tw-font-medium tw-text-iron-100">
-                          {formatNumberWithCommas(drop.ratings_count || 0)}
+                          {formatNumberWithCommas(drop.raters_count || 0)}
                         </span>
                         <span className="tw-text-sm tw-text-iron-400">
-                          {(drop.ratings_count || 0) === 1 ? "voter" : "voters"}
+                          {drop.raters_count === 1 ? "voter" : "voters"}
                         </span>
                       </div>
                     </div>
@@ -292,7 +283,7 @@ export default function MemeParticipationDrop({
           {!isMobile && showReplyAndQuote && (
             <WaveDropActions
               drop={drop}
-              activePartIndex={activePartIndex}
+              activePartIndex={0}
               onReply={handleOnReply}
               onQuote={handleOnQuote}
             />

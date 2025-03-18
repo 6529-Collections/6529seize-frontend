@@ -5,8 +5,6 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WinnerDrop from "./winner/WinnerDrop";
-import MemeParticipationDrop from "../../memes/drops/MemeParticipationDrop";
-import MemeWinnerDrop from "../../memes/drops/MemeWinnerDrop";
 
 export interface DropInteractionParams {
   drop: ExtendedDrop;
