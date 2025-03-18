@@ -1,10 +1,10 @@
-import { useChainId, useConnections, useSwitchChain } from "wagmi";
+import { useConnections, useSwitchChain } from "wagmi";
 import { getChains } from "../../../../pages/_app";
 
 export default function HeaderUserProxyDropdownChains({
   onSwitchChain,
 }: {
-  onSwitchChain: () => void;
+  readonly onSwitchChain: () => void;
 }) {
   const { switchChain } = useSwitchChain();
   const myChains = getChains();
