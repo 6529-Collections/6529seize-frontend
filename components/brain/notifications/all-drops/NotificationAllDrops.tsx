@@ -77,7 +77,7 @@ export default function NotificationAllDrops({
 
     return (
       <>
-        new drop from{" "}
+        new post from{" "}
         <Link
           href={`/${notification.related_drops[0].author.handle}`}
           className="tw-no-underline tw-font-semibold">

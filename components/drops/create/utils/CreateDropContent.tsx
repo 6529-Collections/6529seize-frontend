@@ -63,8 +63,9 @@ import CreateDropActionsRow from "./CreateDropActionsRow";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import EnterKeyPlugin from "../lexical/plugins/enter/EnterKeyPlugin";
 import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
+import { EmojiNode } from "../lexical/nodes/EmojiNode";
 import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
-import useCapacitor from "../../../../hooks/useCapacitor";
+import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -135,6 +136,7 @@ const CreateDropContent = forwardRef<
         LinkNode,
         HorizontalRuleNode,
         ImageNode,
+        EmojiNode,
       ],
       editorState,
       onError(error: Error): void {
@@ -154,7 +156,6 @@ const CreateDropContent = forwardRef<
     const onHashtagAdded = (hashtag: ReferencedNft) => onReferencedNft(hashtag);
 
     const showToggleViewButton = viewType === CreateDropViewType.COMPACT;
-    const { isCapacitor } = useCapacitor();
 
     const getPlaceHolderText = () => {
       switch (type) {
@@ -241,6 +242,8 @@ const CreateDropContent = forwardRef<
                 contentEditable={
                   <div className="tw-relative">
                     <ContentEditable
+                      spellCheck={true}
+                      autoCorrect="on"
                       className={`${
                         viewType === CreateDropViewType.COMPACT
                           ? "editor-input-one-liner tw-pr-12"
@@ -274,9 +277,6 @@ const CreateDropContent = forwardRef<
               />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
-              {isCapacitor && showToggleViewButton && (
-                <ToggleViewButtonPlugin onViewClick={onViewClick} absolute />
-              )}
               <ListPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <TabIndentationPlugin />
@@ -288,6 +288,7 @@ const CreateDropContent = forwardRef<
                 disabled={false}
               />
               <AutoFocusPlugin />
+              <EmojiPlugin />
             </div>
             {children && <div>{children}</div>}
           </div>
@@ -304,7 +305,6 @@ const CreateDropContent = forwardRef<
           setFiles={setFiles}
           breakIntoStorm={breakIntoStorm}
           toggleViewButton={
-            !isCapacitor &&
             showToggleViewButton && (
               <ToggleViewButtonPlugin onViewClick={onViewClick} />
             )

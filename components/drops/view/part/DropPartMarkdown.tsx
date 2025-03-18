@@ -21,6 +21,7 @@ import {
   SeizeLinkInfo,
 } from "../../../../helpers/SeizeLinkParser";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import { EMOJI_MAP } from "../../../../6529-emoji";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -109,7 +110,16 @@ function DropPartMarkdown({
           const randomId = getRandomObjectId();
           return <DropListItemContentPart key={randomId} part={partProps} />;
         } else {
-          return part;
+          const emojiRegex = /(:\w+:)/g;
+          const parts = part.split(emojiRegex);
+
+          return parts.map((part) =>
+            part.match(emojiRegex) ? (
+              <span key={getRandomObjectId()}>{renderEmoji(part)}</span>
+            ) : (
+              <span key={getRandomObjectId()}>{part}</span>
+            )
+          );
         }
       });
 
@@ -148,6 +158,22 @@ function DropPartMarkdown({
     }
 
     return content;
+  };
+
+  const renderEmoji = (emojiProps: string) => {
+    const emojiId = emojiProps.replaceAll(":", "");
+    const emojiCategory = EMOJI_MAP.find((e) =>
+      e.emojis.find((e) => e.id === emojiId)
+    );
+    const emoji = emojiCategory?.emojis.find((e) => e.id === emojiId);
+
+    if (!emoji) {
+      return <span>{`:${emojiId}:`}</span>;
+    }
+
+    return (
+      <img src={emoji.skins[0].src} alt={emojiId} className="emoji-node" />
+    );
   };
 
   const aHrefRenderer = ({
