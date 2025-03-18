@@ -571,3 +571,13 @@ pre code {
     overflow-wrap: normal !important;
   }
 }
+
+.emoji-node {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.1em;
+
+  @media (max-width: 800px) {
+    vertical-align: -0.2em;
+  }
+}

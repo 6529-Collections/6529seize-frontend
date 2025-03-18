@@ -49,6 +49,7 @@ import {
   getMissingRequirements,
   MissingRequirements,
 } from "./utils/getMissingRequirements";
+import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 
 export type CreateDropMetadataType =
   | {
@@ -445,6 +446,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
           MENTION_TRANSFORMER,
           HASHTAG_TRANSFORMER,
           IMAGE_TRANSFORMER,
+          EMOJI_TRANSFORMER,
         ])
       ) ?? null,
     [editorState]

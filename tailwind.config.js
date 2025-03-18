@@ -61,40 +61,40 @@ module.exports = {
         1000: "1000",
       },
       keyframes: {
-        'loading-bar': {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' }
+        "loading-bar": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
         },
-        'trophy-appear': {
-          '0%': { 
-            opacity: '0',
-            transform: 'scale(0.9) translateY(4px)'
+        "trophy-appear": {
+          "0%": {
+            opacity: "0",
+            transform: "scale(0.9) translateY(4px)",
           },
-          '100%': { 
-            opacity: '1',
-            transform: 'scale(1) translateY(0)'
-          }
+          "100%": {
+            opacity: "1",
+            transform: "scale(1) translateY(0)",
+          },
         },
-        'gradient-shift': {
-          '0%': { 
-            'background-position': '0% 50%'
+        "gradient-shift": {
+          "0%": {
+            "background-position": "0% 50%",
           },
-          '50%': { 
-            'background-position': '100% 50%'
+          "50%": {
+            "background-position": "100% 50%",
           },
-          '100%': { 
-            'background-position': '0% 50%'
-          }
-        }
+          "100%": {
+            "background-position": "0% 50%",
+          },
+        },
       },
       animation: {
-        'loading-bar': 'loading-bar 1.5s infinite',
-        'trophy-appear': 'trophy-appear 0.3s ease-out forwards',
-        'gradient-shift': 'gradient-shift 8s ease infinite'
+        "loading-bar": "loading-bar 1.5s infinite",
+        "trophy-appear": "trophy-appear 0.3s ease-out forwards",
+        "gradient-shift": "gradient-shift 8s ease infinite",
       },
       backgroundSize: {
-        'gradient-pos': '200% 200%'
-      }
+        "gradient-pos": "200% 200%",
+      },
     },
   },
   variants: {
@@ -106,10 +106,10 @@ module.exports = {
     require("@tailwindcss/forms")({
       strategy: "class",
     }),
-    require('tailwind-scrollbar')({ nocompatible: true }),
+    require("tailwind-scrollbar")({ nocompatible: true }),
     require("@tailwindcss/container-queries"),
     function ({ addVariant }) {
-      addVariant('desktop-hover', '@media (hover: hover) and (pointer: fine)');
+      addVariant("desktop-hover", "@media (hover: hover) and (pointer: fine)");
     },
   ],
 };
