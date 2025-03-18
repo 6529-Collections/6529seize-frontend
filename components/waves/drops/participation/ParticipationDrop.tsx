@@ -20,35 +20,12 @@ interface ParticipationDropProps {
 }
 
 export default function ParticipationDrop(props: ParticipationDropProps) {
-  const { 
-    drop, 
-    showWaveInfo, 
-    activeDrop, 
-    location, 
-    onReply, 
-    onQuote, 
-    onQuoteClick, 
-    onDropContentClick, 
-    showReplyAndQuote, 
-    parentContainerRef 
-  } = props;
-  const isMemesWave = drop.wave?.id?.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+  const { drop } = props;
+  const isMemesWave =
+    drop.wave?.id?.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
   if (isMemesWave) {
-     return (
-       <MemeParticipationDrop
-         drop={drop}
-         showWaveInfo={showWaveInfo}
-         activeDrop={activeDrop}
-         location={location}
-         onReply={onReply}
-         onQuote={onQuote}
-         onQuoteClick={onQuoteClick}
-         onDropContentClick={onDropContentClick}
-         showReplyAndQuote={showReplyAndQuote}
-         parentContainerRef={parentContainerRef}
-       />
-     );
-   } else {
-  return <DefaultParticipationDrop {...props} />
-}
+    return <MemeParticipationDrop {...props} />;
+  } else {
+    return <DefaultParticipationDrop {...props} />;
+  }
 }
