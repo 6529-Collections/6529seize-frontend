@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-// Define meme name options for dropdown (unchanged)
+// Define meme name options for dropdown
 const MEME_NAME_OPTIONS = [
   "Seize the Memes of Production",
   "WAGMI",
@@ -154,13 +154,11 @@ function TextTrait({
 }: TextTraitProps) {
   return (
     <div
-      className={`tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors
-     
-     `}
+      className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors"
     >
-      <div className="tw-flex tw-justify-between tw-items-center tw-gap-x-6">
+      <div className="tw-flex tw-items-center tw-gap-x-6">
         <label
-          className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${
+          className={`tw-w-1/3 tw-text-sm tw-font-medium ${
             readOnly ? "tw-text-iron-400" : "tw-text-iron-300"
           }`}
         >
@@ -172,7 +170,7 @@ function TextTrait({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder || `Enter ${label.toLowerCase()}`}
           readOnly={readOnly}
-          className={`tw-form-input tw-w-full tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+          className={`tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
             ${
               readOnly
                 ? "tw-bg-iron-950 tw-ring-iron-950 tw-opacity-80 tw-cursor-not-allowed tw-text-iron-500"
@@ -195,13 +193,11 @@ function NumberTrait({
 }: NumberTraitProps) {
   return (
     <div
-      className={`tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors
-     
-`}
+      className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors"
     >
-      <div className="tw-flex tw-justify-between tw-items-center tw-gap-x-6">
+      <div className="tw-flex tw-items-center tw-gap-x-6">
         <label
-          className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${
+          className={`tw-w-1/3 tw-text-sm tw-font-medium ${
             readOnly ? "tw-text-iron-400" : "tw-text-iron-300"
           }`}
         >
@@ -214,7 +210,7 @@ function NumberTrait({
           min={min}
           max={max}
           readOnly={readOnly}
-          className={`tw-form-input tw-w-full tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+          className={`tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
             ${
               readOnly
                 ? "tw-bg-iron-950 tw-ring-iron-950 tw-opacity-80 tw-cursor-not-allowed tw-text-iron-500"
@@ -235,17 +231,16 @@ function DropdownTrait({
 }: DropdownTraitProps) {
   return (
     <div
-      className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors
-     "
+      className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors"
     >
-      <div className="tw-flex tw-justify-between tw-items-center tw-gap-x-6">
-        <label className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-300">
+      <div className="tw-flex tw-items-center tw-gap-x-6">
+        <label className="tw-w-1/3 tw-text-sm tw-font-medium tw-text-iron-300">
           {label}
         </label>
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="tw-form-select tw-w-full tw-bg-iron-900 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-rounded-lg tw-px-3 tw-py-2 
+          className="tw-form-select tw-w-2/3 tw-bg-iron-900 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-rounded-lg tw-px-3 tw-py-3 
             tw-text-sm tw-text-iron-100 tw-cursor-pointer tw-transition-all tw-shadow-inner
             focus:tw-ring-1 focus:tw-ring-primary-400 hover:tw-ring-primary-400"
         >
@@ -289,251 +284,226 @@ function MemesArtSubmissionTraits({
 
   const userProfile = "User's Profile Name";
 
-  const handleTextChange = (field: keyof Traits) => (value: string) => {
+  // Simplified handler functions
+  const updateText = (field: keyof Traits, value: string) => {
     setTraits({ ...traits, [field]: value });
   };
 
-  const handleBooleanChange = (field: keyof Traits) => (value: boolean) => {
+  const updateBoolean = (field: keyof Traits, value: boolean) => {
     setTraits({ ...traits, [field]: value });
   };
 
-  const handleNumberChange = (field: keyof Traits) => (value: number) => {
+  const updateNumber = (field: keyof Traits, value: number) => {
     setTraits({ ...traits, [field]: value });
   };
+
+  // Render helpers for each field type
+  const renderTextTrait = (label: string, field: keyof Traits, readOnly = false, placeholder?: string) => (
+    <div className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors">
+      <div className="tw-flex tw-items-center tw-gap-x-6">
+        <label
+          className={`tw-w-1/3 tw-text-sm tw-font-medium ${
+            readOnly ? "tw-text-iron-400" : "tw-text-iron-300"
+          }`}
+        >
+          {label}
+        </label>
+        <input
+          type="text"
+          value={traits[field] as string || ""}
+          onChange={(e) => updateText(field, e.target.value)}
+          placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+          readOnly={readOnly}
+          className={`tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+            ${
+              readOnly
+                ? "tw-bg-iron-950 tw-ring-iron-950 tw-opacity-80 tw-cursor-not-allowed tw-text-iron-500"
+                : "tw-bg-iron-900 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400"
+            } tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500`}
+        />
+      </div>
+    </div>
+  );
+
+  const renderNumberTrait = (label: string, field: keyof Traits, readOnly = false, min = 0, max = 100) => (
+    <div className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors">
+      <div className="tw-flex tw-items-center tw-gap-x-6">
+        <label
+          className={`tw-w-1/3 tw-text-sm tw-font-medium ${
+            readOnly ? "tw-text-iron-400" : "tw-text-iron-300"
+          }`}
+        >
+          {label}
+        </label>
+        <input
+          type="number"
+          value={traits[field] as number || 0}
+          onChange={(e) => updateNumber(field, Number(e.target.value))}
+          min={min}
+          max={max}
+          readOnly={readOnly}
+          className={`tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+            ${
+              readOnly
+                ? "tw-bg-iron-950 tw-ring-iron-950 tw-opacity-80 tw-cursor-not-allowed tw-text-iron-500"
+                : "tw-bg-iron-900/80 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400"
+            } tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500`}
+        />
+      </div>
+    </div>
+  );
+
+  const renderDropdownTrait = (label: string, field: keyof Traits, options: string[]) => (
+    <div className="tw-bg-iron-900/50 tw-ring-iron-800/5 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors">
+      <div className="tw-flex tw-items-center tw-gap-x-6">
+        <label className="tw-w-1/3 tw-text-sm tw-font-medium tw-text-iron-300">
+          {label}
+        </label>
+        <select
+          value={traits[field] as string || ""}
+          onChange={(e) => updateText(field, e.target.value)}
+          className="tw-form-select tw-w-2/3 tw-bg-iron-900 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-rounded-lg tw-px-3 tw-py-3 
+            tw-text-sm tw-text-iron-100 tw-cursor-pointer tw-transition-all tw-shadow-inner
+            focus:tw-ring-1 focus:tw-ring-primary-400 hover:tw-ring-primary-400"
+        >
+          <option value="" className="tw-bg-iron-950">
+            Select {label}
+          </option>
+          {options.map((option) => (
+            <option key={option} value={option} className="tw-bg-iron-950">
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+
+  const renderBooleanTrait = (label: string, field: keyof Traits) => (
+    <div className="tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800/40 tw-flex tw-items-center">
+      <div className="tw-text-sm tw-text-iron-200 tw-w-1/3 tw-font-medium">
+        {label}
+      </div>
+      <div className="tw-flex tw-gap-3 tw-flex-1">
+        <button
+          onClick={() => updateBoolean(field, true)}
+          className={`tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
+            ${
+              traits[field]
+                ? "tw-bg-emerald-600/30 tw-ring-emerald-500/60 tw-text-emerald-200"
+                : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
+            } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
+        >
+          Yes
+        </button>
+        <button
+          onClick={() => updateBoolean(field, false)}
+          className={`tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
+            ${
+              !traits[field]
+                ? "tw-bg-rose-600/30 tw-ring-rose-500/60 tw-text-rose-200"
+                : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
+            } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
+        >
+          No
+        </button>
+      </div>
+    </div>
+  );
+
+  // Section component for consistent styling
+  const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
+    <div className="tw-mt-6 tw-first:tw-mt-0">
+      <div className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-4">
+        {title}
+      </div>
+      {children}
+    </div>
+  );
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2">
       <div className="tw-text-xl tw-font-semibold tw-text-iron-100">
         Artwork Traits
       </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4 tw-mt-2">
-        <TextTrait
-          label="Artist"
-          value={traits.artist || userProfile}
-          onChange={handleTextChange("artist")}
-        />
-        <TextTrait
-          label="SEIZE Artist Profile"
-          value={traits.seizeArtistProfile || userProfile}
-          onChange={() => {}}
-          readOnly
-        />
-        <DropdownTrait
-          label="Meme Name"
-          value={traits.memeName}
-          onChange={handleTextChange("memeName")}
-          options={MEME_NAME_OPTIONS}
-        />
-        <TextTrait
-          label="Type - Card"
-          value={traits.typeCard || "Card"}
-          onChange={() => {}}
-          readOnly
-        />
-        <TextTrait
-          label="Issuance Month"
-          value={traits.issuanceMonth || getCurrentMonth()}
-          onChange={() => {}}
-          readOnly
-        />
-        <NumberTrait
-          label="Type - Season"
-          value={traits.typeSeason || 11}
-          onChange={() => {}}
-          readOnly
-        />
-        <NumberTrait
-          label="Type - Meme"
-          value={traits.typeMeme || 1}
-          onChange={() => {}}
-          readOnly
-        />
-        <NumberTrait
-          label="Type - Card Number"
-          value={traits.typeCardNumber || 400}
-          onChange={() => {}}
-          readOnly
-        />
-        <NumberTrait
-          label="Points - Power"
-          value={traits.pointsPower || 0}
-          onChange={handleNumberChange("pointsPower")}
-          min={0}
-          max={100}
-        />
-        <NumberTrait
-          label="Points - Wisdom"
-          value={traits.pointsWisdom || 0}
-          onChange={handleNumberChange("pointsWisdom")}
-          min={0}
-          max={100}
-        />
-        <NumberTrait
-          label="Points - Loki"
-          value={traits.pointsLoki || 0}
-          onChange={handleNumberChange("pointsLoki")}
-          min={0}
-          max={100}
-        />
-        <NumberTrait
-          label="Points - Speed"
-          value={traits.pointsSpeed || 0}
-          onChange={handleNumberChange("pointsSpeed")}
-          min={0}
-          max={100}
-        />
-        <BooleanTrait
-          label="Punk 6529"
-          value={traits.punk6529 || false}
-          onChange={handleBooleanChange("punk6529")}
-        />
-        <BooleanTrait
-          label="Gradient"
-          value={traits.gradient || false}
-          onChange={handleBooleanChange("gradient")}
-        />
-        <BooleanTrait
-          label="Movement"
-          value={traits.movement || false}
-          onChange={handleBooleanChange("movement")}
-        />
-        <BooleanTrait
-          label="Dynamic"
-          value={traits.dynamic || false}
-          onChange={handleBooleanChange("dynamic")}
-        />
-        <BooleanTrait
-          label="Interactive"
-          value={traits.interactive || false}
-          onChange={handleBooleanChange("interactive")}
-        />
-        <BooleanTrait
-          label="Collab"
-          value={traits.collab || false}
-          onChange={handleBooleanChange("collab")}
-        />
-        <BooleanTrait
-          label="OM"
-          value={traits.om || false}
-          onChange={handleBooleanChange("om")}
-        />
-        <BooleanTrait
-          label="3D"
-          value={traits.threeD || false}
-          onChange={handleBooleanChange("threeD")}
-        />
-        <BooleanTrait
-          label="Pepe"
-          value={traits.pepe || false}
-          onChange={handleBooleanChange("pepe")}
-        />
-        <BooleanTrait
-          label="GM"
-          value={traits.gm || false}
-          onChange={handleBooleanChange("gm")}
-        />
-        <TextTrait
-          label="Bonus"
-          value={traits.bonus || ""}
-          onChange={handleTextChange("bonus")}
-        />
-        <TextTrait
-          label="Boost"
-          value={traits.boost || ""}
-          onChange={handleTextChange("boost")}
-        />
-        <BooleanTrait
-          label="Summer"
-          value={traits.summer || false}
-          onChange={handleBooleanChange("summer")}
-        />
-        <BooleanTrait
-          label="Tulip"
-          value={traits.tulip || false}
-          onChange={handleBooleanChange("tulip")}
-        />
-        <DropdownTrait
-          label="Palette"
-          value={traits.palette || ""}
-          onChange={handleTextChange("palette")}
-          options={["Color", "Black and White"]}
-        />
-        <TextTrait
-          label="Style"
-          value={traits.style || ""}
-          onChange={handleTextChange("style")}
-        />
-        <TextTrait
-          label="Jewel"
-          value={traits.jewel || ""}
-          onChange={handleTextChange("jewel")}
-        />
-        <TextTrait
-          label="Superpower"
-          value={traits.superpower || ""}
-          onChange={handleTextChange("superpower")}
-        />
-        <TextTrait
-          label="Dharma"
-          value={traits.dharma || ""}
-          onChange={handleTextChange("dharma")}
-        />
-        <TextTrait
-          label="Gear"
-          value={traits.gear || ""}
-          onChange={handleTextChange("gear")}
-        />
-        <TextTrait
-          label="Clothing"
-          value={traits.clothing || ""}
-          onChange={handleTextChange("clothing")}
-        />
-        <TextTrait
-          label="Element"
-          value={traits.element || ""}
-          onChange={handleTextChange("element")}
-        />
-        <TextTrait
-          label="Mystery"
-          value={traits.mystery || ""}
-          onChange={handleTextChange("mystery")}
-        />
-        <TextTrait
-          label="Secrets"
-          value={traits.secrets || ""}
-          onChange={handleTextChange("secrets")}
-        />
-        <TextTrait
-          label="Weapon"
-          value={traits.weapon || ""}
-          onChange={handleTextChange("weapon")}
-        />
-        <TextTrait
-          label="Home"
-          value={traits.home || ""}
-          onChange={handleTextChange("home")}
-        />
-        <TextTrait
-          label="Parent"
-          value={traits.parent || ""}
-          onChange={handleTextChange("parent")}
-        />
-        <TextTrait
-          label="Sibling"
-          value={traits.sibling || ""}
-          onChange={handleTextChange("sibling")}
-        />
-        <TextTrait
-          label="Food"
-          value={traits.food || ""}
-          onChange={handleTextChange("food")}
-        />
-        <TextTrait
-          label="Drink"
-          value={traits.drink || ""}
-          onChange={handleTextChange("drink")}
-        />
-      </div>
+      
+      {/* Basic Information */}
+      <Section title="Basic Information">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4">
+          {renderTextTrait("Artist", "artist", false, userProfile)}
+          {renderTextTrait("SEIZE Artist Profile", "seizeArtistProfile", true, userProfile)}
+          {renderDropdownTrait("Meme Name", "memeName", MEME_NAME_OPTIONS)}
+        </div>
+      </Section>
+      
+      {/* Card Type */}
+      <Section title="Card Type Information">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4">
+          {renderTextTrait("Type - Card", "typeCard", true)}
+          {renderTextTrait("Issuance Month", "issuanceMonth", true)}
+          {renderNumberTrait("Type - Season", "typeSeason", true)}
+          {renderNumberTrait("Type - Meme", "typeMeme", true)}
+          {renderNumberTrait("Type - Card Number", "typeCardNumber", true)}
+        </div>
+      </Section>
+      
+      {/* Card Points */}
+      <Section title="Card Points">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4">
+          {renderNumberTrait("Points - Power", "pointsPower")}
+          {renderNumberTrait("Points - Wisdom", "pointsWisdom")}
+          {renderNumberTrait("Points - Loki", "pointsLoki")}
+          {renderNumberTrait("Points - Speed", "pointsSpeed")}
+        </div>
+      </Section>
+      
+      {/* Card Attributes (Boolean fields) */}
+      <Section title="Card Attributes">
+        <div className="tw-grid tw-grid-cols-2 tw-gap-4">
+          {renderBooleanTrait("Punk 6529", "punk6529")}
+          {renderBooleanTrait("Gradient", "gradient")}
+          {renderBooleanTrait("Movement", "movement")}
+          {renderBooleanTrait("Dynamic", "dynamic")}
+          {renderBooleanTrait("Interactive", "interactive")}
+          {renderBooleanTrait("Collab", "collab")}
+          {renderBooleanTrait("OM", "om")}
+          {renderBooleanTrait("3D", "threeD")}
+          {renderBooleanTrait("Pepe", "pepe")}
+          {renderBooleanTrait("GM", "gm")}
+          {renderBooleanTrait("Summer", "summer")}
+          {renderBooleanTrait("Tulip", "tulip")}
+        </div>
+      </Section>
+      
+      {/* Card Special Properties */}
+      <Section title="Card Special Properties">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4">
+          {renderTextTrait("Bonus", "bonus")}
+          {renderTextTrait("Boost", "boost")}
+          {renderDropdownTrait("Palette", "palette", ["Color", "Black and White"])}
+          {renderTextTrait("Style", "style")}
+          {renderTextTrait("Jewel", "jewel")}
+          {renderTextTrait("Superpower", "superpower")}
+          {renderTextTrait("Dharma", "dharma")}
+          {renderTextTrait("Gear", "gear")}
+          {renderTextTrait("Clothing", "clothing")}
+          {renderTextTrait("Element", "element")}
+        </div>
+      </Section>
+      
+      {/* Card Details */}
+      <Section title="Card Additional Details">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4">
+          {renderTextTrait("Mystery", "mystery")}
+          {renderTextTrait("Secrets", "secrets")}
+          {renderTextTrait("Weapon", "weapon")}
+          {renderTextTrait("Home", "home")}
+          {renderTextTrait("Parent", "parent")}
+          {renderTextTrait("Sibling", "sibling")}
+          {renderTextTrait("Food", "food")}
+          {renderTextTrait("Drink", "drink")}
+        </div>
+      </Section>
     </div>
   );
 }

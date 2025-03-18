@@ -132,7 +132,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   return (
     <>
       <div
-        className="tw-relative tw-flex tw-flex-col tw-h-full"
+        className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
         key={stableWaveKey}
       >
         {/* Don't render tab container for simple waves */}
