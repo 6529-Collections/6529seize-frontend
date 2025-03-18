@@ -162,10 +162,9 @@ function DropPartMarkdown({
 
   const renderEmoji = (emojiProps: string) => {
     const emojiId = emojiProps.replaceAll(":", "");
-    const emojiCategory = EMOJI_MAP.find((e) =>
-      e.emojis.find((e) => e.id === emojiId)
+    const emoji = EMOJI_MAP.flatMap((cat) => cat.emojis).find(
+      (e) => e.id === emojiId
     );
-    const emoji = emojiCategory?.emojis.find((e) => e.id === emojiId);
 
     if (!emoji) {
       return <span>{`:${emojiId}:`}</span>;

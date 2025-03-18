@@ -3,13 +3,11 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import {
   $getRoot,
   $getSelection,
-  $getNodeByKey,
   $isRangeSelection,
   $createRangeSelection,
   $setSelection,
   TextNode,
   LexicalEditor,
-  NodeMutation,
 } from "lexical";
 import { EmojiNode } from "../../nodes/EmojiNode";
 
@@ -108,33 +106,13 @@ function transformEmojiTextToNode(editor: LexicalEditor) {
 const EmojiPlugin = () => {
   const [editor] = useLexicalComposerContext();
 
-  const handleMutation = (
-    mutation: Map<string, NodeMutation>,
-    editor: LexicalEditor
-  ): void => {
-    editor.update(() => {
-      mutation.forEach((type, key) => {
-        if (shouldTransform(type, key)) {
-          transformEmojiTextToNode(editor);
-        }
-      });
-    });
-  };
-
-  const shouldTransform = (type: NodeMutation, key: string): boolean => {
-    if (type !== "created" && type !== "updated") return false;
-
-    const node = $getNodeByKey(key);
-    return (
-      node instanceof TextNode && EMOJI_TEST_REGEX.test(node.getTextContent())
-    );
-  };
-
   useEffect(() => {
     transformEmojiTextToNode(editor);
 
-    return editor.registerMutationListener(TextNode, (mutation) => {
-      handleMutation(mutation, editor);
+    return editor.registerTextContentListener((textContent) => {
+      if (EMOJI_TEST_REGEX.test(textContent)) {
+        transformEmojiTextToNode(editor);
+      }
     });
   }, [editor]);
 
