@@ -63,8 +63,10 @@ import CreateDropActionsRow from "./CreateDropActionsRow";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import EnterKeyPlugin from "../lexical/plugins/enter/EnterKeyPlugin";
 import AutoFocusPlugin from "../lexical/plugins/AutoFocusPlugin";
-import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { EmojiNode } from "../lexical/nodes/EmojiNode";
+import CreateDropEmojiPicker from "../../../waves/CreateDropEmojiPicker";
+import EmojiPlugin from "../lexical/plugins/emoji/EmojiPlugin";
 
 export interface CreateDropContentHandles {
   clearEditorState: () => void;
@@ -135,6 +137,7 @@ const CreateDropContent = forwardRef<
         LinkNode,
         HorizontalRuleNode,
         ImageNode,
+        EmojiNode,
       ],
       editorState,
       onError(error: Error): void {
@@ -274,9 +277,6 @@ const CreateDropContent = forwardRef<
               />
               <MaxLengthPlugin maxLength={25000} />
               <DragDropPastePlugin />
-              {isCapacitor && showToggleViewButton && (
-                <ToggleViewButtonPlugin onViewClick={onViewClick} absolute />
-              )}
               <ListPlugin />
               <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
               <TabIndentationPlugin />
@@ -288,6 +288,7 @@ const CreateDropContent = forwardRef<
                 disabled={false}
               />
               <AutoFocusPlugin />
+              <EmojiPlugin />
             </div>
             {children && <div>{children}</div>}
           </div>
@@ -304,7 +305,6 @@ const CreateDropContent = forwardRef<
           setFiles={setFiles}
           breakIntoStorm={breakIntoStorm}
           toggleViewButton={
-            !isCapacitor &&
             showToggleViewButton && (
               <ToggleViewButtonPlugin onViewClick={onViewClick} />
             )

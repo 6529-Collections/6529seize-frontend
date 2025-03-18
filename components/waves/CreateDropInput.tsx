@@ -55,6 +55,8 @@ import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "../../hooks/useCapacitor";
+import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
+import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 
 export interface CreateDropInputHandles {
   clearEditorState: () => void;
@@ -138,6 +140,7 @@ const CreateDropInput = forwardRef<
         LinkNode,
         HorizontalRuleNode,
         ImageNode,
+        EmojiNode,
       ],
       editorState,
       editable: !submitting,
@@ -272,6 +275,7 @@ const CreateDropInput = forwardRef<
                 canSubmitWithEnter={canSubmitWithEnter}
                 disabled={submitting}
               />
+              <EmojiPlugin />
             </div>
           </div>
         </LexicalComposer>

@@ -552,7 +552,6 @@ pre code {
   }
 }
 
-
 /* X card */
 @media (max-width: 390px) {
   a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq,
@@ -572,4 +571,10 @@ pre code {
     word-break: normal !important;
     overflow-wrap: normal !important;
   }
+}
+
+.emoji-node {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.1em;
 }
