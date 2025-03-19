@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { TraitsData } from '../types/TraitsData';
 import { SubmissionStep, stepIndexToEnum, stepEnumToIndex } from '../types/Steps';
-
+import { useAuth } from '../../../../auth/Auth';
 /**
  * Custom hook to manage artwork submission form state
  */
 export function useArtworkSubmissionForm() {
+  const { connectedProfile } = useAuth();
+
   // Step tracking
   const [currentStep, setCurrentStep] = useState<SubmissionStep>(SubmissionStep.AGREEMENT);
   const [isSigningWallet, setIsSigningWallet] = useState(false);
@@ -18,72 +20,15 @@ export function useArtworkSubmissionForm() {
   const [artworkUploaded, setArtworkUploaded] = useState(false);
   const [artworkUrl, setArtworkUrl] = useState("");
 
-  // Initialize all traits with default values
-  const [traits, setTraits] = useState<TraitsData>({
-    // Initialize text fields
-    title: "",
-    description: "",
-    artist: "",
-    palette: "",
-    style: "",
-    jewel: "",
-    superpower: "",
-    dharma: "",
-    gear: "",
-    clothing: "",
-    element: "",
-    mystery: "",
-    secrets: "",
-    weapon: "",
-    home: "",
-    parent: "",
-    sibling: "",
-    food: "",
-    drink: "",
+  // Import the pre-computed initial values to avoid circular dependency
+  const { initialTraits } = require('../../traits/schema');
+  const [traits, setTraits] = useState<TraitsData>(initialTraits);
 
-    // Initialize boolean fields
-    punk6529: false,
-    gradient: false,
-    movement: false,
-    dynamic: false,
-    interactive: false,
-    collab: false,
-    om: false,
-    threeD: false,
-    pepe: false,
-    gm: false,
-    bonus: false,
-    boost: false,
-    summer: false,
-    tulip: false,
 
-    // Initialize dropdown fields
-    memeName: "",
-
-    // Initialize number fields
-    pointsPower: 0,
-    pointsWisdom: 0,
-    pointsLoki: 0,
-    pointsSpeed: 0,
-
-    // Initialize read-only fields
-    seizeArtistProfile: "",
-    typeCard: "Card",
-    issuanceMonth: "",
-    typeSeason: 11,
-    typeMeme: 1,
-    typeCardNumber: 400,
-  });
-
-  // Helper function to get current user profile info
-  const getUserProfile = () => {
-    // This should be replaced with actual user profile name from context/API
-    return "User's Profile Name";
-  };
 
   // Initialize traits with profile info
   useEffect(() => {
-    const userProfile = getUserProfile();
+    const userProfile = connectedProfile?.profile?.handle ?? "";
     setTraits((prev) => ({
       ...prev,
       artist: userProfile,
