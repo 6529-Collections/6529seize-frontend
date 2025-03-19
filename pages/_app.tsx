@@ -128,6 +128,7 @@ import {
 import { Capacitor } from "@capacitor/core";
 import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
 import { SeizeSettingsProvider } from "../contexts/SeizeSettingsContext";
+import { EmojiProvider } from "../contexts/EmojiContext";
 
 library.add(
   faArrowUp,
@@ -394,22 +395,24 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         <WagmiProvider config={wagmiConfig}>
           <ReactQueryWrapper>
             <SeizeSettingsProvider>
-              <IpfsProvider>
-                <AppWalletsProvider>
-                  <SeizeConnectProvider>
-                    <Auth>
-                      <NotificationsProvider>
-                        <CookieConsentProvider>
-                          <EULAConsentProvider>
-                            {getLayout(<Component {...props} />)}
-                            {appWalletPasswordModal.modal}
-                          </EULAConsentProvider>
-                        </CookieConsentProvider>
-                      </NotificationsProvider>
-                    </Auth>
-                  </SeizeConnectProvider>
-                </AppWalletsProvider>
-              </IpfsProvider>
+              <EmojiProvider>
+                <IpfsProvider>
+                  <AppWalletsProvider>
+                    <SeizeConnectProvider>
+                      <Auth>
+                        <NotificationsProvider>
+                          <CookieConsentProvider>
+                            <EULAConsentProvider>
+                              {getLayout(<Component {...props} />)}
+                              {appWalletPasswordModal.modal}
+                            </EULAConsentProvider>
+                          </CookieConsentProvider>
+                        </NotificationsProvider>
+                      </Auth>
+                    </SeizeConnectProvider>
+                  </AppWalletsProvider>
+                </IpfsProvider>
+              </EmojiProvider>
             </SeizeSettingsProvider>
           </ReactQueryWrapper>
           {!hideFooter && <Footer />}
