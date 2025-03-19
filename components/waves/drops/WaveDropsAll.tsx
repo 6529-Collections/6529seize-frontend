@@ -87,6 +87,7 @@ export default function WaveDropsAll({
   const targetDropRef = useRef<HTMLDivElement | null>(null);
 
   const [isScrolling, setIsScrolling] = useState(false);
+  const [userHasManuallyScrolled, setUserHasManuallyScrolled] = useState(false);
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
@@ -114,6 +115,18 @@ export default function WaveDropsAll({
   );
 
   const [newItemsCount, setNewItemsCount] = useState(0);
+  
+  const handleUserScroll = useCallback((direction: 'up' | 'down', currentIsAtBottom: boolean) => {
+    // If user was at the bottom and is now scrolling up, mark as manual scroll
+    if (direction === 'up' && !currentIsAtBottom && isAtBottom) {
+      setUserHasManuallyScrolled(true);
+    }
+    
+    // If user manually returned to bottom, reset the flag
+    if (currentIsAtBottom && userHasManuallyScrolled) {
+      setUserHasManuallyScrolled(false);
+    }
+  }, [isAtBottom, userHasManuallyScrolled]);
 
   useEffect(() => {
     setTitle({
@@ -133,7 +146,7 @@ export default function WaveDropsAll({
   const [isHandlingNewDrops, setIsHandlingNewDrops] = useState(false);
   
   useEffect(() => {
-    if (haveNewDrops && isAtBottom && !isHandlingNewDrops && !isFetching) {
+    if (haveNewDrops && isAtBottom && !isHandlingNewDrops && !isFetching && !userHasManuallyScrolled) {
       setIsHandlingNewDrops(true);
       refetch()
         .then(() => {
@@ -147,7 +160,7 @@ export default function WaveDropsAll({
           setIsHandlingNewDrops(false);
         });
     }
-  }, [haveNewDrops, isAtBottom, isHandlingNewDrops, isFetching, refetch, scrollToBottom]);
+  }, [haveNewDrops, isAtBottom, isHandlingNewDrops, isFetching, refetch, scrollToBottom, userHasManuallyScrolled]);
   
   // Auto-scroll to bottom on initial load
   useEffect(() => {
@@ -175,15 +188,17 @@ export default function WaveDropsAll({
       // Check if the last drop is a temp drop (your own post)
       const lastDrop = drops[drops.length - 1];
       if (lastDrop.id.startsWith("temp-")) {
-        // For user's own new drop, scroll to bottom
-        if (isAtBottom) {
+        // For user's own new drop, scroll to bottom - but only if they haven't manually scrolled away
+        if (isAtBottom && !userHasManuallyScrolled) {
           setTimeout(() => {
             scrollToBottom();
           }, 100);
-        } else {
+        } else if (!userHasManuallyScrolled) {
           // If not at bottom, use the serialNo approach to scroll to the specific drop
+          // Again, only if they haven't manually scrolled away
           setSerialNo(lastDrop.serial_no);
         }
+        // If they've manually scrolled, respect their intention and don't auto-scroll
       }
     } else {
       smallestSerialNo.current = null;
@@ -260,6 +275,7 @@ export default function WaveDropsAll({
         );
       } else {
         setSerialNo(drop.serial_no);
+        setUserHasManuallyScrolled(false); // Reset when navigating to specific content
       }
     },
     [router, waveId, setSerialNo]
@@ -311,7 +327,10 @@ export default function WaveDropsAll({
 
         <WaveDropsScrollBottomButton
           isAtBottom={isAtBottom}
-          scrollToBottom={scrollToBottom}
+          scrollToBottom={() => {
+            scrollToBottom();
+            setUserHasManuallyScrolled(false); // Reset manual scroll flag when user clicks to bottom
+          }}
         />
       </>
     );

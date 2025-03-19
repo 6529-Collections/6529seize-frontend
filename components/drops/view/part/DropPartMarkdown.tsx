@@ -20,6 +20,8 @@ import {
   parseSeizeLink,
   SeizeLinkInfo,
 } from "../../../../helpers/SeizeLinkParser";
+import { EMOJI_MAP } from "../../../../6529-emoji";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -39,14 +41,15 @@ function DropPartMarkdown({
   referencedNfts,
   partContent,
   onQuoteClick,
-  textSize = "md",
+  textSize,
 }: DropPartMarkdownProps) {
+  const isMobile = useIsMobileScreen();
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
-        return "tw-text-sm";
+        return isMobile ? "tw-text-xs" : "tw-text-sm";
       default:
-        return "tw-text-md";
+        return isMobile ? "tw-text-sm" : "tw-text-md";
     }
   })();
 
@@ -107,7 +110,16 @@ function DropPartMarkdown({
           const randomId = getRandomObjectId();
           return <DropListItemContentPart key={randomId} part={partProps} />;
         } else {
-          return part;
+          const emojiRegex = /(:\w+:)/g;
+          const parts = part.split(emojiRegex);
+
+          return parts.map((part) =>
+            part.match(emojiRegex) ? (
+              <span key={getRandomObjectId()}>{renderEmoji(part)}</span>
+            ) : (
+              <span key={getRandomObjectId()}>{part}</span>
+            )
+          );
         }
       });
 
@@ -146,6 +158,21 @@ function DropPartMarkdown({
     }
 
     return content;
+  };
+
+  const renderEmoji = (emojiProps: string) => {
+    const emojiId = emojiProps.replaceAll(":", "");
+    const emoji = EMOJI_MAP.flatMap((cat) => cat.emojis).find(
+      (e) => e.id === emojiId
+    );
+
+    if (!emoji) {
+      return <span>{`:${emojiId}:`}</span>;
+    }
+
+    return (
+      <img src={emoji.skins[0].src} alt={emojiId} className="emoji-node" />
+    );
   };
 
   const aHrefRenderer = ({
@@ -190,8 +217,7 @@ function DropPartMarkdown({
         className="tw-no-underline"
         target="_blank"
         href={href}
-        data-theme="dark"
-      >
+        data-theme="dark">
         <Tweet id={tweetId} />
       </Link>
     </div>
@@ -324,8 +350,7 @@ function DropPartMarkdown({
         ),
         p: (params) => (
           <p
-            className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
-          >
+            className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -345,8 +370,7 @@ function DropPartMarkdown({
         code: (params) => (
           <code
             style={{ textOverflow: "unset" }}
-            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words"
-          >
+            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words">
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -365,8 +389,7 @@ function DropPartMarkdown({
             })}
           </blockquote>
         ),
-      }}
-    >
+      }}>
       {partContent}
     </Markdown>
   );

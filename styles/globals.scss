@@ -23,8 +23,7 @@
 }
 
 body {
-  background: $bg-color-1;
-  background-color: $bg-color-2 !important;
+  background-color: black !important;
   color: $font-color !important;
   font-size: $font-size !important;
   font-family: $main-font !important;
@@ -570,7 +569,6 @@ pre code {
   }
 }
 
-
 /* X card */
 @media (max-width: 390px) {
   a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq,
@@ -589,5 +587,15 @@ pre code {
     white-space: nowrap !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
+  }
+}
+
+.emoji-node {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.1em;
+
+  @media (max-width: 800px) {
+    vertical-align: -0.2em;
   }
 }

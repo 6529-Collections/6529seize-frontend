@@ -11,19 +11,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-}
-
-.capacitorWidgetPortrait {
-  padding-left: 35px;
-  padding-right: 35px;
-  padding-bottom: 10px;
-  height: 85px;
-}
-
-.capacitorWidgetLandscape {
   padding-left: max(50px, env(safe-area-inset-left));
   padding-right: max(50px, env(safe-area-inset-right));
-  height: 60px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  padding-top: 10px;
 }
 
 .button {

@@ -77,13 +77,16 @@ export function CreateDropWaveWrapper({
       context === CreateDropWaveWrapperContext.MY_STREAM ||
       context === CreateDropWaveWrapperContext.WAVE_CHAT;
 
-    if (capacitor.isCapacitor) {
-      const marginClass = isMyStreamOrWaveChat && !capacitor.keyboardVisible ? "tw-mb-[3.75rem]" : "";
+    if (capacitor.isIos) {
+      const marginClass =
+        isMyStreamOrWaveChat && !capacitor.keyboardVisible
+          ? "tw-mb-[3.75rem]"
+          : "";
       return `tw-max-h-[calc(100vh-14.7rem)] ${marginClass} tw-z-[998]`;
     }
 
     return "tw-max-h-[calc(100vh-8.5rem)] lg:tw-max-h-[calc(100vh-7.5rem)] tw-z-30";
-  }, [capacitor.isCapacitor, capacitor.keyboardVisible, context]);
+  }, [capacitor.isIos, capacitor.keyboardVisible, context]);
   return (
     <div
       ref={containerRef}

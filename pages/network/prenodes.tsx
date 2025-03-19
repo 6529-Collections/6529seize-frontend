@@ -52,9 +52,7 @@ export default function PrenodesPage() {
       <main className={styles.main}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-        <Container
-          fluid
-          className={`${styles.mainContainer} ${styles.leaderboardContainer}`}>
+        <Container fluid className={styles.leaderboardContainer}>
           <Row>
             <Col>
               <PrenodesStatus />

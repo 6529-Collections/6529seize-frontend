@@ -27,7 +27,7 @@ export default function MemePageMintCountdown(
     props.nft_id
   );
 
-  const { platform } = useCapacitor();
+  const { isIos } = useCapacitor();
 
   useEffect(() => {
     if (props.setClaim && manifoldClaim) {
@@ -55,9 +55,8 @@ export default function MemePageMintCountdown(
   };
 
   const getButtons = () => {
-    const hideMintOnSeize = platform === "ios";
     const buttons: MemePageMintBtn[] = [];
-    if (!hideMintOnSeize) {
+    if (!isIos) {
       buttons.push({
         label: "Mint",
         link: `/the-memes/mint`,
