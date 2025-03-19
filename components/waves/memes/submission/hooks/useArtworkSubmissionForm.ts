@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { TraitsData } from '../types/TraitsData';
 import { SubmissionStep, stepIndexToEnum, stepEnumToIndex } from '../types/Steps';
-
+import { useAuth } from '../../../../auth/Auth';
 /**
  * Custom hook to manage artwork submission form state
  */
 export function useArtworkSubmissionForm() {
+  const { connectedProfile } = useAuth();
+
   // Step tracking
   const [currentStep, setCurrentStep] = useState<SubmissionStep>(SubmissionStep.AGREEMENT);
   const [isSigningWallet, setIsSigningWallet] = useState(false);
@@ -75,15 +77,11 @@ export function useArtworkSubmissionForm() {
     typeCardNumber: 400,
   });
 
-  // Helper function to get current user profile info
-  const getUserProfile = () => {
-    // This should be replaced with actual user profile name from context/API
-    return "User's Profile Name";
-  };
+
 
   // Initialize traits with profile info
   useEffect(() => {
-    const userProfile = getUserProfile();
+    const userProfile = connectedProfile?.profile?.handle ?? "";
     setTraits((prev) => ({
       ...prev,
       artist: userProfile,
