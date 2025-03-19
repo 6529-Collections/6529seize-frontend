@@ -1,16 +1,69 @@
 import React, { useState, useMemo } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
-import { Traits } from "../../waves/memes/MemesArtSubmissionTraits";
+
 import { ApiDropMetadata } from "../../../generated/models/ApiDropMetadata";
+import { TraitsData } from "../memes/submission/types/TraitsData";
+import { FieldType } from "../memes/traits/schema";
 
 interface SingleWaveDropTraitsProps {
   readonly drop: ExtendedDrop;
 }
 
 // Extract trait data from drop metadata
-const extractTraitsFromMetadata = (metadata: ApiDropMetadata[]): Partial<Traits> => {
-  const traits: Partial<Traits> = {};
+const extractTraitsFromMetadata = (metadata: ApiDropMetadata[]): Partial<TraitsData> => {
+  // Initialize with empty values for all fields to avoid type errors
+  const traits: Partial<TraitsData> = {
+    // Text fields
+    artist: '',
+    seizeArtistProfile: '',
+    typeCard: '',
+    issuanceMonth: '',
+    memeName: '',
+    palette: '',
+    style: '',
+    jewel: '',
+    superpower: '',
+    dharma: '',
+    gear: '',
+    clothing: '',
+    element: '',
+    mystery: '',
+    secrets: '',
+    weapon: '',
+    home: '',
+    parent: '',
+    sibling: '',
+    food: '',
+    drink: '',
+    bonus: '',
+    boost: '',
+    title: '',
+    description: '',
+    
+    // Boolean fields
+    punk6529: false,
+    gradient: false,
+    movement: false,
+    dynamic: false,
+    interactive: false,
+    collab: false,
+    om: false,
+    threeD: false,
+    pepe: false,
+    gm: false,
+    summer: false,
+    tulip: false,
+    
+    // Number fields
+    pointsPower: 0,
+    pointsWisdom: 0,
+    pointsLoki: 0,
+    pointsSpeed: 0,
+    typeSeason: 0,
+    typeMeme: 0,
+    typeCardNumber: 0
+  };
   
   // Process each metadata item
   metadata.forEach(item => {
@@ -36,7 +89,7 @@ const extractTraitsFromMetadata = (metadata: ApiDropMetadata[]): Partial<Traits>
     ];
     
     // Comprehensive key mapping for string traits
-    const keyMapping: Record<string, keyof Traits> = {
+    const keyMapping: Record<string, keyof TraitsData> = {
       // Basic info
       "artist": "artist",
       "artistname": "artist",
@@ -98,28 +151,68 @@ const extractTraitsFromMetadata = (metadata: ApiDropMetadata[]): Partial<Traits>
     // Process based on trait type
     if (booleanTraits.includes(normalizedKey)) {
       // Handle special case for "3d" which maps to "threeD"
-      const traitKey = normalizedKey === "3d" ? "threeD" : normalizedKey as keyof Traits;
-      traits[traitKey] = value.toLowerCase() === "true" || value === "1" || value.toLowerCase() === "yes";
+      const traitKey = normalizedKey === "3d" ? "threeD" : normalizedKey;
+      
+      // Type guard: ensure we're only assigning to known boolean fields
+      const booleanKeys: Array<keyof TraitsData> = [
+        "punk6529", "gradient", "movement", "dynamic", "interactive", 
+        "collab", "om", "threeD", "pepe", "gm", "summer", "tulip"
+      ];
+      
+      if (booleanKeys.includes(traitKey as keyof TraitsData)) {
+        const boolKey = traitKey as keyof TraitsData;
+        const boolValue = value.toLowerCase() === "true" || value === "1" || value.toLowerCase() === "yes";
+        
+        // Safe assignment with type checking
+        if (typeof traits[boolKey] === 'boolean' || traits[boolKey] === undefined) {
+          (traits as Record<keyof TraitsData, any>)[boolKey] = boolValue;
+        }
+      }
     }
     else if (numberTraits.includes(normalizedKey)) {
       // Map common variations to their canonical property names
-      let traitKey: keyof Traits;
+      let traitKey: keyof TraitsData | null = null;
       
+      // Type guard: map to known number fields
       if (normalizedKey === "season") traitKey = "typeSeason";
       else if (normalizedKey === "cardnumber") traitKey = "typeCardNumber";
-      else traitKey = normalizedKey as keyof Traits;
+      else if ([
+        "pointsPower", "pointsWisdom", "pointsLoki", "pointsSpeed", 
+        "typeSeason", "typeMeme", "typeCardNumber"
+      ].includes(normalizedKey as keyof TraitsData)) {
+        traitKey = normalizedKey as keyof TraitsData;
+      }
       
-      traits[traitKey] = Number(value) || 0;
+      if (traitKey) {
+        const numValue = Number(value) || 0;
+        
+        // Safe assignment with type checking
+        if (typeof traits[traitKey] === 'number' || traits[traitKey] === undefined) {
+          (traits as Record<keyof TraitsData, any>)[traitKey] = numValue;
+        }
+      }
     }
     else if (keyMapping[normalizedKey]) {
-      traits[keyMapping[normalizedKey]] = value;
+      const textKey = keyMapping[normalizedKey];
+      
+      // Safe assignment with type checking
+      if (typeof traits[textKey] === 'string' || traits[textKey] === undefined) {
+        (traits as Record<keyof TraitsData, any>)[textKey] = value;
+      }
     }
     // Special case: handle any key that starts with "points"
     else if (normalizedKey.startsWith("points")) {
       const pointType = normalizedKey.replace("points", "");
-      const camelCaseKey = `points${pointType.charAt(0).toUpperCase()}${pointType.slice(1)}` as keyof Traits;
-      if (["Power", "Wisdom", "Loki", "Speed"].includes(pointType.charAt(0).toUpperCase() + pointType.slice(1))) {
-        traits[camelCaseKey] = Number(value) || 0;
+      const capitalizedPointType = pointType.charAt(0).toUpperCase() + pointType.slice(1);
+      
+      if (["Power", "Wisdom", "Loki", "Speed"].includes(capitalizedPointType)) {
+        const camelCaseKey = `points${capitalizedPointType}` as keyof TraitsData;
+        const pointValue = Number(value) || 0;
+        
+        // Safe assignment with type checking
+        if (typeof traits[camelCaseKey] === 'number' || traits[camelCaseKey] === undefined) {
+          (traits as Record<keyof TraitsData, any>)[camelCaseKey] = pointValue;
+        }
       }
     }
   });
@@ -255,9 +348,14 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
   const traits = useMemo(() => {
     const extractedTraits = extractTraitsFromMetadata(drop.metadata);
     
-    // Return partial traits with fallback values for missing traits
-    return {
-      artist: extractedTraits.artist || drop.author.display_name || "Unknown Artist",
+    // Return full traits with fallback values for missing traits
+    const finalTraits: TraitsData = {
+      // Required basic fields that may not have been set
+      title: '',
+      description: '',
+      
+      // Fields with fallbacks from extracted data or defaults
+      artist: extractedTraits.artist || drop.author.handle || "Unknown Artist",
       palette: extractedTraits.palette || "Color",
       style: extractedTraits.style || "",
       jewel: extractedTraits.jewel || "",
@@ -299,7 +397,9 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       typeSeason: extractedTraits.typeSeason || 11,
       typeMeme: extractedTraits.typeMeme || 1,
       typeCardNumber: extractedTraits.typeCardNumber || 0,
-    } as Traits;
+    };
+    
+    return finalTraits;
   }, [drop]);
 
   // Check if there are any meaningful traits to display

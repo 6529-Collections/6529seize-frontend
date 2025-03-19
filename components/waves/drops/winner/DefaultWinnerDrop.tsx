@@ -176,7 +176,7 @@ const DefaultWinnerDrop = ({
                 badge={
                   <WinnerDropBadge
                     rank={effectiveRank}
-                    decisionTime={decisionTime}
+                    decisionTime={decisionTime || null}
                   />
                 }
               />

@@ -50,7 +50,7 @@ export default function ParticipationDropHeader({
         {drop.rank && (
           <WinnerDropBadge
             rank={drop.rank}
-            decisionTime={drop.winning_context?.decision_time}
+            decisionTime={drop.winning_context?.decision_time || null}
           />
         )}
       </div>

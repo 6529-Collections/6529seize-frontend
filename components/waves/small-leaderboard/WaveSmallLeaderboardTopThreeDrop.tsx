@@ -64,7 +64,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
       return (
         <WinnerDropBadge 
           rank={rank}
-          decisionTime={decisionTime}
+          decisionTime={decisionTime || null}
         />
       );
     }
