@@ -10,6 +10,7 @@ import { WinnerBadge } from "./WinnerBadge";
 interface SingleWaveDropInfoActionsProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave | null;
+  readonly showBadge?: boolean;
 }
 
 /**
@@ -19,13 +20,14 @@ interface SingleWaveDropInfoActionsProps {
 export const SingleWaveDropInfoActions: React.FC<SingleWaveDropInfoActionsProps> = ({
   drop,
   wave,
+  showBadge = true,
 }) => {
   const { canShowVote, isWinner } = useDropInteractionRules(drop);
   
   return (
     <div className="tw-px-6 tw-flex tw-flex-col tw-gap-y-2">
       {isWinner 
-        ? <WinnerBadge drop={drop} /> 
+        ? <WinnerBadge drop={drop} showBadge={showBadge} /> 
         : wave && <SingleWaveDropTime wave={wave} />
       }
       {canShowVote && <SingleWaveDropVote drop={drop} />}

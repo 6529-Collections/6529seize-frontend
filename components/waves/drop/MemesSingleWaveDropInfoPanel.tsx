@@ -107,6 +107,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<MemesSingleWaveDropInfoPanel
         <SingleWaveDropInfoActions
           drop={drop}
           wave={wave}
+          showBadge={false}
         />
 
         <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
