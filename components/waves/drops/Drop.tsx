@@ -64,7 +64,7 @@ export default function Drop({
         parentContainerRef={parentContainerRef}
       />
     );
-  } else if (drop.drop_type === ApiDropType.Winner) {
+  } else if (drop.drop_type === ApiDropType.Winner) {    
     return (
       <WinnerDrop
         drop={drop}

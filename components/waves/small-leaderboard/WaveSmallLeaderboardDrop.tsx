@@ -1,8 +1,9 @@
 import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/wave-drops.helpers";
-import { WaveSmallLeaderboardTopThreeDrop } from "./WaveSmallLeaderboardTopThreeDrop";
-import { WaveSmallLeaderboardDefaultDrop } from "./WaveSmallLeaderboardDefaultDrop";
 import { ApiWave } from "../../../generated/models/ApiWave";
+import { useWave } from "../../../hooks/useWave";
+import { MemesWaveSmallLeaderboardDrop } from "./MemesWaveSmallLeaderboardDrop";
+import { DefaultWaveSmallLeaderboardDrop } from "./DefaultWaveSmallLeaderboardDrop";
 
 interface WaveSmallLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -10,22 +11,25 @@ interface WaveSmallLeaderboardDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-export const WaveSmallLeaderboardDrop: React.FC<WaveSmallLeaderboardDropProps> = ({ drop, wave, onDropClick }) => {
-  return (
-    <div className="tw-cursor-pointer" onClick={() => onDropClick(drop)}>
-      {drop.rank && drop.rank <= 3 ? (
-        <WaveSmallLeaderboardTopThreeDrop
-          drop={drop}
-          wave={wave}
-          onDropClick={onDropClick}
-        />
-      ) : (
-        <WaveSmallLeaderboardDefaultDrop
-          drop={drop}
-          wave={wave}
-          onDropClick={onDropClick}
-        />
-      )}
-    </div>
-  );
-}; 
+export const WaveSmallLeaderboardDrop: React.FC<
+  WaveSmallLeaderboardDropProps
+> = ({ drop, wave, onDropClick }) => {
+  const { isMemesWave } = useWave(wave);
+  if (isMemesWave) {
+    return (
+      <MemesWaveSmallLeaderboardDrop
+        drop={drop}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+  } else {
+    return (
+      <DefaultWaveSmallLeaderboardDrop
+        drop={drop}
+        wave={wave}
+        onDropClick={onDropClick}
+      />
+    );
+  }
+};

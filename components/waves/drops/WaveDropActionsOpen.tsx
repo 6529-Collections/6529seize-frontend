@@ -11,8 +11,7 @@ interface WaveDropActionsOpenProps {
 
 const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
   const router = useRouter();
-  const isParticipationDrop = drop.drop_type === ApiDropType.Participatory;
-  const isDisabled = !isParticipationDrop;
+  const canBeOpened = drop.drop_type !== ApiDropType.Chat;
 
   const onDropClick = (drop: ExtendedDrop) => {
     const currentQuery = { ...router.query };
@@ -27,7 +26,7 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
     );
   };
 
-  if (!isParticipationDrop) {
+  if (!canBeOpened) {
     return null;
   }
 
@@ -36,20 +35,16 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
       content={
         <div className="tw-text-center">
           <span className="tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out">
-            {isDisabled ? "Unavailable" : "Open"}
+            Open
           </span>
         </div>
       }
       placement="top"
-      disabled={isDisabled}
       trigger="mouseenter"
       hideOnClick={false}
     >
       <button
-        disabled={isDisabled}
-        className={`tw-text-yellow/80 tw-px-2 desktop-hover:hover:tw-text-yellow tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
-          isDisabled ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
-        }`}
+        className="tw-text-yellow/80 tw-px-2 desktop-hover:hover:tw-text-yellow tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
         onClick={() => onDropClick(drop)}
       >
         <svg

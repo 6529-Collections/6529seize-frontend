@@ -1,7 +1,7 @@
 import React from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { useWave } from "../../../../hooks/useWave";
-
+import { useWaveTimers } from "../../../../hooks/useWaveTimers";
 interface CompactDroppingPhaseCardProps {
   readonly wave: ApiWave;
 }
@@ -10,44 +10,38 @@ interface CompactDroppingPhaseCardProps {
  * Compact card component for dropping phase - used in multi-decision waves
  * Simplified as descriptive text with minimal styling
  */
-export const CompactDroppingPhaseCard: React.FC<CompactDroppingPhaseCardProps> = ({
-  wave
-}) => {
-  // Using the useWave hook with default options (timers enabled)
-  // This component needs timers for real-time countdown display
-  const waveData = useWave(wave);
-  
+export const CompactDroppingPhaseCard: React.FC<
+  CompactDroppingPhaseCardProps
+> = ({ wave }) => {
   const {
-    phase: droppingTimeState,
-    timeLeft: droppingTimeLeft,
-    startTime: participationPeriodMin,
-    endTime: participationPeriodMax
-  } = waveData.participation;
+    participation: { isCompleted, isUpcoming, timeLeft },
+  } = useWaveTimers(wave);
+  const {
+    participation: { startTime, endTime },
+  } = useWave(wave);
 
   return (
     <div className="tw-px-2">
-      {droppingTimeState !== "COMPLETED" ? (
+      {!isCompleted ? (
         <div className="tw-flex tw-items-center tw-justify-between tw-flex-nowrap">
           <span className="tw-font-normal">
             <span className="tw-text-xs tw-text-iron-400">
-              {droppingTimeState === "UPCOMING"
-                ? "Dropping starts in"
-                : "Dropping ends in"}
+              {isUpcoming ? "Dropping starts in" : "Dropping ends in"}
             </span>{" "}
             <span className="tw-text-xs tw-font-mono tw-text-iron-300 tw-tracking-tight tw-ml-1">
-              {droppingTimeLeft.days > 0 && `${droppingTimeLeft.days}d `}
-              {droppingTimeLeft.hours}h {droppingTimeLeft.minutes}m
+              {timeLeft.days > 0 && `${timeLeft.days}d `}
+              {timeLeft.hours}h {timeLeft.minutes}m
             </span>
             <span className="tw-text-xs tw-text-iron-400 tw-px-1.5 tw-whitespace-nowrap tw-ml-2">
-              {droppingTimeState === "UPCOMING"
-                ? new Date(participationPeriodMin).toLocaleDateString(
-                    undefined,
-                    { month: "short", day: "numeric" }
-                  )
-                : new Date(participationPeriodMax).toLocaleDateString(
-                    undefined,
-                    { month: "short", day: "numeric" }
-                  )}
+              {isUpcoming
+                ? new Date(startTime).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })
+                : new Date(endTime).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })}
             </span>
           </span>
         </div>
@@ -62,7 +56,7 @@ export const CompactDroppingPhaseCard: React.FC<CompactDroppingPhaseCardProps> =
           </div>
 
           <span className="tw-text-xs tw-text-iron-400 tw-px-1.5 tw-whitespace-nowrap tw-ml-2">
-            {new Date(participationPeriodMax).toLocaleDateString(undefined, {
+            {new Date(endTime).toLocaleDateString(undefined, {
               month: "short",
               day: "numeric",
             })}

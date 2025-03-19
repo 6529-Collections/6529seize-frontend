@@ -110,7 +110,7 @@ export const FeedScrollContainer = forwardRef<
       <div
         ref={ref}
         style={{ overflowAnchor: "none" }}
-        className={`tw-flex tw-flex-col-reverse tw-overflow-x-hidden tw-overflow-y-auto no-scrollbar lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full ${className}`}
+        className={`tw-flex tw-flex-col-reverse tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-h-full ${className}`}
         onScroll={handleScroll}
       >
         <div ref={contentRef}>{children}</div>

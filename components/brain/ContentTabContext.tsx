@@ -1,14 +1,19 @@
 import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
 import { MyStreamWaveTab } from '../../types/waves.types';
 import { ApiWave } from '../../generated/models/ApiWave';
-import { WaveVotingState } from '../../hooks/useWaveState';
 import { ApiWaveType } from '../../generated/models/ApiWaveType';
+
+export enum WaveVotingState {
+  NOT_STARTED = "NOT_STARTED",
+  ONGOING = "ONGOING",
+  ENDED = "ENDED",
+}
 
 interface ContentTabContextType {
   activeContentTab: MyStreamWaveTab;
   setActiveContentTab: (tab: MyStreamWaveTab) => void;
   availableTabs: MyStreamWaveTab[];
-  updateAvailableTabs: (wave: ApiWave | undefined, votingState?: WaveVotingState, hasFirstDecisionPassed?: boolean) => void;
+  updateAvailableTabs: (wave: ApiWave | undefined, votingState?: WaveVotingState, firstDecisionDone?: boolean) => void;
 }
 
 // Create the context with a default value
@@ -41,6 +46,9 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       return;
     }
 
+    // Check if this is the Memes wave
+    const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+
     // Chat-type waves only show chat tab
     if (wave.wave.type === ApiWaveType.Chat) {
       setAvailableTabs([MyStreamWaveTab.CHAT]);
@@ -49,6 +57,26 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       if (activeContentTab !== MyStreamWaveTab.CHAT) {
         setActiveContentTabRaw(MyStreamWaveTab.CHAT);
       }
+      return;
+    }
+    
+    // For Memes wave - don't set default tab, let it use standard behavior
+    if (isMemesWave) {
+      const tabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
+      
+      if (hasFirstDecisionPassed) {
+        tabs.push(MyStreamWaveTab.WINNERS);
+      }
+      
+      tabs.push(MyStreamWaveTab.OUTCOME);
+      
+      setAvailableTabs(tabs);
+      
+      // Only switch if the current tab is not available
+      if (!tabs.includes(activeContentTab)) {
+        setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+      }
+      
       return;
     }
     

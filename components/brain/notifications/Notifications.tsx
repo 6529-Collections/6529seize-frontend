@@ -12,6 +12,7 @@ import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import { useLayout } from "../my-stream/layout/LayoutContext";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -19,15 +20,9 @@ export default function Notifications() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const capacitor = useCapacitor();
+  const { waveViewStyle } = useLayout();
 
   const { removeAllDeliveredNotifications } = useNotificationsContext();
-
-  let containerClassName = `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)]`;
-  if (capacitor.isIos) {
-    containerClassName = `${containerClassName} tw-pb-[calc(4rem+80px)]`;
-  } else if (capacitor.isAndroid && !capacitor.keyboardVisible) {
-    containerClassName = `${containerClassName} tw-pb-[70px]`;
-  }
 
   const router = useRouter();
   const { reload } = router.query;
@@ -115,7 +110,10 @@ export default function Notifications() {
   };
 
   return (
-    <div className={containerClassName}>
+    <div 
+      className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow"
+      style={waveViewStyle}
+    >
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
         {!items.length && !isFetching ? (
           <MyStreamNoItems />

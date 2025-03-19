@@ -23,11 +23,15 @@ import {
   generateMediaForOverview,
   generateDropPart,
 } from "./services/waveMediaService";
-import { getAdminGroupId } from "./services/waveGroupService";
-import { useAddWaveMutation } from "./services/waveApiService";
+import {
+  getAdminGroupId
+} from "./services/waveGroupService";
+import {
+  useAddWaveMutation
+} from "./services/waveApiService";
 import { useWaveConfig } from "./hooks/useWaveConfig";
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
 import useCapacitor from "../../../hooks/useCapacitor";
+import useIsMobileScreen from "../../../hooks/isMobileScreen";
 
 export default function CreateWave({
   profile,

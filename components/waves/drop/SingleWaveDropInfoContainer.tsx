@@ -21,15 +21,15 @@ export const SingleWaveDropInfoContainer: React.FC<SingleWaveDropInfoContainerPr
     
     // Use the same calculation as contentContainerStyle in LayoutContext
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px)`,
+      height: `calc(100vh - ${spaces.headerSpace}px)`,
     };
-  }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
+  }, [spaces.measurementsComplete, spaces.headerSpace]);
 
   return (
     <div
       className={`${
         activeTab === SingleWaveDropTab.INFO ? "tw-block" : "tw-hidden"
-      } lg:tw-block lg:tw-w-[36rem] 2xl:tw-max-w-2xl 2xl:tw-w-full tw-py-4 lg:tw-py-6 lg:tw-border lg:tw-border-r-[3px] lg:tw-border-solid tw-border-iron-800 tw-border-y-0 tw-bg-iron-950 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300`}
+      } lg:tw-block lg:tw-w-[28rem] xl:tw-w-[36rem] 2xl:tw-max-w-2xl 2xl:tw-w-full tw-h-full tw-py-4 lg:tw-py-6 lg:tw-border lg:tw-border-r-[3px] lg:tw-border-solid tw-border-iron-800 tw-border-y-0 tw-bg-iron-950 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300`}
       style={dropContainerStyle}
     >
       <div className="tw-h-full tw-relative tw-bg-iron-950">

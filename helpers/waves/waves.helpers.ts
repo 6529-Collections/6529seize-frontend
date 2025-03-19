@@ -4,6 +4,22 @@ import { ApiUpdateWaveRequest } from "../../generated/models/ApiUpdateWaveReques
 import { ApiWave } from "../../generated/models/ApiWave";
 import { CreateWaveStepStatus } from "../../types/waves.types";
 
+// Known wave IDs
+export const KNOWN_WAVE_IDS = {
+  MEMES_WAVE: "87eb0561-5213-4cc6-9ae6-06a3793a5e58",
+};
+
+/**
+ * Checks if a wave is the Memes wave based on the wave ID
+ * 
+ * @param waveId The wave ID to check
+ * @returns True if the wave is the Memes wave, false otherwise
+ */
+export const isMemesWave = (waveId: string | undefined | null): boolean => {
+  if (!waveId) return false;
+  return waveId.toLowerCase() === KNOWN_WAVE_IDS.MEMES_WAVE.toLowerCase();
+};
+
 export const getCreateWaveStepStatus = ({
   stepIndex,
   activeStepIndex,

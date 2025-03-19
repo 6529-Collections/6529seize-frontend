@@ -8,6 +8,8 @@ import RepCategorySearch, {
   RepCategorySearchSize,
 } from "../../../../utils/input/rep-category/RepCategorySearch";
 import { ApiGroupFilterDirection } from "../../../../../generated/models/ApiGroupFilterDirection";
+import { useState } from "react";
+import PositiveOnlyToggle from "./rep/PositiveOnlyToggle";
 
 export default function GroupCreateRep({
   rep,
@@ -16,6 +18,8 @@ export default function GroupCreateRep({
   readonly rep: ApiCreateGroupDescription["rep"];
   readonly setRep: (rep: ApiCreateGroupDescription["rep"]) => void;
 }) {
+  const [positiveOnly, setPositiveOnly] = useState(false);
+
   const IDENTITY_LABEL: Record<ApiGroupFilterDirection, string> = {
     [ApiGroupFilterDirection.Received]: "From Identity",
     [ApiGroupFilterDirection.Sent]: "To Identity",
@@ -28,13 +32,19 @@ export default function GroupCreateRep({
     <div className="tw-p-3 sm:tw-p-5 tw-bg-iron-950 tw-rounded-xl tw-shadow tw-border tw-border-solid tw-border-iron-800">
       <div className="tw-flex tw-flex-col tw-space-y-4">
         <div className="tw-flex tw-flex-col">
-          <div className="tw-mb-4">
-            <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
-              Rep
-            </p>
-            <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-300">
-              Set the giver, rep category, and minimum rep.
-            </p>
+          <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between">
+            <div>
+              <p className="tw-mb-0 tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-50">
+                Rep
+              </p>
+              <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-font-normal tw-text-iron-300">
+                Set the giver, rep category, and minimum rep.
+              </p>
+            </div>
+            <PositiveOnlyToggle 
+              positiveOnly={positiveOnly} 
+              setPositiveOnly={setPositiveOnly} 
+            />
           </div>
           {rep.user_identity && rep.direction && (
             <div className="tw-mb-4">

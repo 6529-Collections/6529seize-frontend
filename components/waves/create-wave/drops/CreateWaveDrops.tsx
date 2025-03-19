@@ -7,6 +7,7 @@ import {
 } from "../../../../types/waves.types";
 import CreateWaveDropsMetadata from "./metadata/CreateWaveDropsMetadata";
 import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
+import CreateWaveTermsOfService from "./terms/CreateWaveTermsOfService";
 
 export default function CreateWaveDrops({
   waveType,
@@ -92,6 +93,12 @@ export default function CreateWaveDrops({
         errors={errors}
         onRequiredMetadataChange={onRequiredMetadataChange}
       />
+      {/* Terms of Service section */}
+      {isNotChatType && (
+        <div className="tw-border-t tw-border-iron-800 tw-pt-6">
+          <CreateWaveTermsOfService waveType={waveType} />
+        </div>
+      )}
     </div>
   );
 }
