@@ -64,7 +64,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     <div className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-bg-[rgba(251,191,36,0.1)] tw-px-2 tw-py-1 tw-border tw-border-solid tw-border-[#fbbf24]/20">
                       <FontAwesomeIcon
                         icon={faTrophy}
-                        className="tw-flex-shrink-0 tw-size-3.5 tw-text-[#fbbf24]"
+                        className="tw-flex-shrink-0 tw-size-2.5 tw-text-[#fbbf24]"
                       />
                     </div>
 
