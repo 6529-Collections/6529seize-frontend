@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { TraitsData } from "./submission/types/TraitsData";
 import { Section, TraitField } from "./traits";
-import { getFormSections } from "./traits/fieldDefinitions";
+import { getFormSections } from "./traits/schema";
 import { useAuth } from "../../auth/Auth";
 
 interface MemesArtSubmissionTraitsProps {
@@ -50,8 +50,8 @@ function MemesArtSubmissionTraits({
     setTraits({ ...traits, [field]: value });
   };
 
-  // Get form sections based on user profile
-  const formSections = getFormSections(userProfile ?? "");
+  // Get form sections based on user profile - schema handles null/undefined profile
+  const formSections = getFormSections(userProfile);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2">
