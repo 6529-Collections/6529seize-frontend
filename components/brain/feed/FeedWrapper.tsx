@@ -5,6 +5,7 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import FeedItems from "./FeedItems";
 import { FeedScrollContainer } from "./FeedScrollContainer";
+import { useLayout } from "../my-stream/layout/LayoutContext";
 
 interface FeedWrapperProps {
   readonly items: TypedFeedItem[];
@@ -28,13 +29,17 @@ export default function FeedWrapper({
   onDropContentClick,
 }: FeedWrapperProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { waveViewStyle } = useLayout();
 
   const handleScrollUpNearTop = () => {
     onBottomIntersection(true);
   };
 
   return (
-    <div className="tw-h-full">
+    <div 
+      className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl"
+      style={waveViewStyle}
+    >
       <FeedScrollContainer
         ref={scrollRef}
         onScrollUpNearTop={handleScrollUpNearTop}

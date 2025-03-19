@@ -2,13 +2,13 @@ import React from "react";
 import Tippy from "@tippyjs/react";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { ApiDropVoter } from "../../../../types/ApiDrop";
+import { ApiDropRater } from "../../../../generated/models/ApiDropRater";
 
 interface MemeDropVoteStatsProps {
   readonly rating: number | null | undefined;
   readonly votingCreditType: string;
   readonly ratersCount: number | null | undefined;
-  readonly topVoters: ApiDropVoter[];
+  readonly topVoters: ApiDropRater[];
 }
 
 export default function MemeDropVoteStats({
@@ -21,18 +21,18 @@ export default function MemeDropVoteStats({
   const firstThreeVoters = topVoters?.slice(0, 3) || [];
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-px-1">
-      <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
+    <div className="tw-flex tw-items-center tw-justify-between">
+      <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span
-          className={`tw-text-xl tw-font-semibold tw-bg-gradient-to-r ${
+          className={`tw-text-md tw-font-semibold ${
             isPositive
-              ? "tw-from-emerald-400 tw-to-emerald-500"
-              : "tw-from-rose-400 tw-to-rose-500"
-          } tw-bg-clip-text tw-text-transparent`}
+              ? "tw-text-emerald-500"
+              : "tw-text-rose-500"
+          } `}
         >
           {formatNumberWithCommas(rating || 0)}
         </span>
-        <span className="tw-text-sm tw-text-iron-400">
+        <span className="tw-text-md tw-text-iron-400">
           {votingCreditType} total
         </span>
       </div>
@@ -63,10 +63,10 @@ export default function MemeDropVoteStats({
           ))}
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
-          <span className="tw-text-base tw-font-medium tw-text-iron-100">
+          <span className="tw-text-md tw-font-medium tw-text-iron-100">
             {formatNumberWithCommas(ratersCount || 0)}
           </span>
-          <span className="tw-text-sm tw-text-iron-400">
+          <span className="tw-text-md tw-text-iron-400">
             {ratersCount === 1 ? "voter" : "voters"}
           </span>
         </div>

@@ -127,7 +127,6 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     </div>
                   </div>
                 </div>
-
                 <div className="tw-text-md tw-text-iron-300 tw-line-clamp-3 tw-leading-relaxed">
                   {description}
                 </div>

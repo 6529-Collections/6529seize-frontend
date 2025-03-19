@@ -85,11 +85,13 @@ export default function MemeWinnerDrop({
             <div className="tw-col-span-1 md:tw-col-span-5 tw-p-5">
               {/* Header with metadata */}
               <div className="tw-flex tw-flex-col tw-gap-y-4">
-                {/* Rank and title in the same row */}
-                <MemeWinnerHeader title={title} decisionTime={decisionTime} />
+                <div className="tw-flex tw-flex-col tw-gap-y-2">
+                  {/* Rank and title in the same row */}
+                  <MemeWinnerHeader title={title} decisionTime={decisionTime} />
 
-                {/* Description on its own row */}
-                <MemeWinnerDescription description={description} />
+                  {/* Description on its own row */}
+                  <MemeWinnerDescription description={description} />
+                </div>
 
                 {/* Vote count and artist info on the last row */}
                 <div className="tw-flex tw-flex-col tw-gap-4">
