@@ -4,7 +4,6 @@ import Link from "next/link";
 import Tippy from "@tippyjs/react";
 import { ApiDropRater } from "../../../generated/models/ApiDropRater";
 
-
 interface MemesLeaderboardDropVoteSummaryProps {
   readonly rating: number;
   readonly creditType: string;
@@ -12,38 +11,31 @@ interface MemesLeaderboardDropVoteSummaryProps {
   readonly topVoters: ApiDropRater[];
 }
 
-export const MemesLeaderboardDropVoteSummary: React.FC<MemesLeaderboardDropVoteSummaryProps> = ({
-  rating,
-  creditType,
-  ratersCount,
-  topVoters,
-}) => {
+export const MemesLeaderboardDropVoteSummary: React.FC<
+  MemesLeaderboardDropVoteSummaryProps
+> = ({ rating, creditType, ratersCount, topVoters }) => {
   const isPositive = (rating || 0) >= 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-px-1">
-      <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 xl:tw-w-full">
+      <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span
-          className={`tw-text-xl tw-font-semibold tw-bg-gradient-to-r ${
-            isPositive
-              ? "tw-from-emerald-400 tw-to-emerald-500"
-              : "tw-from-rose-400 tw-to-rose-500"
-          } tw-bg-clip-text tw-text-transparent`}
+          className={`tw-text-md tw-font-semibold ${
+            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+          }`}
         >
           {formatNumberWithCommas(rating || 0)}
         </span>
-        <span className="tw-text-sm tw-text-iron-400">
-          {creditType} total
-        </span>
+        <span className="tw-text-md tw-text-iron-400">{creditType} total</span>
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-x-3">
         <div className="tw-flex tw-items-center -tw-space-x-1.5">
           {topVoters.map((voter) => (
             <Tippy
               key={voter.profile.handle}
-              content={`${
-                voter.profile.handle
-              } - ${formatNumberWithCommas(voter.rating)}`}
+              content={`${voter.profile.handle} - ${formatNumberWithCommas(
+                voter.rating
+              )}`}
             >
               <Link
                 href={`/${voter.profile.handle}`}
@@ -63,10 +55,10 @@ export const MemesLeaderboardDropVoteSummary: React.FC<MemesLeaderboardDropVoteS
           ))}
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
-          <span className="tw-text-base tw-font-medium tw-text-iron-100">
+          <span className="tw-text-md tw-font-medium tw-text-iron-100">
             {formatNumberWithCommas(ratersCount || 0)}
           </span>
-          <span className="tw-text-sm tw-text-iron-400">
+          <span className="tw-text-md tw-text-iron-400">
             {ratersCount === 1 ? "voter" : "voters"}
           </span>
         </div>

@@ -11,8 +11,8 @@ export default function MemeWinnerHeader({
   decisionTime,
 }: MemeWinnerHeaderProps) {
   return (
-    <div className="tw-flex tw-items-center tw-justify-start tw-gap-3">
-      <WinnerDropBadge rank={1} decisionTime={decisionTime} />
+    <div className="tw-flex tw-flex-col tw-gap-y-3 tw-items-start">
+      <WinnerDropBadge rank={1} decisionTime={decisionTime || null} />
       <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
         {title}
       </h3>

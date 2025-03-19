@@ -69,7 +69,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       style={{
         backgroundColor: bgColor,
         color: accentColor,
-        border: `1px solid ${accentColor}40`,
+        border: `1px solid ${accentColor}30`,
       }}
     >
       {/* Rank part */}

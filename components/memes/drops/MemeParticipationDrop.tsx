@@ -30,18 +30,18 @@ const getBorderClasses = (drop: ExtendedDrop, isActiveDrop: boolean) => {
   const rank = drop.rank && drop.rank <= 3 ? drop.rank : null;
 
   const baseClasses =
-    "tw-rounded-xl tw-border tw-border-solid tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden";
+    "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden";
 
   if (isActiveDrop) {
-    return `${baseClasses} tw-border-[#3CCB7F]/30 tw-bg-[#3CCB7F]/5`;
+    return `${baseClasses} desktop-hover:hover:tw-border-[#3CCB7F]/40 tw-bg-[#3CCB7F]/5`;
   } else if (rank === 1) {
-    return `${baseClasses} tw-border-[#fbbf24]/30`;
+    return `${baseClasses} desktop-hover:hover:tw-border-[#fbbf24]/40`;
   } else if (rank === 2) {
-    return `${baseClasses} tw-border-[#94a3b8]/30`;
+    return `${baseClasses} desktop-hover:hover:tw-border-[#94a3b8]/40`;
   } else if (rank === 3) {
-    return `${baseClasses} tw-border-[#CD7F32]/30`;
+    return `${baseClasses} desktop-hover:hover:tw-border-[#CD7F32]/40`;
   } else {
-    return `${baseClasses} tw-border-iron-800/50`;
+    return `${baseClasses} tw-border-iron-800`;
   }
 };
 

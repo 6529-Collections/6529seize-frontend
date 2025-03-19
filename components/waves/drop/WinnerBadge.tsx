@@ -9,7 +9,7 @@ interface WinnerBadgeProps {
 
 export const WinnerBadge: React.FC<WinnerBadgeProps> = ({ drop }) => {
   const { winningRank } = useDropInteractionRules(drop);
-  const winningTime = drop.winning_context?.decision_time;
+  const winningTime = drop.winning_context?.decision_time || null;
   
   if (!winningRank) return null;
 

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
 import { WaveWinnersEmpty } from "./WaveWinnersEmpty";
-import { WaveWinnersTimelineItem } from "./WaveWinnersTimelineItem";
 import { format } from "date-fns";
-import { WaveWinnersLoading } from "./podium/WaveWinnersLoading";
+import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
+import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 
 interface WaveWinnersTimelineProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -20,19 +20,9 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   wave,
   isLoading,
 }) => {
-  const [expandedPointId, setExpandedPointId] = useState<string | null>(null);
-
-  const toggleExpanded = (pointId: string) => {
-    setExpandedPointId((prevId) => {
-      return prevId === pointId ? null : pointId;
-    });
-  };
-
-  // Group decision points by date for better visual organization
   const groupedByDate: Record<string, ApiWaveDecision[]> = {};
 
-  // Using original array
-  [...decisionPoints].forEach((point, index) => {
+  [...decisionPoints].forEach((point) => {
     const dateKey = format(new Date(point.decision_time), "yyyy-MM-dd");
     if (!groupedByDate[dateKey]) {
       groupedByDate[dateKey] = [];
@@ -41,74 +31,86 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   });
 
   if (isLoading) {
-    return <WaveWinnersLoading />;
+    return <WaveWinnersTimelineLoading />;
   }
 
-  // Display message when no winners are available
   if (decisionPoints.length === 0) {
     return <WaveWinnersEmpty />;
   }
 
+  const sortedDecisionPoints = [...decisionPoints]
+    .filter((point) => point.winners.length > 0)
+    .sort(
+      (a, b) =>
+        new Date(a.decision_time).getTime() -
+        new Date(b.decision_time).getTime()
+    );
+
+  const roundMap = new Map();
+  sortedDecisionPoints.forEach((point, index) => {
+    roundMap.set(point.decision_time, index + 1);
+  });
+
+  const sortedDisplayPoints = [...decisionPoints]
+    .filter((point) => point.winners.length > 0)
+    .sort(
+      (a, b) =>
+        new Date(b.decision_time).getTime() -
+        new Date(a.decision_time).getTime()
+    );
+
   return (
-    <div className="tw-pt-2 lg:tw-pt-4 tw-pb-4 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-bg-black">
+    <div className="tw-pt-2 lg:tw-pt-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
       <div className="tw-relative">
-        {/* Timeline vertical line */}
-        <div className="tw-absolute tw-left-2.5 sm:tw-left-[19px] tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-700/80 tw-backdrop-blur-sm"></div>
-        {/* Timeline glow effect */}
-        <div className="tw-absolute tw-left-2.5 sm:tw-left-[18px] tw-top-0 tw-bottom-0 tw-w-[3px] tw-bg-gradient-to-b tw-from-iron-900 tw-via-iron-700/20 tw-to-iron-900 tw-opacity-40 tw-blur-sm"></div>
+        <div className="tw-absolute tw-left-2.5 sm:tw-left-[19px] tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-700/80"></div>
 
-        <div className="tw-space-y-8">
-          {/* Render decision points by date groups - sorted with newest dates first */}
-          {Object.entries(groupedByDate)
-            .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
-            .map(([dateKey, points], groupIndex) => {
-              const formattedDate = format(
-                new Date(dateKey),
-                "EEE, MMM d, yyyy"
-              );
+        <div className="tw-space-y-6">
+          {sortedDisplayPoints.map((point, index) => {
+            const date = new Date(point.decision_time);
+            const formattedDate = format(date, "EEE, MMM d, yyyy");
+            const formattedTime = format(date, "h:mm a");
+            const roundNumber = roundMap.get(point.decision_time);
 
-              return (
-                <div key={dateKey} className="tw-relative">
-                  {/* Date header */}
-                  <div className="tw-mb-2 sm:tw-mb-4 tw-flex tw-items-center tw-ml-1.5 sm:tw-ml-3.5">
-                    <div className="tw-relative">
-                      <div className="tw-size-2.5 tw-rounded-full tw-bg-iron-600 tw-mr-2.5 sm:tw-mr-4 tw-z-10 tw-relative"></div>
-                      <div className="tw-absolute tw-top-0 tw-left-0 tw-size-2.5 tw-rounded-full tw-bg-iron-500 tw-opacity-40 tw-blur-[2px]"></div>
-                    </div>
-                    <h3 className="tw-text-sm tw-text-iron-300 tw-font-medium tw-border-b tw-border-iron-700/40 tw-mb-0">
-                      {formattedDate}
-                    </h3>
-                  </div>
-
-                  <div className="tw-space-y-3 tw-ml-4 sm:tw-ml-6">
-                    {points.map((point) => {
-                      // Use the original index to determine the round number
-                      const roundIndex = decisionPoints.findIndex(
-                        (p) => p.decision_time === point.decision_time
-                      );
-                      const roundNumber = roundIndex + 1; // +1 because rounds are 1-indexed
-                      const nodeId = `decision-${point.decision_time}`;
-                      const hasWinners = point.winners.length > 0;
-
-                      return (
-                        <WaveWinnersTimelineItem
-                          key={nodeId}
-                          point={point}
-                          roundNumber={roundNumber}
-                          isExpanded={expandedPointId === nodeId && hasWinners}
-                          toggleExpanded={() =>
-                            hasWinners && toggleExpanded(nodeId)
-                          }
-                          onDropClick={onDropClick}
-                          wave={wave}
-                          isInteractive={hasWinners}
-                        />
-                      );
-                    })}
+            return (
+              <div
+                key={`decision-${point.decision_time}`}
+                className="tw-relative group"
+              >
+                <div className="tw-absolute tw-left-2.5 sm:tw-left-3 tw-top-[0.3125rem] tw-z-10">
+                  <div className="tw-size-4 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-border tw-border-iron-700/50 tw-transition-all group-hover:tw-border-iron-500">
+                    <div className="tw-rounded-full tw-bg-iron-500 tw-size-2 tw-transition-all group-hover:tw-bg-iron-400 group-hover:tw-size-2.5"></div>
                   </div>
                 </div>
-              );
-            })}
+
+                <div className="tw-ml-8 sm:tw-ml-10 tw-mb-3">
+                  <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
+                    <h3 className="tw-text-sm tw-text-iron-300 tw-font-medium tw-tracking-wide">
+                      {formattedDate}
+                    </h3>
+                    <span className="tw-text-base tw-font-semibold tw-text-white/90 tw-tracking-tight">
+                      Round {roundNumber}
+                    </span>
+                    <span className="tw-text-xs tw-text-iron-400 tw-font-light tw-tracking-wide">
+                      {formattedTime}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="tw-ml-6 tw-mb-6">
+                  <div className="tw-rounded-lg tw-border-l-2 tw-border-iron-600/40 tw-border-y-0 tw-border-r-0">
+                    <div className="tw-px-4 tw-pb-4">
+                      <WaveWinnersDrops
+                        winners={point.winners}
+                        onDropClick={onDropClick}
+                        wave={wave}
+                        isLoading={false}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

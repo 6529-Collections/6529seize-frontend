@@ -8,7 +8,6 @@ import WaveDropActions from "../../waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
 import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
-import MemeWinnerCallout from "./MemeWinnerCallout";
 import MemeWinnerArtwork from "./MemeWinnerArtwork";
 
 interface MemeWinnerDropProps {
@@ -66,6 +65,10 @@ export default function MemeWinnerDrop({
     console.log("view larger");
   };
 
+  // First place shadow class from DefaultWaveWinnerDrop
+  const firstPlaceShadow =
+    "tw-shadow-[inset_1px_0_0_#fbbf24,inset_0_1px_0_rgba(251,191,36,0.2),inset_-1px_0_0_rgba(251,191,36,0.2),inset_0_-1px_0_rgba(251,191,36,0.2)]";
+
   return (
     <div className="tw-w-full">
       <div
@@ -73,13 +76,15 @@ export default function MemeWinnerDrop({
           location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
         } tw-relative tw-group`}
       >
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-border-[#fbbf24]/30 tw-bg-iron-950">
+        <div
+          className={`tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${firstPlaceShadow}`}
+        >
           {/* Two-column layout */}
           <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-5">
             {/* Left column - Metadata */}
             <div className="tw-col-span-1 md:tw-col-span-5 tw-p-5">
               {/* Header with metadata */}
-              <div className="tw-flex tw-flex-col tw-gap-4">
+              <div className="tw-flex tw-flex-col tw-gap-y-4">
                 {/* Rank and title in the same row */}
                 <MemeWinnerHeader title={title} decisionTime={decisionTime} />
 
@@ -90,9 +95,6 @@ export default function MemeWinnerDrop({
                 <div className="tw-flex tw-flex-col tw-gap-4">
                   {/* Artist info with CIC and level */}
                   <MemeWinnerArtistInfo drop={drop} />
-
-                  {/* Winner callout */}
-                  <MemeWinnerCallout />
                 </div>
               </div>
             </div>

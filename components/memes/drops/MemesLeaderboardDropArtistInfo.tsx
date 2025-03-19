@@ -15,7 +15,7 @@ export const MemesLeaderboardDropArtistInfo: React.FC<MemesLeaderboardDropArtist
   drop,
 }) => {
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2">
+    <div className="tw-flex tw-items-center tw-gap-x-3 tw-mt-2">
       <Link
         href={`/${drop.author?.handle}`}
         onClick={(e) => e.stopPropagation()}
@@ -23,7 +23,7 @@ export const MemesLeaderboardDropArtistInfo: React.FC<MemesLeaderboardDropArtist
       >
         <WaveDropAuthorPfp drop={drop} />
       </Link>
-      <div className="tw-flex tw-items-center tw-gap-x-4">
+      <div className="tw-flex tw-items-center tw-gap-x-3">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           {drop.author?.level && (
             <UserCICAndLevel
