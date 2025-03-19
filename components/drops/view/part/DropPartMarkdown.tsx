@@ -20,8 +20,8 @@ import {
   parseSeizeLink,
   SeizeLinkInfo,
 } from "../../../../helpers/SeizeLinkParser";
-import { EMOJI_MAP } from "../../../../6529-emoji";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import { useEmoji } from "../../../../contexts/EmojiContext";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -44,6 +44,7 @@ function DropPartMarkdown({
   textSize,
 }: DropPartMarkdownProps) {
   const isMobile = useIsMobileScreen();
+  const { emojiMap } = useEmoji();
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
@@ -162,9 +163,9 @@ function DropPartMarkdown({
 
   const renderEmoji = (emojiProps: string) => {
     const emojiId = emojiProps.replaceAll(":", "");
-    const emoji = EMOJI_MAP.flatMap((cat) => cat.emojis).find(
-      (e) => e.id === emojiId
-    );
+    const emoji = emojiMap
+      .flatMap((cat) => cat.emojis)
+      .find((e) => e.id === emojiId);
 
     if (!emoji) {
       return <span>{`:${emojiId}:`}</span>;
