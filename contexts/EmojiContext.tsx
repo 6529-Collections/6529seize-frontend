@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const S3_EMOJI_URL =
   "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json";
@@ -61,8 +61,6 @@ export const EmojiProvider = ({ children }: { children: React.ReactNode }) => {
           ],
         }));
 
-        console.log("hi i am mappedEmojis", mappedEmojis);
-
         setEmojiMap([
           {
             id: "6529",
@@ -81,11 +79,13 @@ export const EmojiProvider = ({ children }: { children: React.ReactNode }) => {
     fetchEmojis();
   }, []);
 
+  const value = useMemo(
+    () => ({ emojiMap, loading, categories, categoryIcons }),
+    [emojiMap, loading, categories, categoryIcons]
+  );
+
   return (
-    <EmojiContext.Provider
-      value={{ emojiMap, loading, categories, categoryIcons }}>
-      {children}
-    </EmojiContext.Provider>
+    <EmojiContext.Provider value={value}>{children}</EmojiContext.Provider>
   );
 };
 
