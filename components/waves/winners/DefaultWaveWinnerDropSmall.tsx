@@ -75,6 +75,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                     <WinnerDropBadge 
                       rank={effectiveRank}
                       // Not passing decisionTime to keep the badge compact
+                      decisionTime={null}
                     />
                   </div>
                 )}

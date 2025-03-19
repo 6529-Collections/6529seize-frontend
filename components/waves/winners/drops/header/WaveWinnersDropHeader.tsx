@@ -24,7 +24,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
           <WaveWinnersDropHeaderCreated winner={winner} />
           <div className="tw-ml-2">
-            <WinnerDropBadge rank={winner.place} decisionTime={winner.drop.winning_context?.decision_time} />
+            <WinnerDropBadge rank={winner.place} decisionTime={winner.drop.winning_context?.decision_time || null} />
           </div>
         </div>
       </div>

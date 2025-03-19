@@ -64,7 +64,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
         </div>
         <WinnerDropBadge
           rank={drop.rank}
-          decisionTime={drop.winning_context?.decision_time}
+          decisionTime={drop.winning_context?.decision_time || null}
         />
       </div>
     </div>
