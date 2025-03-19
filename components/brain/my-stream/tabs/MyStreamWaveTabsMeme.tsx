@@ -15,7 +15,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
 }) => {
   // Get the active tab and utilities from global context
   const { activeContentTab, setActiveContentTab } = useContentTab();
-  const [isMemesModalOpen, setIsMemesModalOpen] = useState(true);
+  const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
 
   // Update your "Submit to Memes" button handler
   const handleMemesSubmit = () => {
