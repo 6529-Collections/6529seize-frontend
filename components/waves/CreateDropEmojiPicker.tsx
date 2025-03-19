@@ -5,13 +5,16 @@ import data from "@emoji-mart/data";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { $createTextNode, $insertNodes } from "lexical";
 import useCapacitor from "../../hooks/useCapacitor";
-import { EMOJI_MAP } from "../../6529-emoji";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
+import { useEmoji } from "../../contexts/EmojiContext";
 
 const CreateDropEmojiPicker: FC = () => {
   const { isCapacitor } = useCapacitor();
   const isMobile = useIsMobileScreen();
+
+  const { emojiMap, categories, categoryIcons } = useEmoji();
+
   const [editor] = useLexicalComposerContext();
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -95,7 +98,9 @@ const CreateDropEmojiPicker: FC = () => {
                 theme="dark"
                 data={data}
                 onEmojiSelect={addEmoji}
-                custom={EMOJI_MAP}
+                custom={emojiMap}
+                categories={categories}
+                categoryIcons={categoryIcons}
               />
             </div>,
             document.body
@@ -111,7 +116,9 @@ const CreateDropEmojiPicker: FC = () => {
               theme="dark"
               data={data}
               onEmojiSelect={addEmoji}
-              custom={EMOJI_MAP}
+              custom={emojiMap}
+              categories={categories}
+              categoryIcons={categoryIcons}
             />
           </div>
         </MobileWrapperDialog>

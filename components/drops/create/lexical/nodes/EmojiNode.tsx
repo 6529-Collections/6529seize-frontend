@@ -6,7 +6,8 @@ import {
   EditorConfig,
   NodeKey,
 } from "lexical";
-import { EMOJI_MAP } from "../../../../../6529-emoji";
+import { createElement } from "react";
+import { useEmoji } from "../../../../../contexts/EmojiContext";
 
 type SerializedEmojiNode = Spread<{ emojiId: string }, SerializedLexicalNode>;
 
@@ -52,21 +53,7 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
   }
 
   decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
-    const emoji = EMOJI_MAP.flatMap((cat) => cat.emojis).find(
-      (e) => e.id === this.__emojiId
-    );
-
-    if (!emoji) {
-      return <span>{`:${this.__emojiId}:`}</span>;
-    }
-
-    return (
-      <img
-        src={emoji.skins[0].src}
-        alt={this.__emojiId}
-        className="emoji-node"
-      />
-    );
+    return createElement(EmojiComponent, { emojiId: this.__emojiId });
   }
 
   static importJSON(serializedNode: SerializedEmojiNode): EmojiNode {
@@ -81,3 +68,17 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
     };
   }
 }
+
+const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
+  const { emojiMap } = useEmoji();
+
+  const emoji = emojiMap
+    .flatMap((cat) => cat.emojis)
+    .find((e) => e.id === emojiId);
+
+  if (!emoji) {
+    return <span>{`:${emojiId}:`}</span>;
+  }
+
+  return <img src={emoji.skins[0].src} alt={emojiId} className="emoji-node" />;
+};
