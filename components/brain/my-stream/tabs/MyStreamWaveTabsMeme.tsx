@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import { useContentTab } from "../../ContentTabContext";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
 import MemesArtSubmissionModal from "../../../waves/memes/MemesArtSubmissionModal";
 import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 
@@ -15,7 +14,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
 }) => {
   // Get the active tab and utilities from global context
   const { activeContentTab, setActiveContentTab } = useContentTab();
-  const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
+  const [isMemesModalOpen, setIsMemesModalOpen] = useState(true);
 
   // Update your "Submit to Memes" button handler
   const handleMemesSubmit = () => {
@@ -45,8 +44,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       <MemesArtSubmissionModal
         isOpen={isMemesModalOpen}
         onClose={() => setIsMemesModalOpen(false)}
-        onSubmit={(artwork) => {
-          // Handle artwork submission here
+        onSubmit={() => {
           setIsMemesModalOpen(false);
         }}
       />

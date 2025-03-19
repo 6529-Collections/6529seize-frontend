@@ -1,11 +1,7 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef } from "react";
 import { useLayout } from "../layout/LayoutContext";
 import { useWave } from "../../../../hooks/useWave";
 import { ApiWave } from "../../../../generated/models/ApiWave";
-import { useContentTab } from "../../ContentTabContext";
-import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
-import PrimaryButton from "../../../utils/button/PrimaryButton";
-import MemesArtSubmissionModal from "../../../waves/memes/MemesArtSubmissionModal";
 import MyStreamWaveTabsMeme from "./MyStreamWaveTabsMeme";
 import MyStreamWaveTabsDefault from "./MyStreamWaveTabsDefault";
 
