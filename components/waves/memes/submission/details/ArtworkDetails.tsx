@@ -35,7 +35,6 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   // Memoized update handlers
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    console.log("Title changed to:", newValue);
     
     // Update both state and ref
     setTitleValue(newValue);
@@ -45,7 +44,6 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   
   const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    console.log("Description changed to:", newValue);
     
     // Update both state and ref
     setDescriptionValue(newValue);
@@ -55,19 +53,19 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   
   // Memoized blur handlers
   const handleTitleBlur = useCallback(() => {
-    console.log("Title input blurred, sending value:", titleRef.current);
+    // Removed console.log
     onTitleChange(titleRef.current);
   }, [onTitleChange]);
   
   const handleDescriptionBlur = useCallback(() => {
-    console.log("Description input blurred, sending value:", descriptionRef.current);
+    // Removed console.log
     onDescriptionChange(descriptionRef.current);
   }, [onDescriptionChange]);
   
   // Update local state from props, but only if the user hasn't edited the field
   useEffect(() => {
     if (!titleEditedRef.current && title !== undefined && title !== null && title !== titleValue) {
-      console.log("ArtworkDetails: Updating title from props:", title);
+      // Removed console.log
       setTitleValue(title);
       titleRef.current = title;
     }
@@ -75,7 +73,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   
   useEffect(() => {
     if (!descriptionEditedRef.current && description !== undefined && description !== null && description !== descriptionValue) {
-      console.log("ArtworkDetails: Updating description from props:", description);
+      // Removed console.log
       setDescriptionValue(description);
       descriptionRef.current = description;
     }

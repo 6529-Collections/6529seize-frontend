@@ -68,9 +68,9 @@ function MemesArtSubmissionTraits({
         }
       });
       
-      // Call the original setTraits with our carefully merged data
-      console.log("setTraitsPreserveFields merging:", 
-        { oldTraits: traits, newTraits, mergedTraits, fieldCache: fieldValuesRef.current });
+      // Removed console.log for performance
+      // console.log("setTraitsPreserveFields merging:", 
+      //  { oldTraits: traits, newTraits, mergedTraits, fieldCache: fieldValuesRef.current });
       
       setTraits(mergedTraits);
     } finally {
@@ -117,7 +117,8 @@ function MemesArtSubmissionTraits({
     
     // Apply any changes
     if (hasChanges) {
-      console.log("Setting default values");
+      // Removed console.log for performance
+      // console.log("Setting default values");
       setTraitsPreserveFields(updatedTraits);
     }
     
@@ -132,39 +133,44 @@ function MemesArtSubmissionTraits({
   // Get the user profile from connected account
   const userProfile = connectedProfile?.profile?.handle;
 
-  // Handler functions - use trackFieldChange to make sure we remember values
-  const updateText = useCallback((field: keyof TraitsData, value: string) => {
-    console.log(`updateText called for ${String(field)} with value:`, value);
+  // Optimize update handlers for better performance
+  // Use a stable reference pattern that doesn't create new functions on every traits change
+  const updateHandlers = useRef({
+    updateText: (field: keyof TraitsData, value: string) => {
+      // Removed all console logging for performance
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log(`updateText: ${String(field)}`);
+      // }
+      
+      // Remember this value in our field cache
+      trackFieldChange(field, value);
+      
+      // Update traits with our value - but don't spread the entire traits object
+      setTraitsPreserveFields({ [field]: value } as unknown as TraitsData);
+    },
     
-    // Remember this value in our field cache
-    trackFieldChange(field, value);
+    updateBoolean: (field: keyof TraitsData, value: boolean) => {
+      // Removed all console logging
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log(`updateBoolean: ${String(field)}`);
+      // }
+      
+      // Track and update
+      trackFieldChange(field, value);
+      setTraitsPreserveFields({ [field]: value } as unknown as TraitsData);
+    },
     
-    // Update traits with our value
-    const updatedTraits = { ...traits, [field]: value };
-    setTraitsPreserveFields(updatedTraits);
-  }, [traits, trackFieldChange, setTraitsPreserveFields]);
-
-  const updateBoolean = useCallback((field: keyof TraitsData, value: boolean) => {
-    console.log(`updateBoolean called for ${String(field)} with value:`, value);
-    
-    // Remember this value
-    trackFieldChange(field, value);
-    
-    // Update traits
-    const updatedTraits = { ...traits, [field]: value };
-    setTraitsPreserveFields(updatedTraits);
-  }, [traits, trackFieldChange, setTraitsPreserveFields]);
-
-  const updateNumber = useCallback((field: keyof TraitsData, value: number) => {
-    console.log(`updateNumber called for ${String(field)} with value:`, value);
-    
-    // Remember this value
-    trackFieldChange(field, value);
-    
-    // Update traits
-    const updatedTraits = { ...traits, [field]: value };
-    setTraitsPreserveFields(updatedTraits);
-  }, [traits, trackFieldChange, setTraitsPreserveFields]);
+    updateNumber: (field: keyof TraitsData, value: number) => {
+      // Removed all console logging
+      // if (process.env.NODE_ENV === 'development') {
+      //   console.log(`updateNumber: ${String(field)}`);
+      // }
+      
+      // Track and update
+      trackFieldChange(field, value);
+      setTraitsPreserveFields({ [field]: value } as unknown as TraitsData);
+    }
+  }).current;
 
   // Use memoization to prevent unnecessary rebuilding of form sections
   const formSections = React.useMemo(() => 
@@ -188,9 +194,9 @@ function MemesArtSubmissionTraits({
                 key={`field-${field.field}-${fieldIndex}`}
                 definition={field}
                 traits={traits}
-                updateText={updateText}
-                updateNumber={updateNumber}
-                updateBoolean={updateBoolean}
+                updateText={updateHandlers.updateText}
+                updateNumber={updateHandlers.updateNumber}
+                updateBoolean={updateHandlers.updateBoolean}
               />
             ))}
           </div>

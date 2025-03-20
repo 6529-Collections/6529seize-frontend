@@ -35,7 +35,6 @@ export const NumberTrait: React.FC<NumberTraitProps> = ({
   // Memoized change handler
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(e.target.value);
-    console.log(`NumberTrait ${field} changing to:`, newValue);
     
     // Update local state
     setValue(newValue);
@@ -53,12 +52,10 @@ export const NumberTrait: React.FC<NumberTraitProps> = ({
       if (field !== 'title' && field !== 'description') {
         // Check if important fields changed and restore them if needed
         if (traits.title !== preservedTitle && preservedTitle) {
-          console.log(`Restoring title after number change to: ${preservedTitle}`);
           // Need to cast to any because updateNumber doesn't accept strings
           (updateNumber as any)('title', preservedTitle);
         }
         if (traits.description !== preservedDescription && preservedDescription) {
-          console.log(`Restoring description after number change to: ${preservedDescription}`);
           (updateNumber as any)('description', preservedDescription);
         }
       }

@@ -30,7 +30,9 @@ const MemesArtSubmissionContainer: React.FC<
 
   // Handle final submission
   const handleSubmit = () => {
-    console.log(form.getSubmissionData());
+    // Removed console.log for performance
+    const data = form.getSubmissionData();
+    // TODO: Handle the actual submission with data
   };
 
   // Map of steps to their corresponding components

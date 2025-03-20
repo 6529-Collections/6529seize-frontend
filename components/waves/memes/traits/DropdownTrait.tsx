@@ -10,16 +10,11 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = ({
   options,
   className,
 }) => {
-  // Debug current field value
-  console.log(`DropdownTrait ${field} rendering with:`, {
-    traitValue: traits[field],
-    traitType: typeof traits[field]
-  });
+  // Removed debug console logs
   
   // IMPORTANT: Initialize with the current trait value
   const [selectedValue, setSelectedValue] = useState<string>(() => {
     const initialValue = traits[field] as string;
-    console.log(`DropdownTrait ${field} initializing with value:`, initialValue);
     return initialValue || '';
   });
   
@@ -33,13 +28,9 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = ({
     // Safe access the trait value, ensuring it's a string
     const traitValue = (traits[field] as string) || '';
     
-    // Log for debugging
-    console.log(`DropdownTrait useEffect: comparing "${traitValue}" with state "${selectedValue}"`);
-    
     // Only update if there's an actual trait value AND it's different from our current state
     // AND we haven't manually selected a value yet
     if (traitValue && traitValue !== selectedValue && !isDirtyRef.current) {
-      console.log(`DropdownTrait ${field} updating state from trait:`, traitValue);
       setSelectedValue(traitValue);
     }
     
@@ -50,7 +41,6 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = ({
   
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newValue = e.target.value;
-    console.log(`DropdownTrait ${field} changed to:`, newValue);
     
     // Update our local value immediately
     setSelectedValue(newValue);
@@ -63,18 +53,14 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = ({
     // Update the parent state
     updateText(field, newValue);
     
-    // Log parent trait value after a short delay to see if it updated
+    // Protect important fields after a short delay
     setTimeout(() => {
-      console.log(`After dropdown change, parent trait is now:`, traits[field]);
-      
       // Protect important fields
       if (field !== 'title' && field !== 'description') {
         if (preservedTitle && traits.title !== preservedTitle) {
-          console.log(`Restoring title after dropdown change to: ${preservedTitle}`);
           updateText('title', preservedTitle);
         }
         if (preservedDescription && traits.description !== preservedDescription) {
-          console.log(`Restoring description after dropdown change to: ${preservedDescription}`);
           updateText('description', preservedDescription);
         }
       }

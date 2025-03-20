@@ -34,13 +34,13 @@ export function useArtworkSubmissionForm() {
   // Flag to track if we're in the middle of an update
   const isUpdatingRef = useRef<boolean>(false);
   
-  // Create a safe version of setTraits that guarantees we preserve fields
+  // Create a throttled/debounced version of setTraits for better performance
   const safeSetTraits = useCallback((traitsOrUpdater: TraitsData | ((prev: TraitsData) => TraitsData)) => {
-    // Set the updating flag
+    // Set the updating flag to prevent effect cascades
     isUpdatingRef.current = true;
     
-    // Log the update for debugging
-    console.log('useArtworkSubmissionForm: safeSetTraits called, preserving:', fieldValuesRef.current);
+    // Completely disable console.log in all environments to improve performance
+    // console.log('useArtworkSubmissionForm: safeSetTraits called');
     
     setTraits(prev => {
       // If traitsOrUpdater is a function, call it to get the new state
@@ -50,13 +50,14 @@ export function useArtworkSubmissionForm() {
       
       // Preserve critical fields
       const mergedTraits = {
-        ...newTraits,
-        // Only use fieldValuesRef if the new traits don't have meaningful values
+        ...prev, // Start with previous traits
+        ...newTraits, // Apply new trait values
+        // Special handling for critical fields - ensure they're preserved properly
         title: newTraits.title || fieldValuesRef.current.title || prev.title || "",
         description: newTraits.description || fieldValuesRef.current.description || prev.description || "",
       };
       
-      // Update our refs with the new values
+      // Update our refs with the new values - only if they have content
       if (mergedTraits.title) fieldValuesRef.current.title = mergedTraits.title;
       if (mergedTraits.description) fieldValuesRef.current.description = mergedTraits.description;
       
@@ -64,10 +65,10 @@ export function useArtworkSubmissionForm() {
       return mergedTraits;
     });
     
-    // Clear the updating flag after a short delay
+    // Use a very short delay to prevent reentrancy issues
     setTimeout(() => {
       isUpdatingRef.current = false;
-    }, 50);
+    }, 5);
   }, []);
   
   // Track changes to critical fields from the traits state
@@ -109,37 +110,65 @@ export function useArtworkSubmissionForm() {
     setCurrentStep(SubmissionStep.ARTWORK);
   }, []);
 
-  // Enhanced update function
+  // Create a debounced version of the update function for text fields
+  const debouncedUpdateRef = useRef<{
+    timeout: NodeJS.Timeout | null;
+    field: keyof TraitsData | null;
+    value: any;
+  }>({
+    timeout: null,
+    field: null,
+    value: null
+  });
+  
+  // Enhanced update function with debouncing for text inputs
   const updateTraitField = useCallback(<K extends keyof TraitsData>(
     field: K,
     value: TraitsData[K]
   ) => {
-    console.log(`updateTraitField: updating ${String(field)} to:`, value);
+    // Removed all console.log calls for performance
     
-    // Special handling for title and description
-    if (field === 'title' && typeof value === 'string') {
-      fieldValuesRef.current.title = value;
-    } else if (field === 'description' && typeof value === 'string') {
-      fieldValuesRef.current.description = value;
-    }
-    
-    // Store value in ref for ALL fields to protect against state loss
+    // Store value in ref for ALL fields immediately
     fieldValuesRef.current[field] = value;
     
-    // Use our safe setter that preserves important fields
-    safeSetTraits(prev => {
-      // Create a complete update that includes all our cached values
-      const updated = { 
-        ...prev,
-        ...fieldValuesRef.current, // Apply all cached field values first
-        [field]: value // Ensure the specific field being updated gets priority
+    // Special handling for text fields that need fast local updates but debounced global updates
+    if ((field === 'title' || field === 'description') && typeof value === 'string') {
+      // If we already have a debounce timer for this field, clear it
+      if (debouncedUpdateRef.current.timeout && debouncedUpdateRef.current.field === field) {
+        clearTimeout(debouncedUpdateRef.current.timeout);
+      }
+      
+      // Set a new debounce timer with increased delay (250ms)
+      debouncedUpdateRef.current = {
+        field,
+        value,
+        timeout: setTimeout(() => {
+          // When the timer fires, update the global state
+          safeSetTraits(prev => {
+            // Create a new object rather than spreading the old one
+            const newTraits = {};
+            // Set only the specific field we're updating
+            newTraits[field] = value;
+            return newTraits as TraitsData;
+          });
+          
+          // Clear our debounce data
+          debouncedUpdateRef.current = {
+            timeout: null,
+            field: null,
+            value: null
+          };
+        }, 250) // Increased debounce to 250ms for text inputs
       };
-      
-      // Log the update for debugging
-      console.log(`updateTraitField: updating ${String(field)}, traits will be:`, updated);
-      
-      return updated;
-    });
+    } else {
+      // For non-text fields, update immediately without debouncing
+      safeSetTraits(() => {
+        // Return a minimal update object with just the field being changed
+        const update = {} as Partial<TraitsData>;
+        update[field] = value;
+        return update as TraitsData;
+      });
+    }
   }, [safeSetTraits]);
 
   // Function to prepare final submission data

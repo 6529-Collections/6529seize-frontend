@@ -30,8 +30,6 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = ({
   
   // Handle button click with value preservation
   const handleSetValue = useCallback((newValue: boolean) => {
-    console.log(`BooleanTrait ${field} changing to:`, newValue);
-    
     // Update local state immediately
     setValue(newValue);
     
@@ -46,11 +44,9 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = ({
     setTimeout(() => {
       if (field !== 'title' && field !== 'description') {
         if (traits.title !== preservedTitle && preservedTitle) {
-          console.log(`Restoring title after boolean change to: ${preservedTitle}`);
           (updateBoolean as any)('title', preservedTitle);
         }
         if (traits.description !== preservedDescription && preservedDescription) {
-          console.log(`Restoring description after boolean change to: ${preservedDescription}`);
           (updateBoolean as any)('description', preservedDescription);
         }
       }

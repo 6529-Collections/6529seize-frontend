@@ -430,9 +430,9 @@ function validateSchema(schema: readonly SectionDefinition[]): void {
         });
       });
       
-      console.log('Schema validation passed');
+      // console.log('Schema validation passed');
     } catch (error) {
-      console.error('Schema validation failed:', error);
+      // console.error('Schema validation failed:', error);
       // In development, we could throw to make the error more visible
       if (process.env.NODE_ENV === 'development') {
         throw error;
@@ -482,7 +482,7 @@ export function getInitialTraitsValues(): TraitsData {
     });
   });
 
-  console.log("Initial traits values created with empty title:", initialValues.title);
+  // console.log("Initial traits values created with empty title:", initialValues.title);
   return initialValues as TraitsData;
 }
 
