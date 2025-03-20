@@ -24,7 +24,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   return (
     <>
       {" "}
-      <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-3 tw-mt-2">
+      <div className="tw-w-full tw-flex tw-flex-col tw-gap-y-3">
         {/* Title and Submit button */}
         <div className="tw-flex tw-items-center tw-justify-between">
           <h1 className="tw-text-2xl tw-font-semibold tw-text-iron-100 tw-mb-0">

@@ -51,7 +51,60 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
     activeWaveId
   );
 
-  const memoizedWaves = useMemo(() => waves || [], [waves]);
+  // Manage recent waves in localStorage
+  const [recentWaveIds, setRecentWaveIds] = useState<string[]>([]);
+  
+  // Load recent waves from localStorage
+  useEffect(() => {
+    try {
+      const storedWaves = JSON.parse(localStorage.getItem('recentWaves') || '[]');
+      setRecentWaveIds(storedWaves);
+    } catch {
+      setRecentWaveIds([]);
+    }
+  }, []);
+  
+  // Update recent waves when active wave changes
+  useEffect(() => {
+    if (!activeWaveId) return;
+    
+    try {
+      // Move current wave to front of recent list
+      const updatedRecentWaves = [
+        activeWaveId,
+        ...recentWaveIds.filter(id => id !== activeWaveId)
+      ].slice(0, 5); // Keep only 5 most recent
+      
+      localStorage.setItem('recentWaves', JSON.stringify(updatedRecentWaves));
+      setRecentWaveIds(updatedRecentWaves);
+    } catch {
+      // Fail silently - recent waves are non-critical
+    }
+  }, [activeWaveId]);
+  
+  // Organize waves into sections: active, recent, and regular
+  const { activeWave, recentWaves, regularWaves } = useMemo(() => {
+    if (!waves?.length) return { activeWave: null, recentWaves: [], regularWaves: [] };
+    
+    // Find active wave
+    const activeWave = waves.find(wave => wave.id === activeWaveId) || null;
+    const remainingWaves = new Map(waves.filter(w => w.id !== activeWaveId).map(w => [w.id, w]));
+    
+    // Find recent waves (excluding active)
+    const recentWaves = recentWaveIds
+      .filter(id => id !== activeWaveId && remainingWaves.has(id))
+      .map(id => {
+        const wave = remainingWaves.get(id)!;
+        remainingWaves.delete(id);
+        return wave;
+      })
+      .slice(0, 3); // Show max 3 recent waves
+    
+    // All other waves
+    const regularWaves = Array.from(remainingWaves.values());
+    
+    return { activeWave, recentWaves, regularWaves };
+  }, [waves, activeWaveId, recentWaveIds]);
 
   return (
     <div className="tw-mb-4">
@@ -76,16 +129,50 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
             />
           </div>
         </div>
-        <div className="tw-mt-2 tw-max-h-96 tw-pb-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
+        
+        {/* Waves list - prioritized by active, recent, then regular */}
+        <div className="tw-overflow-y-auto tw-max-h-[calc(100vh-280px)] tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900 tw-mt-3">
           <div className="tw-flex tw-flex-col">
-            {memoizedWaves.map((wave) => (
+            {/* Active Wave */}
+            {activeWave && (
               <BrainLeftSidebarWave
-                key={wave.id}
-                wave={wave}
+                key={activeWave.id}
+                wave={activeWave}
                 newDropsCounts={newDropsCounts}
                 resetWaveCount={resetWaveCount}
+                isHighlighted={true}
               />
-            ))}
+            )}
+            
+            {/* Recent Waves */}
+            {recentWaves.length > 0 && (
+              <div className="tw-border-t tw-border-iron-800/30">
+                {recentWaves.map(wave => (
+                  <BrainLeftSidebarWave
+                    key={wave.id}
+                    wave={wave}
+                    newDropsCounts={newDropsCounts}
+                    resetWaveCount={resetWaveCount}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {/* All Other Waves */}
+            {regularWaves.length > 0 && (
+              <div className="tw-border-t tw-border-iron-800/30">
+                {regularWaves.map(wave => (
+                  <BrainLeftSidebarWave
+                    key={wave.id}
+                    wave={wave}
+                    newDropsCounts={newDropsCounts}
+                    resetWaveCount={resetWaveCount}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {/* Loading indicator */}
             {isFetchingNextPage && (
               <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
                 <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
@@ -94,6 +181,7 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
             <div ref={intersectionElementRef}></div>
           </div>
         </div>
+        
         <div className="tw-px-4 tw-mt-2">
           <BrainLeftSidebarCreateAWaveButton />
         </div>

@@ -9,17 +9,17 @@ interface SingleWaveDropInfoDetailsProps {
   readonly drop: ExtendedDrop | undefined;
 }
 
-export const SingleWaveDropInfoDetails: React.FC<SingleWaveDropInfoDetailsProps> = ({
-  drop,
-}) => {
+export const SingleWaveDropInfoDetails: React.FC<
+  SingleWaveDropInfoDetailsProps
+> = ({ drop }) => {
   // Check if this is the memes wave
   const isMemes = drop ? isMemesWave(drop.wave.id) : false;
-  
+
   return (
-    <div className="tw-px-6 tw-mt-4 tw-space-y-4 tw-pb-6">
-      {drop && <SingleWaveDropVoters drop={drop} />}
+    <div className="tw-px-6 tw-space-y-4 tw-pb-6">
       {isMemes && drop && <SingleWaveDropTraits drop={drop} />}
+      {drop && <SingleWaveDropVoters drop={drop} />}
       {drop && <SingleWaveDropLogs drop={drop} />}
     </div>
   );
-}; 
+};

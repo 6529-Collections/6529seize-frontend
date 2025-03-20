@@ -19,7 +19,8 @@ const getBorderClasses = (drop: ExtendedDrop) => {
   } else if (rank === 3) {
     return `${baseClasses} desktop-hover:hover:tw-border-[#CD7F32]/40`;
   } else {
-    return `${baseClasses} tw-border-iron-800`;
+    // More subtle hover effect for ranks 4+
+    return `${baseClasses} desktop-hover:hover:tw-border-iron-700`;
   }
 };
 
