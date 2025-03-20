@@ -1,34 +1,72 @@
-import React, { useCallback } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { BooleanTraitProps } from './types';
 import { TraitWrapper } from './TraitWrapper';
 
 /**
- * Simplified BooleanTrait component
- * Boolean traits are simpler and don't need uncontrolled approach
+ * Simplified BooleanTrait component using a ref-based approach
+ * Similar to our solution for text and number inputs
  */
-export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(({
+export const BooleanTrait: React.FC<BooleanTraitProps> = ({
   label,
   field,
   traits,
   updateBoolean,
   className,
 }) => {
-  // For booleans, we can directly read from the traits
-  const value = Boolean(traits[field]);
+  // Use a ref to track the current value to avoid React re-render cycles
+  const valueRef = useRef<boolean>(Boolean(traits[field]));
+  // Use ref for UI state
+  const uiStateRef = useRef<HTMLDivElement>(null);
   
-  // Simple click handler - direct state update is fine for buttons
-  const handleSetValue = useCallback((newValue: boolean) => {
-    updateBoolean(field, newValue);
-  }, [field, updateBoolean]);
+  // Update value ref when traits change
+  useEffect(() => {
+    valueRef.current = Boolean(traits[field]);
+    updateUIState();
+  }, [traits, field]);
+  
+  // Direct DOM manipulation to update UI without re-renders
+  function updateUIState() {
+    if (!uiStateRef.current) return;
+    
+    const yesButton = uiStateRef.current.querySelector('.yes-button');
+    const noButton = uiStateRef.current.querySelector('.no-button');
+    
+    if (valueRef.current) {
+      yesButton?.classList.add('tw-bg-emerald-600/30', 'tw-ring-emerald-500/60', 'tw-text-emerald-200');
+      yesButton?.classList.remove('tw-bg-iron-800/50', 'tw-ring-iron-700/50', 'tw-text-iron-400');
+      
+      noButton?.classList.remove('tw-bg-rose-600/30', 'tw-ring-rose-500/60', 'tw-text-rose-200');
+      noButton?.classList.add('tw-bg-iron-800/50', 'tw-ring-iron-700/50', 'tw-text-iron-400');
+    } else {
+      yesButton?.classList.remove('tw-bg-emerald-600/30', 'tw-ring-emerald-500/60', 'tw-text-emerald-200');
+      yesButton?.classList.add('tw-bg-iron-800/50', 'tw-ring-iron-700/50', 'tw-text-iron-400');
+      
+      noButton?.classList.add('tw-bg-rose-600/30', 'tw-ring-rose-500/60', 'tw-text-rose-200');
+      noButton?.classList.remove('tw-bg-iron-800/50', 'tw-ring-iron-700/50', 'tw-text-iron-400');
+    }
+  }
+  
+  // Click handlers with direct DOM manipulation
+  function handleYesClick() {
+    valueRef.current = true;
+    updateBoolean(field, true);
+    updateUIState();
+  }
+  
+  function handleNoClick() {
+    valueRef.current = false;
+    updateBoolean(field, false);
+    updateUIState();
+  }
   
   return (
     <TraitWrapper label={label} isBoolean={true} className={className}>
-      <div className="tw-flex tw-gap-3 tw-flex-1">
+      <div ref={uiStateRef} className="tw-flex tw-gap-3 tw-flex-1">
         <button
-          onClick={() => handleSetValue(true)}
-          className={`tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
+          onClick={handleYesClick}
+          className={`yes-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
             ${
-              value
+              Boolean(traits[field])
                 ? "tw-bg-emerald-600/30 tw-ring-emerald-500/60 tw-text-emerald-200"
                 : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
@@ -37,10 +75,10 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(({
           Yes
         </button>
         <button
-          onClick={() => handleSetValue(false)}
-          className={`tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
+          onClick={handleNoClick}
+          className={`no-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
             ${
-              !value
+              !Boolean(traits[field])
                 ? "tw-bg-rose-600/30 tw-ring-rose-500/60 tw-text-rose-200"
                 : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
@@ -51,4 +89,4 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(({
       </div>
     </TraitWrapper>
   );
-});
+};

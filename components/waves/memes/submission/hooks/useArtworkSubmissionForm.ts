@@ -94,7 +94,7 @@ export function useArtworkSubmissionForm() {
   // Extract values for convenience
   const { currentStep, agreements, artworkUploaded, artworkUrl, traits } = state;
 
-  // Extremely simple and direct update function - no debouncing
+  // Extremely simple and direct update function
   const updateTraitField = useCallback(<K extends keyof TraitsData>(
     field: K,
     value: TraitsData[K]
