@@ -6,6 +6,7 @@ import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { fullScreenSupported } from "../../../../helpers/Helpers";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 interface DropPartMarkdownImageProps {
   readonly src: string;
@@ -22,6 +23,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
   const [isZoomed, setIsZoomed] = useState(false);
+  const { isCapacitor } = useCapacitor();
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
@@ -53,11 +55,15 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     []
   );
 
-  const handleFullScreen = useCallback(() => {
-    if (imgRef.current) {
-      imgRef.current.requestFullscreen();
-    }
-  }, [imgRef]);
+  const handleFullScreen = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      if (imgRef.current) {
+        imgRef.current.requestFullscreen();
+      }
+    },
+    [imgRef]
+  );
 
   useKeyPressEvent("Escape", () => handleCloseModal());
 
@@ -65,7 +71,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
     <div
       className="tailwind-scope tw-cursor-default tw-relative tw-z-1000"
       onClick={handleCloseModal}>
-      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px]"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px] tw-pointer-events-none"></div>
       <TransformWrapper
         limitToBounds={false}
         smooth
@@ -93,7 +99,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                     />
                   </svg>
                 </button>
-                {fullScreenSupported() && (
+                {fullScreenSupported() && !isCapacitor && (
                   <button
                     onClick={handleFullScreen}
                     className="tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
@@ -103,7 +109,8 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                 )}
                 {isZoomed && (
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       resetTransform();
                       setIsZoomed(false);
                     }}
