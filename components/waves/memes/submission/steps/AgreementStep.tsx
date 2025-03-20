@@ -5,14 +5,12 @@ interface AgreementStepProps {
   readonly agreements: boolean;
   readonly setAgreements: (agreed: boolean) => void;
   readonly onContinue: () => void;
-  readonly isSigningWallet: boolean;
 }
 
 const AgreementStep: React.FC<AgreementStepProps> = ({ 
   agreements, 
   setAgreements, 
   onContinue, 
-  isSigningWallet 
 }) => {
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
@@ -61,11 +59,11 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
       <div className="tw-mt-4 tw-flex tw-justify-center">
         <PrimaryButton
           onClicked={onContinue}
-          loading={isSigningWallet}
+          loading={false}
           disabled={!agreements}
           padding="tw-px-6 tw-py-2.5"
         >
-          {isSigningWallet ? "Signing with wallet..." : "I Agree & Continue"}
+          I Agree & Continue
         </PrimaryButton>
       </div>
     </div>

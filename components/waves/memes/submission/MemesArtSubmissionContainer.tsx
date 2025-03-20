@@ -6,35 +6,31 @@ import Stepper from "./ui/Stepper";
 import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 
 interface MemesArtSubmissionContainerProps {
-  readonly onCancel: () => void;
-  readonly onSubmit: (artwork: {
-    imageUrl: string;
-    traits: TraitsData;
-    signature: string;
-  }) => void;
+  readonly onClose: () => void;
+  readonly wave: ApiWave;
 }
 
 /**
  * MemesArtSubmissionContainer - Main container component for the artwork submission flow
- * 
+ *
  * This component has been simplified by:
  * 1. Moving form state management to a custom hook
  * 2. Extracting the modal layout to a separate component
  * 3. Using an enum with a component map for cleaner step routing
  * 4. Using direct component composition instead of component injection
  */
-const MemesArtSubmissionContainer: React.FC<MemesArtSubmissionContainerProps> = ({
-  onCancel,
-  onSubmit,
-}) => {
+const MemesArtSubmissionContainer: React.FC<
+  MemesArtSubmissionContainerProps
+> = ({ onClose, wave }) => {
   // Use the form hook to manage all state
   const form = useArtworkSubmissionForm();
-  
+
   // Handle final submission
   const handleSubmit = () => {
-    onSubmit(form.getSubmissionData());
+    console.log(form.getSubmissionData());
   };
 
   // Map of steps to their corresponding components
@@ -44,7 +40,6 @@ const MemesArtSubmissionContainer: React.FC<MemesArtSubmissionContainerProps> = 
         agreements={form.agreements}
         setAgreements={form.setAgreements}
         onContinue={form.handleContinueFromTerms}
-        isSigningWallet={form.isSigningWallet}
       />
     ),
     [SubmissionStep.ARTWORK]: (
@@ -55,19 +50,21 @@ const MemesArtSubmissionContainer: React.FC<MemesArtSubmissionContainerProps> = 
         setArtworkUploaded={form.setArtworkUploaded}
         handleFileSelect={form.handleFileSelect}
         onSubmit={handleSubmit}
-        onTitleChange={(title) => form.updateTraitField('title', title)}
-        onDescriptionChange={(description) => form.updateTraitField('description', description)}
+        onTitleChange={(title) => form.updateTraitField("title", title)}
+        onDescriptionChange={(description) =>
+          form.updateTraitField("description", description)
+        }
         setTraits={form.setTraits}
       />
-    )
+    ),
   };
 
   return (
-    <ModalLayout title="Submit Artwork to Memes" onCancel={onCancel}>
+    <ModalLayout title="Submit Artwork to Memes" onCancel={onClose}>
       {/* Stepper */}
-      <Stepper 
-        currentStep={stepEnumToIndex(form.currentStep)} 
-        totalSteps={Object.keys(stepComponents).length} 
+      <Stepper
+        currentStep={stepEnumToIndex(form.currentStep)}
+        totalSteps={Object.keys(stepComponents).length}
       />
 
       {/* Step Content - Render the current step from the map */}

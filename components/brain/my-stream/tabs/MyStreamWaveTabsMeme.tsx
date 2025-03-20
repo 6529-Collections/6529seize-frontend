@@ -43,10 +43,8 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
       </div>
       <MemesArtSubmissionModal
         isOpen={isMemesModalOpen}
+        wave={wave}
         onClose={() => setIsMemesModalOpen(false)}
-        onSubmit={() => {
-          setIsMemesModalOpen(false);
-        }}
       />
     </>
   );
