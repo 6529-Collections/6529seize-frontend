@@ -1,30 +1,20 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '../../../../auth/Auth';
-import { TypeOptions } from 'react-toastify';
 import { ApiCreateDropRequest } from '../../../../../generated/models/ApiCreateDropRequest';
 import { ApiDropType } from '../../../../../generated/models/ApiDropType';
-import { ApiCreateDropPart } from '../../../../../generated/models/ApiCreateDropPart';
 import { ApiDropMedia } from '../../../../../generated/models/ApiDropMedia';
 import { ApiDrop } from '../../../../../generated/models/ApiDrop';
 import { ApiDropMetadata } from '../../../../../generated/models/ApiDropMetadata';
 import { commonApiPost } from '../../../../../services/api/common-api';
 import { TraitsData } from '../types/TraitsData';
-
-/**
- * Interface for tracking file upload progress
- */
-export interface UploadingFile {
-  file: File;
-  isUploading: boolean;
-  progress: number;
-}
+import { SubmissionPhase } from '../ui/SubmissionProgress';
 
 /**
  * Interface for the artwork submission data
  */
 interface ArtworkSubmissionData {
-  imageFile: File; // Changed from imageUrl to imageFile
+  imageFile: File;
   traits: TraitsData;
   waveId: string;
 }
@@ -166,24 +156,76 @@ const transformToApiRequest = (
 };
 
 /**
- * Hook for submitting artwork
+ * Phase transition callback type
+ */
+interface PhaseChangeCallbacks {
+  onPhaseChange?: (phase: SubmissionPhase, error?: string) => void;
+}
+
+/**
+ * Hook for submitting artwork with enhanced UX
  */
 export function useArtworkSubmissionMutation() {
   const { setToast, requestAuth } = useAuth();
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [submissionPhase, setSubmissionPhase] = useState<SubmissionPhase>('idle');
+  const [submissionError, setSubmissionError] = useState<string | undefined>(undefined);
 
-  // Mutation for the API submission
-  const mutation = useMutation<
-    ApiDrop, // Response type
-    Error,   // Error type
-    { // Variables type
-      waveId: string;
-      traits: TraitsData;
-      mediaUrl: string;
-      mimeType: string;
+  // Update submission phase with callbacks
+  const updatePhase = useCallback((phase: SubmissionPhase, callbacks?: PhaseChangeCallbacks, error?: string) => {
+    setSubmissionPhase(phase);
+    setSubmissionError(error);
+    
+    if (callbacks?.onPhaseChange) {
+      callbacks.onPhaseChange(phase, error);
+    }
+  }, []);
+
+  // File upload mutation
+  const uploadMutation = useMutation<
+    ApiDropMedia, // Response type
+    Error,       // Error type
+    {
+      file: File;
+      callbacks?: PhaseChangeCallbacks;
     }
   >({
-    mutationFn: async (submissionData) => {
+    mutationFn: async ({ file, callbacks }) => {
+      updatePhase('uploading', callbacks);
+      
+      return uploadMediaFile(file, (progress) => {
+        setUploadProgress(progress);
+      });
+    },
+    onError: (error, variables) => {
+      const errorMsg = `Error uploading file: ${error.message}`;
+      updatePhase('error', variables.callbacks, errorMsg);
+      
+      setToast({
+        message: errorMsg,
+        type: 'error'
+      });
+    }
+  });
+
+  // Submission mutation
+  const submissionMutation = useMutation<
+    ApiDrop, // Response type
+    Error,   // Error type
+    { 
+      data: {
+        waveId: string;
+        traits: TraitsData;
+        mediaUrl: string;
+        mimeType: string;
+      };
+      callbacks?: PhaseChangeCallbacks;
+    }
+  >({
+    mutationFn: async ({ data, callbacks }) => {
+      // Update phase to processing
+      updatePhase('processing', callbacks);
+      
       // Ensure user is authenticated
       const { success } = await requestAuth();
       if (!success) {
@@ -191,7 +233,7 @@ export function useArtworkSubmissionMutation() {
       }
 
       // Transform data to API format
-      const apiRequest = transformToApiRequest(submissionData);
+      const apiRequest = transformToApiRequest(data);
 
       // Submit to API
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
@@ -199,24 +241,22 @@ export function useArtworkSubmissionMutation() {
         body: apiRequest
       });
     },
-    onError: (error) => {
-      console.log(error);
+    onSuccess: (_, variables) => {
+      updatePhase('success', variables.callbacks);
+      
+      // Show success toast
       setToast({
-        message: `Submission failed: ${error.message}`,
-        type: 'error'
+        message: 'Artwork submitted successfully!',
+        type: 'success'
       });
-    }
-  });
-
-  // File upload mutation
-  const uploadMutation = useMutation<
-    ApiDropMedia, // Response type
-    Error,       // Error type
-    File         // Variables type
-  >({
-    mutationFn: async (file) => {
-      return uploadMediaFile(file, (progress) => {
-        setUploadProgress(progress);
+    },
+    onError: (error, variables) => {
+      const errorMsg = `Submission failed: ${error.message}`;
+      updatePhase('error', variables.callbacks, errorMsg);
+      
+      setToast({
+        message: errorMsg,
+        type: 'error'
       });
     }
   });
@@ -229,9 +269,14 @@ export function useArtworkSubmissionMutation() {
     options?: {
       onSuccess?: (data: ApiDrop) => void;
       onError?: (error: Error) => void;
+      onPhaseChange?: (phase: SubmissionPhase, error?: string) => void;
     }
   ) => {
     try {
+      // Reset state for a new submission
+      setUploadProgress(0);
+      setSubmissionError(undefined);
+      
       // Validate required fields
       if (!data.imageFile) {
         setToast({
@@ -248,32 +293,25 @@ export function useArtworkSubmissionMutation() {
         });
         return null;
       }
+      
+      // Create callbacks object
+      const callbacks = { onPhaseChange: options?.onPhaseChange };
 
       // Step 1: Upload the media file
-      setToast({
-        message: 'Uploading artwork...',
-        type: 'info'
+      const media = await uploadMutation.mutateAsync({
+        file: data.imageFile,
+        callbacks
       });
-      
-      const media = await uploadMutation.mutateAsync(data.imageFile);
       
       // Step 2: Submit the drop with the media URL
-      setToast({
-        message: 'Submitting artwork data...',
-        type: 'info'
-      });
-      
-      const result = await mutation.mutateAsync({
-        waveId: data.waveId,
-        traits: data.traits,
-        mediaUrl: media.url,
-        mimeType: media.mime_type
-      });
-      
-      // Show success toast
-      setToast({
-        message: 'Artwork submitted successfully!',
-        type: 'success'
+      const result = await submissionMutation.mutateAsync({
+        data: {
+          waveId: data.waveId,
+          traits: data.traits,
+          mediaUrl: media.url,
+          mimeType: media.mime_type
+        },
+        callbacks
       });
       
       // Call success callback if provided
@@ -283,12 +321,6 @@ export function useArtworkSubmissionMutation() {
       
       return result;
     } catch (error) {
-      // Show error toast
-      setToast({
-        message: `Submission failed: ${(error as Error).message}`,
-        type: 'error'
-      });
-      
       // Call error callback if provided
       if (options?.onError && error instanceof Error) {
         options.onError(error);
@@ -300,16 +332,21 @@ export function useArtworkSubmissionMutation() {
 
   return {
     submitArtwork,
-    isSubmitting: mutation.isPending || uploadMutation.isPending,
+    isSubmitting: uploadMutation.isPending || submissionMutation.isPending,
     isUploading: uploadMutation.isPending,
+    isProcessing: submissionMutation.isPending,
     uploadProgress,
-    isSuccess: mutation.isSuccess,
-    isError: mutation.isError || uploadMutation.isError,
-    error: mutation.error || uploadMutation.error,
+    submissionPhase,
+    submissionError,
+    isSuccess: submissionMutation.isSuccess,
+    isError: uploadMutation.isError || submissionMutation.isError,
+    error: uploadMutation.error || submissionMutation.error,
     reset: () => {
-      mutation.reset();
       uploadMutation.reset();
+      submissionMutation.reset();
       setUploadProgress(0);
+      setSubmissionPhase('idle');
+      setSubmissionError(undefined);
     }
   };
 }

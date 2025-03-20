@@ -4,6 +4,7 @@ import { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
 import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "../../MemesArtSubmissionTraits";
+import { SubmissionPhase } from "../ui/SubmissionProgress";
 
 interface ArtworkStepProps {
   readonly traits: TraitsData;
@@ -15,6 +16,7 @@ interface ArtworkStepProps {
   readonly updateTraitField: <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => void;
   readonly setTraits: (traits: Partial<TraitsData>) => void;
   readonly isSubmitting?: boolean;
+  readonly submissionPhase?: SubmissionPhase;
 }
 
 /**
@@ -22,7 +24,8 @@ interface ArtworkStepProps {
  * 
  * This component directly includes all the needed components for
  * the artwork submission process in a clear, sequential layout.
- * The submit button is fixed at the bottom of the page.
+ * The submit button is fixed at the bottom of the page and changes
+ * appearance based on the current submission phase.
  */
 const ArtworkStep: React.FC<ArtworkStepProps> = ({
   traits,
@@ -33,7 +36,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   onSubmit,
   updateTraitField,
   setTraits,
-  isSubmitting = false
+  isSubmitting = false,
+  submissionPhase = 'idle'
 }) => {
   // Create callback handlers for title and description
   const handleTitleChange = useCallback((title: string) => {
@@ -46,6 +50,34 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   
   // Determine button disabled state
   const isDisabled = !artworkUploaded || !traits.title || isSubmitting;
+  
+  // Get button text based on submission phase
+  const getButtonText = (): string => {
+    switch(submissionPhase) {
+      case 'uploading':
+        return 'Uploading...';
+      case 'processing':
+        return 'Processing...';
+      case 'success':
+        return '✓ Submission Complete';
+      case 'error':
+        return 'Try Again';
+      default:
+        return 'Submit to Memes';
+    }
+  };
+  
+  // Get button class based on phase
+  const getButtonClass = (): string => {
+    switch(submissionPhase) {
+      case 'success':
+        return 'tw-bg-green-600 hover:tw-bg-green-700';
+      case 'error':
+        return 'tw-bg-red-600 hover:tw-bg-red-700';
+      default:
+        return '';
+    }
+  };
   
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6 tw-relative tw-pb-20">
@@ -79,11 +111,12 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
         <div className="tw-container tw-mx-auto tw-flex tw-justify-end">
           <PrimaryButton
             onClicked={onSubmit}
-            loading={isSubmitting}
-            disabled={!isDisabled}
+            loading={isSubmitting && submissionPhase !== 'success' && submissionPhase !== 'error'}
+            disabled={isDisabled || submissionPhase === 'success'}
             padding="tw-px-8 tw-py-3"
+            className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit to Memes'}
+            {getButtonText()}
           </PrimaryButton>
         </div>
       </div>

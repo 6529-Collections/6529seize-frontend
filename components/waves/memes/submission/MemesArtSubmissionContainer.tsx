@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { SubmissionStep, stepEnumToIndex } from "./types/Steps";
 import ModalLayout from "./layout/ModalLayout";
 import Stepper from "./ui/Stepper";
@@ -6,6 +6,7 @@ import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
+import SubmissionProgress, { SubmissionPhase } from "./ui/SubmissionProgress";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 
 interface MemesArtSubmissionContainerProps {
@@ -22,6 +23,7 @@ interface MemesArtSubmissionContainerProps {
  * 3. Using an enum with a component map for cleaner step routing
  * 4. Using direct component composition instead of component injection
  * 5. Using a separate mutation hook for API submission
+ * 6. Using a dedicated progress component for visual feedback
  */
 const MemesArtSubmissionContainer: React.FC<
   MemesArtSubmissionContainerProps
@@ -30,19 +32,47 @@ const MemesArtSubmissionContainer: React.FC<
   const form = useArtworkSubmissionForm();
   
   // Use the mutation hook for submission
-  const { submitArtwork, isSubmitting, uploadProgress, isUploading } = useArtworkSubmissionMutation();
+  const { 
+    submitArtwork, 
+    uploadProgress, 
+    submissionPhase,
+    submissionError,
+    isSubmitting
+  } = useArtworkSubmissionMutation();
   
   // Keep track of the selected file
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileInfo, setFileInfo] = useState<{name: string, size: number} | null>(null);
+  
+  // Auto-close on successful submission after a short delay
+  useEffect(() => {
+    if (submissionPhase === 'success') {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 1200); // Brief delay to show success state
+      
+      return () => clearTimeout(timer);
+    }
+  }, [submissionPhase, onClose]);
   
   // Handle file selection
   const handleFileSelect = (file: File) => {
     // Store the file for later submission
     setSelectedFile(file);
+    setFileInfo({
+      name: file.name,
+      size: file.size
+    });
     
     // Also pass to the form hook for preview
     form.handleFileSelect(file);
   };
+  
+  // Phase change handler
+  const handlePhaseChange = useCallback((phase: SubmissionPhase) => {
+    // Any additional phase-specific handling can be done here
+    console.log(`Submission phase changed to: ${phase}`);
+  }, []);
 
   // Handle final submission
   const handleSubmit = async () => {
@@ -61,22 +91,11 @@ const MemesArtSubmissionContainer: React.FC<
         waveId: wave.id
       },
       {
-        onSuccess: () => {
-          // Close the modal on success
-          onClose();
-        }
+        onPhaseChange: handlePhaseChange
       }
     );
     
     return result;
-  };
-
-  // Build progress message based on upload state
-  const getUploadStatusMessage = () => {
-    if (isUploading) {
-      return `Uploading artwork: ${uploadProgress}%`;
-    }
-    return isSubmitting ? "Processing submission..." : "";
   };
 
   // Map of steps to their corresponding components
@@ -99,6 +118,7 @@ const MemesArtSubmissionContainer: React.FC<
         updateTraitField={form.updateTraitField}
         setTraits={form.setTraits}
         isSubmitting={isSubmitting}
+        submissionPhase={submissionPhase}
       />
     ),
   };
@@ -111,12 +131,13 @@ const MemesArtSubmissionContainer: React.FC<
         totalSteps={Object.keys(stepComponents).length}
       />
 
-      {/* Upload progress indicator */}
-      {isSubmitting && (
-        <div className="tw-w-full tw-bg-iron-800 tw-p-2 tw-text-center tw-my-4">
-          {getUploadStatusMessage()}
-        </div>
-      )}
+      {/* Submission Progress - Only shows when active */}
+      <SubmissionProgress 
+        phase={submissionPhase}
+        progress={uploadProgress}
+        fileInfo={fileInfo}
+        error={submissionError}
+      />
 
       {/* Step Content - Render the current step from the map */}
       {stepComponents[form.currentStep]}
