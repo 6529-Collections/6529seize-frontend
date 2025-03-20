@@ -6,6 +6,7 @@ import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { fullScreenSupported } from "../../../../../../helpers/Helpers";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
+import useCapacitor from "../../../../../../hooks/useCapacitor";
 
 function DropListItemContentMediaImage({ src }: { readonly src: string }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -13,6 +14,7 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
   const [isZoomed, setIsZoomed] = useState(false);
+  const { isCapacitor } = useCapacitor();
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
@@ -45,11 +47,15 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
     []
   );
 
-  const handleFullScreen = useCallback(() => {
-    if (imgRef.current) {
-      imgRef.current.requestFullscreen();
-    }
-  }, [imgRef]);
+  const handleFullScreen = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      if (imgRef.current) {
+        imgRef.current.requestFullscreen();
+      }
+    },
+    [imgRef]
+  );
 
   const loadingPlaceholderStyle: React.CSSProperties = {
     width: "100%",
@@ -96,7 +102,7 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
                     />
                   </svg>
                 </button>
-                {fullScreenSupported() && (
+                {fullScreenSupported() && !isCapacitor && (
                   <button
                     onClick={handleFullScreen}
                     className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 tw-right-10 lg:tw-top-10 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
@@ -106,7 +112,8 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
                 )}
                 {isZoomed && (
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       resetTransform();
                       setIsZoomed(false);
                     }}
