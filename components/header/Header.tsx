@@ -18,9 +18,9 @@ import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import CapacitorWidget from "./capacitor/CapacitorWidget";
 import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
-import HeaderQR from "./qr/HeaderQR";
+import HeaderQR from "./share/HeaderShare";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
-import HeaderQRScanner from "./qr/HeaderQRScanner";
+import HeaderQRScanner from "./share/HeaderQRScanner";
 
 interface Props {
   onLoad?: () => void;
