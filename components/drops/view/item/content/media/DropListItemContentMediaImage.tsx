@@ -1,12 +1,16 @@
+import { faExpand } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
+import useCapacitor from "../../../../../../hooks/useCapacitor";
 
 function DropListItemContentMediaImage({ src }: { readonly src: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
+  const { isCapacitor } = useCapacitor();
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
@@ -22,8 +26,13 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
     (event: React.MouseEvent<HTMLImageElement>) => {
       event.stopPropagation();
       setIsModalOpen(true);
+      if (isCapacitor) {
+        event.currentTarget.requestFullscreen();
+      } else {
+        setIsModalOpen(true);
+      }
     },
-    []
+    [isCapacitor]
   );
 
   const handleCloseModal = useCallback(
@@ -38,6 +47,12 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
     },
     []
   );
+
+  const handleFullScreen = useCallback(() => {
+    if (imgRef.current) {
+      imgRef.current.requestFullscreen();
+    }
+  }, [imgRef]);
 
   const handleOpenInNewTab = useCallback(() => {
     const img = new Image();
@@ -62,26 +77,27 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
   useKeyPressEvent("Escape", () => handleCloseModal());
 
   const modalContent = (
-    <div
-      className="tailwind-scope tw-cursor-default tw-relative tw-z-1000"
-      onClick={handleCloseModal}
-    >
+    <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
       <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px]"></div>
       <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
         <div className="tw-relative tw-max-w-[95vw] tw-max-h-[95vh] tw-m-4">
           <button
+            onClick={handleFullScreen}
+            className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 lg:tw-top-0 tw-right-10 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+            aria-label="Full screen">
+            <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
+          </button>
+          <button
             onClick={handleCloseModal}
             className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 tw-right-0 lg:tw-top-0 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-8 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-            aria-label="Close modal"
-          >
+            aria-label="Close modal">
             <svg
               className="tw-h-6 tw-w-6 tw-flex-shrink-0"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
-              aria-hidden="true"
-            >
+              aria-hidden="true">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -103,8 +119,7 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
                 handleOpenInNewTab();
               }}
               className="tw-mt-2 tw-whitespace-nowrap tw-text-sm tw-border-0 tw-bg-iron-800 tw-text-iron-200 tw-rounded-full tw-py-1 tw-px-3 tw-opacity-70 "
-              aria-label="Open image in new tab"
-            >
+              aria-label="Open image in new tab">
               Open in Browser
             </button>
           </div>

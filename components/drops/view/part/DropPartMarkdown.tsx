@@ -360,7 +360,7 @@ function DropPartMarkdown({
           </p>
         ),
         li: (params) => (
-          <li className="tw-text-iron-200 tw-break-words word-break">
+          <li className="tw-text-md tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
               content: params.children,
               mentionedUsers,
