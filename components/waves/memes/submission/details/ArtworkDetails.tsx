@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import FormSection from "../ui/FormSection";
 
 interface ArtworkDetailsProps {
@@ -11,8 +11,7 @@ interface ArtworkDetailsProps {
 /**
  * ArtworkDetails - Component for the artwork title and description fields
  * 
- * This component uses the FormSection component for consistent styling
- * and handles the input fields for title and description.
+ * Extreme simplification using uncontrolled inputs with refs for maximum performance
  */
 const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   title,
@@ -20,6 +19,36 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   onTitleChange,
   onDescriptionChange,
 }) => {
+  // Refs to track input elements directly
+  const titleRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Sync refs with props when they change
+  React.useEffect(() => {
+    if (titleRef.current && title && titleRef.current.value !== title) {
+      titleRef.current.value = title;
+    }
+  }, [title]);
+  
+  React.useEffect(() => {
+    if (descriptionRef.current && description && descriptionRef.current.value !== description) {
+      descriptionRef.current.value = description;
+    }
+  }, [description]);
+  
+  // Handle blur events - only update parent state when user finishes typing
+  const handleTitleBlur = useCallback(() => {
+    if (titleRef.current && titleRef.current.value !== title) {
+      onTitleChange(titleRef.current.value);
+    }
+  }, [onTitleChange, title]);
+  
+  const handleDescriptionBlur = useCallback(() => {
+    if (descriptionRef.current && descriptionRef.current.value !== description) {
+      onDescriptionChange(descriptionRef.current.value);
+    }
+  }, [onDescriptionChange, description]);
+
   return (
     <FormSection 
       title="Artwork Details"
@@ -32,9 +61,10 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
               Artwork Title
             </label>
             <input
+              ref={titleRef}
               type="text"
-              value={title || ""}
-              onChange={(e) => onTitleChange(e.target.value)}
+              defaultValue={title || ''}
+              onBlur={handleTitleBlur}
               placeholder="Enter artwork title"
               className="tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
                 tw-bg-iron-900 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400
@@ -48,8 +78,9 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
               Description
             </label>
             <textarea
-              value={description || ""}
-              onChange={(e) => onDescriptionChange(e.target.value)}
+              ref={descriptionRef}
+              defaultValue={description || ''}
+              onBlur={handleDescriptionBlur}
               placeholder="Enter artwork description"
               rows={3}
               className="tw-form-textarea tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
@@ -63,4 +94,5 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   );
 };
 
-export default ArtworkDetails;
+// Use memo to prevent unnecessary re-renders
+export default React.memo(ArtworkDetails);

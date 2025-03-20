@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { TraitsData } from "./submission/types/TraitsData";
 import { Section, TraitField } from "./traits";
 import { getFormSections } from "./traits/schema";
@@ -6,52 +6,81 @@ import { useAuth } from "../../auth/Auth";
 
 interface MemesArtSubmissionTraitsProps {
   readonly traits: TraitsData;
-  readonly setTraits: (traits: TraitsData) => void;
+  readonly setTraits: (traits: Partial<TraitsData>) => void;
 }
 
-// Main Component
-function MemesArtSubmissionTraits({
+/**
+ * MemesArtSubmissionTraits - Component for managing all artwork trait fields
+ * 
+ * Simplified implementation with direct updates to the central state
+ */
+const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   traits,
   setTraits,
-}: MemesArtSubmissionTraitsProps) {
+}) => {
+  console.log(traits)
   const { connectedProfile } = useAuth();
-
-  const getCurrentMonth = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    return `${year}/${month}`;
-  };
-
+  
+  // Initialize default values on mount
   useEffect(() => {
-    const updatedTraits = { ...traits };
-    if (!traits.issuanceMonth) updatedTraits.issuanceMonth = getCurrentMonth();
-    if (!traits.typeSeason) updatedTraits.typeSeason = 11;
-    if (!traits.typeMeme) updatedTraits.typeMeme = 1;
-    if (!traits.typeCardNumber) updatedTraits.typeCardNumber = 400;
-    if (!traits.typeCard) updatedTraits.typeCard = "Card";
-    if (Object.keys(updatedTraits).length !== Object.keys(traits).length) {
-      setTraits(updatedTraits);
+    const getCurrentMonth = () => {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      return `${year}/${month}`;
+    };
+    
+    // Collect default values in a single object
+    const defaultValues: Partial<TraitsData> = {};
+    let hasChanges = false;
+    
+    // Set defaults for missing values
+    if (!traits.issuanceMonth) {
+      defaultValues.issuanceMonth = getCurrentMonth();
+      hasChanges = true;
     }
-  }, []);
+    if (!traits.typeSeason) {
+      defaultValues.typeSeason = 11;
+      hasChanges = true;
+    }
+    if (!traits.typeMeme) {
+      defaultValues.typeMeme = 1;
+      hasChanges = true;
+    }
+    if (!traits.typeCardNumber) {
+      defaultValues.typeCardNumber = 400;
+      hasChanges = true;
+    }
+    if (!traits.typeCard) {
+      defaultValues.typeCard = "Card";
+      hasChanges = true;
+    }
+    
+    // Apply default values in a single update
+    if (hasChanges) {
+      setTraits(defaultValues);
+    }
+  }, [setTraits, traits]);
 
+  // Get the user profile from connected account
   const userProfile = connectedProfile?.profile?.handle;
 
-  // Handler functions
-  const updateText = (field: keyof TraitsData, value: string) => {
-    setTraits({ ...traits, [field]: value });
-  };
+  // Direct field update handlers - much simpler now
+  const updateText = useCallback((field: keyof TraitsData, value: string) => {
+    setTraits({ [field]: value });
+  }, [setTraits]);
+  
+  const updateBoolean = useCallback((field: keyof TraitsData, value: boolean) => {
+    setTraits({ [field]: value });
+  }, [setTraits]);
+  
+  const updateNumber = useCallback((field: keyof TraitsData, value: number) => {
+    setTraits({ [field]: value });
+  }, [setTraits]);
 
-  const updateBoolean = (field: keyof TraitsData, value: boolean) => {
-    setTraits({ ...traits, [field]: value });
-  };
-
-  const updateNumber = (field: keyof TraitsData, value: number) => {
-    setTraits({ ...traits, [field]: value });
-  };
-
-  // Get form sections based on user profile - schema handles null/undefined profile
-  const formSections = getFormSections(userProfile);
+  // Use memoization to prevent unnecessary rebuilding of form sections
+  const formSections = React.useMemo(() => 
+    getFormSections(userProfile), [userProfile]);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2">
@@ -68,7 +97,7 @@ function MemesArtSubmissionTraits({
           >
             {section.fields.map((field, fieldIndex) => (
               <TraitField
-                key={`field-${section.title}-${fieldIndex}`}
+                key={`field-${field.field}-${fieldIndex}`}
                 definition={field}
                 traits={traits}
                 updateText={updateText}
@@ -81,6 +110,7 @@ function MemesArtSubmissionTraits({
       ))}
     </div>
   );
-}
+};
 
-export default MemesArtSubmissionTraits;
+// Use React.memo to prevent unnecessary rerenders
+export default React.memo(MemesArtSubmissionTraits);

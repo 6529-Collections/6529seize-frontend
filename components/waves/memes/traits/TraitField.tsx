@@ -93,13 +93,27 @@ const arePropsEqual = (prevProps: TraitFieldProps, nextProps: TraitFieldProps) =
   // Check if field value has changed
   const fieldMatches = traits[definition.field] === nextTraits[nextDefinition.field];
   
+  // For title/description fields, we want to re-render even if they seem the same
+  // This ensures that stale text doesn't persist in the UI
+  if (definition.field === 'title' || definition.field === 'description') {
+    return false; // Always re-render title/description fields
+  }
+  
   // Check if definition changed
   const definitionMatches = 
     definition.type === nextDefinition.type && 
     definition.field === nextDefinition.field &&
     definition.label === nextDefinition.label;
     
-  // Return true if nothing changed (prevent re-render)
+  // Special handling for dropdown fields - re-render more aggressively
+  if (definition.type === FieldType.DROPDOWN) {
+    // Check if any important title/description changed that might affect dropdown behavior
+    if (traits.title !== nextTraits.title || traits.description !== nextTraits.description) {
+      return false; // Re-render if title/description changed
+    }
+  }
+  
+  // Return true if nothing relevant changed (prevent re-render)
   return fieldMatches && definitionMatches;
 };
 

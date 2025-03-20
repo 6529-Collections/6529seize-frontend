@@ -1,18 +1,19 @@
 import React, { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import MemesArtSubmission from "./MemesArtSubmission";
 import { createPortal } from "react-dom";
 import { useClickAway, useKeyPressEvent } from "react-use";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import MemesArtSubmissionContainer from "./submission/MemesArtSubmissionContainer";
 
 interface MemesArtSubmissionModalProps {
   readonly isOpen: boolean;
+  readonly wave: ApiWave;
   readonly onClose: () => void;
-  readonly onSubmit: () => void;
 }
 
 export const MemesArtSubmissionModal: React.FC<
   MemesArtSubmissionModalProps
-> = ({ isOpen, onClose, onSubmit }) => {
+> = ({ isOpen, wave, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, () => onClose());
   useKeyPressEvent("Escape", () => onClose());
@@ -33,7 +34,7 @@ export const MemesArtSubmissionModal: React.FC<
             ref={modalRef}
           >
             <div className="tw-max-h-[95vh] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-              <MemesArtSubmission onCancel={onClose} onSubmit={onSubmit} />
+              <MemesArtSubmissionContainer onClose={onClose} wave={wave} />
             </div>
           </div>
         </motion.div>

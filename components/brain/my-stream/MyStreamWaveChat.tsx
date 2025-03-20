@@ -88,7 +88,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   if (!searchParamsDone) {
     return null;
   }
-
   return (
     <div
       ref={containerRef}

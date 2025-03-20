@@ -1,122 +1,179 @@
-import { useState, useEffect } from 'react';
-import { TraitsData } from '../types/TraitsData';
-import { SubmissionStep, stepIndexToEnum, stepEnumToIndex } from '../types/Steps';
-import { useAuth } from '../../../../auth/Auth';
+import { useReducer, useEffect, useCallback } from "react";
+import { TraitsData } from "../types/TraitsData";
+import { SubmissionStep } from "../types/Steps";
+import { useAuth } from "../../../../auth/Auth";
+
 /**
- * Custom hook to manage artwork submission form state
+ * Action types for the form reducer - drastically simplified
+ */
+type FormAction = 
+  | { type: 'SET_STEP'; payload: SubmissionStep }
+  | { type: 'SET_AGREEMENTS'; payload: boolean }
+  | { type: 'SET_ARTWORK_UPLOADED'; payload: boolean }
+  | { type: 'SET_ARTWORK_URL'; payload: string }
+  | { type: 'SET_TRAIT_FIELD'; payload: { field: keyof TraitsData; value: any } }
+  | { type: 'SET_MULTIPLE_TRAITS'; payload: Partial<TraitsData> };
+
+/**
+ * State interface for the form reducer
+ */
+interface FormState {
+  currentStep: SubmissionStep;
+  agreements: boolean;
+  artworkUploaded: boolean;
+  artworkUrl: string;
+  traits: TraitsData;
+}
+
+/**
+ * Ultra-simplified reducer function for the artwork submission form
+ */
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_STEP':
+      return { ...state, currentStep: action.payload };
+    
+    case 'SET_AGREEMENTS':
+      return { ...state, agreements: action.payload };
+    
+    case 'SET_ARTWORK_UPLOADED':
+      return { ...state, artworkUploaded: action.payload };
+    
+    case 'SET_ARTWORK_URL':
+      return { ...state, artworkUrl: action.payload };
+    
+    case 'SET_TRAIT_FIELD': {
+      // Simple direct update - no special handling
+      return {
+        ...state,
+        traits: {
+          ...state.traits,
+          [action.payload.field]: action.payload.value
+        }
+      };
+    }
+    
+    case 'SET_MULTIPLE_TRAITS': {
+      // Simple merge - no special handling
+      return {
+        ...state,
+        traits: {
+          ...state.traits,
+          ...action.payload
+        }
+      };
+    }
+    
+    default:
+      return state;
+  }
+}
+
+/**
+ * Extremely simplified hook to manage artwork submission form state
+ * Uses uncontrolled inputs for maximum typing performance
  */
 export function useArtworkSubmissionForm() {
   const { connectedProfile } = useAuth();
+  
+  // Import the pre-computed initial values
+  const { initialTraits } = require("../../traits/schema");
 
-  // Step tracking
-  const [currentStep, setCurrentStep] = useState<SubmissionStep>(SubmissionStep.AGREEMENT);
-  const [isSigningWallet, setIsSigningWallet] = useState(false);
-  const [walletSignature, setWalletSignature] = useState("");
+  // Create the initial state
+  const initialState: FormState = {
+    currentStep: SubmissionStep.AGREEMENT,
+    agreements: true,
+    artworkUploaded: false,
+    artworkUrl: "",
+    traits: initialTraits
+  };
 
-  // Agreement state
-  const [agreements, setAgreements] = useState(true);
+  // Use reducer for state management
+  const [state, dispatch] = useReducer(formReducer, initialState);
+  
+  // Extract values for convenience
+  const { currentStep, agreements, artworkUploaded, artworkUrl, traits } = state;
 
-  // Artwork state
-  const [artworkUploaded, setArtworkUploaded] = useState(false);
-  const [artworkUrl, setArtworkUrl] = useState("");
+  // Extremely simple and direct update function
+  const updateTraitField = useCallback(<K extends keyof TraitsData>(
+    field: K,
+    value: TraitsData[K]
+  ) => {
+    dispatch({ 
+      type: 'SET_TRAIT_FIELD', 
+      payload: { field, value }
+    });
+  }, []);
 
-  // Import the pre-computed initial values to avoid circular dependency
-  const { initialTraits } = require('../../traits/schema');
-  const [traits, setTraits] = useState<TraitsData>(initialTraits);
+  // Multiple traits update function
+  const setTraits = useCallback((traitsUpdate: Partial<TraitsData>) => {
+    dispatch({ type: 'SET_MULTIPLE_TRAITS', payload: traitsUpdate });
+  }, []);
 
+  // Handle file selection
+  const handleFileSelect = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      dispatch({ type: 'SET_ARTWORK_URL', payload: reader.result as string });
+      dispatch({ type: 'SET_ARTWORK_UPLOADED', payload: true });
+    };
+    reader.readAsDataURL(file);
+  }, []);
 
+  // Handle continuing from terms
+  const handleContinueFromTerms = useCallback(() => {
+    dispatch({ type: 'SET_STEP', payload: SubmissionStep.ARTWORK });
+  }, []);
 
   // Initialize traits with profile info
   useEffect(() => {
     const userProfile = connectedProfile?.profile?.handle ?? "";
-    setTraits((prev) => ({
-      ...prev,
-      artist: userProfile,
-      seizeArtistProfile: userProfile,
-    }));
-  }, []);
-
-  const handleFileSelect = (file: File) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setArtworkUrl(reader.result as string);
-      setArtworkUploaded(true);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Mock function to simulate wallet signing
-  // In a real implementation, this would connect to the user's wallet
-  const signWithWallet = async () => {
-    setIsSigningWallet(true);
-
-    try {
-      // Simulate wallet signing delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // In a real implementation, this would be the actual signature from the wallet
-      const mockSignature =
-        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
-      setWalletSignature(mockSignature);
-
-      // Move to the next step
-      setCurrentStep(SubmissionStep.ARTWORK);
-    } catch (error) {
-      console.error("Error signing with wallet:", error);
-      // Handle error (could show error message to user)
-    } finally {
-      setIsSigningWallet(false);
+    if (userProfile) {
+      dispatch({ 
+        type: 'SET_MULTIPLE_TRAITS', 
+        payload: {
+          artist: userProfile,
+          seizeArtistProfile: userProfile
+        }
+      });
     }
-  };
+  }, [connectedProfile]);
 
-  const handleContinueFromTerms = () => {
-    // Sign the terms with the wallet
-    signWithWallet();
-  };
-
-  const updateTraitField = <K extends keyof TraitsData>(
-    field: K, 
-    value: TraitsData[K]
-  ) => {
-    setTraits(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Function to prepare final submission data
-  const getSubmissionData = () => {
+  // Prepare submission data
+  const getSubmissionData = useCallback(() => {
     return {
       imageUrl: artworkUrl,
       traits: {
         ...traits,
-        // Ensure title and description are non-empty with fallbacks
+        // Ensure these fields have values
         title: traits.title || "Artwork Title",
         description: traits.description || "Artwork for The Memes collection."
-      },
-      signature: walletSignature,
+      }
     };
-  };
+  }, [artworkUrl, traits]);
 
+  // Return the API for the form
   return {
     // Current step
     currentStep,
-    
+
     // Agreement step
     agreements,
-    setAgreements,
-    isSigningWallet,
+    setAgreements: (value: boolean) => dispatch({ type: 'SET_AGREEMENTS', payload: value }),
     handleContinueFromTerms,
-    
+
     // Artwork step
     artworkUploaded,
     artworkUrl,
-    setArtworkUploaded,
+    setArtworkUploaded: (value: boolean) => dispatch({ type: 'SET_ARTWORK_UPLOADED', payload: value }),
     handleFileSelect,
-    
+
     // Traits
     traits,
     setTraits,
     updateTraitField,
-    
+
     // Submission
-    getSubmissionData,
+    getSubmissionData
   };
 }

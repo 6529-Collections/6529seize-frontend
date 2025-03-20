@@ -430,9 +430,9 @@ function validateSchema(schema: readonly SectionDefinition[]): void {
         });
       });
       
-      console.log('Schema validation passed');
+      // console.log('Schema validation passed');
     } catch (error) {
-      console.error('Schema validation failed:', error);
+      // console.error('Schema validation failed:', error);
       // In development, we could throw to make the error more visible
       if (process.env.NODE_ENV === 'development') {
         throw error;
@@ -473,12 +473,16 @@ export function getInitialTraitsValues(): TraitsData {
   // Extract initial values from each field definition
   traitDefinitions.forEach(section => {
     section.fields.forEach(field => {
-      initialValues[field.field] = field.initialValue !== undefined 
-        ? field.initialValue 
-        : (field.type === FieldType.BOOLEAN ? false : field.type === FieldType.NUMBER ? 0 : '');
+      // Don't override title and description which are explicitly set above
+      if (field.field !== 'title' && field.field !== 'description') {
+        initialValues[field.field] = field.initialValue !== undefined 
+          ? field.initialValue 
+          : (field.type === FieldType.BOOLEAN ? false : field.type === FieldType.NUMBER ? 0 : '');
+      }
     });
   });
 
+  // console.log("Initial traits values created with empty title:", initialValues.title);
   return initialValues as TraitsData;
 }
 
