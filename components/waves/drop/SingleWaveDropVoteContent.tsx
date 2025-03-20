@@ -78,7 +78,7 @@ export const SingleWaveDropVoteContent: React.FC<SingleWaveDropVoteContentProps>
       onClick={(e) => e.stopPropagation()}
     >
       {/* Top row: Mode toggle + Stats */}
-      <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
+      <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-justify-between tw-w-full">
         <div className="tw-flex-shrink-0">
           <TabToggle
             options={voteOptions}
@@ -141,7 +141,7 @@ export const SingleWaveDropVoteContent: React.FC<SingleWaveDropVoteContentProps>
       </div>
 
       {/* Bottom row: Quick vote buttons + Submit */}
-      <div className="tw-flex tw-justify-between tw-items-center">
+      <div className="tw-flex tw-justify-between tw-flex-wrap tw-gap-y-4 tw-gap-x-4 tw-items-center">
         <div className="tw-flex-1">
           {!isSliderMode && drop.rank !== 1 && (
             <SingleWaveDropVoteQuick drop={drop} setValue={setVoteValue} />

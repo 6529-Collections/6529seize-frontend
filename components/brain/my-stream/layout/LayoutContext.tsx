@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import useCapacitor from "../../../../hooks/useCapacitor";
 
 // Define the different spaces that need to be measured
 interface LayoutSpaces {
@@ -74,6 +75,8 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const { isCapacitor } = useCapacitor();
+  
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
     header: null,
@@ -251,10 +254,17 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
     
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px)`,
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px`,
       display: 'flex'
     };
-  }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace
+  ]);
   
   // Calculate a unified wave view style for all view types (chat, winners, leaderboard, outcome)
   // This replaces the individual style calculations that were all identical
@@ -265,8 +275,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     
     
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 20 : 0}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 20 : 0}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -274,7 +284,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.pinnedSpace,
     spaces.tabsSpace,
     spaces.spacerSpace,
-    spaces.mobileTabsSpace
+    spaces.mobileTabsSpace,
+    isCapacitor
   ]);
 
   // Create context value
