@@ -18,6 +18,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   traits,
   setTraits,
 }) => {
+  console.log(traits)
   const { connectedProfile } = useAuth();
   
   // Initialize default values on mount

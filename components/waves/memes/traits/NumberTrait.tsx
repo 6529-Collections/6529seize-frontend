@@ -1,75 +1,88 @@
-import React, { useRef, useState, useCallback, useEffect } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { NumberTraitProps } from './types';
 import { TraitWrapper } from './TraitWrapper';
 
-export const NumberTrait: React.FC<NumberTraitProps> = ({
+/**
+ * Improved number input component with better UX for handling zero values
+ * Without min/max constraints
+ */
+export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
   label,
   field,
   traits,
   updateNumber,
   readOnly = false,
-  min = 0,
-  max = 100,
+  min,
+  max,
   className,
 }) => {
-  // Use local state for the input field
-  const [value, setValue] = useState<number>((traits[field] as number) || 0);
+  // Use a ref for direct DOM access
+  const inputRef = useRef<HTMLInputElement>(null);
   
-  // Store important values in refs
-  const titleRef = useRef<string>(traits.title || '');
-  const descriptionRef = useRef<string>(traits.description || '');
-  
-  // Update from props when needed
-  useEffect(() => {
-    // Keep a copy of title/description for preservation
-    if (traits.title) titleRef.current = traits.title;
-    if (traits.description) descriptionRef.current = traits.description;
-    
-    // Update local value when the trait changes
-    const traitValue = (traits[field] as number) || 0;
-    if (value !== traitValue) {
-      setValue(traitValue);
+  // Update when props change
+  React.useEffect(() => {
+    const value = (traits[field] as number) ?? 0;
+    // Update input value only if it's different to avoid cursor jumping
+    if (inputRef.current && Number(inputRef.current.value) !== value) {
+      inputRef.current.value = String(value);
     }
-  }, [traits, value, field]);
+  }, [traits, field]);
   
-  // Memoized change handler
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = Number(e.target.value);
-    
-    // Update local state
-    setValue(newValue);
-    
-    // Create a snapshot of important values
-    const preservedTitle = titleRef.current;
-    const preservedDescription = descriptionRef.current;
-    
-    // Update the parent state
-    updateNumber(field, newValue);
-    
-    // Protect important fields with a small delay
-    setTimeout(() => {
-      // Only add protection for title/description if we're not editing them directly
-      if (field !== 'title' && field !== 'description') {
-        // Check if important fields changed and restore them if needed
-        if (traits.title !== preservedTitle && preservedTitle) {
-          // Need to cast to any because updateNumber doesn't accept strings
-          (updateNumber as any)('title', preservedTitle);
-        }
-        if (traits.description !== preservedDescription && preservedDescription) {
-          (updateNumber as any)('description', preservedDescription);
-        }
+  // Handle focus to clear the field when it contains just 0
+  const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    // When focusing, if the value is 0, clear the field for better UX
+    if (e.target.value === '0') {
+      e.target.value = '';
+    }
+  }, []);
+  
+  // Handle blur (when the user finishes typing)
+  const handleBlur = useCallback(() => {
+    if (inputRef.current) {
+      // Get the current value from the input
+      let newValue: number;
+      
+      // If the field is empty, default to 0
+      if (inputRef.current.value === '') {
+        newValue = 0;
+        inputRef.current.value = '0';
+      } else {
+        newValue = Number(inputRef.current.value);
       }
-    }, 0);
-  }, [field, updateNumber, traits.title, traits.description]);
+      
+      // Parse and validate the number
+      if (isNaN(newValue)) {
+        newValue = 0;
+        inputRef.current.value = '0';
+      }
+      
+      // Only update if the value has changed
+      if (newValue !== (traits[field] as number)) {
+        updateNumber(field, newValue);
+      }
+    }
+  }, [field, traits, updateNumber]);
+  
+  // Handle change for increment/decrement buttons
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    // For increment/decrement buttons, immediately update
+    if (e.target.value !== '') {
+      const newValue = Number(e.target.value);
+      if (!isNaN(newValue) && isFinite(newValue)) {
+        updateNumber(field, newValue);
+      }
+    }
+  }, [field, updateNumber]);
   
   return (
     <TraitWrapper label={label} readOnly={readOnly} className={className}>
       <input
+        ref={inputRef}
         type="number"
-        value={value}
+        defaultValue={(traits[field] as number) ?? 0}
         onChange={handleChange}
-        min={min}
-        max={max}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         readOnly={readOnly}
         className={`tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
           ${
@@ -80,4 +93,4 @@ export const NumberTrait: React.FC<NumberTraitProps> = ({
       />
     </TraitWrapper>
   );
-};
+});

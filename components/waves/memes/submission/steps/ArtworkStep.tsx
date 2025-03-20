@@ -32,6 +32,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   updateTraitField,
   setTraits
 }) => {
+  console.log(traits)
   // Create callback handlers for title and description
   const handleTitleChange = useCallback((title: string) => {
     updateTraitField('title', title);

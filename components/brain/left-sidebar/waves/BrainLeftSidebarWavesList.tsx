@@ -158,17 +158,17 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
               </div>
             )}
             
-            {/* All Other Waves */}
+            All Other Waves
             {regularWaves.length > 0 && (
               <div className="tw-border-t tw-border-iron-800/30">
-                {regularWaves.map(wave => (
+                {/* {regularWaves.map(wave => (
                   <BrainLeftSidebarWave
                     key={wave.id}
                     wave={wave}
                     newDropsCounts={newDropsCounts}
                     resetWaveCount={resetWaveCount}
                   />
-                ))}
+                ))} */}
               </div>
             )}
             
