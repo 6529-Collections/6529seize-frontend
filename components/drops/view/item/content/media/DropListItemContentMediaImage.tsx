@@ -73,11 +73,14 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
   const modalContent = (
     <div
       className="tailwind-scope tw-cursor-default tw-relative tw-z-1000"
-      onClick={handleCloseModal}>
+      onClick={handleCloseModal}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}>
       <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px] tw-pointer-events-none"></div>
       <TransformWrapper
         panning={{ disabled: true }}
-        limitToBounds={false}
+        limitToBounds={!isZoomed}
         smooth
         onZoom={(e) => setIsZoomed(e.state.scale > 1)}>
         {({ resetTransform }) => (
@@ -127,13 +130,14 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
                   </button>
                 )}
               </div>
-              <div className="tw-flex tw-flex-col tw-items-center">
+              <div
+                className="tw-flex tw-flex-col tw-items-center"
+                onClick={(e) => e.stopPropagation()}>
                 <TransformComponent>
                   <img
                     src={src}
                     alt="Full size drop media"
                     className="tw-max-w-full tw-max-h-[calc(95vh-60px)] tw-object-contain"
-                    onClick={(e) => e.stopPropagation()}
                   />
                 </TransformComponent>
                 <Link href={src} target="_blank" rel="noopener noreferrer">
