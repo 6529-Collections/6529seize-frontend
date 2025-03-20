@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import { TraitsData } from "./submission/types/TraitsData";
 import { Section, TraitField } from "./traits";
 import { getFormSections } from "./traits/schema";
@@ -16,113 +16,159 @@ function MemesArtSubmissionTraits({
 }: MemesArtSubmissionTraitsProps) {
   const { connectedProfile } = useAuth();
   
-  // Store important values that should be preserved
-  const [preservedTitle, setPreservedTitle] = React.useState<string>(traits.title || '');
-  const [preservedDescription, setPreservedDescription] = React.useState<string>(traits.description || '');
+  // Create a reference to track if we're currently updating traits
+  const isUpdatingRef = useRef<boolean>(false);
   
-  // Update preserved values when they change in the incoming props
-  React.useEffect(() => {
-    if (traits.title && traits.title !== preservedTitle) {
-      setPreservedTitle(traits.title);
-    }
-    if (traits.description && traits.description !== preservedDescription) {
-      setPreservedDescription(traits.description);
-    }
-  }, [traits.title, traits.description]);
-
-  // Protected setTraits wrapper that preserves title and description
-  const setTraitsPreserveFields = (newTraits: TraitsData) => {
-    // Always preserve title and description in the new traits object
-    newTraits.title = newTraits.title || preservedTitle || traits.title;
-    newTraits.description = newTraits.description || preservedDescription || traits.description;
-    
-    // Call the original setTraits with the protected data
-    setTraits(newTraits);
-  };
-
-  const getCurrentMonth = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    return `${year}/${month}`;
-  };
-
+  // Create a special ref to track field values by key
+  const fieldValuesRef = useRef<Record<string, any>>({});
+  
+  // When a field is edited, remember its value
+  const trackFieldChange = useCallback((field: keyof TraitsData, value: any) => {
+    fieldValuesRef.current[field] = value;
+  }, []);
+  
+  // When traits change, update our field cache for non-critical fields
   useEffect(() => {
+    if (!isUpdatingRef.current) {
+      // Clone the current traits to our ref for non-critical fields
+      Object.keys(traits).forEach(key => {
+        // Skip undefined/null values
+        if (traits[key as keyof TraitsData] != null) {
+          fieldValuesRef.current[key] = traits[key as keyof TraitsData];
+        }
+      });
+    }
+  }, [traits]);
+
+  // Protected setTraits wrapper that ensures all fields are preserved
+  const setTraitsPreserveFields = useCallback((newTraits: TraitsData) => {
+    // Flag that we're updating to prevent effect loops
+    isUpdatingRef.current = true;
+    
+    try {
+      // Start with a fresh copy of the current traits
+      const mergedTraits = { ...traits };
+      
+      // Apply the new trait values to our merged traits
+      Object.keys(newTraits).forEach(key => {
+        if (newTraits[key as keyof TraitsData] != null) {
+          mergedTraits[key as keyof TraitsData] = newTraits[key as keyof TraitsData];
+          
+          // Track this value in our field cache too
+          fieldValuesRef.current[key] = newTraits[key as keyof TraitsData];
+        }
+      });
+      
+      // Apply our cached values on top to make sure we don't lose anything
+      Object.keys(fieldValuesRef.current).forEach(key => {
+        if (fieldValuesRef.current[key] != null && 
+            // Only apply if different
+            mergedTraits[key as keyof TraitsData] !== fieldValuesRef.current[key]) {
+          mergedTraits[key as keyof TraitsData] = fieldValuesRef.current[key];
+        }
+      });
+      
+      // Call the original setTraits with our carefully merged data
+      console.log("setTraitsPreserveFields merging:", 
+        { oldTraits: traits, newTraits, mergedTraits, fieldCache: fieldValuesRef.current });
+      
+      setTraits(mergedTraits);
+    } finally {
+      // Clear the updating flag after a small delay 
+      setTimeout(() => {
+        isUpdatingRef.current = false;
+      }, 50);
+    }
+  }, [traits, setTraits]);
+
+  // Initialize default values on mount
+  useEffect(() => {
+    const getCurrentMonth = () => {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      return `${year}/${month}`;
+    };
+    
     const updatedTraits = { ...traits };
-    if (!traits.issuanceMonth) updatedTraits.issuanceMonth = getCurrentMonth();
-    if (!traits.typeSeason) updatedTraits.typeSeason = 11;
-    if (!traits.typeMeme) updatedTraits.typeMeme = 1;
-    if (!traits.typeCardNumber) updatedTraits.typeCardNumber = 400;
-    if (!traits.typeCard) updatedTraits.typeCard = "Card";
+    let hasChanges = false;
     
-    // Check if we actually have changes to make
-    const hasChanges = Object.keys(updatedTraits).some(key => 
-      traits[key as keyof TraitsData] !== updatedTraits[key as keyof TraitsData]
-    );
+    // Set defaults for missing values
+    if (!traits.issuanceMonth) {
+      updatedTraits.issuanceMonth = getCurrentMonth();
+      hasChanges = true;
+    }
+    if (!traits.typeSeason) {
+      updatedTraits.typeSeason = 11;
+      hasChanges = true;
+    }
+    if (!traits.typeMeme) {
+      updatedTraits.typeMeme = 1;
+      hasChanges = true;
+    }
+    if (!traits.typeCardNumber) {
+      updatedTraits.typeCardNumber = 400;
+      hasChanges = true;
+    }
+    if (!traits.typeCard) {
+      updatedTraits.typeCard = "Card";
+      hasChanges = true;
+    }
     
+    // Apply any changes
     if (hasChanges) {
-      console.log("Setting default values while preserving existing traits");
-      
-      // Always ensure title/description are preserved
-      updatedTraits.title = preservedTitle || traits.title;
-      updatedTraits.description = preservedDescription || traits.description;
-      
-      // Use our protected setter
+      console.log("Setting default values");
       setTraitsPreserveFields(updatedTraits);
     }
+    
+    // Populate our field cache with any existing values
+    Object.keys(traits).forEach(key => {
+      if (traits[key as keyof TraitsData] != null) {
+        fieldValuesRef.current[key] = traits[key as keyof TraitsData];
+      }
+    });
   }, []);
 
+  // Get the user profile from connected account
   const userProfile = connectedProfile?.profile?.handle;
 
-  // Handler functions
-  const updateText = (field: keyof TraitsData, value: string) => {
-    // Handle special cases directly
-    if (field === 'title') {
-      setPreservedTitle(value);
-    } else if (field === 'description') {
-      setPreservedDescription(value);
-    }
+  // Handler functions - use trackFieldChange to make sure we remember values
+  const updateText = useCallback((field: keyof TraitsData, value: string) => {
+    console.log(`updateText called for ${String(field)} with value:`, value);
     
-    // Create an updated traits object
-    const updatedTraits = { ...traits };
-    updatedTraits[field] = value;
+    // Remember this value in our field cache
+    trackFieldChange(field, value);
     
-    // Always ensure title/description are preserved
-    if (field !== 'title') {
-      updatedTraits.title = preservedTitle || traits.title;
-    }
-    if (field !== 'description') {
-      updatedTraits.description = preservedDescription || traits.description;
-    }
-    
-    // Use the protected setter
+    // Update traits with our value
+    const updatedTraits = { ...traits, [field]: value };
     setTraitsPreserveFields(updatedTraits);
-  };
+  }, [traits, trackFieldChange, setTraitsPreserveFields]);
 
-  const updateBoolean = (field: keyof TraitsData, value: boolean) => {
-    const updatedTraits = { ...traits };
-    updatedTraits[field] = value;
+  const updateBoolean = useCallback((field: keyof TraitsData, value: boolean) => {
+    console.log(`updateBoolean called for ${String(field)} with value:`, value);
     
-    // Always ensure title/description are preserved
-    updatedTraits.title = preservedTitle || traits.title;
-    updatedTraits.description = preservedDescription || traits.description;
+    // Remember this value
+    trackFieldChange(field, value);
     
+    // Update traits
+    const updatedTraits = { ...traits, [field]: value };
     setTraitsPreserveFields(updatedTraits);
-  };
+  }, [traits, trackFieldChange, setTraitsPreserveFields]);
 
-  const updateNumber = (field: keyof TraitsData, value: number) => {
-    const updatedTraits = { ...traits };
-    updatedTraits[field] = value;
+  const updateNumber = useCallback((field: keyof TraitsData, value: number) => {
+    console.log(`updateNumber called for ${String(field)} with value:`, value);
     
-    // Always ensure title/description are preserved
-    updatedTraits.title = preservedTitle || traits.title;
-    updatedTraits.description = preservedDescription || traits.description;
+    // Remember this value
+    trackFieldChange(field, value);
     
+    // Update traits
+    const updatedTraits = { ...traits, [field]: value };
     setTraitsPreserveFields(updatedTraits);
-  };
+  }, [traits, trackFieldChange, setTraitsPreserveFields]);
 
-  // Get form sections based on user profile - schema handles null/undefined profile
-  const formSections = getFormSections(userProfile);
+  // Use memoization to prevent unnecessary rebuilding of form sections
+  const formSections = React.useMemo(() => 
+    getFormSections(userProfile), [userProfile]);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-2">
@@ -139,7 +185,7 @@ function MemesArtSubmissionTraits({
           >
             {section.fields.map((field, fieldIndex) => (
               <TraitField
-                key={`field-${section.title}-${fieldIndex}`}
+                key={`field-${field.field}-${fieldIndex}`}
                 definition={field}
                 traits={traits}
                 updateText={updateText}
@@ -150,8 +196,15 @@ function MemesArtSubmissionTraits({
           </div>
         </Section>
       ))}
+      
+      {/* Debug info for development */}
+      <div className="tw-hidden">
+        <h5>Traits Cache</h5>
+        <pre>{JSON.stringify(fieldValuesRef.current, null, 2)}</pre>
+      </div>
     </div>
   );
 }
 
-export default MemesArtSubmissionTraits;
+// Use React.memo to prevent unnecessary rerenders
+export default React.memo(MemesArtSubmissionTraits);

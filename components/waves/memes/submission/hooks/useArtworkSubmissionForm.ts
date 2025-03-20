@@ -123,9 +123,17 @@ export function useArtworkSubmissionForm() {
       fieldValuesRef.current.description = value;
     }
     
+    // Store value in ref for ALL fields to protect against state loss
+    fieldValuesRef.current[field] = value;
+    
     // Use our safe setter that preserves important fields
     safeSetTraits(prev => {
-      const updated = { ...prev, [field]: value };
+      // Create a complete update that includes all our cached values
+      const updated = { 
+        ...prev,
+        ...fieldValuesRef.current, // Apply all cached field values first
+        [field]: value // Ensure the specific field being updated gets priority
+      };
       
       // Log the update for debugging
       console.log(`updateTraitField: updating ${String(field)}, traits will be:`, updated);

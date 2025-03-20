@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import { NumberTraitProps } from './types';
 import { TraitWrapper } from './TraitWrapper';
 
@@ -12,12 +12,65 @@ export const NumberTrait: React.FC<NumberTraitProps> = ({
   max = 100,
   className,
 }) => {
+  // Use local state for the input field
+  const [value, setValue] = useState<number>((traits[field] as number) || 0);
+  
+  // Store important values in refs
+  const titleRef = useRef<string>(traits.title || '');
+  const descriptionRef = useRef<string>(traits.description || '');
+  
+  // Update from props when needed
+  useEffect(() => {
+    // Keep a copy of title/description for preservation
+    if (traits.title) titleRef.current = traits.title;
+    if (traits.description) descriptionRef.current = traits.description;
+    
+    // Update local value when the trait changes
+    const traitValue = (traits[field] as number) || 0;
+    if (value !== traitValue) {
+      setValue(traitValue);
+    }
+  }, [traits, value, field]);
+  
+  // Memoized change handler
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = Number(e.target.value);
+    console.log(`NumberTrait ${field} changing to:`, newValue);
+    
+    // Update local state
+    setValue(newValue);
+    
+    // Create a snapshot of important values
+    const preservedTitle = titleRef.current;
+    const preservedDescription = descriptionRef.current;
+    
+    // Update the parent state
+    updateNumber(field, newValue);
+    
+    // Protect important fields with a small delay
+    setTimeout(() => {
+      // Only add protection for title/description if we're not editing them directly
+      if (field !== 'title' && field !== 'description') {
+        // Check if important fields changed and restore them if needed
+        if (traits.title !== preservedTitle && preservedTitle) {
+          console.log(`Restoring title after number change to: ${preservedTitle}`);
+          // Need to cast to any because updateNumber doesn't accept strings
+          (updateNumber as any)('title', preservedTitle);
+        }
+        if (traits.description !== preservedDescription && preservedDescription) {
+          console.log(`Restoring description after number change to: ${preservedDescription}`);
+          (updateNumber as any)('description', preservedDescription);
+        }
+      }
+    }, 0);
+  }, [field, updateNumber, traits.title, traits.description]);
+  
   return (
     <TraitWrapper label={label} readOnly={readOnly} className={className}>
       <input
         type="number"
-        value={traits[field] as number || 0}
-        onChange={(e) => updateNumber(field, Number(e.target.value))}
+        value={value}
+        onChange={handleChange}
         min={min}
         max={max}
         readOnly={readOnly}
