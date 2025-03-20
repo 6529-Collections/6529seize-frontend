@@ -131,6 +131,7 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
                 )}
               </div>
               <div
+                role="button"
                 className="tw-flex tw-flex-col tw-items-center"
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={0}
