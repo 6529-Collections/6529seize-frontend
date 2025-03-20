@@ -5,13 +5,13 @@ import Stepper from "./ui/Stepper";
 import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
+import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 
 interface MemesArtSubmissionContainerProps {
   readonly onClose: () => void;
   readonly wave: ApiWave;
 }
-
 
 /**
  * MemesArtSubmissionContainer - Main container component for the artwork submission flow
@@ -21,19 +21,37 @@ interface MemesArtSubmissionContainerProps {
  * 2. Extracting the modal layout to a separate component
  * 3. Using an enum with a component map for cleaner step routing
  * 4. Using direct component composition instead of component injection
+ * 5. Using a separate mutation hook for API submission
  */
 const MemesArtSubmissionContainer: React.FC<
   MemesArtSubmissionContainerProps
 > = ({ onClose, wave }) => {
   // Use the form hook to manage all state
   const form = useArtworkSubmissionForm();
+  
+  // Use the mutation hook for submission
+  const { submitArtwork, isSubmitting } = useArtworkSubmissionMutation();
 
   // Handle final submission
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Get submission data including all traits and image
-    const data = form.getSubmissionData();
-    console.log(data)
-    // TODO: Handle the actual submission with data
+    const formData = form.getSubmissionData();
+    
+    // Submit the artwork with the wave ID
+    const result = await submitArtwork(
+      {
+        ...formData,
+        waveId: wave.id
+      },
+      {
+        onSuccess: () => {
+          // Close the modal on success
+          onClose();
+        }
+      }
+    );
+    
+    return result;
   };
 
   // Map of steps to their corresponding components
@@ -55,6 +73,7 @@ const MemesArtSubmissionContainer: React.FC<
         onSubmit={handleSubmit}
         updateTraitField={form.updateTraitField}
         setTraits={form.setTraits}
+        isSubmitting={isSubmitting}
       />
     ),
   };

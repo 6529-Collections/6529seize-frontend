@@ -14,6 +14,7 @@ interface ArtworkStepProps {
   readonly onSubmit: () => void;
   readonly updateTraitField: <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => void;
   readonly setTraits: (traits: Partial<TraitsData>) => void;
+  readonly isSubmitting?: boolean;
 }
 
 /**
@@ -31,7 +32,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   handleFileSelect,
   onSubmit,
   updateTraitField,
-  setTraits
+  setTraits,
+  isSubmitting = false
 }) => {
   // Create callback handlers for title and description
   const handleTitleChange = useCallback((title: string) => {
@@ -41,6 +43,9 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   const handleDescriptionChange = useCallback((description: string) => {
     updateTraitField('description', description);
   }, [updateTraitField]);
+  
+  // Determine button disabled state
+  const isDisabled = !artworkUploaded || !traits.title || isSubmitting;
   
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6 tw-relative tw-pb-20">
@@ -74,11 +79,11 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
         <div className="tw-container tw-mx-auto tw-flex tw-justify-end">
           <PrimaryButton
             onClicked={onSubmit}
-            loading={false}
-            disabled={!!artworkUploaded}
+            loading={isSubmitting}
+            disabled={!isDisabled}
             padding="tw-px-8 tw-py-3"
           >
-            Submit to Memes
+            {isSubmitting ? 'Submitting...' : 'Submit to Memes'}
           </PrimaryButton>
         </div>
       </div>
