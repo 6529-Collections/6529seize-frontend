@@ -15,6 +15,30 @@ function MemesArtSubmissionTraits({
   setTraits,
 }: MemesArtSubmissionTraitsProps) {
   const { connectedProfile } = useAuth();
+  
+  // Store important values that should be preserved
+  const [preservedTitle, setPreservedTitle] = React.useState<string>(traits.title || '');
+  const [preservedDescription, setPreservedDescription] = React.useState<string>(traits.description || '');
+  
+  // Update preserved values when they change in the incoming props
+  React.useEffect(() => {
+    if (traits.title && traits.title !== preservedTitle) {
+      setPreservedTitle(traits.title);
+    }
+    if (traits.description && traits.description !== preservedDescription) {
+      setPreservedDescription(traits.description);
+    }
+  }, [traits.title, traits.description]);
+
+  // Protected setTraits wrapper that preserves title and description
+  const setTraitsPreserveFields = (newTraits: TraitsData) => {
+    // Always preserve title and description in the new traits object
+    newTraits.title = newTraits.title || preservedTitle || traits.title;
+    newTraits.description = newTraits.description || preservedDescription || traits.description;
+    
+    // Call the original setTraits with the protected data
+    setTraits(newTraits);
+  };
 
   const getCurrentMonth = () => {
     const date = new Date();
@@ -30,8 +54,21 @@ function MemesArtSubmissionTraits({
     if (!traits.typeMeme) updatedTraits.typeMeme = 1;
     if (!traits.typeCardNumber) updatedTraits.typeCardNumber = 400;
     if (!traits.typeCard) updatedTraits.typeCard = "Card";
-    if (Object.keys(updatedTraits).length !== Object.keys(traits).length) {
-      setTraits(updatedTraits);
+    
+    // Check if we actually have changes to make
+    const hasChanges = Object.keys(updatedTraits).some(key => 
+      traits[key as keyof TraitsData] !== updatedTraits[key as keyof TraitsData]
+    );
+    
+    if (hasChanges) {
+      console.log("Setting default values while preserving existing traits");
+      
+      // Always ensure title/description are preserved
+      updatedTraits.title = preservedTitle || traits.title;
+      updatedTraits.description = preservedDescription || traits.description;
+      
+      // Use our protected setter
+      setTraitsPreserveFields(updatedTraits);
     }
   }, []);
 
@@ -39,15 +76,49 @@ function MemesArtSubmissionTraits({
 
   // Handler functions
   const updateText = (field: keyof TraitsData, value: string) => {
-    setTraits({ ...traits, [field]: value });
+    // Handle special cases directly
+    if (field === 'title') {
+      setPreservedTitle(value);
+    } else if (field === 'description') {
+      setPreservedDescription(value);
+    }
+    
+    // Create an updated traits object
+    const updatedTraits = { ...traits };
+    updatedTraits[field] = value;
+    
+    // Always ensure title/description are preserved
+    if (field !== 'title') {
+      updatedTraits.title = preservedTitle || traits.title;
+    }
+    if (field !== 'description') {
+      updatedTraits.description = preservedDescription || traits.description;
+    }
+    
+    // Use the protected setter
+    setTraitsPreserveFields(updatedTraits);
   };
 
   const updateBoolean = (field: keyof TraitsData, value: boolean) => {
-    setTraits({ ...traits, [field]: value });
+    const updatedTraits = { ...traits };
+    updatedTraits[field] = value;
+    
+    // Always ensure title/description are preserved
+    updatedTraits.title = preservedTitle || traits.title;
+    updatedTraits.description = preservedDescription || traits.description;
+    
+    setTraitsPreserveFields(updatedTraits);
   };
 
   const updateNumber = (field: keyof TraitsData, value: number) => {
-    setTraits({ ...traits, [field]: value });
+    const updatedTraits = { ...traits };
+    updatedTraits[field] = value;
+    
+    // Always ensure title/description are preserved
+    updatedTraits.title = preservedTitle || traits.title;
+    updatedTraits.description = preservedDescription || traits.description;
+    
+    setTraitsPreserveFields(updatedTraits);
   };
 
   // Get form sections based on user profile - schema handles null/undefined profile

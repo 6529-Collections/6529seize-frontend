@@ -473,12 +473,16 @@ export function getInitialTraitsValues(): TraitsData {
   // Extract initial values from each field definition
   traitDefinitions.forEach(section => {
     section.fields.forEach(field => {
-      initialValues[field.field] = field.initialValue !== undefined 
-        ? field.initialValue 
-        : (field.type === FieldType.BOOLEAN ? false : field.type === FieldType.NUMBER ? 0 : '');
+      // Don't override title and description which are explicitly set above
+      if (field.field !== 'title' && field.field !== 'description') {
+        initialValues[field.field] = field.initialValue !== undefined 
+          ? field.initialValue 
+          : (field.type === FieldType.BOOLEAN ? false : field.type === FieldType.NUMBER ? 0 : '');
+      }
     });
   });
 
+  console.log("Initial traits values created with empty title:", initialValues.title);
   return initialValues as TraitsData;
 }
 
