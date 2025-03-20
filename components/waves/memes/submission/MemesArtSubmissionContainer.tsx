@@ -12,6 +12,7 @@ interface MemesArtSubmissionContainerProps {
   readonly wave: ApiWave;
 }
 
+
 /**
  * MemesArtSubmissionContainer - Main container component for the artwork submission flow
  *
@@ -31,6 +32,7 @@ const MemesArtSubmissionContainer: React.FC<
   const handleSubmit = () => {
     // Get submission data including all traits and image
     const data = form.getSubmissionData();
+    console.log(data)
     // TODO: Handle the actual submission with data
   };
 
