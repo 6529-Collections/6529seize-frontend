@@ -40,7 +40,7 @@ const BrainContent: React.FC<BrainContentProps> = ({
       {showPinnedWaves && (
         <div 
           ref={setPinnedRef}
-          className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0"
+          className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-hidden"
         >
           <BrainContentPinnedWaves />
         </div>
