@@ -128,8 +128,15 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                 )}
               </div>
               <div
+                role="button"
                 className="tw-flex tw-flex-col tw-items-center"
-                onClick={(e) => e.stopPropagation()}>
+                onClick={(e) => e.stopPropagation()}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.stopPropagation();
+                  }
+                }}>
                 <TransformComponent>
                   <img
                     src={src}
