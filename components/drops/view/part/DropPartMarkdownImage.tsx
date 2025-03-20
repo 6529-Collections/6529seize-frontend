@@ -62,7 +62,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
 
   const modalContent = (
     <div className="tailwind-scope tw-cursor-default tw-relative tw-z-1000">
-      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px]"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px] tw-pointer-events-none"></div>
       <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
         <div className="tw-relative tw-max-w-[95vw] tw-max-h-[95vh] tw-m-4">
           <button
@@ -100,8 +100,6 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                   alt={alt}
                   className="tw-max-w-full tw-max-h-[calc(95vh-60px)] tw-object-contain"
                   onClick={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                  onTouchMove={(e) => e.stopPropagation()}
                 />
               </TransformComponent>
             </TransformWrapper>
