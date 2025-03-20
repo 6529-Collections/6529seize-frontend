@@ -138,8 +138,8 @@ const transformToApiRequest = (
   // Create metadata array from trait data
   const metadata: ApiDropMetadata[] = Object.entries(traits).map(([key, value]) => ({
     data_key: key,
-    data_value: value?.toString() || ''
-  }));
+    data_value: value?.toString()
+  })).filter((metadata) => metadata.data_value !== undefined && metadata.data_value.length > 0);
 
   // Create the request object
   const request: ApiCreateDropRequest = {
