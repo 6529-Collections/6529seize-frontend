@@ -1,26 +1,11 @@
-import React, { useRef, useCallback, useState, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import { TextTraitProps } from './types';
 import { TraitWrapper } from './TraitWrapper';
 
-// Create a debounced input handler
-function useDebouncedCallback<T extends (...args: any[]) => any>(
-  callback: T, 
-  delay: number
-): (...args: Parameters<T>) => void {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  return useCallback((...args: Parameters<T>) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    timeoutRef.current = setTimeout(() => {
-      callback(...args);
-      timeoutRef.current = null;
-    }, delay);
-  }, [callback, delay]);
-}
-
+/**
+ * Extremely simplified TextTrait component using uncontrolled inputs
+ * This approach eliminates React render cycles during typing for maximum performance
+ */
 export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   label,
   field,
@@ -30,70 +15,25 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   placeholder,
   className,
 }) => {
-  // Use a ref to track the latest value independently of render cycles
-  const valueRef = useRef<string>((traits[field] as string) || '');
+  // Use a ref to track the input element
+  const inputRef = useRef<HTMLInputElement>(null);
   
-  // Controlled component state - initializes from props but then manages locally
-  const [fieldValue, setFieldValue] = useState<string>(() => (traits[field] as string) || '');
-  
-  // Track if the field has been edited by the user
-  const hasBeenEditedRef = useRef<boolean>(false);
-  
-  // Memoized update function that won't change on rerenders
-  const updateParentState = useCallback(() => {
-    if (hasBeenEditedRef.current && valueRef.current !== (traits[field] as string)) {
-      // Completely removed console logging
-      // if (process.env.NODE_ENV === 'development') {
-      //   console.log(`TextTrait ${field} updating parent`);
-      // }
-      updateText(field, valueRef.current);
+  // Handle blur (when user finishes typing)
+  const handleBlur = useCallback(() => {
+    if (inputRef.current && inputRef.current.value !== traits[field]) {
+      updateText(field, inputRef.current.value);
     }
-  }, [field, updateText, traits]);
+  }, [field, traits, updateText]);
   
-  // Create a debounced version of updateParentState
-  const debouncedUpdateParent = useDebouncedCallback(updateParentState, 200);
-  
-  // Only update from props if we haven't been edited AND the prop value changed
+  // Synchronize the input value with props when traits change from outside
   React.useEffect(() => {
-    const propValue = (traits[field] as string) || '';
-    
-    // Skip if we're currently editing this field
-    if ((field === 'title' || field === 'description') && hasBeenEditedRef.current) {
-      return;
-    }
-    
-    // Only update if different
-    if (propValue !== valueRef.current && propValue !== '') {
-      valueRef.current = propValue;
-      setFieldValue(propValue);
+    const value = (traits[field] as string) || '';
+    if (inputRef.current && inputRef.current.value !== value) {
+      inputRef.current.value = value;
     }
   }, [traits, field]);
   
-  // Handle input changes with optimized performance
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    
-    // Update both our ref and state
-    valueRef.current = newValue;
-    setFieldValue(newValue);
-    hasBeenEditedRef.current = true;
-    
-    // For non-critical fields, update parent immediately
-    // For critical fields like title/description, use debouncing
-    if (field === 'title' || field === 'description') {
-      debouncedUpdateParent();
-    } else {
-      updateParentState();
-    }
-  }, [field, updateParentState, debouncedUpdateParent]);
-  
-  // Always update parent state on blur 
-  const handleBlur = useCallback(() => {
-    // Cancel any pending debounced updates
-    updateParentState();
-  }, [updateParentState]);
-  
-  // Memoize the className to prevent unnecessary renders
+  // Prepare input className
   const inputClassName = useMemo(() => `tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
     ${
       readOnly
@@ -104,9 +44,9 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   return (
     <TraitWrapper label={label} readOnly={readOnly} className={className}>
       <input
+        ref={inputRef}
         type="text"
-        value={fieldValue}
-        onChange={handleChange}
+        defaultValue={(traits[field] as string) || ''}
         onBlur={handleBlur}
         placeholder={placeholder || `Enter ${label.toLowerCase()}`}
         readOnly={readOnly}
@@ -115,8 +55,6 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
     </TraitWrapper>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison function for memoization
-  // Only re-render if these specific properties change
   return prevProps.field === nextProps.field &&
          prevProps.label === nextProps.label &&
          prevProps.readOnly === nextProps.readOnly &&

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback, useState } from "react";
+import React, { useRef, useCallback } from "react";
 import FormSection from "../ui/FormSection";
 
 interface ArtworkDetailsProps {
@@ -11,8 +11,7 @@ interface ArtworkDetailsProps {
 /**
  * ArtworkDetails - Component for the artwork title and description fields
  * 
- * This component uses the FormSection component for consistent styling
- * and handles the input fields for title and description with robust state management.
+ * Extreme simplification using uncontrolled inputs with refs for maximum performance
  */
 const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   title,
@@ -20,73 +19,35 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   onTitleChange,
   onDescriptionChange,
 }) => {
-  // Refs to track if fields have been edited by the user
-  const titleEditedRef = useRef<boolean>(false);
-  const descriptionEditedRef = useRef<boolean>(false);
+  // Refs to track input elements directly
+  const titleRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
   
-  // Refs to store the latest values
-  const titleRef = useRef<string>(title || '');
-  const descriptionRef = useRef<string>(description || '');
+  // Sync refs with props when they change
+  React.useEffect(() => {
+    if (titleRef.current && title && titleRef.current.value !== title) {
+      titleRef.current.value = title;
+    }
+  }, [title]);
   
-  // Local state for controlled components
-  const [titleValue, setTitleValue] = useState<string>(title || '');
-  const [descriptionValue, setDescriptionValue] = useState<string>(description || '');
+  React.useEffect(() => {
+    if (descriptionRef.current && description && descriptionRef.current.value !== description) {
+      descriptionRef.current.value = description;
+    }
+  }, [description]);
   
-  // Memoized update handlers
-  const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    
-    // Update both state and ref
-    setTitleValue(newValue);
-    titleRef.current = newValue;
-    titleEditedRef.current = true;
-  }, []);
-  
-  const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value;
-    
-    // Update both state and ref
-    setDescriptionValue(newValue);
-    descriptionRef.current = newValue;
-    descriptionEditedRef.current = true;
-  }, []);
-  
-  // Memoized blur handlers
+  // Handle blur events - only update parent state when user finishes typing
   const handleTitleBlur = useCallback(() => {
-    // Removed console.log
-    onTitleChange(titleRef.current);
-  }, [onTitleChange]);
+    if (titleRef.current && titleRef.current.value !== title) {
+      onTitleChange(titleRef.current.value);
+    }
+  }, [onTitleChange, title]);
   
   const handleDescriptionBlur = useCallback(() => {
-    // Removed console.log
-    onDescriptionChange(descriptionRef.current);
-  }, [onDescriptionChange]);
-  
-  // Update local state from props, but only if the user hasn't edited the field
-  useEffect(() => {
-    if (!titleEditedRef.current && title !== undefined && title !== null && title !== titleValue) {
-      // Removed console.log
-      setTitleValue(title);
-      titleRef.current = title;
+    if (descriptionRef.current && descriptionRef.current.value !== description) {
+      onDescriptionChange(descriptionRef.current.value);
     }
-  }, [title, titleValue]);
-  
-  useEffect(() => {
-    if (!descriptionEditedRef.current && description !== undefined && description !== null && description !== descriptionValue) {
-      // Removed console.log
-      setDescriptionValue(description);
-      descriptionRef.current = description;
-    }
-  }, [description, descriptionValue]);
-  
-  // Send our values to parent on mount and unmount to ensure they're preserved
-  useEffect(() => {
-    return () => {
-      // On unmount, make sure parent has our latest values
-      if (titleRef.current) onTitleChange(titleRef.current);
-      if (descriptionRef.current) onDescriptionChange(descriptionRef.current);
-    };
-  }, [onTitleChange, onDescriptionChange]);
+  }, [onDescriptionChange, description]);
 
   return (
     <FormSection 
@@ -100,9 +61,9 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
               Artwork Title
             </label>
             <input
+              ref={titleRef}
               type="text"
-              value={titleValue}
-              onChange={handleTitleChange}
+              defaultValue={title || ''}
               onBlur={handleTitleBlur}
               placeholder="Enter artwork title"
               className="tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
@@ -117,8 +78,8 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
               Description
             </label>
             <textarea
-              value={descriptionValue}
-              onChange={handleDescriptionChange}
+              ref={descriptionRef}
+              defaultValue={description || ''}
               onBlur={handleDescriptionBlur}
               placeholder="Enter artwork description"
               rows={3}
@@ -133,4 +94,5 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   );
 };
 
+// Use memo to prevent unnecessary re-renders
 export default React.memo(ArtworkDetails);

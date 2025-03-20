@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
 import { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
@@ -12,9 +12,8 @@ interface ArtworkStepProps {
   readonly setArtworkUploaded: (uploaded: boolean) => void;
   readonly handleFileSelect: (file: File) => void;
   readonly onSubmit: () => void;
-  readonly onTitleChange: (title: string) => void;
-  readonly onDescriptionChange: (description: string) => void;
-  readonly setTraits: (traits: TraitsData) => void;
+  readonly updateTraitField: <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => void;
+  readonly setTraits: (traits: Partial<TraitsData>) => void;
 }
 
 /**
@@ -30,10 +29,18 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   setArtworkUploaded,
   handleFileSelect,
   onSubmit,
-  onTitleChange,
-  onDescriptionChange,
+  updateTraitField,
   setTraits
 }) => {
+  // Create callback handlers for title and description
+  const handleTitleChange = useCallback((title: string) => {
+    updateTraitField('title', title);
+  }, [updateTraitField]);
+  
+  const handleDescriptionChange = useCallback((description: string) => {
+    updateTraitField('description', description);
+  }, [updateTraitField]);
+  
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
       {/* File Selection Component */}
@@ -48,8 +55,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       <ArtworkDetails
         title={traits.title}
         description={traits.description}
-        onTitleChange={onTitleChange}
-        onDescriptionChange={onDescriptionChange}
+        onTitleChange={handleTitleChange}
+        onDescriptionChange={handleDescriptionChange}
       />
 
       {/* Traits Component */}
@@ -73,4 +80,5 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   );
 };
 
-export default ArtworkStep;
+// Use React.memo to prevent unnecessary rerenders
+export default React.memo(ArtworkStep);

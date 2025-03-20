@@ -1,5 +1,4 @@
 import React from "react";
-import { TraitsData } from "./types/TraitsData";
 import { SubmissionStep, stepEnumToIndex } from "./types/Steps";
 import ModalLayout from "./layout/ModalLayout";
 import Stepper from "./ui/Stepper";
@@ -17,7 +16,7 @@ interface MemesArtSubmissionContainerProps {
  * MemesArtSubmissionContainer - Main container component for the artwork submission flow
  *
  * This component has been simplified by:
- * 1. Moving form state management to a custom hook
+ * 1. Moving form state management to a custom hook with reducer pattern
  * 2. Extracting the modal layout to a separate component
  * 3. Using an enum with a component map for cleaner step routing
  * 4. Using direct component composition instead of component injection
@@ -30,7 +29,7 @@ const MemesArtSubmissionContainer: React.FC<
 
   // Handle final submission
   const handleSubmit = () => {
-    // Removed console.log for performance
+    // Get submission data including all traits and image
     const data = form.getSubmissionData();
     // TODO: Handle the actual submission with data
   };
@@ -52,10 +51,7 @@ const MemesArtSubmissionContainer: React.FC<
         setArtworkUploaded={form.setArtworkUploaded}
         handleFileSelect={form.handleFileSelect}
         onSubmit={handleSubmit}
-        onTitleChange={(title) => form.updateTraitField("title", title)}
-        onDescriptionChange={(description) =>
-          form.updateTraitField("description", description)
-        }
+        updateTraitField={form.updateTraitField}
         setTraits={form.setTraits}
       />
     ),

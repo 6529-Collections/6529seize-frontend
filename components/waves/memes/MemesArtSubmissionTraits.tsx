@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import { TraitsData } from "./submission/types/TraitsData";
 import { Section, TraitField } from "./traits";
 import { getFormSections } from "./traits/schema";
@@ -6,81 +6,20 @@ import { useAuth } from "../../auth/Auth";
 
 interface MemesArtSubmissionTraitsProps {
   readonly traits: TraitsData;
-  readonly setTraits: (traits: TraitsData) => void;
+  readonly setTraits: (traits: Partial<TraitsData>) => void;
 }
 
-// Main Component
-function MemesArtSubmissionTraits({
+/**
+ * MemesArtSubmissionTraits - Component for managing all artwork trait fields
+ * 
+ * Simplified implementation with direct updates to the central state
+ */
+const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   traits,
   setTraits,
-}: MemesArtSubmissionTraitsProps) {
+}) => {
   const { connectedProfile } = useAuth();
   
-  // Create a reference to track if we're currently updating traits
-  const isUpdatingRef = useRef<boolean>(false);
-  
-  // Create a special ref to track field values by key
-  const fieldValuesRef = useRef<Record<string, any>>({});
-  
-  // When a field is edited, remember its value
-  const trackFieldChange = useCallback((field: keyof TraitsData, value: any) => {
-    fieldValuesRef.current[field] = value;
-  }, []);
-  
-  // When traits change, update our field cache for non-critical fields
-  useEffect(() => {
-    if (!isUpdatingRef.current) {
-      // Clone the current traits to our ref for non-critical fields
-      Object.keys(traits).forEach(key => {
-        // Skip undefined/null values
-        if (traits[key as keyof TraitsData] != null) {
-          fieldValuesRef.current[key] = traits[key as keyof TraitsData];
-        }
-      });
-    }
-  }, [traits]);
-
-  // Protected setTraits wrapper that ensures all fields are preserved
-  const setTraitsPreserveFields = useCallback((newTraits: TraitsData) => {
-    // Flag that we're updating to prevent effect loops
-    isUpdatingRef.current = true;
-    
-    try {
-      // Start with a fresh copy of the current traits
-      const mergedTraits = { ...traits };
-      
-      // Apply the new trait values to our merged traits
-      Object.keys(newTraits).forEach(key => {
-        if (newTraits[key as keyof TraitsData] != null) {
-          mergedTraits[key as keyof TraitsData] = newTraits[key as keyof TraitsData];
-          
-          // Track this value in our field cache too
-          fieldValuesRef.current[key] = newTraits[key as keyof TraitsData];
-        }
-      });
-      
-      // Apply our cached values on top to make sure we don't lose anything
-      Object.keys(fieldValuesRef.current).forEach(key => {
-        if (fieldValuesRef.current[key] != null && 
-            // Only apply if different
-            mergedTraits[key as keyof TraitsData] !== fieldValuesRef.current[key]) {
-          mergedTraits[key as keyof TraitsData] = fieldValuesRef.current[key];
-        }
-      });
-      
-      // Removed console.log for performance
-      // console.log("setTraitsPreserveFields merging:", 
-      //  { oldTraits: traits, newTraits, mergedTraits, fieldCache: fieldValuesRef.current });
-      
-      setTraits(mergedTraits);
-    } finally {
-      // Clear the updating flag after a small delay 
-      setTimeout(() => {
-        isUpdatingRef.current = false;
-      }, 50);
-    }
-  }, [traits, setTraits]);
-
   // Initialize default values on mount
   useEffect(() => {
     const getCurrentMonth = () => {
@@ -90,87 +29,53 @@ function MemesArtSubmissionTraits({
       return `${year}/${month}`;
     };
     
-    const updatedTraits = { ...traits };
+    // Collect default values in a single object
+    const defaultValues: Partial<TraitsData> = {};
     let hasChanges = false;
     
     // Set defaults for missing values
     if (!traits.issuanceMonth) {
-      updatedTraits.issuanceMonth = getCurrentMonth();
+      defaultValues.issuanceMonth = getCurrentMonth();
       hasChanges = true;
     }
     if (!traits.typeSeason) {
-      updatedTraits.typeSeason = 11;
+      defaultValues.typeSeason = 11;
       hasChanges = true;
     }
     if (!traits.typeMeme) {
-      updatedTraits.typeMeme = 1;
+      defaultValues.typeMeme = 1;
       hasChanges = true;
     }
     if (!traits.typeCardNumber) {
-      updatedTraits.typeCardNumber = 400;
+      defaultValues.typeCardNumber = 400;
       hasChanges = true;
     }
     if (!traits.typeCard) {
-      updatedTraits.typeCard = "Card";
+      defaultValues.typeCard = "Card";
       hasChanges = true;
     }
     
-    // Apply any changes
+    // Apply default values in a single update
     if (hasChanges) {
-      // Removed console.log for performance
-      // console.log("Setting default values");
-      setTraitsPreserveFields(updatedTraits);
+      setTraits(defaultValues);
     }
-    
-    // Populate our field cache with any existing values
-    Object.keys(traits).forEach(key => {
-      if (traits[key as keyof TraitsData] != null) {
-        fieldValuesRef.current[key] = traits[key as keyof TraitsData];
-      }
-    });
-  }, []);
+  }, [setTraits, traits]);
 
   // Get the user profile from connected account
   const userProfile = connectedProfile?.profile?.handle;
 
-  // Optimize update handlers for better performance
-  // Use a stable reference pattern that doesn't create new functions on every traits change
-  const updateHandlers = useRef({
-    updateText: (field: keyof TraitsData, value: string) => {
-      // Removed all console logging for performance
-      // if (process.env.NODE_ENV === 'development') {
-      //   console.log(`updateText: ${String(field)}`);
-      // }
-      
-      // Remember this value in our field cache
-      trackFieldChange(field, value);
-      
-      // Update traits with our value - but don't spread the entire traits object
-      setTraitsPreserveFields({ [field]: value } as unknown as TraitsData);
-    },
-    
-    updateBoolean: (field: keyof TraitsData, value: boolean) => {
-      // Removed all console logging
-      // if (process.env.NODE_ENV === 'development') {
-      //   console.log(`updateBoolean: ${String(field)}`);
-      // }
-      
-      // Track and update
-      trackFieldChange(field, value);
-      setTraitsPreserveFields({ [field]: value } as unknown as TraitsData);
-    },
-    
-    updateNumber: (field: keyof TraitsData, value: number) => {
-      // Removed all console logging
-      // if (process.env.NODE_ENV === 'development') {
-      //   console.log(`updateNumber: ${String(field)}`);
-      // }
-      
-      // Track and update
-      trackFieldChange(field, value);
-      setTraitsPreserveFields({ [field]: value } as unknown as TraitsData);
-    }
-  }).current;
+  // Direct field update handlers - much simpler now
+  const updateText = useCallback((field: keyof TraitsData, value: string) => {
+    setTraits({ [field]: value });
+  }, [setTraits]);
+  
+  const updateBoolean = useCallback((field: keyof TraitsData, value: boolean) => {
+    setTraits({ [field]: value });
+  }, [setTraits]);
+  
+  const updateNumber = useCallback((field: keyof TraitsData, value: number) => {
+    setTraits({ [field]: value });
+  }, [setTraits]);
 
   // Use memoization to prevent unnecessary rebuilding of form sections
   const formSections = React.useMemo(() => 
@@ -194,23 +99,17 @@ function MemesArtSubmissionTraits({
                 key={`field-${field.field}-${fieldIndex}`}
                 definition={field}
                 traits={traits}
-                updateText={updateHandlers.updateText}
-                updateNumber={updateHandlers.updateNumber}
-                updateBoolean={updateHandlers.updateBoolean}
+                updateText={updateText}
+                updateNumber={updateNumber}
+                updateBoolean={updateBoolean}
               />
             ))}
           </div>
         </Section>
       ))}
-      
-      {/* Debug info for development */}
-      <div className="tw-hidden">
-        <h5>Traits Cache</h5>
-        <pre>{JSON.stringify(fieldValuesRef.current, null, 2)}</pre>
-      </div>
     </div>
   );
-}
+};
 
 // Use React.memo to prevent unnecessary rerenders
 export default React.memo(MemesArtSubmissionTraits);
