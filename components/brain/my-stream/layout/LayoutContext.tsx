@@ -20,10 +20,10 @@ interface LayoutSpaces {
 
   // Space used by tab elements when present
   tabsSpace: number;
-  
+
   // Space used by spacer elements
   spacerSpace: number;
-  
+
   // Space used by mobile tabs
   mobileTabsSpace: number;
 
@@ -41,15 +41,36 @@ export type LayoutRefType = 'header' | 'pinned' | 'tabs' | 'spacer' | 'mobileTab
 interface LayoutContextType {
   // Calculated spaces
   spaces: LayoutSpaces;
-  
+
   // Registration system
   registerRef: (refType: LayoutRefType, element: HTMLDivElement | null) => void;
-  
+
   // Pre-calculated styles for main containers
   contentContainerStyle: React.CSSProperties;
-  
-  // Unified style for all wave views (chat, winners, leaderboard, outcome)
+
+  // Style for chat view
   waveViewStyle: React.CSSProperties;
+
+  // Style for leaderboard view
+  leaderboardViewStyle: React.CSSProperties;
+
+  // Style for winners view
+  winnersViewStyle: React.CSSProperties;
+
+  // Style for outcome view
+  outcomeViewStyle: React.CSSProperties;
+
+  // Style for notifications view
+  notificationsViewStyle: React.CSSProperties;
+
+  // Style for feed view
+  feedViewStyle: React.CSSProperties;
+  
+  // Style for mobile waves view
+  mobileWavesViewStyle: React.CSSProperties;
+  
+  // Style for mobile about view
+  mobileAboutViewStyle: React.CSSProperties;
 }
 
 // Default context values
@@ -66,9 +87,16 @@ const defaultSpaces: LayoutSpaces = {
 // Create context
 const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
-  registerRef: () => {}, // No-op for default value
+  registerRef: () => { }, // No-op for default value
   contentContainerStyle: {}, // Empty style object as default
   waveViewStyle: {}, // Empty style object as default
+  leaderboardViewStyle: {}, // Empty style object as default
+  winnersViewStyle: {}, // Empty style object as default
+  outcomeViewStyle: {}, // Empty style object as default
+  notificationsViewStyle: {}, // Empty style object as default
+  feedViewStyle: {}, // Empty style object as default
+  mobileWavesViewStyle: {}, // Empty style object as default
+  mobileAboutViewStyle: {}, // Empty style object as default
 });
 
 // Provider component
@@ -76,7 +104,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor } = useCapacitor();
-  
+
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
     header: null,
@@ -93,32 +121,32 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   const [spaces, setSpaces] = useState<LayoutSpaces>(defaultSpaces);
 
   // Create refs for callback functions to solve circular dependency
-  const calculateSpacesRef = useRef<() => void>(() => {});
-  
+  const calculateSpacesRef = useRef<() => void>(() => { });
+
   // Registration function for components to register their elements
   const registerRef = useCallback((refType: LayoutRefType, element: HTMLDivElement | null) => {
     // Skip if element is the same (no change)
     if (refMap.current[refType] === element) return;
-    
+
     // Get the previous element before updating
     const previousElement = refMap.current[refType];
-    
+
     // Store in our internal map (source of truth)
     refMap.current[refType] = element;
-    
+
     // Handle observer management
     if (resizeObserverRef.current) {
       // Unobserve old element if it exists and isn't the new element
       if (previousElement) {
         resizeObserverRef.current.unobserve(previousElement);
       }
-      
+
       // Observe new element if it exists
       if (element) {
         resizeObserverRef.current.observe(element);
       }
     }
-    
+
     // Trigger a recalculation using the ref
     requestAnimationFrame(() => calculateSpacesRef.current());
   }, []);
@@ -168,7 +196,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
         console.error("Error measuring tabs element:", e);
       }
     }
-    
+
     // Measure spacer element if it exists
     if (spacerElement) {
       try {
@@ -178,7 +206,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
         console.error("Error measuring spacer element:", e);
       }
     }
-    
+
     // Measure mobile tabs element if it exists
     if (mobileTabsElement) {
       try {
@@ -216,14 +244,14 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     resizeObserverRef.current = new ResizeObserver(() => {
       requestAnimationFrame(calculateSpaces);
     });
-    
+
     // Observe all existing elements in our refMap
     Object.entries(refMap.current).forEach(([_, element]) => {
       if (element) {
         resizeObserverRef.current?.observe(element);
       }
     });
-    
+
     // Nothing needed here - we'll observe elements as they're registered
 
     // Also listen for window resize
@@ -241,18 +269,18 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       window.removeEventListener("resize", calculateSpaces);
     };
   }, [calculateSpaces]);
-  
+
   // Update the ref with the latest calculateSpaces function
   useEffect(() => {
     calculateSpacesRef.current = calculateSpaces;
   }, [calculateSpaces]);
-  
+
   // Calculate the content container style based on header space
   const contentContainerStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
       return {};
     }
-    
+
     return {
       height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px`,
       display: 'flex'
@@ -265,18 +293,156 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.spacerSpace,
     spaces.mobileTabsSpace
   ]);
-  
-  // Calculate a unified wave view style for all view types (chat, winners, leaderboard, outcome)
-  // This replaces the individual style calculations that were all identical
+
+  // Style for chat view
   const waveViewStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
       return {};
     }
-    
-    
+
     return {
       height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 20 : 0}px)`,
       maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 20 : 0}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor
+  ]);
+
+  // Calculate style for leaderboard view
+  const leaderboardViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 64 : 0}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 64 : 0}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor
+  ]);
+
+  // Calculate style for winners view
+  const winnersViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 60 : 0}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 60 : 0}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor
+  ]);
+
+  // Calculate style for outcome view
+  const outcomeViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 60 : 0}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 60 : 0}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor
+  ]);
+
+  // Calculate style for notifications view
+  const notificationsViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor
+  ]);
+
+  // Calculate style for feed view
+  const feedViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor
+  ]);
+
+  // Calculate style for mobile waves view
+  const mobileWavesViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor
+  ]);
+
+  // Calculate style for mobile about view
+  const mobileAboutViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -293,7 +459,14 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces,
     registerRef,
     contentContainerStyle,
-    waveViewStyle
+    waveViewStyle,
+    leaderboardViewStyle,
+    winnersViewStyle,
+    outcomeViewStyle,
+    notificationsViewStyle,
+    feedViewStyle,
+    mobileWavesViewStyle,
+    mobileAboutViewStyle
   };
 
   return (
