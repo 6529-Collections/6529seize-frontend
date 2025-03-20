@@ -3,14 +3,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
-import useCapacitor from "../../../../../../hooks/useCapacitor";
+import { fullScreenSupported } from "../../../../../../helpers/Helpers";
+import { TransformWrapper } from "react-zoom-pan-pinch";
+import { TransformComponent } from "react-zoom-pan-pinch";
 
 function DropListItemContentMediaImage({ src }: { readonly src: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
-  const { isCapacitor } = useCapacitor();
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
@@ -26,13 +27,8 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
     (event: React.MouseEvent<HTMLImageElement>) => {
       event.stopPropagation();
       setIsModalOpen(true);
-      if (isCapacitor) {
-        event.currentTarget.requestFullscreen();
-      } else {
-        setIsModalOpen(true);
-      }
     },
-    [isCapacitor]
+    []
   );
 
   const handleCloseModal = useCallback(
@@ -82,14 +78,8 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
       <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
         <div className="tw-relative tw-max-w-[95vw] tw-max-h-[95vh] tw-m-4">
           <button
-            onClick={handleFullScreen}
-            className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 lg:tw-top-0 tw-right-10 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-            aria-label="Full screen">
-            <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
-          </button>
-          <button
             onClick={handleCloseModal}
-            className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 tw-right-0 lg:tw-top-0 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-8 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+            className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 lg:tw-top-0 tw-right-10 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
             aria-label="Close modal">
             <svg
               className="tw-h-6 tw-w-6 tw-flex-shrink-0"
@@ -106,13 +96,25 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
               />
             </svg>
           </button>
+          {fullScreenSupported() && (
+            <button
+              onClick={handleFullScreen}
+              className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 tw-right-0 lg:tw-top-10 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+              aria-label="Full screen">
+              <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
+            </button>
+          )}
           <div className="tw-flex tw-flex-col tw-items-center">
-            <img
-              src={src}
-              alt="Full size drop media"
-              className="tw-max-w-full tw-max-h-[calc(95vh-60px)] tw-object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
+            <TransformWrapper>
+              <TransformComponent>
+                <img
+                  src={src}
+                  alt="Full size drop media"
+                  className="tw-max-w-full tw-max-h-[calc(95vh-60px)] tw-object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </TransformComponent>
+            </TransformWrapper>
             <button
               onClick={(e) => {
                 e.stopPropagation();
