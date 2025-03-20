@@ -65,7 +65,7 @@ const ACCEPTED_EXTENSIONS: readonly string[] =
     return parts[1].toUpperCase();
   });
   
-const FILE_SIZE_LIMIT: number = 10 * 1024 * 1024; // 10MB
+const FILE_SIZE_LIMIT: number = 100 * 1024 * 1024; // 100MB
 
 // Create accept string for file input including all video formats
 const FILE_INPUT_ACCEPT: string = 'image/png,image/jpeg,image/jpg,video/*';
@@ -209,8 +209,9 @@ const UploadArea: React.FC<UploadAreaProps> = ({
         aria-live="polite"
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-3">
-          <div className="tw-h-10 tw-w-10 tw-border-t-2 tw-border-b-2 tw-border-primary-500 tw-rounded-full tw-animate-spin" />
-          <span className="tw-text-iron-300">Processing file...</span>
+          <div className="tw-h-12 tw-w-12 tw-border-t-2 tw-border-b-2 tw-border-primary-500 tw-rounded-full tw-animate-spin" />
+          <span className="tw-text-iron-300 tw-font-medium">Processing file...</span>
+          <span className="tw-text-iron-400 tw-text-xs">This may take longer for large files (up to 100MB)</span>
         </div>
       </motion.div>
     )}
@@ -260,59 +261,79 @@ const FilePreview: React.FC<FilePreviewProps> = ({ url, onRemove }) => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
-    className="tw-relative tw-w-full tw-h-full"
+    className="tw-relative tw-w-full tw-h-full tw-bg-iron-950/50 tw-flex tw-items-center tw-justify-center"
   >
-    {/* Render appropriate preview based on file type */}
-    {url.startsWith('data:image/') ? (
-      <img
-        src={url}
-        alt="Artwork preview"
-        className="tw-w-full tw-h-full tw-object-cover"
-      />
-    ) : url.startsWith('data:video/') ? (
-      <video 
-        src={url}
-        className="tw-w-full tw-h-full tw-object-contain"
-        controls
-      />
-    ) : (
-      <img
-        src={url}
-        alt="Artwork preview"
-        className="tw-w-full tw-h-full tw-object-cover"
-      />
-    )}
+    {/* Container with checkerboard pattern for transparent media */}
+    <div className="tw-absolute tw-inset-0 tw-opacity-5">
+      <div className="tw-grid tw-grid-cols-8 tw-h-full">
+        {Array(64)
+          .fill(0)
+          .map((_, i) => (
+            <div
+              key={i}
+              className={`tw-border-[0.5px] ${i % 2 === 0 ? 'tw-bg-iron-400/10' : 'tw-bg-iron-600/10'}`}
+            />
+          ))}
+      </div>
+    </div>
     
-    <button
-      onClick={onRemove}
-      className="tw-absolute tw-top-4 tw-right-4 tw-p-2 tw-rounded-lg tw-bg-iron-900/80 tw-backdrop-blur hover:tw-bg-iron-800/80 tw-transition-colors tw-duration-200 tw-border-0"
-      aria-label="Remove uploaded file"
-      tabIndex={0}
-      data-testid="artwork-remove-button"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        strokeWidth="1.5"
-        stroke="currentColor"
-        className="tw-w-5 tw-h-5 tw-text-iron-400"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+    {/* Media container with proper padding and centering */}
+    <div className="tw-relative tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-p-4 tw-overflow-hidden">
+      {/* Render appropriate preview based on file type */}
+      {url.startsWith('data:image/') ? (
+        <img
+          src={url}
+          alt="Artwork preview"
+          className="tw-max-w-full tw-max-h-full tw-object-contain tw-rounded-md tw-shadow-lg"
         />
-      </svg>
-    </button>
+      ) : url.startsWith('data:video/') ? (
+        <video 
+          src={url}
+          className="tw-max-w-full tw-max-h-full tw-object-contain tw-rounded-md tw-shadow-lg"
+          controls
+        />
+      ) : (
+        <img
+          src={url}
+          alt="Artwork preview"
+          className="tw-max-w-full tw-max-h-full tw-object-contain tw-rounded-md tw-shadow-lg"
+        />
+      )}
+    </div>
+    
+    {/* Control buttons */}
+    <div className="tw-absolute tw-top-0 tw-right-0 tw-z-10 tw-p-2 tw-flex tw-gap-2">
+      <button
+        onClick={onRemove}
+        className="tw-p-2 tw-rounded-lg tw-bg-iron-900/80 tw-backdrop-blur hover:tw-bg-iron-800/80 tw-transition-colors tw-duration-200 tw-border-0 tw-shadow-lg"
+        aria-label="Remove uploaded file"
+        tabIndex={0}
+        data-testid="artwork-remove-button"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          className="tw-w-5 tw-h-5 tw-text-iron-400"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+          />
+        </svg>
+      </button>
+    </div>
   </motion.div>
 );
 
 // Max processing attempts before giving up
 const MAX_PROCESSING_ATTEMPTS = 3;
-// Processing timeout in milliseconds (10 seconds)
-const PROCESSING_TIMEOUT_MS = 10000;
+// Processing timeout in milliseconds (30 seconds for larger files)
+const PROCESSING_TIMEOUT_MS = 30000;
 
 // Browser compatibility detection helpers
 const isBrowserSupported = (): { supported: boolean; reason?: string } => {
