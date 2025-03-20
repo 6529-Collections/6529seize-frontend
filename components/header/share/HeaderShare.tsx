@@ -535,11 +535,11 @@ function CoreAppDownload({
   downloadPath,
   version,
 }: {
-  platform: string;
-  icon: string;
-  title: string;
-  downloadPath: string;
-  version: string;
+  readonly platform: string;
+  readonly icon: string;
+  readonly title: string;
+  readonly downloadPath: string;
+  readonly version: string;
 }) {
   if (!version) {
     return null;
