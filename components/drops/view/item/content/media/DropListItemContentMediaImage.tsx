@@ -76,6 +76,7 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
       onClick={handleCloseModal}>
       <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px] tw-pointer-events-none"></div>
       <TransformWrapper
+        panning={{ disabled: true }}
         limitToBounds={false}
         smooth
         onZoom={(e) => setIsZoomed(e.state.scale > 1)}>
