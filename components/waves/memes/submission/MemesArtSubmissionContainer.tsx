@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import { SubmissionStep, stepEnumToIndex } from "./types/Steps";
 import ModalLayout from "./layout/ModalLayout";
 import Stepper from "./ui/Stepper";
@@ -30,17 +30,34 @@ const MemesArtSubmissionContainer: React.FC<
   const form = useArtworkSubmissionForm();
   
   // Use the mutation hook for submission
-  const { submitArtwork, isSubmitting } = useArtworkSubmissionMutation();
+  const { submitArtwork, isSubmitting, uploadProgress, isUploading } = useArtworkSubmissionMutation();
+  
+  // Keep track of the selected file
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  // Handle file selection
+  const handleFileSelect = (file: File) => {
+    // Store the file for later submission
+    setSelectedFile(file);
+    
+    // Also pass to the form hook for preview
+    form.handleFileSelect(file);
+  };
 
   // Handle final submission
   const handleSubmit = async () => {
-    // Get submission data including all traits and image
-    const formData = form.getSubmissionData();
+    if (!selectedFile) {
+      return null;
+    }
     
-    // Submit the artwork with the wave ID
+    // Get submission data including all traits
+    const { traits } = form.getSubmissionData();
+    
+    // Submit the artwork with the wave ID and selected file
     const result = await submitArtwork(
       {
-        ...formData,
+        imageFile: selectedFile,
+        traits,
         waveId: wave.id
       },
       {
@@ -52,6 +69,14 @@ const MemesArtSubmissionContainer: React.FC<
     );
     
     return result;
+  };
+
+  // Build progress message based on upload state
+  const getUploadStatusMessage = () => {
+    if (isUploading) {
+      return `Uploading artwork: ${uploadProgress}%`;
+    }
+    return isSubmitting ? "Processing submission..." : "";
   };
 
   // Map of steps to their corresponding components
@@ -69,7 +94,7 @@ const MemesArtSubmissionContainer: React.FC<
         artworkUploaded={form.artworkUploaded}
         artworkUrl={form.artworkUrl}
         setArtworkUploaded={form.setArtworkUploaded}
-        handleFileSelect={form.handleFileSelect}
+        handleFileSelect={handleFileSelect}
         onSubmit={handleSubmit}
         updateTraitField={form.updateTraitField}
         setTraits={form.setTraits}
@@ -85,6 +110,13 @@ const MemesArtSubmissionContainer: React.FC<
         currentStep={stepEnumToIndex(form.currentStep)}
         totalSteps={Object.keys(stepComponents).length}
       />
+
+      {/* Upload progress indicator */}
+      {isSubmitting && (
+        <div className="tw-w-full tw-bg-iron-800 tw-p-2 tw-text-center tw-my-4">
+          {getUploadStatusMessage()}
+        </div>
+      )}
 
       {/* Step Content - Render the current step from the map */}
       {stepComponents[form.currentStep]}
