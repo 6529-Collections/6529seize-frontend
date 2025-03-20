@@ -23,7 +23,7 @@ export const WaveLeaderboardWinnerDrop: React.FC<WaveLeaderboardWinnerDropProps>
       className="tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full"
     >
       <div 
-        className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-shadow-[inset_1.5px_0_0_#fbbf24,inset_0_1px_0_rgba(251,191,36,0.13),inset_-1px_0_0_rgba(251,191,36,0.13),inset_0_-1px_0_rgba(251,191,36,0.13)]">
+        className="tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-transparent tw-border-l-2 tw-transition-all tw-duration-200 tw-ease-out tw-shadow-[inset_1.5px_0_0_#fbbf24,inset_0_1px_0_rgba(251,191,36,0.13),inset_-1px_0_0_rgba(251,191,36,0.13),inset_0_-1px_0_rgba(251,191,36,0.13)]">
         <div className="tw-flex tw-flex-col tw-gap-3">
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">

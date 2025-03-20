@@ -11,6 +11,8 @@ interface SingleWaveDropInfoActionsProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave | null;
   readonly showBadge?: boolean;
+  readonly showVotes?: boolean;
+  readonly className?: string;
 }
 
 /**
@@ -21,17 +23,19 @@ export const SingleWaveDropInfoActions: React.FC<SingleWaveDropInfoActionsProps>
   drop,
   wave,
   showBadge = true,
+  showVotes = true,
+  className = "tw-px-6",
 }) => {
   const { canShowVote, isWinner } = useDropInteractionRules(drop);
   
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-2 tw-px-6">
+    <div className={`tw-flex tw-flex-col tw-gap-y-2 ${className}`}>
       {isWinner 
         ? <WinnerBadge drop={drop} showBadge={showBadge} /> 
         : wave && <SingleWaveDropTime wave={wave} />
       }
       {canShowVote && <SingleWaveDropVote drop={drop} />}
-      {drop && <SingleWaveDropVotes drop={drop} />}
+      {showVotes && drop && <SingleWaveDropVotes drop={drop} />}
     </div>
   );
 }; 

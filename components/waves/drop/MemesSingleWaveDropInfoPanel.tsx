@@ -55,7 +55,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
         </div>
 
         {/* Content area with title, description and artwork */}
-        <div className="tw-flex tw-flex-col tw-gap-y-4">
+        <div className="tw-flex tw-flex-col">
           {/* Title and rank badge side by side */}
           <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3 tw-px-6">
             {/* Show either position badge or trophy-only based on winning context */}
@@ -93,8 +93,8 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                     <button
                       onClick={toggleFullscreen}
                       className="tw-absolute tw-top-3 tw-right-3 tw-bg-iron-900/80 tw-text-iron-100 tw-p-2 tw-rounded-lg 
-                              tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-200 
-                              hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
+                            tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-200 
+                            hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
                       aria-label="Toggle fullscreen view"
                     >
                       <FontAwesomeIcon
@@ -114,15 +114,22 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                 )}
               </div>
             </div>
-            <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
-            <SingleWaveDropInfoActions
-              drop={drop}
-              wave={wave}
-              showBadge={false}
-            />
+            <div className="tw-px-6 tw-mt-4">
+              <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
+            </div>
+            <div className="tw-mt-6">
+              <SingleWaveDropInfoActions
+                drop={drop}
+                wave={wave}
+                showBadge={false}
+                showVotes={false}
+              />
+            </div>
           </div>
 
-          <SingleWaveDropInfoDetails drop={drop} />
+          <div className="tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-4 tw-mt-4">
+            <SingleWaveDropInfoDetails drop={drop} />
+          </div>
         </div>
       </SingleWaveDropInfoContainer>
 
@@ -159,7 +166,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                 <FontAwesomeIcon icon={faCompress} className="tw-w-5 tw-h-5" />
               </button>
             </div>
-
+            
             {/* Main artwork display */}
             <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
               <img

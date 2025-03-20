@@ -24,16 +24,19 @@ export const DefaultWaveLeaderboardDrop: React.FC<DefaultWaveLeaderboardDropProp
   const getBorderClasses = () => {
     const rank = drop.rank && drop.rank <= 3 ? drop.rank : 'default';
     
-    const baseClasses = "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out";
+    // Base classes with consistent border styling for ongoing competition items
+    const baseClasses = "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden";
     
+    // Match the hover effects from the other component
     if (rank === 1) {
-      return `${baseClasses} tw-shadow-[inset_1.5px_0_0_#fbbf24,inset_0_1px_0_rgba(251,191,36,0.13),inset_-1px_0_0_rgba(251,191,36,0.13),inset_0_-1px_0_rgba(251,191,36,0.13)]`;
+      return `${baseClasses} desktop-hover:hover:tw-border-[#fbbf24]/40`;
     } else if (rank === 2) {
-      return `${baseClasses} tw-shadow-[inset_1.5px_0_0_#94a3b8,inset_0_1px_0_rgba(148,163,184,0.13),inset_-1px_0_0_rgba(148,163,184,0.13),inset_0_-1px_0_rgba(148,163,184,0.13)]`;
+      return `${baseClasses} desktop-hover:hover:tw-border-[#94a3b8]/40`;
     } else if (rank === 3) {
-      return `${baseClasses} tw-shadow-[inset_1.5px_0_0_#CD7F32,inset_0_1px_0_rgba(205,127,50,0.13),inset_-1px_0_0_rgba(205,127,50,0.13),inset_0_-1px_0_rgba(205,127,50,0.13)]`;
+      return `${baseClasses} desktop-hover:hover:tw-border-[#CD7F32]/40`;
     } else {
-      return `${baseClasses} tw-shadow-[inset_1.5px_0_0_#848490,inset_0_1px_0_rgba(132,132,144,0.13),inset_-1px_0_0_rgba(132,132,144,0.13),inset_0_-1px_0_rgba(132,132,144,0.13)]`;
+      // More subtle hover effect for ranks 4+
+      return `${baseClasses} desktop-hover:hover:tw-border-iron-700`;
     }
   };
 
