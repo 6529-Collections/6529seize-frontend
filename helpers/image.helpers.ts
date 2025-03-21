@@ -5,7 +5,6 @@ export enum ImageScale {
 }
 
 const SCALABLE_PREFIXES = [
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/",
   "https://d3lqz0a4bldqgf.cloudfront.net/pfp/",
   "https://d3lqz0a4bldqgf.cloudfront.net/rememes/",
   "https://d3lqz0a4bldqgf.cloudfront.net/drops/",
