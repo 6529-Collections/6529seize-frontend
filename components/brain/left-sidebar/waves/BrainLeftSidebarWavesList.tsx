@@ -9,6 +9,7 @@ import { AuthContext } from "../../../auth/Auth";
 import { useNewDropsCount } from "../../../../hooks/useNewDropsCount";
 import WaveFollowingWavesSort from "../../../waves/WaveFollowingWavesSort";
 import BrainLeftSidebarCreateAWaveButton from "../BrainLeftSidebarCreateAWaveButton";
+import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
 
 interface BrainLeftSidebarWavesListProps {
   readonly activeWaveId: string | null;
@@ -96,6 +97,9 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
         </div>
         <div className="tw-px-4 tw-mt-2">
           <BrainLeftSidebarCreateAWaveButton />
+        </div>
+        <div className="tw-px-4 tw-mt-2">
+          <BrainLeftSidebarCreateADirectMessageButton />
         </div>
       </div>
     </div>

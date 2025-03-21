@@ -143,7 +143,7 @@ export default function UserPageHeader({
                 {!isMyProfile &&
                   profile.profile?.handle &&
                   connectedProfile?.profile?.handle && (
-                    <UserFollowBtn handle={profile.profile.handle} />
+                    <UserFollowBtn handle={profile.profile.handle} dm />
                   )}
               </div>
             </div>

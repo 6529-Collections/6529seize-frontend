@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 enum WavesViewMode {
   CREATE = "CREATE",
+  CREATE_DM = "CREATE_DM",
   VIEW = "VIEW",
 }
 
@@ -13,7 +14,15 @@ const CreateWave = dynamic(() => import("./create-wave/CreateWave"), {
   ssr: false,
 });
 
+const CreateDirectMessage = dynamic(
+  () => import("./create-dm/CreateDirectMessage"),
+  {
+    ssr: false,
+  }
+);
+
 const NEW_WAVE_SEARCH_PARAM = "new";
+const NEW_DIRECT_MESSAGE_SEARCH_PARAM = "new-dm";
 
 export default function Waves() {
   const searchParams = useSearchParams();
@@ -21,9 +30,17 @@ export default function Waves() {
     useContext(AuthContext);
 
   const isCreateNewWave = searchParams.get(NEW_WAVE_SEARCH_PARAM);
+  const isCreateNewDirectMessage = searchParams.get(
+    NEW_DIRECT_MESSAGE_SEARCH_PARAM
+  );
 
   const getShouldSetCreateNewWave = () =>
     isCreateNewWave &&
+    !!connectedProfile?.profile?.handle &&
+    !activeProfileProxy;
+
+  const getShouldSetCreateNewDirectMessage = () =>
+    isCreateNewDirectMessage &&
     !!connectedProfile?.profile?.handle &&
     !activeProfileProxy;
 
@@ -31,11 +48,11 @@ export default function Waves() {
     getShouldSetCreateNewWave() ? WavesViewMode.CREATE : WavesViewMode.VIEW
   );
 
-  const getShowCreateNewWaveButton = () =>
+  const getShowCreateNewButton = () =>
     !!connectedProfile?.profile?.handle && !activeProfileProxy;
 
-  const [showCreateNewWaveButton, setShowCreateNewWaveButton] = useState(
-    getShowCreateNewWaveButton()
+  const [showCreateNewButton, setShowCreateNewButton] = useState(
+    getShowCreateNewButton()
   );
 
   const onViewModeChange = async (mode: WavesViewMode): Promise<void> => {
@@ -53,32 +70,43 @@ export default function Waves() {
   }, [isCreateNewWave]);
 
   useEffect(() => {
+    if (getShouldSetCreateNewDirectMessage()) {
+      onViewModeChange(WavesViewMode.CREATE_DM);
+    }
+  }, [isCreateNewDirectMessage]);
+
+  useEffect(() => {
     if (!connectedProfile?.profile?.handle || activeProfileProxy) {
       onViewModeChange(WavesViewMode.VIEW);
     }
-    setShowCreateNewWaveButton(getShowCreateNewWaveButton());
+    setShowCreateNewButton(getShowCreateNewButton());
   }, [connectedProfile, activeProfileProxy]);
+
+  if (!showWaves || !connectedProfile) {
+    return null;
+  }
 
   const components: Record<WavesViewMode, JSX.Element> = {
     [WavesViewMode.VIEW]: (
       <WavesList
         onCreateNewWave={() => setViewMode(WavesViewMode.CREATE)}
-        showCreateNewWaveButton={showCreateNewWaveButton}
+        onCreateNewDirectMessage={() => setViewMode(WavesViewMode.CREATE_DM)}
+        showCreateNewButton={showCreateNewButton}
       />
     ),
-    [WavesViewMode.CREATE]: connectedProfile ? (
+    [WavesViewMode.CREATE]: (
       <CreateWave
         onBack={() => setViewMode(WavesViewMode.VIEW)}
         profile={connectedProfile}
       />
-    ) : (
-      <div></div>
+    ),
+    [WavesViewMode.CREATE_DM]: (
+      <CreateDirectMessage
+        onBack={() => setViewMode(WavesViewMode.VIEW)}
+        profile={connectedProfile}
+      />
     ),
   };
-
-  if (!showWaves) {
-    return null;
-  }
 
   return <div className="tailwind-scope">{components[viewMode]}</div>;
 }
