@@ -6,7 +6,7 @@ import { CreateWaveStepStatus } from "../../types/waves.types";
 
 // Known wave IDs
 export const KNOWN_WAVE_IDS = {
-  MEMES_WAVE: "0d4359c1-1f48-4e1a-97ab-c96af3988a30",
+  MEMES_WAVE: "87eb0561-5213-4cc6-9ae6-06a3793a5e58",
 };
 
 /**
