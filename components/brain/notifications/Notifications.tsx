@@ -12,8 +12,9 @@ import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
-import NotificationsCauseFilter from "./NotificationsCauseFilter";
-import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
+import NotificationsCauseFilter, {
+  NotificationFilter,
+} from "./NotificationsCauseFilter";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -22,7 +23,7 @@ export default function Notifications() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const capacitor = useCapacitor();
 
-  const [activeCause, setActiveCause] = useState<ApiNotificationCause | null>(
+  const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
     null
   );
 
@@ -94,7 +95,7 @@ export default function Notifications() {
     activeProfileProxy: !!activeProfileProxy,
     limit: "30",
     reverse: true,
-    cause: activeCause,
+    cause: activeFilter?.cause,
   });
 
   const onBottomIntersection = (state: boolean) => {
@@ -125,8 +126,8 @@ export default function Notifications() {
     <div className={containerClassName}>
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex">
         <NotificationsCauseFilter
-          activeCause={activeCause}
-          setActiveCause={setActiveCause}
+          activeFilter={activeFilter}
+          setActiveFilter={setActiveFilter}
         />
         {!items.length && !isFetching ? (
           <MyStreamNoItems />

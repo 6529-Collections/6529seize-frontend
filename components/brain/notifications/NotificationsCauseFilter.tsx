@@ -1,29 +1,34 @@
 import { useRef, useState, useEffect } from "react";
 import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
 
-interface NotificationFilter {
-  cause: ApiNotificationCause | null;
+export interface NotificationFilter {
+  cause: ApiNotificationCause[];
   title: string;
 }
 
 const NotificationFilters: NotificationFilter[] = [
-  { cause: null, title: "All" },
-  { cause: ApiNotificationCause.IdentityMentioned, title: "Mentions" },
-  { cause: ApiNotificationCause.DropQuoted, title: "Quotes" },
-  { cause: ApiNotificationCause.DropReplied, title: "Replies" },
-  { cause: ApiNotificationCause.IdentitySubscribed, title: "Follows" },
-  { cause: ApiNotificationCause.DropVoted, title: "Ratings" },
-  { cause: ApiNotificationCause.WaveCreated, title: "Invites" },
+  { cause: [], title: "All" },
+  {
+    cause: [
+      ApiNotificationCause.IdentityMentioned,
+      ApiNotificationCause.DropQuoted,
+    ],
+    title: "Mentions",
+  },
+  { cause: [ApiNotificationCause.DropReplied], title: "Replies" },
+  { cause: [ApiNotificationCause.IdentitySubscribed], title: "Follows" },
+  { cause: [ApiNotificationCause.DropVoted], title: "Votes" },
+  { cause: [ApiNotificationCause.WaveCreated], title: "Invites" },
 ];
 
 export default function NotificationsCauseFilter({
-  activeCause,
-  setActiveCause,
+  activeFilter,
+  setActiveFilter,
 }: {
-  readonly activeCause: ApiNotificationCause | null;
-  readonly setActiveCause: (cause: ApiNotificationCause | null) => void;
+  readonly activeFilter: NotificationFilter | null;
+  readonly setActiveFilter: (filter: NotificationFilter | null) => void;
 }) {
-  const [activeCauseIndex, setActiveCauseIndex] = useState<number>(0);
+  const [activeFilterIndex, setActiveFilterIndex] = useState<number>(0);
 
   const [highlightStyle, setHighlightStyle] = useState<{
     left: number;
@@ -37,16 +42,16 @@ export default function NotificationsCauseFilter({
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
 
   useEffect(() => {
-    const button = buttonRefs.current[activeCauseIndex];
+    const button = buttonRefs.current[activeFilterIndex];
     if (button) {
       let l = button.offsetLeft;
       let w = button.offsetWidth;
 
-      if (activeCauseIndex === 0) {
+      if (activeFilterIndex === 0) {
         l += 2;
         w -= 2;
       }
-      if (activeCauseIndex === NotificationFilters.length - 1) {
+      if (activeFilterIndex === NotificationFilters.length - 1) {
         w -= 2;
       }
 
@@ -55,16 +60,13 @@ export default function NotificationsCauseFilter({
         width: w,
       });
     }
-  }, [activeCauseIndex]);
+  }, [activeFilterIndex]);
 
-  const handleChange = (
-    cause: ApiNotificationCause | null,
-    causeIndex: number
-  ) => {
-    setActiveCause(cause);
-    setActiveCauseIndex(causeIndex);
+  const handleChange = (filter: NotificationFilter, filterIndex: number) => {
+    setActiveFilter(filter);
+    setActiveFilterIndex(filterIndex);
 
-    const button = buttonRefs.current[causeIndex];
+    const button = buttonRefs.current[filterIndex];
     const container = containerRef.current;
     if (button && container) {
       const containerWidth = container.clientWidth;
@@ -87,8 +89,7 @@ export default function NotificationsCauseFilter({
     }
   };
 
-  const isActive = (cause: ApiNotificationCause | null) =>
-    activeCause === cause;
+  const isActive = (filter: NotificationFilter) => activeFilter === filter;
 
   return (
     <div className="tw-p-2 tw-w-full">
@@ -106,8 +107,8 @@ export default function NotificationsCauseFilter({
           <NotificationCauseFilterButton
             key={`notification-cause-filter-${filter.cause ?? "ALL"}`}
             title={filter.title}
-            isActive={isActive(filter.cause)}
-            onClick={() => handleChange(filter.cause, index)}
+            isActive={isActive(filter)}
+            onClick={() => handleChange(filter, index)}
             buttonRef={(el) => (buttonRefs.current[index] = el!)}
           />
         ))}
