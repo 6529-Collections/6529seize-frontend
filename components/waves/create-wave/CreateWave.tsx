@@ -75,6 +75,7 @@ export default function CreateWave({
     onVotingTypeChange,
     onCategoryChange,
     onProfileIdChange,
+    onTimeWeightedVotingChange,
     // Approval
     onThresholdChange,
     onThresholdTimeChange,
@@ -234,6 +235,8 @@ export default function CreateWave({
         onTypeChange={onVotingTypeChange}
         setCategory={onCategoryChange}
         setProfileId={onProfileIdChange}
+        timeWeighted={config.voting.timeWeighted}
+        onTimeWeightedChange={onTimeWeightedVotingChange}
       />
     ),
     [CreateWaveStep.APPROVAL]: (

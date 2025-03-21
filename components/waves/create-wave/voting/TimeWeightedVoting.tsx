@@ -1,18 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { TimeWeightedVotingConfig, TimeUnit } from './types';
+import { convertToMinutes, convertFromMinutes, ensureValueInBounds } from './utils';
+import { 
+  TimeWeightedToggle, 
+  AveragingIntervalInput 
+} from './components';
 
-type TimeUnit = "minutes" | "hours";
-
-export interface TimeWeightedVotingConfig {
-  enabled: boolean;
-  averagingInterval: number;
-  averagingIntervalUnit: TimeUnit;
-}
-
+/**
+ * Props for the TimeWeightedVoting component
+ */
 interface TimeWeightedVotingProps {
+  /** Current configuration for time-weighted voting */
   readonly config: TimeWeightedVotingConfig;
+  /** Handler called when configuration changes */
   readonly onChange: (config: TimeWeightedVotingConfig) => void;
 }
 
+/**
+ * TimeWeightedVoting Component
+ * Main component that manages the state and orchestrates child components
+ * Allows configuration of time-weighted voting settings
+ */
 export default function TimeWeightedVoting({
   config,
   onChange,
@@ -26,11 +34,6 @@ export default function TimeWeightedVoting({
   // State for tracking input value during editing
   const [inputValue, setInputValue] = useState<string>(config.averagingInterval.toString());
 
-  // Constants for validation
-  const MIN_MINUTES = 5;
-  const MAX_HOURS = 24;
-  const MAX_MINUTES = MAX_HOURS * 60;
-  
   // Update input value when config changes externally
   useEffect(() => {
     setInputValue(config.averagingInterval.toString());
@@ -38,6 +41,7 @@ export default function TimeWeightedVoting({
 
   // Validate the configuration whenever it changes
   useEffect(() => {
+    // Skip validation if feature is disabled
     if (!config.enabled) {
       setValidationErrors({});
       return;
@@ -45,247 +49,137 @@ export default function TimeWeightedVoting({
 
     const errors: { interval?: string; general?: string } = {};
 
-    // Convert current setting to minutes for comparison
-    const currentValueInMinutes = config.averagingIntervalUnit === "minutes" 
-      ? config.averagingInterval 
-      : config.averagingInterval * 60;
+    // Use the utility function for conversion
+    const valueInMinutes = convertToMinutes(config.averagingInterval, config.averagingIntervalUnit);
 
     // Validate minimum
-    if (currentValueInMinutes < MIN_MINUTES) {
-      errors.interval = `Must be at least ${MIN_MINUTES} minutes`;
+    if (valueInMinutes < 5) {
+      errors.interval = `Must be at least 5 minutes`;
     }
     
     // Validate maximum
-    if (currentValueInMinutes > MAX_MINUTES) {
-      errors.interval = `Must not exceed ${MAX_HOURS} hours`;
+    if (valueInMinutes > 24 * 60) {
+      errors.interval = `Must not exceed 24 hours`;
     }
 
     setValidationErrors(errors);
   }, [config]);
 
-  const handleToggle = () => {
+  /**
+   * Handles the toggle switch for enabling/disabling time-weighted voting
+   */
+  const handleToggle = useCallback(() => {
     onChange({
       ...config,
       enabled: !config.enabled,
     });
-  };
+  }, [config, onChange]);
 
-  const handleAveragingIntervalChange = (value: string) => {
-    // Prevent extremely large inputs by limiting length
-    if (value !== "" && value.length > 5) {
-      return;
-    }
-    
-    // Update the input value to allow for empty field during editing
+  /**
+   * Handles the user changing the averaging interval input
+   * Allows for temporarily empty fields during editing
+   * Caps values at the maximum for the current unit
+   */
+  const handleIntervalChange = useCallback((value: string) => {
+    // Always allow empty string for editing flexibility
     setInputValue(value);
     
-    // If empty string, don't update the config yet
+    // Don't update the config for empty string or invalid input
     if (value === "") {
       return;
     }
     
+    // Parse input to number with validation
     const numValue = parseInt(value, 10);
-    
-    // Only update if it's a valid number
-    if (!isNaN(numValue)) {
-      // Apply constraints based on the current unit
-      if (config.averagingIntervalUnit === "minutes") {
-        // For minutes, don't apply minimum yet to allow typing, but cap at maximum
-        if (numValue <= MAX_MINUTES) {
-          onChange({
-            ...config,
-            averagingInterval: numValue,
-          });
-        } else {
-          // If exceeds maximum, update input to maximum
-          setInputValue(MAX_MINUTES.toString());
-          onChange({
-            ...config,
-            averagingInterval: MAX_MINUTES,
-          });
-        }
-      } else if (config.averagingIntervalUnit === "hours") {
-        // For hours, don't apply minimum yet to allow typing, but cap at maximum
-        if (numValue <= MAX_HOURS) {
-          onChange({
-            ...config,
-            averagingInterval: numValue,
-          });
-        } else {
-          // If exceeds maximum, update input to maximum
-          setInputValue(MAX_HOURS.toString());
-          onChange({
-            ...config,
-            averagingInterval: MAX_HOURS,
-          });
-        }
-      }
+    if (isNaN(numValue)) {
+      return;
     }
-  };
+    
+    // Get maximum value for current unit
+    const maxValueForUnit = config.averagingIntervalUnit === "minutes" ? 24 * 60 : 24;
+    
+    // Calculate an appropriate bounded value
+    if (numValue <= maxValueForUnit) {
+      // Within range, update normally (minimum will be enforced on blur)
+      onChange({
+        ...config,
+        averagingInterval: numValue,
+      });
+    } else {
+      // Exceeds maximum, cap at maximum
+      const cappedValue = maxValueForUnit;
+      setInputValue(cappedValue.toString());
+      onChange({
+        ...config,
+        averagingInterval: cappedValue,
+      });
+    }
+  }, [config, onChange]);
 
-  const handleAveragingIntervalUnitChange = (unit: TimeUnit) => {
-    let newInterval = config.averagingInterval;
-    
-    // Handle unit conversion and enforce limits
-    if (unit === "hours" && config.averagingIntervalUnit === "minutes") {
-      // Converting from minutes to hours
-      newInterval = Math.floor(config.averagingInterval / 60);
-      // Ensure minimum 1 hour if converting from minutes
-      newInterval = Math.max(1, newInterval);
-      // Ensure maximum 24 hours
-      newInterval = Math.min(MAX_HOURS, newInterval);
-    } else if (unit === "minutes" && config.averagingIntervalUnit === "hours") {
-      // Converting from hours to minutes
-      newInterval = config.averagingInterval * 60;
-      // Ensure maximum 24 hours worth of minutes
-      newInterval = Math.min(MAX_MINUTES, newInterval);
+  /**
+   * Handles the user changing the time unit
+   * Converts the current value to the new unit while maintaining the same time duration
+   * Ensures the converted value is within the valid range for the new unit
+   */
+  const handleUnitChange = useCallback((unit: TimeUnit) => {
+    // If same unit, no conversion needed
+    if (unit === config.averagingIntervalUnit) {
+      return;
     }
     
+    // First convert to minutes (as the common unit)
+    const valueInMinutes = convertToMinutes(config.averagingInterval, config.averagingIntervalUnit);
+    
+    // Then convert to the target unit and ensure it's within bounds
+    const newInterval = ensureValueInBounds(
+      convertFromMinutes(valueInMinutes, unit),
+      unit
+    );
+    
+    // Update both the config and input value for consistency
+    setInputValue(newInterval.toString());
     onChange({
       ...config,
       averagingInterval: newInterval,
       averagingIntervalUnit: unit,
     });
-  };
-
-  // Helper component for time unit selector
-  const TimeUnitSelector = ({
-    value,
-    onChange,
-    id,
-    ariaLabel,
-  }: {
-    value: TimeUnit;
-    onChange: (unit: TimeUnit) => void;
-    id: string;
-    ariaLabel: string;
-  }) => (
-    <select
-      id={id}
-      aria-label={ariaLabel}
-      className="tw-px-3 tw-py-2 tw-bg-iron-800 tw-text-iron-50 tw-border tw-border-iron-700 tw-rounded-md tw-ml-2"
-      value={value}
-      onChange={(e) => onChange(e.target.value as TimeUnit)}
-    >
-      <option value="minutes">Minutes</option>
-      <option value="hours">Hours</option>
-    </select>
-  );
+  }, [config, onChange]);
 
   // Determine if there are any validation errors
   const hasErrors = Object.keys(validationErrors).length > 0;
 
   return (
-    <div className="tw-mt-6 tw-border-t tw-border-iron-700 tw-pt-6">
-      <div className="tw-flex tw-items-center tw-mb-4">
-        <h3 className="tw-text-lg tw-font-semibold tw-text-iron-50 tw-mb-0 tw-mr-4">
-          Time-Weighted Voting
-        </h3>
-        <div className="tw-relative tw-inline-block tw-w-12 tw-align-middle tw-select-none">
-          <input
-            type="checkbox"
-            id="toggle-time-weighted"
-            checked={config.enabled}
-            onChange={handleToggle}
-            className="tw-sr-only"
-            aria-labelledby="time-weighted-label"
-          />
-          <label
-            id="time-weighted-label"
-            htmlFor="toggle-time-weighted"
-            className={`tw-block tw-overflow-hidden tw-h-6 tw-rounded-full tw-cursor-pointer ${
-              config.enabled ? "tw-bg-blue-600" : "tw-bg-iron-700"
-            }`}
-            aria-hidden="true"
-          >
-            <span
-              className={`tw-block tw-h-6 tw-w-6 tw-rounded-full tw-bg-white tw-transform tw-transition-transform ${
-                config.enabled ? "tw-translate-x-6" : "tw-translate-x-0"
-              }`}
-            ></span>
-          </label>
-        </div>
-      </div>
-
-      <p className="tw-text-iron-400 tw-mb-4">
-        Protects against last-minute vote manipulation by using a time-averaged
-        vote count instead of the final tally.
-      </p>
+    <section className="tw-mt-6 tw-border-t tw-border-iron-700 tw-pt-6" data-testid="time-weighted-voting">
+      <TimeWeightedToggle 
+        enabled={config.enabled} 
+        onToggle={handleToggle} 
+      />
 
       {config.enabled && (
         <>
-          {hasErrors && (
-            <div className="tw-mb-4 tw-text-red-400 tw-text-sm tw-font-medium">
+          {/* General error display */}
+          {hasErrors && validationErrors.general && (
+            <div 
+              className="tw-mb-4 tw-text-red-400 tw-text-sm tw-font-medium" 
+              role="alert"
+              data-testid="general-error"
+            >
               {validationErrors.general}
             </div>
           )}
 
+          {/* Configuration form */}
           <div className="tw-grid md:tw-grid-cols-2 tw-gap-6">
-            <div>
-              <label
-                htmlFor="averaging-interval"
-                className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 tw-mb-2"
-              >
-                Averaging Interval
-              </label>
-              <div className="tw-flex tw-items-center">
-                <input
-                  type="number"
-                  id="averaging-interval"
-                  // Don't use min/max to allow for empty field during typing
-                  value={inputValue}
-                  onChange={(e) =>
-                    handleAveragingIntervalChange(e.target.value)
-                  }
-                  // Handle blur event to apply constraints when user finishes editing
-                  onBlur={() => {
-                    // Apply min constraints when focus is lost
-                    const numValue = parseInt(inputValue, 10);
-                    if (inputValue === "" || isNaN(numValue) || numValue < (config.averagingIntervalUnit === "minutes" ? MIN_MINUTES : 1)) {
-                      // Set to minimum if below minimum or invalid
-                      const minValue = config.averagingIntervalUnit === "minutes" ? MIN_MINUTES : 1;
-                      setInputValue(minValue.toString());
-                      onChange({
-                        ...config,
-                        averagingInterval: minValue,
-                      });
-                    }
-                  }}
-                  className={`tw-px-3 tw-py-2 tw-bg-iron-800 tw-text-iron-50 tw-border tw-rounded-md tw-w-24 ${
-                    validationErrors.interval
-                      ? "tw-border-red-500"
-                      : "tw-border-iron-700"
-                  }`}
-                  aria-invalid={!!validationErrors.interval}
-                  aria-describedby="averaging-interval-description averaging-interval-error"
-                />
-                <TimeUnitSelector
-                  id="averaging-interval-unit"
-                  ariaLabel="Averaging interval time unit"
-                  value={config.averagingIntervalUnit}
-                  onChange={handleAveragingIntervalUnitChange}
-                />
-              </div>
-              {validationErrors.interval ? (
-                <p
-                  id="averaging-interval-error"
-                  className="tw-text-xs tw-text-red-400 tw-mt-1"
-                >
-                  {validationErrors.interval}
-                </p>
-              ) : (
-                <p
-                  id="averaging-interval-description"
-                  className="tw-text-xs tw-text-iron-400 tw-mt-1"
-                >
-                  The time period over which votes are averaged. Must be between {MIN_MINUTES} minutes 
-                  and {MAX_HOURS} hours. Longer intervals are more resistant to manipulation.
-                </p>
-              )}
-            </div>
+            <AveragingIntervalInput
+              value={inputValue}
+              unit={config.averagingIntervalUnit}
+              onIntervalChange={handleIntervalChange}
+              onUnitChange={handleUnitChange}
+              validationError={validationErrors.interval}
+            />
           </div>
         </>
       )}
-    </div>
+    </section>
   );
 }
