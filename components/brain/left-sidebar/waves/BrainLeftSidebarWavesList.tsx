@@ -170,7 +170,7 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
             )}
 
             {/* Recent Waves */}
-            {recentWaves.length > 0 && (
+            {/* {recentWaves.length > 0 && (
               <div className="tw-border-t tw-border-iron-800/30 tw-mt-2">
                 <div className="tw-pl-5 tw-py-2">
                   <p className="tw-text-xs tw-font-medium tw-text-iron-500 tw-tracking-widest tw-uppercase tw-mb-0">
@@ -186,10 +186,10 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
                   />
                 ))}
               </div>
-            )}
+            )} */}
 
             {/* All Other Waves */}
-            {regularWaves.length > 0 && (
+            {/* {regularWaves.length > 0 && (
               <div className="tw-border-t tw-border-iron-800/30 tw-mt-2">
                 <div className="tw-pl-5 tw-py-2">
                   <p className="tw-text-xs tw-font-medium tw-text-iron-500 tw-tracking-widest tw-uppercase tw-mb-0">
@@ -205,7 +205,7 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
                   />
                 ))}
               </div>
-            )}
+            )} */}
 
             {/* Loading indicator */}
             {isFetchingNextPage && (

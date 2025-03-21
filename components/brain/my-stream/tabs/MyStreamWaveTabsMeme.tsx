@@ -31,7 +31,10 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             Weekly Rolling Wave (Long-Term)
           </h1>
           <div className="tw-flex-shrink-0">
-            <MyStreamWaveTabsMemeSubmit handleMemesSubmit={handleMemesSubmit} />
+            <MyStreamWaveTabsMemeSubmit
+              handleMemesSubmit={handleMemesSubmit}
+              wave={wave}
+            />
           </div>
         </div>
 
