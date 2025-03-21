@@ -34,7 +34,12 @@ export default function CreateDirectMessage({
   >([]);
 
   const onIdentitySelect = (identity: CommunityMemberMinimal) => {
-    if (areEqualAddresses(identity.wallet, profile.profile?.primary_wallet!)) {
+    if (
+      areEqualAddresses(
+        identity.primary_wallet ?? identity.wallet,
+        profile.profile?.primary_wallet!
+      )
+    ) {
       setToast({
         message: "You are included by default in a Direct Message!",
         type: "info",
@@ -45,7 +50,7 @@ export default function CreateDirectMessage({
   };
 
   const onRemove = (id: string) => {
-    if (areEqualAddresses(id, profile.profile?.primary_wallet!)) {
+    if (areEqualAddresses(id, profile.profile?.primary_wallet)) {
       setToast({
         message: "You cannot remove yourself from the DM",
         type: "error",
@@ -54,7 +59,9 @@ export default function CreateDirectMessage({
     }
 
     setSelectedIdentities(
-      selectedIdentities.filter((i) => !areEqualAddresses(i.wallet, id))
+      selectedIdentities.filter(
+        (i) => !areEqualAddresses(i.primary_wallet ?? i.wallet, id)
+      )
     );
   };
 
@@ -62,13 +69,15 @@ export default function CreateDirectMessage({
     setIsCreating(true);
     try {
       const wave = await createDirectMessageWave({
-        addresses: selectedIdentities.map((i) => i.wallet),
+        addresses: selectedIdentities
+          .map((i) => i.primary_wallet ?? i.wallet)
+          .filter((i) => i !== null),
       });
       router.push(`/waves/${wave.id}`);
     } catch (error) {
       console.error(error);
       setToast({
-        message: "Failed to create Direct Message",
+        message: `Failed to create Direct Message: ${error}`,
         type: "error",
       });
       setIsCreating(false);
