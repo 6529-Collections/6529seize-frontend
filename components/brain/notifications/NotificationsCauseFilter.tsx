@@ -39,9 +39,20 @@ export default function NotificationsCauseFilter({
   useEffect(() => {
     const button = buttonRefs.current[activeCauseIndex];
     if (button) {
+      let l = button.offsetLeft;
+      let w = button.offsetWidth;
+
+      if (activeCauseIndex === 0) {
+        l += 2;
+        w -= 2;
+      }
+      if (activeCauseIndex === NotificationFilters.length - 1) {
+        w -= 2;
+      }
+
       setHighlightStyle({
-        left: button.offsetLeft,
-        width: button.offsetWidth,
+        left: l,
+        width: w,
       });
     }
   }, [activeCauseIndex]);
@@ -80,12 +91,10 @@ export default function NotificationsCauseFilter({
     activeCause === cause;
 
   return (
-    <div className="tw-mb-3 tw-w-full">
-      {/* Scrollable container with a ref */}
+    <div className="tw-p-2 tw-w-full">
       <div
         ref={containerRef}
         className="tw-relative tw-flex tw-nowrap tw-items-center tw-gap-1 tw-h-10 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-overflow-x-auto">
-        {/* Highlight bar */}
         <div
           className="tw-absolute tw-h-8 tw-bg-iron-800 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-in-out"
           style={{
