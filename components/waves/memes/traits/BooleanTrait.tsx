@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { BooleanTraitProps } from './types';
 import { TraitWrapper } from './TraitWrapper';
 
@@ -6,12 +6,14 @@ import { TraitWrapper } from './TraitWrapper';
  * Simplified BooleanTrait component using a ref-based approach
  * Similar to our solution for text and number inputs
  */
-export const BooleanTrait: React.FC<BooleanTraitProps> = ({
+export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(({
   label,
   field,
   traits,
   updateBoolean,
   className,
+  error,
+  onBlur
 }) => {
   // Use a ref to track the current value to avoid React re-render cycles
   const valueRef = useRef<boolean>(Boolean(traits[field]));
@@ -47,21 +49,40 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = ({
   }
   
   // Click handlers with direct DOM manipulation
-  function handleYesClick() {
+  const handleYesClick = useCallback(() => {
     valueRef.current = true;
     updateBoolean(field, true);
     updateUIState();
-  }
+    
+    // Trigger onBlur if provided (for validation)
+    if (onBlur) {
+      onBlur(field);
+    }
+  }, [field, updateBoolean, onBlur]);
   
-  function handleNoClick() {
+  const handleNoClick = useCallback(() => {
     valueRef.current = false;
     updateBoolean(field, false);
     updateUIState();
-  }
+    
+    // Trigger onBlur if provided (for validation)
+    if (onBlur) {
+      onBlur(field);
+    }
+  }, [field, updateBoolean, onBlur]);
   
   return (
-    <TraitWrapper label={label} isBoolean={true} className={className}>
-      <div ref={uiStateRef} className="tw-flex tw-gap-3 tw-flex-1">
+    <TraitWrapper 
+      label={label} 
+      isBoolean={true} 
+      className={className}
+      error={error}
+      id={`field-${field}`}
+    >
+      <div 
+        ref={uiStateRef} 
+        className="tw-flex tw-gap-3 tw-flex-1"
+        data-field={field}>
         <button
           onClick={handleYesClick}
           className={`yes-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
@@ -89,4 +110,12 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = ({
       </div>
     </TraitWrapper>
   );
-};
+}, (prevProps, nextProps) => {
+  // Memoization check for performance
+  return prevProps.field === nextProps.field &&
+         prevProps.label === nextProps.label &&
+         prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field] &&
+         prevProps.error === nextProps.error;
+});
+
+BooleanTrait.displayName = 'BooleanTrait';

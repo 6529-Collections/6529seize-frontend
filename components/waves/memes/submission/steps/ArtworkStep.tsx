@@ -1,10 +1,12 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
 import { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
 import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "../../MemesArtSubmissionTraits";
 import { SubmissionPhase } from "../ui/SubmissionProgress";
+import ValidationSummary from "../ui/ValidationSummary";
+import { useTraitsValidation } from "../validation";
 
 interface ArtworkStepProps {
   readonly traits: TraitsData;
@@ -17,6 +19,7 @@ interface ArtworkStepProps {
   readonly setTraits: (traits: Partial<TraitsData>) => void;
   readonly isSubmitting?: boolean;
   readonly submissionPhase?: SubmissionPhase;
+  readonly initialTraits?: TraitsData;
 }
 
 /**
@@ -37,8 +40,13 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   updateTraitField,
   setTraits,
   isSubmitting = false,
-  submissionPhase = 'idle'
+  submissionPhase = 'idle',
+  initialTraits
 }) => {
+  // Set up validation
+  const validation = useTraitsValidation(traits, initialTraits || traits);
+  const [showErrorSummary, setShowErrorSummary] = useState(false);
+  
   // Create callback handlers for title and description
   const handleTitleChange = useCallback((title: string) => {
     updateTraitField('title', title);
@@ -48,8 +56,32 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     updateTraitField('description', description);
   }, [updateTraitField]);
   
+  // Handler for field blur to mark fields as touched for validation
+  const handleFieldBlur = useCallback((field: keyof TraitsData) => {
+    validation.markFieldTouched(field);
+    // For development debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(`Field touched: ${field}`);
+    }
+  }, [validation]);
+  
+  // Handle submission with validation
+  const handleSubmit = useCallback(() => {
+    // Validate all fields
+    const validationResult = validation.validateAll();
+    
+    if (validationResult.isValid) {
+      // Proceed with submission if valid
+      onSubmit();
+    } else {
+      // Show validation errors and focus the first invalid field
+      setShowErrorSummary(true);
+      validation.focusFirstInvalidField();
+    }
+  }, [validation, onSubmit]);
+  
   // Determine button disabled state
-  const isDisabled = !artworkUploaded || !traits.title || isSubmitting;
+  const isDisabled = !artworkUploaded || !validation.isValid || isSubmitting;
   
   // Get button text based on submission phase
   const getButtonText = (): string => {
@@ -97,27 +129,42 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
           description={traits.description}
           onTitleChange={handleTitleChange}
           onDescriptionChange={handleDescriptionChange}
+          titleError={validation.errors.title}
+          descriptionError={validation.errors.description}
+          onTitleBlur={() => handleFieldBlur('title')}
+          onDescriptionBlur={() => handleFieldBlur('description')}
+        />
+
+        {/* Validation error summary */}
+        <ValidationSummary 
+          errors={validation.errors}
+          show={showErrorSummary && validation.submitAttempted && !validation.isValid}
+          onErrorClick={validation.focusFirstInvalidField}
+          className="tw-mt-2"
         />
 
         {/* Traits Component */}
         <MemesArtSubmissionTraits
           traits={traits}
           setTraits={setTraits}
+          validationErrors={validation.errors}
+          onFieldBlur={handleFieldBlur}
         />
       </div>
 
       {/* Submit Button - Fixed at bottom */}
       <div className="tw-fixed tw-bottom-0 tw-left-0 tw-w-full tw-bg-iron-950/80 tw-backdrop-blur-sm tw-py-4 tw-px-6 tw-z-10 tw-border-t tw-border-iron-800">
         <div className="tw-container tw-mx-auto tw-flex tw-justify-end">
-          <PrimaryButton
-            onClicked={onSubmit}
-            loading={isSubmitting && submissionPhase !== 'success' && submissionPhase !== 'error'}
-            disabled={isDisabled || submissionPhase === 'success'}
-            padding="tw-px-8 tw-py-3"
-            className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}
-          >
-            {getButtonText()}
-          </PrimaryButton>
+          <div className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}>
+            <PrimaryButton
+              onClicked={handleSubmit}
+              loading={isSubmitting && submissionPhase !== 'success' && submissionPhase !== 'error'}
+              disabled={isDisabled || submissionPhase === 'success'}
+              padding="tw-px-8 tw-py-3"
+            >
+              {getButtonText()}
+            </PrimaryButton>
+          </div>
         </div>
       </div>
     </div>

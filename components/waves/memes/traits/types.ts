@@ -5,6 +5,9 @@ export interface BaseTraitProps {
   readonly label: string;
   readonly field: keyof TraitsData;
   readonly className?: string;
+  readonly error?: string | null;
+  readonly onBlur?: (field: keyof TraitsData) => void;
+  readonly required?: boolean;
 }
 
 export interface TextTraitProps extends BaseTraitProps {
@@ -45,4 +48,7 @@ export interface TraitWrapperProps {
   readonly children: React.ReactNode;
   readonly isBoolean?: boolean;
   readonly className?: string;
+  readonly error?: string | null;
+  readonly id?: string;
+  readonly required?: boolean;
 }

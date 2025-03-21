@@ -7,6 +7,8 @@ import { useAuth } from "../../auth/Auth";
 interface MemesArtSubmissionTraitsProps {
   readonly traits: TraitsData;
   readonly setTraits: (traits: Partial<TraitsData>) => void;
+  readonly validationErrors?: Record<keyof TraitsData, string | null>;
+  readonly onFieldBlur?: (field: keyof TraitsData) => void;
 }
 
 /**
@@ -17,6 +19,8 @@ interface MemesArtSubmissionTraitsProps {
 const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   traits,
   setTraits,
+  validationErrors = {},
+  onFieldBlur,
 }) => {
   console.log(traits)
   const { connectedProfile } = useAuth();
@@ -103,6 +107,8 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
                 updateText={updateText}
                 updateNumber={updateNumber}
                 updateBoolean={updateBoolean}
+                error={validationErrors[field.field]}
+                onBlur={onFieldBlur ? () => onFieldBlur(field.field) : undefined}
               />
             ))}
           </div>

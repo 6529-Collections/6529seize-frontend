@@ -12,6 +12,8 @@ interface TraitFieldProps {
   readonly updateText: (field: keyof TraitsData, value: string) => void;
   readonly updateNumber: (field: keyof TraitsData, value: number) => void;
   readonly updateBoolean: (field: keyof TraitsData, value: boolean) => void;
+  readonly error?: string | null;
+  readonly onBlur?: () => void;
 }
 
 // Create the component
@@ -21,6 +23,8 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
   updateText,
   updateNumber,
   updateBoolean,
+  error,
+  onBlur,
 }) => {
   // Text field rendering
   if (definition.type === FieldType.TEXT) {
@@ -33,6 +37,8 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         updateText={updateText}
         readOnly={definition.readOnly}
         placeholder={definition.placeholder}
+        error={error}
+        onBlur={onBlur}
       />
     );
   }
@@ -49,6 +55,8 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         readOnly={definition.readOnly}
         min={definition.min}
         max={definition.max}
+        error={error}
+        onBlur={onBlur}
       />
     );
   }
@@ -63,6 +71,8 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         traits={traits}
         updateText={updateText}
         options={definition.options}
+        error={error}
+        onBlur={onBlur}
       />
     );
   }
@@ -76,6 +86,8 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         field={definition.field}
         traits={traits}
         updateBoolean={updateBoolean}
+        error={error}
+        onBlur={onBlur}
       />
     );
   }
@@ -87,8 +99,8 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
 
 // Create comparison function for memoization
 const arePropsEqual = (prevProps: TraitFieldProps, nextProps: TraitFieldProps) => {
-  const { definition, traits } = prevProps;
-  const { definition: nextDefinition, traits: nextTraits } = nextProps;
+  const { definition, traits, error } = prevProps;
+  const { definition: nextDefinition, traits: nextTraits, error: nextError } = nextProps;
   
   // Check if field value has changed
   const fieldMatches = traits[definition.field] === nextTraits[nextDefinition.field];
@@ -104,7 +116,10 @@ const arePropsEqual = (prevProps: TraitFieldProps, nextProps: TraitFieldProps) =
     definition.type === nextDefinition.type && 
     definition.field === nextDefinition.field &&
     definition.label === nextDefinition.label;
-    
+  
+  // Check if validation error changed
+  const errorMatches = error === nextError;
+  
   // Special handling for dropdown fields - re-render more aggressively
   if (definition.type === FieldType.DROPDOWN) {
     // Check if any important title/description changed that might affect dropdown behavior
@@ -114,7 +129,7 @@ const arePropsEqual = (prevProps: TraitFieldProps, nextProps: TraitFieldProps) =
   }
   
   // Return true if nothing relevant changed (prevent re-render)
-  return fieldMatches && definitionMatches;
+  return fieldMatches && definitionMatches && errorMatches;
 };
 
 // Export memoized component with display name
