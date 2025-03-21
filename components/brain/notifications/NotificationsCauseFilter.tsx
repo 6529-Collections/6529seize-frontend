@@ -13,7 +13,7 @@ const NotificationFilters: NotificationFilter[] = [
   { cause: ApiNotificationCause.DropReplied, title: "Replies" },
   { cause: ApiNotificationCause.IdentitySubscribed, title: "Follows" },
   { cause: ApiNotificationCause.DropVoted, title: "Ratings" },
-  { cause: ApiNotificationCause.WaveCreated, title: "Waves" },
+  { cause: ApiNotificationCause.WaveCreated, title: "Invites" },
 ];
 
 export default function NotificationsCauseFilter({
