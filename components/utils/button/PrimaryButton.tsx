@@ -6,12 +6,14 @@ export default function PrimaryButton({
   onClicked,
   children,
   padding = "tw-px-3.5 tw-py-2.5",
+  title,
 }: {
   readonly loading: boolean;
   readonly disabled: boolean;
   readonly onClicked: () => void;
   readonly children: React.ReactNode;
   readonly padding?: string;
+  readonly title?: string;
 }) {
   return (
     <div
@@ -25,6 +27,7 @@ export default function PrimaryButton({
         onClick={onClicked}
         disabled={disabled || loading}
         type="button"
+        title={title}
         className={`${
           disabled || loading
             ? "tw-opacity-30 tw-text-iron-300"

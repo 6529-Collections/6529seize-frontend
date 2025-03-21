@@ -31,8 +31,6 @@ export default function CreateWaveVoting({
   // This will be wired up to the parent component later
   const [timeWeightedVotingConfig, setTimeWeightedVotingConfig] = useState<TimeWeightedVotingConfig>({
     enabled: false,
-    snapshotGranularity: 1,
-    snapshotGranularityUnit: "hours",
     averagingInterval: 24,
     averagingIntervalUnit: "hours",
   });

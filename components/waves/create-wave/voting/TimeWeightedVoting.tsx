@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 
-type TimeUnit = "minutes" | "hours" | "days";
+type TimeUnit = "minutes" | "hours";
 
 export interface TimeWeightedVotingConfig {
   enabled: boolean;
-  snapshotGranularity: number;
-  snapshotGranularityUnit: TimeUnit;
   averagingInterval: number;
   averagingIntervalUnit: TimeUnit;
 }
@@ -15,20 +13,28 @@ interface TimeWeightedVotingProps {
   readonly onChange: (config: TimeWeightedVotingConfig) => void;
 }
 
-// Constants for validation
-const MAX_GRANULARITY = 24;
-const MAX_INTERVAL = 72;
-
 export default function TimeWeightedVoting({
   config,
   onChange,
 }: TimeWeightedVotingProps) {
   // State for validation errors
   const [validationErrors, setValidationErrors] = useState<{
-    granularity?: string;
     interval?: string;
     general?: string;
   }>({});
+  
+  // State for tracking input value during editing
+  const [inputValue, setInputValue] = useState<string>(config.averagingInterval.toString());
+
+  // Constants for validation
+  const MIN_MINUTES = 5;
+  const MAX_HOURS = 24;
+  const MAX_MINUTES = MAX_HOURS * 60;
+  
+  // Update input value when config changes externally
+  useEffect(() => {
+    setInputValue(config.averagingInterval.toString());
+  }, [config.averagingInterval]);
 
   // Validate the configuration whenever it changes
   useEffect(() => {
@@ -37,37 +43,21 @@ export default function TimeWeightedVoting({
       return;
     }
 
-    const errors: { granularity?: string; interval?: string; general?: string } = {};
+    const errors: { interval?: string; general?: string } = {};
 
-    // Validate granularity
-    if (config.snapshotGranularity <= 0) {
-      errors.granularity = "Must be greater than 0";
-    } else if (config.snapshotGranularity > MAX_GRANULARITY && config.snapshotGranularityUnit === "hours") {
-      errors.granularity = `Should not exceed ${MAX_GRANULARITY} hours`;
+    // Convert current setting to minutes for comparison
+    const currentValueInMinutes = config.averagingIntervalUnit === "minutes" 
+      ? config.averagingInterval 
+      : config.averagingInterval * 60;
+
+    // Validate minimum
+    if (currentValueInMinutes < MIN_MINUTES) {
+      errors.interval = `Must be at least ${MIN_MINUTES} minutes`;
     }
-
-    // Validate interval
-    if (config.averagingInterval <= 0) {
-      errors.interval = "Must be greater than 0";
-    } else if (config.averagingInterval > MAX_INTERVAL && config.averagingIntervalUnit === "hours") {
-      errors.interval = `Should not exceed ${MAX_INTERVAL} hours`;
-    }
-
-    // Calculate durations in minutes for comparison
-    const getMinutes = (value: number, unit: TimeUnit): number => {
-      switch (unit) {
-        case "minutes": return value;
-        case "hours": return value * 60;
-        case "days": return value * 24 * 60;
-      }
-    };
-
-    const granularityMinutes = getMinutes(config.snapshotGranularity, config.snapshotGranularityUnit);
-    const intervalMinutes = getMinutes(config.averagingInterval, config.averagingIntervalUnit);
-
-    // Validate the relationship between granularity and interval
-    if (granularityMinutes >= intervalMinutes) {
-      errors.general = "Averaging interval must be larger than snapshot granularity";
+    
+    // Validate maximum
+    if (currentValueInMinutes > MAX_MINUTES) {
+      errors.interval = `Must not exceed ${MAX_HOURS} hours`;
     }
 
     setValidationErrors(errors);
@@ -80,36 +70,80 @@ export default function TimeWeightedVoting({
     });
   };
 
-  const handleSnapshotGranularityChange = (value: string) => {
-    const numValue = parseInt(value, 10);
-    if (!isNaN(numValue) && numValue > 0) {
-      onChange({
-        ...config,
-        snapshotGranularity: numValue,
-      });
-    }
-  };
-
-  const handleSnapshotGranularityUnitChange = (unit: TimeUnit) => {
-    onChange({
-      ...config,
-      snapshotGranularityUnit: unit,
-    });
-  };
-
   const handleAveragingIntervalChange = (value: string) => {
+    // Prevent extremely large inputs by limiting length
+    if (value !== "" && value.length > 5) {
+      return;
+    }
+    
+    // Update the input value to allow for empty field during editing
+    setInputValue(value);
+    
+    // If empty string, don't update the config yet
+    if (value === "") {
+      return;
+    }
+    
     const numValue = parseInt(value, 10);
-    if (!isNaN(numValue) && numValue > 0) {
-      onChange({
-        ...config,
-        averagingInterval: numValue,
-      });
+    
+    // Only update if it's a valid number
+    if (!isNaN(numValue)) {
+      // Apply constraints based on the current unit
+      if (config.averagingIntervalUnit === "minutes") {
+        // For minutes, don't apply minimum yet to allow typing, but cap at maximum
+        if (numValue <= MAX_MINUTES) {
+          onChange({
+            ...config,
+            averagingInterval: numValue,
+          });
+        } else {
+          // If exceeds maximum, update input to maximum
+          setInputValue(MAX_MINUTES.toString());
+          onChange({
+            ...config,
+            averagingInterval: MAX_MINUTES,
+          });
+        }
+      } else if (config.averagingIntervalUnit === "hours") {
+        // For hours, don't apply minimum yet to allow typing, but cap at maximum
+        if (numValue <= MAX_HOURS) {
+          onChange({
+            ...config,
+            averagingInterval: numValue,
+          });
+        } else {
+          // If exceeds maximum, update input to maximum
+          setInputValue(MAX_HOURS.toString());
+          onChange({
+            ...config,
+            averagingInterval: MAX_HOURS,
+          });
+        }
+      }
     }
   };
 
   const handleAveragingIntervalUnitChange = (unit: TimeUnit) => {
+    let newInterval = config.averagingInterval;
+    
+    // Handle unit conversion and enforce limits
+    if (unit === "hours" && config.averagingIntervalUnit === "minutes") {
+      // Converting from minutes to hours
+      newInterval = Math.floor(config.averagingInterval / 60);
+      // Ensure minimum 1 hour if converting from minutes
+      newInterval = Math.max(1, newInterval);
+      // Ensure maximum 24 hours
+      newInterval = Math.min(MAX_HOURS, newInterval);
+    } else if (unit === "minutes" && config.averagingIntervalUnit === "hours") {
+      // Converting from hours to minutes
+      newInterval = config.averagingInterval * 60;
+      // Ensure maximum 24 hours worth of minutes
+      newInterval = Math.min(MAX_MINUTES, newInterval);
+    }
+    
     onChange({
       ...config,
+      averagingInterval: newInterval,
       averagingIntervalUnit: unit,
     });
   };
@@ -135,7 +169,6 @@ export default function TimeWeightedVoting({
     >
       <option value="minutes">Minutes</option>
       <option value="hours">Hours</option>
-      <option value="days">Days</option>
     </select>
   );
 
@@ -175,7 +208,8 @@ export default function TimeWeightedVoting({
       </div>
 
       <p className="tw-text-iron-400 tw-mb-4">
-        Protects against last-minute vote manipulation by using a time-averaged vote count instead of the final tally.
+        Protects against last-minute vote manipulation by using a time-averaged
+        vote count instead of the final tally.
       </p>
 
       {config.enabled && (
@@ -185,47 +219,8 @@ export default function TimeWeightedVoting({
               {validationErrors.general}
             </div>
           )}
-          
-          <div className="tw-grid md:tw-grid-cols-2 tw-gap-6">
-            <div>
-              <label
-                htmlFor="snapshot-granularity"
-                className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 tw-mb-2"
-              >
-                Snapshot Granularity
-              </label>
-              <div className="tw-flex tw-items-center">
-                <input
-                  type="number"
-                  id="snapshot-granularity"
-                  min="1"
-                  max={MAX_GRANULARITY}
-                  value={config.snapshotGranularity}
-                  onChange={(e) => handleSnapshotGranularityChange(e.target.value)}
-                  className={`tw-px-3 tw-py-2 tw-bg-iron-800 tw-text-iron-50 tw-border tw-rounded-md tw-w-24 ${
-                    validationErrors.granularity ? "tw-border-red-500" : "tw-border-iron-700"
-                  }`}
-                  aria-invalid={!!validationErrors.granularity}
-                  aria-describedby="snapshot-granularity-description snapshot-granularity-error"
-                />
-                <TimeUnitSelector
-                  id="snapshot-granularity-unit"
-                  ariaLabel="Snapshot granularity time unit"
-                  value={config.snapshotGranularityUnit}
-                  onChange={handleSnapshotGranularityUnitChange}
-                />
-              </div>
-              {validationErrors.granularity ? (
-                <p id="snapshot-granularity-error" className="tw-text-xs tw-text-red-400 tw-mt-1">
-                  {validationErrors.granularity}
-                </p>
-              ) : (
-                <p id="snapshot-granularity-description" className="tw-text-xs tw-text-iron-400 tw-mt-1">
-                  How often vote counts are recorded. Smaller values provide more precision but require more computation.
-                </p>
-              )}
-            </div>
 
+          <div className="tw-grid md:tw-grid-cols-2 tw-gap-6">
             <div>
               <label
                 htmlFor="averaging-interval"
@@ -237,12 +232,29 @@ export default function TimeWeightedVoting({
                 <input
                   type="number"
                   id="averaging-interval"
-                  min="1"
-                  max={MAX_INTERVAL}
-                  value={config.averagingInterval}
-                  onChange={(e) => handleAveragingIntervalChange(e.target.value)}
+                  // Don't use min/max to allow for empty field during typing
+                  value={inputValue}
+                  onChange={(e) =>
+                    handleAveragingIntervalChange(e.target.value)
+                  }
+                  // Handle blur event to apply constraints when user finishes editing
+                  onBlur={() => {
+                    // Apply min constraints when focus is lost
+                    const numValue = parseInt(inputValue, 10);
+                    if (inputValue === "" || isNaN(numValue) || numValue < (config.averagingIntervalUnit === "minutes" ? MIN_MINUTES : 1)) {
+                      // Set to minimum if below minimum or invalid
+                      const minValue = config.averagingIntervalUnit === "minutes" ? MIN_MINUTES : 1;
+                      setInputValue(minValue.toString());
+                      onChange({
+                        ...config,
+                        averagingInterval: minValue,
+                      });
+                    }
+                  }}
                   className={`tw-px-3 tw-py-2 tw-bg-iron-800 tw-text-iron-50 tw-border tw-rounded-md tw-w-24 ${
-                    validationErrors.interval ? "tw-border-red-500" : "tw-border-iron-700"
+                    validationErrors.interval
+                      ? "tw-border-red-500"
+                      : "tw-border-iron-700"
                   }`}
                   aria-invalid={!!validationErrors.interval}
                   aria-describedby="averaging-interval-description averaging-interval-error"
@@ -255,12 +267,19 @@ export default function TimeWeightedVoting({
                 />
               </div>
               {validationErrors.interval ? (
-                <p id="averaging-interval-error" className="tw-text-xs tw-text-red-400 tw-mt-1">
+                <p
+                  id="averaging-interval-error"
+                  className="tw-text-xs tw-text-red-400 tw-mt-1"
+                >
                   {validationErrors.interval}
                 </p>
               ) : (
-                <p id="averaging-interval-description" className="tw-text-xs tw-text-iron-400 tw-mt-1">
-                  The time period over which votes are averaged. Longer intervals are more resistant to manipulation.
+                <p
+                  id="averaging-interval-description"
+                  className="tw-text-xs tw-text-iron-400 tw-mt-1"
+                >
+                  The time period over which votes are averaged. Must be between {MIN_MINUTES} minutes 
+                  and {MAX_HOURS} hours. Longer intervals are more resistant to manipulation.
                 </p>
               )}
             </div>
