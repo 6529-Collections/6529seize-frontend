@@ -25,7 +25,6 @@ export default function NotificationsCauseFilter({
 }) {
   const [activeCauseIndex, setActiveCauseIndex] = useState<number>(0);
 
-  // We'll store the position/width for our highlight bar in state
   const [highlightStyle, setHighlightStyle] = useState<{
     left: number;
     width: number;
@@ -34,14 +33,12 @@ export default function NotificationsCauseFilter({
     width: 0,
   });
 
-  // Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
 
   useEffect(() => {
     const button = buttonRefs.current[activeCauseIndex];
     if (button) {
-      // Position the highlight bar under the selected button
       setHighlightStyle({
         left: button.offsetLeft,
         width: button.offsetWidth,
@@ -56,7 +53,6 @@ export default function NotificationsCauseFilter({
     setActiveCause(cause);
     setActiveCauseIndex(causeIndex);
 
-    // Scroll that button into the center, if possible
     const button = buttonRefs.current[causeIndex];
     const container = containerRef.current;
     if (button && container) {
@@ -66,10 +62,8 @@ export default function NotificationsCauseFilter({
       const buttonLeft = button.offsetLeft;
       const buttonWidth = button.offsetWidth;
 
-      // Ideal scrollLeft to center the button:
       let scrollLeft = buttonLeft - containerWidth / 2 + buttonWidth / 2;
 
-      // Clamp to avoid over-scrolling
       if (scrollLeft < 0) scrollLeft = 0;
       if (scrollLeft > scrollWidth - containerWidth) {
         scrollLeft = scrollWidth - containerWidth;
