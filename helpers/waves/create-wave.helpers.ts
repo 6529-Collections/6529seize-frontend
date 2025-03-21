@@ -16,6 +16,35 @@ import {
   WaveSignatureType,
 } from "../../types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
+import { TimeWeightedVotingSettings } from "../../types/waves.types";
+
+/**
+ * Converts time-weighted voting settings to milliseconds, ensuring it's within acceptable range
+ * @param timeWeighted The time-weighted voting configuration
+ * @returns The time lock in milliseconds, constrained within acceptable range
+ */
+export const getTimeWeightedLockMs = (
+  timeWeighted: TimeWeightedVotingSettings
+): number => {
+  // Constants
+  const MIN_MINUTES = 5;
+  const MAX_HOURS = 24;
+  const MINUTE_IN_MS = 60 * 1000;
+  const HOUR_IN_MS = 60 * MINUTE_IN_MS;
+  const MIN_MS = MIN_MINUTES * MINUTE_IN_MS;
+  const MAX_MS = MAX_HOURS * HOUR_IN_MS;
+
+  // Calculate milliseconds based on unit
+  let ms: number;
+  if (timeWeighted.averagingIntervalUnit === "minutes") {
+    ms = timeWeighted.averagingInterval * MINUTE_IN_MS;
+  } else {
+    ms = timeWeighted.averagingInterval * HOUR_IN_MS;
+  }
+
+  // Enforce minimum and maximum constraints
+  return Math.max(MIN_MS, Math.min(MAX_MS, ms));
+};
 
 export const getCreateWaveNextStep = ({
   step,
@@ -415,7 +444,9 @@ export const getCreateNewWaveBody = ({
       winning_thresholds: getWinningThreshold({ config }),
       // TODO - should be in outcomes
       max_winners: null,
-      time_lock_ms: config.approval.thresholdTimeMs,
+      time_lock_ms: config.overview.type === ApiWaveType.Rank && config.voting.timeWeighted.enabled
+        ? getTimeWeightedLockMs(config.voting.timeWeighted)
+        : null,
       admin_group: {
         group_id: config.groups.admin,
       },

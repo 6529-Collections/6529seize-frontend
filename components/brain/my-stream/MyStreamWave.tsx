@@ -24,7 +24,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
-  const { isChatWave } = useWave(wave);
+  const { isChatWave, isMemesWave } = useWave(wave);
   const {
     voting: { isUpcoming, isCompleted, isInProgress },
     decisions: { firstDecisionDone },
@@ -53,7 +53,16 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       : isCompleted
       ? WaveVotingState.ENDED
       : WaveVotingState.ONGOING;
-    updateAvailableTabs(wave, votingState, firstDecisionDone);
+    updateAvailableTabs(
+      wave
+        ? {
+            isMemesWave,
+            isChatWave,
+            votingState,
+            hasFirstDecisionPassed: firstDecisionDone,
+          }
+        : null
+    );
   }, [
     wave,
     isUpcoming,

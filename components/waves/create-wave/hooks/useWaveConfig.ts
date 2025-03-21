@@ -4,6 +4,7 @@ import {
   CreateWaveGroupConfigType, 
   CreateWaveOutcomeType, 
   CreateWaveStep, 
+  TimeWeightedVotingSettings, 
   WaveSignatureType 
 } from "../../../../types/waves.types";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
@@ -64,6 +65,11 @@ export function useWaveConfig() {
         type: ApiWaveCreditType.Tdh,
         category: null,
         profileId: null,
+        timeWeighted: {
+          enabled: false,
+          averagingInterval: 24,
+          averagingIntervalUnit: "hours",
+        },
       },
       outcomes: [],
       approval: {
@@ -233,6 +239,17 @@ export function useWaveConfig() {
         type,
         category: null,
         profileId: null,
+        timeWeighted: prev.voting.timeWeighted,
+      },
+    }));
+  };
+  
+  const onTimeWeightedVotingChange = (timeWeighted: TimeWeightedVotingSettings) => {
+    setConfig((prev) => ({
+      ...prev,
+      voting: {
+        ...prev.voting,
+        timeWeighted,
       },
     }));
   };
@@ -310,6 +327,7 @@ export function useWaveConfig() {
     onVotingTypeChange,
     onCategoryChange,
     onProfileIdChange,
+    onTimeWeightedVotingChange,
     // Approval
     onThresholdChange,
     onThresholdTimeChange,

@@ -5,6 +5,7 @@ import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import React from "react";
 import DefaultParticipationDrop from "./DefaultParticipationDrop";
 import MemeParticipationDrop from "../../../memes/drops/MemeParticipationDrop";
+import { isMemesWave } from "../../../../helpers/waves/waves.helpers";
 
 interface ParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -21,9 +22,8 @@ interface ParticipationDropProps {
 
 export default function ParticipationDrop(props: ParticipationDropProps) {
   const { drop } = props;
-  const isMemesWave =
-    drop.wave?.id?.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
-  if (isMemesWave) {
+
+  if (isMemesWave(drop.wave?.id?.toLowerCase())) {
     return <MemeParticipationDrop {...props} />;
   } else {
     return <DefaultParticipationDrop {...props} />;

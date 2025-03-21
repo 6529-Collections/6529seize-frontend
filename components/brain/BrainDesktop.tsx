@@ -1,10 +1,10 @@
-import React, { ReactNode, useEffect, useState, useMemo } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import BrainLeftSidebar from "./left-sidebar/BrainLeftSidebar";
 import BrainRightSidebar, {
   SidebarTab,
 } from "./right-sidebar/BrainRightSidebar";
-import { ContentTabProvider, useContentTab } from "./ContentTabContext";
+import { ContentTabProvider } from "./ContentTabContext";
 import { useRouter } from "next/router";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";

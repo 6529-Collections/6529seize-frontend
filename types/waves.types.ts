@@ -52,10 +52,17 @@ export interface CreateWaveDropsConfig {
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
 }
 
+export interface TimeWeightedVotingSettings {
+  readonly enabled: boolean;
+  readonly averagingInterval: number;
+  readonly averagingIntervalUnit: "minutes" | "hours";
+}
+
 export interface CreateWaveVotingConfig {
   readonly type: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
+  readonly timeWeighted: TimeWeightedVotingSettings;
 }
 
 export enum CreateWaveStep {

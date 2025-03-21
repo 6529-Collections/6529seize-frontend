@@ -6,7 +6,8 @@ import { WAVE_VOTING_LABELS } from "../../../../helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "../../../utils/radio/CommonBorderedRadioButton";
 import CreateWaveVotingRep from "./CreateWaveVotingRep";
 import NegativeVotingToggle from "./NegativeVotingToggle";
-import TimeWeightedVoting, { TimeWeightedVotingConfig } from "./TimeWeightedVoting";
+import TimeWeightedVoting from "./TimeWeightedVoting";
+import { TimeWeightedVotingConfig } from "./types";
 
 export default function CreateWaveVoting({
   waveType,
@@ -17,6 +18,8 @@ export default function CreateWaveVoting({
   onTypeChange,
   setCategory,
   setProfileId,
+  timeWeighted,
+  onTimeWeightedChange,
 }: {
   readonly waveType: ApiWaveType;
   readonly selectedType: ApiWaveCreditType | null;
@@ -26,19 +29,12 @@ export default function CreateWaveVoting({
   readonly onTypeChange: (type: ApiWaveCreditType) => void;
   readonly setCategory: (category: string | null) => void;
   readonly setProfileId: (profileId: string | null) => void;
+  readonly timeWeighted: TimeWeightedVotingConfig;
+  readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
-  // Local state for time-weighted voting config
-  // This will be wired up to the parent component later
-  const [timeWeightedVotingConfig, setTimeWeightedVotingConfig] = useState<TimeWeightedVotingConfig>({
-    enabled: false,
-    snapshotGranularity: 1,
-    snapshotGranularityUnit: "hours",
-    averagingInterval: 24,
-    averagingIntervalUnit: "hours",
-  });
-
-  // Local state for negative voting toggle
-  // This will be wired up to the parent component later
+  // We now use the props from the parent instead of local state
+  
+  // Still using local state for negative voting toggle for now
   const [allowNegativeVotes, setAllowNegativeVotes] = useState(true);
 
   const TITLES: Record<ApiWaveType, string> = {
@@ -91,8 +87,8 @@ export default function CreateWaveVoting({
       {/* Only show Time-Weighted Voting for Rank waves */}
       {waveType === ApiWaveType.Rank && (
         <TimeWeightedVoting
-          config={timeWeightedVotingConfig}
-          onChange={setTimeWeightedVotingConfig}
+          config={timeWeighted}
+          onChange={onTimeWeightedChange}
         />
       )}
     </div>

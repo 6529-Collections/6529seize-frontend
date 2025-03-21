@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { ApiWave } from "../generated/models/ApiWave";
 import { Time } from "../helpers/time";
 import { calculateLastDecisionTime } from "../helpers/waves/time.utils";
+import { isMemesWave } from "../helpers/waves/waves.helpers";
 
 export function useWave(wave: ApiWave | null | undefined) {
   // Extract time period boundaries or default to current time
@@ -33,11 +34,11 @@ export function useWave(wave: ApiWave | null | undefined) {
       endTime: participationEndTime,
     },
     decisions: {
-      multiDecision: !!wave?.wave.decisions_strategy?.subsequent_decisions.length
+      multiDecision:
+        !!wave?.wave.decisions_strategy?.subsequent_decisions.length,
     },
     isChatWave: wave?.wave.type === "CHAT",
     isRankWave: wave?.wave.type === "RANK",
-    isMemesWave:
-      wave?.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58",
+    isMemesWave: isMemesWave(wave?.id.toLowerCase()),
   };
 }
