@@ -42,7 +42,7 @@ export default function WavesListHeader({
           setWaveName={setWaveName}
           setIdentity={setIdentity}
         />
-        <div className="tw-flex tw-gap-x-3">
+        <div className="tw-flex tw-flex-wrap tw-gap-3">
           {showMyWavesButton && (
             <button
               onClick={() =>
