@@ -27,11 +27,13 @@ export enum UserFollowBtnSize {
 export default function UserFollowBtn({
   handle,
   size = UserFollowBtnSize.MEDIUM,
-  dm = false,
+  onDirectMessage,
+  directMessageLoading,
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize;
-  readonly dm?: boolean;
+  readonly onDirectMessage?: () => void;
+  readonly directMessageLoading?: boolean;
 }) {
   const BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
     [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-2 tw-text-xs",
@@ -143,15 +145,20 @@ export default function UserFollowBtn({
 
   return (
     <div className="tw-flex tw-items-center">
-      {dm && following && (
+      {onDirectMessage && following && (
         <Tippy
           content="Direct Message"
           placement="left"
           theme="dark"
           delay={250}>
           <button
+            onClick={onDirectMessage}
             className={`${BUTTON_CLASSES[size]} tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700 tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out tw-mr-2`}>
-            <FontAwesomeIcon icon={faPaperPlane} className="tw-h-4 tw-w-4" />
+            {directMessageLoading ? (
+              <CircleLoader size={CircleLoaderSize.SMALL} />
+            ) : (
+              <FontAwesomeIcon icon={faPaperPlane} className="tw-h-4 tw-w-4" />
+            )}
           </button>
         </Tippy>
       )}
