@@ -62,7 +62,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   return (
     <div className="tw-pt-2 lg:tw-pt-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
       <div className="tw-relative">
-        <div className="tw-absolute tw-left-2.5 sm:tw-left-[19px] tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-700/80"></div>
+        <div className="tw-absolute tw-left-2 lg:tw-left-[19px] tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-700/80"></div>
 
         <div className="tw-space-y-6">
           {sortedDisplayPoints.map((point, index) => {
@@ -76,13 +76,13 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
                 key={`decision-${point.decision_time}`}
                 className="tw-relative group"
               >
-                <div className="tw-absolute tw-left-2.5 sm:tw-left-3 tw-top-[0.3125rem] tw-z-10">
+                <div className="tw-absolute tw-left-0 lg:tw-left-3 tw-top-[0.3125rem] tw-z-10">
                   <div className="tw-size-4 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-border tw-border-iron-700/50 tw-transition-all group-hover:tw-border-iron-500">
                     <div className="tw-rounded-full tw-bg-iron-500 tw-size-2 tw-transition-all group-hover:tw-bg-iron-400 group-hover:tw-size-2.5"></div>
                   </div>
                 </div>
 
-                <div className="tw-ml-8 sm:tw-ml-10 tw-mb-3">
+                <div className="tw-ml-6 lg:tw-ml-10 tw-mb-3">
                   <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
                     <h3 className="tw-text-sm tw-text-iron-300 tw-font-medium tw-tracking-wide">
                       {formattedDate}
@@ -97,15 +97,13 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
                 </div>
 
                 <div className="tw-ml-6 tw-mb-6">
-                  <div className="tw-rounded-lg tw-border-l-2 tw-border-iron-600/40 tw-border-y-0 tw-border-r-0">
-                    <div className="tw-px-4 tw-pb-4">
-                      <WaveWinnersDrops
-                        winners={point.winners}
-                        onDropClick={onDropClick}
-                        wave={wave}
-                        isLoading={false}
-                      />
-                    </div>
+                  <div className="lg:tw-px-4 lg:tw-pb-4">
+                    <WaveWinnersDrops
+                      winners={point.winners}
+                      onDropClick={onDropClick}
+                      wave={wave}
+                      isLoading={false}
+                    />
                   </div>
                 </div>
               </div>

@@ -15,7 +15,7 @@ export default function ParticipationDropRatingsTotalSection({
   const { totalRating } = ratingsData;
 
   return (
-    <div className="tw-flex tw-items-baseline tw-gap-2">
+    <div className="tw-flex tw-items-center tw-gap-x-1">
       <Tippy
         content={<VoteBreakdownTooltip drop={drop} ratingsData={ratingsData} />}
         interactive={true}

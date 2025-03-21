@@ -42,29 +42,30 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     <MemesLeaderboardDropCard drop={drop}>
       <div className="tw-grid tw-grid-cols-1 xl:tw-grid-cols-12">
         {/* Left column - Metadata */}
-        <div className="tw-col-span-1 xl:tw-col-span-5 tw-p-5">
+        <div className="tw-col-span-1 xl:tw-col-span-5 tw-px-4 tw-pt-4 tw-pb-4">
           {/* Header with metadata */}
-          <div className="tw-flex tw-flex-col tw-gap-4">
+          <div className="tw-flex tw-flex-col tw-gap-y-1 sm:tw-gap-y-2">
             {/* Rank and title in the same row */}
-            <div className="tw-flex tw-items-center xl:tw-flex-wrap tw-justify-between tw-w-full tw-gap-x-3 tw-gap-y-4">
-              <MemesLeaderboardDropHeader
-                title={title}
-                rank={drop.rank}
-                decisionTime={drop.winning_context?.decision_time || null}
-              />
-              <MemesLeaderboardDropVoteSummary
-                rating={drop.rating || 0}
-                creditType={drop.wave.voting_credit_type}
-                ratersCount={drop.raters_count || 0}
-                topVoters={firstThreeVoters}
-              />
-            </div>
+
+            <MemesLeaderboardDropHeader
+              title={title}
+              rank={drop.rank}
+              decisionTime={drop.winning_context?.decision_time || null}
+            />
             {/* Description on its own row */}
             <MemesLeaderboardDropDescription description={description} />
-
+          </div>
+          <div className="tw-flex tw-flex-col tw-gap-y-4 tw-mt-4">
+            <MemesLeaderboardDropVoteSummary
+              rating={drop.rating || 0}
+              creditType={drop.wave.voting_credit_type}
+              ratersCount={drop.raters_count || 0}
+              topVoters={firstThreeVoters}
+            />
             {/* Vote count and artist info */}
             <MemesLeaderboardDropArtistInfo drop={drop} />
           </div>
+
         </div>
 
         {/* Right column - Artwork - now spans 7 columns on xl screens */}

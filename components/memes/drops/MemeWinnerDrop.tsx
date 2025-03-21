@@ -72,20 +72,19 @@ export default function MemeWinnerDrop({
   return (
     <div className="tw-w-full">
       <div
-        className={`tw-w-full ${
-          location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-        } tw-relative tw-group`}
+        className={`tw-w-full ${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
+          } tw-relative tw-group`}
       >
         <div
-          className={`tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${firstPlaceShadow}`}
+          className={`tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${location === DropLocation.WAVE ? 'tw-bg-iron-900' : 'tw-bg-iron-950'} ${firstPlaceShadow}`}
         >
           {/* Two-column layout */}
           <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-5">
             {/* Left column - Metadata */}
-            <div className="tw-col-span-1 md:tw-col-span-5 tw-p-5">
+            <div className="tw-col-span-1 md:tw-col-span-5 tw-px-4 tw-pt-4">
               {/* Header with metadata */}
               <div className="tw-flex tw-flex-col tw-gap-y-4">
-                <div className="tw-flex tw-flex-col tw-gap-y-2">
+                <div className="tw-flex tw-flex-col tw-gap-y-1 sm:tw-gap-y-2">
                   {/* Rank and title in the same row */}
                   <MemeWinnerHeader title={title} decisionTime={decisionTime} />
 

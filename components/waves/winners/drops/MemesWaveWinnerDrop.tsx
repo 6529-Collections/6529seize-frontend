@@ -56,31 +56,32 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     >
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/40 tw-shadow-[0_0_15px_rgba(251,191,36,0.15)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
         <div className="tw-flex tw-flex-col">
-          <div className="tw-p-5">
+          <div className="tw-p-4">
             <div className="tw-flex tw-flex-col tw-gap-y-4">
               <div className="tw-space-y-2">
+                {/* Title section */}
                 <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
-                  <div className="tw-flex tw-items-center tw-gap-x-2">
+                  <div className="tw-flex tw-flex-col xl:tw-flex-row tw-items-start xl:tw-items-center tw-gap-y-1 tw-gap-x-2">
                     <div className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-bg-[rgba(251,191,36,0.1)] tw-px-2 tw-py-1 tw-border tw-border-solid tw-border-[#fbbf24]/20">
                       <FontAwesomeIcon
                         icon={faTrophy}
-                        className="tw-flex-shrink-0 tw-size-2.5 tw-text-[#fbbf24]"
+                        className="tw-flex-shrink-0 tw-size-3 tw-text-[#fbbf24]"
                       />
                     </div>
 
-                    <h3 className="tw-text-lg tw-font-semibold tw-text-white tw-mb-0 tw-line-clamp-2 tw-flex tw-items-center">
+                    <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0 tw-whitespace-nowrap">
                       {title}
                     </h3>
                   </div>
 
-                  <div className="tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0">
+                  {/* Votes and stats section for desktop (xl+) */}
+                  <div className="tw-hidden xl:tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0">
                     <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
                       <span
-                        className={`tw-text-md tw-font-semibold ${
-                          isPositive
+                        className={`tw-text-md tw-font-semibold ${isPositive
                             ? "tw-text-emerald-500"
                             : "tw-text-rose-500"
-                        } `}
+                          } `}
                       >
                         {formatNumberWithCommas(rating)}
                       </span>
@@ -94,9 +95,8 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         {topVoters.map((voter) => (
                           <Tippy
                             key={voter.profile.handle}
-                            content={`${
-                              voter.profile.handle
-                            } - ${formatNumberWithCommas(voter.rating)}`}
+                            content={`${voter.profile.handle
+                              } - ${formatNumberWithCommas(voter.rating)}`}
                           >
                             <Link
                               href={`/${voter.profile.handle}`}
@@ -127,8 +127,63 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className="tw-text-md tw-text-iron-300 tw-line-clamp-3 tw-leading-relaxed">
+
+                {/* Description - comes after title on mobile */}
+                <div className="tw-text-md tw-text-iron-400 tw-line-clamp-3 tw-mt-2 xl:tw-mt-0">
                   {description}
+                </div>
+                
+                {/* Votes and stats section for mobile - visible only on mobile and hidden on xl+ */}
+                <div className="tw-flex xl:tw-hidden tw-items-center tw-justify-between tw-mt-3">
+                  <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
+                    <span
+                      className={`tw-text-md tw-font-semibold ${isPositive
+                          ? "tw-text-emerald-500"
+                          : "tw-text-rose-500"
+                        } `}
+                    >
+                      {formatNumberWithCommas(rating)}
+                    </span>
+                    <span className="tw-text-sm tw-text-iron-400 tw-tracking-wide">
+                      {creditType}
+                    </span>
+                  </div>
+
+                  <div className="tw-flex tw-items-center tw-gap-x-2">
+                    <div className="tw-flex tw-items-center -tw-space-x-1.5">
+                      {topVoters.map((voter) => (
+                        <Tippy
+                          key={voter.profile.handle}
+                          content={`${voter.profile.handle
+                            } - ${formatNumberWithCommas(voter.rating)}`}
+                        >
+                          <Link
+                            href={`/${voter.profile.handle}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="tw-transition-transform hover:tw-translate-y-[-2px]"
+                          >
+                            {voter.profile.pfp ? (
+                              <img
+                                className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-border tw-border-iron-800/60"
+                                src={voter.profile.pfp}
+                                alt="Recent voter"
+                              />
+                            ) : (
+                              <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" />
+                            )}
+                          </Link>
+                        </Tippy>
+                      ))}
+                    </div>
+                    <div className="tw-flex tw-items-baseline tw-gap-x-1">
+                      <span className="tw-text-md tw-font-medium tw-text-iron-100">
+                        {formatNumberWithCommas(ratersCount)}
+                      </span>
+                      <span className="tw-text-sm tw-text-iron-400">
+                        {ratersCount === 1 ? "voter" : "voters"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 

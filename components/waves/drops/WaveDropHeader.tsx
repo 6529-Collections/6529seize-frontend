@@ -5,7 +5,6 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -36,8 +35,8 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap sm:tw-flex-nowrap">
+          <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-shrink-0">
             <UserCICAndLevel
               level={drop.author.level}
               cicType={cicType}
@@ -53,14 +52,13 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 {drop.author.handle}
               </Link>
             </p>
+            <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+            <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+              {getTimeAgoShort(drop.created_at)}
+            </p>
           </div>
 
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-            {getTimeAgoShort(drop.created_at)}
-          </p>
-          
-          {badge && <div className="tw-ml-4">{badge}</div>}
+          {badge && <div className="tw-ml-1 sm:tw-ml-4 tw-mt-0">{badge}</div>}
         </div>
       </div>
       <div>

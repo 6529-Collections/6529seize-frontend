@@ -56,7 +56,7 @@ export default function WaveHeader({
           } tw-overflow-hidden`}
         >
           <div
-            className="tw-h-14 tw-w-full tw-object-cover"
+            className="tw-h-14 tw-w-full tw-object-cover tw-rounded-t-xl lg:tw-rounded-t-none"
             style={{
               background: `linear-gradient(45deg, ${wave.author.banner1_color} 0%, ${wave.author.banner2_color} 100%)`,
             }}

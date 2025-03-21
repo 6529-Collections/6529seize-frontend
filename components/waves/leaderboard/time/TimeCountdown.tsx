@@ -9,21 +9,21 @@ interface TimeCountdownProps {
 /**
  * Displays a countdown with time units
  */
-export const TimeCountdown: React.FC<TimeCountdownProps> = ({ 
-  timeLeft 
+export const TimeCountdown: React.FC<TimeCountdownProps> = ({
+  timeLeft
 }) => {
   return (
-    <div className="tw-flex tw-gap-1.5">
+    <div className="tw-flex tw-w-full sm:tw-w-auto tw-gap-1.5">
       {/* Days - only show when > 0 */}
       {timeLeft.days > 0 && (
-        <TimeUnitDisplay value={timeLeft.days} label="DAYS" />
+        <div className="tw-flex-1 sm:tw-flex-none"> <TimeUnitDisplay value={timeLeft.days} label="DAYS" /></div>
       )}
       {/* Hours - always show */}
-      <TimeUnitDisplay value={timeLeft.hours} label="HRS" />
+      <div className="tw-flex-1 sm:tw-flex-none"> <TimeUnitDisplay value={timeLeft.hours} label="HRS" /></div>
       {/* Minutes - always show */}
-      <TimeUnitDisplay value={timeLeft.minutes} label="MIN" />
+      <div className="tw-flex-1 sm:tw-flex-none"> <TimeUnitDisplay value={timeLeft.minutes} label="MIN" /></div>
       {/* Seconds - always show */}
-      <TimeUnitDisplay value={timeLeft.seconds} label="SEC" />
+      <div className="tw-flex-1 sm:tw-flex-none"> <TimeUnitDisplay value={timeLeft.seconds} label="SEC" /></div>
     </div>
   );
 };

@@ -33,7 +33,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
 
   return (
     <div
-      className="tw-space-y-4 lg:tw-space-y-6 sm:tw-px-2 lg:tw-px-0 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
+      className="tw-space-y-4 lg:tw-space-y-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
       style={winnersViewStyle}
     >
       {multiDecision ? (

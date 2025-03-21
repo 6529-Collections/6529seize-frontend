@@ -16,7 +16,7 @@ export default function ParticipationDropRatingsUserSection({
   const { userRating } = ratingsData;
 
   return (
-    <div className="tw-flex tw-items-baseline tw-gap-2">
+    <div className="tw-flex tw-items-center tw-gap-x-1">
       <span className="tw-text-sm tw-font-medium tw-text-iron-500">
         Your votes
       </span>

@@ -13,7 +13,7 @@ export const MemesLeaderboardDropHeader: React.FC<MemesLeaderboardDropHeaderProp
   decisionTime,
 }) => {
   return (
-    <div className="tw-flex tw-items-center tw-justify-start tw-gap-x-3">
+    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-3 sm:tw-gap-y-2">
       <WinnerDropBadge
         rank={rank}
         decisionTime={decisionTime || null}
