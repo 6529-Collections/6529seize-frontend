@@ -9,11 +9,19 @@ export enum WaveVotingState {
   ENDED = "ENDED",
 }
 
+// Define a type for the updateAvailableTabs parameters
+export type WaveTabParams = {
+  isChatWave: boolean;
+  isMemesWave: boolean;
+  votingState: WaveVotingState;
+  hasFirstDecisionPassed: boolean;
+};
+
 interface ContentTabContextType {
   activeContentTab: MyStreamWaveTab;
   setActiveContentTab: (tab: MyStreamWaveTab) => void;
   availableTabs: MyStreamWaveTab[];
-  updateAvailableTabs: (wave: ApiWave | undefined, votingState?: WaveVotingState, firstDecisionDone?: boolean) => void;
+  updateAvailableTabs: (params: WaveTabParams | null) => void;
 }
 
 // Create the context with a default value
@@ -30,13 +38,9 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
   const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([MyStreamWaveTab.CHAT]);
 
   // Function to determine which tabs are available based on wave state
-  // Now takes the voting state parameters directly instead of using the hook
-  const updateAvailableTabs = useCallback((
-    wave: ApiWave | undefined, 
-    votingState?: WaveVotingState, 
-    hasFirstDecisionPassed?: boolean
-  ) => {
-    if (!wave) {
+  // Now accepts a params object or null
+  const updateAvailableTabs = useCallback((params: WaveTabParams | null) => {
+    if (!params) {
       setAvailableTabs([MyStreamWaveTab.CHAT]);
       
       // If current tab is not CHAT, switch to it
@@ -46,11 +50,10 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       return;
     }
 
-    // Check if this is the Memes wave
-    const isMemesWave = wave.id.toLowerCase() === "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
+    const { isChatWave, isMemesWave, votingState, hasFirstDecisionPassed } = params;
 
     // Chat-type waves only show chat tab
-    if (wave.wave.type === ApiWaveType.Chat) {
+    if (isChatWave) {
       setAvailableTabs([MyStreamWaveTab.CHAT]);
       
       // If current tab is not CHAT, switch to it

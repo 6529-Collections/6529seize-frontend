@@ -5,6 +5,7 @@ import { DropInteractionParams, DropLocation } from "../Drop";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import MemeWinnerDrop from "../../../memes/drops/MemeWinnerDrop";
 import DefaultWinnerDrop from "./DefaultWinnerDrop";
+import { isMemesWave } from "../../../../helpers/waves/waves.helpers";
 
 interface WinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -24,11 +25,7 @@ interface WinnerDropProps {
 }
 
 const WinnerDrop = (props: WinnerDropProps) => {
-  const isMemesWave =
-    props.drop.wave?.id?.toLowerCase() ===
-    "87eb0561-5213-4cc6-9ae6-06a3793a5e58";
-
-  if (isMemesWave) {
+  if (isMemesWave(props.drop.wave?.id?.toLowerCase())) {
     return <MemeWinnerDrop {...props} />;
   }
 
