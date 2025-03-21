@@ -1,6 +1,41 @@
 import { useState } from "react";
 import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
 
+interface NotificationFilter {
+  cause: ApiNotificationCause | null;
+}
+
+const NotificationFilters = [
+  {
+    cause: null,
+    title: "All",
+  },
+  {
+    cause: ApiNotificationCause.IdentityMentioned,
+    title: "Mentions",
+  },
+  {
+    cause: ApiNotificationCause.DropQuoted,
+    title: "Quotes",
+  },
+  {
+    cause: ApiNotificationCause.DropReplied,
+    title: "Replies",
+  },
+  {
+    cause: ApiNotificationCause.IdentitySubscribed,
+    title: "Follows",
+  },
+  {
+    cause: ApiNotificationCause.DropVoted,
+    title: "Ratings",
+  },
+  {
+    cause: ApiNotificationCause.WaveCreated,
+    title: "Waves",
+  },
+];
+
 export default function NotificationsCauseFilter({
   activeCause,
   setActiveCause,
@@ -23,7 +58,7 @@ export default function NotificationsCauseFilter({
   };
 
   return (
-    <div className="tw-mb-2 tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-h-10 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-relative">
+    <div className="tw-mb-3 tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-h-10 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-relative">
       <div
         className="tw-absolute tw-h-8 tw-bg-iron-800 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-in-out"
         style={{
@@ -33,41 +68,14 @@ export default function NotificationsCauseFilter({
             : `calc(100% / 7 * ${activeCauseIndex} + 2px)`,
         }}
       />
-      <NotificationCauseFilterButton
-        title="All"
-        isActive={isActive(null)}
-        onClick={() => handleChange(null, 0)}
-      />
-      <NotificationCauseFilterButton
-        title="Mentions"
-        isActive={isActive(ApiNotificationCause.IdentityMentioned)}
-        onClick={() => handleChange(ApiNotificationCause.IdentityMentioned, 1)}
-      />
-      <NotificationCauseFilterButton
-        title="Quotes"
-        isActive={isActive(ApiNotificationCause.DropQuoted)}
-        onClick={() => handleChange(ApiNotificationCause.DropQuoted, 2)}
-      />
-      <NotificationCauseFilterButton
-        title="Replies"
-        isActive={isActive(ApiNotificationCause.DropReplied)}
-        onClick={() => handleChange(ApiNotificationCause.DropReplied, 3)}
-      />
-      <NotificationCauseFilterButton
-        title="Follows"
-        isActive={isActive(ApiNotificationCause.IdentitySubscribed)}
-        onClick={() => handleChange(ApiNotificationCause.IdentitySubscribed, 4)}
-      />
-      <NotificationCauseFilterButton
-        title="Ratings"
-        isActive={isActive(ApiNotificationCause.DropVoted)}
-        onClick={() => handleChange(ApiNotificationCause.DropVoted, 5)}
-      />
-      <NotificationCauseFilterButton
-        title="Waves"
-        isActive={isActive(ApiNotificationCause.WaveCreated)}
-        onClick={() => handleChange(ApiNotificationCause.WaveCreated, 6)}
-      />
+      {NotificationFilters.map((filter, index) => (
+        <NotificationCauseFilterButton
+          key={`notification-cause-filter-${filter.cause}`}
+          title={filter.title}
+          isActive={isActive(filter.cause)}
+          onClick={() => handleChange(filter.cause, index)}
+        />
+      ))}
     </div>
   );
 }
