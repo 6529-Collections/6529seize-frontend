@@ -5,8 +5,8 @@ export default function NotificationsCauseFilter({
   activeCause,
   setActiveCause,
 }: {
-  activeCause: ApiNotificationCause | null;
-  setActiveCause: (cause: ApiNotificationCause | null) => void;
+  readonly activeCause: ApiNotificationCause | null;
+  readonly setActiveCause: (cause: ApiNotificationCause | null) => void;
 }) {
   const [activeCauseIndex, setActiveCauseIndex] = useState<number>(0);
 
@@ -77,9 +77,9 @@ function NotificationCauseFilterButton({
   isActive,
   onClick,
 }: {
-  title: string;
-  isActive: boolean;
-  onClick: () => void;
+  readonly title: string;
+  readonly isActive: boolean;
+  readonly onClick: () => void;
 }) {
   const getLinkClasses = () =>
     `tw-border-none tw-bg-transparent tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-8 tw-rounded-lg tw-transition-colors tw-duration-300 tw-ease-in-out tw-relative z-10 ${

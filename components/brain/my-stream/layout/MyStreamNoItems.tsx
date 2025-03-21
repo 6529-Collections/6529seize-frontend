@@ -1,10 +1,6 @@
 import Link from "next/link";
 
-export default function MyStreamNoItems({
-  notifications,
-}: {
-  notifications?: boolean;
-}) {
+export default function MyStreamNoItems() {
   return (
     <div className="tw-mt-8 tw-pb-8 md:tw-max-w-xl tw-mx-auto tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
       <div className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-900 tw-p-4">
