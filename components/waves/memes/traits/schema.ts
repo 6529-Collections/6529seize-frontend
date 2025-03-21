@@ -5,10 +5,10 @@ import { TraitsData } from "../submission/types/TraitsData";
  * Using string enum for better debugging and serialization
  */
 export enum FieldType {
-  TEXT = 'text',
-  NUMBER = 'number',
-  BOOLEAN = 'boolean',
-  DROPDOWN = 'dropdown',
+  TEXT = "text",
+  NUMBER = "number",
+  BOOLEAN = "boolean",
+  DROPDOWN = "dropdown",
 }
 
 /**
@@ -59,16 +59,16 @@ export interface DropdownFieldDefinition extends BaseFieldDefinition {
 }
 
 // Union type of all field definitions
-export type FieldDefinition = 
-  | TextFieldDefinition 
-  | NumberFieldDefinition 
-  | BooleanFieldDefinition 
+export type FieldDefinition =
+  | TextFieldDefinition
+  | NumberFieldDefinition
+  | BooleanFieldDefinition
   | DropdownFieldDefinition;
 
 // Section definition
 export interface SectionDefinition {
   readonly title: string;
-  readonly layout: 'single' | 'double';
+  readonly layout: "single" | "double";
   readonly fields: readonly FieldDefinition[];
 }
 
@@ -97,344 +97,357 @@ export const traitDefinitions: readonly SectionDefinition[] = [
     title: "Basic Information",
     layout: "single",
     fields: [
-      { 
-        type: FieldType.TEXT, 
-        label: 'Artist', 
-        field: 'artist',
-        initialValue: '' 
+      {
+        type: FieldType.TEXT,
+        label: "Artist",
+        field: "artist",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'SEIZE Artist Profile', 
-        field: 'seizeArtistProfile',
+      {
+        type: FieldType.TEXT,
+        label: "SEIZE Artist Profile",
+        field: "seizeArtistProfile",
         readOnly: true,
-        initialValue: '' 
+        initialValue: "",
       },
-      { 
-        type: FieldType.DROPDOWN, 
-        label: 'Meme Name', 
-        field: 'memeName',
+      {
+        type: FieldType.DROPDOWN,
+        label: "Meme Name",
+        field: "memeName",
         options: MEME_NAME_OPTIONS,
-        initialValue: '' 
-      }
-    ]
+        initialValue: "",
+      },
+    ],
   },
   {
     title: "Card Type Information",
     layout: "single",
     fields: [
-      { 
-        type: FieldType.TEXT, 
-        label: 'Type - Card', 
-        field: 'typeCard',
+      {
+        type: FieldType.TEXT,
+        label: "Type - Card",
+        field: "typeCard",
         readOnly: true,
-        initialValue: 'Card' 
+        initialValue: "Card",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Issuance Month', 
-        field: 'issuanceMonth',
+      {
+        type: FieldType.TEXT,
+        label: "Issuance Month",
+        field: "issuanceMonth",
         readOnly: true,
-        initialValue: '' 
+        initialValue: "",
       },
-      { 
-        type: FieldType.NUMBER, 
-        label: 'Type - Season', 
-        field: 'typeSeason',
+      {
+        type: FieldType.NUMBER,
+        label: "Type - Season",
+        field: "typeSeason",
         readOnly: true,
-        initialValue: 11 
+        initialValue: 11,
       },
-      { 
-        type: FieldType.NUMBER, 
-        label: 'Type - Meme', 
-        field: 'typeMeme',
+      {
+        type: FieldType.NUMBER,
+        label: "Type - Meme",
+        field: "typeMeme",
         readOnly: true,
-        initialValue: 1 
+        initialValue: 1,
       },
-      { 
-        type: FieldType.NUMBER, 
-        label: 'Type - Card Number', 
-        field: 'typeCardNumber',
+      {
+        type: FieldType.NUMBER,
+        label: "Type - Card Number",
+        field: "typeCardNumber",
         readOnly: true,
-        initialValue: 400 
-      }
-    ]
+        initialValue: 400,
+      },
+    ],
   },
   {
     title: "Card Points",
     layout: "single",
     fields: [
-      { 
-        type: FieldType.NUMBER, 
-        label: 'Points - Power', 
-        field: 'pointsPower',
-        initialValue: 0
+      {
+        type: FieldType.NUMBER,
+        label: "Points - Power",
+        field: "pointsPower",
+        initialValue: 0,
       },
-      { 
-        type: FieldType.NUMBER, 
-        label: 'Points - Wisdom', 
-        field: 'pointsWisdom',
-        initialValue: 0
+      {
+        type: FieldType.NUMBER,
+        label: "Points - Wisdom",
+        field: "pointsWisdom",
+        initialValue: 0,
       },
-      { 
-        type: FieldType.NUMBER, 
-        label: 'Points - Loki', 
-        field: 'pointsLoki',
-        initialValue: 0
+      {
+        type: FieldType.NUMBER,
+        label: "Points - Loki",
+        field: "pointsLoki",
+        initialValue: 0,
       },
-      { 
-        type: FieldType.NUMBER, 
-        label: 'Points - Speed', 
-        field: 'pointsSpeed',
-        initialValue: 0
-      }
-    ]
+      {
+        type: FieldType.NUMBER,
+        label: "Points - Speed",
+        field: "pointsSpeed",
+        initialValue: 0,
+      },
+    ],
   },
   {
     title: "Card Attributes",
     layout: "double",
     fields: [
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Punk 6529', 
-        field: 'punk6529',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "Punk 6529",
+        field: "punk6529",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Gradient', 
-        field: 'gradient',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "Gradient",
+        field: "gradient",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Movement', 
-        field: 'movement',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "Movement",
+        field: "movement",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Dynamic', 
-        field: 'dynamic',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "Dynamic",
+        field: "dynamic",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Interactive', 
-        field: 'interactive',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "Interactive",
+        field: "interactive",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Collab', 
-        field: 'collab',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "Collab",
+        field: "collab",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'OM', 
-        field: 'om',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "OM",
+        field: "om",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: '3D', 
-        field: 'threeD',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "3D",
+        field: "threeD",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Pepe', 
-        field: 'pepe',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "Pepe",
+        field: "pepe",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'GM', 
-        field: 'gm',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "GM",
+        field: "gm",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Summer', 
-        field: 'summer',
-        initialValue: false
+      {
+        type: FieldType.BOOLEAN,
+        label: "Summer",
+        field: "summer",
+        initialValue: false,
       },
-      { 
-        type: FieldType.BOOLEAN, 
-        label: 'Tulip', 
-        field: 'tulip',
-        initialValue: false
-      }
-    ]
+      {
+        type: FieldType.BOOLEAN,
+        label: "Tulip",
+        field: "tulip",
+        initialValue: false,
+      },
+    ],
   },
   {
     title: "Card Special Properties",
     layout: "single",
     fields: [
-      { 
-        type: FieldType.TEXT, 
-        label: 'Bonus', 
-        field: 'bonus',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Bonus",
+        field: "bonus",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Boost', 
-        field: 'boost',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Boost",
+        field: "boost",
+        initialValue: "",
       },
-      { 
-        type: FieldType.DROPDOWN, 
-        label: 'Palette', 
-        field: 'palette',
+      {
+        type: FieldType.DROPDOWN,
+        label: "Palette",
+        field: "palette",
         options: ["Color", "Black and White"],
-        initialValue: ''
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Style', 
-        field: 'style',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Style",
+        field: "style",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Jewel', 
-        field: 'jewel',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Jewel",
+        field: "jewel",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Superpower', 
-        field: 'superpower',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Superpower",
+        field: "superpower",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Dharma', 
-        field: 'dharma',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Dharma",
+        field: "dharma",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Gear', 
-        field: 'gear',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Gear",
+        field: "gear",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Clothing', 
-        field: 'clothing',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Clothing",
+        field: "clothing",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Element', 
-        field: 'element',
-        initialValue: ''
-      }
-    ]
+      {
+        type: FieldType.TEXT,
+        label: "Element",
+        field: "element",
+        initialValue: "",
+      },
+    ],
   },
   {
     title: "Card Additional Details",
     layout: "single",
     fields: [
-      { 
-        type: FieldType.TEXT, 
-        label: 'Mystery', 
-        field: 'mystery',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Mystery",
+        field: "mystery",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Secrets', 
-        field: 'secrets',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Secrets",
+        field: "secrets",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Weapon', 
-        field: 'weapon',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Weapon",
+        field: "weapon",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Home', 
-        field: 'home',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Home",
+        field: "home",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Parent', 
-        field: 'parent',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Parent",
+        field: "parent",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Sibling', 
-        field: 'sibling',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Sibling",
+        field: "sibling",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Food', 
-        field: 'food',
-        initialValue: ''
+      {
+        type: FieldType.TEXT,
+        label: "Food",
+        field: "food",
+        initialValue: "",
       },
-      { 
-        type: FieldType.TEXT, 
-        label: 'Drink', 
-        field: 'drink',
-        initialValue: ''
-      }
-    ]
-  }
+      {
+        type: FieldType.TEXT,
+        label: "Drink",
+        field: "drink",
+        initialValue: "",
+      },
+    ],
+  },
 ];
 
 // Runtime schema validation function - called in development only
 function validateSchema(schema: readonly SectionDefinition[]): void {
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env.NODE_ENV !== "production") {
     try {
       // Validate sections
       schema.forEach((section, sectionIndex) => {
         if (!section.title) {
           throw new Error(`Section ${sectionIndex} is missing title`);
         }
-        
-        if (!section.layout || !['single', 'double'].includes(section.layout)) {
-          throw new Error(`Section "${section.title}" has invalid layout: ${section.layout}`);
+
+        if (!section.layout || !["single", "double"].includes(section.layout)) {
+          throw new Error(
+            `Section "${section.title}" has invalid layout: ${section.layout}`
+          );
         }
-        
+
         if (!section.fields || !Array.isArray(section.fields)) {
           throw new Error(`Section "${section.title}" is missing fields array`);
         }
-        
+
         // Validate each field
         section.fields.forEach((field, fieldIndex) => {
           if (!field.type) {
-            throw new Error(`Field ${fieldIndex} in section "${section.title}" is missing type`);
+            throw new Error(
+              `Field ${fieldIndex} in section "${section.title}" is missing type`
+            );
           }
-          
+
           if (!field.field) {
-            throw new Error(`Field ${fieldIndex} in section "${section.title}" is missing field name`);
+            throw new Error(
+              `Field ${fieldIndex} in section "${section.title}" is missing field name`
+            );
           }
-          
+
           if (!field.label) {
-            throw new Error(`Field ${fieldIndex} in section "${section.title}" is missing label`);
+            throw new Error(
+              `Field ${fieldIndex} in section "${section.title}" is missing label`
+            );
           }
-          
+
           // Type-specific validation
-          if (field.type === FieldType.DROPDOWN && (!('options' in field) || !Array.isArray(field.options))) {
-            throw new Error(`Dropdown field "${field.label}" is missing options array`);
+          if (
+            field.type === FieldType.DROPDOWN &&
+            (!("options" in field) || !Array.isArray(field.options))
+          ) {
+            throw new Error(
+              `Dropdown field "${field.label}" is missing options array`
+            );
           }
         });
       });
-      
+
       // console.log('Schema validation passed');
     } catch (error) {
       // console.error('Schema validation failed:', error);
       // In development, we could throw to make the error more visible
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         throw error;
       }
     }
@@ -445,39 +458,46 @@ function validateSchema(schema: readonly SectionDefinition[]): void {
 validateSchema(traitDefinitions);
 
 // Generate form sections (with dynamic user profile)
-export function getFormSections(userProfile: string | null | undefined): readonly SectionDefinition[] {
+export function getFormSections(
+  userProfile: string | null | undefined
+): readonly SectionDefinition[] {
   const profile = userProfile || "User's Profile Name";
-  
-  return traitDefinitions.map(section => ({
+
+  return traitDefinitions.map((section) => ({
     ...section,
-    fields: section.fields.map(field => {
+    fields: section.fields.map((field) => {
       // Handle special case for userProfile placeholder
-      if (field.field === 'artist' || field.field === 'seizeArtistProfile') {
+      if (field.field === "artist" || field.field === "seizeArtistProfile") {
         return {
           ...field,
-          placeholder: profile
+          placeholder: profile,
         };
       }
       return field;
-    })
+    }),
   }));
 }
 
 // Get initial trait values
 export function getInitialTraitsValues(): TraitsData {
   const initialValues: Record<string, any> = {
-    title: '',
-    description: '',
+    title: "",
+    description: "",
   };
 
   // Extract initial values from each field definition
-  traitDefinitions.forEach(section => {
-    section.fields.forEach(field => {
+  traitDefinitions.forEach((section) => {
+    section.fields.forEach((field) => {
       // Don't override title and description which are explicitly set above
-      if (field.field !== 'title' && field.field !== 'description') {
-        initialValues[field.field] = field.initialValue !== undefined 
-          ? field.initialValue 
-          : (field.type === FieldType.BOOLEAN ? false : field.type === FieldType.NUMBER ? 0 : '');
+      if (field.field !== "title" && field.field !== "description") {
+        initialValues[field.field] =
+          field.initialValue !== undefined
+            ? field.initialValue
+            : field.type === FieldType.BOOLEAN
+            ? false
+            : field.type === FieldType.NUMBER
+            ? 0
+            : "";
       }
     });
   });

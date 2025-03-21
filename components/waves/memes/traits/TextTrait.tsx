@@ -14,16 +14,23 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   readOnly = false,
   placeholder,
   className,
+  error,
+  onBlur,
+  required = false,
 }) => {
   // Use a ref to track the input element
   const inputRef = useRef<HTMLInputElement>(null);
   
   // Handle blur (when user finishes typing)
-  const handleBlur = useCallback(() => {
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     if (inputRef.current && inputRef.current.value !== traits[field]) {
       updateText(field, inputRef.current.value);
     }
-  }, [field, traits, updateText]);
+    // Call parent onBlur if provided
+    if (onBlur) {
+      onBlur(field);
+    }
+  }, [field, traits, updateText, onBlur]);
   
   // Synchronize the input value with props when traits change from outside
   React.useEffect(() => {
@@ -42,7 +49,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
     } tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500`, [readOnly]);
   
   return (
-    <TraitWrapper label={label} readOnly={readOnly} className={className}>
+    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error} required={required}>
       <input
         ref={inputRef}
         type="text"
@@ -58,5 +65,8 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   return prevProps.field === nextProps.field &&
          prevProps.label === nextProps.label &&
          prevProps.readOnly === nextProps.readOnly &&
-         prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field];
+         prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field] &&
+         prevProps.error === nextProps.error;
 });
+
+TextTrait.displayName = 'TextTrait';
