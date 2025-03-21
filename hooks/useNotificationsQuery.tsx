@@ -34,7 +34,7 @@ interface UseNotificationsQueryProps {
   /**
    * The cause of the notifications to fetch.
    */
-  cause?: ApiNotificationCause | null;
+  cause?: ApiNotificationCause[] | null;
 }
 
 export function useNotificationsQuery({
@@ -61,7 +61,7 @@ export function useNotificationsQuery({
         params.id_less_than = String(pageParam);
       }
       if (cause) {
-        params.cause = cause;
+        params.cause = cause.join(",");
       }
       return await commonApiFetch<TypedNotificationsResponse>({
         endpoint: "notifications",
@@ -87,7 +87,7 @@ export function useNotificationsQuery({
         params.id_less_than = `${pageParam}`;
       }
       if (cause) {
-        params.cause = cause;
+        params.cause = cause.join(",");
       }
       return await commonApiFetch<TypedNotificationsResponse>({
         endpoint: "notifications",
