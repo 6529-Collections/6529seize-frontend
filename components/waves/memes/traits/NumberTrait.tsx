@@ -17,6 +17,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
   className,
   error,
   onBlur,
+  required = false,
 }) => {
   // Use a ref for direct DOM access
   const inputRef = useRef<HTMLInputElement>(null);
@@ -102,7 +103,7 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
   }, [field, updateNumber, min, max]);
   
   return (
-    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error}>
+    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error} required={required}>
       <input
         ref={inputRef}
         type="number"

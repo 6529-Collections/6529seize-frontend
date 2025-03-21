@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useMemo } from "react";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
 import { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
@@ -7,6 +7,117 @@ import MemesArtSubmissionTraits from "../../MemesArtSubmissionTraits";
 import { SubmissionPhase } from "../ui/SubmissionProgress";
 import ValidationSummary from "../ui/ValidationSummary";
 import { useTraitsValidation } from "../validation";
+
+/**
+ * Required fields for submission 
+ * All fields are required for submission
+ */
+const REQUIRED_FIELDS = ['title', 'description', 'memeName'] as const;
+
+/**
+ * Fields that are read-only and should be skipped in validation
+ * These are pre-populated by the system
+ */
+const READ_ONLY_FIELDS = [
+  'seizeArtistProfile', 'typeCard', 'issuanceMonth', 
+  'typeSeason', 'typeMeme', 'typeCardNumber'
+] as const;
+
+/**
+ * Get tooltip text for submit button based on current state
+ * Helps users understand why the button might be disabled
+ */
+function getSubmitButtonTooltip(
+  isDisabled: boolean,
+  isFormComplete: boolean,
+  artworkUploaded: boolean,
+  traits: TraitsData
+): string {
+  if (!isDisabled) return '';
+  
+  if (!artworkUploaded) {
+    return 'Please upload artwork';
+  }
+  
+  if (!isFormComplete) {
+    // Check each field and return specific message for the first empty one
+    // This helps the user understand what's missing
+    for (const field of Object.keys(traits) as Array<keyof TraitsData>) {
+      // Skip read-only fields
+      if (READ_ONLY_FIELDS.includes(field as any)) continue;
+      
+      const value = traits[field];
+      const fieldName = field.replace(/([A-Z])/g, ' $1').toLowerCase();
+      
+      // String fields (including dropdowns)
+      if (typeof value === 'string') {
+        if (!value.trim()) {
+          if (field === 'memeName' || field === 'palette') {
+            return `Please select a ${fieldName}`;
+          } else {
+            return `Please enter ${fieldName}`;
+          }
+        }
+      }
+      // Number fields
+      else if (typeof value === 'number') {
+        if (value === null || value === undefined || isNaN(value)) {
+          return `Please enter ${fieldName}`;
+        }
+      }
+      // Boolean fields need explicit value
+      else if (typeof value === 'boolean') {
+        if (value === null || value === undefined) {
+          return `Please set ${fieldName}`;
+        }
+      }
+      // Handle potential null/undefined
+      else if (value === null || value === undefined) {
+        return `Please complete ${fieldName}`;
+      }
+    }
+    
+    return 'All fields are required';
+  }
+  
+  return 'Please fix validation errors before submitting';
+}
+
+/**
+ * Checks if form meets basic submission requirements
+ * ALL fields are required except read-only ones
+ */
+function checkFormCompleteness(traits: TraitsData, artworkUploaded: boolean): boolean {
+  // Must have artwork
+  if (!artworkUploaded) return false;
+  
+  // Check every field in TraitsData
+  for (const field of Object.keys(traits) as Array<keyof TraitsData>) {
+    // Skip read-only fields that are pre-populated
+    if (READ_ONLY_FIELDS.includes(field as any)) continue;
+    
+    const value = traits[field];
+    
+    // Handle string fields - must not be empty
+    if (typeof value === 'string') {
+      if (!value.trim()) return false;
+    }
+    // Handle number fields - must be a defined number (can be 0)
+    else if (typeof value === 'number') {
+      if (value === null || value === undefined || isNaN(value)) return false;
+    }
+    // Handle boolean fields - must be explicitly true or false
+    else if (typeof value === 'boolean') {
+      if (value === null || value === undefined) return false;
+    }
+    // Handle potential null/undefined values
+    else if (value === null || value === undefined) {
+      return false;
+    }
+  }
+  
+  return true;
+}
 
 interface ArtworkStepProps {
   readonly traits: TraitsData;
@@ -47,6 +158,12 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   const validation = useTraitsValidation(traits, initialTraits || traits);
   const [showErrorSummary, setShowErrorSummary] = useState(false);
   
+  // Check form completeness - separate from validation
+  const isFormComplete = useMemo(() => 
+    checkFormCompleteness(traits, artworkUploaded),
+    [traits, artworkUploaded]
+  );
+  
   // Create callback handlers for title and description
   const handleTitleChange = useCallback((title: string) => {
     updateTraitField('title', title);
@@ -80,8 +197,23 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     }
   }, [validation, onSubmit]);
   
-  // Determine button disabled state
-  const isDisabled = !artworkUploaded || !validation.isValid || isSubmitting;
+  // Determine button disabled state - explicit and readable
+  const isSubmitDisabled = useMemo(() => {
+    // Basic completeness check (required fields + artwork)
+    if (!isFormComplete) return true;
+    
+    // Submission in progress
+    if (isSubmitting) return true;
+    
+    // Already successfully submitted
+    if (submissionPhase === 'success') return true;
+    
+    // If user has attempted to submit once, ensure validation passes
+    if (validation.submitAttempted && !validation.isValid) return true;
+    
+    // All checks passed, enable button
+    return false;
+  }, [isFormComplete, isSubmitting, submissionPhase, validation.submitAttempted, validation.isValid]);
   
   // Get button text based on submission phase
   const getButtonText = (): string => {
@@ -149,6 +281,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
           setTraits={setTraits}
           validationErrors={validation.errors}
           onFieldBlur={handleFieldBlur}
+          requiredFields={REQUIRED_FIELDS}
         />
       </div>
 
@@ -159,8 +292,9 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
             <PrimaryButton
               onClicked={handleSubmit}
               loading={isSubmitting && submissionPhase !== 'success' && submissionPhase !== 'error'}
-              disabled={isDisabled || submissionPhase === 'success'}
+              disabled={isSubmitDisabled}
               padding="tw-px-8 tw-py-3"
+              title={getSubmitButtonTooltip(isSubmitDisabled, isFormComplete, artworkUploaded, traits)}
             >
               {getButtonText()}
             </PrimaryButton>

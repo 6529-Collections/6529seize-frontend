@@ -14,6 +14,7 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(({
   className,
   error,
   onBlur,
+  required = false,
 }) => {
   // Create ref for select element
   const selectRef = useRef<HTMLSelectElement>(null);
@@ -42,7 +43,7 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(({
   }, [onBlur, field]);
   
   return (
-    <TraitWrapper label={label} className={className} error={error}>
+    <TraitWrapper label={label} className={className} error={error} required={required}>
       <select
         ref={selectRef}
         defaultValue={(traits[field] as string) || ''}
