@@ -50,7 +50,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<DefaultWaveLeaderboardDropProp
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
               <WaveLeaderboardDropHeader drop={drop} />
-              <div>
+              {/* Only show raters on lg screens and above */}
+              <div className="tw-hidden lg:tw-block">
                 <WaveLeaderboardDropRaters drop={drop} />
               </div>
             </div>
@@ -62,8 +63,20 @@ export const DefaultWaveLeaderboardDrop: React.FC<DefaultWaveLeaderboardDropProp
             {canShowVote && (
               <div className="tw-pb-3 tw-pt-2">
                 <SingleWaveDropVote drop={drop} />
+                {/* Show raters below voting section on mobile/tablet */}
+                <div className="tw-block lg:tw-hidden tw-mt-3">
+                  <WaveLeaderboardDropRaters drop={drop} />
+                </div>
               </div>
             )}
+            
+            {/* If voting is not available, show raters before footer on mobile/tablet */}
+            {!canShowVote && (
+              <div className="tw-block lg:tw-hidden tw-mb-2">
+                <WaveLeaderboardDropRaters drop={drop} />
+              </div>
+            )}
+            
             <WaveLeaderboardDropFooter drop={drop} wave={wave} />
           </div>
         </div>

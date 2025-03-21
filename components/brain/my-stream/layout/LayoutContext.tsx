@@ -71,6 +71,9 @@ interface LayoutContextType {
   
   // Style for mobile about view
   mobileAboutViewStyle: React.CSSProperties;
+
+  // Style for single drop view
+  singleDropViewStyle: React.CSSProperties;
 }
 
 // Default context values
@@ -97,6 +100,7 @@ const LayoutContext = createContext<LayoutContextType>({
   feedViewStyle: {}, // Empty style object as default
   mobileWavesViewStyle: {}, // Empty style object as default
   mobileAboutViewStyle: {}, // Empty style object as default
+  singleDropViewStyle: {}, // Empty style object as default
 });
 
 // Provider component
@@ -453,6 +457,29 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor
   ]);
+  
+  // Calculate style for single drop view (with extra 47px margin after header on non-lg screens only)
+  const singleDropViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    // Use CSS media query directly in the calc expression for better responsiveness
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - var(--single-drop-margin, 0px))`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - var(--single-drop-margin, 0px))`,
+      // Define the CSS variable based on screen size
+      // This will be applied by the browser based on viewport size
+      // and will update automatically when the screen size changes
+      '--single-drop-margin': '47px',
+      '@media (min-width: 1024px)': {
+        '--single-drop-margin': '0px',
+      }
+    } as React.CSSProperties;
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace
+  ]);
 
   // Create context value
   const contextValue: LayoutContextType = {
@@ -466,7 +493,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     notificationsViewStyle,
     feedViewStyle,
     mobileWavesViewStyle,
-    mobileAboutViewStyle
+    mobileAboutViewStyle,
+    singleDropViewStyle
   };
 
   return (

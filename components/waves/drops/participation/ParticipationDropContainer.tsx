@@ -41,7 +41,7 @@ const getColorClasses = ({
       metadataKey: "tw-text-amber-400/70",
       metadataValue: "tw-text-amber-200/90",
       dropStyles: isActiveDrop
-        ? "tw-shadow-[inset_1.5px_0_0_rgba(60,203,127,0.7)]"
+        ? "tw-shadow-[inset_1px_0_0_rgba(60,203,127,0.7)]"
         : "tw-border tw-border-iron-800 desktop-hover:hover:tw-border-amber-400/40",
     },
     2: {
@@ -51,7 +51,7 @@ const getColorClasses = ({
       metadataKey: "tw-text-slate-400/70",
       metadataValue: "tw-text-slate-200/90",
       dropStyles: isActiveDrop
-        ? "tw-shadow-[inset_1.5px_0_0_rgba(60,203,127,0.7)]"
+        ? "tw-shadow-[inset_1px_0_0_rgba(60,203,127,0.7)]"
         : "tw-border tw-border-iron-800 desktop-hover:hover:tw-border-slate-400/40",
     },
     3: {
@@ -61,7 +61,7 @@ const getColorClasses = ({
       metadataKey: "tw-text-[#CD7F32]/70",
       metadataValue: "tw-text-[#CD7F32]/90",
       dropStyles: isActiveDrop
-        ? "tw-shadow-[inset_1.5px_0_0_rgba(60,203,127,0.7)]"
+        ? "tw-shadow-[inset_1px_0_0_rgba(60,203,127,0.7)]"
         : "tw-border tw-border-iron-800 desktop-hover:hover:tw-border-[#CD7F32]/40",
     },
     default: {
@@ -71,7 +71,7 @@ const getColorClasses = ({
       metadataKey: "tw-text-iron-400",
       metadataValue: "tw-text-iron-200",
       dropStyles: isActiveDrop
-        ? "tw-shadow-[inset_1.5px_0_0_rgba(60,203,127,0.7)]"
+        ? "tw-shadow-[inset_1px_0_0_rgba(60,203,127,0.7)]"
         : "tw-border tw-border-iron-800 desktop-hover:hover:tw-border-iron-600",
     },
   };

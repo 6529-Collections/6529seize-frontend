@@ -71,7 +71,7 @@ export default function ParticipationDropRatingsVoterSection({
         </div>
       )}
       
-      <span className={`tw-text-sm tw-font-bold ${theme.text}`}>
+      <span className={`tw-text-sm tw-font-bold tw-ml-1 ${theme.text}`}>
         {drop.raters_count}
       </span>
     </div>

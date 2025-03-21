@@ -11,7 +11,7 @@ export const WaveWinnersTimelineLoading: React.FC = () => {
       </div>
 
       {/* Combined header skeleton */}
-      <div className="tw-ml-6 lg:tw-ml-10 tw-mb-3">
+      <div className="tw-ml-6 lg:tw-ml-10 tw-mb-2 lg:tw-mb-3">
         <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1">
           <div className="tw-h-5 tw-w-28 tw-bg-iron-800 tw-rounded-md tw-animate-pulse"></div>
           <div className="tw-h-6 tw-w-20 tw-bg-iron-800 tw-rounded-md tw-animate-pulse"></div>

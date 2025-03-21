@@ -16,7 +16,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="tw-flex tw-flex-wrap md:tw-flex-nowrap tw-gap-y-1 tw-justify-between tw-w-full"
+      className="tw-flex tw-flex-wrap tw-gap-y-2 tw-justify-between tw-w-full"
     >
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-w-full">
         <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -29,8 +29,8 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
         </div>
       </div>
 
-      <div className="tw-flex tw-items-center tw-whitespace-nowrap">
-        <div className="tw-flex tw-items-center tw-gap-x-4 tw-gap-y-2">
+      <div className="ttw-whitespace-nowrap tw-mt-1 sm:tw-mt-0">
+        <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-2 sm:tw-gap-x-4 tw-gap-y-2">
           <WaveWinnersDropHeaderTotalVotes winner={winner} />
           <WaveWinnersDropHeaderVoters winner={winner} />
         </div>

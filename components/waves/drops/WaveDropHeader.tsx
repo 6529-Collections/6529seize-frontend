@@ -35,8 +35,9 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
-        <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-wrap sm:tw-flex-nowrap">
-          <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-shrink-0">
+        <div className="tw-flex tw-items-center tw-gap-x-2 tw-justify-between tw-w-full">
+
+          <div className="tw-flex tw-items-center tw-gap-x-2">
             <UserCICAndLevel
               level={drop.author.level}
               cicType={cicType}
@@ -58,7 +59,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             </p>
           </div>
 
-          {badge && <div className="tw-ml-1 sm:tw-ml-4 tw-mt-0">{badge}</div>}
+          {badge && <div className="tw-ml-2 sm:tw-ml-4">{badge}</div>}
         </div>
       </div>
       <div>

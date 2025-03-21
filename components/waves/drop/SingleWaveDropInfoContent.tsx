@@ -17,7 +17,7 @@ export const SingleWaveDropInfoContent: React.FC<SingleWaveDropInfoContentProps>
   const isMemes = drop ? isMemesWave(drop.wave.id) : false;
   
   return (
-    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-2">
+    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-4">
       <div className="tw-px-6">
         {drop?.drop_type === ApiDropType.Participatory && (
           <SingleWaveDropPosition rank={drop.rank} />
