@@ -12,6 +12,8 @@ import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
+import NotificationsCauseFilter from "./NotificationsCauseFilter";
+import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -20,9 +22,13 @@ export default function Notifications() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const capacitor = useCapacitor();
 
+  const [activeCause, setActiveCause] = useState<ApiNotificationCause | null>(
+    null
+  );
+
   const { removeAllDeliveredNotifications } = useNotificationsContext();
 
-  let containerClassName = `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)] lg:tw-h-[calc(100vh-6.625rem)] min-[1200px]:tw-h-[calc(100vh-7.375rem)]`;
+  let containerClassName = `tw-relative tw-flex tw-flex-col tw-h-[calc(100vh-9.5rem)]  min-[1200px]:tw-h-[calc(100vh-7.375rem)]`;
   if (capacitor.isIos) {
     containerClassName = `${containerClassName} tw-pb-[calc(4rem+80px)]`;
   } else if (capacitor.isAndroid && !capacitor.keyboardVisible) {
@@ -88,6 +94,7 @@ export default function Notifications() {
     activeProfileProxy: !!activeProfileProxy,
     limit: "30",
     reverse: true,
+    cause: activeCause,
   });
 
   const onBottomIntersection = (state: boolean) => {
@@ -117,6 +124,10 @@ export default function Notifications() {
   return (
     <div className={containerClassName}>
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex">
+        <NotificationsCauseFilter
+          activeCause={activeCause}
+          setActiveCause={setActiveCause}
+        />
         {!items.length && !isFetching ? (
           <MyStreamNoItems />
         ) : (
