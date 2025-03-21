@@ -124,10 +124,18 @@ function validateRequiredFields(
     }
   }
   
-  // Special case for title and description which must always be validated
-  // as they're critical fields
-  if (!traits.title || traits.title.trim() === '') {
-    errors.title = 'Title is required';
+  // Special case for title and description which are critical fields,
+  // but still respect the validation mode
+  if (options.mode === 'all' || (options.touchedFields && options.touchedFields.has('title'))) {
+    if (!traits.title || traits.title.trim() === '') {
+      errors.title = 'Title is required';
+    }
+  }
+  
+  if (options.mode === 'all' || (options.touchedFields && options.touchedFields.has('description'))) {
+    if (!traits.description || traits.description.trim() === '') {
+      errors.description = 'Description is required';
+    }
   }
   
   return errors;

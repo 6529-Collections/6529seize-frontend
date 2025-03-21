@@ -43,7 +43,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   submissionPhase = 'idle',
   initialTraits
 }) => {
-  // Set up validation
+  // Set up validation with initial empty touched fields to prevent errors on load
   const validation = useTraitsValidation(traits, initialTraits || traits);
   const [showErrorSummary, setShowErrorSummary] = useState(false);
   
