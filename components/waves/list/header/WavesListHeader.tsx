@@ -75,7 +75,7 @@ export default function WavesListHeader({
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <span>Create New Wave</span>
+                  <span>Create Wave</span>
                 </button>
               </div>
               <div className="tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-primary-400 tw-to-primary-500 tw-gap-x-1">
@@ -87,7 +87,7 @@ export default function WavesListHeader({
                     icon={faPaperPlane}
                     className="tw-size-4 tw-mr-1.5 -tw-ml-1.5 tw-flex-shrink-0"
                   />
-                  <span>Create New DM</span>
+                  <span>Create DM</span>
                 </button>
               </div>
             </>
