@@ -74,7 +74,7 @@ export default function WavePicture({ wave }: { readonly wave: ApiWave }) {
     );
   }
 
-  // 4) Use up to N slices. If you want max = 6, do this:
+  // 4) Use up to N slices
   const maxSlices = 6;
   const sliceCount = Math.min(pfps.length, maxSlices);
 
