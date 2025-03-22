@@ -7,11 +7,13 @@ import WavesListHeader from "./header/WavesListHeader";
 import WavesListSearchResults from "./WavesListSearchResults";
 
 export default function WavesList({
-  showCreateNewWaveButton,
+  showCreateNewButton,
   onCreateNewWave,
+  onCreateNewDirectMessage,
 }: {
-  readonly showCreateNewWaveButton?: boolean;
+  readonly showCreateNewButton?: boolean;
   readonly onCreateNewWave: () => void;
+  readonly onCreateNewDirectMessage: () => void;
 }) {
   const router = useRouter();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -84,8 +86,9 @@ export default function WavesList({
         <WavesListHeader
           identity={identity}
           waveName={waveName}
-          showCreateNewWaveButton={showCreateNewWaveButton}
+          showCreateNewButton={showCreateNewButton}
           onCreateNewWave={onCreateNewWave}
+          onCreateNewDirectMessage={onCreateNewDirectMessage}
           setIdentity={updateIdentity}
           setWaveName={setWaveName}
         />

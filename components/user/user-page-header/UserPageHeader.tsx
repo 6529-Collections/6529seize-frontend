@@ -22,6 +22,7 @@ import { AuthContext } from "../../auth/Auth";
 import dynamic from "next/dynamic";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { createDirectMessageWave } from "../../../helpers/waves/waves.helpers";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
@@ -47,7 +48,11 @@ export default function UserPageHeader({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
   const { address } = useSeizeConnectContext();
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy, setToast } =
+    useContext(AuthContext);
+
+  const [directMessageLoading, setDirectMessageLoading] =
+    useState<boolean>(false);
 
   // Initialize with a check to prevent button flash
   const initialIsMyProfile =
@@ -113,6 +118,30 @@ export default function UserPageHeader({
     setShowAbout(false);
   }, [aboutStatement, canEdit, isFetched]);
 
+  const handleCreateDirectMessage = async (
+    primaryWallet: string | undefined
+  ) => {
+    if (!primaryWallet) {
+      return;
+    }
+
+    setDirectMessageLoading(true);
+
+    try {
+      const wave = await createDirectMessageWave({
+        addresses: [primaryWallet],
+      });
+      router.push(`/waves/${wave.id}`);
+    } catch (error) {
+      console.error(error);
+      setToast({
+        message: `Failed to create direct message: ${error}`,
+        type: "error",
+      });
+      setDirectMessageLoading(false);
+    }
+  };
+
   return (
     <div className="tailwind-scope">
       <section className="tw-pb-6 md:tw-pb-8">
@@ -143,7 +172,18 @@ export default function UserPageHeader({
                 {!isMyProfile &&
                   profile.profile?.handle &&
                   connectedProfile?.profile?.handle && (
-                    <UserFollowBtn handle={profile.profile.handle} />
+                    <UserFollowBtn
+                      handle={profile.profile.handle}
+                      onDirectMessage={
+                        profile.profile?.primary_wallet
+                          ? () =>
+                              handleCreateDirectMessage(
+                                profile.profile?.primary_wallet
+                              )
+                          : undefined
+                      }
+                      directMessageLoading={directMessageLoading}
+                    />
                   )}
               </div>
             </div>
