@@ -65,8 +65,7 @@ export default function WavePicture({ wave }: { readonly wave: ApiWave }) {
 
   const pfps = wave.contributors_overview
     .map((c) => c.contributor_pfp)
-    .sort()
-    .filter(Boolean) as string[];
+    .filter(Boolean);
 
   // 3) If no PFPS, show fallback background
   if (pfps.length === 0) {
