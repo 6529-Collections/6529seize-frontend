@@ -3,12 +3,17 @@ import { useRouter } from "next/router";
 import { usePinnedWaves } from "../../../../../hooks/usePinnedWaves";
 import { useWaveData } from "../../../../../hooks/useWaveData";
 import BrainLeftSidebarWave from "../BrainLeftSidebarWave";
-import Link from "next/link";
 
-const RecentWavesList: React.FC = () => {
+interface RecentWavesListProps {
+  readonly activeWaveId: string | null;
+}
+
+const RecentWavesList: React.FC<RecentWavesListProps> = ({
+  activeWaveId
+}) => {
   const router = useRouter();
   const { pinnedIds, addId, removeId } = usePinnedWaves();
-  const activeWaveId = router.query.wave as string | undefined;
+
 
   // Add current wave to pinned/recent waves list when it changes
   useEffect(() => {
@@ -36,10 +41,10 @@ const RecentWavesList: React.FC = () => {
         <div className="tw-mt-2 tw-max-h-96 tw-pb-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
             {pinnedIds.map((id) => (
-              <PinnedWaveItem 
-                key={id} 
-                waveId={id} 
-                isActive={id === activeWaveId} 
+              <PinnedWaveItem
+                key={id}
+                waveId={id}
+                isActive={id === activeWaveId}
                 onRemove={removeId}
               />
             ))}
@@ -57,11 +62,15 @@ interface PinnedWaveItemProps {
   readonly onRemove: (id: string) => void;
 }
 
-const PinnedWaveItem: React.FC<PinnedWaveItemProps> = ({ waveId, isActive, onRemove }) => {
+const PinnedWaveItem: React.FC<PinnedWaveItemProps> = ({
+  waveId,
+  isActive,
+  onRemove,
+}) => {
   const router = useRouter();
   const { data: wave, isLoading } = useWaveData(waveId);
   const { addId } = usePinnedWaves();
-  
+
   // Empty states while loading
   if (isLoading || !wave) {
     return (
@@ -112,8 +121,19 @@ const PinnedWaveItem: React.FC<PinnedWaveItemProps> = ({ waveId, isActive, onRem
         className="tw-absolute tw-right-4 tw-top-1/2 tw-transform -tw-translate-y-1/2 tw-bg-transparent tw-border-0 tw-p-1.5 tw-rounded-full tw-text-iron-400 tw-opacity-0 group-hover:tw-opacity-100 hover:tw-text-red-500 tw-transition-opacity tw-duration-200"
         aria-label="Remove from recent waves"
       >
-        <svg className="tw-w-4 tw-h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M6 18L18 6M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <svg
+          className="tw-w-4 tw-h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 18L18 6M6 6L18 18"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
     </div>

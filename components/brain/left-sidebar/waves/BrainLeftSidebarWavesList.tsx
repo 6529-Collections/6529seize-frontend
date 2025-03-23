@@ -51,8 +51,6 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
     activeWaveId
   );
 
-  const memoizedWaves = useMemo(() => waves || [], [waves]);
-
   return (
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
@@ -78,7 +76,7 @@ const BrainLeftSidebarWavesList: React.FC<BrainLeftSidebarWavesListProps> = ({
         </div>
         <div className="tw-mt-2 tw-max-h-96 tw-pb-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
           <div className="tw-flex tw-flex-col">
-            {memoizedWaves.map((wave) => (
+            {waves.map((wave) => (
               <BrainLeftSidebarWave
                 key={wave.id}
                 wave={wave}

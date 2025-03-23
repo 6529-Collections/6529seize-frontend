@@ -11,7 +11,7 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
 }) => {
   return (
     <div>
-      <RecentWavesList />
+      <RecentWavesList activeWaveId={activeWaveId}/>
       <BrainLeftSidebarWavesList activeWaveId={activeWaveId} />
     </div>
   );
