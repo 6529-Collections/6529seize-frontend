@@ -1,4 +1,4 @@
-import styles from "./HeaderQR.module.scss";
+import styles from "./HeaderShare.module.scss";
 import {
   faCopy,
   faExternalLink,
@@ -20,12 +20,14 @@ import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import Tippy from "@tippyjs/react";
 import { useElectron } from "../../../hooks/useElectron";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import yaml from "js-yaml";
 
 const QRCode = require("qrcode");
 
 enum Mode {
   NAVIGATE,
   SHARE,
+  APPS,
 }
 
 enum SubMode {
@@ -33,6 +35,15 @@ enum SubMode {
   APP,
   CORE,
 }
+
+const squareStyle = {
+  width: "100%",
+  maxWidth: "1000px",
+  aspectRatio: "1 / 1",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
 
 export default function HeaderQR() {
   const capacitor = useCapacitor();
@@ -191,15 +202,6 @@ function HeaderQRModal({
     };
 
     const renderCoreLink = (url: string) => {
-      const squareStyle = {
-        width: "100%",
-        maxWidth: "1000px",
-        aspectRatio: "1 / 1",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      };
-
       return (
         <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
           <a
@@ -252,7 +254,6 @@ function HeaderQRModal({
           break;
       }
     } else if (activeTab === Mode.SHARE) {
-      // For SHARE mode, only APP and CORE are valid.
       switch (activeSubTab) {
         case SubMode.APP:
           url = shareConnectionAppUrl;
@@ -267,6 +268,51 @@ function HeaderQRModal({
           break;
         default:
           content = <span>Invalid submode for SHARE</span>;
+          break;
+      }
+    } else if (activeTab === Mode.APPS) {
+      switch (activeSubTab) {
+        case SubMode.APP:
+          content = (
+            <div
+              className="tw-p-10 tw-flex tw-flex-col tw-gap-12 tw-items-center tw-justify-center"
+              style={squareStyle}>
+              <a
+                href="https://apps.apple.com/us/app/6529-mobile/id6654923687"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
+                <Image
+                  priority
+                  loading="eager"
+                  src="/app-store.png"
+                  alt="6529 Mobile iOS"
+                  width={0}
+                  height={0}
+                  placeholder="empty"
+                  className="tw-w-[200px] tw-h-auto hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
+                />
+              </a>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.core6529.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
+                <Image
+                  priority
+                  loading="eager"
+                  src="/play-store.png"
+                  alt="6529 Mobile Android"
+                  width={0}
+                  height={0}
+                  className="tw-w-[200px] tw-h-auto hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
+                />
+              </a>
+            </div>
+          );
+          break;
+        case SubMode.CORE:
+          content = <CoreAppsDownload />;
           break;
       }
     }
@@ -347,52 +393,182 @@ function ModalMenu({
           onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}>
           Current URL
         </Button>
+        <Button
+          className={activeTab === Mode.APPS ? styles.disabledMenuBtn : ""}
+          variant={activeTab === Mode.APPS ? "light" : "outline-light"}
+          onClick={() => onTabChange(Mode.APPS, SubMode.APP)}>
+          6529 Apps
+        </Button>
       </div>
 
       <div className="mt-3 d-flex gap-2">
-        {activeTab === Mode.NAVIGATE ? (
-          <>
-            <Button
-              variant={activeSubTab === SubMode.APP ? "light" : "outline-light"}
-              onClick={() => onTabChange(Mode.NAVIGATE, SubMode.APP)}>
-              <span className="font-smaller">Mobile App</span>
-            </Button>
-            <Button
-              variant={
-                activeSubTab === SubMode.BROWSER ? "light" : "outline-light"
-              }
-              onClick={() => onTabChange(Mode.NAVIGATE, SubMode.BROWSER)}>
-              <span className="font-smaller">Browser</span>
-            </Button>
-            {!isElectron && (
-              <Button
-                variant={
-                  activeSubTab === SubMode.CORE ? "light" : "outline-light"
-                }
-                onClick={() => onTabChange(Mode.NAVIGATE, SubMode.CORE)}>
-                <span className="font-smaller">6529 Core</span>
-              </Button>
-            )}
-          </>
-        ) : (
-          <>
-            <Button
-              variant={activeSubTab === SubMode.APP ? "light" : "outline-light"}
-              onClick={() => onTabChange(Mode.SHARE, SubMode.APP)}>
-              <span className="font-smaller">Mobile App</span>
-            </Button>
-            {!isElectron && (
-              <Button
-                variant={
-                  activeSubTab === SubMode.CORE ? "light" : "outline-light"
-                }
-                onClick={() => onTabChange(Mode.SHARE, SubMode.CORE)}>
-                <span className="font-smaller">6529 Core</span>
-              </Button>
-            )}
-          </>
+        <Button
+          variant={activeSubTab === SubMode.APP ? "light" : "outline-light"}
+          onClick={() => onTabChange(activeTab, SubMode.APP)}>
+          <span className="font-smaller">6529 Mobile</span>
+        </Button>
+        {activeTab === Mode.NAVIGATE && (
+          <Button
+            variant={
+              activeSubTab === SubMode.BROWSER ? "light" : "outline-light"
+            }
+            onClick={() => onTabChange(activeTab, SubMode.BROWSER)}>
+            <span className="font-smaller">Browser</span>
+          </Button>
+        )}
+        {!isElectron && (
+          <Button
+            variant={activeSubTab === SubMode.CORE ? "light" : "outline-light"}
+            onClick={() => onTabChange(activeTab, SubMode.CORE)}>
+            <span className="font-smaller">6529 Core</span>
+          </Button>
         )}
       </div>
     </div>
+  );
+}
+
+function CoreAppsDownload() {
+  interface OSInfo {
+    name: "windows" | "mac" | "linux";
+    url: string;
+    displayName: string;
+    downloadPath: string;
+    image: string;
+    enabled: boolean;
+    version?: string;
+  }
+
+  interface FileData {
+    url: string;
+    sha512: string;
+    size: number;
+  }
+
+  interface LatestYml {
+    version: string;
+    files: FileData[];
+  }
+
+  const osConfigs: OSInfo[] = [
+    {
+      name: "windows",
+      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/win/latest.yml",
+      displayName: "Windows",
+      downloadPath: "6529-core-app/win/links",
+      image: "/windows.png",
+      enabled: true,
+    },
+    {
+      name: "mac",
+      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/mac/latest-mac.yml",
+      displayName: "macOS",
+      downloadPath: "6529-core-app/mac/links",
+      image: "/macos.png",
+      enabled: true,
+    },
+    {
+      name: "linux",
+      url: "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/linux/latest-linux.yml",
+      displayName: "Linux",
+      downloadPath: "6529-core-app/linux/links",
+      image: "/linux.png",
+      enabled: true,
+    },
+  ];
+
+  const [versions, setVersions] = useState<OSInfo[]>([]);
+
+  useEffect(() => {
+    const fetchYml = async (url: string): Promise<LatestYml> => {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}`);
+      }
+
+      const text = await response.text();
+      return yaml.load(text) as LatestYml;
+    };
+
+    const loadVersions = async () => {
+      const versions: OSInfo[] = [];
+      for (const osConfig of osConfigs.filter((config) => config.enabled)) {
+        try {
+          const ymlData = await fetchYml(osConfig.url);
+          versions.push({ ...osConfig, version: ymlData.version });
+        } catch (error) {
+          console.error(
+            `Failed to fetch or process ${osConfig.displayName}:`,
+            error
+          );
+        }
+      }
+      setVersions(versions);
+    };
+
+    loadVersions();
+  }, []);
+
+  return (
+    <div style={squareStyle}>
+      <div className="tw-inline-flex tw-flex-col tw-gap-10">
+        {versions.map((version) => (
+          <CoreAppDownload
+            key={version.name}
+            platform={version.displayName}
+            icon={version.image}
+            title={version.displayName}
+            downloadPath={version.downloadPath}
+            version={version.version ?? ""}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CoreAppDownload({
+  platform,
+  icon,
+  title,
+  downloadPath,
+  version,
+}: {
+  readonly platform: string;
+  readonly icon: string;
+  readonly title: string;
+  readonly downloadPath: string;
+  readonly version: string;
+}) {
+  if (!version) {
+    return null;
+  }
+
+  const url = `https://d3lqz0a4bldqgf.cloudfront.net/${downloadPath}/${version}.html`;
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="tw-w-full tw-bg-black tw-px-5 tw-py-3 tw-border tw-border-solid tw-border-white tw-rounded-lg decoration-none tw-flex tw-items-center tw-gap-4 hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out">
+      <div className="tw-bg-white tw-rounded-full tw-p-4">
+        <Image
+          priority
+          loading="eager"
+          src={icon}
+          alt={title}
+          width={40}
+          height={40}
+          className="unselectable"
+        />
+      </div>
+      <div className="tw-flex tw-items-center tw-gap-2 tw-w-full">
+        <div className="no-wrap tw-text-lg tw-font-semibold">
+          {platform} v{version}
+        </div>
+      </div>
+    </a>
   );
 }
