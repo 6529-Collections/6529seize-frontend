@@ -48,17 +48,20 @@ export const useWavesList = (refetchInterval = 10000) => {
     refetchInterval,
   });
 
-  // Create a set of wave IDs from main waves for efficient lookup - use ref comparison to stabilize
-  const mainWaveIds = useMemo(() => {
-    // Only recalculate if mainWaves has actually changed
-    if (mainWaves !== prevMainWavesRef.current) {
-      prevMainWavesRef.current = mainWaves;
-      return new Set(mainWaves.map(wave => wave.id));
-    }
-    return new Set(prevMainWavesRef.current.map(wave => wave.id));
+  // Create a map of mainWaves by ID for easy lookup
+  const mainWavesMap = useMemo(() => {
+    const map = new Map<string, ApiWave>();
+    mainWaves.forEach(wave => map.set(wave.id, wave));
+    prevMainWavesRef.current = mainWaves;
+    return map;
   }, [mainWaves]);
 
-  // Determine which pinned waves need individual fetching - use stable reference
+  // Set of wave IDs in the main list for quick checking
+  const mainWaveIds = useMemo(() => {
+    return new Set(mainWavesMap.keys());
+  }, [mainWavesMap]);
+
+  // Determine which pinned waves need individual fetching
   const missingPinnedIds = useMemo(() => {
     return pinnedIds.filter(id => !mainWaveIds.has(id));
   }, [pinnedIds, mainWaveIds]);
@@ -76,11 +79,11 @@ export const useWavesList = (refetchInterval = 10000) => {
   const wave9 = useIndividualWaveData(missingPinnedIds[8] || null, refetchInterval);
   const wave10 = useIndividualWaveData(missingPinnedIds[9] || null, refetchInterval);
 
-  // Collect all wave data in an array for easier processing - use stable references
+  // Collect all wave data in an array for easier processing
   const waveDataArray = [wave1, wave2, wave3, wave4, wave5, wave6, wave7, wave8, wave9, wave10];
   
-  // Extract the pinned waves data
-  const pinnedWaves = useMemo(() => {
+  // Get separately fetched pinned waves
+  const separatelyFetchedPinnedWaves = useMemo(() => {
     const result: ApiWave[] = [];
     
     // Loop through missing pinned IDs and corresponding wave data
@@ -90,22 +93,41 @@ export const useWavesList = (refetchInterval = 10000) => {
       }
     });
     
+    return result;
+  }, [missingPinnedIds, waveDataArray]);
+
+  // Collect ALL pinned waves (both from mainWaves and separately fetched)
+  const allPinnedWaves = useMemo(() => {
+    const result: ApiWave[] = [];
+    
+    // First add pinned waves from mainWaves
+    pinnedIds.forEach(id => {
+      const waveFromMain = mainWavesMap.get(id);
+      if (waveFromMain) {
+        result.push(waveFromMain);
+      }
+    });
+    
+    // Then add separately fetched pinned waves
+    result.push(...separatelyFetchedPinnedWaves);
+    
+    // Update the ref if content changed
     if (JSON.stringify(result) !== JSON.stringify(prevPinnedWavesRef.current)) {
       prevPinnedWavesRef.current = result;
     }
     
     return prevPinnedWavesRef.current;
-  }, [missingPinnedIds, waveDataArray]);
+  }, [pinnedIds, mainWavesMap, separatelyFetchedPinnedWaves]);
 
-  // Combine main waves with pinned waves - update ref but maintain stability
+  // Combine main waves with separately fetched pinned waves
   useEffect(() => {
-    const newAllWaves = [...mainWaves, ...pinnedWaves];
+    const newAllWaves = [...mainWaves, ...separatelyFetchedPinnedWaves];
     
     // Only update if the arrays have actually changed in content
     if (JSON.stringify(newAllWaves) !== JSON.stringify(allWavesRef.current)) {
       allWavesRef.current = newAllWaves;
     }
-  }, [mainWaves, pinnedWaves]);
+  }, [mainWaves, separatelyFetchedPinnedWaves]);
 
   // Determine if any pinned waves are still loading
   const isPinnedWavesLoading = missingPinnedIds.some((_, index) => 
@@ -122,12 +144,9 @@ export const useWavesList = (refetchInterval = 10000) => {
     return fetchNextPage();
   }, [fetchNextPage]);
 
-  // Create a stable waves reference
-  const waves = allWavesRef.current;
-
   return {
     // Main data
-    waves,
+    waves: allWavesRef.current,
     
     // Original waves pagination and loading
     isFetching,
@@ -136,8 +155,8 @@ export const useWavesList = (refetchInterval = 10000) => {
     fetchNextPage: fetchNextPageStable,
     status: mainWavesStatus,
     
-    // Pinned waves metadata
-    pinnedWaves: prevPinnedWavesRef.current,
+    // Pinned waves metadata - now includes ALL pinned waves
+    pinnedWaves: allPinnedWaves,
     isPinnedWavesLoading,
     hasPinnedWavesError,
     
