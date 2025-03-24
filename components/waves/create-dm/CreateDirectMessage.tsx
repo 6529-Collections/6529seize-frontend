@@ -4,7 +4,6 @@ import {
   CommunityMemberMinimal,
   IProfileAndConsolidations,
 } from "../../../entities/IProfile";
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
 import GroupCreateIdentitiesSelect from "../../groups/page/create/config/identities/select/GroupCreateIdentitiesSelect";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { useAuth } from "../../auth/Auth";
@@ -24,7 +23,6 @@ export default function CreateDirectMessage({
   readonly profile: IProfileAndConsolidations;
   readonly onBack: () => void;
 }) {
-  const isMobile = useIsMobileScreen();
   const [isCreating, setIsCreating] = useState(false);
   const router = useRouter();
 

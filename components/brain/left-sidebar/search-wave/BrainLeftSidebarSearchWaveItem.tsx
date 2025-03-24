@@ -2,10 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ApiWave } from "../../../../generated/models/ApiWave";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "../../../../helpers/image.helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import WavePicture from "../../../waves/WavePicture";

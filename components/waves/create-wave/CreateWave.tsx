@@ -46,7 +46,6 @@ import {
 } from "../../../helpers/waves/create-wave.validation";
 import { Period } from "../../../helpers/Types";
 import useCapacitor from "../../../hooks/useCapacitor";
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
 import CreateWaveFlow from "./CreateWaveFlow";
 
 export default function CreateWave({
@@ -57,7 +56,6 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const router = useRouter();
-  const isMobile = useIsMobileScreen();
   const { isIos, keyboardVisible } = useCapacitor();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { waitAndInvalidateDrops, onWaveCreated } = useContext(
