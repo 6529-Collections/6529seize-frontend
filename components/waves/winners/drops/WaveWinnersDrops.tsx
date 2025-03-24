@@ -1,10 +1,6 @@
 import React, { useContext, useMemo } from "react";
 import { WaveWinnersDrop } from "./WaveWinnersDrop";
-import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../../hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard } from "../../../../hooks/useWaveDropsLeaderboard";
 import { AuthContext } from "../../../auth/Auth";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
 import { ApiWave } from "../../../../generated/models/ApiWave";
@@ -25,8 +21,6 @@ export const WaveWinnersDrops: React.FC<WaveWinnersDropsProps> = ({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
       reverse: false,
-      dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
-      sortDirection: WaveDropsLeaderboardSortDirection.ASC,
       pollingEnabled: false,
     });
 

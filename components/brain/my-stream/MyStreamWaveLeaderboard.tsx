@@ -1,15 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveWinners } from "../../waves/winners/WaveWinners";
-import {
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 import useCapacitor from "../../../hooks/useCapacitor";
-import { WaveLeaderboardSortType } from "../../waves/leaderboard/WaveLeaderboard";
 import { WaveLeaderboardTime } from "../../waves/leaderboard/WaveLeaderboardTime";
 import { WaveLeaderboardHeader } from "../../waves/leaderboard/header/WaveleaderboardHeader";
 import { WaveDropCreate } from "../../waves/leaderboard/create/WaveDropCreate";
@@ -48,24 +43,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     )}`;
   }, [capacitor.platform, capacitor.keyboardVisible]);
   const { votingState } = useWaveState(wave);
-  const [sort, setSort] = useState<WaveLeaderboardSortType>(
-    WaveLeaderboardSortType.RANK
-  );
-  const [showMyDrops, setShowMyDrops] = useState(false);
+
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
-
-  const sortBy: Record<WaveLeaderboardSortType, WaveDropsLeaderboardSortBy> = {
-    [WaveLeaderboardSortType.RANK]: WaveDropsLeaderboardSortBy.RANK,
-    [WaveLeaderboardSortType.RECENT]: WaveDropsLeaderboardSortBy.CREATION_TIME,
-  };
-
-  const sortDirection: Record<
-    WaveLeaderboardSortType,
-    WaveDropsLeaderboardSortDirection
-  > = {
-    [WaveLeaderboardSortType.RANK]: WaveDropsLeaderboardSortDirection.DESC,
-    [WaveLeaderboardSortType.RECENT]: WaveDropsLeaderboardSortDirection.ASC,
-  };
 
   return (
     <div className={containerClassName}>
@@ -78,11 +57,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
             <WaveLeaderboardTime wave={wave} />
             <WaveLeaderboardHeader
-              wave={wave}
-              sort={sort}
-              setSort={setSort}
-              showMyDrops={showMyDrops}
-              setShowMyDrops={setShowMyDrops}
               onCreateDrop={() => setIsCreatingDrop(true)}
             />
           </div>
@@ -94,7 +68,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}>
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                >
                   <WaveDropCreate
                     wave={wave!}
                     onCancel={() => setIsCreatingDrop(false)}
@@ -107,9 +82,6 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             </AnimatePresence>
             <WaveLeaderboardDrops
               wave={wave}
-              dropsSortBy={sortBy[sort]}
-              sortDirection={sortDirection[sort]}
-              showMyDrops={showMyDrops}
               onCreateDrop={() => setIsCreatingDrop(true)}
             />
           </div>

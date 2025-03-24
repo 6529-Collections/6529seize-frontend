@@ -1,21 +1,14 @@
 import React, { useContext, useState, memo, useCallback } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard } from "../../../hooks/useWaveDropsLeaderboard";
 import { AuthContext } from "../../auth/Auth";
 import Link from "next/link";
 import {
   formatNumberWithCommas,
   getTimeAgoShort,
 } from "../../../helpers/Helpers";
-import {
-  ImageScale,
-  getScaledImageUri,
-} from "../../../helpers/image.helpers";
+import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
 import WaveDropContent from "../drops/WaveDropContent";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 
@@ -159,7 +152,7 @@ const WaveWinnerItem = memo<{
     if (rankStyle) {
       return rankStyle.text;
     }
-    
+
     if (drop.rating >= 0) {
       return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
     }
@@ -173,7 +166,7 @@ const WaveWinnerItem = memo<{
     if (drop.rank && drop.rank <= 3 && rankStyle) {
       return rankStyle.text;
     }
-    
+
     if (isNegativeVote) {
       return "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
     }
@@ -324,8 +317,6 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     const { drops } = useWaveDropsLeaderboard({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
-      dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
-      sortDirection: WaveDropsLeaderboardSortDirection.ASC,
       reverse: false,
     });
 

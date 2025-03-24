@@ -1,11 +1,7 @@
 import React, { useContext, useMemo } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { AuthContext } from "../../../auth/Auth";
-import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../../hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard } from "../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
@@ -14,17 +10,11 @@ import { useRouter } from "next/router";
 
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
-  readonly dropsSortBy: WaveDropsLeaderboardSortBy;
-  readonly sortDirection: WaveDropsLeaderboardSortDirection;
-  readonly showMyDrops: boolean;
   readonly onCreateDrop: () => void;
 }
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
-  dropsSortBy,
-  sortDirection,
-  showMyDrops,
   onCreateDrop,
 }) => {
   const router = useRouter();
@@ -34,9 +24,6 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
       reverse: true,
-      dropsSortBy,
-      sortDirection,
-      handle: showMyDrops ? connectedProfile?.profile?.handle : undefined,
     });
 
   const memoizedDrops = useMemo(() => drops, [drops]);
