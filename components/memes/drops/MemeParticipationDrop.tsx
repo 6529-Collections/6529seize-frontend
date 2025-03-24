@@ -101,27 +101,32 @@ export default function MemeParticipationDrop({
   return (
     <div className="tw-w-full">
       <div
-        className={`tw-w-full tw-group tw-relative ${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-          }`}
+        className={`tw-w-full tw-group tw-relative ${
+          location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
+        }`}
       >
-        <div className={`${borderClasses} ${location === DropLocation.WAVE ? 'tw-bg-iron-900' : 'tw-bg-iron-950'}`}>
+        <div
+          className={`${borderClasses} ${
+            location === DropLocation.WAVE ? "tw-bg-iron-900" : "tw-bg-iron-950"
+          }`}
+        >
           {/* Two-column layout */}
-          <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-5">
+          <div className="tw-grid tw-grid-cols-1 xl:tw-grid-cols-12 tw-gap-5">
             {/* Left column - Metadata */}
-            <div className="tw-col-span-1 md:tw-col-span-5 tw-px-4 tw-pt-4">
+            <div className="tw-col-span-1 xl:tw-col-span-5 tw-px-4 tw-pt-4 tw-pb-4">
               {/* Header with metadata */}
-              <div className="tw-flex tw-flex-col tw-gap-y-1 sm:tw-gap-y-2">
+              <div className="tw-flex tw-flex-col tw-gap-y-1">
                 {/* Header component */}
                 <MemeDropHeader
                   title={title}
                   rank={drop.rank}
                   decisionTime={drop.winning_context?.decision_time || null}
                 />
-
                 {/* Description component */}
                 <MemeDropDescription description={description} />
               </div>
-              {/* Vote count and artist info */}
+
+              {/* Vote count section */}
               <div className="tw-flex tw-flex-col tw-gap-y-4 tw-mt-4">
                 {/* Vote stats component */}
                 <MemeDropVoteStats
@@ -130,11 +135,11 @@ export default function MemeParticipationDrop({
                   ratersCount={drop.raters_count}
                   topVoters={drop.top_raters || []}
                 />
-
-                {/* Artist info component */}
+              </div>
+              {/* Artist info component */}
+              <div className="tw-mt-4">
                 <MemeDropArtistInfo drop={drop} />
               </div>
-
             </div>
 
             {/* Artwork component */}

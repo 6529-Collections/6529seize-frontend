@@ -115,6 +115,7 @@ const MemesArtSubmissionContainer: React.FC<
         setArtworkUploaded={form.setArtworkUploaded}
         handleFileSelect={handleFileSelect}
         onSubmit={handleSubmit}
+        onCancel={onClose}
         updateTraitField={form.updateTraitField}
         setTraits={form.setTraits}
         isSubmitting={isSubmitting}

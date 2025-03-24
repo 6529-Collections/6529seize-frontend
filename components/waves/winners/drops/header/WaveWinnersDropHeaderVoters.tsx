@@ -26,7 +26,7 @@ export default function WaveWinnersDropHeaderVoters({
     if (rank && rank <= 3) {
       return topThreeRankStyles[rank];
     }
-    
+
     if (isNegative) {
       return "tw-bg-gradient-to-r tw-from-red tw-to-red tw-bg-clip-text tw-text-transparent";
     }
@@ -49,7 +49,10 @@ export default function WaveWinnersDropHeaderVoters({
         ))}
       </div>
       <span className="tw-text-sm tw-text-iron-400">
-        {formatNumberWithCommas(winner.drop.raters_count)}{" "}
+        <span className="tw-font-semibold">
+          {" "}
+          {formatNumberWithCommas(winner.drop.raters_count)}{" "}
+        </span>
         {winner.drop.raters_count === 1 ? "voter" : "voters"}
       </span>
 
@@ -58,7 +61,8 @@ export default function WaveWinnersDropHeaderVoters({
           <span className="tw-text-sm">
             <span className="tw-text-iron-400">Your vote: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
-              {formatNumberWithCommas(userVote)} {winner.drop.wave.voting_credit_type}
+              {formatNumberWithCommas(userVote)}{" "}
+              {winner.drop.wave.voting_credit_type}
             </span>
           </span>
         </div>

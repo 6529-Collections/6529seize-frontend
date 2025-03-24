@@ -35,7 +35,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   return (
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
-        <div className="tw-flex tw-items-center tw-gap-x-2 tw-justify-between tw-w-full">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
 
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <UserCICAndLevel

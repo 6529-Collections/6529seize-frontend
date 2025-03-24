@@ -42,7 +42,7 @@ export const WaveLeaderboardDropRaters: React.FC<
     drop.context_profile_context?.rating !== 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-1.5 lg:tw-justify-end">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-1.5 tw-justify-end">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span className={`tw-text-sm tw-font-semibold ${rankStyle}`}>
           {formatNumberWithCommas(drop.rating)}

@@ -84,7 +84,7 @@ export default function MemeWinnerDrop({
             <div className="tw-col-span-1 md:tw-col-span-5 tw-px-4 tw-pt-4">
               {/* Header with metadata */}
               <div className="tw-flex tw-flex-col tw-gap-y-4">
-                <div className="tw-flex tw-flex-col tw-gap-y-1 sm:tw-gap-y-2">
+                <div className="tw-flex tw-flex-col tw-gap-y-1">
                   {/* Rank and title in the same row */}
                   <MemeWinnerHeader title={title} decisionTime={decisionTime} />
 

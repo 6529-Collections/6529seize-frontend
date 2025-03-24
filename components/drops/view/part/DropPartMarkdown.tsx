@@ -50,7 +50,7 @@ function DropPartMarkdown({
       case "sm":
         return isMobile ? "tw-text-xs" : "tw-text-sm";
       default:
-        return isMobile ? "tw-text-sm" : "tw-text-md";
+        return "tw-text-md"; // Always use medium text for both mobile and desktop
     }
   })();
 

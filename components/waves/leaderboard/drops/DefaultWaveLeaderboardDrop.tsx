@@ -14,19 +14,18 @@ interface DefaultWaveLeaderboardDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-export const DefaultWaveLeaderboardDrop: React.FC<DefaultWaveLeaderboardDropProps> = ({
-  drop,
-  wave,
-  onDropClick,
-}) => {
+export const DefaultWaveLeaderboardDrop: React.FC<
+  DefaultWaveLeaderboardDropProps
+> = ({ drop, wave, onDropClick }) => {
   const { canShowVote } = useDropInteractionRules(drop);
-  
+
   const getBorderClasses = () => {
-    const rank = drop.rank && drop.rank <= 3 ? drop.rank : 'default';
-    
+    const rank = drop.rank && drop.rank <= 3 ? drop.rank : "default";
+
     // Base classes with consistent border styling for ongoing competition items
-    const baseClasses = "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden";
-    
+    const baseClasses =
+      "tw-rounded-xl tw-bg-iron-950 tw-p-4 md:tw-px-5 tw-border tw-border-solid tw-border-iron-800 tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden";
+
     // Match the hover effects from the other component
     if (rank === 1) {
       return `${baseClasses} desktop-hover:hover:tw-border-[#fbbf24]/40`;
@@ -50,34 +49,31 @@ export const DefaultWaveLeaderboardDrop: React.FC<DefaultWaveLeaderboardDropProp
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
               <WaveLeaderboardDropHeader drop={drop} />
-              {/* Only show raters on lg screens and above */}
-              <div className="tw-hidden lg:tw-block">
-                <WaveLeaderboardDropRaters drop={drop} />
-              </div>
+              {/* Removed raters from header, now always in footer */}
             </div>
           </div>
 
-          <div className="tw-ml-[3.35rem] tw-space-y-2">
-            <WaveLeaderboardDropContent drop={drop} />
+          <div className="tw-space-y-2">
+            <div className="tw-ml-[3.35rem]">
+              <WaveLeaderboardDropContent drop={drop} />
+            </div>
 
             {canShowVote && (
-              <div className="tw-pb-3 tw-pt-2">
+              <div className="tw-pb-3 tw-pt-2 sm:tw-ml-[3.25rem]">
                 <SingleWaveDropVote drop={drop} />
-                {/* Show raters below voting section on mobile/tablet */}
-                <div className="tw-block lg:tw-hidden tw-mt-3">
-                  <WaveLeaderboardDropRaters drop={drop} />
-                </div>
               </div>
             )}
-            
-            {/* If voting is not available, show raters before footer on mobile/tablet */}
-            {!canShowVote && (
-              <div className="tw-block lg:tw-hidden tw-mb-2">
+
+            {/* Responsive footer layout with pure Tailwind */}
+            <div className="tw-grid tw-grid-cols-[auto,1fr] tw-gap-x-4 tw-items-center sm:tw-ml-[3.25rem]">
+              <div className="tw-contents">
+                <WaveLeaderboardDropFooter drop={drop} wave={wave} />
+              </div>
+              
+              <div className="tw-justify-self-end">
                 <WaveLeaderboardDropRaters drop={drop} />
               </div>
-            )}
-            
-            <WaveLeaderboardDropFooter drop={drop} wave={wave} />
+            </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { WaveWinnersDropHeader } from "./header/WaveWinnersDropHeader";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
@@ -6,6 +6,8 @@ import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
+import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotalVotes";
+import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -35,6 +37,22 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   onDropClick,
 }) => {
   const shadowClass = getRankShadowClass(winner.place);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Function to check if viewport is mobile sized
+  const checkIsMobile = () => {
+    setIsMobile(window.innerWidth < 640); // 640px is sm breakpoint in Tailwind
+  };
+
+  // Set up listener for viewport changes
+  useEffect(() => {
+    checkIsMobile(); // Check on initial render
+
+    window.addEventListener("resize", checkIsMobile);
+    return () => {
+      window.removeEventListener("resize", checkIsMobile);
+    };
+  }, []);
 
   return (
     <div
@@ -50,11 +68,23 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
       <div className="tw-rounded-xl tw-p-4">
         <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
           <WaveWinnersDropHeaderAuthorPfp winner={winner} />
-          <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-1.5">
-            <WaveWinnersDropHeader winner={winner} />
+          <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
+            {/* Always show header without voting info */}
+            <WaveWinnersDropHeader winner={winner} showVotingInfo={false} />
+
             <WaveWinnersDropContent winner={winner} />
-            <div className="tw-mt-4">
+          </div>
+        </div>
+        {/* Outcome section with voting info (always displayed) */}
+        <div className="tw-mt-3 tw-ml-[3.25rem]">
+          <div className="tw-flex tw-items-center tw-flex-wrap tw-justify-between tw-gap-x-4 tw-gap-y-2">
+            <div className="tw-whitespace-nowrap">
               <WaveWinnersDropOutcome winner={winner} />
+            </div>
+
+            <div className="tw-flex tw-flex-whitespace-nowrap tw-gap-x-4 tw-items-center">
+              <WaveWinnersDropHeaderTotalVotes winner={winner} />
+              <WaveWinnersDropHeaderVoters winner={winner} />
             </div>
           </div>
         </div>

@@ -7,14 +7,12 @@ interface WaveWinnersSmallEmptyProps {
 export const WaveWinnersSmallEmpty: React.FC<WaveWinnersSmallEmptyProps> = ({
   isMultiDecision = false,
 }) => {
-  // Different messages based on wave type
-  const title = isMultiDecision
-    ? "No Decision Points Available"
-    : "No Winners to Display";
+  // User-friendly messages focused on winners, not technical details
+  const title = "No Winners Yet";
   
   const message = isMultiDecision
-    ? "There are no past decision points to display"
-    : "This wave ended without any submissions";
+    ? "No winners have been announced for this wave yet. Check back later!"
+    : "This wave ended without any winning submissions";
 
   return (
     <div className="tw-p-3">
@@ -22,7 +20,7 @@ export const WaveWinnersSmallEmpty: React.FC<WaveWinnersSmallEmptyProps> = ({
         <div className="tw-mt-4 tw-text-base tw-font-semibold tw-text-iron-300">
           {title}
         </div>
-        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400 tw-text-center">
           {message}
         </p>
       </div>

@@ -13,7 +13,7 @@ export default function MemeDropHeader({
   decisionTime,
 }: MemeDropHeaderProps) {
   return (
-    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-3 sm:tw-gap-y-2">
+    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-3">
       <WinnerDropBadge
         rank={rank}
         decisionTime={decisionTime}

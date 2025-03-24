@@ -44,7 +44,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
         {/* Left column - Metadata */}
         <div className="tw-col-span-1 xl:tw-col-span-5 tw-px-4 tw-pt-4 tw-pb-4">
           {/* Header with metadata */}
-          <div className="tw-flex tw-flex-col tw-gap-y-1 sm:tw-gap-y-2">
+          <div className="tw-flex tw-flex-col">
             {/* Rank and title in the same row */}
 
             <MemesLeaderboardDropHeader
@@ -53,9 +53,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               decisionTime={drop.winning_context?.decision_time || null}
             />
             {/* Description on its own row */}
-            <MemesLeaderboardDropDescription description={description} />
+            <div className="tw-mt-1">
+              <MemesLeaderboardDropDescription description={description} />
+            </div>
           </div>
-          <div className="tw-flex tw-flex-col tw-gap-y-4 tw-mt-4">
+          <div className="tw-flex tw-flex-col tw-mt-4">
             <MemesLeaderboardDropVoteSummary
               rating={drop.rating || 0}
               creditType={drop.wave.voting_credit_type}
@@ -63,9 +65,10 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               topVoters={firstThreeVoters}
             />
             {/* Vote count and artist info */}
-            <MemesLeaderboardDropArtistInfo drop={drop} />
+            <div className="tw-mt-4">
+              <MemesLeaderboardDropArtistInfo drop={drop} />
+            </div>
           </div>
-
         </div>
 
         {/* Right column - Artwork - now spans 7 columns on xl screens */}

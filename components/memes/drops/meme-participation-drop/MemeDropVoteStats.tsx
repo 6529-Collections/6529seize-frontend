@@ -21,7 +21,7 @@ export default function MemeDropVoteStats({
   const firstThreeVoters = topVoters?.slice(0, 3) || [];
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between">
+    <div className="tw-flex tw-items-center tw-gap-x-4">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span
           className={`tw-text-md tw-font-semibold ${

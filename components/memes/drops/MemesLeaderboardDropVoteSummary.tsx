@@ -17,7 +17,7 @@ export const MemesLeaderboardDropVoteSummary: React.FC<
   const isPositive = (rating || 0) >= 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4 xl:tw-w-full">
+    <div className="tw-flex tw-items-center tw-gap-x-4">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span
           className={`tw-text-md tw-font-semibold ${

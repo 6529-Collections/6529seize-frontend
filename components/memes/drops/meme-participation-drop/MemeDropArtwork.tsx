@@ -15,10 +15,10 @@ export default function MemeDropArtwork({
 }: MemeDropArtworkProps) {
   return (
     <div
-      className="tw-col-span-1 md:tw-col-span-7 tw-relative tw-bg-iron-900/30 tw-h-full tw-cursor-pointer"
+      className="tw-col-span-1 xl:tw-col-span-7 tw-relative tw-bg-iron-950 tw-h-full tw-cursor-pointer"
       onClick={onViewLarger}
     >
-      <div className="tw-aspect-video tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-900/50">
+      <div className="tw-aspect-video tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-950">
         {artworkMedia ? (
           <img
             src={artworkMedia}

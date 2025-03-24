@@ -7,17 +7,14 @@ interface MemesLeaderboardDropHeaderProps {
   readonly decisionTime: number | null;
 }
 
-export const MemesLeaderboardDropHeader: React.FC<MemesLeaderboardDropHeaderProps> = ({
-  title,
-  rank,
-  decisionTime,
-}) => {
+export const MemesLeaderboardDropHeader: React.FC<
+  MemesLeaderboardDropHeaderProps
+> = ({ title, rank, decisionTime }) => {
   return (
-    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-3 sm:tw-gap-y-2">
-      <WinnerDropBadge
-        rank={rank}
-        decisionTime={decisionTime || null}
-      />
+    <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-3">
+      <div className="tw-mt-1">
+        <WinnerDropBadge rank={rank} decisionTime={decisionTime || null} />
+      </div>
       <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
         {title}
       </h3>

@@ -1,5 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 interface ModalLayoutProps {
   readonly title: string;
@@ -13,7 +15,7 @@ interface ModalLayoutProps {
 const ModalLayout: React.FC<ModalLayoutProps> = ({
   title,
   onCancel,
-  children
+  children,
 }) => {
   return (
     <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-h-full">
@@ -26,31 +28,32 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
             <div className="tw-absolute tw-w-1/2 tw-h-1/2 tw-bg-iron-500/4 tw-blur-3xl -tw-bottom-1/4 -tw-left-1/4" />
           </div>
 
-          {/* Cancel button */}
+          {/* X close button */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
             onClick={onCancel}
-            className="tw-absolute tw-bg-transparent tw-border-0 tw-right-8 tw-top-10 tw-z-20 tw-text-iron-400 tw-text-sm tw-font-medium hover:tw-text-iron-100 tw-transition-colors"
+            className="tw-absolute tw-right-8 tw-top-8 tw-z-20 tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-full tw-border-0 tw-bg-iron-800/60 desktop-hover:hover:tw-bg-iron-700/80 tw-text-iron-400 desktop-hover:hover:tw-text-iron-100 tw-transition-all"
+            aria-label="Close modal"
           >
-            Cancel
+            <FontAwesomeIcon icon={faXmark} className="tw-size-4 tw-flex-shrink-0" />
           </motion.button>
 
           <div className="tw-relative tw-z-10">
-            {/* Modern Header */}
-            <motion.h3
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="tw-text-3xl tw-font-semibold tw-text-iron-100"
-            >
-              {title}
-            </motion.h3>
+            {/* Header Section with bottom border */}
+            <div className="tw-mb-6 tw-pb-4 tw-border-b tw-border-iron-800/50">
+              <motion.h3
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="tw-text-3xl tw-font-semibold tw-text-iron-100"
+              >
+                {title}
+              </motion.h3>
+            </div>
 
             {/* Main Content */}
             {children}
           </div>
         </div>
       </motion.div>
-      <div className="tw-inline-block"></div>
     </div>
   );
 };
