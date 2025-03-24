@@ -5,10 +5,11 @@ import { AnimatePresence } from "framer-motion";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
 import { ExpandedTimelineContent } from "./time/ExpandedTimelineContent";
-import { isTimeZero } from "../../../helpers/waves/time.utils";
+import { calculateTimeLeft, isTimeZero } from "../../../helpers/waves/time.utils";
 import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
 import { CompactVotingPhaseCard } from "./time/CompactVotingPhaseCard";
 import { useWave } from "../../../hooks/useWave";
+import { Time } from "../../../helpers/time";
 
 interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
@@ -22,7 +23,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
 }) => {
   // Using decision points hooks
-  const { nextDecisionTime, allDecisions, nextDecisionTimeLeft } =
+  const { allDecisions } =
     useDecisionPoints(wave);
   const {
     decisions: { multiDecision },
@@ -32,15 +33,12 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
 
-  const [hasNextDecision, setHasNextDecision] = useState(false);
+  const nextDecisionTime = allDecisions.find(decision => decision.timestamp > Time.currentMillis())?.timestamp ?? null;
+  const nextDecisionTimeLeft = nextDecisionTime ? calculateTimeLeft(nextDecisionTime) : null;
 
-  useEffect(() => {
-    setHasNextDecision(
-      !!nextDecisionTime &&
-        !!nextDecisionTimeLeft &&
-        !isTimeZero(nextDecisionTimeLeft)
-    );
-  }, [nextDecisionTime, nextDecisionTimeLeft]);
+  
+
+
 
   return (
     <div className="tw-mb-4">
@@ -52,7 +50,6 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
             icon={faClock}
             isOpen={isDecisionDetailsOpen}
             setIsOpen={setIsDecisionDetailsOpen}
-            hasNextDecision={hasNextDecision}
             nextDecisionTime={nextDecisionTime}
             timeLeft={nextDecisionTimeLeft}
           />

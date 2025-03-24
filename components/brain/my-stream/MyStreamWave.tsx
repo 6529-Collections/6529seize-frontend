@@ -24,6 +24,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
+
   const { isChatWave, isMemesWave } = useWave(wave);
   const {
     voting: { isUpcoming, isCompleted, isInProgress },

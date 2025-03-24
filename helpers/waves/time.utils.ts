@@ -62,6 +62,7 @@ export const isTimeZero = (timeLeft: TimeLeft): boolean => {
 export function calculateLastDecisionTime(wave: ApiWave | null | undefined): number {
   if (!wave) return 0;
 
+
   // Get basic decision strategy data
   const firstDecisionTime = wave.wave.decisions_strategy?.first_decision_time;
   const subsequentDecisions =
@@ -71,30 +72,34 @@ export function calculateLastDecisionTime(wave: ApiWave | null | undefined): num
   const votingEndTime = wave.voting.period?.max || FALLBACK_END_TIME;
 
   // If no first decision time is set, use the voting end time
-  if (!firstDecisionTime) return votingEndTime;
+  if (!firstDecisionTime) {
+    return votingEndTime;
+  }
 
   // Case 1: Single decision wave (no subsequent decisions)
   if (subsequentDecisions.length === 0) {
     // For single decision waves, the end time is the first decision time
     // But make sure it's not after the voting end time
-    return Math.min(firstDecisionTime, votingEndTime);
+    const result = Math.min(firstDecisionTime, votingEndTime);
+    return result;
   }
 
   // Case 2: Multi-decision waves (fixed number of decisions)
   if (!isRolling) {
     // Calculate the last decision time by adding all intervals
     let lastDecisionTime = firstDecisionTime;
+    
     for (const interval of subsequentDecisions) {
       lastDecisionTime += interval;
     }
+    
     // But make sure it's not after the voting end time
-    return Math.min(lastDecisionTime, votingEndTime);
+    const result = Math.min(lastDecisionTime, votingEndTime);
+    return result;
   }
 
   // Case 3: Rolling waves (decisions repeat until end time)
-  // For rolling waves, we need to calculate how many decision cycles
-  // will occur before the voting end time
-
+  
   // Calculate the total length of one decision cycle
   const cycleLength = subsequentDecisions.reduce(
     (sum, interval) => sum + interval,
@@ -123,16 +128,17 @@ export function calculateLastDecisionTime(wave: ApiWave | null | undefined): num
   // Start with the time after all complete cycles
   let lastDecisionTime = firstDecisionTime + completeCycles * cycleLength;
 
+
   // Process partial cycle - find the last decision that fits
   let accumulatedTime = 0;
   for (const interval of subsequentDecisions) {
     accumulatedTime += interval;
+    
     if (accumulatedTime <= remainingTime) {
       lastDecisionTime += interval;
     } else {
       break;
     }
   }
-
   return lastDecisionTime;
 }
