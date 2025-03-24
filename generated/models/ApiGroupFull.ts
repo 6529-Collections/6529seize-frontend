@@ -22,6 +22,7 @@ export class ApiGroupFull {
     'created_by': ApiProfileMin;
     'visible': boolean;
     'is_private': boolean;
+    'is_direct_message'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -65,6 +66,12 @@ export class ApiGroupFull {
         {
             "name": "is_private",
             "baseName": "is_private",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "is_direct_message",
+            "baseName": "is_direct_message",
             "type": "boolean",
             "format": ""
         }    ];
