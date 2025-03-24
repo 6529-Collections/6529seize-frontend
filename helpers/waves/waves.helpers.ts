@@ -104,7 +104,7 @@ export const createDirectMessageWave = ({
   readonly addresses: string[];
 }): Promise<ApiWave> => {
   return commonApiPost({
-    endpoint: "waves/create-direct-message",
+    endpoint: "waves/direct-message/new",
     body: {
       identity_addresses: addresses,
     },
