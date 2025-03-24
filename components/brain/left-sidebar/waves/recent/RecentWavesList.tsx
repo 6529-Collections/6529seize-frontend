@@ -4,9 +4,9 @@ import { usePinnedWaves } from "../../../../../hooks/usePinnedWaves";
 import { useWaveData } from "../../../../../hooks/useWaveData";
 import BrainLeftSidebarWave from "../BrainLeftSidebarWave";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
-
+import { EnhancedWave } from "../../../../../hooks/useWavesList";
 interface RecentWavesListProps {
-  readonly waves: ApiWave[];
+  readonly waves: EnhancedWave[];
 }
 
 const RecentWavesList: React.FC<RecentWavesListProps> = ({ waves }) => {

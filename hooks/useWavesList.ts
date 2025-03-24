@@ -6,16 +6,23 @@ import { usePinnedWaves } from "./usePinnedWaves";
 import { useWaveData } from "./useWaveData";
 import { ApiWave } from "../generated/models/ApiWave";
 
+// Enhanced wave interface with isPinned field and newDropsCount
+export interface EnhancedWave extends ApiWave {
+  isPinned: boolean;
+  newDropsCount: number;
+}
+
 // Helper function for deep comparison of wave arrays
-function areWavesEqual(arrA: ApiWave[], arrB: ApiWave[]): boolean {
+function areWavesEqual(arrA: EnhancedWave[], arrB: EnhancedWave[]): boolean {
   if (arrA === arrB) return true;
   if (arrA.length !== arrB.length) return false;
   
-  // Compare each wave by ID and basic properties
-  // This is more efficient than a full deep equality check
+  // Compare each wave by ID, updatedAt, isPinned status, and newDropsCount
   for (let i = 0; i < arrA.length; i++) {
     if (arrA[i].id !== arrB[i].id) return false;
     if (arrA[i].updatedAt !== arrB[i].updatedAt) return false;
+    if (arrA[i].isPinned !== arrB[i].isPinned) return false;
+    if (arrA[i].newDropsCount !== arrB[i].newDropsCount) return false;
   }
   
   return true;
@@ -32,18 +39,23 @@ const useIndividualWaveData = (
 
 /**
  * Hook for managing and fetching waves list including pinned waves
+ * @param refetchInterval - Interval in ms to refetch waves
+ * @param activeWaveId - ID of the currently active wave, to reset new drops count
  * @returns Wave list data and loading states
  */
-export const useWavesList = (refetchInterval = 10000) => {
+export const useWavesList = (refetchInterval = 10000, activeWaveId: string | null = null) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   
   // Use state for allWaves instead of ref to ensure reactivity
-  const [allWaves, setAllWaves] = useState<ApiWave[]>([]);
+  const [allWaves, setAllWaves] = useState<EnhancedWave[]>([]);
+  
+  // State for tracking initial drops counts for waves
+  const [initialDropsCounts, setInitialDropsCounts] = useState<Record<string, number>>({});
   
   // Use ref to avoid too many re-renders for derived values
   const prevMainWavesRef = useRef<ApiWave[]>([]);
-  const prevPinnedWavesRef = useRef<ApiWave[]>([]);
+  const prevPinnedWavesRef = useRef<EnhancedWave[]>([]);
   
   // Track connected identity state - memoize to prevent re-renders
   const isConnectedIdentity = useMemo(() => {
@@ -115,18 +127,21 @@ export const useWavesList = (refetchInterval = 10000) => {
 
   // Collect ALL pinned waves (both from mainWaves and separately fetched)
   const allPinnedWaves = useMemo(() => {
-    const result: ApiWave[] = [];
+    const result: EnhancedWave[] = [];
     
     // First add pinned waves from mainWaves
     pinnedIds.forEach(id => {
       const waveFromMain = mainWavesMap.get(id);
       if (waveFromMain) {
-        result.push(waveFromMain);
+        // Add isPinned property
+        result.push({ ...waveFromMain, isPinned: true });
       }
     });
     
     // Then add separately fetched pinned waves
-    result.push(...separatelyFetchedPinnedWaves);
+    separatelyFetchedPinnedWaves.forEach(wave => {
+      result.push({ ...wave, isPinned: true });
+    });
     
     // Update the ref if content changed - still useful for comparison and memoization
     if (!areWavesEqual(result, prevPinnedWavesRef.current)) {
@@ -136,10 +151,130 @@ export const useWavesList = (refetchInterval = 10000) => {
     return result; // Return the actual result, not the ref
   }, [pinnedIds, mainWavesMap, separatelyFetchedPinnedWaves]);
 
+  // Calculate new drops counts
+  const newDropsCountsMap = useMemo(() => {
+    const counts: Record<string, number> = {};
+    [...mainWaves, ...separatelyFetchedPinnedWaves].forEach((wave) => {
+      if (wave.id in initialDropsCounts) {
+        counts[wave.id] = Math.max(0, wave.metrics.drops_count - initialDropsCounts[wave.id]);
+      } else {
+        counts[wave.id] = 0;
+      }
+    });
+    return counts;
+  }, [mainWaves, separatelyFetchedPinnedWaves, initialDropsCounts]);
+
   // Combine main waves with separately fetched pinned waves using useMemo
+  // Order: pinned waves first (in pinnedIds order), then all other waves
   const combinedWaves = useMemo(() => {
-    return [...mainWaves, ...separatelyFetchedPinnedWaves];
+    // Create a Map of all waves by ID for easy lookup
+    const allWavesMap = new Map<string, ApiWave>();
+    
+    // Add main waves to the map
+    mainWaves.forEach(wave => {
+      allWavesMap.set(wave.id, wave);
+    });
+    
+    // Add separately fetched pinned waves to the map
+    separatelyFetchedPinnedWaves.forEach(wave => {
+      allWavesMap.set(wave.id, wave);
+    });
+    
+    // Result array to hold ordered waves
+    const result: EnhancedWave[] = [];
+    
+    // First add pinned waves in the order they appear in pinnedIds
+    pinnedIds.forEach(id => {
+      const wave = allWavesMap.get(id);
+      if (wave) {
+        result.push({
+          ...wave,
+          isPinned: true,
+          newDropsCount: newDropsCountsMap[wave.id] || 0
+        });
+      }
+    });
+    
+    // Track which waves have already been added
+    const addedWaveIds = new Set(result.map(w => w.id));
+    
+    // Add remaining mainWaves that aren't already in the result
+    mainWaves.forEach(wave => {
+      if (!addedWaveIds.has(wave.id)) {
+        result.push({
+          ...wave,
+          isPinned: false, // These aren't pinned since we already added all pinned waves
+          newDropsCount: newDropsCountsMap[wave.id] || 0
+        });
+      }
+    });
+    
+    return result;
+  }, [mainWaves, separatelyFetchedPinnedWaves, pinnedIds, newDropsCountsMap]);
+
+  // Create a stable reference to track processed waves
+  const processedWaveIds = useRef(new Set<string>());
+  
+  // Initialize initial drops counts for new waves - only run on waves changes, not on initialDropsCounts changes
+  useEffect(() => {
+    const allWavesArray = [...mainWaves, ...separatelyFetchedPinnedWaves];
+    const newInitialCounts: Record<string, number> = {};
+    
+    // Check all waves from both sources
+    allWavesArray.forEach((wave) => {
+      // Only process waves we haven't seen before
+      if (!processedWaveIds.current.has(wave.id)) {
+        processedWaveIds.current.add(wave.id);
+        newInitialCounts[wave.id] = wave.metrics.drops_count;
+      }
+    });
+    
+    if (Object.keys(newInitialCounts).length > 0) {
+      // Use functional update to avoid dependency on initialDropsCounts
+      setInitialDropsCounts(prev => ({
+        ...prev,
+        ...newInitialCounts
+      }));
+    }
+  }, [mainWaves, separatelyFetchedPinnedWaves]); // Explicitly exclude initialDropsCounts
+
+  // Track last active wave ID to prevent unnecessary resets
+  const lastActiveWaveIdRef = useRef<string | null>(null);
+  
+  // Reset function for when a wave becomes active or upon manual reset
+  const resetWaveNewDropsCount = useCallback((waveId: string) => {
+    // Bail early if we don't have this wave or no waves at all
+    if (!waveId || mainWaves.length === 0) return;
+    
+    const wave = [...mainWaves, ...separatelyFetchedPinnedWaves].find((w) => w.id === waveId);
+    if (wave) {
+      setInitialDropsCounts((prev) => ({
+        ...prev,
+        [waveId]: wave.metrics.drops_count,
+      }));
+    }
   }, [mainWaves, separatelyFetchedPinnedWaves]);
+
+  // Auto-reset active wave count - with safeguards against infinite loops
+  useEffect(() => {
+    if (activeWaveId && activeWaveId !== lastActiveWaveIdRef.current) {
+      lastActiveWaveIdRef.current = activeWaveId;
+      
+      // Find the wave first to make sure it exists
+      const wave = [...mainWaves, ...separatelyFetchedPinnedWaves].find(
+        (w) => w.id === activeWaveId
+      );
+      
+      // Only reset if we actually found the wave
+      if (wave) {
+        // Use direct state update instead of calling the function
+        setInitialDropsCounts((prev) => ({
+          ...prev,
+          [activeWaveId]: wave.metrics.drops_count,
+        }));
+      }
+    }
+  }, [activeWaveId, mainWaves, separatelyFetchedPinnedWaves]);
 
   // Update allWaves state when the combined waves change
   useEffect(() => {
@@ -164,7 +299,7 @@ export const useWavesList = (refetchInterval = 10000) => {
   }, [fetchNextPage]);
 
   return {
-    // Main data - now using state instead of ref
+    // Main data - now using state instead of ref, with enhanced type
     waves: allWaves,
     
     // Original waves pagination and loading
@@ -174,7 +309,7 @@ export const useWavesList = (refetchInterval = 10000) => {
     fetchNextPage: fetchNextPageStable,
     status: mainWavesStatus,
     
-    // Pinned waves metadata - now includes ALL pinned waves
+    // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
     pinnedWaves: allPinnedWaves,
     isPinnedWavesLoading,
     hasPinnedWavesError,
@@ -183,9 +318,12 @@ export const useWavesList = (refetchInterval = 10000) => {
     addPinnedWave: addId,
     removePinnedWave: removeId,
     
+    // New drops count management
+    resetWaveNewDropsCount,
+    
     // Additional data that might be useful
     mainWaves: prevMainWavesRef.current,
-    missingPinnedIds,
+    missingPinnedIds
   };
 };
 

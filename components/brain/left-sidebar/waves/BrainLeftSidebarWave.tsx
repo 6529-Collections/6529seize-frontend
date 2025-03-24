@@ -1,21 +1,19 @@
 import React from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
+import { EnhancedWave } from "../../../../hooks/useWavesList";
 
 interface BrainLeftSidebarWaveProps {
-  readonly wave: ApiWave;
-  readonly newDropsCounts: Record<string, number>;
+  readonly wave: EnhancedWave;
   readonly resetWaveCount: (waveId: string) => void;
   readonly isHighlighted?: boolean;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
-  newDropsCounts,
   resetWaveCount,
   isHighlighted = false,
 }) => {
@@ -30,7 +28,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       : `/my-stream?wave=${waveId}`;
   };
 
-  const haveNewDrops = newDropsCounts[wave.id] > 0;
+  const haveNewDrops = wave.newDropsCount > 0;
 
   const onHover = (waveId: string) => {
     if (waveId !== router.query.wave) prefetchWaveData(waveId);
@@ -106,7 +104,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             )}
             {!isActive && haveNewDrops && (
               <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-px-1 tw-shadow-sm">
-                {newDropsCounts[wave.id]}
+                {wave.newDropsCount}
               </div>
             )}
           </div>
