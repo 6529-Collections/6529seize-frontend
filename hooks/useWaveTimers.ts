@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { ApiWave } from "../generated/models/ApiWave";
 import { Time } from "../helpers/time";
-import { TimeLeft, calculateTimeLeft, calculateLastDecisionTime } from "../helpers/waves/time.utils";
-
+import { 
+  TimeLeft, 
+  calculateTimeLeft, 
+  calculateLastDecisionTime,
+  FALLBACK_START_TIME,
+  FALLBACK_END_TIME 
+} from "../helpers/waves/time.utils";
 
 export type PhaseState = "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
 
@@ -32,6 +37,8 @@ export interface WaveTimersResult {
   };
 }
 
+// Using the shared constants from time.utils.ts
+
 /**
  * Hook for handling timers in waves.
  * 
@@ -44,15 +51,15 @@ export interface WaveTimersResult {
 export function useWaveTimers(
   wave: ApiWave | null | undefined
 ): WaveTimersResult {
-  // Extract time period boundaries or default to current time
+  // Extract time period boundaries with stable fallback values
   const participationStartTime =
-    wave?.participation.period?.min ?? Time.currentMillis();
+    wave?.participation.period?.min ?? FALLBACK_START_TIME;
   const participationEndTime =
-    wave?.participation.period?.max ?? Time.currentMillis();
-  const votingStartTime = wave?.voting.period?.min ?? Time.currentMillis();
+    wave?.participation.period?.max ?? FALLBACK_END_TIME;
+  const votingStartTime = wave?.voting.period?.min ?? FALLBACK_START_TIME;
   
-  // Calculate the actual voting end time
-  const actualVotingEndTime = wave ? calculateLastDecisionTime(wave) : Time.currentMillis();
+  // Calculate the actual voting end time with stable fallback
+  const actualVotingEndTime = wave ? calculateLastDecisionTime(wave) : FALLBACK_END_TIME;
 
   // State for participation phase
   const [participationPhase, setParticipationPhase] =
@@ -82,7 +89,7 @@ export function useWaveTimers(
     phase: PhaseState;
     timeLeft: TimeLeft;
   } => {
-    const now = Time.currentMillis();
+    const now = Time.currentMillis(); // This is ok here as it's only used inside the timer callback
 
     // Determine phase state
     let newPhaseState: PhaseState;
@@ -112,7 +119,7 @@ export function useWaveTimers(
     phase: PhaseState;
     timeLeft: TimeLeft;
   } => {
-    const now = Time.currentMillis();
+    const now = Time.currentMillis(); // This is ok here as it's only used inside the timer callback
 
     // Determine phase state
     let newPhaseState: PhaseState;
@@ -137,7 +144,7 @@ export function useWaveTimers(
   
   // Helper function to determine if first decision is done
   const calculateFirstDecisionStatus = (): boolean => {
-    const now = Time.currentMillis();
+    const now = Time.currentMillis(); // This is ok here as it's only used within the timer
     const firstDecisionTime = wave?.wave.decisions_strategy?.first_decision_time;
     
     // If there's no first decision time, consider it not done

@@ -1,6 +1,10 @@
 import { Time } from "../time";
 import { ApiWave } from "../../generated/models/ApiWave";
 
+// Constants for fallback values 
+export const FALLBACK_START_TIME = 0; // Use 0 (Jan 1, 1970) to indicate "started immediately"
+export const FALLBACK_END_TIME = Number.MAX_SAFE_INTEGER; // Far future to indicate "no end date"
+
 export interface TimeLeft {
   days: number;
   hours: number;
@@ -63,7 +67,8 @@ export function calculateLastDecisionTime(wave: ApiWave | null | undefined): num
   const subsequentDecisions =
     wave.wave.decisions_strategy?.subsequent_decisions || [];
   const isRolling = wave.wave.decisions_strategy?.is_rolling || false;
-  const votingEndTime = wave.voting.period?.max || Time.currentMillis();
+  // Use stable fallback value for missing end time
+  const votingEndTime = wave.voting.period?.max || FALLBACK_END_TIME;
 
   // If no first decision time is set, use the voting end time
   if (!firstDecisionTime) return votingEndTime;

@@ -20,9 +20,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   hasNextPage,
   isFetchingNextPage,
 }) => {
-  // Split waves into recent (pinned) and following (non-pinned)
-  const recentWaves = waves.filter((wave) => wave.isPinned);
-  const followingWaves = waves.filter((wave) => !wave.isPinned);
+  // No longer splitting waves into separate categories
   
   // Ref for intersection observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -76,47 +74,20 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           <BrainLeftSidebarCreateAWaveButton />
         </div>
         
-        {/* Scrollable container for all waves */}
-        <div className="tw-max-h-[calc(100vh-180px)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-600 tw-scrollbar-track-iron-900">
-          {/* Recent Section */}
-          {recentWaves.length > 0 && (
-            <>
-              <div className="tw-px-5 tw-mb-2">
-                <p className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-uppercase tw-tracking-wider">
-                  Recent
-                </p>
-              </div>
-              <div className="tw-flex tw-flex-col tw-mb-4">
-                {recentWaves.map((wave) => (
-                  <BrainLeftSidebarWave
-                    key={wave.id}
-                    wave={wave}
-                    resetWaveCount={resetWaveCount}
-                    isHighlighted={wave.id === activeWaveId}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-          
-          {/* Following Section */}
-          {followingWaves.length > 0 && (
-            <>
-              <div className="tw-px-5 tw-mb-2">
-                <p className="tw-text-xs tw-font-semibold tw-text-iron-400 tw-uppercase tw-tracking-wider">
-                  Following
-                </p>
-              </div>
-              <div className="tw-flex tw-flex-col">
-                {followingWaves.map((wave) => (
-                  <BrainLeftSidebarWave
-                    key={wave.id}
-                    wave={wave}
-                    resetWaveCount={resetWaveCount}
-                  />
-                ))}
-              </div>
-            </>
+        {/* Non-scrollable container for all waves - parent will handle scrolling */}
+        <div className="tw-w-full">
+          {/* Unified Waves List */}
+          {waves.length > 0 && (
+            <div className="tw-flex tw-flex-col">
+              {waves.map((wave) => (
+                <BrainLeftSidebarWave
+                  key={wave.id}
+                  wave={wave}
+                  resetWaveCount={resetWaveCount}
+                  isHighlighted={wave.id === activeWaveId}
+                />
+              ))}
+            </div>
           )}
           
           {/* Loading indicator and intersection trigger */}
