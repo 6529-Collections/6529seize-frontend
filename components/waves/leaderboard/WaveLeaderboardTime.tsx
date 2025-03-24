@@ -5,7 +5,10 @@ import { AnimatePresence } from "framer-motion";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
 import { ExpandedTimelineContent } from "./time/ExpandedTimelineContent";
-import { calculateTimeLeft, isTimeZero } from "../../../helpers/waves/time.utils";
+import {
+  calculateTimeLeft,
+  isTimeZero,
+} from "../../../helpers/waves/time.utils";
 import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
 import { CompactVotingPhaseCard } from "./time/CompactVotingPhaseCard";
 import { useWave } from "../../../hooks/useWave";
@@ -23,8 +26,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
 }) => {
   // Using decision points hooks
-  const { allDecisions } =
-    useDecisionPoints(wave);
+  const { allDecisions } = useDecisionPoints(wave);
   const {
     decisions: { multiDecision },
   } = useWave(wave);
@@ -33,12 +35,17 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
 
-  const nextDecisionTime = allDecisions.find(decision => decision.timestamp > Time.currentMillis())?.timestamp ?? null;
-  const nextDecisionTimeLeft = nextDecisionTime ? calculateTimeLeft(nextDecisionTime) : null;
-
-  
-
-
+  const nextDecisionTime =
+    allDecisions.find((decision) => decision.timestamp > Time.currentMillis())
+      ?.timestamp ?? null;
+  const nextDecisionTimeLeft = nextDecisionTime
+    ? calculateTimeLeft(nextDecisionTime)
+    : {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+      };
 
   return (
     <div className="tw-mb-4">
@@ -52,6 +59,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
             setIsOpen={setIsDecisionDetailsOpen}
             nextDecisionTime={nextDecisionTime}
             timeLeft={nextDecisionTimeLeft}
+            hasNextDecision={!!nextDecisionTime}
           />
 
           {/* Expandable timeline section */}

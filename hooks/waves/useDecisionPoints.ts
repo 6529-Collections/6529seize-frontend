@@ -1,14 +1,6 @@
-import { useState, useEffect } from "react";
 import { ApiWave } from "../../generated/models/ApiWave";
-import { Time } from "../../helpers/time";
 import { DecisionPoint } from "../../helpers/waves/time.types";
-import {
-  TimeLeft,
-  calculateTimeLeft,
-  isTimeZero,
-  calculateLastDecisionTime,
-  FALLBACK_END_TIME,
-} from "../../helpers/waves/time.utils";
+import { calculateLastDecisionTime } from "../../helpers/waves/time.utils";
 
 export const useDecisionPoints = (wave: ApiWave) => {
   // Function that calculates decision points for a wave
@@ -34,6 +26,7 @@ export const useDecisionPoints = (wave: ApiWave) => {
 
     let currentTime = firstDecisionTime;
     let decisionIndex = 0;
+
     const maxDecisionIndex =
       wave.wave.decisions_strategy.subsequent_decisions.length - 1;
     do {
@@ -47,8 +40,8 @@ export const useDecisionPoints = (wave: ApiWave) => {
         break;
       }
       decisions.push({
-        id: decisionIndex + 1,
-        name: `Decision ${decisionIndex + 1}`,
+        id: decisions.length,
+        name: `Decision ${decisions.length}`,
         timestamp: nextDecisionTime,
       });
       currentTime = nextDecisionTime;

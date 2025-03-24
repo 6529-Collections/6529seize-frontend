@@ -246,7 +246,7 @@ export function useWaveTimers(
       timeLeft: votingTimeLeft,
       isUpcoming: votingTimePhase === "UPCOMING",
       isInProgress: votingTimePhase === "IN_PROGRESS",
-      
+      // TODO: fix it
       isCompleted: false,
     },
     decisions: {
