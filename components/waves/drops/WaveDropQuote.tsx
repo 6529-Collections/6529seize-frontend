@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropPart } from "../../../generated/models/ApiDropPart";
 import DropPartMarkdownWithPropLogger from "../../drops/view/part/DropPartMarkdownWithPropLogger";
+import { Time } from "../../../helpers/time";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -76,8 +77,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
         }
       }}
       role="button"
-      tabIndex={0}
-    >
+      tabIndex={0}>
       <div className="tw-relative tw-group tw-w-full tw-flex tw-flex-col">
         <div className="tw-flex tw-gap-x-2">
           <div className="tw-h-6 tw-w-6 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-md">
@@ -99,23 +99,31 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
                 <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
                   <Link
                     href={`/${drop?.author.handle}`}
-                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-                  >
+                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
                     {drop?.author.handle}
                   </Link>
                 </p>
               </div>
 
-              <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-              <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-                {!!drop && getTimeAgoShort(drop.created_at)}
-              </p>
+              {!!drop && (
+                <>
+                  <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+                  <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+                    {getTimeAgoShort(drop.created_at)}
+                  </p>
+                  <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+                  <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+                    {Time.millis(
+                      drop.created_at
+                    ).toIsoTimeStringWithoutSeconds()}
+                  </p>
+                </>
+              )}
             </div>
             <div>
               <Link
                 href={`/my-stream?wave=${drop?.wave.id}`}
-                className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-              >
+                className="tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
                 {drop?.wave.name}
               </Link>
             </div>
