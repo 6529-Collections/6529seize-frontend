@@ -26,5 +26,4 @@ export interface DecisionPoint {
   id: number;
   name: string;
   timestamp: number;
-  isPast?: boolean;
 }

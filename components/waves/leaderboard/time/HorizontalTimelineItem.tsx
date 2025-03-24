@@ -1,6 +1,7 @@
 import React from "react";
 import { DecisionPoint } from "../../../../helpers/waves/time.types";
 import { HorizontalTimelineDot } from "./HorizontalTimelineDot";
+import { Time } from "../../../../helpers/time";
 
 interface HorizontalTimelineItemProps {
   readonly decision: DecisionPoint;
@@ -16,7 +17,7 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
   isNext,
   flexGrow = false
 }) => {
-  const isPast = !!decision.isPast;
+  const isPast = decision.timestamp < Time.currentMillis();
   
   return (
     <div

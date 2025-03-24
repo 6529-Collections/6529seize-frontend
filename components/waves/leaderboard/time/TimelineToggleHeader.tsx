@@ -1,16 +1,17 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { TimeLeft } from "../../../../helpers/waves/time.utils";
+import {
+  calculateTimeLeft,
+  TimeLeft,
+} from "../../../../helpers/waves/time.utils";
 import { TimeCountdown } from "./TimeCountdown";
 
 interface TimelineToggleHeaderProps {
   readonly icon: IconDefinition;
   readonly isOpen: boolean;
   readonly setIsOpen: (isOpen: boolean) => void;
-  readonly hasNextDecision: boolean;
   readonly nextDecisionTime: number | null;
-  readonly timeLeft: TimeLeft;
 }
 
 /**
@@ -20,10 +21,47 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
   icon,
   isOpen,
   setIsOpen,
-  hasNextDecision,
   nextDecisionTime,
-  timeLeft
 }) => {
+  const hasNextDecision = !!nextDecisionTime;
+  const getTimeLeft = () => {
+    if (hasNextDecision) {
+      return calculateTimeLeft(nextDecisionTime);
+    }
+    return {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    };
+  };
+
+  const [timeLeft, setTimeLeft] = React.useState<TimeLeft>(getTimeLeft());
+
+  React.useEffect(() => {
+    // Initial calculation
+    setTimeLeft(getTimeLeft());
+
+    // Only set up interval if there's a next decision and time remaining
+    if (hasNextDecision) {
+      const intervalId = setInterval(() => {
+        const newTimeLeft = getTimeLeft();
+        setTimeLeft(newTimeLeft);
+
+        // Clear interval when countdown reaches zero
+        if (newTimeLeft.days === 0 && 
+            newTimeLeft.hours === 0 && 
+            newTimeLeft.minutes === 0 && 
+            newTimeLeft.seconds === 0) {
+          clearInterval(intervalId);
+        }
+      }, 1000);
+
+      // Clean up interval on unmount
+      return () => clearInterval(intervalId);
+    }
+  }, [nextDecisionTime, hasNextDecision]);
+
   return (
     <div
       className="tw-px-3 tw-py-2 tw-group tw-bg-iron-900 tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800/60 tw-transition tw-duration-300 tw-ease-out"
@@ -45,7 +83,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
               : "Announcement history"}
           </div>
         </div>
-      
+
         {/* Date and chevron for mobile only */}
         <div className="tw-flex sm:tw-hidden tw-items-center tw-flex-shrink-0">
           <div className="tw-text-xs tw-text-iron-400 tw-mr-2 tw-whitespace-nowrap">
@@ -87,14 +125,14 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
           <TimeCountdown timeLeft={timeLeft} />
         </div>
       )}
-      
+
       {/* Second row for mobile: Countdown */}
       {hasNextDecision && (
         <div className="tw-mt-2 sm:tw-hidden">
           <TimeCountdown timeLeft={timeLeft} />
         </div>
       )}
-      
+
       {/* Date and chevron for desktop */}
       <div className="tw-hidden sm:tw-flex tw-items-center tw-ml-auto">
         <div className="tw-text-xs tw-text-iron-400 tw-mr-2 tw-whitespace-nowrap">

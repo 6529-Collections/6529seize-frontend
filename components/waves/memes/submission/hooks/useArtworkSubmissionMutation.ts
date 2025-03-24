@@ -149,7 +149,9 @@ const transformToApiRequest = (
     ],
     referenced_nfts: [],
     mentioned_users: [],
-    metadata
+    metadata,
+    // TODO: fix it
+    signature: null,
   };
 
   return request;

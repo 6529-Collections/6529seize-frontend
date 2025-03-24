@@ -20,7 +20,7 @@ function areWavesEqual(arrA: EnhancedWave[], arrB: EnhancedWave[]): boolean {
   // Compare each wave by ID, updatedAt, isPinned status, and newDropsCount
   for (let i = 0; i < arrA.length; i++) {
     if (arrA[i].id !== arrB[i].id) return false;
-    if (arrA[i].updatedAt !== arrB[i].updatedAt) return false;
+    if (arrA[i].created_at !== arrB[i].created_at) return false;
     if (arrA[i].isPinned !== arrB[i].isPinned) return false;
     if (arrA[i].newDropsCount !== arrB[i].newDropsCount) return false;
   }
@@ -134,13 +134,13 @@ export const useWavesList = (refetchInterval = 10000, activeWaveId: string | nul
       const waveFromMain = mainWavesMap.get(id);
       if (waveFromMain) {
         // Add isPinned property
-        result.push({ ...waveFromMain, isPinned: true });
+        result.push({ ...waveFromMain, isPinned: true, newDropsCount: 0 });
       }
     });
     
     // Then add separately fetched pinned waves
     separatelyFetchedPinnedWaves.forEach(wave => {
-      result.push({ ...wave, isPinned: true });
+      result.push({ ...wave, isPinned: true, newDropsCount: 0 });
     });
     
     // Update the ref if content changed - still useful for comparison and memoization
@@ -165,7 +165,10 @@ export const useWavesList = (refetchInterval = 10000, activeWaveId: string | nul
   }, [mainWaves, separatelyFetchedPinnedWaves, initialDropsCounts]);
 
   // Combine main waves with separately fetched pinned waves using useMemo
-  // Order: pinned waves first (in pinnedIds order), then all other waves
+  // New order: 
+  // 1. Waves with new drops first (sorted by most new drops)
+  // 2. Pinned waves (in original order)
+  // 3. All remaining waves (in original order)
   const combinedWaves = useMemo(() => {
     // Create a Map of all waves by ID for easy lookup
     const allWavesMap = new Map<string, ApiWave>();
@@ -180,36 +183,56 @@ export const useWavesList = (refetchInterval = 10000, activeWaveId: string | nul
       allWavesMap.set(wave.id, wave);
     });
     
-    // Result array to hold ordered waves
-    const result: EnhancedWave[] = [];
+    // Create arrays for each category
+    const wavesWithNewDrops: EnhancedWave[] = [];
+    const pinnedWavesWithoutNewDrops: EnhancedWave[] = [];
+    const remainingWaves: EnhancedWave[] = [];
     
-    // First add pinned waves in the order they appear in pinnedIds
-    pinnedIds.forEach(id => {
-      const wave = allWavesMap.get(id);
-      if (wave) {
-        result.push({
-          ...wave,
-          isPinned: true,
-          newDropsCount: newDropsCountsMap[wave.id] || 0
-        });
+    // Process pinned waves first to mark them accordingly
+    const pinnedWavesSet = new Set(pinnedIds);
+    
+    // Process all waves and categorize them
+    [...mainWaves, ...separatelyFetchedPinnedWaves].forEach(wave => {
+      // Skip duplicates (waves that appear in both collections)
+      if (!allWavesMap.has(wave.id)) return;
+      
+      // Remove from map to avoid processing twice
+      allWavesMap.delete(wave.id);
+      
+      const newDropsCount = newDropsCountsMap[wave.id] || 0;
+      const isPinned = pinnedWavesSet.has(wave.id);
+      const enhancedWave: EnhancedWave = {
+        ...wave,
+        isPinned,
+        newDropsCount
+      };
+      
+      // Categorize the wave
+      if (newDropsCount > 0) {
+        wavesWithNewDrops.push(enhancedWave);
+      } else if (isPinned) {
+        pinnedWavesWithoutNewDrops.push(enhancedWave);
+      } else {
+        remainingWaves.push(enhancedWave);
       }
     });
     
-    // Track which waves have already been added
-    const addedWaveIds = new Set(result.map(w => w.id));
+    // Sort waves with new drops by number of new drops (descending)
+    wavesWithNewDrops.sort((a, b) => b.newDropsCount - a.newDropsCount);
     
-    // Add remaining mainWaves that aren't already in the result
-    mainWaves.forEach(wave => {
-      if (!addedWaveIds.has(wave.id)) {
-        result.push({
-          ...wave,
-          isPinned: false, // These aren't pinned since we already added all pinned waves
-          newDropsCount: newDropsCountsMap[wave.id] || 0
-        });
-      }
+    // Sort pinned waves without new drops in the original pinnedIds order
+    pinnedWavesWithoutNewDrops.sort((a, b) => {
+      const aIndex = pinnedIds.indexOf(a.id);
+      const bIndex = pinnedIds.indexOf(b.id);
+      return aIndex - bIndex;
     });
     
-    return result;
+    // Combine all categories in the desired order
+    return [
+      ...wavesWithNewDrops,
+      ...pinnedWavesWithoutNewDrops,
+      ...remainingWaves
+    ];
   }, [mainWaves, separatelyFetchedPinnedWaves, pinnedIds, newDropsCountsMap]);
 
   // Create a stable reference to track processed waves
@@ -278,10 +301,12 @@ export const useWavesList = (refetchInterval = 10000, activeWaveId: string | nul
 
   // Update allWaves state when the combined waves change
   useEffect(() => {
-    if (!areWavesEqual(combinedWaves, allWaves)) {
-      setAllWaves(combinedWaves);
-    }
-  }, [combinedWaves, allWaves]);
+    // Using a functional update and removing the allWaves dependency
+    // to break the infinite update cycle
+    setAllWaves(prevWaves => {
+      return !areWavesEqual(combinedWaves, prevWaves) ? combinedWaves : prevWaves;
+    });
+  }, [combinedWaves]);
 
   // Determine if any pinned waves are still loading
   const isPinnedWavesLoading = missingPinnedIds.some((_, index) => 

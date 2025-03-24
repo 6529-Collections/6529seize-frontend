@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { ApiWave } from "../generated/models/ApiWave";
 import { Time } from "../helpers/time";
-import { TimeLeft, calculateTimeLeft, calculateLastDecisionTime } from "../helpers/waves/time.utils";
-
+import {
+  TimeLeft,
+  calculateTimeLeft,
+  calculateLastDecisionTime,
+  FALLBACK_START_TIME,
+  FALLBACK_END_TIME,
+} from "../helpers/waves/time.utils";
 
 export type PhaseState = "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
 
@@ -17,7 +22,7 @@ export interface WaveTimersResult {
     isInProgress: boolean;
     isCompleted: boolean;
   };
-  
+
   // Voting time information
   voting: {
     timeLeft: TimeLeft;
@@ -32,27 +37,32 @@ export interface WaveTimersResult {
   };
 }
 
+// Using the shared constants from time.utils.ts
+
 /**
  * Hook for handling timers in waves.
- * 
+ *
  * This hook is designed to be used separately from useWave to control interval timers.
  * Timers are always active when this hook is used.
- * 
+ *
  * @param wave The wave object
  * @returns Timer states
  */
 export function useWaveTimers(
   wave: ApiWave | null | undefined
 ): WaveTimersResult {
-  // Extract time period boundaries or default to current time
+  // Extract time period boundaries with stable fallback values
   const participationStartTime =
-    wave?.participation.period?.min ?? Time.currentMillis();
+    wave?.participation.period?.min ?? FALLBACK_START_TIME;
   const participationEndTime =
-    wave?.participation.period?.max ?? Time.currentMillis();
-  const votingStartTime = wave?.voting.period?.min ?? Time.currentMillis();
-  
-  // Calculate the actual voting end time
-  const actualVotingEndTime = wave ? calculateLastDecisionTime(wave) : Time.currentMillis();
+    wave?.participation.period?.max ?? FALLBACK_END_TIME;
+  const votingStartTime = wave?.voting.period?.min ?? FALLBACK_START_TIME;
+
+  // Calculate the actual voting end time with stable fallback
+  const actualVotingEndTime = wave
+    ? calculateLastDecisionTime(wave)
+    : FALLBACK_END_TIME;
+
 
   // State for participation phase
   const [participationPhase, setParticipationPhase] =
@@ -73,16 +83,17 @@ export function useWaveTimers(
     minutes: 0,
     seconds: 0,
   });
-  
+
   // State for first decision status
-  const [isFirstDecisionDone, setIsFirstDecisionDone] = useState<boolean>(false);
+  const [isFirstDecisionDone, setIsFirstDecisionDone] =
+    useState<boolean>(false);
 
   // Helper function for one-time calculation of participation time state
   const calculateParticipationTimeState = (): {
     phase: PhaseState;
     timeLeft: TimeLeft;
   } => {
-    const now = Time.currentMillis();
+    const now = Time.currentMillis(); // This is ok here as it's only used inside the timer callback
 
     // Determine phase state
     let newPhaseState: PhaseState;
@@ -112,7 +123,7 @@ export function useWaveTimers(
     phase: PhaseState;
     timeLeft: TimeLeft;
   } => {
-    const now = Time.currentMillis();
+    const now = Time.currentMillis(); // This is ok here as it's only used inside the timer callback
 
     // Determine phase state
     let newPhaseState: PhaseState;
@@ -134,17 +145,18 @@ export function useWaveTimers(
 
     return { phase: newPhaseState, timeLeft };
   };
-  
+
   // Helper function to determine if first decision is done
   const calculateFirstDecisionStatus = (): boolean => {
-    const now = Time.currentMillis();
-    const firstDecisionTime = wave?.wave.decisions_strategy?.first_decision_time;
-    
+    const now = Time.currentMillis(); // This is ok here as it's only used within the timer
+    const firstDecisionTime =
+      wave?.wave.decisions_strategy?.first_decision_time;
+
     // If there's no first decision time, consider it not done
     if (!firstDecisionTime) {
       return false;
     }
-    
+
     // The first decision is done if the current time is past the first decision time
     return now >= firstDecisionTime;
   };
@@ -152,43 +164,47 @@ export function useWaveTimers(
   // Initial calculation and setup of timers
   useEffect(() => {
     if (!wave) return;
-    
+
     // Do initial calculations
-    const { phase: participationPhaseState, timeLeft: participationTimeLeftState } = calculateParticipationTimeState();
+    const {
+      phase: participationPhaseState,
+      timeLeft: participationTimeLeftState,
+    } = calculateParticipationTimeState();
     setParticipationPhase(participationPhaseState);
     setParticipationTimeLeft(participationTimeLeftState);
-    
-    const { phase: votingPhaseState, timeLeft: votingTimeLeftState } = calculateVotingTimeState();
+
+    const { phase: votingPhaseState, timeLeft: votingTimeLeftState } =
+      calculateVotingTimeState();
     setVotingTimePhase(votingPhaseState);
     setVotingTimeLeft(votingTimeLeftState);
-    
+
     // Calculate initial first decision status
     setIsFirstDecisionDone(calculateFirstDecisionStatus());
-    
+
     // Set up intervals
     const updateParticipationTime = () => {
       const { phase, timeLeft } = calculateParticipationTimeState();
       setParticipationPhase(phase);
       setParticipationTimeLeft(timeLeft);
     };
-    
+
     const updateVotingTime = () => {
       const { phase, timeLeft } = calculateVotingTimeState();
       setVotingTimePhase(phase);
       setVotingTimeLeft(timeLeft);
     };
-    
+
     const updateFirstDecisionStatus = () => {
       const firstDecisionDone = calculateFirstDecisionStatus();
       setIsFirstDecisionDone(firstDecisionDone);
-      
+
       // If first decision is done, clear this timer
       return firstDecisionDone;
     };
-    
+
     const participationTimer = setInterval(updateParticipationTime, 1000);
     const votingTimer = setInterval(updateVotingTime, 1000);
-    
+
     // Only set up first decision timer if not already done
     let firstDecisionTimer: NodeJS.Timeout | null = null;
     if (!calculateFirstDecisionStatus()) {
@@ -202,7 +218,7 @@ export function useWaveTimers(
         }
       }, 1000);
     }
-    
+
     // Clean up intervals on unmount
     return () => {
       clearInterval(participationTimer);
@@ -230,7 +246,7 @@ export function useWaveTimers(
       timeLeft: votingTimeLeft,
       isUpcoming: votingTimePhase === "UPCOMING",
       isInProgress: votingTimePhase === "IN_PROGRESS",
-      isCompleted: votingTimePhase === "COMPLETED",
+      isCompleted: false,
     },
     decisions: {
       firstDecisionDone: isFirstDecisionDone,

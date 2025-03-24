@@ -19,6 +19,7 @@ export class ApiGroup {
     'author'?: ApiProfileMin;
     'created_at'?: number;
     'is_hidden': boolean;
+    'is_direct_message'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -50,6 +51,12 @@ export class ApiGroup {
         {
             "name": "is_hidden",
             "baseName": "is_hidden",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "is_direct_message",
+            "baseName": "is_direct_message",
             "type": "boolean",
             "format": ""
         }    ];

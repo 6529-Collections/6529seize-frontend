@@ -65,8 +65,11 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
     
     // For Memes wave - don't set default tab, let it use standard behavior
     if (isMemesWave) {
-      const tabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
-      
+      const tabs = [MyStreamWaveTab.CHAT];
+      if (votingState !== WaveVotingState.ENDED) {
+        tabs.push(MyStreamWaveTab.LEADERBOARD);
+      }
+
       if (hasFirstDecisionPassed) {
         tabs.push(MyStreamWaveTab.WINNERS);
       }

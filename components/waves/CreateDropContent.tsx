@@ -365,6 +365,11 @@ const getOptimisticDrop = (
       voting_credit_type: wave.voting.credit_type,
       voting_period_start: wave.voting.period?.min ?? null,
       voting_period_end: wave.voting.period?.max ?? null,
+      visibility_group_id: null,
+      participation_group_id: null,
+      chat_group_id: null,
+      voting_group_id: null,
+      admin_group_id: null,
     },
     author: {
       id: connectedProfile.profile.external_id,
@@ -409,6 +414,9 @@ const getOptimisticDrop = (
     subscribed_actions: [],
     drop_type: dropType,
     rank: null,
+    realtime_rating: 0,
+    // TODO: fix it
+    is_signed: false,
   };
 };
 
@@ -525,6 +533,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         mentioned_users: drop?.mentioned_users ?? [],
         referenced_nfts: drop?.referenced_nfts ?? [],
         metadata: convertMetadataToDropMetadata(metadata),
+        // TODO: fix it
+        signature: null,
         drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
       };
     }
@@ -557,6 +567,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       mentioned_users: allMentions,
       referenced_nfts: allNfts,
       metadata: convertMetadataToDropMetadata(metadata),
+      // TODO: fix it
+      signature: null,
     };
   };
 

@@ -23,12 +23,12 @@ export function useCountdown(targetTime: number | null): string {
       setDisplay(formatted);
       
       // Return true if we should continue updating (target not reached)
-      return Date.now() < targetTime;
+      return targetTime !== null && Date.now() < targetTime;
     }
     
     // Determine update frequency based on time remaining
     function getUpdateInterval(): number {
-      const timeRemaining = targetTime - Date.now();
+      const timeRemaining = targetTime !== null ? targetTime - Date.now() : 0;
       
       if (timeRemaining < 60 * 60 * 1000) {
         return 60 * 1000; // 1 minute updates when < 1 hour away

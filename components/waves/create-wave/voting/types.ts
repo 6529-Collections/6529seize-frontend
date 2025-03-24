@@ -10,9 +10,6 @@ export type TimeUnit = "minutes" | "hours";
 // Match the config interface from the main wave types
 import { TimeWeightedVotingSettings } from "../../../../types/waves.types";
 
-// Local TimeUnit type for the component
-export type TimeUnit = "minutes" | "hours";
-
 // Re-export TimeWeightedVotingSettings as TimeWeightedVotingConfig for backward compatibility
 export type TimeWeightedVotingConfig = TimeWeightedVotingSettings;
 

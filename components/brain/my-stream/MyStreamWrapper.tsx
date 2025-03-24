@@ -18,6 +18,7 @@ const MyStreamWrapper: React.FC = () => {
   const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
 
   useEffect(() => {
+    
     const { wave: waveId } = router.query;
     setSerialisedWaveId(typeof waveId === "string" ? waveId : null);
   }, [router.query]);
