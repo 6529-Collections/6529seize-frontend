@@ -1,10 +1,25 @@
-import { useContext, useMemo, useCallback, useRef, useEffect } from "react";
+import { useContext, useMemo, useCallback, useRef, useEffect, useState } from "react";
 import { AuthContext } from "../components/auth/Auth";
 import { useWavesOverview } from "./useWavesOverview";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { usePinnedWaves } from "./usePinnedWaves";
 import { useWaveData } from "./useWaveData";
 import { ApiWave } from "../generated/models/ApiWave";
+
+// Helper function for deep comparison of wave arrays
+function areWavesEqual(arrA: ApiWave[], arrB: ApiWave[]): boolean {
+  if (arrA === arrB) return true;
+  if (arrA.length !== arrB.length) return false;
+  
+  // Compare each wave by ID and basic properties
+  // This is more efficient than a full deep equality check
+  for (let i = 0; i < arrA.length; i++) {
+    if (arrA[i].id !== arrB[i].id) return false;
+    if (arrA[i].updatedAt !== arrB[i].updatedAt) return false;
+  }
+  
+  return true;
+}
 
 // Custom hook to handle individual wave data
 const useIndividualWaveData = (
@@ -21,12 +36,14 @@ const useIndividualWaveData = (
  */
 export const useWavesList = (refetchInterval = 10000) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { pinnedIds } = usePinnedWaves();
+  const { pinnedIds, addId, removeId } = usePinnedWaves();
+  
+  // Use state for allWaves instead of ref to ensure reactivity
+  const [allWaves, setAllWaves] = useState<ApiWave[]>([]);
   
   // Use ref to avoid too many re-renders for derived values
   const prevMainWavesRef = useRef<ApiWave[]>([]);
   const prevPinnedWavesRef = useRef<ApiWave[]>([]);
-  const allWavesRef = useRef<ApiWave[]>([]);
   
   // Track connected identity state - memoize to prevent re-renders
   const isConnectedIdentity = useMemo(() => {
@@ -111,23 +128,25 @@ export const useWavesList = (refetchInterval = 10000) => {
     // Then add separately fetched pinned waves
     result.push(...separatelyFetchedPinnedWaves);
     
-    // Update the ref if content changed
-    if (JSON.stringify(result) !== JSON.stringify(prevPinnedWavesRef.current)) {
+    // Update the ref if content changed - still useful for comparison and memoization
+    if (!areWavesEqual(result, prevPinnedWavesRef.current)) {
       prevPinnedWavesRef.current = result;
     }
     
-    return prevPinnedWavesRef.current;
+    return result; // Return the actual result, not the ref
   }, [pinnedIds, mainWavesMap, separatelyFetchedPinnedWaves]);
 
-  // Combine main waves with separately fetched pinned waves
-  useEffect(() => {
-    const newAllWaves = [...mainWaves, ...separatelyFetchedPinnedWaves];
-    
-    // Only update if the arrays have actually changed in content
-    if (JSON.stringify(newAllWaves) !== JSON.stringify(allWavesRef.current)) {
-      allWavesRef.current = newAllWaves;
-    }
+  // Combine main waves with separately fetched pinned waves using useMemo
+  const combinedWaves = useMemo(() => {
+    return [...mainWaves, ...separatelyFetchedPinnedWaves];
   }, [mainWaves, separatelyFetchedPinnedWaves]);
+
+  // Update allWaves state when the combined waves change
+  useEffect(() => {
+    if (!areWavesEqual(combinedWaves, allWaves)) {
+      setAllWaves(combinedWaves);
+    }
+  }, [combinedWaves, allWaves]);
 
   // Determine if any pinned waves are still loading
   const isPinnedWavesLoading = missingPinnedIds.some((_, index) => 
@@ -145,8 +164,8 @@ export const useWavesList = (refetchInterval = 10000) => {
   }, [fetchNextPage]);
 
   return {
-    // Main data
-    waves: allWavesRef.current,
+    // Main data - now using state instead of ref
+    waves: allWaves,
     
     // Original waves pagination and loading
     isFetching,
@@ -159,6 +178,10 @@ export const useWavesList = (refetchInterval = 10000) => {
     pinnedWaves: allPinnedWaves,
     isPinnedWavesLoading,
     hasPinnedWavesError,
+    
+    // Pinned waves management functions
+    addPinnedWave: addId,
+    removePinnedWave: removeId,
     
     // Additional data that might be useful
     mainWaves: prevMainWavesRef.current,
