@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TabToggle } from "../../common/TabToggle";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { MyStreamWaveTab } from "../../../types/waves.types";
-import { useContentTab } from "../ContentTabContext";
+import { useContentTab, WaveVotingState } from "../ContentTabContext";
 import { useWave } from "../../../hooks/useWave";
+import { useWaveTimers } from "../../../hooks/useWaveTimers";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -22,9 +24,47 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   setActiveTab,
 }) => {
   // Use the available tabs from context instead of recalculating
-  const { availableTabs } = useContentTab();
+  const { availableTabs, updateAvailableTabs, setActiveContentTab } =
+    useContentTab();
 
-  const { isChatWave } = useWave(wave);
+  const { isChatWave, isMemesWave } = useWave(wave);
+  const {
+    voting: { isUpcoming, isCompleted, isInProgress },
+    decisions: { firstDecisionDone },
+  } = useWaveTimers(wave);
+
+  // Update available tabs when wave changes
+  useEffect(() => {
+    const votingState = isUpcoming
+      ? WaveVotingState.NOT_STARTED
+      : isCompleted
+      ? WaveVotingState.ENDED
+      : WaveVotingState.ONGOING;
+    updateAvailableTabs(
+      wave
+        ? {
+            isMemesWave,
+            isChatWave,
+            votingState,
+            hasFirstDecisionPassed: firstDecisionDone,
+          }
+        : null
+    );
+  }, [
+    wave,
+    isUpcoming,
+    isCompleted,
+    isInProgress,
+    firstDecisionDone,
+    updateAvailableTabs,
+  ]);
+
+  // Always switch to Chat for Chat-type waves
+  useEffect(() => {
+    if (wave?.wave?.type === ApiWaveType.Chat) {
+      setActiveContentTab(MyStreamWaveTab.CHAT);
+    }
+  }, [wave?.wave?.type, setActiveContentTab]);
 
   // For simple waves, don't render any tabs
   if (isChatWave) {

@@ -38,14 +38,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   const nextDecisionTime =
     allDecisions.find((decision) => decision.timestamp > Time.currentMillis())
       ?.timestamp ?? null;
-  const nextDecisionTimeLeft = nextDecisionTime
-    ? calculateTimeLeft(nextDecisionTime)
-    : {
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-      };
+
 
   return (
     <div className="tw-mb-4">
@@ -58,8 +51,6 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
             isOpen={isDecisionDetailsOpen}
             setIsOpen={setIsDecisionDetailsOpen}
             nextDecisionTime={nextDecisionTime}
-            timeLeft={nextDecisionTimeLeft}
-            hasNextDecision={!!nextDecisionTime}
           />
 
           {/* Expandable timeline section */}
