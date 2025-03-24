@@ -11,13 +11,6 @@ export enum MyStreamWaveTab {
   OUTCOME = "OUTCOME",
 }
 
-export enum WaveSignatureType {
-  NONE = "NONE",
-  DROPS = "DROPS",
-  VOTING = "VOTING",
-  DROPS_AND_VOTING = "DROPS_AND_VOTING",
-}
-
 export enum CreateWaveGroupConfigType {
   CAN_VIEW = "CAN_VIEW",
   CAN_DROP = "CAN_DROP",
@@ -28,7 +21,6 @@ export enum CreateWaveGroupConfigType {
 
 export interface WaveOverviewConfig {
   readonly type: ApiWaveType;
-  readonly signatureType: WaveSignatureType;
   readonly name: string;
   readonly image: File | null;
 }
@@ -50,6 +42,8 @@ export interface CreateWaveDropsConfig {
   readonly noOfApplicationsAllowedPerParticipant: number | null;
   readonly requiredTypes: ApiWaveParticipationRequirement[];
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
+  readonly terms: string | null;
+  readonly signatureRequired: boolean;
 }
 
 export interface TimeWeightedVotingSettings {

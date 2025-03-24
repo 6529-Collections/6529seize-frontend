@@ -13,7 +13,6 @@ import {
   CreateWaveDatesConfig,
   CreateWaveOutcomeType,
   CreateWaveStep,
-  WaveSignatureType,
 } from "../../types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
 import { TimeWeightedVotingSettings } from "../../types/waves.types";
@@ -122,28 +121,6 @@ export const getCreateWavePreviousStep = ({
       assertUnreachable(step);
       return null;
   }
-};
-
-const getIsVotingSignatureRequired = ({
-  config,
-}: {
-  readonly config: CreateWaveConfig;
-}): boolean => {
-  return (
-    config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
-    config.overview.signatureType === WaveSignatureType.VOTING
-  );
-};
-
-const getIsParticipationSignatureRequired = ({
-  config,
-}: {
-  readonly config: CreateWaveConfig;
-}): boolean => {
-  return (
-    config.overview.signatureType === WaveSignatureType.DROPS_AND_VOTING ||
-    config.overview.signatureType === WaveSignatureType.DROPS
-  );
 };
 
 const getWinningThreshold = ({
@@ -403,7 +380,7 @@ export const getCreateNewWaveBody = ({
       credit_scope: ApiWaveCreditScope.Wave,
       credit_category: config.voting.category,
       creditor_id: config.voting.profileId,
-      signature_required: getIsVotingSignatureRequired({ config }),
+      signature_required: false,
       period: {
         min: config.dates.votingStartDate,
         max: endDate,
@@ -427,13 +404,12 @@ export const getCreateNewWaveBody = ({
           type: metadata.type,
         }))
         .filter((metadata) => !!metadata.name),
-      signature_required: getIsParticipationSignatureRequired({ config }),
+      signature_required: config.drops.signatureRequired,
       period: {
         min: config.dates.submissionStartDate,
         max: endDate,
       },
-      // TODO: fix it
-      terms: null,
+      terms: config.drops.terms,
     },
     chat: {
       scope: {
@@ -446,9 +422,11 @@ export const getCreateNewWaveBody = ({
       winning_thresholds: getWinningThreshold({ config }),
       // TODO - should be in outcomes
       max_winners: null,
-      time_lock_ms: config.overview.type === ApiWaveType.Rank && config.voting.timeWeighted.enabled
-        ? getTimeWeightedLockMs(config.voting.timeWeighted)
-        : null,
+      time_lock_ms:
+        config.overview.type === ApiWaveType.Rank &&
+        config.voting.timeWeighted.enabled
+          ? getTimeWeightedLockMs(config.voting.timeWeighted)
+          : null,
       admin_group: {
         group_id: config.groups.admin,
       },

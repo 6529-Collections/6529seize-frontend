@@ -72,8 +72,7 @@ export const convertWaveToUpdateWave = (
     required_metadata: wave.participation.required_metadata,
     signature_required: !!wave.participation.signature_required,
     period: wave.participation.period,
-    // TODO: fix it
-    terms: null,
+    terms: wave.participation.terms,
   },
   wave: {
     type: wave.wave.type,
