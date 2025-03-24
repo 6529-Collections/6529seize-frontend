@@ -4033,6 +4033,8 @@ components:
           format: int64
         is_hidden:
           type: boolean
+        is_direct_message:
+          type: boolean
     ApiGroupCicFilter:
       type: object
       required:
@@ -4128,6 +4130,8 @@ components:
         visible:
           type: boolean
         is_private:
+          type: boolean
+        is_direct_message:
           type: boolean
     ApiGroupLevelFilter:
       type: object

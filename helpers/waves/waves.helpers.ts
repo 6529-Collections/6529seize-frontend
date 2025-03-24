@@ -2,6 +2,7 @@ import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
 import { ApiUpdateWaveRequest } from "../../generated/models/ApiUpdateWaveRequest";
 import { ApiWave } from "../../generated/models/ApiWave";
+import { commonApiPost } from "../../services/api/common-api";
 import { CreateWaveStepStatus } from "../../types/waves.types";
 
 export const getCreateWaveStepStatus = ({
@@ -95,4 +96,17 @@ export const canEditWave = ({
     return true;
   }
   return false;
+};
+
+export const createDirectMessageWave = ({
+  addresses,
+}: {
+  readonly addresses: string[];
+}): Promise<ApiWave> => {
+  return commonApiPost({
+    endpoint: "waves/direct-message/new",
+    body: {
+      identity_addresses: addresses,
+    },
+  });
 };

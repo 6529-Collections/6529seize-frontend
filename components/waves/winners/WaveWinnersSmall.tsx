@@ -12,10 +12,7 @@ import {
   formatNumberWithCommas,
   getTimeAgoShort,
 } from "../../../helpers/Helpers";
-import {
-  ImageScale,
-  getScaledImageUri,
-} from "../../../helpers/image.helpers";
+import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
 import WaveDropContent from "../drops/WaveDropContent";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 
@@ -73,8 +70,7 @@ const TrophyIcon = memo(() => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 576 512"
-    fill="currentColor"
-  >
+    fill="currentColor">
     <path d="M400 0L176 0c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8L24 64C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9L192 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-26.1 0C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24L446.4 64c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112l84.4 0c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6l84.4 0c-5.1 66.3-31.1 111.2-63 142.3z" />
   </svg>
 ));
@@ -159,7 +155,7 @@ const WaveWinnerItem = memo<{
     if (rankStyle) {
       return rankStyle.text;
     }
-    
+
     if (drop.rating >= 0) {
       return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
     }
@@ -173,7 +169,7 @@ const WaveWinnerItem = memo<{
     if (drop.rank && drop.rank <= 3 && rankStyle) {
       return rankStyle.text;
     }
-    
+
     if (isNegativeVote) {
       return "tw-bg-gradient-to-r tw-from-rose-400 tw-to-rose-500 tw-bg-clip-text tw-text-transparent";
     }
@@ -190,8 +186,7 @@ const WaveWinnerItem = memo<{
   return (
     <div
       onClick={handleDropClick}
-      className="tw-w-full tw-text-left tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-scale-[1.01] tw-transform tw-transition-all tw-duration-300 tw-ease-out"
-    >
+      className="tw-w-full tw-text-left tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-scale-[1.01] tw-transform tw-transition-all tw-duration-300 tw-ease-out">
       <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out">
         {drop.rank && drop.rank <= 3 && rankStyle && (
           <div className="tw-absolute tw-inset-0">
@@ -223,8 +218,7 @@ const WaveWinnerItem = memo<{
                 <div>
                   {rankStyle ? (
                     <div
-                      className={`${rankStyle.shadow} tw-ring-1 ${rankStyle.bg} ${rankStyle.ring} tw-rounded-xl tw-h-7 tw-w-full tw-px-2.5 ${rankStyle.text} tw-font-medium tw-text-xs tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 desktop-hover:${rankStyle.hover} tw-transition-all tw-duration-200`}
-                    >
+                      className={`${rankStyle.shadow} tw-ring-1 ${rankStyle.bg} ${rankStyle.ring} tw-rounded-xl tw-h-7 tw-w-full tw-px-2.5 ${rankStyle.text} tw-font-medium tw-text-xs tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 desktop-hover:${rankStyle.hover} tw-transition-all tw-duration-200`}>
                       <TrophyIcon />
                       <span className={`${rankStyle.dropShadow} tw-text-sm`}>
                         #{drop.rank}
@@ -261,8 +255,7 @@ const WaveWinnerItem = memo<{
                 <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap">
                   <span className="tw-text-iron-400 tw-text-sm">You:</span>
                   <span
-                    className={`tw-text-sm tw-font-medium ${userVoteStyle}`}
-                  >
+                    className={`tw-text-sm tw-font-medium ${userVoteStyle}`}>
                     {formatNumberWithCommas(userVote)}{" "}
                     {drop.wave.voting_credit_type}
                   </span>
@@ -276,8 +269,7 @@ const WaveWinnerItem = memo<{
           <Link
             href={`/${drop.author.handle}`}
             onClick={(e) => e.stopPropagation()}
-            className="tw-block tw-flex-shrink-0 desktop-hover:group-hover:tw-opacity-90 tw-transition-opacity"
-          >
+            className="tw-block tw-flex-shrink-0 desktop-hover:group-hover:tw-opacity-90 tw-transition-opacity">
             {drop.author.pfp ? (
               <img
                 src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
@@ -293,8 +285,7 @@ const WaveWinnerItem = memo<{
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
-              className="tw-no-underline tw-truncate"
-            >
+              className="tw-no-underline tw-truncate">
               <span className="tw-text-sm tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-iron-100 tw-transition-colors">
                 {drop.author.handle}
               </span>
