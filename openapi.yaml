@@ -2387,6 +2387,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: voter_identity
+          in: query
+          description: Filter drops where given identity has voted
+          required: false
+          schema:
+            type: string
+        - name: author_identity
+          in: query
+          description: Filter drops by given author
+          required: false
+          schema:
+            type: string
         - name: page_size
           in: query
           description: Default is 50
@@ -2422,12 +2434,6 @@ paths:
             enum:
               - RANK
               - CREATION_TIME
-        - name: author_identity
-          in: query
-          description: Identity of author to filter by
-          required: false
-          schema:
-            type: string
       responses:
         "200":
           description: successful operation
@@ -3384,7 +3390,6 @@ components:
         - chat
         - wave
         - outcomes
-        - decisions_strategy
       properties:
         name:
           description: The name of the wave
@@ -3429,6 +3434,7 @@ components:
         - signature_required
         - no_of_applications_allowed_per_participant
         - required_media
+        - terms
       properties:
         scope:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
@@ -3454,6 +3460,10 @@ components:
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
+        terms:
+          description: If this is and the "signature_required" is set then this will be embedded as a signature input data component for each drop.
+          type: string
+          nullable: true
         period:
           $ref: "#/components/schemas/ApiIntRange"
     ApiCreateNewWaveScope:
@@ -3554,6 +3564,7 @@ components:
         - mentioned_users
         - metadata
         - parts
+        - signature
       properties:
         title:
           type: string
@@ -3576,6 +3587,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMetadata"
+        signature:
+          description: 'If wave requires drop signatures then this needs to be set. Signature of a drop is ethSign(creatorWallet, sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest - signature (+ wave.participation.terms if it exists))))'
+          type: string
+          nullable: true
     ApiDrop:
       type: object
       required:
@@ -3592,12 +3607,14 @@ components:
         - parts
         - parts_count
         - rating
+        - realtime_rating
         - top_raters
         - raters_count
         - title
         - context_profile_context
         - subscribed_actions
         - rank
+        - is_signed
       properties:
         id:
           type: string
@@ -3659,6 +3676,9 @@ components:
         rating:
           type: number
           format: int64
+        realtime_rating:
+          type: number
+          format: int64
         top_raters:
           type: array
           items:
@@ -3674,6 +3694,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
+        is_signed:
+          type: boolean
     ApiDropAndDropVote:
       type: object
       required:
@@ -3922,12 +3944,14 @@ components:
         - parts
         - parts_count
         - rating
+        - realtime_rating
         - top_raters
         - raters_count
         - title
         - subscribed_actions
         - context_profile_context
         - rank
+        - is_signed
       properties:
         id:
           type: string
@@ -3987,6 +4011,9 @@ components:
         rating:
           type: number
           format: int64
+        realtime_rating:
+          type: number
+          format: int64
         top_raters:
           type: array
           items:
@@ -4002,6 +4029,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
+        is_signed:
+          type: boolean
     ApiFeedItem:
       type: object
       required:
@@ -4037,6 +4066,8 @@ components:
           type: number
           format: int64
         is_hidden:
+          type: boolean
+        is_direct_message:
           type: boolean
     ApiGroupCicFilter:
       type: object
@@ -4133,6 +4164,8 @@ components:
         visible:
           type: boolean
         is_private:
+          type: boolean
+        is_direct_message:
           type: boolean
     ApiGroupLevelFilter:
       type: object
@@ -5659,6 +5692,11 @@ components:
         - voting_period_start
         - voting_period_end
         - voting_credit_type
+        - visibility_group_id
+        - participation_group_id
+        - chat_group_id
+        - voting_group_id
+        - admin_group_id
       properties:
         id:
           type: string
@@ -5674,6 +5712,21 @@ components:
           type: boolean
         authenticated_user_eligible_to_chat:
           type: boolean
+        visibility_group_id:
+          type: string
+          nullable: true
+        participation_group_id:
+          type: string
+          nullable: true
+        chat_group_id:
+          type: string
+          nullable: true
+        voting_group_id:
+          type: string
+          nullable: true
+        admin_group_id:
+          type: string
+          nullable: true
         voting_period_start:
           type: number
           format: int64
@@ -5740,6 +5793,7 @@ components:
         - no_of_applications_allowed_per_participant
         - required_media
         - authenticated_user_eligible
+        - terms
       properties:
         scope:
           $ref: "#/components/schemas/ApiWaveScope"
@@ -5769,6 +5823,9 @@ components:
           $ref: "#/components/schemas/ApiIntRange"
         authenticated_user_eligible:
           type: boolean
+        terms:
+          type: string
+          nullable: true
     ApiWaveParticipationRequirement:
       type: string
       enum:

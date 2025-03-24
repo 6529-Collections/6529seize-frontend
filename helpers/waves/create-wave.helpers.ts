@@ -432,6 +432,8 @@ export const getCreateNewWaveBody = ({
         min: config.dates.submissionStartDate,
         max: endDate,
       },
+      // TODO: fix it
+      terms: null,
     },
     chat: {
       scope: {

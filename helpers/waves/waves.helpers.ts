@@ -72,6 +72,8 @@ export const convertWaveToUpdateWave = (
     required_metadata: wave.participation.required_metadata,
     signature_required: !!wave.participation.signature_required,
     period: wave.participation.period,
+    // TODO: fix it
+    terms: null,
   },
   wave: {
     type: wave.wave.type,
@@ -87,6 +89,7 @@ export const convertWaveToUpdateWave = (
     decisions_strategy: wave.wave.decisions_strategy,
   },
   outcomes: wave.outcomes,
+
 });
 
 export const canEditWave = ({

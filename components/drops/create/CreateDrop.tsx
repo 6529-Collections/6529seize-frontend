@@ -216,6 +216,11 @@ export default function CreateDrop({
         voting_credit_type: waveDetailed.voting.credit_type,
         voting_period_start: waveDetailed.voting.period?.min ?? null,
         voting_period_end: waveDetailed.voting.period?.max ?? null,
+        visibility_group_id: null,
+        participation_group_id: null,
+        chat_group_id: null,
+        voting_group_id: null,
+        admin_group_id: null,
       },
       author: {
         ...profileMin,
@@ -251,6 +256,9 @@ export default function CreateDrop({
       subscribed_actions: [],
       drop_type: ApiDropType.Chat,
       rank: null,
+      realtime_rating: 0,
+      // TODO: fix it
+      is_signed: false,
     };
   };
 

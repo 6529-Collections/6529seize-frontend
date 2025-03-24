@@ -21,6 +21,11 @@ export class ApiWaveMin {
     'authenticated_user_eligible_to_vote': boolean;
     'authenticated_user_eligible_to_participate': boolean;
     'authenticated_user_eligible_to_chat': boolean;
+    'visibility_group_id': string | null;
+    'participation_group_id': string | null;
+    'chat_group_id': string | null;
+    'voting_group_id': string | null;
+    'admin_group_id': string | null;
     'voting_period_start': number | null;
     'voting_period_end': number | null;
     'voting_credit_type': ApiWaveCreditType;
@@ -68,6 +73,36 @@ export class ApiWaveMin {
             "name": "authenticated_user_eligible_to_chat",
             "baseName": "authenticated_user_eligible_to_chat",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "visibility_group_id",
+            "baseName": "visibility_group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "participation_group_id",
+            "baseName": "participation_group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "chat_group_id",
+            "baseName": "chat_group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "voting_group_id",
+            "baseName": "voting_group_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "admin_group_id",
+            "baseName": "admin_group_id",
+            "type": "string",
             "format": ""
         },
         {
