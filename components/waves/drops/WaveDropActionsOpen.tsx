@@ -11,7 +11,7 @@ interface WaveDropActionsOpenProps {
 
 const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
   const router = useRouter();
-  const isParticipationDrop = drop.drop_type === ApiDropType.Participatory;
+  const isParticipationDrop = drop.drop_type === ApiDropType.Participatory || drop.drop_type === ApiDropType.Winner;
   const isDisabled = !isParticipationDrop;
 
   const onDropClick = (drop: ExtendedDrop) => {

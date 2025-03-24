@@ -10,14 +10,13 @@
  * Do not edit the class manually.
  */
 
-import { ApiDrop } from '../models/ApiDrop';
 import { ApiWaveDecisionAward } from '../models/ApiWaveDecisionAward';
 import { HttpFile } from '../http/http';
 
-export class ApiWaveDecisionWinner {
+export class ApiDropWinningContext {
     'place': number;
     'awards': Array<ApiWaveDecisionAward>;
-    'drop': ApiDrop;
+    'decision_time': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -35,14 +34,14 @@ export class ApiWaveDecisionWinner {
             "format": ""
         },
         {
-            "name": "drop",
-            "baseName": "drop",
-            "type": "ApiDrop",
-            "format": ""
+            "name": "decision_time",
+            "baseName": "decision_time",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiWaveDecisionWinner.attributeTypeMap;
+        return ApiDropWinningContext.attributeTypeMap;
     }
 
     public constructor() {

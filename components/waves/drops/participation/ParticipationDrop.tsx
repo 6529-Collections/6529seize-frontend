@@ -68,6 +68,7 @@ export default function ParticipationDrop({
       isActiveDrop={isActiveDrop}
       location={location}
     >
+      {drop.drop_type}
       {!isMobile && showReplyAndQuote && (
         <WaveDropActions
           drop={drop}
