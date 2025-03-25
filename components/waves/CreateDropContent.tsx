@@ -52,6 +52,7 @@ import {
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { DropHasher } from "../../utils/drop-hasher";
 import { useDropSignature } from "../../hooks/drops/useDropSignature";
+import { useWave } from "../../hooks/useWave";
 
 export type CreateDropMetadataType =
   | {
@@ -440,6 +441,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { signDrop } = useDropSignature();
+  const { isMemesWave } = useWave(wave);
 
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
@@ -896,7 +898,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            {isParticipatory && !dropId && (
+            {isParticipatory && !dropId && !isMemesWave && (
               <CreateDropDropModeToggle
                 isDropMode={isDropMode}
                 onDropModeChange={onDropModeChange}
