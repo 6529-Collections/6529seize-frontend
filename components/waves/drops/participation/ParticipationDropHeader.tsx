@@ -7,6 +7,7 @@ import UserCICAndLevel, {
 import { DropTrophyIcon } from "../../DropThrophyIcon";
 import ParticipationDropPfp from "./ParticipationDropPfp";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
+import { Time } from "../../../../helpers/time";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;
@@ -42,8 +43,7 @@ export default function ParticipationDropHeader({
             <Link
               onClick={(e) => e.stopPropagation()}
               href={`/${drop.author.handle}`}
-              className="tw-no-underline tw-text-iron-200 desktop-hover:hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-            >
+              className="tw-no-underline tw-text-iron-200 desktop-hover:hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
               {drop.author.handle}
             </Link>
           </p>
@@ -54,8 +54,10 @@ export default function ParticipationDropHeader({
           )}
         </div>
         <div className="tw-flex tw-items-center tw-gap-2">
-          <p className="tw-text-xs sm:tw-text-sm tw-m-0 tw-whitespace-nowrap tw-font-medium tw-leading-none tw-text-iron-400">
+          <p className="tw-text-xs tw-m-0 tw-whitespace-nowrap tw-font-medium tw-leading-none tw-text-iron-400">
             {getTimeAgoShort(drop.created_at)}
+            &nbsp;&#45;&nbsp;
+            {Time.millis(drop.created_at).toLocaleTimeString()}
           </p>
           {showWaveInfo && (
             <>
@@ -63,8 +65,7 @@ export default function ParticipationDropHeader({
               <Link
                 onClick={(e) => e.stopPropagation()}
                 href={`/my-stream?wave=${drop.wave.id}`}
-                className="tw-text-xs sm:tw-text-sm tw-leading-none tw-font-medium tw-text-iron-400 desktop-hover:hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-              >
+                className="tw-text-xs sm:tw-text-sm tw-leading-none tw-font-medium tw-text-iron-400 desktop-hover:hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
                 {drop.wave.name}
               </Link>
             </>

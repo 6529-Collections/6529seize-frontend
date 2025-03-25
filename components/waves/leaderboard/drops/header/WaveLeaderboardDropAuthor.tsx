@@ -3,7 +3,10 @@ import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 
 import { cicToType, getTimeAgoShort } from "../../../../../helpers/Helpers";
 import Link from "next/link";
-import UserCICAndLevel, { UserCICAndLevelSize } from "../../../../user/utils/UserCICAndLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "../../../../user/utils/UserCICAndLevel";
+import { Time } from "../../../../../helpers/time";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -16,8 +19,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
     <Link
       href={`/${drop.author.handle}`}
       onClick={(e) => e.stopPropagation()}
-      className="tw-flex tw-items-center tw-gap-x-3.5 tw-no-underline group"
-    >
+      className="tw-flex tw-items-center tw-gap-x-3.5 tw-no-underline group">
       <div className="tw-relative">
         {drop.author.pfp ? (
           <img
@@ -40,8 +42,10 @@ export const WaveLeaderboardDropAuthor: React.FC<
         <span className="tw-text-base md:tw-text-lg tw-font-semibold tw-text-iron-100 tw-leading-none group-hover:tw-text-iron-50 tw-transition-colors">
           {drop.author.handle}
         </span>
-        <span className="tw-whitespace-nowrap tw-text-xs md:tw-text-sm tw-font-medium tw-text-iron-400 tw-leading-none">
+        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
           {getTimeAgoShort(drop.created_at)}
+          &nbsp;&#45;&nbsp;
+          {Time.millis(drop.created_at).toLocaleTimeString()}
         </span>
       </div>
     </Link>

@@ -248,6 +248,13 @@ export class Time {
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   }
 
+  public toLocaleTimeString(): string {
+    const date = this.toDate();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
+  }
+
   public toString = (): string => {
     return this.formatAsDuration();
   };

@@ -1,6 +1,10 @@
 import React, { useContext } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { getTimeUntil, numberWithCommas } from "../../../helpers/Helpers";
+import {
+  getTimeAgo,
+  getTimeUntil,
+  numberWithCommas,
+} from "../../../helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";
 import { AuthContext } from "../../auth/Auth";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
@@ -33,7 +37,7 @@ export default function WaveHeader({
   pinnedSide = WaveHeaderPinnedSide.RIGHT,
 }: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const created = getTimeUntil(wave.created_at);
+  const created = getTimeAgo(wave.created_at);
   const firstXContributors = wave.contributors_overview.slice(0, 10);
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
 
@@ -104,10 +108,9 @@ export default function WaveHeader({
           <WaveHeaderName wave={wave} />
           <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-2 tw-gap-y-1 tw-mt-1">
             <div className="tw-text-sm">
-              <span className="tw-font-normal tw-text-iron-400 tw-pr-0.5">
-                Created
+              <span className="tw-font-normal tw-text-iron-400">
+                Created {created}
               </span>
-              <span className="tw-font-normal tw-text-iron-400">{created}</span>
             </div>
           </div>
           <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-y-4">
