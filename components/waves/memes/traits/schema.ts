@@ -119,47 +119,7 @@ export const traitDefinitions: readonly SectionDefinition[] = [
       },
     ],
   },
-  {
-    title: "Card Type Information",
-    layout: "single",
-    fields: [
-      {
-        type: FieldType.TEXT,
-        label: "Type - Card",
-        field: "typeCard",
-        readOnly: true,
-        initialValue: "Card",
-      },
-      {
-        type: FieldType.TEXT,
-        label: "Issuance Month",
-        field: "issuanceMonth",
-        readOnly: true,
-        initialValue: "",
-      },
-      {
-        type: FieldType.NUMBER,
-        label: "Type - Season",
-        field: "typeSeason",
-        readOnly: true,
-        initialValue: 11,
-      },
-      {
-        type: FieldType.NUMBER,
-        label: "Type - Meme",
-        field: "typeMeme",
-        readOnly: true,
-        initialValue: 1,
-      },
-      {
-        type: FieldType.NUMBER,
-        label: "Type - Card Number",
-        field: "typeCardNumber",
-        readOnly: true,
-        initialValue: 400,
-      },
-    ],
-  },
+
   {
     title: "Card Points",
     layout: "single",

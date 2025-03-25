@@ -21,11 +21,6 @@ const REQUIRED_FIELDS = ["title", "description", "memeName"] as const;
  */
 const READ_ONLY_FIELDS = [
   "seizeArtistProfile",
-  "typeCard",
-  "issuanceMonth",
-  "typeSeason",
-  "typeMeme",
-  "typeCardNumber",
 ] as const;
 
 /**
