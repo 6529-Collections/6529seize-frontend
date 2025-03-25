@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useEffect, useMemo } from "react";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import SecondaryButton from "../../../../utils/button/SecondaryButton";
 import { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
 import ArtworkDetails from "../details/ArtworkDetails";
@@ -306,19 +307,20 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       {/* Action Buttons - Fixed at bottom */}
       <div className="tw-sticky tw-bottom-0 tw-left-0 tw-w-full tw-bg-iron-950/80 tw-backdrop-blur-sm tw-py-4 tw-z-10">
         <div className="tw-container tw-mx-auto tw-flex tw-items-center tw-justify-between">
-          {/* Cancel button - only show during idle state */}
-          {submissionPhase === 'idle' && (
+          {/* Cancel button - always visible, but disabled during upload/processing and hidden on success */}
+          {onCancel && submissionPhase !== 'success' ? (
             <button
-              onClick={onCancel}
-              className="tw-text-iron-400 desktop-hover:hover:tw-text-iron-100 tw-transition-colors tw-font-medium"
+              onClick={submissionPhase === 'uploading' || submissionPhase === 'processing' ? undefined : onCancel}
+              disabled={submissionPhase === 'uploading' || submissionPhase === 'processing'}
+              className="tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
               type="button"
             >
               Cancel
             </button>
+          ) : (
+            /* Keep this invisible div when button is not shown to maintain layout */
+            <div></div>
           )}
-          
-          {/* Keep this invisible div when button is not shown to maintain layout */}
-          {submissionPhase !== 'idle' && <div></div>}
           
           {/* Submit button */}
           <div
