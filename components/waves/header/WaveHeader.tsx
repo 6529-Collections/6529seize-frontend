@@ -11,6 +11,7 @@ import WaveHeaderPinned from "./WaveHeaderPinned";
 import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
 import Link from "next/link";
 import WavePicture from "../WavePicture";
+import { Time } from "../../../helpers/time";
 
 export enum WaveHeaderPinnedSide {
   LEFT = "LEFT",
@@ -105,7 +106,8 @@ export default function WaveHeader({
           <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-2 tw-gap-y-1 tw-mt-1">
             <div className="tw-text-sm">
               <span className="tw-font-normal tw-text-iron-400">
-                Created {created}
+                Created {created} -{" "}
+                {Time.millis(wave.created_at).toDate().toLocaleDateString()}
               </span>
             </div>
           </div>
