@@ -24,49 +24,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   onFieldBlur,
   requiredFields = [],
 }) => {
-  console.log(traits);
   const { connectedProfile } = useAuth();
-
-  // Initialize default values on mount
-  useEffect(() => {
-    const getCurrentMonth = () => {
-      const date = new Date();
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      return `${year}/${month}`;
-    };
-
-    // Collect default values in a single object
-    const defaultValues: Partial<TraitsData> = {};
-    let hasChanges = false;
-
-    // Set defaults for missing values
-    if (!traits.issuanceMonth) {
-      defaultValues.issuanceMonth = getCurrentMonth();
-      hasChanges = true;
-    }
-    if (!traits.typeSeason) {
-      defaultValues.typeSeason = 11;
-      hasChanges = true;
-    }
-    if (!traits.typeMeme) {
-      defaultValues.typeMeme = 1;
-      hasChanges = true;
-    }
-    if (!traits.typeCardNumber) {
-      defaultValues.typeCardNumber = 400;
-      hasChanges = true;
-    }
-    if (!traits.typeCard) {
-      defaultValues.typeCard = "Card";
-      hasChanges = true;
-    }
-
-    // Apply default values in a single update
-    if (hasChanges) {
-      setTraits(defaultValues);
-    }
-  }, [setTraits, traits]);
 
   // Get the user profile from connected account
   const userProfile = connectedProfile?.profile?.handle;
