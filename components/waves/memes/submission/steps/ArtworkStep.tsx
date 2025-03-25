@@ -168,7 +168,6 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 }) => {
   // Set up validation with initial empty touched fields to prevent errors on load
   const validation = useTraitsValidation(traits, initialTraits || traits);
-  const [showErrorSummary, setShowErrorSummary] = useState(false);
 
   // Check form completeness - separate from validation
   const isFormComplete = useMemo(
@@ -213,7 +212,6 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       onSubmit();
     } else {
       // Show validation errors and focus the first invalid field
-      setShowErrorSummary(true);
       validation.focusFirstInvalidField();
     }
   }, [validation, onSubmit]);
@@ -294,17 +292,6 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
           onDescriptionBlur={() => handleFieldBlur("description")}
         />
 
-        {/* Validation error summary */}
-        <ValidationSummary
-          errors={validation.errors}
-          show={
-            showErrorSummary &&
-            validation.submitAttempted &&
-            !validation.isValid
-          }
-          onErrorClick={validation.focusFirstInvalidField}
-          className="tw-mt-2"
-        />
 
         {/* Traits Component */}
         <MemesArtSubmissionTraits

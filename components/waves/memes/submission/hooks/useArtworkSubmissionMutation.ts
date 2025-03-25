@@ -215,12 +215,7 @@ export function useArtworkSubmissionMutation() {
     ApiDrop, // Response type
     Error,   // Error type
     { 
-      data: {
-        waveId: string;
-        traits: TraitsData;
-        mediaUrl: string;
-        mimeType: string;
-      };
+      data: ApiCreateDropRequest;
       callbacks?: PhaseChangeCallbacks;
     }
   >({
@@ -234,13 +229,10 @@ export function useArtworkSubmissionMutation() {
         throw new Error('Authentication required');
       }
 
-      // Transform data to API format
-      const apiRequest = transformToApiRequest(data);
-
       // Submit to API
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: 'drops/',
-        body: apiRequest
+        body: data
       });
     },
     onSuccess: (_, variables) => {
@@ -305,14 +297,16 @@ export function useArtworkSubmissionMutation() {
         callbacks
       });
       
-      // Step 2: Submit the drop with the media URL
+      // Step 2: Transform data to API format and submit the drop
+      const transformedRequest = transformToApiRequest({
+        waveId: data.waveId,
+        traits: data.traits,
+        mediaUrl: media.url,
+        mimeType: media.mime_type
+      });
+      
       const result = await submissionMutation.mutateAsync({
-        data: {
-          waveId: data.waveId,
-          traits: data.traits,
-          mediaUrl: media.url,
-          mimeType: media.mime_type
-        },
+        data: transformedRequest,
         callbacks
       });
       
