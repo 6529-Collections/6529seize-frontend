@@ -102,6 +102,7 @@ const MemesArtSubmissionContainer: React.FC<
   const stepComponents = {
     [SubmissionStep.AGREEMENT]: (
       <AgreementStep
+        wave={wave}
         agreements={form.agreements}
         setAgreements={form.setAgreements}
         onContinue={form.handleContinueFromTerms}
