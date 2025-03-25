@@ -5,8 +5,8 @@ import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
 import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
-import useCapacitor from "../../../../hooks/useCapacitor";
 import { LayoutProvider, useLayout } from "./LayoutContext";
+import { useRouter } from "next/router";
 
 
 const Header = dynamic(() => import("../../../header/Header"), {
@@ -16,6 +16,7 @@ const Header = dynamic(() => import("../../../header/Header"), {
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
+  const router = useRouter();
   const { setTitle, title, showWaves } = useContext(AuthContext);
   const { registerRef, spaces } = useLayout();
 
@@ -53,8 +54,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   ];
 
   useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
-
-  const capacitor = useCapacitor();
   const containerClassName = `tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope`;
 
   return (

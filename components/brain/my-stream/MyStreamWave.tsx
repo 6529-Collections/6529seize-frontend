@@ -11,7 +11,6 @@ import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { useWave } from "../../../hooks/useWave";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
-import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
