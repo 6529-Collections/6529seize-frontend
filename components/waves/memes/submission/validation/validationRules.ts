@@ -57,6 +57,14 @@ export function validateNumberField(
     };
   }
   
+  // Disallow zero values
+  if (value === 0) {
+    return {
+      isValid: false,
+      errorMessage: "Value cannot be zero"
+    };
+  }
+  
   // Check min/max constraints if defined in the field definition
   const numberFieldDef = fieldDefinition as NumberFieldDefinition;
   

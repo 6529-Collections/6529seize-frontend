@@ -105,9 +105,9 @@ function checkFormCompleteness(
     if (typeof value === "string") {
       if (!value.trim()) return false;
     }
-    // Handle number fields - must be a defined number (can be 0)
+    // Handle number fields - must be a defined number and not zero
     else if (typeof value === "number") {
-      if (value === null || value === undefined || isNaN(value)) return false;
+      if (value === null || value === undefined || isNaN(value) || value === 0) return false;
     }
     // Handle boolean fields - must be explicitly true or false
     else if (typeof value === "boolean") {
