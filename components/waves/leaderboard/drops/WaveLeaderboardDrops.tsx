@@ -23,7 +23,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     useWaveDropsLeaderboard({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
-      reverse: true,
+      reverse: false,
     });
 
   const memoizedDrops = useMemo(() => drops, [drops]);

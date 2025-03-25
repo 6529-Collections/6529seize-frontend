@@ -50,8 +50,6 @@ export default function ParticipationDrop({
     setIsSlideUp(true);
   }, [isMobile]);
 
-
-
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[activePartIndex].part_id });
@@ -68,7 +66,6 @@ export default function ParticipationDrop({
       isActiveDrop={isActiveDrop}
       location={location}
     >
-      {drop.drop_type}
       {!isMobile && showReplyAndQuote && (
         <WaveDropActions
           drop={drop}
