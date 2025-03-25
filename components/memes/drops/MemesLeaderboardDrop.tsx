@@ -108,7 +108,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 onViewLarger={onViewLarger}
               />
               <div className="tw-p-4">
-                <MemeDropTraits />
+                <MemeDropTraits drop={drop} />
               </div>
               <div className="tw-flex tw-flex-col tw-px-4 tw-pb-4">
                 <MemesLeaderboardDropVoteSummary

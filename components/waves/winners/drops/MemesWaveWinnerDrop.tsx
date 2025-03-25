@@ -133,7 +133,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             </div>
           </div>
           <div className="tw-p-4">
-            <MemeDropTraits />
+            <MemeDropTraits drop={winner.drop}/>
           </div>
           <div className="tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0 tw-px-4 tw-pb-4">
             <div className="tw-flex tw-items-baseline tw-gap-x-1.5">

@@ -109,7 +109,7 @@ export default function MemeWinnerDrop({
             onViewLarger={handleViewLarger}
           />
           <div className="tw-p-4">
-            <MemeDropTraits />
+            <MemeDropTraits drop={drop} />
           </div>
           {/* Actions for desktop */}
           {!isMobile && showReplyAndQuote && (

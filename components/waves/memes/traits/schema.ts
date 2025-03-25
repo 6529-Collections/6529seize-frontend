@@ -11,6 +11,58 @@ export enum FieldType {
   DROPDOWN = "dropdown",
 }
 
+// Map from field name to human-readable label for reuse across components
+export const FIELD_TO_LABEL_MAP: Record<keyof TraitsData, string> = {
+  // Basic fields
+  title: "Title",
+  description: "Description",
+  
+  // Text fields
+  artist: "Artist",
+  seizeArtistProfile: "SEIZE Artist Profile",
+  palette: "Palette",
+  style: "Style",
+  jewel: "Jewel",
+  superpower: "Superpower",
+  dharma: "Dharma",
+  gear: "Gear",
+  clothing: "Clothing",
+  element: "Element",
+  mystery: "Mystery",
+  secrets: "Secrets",
+  weapon: "Weapon",
+  home: "Home",
+  parent: "Parent",
+  sibling: "Sibling",
+  food: "Food",
+  drink: "Drink",
+  bonus: "Bonus",
+  boost: "Boost",
+  
+  // Boolean fields
+  punk6529: "Punk 6529",
+  gradient: "Gradient",
+  movement: "Movement",
+  dynamic: "Dynamic",
+  interactive: "Interactive",
+  collab: "Collab",
+  om: "OM",
+  threeD: "3D",
+  pepe: "Pepe",
+  gm: "GM",
+  summer: "Summer",
+  tulip: "Tulip",
+  
+  // Dropdown fields
+  memeName: "Meme Name",
+  
+  // Number fields
+  pointsPower: "Points - Power",
+  pointsWisdom: "Points - Wisdom",
+  pointsLoki: "Points - Loki",
+  pointsSpeed: "Points - Speed",
+};
+
 /**
  * Base interface for all field definitions
  */
@@ -99,20 +151,20 @@ export const traitDefinitions: readonly SectionDefinition[] = [
     fields: [
       {
         type: FieldType.TEXT,
-        label: "Artist",
+        label: FIELD_TO_LABEL_MAP.artist,
         field: "artist",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "SEIZE Artist Profile",
+        label: FIELD_TO_LABEL_MAP.seizeArtistProfile,
         field: "seizeArtistProfile",
         readOnly: true,
         initialValue: "",
       },
       {
         type: FieldType.DROPDOWN,
-        label: "Meme Name",
+        label: FIELD_TO_LABEL_MAP.memeName,
         field: "memeName",
         options: MEME_NAME_OPTIONS,
         initialValue: "",
@@ -126,25 +178,25 @@ export const traitDefinitions: readonly SectionDefinition[] = [
     fields: [
       {
         type: FieldType.NUMBER,
-        label: "Points - Power",
+        label: FIELD_TO_LABEL_MAP.pointsPower,
         field: "pointsPower",
         initialValue: 0,
       },
       {
         type: FieldType.NUMBER,
-        label: "Points - Wisdom",
+        label: FIELD_TO_LABEL_MAP.pointsWisdom,
         field: "pointsWisdom",
         initialValue: 0,
       },
       {
         type: FieldType.NUMBER,
-        label: "Points - Loki",
+        label: FIELD_TO_LABEL_MAP.pointsLoki,
         field: "pointsLoki",
         initialValue: 0,
       },
       {
         type: FieldType.NUMBER,
-        label: "Points - Speed",
+        label: FIELD_TO_LABEL_MAP.pointsSpeed,
         field: "pointsSpeed",
         initialValue: 0,
       },
@@ -156,73 +208,73 @@ export const traitDefinitions: readonly SectionDefinition[] = [
     fields: [
       {
         type: FieldType.BOOLEAN,
-        label: "Punk 6529",
+        label: FIELD_TO_LABEL_MAP.punk6529,
         field: "punk6529",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "Gradient",
+        label: FIELD_TO_LABEL_MAP.gradient,
         field: "gradient",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "Movement",
+        label: FIELD_TO_LABEL_MAP.movement,
         field: "movement",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "Dynamic",
+        label: FIELD_TO_LABEL_MAP.dynamic,
         field: "dynamic",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "Interactive",
+        label: FIELD_TO_LABEL_MAP.interactive,
         field: "interactive",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "Collab",
+        label: FIELD_TO_LABEL_MAP.collab,
         field: "collab",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "OM",
+        label: FIELD_TO_LABEL_MAP.om,
         field: "om",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "3D",
+        label: FIELD_TO_LABEL_MAP.threeD,
         field: "threeD",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "Pepe",
+        label: FIELD_TO_LABEL_MAP.pepe,
         field: "pepe",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "GM",
+        label: FIELD_TO_LABEL_MAP.gm,
         field: "gm",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "Summer",
+        label: FIELD_TO_LABEL_MAP.summer,
         field: "summer",
         initialValue: false,
       },
       {
         type: FieldType.BOOLEAN,
-        label: "Tulip",
+        label: FIELD_TO_LABEL_MAP.tulip,
         field: "tulip",
         initialValue: false,
       },
@@ -234,62 +286,62 @@ export const traitDefinitions: readonly SectionDefinition[] = [
     fields: [
       {
         type: FieldType.TEXT,
-        label: "Bonus",
+        label: FIELD_TO_LABEL_MAP.bonus,
         field: "bonus",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Boost",
+        label: FIELD_TO_LABEL_MAP.boost,
         field: "boost",
         initialValue: "",
       },
       {
         type: FieldType.DROPDOWN,
-        label: "Palette",
+        label: FIELD_TO_LABEL_MAP.palette,
         field: "palette",
         options: ["Color", "Black and White"],
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Style",
+        label: FIELD_TO_LABEL_MAP.style,
         field: "style",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Jewel",
+        label: FIELD_TO_LABEL_MAP.jewel,
         field: "jewel",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Superpower",
+        label: FIELD_TO_LABEL_MAP.superpower,
         field: "superpower",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Dharma",
+        label: FIELD_TO_LABEL_MAP.dharma,
         field: "dharma",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Gear",
+        label: FIELD_TO_LABEL_MAP.gear,
         field: "gear",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Clothing",
+        label: FIELD_TO_LABEL_MAP.clothing,
         field: "clothing",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Element",
+        label: FIELD_TO_LABEL_MAP.element,
         field: "element",
         initialValue: "",
       },
@@ -301,49 +353,49 @@ export const traitDefinitions: readonly SectionDefinition[] = [
     fields: [
       {
         type: FieldType.TEXT,
-        label: "Mystery",
+        label: FIELD_TO_LABEL_MAP.mystery,
         field: "mystery",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Secrets",
+        label: FIELD_TO_LABEL_MAP.secrets,
         field: "secrets",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Weapon",
+        label: FIELD_TO_LABEL_MAP.weapon,
         field: "weapon",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Home",
+        label: FIELD_TO_LABEL_MAP.home,
         field: "home",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Parent",
+        label: FIELD_TO_LABEL_MAP.parent,
         field: "parent",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Sibling",
+        label: FIELD_TO_LABEL_MAP.sibling,
         field: "sibling",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Food",
+        label: FIELD_TO_LABEL_MAP.food,
         field: "food",
         initialValue: "",
       },
       {
         type: FieldType.TEXT,
-        label: "Drink",
+        label: FIELD_TO_LABEL_MAP.drink,
         field: "drink",
         initialValue: "",
       },

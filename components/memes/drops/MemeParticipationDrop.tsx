@@ -132,7 +132,7 @@ export default function MemeParticipationDrop({
             />
             {/* Traits component */}
             <div className="tw-p-4">
-              <MemeDropTraits />
+              <MemeDropTraits drop={drop} />
             </div>
             <div className="tw-px-4 tw-pb-4">
               <MemeDropVoteStats
