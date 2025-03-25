@@ -9,7 +9,7 @@ import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
 import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
 import MemeWinnerArtwork from "./MemeWinnerArtwork";
-import DropListItemContentMediaImage from "../../drops/view/item/content/media/DropListItemContentMediaImage";
+import MemeDropTraits from "./MemeDropTraits";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -73,72 +73,66 @@ export default function MemeWinnerDrop({
 
   return (
     <div className="tw-w-full">
+      <div
+        className={`tw-w-full ${
+          location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
+        } tw-relative tw-group`}
+      >
         <div
-          className={`tw-w-full ${location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-            } tw-relative tw-group`}
+          className={`tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${
+            location === DropLocation.WAVE ? "tw-bg-iron-900" : "tw-bg-iron-950"
+          } ${firstPlaceShadow}`}
         >
-          <div
-            className={`tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${location === DropLocation.WAVE ? 'tw-bg-iron-900' : 'tw-bg-iron-950'} ${firstPlaceShadow}`}
-          >
-            {/* Two-column layout */}
-            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-5">
-              {/* Left column - Metadata */}
-              <div className="tw-col-span-1 md:tw-col-span-5 tw-px-4 tw-pt-4">
-                {/* Header with metadata */}
-                <div className="tw-flex tw-flex-col tw-gap-y-4">
-                  <div className="tw-flex tw-flex-col tw-gap-y-1">
-                    {/* Rank and title in the same row */}
-                    <MemeWinnerHeader title={title} decisionTime={decisionTime} />
+          {/* Left column - Metadata */}
+          <div className="tw-p-4">
+            {/* Header with metadata */}
+            <div className="tw-flex tw-flex-col">
+              <div className="tw-flex tw-flex-col">
+                {/* Rank and title in the same row */}
+                <MemeWinnerHeader title={title} decisionTime={decisionTime} />
 
-                    {/* Description on its own row */}
-                    <MemeWinnerDescription description={description} />
-                  </div>
-
-                  {/* Vote count and artist info on the last row */}
-                  <div className="tw-flex tw-flex-col tw-gap-4">
-                    {/* Artist info with CIC and level */}
-                    <MemeWinnerArtistInfo drop={drop} />
-                  </div>
-                </div>
+                {/* Description on its own row */}
+                <MemeWinnerDescription description={description} />
               </div>
 
-              {/* Right column - Artwork */}
-              <MemeWinnerArtwork
-                title={title}
-                artworkMedia={artworkMedia}
-                onViewLarger={handleViewLarger}
-              />
+              {/* Vote count and artist info on the last row */}
+              <div className="tw-flex tw-flex-col tw-gap-4">
+                {/* Artist info with CIC and level */}
+                <MemeWinnerArtistInfo drop={drop} />
+              </div>
             </div>
-
-            {/* Actions for desktop */}
-            {!isMobile && showReplyAndQuote && (
-              <WaveDropActions
-                drop={drop}
-                activePartIndex={0}
-                onReply={handleOnReply}
-                onQuote={handleOnQuote}
-              />
-            )}
           </div>
-        </div>
 
-        {/* Mobile menu */}
-        <WaveDropMobileMenu
-          drop={drop}
-          isOpen={isSlideUp}
-          longPressTriggered={longPressTriggered}
-          showReplyAndQuote={showReplyAndQuote}
-          setOpen={setIsSlideUp}
-          onReply={handleOnReply}
-          onQuote={handleOnQuote}
-        />
-      
-      {/* Image modal */}
-      {isImageModalOpen && artworkMedia && (
-        <div onClick={() => setIsImageModalOpen(false)}>
-          <DropListItemContentMediaImage src={artworkMedia} />
+          <MemeWinnerArtwork
+            title={title}
+            artworkMedia={artworkMedia}
+            onViewLarger={handleViewLarger}
+          />
+          <div className="tw-p-4">
+            <MemeDropTraits />
+          </div>
+          {/* Actions for desktop */}
+          {!isMobile && showReplyAndQuote && (
+            <WaveDropActions
+              drop={drop}
+              activePartIndex={0}
+              onReply={handleOnReply}
+              onQuote={handleOnQuote}
+            />
+          )}
         </div>
-      )}
+      </div>
+
+      {/* Mobile menu */}
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen={isSlideUp}
+        longPressTriggered={longPressTriggered}
+        showReplyAndQuote={showReplyAndQuote}
+        setOpen={setIsSlideUp}
+        onReply={handleOnReply}
+        onQuote={handleOnQuote}
+      />
     </div>
   );
 }

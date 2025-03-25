@@ -8,7 +8,7 @@ import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
 import MemesLeaderboardDropArtworkPreview from "./MemesLeaderboardDropArtworkPreview";
 import MemesLeaderboardDropVotingSection from "./MemesLeaderboardDropVotingSection";
-import DropListItemContentMediaImage from "../../drops/view/item/content/media/DropListItemContentMediaImage";
+import MemeDropTraits from "./MemeDropTraits";
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
@@ -42,12 +42,13 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   return (
     <>
       <MemesLeaderboardDropCard drop={drop}>
-        <div className="tw-grid tw-grid-cols-1 xl:tw-grid-cols-12">
+        <div>
           {/* Left column - Metadata */}
-          <div className="tw-col-span-1 xl:tw-col-span-5 tw-px-4 tw-pt-4 tw-pb-4">
+          <div className="tw-p-4">
             {/* Header with metadata */}
             <div className="tw-flex tw-flex-col tw-gap-y-4">
               <MemesLeaderboardDropArtistInfo drop={drop} />
+
               <div className="tw-space-y-1">
                 <MemesLeaderboardDropHeader
                   title={title}
@@ -57,21 +58,22 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                 <MemesLeaderboardDropDescription description={description} />
               </div>
             </div>
-            <div className="tw-flex tw-flex-col tw-mt-4">
-              <MemesLeaderboardDropVoteSummary
-                rating={drop.rating || 0}
-                creditType={drop.wave.voting_credit_type}
-                ratersCount={drop.raters_count || 0}
-                topVoters={firstThreeVoters}
-              />
-            </div>
           </div>
 
-          <div className="tw-col-span-1 xl:tw-col-span-7">
-            <MemesLeaderboardDropArtworkPreview
-              artworkMedia={artworkMedia}
-              title={title}
-              onViewLarger={onViewLarger}
+          <MemesLeaderboardDropArtworkPreview
+            artworkMedia={artworkMedia}
+            title={title}
+            onViewLarger={onViewLarger}
+          />
+          <div className="tw-p-4">
+            <MemeDropTraits />
+          </div>
+          <div className="tw-flex tw-flex-col tw-px-4 tw-pb-4">
+            <MemesLeaderboardDropVoteSummary
+              rating={drop.rating || 0}
+              creditType={drop.wave.voting_credit_type}
+              ratersCount={drop.raters_count || 0}
+              topVoters={firstThreeVoters}
             />
           </div>
         </div>
@@ -82,13 +84,6 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
           canShowVote={canShowVote}
         />
       </MemesLeaderboardDropCard>
-
-      {/* Image modal */}
-      {isImageModalOpen && artworkMedia && (
-        <div onClick={() => setIsImageModalOpen(false)}>
-          <DropListItemContentMediaImage src={artworkMedia} />
-        </div>
-      )}
     </>
   );
 };

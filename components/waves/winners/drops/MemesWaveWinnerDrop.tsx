@@ -16,6 +16,7 @@ import Tippy from "@tippyjs/react";
 import { faImage } from "@fortawesome/free-regular-svg-icons";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import MemeDropTraits from "../../../memes/drops/MemeDropTraits";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -131,8 +132,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               )}
             </div>
           </div>
-
-          <div className="tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0 tw-p-4">
+          <div className="tw-p-4">
+            <MemeDropTraits />
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0 tw-px-4 tw-pb-4">
             <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
               <span
                 className={`tw-text-md tw-font-semibold ${

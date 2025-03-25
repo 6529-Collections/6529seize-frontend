@@ -13,6 +13,7 @@ import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
 import MemeDropArtwork from "./meme-participation-drop/MemeDropArtwork";
 import MemeDropVotingSection from "./meme-participation-drop/MemeDropVotingSection";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
+import MemeDropTraits from "./MemeDropTraits";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -110,10 +111,9 @@ export default function MemeParticipationDrop({
             location === DropLocation.WAVE ? "tw-bg-iron-900" : "tw-bg-iron-950"
           }`}
         >
-          {/* Two-column layout */}
-          <div className="tw-grid tw-grid-cols-1 xl:tw-grid-cols-12 tw-gap-5">
+          <div>
             {/* Left column - Metadata */}
-            <div className="tw-col-span-1 xl:tw-col-span-5 tw-px-4 tw-pt-4 tw-pb-4">
+            <div className="tw-p-4">
               <MemeDropArtistInfo drop={drop} />
               <div className="tw-flex tw-flex-col tw-gap-y-1 tw-mt-4">
                 <MemeDropHeader
@@ -123,23 +123,25 @@ export default function MemeParticipationDrop({
                 />
                 <MemeDropDescription description={description} />
               </div>
-
-              <div className="tw-mt-4">
-                <MemeDropVoteStats
-                  rating={drop.rating}
-                  votingCreditType={drop.wave.voting_credit_type}
-                  ratersCount={drop.raters_count}
-                  topVoters={drop.top_raters || []}
-                />
-              </div>
             </div>
-
             {/* Artwork component */}
             <MemeDropArtwork
               artworkMedia={artworkMedia}
               title={title}
               onViewLarger={handleViewLarger}
             />
+            {/* Traits component */}
+            <div className="tw-p-4">
+              <MemeDropTraits />
+            </div>
+            <div className="tw-px-4 tw-pb-4">
+              <MemeDropVoteStats
+                rating={drop.rating}
+                votingCreditType={drop.wave.voting_credit_type}
+                ratersCount={drop.raters_count}
+                topVoters={drop.top_raters || []}
+              />
+            </div>
           </div>
 
           {/* Voting section component */}
