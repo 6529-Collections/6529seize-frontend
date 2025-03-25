@@ -165,10 +165,7 @@ export const useWavesList = (refetchInterval = 10000, activeWaveId: string | nul
   }, [mainWaves, separatelyFetchedPinnedWaves, initialDropsCounts]);
 
   // Combine main waves with separately fetched pinned waves using useMemo
-  // New order: 
-  // 1. Waves with new drops first (sorted by most new drops)
-  // 2. Pinned waves (in original order)
-  // 3. All remaining waves (in original order)
+  // Simplified order: All waves sorted by latest_drop_timestamp (most recent first)
   const combinedWaves = useMemo(() => {
     // Create a Map of all waves by ID for easy lookup
     const allWavesMap = new Map<string, ApiWave>();
@@ -183,15 +180,13 @@ export const useWavesList = (refetchInterval = 10000, activeWaveId: string | nul
       allWavesMap.set(wave.id, wave);
     });
     
-    // Create arrays for each category
-    const wavesWithNewDrops: EnhancedWave[] = [];
-    const pinnedWavesWithoutNewDrops: EnhancedWave[] = [];
-    const remainingWaves: EnhancedWave[] = [];
-    
     // Process pinned waves first to mark them accordingly
     const pinnedWavesSet = new Set(pinnedIds);
     
-    // Process all waves and categorize them
+    // Create array of all waves
+    const allWavesArray: EnhancedWave[] = [];
+    
+    // Process all waves and add them to the array
     [...mainWaves, ...separatelyFetchedPinnedWaves].forEach(wave => {
       // Skip duplicates (waves that appear in both collections)
       if (!allWavesMap.has(wave.id)) return;
@@ -201,38 +196,18 @@ export const useWavesList = (refetchInterval = 10000, activeWaveId: string | nul
       
       const newDropsCount = newDropsCountsMap[wave.id] || 0;
       const isPinned = pinnedWavesSet.has(wave.id);
-      const enhancedWave: EnhancedWave = {
+      
+      allWavesArray.push({
         ...wave,
         isPinned,
         newDropsCount
-      };
-      
-      // Categorize the wave
-      if (newDropsCount > 0) {
-        wavesWithNewDrops.push(enhancedWave);
-      } else if (isPinned) {
-        pinnedWavesWithoutNewDrops.push(enhancedWave);
-      } else {
-        remainingWaves.push(enhancedWave);
-      }
+      });
     });
     
-    // Sort waves with new drops by number of new drops (descending)
-    wavesWithNewDrops.sort((a, b) => b.newDropsCount - a.newDropsCount);
+    // Sort all waves by latest_drop_timestamp (most recent first)
+    allWavesArray.sort((a, b) => b.metrics.latest_drop_timestamp - a.metrics.latest_drop_timestamp);
     
-    // Sort pinned waves without new drops in the original pinnedIds order
-    pinnedWavesWithoutNewDrops.sort((a, b) => {
-      const aIndex = pinnedIds.indexOf(a.id);
-      const bIndex = pinnedIds.indexOf(b.id);
-      return aIndex - bIndex;
-    });
-    
-    // Combine all categories in the desired order
-    return [
-      ...wavesWithNewDrops,
-      ...pinnedWavesWithoutNewDrops,
-      ...remainingWaves
-    ];
+    return allWavesArray;
   }, [mainWaves, separatelyFetchedPinnedWaves, pinnedIds, newDropsCountsMap]);
 
   // Create a stable reference to track processed waves
