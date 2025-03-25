@@ -11,9 +11,7 @@ export default function WaveWinnersDropHeaderCreated({
 }: WaveWinnersDropHeaderCreatedProps) {
   return (
     <span className="tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
-      {getTimeAgoShort(drop.created_at)}
-      &nbsp;&#45;&nbsp;
-      {Time.millis(drop.created_at).toLocaleTimeString()}
+      {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
     </span>
   );
 }

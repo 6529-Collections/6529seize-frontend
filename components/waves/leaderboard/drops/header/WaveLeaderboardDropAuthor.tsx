@@ -43,9 +43,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
           {drop.author.handle}
         </span>
         <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
-          {getTimeAgoShort(drop.created_at)}
-          &nbsp;&#45;&nbsp;
-          {Time.millis(drop.created_at).toLocaleTimeString()}
+          {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
         </span>
       </div>
     </Link>

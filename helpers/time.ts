@@ -248,11 +248,38 @@ export class Time {
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   }
 
-  public toLocaleTimeString(): string {
+  public toLocaleDropDateAndTimeString(): string {
     const date = this.toDate();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
+    const now = new Date();
+
+    const isToday = date.toDateString() === now.toDateString();
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    const timeStr = date.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (isToday) {
+      return `Today - ${timeStr}`;
+    }
+
+    if (isYesterday) {
+      return `Yesterday - ${timeStr}`;
+    }
+
+    const sameYear = date.getFullYear() === now.getFullYear();
+
+    const dateStr = date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "2-digit",
+      ...(sameYear ? {} : { year: "numeric" }),
+    });
+
+    return `${dateStr} - ${timeStr}`;
   }
 
   public toString = (): string => {

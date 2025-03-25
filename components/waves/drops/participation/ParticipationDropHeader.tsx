@@ -55,9 +55,7 @@ export default function ParticipationDropHeader({
         </div>
         <div className="tw-flex tw-items-center tw-gap-2">
           <p className="tw-text-xs tw-m-0 tw-whitespace-nowrap tw-font-medium tw-leading-none tw-text-iron-400">
-            {getTimeAgoShort(drop.created_at)}
-            &nbsp;&#45;&nbsp;
-            {Time.millis(drop.created_at).toLocaleTimeString()}
+            {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
           </p>
           {showWaveInfo && (
             <>

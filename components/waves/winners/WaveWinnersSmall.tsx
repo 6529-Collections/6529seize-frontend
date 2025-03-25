@@ -293,9 +293,7 @@ const WaveWinnerItem = memo<{
             </Link>
             <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></span>
             <span className="tw-text-xs tw-text-iron-400 tw-flex-shrink-0">
-              {getTimeAgoShort(drop.created_at)}
-              &nbsp;&#45;&nbsp;
-              {Time.millis(drop.created_at).toLocaleTimeString()}
+              {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
             </span>
           </div>
         </div>

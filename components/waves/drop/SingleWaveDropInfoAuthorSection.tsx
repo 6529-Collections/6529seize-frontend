@@ -21,13 +21,8 @@ export const SingleWaveDropInfoAuthorSection: React.FC<
         <div className="tw-flex tw-gap-x-2 tw-items-center">
           <div className="tw-w-[3px] tw-h-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
           <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-            {drop && (
-              <>
-                {getTimeAgoShort(drop.created_at)}
-                &nbsp;&#45;&nbsp;
-                {Time.millis(drop.created_at).toLocaleTimeString()}
-              </>
-            )}
+            {drop &&
+              Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
           </p>
         </div>
       </div>
