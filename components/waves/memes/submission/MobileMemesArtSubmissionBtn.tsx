@@ -23,7 +23,7 @@ const MobileMemesArtSubmissionBtn: React.FC<
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="tw-h-5 tw-w-5"
+            className="tw-size-6 tw-flex-shrink-0"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

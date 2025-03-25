@@ -168,7 +168,7 @@ export const SingleWaveDropVoteInput: React.FC<SingleWaveDropVoteInputProps> = (
     <div className="tw-flex tw-flex-col">
       {/* Input and buttons on one row */}
       <div className="tw-flex tw-items-center tw-gap-2">
-        <div className="tw-relative tw-w-full @[640px]:tw-w-[280px]">
+        <div className="tw-relative tw-w-full xl:tw-max-w-xs">
           <input
             type="text"
             pattern="-?[0-9]*"
@@ -239,7 +239,7 @@ export const SingleWaveDropVoteInput: React.FC<SingleWaveDropVoteInputProps> = (
           <button
             key={percentage}
             onClick={() => handleQuickPercentage(percentage)}
-            className={`tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
+            className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
               percentage,
               voteValue
             )}`}

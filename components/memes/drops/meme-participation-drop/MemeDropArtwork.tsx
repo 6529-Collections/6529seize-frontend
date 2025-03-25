@@ -37,7 +37,12 @@ export default function MemeDropArtwork({
 
         {/* View larger button */}
         <div className="tw-absolute tw-bottom-3 tw-right-3">
-          <button className="tw-flex tw-items-center tw-border-0 tw-gap-1.5 tw-bg-iron-950/80 tw-text-iron-300 tw-px-3 tw-py-1.5 tw-rounded-lg tw-text-xs tw-font-medium hover:tw-bg-iron-900">
+          <button className="tw-flex tw-items-center tw-border-0 tw-gap-1.5 tw-bg-iron-950/80 tw-text-iron-300 tw-px-3 tw-py-1.5 tw-rounded-lg tw-text-xs tw-font-medium hover:tw-bg-iron-900"
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewLarger();
+            }}
+          >
             <FontAwesomeIcon
               icon={faExpand}
               className="tw-size-3 tw-flex-shrink-0"

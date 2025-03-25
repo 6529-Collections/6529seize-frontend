@@ -5,7 +5,6 @@ import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import WaveDropMobileMenu from "../../waves/drops/WaveDropMobileMenu";
-
 // Import new components
 import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
@@ -63,6 +62,7 @@ export default function MemeParticipationDrop({
 
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const isMobile = useIsMobileDevice();
 
   // Extract metadata
@@ -95,7 +95,7 @@ export default function MemeParticipationDrop({
   }, [onQuote, drop]);
 
   const handleViewLarger = () => {
-    console.log("view larger");
+    setIsImageModalOpen(true);
   };
 
   return (
@@ -114,31 +114,23 @@ export default function MemeParticipationDrop({
           <div className="tw-grid tw-grid-cols-1 xl:tw-grid-cols-12 tw-gap-5">
             {/* Left column - Metadata */}
             <div className="tw-col-span-1 xl:tw-col-span-5 tw-px-4 tw-pt-4 tw-pb-4">
-              {/* Header with metadata */}
-              <div className="tw-flex tw-flex-col tw-gap-y-1">
-                {/* Header component */}
+              <MemeDropArtistInfo drop={drop} />
+              <div className="tw-flex tw-flex-col tw-gap-y-1 tw-mt-4">
                 <MemeDropHeader
                   title={title}
                   rank={drop.rank}
                   decisionTime={drop.winning_context?.decision_time || null}
                 />
-                {/* Description component */}
                 <MemeDropDescription description={description} />
               </div>
 
-              {/* Vote count section */}
-              <div className="tw-flex tw-flex-col tw-gap-y-4 tw-mt-4">
-                {/* Vote stats component */}
+              <div className="tw-mt-4">
                 <MemeDropVoteStats
                   rating={drop.rating}
                   votingCreditType={drop.wave.voting_credit_type}
                   ratersCount={drop.raters_count}
                   topVoters={drop.top_raters || []}
                 />
-              </div>
-              {/* Artist info component */}
-              <div className="tw-mt-4">
-                <MemeDropArtistInfo drop={drop} />
               </div>
             </div>
 

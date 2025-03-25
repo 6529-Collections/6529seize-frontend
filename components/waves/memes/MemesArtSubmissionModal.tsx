@@ -29,7 +29,7 @@ export const MemesArtSubmissionModal: React.FC<
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="tailwind-scope tw-fixed tw-inset-0 tw-z-50 tw-bg-iron-700/80 tw-backdrop-blur-sm"
+          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-bg-iron-700/80 tw-backdrop-blur-sm"
           onClick={(e) => {
             e.stopPropagation();
             onClose();

@@ -6,6 +6,7 @@ import UserCICAndLevel, {
 } from "../../../user/utils/UserCICAndLevel";
 import WaveDropAuthorPfp from "../../../waves/drops/WaveDropAuthorPfp";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import WinnerDropBadge from "../../../waves/drops/winner/WinnerDropBadge";
 
 interface MemeDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -47,6 +48,11 @@ export default function MemeDropArtistInfo({
           <span className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
             {getTimeAgoShort(drop.created_at)}
           </span>
+          
+          <WinnerDropBadge
+            rank={drop.rank}
+            decisionTime={drop.winning_context?.decision_time || null}
+          />
         </div>
       </div>
     </div>

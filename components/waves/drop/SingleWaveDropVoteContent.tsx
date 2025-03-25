@@ -8,7 +8,6 @@ import SingleWaveDropVoteSlider from "./SingleWaveDropVoteSlider";
 import { TabToggle } from "../../common/TabToggle";
 import { SingleWaveDropVoteInput } from "./SingleWaveDropVoteInput";
 import { SingleWaveDropVoteStats } from "./SingleWaveDropVoteStats";
-import SingleWaveDropVoteQuick from "./SingleWaveDropVoteQuick";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExchange } from "@fortawesome/free-solid-svg-icons";
 
@@ -45,14 +44,14 @@ export const SingleWaveDropVoteContent: React.FC<
       onClick={(e) => e.stopPropagation()}
     >
       {/* Main row with all controls */}
-      <div className="tw-flex tw-items-center tw-gap-2.5">
+      <div className="tw-flex tw-items-start tw-gap-2.5">
         {/* Toggle button on far left */}
         <div className="tw-flex-shrink-0">
           <button
             onClick={() => setIsSliderMode(!isSliderMode)}
-            className="tw-h-8 tw-w-8 tw-rounded-md tw-border-0 tw-bg-iron-700 
+            className="tw-h-8 tw-w-8 tw-rounded-md tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-700 
                     tw-flex tw-items-center tw-justify-center tw-transition-colors
-                    hover:tw-bg-iron-650"
+                    desktop-hover:hover:tw-bg-iron-650"
             title="Switch mode"
           >
             <FontAwesomeIcon 
@@ -64,7 +63,7 @@ export const SingleWaveDropVoteContent: React.FC<
         </div>
 
         {/* Input controls - flex-1 to take available space */}
-        <div className="tw-flex-1 tw-min-w-0">
+        <div className="tw-flex-1 tw-min-w-0 tw-h-14">
           {/* Slider mode */}
           {isSliderMode && (
             <SingleWaveDropVoteSlider
@@ -79,28 +78,14 @@ export const SingleWaveDropVoteContent: React.FC<
 
           {/* Numeric mode */}
           {!isSliderMode && (
-            <div className="tw-flex tw-items-center tw-gap-2">
-              <div className="tw-flex-1">
-                <SingleWaveDropVoteInput
-                  voteValue={voteValue}
-                  minValue={minRating}
-                  maxValue={maxRating}
-                  setVoteValue={setVoteValue}
-                  onSubmit={handleSubmit}
-                  creditType={drop.wave.voting_credit_type}
-                />
-              </div>
-
-              {/* Quick vote buttons (only in numeric mode and not for rank 1) */}
-              {drop.rank !== 1 && (
-                <div className="tw-flex-shrink-0">
-                  <SingleWaveDropVoteQuick
-                    drop={drop}
-                    setValue={setVoteValue}
-                  />
-                </div>
-              )}
-            </div>
+            <SingleWaveDropVoteInput
+              voteValue={voteValue}
+              minValue={minRating}
+              maxValue={maxRating}
+              setVoteValue={setVoteValue}
+              onSubmit={handleSubmit}
+              creditType={drop.wave.voting_credit_type}
+            />
           )}
         </div>
 
@@ -115,7 +100,7 @@ export const SingleWaveDropVoteContent: React.FC<
       </div>
 
       {/* Stats row - just showing stats on the right */}
-      <div className="tw-flex tw-items-center tw-justify-end tw-mt-2">
+      <div className="tw-flex tw-items-center tw-ml-11 tw-mt-3">
         <SingleWaveDropVoteStats
           currentRating={drop.context_profile_context?.rating ?? 0}
           maxRating={maxRating}

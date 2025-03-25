@@ -6,14 +6,15 @@ import UserCICAndLevel, {
 } from "../../user/utils/UserCICAndLevel";
 import WaveDropAuthorPfp from "../../waves/drops/WaveDropAuthorPfp";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
 }
 
-export const MemesLeaderboardDropArtistInfo: React.FC<MemesLeaderboardDropArtistInfoProps> = ({
-  drop,
-}) => {
+export const MemesLeaderboardDropArtistInfo: React.FC<
+  MemesLeaderboardDropArtistInfoProps
+> = ({ drop }) => {
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3 tw-mt-2">
       <Link
@@ -48,6 +49,10 @@ export const MemesLeaderboardDropArtistInfo: React.FC<MemesLeaderboardDropArtist
             {getTimeAgoShort(drop.created_at)}
           </span>
         </div>
+        <WinnerDropBadge
+          rank={drop.rank}
+          decisionTime={drop.winning_context?.decision_time || null}
+        />
       </div>
     </div>
   );

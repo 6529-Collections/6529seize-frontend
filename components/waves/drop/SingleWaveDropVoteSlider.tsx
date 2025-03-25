@@ -171,7 +171,7 @@ export default function WaveDropVoteSlider({
 
   return (
     <div
-      className="tw-h-[16px] tw-flex tw-items-center"
+      className="tw-h-9 tw-flex tw-items-center"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
