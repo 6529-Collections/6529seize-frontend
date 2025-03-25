@@ -4,7 +4,6 @@ import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import {
   CreateWaveGroupConfigType,
   CreateWaveStep,
-  WaveSignatureType,
 } from "../../types/waves.types";
 
 export const WAVE_LABELS: Record<ApiWaveType, string> = {
@@ -16,30 +15,6 @@ export const WAVE_LABELS: Record<ApiWaveType, string> = {
 export const WAVE_VOTING_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.Tdh]: "By TDH",
   [ApiWaveCreditType.Rep]: "By Rep",
-};
-
-export const WAVE_SIGNATURE_LABELS: Record<
-  ApiWaveType,
-  Record<WaveSignatureType, string>
-> = {
-  [ApiWaveType.Chat]: {
-    [WaveSignatureType.NONE]: "None",
-    [WaveSignatureType.DROPS]: "Drops",
-    [WaveSignatureType.VOTING]: "Rating",
-    [WaveSignatureType.DROPS_AND_VOTING]: "All",
-  },
-  [ApiWaveType.Rank]: {
-    [WaveSignatureType.NONE]: "None",
-    [WaveSignatureType.DROPS]: "Drops",
-    [WaveSignatureType.VOTING]: "Voting",
-    [WaveSignatureType.DROPS_AND_VOTING]: "All",
-  },
-  [ApiWaveType.Approve]: {
-    [WaveSignatureType.NONE]: "None",
-    [WaveSignatureType.DROPS]: "Drops",
-    [WaveSignatureType.VOTING]: "Voting",
-    [WaveSignatureType.DROPS_AND_VOTING]: "All",
-  },
 };
 
 export const CREATE_WAVE_MAIN_STEPS: Record<ApiWaveType, CreateWaveStep[]> = {

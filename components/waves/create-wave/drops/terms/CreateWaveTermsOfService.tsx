@@ -3,17 +3,26 @@ import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 
 export default function CreateWaveTermsOfService({
   waveType,
+  terms,
+  setTerms,
 }: {
   readonly waveType: ApiWaveType;
+  readonly terms: string | null;
+  readonly setTerms: (terms: string | null) => void;
 }) {
-  const [enabled, setEnabled] = useState(false);
-  const [tosText, setTosText] = useState("");
-  
+  const [enabled, setEnabled] = useState(!!terms);
+
+  const onEnabledChange = (enabled: boolean) => {
+    setEnabled(enabled);
+    if (!enabled) {
+      setTerms(null);
+    }
+  };
+
   // Only show for Rank and Approve waves
-  const isApplicableWaveType = 
-    waveType === ApiWaveType.Rank || 
-    waveType === ApiWaveType.Approve;
-  
+  const isApplicableWaveType =
+    waveType === ApiWaveType.Rank || waveType === ApiWaveType.Approve;
+
   if (!isApplicableWaveType) {
     return null;
   }
@@ -36,7 +45,7 @@ export default function CreateWaveTermsOfService({
                   id="tos-toggle"
                   type="checkbox"
                   checked={enabled}
-                  onChange={() => setEnabled(!enabled)}
+                  onChange={() => onEnabledChange(!enabled)}
                   className="tw-sr-only"
                 />
                 <span
@@ -63,7 +72,8 @@ export default function CreateWaveTermsOfService({
           </label>
         </div>
         <p className="tw-text-sm tw-text-iron-300 tw-mt-1">
-          Add custom terms that participants must agree to and sign with their wallet before submitting content.
+          Add custom terms that participants must agree to and sign with their
+          wallet before submitting content.
         </p>
       </div>
 
@@ -71,8 +81,8 @@ export default function CreateWaveTermsOfService({
         <div className="tw-mt-4">
           <div className="tw-group tw-w-full tw-relative">
             <textarea
-              value={tosText}
-              onChange={(e) => setTosText(e.target.value)}
+              value={terms ?? ""}
+              onChange={(e) => setTerms(e.target.value)}
               id="terms-of-service-text"
               rows={6}
               className="tw-ring-iron-650 focus:tw-border-blue-500 focus:tw-ring-primary-400 tw-caret-primary-400 tw-form-textarea tw-block tw-px-4 tw-py-4 tw-w-full tw-text-base tw-rounded-lg tw-border-0 tw-appearance-none tw-text-white tw-border-iron-600 tw-peer tw-bg-iron-900 focus:tw-bg-iron-900 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
@@ -83,7 +93,7 @@ export default function CreateWaveTermsOfService({
             <span>
               Participants will need to sign these terms with their wallet
             </span>
-            <span>{tosText.length} characters</span>
+            <span>{terms?.length ?? 0} characters</span>
           </div>
         </div>
       )}

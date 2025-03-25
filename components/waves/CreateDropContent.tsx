@@ -50,6 +50,9 @@ import {
   MissingRequirements,
 } from "./utils/getMissingRequirements";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
+import { DropHasher } from "../../utils/drop-hasher";
+import { useDropSignature } from "../../hooks/drops/useDropSignature";
+import { useWave } from "../../hooks/useWave";
 
 export type CreateDropMetadataType =
   | {
@@ -437,6 +440,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const breakpoint = useBreakpoint();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
+  const { signDrop } = useDropSignature();
+  const { isMemesWave } = useWave(wave);
 
   const [submitting, setSubmitting] = useState(false);
   const [editorState, setEditorState] = useState<EditorState | null>(null);
@@ -659,8 +664,24 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         wave_id: wave.id,
         parts,
       };
+
+      const { success, signature } = await signDrop({
+        drop: requestBody,
+        termsOfService: wave.participation.terms,
+      });
+
+      if (!success || !signature) {
+        setSubmitting(false);
+        return;
+      }
+
+      const updatedDropRequest = {
+        ...requestBody,
+        signature,
+      };
+
       const optimisticDrop = getOptimisticDrop(
-        requestBody,
+        updatedDropRequest,
         connectedProfile,
         wave,
         activeDrop,
@@ -672,7 +693,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);
       refreshState();
-      submitDrop(requestBody);
+      submitDrop(updatedDropRequest);
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),
@@ -877,7 +898,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         </div>
         <div className="tw-ml-2 lg:tw-ml-3">
           <div className="tw-flex tw-items-center tw-gap-x-3">
-            {isParticipatory && !dropId && (
+            {isParticipatory && !dropId && !isMemesWave && (
               <CreateDropDropModeToggle
                 isDropMode={isDropMode}
                 onDropModeChange={onDropModeChange}
@@ -910,7 +931,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}>
+            transition={{ duration: 0.3 }}
+          >
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}

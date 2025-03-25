@@ -5,7 +5,6 @@ import {
   CreateWaveOutcomeType, 
   CreateWaveStep, 
   TimeWeightedVotingSettings, 
-  WaveSignatureType 
 } from "../../../../types/waves.types";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { Time } from "../../../../helpers/time";
@@ -34,7 +33,6 @@ export function useWaveConfig() {
     return {
       overview: {
         type,
-        signatureType: WaveSignatureType.NONE,
         name: "",
         image: null,
       },
@@ -60,6 +58,8 @@ export function useWaveConfig() {
         noOfApplicationsAllowedPerParticipant: null,
         requiredTypes: [],
         requiredMetadata: [],
+        terms: null,
+        signatureRequired: false,
       },
       voting: {
         type: ApiWaveCreditType.Tdh,
