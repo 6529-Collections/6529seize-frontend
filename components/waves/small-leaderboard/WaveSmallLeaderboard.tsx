@@ -2,9 +2,7 @@ import React, { useContext, useMemo } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { AuthContext } from "../../auth/Auth";
 import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
+  useWaveDropsLeaderboard
 } from "../../../hooks/useWaveDropsLeaderboard";
 import { WaveSmallLeaderboardDrop } from "./WaveSmallLeaderboardDrop";
 import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
@@ -22,8 +20,6 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({ wave
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
       reverse: true,
-      dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
-      sortDirection: WaveDropsLeaderboardSortDirection.DESC,
     });
 
   const memoizedDrops = useMemo(() => drops, [drops]);

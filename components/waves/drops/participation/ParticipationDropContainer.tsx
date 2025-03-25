@@ -1,4 +1,4 @@
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ExtendedDrop, getDropRank } from "../../../../helpers/waves/drop.helpers";
 import { ApiDropType } from "../../../../generated/models/ApiDropType";
 import { DropLocation } from "../Drop";
 
@@ -92,8 +92,8 @@ export default function ParticipationDropContainer({
   location,
   children
 }: ParticipationDropContainerProps) {
-  const isDrop = drop.drop_type === ApiDropType.Participatory;
-  const rank = drop.rank;
+  const isDrop = drop.drop_type === ApiDropType.Participatory || drop.drop_type === ApiDropType.Winner;
+  const rank = getDropRank(drop);
   const colorClasses = getColorClasses({ isActiveDrop, rank, isDrop });
 
   return (

@@ -1,11 +1,7 @@
 import React, { useContext, useState, memo, useCallback } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard } from "../../../hooks/useWaveDropsLeaderboard";
 import { AuthContext } from "../../auth/Auth";
 import Link from "next/link";
 import {
@@ -315,8 +311,6 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     const { drops } = useWaveDropsLeaderboard({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
-      dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
-      sortDirection: WaveDropsLeaderboardSortDirection.ASC,
       reverse: false,
     });
 

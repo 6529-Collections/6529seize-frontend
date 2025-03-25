@@ -364,6 +364,11 @@ const getOptimisticDrop = (
       voting_credit_type: wave.voting.credit_type,
       voting_period_start: null,
       voting_period_end: null,
+      visibility_group_id: null,
+      participation_group_id: null,
+      chat_group_id: null,
+      voting_group_id: null,
+      admin_group_id: null,
     },
     author: {
       id: connectedProfile.profile.external_id,
@@ -408,6 +413,8 @@ const getOptimisticDrop = (
     subscribed_actions: [],
     drop_type: dropType,
     rank: null,
+    is_signed: false,
+    realtime_rating: 0,
   };
 };
 
@@ -525,6 +532,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         referenced_nfts: drop?.referenced_nfts ?? [],
         metadata: convertMetadataToDropMetadata(metadata),
         drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
+        signature: null,
       };
     }
     return null;
@@ -556,6 +564,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       mentioned_users: allMentions,
       referenced_nfts: allNfts,
       metadata: convertMetadataToDropMetadata(metadata),
+      signature: null,
     };
   };
 
@@ -651,7 +660,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         connectedProfile,
         wave,
         activeDrop,
-        isDropMode ? ApiDropType.Participatory : ApiDropType.Chat
+        isDropMode ? ApiDropType.Participatory  : ApiDropType.Chat
       );
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
@@ -897,7 +906,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}>
+            transition={{ duration: 0.3 }}
+          >
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}

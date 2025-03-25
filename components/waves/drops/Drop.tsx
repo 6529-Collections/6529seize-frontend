@@ -48,7 +48,10 @@ export default function Drop({
   showReplyAndQuote,
   parentContainerRef,
 }: DropProps) {
-  if (drop.drop_type === ApiDropType.Participatory) {
+  if (
+    drop.drop_type === ApiDropType.Participatory ||
+    drop.drop_type === ApiDropType.Winner
+  ) {
     return (
       <ParticipationDrop
         drop={drop}

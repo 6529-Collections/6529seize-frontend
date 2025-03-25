@@ -10,18 +10,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
 import { WaveWinners } from "../winners/WaveWinners";
-import { WaveDropsLeaderboardSortBy, WaveDropsLeaderboardSortDirection } from "../../../hooks/useWaveDropsLeaderboard";
 
 
 interface WaveLeaderboardProps {
   readonly wave: ApiWave;
   readonly children: React.ReactNode;
   readonly setActiveDrop: (drop: ExtendedDrop) => void;
-}
-
-export enum WaveLeaderboardSortType {
-  RANK = "RANK",
-  RECENT = "RECENT",
 }
 
 export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
@@ -31,26 +25,12 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
 }) => {
   const capacitor = useCapacitor();
   const { votingState } = useWaveState(wave);
-  const [sort, setSort] = useState<WaveLeaderboardSortType>(
-    WaveLeaderboardSortType.RANK
-  );
 
-  const [showMyDrops, setShowMyDrops] = useState(false);
+
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024);
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
 
-  const sortBy: Record<WaveLeaderboardSortType, WaveDropsLeaderboardSortBy> = {
-    [WaveLeaderboardSortType.RANK]: WaveDropsLeaderboardSortBy.RANK,
-    [WaveLeaderboardSortType.RECENT]: WaveDropsLeaderboardSortBy.CREATION_TIME,
-  };
-
-  const sortDirection: Record<
-    WaveLeaderboardSortType,
-    WaveDropsLeaderboardSortDirection
-  > = {
-    [WaveLeaderboardSortType.RANK]: WaveDropsLeaderboardSortDirection.DESC,
-    [WaveLeaderboardSortType.RECENT]: WaveDropsLeaderboardSortDirection.ASC,
-  };
 
   const contentHeight = capacitor.isCapacitor
     ? "tw-h-[calc(100vh-16rem)]"
@@ -76,11 +56,6 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
             <>
               <WaveLeaderboardTime wave={wave} />
               <WaveLeaderboardHeader
-                wave={wave}
-                sort={sort}
-                setSort={setSort}
-                showMyDrops={showMyDrops}
-                setShowMyDrops={setShowMyDrops}
                 onCreateDrop={() => setIsCreatingDrop(true)}
               />
 
@@ -104,9 +79,6 @@ export const WaveLeaderboard: React.FC<WaveLeaderboardProps> = ({
               </AnimatePresence>
               <WaveLeaderboardDrops
                 wave={wave}
-                dropsSortBy={sortBy[sort]}
-                sortDirection={sortDirection[sort]}
-                showMyDrops={showMyDrops}
                 onCreateDrop={() => setIsCreatingDrop(true)}
               />
             </>

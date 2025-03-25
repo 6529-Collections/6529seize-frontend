@@ -30,6 +30,7 @@ export class ApiWaveConfig {
     'admin_group': ApiWaveScope;
     'authenticated_user_eligible_for_admin': boolean;
     'decisions_strategy': ApiWaveDecisionsStrategy | null;
+    'next_decision_time': number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -75,6 +76,12 @@ export class ApiWaveConfig {
             "baseName": "decisions_strategy",
             "type": "ApiWaveDecisionsStrategy",
             "format": ""
+        },
+        {
+            "name": "next_decision_time",
+            "baseName": "next_decision_time",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {

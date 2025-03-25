@@ -4,6 +4,7 @@ import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiDropType } from "../../generated/models/ApiDropType";
 import { DropVoteState } from "./types";
 
+
 interface DropInteractionRules {
   canShowVote: boolean; // determines if voting UI should be visible
   canVote: boolean; // determines if voting is enabled
@@ -39,7 +40,9 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
       (drop.drop_type === ApiDropType.Participatory &&
         !drop.wave.authenticated_user_eligible_to_vote) ||
       (drop.drop_type === ApiDropType.Chat &&
-        !drop.wave.authenticated_user_eligible_to_chat)
+        !drop.wave.authenticated_user_eligible_to_chat) ||
+      drop.drop_type === ApiDropType.Winner ||
+      (drop.wave.voting_period_end && drop.wave.voting_period_end < Date.now())
     ) {
       return DropVoteState.CANT_VOTE;
     }

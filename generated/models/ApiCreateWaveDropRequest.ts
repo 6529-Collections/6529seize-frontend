@@ -22,6 +22,10 @@ export class ApiCreateWaveDropRequest {
     'referenced_nfts': Array<ApiDropReferencedNFT>;
     'mentioned_users': Array<ApiDropMentionedUser>;
     'metadata': Array<ApiDropMetadata>;
+    /**
+    * If wave requires drop signatures then this needs to be set. Signature of a drop is ethSign(creatorWallet, sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest - signature (+ wave.participation.terms if it exists))))
+    */
+    'signature': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -54,6 +58,12 @@ export class ApiCreateWaveDropRequest {
             "name": "metadata",
             "baseName": "metadata",
             "type": "Array<ApiDropMetadata>",
+            "format": ""
+        },
+        {
+            "name": "signature",
+            "baseName": "signature",
+            "type": "string",
             "format": ""
         }    ];
 

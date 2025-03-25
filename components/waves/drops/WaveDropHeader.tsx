@@ -6,7 +6,7 @@ import UserCICAndLevel, {
 } from "../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { DropTrophyIcon } from "../DropThrophyIcon";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { getDropRank } from "../../../helpers/waves/drop.helpers";
 import { Time } from "../../../helpers/time";
 
 interface WaveDropHeaderProps {
@@ -32,6 +32,8 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
     e.stopPropagation();
     router.push(path);
   };
+
+  const rank = getDropRank(drop);
 
   return (
     <>
@@ -63,8 +65,8 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             {Time.millis(drop.created_at).toIsoTimeStringWithoutSeconds()}
           </p>
         </div>
-        {drop.drop_type === ApiDropType.Participatory && (
-          <DropTrophyIcon rank={drop.rank} />
+        {rank && (
+          <DropTrophyIcon rank={rank} />
         )}
       </div>
       <div>

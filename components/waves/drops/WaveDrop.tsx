@@ -5,7 +5,7 @@ import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropRatings from "./WaveDropRatings";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop, getDropRank } from "../../../helpers/waves/drop.helpers";
 import WaveDropMetadata from "./WaveDropMetadata";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
@@ -132,7 +132,7 @@ const WaveDrop = ({
   const touchStartPosition = useRef<{ x: number; y: number } | null>(null);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isStorm = drop.parts.length > 1;
-  const isDrop = drop.drop_type === ApiDropType.Participatory;
+  const isDrop = drop.drop_type === ApiDropType.Participatory || drop.drop_type === ApiDropType.Winner;
 
   const shouldGroupWithPreviousDrop =
     !isDrop && shouldGroupWithDrop(drop, previousDrop);
@@ -210,7 +210,7 @@ const WaveDrop = ({
     isActiveDrop,
     groupingClass,
     location,
-    drop.rank,
+    getDropRank(drop),
     isDrop
   );
 

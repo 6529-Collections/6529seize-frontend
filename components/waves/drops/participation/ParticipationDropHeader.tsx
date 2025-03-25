@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import {
+  ExtendedDrop,
+  getDropRank,
+} from "../../../../helpers/waves/drop.helpers";
 import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -18,6 +21,8 @@ export default function ParticipationDropHeader({
   showWaveInfo,
 }: ParticipationDropHeaderProps) {
   const cicType = cicToType(drop.author.cic);
+
+  const rank = getDropRank(drop);
 
   return (
     <div className="tw-grid tw-grid-cols-[auto_1fr] tw-gap-5 tw-px-4 md:tw-px-6 tw-pb-4 md:tw-pb-6">
@@ -47,11 +52,13 @@ export default function ParticipationDropHeader({
               {drop.author.handle}
             </Link>
           </p>
-          {drop.drop_type === ApiDropType.Participatory && (
-            <div className="tw-flex tw-items-center tw-justify-center tw-h-6">
-              <DropTrophyIcon rank={drop.rank} />
-            </div>
-          )}
+          {(drop.drop_type === ApiDropType.Participatory ||
+            drop.drop_type === ApiDropType.Winner) &&
+            rank !== null && (
+              <div className="tw-flex tw-items-center tw-justify-center tw-h-6">
+                <DropTrophyIcon rank={rank} />
+              </div>
+            )}
         </div>
         <div className="tw-flex tw-items-center tw-gap-2">
           <p className="tw-text-xs sm:tw-text-sm tw-m-0 tw-whitespace-nowrap tw-font-medium tw-leading-none tw-text-iron-400">

@@ -18,6 +18,7 @@ import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropType } from '../models/ApiDropType';
+import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiWaveMin } from '../models/ApiWaveMin';
@@ -31,6 +32,7 @@ export class ApiDrop {
     'serial_no': number;
     'drop_type': ApiDropType;
     'rank': number | null;
+    'winning_context'?: ApiDropWinningContext;
     'wave': ApiWaveMin;
     'reply_to'?: ApiReplyToDropResponse;
     'author': ApiProfileMin;
@@ -52,10 +54,12 @@ export class ApiDrop {
     'mentioned_users': Array<ApiDropMentionedUser>;
     'metadata': Array<ApiDropMetadata>;
     'rating': number;
+    'realtime_rating': number;
     'top_raters': Array<ApiDropRater>;
     'raters_count': number;
     'context_profile_context': ApiDropContextProfileContext | null;
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
+    'is_signed': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -83,6 +87,12 @@ export class ApiDrop {
             "baseName": "rank",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "winning_context",
+            "baseName": "winning_context",
+            "type": "ApiDropWinningContext",
+            "format": ""
         },
         {
             "name": "wave",
@@ -157,6 +167,12 @@ export class ApiDrop {
             "format": "int64"
         },
         {
+            "name": "realtime_rating",
+            "baseName": "realtime_rating",
+            "type": "number",
+            "format": "int64"
+        },
+        {
             "name": "top_raters",
             "baseName": "top_raters",
             "type": "Array<ApiDropRater>",
@@ -178,6 +194,12 @@ export class ApiDrop {
             "name": "subscribed_actions",
             "baseName": "subscribed_actions",
             "type": "Array<ApiDropSubscriptionTargetAction>",
+            "format": ""
+        },
+        {
+            "name": "is_signed",
+            "baseName": "is_signed",
+            "type": "boolean",
             "format": ""
         }    ];
 

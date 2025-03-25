@@ -1,11 +1,7 @@
 import React, { useContext } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortDirection,
-  WaveDropsLeaderboardSortBy,
-} from "../../../../hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard } from "../../../../hooks/useWaveDropsLeaderboard";
 import { AuthContext } from "../../../auth/Auth";
 import { WaveWinnersPodiumFirst } from "./WaveWinnersPodiumFirst";
 import { WaveWinnersPodiumSecond } from "./WaveWinnersPodiumSecond";
@@ -61,8 +57,6 @@ export const WaveWinnersPodium: React.FC<WaveWinnersPodiumProps> = ({
     waveId: wave.id,
     connectedProfileHandle: connectedProfile?.profile?.handle,
     reverse: false,
-    dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
-    sortDirection: WaveDropsLeaderboardSortDirection.ASC,
     pollingEnabled: false,
   });
 

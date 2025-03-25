@@ -31,6 +31,10 @@ export class ApiCreateNewWaveParticipationConfig {
     * If true then the votes must be signed by voters.
     */
     'signature_required': boolean;
+    /**
+    * If this is and the \"signature_required\" is set then this will be embedded as a signature input data component for each drop.
+    */
+    'terms': string | null;
     'period'?: ApiIntRange;
 
     static readonly discriminator: string | undefined = undefined;
@@ -64,6 +68,12 @@ export class ApiCreateNewWaveParticipationConfig {
             "name": "signature_required",
             "baseName": "signature_required",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "terms",
+            "baseName": "terms",
+            "type": "string",
             "format": ""
         },
         {
