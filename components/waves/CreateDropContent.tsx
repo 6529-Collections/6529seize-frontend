@@ -663,6 +663,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         }),
         wave_id: wave.id,
         parts,
+        
       };
 
       const { success, signature } = await signDrop({

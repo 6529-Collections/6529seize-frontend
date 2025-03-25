@@ -11,6 +11,7 @@ import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { useWave } from "../../../hooks/useWave";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
+import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -23,7 +24,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
 
-  const { isChatWave } = useWave(wave);
+  const { isChatWave, isMemesWave } = useWave(wave);
 
   // Track mount status to prevent post-unmount updates
   const mountedRef = useRef(true);
@@ -78,6 +79,8 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
         key={stableWaveKey}
       >
+
+
         {/* Don't render tab container for simple waves */}
         {breakpoint !== "S" && !isChatWave && <MyStreamWaveTabs wave={wave} />}
 
