@@ -24,8 +24,8 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
   );
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2">
-      <div className="tw-flex tw-flex-wrap tw-gap-2">
+    <div className={`tw-flex ${showAllTraits && otherTraits.length > 5 ? 'tw-flex-col' : ''} tw-gap-2`}>
+      <div className="tw-flex tw-flex-wrap tw-gap-2 tw-flex-1">
         <MemeDropTrait
           label={FIELD_TO_LABEL_MAP.artist}
           value={artistTrait?.data_value ?? ""}
@@ -47,7 +47,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
       </div>
       <button
         onClick={() => setShowAllTraits(!showAllTraits)}
-        className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0"
+        className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-self-start tw-ml-auto tw-whitespace-nowrap"
       >
         {showAllTraits ? "Show less" : "Show all"}
       </button>
