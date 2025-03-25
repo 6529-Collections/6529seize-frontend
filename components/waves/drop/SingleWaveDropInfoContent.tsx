@@ -1,6 +1,5 @@
 import React from "react";
 import { ExtendedDrop, getDropRank } from "../../../helpers/waves/drop.helpers";
-import { ApiDropType } from "../../../generated/models/ObjectSerializer";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
 
