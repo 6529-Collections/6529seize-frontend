@@ -19,7 +19,7 @@ const ValidationError: React.FC<ValidationErrorProps> = ({
   return (
     <div 
       id={id}
-      className={`tw-text-red-500 tw-text-sm tw-mt-1 tw-font-medium ${className}`}
+      className={`tw-text-red tw-text-sm tw-mt-1 tw-font-normal ${className}`}
       role="alert"
       aria-live="polite"
     >

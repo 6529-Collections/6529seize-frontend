@@ -269,7 +269,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-6 tw-relative">
+    <div className="tw-flex tw-flex-col tw-relative">
       {/* Form content wrapped in a container */}
       <div className="tw-flex tw-flex-col tw-gap-y-6">
         {/* File Selection Component */}

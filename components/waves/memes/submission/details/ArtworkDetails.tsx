@@ -15,7 +15,7 @@ interface ArtworkDetailsProps {
 
 /**
  * ArtworkDetails - Component for the artwork title and description fields
- * 
+ *
  * Extreme simplification using uncontrolled inputs with refs for maximum performance
  */
 const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
@@ -31,20 +31,24 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   // Refs to track input elements directly
   const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
-  
+
   // Sync refs with props when they change
   React.useEffect(() => {
     if (titleRef.current && title && titleRef.current.value !== title) {
       titleRef.current.value = title;
     }
   }, [title]);
-  
+
   React.useEffect(() => {
-    if (descriptionRef.current && description && descriptionRef.current.value !== description) {
+    if (
+      descriptionRef.current &&
+      description &&
+      descriptionRef.current.value !== description
+    ) {
       descriptionRef.current.value = description;
     }
   }, [description]);
-  
+
   // Handle blur events - only update parent state when user finishes typing
   const handleTitleBlur = useCallback(() => {
     if (titleRef.current && titleRef.current.value !== title) {
@@ -55,9 +59,12 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
       onTitleBlur();
     }
   }, [onTitleChange, title, onTitleBlur]);
-  
+
   const handleDescriptionBlur = useCallback(() => {
-    if (descriptionRef.current && descriptionRef.current.value !== description) {
+    if (
+      descriptionRef.current &&
+      descriptionRef.current.value !== description
+    ) {
       onDescriptionChange(descriptionRef.current.value);
     }
     // Call parent blur handler for validation
@@ -67,70 +74,84 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   }, [onDescriptionChange, description, onDescriptionBlur]);
 
   return (
-    <FormSection 
+    <FormSection
       title="Artwork Details"
       titleClassName="tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4"
     >
       <div className="tw-grid tw-grid-cols-1 tw-gap-4">
-        <div className={`tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors
-          ${titleError ? 'tw-ring-red-500/40' : 'tw-ring-iron-800/5'}`}>
+        <div className="tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors tw-ring-iron-800/5">
           <div className="tw-flex tw-items-center tw-gap-x-6">
-            <label 
+            <label
               htmlFor="field-title"
-              className={`tw-w-1/3 tw-text-sm tw-font-medium ${titleError ? 'tw-text-red-500' : 'tw-text-iron-300'}`}
+              className="tw-w-1/3 tw-text-sm tw-font-medium tw-text-iron-300"
             >
-              Artwork Title<span className="tw-text-red-500 tw-ml-1">*</span>
+              Artwork Title<span className="tw-text-iron-300 tw-ml-1">*</span>
             </label>
-            <input
-              ref={titleRef}
-              id="field-title"
-              name="title"
-              type="text"
-              defaultValue={title || ''}
-              onBlur={handleTitleBlur}
-              placeholder="Enter artwork title"
-              aria-invalid={!!titleError}
-              aria-describedby={titleError ? "title-error" : undefined}
-              data-field="title"
-              className={`tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+            <div className="tw-flex tw-flex-col tw-w-2/3">
+              <input
+                ref={titleRef}
+                id="field-title"
+                name="title"
+                type="text"
+                defaultValue={title || ""}
+                onBlur={handleTitleBlur}
+                placeholder="Enter artwork title"
+                aria-invalid={!!titleError}
+                aria-describedby={titleError ? "title-error" : undefined}
+                data-field="title"
+                className={`tw-form-input tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
                 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500
-                ${titleError 
-                  ? "tw-ring-red-500/40 focus:tw-ring-red-500" 
-                  : "tw-ring-iron-700/60 hover:tw-ring-primary-400 focus:tw-ring-primary-400"
+                ${
+                  titleError
+                    ? "tw-ring-red"
+                    : "tw-ring-iron-700/60 hover:tw-ring-primary-400 focus:tw-ring-primary-400"
                 }`}
-            />
+              />
+              <ValidationError
+                error={titleError}
+                id="title-error"
+                className="tw-mt-1"
+              />
+            </div>
           </div>
-          <ValidationError error={titleError} id="title-error" className="tw-ml-[33%] tw-mt-1" />
         </div>
-        <div className={`tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors
-          ${descriptionError ? 'tw-ring-red-500/40' : 'tw-ring-iron-800/5'}`}>
+        <div className="tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors tw-ring-iron-800/5">
           <div className="tw-flex tw-items-start tw-gap-x-6">
-            <label 
+            <label
               htmlFor="field-description"
-              className={`tw-w-1/3 tw-text-sm tw-font-medium tw-mt-2 ${descriptionError ? 'tw-text-red-500' : 'tw-text-iron-300'}`}
+              className="tw-w-1/3 tw-text-sm tw-font-medium tw-mt-2 tw-text-iron-300"
             >
-              Description<span className="tw-text-red-500 tw-ml-1">*</span>
+              Description<span className="tw-text-iron-300 tw-ml-1">*</span>
             </label>
-            <textarea
-              ref={descriptionRef}
-              id="field-description"
-              name="description"
-              defaultValue={description || ''}
-              onBlur={handleDescriptionBlur}
-              placeholder="Enter artwork description"
-              rows={3}
-              aria-invalid={!!descriptionError}
-              aria-describedby={descriptionError ? "description-error" : undefined}
-              data-field="description"
-              className={`tw-form-textarea tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+            <div className="tw-flex tw-flex-col tw-w-2/3">
+              <textarea
+                ref={descriptionRef}
+                id="field-description"
+                name="description"
+                defaultValue={description || ""}
+                onBlur={handleDescriptionBlur}
+                placeholder="Enter artwork description"
+                rows={3}
+                aria-invalid={!!descriptionError}
+                aria-describedby={
+                  descriptionError ? "description-error" : undefined
+                }
+                data-field="description"
+                className={`tw-form-textarea tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
                 tw-bg-iron-900 tw-cursor-text tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500
-                ${descriptionError 
-                  ? "tw-ring-red-500/40 focus:tw-ring-red-500" 
-                  : "tw-ring-iron-700/60 hover:tw-ring-primary-400 focus:tw-ring-primary-400"
+                ${
+                  descriptionError
+                    ? "tw-ring-red"
+                    : "tw-ring-iron-700/60 hover:tw-ring-primary-400 focus:tw-ring-primary-400"
                 }`}
-            />
+              />
+              <ValidationError
+                error={descriptionError}
+                id="description-error"
+                className="tw-mt-1"
+              />
+            </div>
           </div>
-          <ValidationError error={descriptionError} id="description-error" className="tw-ml-[33%] tw-mt-1" />
         </div>
       </div>
     </FormSection>
