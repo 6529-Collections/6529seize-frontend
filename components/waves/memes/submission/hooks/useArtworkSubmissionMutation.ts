@@ -9,6 +9,7 @@ import { ApiDropMetadata } from '../../../../../generated/models/ApiDropMetadata
 import { commonApiPost } from '../../../../../services/api/common-api';
 import { TraitsData } from '../types/TraitsData';
 import { SubmissionPhase } from '../ui/SubmissionProgress';
+import { useDropSignature } from '../../../../../hooks/drops/useDropSignature';
 
 /**
  * Interface for the artwork submission data
@@ -17,6 +18,7 @@ interface ArtworkSubmissionData {
   imageFile: File;
   traits: TraitsData;
   waveId: string;
+  termsOfService: string | null;
 }
 
 /**
@@ -169,6 +171,7 @@ interface PhaseChangeCallbacks {
  */
 export function useArtworkSubmissionMutation() {
   const { setToast, requestAuth } = useAuth();
+  const { signDrop, isLoading: isSigningDrop } = useDropSignature();
   const [uploadProgress, setUploadProgress] = useState(0);
   const [submissionPhase, setSubmissionPhase] = useState<SubmissionPhase>('idle');
   const [submissionError, setSubmissionError] = useState<string | undefined>(undefined);
@@ -215,12 +218,7 @@ export function useArtworkSubmissionMutation() {
     ApiDrop, // Response type
     Error,   // Error type
     { 
-      data: {
-        waveId: string;
-        traits: TraitsData;
-        mediaUrl: string;
-        mimeType: string;
-      };
+      data: ApiCreateDropRequest;
       callbacks?: PhaseChangeCallbacks;
     }
   >({
@@ -234,13 +232,10 @@ export function useArtworkSubmissionMutation() {
         throw new Error('Authentication required');
       }
 
-      // Transform data to API format
-      const apiRequest = transformToApiRequest(data);
-
       // Submit to API
       return commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: 'drops/',
-        body: apiRequest
+        body: data
       });
     },
     onSuccess: (_, variables) => {
@@ -305,14 +300,31 @@ export function useArtworkSubmissionMutation() {
         callbacks
       });
       
-      // Step 2: Submit the drop with the media URL
+      // Step 2: Transform data to API format
+      const transformedRequest = transformToApiRequest({
+        waveId: data.waveId,
+        traits: data.traits,
+        mediaUrl: media.url,
+        mimeType: media.mime_type
+      });
+
+      // Step 3: Sign the drop
+      updatePhase('signing', callbacks);
+      const signatureResult = await signDrop({
+        drop: transformedRequest,
+        termsOfService: data.termsOfService
+      });
+
+      if (!signatureResult.success) {
+        throw new Error('Failed to sign the drop');
+      }
+
+      // Add signature to the request
+      transformedRequest.signature = signatureResult.signature || null;
+      
+      // Step 4: Submit the signed drop
       const result = await submissionMutation.mutateAsync({
-        data: {
-          waveId: data.waveId,
-          traits: data.traits,
-          mediaUrl: media.url,
-          mimeType: media.mime_type
-        },
+        data: transformedRequest,
         callbacks
       });
       
@@ -334,8 +346,9 @@ export function useArtworkSubmissionMutation() {
 
   return {
     submitArtwork,
-    isSubmitting: uploadMutation.isPending || submissionMutation.isPending,
+    isSubmitting: uploadMutation.isPending || isSigningDrop || submissionMutation.isPending,
     isUploading: uploadMutation.isPending,
+    isSigning: isSigningDrop,
     isProcessing: submissionMutation.isPending,
     uploadProgress,
     submissionPhase,

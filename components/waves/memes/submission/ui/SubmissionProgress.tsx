@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type SubmissionPhase = 'idle' | 'uploading' | 'processing' | 'success' | 'error';
+export type SubmissionPhase = 'idle' | 'uploading' | 'signing' | 'processing' | 'success' | 'error';
 
 interface SubmissionProgressProps {
   readonly phase: SubmissionPhase;
@@ -42,6 +42,8 @@ const SubmissionProgress: React.FC<SubmissionProgressProps> = ({
           return `Uploading ${fileInfo.name} (${formatFileSize(fileInfo.size)})`;
         }
         return 'Uploading artwork...';
+      case 'signing':
+        return 'Signing submission...';
       case 'processing':
         return 'Processing submission...';
       case 'success':
@@ -58,6 +60,8 @@ const SubmissionProgress: React.FC<SubmissionProgressProps> = ({
     switch (phase) {
       case 'uploading':
         return 'tw-bg-blue-500';
+      case 'signing':
+        return 'tw-bg-yellow-500';
       case 'processing':
         return 'tw-bg-purple-500';
       case 'success':
@@ -71,6 +75,7 @@ const SubmissionProgress: React.FC<SubmissionProgressProps> = ({
 
   // Calculate width based on progress and phase
   const getProgressWidth = (): string => {
+    if (phase === 'signing') return '75%';
     if (phase === 'processing') return '90%';
     if (phase === 'success') return '100%';
     if (phase === 'error') return '100%';

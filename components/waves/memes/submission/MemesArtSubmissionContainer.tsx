@@ -29,44 +29,47 @@ const MemesArtSubmissionContainer: React.FC<
 > = ({ onClose, wave }) => {
   // Use the form hook to manage all state
   const form = useArtworkSubmissionForm();
-  
+
   // Use the mutation hook for submission
-  const { 
-    submitArtwork, 
-    uploadProgress, 
+  const {
+    submitArtwork,
+    uploadProgress,
     submissionPhase,
     submissionError,
-    isSubmitting
+    isSubmitting,
   } = useArtworkSubmissionMutation();
-  
+
   // Keep track of the selected file
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileInfo, setFileInfo] = useState<{name: string, size: number} | null>(null);
-  
+  const [fileInfo, setFileInfo] = useState<{
+    name: string;
+    size: number;
+  } | null>(null);
+
   // Auto-close on successful submission after a short delay
   useEffect(() => {
-    if (submissionPhase === 'success') {
+    if (submissionPhase === "success") {
       const timer = setTimeout(() => {
         onClose();
       }, 1200); // Brief delay to show success state
-      
+
       return () => clearTimeout(timer);
     }
   }, [submissionPhase, onClose]);
-  
+
   // Handle file selection
   const handleFileSelect = (file: File) => {
     // Store the file for later submission
     setSelectedFile(file);
     setFileInfo({
       name: file.name,
-      size: file.size
+      size: file.size,
     });
-    
+
     // Also pass to the form hook for preview
     form.handleFileSelect(file);
   };
-  
+
   // Phase change handler
   const handlePhaseChange = useCallback((phase: SubmissionPhase) => {
     // Any additional phase-specific handling can be done here
@@ -78,22 +81,23 @@ const MemesArtSubmissionContainer: React.FC<
     if (!selectedFile) {
       return null;
     }
-    
+
     // Get submission data including all traits
     const { traits } = form.getSubmissionData();
-    
+
     // Submit the artwork with the wave ID and selected file
     const result = await submitArtwork(
       {
         imageFile: selectedFile,
         traits,
-        waveId: wave.id
+        waveId: wave.id,
+        termsOfService: wave.participation.terms,
       },
       {
-        onPhaseChange: handlePhaseChange
+        onPhaseChange: handlePhaseChange,
       }
     );
-    
+
     return result;
   };
 
@@ -101,6 +105,7 @@ const MemesArtSubmissionContainer: React.FC<
   const stepComponents = {
     [SubmissionStep.AGREEMENT]: (
       <AgreementStep
+        wave={wave}
         agreements={form.agreements}
         setAgreements={form.setAgreements}
         onContinue={form.handleContinueFromTerms}
@@ -126,7 +131,7 @@ const MemesArtSubmissionContainer: React.FC<
   return (
     <ModalLayout title="Submit Artwork to Memes" onCancel={onClose}>
       {/* Submission Progress - Only shows when active */}
-      <SubmissionProgress 
+      <SubmissionProgress
         phase={submissionPhase}
         progress={uploadProgress}
         fileInfo={fileInfo}

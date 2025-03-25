@@ -1,17 +1,21 @@
 import React from "react";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
+import { ApiWave } from "../../../../../generated/models/ApiWave";
 
 interface AgreementStepProps {
+  readonly wave: ApiWave;
   readonly agreements: boolean;
   readonly setAgreements: (agreed: boolean) => void;
   readonly onContinue: () => void;
 }
 
-const AgreementStep: React.FC<AgreementStepProps> = ({
-  agreements,
-  setAgreements,
-  onContinue,
+const AgreementStep: React.FC<AgreementStepProps> = ({ 
+  wave,
+  agreements, 
+  setAgreements, 
+  onContinue, 
 }) => {
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
       <div className="tw-text-iron-300 tw-text-base">
@@ -20,11 +24,18 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
       </div>
 
       <div className="tw-flex tw-flex-col tw-gap-4 tw-bg-iron-900 tw-rounded-lg tw-p-5 tw-border tw-border-iron-800/50 tw-border-solid">
-        <button
-          onClick={() => setAgreements(!agreements)}
-          className="tw-flex tw-items-start tw-gap-3 tw-w-full tw-text-left hover:tw-opacity-80 tw-transition-opacity tw-bg-transparent tw-border-0"
-        >
-          <div className="tw-flex-shrink-0 tw-mt-0.5">
+        {/* Terms content separate from checkbox for better readability */}
+        <div className="tw-text-sm tw-text-iron-300 tw-whitespace-pre-wrap tw-mb-4">
+          {wave.participation.terms}
+        </div>
+        
+        {/* Checkbox at the bottom after reading the terms */}
+        <div className="tw-flex tw-items-center">
+          <button
+            onClick={() => setAgreements(!agreements)}
+            className="tw-flex tw-items-center tw-gap-3 tw-text-left hover:tw-opacity-80 tw-transition-opacity tw-bg-transparent tw-border-0"
+            aria-label={agreements ? "Uncheck terms agreement" : "Check terms agreement"}
+          >
             <div
               className={`tw-w-5 tw-h-5 tw-rounded tw-border ${
                 agreements
@@ -48,12 +59,11 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
                 </svg>
               )}
             </div>
-          </div>
-          <div className="tw-text-sm tw-text-iron-300">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
-          </div>
-        </button>
+            <span className="tw-text-sm tw-text-iron-300 tw-font-medium">
+              I have read and agree to the terms and conditions
+            </span>
+          </button>
+        </div>
       </div>
       <div className="tw-mt-4 tw-flex tw-justify-center">
         <PrimaryButton
