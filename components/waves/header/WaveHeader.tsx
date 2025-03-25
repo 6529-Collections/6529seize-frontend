@@ -1,10 +1,6 @@
 import React, { useContext } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import {
-  getTimeAgo,
-  getTimeUntil,
-  numberWithCommas,
-} from "../../../helpers/Helpers";
+import { getTimeAgo, numberWithCommas } from "../../../helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";
 import { AuthContext } from "../../auth/Auth";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
