@@ -63,16 +63,14 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 <SingleWaveDropVote drop={drop} />
               </div>
             )}
-
-            {/* Responsive footer layout with pure Tailwind */}
-            <div className="tw-grid tw-grid-cols-[auto,1fr] tw-gap-x-4 tw-items-center sm:tw-ml-[3.25rem]">
-              <div className="tw-contents">
-                <WaveLeaderboardDropFooter drop={drop} wave={wave} />
-              </div>
-              
-              <div className="tw-justify-self-end">
-                <WaveLeaderboardDropRaters drop={drop} />
-              </div>
+          </div>
+          {/* Responsive footer layout with pure Tailwind */}
+          <div className="tw-mt-3 tw-grid tw-grid-cols-[auto,1fr] tw-gap-x-4 tw-items-center sm:tw-ml-[3.25rem]">
+            <div className="tw-contents">
+              <WaveLeaderboardDropRaters drop={drop} />
+            </div>
+            <div className="tw-justify-self-end">
+              <WaveLeaderboardDropFooter drop={drop} wave={wave} />
             </div>
           </div>
         </div>
