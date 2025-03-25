@@ -7,12 +7,11 @@ export interface TraitsData {
   // Basic fields
   title: string;
   description: string;
-  
+
   // Text fields
   artist: string;
   seizeArtistProfile: string;
-  typeCard: string;
-  issuanceMonth: string;
+
   palette: string;
   style: string;
   jewel: string;
@@ -54,7 +53,4 @@ export interface TraitsData {
   pointsWisdom: number;
   pointsLoki: number;
   pointsSpeed: number;
-  typeSeason: number;
-  typeMeme: number;
-  typeCardNumber: number;
 }
