@@ -50,7 +50,6 @@ import {
   MissingRequirements,
 } from "./utils/getMissingRequirements";
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
-import { DropHasher } from "../../utils/drop-hasher";
 import { useDropSignature } from "../../hooks/drops/useDropSignature";
 import { useWave } from "../../hooks/useWave";
 
@@ -632,6 +631,28 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
+  const getUpdatedDropRequest = async (
+    requestBody: ApiCreateDropRequest
+  ): Promise<ApiCreateDropRequest | null> => {
+    console.log({ wave })
+    if (!wave.participation.signature_required) {
+      return requestBody;
+    }
+    const { success, signature } = await signDrop({
+      drop: requestBody,
+      termsOfService: wave.participation.terms,
+    });
+
+    if (!success || !signature) {
+      return null;
+    }
+
+    const updatedDropRequest = {
+      ...requestBody,
+      signature,
+    };
+    return updatedDropRequest;
+  };
   const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
       return;
@@ -663,23 +684,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         }),
         wave_id: wave.id,
         parts,
-        
       };
 
-      const { success, signature } = await signDrop({
-        drop: requestBody,
-        termsOfService: wave.participation.terms,
-      });
-
-      if (!success || !signature) {
+      const updatedDropRequest = await getUpdatedDropRequest(requestBody);
+      if (!updatedDropRequest) {
         setSubmitting(false);
         return;
       }
-
-      const updatedDropRequest = {
-        ...requestBody,
-        signature,
-      };
 
       const optimisticDrop = getOptimisticDrop(
         updatedDropRequest,
