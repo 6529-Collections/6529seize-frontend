@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { SubmissionStep, stepEnumToIndex } from "./types/Steps";
+import { SubmissionStep } from "./types/Steps";
 import ModalLayout from "./layout/ModalLayout";
-import Stepper from "./ui/Stepper";
 import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
@@ -126,12 +125,6 @@ const MemesArtSubmissionContainer: React.FC<
 
   return (
     <ModalLayout title="Submit Artwork to Memes" onCancel={onClose}>
-      {/* Stepper */}
-      <Stepper
-        currentStep={stepEnumToIndex(form.currentStep)}
-        totalSteps={Object.keys(stepComponents).length}
-      />
-
       {/* Submission Progress - Only shows when active */}
       <SubmissionProgress 
         phase={submissionPhase}

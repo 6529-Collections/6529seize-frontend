@@ -78,10 +78,11 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                   <div className="tw-hidden xl:tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0">
                     <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
                       <span
-                        className={`tw-text-md tw-font-semibold ${isPositive
+                        className={`tw-text-md tw-font-semibold ${
+                          isPositive
                             ? "tw-text-emerald-500"
                             : "tw-text-rose-500"
-                          } `}
+                        } `}
                       >
                         {formatNumberWithCommas(rating)}
                       </span>
@@ -95,8 +96,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         {topVoters.map((voter) => (
                           <Tippy
                             key={voter.profile.handle}
-                            content={`${voter.profile.handle
-                              } - ${formatNumberWithCommas(voter.rating)}`}
+                            content={`${
+                              voter.profile.handle
+                            } - ${formatNumberWithCommas(voter.rating)}`}
                           >
                             <Link
                               href={`/${voter.profile.handle}`}
@@ -132,15 +134,14 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 <div className="tw-text-md tw-text-iron-400 tw-line-clamp-3 tw-mt-2 xl:tw-mt-0">
                   {description}
                 </div>
-                
+
                 {/* Votes and stats section for mobile - visible only on mobile and hidden on xl+ */}
                 <div className="tw-flex xl:tw-hidden tw-items-center tw-justify-between tw-mt-3">
                   <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
                     <span
-                      className={`tw-text-md tw-font-semibold ${isPositive
-                          ? "tw-text-emerald-500"
-                          : "tw-text-rose-500"
-                        } `}
+                      className={`tw-text-md tw-font-semibold ${
+                        isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+                      } `}
                     >
                       {formatNumberWithCommas(rating)}
                     </span>
@@ -154,8 +155,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                       {topVoters.map((voter) => (
                         <Tippy
                           key={voter.profile.handle}
-                          content={`${voter.profile.handle
-                            } - ${formatNumberWithCommas(voter.rating)}`}
+                          content={`${
+                            voter.profile.handle
+                          } - ${formatNumberWithCommas(voter.rating)}`}
                         >
                           <Link
                             href={`/${voter.profile.handle}`}

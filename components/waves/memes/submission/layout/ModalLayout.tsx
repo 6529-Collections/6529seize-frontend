@@ -31,15 +31,18 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
           {/* X close button */}
           <motion.button
             onClick={onCancel}
-            className="tw-absolute tw-right-8 tw-top-8 tw-z-20 tw-flex tw-items-center tw-justify-center tw-size-8 tw-rounded-full tw-border-0 tw-bg-iron-800/60 desktop-hover:hover:tw-bg-iron-700/80 tw-text-iron-400 desktop-hover:hover:tw-text-iron-100 tw-transition-all"
+            className="tw-absolute tw-right-8 tw-top-8 tw-z-20 tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-100 tw-transition-all"
             aria-label="Close modal"
           >
-            <FontAwesomeIcon icon={faXmark} className="tw-size-4 tw-flex-shrink-0" />
+            <FontAwesomeIcon
+              icon={faXmark}
+              className="tw-size-6 tw-flex-shrink-0"
+            />
           </motion.button>
 
           <div className="tw-relative tw-z-10">
             {/* Header Section with bottom border */}
-            <div className="tw-mb-6 tw-pb-4 tw-border-b tw-border-iron-800/50">
+            <div className="tw-mb-6">
               <motion.h3
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -7,14 +7,14 @@ interface AgreementStepProps {
   readonly onContinue: () => void;
 }
 
-const AgreementStep: React.FC<AgreementStepProps> = ({ 
-  agreements, 
-  setAgreements, 
-  onContinue, 
+const AgreementStep: React.FC<AgreementStepProps> = ({
+  agreements,
+  setAgreements,
+  onContinue,
 }) => {
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
-      <div className="tw-text-iron-300 tw-text-sm">
+      <div className="tw-text-iron-300 tw-text-base">
         Before submitting your artwork to The Memes, please review and agree to
         the following terms:
       </div>
@@ -55,7 +55,6 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
           </div>
         </button>
       </div>
-
       <div className="tw-mt-4 tw-flex tw-justify-center">
         <PrimaryButton
           onClicked={onContinue}

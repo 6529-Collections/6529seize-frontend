@@ -10,7 +10,7 @@ const Stepper: React.FC<StepperProps> = ({
   totalSteps,
 }) => {
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-mb-8 tw-w-full tw-max-w-md tw-mx-auto">
+    <div className="tw-flex tw-items-center tw-justify-between tw-mb-8 tw-w-full tw-max-w-full">
       {Array.from({ length: totalSteps }).map((_, index) => (
         <React.Fragment key={index}>
           {/* Step circle */}
