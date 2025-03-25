@@ -28,7 +28,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
         {/* Title and Submit button */}
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
           <h1 className="tw-text-2xl tw-font-semibold tw-text-iron-100 tw-mb-0">
-            Weekly Rolling Wave (Long-Term)
+            {wave.name}
           </h1>
           <div className="tw-flex-shrink-0">
             <MyStreamWaveTabsMemeSubmit

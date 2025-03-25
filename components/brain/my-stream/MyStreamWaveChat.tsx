@@ -13,6 +13,8 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
 import { useLayout } from "./layout/LayoutContext";
+import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
+import { useWave } from "../../../hooks/useWave";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
@@ -24,7 +26,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const [searchParamsDone, setSearchParamsDone] = useState(false);
-
+  const { isMemesWave } = useWave(wave);
   // Handle URL parameters
   useEffect(() => {
     const dropParam = searchParams.get("serialNo");
@@ -115,6 +117,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
           />
         </CreateDropWaveWrapper>
       </div>
+      {/* Floating submission button */}
+      {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
     </div>
   );
 };
