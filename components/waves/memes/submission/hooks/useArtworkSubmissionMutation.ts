@@ -248,7 +248,8 @@ export function useArtworkSubmissionMutation() {
       });
     },
     onError: (error, variables) => {
-      const errorMsg = `Submission failed: ${error.message}`;
+      console.log(error);
+      const errorMsg = `Submission failed: ${error}`;
       updatePhase('error', variables.callbacks, errorMsg);
       
       setToast({
