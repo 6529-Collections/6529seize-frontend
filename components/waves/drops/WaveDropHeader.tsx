@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { cicToType, getTimeAgoShort } from "../../../helpers/Helpers";
+import { cicToType } from "../../../helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
@@ -53,14 +53,9 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               </Link>
             </p>
           </div>
-
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-            {getTimeAgoShort(drop.created_at)}
-          </p>
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-            {Time.millis(drop.created_at).toIsoTimeStringWithoutSeconds()}
+          <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+            {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
           </p>
         </div>
         {drop.drop_type === ApiDropType.Participatory && (

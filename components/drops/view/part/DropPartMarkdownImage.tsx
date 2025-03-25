@@ -142,6 +142,9 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                     src={src}
                     alt={alt}
                     className="tw-max-w-full tw-max-h-[calc(95vh-60px)] tw-object-contain"
+                    style={{
+                      pointerEvents: "auto",
+                    }}
                   />
                 </TransformComponent>
                 <Link href={src} target="_blank" rel="noopener noreferrer">

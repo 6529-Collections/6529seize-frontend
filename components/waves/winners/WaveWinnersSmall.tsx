@@ -8,13 +8,11 @@ import {
 } from "../../../hooks/useWaveDropsLeaderboard";
 import { AuthContext } from "../../auth/Auth";
 import Link from "next/link";
-import {
-  formatNumberWithCommas,
-  getTimeAgoShort,
-} from "../../../helpers/Helpers";
+import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
 import WaveDropContent from "../drops/WaveDropContent";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
+import { Time } from "../../../helpers/time";
 
 interface WaveWinnersSmallProps {
   readonly wave: ApiWave;
@@ -291,8 +289,8 @@ const WaveWinnerItem = memo<{
               </span>
             </Link>
             <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></span>
-            <span className="tw-text-sm tw-text-iron-400 tw-flex-shrink-0">
-              {getTimeAgoShort(drop.created_at)}
+            <span className="tw-text-xs tw-text-iron-400 tw-flex-shrink-0">
+              {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
             </span>
           </div>
         </div>

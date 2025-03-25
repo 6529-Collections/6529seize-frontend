@@ -145,6 +145,9 @@ function DropListItemContentMediaImage({ src }: { readonly src: string }) {
                     src={src}
                     alt="Full size drop media"
                     className="tw-max-w-full tw-max-h-[calc(95vh-60px)] tw-object-contain"
+                    style={{
+                      pointerEvents: "auto",
+                    }}
                   />
                 </TransformComponent>
                 <Link href={src} target="_blank" rel="noopener noreferrer">
