@@ -23,7 +23,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
 
-  const { isChatWave, isMemesWave } = useWave(wave);
+  const { isChatWave } = useWave(wave);
 
   // Track mount status to prevent post-unmount updates
   const mountedRef = useRef(true);
@@ -78,8 +78,6 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
         className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
         key={stableWaveKey}
       >
-
-
         {/* Don't render tab container for simple waves */}
         {breakpoint !== "S" && !isChatWave && <MyStreamWaveTabs wave={wave} />}
 
