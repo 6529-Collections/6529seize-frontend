@@ -1,4 +1,5 @@
 import React, { useRef, useCallback } from 'react';
+import { useDebounce } from 'react-use';
 import { NumberTraitProps } from './types';
 import { TraitWrapper } from './TraitWrapper';
 
@@ -82,9 +83,39 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
     }
   }, [field, traits, updateNumber, min, max, onBlur]);
   
-  // Handle change for increment/decrement buttons
+  // Store current input for debounce
+  const [debouncedValue, setDebouncedValue] = React.useState<string>('');
+  
+  // Update traits when debounced value changes
+  useDebounce(
+    () => {
+      if (debouncedValue !== '') {
+        let newValue = Number(debouncedValue);
+        if (!isNaN(newValue) && isFinite(newValue)) {
+          // Apply min/max constraints if provided
+          if (min !== undefined && newValue < min) {
+            newValue = min;
+          }
+          
+          if (max !== undefined && newValue > max) {
+            newValue = max;
+          }
+          
+          if (newValue !== (traits[field] as number)) {
+            updateNumber(field, newValue);
+          }
+        }
+      }
+    },
+    400, // 400ms is a good balance for typing pauses
+    [debouncedValue]
+  );
+  
+  // Handle change for typing and increment/decrement buttons
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    // For increment/decrement buttons, immediately update
+    setDebouncedValue(e.target.value);
+    
+    // For increment/decrement buttons, also immediately update
     if (e.target.value !== '') {
       let newValue = Number(e.target.value);
       if (!isNaN(newValue) && isFinite(newValue)) {

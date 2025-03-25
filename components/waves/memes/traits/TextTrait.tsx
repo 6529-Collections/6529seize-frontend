@@ -1,4 +1,5 @@
 import React, { useRef, useCallback, useMemo } from 'react';
+import { useDebounce } from 'react-use';
 import { TextTraitProps } from './types';
 import { TraitWrapper } from './TraitWrapper';
 
@@ -20,6 +21,25 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
 }) => {
   // Use a ref to track the input element
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Debounced update function - stores the current input value for use in the debounced function
+  const [debouncedValue, setDebouncedValue] = React.useState<string>('');
+  
+  // Update traits when debounced value changes
+  useDebounce(
+    () => {
+      if (debouncedValue !== '' && debouncedValue !== traits[field]) {
+        updateText(field, debouncedValue);
+      }
+    },
+    400, // 400ms is a good balance for typing pauses
+    [debouncedValue]
+  );
+  
+  // Handle input changes with debounce
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setDebouncedValue(e.target.value);
+  }, []);
   
   // Handle blur (when user finishes typing)
   const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
@@ -54,6 +74,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
         ref={inputRef}
         type="text"
         defaultValue={(traits[field] as string) || ''}
+        onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder || `Enter ${label.toLowerCase()}`}
         readOnly={readOnly}
