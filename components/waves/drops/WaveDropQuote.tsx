@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
-import { cicToType, getTimeAgoShort } from "../../../helpers/Helpers";
+import { cicToType } from "../../../helpers/Helpers";
 import Link from "next/link";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropPart } from "../../../generated/models/ApiDropPart";

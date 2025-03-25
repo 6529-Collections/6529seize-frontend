@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
+import { cicToType } from "../../../../helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";

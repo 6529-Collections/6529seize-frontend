@@ -1,7 +1,6 @@
 import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { getTimeAgoShort } from "../../../helpers/Helpers";
 import { WaveSmallLeaderboardItemOutcomes } from "../small-leaderboard/WaveSmallLeaderboardItemOutcomes";
 import { SingleWaveDropAuthor } from "./SingleWaveDropAuthor";
 import { Time } from "../../../helpers/time";

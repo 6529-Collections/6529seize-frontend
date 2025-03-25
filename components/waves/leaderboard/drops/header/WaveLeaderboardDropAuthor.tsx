@@ -1,7 +1,7 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 
-import { cicToType, getTimeAgoShort } from "../../../../../helpers/Helpers";
+import { cicToType } from "../../../../../helpers/Helpers";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,

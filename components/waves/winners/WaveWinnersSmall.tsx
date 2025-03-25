@@ -8,10 +8,7 @@ import {
 } from "../../../hooks/useWaveDropsLeaderboard";
 import { AuthContext } from "../../auth/Auth";
 import Link from "next/link";
-import {
-  formatNumberWithCommas,
-  getTimeAgoShort,
-} from "../../../helpers/Helpers";
+import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
 import WaveDropContent from "../drops/WaveDropContent";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
