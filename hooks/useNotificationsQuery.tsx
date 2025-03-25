@@ -60,7 +60,7 @@ export function useNotificationsQuery({
       if (pageParam) {
         params.id_less_than = String(pageParam);
       }
-      if (cause) {
+      if (cause?.length) {
         params.cause = cause.join(",");
       }
       return await commonApiFetch<TypedNotificationsResponse>({
