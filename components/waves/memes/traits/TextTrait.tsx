@@ -41,7 +41,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   }, [traits, field]);
   
   // Prepare input className
-  const inputClassName = useMemo(() => `tw-form-input tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+  const inputClassName = useMemo(() => `tw-form-input tw-w-full sm:tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
     ${
       readOnly
         ? "tw-bg-iron-950 tw-ring-iron-950 tw-opacity-80 tw-cursor-not-allowed tw-text-iron-500"

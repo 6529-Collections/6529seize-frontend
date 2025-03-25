@@ -10,25 +10,20 @@ interface FormSectionProps {
 
 /**
  * FormSection - A reusable component for creating form sections with titles
- * 
+ *
  * This component allows customizing the styling of the section, title,
  * and content areas through className props.
  */
-const FormSection: React.FC<FormSectionProps> = ({ 
-  title, 
+const FormSection: React.FC<FormSectionProps> = ({
+  title,
   children,
-  className = "tw-mt-6 tw-first:tw-mt-0",
   titleClassName = "tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-4",
-  contentClassName = ""
+  contentClassName = "",
 }) => {
   return (
-    <div className={className}>
-      <div className={titleClassName}>
-        {title}
-      </div>
-      <div className={contentClassName}>
-        {children}
-      </div>
+    <div>
+      <div className={titleClassName}>{title}</div>
+      <div className={contentClassName}>{children}</div>
     </div>
   );
 };

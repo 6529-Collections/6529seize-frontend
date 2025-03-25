@@ -76,18 +76,18 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
   return (
     <FormSection
       title="Artwork Details"
-      titleClassName="tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4"
+      titleClassName="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-2 sm:tw-mb-4"
     >
       <div className="tw-grid tw-grid-cols-1 tw-gap-4">
         <div className="tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors tw-ring-iron-800/5">
-          <div className="tw-flex tw-items-center tw-gap-x-6">
+          <div className="tw-flex sm:tw-items-center tw-gap-x-6 tw-flex-col sm:tw-flex-row tw-gap-y-1.5">
             <label
               htmlFor="field-title"
-              className="tw-w-1/3 tw-text-sm tw-font-medium tw-text-iron-300"
+              className="sm:tw-w-1/3 tw-text-sm tw-font-medium tw-text-iron-300"
             >
               Artwork Title<span className="tw-text-iron-300 tw-ml-1">*</span>
             </label>
-            <div className="tw-flex tw-flex-col tw-w-2/3">
+            <div className="tw-flex tw-flex-col sm:tw-w-2/3">
               <input
                 ref={titleRef}
                 id="field-title"
@@ -116,14 +116,14 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
           </div>
         </div>
         <div className="tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors tw-ring-iron-800/5">
-          <div className="tw-flex tw-items-start tw-gap-x-6">
+          <div className="tw-flex sm:tw-items-center tw-gap-x-6 tw-flex-col sm:tw-flex-row tw-gap-y-1.5">
             <label
               htmlFor="field-description"
-              className="tw-w-1/3 tw-text-sm tw-font-medium tw-mt-2 tw-text-iron-300"
+              className="sm:tw-w-1/3 tw-text-sm tw-font-medium sm:tw-mt-2 tw-text-iron-300"
             >
               Description<span className="tw-text-iron-300 tw-ml-1">*</span>
             </label>
-            <div className="tw-flex tw-flex-col tw-w-2/3">
+            <div className="tw-flex tw-flex-col sm:tw-w-2/3">
               <textarea
                 ref={descriptionRef}
                 id="field-description"

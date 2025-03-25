@@ -16,15 +16,15 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
   onContinue,
 }) => {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-6 tw-pb-6 lg:tw-pb-8">
+    <div className="tw-flex tw-flex-col tw-pb-6 lg:tw-pb-8">
       <div className="tw-text-iron-300 tw-text-base">
         Before submitting your artwork to The Memes, please review and agree to
         the following terms:
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-4 tw-bg-iron-900 tw-rounded-lg tw-p-5 tw-border tw-border-iron-800/50 tw-border-solid">
+      <div className="tw-mt-4 tw-flex tw-flex-col tw-bg-iron-900 tw-rounded-lg tw-p-3 lg:tw-p-5 tw-border tw-border-iron-800/50 tw-border-solid">
         {/* Terms content separate from checkbox for better readability */}
-        <div className="tw-text-sm tw-text-iron-300 tw-whitespace-pre-wrap tw-mb-4">
+        <div className="tw-text-sm tw-text-iron-300 tw-whitespace-pre-wrap">
           {wave.participation.terms}
         </div>
 
@@ -63,7 +63,7 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
           </span>
         </button>
       </div>
-      <div className="tw-flex tw-justify-center">
+      <div className="tw-mt-6 tw-flex tw-justify-center">
         <PrimaryButton
           onClicked={onContinue}
           loading={false}

@@ -124,20 +124,15 @@ const MemesArtSubmissionContainer: React.FC<
         setTraits={form.setTraits}
         isSubmitting={isSubmitting}
         submissionPhase={submissionPhase}
+        uploadProgress={uploadProgress}
+        fileInfo={fileInfo}
+        submissionError={submissionError}
       />
     ),
   };
 
   return (
     <ModalLayout title="Submit Artwork to Memes" onCancel={onClose}>
-      {/* Submission Progress - Only shows when active */}
-      <SubmissionProgress
-        phase={submissionPhase}
-        progress={uploadProgress}
-        fileInfo={fileInfo}
-        error={submissionError}
-      />
-
       {/* Step Content - Render the current step from the map */}
       {stepComponents[form.currentStep]}
     </ModalLayout>

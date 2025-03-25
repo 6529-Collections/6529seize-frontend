@@ -8,7 +8,7 @@ import { SectionProps } from "./types";
 const SectionComponent: React.FC<SectionProps> = ({ title, children }) => {
   return (
     <div>
-      <div className="tw-text-base tw-font-medium tw-text-iron-300 tw-mb-4">
+      <div className="tw-text-base tw-font-medium tw-text-iron-300 tw-mb-2 sm:tw-mb-4">
         {title}
       </div>
       {children}

@@ -93,6 +93,14 @@ module.exports = {
           '50%': {
             'background-position': '100% 50%'
           }
+        },
+        'fadeIn': {
+          '0%': { 
+            opacity: '0'
+          },
+          '100%': { 
+            opacity: '1'
+          }
         }
       },
       animation: {
@@ -100,7 +108,8 @@ module.exports = {
         'trophy-appear': 'trophy-appear 0.3s ease-out forwards',
         'gradient-shift': 'gradient-shift 8s ease infinite',
         'gradient-x': 'gradient-x 3s ease infinite',
-        'spin-slow': 'spin 15s linear infinite'
+        'spin-slow': 'spin 15s linear infinite',
+        'fadeIn': 'fadeIn 0.3s ease-out forwards'
       },
       backgroundSize: {
         'gradient-pos': '200% 200%',

@@ -49,7 +49,7 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(({
         defaultValue={(traits[field] as string) || ''}
         onChange={handleChange}
         onBlur={handleBlur}
-        className="tw-form-select tw-w-2/3 tw-bg-iron-900 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-rounded-lg tw-px-3 tw-py-3 
+        className="tw-form-select tw-w-full sm:tw-w-2/3 tw-bg-iron-900 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-rounded-lg tw-px-3 tw-py-3 
           tw-text-sm tw-text-iron-100 tw-cursor-pointer tw-transition-all tw-shadow-inner
           focus:tw-ring-1 focus:tw-ring-primary-400 hover:tw-ring-primary-400"
       >

@@ -5,7 +5,7 @@ import { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
 import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "../../MemesArtSubmissionTraits";
-import { SubmissionPhase } from "../ui/SubmissionProgress";
+import SubmissionProgress, { SubmissionPhase } from "../ui/SubmissionProgress";
 import ValidationSummary from "../ui/ValidationSummary";
 import { useTraitsValidation } from "../validation";
 
@@ -143,6 +143,10 @@ interface ArtworkStepProps {
   readonly isSubmitting?: boolean;
   readonly submissionPhase?: SubmissionPhase;
   readonly initialTraits?: TraitsData;
+  // Additional props for SubmissionProgress
+  readonly uploadProgress?: number;
+  readonly fileInfo?: { name: string; size: number } | null;
+  readonly submissionError?: string;
 }
 
 /**
@@ -166,6 +170,9 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   isSubmitting = false,
   submissionPhase = "idle",
   initialTraits,
+  uploadProgress = 0,
+  fileInfo = null,
+  submissionError,
 }) => {
   // Set up validation with initial empty touched fields to prevent errors on load
   const validation = useTraitsValidation(traits, initialTraits || traits);
@@ -306,43 +313,58 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 
       {/* Action Buttons - Fixed at bottom */}
       <div className="tw-sticky tw-bottom-0 tw-left-0 tw-w-full tw-bg-iron-950/80 tw-backdrop-blur-sm tw-py-4 tw-z-10">
-        <div className="tw-container tw-mx-auto tw-flex tw-items-center tw-justify-between">
-          {/* Cancel button - always visible, but disabled during upload/processing and hidden on success */}
-          {onCancel && submissionPhase !== 'success' ? (
-            <button
-              onClick={submissionPhase === 'uploading' || submissionPhase === 'processing' ? undefined : onCancel}
-              disabled={submissionPhase === 'uploading' || submissionPhase === 'processing'}
-              className="tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
-              type="button"
-            >
-              Cancel
-            </button>
-          ) : (
-            /* Keep this invisible div when button is not shown to maintain layout */
-            <div></div>
+        <div className="tw-container tw-mx-auto">
+          {/* Submission Progress - Only shown when active */}
+          {submissionPhase !== 'idle' && (
+            <div className="tw-mb-4">
+              <SubmissionProgress
+                phase={submissionPhase}
+                progress={uploadProgress}
+                fileInfo={fileInfo}
+                error={submissionError}
+              />
+            </div>
           )}
           
-          {/* Submit button */}
-          <div
-            className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}
-          >
-            <PrimaryButton
-              onClicked={handleSubmit}
-              loading={
-                isSubmitting &&
-                submissionPhase !== "success" &&
-                submissionPhase !== "error"
-              }
-              disabled={isSubmitDisabled}
-              title={getSubmitButtonTooltip(
-                isSubmitDisabled,
-                isFormComplete,
-                artworkUploaded,
-                traits
-              )}
+          {/* Action buttons row */}
+          <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
+            {/* Cancel button - always visible, but disabled during upload/processing and hidden on success */}
+            {onCancel && submissionPhase !== 'success' ? (
+              <button
+                onClick={submissionPhase === 'uploading' || submissionPhase === 'processing' ? undefined : onCancel}
+                disabled={submissionPhase === 'uploading' || submissionPhase === 'processing'}
+                className="tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                type="button"
+              >
+                Cancel
+              </button>
+            ) : (
+              /* Keep this invisible div when button is not shown to maintain layout */
+              <div></div>
+            )}
+            
+            {/* Submit button */}
+            <div
+              className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}
             >
-              {getButtonText()}
-            </PrimaryButton>
+              <PrimaryButton
+                onClicked={handleSubmit}
+                loading={
+                  isSubmitting &&
+                  submissionPhase !== "success" &&
+                  submissionPhase !== "error"
+                }
+                disabled={isSubmitDisabled}
+                title={getSubmitButtonTooltip(
+                  isSubmitDisabled,
+                  isFormComplete,
+                  artworkUploaded,
+                  traits
+                )}
+              >
+                {getButtonText()}
+              </PrimaryButton>
+            </div>
           </div>
         </div>
       </div>
