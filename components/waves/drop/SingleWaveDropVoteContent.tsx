@@ -100,7 +100,7 @@ export const SingleWaveDropVoteContent: React.FC<
       </div>
 
       {/* Stats row - just showing stats on the right */}
-      <div className="tw-flex tw-items-center tw-ml-11 tw-mt-3">
+      <div className="tw-flex tw-items-center tw-ml-11 tw-mt-2">
         <SingleWaveDropVoteStats
           currentRating={drop.context_profile_context?.rating ?? 0}
           maxRating={maxRating}

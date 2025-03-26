@@ -9,7 +9,6 @@ import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSecti
 import { SingleWaveDropInfoActions } from "./SingleWaveDropInfoActions";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImage } from "@fortawesome/free-regular-svg-icons";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
@@ -17,7 +16,6 @@ import { faCompress, faExpand } from "@fortawesome/free-solid-svg-icons";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import { WinnerBadge } from "./WinnerBadge";
-import { SingleWaveDropTime } from "./SingleWaveDropTime";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -51,34 +49,20 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
   return (
     <>
       <SingleWaveDropInfoContainer activeTab={activeTab}>
-        {/* Close button for desktop view */}
         <div className="tw-hidden lg:tw-block">
           <SingleWaveDropClose onClose={onClose} />
         </div>
-
-        {/* Content area with title, description and artwork */}
         <div className="tw-flex tw-flex-col">
-          {/* Title and rank badge side by side */}
           <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3 tw-px-6">
-            {/* Show either position badge or trophy-only based on winning context */}
-            {isWinner ? (
-              <WinnerBadge drop={drop} showBadge={true} />
-            ) : (
-              wave && <SingleWaveDropTime wave={wave} />
-            )}
-            {/* Title */}
+            {isWinner && <WinnerBadge drop={drop} showBadge={true} />}
             <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
               {title}
             </h3>
           </div>
-
-          {/* Votes and voters info right below the title */}
           <div className="tw-px-6 tw-pt-4 tw-pb-4">
             <SingleWaveDropVotes drop={drop} />
           </div>
-
           <div>
-            {/* Full width artwork with fullscreen toggle */}
             {artworkMedia && (
               <div className="tw-flex tw-justify-center">
                 <DropListItemContentMedia
@@ -90,11 +74,10 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             <div className="tw-px-6 tw-mt-4">
               <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
             </div>
-            <div className="tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-4 tw-mt-4">
+            <div>
               <SingleWaveDropInfoActions
                 drop={drop}
                 wave={wave}
-                showBadge={false}
                 showVotes={false}
               />
             </div>
@@ -141,7 +124,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             {/* Main artwork display */}
             <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
               <img
-                src={artworkMedia}
+                src={artworkMedia.url}
                 alt={title}
                 className="tw-max-w-full tw-max-h-full tw-object-contain"
               />
