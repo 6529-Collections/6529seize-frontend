@@ -2,6 +2,11 @@ import React from "react";
 
 interface TimePhaseStatusProps {
   readonly isCompleted: boolean;
+  readonly phaseType: "Dropping" | "Voting";
+}
+
+interface TimePhaseTitleProps {
+  readonly isCompleted: boolean;
   readonly isUpcoming: boolean;
   readonly isInProgress: boolean;
   readonly phaseType: "Dropping" | "Voting";
@@ -28,7 +33,7 @@ export const TimePhaseStatus: React.FC<TimePhaseStatusProps> = ({
 /**
  * Displays the title for a time phase based on its state
  */
-export const TimePhaseTitle: React.FC<TimePhaseStatusProps> = ({
+export const TimePhaseTitle: React.FC<TimePhaseTitleProps> = ({
   isCompleted,
   isUpcoming,
   isInProgress,
@@ -36,12 +41,9 @@ export const TimePhaseTitle: React.FC<TimePhaseStatusProps> = ({
 }) => {
   return (
     <h2 className="tw-text-sm md:tw-text-base tw-font-medium tw-text-white/90 tw-mb-0">
-      {isUpcoming &&
-        `${phaseType} Starts In`}
-      {isInProgress &&
-        `${phaseType} Ends In`}
-      {isCompleted &&
-        `${phaseType} Complete`}
+      {isUpcoming && `${phaseType} Starts In`}
+      {isInProgress && `${phaseType} Ends In`}
+      {isCompleted && `${phaseType} Complete`}
     </h2>
   );
 };

@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
 import { AuthContext } from "../../../auth/Auth";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
 

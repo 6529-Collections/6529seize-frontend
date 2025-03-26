@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";

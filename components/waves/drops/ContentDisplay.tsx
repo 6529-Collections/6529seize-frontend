@@ -1,5 +1,5 @@
 import React from "react";
-import { MediaItem, ProcessedContent } from "./media-utils";
+import { ProcessedContent } from "./media-utils";
 import ContentSegmentComponent from "./ContentSegmentComponent";
 import MediaThumbnail from "./MediaThumbnail";
 
@@ -15,7 +15,7 @@ interface ContentDisplayProps {
 export default function ContentDisplay({
   content,
   onReplyClick,
-  serialNo
+  serialNo,
 }: ContentDisplayProps) {
   const handleClick = () => {
     if (serialNo) {
@@ -28,21 +28,20 @@ export default function ContentDisplay({
       className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-flex tw-items-center tw-flex-wrap tw-gap-1 tw-line-clamp-2 lg:tw-line-clamp-1"
       onClick={handleClick}
     >
-      <span className="tw-line-clamp-2 lg:tw-line-clamp-1">{/* Render segments in their original order */}
+      <span className="tw-line-clamp-2 lg:tw-line-clamp-1">
+        {/* Render segments in their original order */}
         {content.segments.map((segment, i) => (
           <ContentSegmentComponent
             key={`segment-${i}`}
             segment={segment}
             index={i}
           />
-        ))}</span>
+        ))}
+      </span>
 
       {/* Render API media at the end */}
       {content.apiMedia.map((media, i) => (
-        <MediaThumbnail
-          key={`api-media-${i}`}
-          media={media}
-        />
+        <MediaThumbnail key={`api-media-${i}`} media={media} />
       ))}
     </span>
   );

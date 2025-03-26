@@ -4,7 +4,6 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import {
-  MediaItem,
   ProcessedContent,
   isVideoMimeType,
   processContent,

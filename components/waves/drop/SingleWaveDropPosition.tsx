@@ -15,7 +15,7 @@ const TrophyOnlyBadge: React.FC<{ rank: number }> = ({ rank }) => {
   // Colors for each rank (same as in WinnerDropBadge)
   let accentColor = "";
   let bgColor = "";
-  
+
   switch (rank) {
     case 1:
       accentColor = "#fbbf24"; // Gold
@@ -44,22 +44,25 @@ const TrophyOnlyBadge: React.FC<{ rank: number }> = ({ rank }) => {
       }}
     >
       <span className="tw-px-2 tw-py-1 tw-text-xs tw-flex tw-items-center">
-        <FontAwesomeIcon icon={faTrophy} className="tw-size-2.5 tw-flex-shrink-0" />
+        <FontAwesomeIcon
+          icon={faTrophy}
+          className="tw-size-2.5 tw-flex-shrink-0"
+        />
       </span>
     </div>
   );
 };
 
-export const SingleWaveDropPosition: React.FC<SingleWaveDropPositionProps> = ({ 
+export const SingleWaveDropPosition: React.FC<SingleWaveDropPositionProps> = ({
   rank,
   drop,
-  isFinalWinner = false
+  isFinalWinner = false,
 }) => {
   if (!rank) return null;
-  
+
   // Check if the drop has winning_context or manual override with isFinalWinner prop
-  const isWinner = isFinalWinner || (drop && drop.winning_context);
-  
+  const isWinner = isFinalWinner || drop?.winning_context;
+
   if (isWinner) {
     return (
       <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
@@ -67,10 +70,10 @@ export const SingleWaveDropPosition: React.FC<SingleWaveDropPositionProps> = ({
       </div>
     );
   }
-  
+
   return (
     <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
       <WinnerDropBadge rank={rank} decisionTime={null} />
     </div>
   );
-}; 
+};

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from "react";
 
 /**
  * Props for the useAccessibility hook
@@ -26,34 +26,36 @@ interface AccessibilityHandlers {
 
 /**
  * Hook for managing accessibility features
- * 
+ *
  * Provides keyboard navigation, touch handling, and focus management
  * to ensure the component is accessible.
- * 
+ *
  * @param props Hook props
  * @returns Object with ref and event handlers
  */
 export const useAccessibility = ({
   isActive,
   onAreaClick,
-  prefersReducedMotion = false
+  prefersReducedMotion = false,
 }: UseAccessibilityProps): AccessibilityHandlers => {
-  const touchAreaRef = useRef<HTMLDivElement | null>(null);
-  
   // Check for reduced motion preference if not provided
-  const detectedReducedMotion = 
-    typeof prefersReducedMotion !== 'undefined' ? prefersReducedMotion :
-    (typeof window !== 'undefined' ? 
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches : 
-      false);
-  
+  const detectedReducedMotion =
+    typeof prefersReducedMotion !== "undefined"
+      ? prefersReducedMotion
+      : typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false;
+
   // Keyboard event handler for accessibility
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>): void => {
-    if ((e.key === 'Enter' || e.key === ' ') && isActive) {
-      e.preventDefault();
-      onAreaClick();
-    }
-  }, [isActive, onAreaClick]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>): void => {
+      if ((e.key === "Enter" || e.key === " ") && isActive) {
+        e.preventDefault();
+        onAreaClick();
+      }
+    },
+    [isActive, onAreaClick]
+  );
 
   // Define touch event handlers
   const handleTouchStart = useCallback((): void => {
@@ -62,25 +64,25 @@ export const useAccessibility = ({
       // Any touch-specific visual feedback can be triggered here
     }
   }, [isActive, detectedReducedMotion]);
-  
+
   const handleTouchEnd = useCallback((): void => {
     // Reset visual feedback
     if (isActive && !detectedReducedMotion) {
       // Any touch-specific cleanup can be done here
     }
   }, [isActive, detectedReducedMotion]);
-  
+
   // Add touch event listeners for mobile devices
   useEffect(() => {
     return () => {
       // Cleanup if needed
     };
   }, [isActive, handleTouchStart, handleTouchEnd]);
-  
+
   return {
     handleKeyDown,
     handleTouchStart,
-    handleTouchEnd
+    handleTouchEnd,
   };
 };
 

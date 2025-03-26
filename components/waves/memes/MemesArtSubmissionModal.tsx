@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
-import { useClickAway, useKeyPressEvent } from "react-use";
+import { useKeyPressEvent } from "react-use";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import MemesArtSubmissionContainer from "./submission/MemesArtSubmissionContainer";
 
@@ -15,7 +15,7 @@ export const MemesArtSubmissionModal: React.FC<
   MemesArtSubmissionModalProps
 > = ({ isOpen, wave, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  
+
   // We won't use useClickAway since we have our own click handler on the backdrop
   useKeyPressEvent("Escape", () => onClose());
 

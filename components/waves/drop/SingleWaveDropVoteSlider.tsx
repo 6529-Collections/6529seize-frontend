@@ -107,9 +107,6 @@ export default function WaveDropVoteSlider({
 }: WaveDropVoteSliderProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [hoveredPreset, setHoveredPreset] = useState<number | null>(null);
-
-  const presetMarks = calculatePresetMarks(minValue, maxValue);
 
   const getTheme = (rank: number | null): SliderTheme => {
     if (rank === 1 || rank === 2 || rank === 3) {
@@ -123,18 +120,6 @@ export default function WaveDropVoteSlider({
   const handleSliderChange = (newValue: number) => {
     const transformedValue = transformFromLog(newValue, minValue, maxValue);
     setVoteValue(transformedValue);
-  };
-
-  const handlePresetClick = (percentage: number) => {
-    if (percentage < 0) {
-      const negativeRange = Math.abs(minValue);
-      const value = Math.round(-(negativeRange * Math.abs(percentage)) / 100);
-      setVoteValue(value);
-    } else {
-      const positiveRange = maxValue;
-      const value = Math.round((positiveRange * percentage) / 100);
-      setVoteValue(value);
-    }
   };
 
   const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;

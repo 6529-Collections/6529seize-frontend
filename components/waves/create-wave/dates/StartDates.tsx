@@ -7,7 +7,6 @@ import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { CREATE_WAVE_START_DATE_LABELS } from "../../../../helpers/waves/waves.constants";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { Time } from "../../../../helpers/time";
-import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
 import DateAccordion from "../../../common/DateAccordion";
 import TooltipIconButton from "../../../common/TooltipIconButton";
 

@@ -23,12 +23,12 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   // Convert rank to a number to ensure proper comparison
   const rankNumber =
     typeof effectiveRank === "string"
-      ? parseInt(effectiveRank as string, 10)
+      ? parseInt(effectiveRank, 10)
       : effectiveRank;
 
   // Format separate date and time for responsive display
   const dateTime = decisionTime ? new Date(decisionTime) : null;
-  
+
   // Date string (e.g. "Mar 21")
   const dateString = dateTime
     ? dateTime.toLocaleString(undefined, {
@@ -36,7 +36,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
         day: "numeric",
       })
     : null;
-  
+
   // Time string (e.g. "12:30 PM") - will only show on sm screens and up
   const timeString = dateTime
     ? dateTime.toLocaleString(undefined, {
@@ -106,7 +106,9 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
             <FontAwesomeIcon icon={faClock} className="tw-mr-1.5 tw-size-2.5" />
             {dateString}
             {/* Time only shows on sm breakpoint and up */}
-            {timeString && <span className="tw-hidden sm:tw-inline">, {timeString}</span>}
+            {timeString && (
+              <span className="tw-hidden sm:tw-inline">, {timeString}</span>
+            )}
           </span>
         </span>
       )}

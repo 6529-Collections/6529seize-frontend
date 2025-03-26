@@ -21,7 +21,7 @@ export default function WaveDropReply({
   maybeDrop,
   onReplyClick,
 }: WaveDropReplyProps) {
-  const { drop, content, isLoading, error } = useDropContent(
+  const { drop, content, isLoading } = useDropContent(
     dropId,
     dropPartId,
     maybeDrop
@@ -61,10 +61,10 @@ export default function WaveDropReply({
             >
               {drop.author.handle}
             </Link>
-            <ContentDisplay 
-              content={content} 
-              onReplyClick={onReplyClick} 
-              serialNo={drop?.serial_no} 
+            <ContentDisplay
+              content={content}
+              onReplyClick={onReplyClick}
+              serialNo={drop?.serial_no}
             />
           </p>
         </div>

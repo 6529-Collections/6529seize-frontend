@@ -116,7 +116,7 @@ export const useFileUploader = ({
         }
       }
     } else {
-      const errorMessage = result.error || 'Invalid file';
+      const errorMessage = result.error ?? 'Invalid file';
       
       // Dispatch error state
       dispatch({ type: 'PROCESSING_ERROR', payload: errorMessage });

@@ -18,8 +18,8 @@ const MetadataItem: React.FC<{
 
   // Skip empty values
   if (
-    (typeof value === "string" && !value) ||
-    (typeof value === "number" && value === 0) ||
+    (typeof value === "string" && !value) ??
+    (typeof value === "number" && value === 0) ??
     (typeof value === "boolean" && !value)
   ) {
     return null;
@@ -203,13 +203,13 @@ const extractTraitsFromMetadata = (
       if (booleanKeys.includes(traitKey as keyof TraitsData)) {
         const boolKey = traitKey as keyof TraitsData;
         const boolValue =
-          value.toLowerCase() === "true" ||
-          value === "1" ||
+          value.toLowerCase() === "true" ??
+          value === "1" ??
           value.toLowerCase() === "yes";
 
         // Safe assignment with type checking
         if (
-          typeof traits[boolKey] === "boolean" ||
+          typeof traits[boolKey] === "boolean" ??
           traits[boolKey] === undefined
         ) {
           (traits as Record<keyof TraitsData, any>)[boolKey] = boolValue;
@@ -229,11 +229,11 @@ const extractTraitsFromMetadata = (
       }
 
       if (traitKey) {
-        const numValue = Number(value) || 0;
+        const numValue = Number(value) ?? 0;
 
         // Safe assignment with type checking
         if (
-          typeof traits[traitKey] === "number" ||
+          typeof traits[traitKey] === "number" ??
           traits[traitKey] === undefined
         ) {
           (traits as Record<keyof TraitsData, any>)[traitKey] = numValue;
@@ -244,7 +244,7 @@ const extractTraitsFromMetadata = (
 
       // Safe assignment with type checking
       if (
-        typeof traits[textKey] === "string" ||
+        typeof traits[textKey] === "string" ??
         traits[textKey] === undefined
       ) {
         (traits as Record<keyof TraitsData, any>)[textKey] = value;
@@ -259,11 +259,11 @@ const extractTraitsFromMetadata = (
       if (["Power", "Wisdom", "Loki", "Speed"].includes(capitalizedPointType)) {
         const camelCaseKey =
           `points${capitalizedPointType}` as keyof TraitsData;
-        const pointValue = Number(value) || 0;
+        const pointValue = Number(value) ?? 0;
 
         // Safe assignment with type checking
         if (
-          typeof traits[camelCaseKey] === "number" ||
+          typeof traits[camelCaseKey] === "number" ??
           traits[camelCaseKey] === undefined
         ) {
           (traits as Record<keyof TraitsData, any>)[camelCaseKey] = pointValue;
@@ -291,43 +291,43 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       description: "",
 
       // Fields with fallbacks from extracted data or defaults
-      artist: extractedTraits.artist || "",
-      palette: extractedTraits.palette || "",
-      style: extractedTraits.style || "",
-      jewel: extractedTraits.jewel || "",
-      superpower: extractedTraits.superpower || "",
-      dharma: extractedTraits.dharma || "",
-      gear: extractedTraits.gear || "",
-      clothing: extractedTraits.clothing || "",
-      element: extractedTraits.element || "",
-      mystery: extractedTraits.mystery || "",
-      secrets: extractedTraits.secrets || "",
-      weapon: extractedTraits.weapon || "",
-      home: extractedTraits.home || "",
-      parent: extractedTraits.parent || "",
-      sibling: extractedTraits.sibling || "",
-      food: extractedTraits.food || "",
-      drink: extractedTraits.drink || "",
-      bonus: extractedTraits.boost || "",
-      boost: extractedTraits.boost || "",
-      punk6529: extractedTraits.punk6529 || false,
-      gradient: extractedTraits.gradient || false,
-      movement: extractedTraits.movement || false,
-      dynamic: extractedTraits.dynamic || false,
-      interactive: extractedTraits.interactive || false,
-      collab: extractedTraits.collab || false,
-      om: extractedTraits.om || false,
-      threeD: extractedTraits.threeD || false,
-      pepe: extractedTraits.pepe || false,
-      gm: extractedTraits.gm || false,
-      summer: extractedTraits.summer || false,
-      tulip: extractedTraits.tulip || false,
-      memeName: extractedTraits.memeName || "",
-      pointsPower: extractedTraits.pointsPower || 0,
-      pointsWisdom: extractedTraits.pointsWisdom || 0,
-      pointsLoki: extractedTraits.pointsLoki || 0,
-      pointsSpeed: extractedTraits.pointsSpeed || 0,
-      seizeArtistProfile: extractedTraits.seizeArtistProfile || "",
+      artist: extractedTraits.artist ?? "",
+      palette: extractedTraits.palette ?? "",
+      style: extractedTraits.style ?? "",
+      jewel: extractedTraits.jewel ?? "",
+      superpower: extractedTraits.superpower ?? "",
+      dharma: extractedTraits.dharma ?? "",
+      gear: extractedTraits.gear ?? "",
+      clothing: extractedTraits.clothing ?? "",
+      element: extractedTraits.element ?? "",
+      mystery: extractedTraits.mystery ?? "",
+      secrets: extractedTraits.secrets ?? "",
+      weapon: extractedTraits.weapon ?? "",
+      home: extractedTraits.home ?? "",
+      parent: extractedTraits.parent ?? "",
+      sibling: extractedTraits.sibling ?? "",
+      food: extractedTraits.food ?? "",
+      drink: extractedTraits.drink ?? "",
+      bonus: extractedTraits.boost ?? "",
+      boost: extractedTraits.boost ?? "",
+      punk6529: extractedTraits.punk6529 ?? false,
+      gradient: extractedTraits.gradient ?? false,
+      movement: extractedTraits.movement ?? false,
+      dynamic: extractedTraits.dynamic ?? false,
+      interactive: extractedTraits.interactive ?? false,
+      collab: extractedTraits.collab ?? false,
+      om: extractedTraits.om ?? false,
+      threeD: extractedTraits.threeD ?? false,
+      pepe: extractedTraits.pepe ?? false,
+      gm: extractedTraits.gm ?? false,
+      summer: extractedTraits.summer ?? false,
+      tulip: extractedTraits.tulip ?? false,
+      memeName: extractedTraits.memeName ?? "",
+      pointsPower: extractedTraits.pointsPower ?? 0,
+      pointsWisdom: extractedTraits.pointsWisdom ?? 0,
+      pointsLoki: extractedTraits.pointsLoki ?? 0,
+      pointsSpeed: extractedTraits.pointsSpeed ?? 0,
+      seizeArtistProfile: extractedTraits.seizeArtistProfile ?? "",
     };
 
     return finalTraits;
@@ -373,17 +373,17 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
     <div className="tw-w-full">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-3 tw-gap-2">
         {/* Always show first 2 items (changed from 4) */}
-        {traitItems.slice(0, 2).map((item, index) => (
-          <MetadataItem key={index} label={item.label} value={item.value} />
+        {traitItems.slice(0, 2).map((item) => (
+          <MetadataItem key={item.label} label={item.label} value={item.value} />
         ))}
 
         {/* Show more button or additional items */}
         {traitItems.length > 2 && (
           showAllTraits ? (
             <>
-              {traitItems.slice(2).map((item, index) => (
+              {traitItems.slice(2).map((item) => (
                 <MetadataItem
-                  key={`more-${index}`}
+                  key={item.label}
                   label={item.label}
                   value={item.value}
                 />

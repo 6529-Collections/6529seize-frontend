@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useState } from "react";
 import Link from "next/link";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
@@ -176,7 +176,7 @@ const DefaultWinnerDrop = ({
                 badge={
                   <WinnerDropBadge
                     rank={effectiveRank}
-                    decisionTime={decisionTime || null}
+                    decisionTime={decisionTime ?? null}
                   />
                 }
               />

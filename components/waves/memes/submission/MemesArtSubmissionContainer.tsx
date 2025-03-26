@@ -5,7 +5,7 @@ import AgreementStep from "./steps/AgreementStep";
 import ArtworkStep from "./steps/ArtworkStep";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
-import SubmissionProgress, { SubmissionPhase } from "./ui/SubmissionProgress";
+import { SubmissionPhase } from "./ui/SubmissionProgress";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 
 interface MemesArtSubmissionContainerProps {
