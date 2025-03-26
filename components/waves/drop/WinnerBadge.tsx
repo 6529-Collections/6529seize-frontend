@@ -14,7 +14,7 @@ export const WinnerBadge: React.FC<WinnerBadgeProps> = ({
 }) => {
   const { winningRank } = useDropInteractionRules(drop);
   const winningTime = drop.winning_context?.decision_time || null;
-
+  
   if (!winningRank || !showBadge) return null;
 
   return (

@@ -5,22 +5,30 @@ import { ApiDropType } from "../../../generated/models/ObjectSerializer";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { MemesSingleWaveDropContent } from "./MemesSingleWaveDropContent";
+import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+import { WinnerBadge } from "./WinnerBadge";
 
 interface SingleWaveDropInfoContentProps {
   readonly drop: ExtendedDrop | undefined;
 }
 
-export const SingleWaveDropInfoContent: React.FC<SingleWaveDropInfoContentProps> = ({
-  drop,
-}) => {
+export const SingleWaveDropInfoContent: React.FC<
+  SingleWaveDropInfoContentProps
+> = ({ drop }) => {
+  if (!drop) {
+    return null;
+  }
   // Check if this is a memes wave drop
-  const isMemes = drop ? isMemesWave(drop.wave.id) : false;
-  
+  const isMemes = isMemesWave(drop.wave.id);
+
   return (
     <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-4">
       <div className="tw-px-6">
         {drop?.drop_type === ApiDropType.Participatory && (
           <SingleWaveDropPosition rank={drop.rank} />
+        )}
+        {drop.drop_type === ApiDropType.Winner && (
+          <WinnerBadge drop={drop} showBadge={true} />
         )}
       </div>
 
@@ -35,4 +43,4 @@ export const SingleWaveDropInfoContent: React.FC<SingleWaveDropInfoContentProps>
       </div>
     </div>
   );
-}; 
+};
