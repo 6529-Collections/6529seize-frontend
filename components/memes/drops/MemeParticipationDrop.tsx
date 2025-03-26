@@ -4,8 +4,6 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import WaveDropMobileMenu from "../../waves/drops/WaveDropMobileMenu";
-// Import new components
 import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
 import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
@@ -14,6 +12,7 @@ import MemeDropArtwork from "./meme-participation-drop/MemeDropArtwork";
 import MemeDropVotingSection from "./meme-participation-drop/MemeDropVotingSection";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropTraits from "./MemeDropTraits";
+import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -61,8 +60,6 @@ export default function MemeParticipationDrop({
   const { canShowVote } = useDropInteractionRules(drop);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
 
-  const [longPressTriggered, setLongPressTriggered] = useState(false);
-  const [isSlideUp, setIsSlideUp] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const isMobile = useIsMobileDevice();
 
@@ -79,19 +76,13 @@ export default function MemeParticipationDrop({
 
   const borderClasses = getBorderClasses(drop, isActiveDrop);
 
-  const handleLongPress = useCallback(() => {
-    if (!isMobile) return;
-    setLongPressTriggered(true);
-    setIsSlideUp(true);
-  }, [isMobile]);
+
 
   const handleOnReply = useCallback(() => {
-    setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[0].part_id });
   }, [onReply, drop]);
 
   const handleOnQuote = useCallback(() => {
-    setIsSlideUp(false);
     onQuote({ drop, partId: drop.parts[0].part_id });
   }, [onQuote, drop]);
 
@@ -111,63 +102,62 @@ export default function MemeParticipationDrop({
             location === DropLocation.WAVE ? "tw-bg-iron-900" : "tw-bg-iron-950"
           }`}
         >
-          <div>
-            {/* Left column - Metadata */}
-            <div className="tw-p-4">
-              <MemeDropArtistInfo drop={drop} />
-              <div className="tw-flex tw-flex-col tw-gap-y-1 tw-mt-4">
-                <MemeDropHeader
-                  title={title}
-                  rank={drop.rank}
-                  decisionTime={drop.winning_context?.decision_time || null}
-                />
-                <MemeDropDescription description={description} />
+          <DropMobileMenuHandler
+            drop={drop}
+            showReplyAndQuote={showReplyAndQuote}
+            onReply={handleOnReply}
+            onQuote={handleOnQuote}
+          >
+            <>
+              {" "}
+              {/* Left column - Metadata */}
+              <div className="tw-p-4">
+                <MemeDropArtistInfo drop={drop} />
+                <div className="tw-flex tw-flex-col tw-gap-y-1 tw-mt-4">
+                  <MemeDropHeader
+                    title={title}
+                    rank={drop.rank}
+                    decisionTime={drop.winning_context?.decision_time || null}
+                  />
+                  <MemeDropDescription description={description} />
+                </div>
               </div>
-            </div>
-            {/* Artwork component */}
-            <MemeDropArtwork
-              artworkMedia={artworkMedia}
-              title={title}
-              onViewLarger={handleViewLarger}
-            />
-            {/* Traits component */}
-            <div className="tw-p-4">
-              <MemeDropTraits drop={drop} />
-            </div>
-            <div className="tw-px-4 tw-pb-4">
-              <MemeDropVoteStats
-                rating={drop.rating}
-                votingCreditType={drop.wave.voting_credit_type}
-                ratersCount={drop.raters_count}
-                topVoters={drop.top_raters || []}
+              {/* Artwork component */}
+              <MemeDropArtwork
+                artworkMedia={artworkMedia}
+                title={title}
+                onViewLarger={handleViewLarger}
               />
-            </div>
-          </div>
+              {/* Traits component */}
+              <div className="tw-p-4">
+                <MemeDropTraits drop={drop} />
+              </div>
+              <div className="tw-px-4 tw-pb-4">
+                <MemeDropVoteStats
+                  rating={drop.rating}
+                  votingCreditType={drop.wave.voting_credit_type}
+                  ratersCount={drop.raters_count}
+                  topVoters={drop.top_raters || []}
+                />
+              </div>
+            </>
+          </DropMobileMenuHandler>
 
           {/* Voting section component */}
           {canShowVote && <MemeDropVotingSection drop={drop} />}
 
           {/* Actions component (desktop only) */}
-          <MemeDropActions
-            drop={drop}
-            isMobile={isMobile}
-            showReplyAndQuote={showReplyAndQuote}
-            onReply={handleOnReply}
-            onQuote={handleOnQuote}
-          />
+          <div className="tw-absolute tw-right-4 tw-top-2">
+            <MemeDropActions
+              drop={drop}
+              isMobile={isMobile}
+              showReplyAndQuote={showReplyAndQuote}
+              onReply={handleOnReply}
+              onQuote={handleOnQuote}
+            />
+          </div>
         </div>
       </div>
-
-      {/* Mobile menu */}
-      <WaveDropMobileMenu
-        drop={drop}
-        isOpen={isSlideUp}
-        longPressTriggered={longPressTriggered}
-        showReplyAndQuote={showReplyAndQuote}
-        setOpen={setIsSlideUp}
-        onReply={handleOnReply}
-        onQuote={handleOnQuote}
-      />
     </div>
   );
 }

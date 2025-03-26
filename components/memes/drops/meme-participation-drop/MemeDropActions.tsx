@@ -20,13 +20,13 @@ export default function MemeDropActions({
   if (isMobile || !showReplyAndQuote) {
     return null;
   }
-  
+
   return (
     <WaveDropActions
-      drop={drop}
-      activePartIndex={0}
-      onReply={onReply}
-      onQuote={onQuote}
-    />
+        drop={drop}
+        activePartIndex={0}
+        onReply={onReply}
+        onQuote={onQuote}
+      />
   );
 }

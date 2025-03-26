@@ -205,12 +205,14 @@ const DefaultWinnerDrop = ({
           </div>
         </div>
         {!isMobile && showReplyAndQuote && (
-          <WaveDropActions
-            drop={drop}
-            activePartIndex={activePartIndex}
-            onReply={handleOnReply}
-            onQuote={handleOnQuote}
-          />
+          <div className="tw-absolute tw-right-0 tw-top-1">
+            <WaveDropActions
+              drop={drop}
+              activePartIndex={activePartIndex}
+              onReply={handleOnReply}
+              onQuote={handleOnQuote}
+            />
+          </div>
         )}
         <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-ml-[3.25rem] tw-mt-1.5">
           <div className="tw-flex tw-items-center tw-gap-x-2">
