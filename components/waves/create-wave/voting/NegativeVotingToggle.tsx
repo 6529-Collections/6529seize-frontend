@@ -1,14 +1,18 @@
 interface NegativeVotingToggleProps {
   readonly allowNegativeVotes: boolean;
   readonly onChange: (allowNegativeVotes: boolean) => void;
+  readonly isDisabled?: boolean;
 }
 
 export default function NegativeVotingToggle({
   allowNegativeVotes,
   onChange,
+  isDisabled = true,
 }: NegativeVotingToggleProps) {
   const handleToggle = () => {
-    onChange(!allowNegativeVotes);
+    if (!isDisabled) {
+      onChange(!allowNegativeVotes);
+    }
   };
 
   return (
@@ -19,6 +23,7 @@ export default function NegativeVotingToggle({
         </h3>
         <div className="tw-relative tw-inline-block tw-w-12 tw-align-middle tw-select-none">
           <input
+            disabled={isDisabled}
             type="checkbox"
             id="toggle-negative-votes"
             checked={allowNegativeVotes}
@@ -29,7 +34,9 @@ export default function NegativeVotingToggle({
           <label
             id="negative-votes-label"
             htmlFor="toggle-negative-votes"
-            className={`tw-block tw-overflow-hidden tw-h-6 tw-rounded-full tw-cursor-pointer ${
+            className={`tw-block tw-overflow-hidden tw-h-6 tw-rounded-full ${
+              isDisabled ? "tw-cursor-not-allowed tw-opacity-70" : "tw-cursor-pointer"
+            } ${
               allowNegativeVotes ? "tw-bg-blue-600" : "tw-bg-iron-700"
             }`}
             aria-hidden="true"
@@ -37,16 +44,16 @@ export default function NegativeVotingToggle({
             <span
               className={`tw-block tw-h-6 tw-w-6 tw-rounded-full tw-bg-white tw-transform tw-transition-transform ${
                 allowNegativeVotes ? "tw-translate-x-6" : "tw-translate-x-0"
-              }`}
+              } ${isDisabled ? "tw-opacity-70" : ""}`}
             ></span>
           </label>
         </div>
       </div>
-      <p className="tw-text-iron-400 tw-mb-4">
-        {allowNegativeVotes 
+      <p className={`tw-text-iron-400 tw-mb-4 ${isDisabled ? "tw-opacity-70" : ""}`}>
+        {allowNegativeVotes
           ? "Users can submit negative votes for drops. This allows for more nuanced voting but may lead to more contentious results."
-          : "Only positive votes are allowed. This encourages constructive voting and simplifies the voting dynamics."
-        }
+          : "Only positive votes are allowed. This encourages constructive voting and simplifies the voting dynamics."}
+        {isDisabled && " This setting cannot be changed."}
       </p>
     </div>
   );
