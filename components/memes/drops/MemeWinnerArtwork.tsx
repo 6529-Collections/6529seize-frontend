@@ -15,7 +15,7 @@ export default function MemeWinnerArtwork({
 }: MemeWinnerArtworkProps) {
   return (
     <div
-      className="tw-relative tw-bg-iron-950 tw-h-full tw-cursor-pointer"
+      className="tw-relative tw-bg-iron-950 tw-h-full tw-cursor-pointer tw-mx-[1px]"
       onClick={onViewLarger}
     >
       <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-950">

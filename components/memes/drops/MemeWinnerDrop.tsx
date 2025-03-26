@@ -45,7 +45,6 @@ export default function MemeWinnerDrop({
 
   // Get artwork media URL if available
   const artworkMedia = drop.parts.at(0)?.media?.at(0)?.url;
-  const decisionTime = drop.winning_context?.decision_time;
 
   const handleLongPress = useCallback(() => {
     if (!isMobile) return;
@@ -83,23 +82,13 @@ export default function MemeWinnerDrop({
             location === DropLocation.WAVE ? "tw-bg-iron-900" : "tw-bg-iron-950"
           } ${firstPlaceShadow}`}
         >
-          {/* Left column - Metadata */}
           <div className="tw-p-4">
-            {/* Header with metadata */}
-            <div className="tw-flex tw-flex-col">
-              <div className="tw-flex tw-flex-col">
-                {/* Rank and title in the same row */}
-                <MemeWinnerHeader title={title} decisionTime={decisionTime} />
-
-                {/* Description on its own row */}
-                <MemeWinnerDescription description={description} />
-              </div>
-
-              {/* Vote count and artist info on the last row */}
-              <div className="tw-flex tw-flex-col tw-gap-4">
-                {/* Artist info with CIC and level */}
-                <MemeWinnerArtistInfo drop={drop} />
-              </div>
+            <div className="tw-flex tw-flex-col tw-gap-4">
+              <MemeWinnerArtistInfo drop={drop} />
+            </div>
+            <div className="tw-flex tw-flex-col tw-mt-3">
+              <MemeWinnerHeader title={title} />
+              <MemeWinnerDescription description={description} />
             </div>
           </div>
 

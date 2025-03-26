@@ -74,7 +74,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
 
   return (
     <div
-      className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap -tw-mt-0.5"
+      className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap"
       style={{
         backgroundColor: bgColor,
         color: accentColor,
