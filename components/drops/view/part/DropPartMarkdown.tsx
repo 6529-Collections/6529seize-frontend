@@ -114,11 +114,29 @@ function DropPartMarkdown({
           const emojiRegex = /(:\w+:)/g;
           const parts = part.split(emojiRegex);
 
+          const isEmoji = (str: string): boolean => {
+            const emojiTextRegex =
+              /^(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|\uFE0F|\u200D)+$/;
+            return emojiTextRegex.test(str.trim());
+          };
+
+          const areAllPartsEmojis = parts
+            .filter((p) => !!p)
+            .every((part) => part.match(emojiRegex) || isEmoji(part));
+
           return parts.map((part) =>
             part.match(emojiRegex) ? (
-              <span key={getRandomObjectId()}>{renderEmoji(part)}</span>
+              <span key={getRandomObjectId()}>
+                {renderEmoji(part, areAllPartsEmojis)}
+              </span>
             ) : (
-              <span key={getRandomObjectId()}>{part}</span>
+              <span
+                key={getRandomObjectId()}
+                className={`${
+                  areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
+                }`}>
+                {part}
+              </span>
             )
           );
         }
@@ -161,7 +179,7 @@ function DropPartMarkdown({
     return content;
   };
 
-  const renderEmoji = (emojiProps: string) => {
+  const renderEmoji = (emojiProps: string, bigEmoji: boolean) => {
     const emojiId = emojiProps.replaceAll(":", "");
     const emoji = emojiMap
       .flatMap((cat) => cat.emojis)
@@ -172,7 +190,11 @@ function DropPartMarkdown({
     }
 
     return (
-      <img src={emoji.skins[0].src} alt={emojiId} className="emoji-node" />
+      <img
+        src={emoji.skins[0].src}
+        alt={emojiId}
+        className={`${bigEmoji ? "emoji-node-big" : "emoji-node"}`}
+      />
     );
   };
 

@@ -27,7 +27,7 @@ export default function NextGenAdmin() {
     { display: "Admin" },
   ];
   setTitle({
-    title: "NextGen Admin | 6529 SEIZE",
+    title: "NextGen Admin | 6529.io",
   });
 
   return (
@@ -35,13 +35,13 @@ export default function NextGenAdmin() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="NextGen Admin | 6529 SEIZE" />
+        <meta name="description" content="NextGen Admin | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/nextgen/admin`}
         />
         <meta property="og:title" content="NextGen Admin" />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/nextgen.png`}

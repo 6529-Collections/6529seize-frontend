@@ -27,7 +27,7 @@ export default function MyStreamLayout({
     { display: "My Stream" },
   ];
 
-  useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
+  useEffect(() => setTitle({ title: "My Stream | 6529.io" }), []);
 
   const capacitor = useCapacitor();
   let containerClassName = `lg:tw-pt-4 tw-relative tw-flex tw-flex-col lg:tw-h-full lg:tw-flex-1 tailwind-scope`;
@@ -42,7 +42,7 @@ export default function MyStreamLayout({
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="My Stream | 6529 SEIZE" />
+        <meta name="description" content="My Stream | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/my-stream`}
@@ -50,9 +50,9 @@ export default function MyStreamLayout({
         <meta property="og:title" content="My Stream" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <style>{`
         body {
           overflow: hidden !important;

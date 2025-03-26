@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const S3_EMOJI_URL =
-  "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json";
+  // "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json";
+  "/emoji-list.json";
 
 interface Emoji {
   id: string;

@@ -17,7 +17,7 @@ export default function Buidl() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "BUIDL | 6529 SEIZE",
+      title: "BUIDL | 6529.io",
     });
   }, []);
 
@@ -31,16 +31,16 @@ export default function Buidl() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="BUIDL | 6529 SEIZE" />
+        <meta name="description" content="BUIDL | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/buidl`}
         />
         <meta property="og:title" content="BUIDL" />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
 

@@ -31,7 +31,7 @@ export function SharedHead(
   const pageProps = props.props;
   const pagenameFull = `${pageProps.name}${
     props.isDistribution ? " Distribution" : ""
-  } | 6529 SEIZE`;
+  } | 6529.io`;
 
   useEffect(() => {
     setTitle({
@@ -50,11 +50,11 @@ export function SharedHead(
       />
       <meta property="og:title" content={pageProps.name} />
       <meta property="og:image" content={pageProps.image} />
-      <meta property="og:description" content="6529 SEIZE" />
+      <meta property="og:description" content="6529.io" />
       <meta name="twitter:card" content={pagenameFull} />
       <meta name="twitter:image:alt" content={pageProps.name} />
       <meta name="twitter:title" content={pageProps.name} />
-      <meta name="twitter:description" content="6529 SEIZE" />
+      <meta name="twitter:description" content="6529.io" />
       <meta name="twitter:image" content={pageProps.image} />
     </Head>
   );
@@ -71,7 +71,7 @@ export async function getSharedServerSideProps(req: any, contract: string) {
   const response = await fetchUrl(
     `${process.env.API_ENDPOINT}/api/${urlPath}?contract=${contract}&id=${id}`
   );
-  let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
+  let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
   if (response?.data?.length > 0) {
     name = `${response.data[0].name} | ${name}`;
     if (response.data[0].thumbnail) {

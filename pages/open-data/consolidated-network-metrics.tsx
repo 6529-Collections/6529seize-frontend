@@ -29,7 +29,7 @@ export default function ConsolidatedCommunityMetricsDownloads() {
 
   useEffect(() => {
     setTitle({
-      title: "Consolidated Network Metrics Downloads | 6529 SEIZE",
+      title: "Consolidated Network Metrics Downloads | 6529.io",
     });
   }, []);
 
@@ -40,7 +40,7 @@ export default function ConsolidatedCommunityMetricsDownloads() {
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content="Consolidated Network Metrics Downloads | 6529 SEIZE"
+          content="Consolidated Network Metrics Downloads | 6529.io"
         />
         <meta
           property="og:url"
@@ -50,10 +50,10 @@ export default function ConsolidatedCommunityMetricsDownloads() {
           property="og:title"
           content={`Consolidated Network Metrics Downloads`}
         />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
 

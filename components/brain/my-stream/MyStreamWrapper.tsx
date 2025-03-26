@@ -8,7 +8,10 @@ import {
   useMyStreamQuery,
   usePollingQuery,
 } from "../../../hooks/useMyStreamQuery";
-import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
+import {
+  ActiveDropAction,
+  ActiveDropState,
+} from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 
@@ -83,7 +86,7 @@ const MyStreamWrapper: React.FC = () => {
 
   useEffect(() => {
     setTitle({
-      title: haveNewItems ? "New Stream Items Available | 6529 SEIZE" : null,
+      title: haveNewItems ? "New Stream Items Available | 6529.io" : null,
       type: TitleType.MY_STREAM,
     });
 
@@ -128,8 +131,7 @@ const MyStreamWrapper: React.FC = () => {
     <BrainContent
       activeDrop={activeDrop}
       onCancelReplyQuote={onCancelReplyQuote}
-      waveId={serialisedWaveId ?? undefined}
-    >
+      waveId={serialisedWaveId ?? undefined}>
       {component}
     </BrainContent>
   );

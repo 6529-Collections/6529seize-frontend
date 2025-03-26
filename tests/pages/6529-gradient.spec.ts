@@ -12,10 +12,10 @@ test.describe("6529 Gradient Page", () => {
       expect.stringContaining("6529 Gradient")
     );
 
-    // Check og:description meta tag contains "6529 SEIZE"
+    // Check og:description meta tag contains "6529.io"
     await expect(
       page.locator('meta[property="og:description"]')
-    ).toHaveAttribute("content", expect.stringContaining("6529 SEIZE"));
+    ).toHaveAttribute("content", expect.stringContaining("6529.io"));
 
     // Check og:image meta tag contains "gradients"
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
@@ -166,9 +166,9 @@ test.describe("Individual Gradient Page", () => {
       expect.stringMatching(/.+/)
     );
 
-    // Check og:description meta tag contains "6529 SEIZE"
+    // Check og:description meta tag contains "6529.io"
     await expect(
       page.locator('meta[property="og:description"]')
-    ).toHaveAttribute("content", expect.stringContaining("6529 SEIZE"));
+    ).toHaveAttribute("content", expect.stringContaining("6529.io"));
   });
 });

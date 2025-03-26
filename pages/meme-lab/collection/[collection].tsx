@@ -30,7 +30,7 @@ export default function MemeLabIndex(props: any) {
     { display: "Collections", href: "/meme-lab?sort=collections" },
     { display: pageProps.collection.replaceAll("-", " ") },
   ]);
-  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
+  const pagenameFull = `${pageProps.name} | 6529.io`;
 
   useEffect(() => {
     setTitle({
@@ -51,16 +51,16 @@ export default function MemeLabIndex(props: any) {
         <meta property="og:title" content={pageProps.name} />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta name="twitter:card" content={pagenameFull} />
         <meta name="twitter:image:alt" content={pageProps.name} />
         <meta name="twitter:title" content={pageProps.name} />
-        <meta name="twitter:description" content="6529 SEIZE" />
+        <meta name="twitter:description" content="6529.io" />
         <meta
           name="twitter:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
 

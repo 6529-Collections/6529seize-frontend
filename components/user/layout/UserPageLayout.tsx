@@ -25,7 +25,7 @@ const Header = dynamic(() => import("../../header/Header"), {
 });
 
 const DEFAULT_IMAGE =
-  "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_2.png";
+  "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/6529io.png";
 
 export default function UserPageLayout({
   profile: initialProfile,
@@ -72,7 +72,7 @@ export default function UserPageLayout({
     return formatAddress(handleOrWallet);
   };
 
-  const pagenameFull = `${getTitle()} | 6529 SEIZE`;
+  const pagenameFull = `${getTitle()} | 6529.io`;
   useEffect(() => {
     setTitle({
       title: pagenameFull,
@@ -92,7 +92,7 @@ export default function UserPageLayout({
   );
   descriptionArray.push(`Cards: ${formatNumberWithCommas(profile.balance)}`);
 
-  descriptionArray.push("6529 SEIZE");
+  descriptionArray.push("6529.io");
 
   const mainAddress =
     profile.profile?.primary_wallet ?? handleOrWallet.toLowerCase();

@@ -21,7 +21,7 @@ export default function TheMemesPage() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "NFT Activity | 6529 SEIZE",
+      title: "NFT Activity | 6529.io",
     });
   }, []);
 
@@ -35,16 +35,16 @@ export default function TheMemesPage() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="NFT Activity | 6529 SEIZE" />
+        <meta name="description" content="NFT Activity | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/nft-activity`}
         />
         <meta property="og:title" content="NFT Activity" />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
 

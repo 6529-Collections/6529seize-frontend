@@ -1,4 +1,4 @@
-import { test, expect } from '../testHelpers';
+import { test, expect } from "../testHelpers";
 
 test.describe("Home Page", () => {
   test.beforeEach(async ({ page }) => {
@@ -6,7 +6,7 @@ test.describe("Home Page", () => {
   });
 
   test("should display the Latest Drop section", async ({ page }) => {
-    await expect(page).toHaveTitle("6529 SEIZE");
+    await expect(page).toHaveTitle("6529.io");
 
     const heading = page.locator("h1", { hasText: "Latest Drop" });
     await expect(heading).toBeVisible();

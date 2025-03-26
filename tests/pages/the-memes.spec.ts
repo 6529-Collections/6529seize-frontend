@@ -6,7 +6,7 @@ test.describe("The Memes Page", () => {
   });
 
   test("should load with correct title and heading", async ({ page }) => {
-    await expect(page).toHaveTitle("The Memes | 6529 SEIZE");
+    await expect(page).toHaveTitle("The Memes | 6529.io");
 
     const heading = page.locator("h1", { hasText: "The Memes" });
     await expect(heading).toBeVisible();

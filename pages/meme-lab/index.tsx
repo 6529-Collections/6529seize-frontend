@@ -22,7 +22,7 @@ export default function MemeLab() {
 
   useEffect(() => {
     setTitle({
-      title: "Meme Lab | 6529 SEIZE",
+      title: "Meme Lab | 6529.io",
     });
   }, []);
 
@@ -38,13 +38,13 @@ export default function MemeLab() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Meme Lab | 6529 SEIZE" />
+        <meta name="description" content="Meme Lab | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/meme-lab`}
         />
         <meta property="og:title" content="Meme Lab" />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/meme-lab.jpg`}
