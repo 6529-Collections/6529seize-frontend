@@ -1,5 +1,4 @@
 import React from "react";
-import useCapacitor from "../../../hooks/useCapacitor";
 import BrainLeftSidebarSearchWave from "../left-sidebar/search-wave/BrainLeftSidebarSearchWave";
 import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
 import { useLayout } from "../my-stream/layout/LayoutContext";
@@ -11,7 +10,6 @@ interface BrainMobileWavesProps {
 const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
   activeWaveId,
 }) => {
-  const capacitor = useCapacitor();
   const { mobileWavesViewStyle } = useLayout();
 
   // We'll use the mobileWavesViewStyle for capacitor spacing

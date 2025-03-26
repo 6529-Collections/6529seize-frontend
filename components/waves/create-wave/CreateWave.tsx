@@ -161,7 +161,6 @@ export default function CreateWave({
         data_key: meta.data_key,
         data_value: meta.data_value,
       })),
-      // TODO: fix it
       signature: null,
     };
 

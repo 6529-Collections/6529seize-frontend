@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import useWavesList from "../../../../hooks/useWavesList";
 import { useRouter } from "next/router";
 import UnifiedWavesList from "./UnifiedWavesList";

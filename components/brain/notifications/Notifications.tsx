@@ -10,7 +10,6 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import BrainContentInput from "../content/input/BrainContentInput";
 import { FeedScrollContainer } from "../feed/FeedScrollContainer";
 import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
-import useCapacitor from "../../../hooks/useCapacitor";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import NotificationsCauseFilter, {
@@ -22,7 +21,6 @@ export default function Notifications() {
     useContext(AuthContext);
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const capacitor = useCapacitor();
   const { notificationsViewStyle } = useLayout();
 
   const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(

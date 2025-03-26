@@ -334,7 +334,6 @@ const CreateDropWrapper = forwardRef<
           mentioned_users: drop?.mentioned_users ?? [],
           referenced_nfts: drop?.referenced_nfts ?? [],
           metadata,
-          // TODO: fix it
           signature: null,
         };
         setDrop(currentDrop);
@@ -375,7 +374,6 @@ const CreateDropWrapper = forwardRef<
         mentioned_users: allMentions,
         referenced_nfts: allNfts,
         metadata,
-        // TODO: fix it
         signature: null,
       };
       currentDrop.parts.push({

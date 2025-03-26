@@ -41,41 +41,42 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
 
   const isRankWave = wave.wave.type === ApiWaveType.Rank;
-  const { voting: { isCompleted }, decisions: { firstDecisionDone } } = useWaveTimers(wave);
-  
+  const {
+    voting: { isCompleted },
+    decisions: { firstDecisionDone },
+  } = useWaveTimers(wave);
+
   // Handle tab validity when wave state changes
   useEffect(() => {
+    const isLeaderboardAndVotingEnded =
+      activeTab === SidebarTab.LEADERBOARD && isCompleted;
+    const isWinnersAndFirstDecisionNotPassed =
+      activeTab === SidebarTab.WINNERS && !firstDecisionDone;
     // If on Leaderboard tab and voting has ended, switch to About
-    if (activeTab === SidebarTab.LEADERBOARD && isCompleted) {
-      setActiveTab(SidebarTab.ABOUT);
-    }
-    // If on Winners tab and first decision hasn't passed, switch to About
-    else if (activeTab === SidebarTab.WINNERS && !firstDecisionDone) {
+    if (isLeaderboardAndVotingEnded || isWinnersAndFirstDecisionNotPassed) {
       setActiveTab(SidebarTab.ABOUT);
     }
   }, [isCompleted, firstDecisionDone, activeTab, setActiveTab]);
 
   // Generate tab options based on wave state
   const options = useMemo(() => {
-    const tabs: TabOption[] = [
-      { key: SidebarTab.ABOUT, label: "About" },
-    ];
-    
+    const tabs: TabOption[] = [{ key: SidebarTab.ABOUT, label: "About" }];
+
     // Show Leaderboard tab always except when voting has ended
     if (!isCompleted) {
       tabs.push({ key: SidebarTab.LEADERBOARD, label: "Leaderboard" });
     }
-    
+
     // Show Winners tab if first decision has passed
     if (firstDecisionDone) {
       tabs.push({ key: SidebarTab.WINNERS, label: "Winners" });
     }
-    
+
     tabs.push(
       { key: SidebarTab.TOP_VOTERS, label: "Voters" },
       { key: SidebarTab.ACTIVITY_LOG, label: "Activity" }
     );
-    
+
     return tabs;
   }, [isCompleted, firstDecisionDone]);
 

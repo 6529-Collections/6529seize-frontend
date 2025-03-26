@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import { BrainLeftSidebarViewChange } from "./BrainLeftSidebarViewChange";
 import BrainLeftSidebarSearchWave from "./search-wave/BrainLeftSidebarSearchWave";
 import BrainLeftSidebarWaves from "./waves/BrainLeftSidebarWaves";

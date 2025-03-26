@@ -81,12 +81,16 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     if (!wave) return;
 
+    const isInLeaderboardAndVotingHasEnded =
+      activeView === BrainView.LEADERBOARD && isCompleted;
+    const isInWinnersAndFirstDecisionHasntPassed =
+      activeView === BrainView.WINNERS && !firstDecisionDone;
+
     // If on Leaderboard tab and voting has ended, switch to Default
-    if (activeView === BrainView.LEADERBOARD && isCompleted) {
-      setActiveView(BrainView.DEFAULT);
-    }
-    // If on Winners tab and first decision hasn't passed, switch to Default
-    else if (activeView === BrainView.WINNERS && !firstDecisionDone) {
+    if (
+      isInLeaderboardAndVotingHasEnded ||
+      isInWinnersAndFirstDecisionHasntPassed
+    ) {
       setActiveView(BrainView.DEFAULT);
     }
   }, [wave, isCompleted, firstDecisionDone, activeView]);

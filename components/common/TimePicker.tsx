@@ -50,6 +50,25 @@ export default function TimePicker({
     return false;
   };
 
+  const onHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    if (isNaN(val)) return;
+    const newHours = isPm ? (val === 12 ? 12 : val + 12) : val === 12 ? 0 : val;
+
+    if (!isTimeDisabled(newHours, minutes)) {
+      onTimeChange(newHours, minutes);
+    }
+  };
+
+  const onMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    if (isNaN(val)) return;
+
+    if (!isTimeDisabled(hours, val)) {
+      onTimeChange(hours, val);
+    }
+  }
+
   return (
     <div className="tw-py-4 tw-relative tw-rounded-lg tw-bg-iron-800/60 tw-shadow-md tw-ring-1 tw-ring-iron-700/50">
       <div className="tw-px-5">
@@ -61,21 +80,7 @@ export default function TimePicker({
                 min="1"
                 max="12"
                 value={displayHours}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  if (isNaN(val)) return;
-                  const newHours = isPm
-                    ? val === 12
-                      ? 12
-                      : val + 12
-                    : val === 12
-                    ? 0
-                    : val;
-
-                  if (!isTimeDisabled(newHours, minutes)) {
-                    onTimeChange(newHours, minutes);
-                  }
-                }}
+                onChange={onHoursChange}
                 className="tw-w-full tw-bg-[#2A2A33] tw-border-0 tw-text-white tw-rounded-lg tw-p-2 tw-ring-1 tw-ring-iron-700/30 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
                 placeholder="HH"
               />
@@ -87,14 +92,7 @@ export default function TimePicker({
                 min="0"
                 max="59"
                 value={minutes}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  if (isNaN(val)) return;
-
-                  if (!isTimeDisabled(hours, val)) {
-                    onTimeChange(hours, val);
-                  }
-                }}
+                onChange={onMinutesChange}
                 className="tw-w-full tw-bg-[#2A2A33] tw-border-0 tw-text-white tw-rounded-lg tw-p-2 tw-ring-1 tw-ring-iron-700/30 focus:tw-ring-primary-400 focus:tw-outline-none tw-transition-all tw-duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none"
                 placeholder="MM"
               />

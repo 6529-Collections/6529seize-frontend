@@ -481,8 +481,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.headerSpace
   ]);
 
-  // Create context value
-  const contextValue: LayoutContextType = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo<LayoutContextType>(() => ({
     spaces,
     registerRef,
     contentContainerStyle,
@@ -495,7 +495,20 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     mobileWavesViewStyle,
     mobileAboutViewStyle,
     singleDropViewStyle
-  };
+  }), [
+    spaces,
+    registerRef,
+    contentContainerStyle,
+    waveViewStyle,
+    leaderboardViewStyle,
+    winnersViewStyle,
+    outcomeViewStyle,
+    notificationsViewStyle,
+    feedViewStyle,
+    mobileWavesViewStyle,
+    mobileAboutViewStyle,
+    singleDropViewStyle
+  ]);
 
   return (
     <LayoutContext.Provider value={contextValue}>

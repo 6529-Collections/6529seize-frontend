@@ -1,7 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { MyStreamWaveTab } from '../../types/waves.types';
-import { ApiWave } from '../../generated/models/ApiWave';
-import { ApiWaveType } from '../../generated/models/ApiWaveType';
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",
@@ -34,7 +32,7 @@ const ContentTabContext = createContext<ContentTabContextType>({
 
 // Export a provider component
 export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activeContentTab, setActiveContentTabRaw] = useState<MyStreamWaveTab>(MyStreamWaveTab.CHAT);
+  const [activeContentTabRaw, setActiveContentTabRaw] = useState<MyStreamWaveTab>(MyStreamWaveTab.CHAT);
   const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([MyStreamWaveTab.CHAT]);
 
   // Function to determine which tabs are available based on wave state
@@ -44,7 +42,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       setAvailableTabs([MyStreamWaveTab.CHAT]);
       
       // If current tab is not CHAT, switch to it
-      if (activeContentTab !== MyStreamWaveTab.CHAT) {
+      if (activeContentTabRaw !== MyStreamWaveTab.CHAT) {
         setActiveContentTabRaw(MyStreamWaveTab.CHAT);
       }
       return;
@@ -57,7 +55,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       setAvailableTabs([MyStreamWaveTab.CHAT]);
       
       // If current tab is not CHAT, switch to it
-      if (activeContentTab !== MyStreamWaveTab.CHAT) {
+      if (activeContentTabRaw !== MyStreamWaveTab.CHAT) {
         setActiveContentTabRaw(MyStreamWaveTab.CHAT);
       }
       return;
@@ -79,7 +77,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       setAvailableTabs(tabs);
       
       // Only switch if the current tab is not available
-      if (!tabs.includes(activeContentTab)) {
+      if (!tabs.includes(activeContentTabRaw)) {
         setActiveContentTabRaw(MyStreamWaveTab.CHAT);
       }
       
@@ -106,7 +104,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
     setAvailableTabs(tabs);
     
     // If current tab is no longer available, switch to a default available tab
-    if (!tabs.includes(activeContentTab)) {
+    if (!tabs.includes(activeContentTabRaw)) {
       // Prefer to switch to LEADERBOARD if available, otherwise CHAT
       if (tabs.includes(MyStreamWaveTab.LEADERBOARD)) {
         setActiveContentTabRaw(MyStreamWaveTab.LEADERBOARD);
@@ -114,7 +112,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
         setActiveContentTabRaw(MyStreamWaveTab.CHAT);
       }
     }
-  }, [activeContentTab]);
+  }, [activeContentTabRaw]);
 
   // Wrapper for setActiveContentTab that validates the tab
   const setActiveContentTab = useCallback((tab: MyStreamWaveTab) => {
@@ -127,13 +125,16 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
     }
   }, [availableTabs]);
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    activeContentTab: activeContentTabRaw,
+    setActiveContentTab,
+    availableTabs,
+    updateAvailableTabs
+  }), [activeContentTabRaw, setActiveContentTab, availableTabs, updateAvailableTabs]);
+
   return (
-    <ContentTabContext.Provider value={{ 
-      activeContentTab, 
-      setActiveContentTab,
-      availableTabs,
-      updateAvailableTabs
-    }}>
+    <ContentTabContext.Provider value={contextValue}>
       {children}
     </ContentTabContext.Provider>
   );

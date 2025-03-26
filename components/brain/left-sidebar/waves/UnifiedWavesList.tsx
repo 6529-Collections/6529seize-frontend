@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { EnhancedWave } from "../../../../hooks/useWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
-import BrainLeftSidebarCreateAWaveButton from "../BrainLeftSidebarCreateAWaveButton";
 import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";

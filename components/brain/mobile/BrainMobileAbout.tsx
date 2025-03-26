@@ -8,7 +8,6 @@ import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import BrainRightSidebarContent from "../right-sidebar/BrainRightSidebarContent";
 import BrainRightSidebarFollowers from "../right-sidebar/BrainRightSidebarFollowers";
-import useCapacitor from "../../../hooks/useCapacitor";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 
 interface BrainMobileAboutProps {
@@ -35,7 +34,6 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
   });
 
   const [mode, setMode] = useState<Mode>(Mode.CONTENT);
-  const capacitor = useCapacitor();
   const { mobileAboutViewStyle } = useLayout();
 
   // Use mobileAboutViewStyle for capacitor spacing

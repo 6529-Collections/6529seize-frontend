@@ -28,7 +28,6 @@ export const FeedScrollContainer = forwardRef<
     const [lastScrollTop, setLastScrollTop] = useState(0);
     const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const previousHeightRef = useRef<number>(0);
-    const previousItemsCountRef = useRef<number>(0);
 
     // Track height changes to maintain scroll position
     useEffect(() => {

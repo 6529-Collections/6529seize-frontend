@@ -13,7 +13,6 @@ interface BrainContentProps {
   readonly children: React.ReactNode;
   readonly activeDrop: ActiveDropState | null;
   readonly onCancelReplyQuote: () => void;
-  readonly waveId?: string;
 }
 
 const BrainContent: React.FC<BrainContentProps> = ({

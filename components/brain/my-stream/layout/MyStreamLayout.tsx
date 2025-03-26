@@ -6,8 +6,6 @@ import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
 import { LayoutProvider, useLayout } from "./LayoutContext";
-import { useRouter } from "next/router";
-
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -16,7 +14,6 @@ const Header = dynamic(() => import("../../../header/Header"), {
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
-  const router = useRouter();
   const { setTitle, title, showWaves } = useContext(AuthContext);
   const { registerRef, spaces } = useLayout();
 
@@ -35,7 +32,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     },
     [registerRef]
   );
-  
+
   // Callback ref for registration with LayoutContext (spacer)
   const setSpacerRef = useCallback(
     (element: HTMLDivElement | null) => {

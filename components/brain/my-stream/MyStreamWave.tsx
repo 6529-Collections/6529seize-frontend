@@ -9,7 +9,6 @@ import { createBreakpoint } from "react-use";
 import { useRouter } from "next/router";
 import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
-import { useWave } from "../../../hooks/useWave";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 
 interface MyStreamWaveProps {
@@ -22,8 +21,6 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
-
-  const { isChatWave } = useWave(wave);
 
   // Track mount status to prevent post-unmount updates
   const mountedRef = useRef(true);
@@ -38,8 +35,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const stableWaveKey = `wave-${waveId}`;
 
   // Get the active tab and utilities from global context
-  const { activeContentTab, setActiveContentTab, updateAvailableTabs } =
-    useContentTab();
+  const { activeContentTab } = useContentTab();
 
   // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
@@ -73,19 +69,17 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   };
 
   return (
-    <>
-      <div
-        className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
-        key={stableWaveKey}
-      >
-        {/* Don't render tab container for simple waves */}
-        {breakpoint !== "S" && !isChatWave && <MyStreamWaveTabs wave={wave} />}
+    <div
+      className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
+      key={stableWaveKey}
+    >
+      {/* Don't render tab container for simple waves */}
+      {breakpoint !== "S" && <MyStreamWaveTabs wave={wave} />}
 
-        <div className="tw-flex-grow tw-overflow-hidden">
-          {components[activeContentTab]}
-        </div>
+      <div className="tw-flex-grow tw-overflow-hidden">
+        {components[activeContentTab]}
       </div>
-    </>
+    </div>
   );
 };
 
