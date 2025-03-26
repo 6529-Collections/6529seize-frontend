@@ -8,6 +8,9 @@ import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
 import { SingleWaveDropInfoActions } from "./SingleWaveDropInfoActions";
 import { SingleWaveDropInfoContent } from "./SingleWaveDropInfoContent";
+import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+import { SingleWaveDropTime } from "./SingleWaveDropTime";
+import { WinnerBadge } from "./WinnerBadge";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -19,8 +22,14 @@ interface SingleWaveDropInfoPanelProps {
 export const SingleWaveDropInfoPanel: React.FC<
   SingleWaveDropInfoPanelProps
 > = ({ drop, wave, activeTab, onClose }) => {
+  const { isWinner } = useDropInteractionRules(drop);
   return (
     <SingleWaveDropInfoContainer activeTab={activeTab}>
+      {isWinner ? (
+        <WinnerBadge drop={drop} showBadge={true} />
+      ) : (
+        wave && <SingleWaveDropTime wave={wave} />
+      )}
       <div className="tw-hidden lg:tw-block">
         <SingleWaveDropClose onClose={onClose} />
       </div>

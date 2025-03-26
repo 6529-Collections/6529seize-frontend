@@ -15,6 +15,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
 import { faCompress, faExpand } from "@fortawesome/free-solid-svg-icons";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
+import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+import { WinnerBadge } from "./WinnerBadge";
+import { SingleWaveDropTime } from "./SingleWaveDropTime";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -28,7 +31,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 > = ({ drop, wave, activeTab, onClose }) => {
   // State for fullscreen artwork view
   const [isFullscreen, setIsFullscreen] = useState(false);
-
+  const { isWinner } = useDropInteractionRules(drop);
   // Extract metadata
   const title =
     drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
@@ -58,7 +61,11 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           {/* Title and rank badge side by side */}
           <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3 tw-px-6">
             {/* Show either position badge or trophy-only based on winning context */}
-            <SingleWaveDropPosition rank={drop.rank || 1} drop={drop} />
+            {isWinner ? (
+              <WinnerBadge drop={drop} showBadge={true} />
+            ) : (
+              wave && <SingleWaveDropTime wave={wave} />
+            )}
             {/* Title */}
             <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
               {title}
@@ -73,13 +80,13 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           <div>
             {/* Full width artwork with fullscreen toggle */}
             {artworkMedia && (
-                 <div className="tw-flex tw-justify-center">
-                 <DropListItemContentMedia
-                   media_mime_type={artworkMedia.mime_type}
-                   media_url={artworkMedia.url}
-                 />
-               </div>
-              )}
+              <div className="tw-flex tw-justify-center">
+                <DropListItemContentMedia
+                  media_mime_type={artworkMedia.mime_type}
+                  media_url={artworkMedia.url}
+                />
+              </div>
+            )}
             <div className="tw-px-6 tw-mt-4">
               <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
             </div>

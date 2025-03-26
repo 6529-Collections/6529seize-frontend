@@ -19,23 +19,15 @@ interface SingleWaveDropInfoActionsProps {
  * Component that displays time, voting options, and vote counts for a drop.
  * For winning drops, displays a winner badge instead of the time component.
  */
-export const SingleWaveDropInfoActions: React.FC<SingleWaveDropInfoActionsProps> = ({
-  drop,
-  wave,
-  showBadge = true,
-  showVotes = true,
-  className = "tw-px-6",
-}) => {
-  const { canShowVote, isWinner } = useDropInteractionRules(drop);
-  
+export const SingleWaveDropInfoActions: React.FC<
+  SingleWaveDropInfoActionsProps
+> = ({ drop, showVotes = true, className = "tw-px-6" }) => {
+  const { canShowVote } = useDropInteractionRules(drop);
+
   return (
     <div className={`tw-flex tw-flex-col tw-gap-y-2 tw-pb-4 ${className}`}>
-      {isWinner 
-        ? <WinnerBadge drop={drop} showBadge={showBadge} /> 
-        : wave && <SingleWaveDropTime wave={wave} />
-      }
       {canShowVote && <SingleWaveDropVote drop={drop} />}
       {showVotes && drop && <SingleWaveDropVotes drop={drop} />}
     </div>
   );
-}; 
+};
