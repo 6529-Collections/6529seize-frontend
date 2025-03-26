@@ -459,6 +459,14 @@ export default function Header(props: Readonly<Props>) {
                   `/about/${AboutSection.PRIMARY_ADDRESS}`
                 )}
                 {printMobileHr()}
+                {printMobileSubheader("6529 Capital")}
+                {printMobileRow("About 6529 Capital", `/capital`)}
+                {printMobileRow(
+                  "Company Portfolio",
+                  `/capital/company-portfolio`
+                )}
+                {printMobileRow("NFT Fund", `/capital/fund`)}
+                {printMobileHr()}
                 {printMobileSubheader("Support")}
                 {printMobileRow("FAQ", `/about/${AboutSection.FAQ}`)}
                 {printMobileRow("Apply", `/about/${AboutSection.APPLY}`)}
@@ -880,6 +888,37 @@ export default function Header(props: Readonly<Props>) {
                                     link={{
                                       name: "Primary Address",
                                       path: `/about/${AboutSection.PRIMARY_ADDRESS}`,
+                                    }}
+                                  />
+                                </div>
+                              </NavDropdown.Item>
+                              <NavDropdown.Item
+                                className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  6529 Capital
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "About 6529 Capital",
+                                      path: `/capital`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Company Portfolio",
+                                      path: `/capital/company-portfolio`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "NFT Fund",
+                                      path: `/capital/fund`,
                                     }}
                                   />
                                 </div>
