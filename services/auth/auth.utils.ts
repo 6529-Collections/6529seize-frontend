@@ -51,38 +51,38 @@ export const setAuthJwt = (
 
 //TODO: CHANGE IT BACK
 
-// export const getAuthJwt = () => {
-//   if (true) {
-//     return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE4MDMzNDBhLTBlZGItNDRjNi04NTU2LWZjMThkNzM4NzUyZiIsInN1YiI6IjB4OWI4Nzc1ZTdhMWU2YmYwNzQ1NmJiODEwZmIwN2VmODIzNzViYTEzMiIsInJvbGUiOiIzOTA5ODhiYi0yY2NjLTRmMTQtYmFkYi05YzAzNDdhYWE1NDEiLCJpYXQiOjE3NDI4MDYzMDcsImV4cCI6MTc0Mjk3MjcwN30.K4kJbAI0y7G1e39buQImjCXRp4TZzj_ytQ6IpBfiMDU";
-//   }
-//   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
-// };
-
-// export const getRefreshToken = () => {
-//   if (true) {
-//     return "55679862c7df57fd47fda5e950e29b128d40e3853858e9cacfc42c0c926268ef7926183db57b15bb89f3216be67b9ae9d450a8d496edcbc354f9c6c6b03b4d40";
-//   }
-//   return Cookies.get(WALLET_REFRESH_TOKEN_COOKIE) ?? null;
-// };
-
-// export const getWalletAddress = () => {
-//   if (true) {
-//     return "0x9B8775e7A1e6BF07456bB810fb07ef82375ba132";
-//   }
-//   return Cookies.get(WALLET_ADDRESS_COOKIE) ?? null;
-// };
-
 export const getAuthJwt = () => {
+  if (true) {
+    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQ1MTEyZDdlLTM5NDMtNDM4NS1hMGIwLTI5NDlkMzFmZTIyYiIsInN1YiI6IjB4MjNhODY3YzliMzljOTQwZTk0NjdmNWIzYjQzZmEwZTVhMmJkMWU2ZSIsInJvbGUiOiI3YzZjODg1ZS04N2IyLTExZWUtOTY2MS0wMjQyNGUyYzE0YWQiLCJpYXQiOjE3NDI5NzY4MTAsImV4cCI6MTc0MzE0MzIxMH0.1INLMX91z3o1LYieS3PFFVy_Q9h1vxmMSa8eKbw1dZ4";
+  }
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
 
 export const getRefreshToken = () => {
+  if (true) {
+    return "2260b239cf604e2e825266a971a643cb6320b572faa178b8179e5eb9530dd5148582c5dcfb4dfe98064df81a58f99768cf070163e50648273cccf41ac1f9ab35";
+  }
   return Cookies.get(WALLET_REFRESH_TOKEN_COOKIE) ?? null;
 };
 
 export const getWalletAddress = () => {
+  if (true) {
+    return "0x23a867C9b39c940E9467f5b3B43FA0e5a2bD1e6E";
+  }
   return Cookies.get(WALLET_ADDRESS_COOKIE) ?? null;
 };
+
+// export const getAuthJwt = () => {
+//   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
+// };
+
+// export const getRefreshToken = () => {
+//   return Cookies.get(WALLET_REFRESH_TOKEN_COOKIE) ?? null;
+// };
+
+// export const getWalletAddress = () => {
+//   return Cookies.get(WALLET_ADDRESS_COOKIE) ?? null;
+// };
 
 export const getWalletRole = () => {
   return Cookies.get(WALLET_ROLE_COOKIE) ?? null;

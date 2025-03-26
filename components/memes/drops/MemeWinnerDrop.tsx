@@ -3,13 +3,13 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
-import WaveDropMobileMenu from "../../waves/drops/WaveDropMobileMenu";
 import WaveDropActions from "../../waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
 import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
 import MemeWinnerArtwork from "./MemeWinnerArtwork";
 import MemeDropTraits from "./MemeDropTraits";
+import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -30,8 +30,6 @@ export default function MemeWinnerDrop({
   onQuote,
   onDropContentClick,
 }: MemeWinnerDropProps) {
-  const [longPressTriggered, setLongPressTriggered] = useState(false);
-  const [isSlideUp, setIsSlideUp] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const isMobile = useIsMobileDevice();
 
@@ -46,19 +44,11 @@ export default function MemeWinnerDrop({
   // Get artwork media URL if available
   const artworkMedia = drop.parts.at(0)?.media?.at(0)?.url;
 
-  const handleLongPress = useCallback(() => {
-    if (!isMobile) return;
-    setLongPressTriggered(true);
-    setIsSlideUp(true);
-  }, [isMobile]);
-
   const handleOnReply = useCallback(() => {
-    setIsSlideUp(false);
     onReply({ drop, partId: drop.parts[0].part_id });
   }, [onReply, drop]);
 
   const handleOnQuote = useCallback(() => {
-    setIsSlideUp(false);
     onQuote({ drop, partId: drop.parts[0].part_id });
   }, [onQuote, drop]);
 
@@ -82,46 +72,46 @@ export default function MemeWinnerDrop({
             location === DropLocation.WAVE ? "tw-bg-iron-900" : "tw-bg-iron-950"
           } ${firstPlaceShadow}`}
         >
-          <div className="tw-p-4">
-            <div className="tw-flex tw-flex-col tw-gap-4">
-              <MemeWinnerArtistInfo drop={drop} />
-            </div>
-            <div className="tw-flex tw-flex-col tw-mt-3">
-              <MemeWinnerHeader title={title} />
-              <MemeWinnerDescription description={description} />
-            </div>
-          </div>
+          <DropMobileMenuHandler
+            drop={drop}
+            showReplyAndQuote={showReplyAndQuote}
+            onReply={handleOnReply}
+            onQuote={handleOnQuote}
+          >
+            <>
+              <div className="tw-p-4">
+                <div className="tw-flex tw-flex-col tw-gap-4">
+                  <MemeWinnerArtistInfo drop={drop} />
+                </div>
+                <div className="tw-flex tw-flex-col tw-mt-3">
+                  <MemeWinnerHeader title={title} />
+                  <MemeWinnerDescription description={description} />
+                </div>
+              </div>
 
-          <MemeWinnerArtwork
-            title={title}
-            artworkMedia={artworkMedia}
-            onViewLarger={handleViewLarger}
-          />
-          <div className="tw-p-4">
-            <MemeDropTraits drop={drop} />
-          </div>
+              <MemeWinnerArtwork
+                title={title}
+                artworkMedia={artworkMedia}
+                onViewLarger={handleViewLarger}
+              />
+              <div className="tw-p-4">
+                <MemeDropTraits drop={drop} />
+              </div>
+            </>
+          </DropMobileMenuHandler>
           {/* Actions for desktop */}
           {!isMobile && showReplyAndQuote && (
-            <WaveDropActions
-              drop={drop}
-              activePartIndex={0}
-              onReply={handleOnReply}
-              onQuote={handleOnQuote}
-            />
+            <div className="tw-absolute tw-right-4 tw-top-2">
+              <WaveDropActions
+                drop={drop}
+                activePartIndex={0}
+                onReply={handleOnReply}
+                onQuote={handleOnQuote}
+              />
+            </div>
           )}
         </div>
       </div>
-
-      {/* Mobile menu */}
-      <WaveDropMobileMenu
-        drop={drop}
-        isOpen={isSlideUp}
-        longPressTriggered={longPressTriggered}
-        showReplyAndQuote={showReplyAndQuote}
-        setOpen={setIsSlideUp}
-        onReply={handleOnReply}
-        onQuote={handleOnQuote}
-      />
     </div>
   );
 }
