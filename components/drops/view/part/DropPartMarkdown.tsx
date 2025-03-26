@@ -116,7 +116,7 @@ function DropPartMarkdown({
 
           const isEmoji = (str: string): boolean => {
             const emojiTextRegex =
-              /^(?:\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|[\u00a9\u00ae\uFE0F\u2000-\u3300])+$/;
+              /^(?:\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]|\u00ae\uFE0F|[\u00a9\u00ae\uFE0F\u2000-\u3300])+$/;
             return emojiTextRegex.test(str.trim());
           };
 
