@@ -3,6 +3,8 @@ import Tippy from "@tippyjs/react";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { ApiDropRater } from "../../../../generated/models/ApiDropRater";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
 interface MemeDropVoteStatsProps {
   readonly rating: number | null | undefined;
@@ -17,6 +19,10 @@ export default function MemeDropVoteStats({
   ratersCount,
   topVoters,
 }: MemeDropVoteStatsProps) {
+  // HARDCODED: This would normally come from props
+  const isProgressing = true;
+  const targetRating = 160;
+  
   const isPositive = (rating || 0) >= 0;
   const firstThreeVoters = topVoters?.slice(0, 3) || [];
 
@@ -30,9 +36,37 @@ export default function MemeDropVoteStats({
         >
           {formatNumberWithCommas(rating || 0)}
         </span>
-        <span className="tw-text-md tw-text-iron-400">
-          {votingCreditType} total
-        </span>
+        <Tippy content={"Gradually increasing to 160 over time"}>
+          <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
+            <span className="tw-text-md tw-text-iron-400">
+              {votingCreditType} total
+            </span>
+            
+            {/* HARDCODED: Progression indicator with pulsing animation */}
+            {isProgressing && (
+              <span 
+                className="tw-text-xs tw-font-medium tw-text-emerald-400 tw-animate-pulse tw-ml-0.5 tw-bg-emerald-950/40 tw-px-1.5 tw-py-0.5 tw-rounded-sm tw-flex tw-items-center tw-gap-x-1"
+                style={{
+                  animationDuration: "2s"
+                }}
+              >
+                <FontAwesomeIcon icon={faArrowRight} className="tw-flex-shrink-0 tw-size-3" />
+                <span>{formatNumberWithCommas(targetRating)}</span>
+              </span>
+            )}
+            {isProgressing && (
+              <span 
+                className="tw-text-xs tw-font-medium tw-text-rose-400 tw-animate-pulse tw-ml-0.5 tw-bg-rose-950/40 tw-px-1.5 tw-py-0.5 tw-rounded-sm tw-flex tw-items-center tw-gap-x-1"
+                style={{
+                  animationDuration: "2s"
+                }}
+              >
+                <FontAwesomeIcon icon={faArrowRight} className="tw-flex-shrink-0 tw-size-3" />
+                <span>{formatNumberWithCommas(targetRating)}</span>
+              </span>
+            )}
+          </div>
+        </Tippy>
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-x-3">
         <div className="tw-flex tw-items-center -tw-space-x-1.5">
