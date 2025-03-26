@@ -172,7 +172,7 @@ export default function Home({
         <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io-banner.png`}
         />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
