@@ -23,6 +23,16 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
       ![artistTrait?.data_key, memeNameTrait?.data_key].includes(md.data_key)
   );
 
+  const handleShowLess = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllTraits(false);
+  };
+
+  const handleShowAll = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllTraits(true);
+  };
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
@@ -49,7 +59,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
               />
             ))}
             <button
-              onClick={() => setShowAllTraits(false)}
+              onClick={handleShowLess}
               className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0"
             >
               Show less
@@ -57,7 +67,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
           </>
         ) : (
           <button
-            onClick={() => setShowAllTraits(true)}
+            onClick={handleShowAll}
             className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
           >
             Show all

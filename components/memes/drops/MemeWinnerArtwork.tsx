@@ -15,10 +15,10 @@ export default function MemeWinnerArtwork({
 }: MemeWinnerArtworkProps) {
   return (
     <div
-      className="tw-relative tw-bg-iron-900/30 tw-h-full tw-cursor-pointer tw-mx-[1px]"
+      className="tw-relative tw-bg-iron-800/30 tw-h-full tw-cursor-pointer tw-mx-[1px]"
       onClick={onViewLarger}
     >
-      <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-900/30">
+      <div className="tw-aspect-video tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
         {artworkMedia ? (
           <img
             src={artworkMedia}

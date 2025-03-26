@@ -23,7 +23,7 @@ export const WaveLeaderboardDropContent: React.FC<
   };
 
   return (
-    <div className="tw-flex tw-gap-x-6 tw-items-end tw-justify-between">
+    <div className="tw-flex tw-flex-col tw-gap-y-1">
       <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}

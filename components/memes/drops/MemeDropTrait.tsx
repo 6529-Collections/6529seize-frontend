@@ -32,7 +32,7 @@ const MemeDropTrait: React.FC<MemeDropTraitProps> = ({ label, value }) => {
     console.log(value, typeof value);
   }
   return (
-    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800/50 tw-flex tw-flex-col tw-gap-y-1">
+    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1">
       <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5">{label}:</span>
       <Tippy
         disabled={isMobile}

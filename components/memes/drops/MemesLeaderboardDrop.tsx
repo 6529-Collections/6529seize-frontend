@@ -42,17 +42,17 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
 
   return (
     <>
-      <div className="tw-w-full tw-cursor-pointer" onClick={() => onDropClick(drop)}>
+      <div
+        className="tw-w-full tw-cursor-pointer"
+        onClick={() => onDropClick(drop)}
+      >
         <div className="tw-w-full tw-group tw-relative">
           <MemesLeaderboardDropCard drop={drop}>
             <div>
-              {/* Left column - Metadata */}
               <div className="tw-p-4">
-                {/* Header with metadata */}
-                <div className="tw-flex tw-flex-col tw-gap-y-4">
+                <div className="tw-flex tw-flex-col tw-gap-y-1">
                   <MemesLeaderboardDropArtistInfo drop={drop} />
-
-                  <div className="tw-space-y-1">
+                  <div className="tw-ml-[3.25rem]">
                     <MemesLeaderboardDropHeader
                       title={title}
                       rank={drop.rank}
@@ -64,7 +64,6 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   </div>
                 </div>
               </div>
-
               <MemesLeaderboardDropArtworkPreview
                 artworkMedia={artworkMedia}
                 title={title}

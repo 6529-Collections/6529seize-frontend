@@ -58,7 +58,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/40 tw-shadow-[0_0_15px_rgba(251,191,36,0.15)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
         <div className="tw-flex tw-flex-col">
           <div className="tw-p-4">
-            <div className="tw-flex tw-flex-col tw-gap-y-4">
+            <div className="tw-flex tw-flex-col tw-gap-y-1.5">
               <div className="tw-flex tw-items-center tw-gap-x-3">
                 <Link
                   href={`/${winner.drop.author?.handle}`}
@@ -100,7 +100,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                   />
                 </div>
               </div>
-              <div className="tw-space-y-1">
+              <div className="tw-ml-[3.25rem]">
                 <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0 tw-whitespace-nowrap">
                   {title}
                 </h3>
@@ -112,9 +112,9 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           </div>
 
           <div className="tw-w-full tw-relative tw-overflow-hidden">
-            <div className="tw-aspect-video tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-gradient-to-br tw-from-iron-900/90 tw-to-iron-950 tw-backdrop-blur-sm">
+            <div className="tw-aspect-video tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-900/30">
               {artworkMedia ? (
-                <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-p-2 tw-overflow-hidden">
+                <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
                   <img
                     src={artworkMedia}
                     alt={title}

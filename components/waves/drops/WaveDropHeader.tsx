@@ -36,7 +36,6 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
     <>
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <UserCICAndLevel
               level={drop.author.level}
@@ -58,8 +57,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               {getTimeAgoShort(drop.created_at)}
             </p>
           </div>
-
-          {badge && <div className="tw-ml-2 sm:tw-ml-4">{badge}</div>}
+          {badge && <div className="tw-ml-2">{badge}</div>}
         </div>
       </div>
       <div>

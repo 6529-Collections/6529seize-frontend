@@ -105,7 +105,7 @@ export default function MemeParticipationDrop({
             <>
               <div className="tw-p-4">
                 <MemeDropArtistInfo drop={drop} />
-                <div className="tw-flex tw-flex-col tw-mt-3 tw-ml-[3.25rem]">
+                <div className="tw-flex tw-flex-col tw-mt-1.5 tw-ml-[3.25rem]">
                   <MemeDropHeader
                     title={title}
                     rank={drop.rank}

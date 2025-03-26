@@ -16,7 +16,7 @@ export const MemesLeaderboardDropArtistInfo: React.FC<
   MemesLeaderboardDropArtistInfoProps
 > = ({ drop }) => {
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-3 tw-mt-2">
+    <div className="tw-flex tw-items-center tw-gap-x-3">
       <Link
         href={`/${drop.author?.handle}`}
         onClick={(e) => e.stopPropagation()}
