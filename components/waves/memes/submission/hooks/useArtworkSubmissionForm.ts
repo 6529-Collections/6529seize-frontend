@@ -82,7 +82,7 @@ export function useArtworkSubmissionForm() {
   // Create the initial state
   const initialState: FormState = {
     currentStep: SubmissionStep.AGREEMENT,
-    agreements: true,
+    agreements: false,
     artworkUploaded: false,
     artworkUrl: "",
     traits: initialTraits

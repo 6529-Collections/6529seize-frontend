@@ -1,8 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { EnhancedWave } from "../../../../hooks/useWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import BrainLeftSidebarCreateAWaveButton from "../BrainLeftSidebarCreateAWaveButton";
 import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
+import CommonSwitch from "../../../utils/switch/CommonSwitch";
+import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
+import { useAuth } from "../../../auth/Auth";
 
 interface UnifiedWavesListProps {
   readonly waves: EnhancedWave[];
@@ -22,6 +25,13 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   isFetchingNextPage,
 }) => {
   // No longer splitting waves into separate categories
+
+  const [following, setFollowing] = useShowFollowingWaves();
+  const { connectedProfile, activeProfileProxy } = useAuth();
+
+  const isConnectedIdentity = useMemo(() => {
+    return !!connectedProfile?.profile?.handle && !activeProfileProxy;
+  }, [connectedProfile?.profile?.handle, activeProfileProxy]);
 
   // Ref for intersection observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -75,8 +85,15 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
         {/* Create Wave Button */}
-        <div className="tw-px-4 tw-mb-4">
+        <div className="tw-px-4 tw-mb-4 tw-flex tw-items-center tw-gap-2">
           <BrainLeftSidebarCreateADirectMessageButton />
+          {isConnectedIdentity && (
+            <CommonSwitch
+              label="Following"
+              isOn={following}
+              setIsOn={setFollowing}
+            />
+          )}
         </div>
 
         {/* Non-scrollable container for all waves - parent will handle scrolling */}

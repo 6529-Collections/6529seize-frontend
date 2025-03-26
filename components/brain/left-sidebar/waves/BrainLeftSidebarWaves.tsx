@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useWavesList from "../../../../hooks/useWavesList";
 import { useRouter } from "next/router";
 import UnifiedWavesList from "./UnifiedWavesList";
@@ -25,6 +25,7 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
   
   // Use fixed refetch interval to avoid dependency issues
   const refetchInterval = 10000;
+
   
   const { 
     waves, 

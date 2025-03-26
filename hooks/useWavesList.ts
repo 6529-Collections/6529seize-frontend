@@ -5,6 +5,7 @@ import { WAVE_FOLLOWING_WAVES_PARAMS } from "../components/react-query-wrapper/u
 import { usePinnedWaves } from "./usePinnedWaves";
 import { useWaveData } from "./useWaveData";
 import { ApiWave } from "../generated/models/ApiWave";
+import { useShowFollowingWaves } from "./useShowFollowingWaves";
 
 // Enhanced wave interface with isPinned field and newDropsCount
 export interface EnhancedWave extends ApiWave {
@@ -46,7 +47,7 @@ const useIndividualWaveData = (
 export const useWavesList = (refetchInterval = 10000, activeWaveId: string | null = null) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { pinnedIds, addId, removeId } = usePinnedWaves();
-  
+  const [following] = useShowFollowingWaves();
   // Use state for allWaves instead of ref to ensure reactivity
   const [allWaves, setAllWaves] = useState<EnhancedWave[]>([]);
   
@@ -73,7 +74,7 @@ export const useWavesList = (refetchInterval = 10000, activeWaveId: string | nul
   } = useWavesOverview({
     type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
-    following: isConnectedIdentity,
+    following: isConnectedIdentity && following,
     refetchInterval,
   });
 
