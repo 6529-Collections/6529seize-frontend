@@ -1,15 +1,6 @@
-import React, { memo, useCallback } from "react";
+import React, { memo } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import Link from "next/link";
-import {
-  formatNumberWithCommas,
-  getTimeAgoShort,
-} from "../../../helpers/Helpers";
-import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
-import { DropContentSmall } from "./drops/DropContentSmall";
-import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
-import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import { useWave } from "../../../hooks/useWave";
 import { MemesWaveWinnerDropSmall } from "./MemesWaveWinnerDropSmall";
 import { DefaultWaveWinnerDropSmall } from "./DefaultWaveWinnerDropSmall";

@@ -11,7 +11,6 @@ import WaveWinnersDropHeaderVoters from "./header/WaveWinnersDropHeaderVoters";
 
 interface DefaultWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
-  readonly wave: ApiWave;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
@@ -33,26 +32,9 @@ const getRankShadowClass = (place: number | null): string => {
 
 export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   winner,
-  wave,
   onDropClick,
 }) => {
   const shadowClass = getRankShadowClass(winner.place);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Function to check if viewport is mobile sized
-  const checkIsMobile = () => {
-    setIsMobile(window.innerWidth < 640); // 640px is sm breakpoint in Tailwind
-  };
-
-  // Set up listener for viewport changes
-  useEffect(() => {
-    checkIsMobile(); // Check on initial render
-
-    window.addEventListener("resize", checkIsMobile);
-    return () => {
-      window.removeEventListener("resize", checkIsMobile);
-    };
-  }, []);
 
   return (
     <div

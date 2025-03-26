@@ -2,7 +2,10 @@ import React, { memo, useCallback } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import Link from "next/link";
-import { formatNumberWithCommas, getTimeAgoShort } from "../../../helpers/Helpers";
+import {
+  formatNumberWithCommas,
+  getTimeAgoShort,
+} from "../../../helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
@@ -27,14 +30,6 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
     const userVote = drop.context_profile_context?.rating ?? 0;
     const isNegativeVote = userVote < 0;
 
-    // Gets the text color to use for rank-based styling (same as in WaveSmallLeaderboardTopThreeDrop)
-    const getRankTextColor = (rank: number | null): string | null => {
-      if (rank === 1) return "#E8D48A";
-      if (rank === 2) return "#DDDDDD";
-      if (rank === 3) return "#CD7F32";
-      return "#60606C";
-    };
-    
     const getRatingStyle = () => {
       if (drop.rating >= 0) {
         return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
@@ -64,15 +59,13 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
         onClick={handleDropClick}
         className="tw-w-full tw-text-left tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden desktop-hover:hover:tw-scale-[1.01] tw-transform tw-transition-all tw-duration-300 tw-ease-out"
       >
-        <div 
-          className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out"
-          >
+        <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out">
           <div className="tw-flex tw-flex-col tw-relative">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
               <div className="tw-flex tw-items-center tw-gap-x-3">
                 {effectiveRank && (
                   <div>
-                    <WinnerDropBadge 
+                    <WinnerDropBadge
                       rank={effectiveRank}
                       // Not passing decisionTime to keep the badge compact
                       decisionTime={null}
@@ -83,7 +76,9 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
 
               <div className="tw-flex tw-justify-end tw-items-center tw-gap-x-3 tw-flex-wrap">
                 <div className="tw-flex tw-items-center tw-gap-x-1.5">
-                  <span className={`tw-text-sm tw-font-semibold ${ratingStyle}`}>
+                  <span
+                    className={`tw-text-sm tw-font-semibold ${ratingStyle}`}
+                  >
                     {formatNumberWithCommas(drop.rating)}
                   </span>
                   <span className="tw-text-sm tw-font-medium tw-text-iron-400">
@@ -122,7 +117,10 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
             >
               {drop.author.pfp ? (
                 <img
-                  src={getScaledImageUri(drop.author.pfp, ImageScale.W_AUTO_H_50)}
+                  src={getScaledImageUri(
+                    drop.author.pfp,
+                    ImageScale.W_AUTO_H_50
+                  )}
                   alt={`${drop.author.handle}'s profile`}
                   className="tw-size-7 tw-rounded-lg tw-ring-1 tw-ring-white/10 tw-object-cover"
                 />

@@ -26,7 +26,7 @@ export function useShowFollowingWaves(): [boolean, (value: boolean) => void] {
   };
 
   // Initialize state with value from localStorage
-  const [showFollowingWaves, setStateValue] = useState<boolean>(getStoredValue);
+  const [stateValue, setStateValue] = useState<boolean>(getStoredValue);
 
   // Update localStorage and state when the value changes
   const setShowFollowingWaves = useCallback((value: boolean) => {
@@ -72,5 +72,5 @@ export function useShowFollowingWaves(): [boolean, (value: boolean) => void] {
     };
   }, []);
 
-  return [showFollowingWaves, setShowFollowingWaves];
+  return [stateValue, setShowFollowingWaves];
 }

@@ -25,7 +25,7 @@ export default function WaveWinnersDropOutcome({
     )
     .map((award) => ({
       type: OutcomeType.NIC as const,
-      value: award.amount || 0,
+      value: award.amount ?? 0,
     }));
 
   const repOutcomes = winner.awards
@@ -37,8 +37,8 @@ export default function WaveWinnersDropOutcome({
     )
     .map((award) => ({
       type: OutcomeType.REP as const,
-      value: award.amount || 0,
-      category: award.rep_category || "",
+      value: award.amount ?? 0,
+      category: award.rep_category ?? "",
     }));
 
   const manualOutcomes = winner.awards
@@ -47,7 +47,7 @@ export default function WaveWinnersDropOutcome({
     )
     .map((award) => ({
       type: OutcomeType.MANUAL as const,
-      description: award.description || "",
+      description: award.description ?? "",
     }));
 
   const haveOutcomes =

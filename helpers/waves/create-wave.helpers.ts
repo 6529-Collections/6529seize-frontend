@@ -13,9 +13,9 @@ import {
   CreateWaveDatesConfig,
   CreateWaveOutcomeType,
   CreateWaveStep,
+  TimeWeightedVotingSettings,
 } from "../../types/waves.types";
 import { assertUnreachable } from "../AllowlistToolHelpers";
-import { TimeWeightedVotingSettings } from "../../types/waves.types";
 
 /**
  * Converts time-weighted voting settings to milliseconds, ensuring it's within acceptable range
@@ -354,7 +354,7 @@ export const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
   }
 
   // This should never happen if all cases are covered
-  return dates.endDate || dates.firstDecisionTime;
+  return dates.endDate ?? dates.firstDecisionTime;
 };
 
 export const getCreateNewWaveBody = ({

@@ -31,7 +31,6 @@ export const WaveWinnersDrop: React.FC<WaveWinnersDropProps> = ({
   return (
     <DefaultWaveWinnersDrop
       winner={winner}
-      wave={wave}
       onDropClick={onDropClick}
     />
   );

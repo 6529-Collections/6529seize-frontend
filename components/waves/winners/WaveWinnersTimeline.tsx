@@ -69,7 +69,6 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
             const date = new Date(point.decision_time);
             const formattedDate = format(date, "EEE, MMM d, yyyy");
             const formattedTime = format(date, "h:mm a");
-            const roundNumber = roundMap.get(point.decision_time);
 
             return (
               <div

@@ -1,7 +1,7 @@
 import { Time } from "../time";
 import { ApiWave } from "../../generated/models/ApiWave";
 
-// Constants for fallback values 
+// Constants for fallback values
 export const FALLBACK_START_TIME = 0; // Use 0 (Jan 1, 1970) to indicate "started immediately"
 export const FALLBACK_END_TIME = Number.MAX_SAFE_INTEGER; // Far future to indicate "no end date"
 
@@ -14,7 +14,7 @@ export interface TimeLeft {
 
 /**
  * Calculates the time remaining until a target timestamp
- * 
+ *
  * @param targetTime - Target timestamp in milliseconds
  * @returns TimeLeft object with days, hours, minutes, seconds
  */
@@ -41,7 +41,7 @@ export const calculateTimeLeft = (targetTime: number): TimeLeft => {
 
 /**
  * Determines if all time components are zero
- * 
+ *
  * @param timeLeft - TimeLeft object
  * @returns boolean - true if all values are zero
  */
@@ -59,9 +59,10 @@ export const isTimeZero = (timeLeft: TimeLeft): boolean => {
  * This considers the wave type (single decision, multi-decision, or rolling)
  * and determines when voting will actually end.
  */
-export function calculateLastDecisionTime(wave: ApiWave | null | undefined): number {
+export function calculateLastDecisionTime(
+  wave: ApiWave | null | undefined
+): number {
   if (!wave) return 0;
-
 
   // Get basic decision strategy data
   const firstDecisionTime = wave.wave.decisions_strategy?.first_decision_time;
@@ -69,7 +70,7 @@ export function calculateLastDecisionTime(wave: ApiWave | null | undefined): num
     wave.wave.decisions_strategy?.subsequent_decisions || [];
   const isRolling = wave.wave.decisions_strategy?.is_rolling || false;
   // Use stable fallback value for missing end time
-  const votingEndTime = wave.voting.period?.max || FALLBACK_END_TIME;
+  const votingEndTime = wave.voting.period?.max ?? FALLBACK_END_TIME;
 
   // If no first decision time is set, use the voting end time
   if (!firstDecisionTime) {
@@ -88,18 +89,18 @@ export function calculateLastDecisionTime(wave: ApiWave | null | undefined): num
   if (!isRolling) {
     // Calculate the last decision time by adding all intervals
     let lastDecisionTime = firstDecisionTime;
-    
+
     for (const interval of subsequentDecisions) {
       lastDecisionTime += interval;
     }
-    
+
     // But make sure it's not after the voting end time
     const result = Math.min(lastDecisionTime, votingEndTime);
     return result;
   }
 
   // Case 3: Rolling waves (decisions repeat until end time)
-  
+
   // Calculate the total length of one decision cycle
   const cycleLength = subsequentDecisions.reduce(
     (sum, interval) => sum + interval,
@@ -128,12 +129,11 @@ export function calculateLastDecisionTime(wave: ApiWave | null | undefined): num
   // Start with the time after all complete cycles
   let lastDecisionTime = firstDecisionTime + completeCycles * cycleLength;
 
-
   // Process partial cycle - find the last decision that fits
   let accumulatedTime = 0;
   for (const interval of subsequentDecisions) {
     accumulatedTime += interval;
-    
+
     if (accumulatedTime <= remainingTime) {
       lastDecisionTime += interval;
     } else {

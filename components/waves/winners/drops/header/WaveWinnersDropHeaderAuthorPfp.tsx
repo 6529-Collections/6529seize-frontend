@@ -1,9 +1,4 @@
 import React from "react";
-import Link from "next/link";
-import {
-  getScaledImageUri,
-  ImageScale,
-} from "../../../../../helpers/image.helpers";
 import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 
 interface WaveWinnersDropHeaderAuthorPfpProps {

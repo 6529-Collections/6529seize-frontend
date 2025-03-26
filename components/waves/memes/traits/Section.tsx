@@ -26,7 +26,7 @@ const areSectionPropsEqual = (
 ): boolean => {
   return (
     prevProps.title === nextProps.title &&
-    (prevProps.className || "") === (nextProps.className || "")
+    (prevProps.className ?? "") === (nextProps.className ?? "")
     // React handles children comparison internally
   );
 };

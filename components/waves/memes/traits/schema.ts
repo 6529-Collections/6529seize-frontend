@@ -16,7 +16,7 @@ export const FIELD_TO_LABEL_MAP: Record<keyof TraitsData, string> = {
   // Basic fields
   title: "Title",
   description: "Description",
-  
+
   // Text fields
   artist: "Artist",
   seizeArtistProfile: "SEIZE Artist Profile",
@@ -38,7 +38,7 @@ export const FIELD_TO_LABEL_MAP: Record<keyof TraitsData, string> = {
   drink: "Drink",
   bonus: "Bonus",
   boost: "Boost",
-  
+
   // Boolean fields
   punk6529: "Punk 6529",
   gradient: "Gradient",
@@ -52,10 +52,10 @@ export const FIELD_TO_LABEL_MAP: Record<keyof TraitsData, string> = {
   gm: "GM",
   summer: "Summer",
   tulip: "Tulip",
-  
+
   // Dropdown fields
   memeName: "Meme Name",
-  
+
   // Number fields
   pointsPower: "Points - Power",
   pointsWisdom: "Points - Wisdom",
@@ -459,10 +459,8 @@ function validateSchema(schema: readonly SectionDefinition[]): void {
           }
         });
       });
-
-      // console.log('Schema validation passed');
     } catch (error) {
-      // console.error('Schema validation failed:', error);
+      console.error("Schema validation failed:", error);
       // In development, we could throw to make the error more visible
       if (process.env.NODE_ENV === "development") {
         throw error;
@@ -478,7 +476,7 @@ validateSchema(traitDefinitions);
 export function getFormSections(
   userProfile: string | null | undefined
 ): readonly SectionDefinition[] {
-  const profile = userProfile || "User's Profile Name";
+  const profile = userProfile ?? "User's Profile Name";
 
   return traitDefinitions.map((section) => ({
     ...section,
@@ -519,7 +517,6 @@ export function getInitialTraitsValues(): TraitsData {
     });
   });
 
-  // console.log("Initial traits values created with empty title:", initialValues.title);
   return initialValues as TraitsData;
 }
 

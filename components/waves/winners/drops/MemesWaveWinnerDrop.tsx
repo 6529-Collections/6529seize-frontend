@@ -13,7 +13,6 @@ import {
   getTimeAgoShort,
 } from "../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
-import { faImage } from "@fortawesome/free-regular-svg-icons";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MemeDropTraits from "../../../memes/drops/MemeDropTraits";
@@ -105,9 +104,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0 tw-whitespace-nowrap">
                   {title}
                 </h3>
-                <div className="tw-text-md tw-text-iron-400">
-                  {description}
-                </div>
+                <div className="tw-text-md tw-text-iron-400">{description}</div>
               </div>
             </div>
           </div>

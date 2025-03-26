@@ -53,20 +53,10 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
     }
   };
 
-  const getBadgeColor = (rank: number | null): string => {
-    if (rank === 1)
-      return "tw-text-[#E8D48A] tw-bg-[#E8D48A]/10 tw-border-[#E8D48A]/30";
-    if (rank === 2)
-      return "tw-text-[#DDDDDD] tw-bg-[#DDDDDD]/10 tw-border-[#DDDDDD]/30";
-    if (rank === 3)
-      return "tw-text-[#CD7F32] tw-bg-[#CD7F32]/10 tw-border-[#CD7F32]/30";
-    return "tw-text-iron-400 tw-bg-iron-800/40 tw-border-iron-700/30";
-  };
-
   const trophyIcon = (rank: number | null, decisionTime?: number) => {
     if (rank) {
       return (
-        <WinnerDropBadge rank={rank} decisionTime={decisionTime || null} />
+        <WinnerDropBadge rank={rank} decisionTime={decisionTime ?? null} />
       );
     }
     return <></>;

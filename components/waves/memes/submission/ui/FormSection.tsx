@@ -3,7 +3,6 @@ import React from "react";
 interface FormSectionProps {
   readonly title: string;
   readonly children: React.ReactNode;
-  readonly className?: string;
   readonly titleClassName?: string;
   readonly contentClassName?: string;
 }

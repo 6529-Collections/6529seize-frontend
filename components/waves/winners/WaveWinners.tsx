@@ -25,11 +25,10 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
   const { winnersViewStyle } = useLayout();
 
   // Fetch data using decisions endpoint for all waves
-  const { decisionPoints: decisionPoints, isFetching: isDecisionsLoading } =
-    useWaveDecisions({
-      wave,
-      enabled: true, // Always enabled now that we use it for both types
-    });
+  const { decisionPoints, isFetching: isDecisionsLoading } = useWaveDecisions({
+    wave,
+    enabled: true, // Always enabled now that we use it for both types
+  });
 
   return (
     <div

@@ -1,5 +1,5 @@
 import { TraitsData } from "../types/TraitsData";
-import { BaseFieldDefinition, FieldType } from "../../traits/schema";
+import { BaseFieldDefinition } from "../../traits/schema";
 
 /**
  * Options to configure validation behavior
@@ -11,14 +11,14 @@ export interface ValidationOptions {
    * - 'touched': Only validate fields the user has interacted with
    * - 'dirty': Only validate fields that have been modified from initial values
    */
-  mode?: 'all' | 'touched' | 'dirty';
-  
+  mode?: "all" | "touched" | "dirty";
+
   /**
    * Set of fields that have been touched by user interaction
    * Used with mode: 'touched'
    */
   touchedFields?: Set<keyof TraitsData>;
-  
+
   /**
    * Map of initial values to determine dirty state
    * Used with mode: 'dirty'
@@ -34,7 +34,7 @@ export interface FieldValidationResult {
    * Whether the field is valid
    */
   isValid: boolean;
-  
+
   /**
    * Error message if invalid, null if valid
    */
@@ -49,18 +49,18 @@ export interface ValidationResult {
    * Whether the entire form is valid
    */
   isValid: boolean;
-  
+
   /**
    * Map of field names to their error messages
    * If a field is valid, its value will be null
    */
   errors: Record<keyof TraitsData, string | null>;
-  
+
   /**
    * Reference to the first invalid field for focusing
    */
   firstInvalidField?: keyof TraitsData;
-  
+
   /**
    * Count of validation errors
    */
@@ -68,25 +68,27 @@ export interface ValidationResult {
 }
 
 /**
- * Field validation context with all necessary information 
+ * Field validation context with all necessary information
  * for validating a specific field
  */
-export interface FieldValidationContext<T extends keyof TraitsData = keyof TraitsData> {
+export interface FieldValidationContext<
+  T extends keyof TraitsData = keyof TraitsData
+> {
   /**
    * Field name/key
    */
   field: T;
-  
+
   /**
    * Current value of the field
    */
   value: TraitsData[T];
-  
+
   /**
    * Field definition from schema
    */
   fieldDefinition: BaseFieldDefinition;
-  
+
   /**
    * Complete form data for cross-field validation
    */

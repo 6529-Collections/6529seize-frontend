@@ -1,5 +1,12 @@
-import { FieldValidationContext, FieldValidationResult } from "./validationTypes";
-import { FieldType, TextFieldDefinition, NumberFieldDefinition, DropdownFieldDefinition } from "../../traits/schema";
+import {
+  FieldValidationContext,
+  FieldValidationResult,
+} from "./validationTypes";
+import {
+  FieldType,
+  NumberFieldDefinition,
+  DropdownFieldDefinition,
+} from "../../traits/schema";
 
 /**
  * Validates a text field
@@ -10,25 +17,25 @@ export function validateTextField(
   context: FieldValidationContext
 ): FieldValidationResult {
   const { value } = context;
-  
+
   // Text fields must be non-empty strings
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return {
       isValid: false,
-      errorMessage: "Value must be a text string"
+      errorMessage: "Value must be a text string",
     };
   }
-  
+
   if (value.trim().length === 0) {
     return {
       isValid: false,
-      errorMessage: "Field cannot be empty"
+      errorMessage: "Field cannot be empty",
     };
   }
-  
+
   return {
     isValid: true,
-    errorMessage: null
+    errorMessage: null,
   };
 }
 
@@ -41,50 +48,50 @@ export function validateNumberField(
   context: FieldValidationContext
 ): FieldValidationResult {
   const { value, fieldDefinition } = context;
-  
+
   // Number fields must be actual numbers
-  if (typeof value !== 'number') {
+  if (typeof value !== "number") {
     return {
       isValid: false,
-      errorMessage: "Value must be a number"
+      errorMessage: "Value must be a number",
     };
   }
-  
+
   if (isNaN(value)) {
     return {
       isValid: false,
-      errorMessage: "Value must be a valid number"
+      errorMessage: "Value must be a valid number",
     };
   }
-  
+
   // Disallow zero values
   if (value === 0) {
     return {
       isValid: false,
-      errorMessage: "Value cannot be zero"
+      errorMessage: "Value cannot be zero",
     };
   }
-  
+
   // Check min/max constraints if defined in the field definition
   const numberFieldDef = fieldDefinition as NumberFieldDefinition;
-  
+
   if (numberFieldDef.min !== undefined && value < numberFieldDef.min) {
     return {
       isValid: false,
-      errorMessage: `Value must be at least ${numberFieldDef.min}`
+      errorMessage: `Value must be at least ${numberFieldDef.min}`,
     };
   }
-  
+
   if (numberFieldDef.max !== undefined && value > numberFieldDef.max) {
     return {
       isValid: false,
-      errorMessage: `Value must be at most ${numberFieldDef.max}`
+      errorMessage: `Value must be at most ${numberFieldDef.max}`,
     };
   }
-  
+
   return {
     isValid: true,
-    errorMessage: null
+    errorMessage: null,
   };
 }
 
@@ -97,18 +104,18 @@ export function validateBooleanField(
   context: FieldValidationContext
 ): FieldValidationResult {
   const { value } = context;
-  
+
   // Boolean fields must be true or false
-  if (typeof value !== 'boolean') {
+  if (typeof value !== "boolean") {
     return {
       isValid: false,
-      errorMessage: "Value must be a boolean"
+      errorMessage: "Value must be a boolean",
     };
   }
-  
+
   return {
     isValid: true,
-    errorMessage: null
+    errorMessage: null,
   };
 }
 
@@ -121,34 +128,34 @@ export function validateDropdownField(
   context: FieldValidationContext
 ): FieldValidationResult {
   const { value, fieldDefinition } = context;
-  
+
   // Dropdown fields must be strings
-  if (typeof value !== 'string') {
+  if (typeof value !== "string") {
     return {
       isValid: false,
-      errorMessage: "Value must be a text selection"
+      errorMessage: "Value must be a text selection",
     };
   }
-  
+
   if (value.trim().length === 0) {
     return {
       isValid: false,
-      errorMessage: "Please select an option"
+      errorMessage: "Please select an option",
     };
   }
-  
+
   // Check if the value is in the options list
   const dropdownFieldDef = fieldDefinition as DropdownFieldDefinition;
   if (!dropdownFieldDef.options.includes(value)) {
     return {
       isValid: false,
-      errorMessage: "Selected value is not a valid option"
+      errorMessage: "Selected value is not a valid option",
     };
   }
-  
+
   return {
     isValid: true,
-    errorMessage: null
+    errorMessage: null,
   };
 }
 
