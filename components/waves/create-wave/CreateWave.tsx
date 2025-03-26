@@ -5,9 +5,7 @@ import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveGroups from "./groups/CreateWaveGroups";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
-import {
-  CreateWaveStep,
-} from "../../../types/waves.types";
+import { CreateWaveStep } from "../../../types/waves.types";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
 import CreateWaveActions from "./utils/CreateWaveActions";
@@ -20,20 +18,15 @@ import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { ApiCreateWaveDropRequest } from "../../../generated/models/ApiCreateWaveDropRequest";
 import { useRouter } from "next/router";
-import { 
-  generateMediaForPart, 
-  generateMediaForOverview, 
-  generateDropPart 
+import {
+  generateMediaForOverview,
+  generateDropPart,
 } from "./services/waveMediaService";
-import {
-  getAdminGroupId
-} from "./services/waveGroupService";
-import {
-  useAddWaveMutation
-} from "./services/waveApiService";
+import { getAdminGroupId } from "./services/waveGroupService";
+import { useAddWaveMutation } from "./services/waveApiService";
 import { useWaveConfig } from "./hooks/useWaveConfig";
 import useCapacitor from "../../../hooks/useCapacitor";
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
+import CreateWaveFlow from "./CreateWaveFlow";
 
 export default function CreateWave({
   profile,
@@ -43,14 +36,13 @@ export default function CreateWave({
   readonly onBack: () => void;
 }) {
   const router = useRouter();
-  const isMobile = useIsMobileScreen();
   const { isIos, keyboardVisible } = useCapacitor();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { waitAndInvalidateDrops, onWaveCreated } = useContext(
     ReactQueryWrapperContext
   );
   const [submitting, setSubmitting] = useState(false);
-  
+
   // Use the hook for configuration state management
   const {
     config,
@@ -87,7 +79,6 @@ export default function CreateWave({
     null
   );
 
-
   const addWaveMutation = useAddWaveMutation({
     onSuccess: (response) => {
       waitAndInvalidateDrops();
@@ -111,8 +102,6 @@ export default function CreateWave({
     if (haveDrop) setShowDropError(false);
   };
 
-
-
   const onComplete = async () => {
     setSubmitting(true);
     const { success } = await requestAuth();
@@ -133,10 +122,11 @@ export default function CreateWave({
       handle: connectedProfile?.profile?.handle,
       onError: (error) => {
         setToast({
-          message: typeof error === 'string' ? error : "Failed to get admin group",
+          message:
+            typeof error === "string" ? error : "Failed to get admin group",
           type: "error",
         });
-      }
+      },
     });
     if (!adminGroupId) {
       setSubmitting(false);
@@ -279,72 +269,43 @@ export default function CreateWave({
   };
 
   return (
-    <div className="tailwind-scope tw-bg-iron-950 tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-28 tw-px-4 xl:tw-px-0 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto tw-min-h-screen">
-      <div className="tw-h-full tw-w-full">
-        <div className="xl:tw-max-w-[60rem] tw-mx-auto">
-          <button
-            onClick={onBack}
-            type="button"
-            className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50">
-            <svg
-              className="tw-flex-shrink-0 tw-w-5 tw-h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M20 12H4M4 12L10 18M4 12L10 6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"></path>
-            </svg>
-            <span>Back</span>
-          </button>
-          <div
-            className={`tw-mb-0 tw-font-bold ${
-              isMobile ? "tw-text-3xl" : "tw-text-5xl"
-            }`}>
-            Create Wave {!!config.overview.name && `"${config.overview.name}"`}
-          </div>
+    <CreateWaveFlow
+      onBack={onBack}
+      title={`Create Wave ${
+        !!config.overview.name && `"${config.overview.name}"`
+      }`}
+    >
+      <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
+        <div className="tw-1/4">
+          <CreateWavesMainSteps
+            activeStep={step}
+            waveType={config.overview.type}
+            onStep={(step) => onStep({ step, direction: "backward" })}
+          />
         </div>
-        <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
-          <div className="tw-1/4">
-            <CreateWavesMainSteps
-              activeStep={step}
-              waveType={config.overview.type}
-              onStep={(step) => onStep({ step, direction: "backward" })}
-            />
-          </div>
-          <div
-            className={`tw-flex-1 ${
-              isIos && !keyboardVisible ? "tw-mb-10" : ""
-            }`}>
-            <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
-              <div className="tw-relative tw-h-full">
-                <div className="tw-flex tw-flex-col tw-h-full">
-                  <div className="tw-flex-1 tw-w-full">
-                    {stepComponent[step]}
+        <div
+          className={`tw-flex-1 ${isIos && !keyboardVisible ? "tw-mb-10" : ""}`}
+        >
+          <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
+            <div className="tw-relative tw-h-full">
+              <div className="tw-flex tw-flex-col tw-h-full">
+                <div className="tw-flex-1 tw-w-full">{stepComponent[step]}</div>
+                {!selectedOutcomeType && (
+                  <div className="tw-mt-auto">
+                    <CreateWaveActions
+                      setStep={(step, direction) => onStep({ step, direction })}
+                      step={step}
+                      config={config}
+                      submitting={submitting}
+                      onComplete={onComplete}
+                    />
                   </div>
-                  {!selectedOutcomeType && (
-                    <div className="tw-mt-auto">
-                      <CreateWaveActions
-                        setStep={(step, direction) =>
-                          onStep({ step, direction })
-                        }
-                        step={step}
-                        config={config}
-                        submitting={submitting}
-                        onComplete={onComplete}
-                      />
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </CreateWaveFlow>
   );
 }

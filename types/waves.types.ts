@@ -44,6 +44,7 @@ export interface CreateWaveDropsConfig {
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
   readonly terms: string | null;
   readonly signatureRequired: boolean;
+  readonly adminCanDeleteDrops: boolean;
 }
 
 export interface TimeWeightedVotingSettings {

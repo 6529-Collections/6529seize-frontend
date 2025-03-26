@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { EnhancedWave } from "../../../../hooks/useWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import BrainLeftSidebarCreateAWaveButton from "../BrainLeftSidebarCreateAWaveButton";
+import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
 
 interface UnifiedWavesListProps {
   readonly waves: EnhancedWave[];
@@ -21,10 +22,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   isFetchingNextPage,
 }) => {
   // No longer splitting waves into separate categories
-  
+
   // Ref for intersection observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  
+
   // Track if we've triggered a fetch to avoid multiple triggers
   const hasFetchedRef = useRef(false);
 
@@ -32,48 +33,52 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   useEffect(() => {
     hasFetchedRef.current = false;
   }, [hasNextPage, isFetchingNextPage]);
-  
+
   // Set up intersection observer for infinite scrolling
   useEffect(() => {
     const currentRef = loadMoreRef.current;
-    
+
     // Only observe if we have more pages to load and aren't already fetching
     if (!hasNextPage || isFetchingNextPage) return;
-    
+
     const handleIntersection = (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
       // Only fetch if we're intersecting, have more pages, aren't already fetching,
       // and haven't triggered a fetch in this cycle
-      if (entry.isIntersecting && hasNextPage && !isFetchingNextPage && !hasFetchedRef.current) {
+      if (
+        entry.isIntersecting &&
+        hasNextPage &&
+        !isFetchingNextPage &&
+        !hasFetchedRef.current
+      ) {
         hasFetchedRef.current = true;
         fetchNextPage();
       }
     };
-    
-    const observer = new IntersectionObserver(
-      handleIntersection,
-      { rootMargin: "100px" }
-    );
-    
+
+    const observer = new IntersectionObserver(handleIntersection, {
+      rootMargin: "100px",
+    });
+
     if (currentRef) {
       observer.observe(currentRef);
     }
-    
+
     return () => {
       if (currentRef) {
         observer.unobserve(currentRef);
       }
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-  
+
   return (
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
         {/* Create Wave Button */}
         <div className="tw-px-4 tw-mb-4">
-          <BrainLeftSidebarCreateAWaveButton />
+          <BrainLeftSidebarCreateADirectMessageButton />
         </div>
-        
+
         {/* Non-scrollable container for all waves - parent will handle scrolling */}
         <div className="tw-w-full">
           {/* Unified Waves List */}
@@ -89,10 +94,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
               ))}
             </div>
           )}
-          
+
           {/* Loading indicator and intersection trigger */}
           {(hasNextPage || isFetchingNextPage) && (
-            <div 
+            <div
               ref={loadMoreRef}
               className="tw-flex tw-justify-center tw-items-center tw-py-4"
             >
@@ -105,7 +110,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
               )}
             </div>
           )}
-          
+
           {/* Empty state */}
           {waves.length === 0 && !isFetchingNextPage && (
             <div className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500">

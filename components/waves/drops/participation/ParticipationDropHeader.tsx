@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
+import { cicToType } from "../../../../helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
-import ParticipationDropPfp from "./ParticipationDropPfp";
-import { ApiDropType } from "../../../../generated/models/ApiDropType";
 import WinnerDropBadge from "../winner/WinnerDropBadge";
+import { Time } from "../../../../helpers/time";
 
 interface ParticipationDropHeaderProps {
   readonly drop: ExtendedDrop;
@@ -42,8 +41,8 @@ export default function ParticipationDropHeader({
           </div>
 
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-            {getTimeAgoShort(drop.created_at)}
+          <p className="tw-text-xs tw-m-0 tw-whitespace-nowrap tw-font-medium tw-leading-none tw-text-iron-400">
+            {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
           </p>
         </div>
 

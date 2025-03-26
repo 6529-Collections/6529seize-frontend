@@ -86,7 +86,7 @@ export default function HeaderUserProfile({
         <img
           src={userContent.pfpUrl}
           alt="Profile Picture"
-          className="tw-flex-shrink-0 tw-h-7 tw-w-7 -tw-ml-1 tw-flex-none tw-rounded-md tw-bg-iron-700"
+          className="tw-flex-shrink-0 tw-max-h-7 tw-max-w-7 -tw-ml-1 tw-flex-none tw-rounded-md tw-bg-iron-700"
         />
       ) : (
         <div className="tw-flex-shrink-0 tw-h-7 tw-w-7 -tw-ml-1 tw-flex-none tw-rounded-md tw-bg-iron-700 group-hover:tw-bg-iron-600 tw-transition tw-duration-300 tw-ease-out"></div>

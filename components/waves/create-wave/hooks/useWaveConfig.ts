@@ -60,6 +60,7 @@ export function useWaveConfig() {
         requiredMetadata: [],
         terms: null,
         signatureRequired: false,
+        adminCanDeleteDrops: false,
       },
       voting: {
         type: ApiWaveCreditType.Tdh,

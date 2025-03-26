@@ -20,8 +20,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
                 <span className="tw-text-xs">
                   {rater.profile.handle} - {rater.rating}
                 </span>
-              }
-            >
+              }>
               {rater.profile.pfp ? (
                 <img
                   src={getScaledImageUri(
@@ -29,7 +28,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
                     ImageScale.W_AUTO_H_50
                   )}
                   alt={`${rater.profile.handle}'s avatar`}
-                  className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-black/50 tw-ring-1 tw-bg-iron-700"
+                  className="tw-max-h-5 tw-max-w-5 tw-rounded-md tw-ring-black/50 tw-ring-1 tw-bg-iron-700"
                 />
               ) : (
                 <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black/50 tw-bg-iron-700" />
@@ -46,8 +45,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
       <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">
         {!!drop.rating && (
           <Tippy
-            content={<span className="tw-text-xs tw-font-medium">Total</span>}
-          >
+            content={<span className="tw-text-xs tw-font-medium">Total</span>}>
             <span className="tw-text-iron-500 tw-text-xs tw-font-normal tw-bg-iron-800/30 tw-px-2 tw-py-0.5 tw-rounded-full">
               {formatNumberWithCommas(drop.rating)}{" "}
               <span className="">likes</span>
@@ -60,22 +58,19 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
               drop.context_profile_context.rating > 0
                 ? "tw-bg-green/20"
                 : "tw-bg-red/20"
-            } tw-ml-2 tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-transition tw-ease-out tw-duration-300`}
-          >
+            } tw-ml-2 tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-transition tw-ease-out tw-duration-300`}>
             <Tippy
               content={
                 <span className="tw-text-xs tw-font-medium">
                   Your given likes
                 </span>
-              }
-            >
+              }>
               <span
                 className={`${
                   drop.context_profile_context.rating > 0
                     ? "tw-text-green"
                     : "tw-text-error"
-                } tw-text-xs tw-font-normal`}
-              >
+                } tw-text-xs tw-font-normal`}>
                 {formatNumberWithCommas(drop.context_profile_context.rating)}
               </span>
             </Tippy>
