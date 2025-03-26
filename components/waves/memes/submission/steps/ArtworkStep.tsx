@@ -1,19 +1,17 @@
-import React, { useCallback, useState, useEffect, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
-import SecondaryButton from "../../../../utils/button/SecondaryButton";
 import { TraitsData } from "../types/TraitsData";
 import MemesArtSubmissionFile from "../../MemesArtSubmissionFile";
 import ArtworkDetails from "../details/ArtworkDetails";
 import MemesArtSubmissionTraits from "../../MemesArtSubmissionTraits";
 import SubmissionProgress, { SubmissionPhase } from "../ui/SubmissionProgress";
-import ValidationSummary from "../ui/ValidationSummary";
 import { useTraitsValidation } from "../validation";
 
 /**
  * Required fields for submission
  * All fields are required for submission
  */
-const REQUIRED_FIELDS = ["title", "description", "memeName"] as const;
+
 
 /**
  * Fields that are read-only and should be skipped in validation
@@ -302,7 +300,6 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
           setTraits={setTraits}
           validationErrors={validation.errors}
           onFieldBlur={handleFieldBlur}
-          requiredFields={REQUIRED_FIELDS}
         />
       </div>
 

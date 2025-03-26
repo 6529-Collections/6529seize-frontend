@@ -4,17 +4,8 @@
  * Utility functions for handling file formats, extensions, and sizes.
  */
 
-import { ACCEPTED_FORMATS } from './constants';
 import { detectBrowser } from './browserDetection';
 
-/**
- * Create extensions list from formats for validation messages
- */
-export const ACCEPTED_EXTENSIONS: readonly string[] = 
-  ACCEPTED_FORMATS.map(format => {
-    const parts = format.split('/');
-    return parts[1].toUpperCase();
-  });
 
 /**
  * Get file extension from File object

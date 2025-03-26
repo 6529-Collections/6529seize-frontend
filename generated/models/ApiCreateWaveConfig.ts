@@ -29,6 +29,7 @@ export class ApiCreateWaveConfig {
     'time_lock_ms': number | null;
     'admin_group': ApiCreateNewWaveScope | null;
     'decisions_strategy': ApiWaveDecisionsStrategy | null;
+    'admin_drop_deletion_enabled': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -67,6 +68,12 @@ export class ApiCreateWaveConfig {
             "name": "decisions_strategy",
             "baseName": "decisions_strategy",
             "type": "ApiWaveDecisionsStrategy",
+            "format": ""
+        },
+        {
+            "name": "admin_drop_deletion_enabled",
+            "baseName": "admin_drop_deletion_enabled",
+            "type": "boolean",
             "format": ""
         }    ];
 

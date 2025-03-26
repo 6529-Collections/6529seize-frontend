@@ -85,7 +85,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
               htmlFor="field-title"
               className="sm:tw-w-1/3 tw-text-sm tw-font-medium tw-text-iron-300"
             >
-              Artwork Title<span className="tw-text-iron-300 tw-ml-1">*</span>
+              Artwork Title
             </label>
             <div className="tw-flex tw-flex-col sm:tw-w-2/3">
               <input
@@ -121,7 +121,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
               htmlFor="field-description"
               className="sm:tw-w-1/3 tw-text-sm tw-font-medium sm:tw-mt-2 tw-text-iron-300"
             >
-              Description<span className="tw-text-iron-300 tw-ml-1">*</span>
+              Description
             </label>
             <div className="tw-flex tw-flex-col sm:tw-w-2/3">
               <textarea

@@ -50,5 +50,4 @@ export interface TraitWrapperProps {
   readonly className?: string;
   readonly error?: string | null;
   readonly id?: string;
-  readonly required?: boolean;
 }

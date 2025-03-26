@@ -9,7 +9,6 @@ interface MemesArtSubmissionTraitsProps {
   readonly setTraits: (traits: Partial<TraitsData>) => void;
   readonly validationErrors?: Record<keyof TraitsData, string | null>;
   readonly onFieldBlur?: (field: keyof TraitsData) => void;
-  readonly requiredFields?: ReadonlyArray<keyof TraitsData>;
 }
 
 /**
@@ -22,7 +21,6 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   setTraits,
   validationErrors = {},
   onFieldBlur,
-  requiredFields = [],
 }) => {
   const { connectedProfile } = useAuth();
 
@@ -82,7 +80,6 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
                   onBlur={
                     onFieldBlur ? () => onFieldBlur(field.field) : undefined
                   }
-                  requiredFields={requiredFields}
                 />
               ))}
             </div>

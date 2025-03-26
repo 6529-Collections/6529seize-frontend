@@ -30,7 +30,7 @@ export const FILE_SIZE_LIMIT: number = 100 * 1024 * 1024;
 /**
  * Accept string for file input element
  */
-export const FILE_INPUT_ACCEPT: string = 'image/png,image/jpeg,image/jpg,video/*';
+export const FILE_INPUT_ACCEPT: string = 'image/png,image/jpeg,image/jpg,image/gif,video/mp4';
 
 /**
  * Maximum number of processing attempts before giving up

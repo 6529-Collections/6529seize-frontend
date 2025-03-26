@@ -31,6 +31,7 @@ export class ApiWaveConfig {
     'authenticated_user_eligible_for_admin': boolean;
     'decisions_strategy': ApiWaveDecisionsStrategy | null;
     'next_decision_time': number | null;
+    'admin_drop_deletion_enabled': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -82,6 +83,12 @@ export class ApiWaveConfig {
             "baseName": "next_decision_time",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "admin_drop_deletion_enabled",
+            "baseName": "admin_drop_deletion_enabled",
+            "type": "boolean",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

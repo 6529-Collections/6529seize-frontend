@@ -10,7 +10,6 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   className,
   error,
   id,
-  required = true,
 }) => {
   // Generate unique IDs for accessibility
   const fieldId = id || `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
@@ -42,9 +41,6 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
             }`}
           >
             {label}
-            {required && !readOnly && (
-              <span className="tw-text-red tw-ml-1">*</span>
-            )}
           </label>
         </div>
 
