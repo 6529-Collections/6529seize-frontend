@@ -53,16 +53,16 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           <SingleWaveDropClose onClose={onClose} />
         </div>
         <div className="tw-flex tw-flex-col">
-          <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3 tw-px-6">
+          <div className="tw-flex tw-flex-col tw-gap-y-2 tw-px-6">
             {isWinner && <WinnerBadge drop={drop} showBadge={true} />}
             <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
               {title}
             </h3>
           </div>
-          <div className="tw-px-6 tw-pt-4 tw-pb-4">
+          <div className="tw-px-6 tw-mt-2">
             <SingleWaveDropVotes drop={drop} />
           </div>
-          <div>
+          <div className="tw-mt-4">
             {artworkMedia && (
               <div className="tw-flex tw-justify-center">
                 <DropListItemContentMedia
