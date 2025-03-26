@@ -7,7 +7,6 @@ export interface BaseTraitProps {
   readonly className?: string;
   readonly error?: string | null;
   readonly onBlur?: (field: keyof TraitsData) => void;
-  readonly required?: boolean;
 }
 
 export interface TextTraitProps extends BaseTraitProps {
@@ -50,5 +49,4 @@ export interface TraitWrapperProps {
   readonly className?: string;
   readonly error?: string | null;
   readonly id?: string;
-  readonly required?: boolean;
 }

@@ -5,7 +5,6 @@ import SingleWaveDropVoteSubmit, {
   SingleWaveDropVoteSubmitHandles,
 } from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSlider from "./SingleWaveDropVoteSlider";
-import { TabToggle } from "../../common/TabToggle";
 import { SingleWaveDropVoteInput } from "./SingleWaveDropVoteInput";
 import { SingleWaveDropVoteStats } from "./SingleWaveDropVoteStats";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

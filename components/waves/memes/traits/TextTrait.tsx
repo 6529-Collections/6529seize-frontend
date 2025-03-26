@@ -17,7 +17,6 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   className,
   error,
   onBlur,
-  required = false,
 }) => {
   // Use a ref to track the input element
   const inputRef = useRef<HTMLInputElement>(null);
@@ -69,7 +68,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
     } tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500`, [readOnly]);
   
   return (
-    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error} required={required}>
+    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error}>
       <input
         ref={inputRef}
         type="text"

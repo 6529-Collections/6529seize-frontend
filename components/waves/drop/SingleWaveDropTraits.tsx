@@ -185,12 +185,9 @@ const extractTraitsFromMetadata = (
 
       // Type guard: map to known number fields
       if (
-        [
-          "pointsPower",
-          "pointsWisdom",
-          "pointsLoki",
-          "pointsSpeed",
-        ].includes(normalizedKey as keyof TraitsData)
+        ["pointsPower", "pointsWisdom", "pointsLoki", "pointsSpeed"].includes(
+          normalizedKey as keyof TraitsData
+        )
       ) {
         traitKey = normalizedKey as keyof TraitsData;
       }
@@ -370,7 +367,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       description: "",
 
       // Fields with fallbacks from extracted data or defaults
-      artist: extractedTraits.artist || drop.author.handle || "Unknown Artist",
+      artist: extractedTraits.artist || "",
       palette: extractedTraits.palette || "Color",
       style: extractedTraits.style || "",
       jewel: extractedTraits.jewel || "",
@@ -401,13 +398,12 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       gm: extractedTraits.gm || false,
       summer: extractedTraits.summer || false,
       tulip: extractedTraits.tulip || false,
-      memeName: extractedTraits.memeName || drop.title || "WAGMI",
+      memeName: extractedTraits.memeName || "",
       pointsPower: extractedTraits.pointsPower || 0,
       pointsWisdom: extractedTraits.pointsWisdom || 0,
       pointsLoki: extractedTraits.pointsLoki || 0,
       pointsSpeed: extractedTraits.pointsSpeed || 0,
-      seizeArtistProfile:
-        extractedTraits.seizeArtistProfile || drop.author.handle || "",
+      seizeArtistProfile: extractedTraits.seizeArtistProfile || "",
     };
 
     return finalTraits;

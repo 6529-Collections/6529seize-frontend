@@ -29,6 +29,7 @@ export class ApiWaveMin {
     'voting_period_start': number | null;
     'voting_period_end': number | null;
     'voting_credit_type': ApiWaveCreditType;
+    'admin_drop_deletion_enabled': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -121,6 +122,12 @@ export class ApiWaveMin {
             "name": "voting_credit_type",
             "baseName": "voting_credit_type",
             "type": "ApiWaveCreditType",
+            "format": ""
+        },
+        {
+            "name": "admin_drop_deletion_enabled",
+            "baseName": "admin_drop_deletion_enabled",
+            "type": "boolean",
             "format": ""
         }    ];
 

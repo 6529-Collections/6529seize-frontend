@@ -418,6 +418,8 @@ export const getCreateNewWaveBody = ({
       enabled: config.chat.enabled,
     },
     wave: {
+      // TODO: fix it
+      admin_drop_deletion_enabled: true,
       type: config.overview.type,
       winning_thresholds: getWinningThreshold({ config }),
       // TODO - should be in outcomes

@@ -235,68 +235,6 @@ export default function WaveDropVoteSlider({
             />
           </div>
 
-          {/* Ticks */}
-          {presetMarks.map((mark) => (
-            <div
-              key={mark.percentage}
-              className="tw-absolute tw-z-20"
-              style={{ left: `${mark.position}%` }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePresetClick(mark.percentage);
-              }}
-            >
-              <div
-                className="tw-relative -tw-top-[2px] tw-cursor-pointer tw-group"
-                onMouseEnter={() => setHoveredPreset(mark.percentage)}
-                onMouseLeave={() => setHoveredPreset(null)}
-              >
-                <div className="tw-absolute tw-h-4 tw-w-8 -tw-left-4" />
-                <div
-                  className="tw-h-4 tw-w-0.5 tw-bg-iron-300/40 tw-rounded-full tw-mx-auto
-                  group-hover:tw-bg-iron-300/70 tw-transition-colors tw-duration-200"
-                />
-              </div>
-              <div className="tw-relative">
-                {/* Just show percentage labels below ticks */}
-                <div className={`tw-absolute tw-top-1 tw-left-1/2 -tw-translate-x-1/2 
-                  tw-text-[10px] tw-font-medium tw-text-iron-300 tw-opacity-70
-                  tw-whitespace-nowrap tw-select-none`}
-                >
-                  {mark.label}
-                </div>
-                
-                {/* Better tooltip that shows on hover */}
-                {hoveredPreset === mark.percentage && (
-                  <div className="tw-absolute tw-bottom-6 tw-left-1/2 -tw-translate-x-1/2 
-                    tw-bg-iron-800/90 tw-border tw-border-iron-700
-                    tw-rounded-md tw-px-2 tw-py-1 tw-shadow-lg tw-z-50">
-                    <div className="tw-inline-flex tw-items-center tw-gap-1">
-                      <span className="tw-text-[10px] tw-font-medium tw-text-iron-100">
-                        {formatNumberWithCommas(
-                          mark.percentage === 0
-                            ? 0
-                            : mark.percentage < 0
-                            ? Math.round(
-                                -(Math.abs(minValue) * Math.abs(mark.percentage)) / 100
-                              )
-                            : Math.round((maxValue * mark.percentage) / 100)
-                        )}
-                      </span>
-                      <span className="tw-text-[10px] tw-font-medium tw-text-iron-100">
-                        {creditType}
-                      </span>
-                    </div>
-                    <div className="tw-absolute tw-w-1.5 tw-h-1.5 tw-bottom-[-3px] 
-                      tw-left-1/2 -tw-translate-x-1/2 tw-rotate-45 
-                      tw-bg-iron-800/90 tw-border-r tw-border-b tw-border-iron-700">
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-
           {/* Thumb visual - Compact */}
           <motion.div
             ref={thumbRef}

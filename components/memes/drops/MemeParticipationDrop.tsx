@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
@@ -8,7 +8,6 @@ import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
 import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
-import DropArtwork from "../../drops/view/DropArtwork";
 import MemeDropVotingSection from "./meme-participation-drop/MemeDropVotingSection";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropTraits from "./MemeDropTraits";
@@ -79,7 +78,6 @@ export default function MemeParticipationDrop({
     onQuote({ drop, partId: drop.parts[0].part_id });
   }, [onQuote, drop]);
 
-
   return (
     <div className="tw-w-full">
       <div
@@ -111,12 +109,12 @@ export default function MemeParticipationDrop({
                 </div>
               </div>
               {artworkMedia && (
-                 <div className="tw-flex tw-justify-center">
-                 <DropListItemContentMedia
-                   media_mime_type={artworkMedia.mime_type}
-                   media_url={artworkMedia.url}
-                 />
-               </div>
+                <div className="tw-flex tw-justify-center">
+                  <DropListItemContentMedia
+                    media_mime_type={artworkMedia.mime_type}
+                    media_url={artworkMedia.url}
+                  />
+                </div>
               )}
               <div className="tw-p-4">
                 <MemeDropTraits drop={drop} />

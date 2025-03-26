@@ -2245,6 +2245,32 @@ paths:
                 $ref: "#/components/schemas/ApiWave"
         "400":
           description: Invalid request
+  /waves/direct-message/new:
+    post:
+      tags:
+        - Waves
+      summary: Create a direct message wave
+      operationId: createDirectMessageWave
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identity_addresses:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWave"
+        "400":
+          description: Invalid request
   /waves/{id}:
     get:
       tags:
@@ -3522,6 +3548,7 @@ components:
         - max_winners
         - admin_group
         - decisions_strategy
+        - admin_drop_deletion_enabled
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
@@ -3557,6 +3584,8 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiWaveDecisionsStrategy"
+        admin_drop_deletion_enabled:
+          type: boolean
     ApiCreateWaveDropRequest:
       type: object
       required:
@@ -5431,6 +5460,7 @@ components:
         - authenticated_user_eligible_for_admin
         - decisions_strategy
         - next_decision_time
+        - admin_drop_deletion_enabled
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
@@ -5470,6 +5500,8 @@ components:
           type: number
           format: int64
           nullable: true
+        admin_drop_deletion_enabled:
+          type: boolean
     ApiWaveContributorOverview:
       required:
         - contributor_identity
@@ -5697,6 +5729,7 @@ components:
         - chat_group_id
         - voting_group_id
         - admin_group_id
+        - admin_drop_deletion_enabled
       properties:
         id:
           type: string
@@ -5737,6 +5770,8 @@ components:
           nullable: true
         voting_credit_type:
           $ref: "#/components/schemas/ApiWaveCreditType"
+        admin_drop_deletion_enabled:
+          type: boolean
     ApiWaveOutcome:
       type: object
       required:

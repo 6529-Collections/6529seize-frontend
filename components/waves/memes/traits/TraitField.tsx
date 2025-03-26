@@ -14,7 +14,6 @@ interface TraitFieldProps {
   readonly updateBoolean: (field: keyof TraitsData, value: boolean) => void;
   readonly error?: string | null;
   readonly onBlur?: () => void;
-  readonly requiredFields?: ReadonlyArray<keyof TraitsData>;
 }
 
 // Create the component
@@ -26,10 +25,7 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
   updateBoolean,
   error,
   onBlur,
-  requiredFields = [],
 }) => {
-  // Check if this field is required
-  const isRequired = requiredFields.includes(definition.field);
   // Text field rendering
   if (definition.type === FieldType.TEXT) {
     // TypeScript automatically narrows the type here
@@ -43,7 +39,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         placeholder={definition.placeholder}
         error={error}
         onBlur={onBlur}
-        required={isRequired}
       />
     );
   }
@@ -62,7 +57,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         max={definition.max}
         error={error}
         onBlur={onBlur}
-        required={isRequired}
       />
     );
   }
@@ -79,7 +73,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         options={definition.options}
         error={error}
         onBlur={onBlur}
-        required={isRequired}
       />
     );
   }
@@ -95,7 +88,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         updateBoolean={updateBoolean}
         error={error}
         onBlur={onBlur}
-        required={isRequired}
       />
     );
   }

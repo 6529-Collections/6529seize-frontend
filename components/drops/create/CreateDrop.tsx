@@ -221,6 +221,7 @@ export default function CreateDrop({
         chat_group_id: null,
         voting_group_id: null,
         admin_group_id: null,
+        admin_drop_deletion_enabled: waveDetailed.wave.admin_drop_deletion_enabled,
       },
       author: {
         ...profileMin,

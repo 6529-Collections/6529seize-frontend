@@ -25,9 +25,7 @@ export default function MemeDropVoteStats({
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span
           className={`tw-text-md tw-font-semibold ${
-            isPositive
-              ? "tw-text-emerald-500"
-              : "tw-text-rose-500"
+            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
           } `}
         >
           {formatNumberWithCommas(rating || 0)}
@@ -41,9 +39,9 @@ export default function MemeDropVoteStats({
           {firstThreeVoters.map((voter) => (
             <Tippy
               key={voter.profile.handle}
-              content={`${
-                voter.profile.handle
-              } - ${formatNumberWithCommas(voter.rating)}`}
+              content={`${voter.profile.handle} - ${formatNumberWithCommas(
+                voter.rating
+              )}`}
             >
               <Link
                 href={`/${voter.profile.handle}`}
