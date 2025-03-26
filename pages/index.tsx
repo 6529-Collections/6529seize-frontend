@@ -101,7 +101,7 @@ export default function Home({
   const { connectedProfile, setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "6529.io",
+      title: "6529",
     });
   }, []);
 
