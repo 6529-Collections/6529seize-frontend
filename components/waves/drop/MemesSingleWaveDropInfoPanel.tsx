@@ -16,6 +16,7 @@ import { faCompress, faExpand } from "@fortawesome/free-solid-svg-icons";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import { WinnerBadge } from "./WinnerBadge";
+import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 interface MemesSingleWaveDropInfoPanelProps {
@@ -54,7 +55,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           <SingleWaveDropClose onClose={onClose} />
         </div>
         <div className="tw-flex tw-flex-col">
-          <div className="tw-px-6 tw-pb-4">
+          <div className="tw-px-6 tw-pb-3">
             {drop?.drop_type === ApiDropType.Participatory && (
               <SingleWaveDropPosition rank={drop.rank} />
             )}
@@ -79,6 +80,9 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                 />
               </div>
             )}
+            <div className="tw-px-6 tw-mt-4">
+              <SingleWaveDropTraits drop={drop} />
+            </div>
             <div className="tw-px-6 tw-mt-4">
               <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
             </div>

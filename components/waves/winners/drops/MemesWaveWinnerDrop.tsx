@@ -101,11 +101,11 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                   />
                 </div>
               </div>
-              <div className="tw-ml-[3.25rem]">
+              <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
                 <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0 tw-whitespace-nowrap">
                   {title}
                 </h3>
-                <div className="tw-text-md tw-text-iron-400 tw-line-clamp-3 tw-mt-2 xl:tw-mt-0">
+                <div className="tw-text-md tw-text-iron-400">
                   {description}
                 </div>
               </div>
@@ -113,7 +113,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           </div>
 
           {artworkMedia && (
-            <div className="tw-flex tw-justify-center">
+            <div className="tw-flex tw-justify-center tw-bg-iron-900/30">
               <DropListItemContentMedia
                 media_mime_type={artworkMedia.mime_type}
                 media_url={artworkMedia.url}

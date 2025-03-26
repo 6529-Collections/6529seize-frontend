@@ -24,22 +24,18 @@ export const SingleWaveDropInfoPanel: React.FC<
   const { isWinner } = useDropInteractionRules(drop);
   return (
     <SingleWaveDropInfoContainer activeTab={activeTab}>
-   
       <div className="tw-hidden lg:tw-block">
         <SingleWaveDropClose onClose={onClose} />
       </div>
 
       <SingleWaveDropInfoContent drop={drop} />
+      <div className="tw-px-6">
+        <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
+      </div>
+      <SingleWaveDropInfoActions drop={drop} wave={wave} />
 
-      <div className="tw-border-t tw-border-iron-800 tw-pt-3 tw-border-solid tw-border-x-0 tw-border-b-0">
-        <SingleWaveDropInfoActions drop={drop} wave={wave} />
-        <div className="tw-pt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-px-6">
-          <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
-        </div>
-
-        <div className="tw-mt-4 tw-pt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
-          <SingleWaveDropInfoDetails drop={drop} />
-        </div>
+      <div className="tw-mt-4 tw-pt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
+        <SingleWaveDropInfoDetails drop={drop} />
       </div>
     </SingleWaveDropInfoContainer>
   );

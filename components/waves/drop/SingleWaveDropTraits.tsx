@@ -1,13 +1,49 @@
 import React, { useState, useMemo } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { AnimatePresence, motion } from "framer-motion";
-
+import Tippy from "@tippyjs/react";
+import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import { ApiDropMetadata } from "../../../generated/models/ApiDropMetadata";
 import { TraitsData } from "../memes/submission/types/TraitsData";
 
 interface SingleWaveDropTraitsProps {
   readonly drop: ExtendedDrop;
 }
+
+// Component to display individual metadata items in cards
+const MetadataItem: React.FC<{
+  label: string;
+  value: string | number | boolean;
+}> = ({ label, value }) => {
+  const isMobile = useIsMobileDevice();
+
+  // Skip empty values
+  if (
+    (typeof value === "string" && !value) ||
+    (typeof value === "number" && value === 0) ||
+    (typeof value === "boolean" && !value)
+  ) {
+    return null;
+  }
+
+  // Format display value
+  const displayValue = typeof value === "boolean" ? "Yes" : String(value);
+
+  return (
+    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1">
+      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5">{label}:</span>
+      <Tippy
+        disabled={isMobile}
+        content={displayValue}
+        placement="top"
+        theme="dark"
+      >
+        <span className="tw-text-iron-200 tw-text-xs tw-font-medium tw-truncate">
+          {displayValue}
+        </span>
+      </Tippy>
+    </div>
+  );
+};
 
 // Extract trait data from drop metadata
 const extractTraitsFromMetadata = (
@@ -239,122 +275,10 @@ const extractTraitsFromMetadata = (
   return traits;
 };
 
-// Helper component for displaying trait items
-const TraitItem = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number | boolean;
-}) => {
-  // Skip empty string values or zero values
-  if (
-    (typeof value === "string" && !value) ||
-    (typeof value === "number" && value === 0)
-  ) {
-    return null;
-  }
-
-  // For boolean values, only show those that are true
-  if (typeof value === "boolean" && !value) {
-    return null;
-  }
-
-  // Format values appropriately
-  let displayValue: string | number;
-
-  if (typeof value === "boolean") {
-    displayValue = "Yes";
-  } else {
-    displayValue = value;
-  }
-
-  return (
-    <div className="tw-flex tw-justify-between tw-py-2 tw-px-4">
-      <span className="tw-text-iron-300 tw-text-sm">{label}</span>
-      <span className="tw-text-primary-300 tw-text-sm tw-font-medium">
-        {displayValue}
-      </span>
-    </div>
-  );
-};
-
-// Component for displaying a category of traits with its own collapsible section
-const TraitCategory = ({
-  title,
-  isOpen,
-  toggleOpen,
-  children,
-}: {
-  title: string;
-  isOpen: boolean;
-  toggleOpen: () => void;
-  children: React.ReactNode;
-}) => {
-  // Check if there are any non-null children to display
-  const childrenArray = React.Children.toArray(children);
-  const hasVisibleChildren = childrenArray.some((child) => child !== null);
-
-  // Don't render the category if there are no visible children
-  if (!hasVisibleChildren) {
-    return null;
-  }
-
-  return (
-    <div className="tw-border-b tw-border-iron-700 tw-last:tw-border-b-0">
-      <button
-        onClick={toggleOpen}
-        className="tw-w-full tw-flex tw-items-center tw-justify-between tw-py-3 tw-px-4 tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-colors hover:tw-text-primary-300 tw-border-0 tw-bg-transparent"
-      >
-        <span>{title}</span>
-        <motion.svg
-          animate={{ rotate: isOpen ? 0 : -90 }}
-          transition={{ duration: 0.2 }}
-          className="tw-w-4 tw-h-4 tw-text-iron-400"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </motion.svg>
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="tw-overflow-hidden"
-          >
-            <div className="tw-border-t tw-border-iron-800/80 tw-pb-2">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
 export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
   drop,
 }) => {
-  const [isTraitsOpen, setIsTraitsOpen] = useState(false);
-  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
-    {
-      "Basic Information": true,
-      "Card Points": false,
-      "Card Attributes": false,
-      "Special Properties": false,
-      "Additional Details": false,
-    }
-  );
+  const [showAllTraits, setShowAllTraits] = useState(false);
 
   // Extract traits from drop metadata
   const traits = useMemo(() => {
@@ -368,7 +292,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
 
       // Fields with fallbacks from extracted data or defaults
       artist: extractedTraits.artist || "",
-      palette: extractedTraits.palette || "Color",
+      palette: extractedTraits.palette || "",
       style: extractedTraits.style || "",
       jewel: extractedTraits.jewel || "",
       superpower: extractedTraits.superpower || "",
@@ -384,7 +308,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       sibling: extractedTraits.sibling || "",
       food: extractedTraits.food || "",
       drink: extractedTraits.drink || "",
-      bonus: extractedTraits.bonus || "",
+      bonus: extractedTraits.boost || "",
       boost: extractedTraits.boost || "",
       punk6529: extractedTraits.punk6529 || false,
       gradient: extractedTraits.gradient || false,
@@ -409,157 +333,78 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
     return finalTraits;
   }, [drop]);
 
-  // Check if there are any meaningful traits to display
-  const hasTraits = useMemo(() => {
-    // Check for any non-empty or non-zero traits
-    const nonEmptyCount = Object.entries(traits).filter(([_, value]) => {
-      if (typeof value === "string") return !!value;
-      if (typeof value === "number") return value > 0;
-      if (typeof value === "boolean") return value === true;
-      return false;
-    }).length;
+  // Convert traits to array of items for display
+  const traitItems = useMemo(() => {
+    return Object.entries(traits)
+      .filter(([_, value]) => {
+        if (typeof value === "string") return !!value;
+        if (typeof value === "number") return value > 0;
+        if (typeof value === "boolean") return value === true;
+        return false;
+      })
+      .map(([key, value]) => {
+        // Format key for display (camelCase to Title Case)
+        const formattedKey = key
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase())
+          .replace(/Points /, "") // Remove "Points " prefix
+          .trim();
 
-    // Only show traits section if we have at least 3 valid traits
-    return nonEmptyCount >= 3;
+        return { label: formattedKey, value };
+      });
   }, [traits]);
 
   // If there are no meaningful traits to display, don't render the component
-  if (!hasTraits) {
+  if (traitItems.length === 0) {
     return null;
   }
 
-  const toggleCategory = (category: string) => {
-    setOpenCategories((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
+  const handleShowMore = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllTraits(true);
+  };
+
+  const handleShowLess = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllTraits(false);
   };
 
   return (
-    <div>
-      <button
-        onClick={() => setIsTraitsOpen(!isTraitsOpen)}
-        className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-2.5 md:tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
-          isTraitsOpen ? "tw-rounded-t-xl" : "tw-rounded-xl"
-        }`}
-      >
-        <span
-          className={
-            isTraitsOpen
-              ? "tw-text-primary-300"
-              : "tw-text-iron-300 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
-          }
-        >
-          Artwork Traits
-        </span>
-        <motion.svg
-          animate={{ rotate: isTraitsOpen ? 0 : -90 }}
-          transition={{ duration: 0.3 }}
-          className={`tw-w-4 tw-h-4 tw-flex-shrink-0 ${
-            isTraitsOpen
-              ? "tw-text-primary-300"
-              : "tw-text-iron-400 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
-          }`}
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </motion.svg>
-      </button>
+    <div className="tw-w-full">
+      <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-3 tw-gap-2">
+        {/* Always show first 2 items (changed from 4) */}
+        {traitItems.slice(0, 2).map((item, index) => (
+          <MetadataItem key={index} label={item.label} value={item.value} />
+        ))}
 
-      <AnimatePresence>
-        {isTraitsOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900"
-          >
-            <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
-              <TraitCategory
-                title="Basic Information"
-                isOpen={openCategories["Basic Information"]}
-                toggleOpen={() => toggleCategory("Basic Information")}
+        {/* Show more button or additional items */}
+        {traitItems.length > 2 && (
+          showAllTraits ? (
+            <>
+              {traitItems.slice(2).map((item, index) => (
+                <MetadataItem
+                  key={`more-${index}`}
+                  label={item.label}
+                  value={item.value}
+                />
+              ))}
+              <button
+                onClick={handleShowLess}
+                className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
               >
-                <TraitItem label="Artist" value={traits.artist} />
-                <TraitItem label="Meme Name" value={traits.memeName} />
-              </TraitCategory>
-
-              <TraitCategory
-                title="Card Points"
-                isOpen={openCategories["Card Points"]}
-                toggleOpen={() => toggleCategory("Card Points")}
-              >
-                <TraitItem label="Power" value={traits.pointsPower} />
-                <TraitItem label="Wisdom" value={traits.pointsWisdom} />
-                <TraitItem label="Loki" value={traits.pointsLoki} />
-                <TraitItem label="Speed" value={traits.pointsSpeed} />
-              </TraitCategory>
-
-              <TraitCategory
-                title="Card Attributes"
-                isOpen={openCategories["Card Attributes"]}
-                toggleOpen={() => toggleCategory("Card Attributes")}
-              >
-                <div className="tw-grid tw-grid-cols-2 tw-gap-x-4">
-                  <TraitItem label="Punk 6529" value={traits.punk6529} />
-                  <TraitItem label="Gradient" value={traits.gradient} />
-                  <TraitItem label="Movement" value={traits.movement} />
-                  <TraitItem label="Dynamic" value={traits.dynamic} />
-                  <TraitItem label="Interactive" value={traits.interactive} />
-                  <TraitItem label="Collab" value={traits.collab} />
-                  <TraitItem label="OM" value={traits.om} />
-                  <TraitItem label="3D" value={traits.threeD} />
-                  <TraitItem label="Pepe" value={traits.pepe} />
-                  <TraitItem label="GM" value={traits.gm} />
-                  <TraitItem label="Summer" value={traits.summer} />
-                  <TraitItem label="Tulip" value={traits.tulip} />
-                </div>
-              </TraitCategory>
-
-              <TraitCategory
-                title="Special Properties"
-                isOpen={openCategories["Special Properties"]}
-                toggleOpen={() => toggleCategory("Special Properties")}
-              >
-                <TraitItem label="Palette" value={traits.palette} />
-                <TraitItem label="Style" value={traits.style} />
-                <TraitItem label="Jewel" value={traits.jewel} />
-                <TraitItem label="Superpower" value={traits.superpower} />
-                <TraitItem label="Dharma" value={traits.dharma} />
-                <TraitItem label="Gear" value={traits.gear} />
-                <TraitItem label="Clothing" value={traits.clothing} />
-                <TraitItem label="Element" value={traits.element} />
-                <TraitItem label="Bonus" value={traits.bonus} />
-                <TraitItem label="Boost" value={traits.boost} />
-              </TraitCategory>
-
-              <TraitCategory
-                title="Additional Details"
-                isOpen={openCategories["Additional Details"]}
-                toggleOpen={() => toggleCategory("Additional Details")}
-              >
-                <TraitItem label="Mystery" value={traits.mystery} />
-                <TraitItem label="Secrets" value={traits.secrets} />
-                <TraitItem label="Weapon" value={traits.weapon} />
-                <TraitItem label="Home" value={traits.home} />
-                <TraitItem label="Parent" value={traits.parent} />
-                <TraitItem label="Sibling" value={traits.sibling} />
-                <TraitItem label="Food" value={traits.food} />
-                <TraitItem label="Drink" value={traits.drink} />
-              </TraitCategory>
-            </div>
-          </motion.div>
+                Show less
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleShowMore}
+              className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
+            >
+              Show all
+            </button>
+          )
         )}
-      </AnimatePresence>
+      </div>
     </div>
   );
 };

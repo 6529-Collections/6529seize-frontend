@@ -51,9 +51,9 @@ export const setAuthJwt = (
 
 //TODO: CHANGE IT BACK
 
-/* export const getAuthJwt = () => {
+export const getAuthJwt = () => {
   if (true) {
-    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE4MDMzNDBhLTBlZGItNDRjNi04NTU2LWZjMThkNzM4NzUyZiIsInN1YiI6IjB4OWI4Nzc1ZTdhMWU2YmYwNzQ1NmJiODEwZmIwN2VmODIzNzViYTEzMiIsInJvbGUiOiIzOTA5ODhiYi0yY2NjLTRmMTQtYmFkYi05YzAzNDdhYWE1NDEiLCJpYXQiOjE3NDI4MDYzMDcsImV4cCI6MTc0Mjk3MjcwN30.K4kJbAI0y7G1e39buQImjCXRp4TZzj_ytQ6IpBfiMDU";
+    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVjZmQ0NDY0LTI1Y2QtNDg5ZC05ZGJiLTJjMmMzZmVkZGQ3OSIsInN1YiI6IjB4OWI4Nzc1ZTdhMWU2YmYwNzQ1NmJiODEwZmIwN2VmODIzNzViYTEzMiIsInJvbGUiOiIzOTA5ODhiYi0yY2NjLTRmMTQtYmFkYi05YzAzNDdhYWE1NDEiLCJpYXQiOjE3NDI5Nzg3MDMsImV4cCI6MTc0MzE0NTEwM30.whPLE_KeAILn3yb8pKWSiLTEC0sPGNW9lSWuPSFqGyk";
   }
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
@@ -70,9 +70,9 @@ export const getWalletAddress = () => {
     return "0x9B8775e7A1e6BF07456bB810fb07ef82375ba132";
   }
   return Cookies.get(WALLET_ADDRESS_COOKIE) ?? null;
-}; */
+};
 
-export const getAuthJwt = () => {
+/* export const getAuthJwt = () => {
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
 
@@ -86,7 +86,7 @@ export const getWalletAddress = () => {
 
 export const getWalletRole = () => {
   return Cookies.get(WALLET_ROLE_COOKIE) ?? null;
-};
+}; */
 
 export const removeAuthJwt = () => {
   Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);

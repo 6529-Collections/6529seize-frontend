@@ -53,7 +53,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               <div className="tw-p-4">
                 <div className="tw-flex tw-flex-col tw-gap-y-1">
                   <MemesLeaderboardDropArtistInfo drop={drop} />
-                  <div className="tw-ml-[3.25rem]">
+                  <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
                     <MemesLeaderboardDropHeader
                       title={title}
                       rank={drop.rank}

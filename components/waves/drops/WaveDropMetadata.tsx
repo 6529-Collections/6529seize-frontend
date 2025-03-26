@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Tippy from "@tippyjs/react";
 import { DropMetadata } from "../../../entities/IDrop";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
@@ -29,22 +29,62 @@ const MetadataItem: React.FC<{ label: string; value: string }> = ({ label, value
 };
 
 export default function WaveDropMetadata({ metadata }: WaveDropMetadataProps) {
+  const [showAllMetadata, setShowAllMetadata] = useState(false);
+  
   // Ensure metadata exists and is not empty
   if (!metadata || metadata.length === 0) {
     return null;
   }
+
+  const handleShowMore = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllMetadata(true);
+  };
+  
+  const handleShowLess = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowAllMetadata(false);
+  };
   
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
-        {/* Show all metadata items without show more/less buttons */}
-        {metadata.map((item) => (
+        {/* Always show first 2 items */}
+        {metadata.slice(0, 2).map((item) => (
           <MetadataItem 
             key={item.data_key} 
             label={item.data_key} 
             value={item.data_value || ""}
           />
         ))}
+        
+        {/* Show more button or additional items */}
+        {metadata.length > 2 && (
+          showAllMetadata ? (
+            <>
+              {metadata.slice(2).map((item) => (
+                <MetadataItem 
+                  key={item.data_key} 
+                  label={item.data_key} 
+                  value={item.data_value || ""}
+                />
+              ))}
+              <button
+                onClick={handleShowLess}
+                className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
+              >
+                Show less
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleShowMore}
+              className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
+            >
+              Show all
+            </button>
+          )
+        )}
       </div>
     </div>
   );

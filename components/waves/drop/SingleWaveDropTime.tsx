@@ -28,7 +28,7 @@ export const SingleWaveDropTime: React.FC<SingleWaveDropTimeProps> = ({
   // For both upcoming and in-progress states, use the same CountdownDisplay
   // with dynamic props based on the phase
   return (
-    <div className="tw-relative">
+    <div className="tw-relative tw-pt-4">
       <CountdownDisplay
         headerText={isUpcoming ? "Voting Starts In" : "Voting Ends In"}
         headerClassName="tw-text-sm tw-text-iron-400"

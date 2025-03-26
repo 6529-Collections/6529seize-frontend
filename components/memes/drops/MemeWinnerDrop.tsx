@@ -69,7 +69,7 @@ export default function MemeWinnerDrop({
       >
         <div
           className={`tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${
-            location === DropLocation.WAVE ? "tw-bg-iron-900" : "tw-bg-iron-950"
+            location === DropLocation.WAVE ? "tw-bg-iron-900/80" : "tw-bg-iron-950"
           } ${firstPlaceShadow}`}
         >
           <DropMobileMenuHandler
@@ -83,7 +83,7 @@ export default function MemeWinnerDrop({
                 <div className="tw-flex tw-flex-col tw-gap-4">
                   <MemeWinnerArtistInfo drop={drop} />
                 </div>
-                <div className="tw-flex tw-flex-col tw-mt-1.5 tw-ml-[3.25rem]">
+                <div className="tw-flex tw-flex-col tw-mt-2 sm:tw-mt-1.5 sm:tw-ml-[3.25rem]">
                   <MemeWinnerHeader title={title} />
                   <MemeWinnerDescription description={description} />
                 </div>
