@@ -39,7 +39,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         placeholder={definition.placeholder}
         error={error}
         onBlur={onBlur}
-        required={false}
       />
     );
   }
@@ -58,7 +57,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         max={definition.max}
         error={error}
         onBlur={onBlur}
-        required={false}
       />
     );
   }
@@ -75,7 +73,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         options={definition.options}
         error={error}
         onBlur={onBlur}
-        required={false}
       />
     );
   }
@@ -91,7 +88,6 @@ const TraitFieldComponent: React.FC<TraitFieldProps> = ({
         updateBoolean={updateBoolean}
         error={error}
         onBlur={onBlur}
-        required={false}
       />
     );
   }

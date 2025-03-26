@@ -372,6 +372,7 @@ const getOptimisticDrop = (
       chat_group_id: null,
       voting_group_id: null,
       admin_group_id: null,
+      admin_drop_deletion_enabled: false,
     },
     author: {
       id: connectedProfile.profile.external_id,
@@ -634,7 +635,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const getUpdatedDropRequest = async (
     requestBody: ApiCreateDropRequest
   ): Promise<ApiCreateDropRequest | null> => {
-    console.log({ wave })
+    console.log({ wave });
     if (!wave.participation.signature_required) {
       return requestBody;
     }

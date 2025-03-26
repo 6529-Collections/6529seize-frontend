@@ -75,6 +75,7 @@ export const convertWaveToUpdateWave = (
     terms: wave.participation.terms,
   },
   wave: {
+    admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
     type: wave.wave.type,
     winning_thresholds:
       wave.wave.winning_thresholds?.max || wave.wave.winning_thresholds?.min

@@ -134,7 +134,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             {/* Main artwork display */}
             <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
               <img
-                src={artworkMedia}
+                src={artworkMedia.url}
                 alt={title}
                 className="tw-max-w-full tw-max-h-full tw-object-contain"
               />
