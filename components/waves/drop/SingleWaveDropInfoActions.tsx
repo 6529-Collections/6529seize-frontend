@@ -29,7 +29,7 @@ export const SingleWaveDropInfoActions: React.FC<SingleWaveDropInfoActionsProps>
   const { canShowVote, isWinner } = useDropInteractionRules(drop);
   
   return (
-    <div className={`tw-flex tw-flex-col tw-gap-y-2 tw-pb-6 ${className}`}>
+    <div className={`tw-flex tw-flex-col tw-gap-y-2 tw-pb-4 ${className}`}>
       {isWinner 
         ? <WinnerBadge drop={drop} showBadge={showBadge} /> 
         : wave && <SingleWaveDropTime wave={wave} />

@@ -60,7 +60,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
             ))}
             <button
               onClick={handleShowLess}
-              className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0"
+              className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
             >
               Show less
             </button>

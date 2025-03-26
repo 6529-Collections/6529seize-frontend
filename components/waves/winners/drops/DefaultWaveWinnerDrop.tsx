@@ -69,13 +69,10 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
         <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
           <WaveWinnersDropHeaderAuthorPfp winner={winner} />
           <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-2">
-            {/* Always show header without voting info */}
             <WaveWinnersDropHeader winner={winner} showVotingInfo={false} />
-
             <WaveWinnersDropContent winner={winner} />
           </div>
         </div>
-        {/* Outcome section with voting info (always displayed) */}
         <div className="tw-mt-3 tw-ml-[3.25rem]">
           <div className="tw-flex tw-items-center tw-flex-wrap tw-justify-between tw-gap-x-4 tw-gap-y-2">
             <div className="tw-flex tw-flex-whitespace-nowrap tw-gap-x-4 tw-items-center">
