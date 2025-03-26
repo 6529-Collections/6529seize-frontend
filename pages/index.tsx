@@ -174,6 +174,7 @@ export default function Home({
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       <main className={styles.main}>
