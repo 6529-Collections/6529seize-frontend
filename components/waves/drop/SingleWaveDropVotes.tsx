@@ -3,6 +3,7 @@ import { ApiDrop } from "../../../generated/models/ObjectSerializer";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 import Link from "next/link";
+import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 
 interface SingleWaveDropVotesProps {
   readonly drop: ApiDrop;
@@ -22,6 +23,10 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({ drop }
         } `}>
           {formatNumberWithCommas(drop.rating)}
         </span>
+        <DropVoteProgressing
+          rating={drop.rating}
+          realtimeRating={drop.realtime_rating}
+        />
         <span className="tw-text-md tw-text-iron-400">{drop.wave.voting_credit_type} total</span>
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-x-3">

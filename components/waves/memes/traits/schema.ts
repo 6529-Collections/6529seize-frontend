@@ -88,8 +88,8 @@ export interface TextFieldDefinition extends BaseFieldDefinition {
 export interface NumberFieldDefinition extends BaseFieldDefinition {
   readonly type: FieldType.NUMBER;
   readonly readOnly?: boolean;
-  readonly min?: number;
-  readonly max?: number;
+  readonly min: number;
+  readonly max: number;
   readonly initialValue?: number;
 }
 
@@ -181,24 +181,29 @@ export const traitDefinitions: readonly SectionDefinition[] = [
         label: FIELD_TO_LABEL_MAP.pointsPower,
         field: "pointsPower",
         initialValue: 0,
+        min: -10000000000,
+        max: 10000000000,
       },
       {
         type: FieldType.NUMBER,
         label: FIELD_TO_LABEL_MAP.pointsWisdom,
         field: "pointsWisdom",
-        initialValue: 0,
+        min: -10000000000,
+        max: 10000000000,
       },
       {
         type: FieldType.NUMBER,
         label: FIELD_TO_LABEL_MAP.pointsLoki,
         field: "pointsLoki",
-        initialValue: 0,
+        min: -10000000000,
+        max: 10000000000,
       },
       {
         type: FieldType.NUMBER,
         label: FIELD_TO_LABEL_MAP.pointsSpeed,
         field: "pointsSpeed",
-        initialValue: 0,
+        min: -10000000000,
+        max: 10000000000,
       },
     ],
   },

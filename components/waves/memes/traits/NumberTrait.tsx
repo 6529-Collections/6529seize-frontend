@@ -19,6 +19,8 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
   error,
   onBlur,
 }) => {
+
+
   // Use a ref for direct DOM access
   const inputRef = useRef<HTMLInputElement>(null);
   

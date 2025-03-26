@@ -373,6 +373,7 @@ const getOptimisticDrop = (
       voting_group_id: null,
       admin_group_id: null,
       admin_drop_deletion_enabled: false,
+      authenticated_user_admin: false,
     },
     author: {
       id: connectedProfile.profile.external_id,

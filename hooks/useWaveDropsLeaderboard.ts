@@ -18,23 +18,11 @@ import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
 import useCapacitor from "./useCapacitor";
 
-export enum WaveDropsLeaderboardSortBy {
-  RANK = "RANK",
-  CREATION_TIME = "CREATION_TIME",
-}
 
-export enum WaveDropsLeaderboardSortDirection {
-  ASC = "ASC",
-  DESC = "DESC",
-}
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | undefined;
-  readonly reverse: boolean;
-  readonly dropsSortBy: WaveDropsLeaderboardSortBy;
-  readonly sortDirection: WaveDropsLeaderboardSortDirection;
-  readonly handle?: string;
   readonly pollingEnabled?: boolean;
   readonly enabled?: boolean;
 }
@@ -59,10 +47,6 @@ function useTabVisibility() {
 export function useWaveDropsLeaderboard({
   waveId,
   connectedProfileHandle,
-  reverse,
-  dropsSortBy,
-  sortDirection,
-  handle,
   pollingEnabled = true,
   enabled = true,
 }: UseWaveDropsLeaderboardProps) {
@@ -83,9 +67,6 @@ export function useWaveDropsLeaderboard({
     {
       waveId,
       page_size: WAVE_DROPS_PARAMS.limit,
-      sort: dropsSortBy,
-      sort_direction: sortDirection,
-      handle,
     },
   ];
 
@@ -98,16 +79,10 @@ export function useWaveDropsLeaderboard({
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
           page_size: WAVE_DROPS_PARAMS.limit.toString(),
-          sort: dropsSortBy,
-          sort_direction: sortDirection,
         };
 
         if (pageParam) {
           params.page = `${pageParam}`;
-        }
-
-        if (handle) {
-          params.author_identity = handle;
         }
 
         return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -121,7 +96,7 @@ export function useWaveDropsLeaderboard({
       pages: 3,
       staleTime: 60000,
     });
-  }, [waveId, dropsSortBy, enabled]);
+  }, [waveId, enabled]);
 
   const {
     data,
@@ -135,16 +110,10 @@ export function useWaveDropsLeaderboard({
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         page_size: WAVE_DROPS_PARAMS.limit.toString(),
-        sort: dropsSortBy,
-        sort_direction: sortDirection,
       };
 
       if (pageParam) {
         params.page = `${pageParam}`;
-      }
-
-      if (handle) {
-        params.author_identity = handle;
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -170,13 +139,12 @@ export function useWaveDropsLeaderboard({
               drops: page.drops,
             })),
             prev,
-            reverse
           )
         : [];
       return generateUniqueKeys(newDrops, prev);
     });
     setHasInitialized(true);
-  }, [data, reverse]);
+  }, [data]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
 
@@ -185,13 +153,7 @@ export function useWaveDropsLeaderboard({
     queryFn: async () => {
       const params: Record<string, string> = {
         page_size: "1",
-        sort: dropsSortBy,
-        sort_direction: sortDirection,
       };
-
-      if (handle) {
-        params.author_identity = handle;
-      }
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,

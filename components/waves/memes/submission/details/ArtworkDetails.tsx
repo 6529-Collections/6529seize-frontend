@@ -93,6 +93,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 id="field-title"
                 name="title"
                 type="text"
+                maxLength={500}
                 defaultValue={title || ""}
                 onBlur={handleTitleBlur}
                 placeholder="Enter artwork title"
@@ -132,6 +133,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 onBlur={handleDescriptionBlur}
                 placeholder="Enter artwork description"
                 rows={3}
+                maxLength={500}
                 aria-invalid={!!descriptionError}
                 aria-describedby={
                   descriptionError ? "description-error" : undefined

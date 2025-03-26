@@ -75,6 +75,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
         defaultValue={(traits[field] as string) || ''}
         onChange={handleChange}
         onBlur={handleBlur}
+        maxLength={500}
         placeholder={placeholder || `Enter ${label.toLowerCase()}`}
         readOnly={readOnly}
         className={inputClassName}

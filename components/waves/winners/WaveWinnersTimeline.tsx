@@ -65,7 +65,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
         <div className="tw-absolute tw-left-2 lg:tw-left-[19px] tw-top-0 tw-bottom-0 tw-w-px tw-bg-iron-700/80"></div>
 
         <div className="tw-space-y-6">
-          {sortedDisplayPoints.map((point, index) => {
+          {sortedDisplayPoints.map((point) => {
             const date = new Date(point.decision_time);
             const formattedDate = format(date, "EEE, MMM d, yyyy");
             const formattedTime = format(date, "h:mm a");
@@ -87,9 +87,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
                     <h3 className="tw-text-sm tw-text-iron-300 tw-font-medium tw-tracking-wide">
                       {formattedDate}
                     </h3>
-                    <span className="tw-text-base tw-font-semibold tw-text-white/90 tw-tracking-tight">
-                      Round {roundNumber}
-                    </span>
+
                     <span className="tw-text-xs tw-text-iron-400 tw-font-light tw-tracking-wide">
                       {formattedTime}
                     </span>

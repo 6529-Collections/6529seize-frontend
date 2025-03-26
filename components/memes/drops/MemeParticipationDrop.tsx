@@ -87,7 +87,9 @@ export default function MemeParticipationDrop({
       >
         <div
           className={`${borderClasses} ${
-            location === DropLocation.WAVE ? "tw-bg-iron-900/80" : "tw-bg-iron-950"
+            location === DropLocation.WAVE
+              ? "tw-bg-iron-900/80"
+              : "tw-bg-iron-950"
           }`}
         >
           <DropMobileMenuHandler
@@ -109,9 +111,13 @@ export default function MemeParticipationDrop({
                 </div>
               </div>
               {artworkMedia && (
-                <div className={`tw-flex tw-justify-center ${
-                  location === DropLocation.WAVE ? "tw-bg-iron-800/30" : "tw-bg-iron-900/30"
-                }`}>
+                <div
+                  className={`tw-flex tw-justify-center ${
+                    location === DropLocation.WAVE
+                      ? "tw-bg-iron-800/30"
+                      : "tw-bg-iron-900/30"
+                  }`}
+                >
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
@@ -124,6 +130,7 @@ export default function MemeParticipationDrop({
               <div className="tw-px-4 tw-pb-4">
                 <MemeDropVoteStats
                   rating={drop.rating}
+                  realtimeRating={drop.realtime_rating}
                   votingCreditType={drop.wave.voting_credit_type}
                   ratersCount={drop.raters_count}
                   topVoters={drop.top_raters || []}

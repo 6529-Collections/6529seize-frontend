@@ -2,6 +2,7 @@ import Tippy from "@tippyjs/react";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
 import { RatingsSectionProps, RatingsData } from "./types";
 import VoteBreakdownTooltip from "./tooltips/VoteBreakdownTooltip";
+import DropVoteProgressing from "../../../../drops/view/utils/DropVoteProgressing";
 
 interface ParticipationDropRatingsTotalSectionProps extends RatingsSectionProps {
   readonly ratingsData: RatingsData;
@@ -27,13 +28,14 @@ export default function ParticipationDropRatingsTotalSection({
           Total {drop.wave.voting_credit_type}
         </span>
       </Tippy>
-      <div className={`tw-relative tw-inline-flex ${theme.indicator}`}>
+      <div className={`tw-relative tw-inline-flex tw-items-center tw-gap-x-1 ${theme.indicator}`}>
         <span
           className={`tw-text-sm tw-font-bold tw-bg-gradient-to-r ${theme.gradient} tw-bg-clip-text tw-text-transparent`}
         >
           {totalRating < 0 && "-"}
           {formatNumberWithCommas(Math.abs(totalRating))}
         </span>
+        <DropVoteProgressing rating={totalRating} realtimeRating={drop.realtime_rating} />
       </div>
     </div>
   );

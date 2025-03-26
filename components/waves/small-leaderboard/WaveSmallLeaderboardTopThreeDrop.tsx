@@ -9,6 +9,7 @@ import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutc
 import { ApiWave } from "../../../generated/models/ApiWave";
 import WaveDropActionsRate from "../drops/WaveDropActionsRate";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 
 interface WaveSmallLeaderboardTopThreeDropProps {
   readonly drop: ExtendedDrop;
@@ -53,19 +54,19 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
   };
 
   const getBadgeColor = (rank: number | null): string => {
-    if (rank === 1) return "tw-text-[#E8D48A] tw-bg-[#E8D48A]/10 tw-border-[#E8D48A]/30";
-    if (rank === 2) return "tw-text-[#DDDDDD] tw-bg-[#DDDDDD]/10 tw-border-[#DDDDDD]/30";
-    if (rank === 3) return "tw-text-[#CD7F32] tw-bg-[#CD7F32]/10 tw-border-[#CD7F32]/30";
+    if (rank === 1)
+      return "tw-text-[#E8D48A] tw-bg-[#E8D48A]/10 tw-border-[#E8D48A]/30";
+    if (rank === 2)
+      return "tw-text-[#DDDDDD] tw-bg-[#DDDDDD]/10 tw-border-[#DDDDDD]/30";
+    if (rank === 3)
+      return "tw-text-[#CD7F32] tw-bg-[#CD7F32]/10 tw-border-[#CD7F32]/30";
     return "tw-text-iron-400 tw-bg-iron-800/40 tw-border-iron-700/30";
   };
 
   const trophyIcon = (rank: number | null, decisionTime?: number) => {
     if (rank) {
       return (
-        <WinnerDropBadge 
-          rank={rank}
-          decisionTime={decisionTime || null}
-        />
+        <WinnerDropBadge rank={rank} decisionTime={decisionTime || null} />
       );
     }
     return <></>;
@@ -75,16 +76,39 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
     <div>
       <div className="tw-space-y-3">
         <li className="tw-relative tw-flex tw-flex-col">
-          <div 
+          <div
             className="tw-@container tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out"
             style={{
               border: "1px solid transparent",
-              boxShadow: `inset 2px 0 0 ${drop.rank && drop.rank <= 3 ? getRankTextColor(drop.rank)?.replace('tw-text-', '').trim() : "#60606C"}, 
-                         inset 0 1px 0 ${drop.rank && drop.rank <= 3 ? getRankTextColor(drop.rank)?.replace('tw-text-', '').trim() : "#60606C"}20, 
-                         inset -1px 0 0 ${drop.rank && drop.rank <= 3 ? getRankTextColor(drop.rank)?.replace('tw-text-', '').trim() : "#60606C"}20, 
-                         inset 0 -1px 0 ${drop.rank && drop.rank <= 3 ? getRankTextColor(drop.rank)?.replace('tw-text-', '').trim() : "#60606C"}20`,
-              transition: "box-shadow 0.2s ease, background-color 0.2s ease"
-            }}>
+              boxShadow: `inset 2px 0 0 ${
+                drop.rank && drop.rank <= 3
+                  ? getRankTextColor(drop.rank)?.replace("tw-text-", "").trim()
+                  : "#60606C"
+              }, 
+                         inset 0 1px 0 ${
+                           drop.rank && drop.rank <= 3
+                             ? getRankTextColor(drop.rank)
+                                 ?.replace("tw-text-", "")
+                                 .trim()
+                             : "#60606C"
+                         }20, 
+                         inset -1px 0 0 ${
+                           drop.rank && drop.rank <= 3
+                             ? getRankTextColor(drop.rank)
+                                 ?.replace("tw-text-", "")
+                                 .trim()
+                             : "#60606C"
+                         }20, 
+                         inset 0 -1px 0 ${
+                           drop.rank && drop.rank <= 3
+                             ? getRankTextColor(drop.rank)
+                                 ?.replace("tw-text-", "")
+                                 .trim()
+                             : "#60606C"
+                         }20`,
+              transition: "box-shadow 0.2s ease, background-color 0.2s ease",
+            }}
+          >
             <div>
               <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
                 {trophyIcon(drop.rank, drop.winning_context?.decision_time)}
@@ -155,6 +179,10 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                     <span className="tw-text-xs tw-font-medium">
                       {formatNumberWithCommas(drop.rating)}
                     </span>
+                    <DropVoteProgressing
+                      rating={drop.rating}
+                      realtimeRating={drop.realtime_rating}
+                    />
                   </div>
                 </div>
 

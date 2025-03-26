@@ -9,6 +9,7 @@ import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemConte
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import WaveDropActionsRate from "../drops/WaveDropActionsRate";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
@@ -121,6 +122,10 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<WaveSmallLeaderboardDefau
                   <span className="tw-text-xs tw-font-medium tw-text-iron-400">
                     {formatNumberWithCommas(drop.rating)}
                   </span>
+                  <DropVoteProgressing
+                    rating={drop.rating}
+                    realtimeRating={drop.realtime_rating}
+                  />
                 </div>
               </div>
 

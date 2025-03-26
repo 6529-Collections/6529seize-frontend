@@ -3,9 +3,11 @@ import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import Link from "next/link";
 import Tippy from "@tippyjs/react";
 import { ApiDropRater } from "../../../generated/models/ApiDropRater";
+import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 
 interface MemesLeaderboardDropVoteSummaryProps {
   readonly rating: number;
+  readonly realtimeRating: number;
   readonly creditType: string;
   readonly ratersCount: number;
   readonly topVoters: ApiDropRater[];
@@ -13,7 +15,7 @@ interface MemesLeaderboardDropVoteSummaryProps {
 
 export const MemesLeaderboardDropVoteSummary: React.FC<
   MemesLeaderboardDropVoteSummaryProps
-> = ({ rating, creditType, ratersCount, topVoters }) => {
+> = ({ rating, realtimeRating, creditType, ratersCount, topVoters }) => {
   const isPositive = (rating || 0) >= 0;
 
   return (
@@ -26,6 +28,7 @@ export const MemesLeaderboardDropVoteSummary: React.FC<
         >
           {formatNumberWithCommas(rating || 0)}
         </span>
+        <DropVoteProgressing rating={rating} realtimeRating={realtimeRating} />
         <span className="tw-text-md tw-text-iron-400">{creditType} total</span>
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-x-3">

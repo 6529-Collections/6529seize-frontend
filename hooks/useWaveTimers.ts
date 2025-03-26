@@ -246,7 +246,7 @@ export function useWaveTimers(
       timeLeft: votingTimeLeft,
       isUpcoming: votingTimePhase === "UPCOMING",
       isInProgress: votingTimePhase === "IN_PROGRESS",
-      isCompleted: false,
+      isCompleted: votingTimePhase === "COMPLETED",
     },
     decisions: {
       firstDecisionDone: isFirstDecisionDone,

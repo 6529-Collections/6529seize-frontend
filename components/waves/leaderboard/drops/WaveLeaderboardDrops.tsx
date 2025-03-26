@@ -1,33 +1,22 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { AuthContext } from "../../../auth/Auth";
-import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../../hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard } from "../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
-import { useWave } from "../../../../hooks/useWave";
 import { WaveLeaderboardEmptyState } from "./WaveLeaderboardEmptyState";
 import { WaveLeaderboardLoading } from "./WaveLeaderboardLoading";
 import { WaveLeaderboardLoadingBar } from "./WaveLeaderboardLoadingBar";
 
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
-  readonly dropsSortBy: WaveDropsLeaderboardSortBy;
-  readonly sortDirection: WaveDropsLeaderboardSortDirection;
-  readonly showMyDrops: boolean;
   readonly onCreateDrop: () => void;
 }
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
-  dropsSortBy,
-  sortDirection,
-  showMyDrops,
   onCreateDrop,
 }) => {
   const router = useRouter();
@@ -36,12 +25,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     useWaveDropsLeaderboard({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
-      reverse: true,
-      dropsSortBy,
-      sortDirection,
-      handle: showMyDrops ? connectedProfile?.profile?.handle : undefined,
     });
-
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
@@ -67,7 +51,9 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   }
 
   if (drops.length === 0) {
-    return <WaveLeaderboardEmptyState onCreateDrop={onCreateDrop} wave={wave} />;
+    return (
+      <WaveLeaderboardEmptyState onCreateDrop={onCreateDrop} wave={wave} />
+    );
   }
 
   return (

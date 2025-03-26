@@ -104,8 +104,12 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     !!connectedProfile?.profile?.handle &&
     connectedProfile.profile.handle === drop.author.handle;
 
+
+  const isAdmin = drop.wave.authenticated_user_admin;
+  const adminDropDeletionEnabled = drop.wave.admin_drop_deletion_enabled;
+  const canDeleteAsAdmin = isAdmin && adminDropDeletionEnabled;
   // Delete rules
-  const canDelete = baseRules && isAuthor;
+  const canDelete = baseRules && (isAuthor || canDeleteAsAdmin);
   
   // Check if voting has ended by comparing current time with voting period end time
   const now = Time.currentMillis();

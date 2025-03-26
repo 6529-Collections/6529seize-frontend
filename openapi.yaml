@@ -716,6 +716,18 @@ paths:
             format: int64
             minimum: 1
             maximum: 100
+        - name: group_id
+          description: Search only users who can view given group
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: ignore_authenticated_user
+          description: Ignore authenticated user
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -1409,7 +1421,7 @@ paths:
                 $ref: "#/components/schemas/ApiChangeProfileCicRatingResponse"
         "400":
           description: Invalid request
-  /profiles/{identity}/repcic/ratings/by-rater:
+  /profiles/{identity}/cic/ratings/by-rater:
     get:
       tags:
         - ProfileCIC
@@ -3487,7 +3499,9 @@ components:
           description: If true then the votes must be signed by voters.
           type: boolean
         terms:
-          description: If this is and the "signature_required" is set then this will be embedded as a signature input data component for each drop.
+          description: >-
+            If this is and the "signature_required" is set then this will be
+            embedded as a signature input data component for each drop.
           type: string
           nullable: true
         period:
@@ -3617,7 +3631,11 @@ components:
           items:
             $ref: "#/components/schemas/ApiDropMetadata"
         signature:
-          description: 'If wave requires drop signatures then this needs to be set. Signature of a drop is ethSign(creatorWallet, sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest - signature (+ wave.participation.terms if it exists))))'
+          description: >-
+            If wave requires drop signatures then this needs to be set.
+            Signature of a drop is ethSign(creatorWallet,
+            sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest
+            - signature (+ wave.participation.terms if it exists))))
           type: string
           nullable: true
     ApiDrop:
@@ -3957,6 +3975,23 @@ components:
           $ref: "#/components/schemas/ApiProfileMin"
         time:
           type: number
+          format: int64
+    ApiDropWinningContext:
+      type: object
+      required:
+        - place
+        - awards
+        - decision_time
+      properties:
+        place:
+          type: integer
+          format: int64
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionAward"
+        decision_time:
+          type: integer
           format: int64
     ApiDropWithoutWave:
       type: object
@@ -5600,23 +5635,6 @@ components:
             decisions (see description of subsequent_decisions). Also if true
             then there needs to be at least one element in subsequent_decisions
             array.
-    ApiDropWinningContext:
-      type: object
-      required:
-        - place
-        - awards
-        - decision_time
-      properties:
-        place:
-          type: integer
-          format: int64
-        awards:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiWaveDecisionAward"
-        decision_time:
-          type: integer
-          format: int64
     ApiWaveDecisionWinner:
       type: object
       required:
@@ -5721,6 +5739,7 @@ components:
         - authenticated_user_eligible_to_vote
         - authenticated_user_eligible_to_participate
         - authenticated_user_eligible_to_chat
+        - authenticated_user_admin
         - voting_period_start
         - voting_period_end
         - voting_credit_type
@@ -5744,6 +5763,8 @@ components:
         authenticated_user_eligible_to_participate:
           type: boolean
         authenticated_user_eligible_to_chat:
+          type: boolean
+        authenticated_user_admin:
           type: boolean
         visibility_group_id:
           type: string

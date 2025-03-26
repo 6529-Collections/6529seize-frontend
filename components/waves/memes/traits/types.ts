@@ -18,8 +18,8 @@ export interface TextTraitProps extends BaseTraitProps {
 
 export interface NumberTraitProps extends BaseTraitProps {
   readonly readOnly?: boolean;
-  readonly min?: number;
-  readonly max?: number;
+  readonly min: number;
+  readonly max: number;
   readonly traits: TraitsData;
   readonly updateNumber: (field: keyof TraitsData, value: number) => void;
 }
