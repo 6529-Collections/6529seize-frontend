@@ -20,17 +20,17 @@ export const ACCEPTED_FORMATS: readonly string[] = [
 /**
  * Simplified format categories for UI display
  */
-export const UI_FORMAT_CATEGORIES = ['PNG', 'JPG', 'VIDEO'];
+export const UI_FORMAT_CATEGORIES = ['PNG', 'JPG', 'GIF', 'VIDEO'];
 
 /**
  * Maximum file size allowed (100MB)
  */
-export const FILE_SIZE_LIMIT: number = 100 * 1024 * 1024;
+export const FILE_SIZE_LIMIT: number = 200 * 1024 * 1024;
 
 /**
  * Accept string for file input element
  */
-export const FILE_INPUT_ACCEPT: string = 'image/png,image/jpeg,image/jpg,image/gif,video/mp4';
+export const FILE_INPUT_ACCEPT: string = 'image/png,image/jpeg,image/jpg,image/gif,video/mp4,video/quicktime';
 
 /**
  * Maximum number of processing attempts before giving up

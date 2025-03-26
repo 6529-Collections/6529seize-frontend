@@ -25,7 +25,7 @@ export const validateFile = (file: File): FileValidationResult => {
   
   // Check file type with support for generic video types
   const isImageType = file.type.startsWith('image/') && 
-    (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/jpg');
+    (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/gif');
   
   const isVideoType = file.type.startsWith('video/');
   

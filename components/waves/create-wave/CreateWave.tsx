@@ -5,9 +5,7 @@ import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveGroups from "./groups/CreateWaveGroups";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
-import {
-  CreateWaveStep,
-} from "../../../types/waves.types";
+import { CreateWaveStep } from "../../../types/waves.types";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
 import CreateWaveActions from "./utils/CreateWaveActions";
@@ -20,17 +18,12 @@ import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { ApiCreateWaveDropRequest } from "../../../generated/models/ApiCreateWaveDropRequest";
 import { useRouter } from "next/router";
-import { 
-  generateMediaForPart, 
-  generateMediaForOverview, 
-  generateDropPart 
+import {
+  generateMediaForOverview,
+  generateDropPart,
 } from "./services/waveMediaService";
-import {
-  getAdminGroupId
-} from "./services/waveGroupService";
-import {
-  useAddWaveMutation
-} from "./services/waveApiService";
+import { getAdminGroupId } from "./services/waveGroupService";
+import { useAddWaveMutation } from "./services/waveApiService";
 import { useWaveConfig } from "./hooks/useWaveConfig";
 import useCapacitor from "../../../hooks/useCapacitor";
 import CreateWaveFlow from "./CreateWaveFlow";
@@ -49,7 +42,7 @@ export default function CreateWave({
     ReactQueryWrapperContext
   );
   const [submitting, setSubmitting] = useState(false);
-  
+
   // Use the hook for configuration state management
   const {
     config,
@@ -86,7 +79,6 @@ export default function CreateWave({
     null
   );
 
-
   const addWaveMutation = useAddWaveMutation({
     onSuccess: (response) => {
       waitAndInvalidateDrops();
@@ -110,8 +102,6 @@ export default function CreateWave({
     if (haveDrop) setShowDropError(false);
   };
 
-
-
   const onComplete = async () => {
     setSubmitting(true);
     const { success } = await requestAuth();
@@ -132,10 +122,11 @@ export default function CreateWave({
       handle: connectedProfile?.profile?.handle,
       onError: (error) => {
         setToast({
-          message: typeof error === 'string' ? error : "Failed to get admin group",
+          message:
+            typeof error === "string" ? error : "Failed to get admin group",
           type: "error",
         });
-      }
+      },
     });
     if (!adminGroupId) {
       setSubmitting(false);
@@ -282,7 +273,8 @@ export default function CreateWave({
       onBack={onBack}
       title={`Create Wave ${
         !!config.overview.name && `"${config.overview.name}"`
-      }`}>
+      }`}
+    >
       <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
         <div className="tw-1/4">
           <CreateWavesMainSteps
@@ -292,9 +284,8 @@ export default function CreateWave({
           />
         </div>
         <div
-          className={`tw-flex-1 ${
-            isIos && !keyboardVisible ? "tw-mb-10" : ""
-          }`}>
+          className={`tw-flex-1 ${isIos && !keyboardVisible ? "tw-mb-10" : ""}`}
+        >
           <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
             <div className="tw-relative tw-h-full">
               <div className="tw-flex tw-flex-col tw-h-full">
