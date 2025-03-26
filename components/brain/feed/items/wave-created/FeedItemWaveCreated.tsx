@@ -4,7 +4,10 @@ import { IFeedItemWaveCreated } from "../../../../../types/feed.types";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import Drop, { DropInteractionParams, DropLocation } from "../../../../waves/drops/Drop";
+import Drop, {
+  DropInteractionParams,
+  DropLocation,
+} from "../../../../waves/drops/Drop";
 
 export default function FeedItemWaveCreated({
   item,
@@ -27,14 +30,16 @@ export default function FeedItemWaveCreated({
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
+    router.push(
+      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+    );
   };
 
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-space-y-2">
         <div className="tw-inline-flex tw-items-center">
-          <div className="tw-mr-2 tw-size-6 md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
+          <div className="tw-mr-2 tw-size-6 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
               className="tw-flex-shrink-0 tw-size-4 md:tw-size-5 tw-text-iron-300"
               xmlns="http://www.w3.org/2000/svg"
@@ -42,8 +47,7 @@ export default function FeedItemWaveCreated({
               aria-hidden="true"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor"
-            >
+              stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

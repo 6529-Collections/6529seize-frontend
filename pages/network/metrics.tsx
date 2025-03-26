@@ -201,7 +201,7 @@ export default function CommunityMetrics() {
                       <u>Category A</u>
                     </p>
                     <ol>
-                      <li>A complete set of all Meme Cards: 1.45x</li>
+                      <li>A complete set of all Meme Cards: 1.50x</li>
                       <li>
                         Additional complete set of Meme Cards: 1.02x (up to a
                         maximum of 2 additional sets)
@@ -229,6 +229,7 @@ export default function CommunityMetrics() {
                       <li>SZN7: Complete Set: 1.05x</li>
                       <li>SZN8: Complete Set: 1.05x</li>
                       <li>SZN9: Complete Set: 1.05x</li>
+                      <li>SZN10: Complete Set: 1.05x</li>
                     </ol>
                     <p>
                       <u>Category C</u>

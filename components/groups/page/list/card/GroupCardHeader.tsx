@@ -38,9 +38,8 @@ export default function GroupCardHeader({
       <div className="tw-mt-1.5 tw-flex tw-items-center tw-w-full tw-justify-between">
         <Link
           onClick={(e) => e.stopPropagation()}
-          href={group.created_by.handle}
-          className="tw-no-underline hover:tw-underline tw-transition tw-duration-300 tw-ease-out  tw-text-iron-50 hover:tw-text-iron-400"
-        >
+          href={`/${group.created_by.handle}`}
+          className="tw-no-underline hover:tw-underline tw-transition tw-duration-300 tw-ease-out  tw-text-iron-50 hover:tw-text-iron-400">
           <span className="tw-text-sm tw-font-semibold">
             {group.created_by.handle}
           </span>

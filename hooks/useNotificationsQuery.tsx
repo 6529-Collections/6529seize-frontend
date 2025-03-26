@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
-import {
-  useInfiniteQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
 import {
   TypedNotification,
   TypedNotificationsResponse,
 } from "../types/feed.types";
+import { ApiNotificationCause } from "../generated/models/ApiNotificationCause";
 
 interface UseNotificationsQueryProps {
   /**
@@ -32,6 +30,11 @@ interface UseNotificationsQueryProps {
    * How many notifications to fetch per page.
    */
   limit?: string;
+
+  /**
+   * The cause of the notifications to fetch.
+   */
+  cause?: ApiNotificationCause[] | null;
 }
 
 export function useNotificationsQuery({
@@ -39,6 +42,7 @@ export function useNotificationsQuery({
   identity,
   activeProfileProxy = false,
   limit = "30",
+  cause = null,
 }: UseNotificationsQueryProps) {
   const queryClient = useQueryClient();
 
@@ -50,11 +54,14 @@ export function useNotificationsQuery({
    * This is similar to how `useMyStreamQuery` sets up prefetching.
    */
   queryClient.prefetchInfiniteQuery({
-    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit }],
+    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }],
     queryFn: async ({ pageParam }: { pageParam?: number | null }) => {
       const params: Record<string, string> = { limit };
       if (pageParam) {
         params.id_less_than = String(pageParam);
+      }
+      if (cause?.length) {
+        params.cause = cause.join(",");
       }
       return await commonApiFetch<TypedNotificationsResponse>({
         endpoint: "notifications",
@@ -63,7 +70,6 @@ export function useNotificationsQuery({
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
-
     pages: 3,
     staleTime: 60000,
   });
@@ -72,7 +78,7 @@ export function useNotificationsQuery({
    * Now the actual Infinite Query for notifications
    */
   const query = useInfiniteQuery({
-    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit }],
+    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         limit,
@@ -80,8 +86,11 @@ export function useNotificationsQuery({
       if (pageParam) {
         params.id_less_than = `${pageParam}`;
       }
+      if (cause) {
+        params.cause = cause.join(",");
+      }
       return await commonApiFetch<TypedNotificationsResponse>({
-        endpoint: `notifications`,
+        endpoint: "notifications",
         params,
       });
     },

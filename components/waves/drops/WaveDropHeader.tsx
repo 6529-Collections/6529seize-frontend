@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { cicToType, getTimeAgoShort } from "../../../helpers/Helpers";
+import { cicToType } from "../../../helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { DropTrophyIcon } from "../DropThrophyIcon";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { Time } from "../../../helpers/time";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -47,15 +50,14 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               <Link
                 onClick={(e) => handleNavigation(e, `/${drop.author.handle}`)}
                 href={`/${drop.author.handle}`}
-                className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-              >
+                className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
                 {drop.author.handle}
               </Link>
             </p>
             <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-            <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-              {getTimeAgoShort(drop.created_at)}
-            </p>
+            <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
+            {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
+          </p>
           </div>
           {badge && <div className="tw-ml-2">{badge}</div>}
         </div>

@@ -1,5 +1,5 @@
 import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
-import { getTimeAgoShort } from "../../../../../helpers/Helpers";
+import { Time } from "../../../../../helpers/time";
 
 interface WaveWinnersDropHeaderCreatedProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -9,8 +9,8 @@ export default function WaveWinnersDropHeaderCreated({
   winner,
 }: WaveWinnersDropHeaderCreatedProps) {
   return (
-    <p className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-      {getTimeAgoShort(winner.drop.created_at)}
-    </p>
+    <span className="tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
+      {Time.millis(winner.drop.created_at).toLocaleDropDateAndTimeString()}
+    </span>
   );
 }

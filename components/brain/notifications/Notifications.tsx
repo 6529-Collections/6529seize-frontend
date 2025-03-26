@@ -13,6 +13,9 @@ import { useNotificationsQuery } from "../../../hooks/useNotificationsQuery";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import { useLayout } from "../my-stream/layout/LayoutContext";
+import NotificationsCauseFilter, {
+  NotificationFilter,
+} from "./NotificationsCauseFilter";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -21,6 +24,10 @@ export default function Notifications() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const capacitor = useCapacitor();
   const { notificationsViewStyle } = useLayout();
+
+  const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
+    null
+  );
 
   const { removeAllDeliveredNotifications } = useNotificationsContext();
 
@@ -83,6 +90,7 @@ export default function Notifications() {
     activeProfileProxy: !!activeProfileProxy,
     limit: "30",
     reverse: true,
+    cause: activeFilter?.cause,
   });
 
   const onBottomIntersection = (state: boolean) => {
@@ -115,6 +123,10 @@ export default function Notifications() {
       style={notificationsViewStyle}
     >
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+      <NotificationsCauseFilter
+          activeFilter={activeFilter}
+          setActiveFilter={setActiveFilter}
+        />
         {!items.length && !isFetching ? (
           <MyStreamNoItems />
         ) : (
