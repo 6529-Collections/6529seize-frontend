@@ -134,6 +134,16 @@ export function useWaveConfig() {
     }));
   };
 
+  const setDropsAdminCanDelete = (adminCanDeleteDrops: boolean) => {
+    setConfig((prev) => ({
+      ...prev,
+      drops: {
+        ...prev.drops,
+        adminCanDeleteDrops,  
+      },
+    }));
+  };
+
   const setOutcomes = (outcomes: CreateWaveConfig["outcomes"]) => {
     setConfig((prev) => ({
       ...prev,
@@ -317,6 +327,7 @@ export function useWaveConfig() {
     setOverview,
     setDates,
     setDrops,
+    setDropsAdminCanDelete,
     setOutcomes,
     // Navigation
     onStep,

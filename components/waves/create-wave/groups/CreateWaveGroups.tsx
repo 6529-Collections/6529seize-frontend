@@ -13,8 +13,10 @@ export default function CreateWaveGroups({
   groups,
   onGroupSelect,
   chatEnabled,
+  adminCanDeleteDrops,
   groupsCache,
   setChatEnabled,
+  setDropsAdminCanDelete,
 }: {
   readonly waveType: ApiWaveType;
   readonly groups: WaveGroupsConfig;
@@ -23,8 +25,10 @@ export default function CreateWaveGroups({
     groupType: CreateWaveGroupConfigType;
   }) => void;
   readonly chatEnabled: boolean;
+  readonly adminCanDeleteDrops: boolean;
   readonly groupsCache: Record<string, ApiGroupFull>;
   readonly setChatEnabled: (enabled: boolean) => void;
+  readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
 }) {
   const isRestrictedGroup = !!groups.admin && !!groups.canView;
 
@@ -39,8 +43,10 @@ export default function CreateWaveGroups({
           chatEnabled={chatEnabled}
           groupsCache={groupsCache}
           groups={groups}
+          adminCanDeleteDrops={adminCanDeleteDrops}
           setChatEnabled={setChatEnabled}
           onGroupSelect={(group) => onGroupSelect({ group, groupType })}
+          setDropsAdminCanDelete={setDropsAdminCanDelete}
         />
       ))}
       {isRestrictedGroup && (

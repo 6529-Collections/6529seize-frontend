@@ -57,6 +57,7 @@ export default function CreateWave({
     setDates,
     setDrops,
     setOutcomes,
+    setDropsAdminCanDelete,
     // Navigation
     onStep,
     // Outcome management
@@ -195,8 +196,10 @@ export default function CreateWave({
         groups={config.groups}
         groupsCache={groupsCache}
         chatEnabled={config.chat.enabled}
+        adminCanDeleteDrops={config.drops.adminCanDeleteDrops}
         setChatEnabled={onChatEnabledChange}
         onGroupSelect={onGroupSelect}
+        setDropsAdminCanDelete={setDropsAdminCanDelete}
       />
     ),
     [CreateWaveStep.DATES]: (

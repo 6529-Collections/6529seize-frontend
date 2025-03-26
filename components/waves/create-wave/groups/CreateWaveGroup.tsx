@@ -19,21 +19,24 @@ export default function CreateWaveGroup({
   waveType,
   groupType,
   chatEnabled,
+  adminCanDeleteDrops,
   setChatEnabled,
   onGroupSelect,
   groupsCache,
   groups,
+  setDropsAdminCanDelete,
 }: {
   readonly waveType: ApiWaveType;
   readonly groupType: CreateWaveGroupConfigType;
   readonly chatEnabled: boolean;
+  readonly adminCanDeleteDrops: boolean;
   readonly setChatEnabled: (enabled: boolean) => void;
   readonly onGroupSelect: (group: ApiGroupFull | null) => void;
   readonly groupsCache: Record<string, ApiGroupFull>;
   readonly groups: WaveGroupsConfig;
+  readonly setDropsAdminCanDelete: (adminCanDeleteDrops: boolean) => void;
 }) {
-  // Local state for admin delete permissions - to be wired up later
-  const [adminCanDeleteDrops, setAdminCanDeleteDrops] = useState(false);
+
 
   const getSelectedGroupId = () => {
     switch (groupType) {
@@ -96,7 +99,7 @@ export default function CreateWaveGroup({
         {isNotChatWave && groupType === CreateWaveGroupConfigType.ADMIN && (
           <CreateWaveToggle
             enabled={adminCanDeleteDrops}
-            onChange={setAdminCanDeleteDrops}
+            onChange={setDropsAdminCanDelete}
             label="Allow admins to delete drops"
             displayLabel={true}
           />
