@@ -17,6 +17,7 @@ import { faImage } from "@fortawesome/free-regular-svg-icons";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MemeDropTraits from "../../../memes/drops/MemeDropTraits";
+import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -36,7 +37,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     winner.drop.metadata?.find((m) => m.data_key === "description")
       ?.data_value || "This is an artwork submission for The Memes collection.";
 
-  const artworkMedia = winner.drop.parts.at(0)?.media.at(0)?.url || null;
+  const artworkMedia = winner.drop.parts.at(0)?.media.at(0);
 
   const rating = winner.drop.rating || 0;
   const isPositive = rating >= 0;
@@ -111,29 +112,16 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             </div>
           </div>
 
-          <div className="tw-w-full tw-relative tw-overflow-hidden">
-            <div className="tw-aspect-video tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-900/30">
-              {artworkMedia ? (
-                <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
-                  <img
-                    src={artworkMedia}
-                    alt={title}
-                    className="tw-max-w-full tw-max-h-full tw-object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="tw-text-center tw-text-iron-400 tw-px-6">
-                  <FontAwesomeIcon
-                    icon={faImage}
-                    className="tw-w-12 tw-h-12 tw-mx-auto tw-mb-3 tw-text-iron-700 tw-flex-shrink-0"
-                  />
-                  <p className="tw-text-sm">Artwork preview</p>
-                </div>
-              )}
+          {artworkMedia && (
+            <div className="tw-flex tw-justify-center">
+              <DropListItemContentMedia
+                media_mime_type={artworkMedia.mime_type}
+                media_url={artworkMedia.url}
+              />
             </div>
-          </div>
+          )}
           <div className="tw-p-4">
-            <MemeDropTraits drop={winner.drop}/>
+            <MemeDropTraits drop={winner.drop} />
           </div>
           <div className="tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0 tw-px-4 tw-pb-4">
             <div className="tw-flex tw-items-baseline tw-gap-x-1.5">

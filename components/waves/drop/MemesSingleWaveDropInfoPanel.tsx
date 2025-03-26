@@ -14,6 +14,7 @@ import { faImage } from "@fortawesome/free-regular-svg-icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
 import { faCompress, faExpand } from "@fortawesome/free-solid-svg-icons";
+import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -35,7 +36,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
     "Artwork Title";
 
   // Get artwork media URL if available
-  const artworkMedia = drop.parts?.at(0)?.media?.at(0)?.url;
+  const artworkMedia = drop.parts?.at(0)?.media?.at(0);
 
   // Handler for toggling fullscreen view
   const toggleFullscreen = (e: React.MouseEvent) => {
@@ -71,40 +72,14 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 
           <div>
             {/* Full width artwork with fullscreen toggle */}
-            <div className="tw-relative tw-bg-iron-900/30 tw-w-full tw-rounded-lg tw-overflow-hidden tw-group">
-              <div className="tw-aspect-video tw-w-full tw-flex tw-items-center tw-justify-center">
-                {artworkMedia ? (
-                  <>
-                    <img
-                      src={artworkMedia}
-                      alt={title}
-                      className="tw-max-w-full tw-max-h-full tw-object-contain"
-                    />
-                    {/* Fullscreen toggle button */}
-                    <button
-                      onClick={toggleFullscreen}
-                      className="tw-absolute tw-top-3 tw-right-3 tw-bg-iron-900/80 tw-text-iron-100 tw-p-2 tw-rounded-lg 
-                            tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-200 
-                            hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
-                      aria-label="Toggle fullscreen view"
-                    >
-                      <FontAwesomeIcon
-                        icon={faExpand}
-                        className="tw-w-4 tw-h-4"
-                      />
-                    </button>
-                  </>
-                ) : (
-                  <div className="tw-text-center tw-text-iron-400 tw-px-6">
-                    <FontAwesomeIcon
-                      icon={faImage}
-                      className="tw-w-14 tw-h-14 tw-mx-auto tw-mb-3 tw-text-iron-700"
-                    />
-                    <p className="tw-text-sm">Artwork preview</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            {artworkMedia && (
+                 <div className="tw-flex tw-justify-center">
+                 <DropListItemContentMedia
+                   media_mime_type={artworkMedia.mime_type}
+                   media_url={artworkMedia.url}
+                 />
+               </div>
+              )}
             <div className="tw-px-6 tw-mt-4">
               <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
             </div>

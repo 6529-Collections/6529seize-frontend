@@ -7,9 +7,9 @@ import WaveDropActions from "../../waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
 import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
-import MemeWinnerArtwork from "./MemeWinnerArtwork";
 import MemeDropTraits from "./MemeDropTraits";
 import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
+import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -42,7 +42,7 @@ export default function MemeWinnerDrop({
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
-  const artworkMedia = drop.parts.at(0)?.media?.at(0)?.url;
+  const artworkMedia = drop.parts.at(0)?.media?.at(0);
 
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[0].part_id });
@@ -89,11 +89,14 @@ export default function MemeWinnerDrop({
                 </div>
               </div>
 
-              <MemeWinnerArtwork
-                title={title}
-                artworkMedia={artworkMedia}
-                onViewLarger={handleViewLarger}
-              />
+              {artworkMedia && (
+                <div className="tw-flex tw-justify-center">
+                  <DropListItemContentMedia
+                    media_mime_type={artworkMedia.mime_type}
+                    media_url={artworkMedia.url}
+                  />
+                </div>
+              )}
               <div className="tw-p-4">
                 <MemeDropTraits drop={drop} />
               </div>

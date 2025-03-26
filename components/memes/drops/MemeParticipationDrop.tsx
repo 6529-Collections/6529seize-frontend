@@ -8,11 +8,12 @@ import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
 import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
-import MemeDropArtwork from "./meme-participation-drop/MemeDropArtwork";
+import DropArtwork from "../../drops/view/DropArtwork";
 import MemeDropVotingSection from "./meme-participation-drop/MemeDropVotingSection";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropTraits from "./MemeDropTraits";
 import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
+import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -55,8 +56,6 @@ export default function MemeParticipationDrop({
 }: MemeParticipationDropProps) {
   const { canShowVote } = useDropInteractionRules(drop);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
-
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const isMobile = useIsMobileDevice();
 
   // Extract metadata
@@ -68,7 +67,7 @@ export default function MemeParticipationDrop({
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
-  const artworkMedia = drop.parts.at(0)?.media.at(0)?.url;
+  const artworkMedia = drop.parts.at(0)?.media.at(0);
 
   const borderClasses = getBorderClasses(drop, isActiveDrop);
 
@@ -80,9 +79,6 @@ export default function MemeParticipationDrop({
     onQuote({ drop, partId: drop.parts[0].part_id });
   }, [onQuote, drop]);
 
-  const handleViewLarger = () => {
-    setIsImageModalOpen(true);
-  };
 
   return (
     <div className="tw-w-full">
@@ -114,11 +110,14 @@ export default function MemeParticipationDrop({
                   <MemeDropDescription description={description} />
                 </div>
               </div>
-              <MemeDropArtwork
-                artworkMedia={artworkMedia}
-                title={title}
-                onViewLarger={handleViewLarger}
-              />
+              {artworkMedia && (
+                 <div className="tw-flex tw-justify-center">
+                 <DropListItemContentMedia
+                   media_mime_type={artworkMedia.mime_type}
+                   media_url={artworkMedia.url}
+                 />
+               </div>
+              )}
               <div className="tw-p-4">
                 <MemeDropTraits drop={drop} />
               </div>

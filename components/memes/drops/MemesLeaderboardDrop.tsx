@@ -6,9 +6,10 @@ import MemesLeaderboardDropHeader from "./MemesLeaderboardDropHeader";
 import MemesLeaderboardDropDescription from "./MemesLeaderboardDropDescription";
 import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
-import MemesLeaderboardDropArtworkPreview from "./MemesLeaderboardDropArtworkPreview";
+
 import MemesLeaderboardDropVotingSection from "./MemesLeaderboardDropVotingSection";
 import MemeDropTraits from "./MemeDropTraits";
+import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -35,7 +36,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
-  const artworkMedia = drop.parts.at(0)?.media.at(0)?.url || null;
+  const artworkMedia = drop.parts.at(0)?.media.at(0);
 
   // Get top voters for votes display
   const firstThreeVoters = drop.top_raters?.slice(0, 3) || [];
@@ -64,11 +65,15 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   </div>
                 </div>
               </div>
-              <MemesLeaderboardDropArtworkPreview
-                artworkMedia={artworkMedia}
-                title={title}
-                onViewLarger={onViewLarger}
-              />
+
+              {artworkMedia && (
+                 <div className="tw-flex tw-justify-center">
+                 <DropListItemContentMedia
+                   media_mime_type={artworkMedia.mime_type}
+                   media_url={artworkMedia.url}
+                 />
+               </div>
+              )}
               <div className="tw-p-4">
                 <MemeDropTraits drop={drop} />
               </div>
