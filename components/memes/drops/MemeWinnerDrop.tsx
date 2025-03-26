@@ -83,7 +83,7 @@ export default function MemeWinnerDrop({
                 <div className="tw-flex tw-flex-col tw-gap-4">
                   <MemeWinnerArtistInfo drop={drop} />
                 </div>
-                <div className="tw-flex tw-flex-col tw-mt-3">
+                <div className="tw-flex tw-flex-col tw-mt-3 tw-ml-[3.25rem]">
                   <MemeWinnerHeader title={title} />
                   <MemeWinnerDescription description={description} />
                 </div>

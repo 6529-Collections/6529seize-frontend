@@ -16,10 +16,10 @@ export const MemesLeaderboardDropArtworkPreview: React.FC<MemesLeaderboardDropAr
 }) => {
   return (
     <div
-      className="tw-relative tw-bg-iron-950 tw-h-full"
+      className="tw-relative tw-bg-iron-900/30 tw-h-full"
       onClick={onViewLarger}
     >
-      <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-950">
+      <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-900/30">
         {artworkMedia ? (
           <img
             src={artworkMedia}

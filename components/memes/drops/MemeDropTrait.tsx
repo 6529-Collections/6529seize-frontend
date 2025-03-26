@@ -1,6 +1,8 @@
 import React from "react";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import { FIELD_TO_LABEL_MAP } from "../../waves/memes/traits/schema";
+import Tippy from "@tippyjs/react";
+import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 interface MemeDropTraitProps {
   readonly label: string;
@@ -23,15 +25,25 @@ const convertValue = (value: string) => {
 };
 
 const MemeDropTrait: React.FC<MemeDropTraitProps> = ({ label, value }) => {
+  const isMobile = useIsMobileDevice();
+  const convertedValue = convertValue(value);
+
   if (label === FIELD_TO_LABEL_MAP.pointsLoki) {
     console.log(value, typeof value);
   }
   return (
-    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800/50 tw-flex tw-items-center tw-justify-between">
-      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-whitespace-nowrap">{label}:</span>
-      <span className="tw-text-iron-200 tw-text-xs tw-font-medium tw-truncate">
-        {convertValue(value)}
-      </span>
+    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800/50 tw-flex tw-flex-col tw-gap-y-1">
+      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5">{label}:</span>
+      <Tippy
+        disabled={isMobile}
+        content={convertedValue}
+        placement="top"
+        theme="dark"
+      >
+        <span className="tw-text-iron-200 tw-text-xs tw-font-medium tw-truncate">
+          {convertedValue}
+        </span>
+      </Tippy>
     </div>
   );
 };

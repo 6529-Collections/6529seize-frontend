@@ -25,7 +25,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
-      <div className="tw-grid tw-grid-cols-4 tw-gap-2">
+      <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
         <MemeDropTrait
           label={FIELD_TO_LABEL_MAP.artist}
           value={artistTrait?.data_value ?? ""}
@@ -35,22 +35,35 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
           value={memeNameTrait?.data_value ?? ""}
         />
 
-        {showAllTraits && (
-          otherTraits.map((trait) => (
-            <MemeDropTrait
-              key={trait.data_key}
-              label={FIELD_TO_LABEL_MAP[trait.data_key as keyof typeof FIELD_TO_LABEL_MAP]}
-              value={trait.data_value ?? ""}
-            />
-          ))
+        {showAllTraits ? (
+          <>
+            {otherTraits.map((trait) => (
+              <MemeDropTrait
+                key={trait.data_key}
+                label={
+                  FIELD_TO_LABEL_MAP[
+                    trait.data_key as keyof typeof FIELD_TO_LABEL_MAP
+                  ]
+                }
+                value={trait.data_value ?? ""}
+              />
+            ))}
+            <button
+              onClick={() => setShowAllTraits(false)}
+              className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0"
+            >
+              Show less
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setShowAllTraits(true)}
+            className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
+          >
+            Show all
+          </button>
         )}
       </div>
-      <button
-        onClick={() => setShowAllTraits(!showAllTraits)}
-        className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-self-start tw-ml-auto tw-whitespace-nowrap"
-      >
-        {showAllTraits ? "Show less" : "Show all"}
-      </button>
     </div>
   );
 };

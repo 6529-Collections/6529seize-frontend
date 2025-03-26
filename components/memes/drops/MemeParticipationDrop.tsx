@@ -44,10 +44,6 @@ const getBorderClasses = (drop: ExtendedDrop, isActiveDrop: boolean) => {
   }
 };
 
-/**
- * Special version of ParticipationDrop for the Memes wave
- * This component features a 2-column layout with artwork on the right
- */
 export default function MemeParticipationDrop({
   drop,
   activeDrop,
@@ -75,8 +71,6 @@ export default function MemeParticipationDrop({
   const artworkMedia = drop.parts.at(0)?.media.at(0)?.url;
 
   const borderClasses = getBorderClasses(drop, isActiveDrop);
-
-
 
   const handleOnReply = useCallback(() => {
     onReply({ drop, partId: drop.parts[0].part_id });
@@ -109,11 +103,9 @@ export default function MemeParticipationDrop({
             onQuote={handleOnQuote}
           >
             <>
-              {" "}
-              {/* Left column - Metadata */}
               <div className="tw-p-4">
                 <MemeDropArtistInfo drop={drop} />
-                <div className="tw-flex tw-flex-col tw-gap-y-1 tw-mt-4">
+                <div className="tw-flex tw-flex-col tw-mt-3 tw-ml-[3.25rem]">
                   <MemeDropHeader
                     title={title}
                     rank={drop.rank}
@@ -122,13 +114,11 @@ export default function MemeParticipationDrop({
                   <MemeDropDescription description={description} />
                 </div>
               </div>
-              {/* Artwork component */}
               <MemeDropArtwork
                 artworkMedia={artworkMedia}
                 title={title}
                 onViewLarger={handleViewLarger}
               />
-              {/* Traits component */}
               <div className="tw-p-4">
                 <MemeDropTraits drop={drop} />
               </div>
@@ -142,11 +132,8 @@ export default function MemeParticipationDrop({
               </div>
             </>
           </DropMobileMenuHandler>
-
-          {/* Voting section component */}
           {canShowVote && <MemeDropVotingSection drop={drop} />}
 
-          {/* Actions component (desktop only) */}
           <div className="tw-absolute tw-right-4 tw-top-2">
             <MemeDropActions
               drop={drop}
