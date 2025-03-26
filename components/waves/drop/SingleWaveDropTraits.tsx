@@ -229,7 +229,7 @@ const extractTraitsFromMetadata = (
       }
 
       if (traitKey) {
-        const numValue = Number(value) ?? 0;
+        const numValue = Number(value) || 0;
 
         // Safe assignment with type checking
         if (
@@ -259,7 +259,7 @@ const extractTraitsFromMetadata = (
       if (["Power", "Wisdom", "Loki", "Speed"].includes(capitalizedPointType)) {
         const camelCaseKey =
           `points${capitalizedPointType}` as keyof TraitsData;
-        const pointValue = Number(value) ?? 0;
+        const pointValue = Number(value) || 0;
 
         // Safe assignment with type checking
         if (
