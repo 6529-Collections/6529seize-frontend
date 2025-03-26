@@ -168,7 +168,7 @@ export default function Home({
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="6529.io" />
         <meta property="og:url" content={`${process.env.BASE_ENDPOINT}`} />
-        <meta property="og:title" content="6529.io" />
+        <meta property="og:title" content="6529" />
         <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
