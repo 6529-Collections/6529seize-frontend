@@ -24,7 +24,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
       </Link>
       <div className="tw-flex tw-flex-col tw-gap-y-1.5">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          {drop.author?.level && (
+          {!!drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
               cicType={cicToType(drop.author.cic)}
@@ -47,7 +47,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
           <div className="tw-ml-2">
             <WinnerDropBadge
               rank={drop.rank}
-              decisionTime={drop.winning_context?.decision_time || null}
+              decisionTime={drop.winning_context?.decision_time ?? null}
             />
           </div>
         </div>

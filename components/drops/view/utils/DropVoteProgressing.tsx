@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";

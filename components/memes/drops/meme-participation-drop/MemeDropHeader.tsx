@@ -2,8 +2,6 @@ import React from "react";
 
 interface MemeDropHeaderProps {
   readonly title: string;
-  readonly rank: number | null;
-  readonly decisionTime: number | null;
 }
 
 export default function MemeDropHeader({ title }: MemeDropHeaderProps) {

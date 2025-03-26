@@ -88,7 +88,7 @@ export default function CreateWave({
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
+        message: error as string,
         type: "error",
       });
     },

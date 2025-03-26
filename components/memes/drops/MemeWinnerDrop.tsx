@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import WaveDropActions from "../../waves/drops/WaveDropActions";
@@ -13,32 +12,27 @@ import DropListItemContentMedia from "../../drops/view/item/content/media/DropLi
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
-  readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function MemeWinnerDrop({
   drop,
-  activeDrop,
   showReplyAndQuote,
   location,
   onReply,
   onQuote,
-  onDropContentClick,
 }: MemeWinnerDropProps) {
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const isMobile = useIsMobileDevice();
 
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
+    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
     "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.data_key === "description")?.data_value ||
+    drop.metadata?.find((m) => m.data_key === "description")?.data_value ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
@@ -51,10 +45,6 @@ export default function MemeWinnerDrop({
   const handleOnQuote = useCallback(() => {
     onQuote({ drop, partId: drop.parts[0].part_id });
   }, [onQuote, drop]);
-
-  const handleViewLarger = () => {
-    setIsImageModalOpen(true);
-  };
 
   // First place shadow class from DefaultWaveWinnerDrop
   const firstPlaceShadow =
@@ -69,7 +59,9 @@ export default function MemeWinnerDrop({
       >
         <div
           className={`tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${
-            location === DropLocation.WAVE ? "tw-bg-iron-900/80" : "tw-bg-iron-950"
+            location === DropLocation.WAVE
+              ? "tw-bg-iron-900/80"
+              : "tw-bg-iron-950"
           } ${firstPlaceShadow}`}
         >
           <DropMobileMenuHandler

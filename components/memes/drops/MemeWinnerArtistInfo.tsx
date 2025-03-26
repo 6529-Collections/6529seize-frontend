@@ -26,7 +26,7 @@ export default function MemeWinnerArtistInfo({
       <WaveDropAuthorPfp drop={drop} />
       <div className="tw-flex tw-flex-col tw-gap-y-1.5">
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          {drop.author?.level && (
+          {!!drop.author?.level && (
             <UserCICAndLevel
               level={drop.author.level}
               cicType={cicType}
@@ -48,7 +48,7 @@ export default function MemeWinnerArtistInfo({
             {getTimeAgoShort(drop.created_at)}
           </p>
           <div className="tw-ml-2">
-            <WinnerDropBadge rank={1} decisionTime={decisionTime || null} />
+            <WinnerDropBadge rank={1} decisionTime={decisionTime ?? null} />
           </div>
         </div>
 

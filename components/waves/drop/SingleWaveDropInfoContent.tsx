@@ -5,7 +5,6 @@ import { ApiDropType } from "../../../generated/models/ObjectSerializer";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { MemesSingleWaveDropContent } from "./MemesSingleWaveDropContent";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import { WinnerBadge } from "./WinnerBadge";
 
 interface SingleWaveDropInfoContentProps {

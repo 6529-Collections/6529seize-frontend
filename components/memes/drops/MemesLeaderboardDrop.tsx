@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import MemesLeaderboardDropCard from "./MemesLeaderboardDropCard";
@@ -21,18 +21,13 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   onDropClick,
 }) => {
   const { canShowVote } = useDropInteractionRules(drop);
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-
-  const onViewLarger = () => {
-    setIsImageModalOpen(true);
-  };
 
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
+    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
     "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.data_key === "description")?.data_value ||
+    drop.metadata?.find((m) => m.data_key === "description")?.data_value ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
@@ -42,63 +37,55 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   const firstThreeVoters = drop.top_raters?.slice(0, 3) || [];
 
   return (
-    <>
-      <div
-        className="tw-w-full tw-cursor-pointer"
-        onClick={() => onDropClick(drop)}
-      >
-        <div className="tw-w-full tw-group tw-relative">
-          <MemesLeaderboardDropCard drop={drop}>
-            <div>
-              <div className="tw-p-4">
-                <div className="tw-flex tw-flex-col tw-gap-y-1">
-                  <MemesLeaderboardDropArtistInfo drop={drop} />
-                  <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
-                    <MemesLeaderboardDropHeader
-                      title={title}
-                      rank={drop.rank}
-                      decisionTime={drop.winning_context?.decision_time || null}
-                    />
-                    <MemesLeaderboardDropDescription
-                      description={description}
-                    />
-                  </div>
+    <div
+      className="tw-w-full tw-cursor-pointer"
+      onClick={() => onDropClick(drop)}
+    >
+      <div className="tw-w-full tw-group tw-relative">
+        <MemesLeaderboardDropCard drop={drop}>
+          <div>
+            <div className="tw-p-4">
+              <div className="tw-flex tw-flex-col tw-gap-y-1">
+                <MemesLeaderboardDropArtistInfo drop={drop} />
+                <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
+                  <MemesLeaderboardDropHeader title={title} />
+                  <MemesLeaderboardDropDescription description={description} />
                 </div>
-              </div>
-
-              {artworkMedia && (
-                 <div className="tw-flex tw-justify-center">
-                 <DropListItemContentMedia
-                   media_mime_type={artworkMedia.mime_type}
-                   media_url={artworkMedia.url}
-                 />
-               </div>
-              )}
-              <div className="tw-p-4">
-                <MemeDropTraits drop={drop} />
-              </div>
-              <div className="tw-flex tw-flex-col tw-px-4 tw-pb-4">
-                <MemesLeaderboardDropVoteSummary
-                  rating={drop.rating || 0}
-                  realtimeRating={drop.realtime_rating || 0}
-                  creditType={drop.wave.voting_credit_type}
-                  ratersCount={drop.raters_count || 0}
-                  topVoters={firstThreeVoters}
-                />
               </div>
             </div>
 
-            {/* Voting section - spanning both columns */}
-            <MemesLeaderboardDropVotingSection
-              drop={drop}
-              canShowVote={canShowVote}
-            />
+            {artworkMedia && (
+              <div className="tw-flex tw-justify-center">
+                <DropListItemContentMedia
+                  media_mime_type={artworkMedia.mime_type}
+                  media_url={artworkMedia.url}
+                />
+              </div>
+            )}
+            <div className="tw-p-4">
+              <MemeDropTraits drop={drop} />
+            </div>
+            <div className="tw-flex tw-flex-col tw-px-4 tw-pb-4">
+              <MemesLeaderboardDropVoteSummary
+                rating={drop.rating || 0}
+                realtimeRating={drop.realtime_rating || 0}
+                creditType={drop.wave.voting_credit_type}
+                ratersCount={drop.raters_count || 0}
+                topVoters={firstThreeVoters}
+              />
+            </div>
+          </div>
 
-            {/* Actions component (desktop only) - Moved outside the card to work with hover */}
-          </MemesLeaderboardDropCard>
-        </div>
+          {/* Voting section - spanning both columns */}
+          <MemesLeaderboardDropVotingSection
+            drop={drop}
+            canShowVote={canShowVote}
+          />
+
+          {/* Actions component (desktop only) - Moved outside the card to work with hover */}
+        </MemesLeaderboardDropCard>
       </div>
-    </>
+    </div>
   );
 };
 

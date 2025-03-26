@@ -20,8 +20,8 @@ export default function MemeDropVoteStats({
   ratersCount,
   topVoters,
 }: MemeDropVoteStatsProps) {
-  const isPositive = (rating || 0) >= 0;
-  const firstThreeVoters = topVoters?.slice(0, 3) || [];
+  const isPositive = (rating ?? 0) >= 0;
+  const firstThreeVoters = topVoters?.slice(0, 3) ?? [];
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-4">
@@ -31,7 +31,7 @@ export default function MemeDropVoteStats({
             isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
           } `}
         >
-          {formatNumberWithCommas(rating || 0)}
+          {formatNumberWithCommas(rating ?? 0)}
         </span>
 
         <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
@@ -70,7 +70,7 @@ export default function MemeDropVoteStats({
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
           <span className="tw-text-md tw-font-medium tw-text-iron-100">
-            {formatNumberWithCommas(ratersCount || 0)}
+            {formatNumberWithCommas(ratersCount ?? 0)}
           </span>
           <span className="tw-text-md tw-text-iron-400">
             {ratersCount === 1 ? "voter" : "voters"}

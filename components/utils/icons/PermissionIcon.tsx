@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
 interface PermissionIconProps {
-  className?: string;
+  readonly className?: string;
 }
 
 /**

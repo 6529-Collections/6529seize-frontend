@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import TimePicker from "../../../common/TimePicker";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";

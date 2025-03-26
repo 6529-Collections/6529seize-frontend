@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
 interface LimitIconProps {
-  className?: string;
+  readonly className?: string;
 }
 
 /**

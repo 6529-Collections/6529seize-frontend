@@ -20,7 +20,7 @@ export const createOnlyMeGroup = async ({
 }): Promise<string | null> => {
   try {
     const groupConfig: ApiCreateGroup = {
-      name: `Only ${handle || 'Me'}`,
+      name: `Only ${handle ?? "Me"}`,
       group: {
         tdh: { min: null, max: null },
         rep: {
@@ -42,16 +42,16 @@ export const createOnlyMeGroup = async ({
         excluded_identity_addresses: null,
       },
     };
-    
+
     const group = await commonApiPost<ApiCreateGroup, ApiGroupFull>({
       endpoint: `groups`,
       body: groupConfig,
     });
-    
+
     if (!group) {
       return null;
     }
-    
+
     await commonApiPost<
       { visible: true; old_version_id: string | null },
       ApiGroupFull
@@ -59,7 +59,7 @@ export const createOnlyMeGroup = async ({
       endpoint: `groups/${group.id}/visible`,
       body: { visible: true, old_version_id: null },
     });
-    
+
     return group.id;
   } catch (error) {
     onError(error);
@@ -89,15 +89,15 @@ export const getAdminGroupId = async ({
   if (adminGroupId) {
     return adminGroupId;
   }
-  
+
   if (!primaryWallet) {
     onError("You need to have a primary wallet to create a wave");
     return null;
   }
 
-  return await createOnlyMeGroup({ 
-    primaryWallet, 
+  return await createOnlyMeGroup({
+    primaryWallet,
     handle,
-    onError 
+    onError,
   });
 };

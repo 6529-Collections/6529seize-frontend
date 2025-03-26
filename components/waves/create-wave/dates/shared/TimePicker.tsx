@@ -71,7 +71,7 @@ export default function TimePicker({ hours, minutes, onTimeChange }: TimePickerP
   );
 }
 
-function TimeInput({ value, max, onChange, placeholder }: { value: number; max: number; onChange: (value: number) => void; placeholder: string }) {
+function TimeInput({ value, max, onChange, placeholder }: { readonly value: number; readonly max: number; readonly onChange: (value: number) => void; readonly placeholder: string }) {
   return (
     <div className="tw-w-16">
       <input

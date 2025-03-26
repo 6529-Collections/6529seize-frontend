@@ -3,13 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import CommonCalendar from "../../../utils/calendar/CommonCalendar";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
-import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import DateAccordion from "../../../common/DateAccordion";
 import TimePicker from "../../../common/TimePicker";
 import TooltipIconButton from "../../../common/TooltipIconButton";
 import {
   calculateDecisionTimes,
-  calculateEndDateForCycles,
   countTotalDecisions,
   formatDate,
 } from "../services/waveDecisionService";
@@ -38,7 +36,6 @@ export default function RollingEndDate({
   const [endDateMinutes, setEndDateMinutes] = useState(
     initialDate.getMinutes()
   );
-  const [showTooltip, setShowTooltip] = useState(false);
 
   // Determine minimum allowed end date based on decisions
   const calculateMinEndDate = (): number => {
@@ -120,32 +117,6 @@ export default function RollingEndDate({
     );
   };
 
-  // This function is simpler now since the main toggle is in the Decisions component
-  const handleToggleSwitch = (value: boolean) => {
-    setIsRollingMode(value);
-
-    if (!value) {
-      // When turning off rolling mode:
-      // 1. Clear isRolling flag
-      // 2. Set end date to the last decision point
-      let newEndDate = dates.firstDecisionTime;
-
-      if (dates.subsequentDecisions.length > 0) {
-        const decisionTimes = calculateDecisionTimes(
-          dates.firstDecisionTime,
-          dates.subsequentDecisions
-        );
-        newEndDate = decisionTimes[decisionTimes.length - 1];
-      }
-
-      setDates({
-        ...dates,
-        isRolling: false,
-        endDate: newEndDate,
-      });
-    }
-  };
-
   return (
     <div className="tw-relative">
       <DateAccordion
@@ -197,12 +168,14 @@ export default function RollingEndDate({
                   minutes={endDateMinutes}
                   onTimeChange={handleTimeChange}
                 />
-                
+
                 {/* Last decision time info */}
                 {dates.endDate && isRollingMode && (
                   <div className="tw-mt-4 tw-bg-primary-500/10 tw-rounded-lg tw-p-2">
                     <p className="tw-mb-0 tw-text-xs">
-                      <span className="tw-text-iron-300">Last winner announcement will be at:</span>
+                      <span className="tw-text-iron-300">
+                        Last winner announcement will be at:
+                      </span>
                     </p>
                     <p className="tw-mb-0 tw-text-sm tw-text-primary-400 tw-font-medium">
                       {formatDate(
@@ -222,22 +195,27 @@ export default function RollingEndDate({
           {/* Explanatory text - moved below the calendar and time picker */}
           <div className="tw-mt-4 tw-bg-iron-800/30 tw-rounded-lg tw-p-3">
             <p className="tw-mb-1 tw-text-sm tw-font-medium tw-text-iron-200">
-              {isRollingMode ? "About Recurring Winners" : "About Wave End Date"}
+              {isRollingMode
+                ? "About Recurring Winners"
+                : "About Wave End Date"}
             </p>
 
             {isRollingMode ? (
               <>
                 <p className="tw-text-xs tw-text-iron-400 tw-mb-2">
-                  In recurring mode, your wave continues announcing winners in regular intervals until the official end date.
+                  In recurring mode, your wave continues announcing winners in
+                  regular intervals until the official end date.
                 </p>
 
                 <p className="tw-text-xs tw-text-iron-400 tw-mb-2">
-                  The last winner announcement may occur before the official end date, depending on your cycle timing.
+                  The last winner announcement may occur before the official end
+                  date, depending on your cycle timing.
                 </p>
               </>
             ) : (
               <p className="tw-text-xs tw-text-iron-400 tw-mb-2">
-                Your wave will end immediately after the final winner announcement.
+                Your wave will end immediately after the final winner
+                announcement.
               </p>
             )}
 

@@ -21,7 +21,6 @@ interface MemeParticipationDropProps {
   readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 // Border styling based on rank
@@ -51,7 +50,6 @@ export default function MemeParticipationDrop({
   location,
   onReply,
   onQuote,
-  onDropContentClick,
 }: MemeParticipationDropProps) {
   const { canShowVote } = useDropInteractionRules(drop);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
@@ -59,10 +57,10 @@ export default function MemeParticipationDrop({
 
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
+    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
     "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.data_key === "description")?.data_value ||
+    drop.metadata?.find((m) => m.data_key === "description")?.data_value ??
     "This is an artwork submission for The Memes collection.";
 
   // Get artwork media URL if available
@@ -102,11 +100,7 @@ export default function MemeParticipationDrop({
               <div className="tw-p-4">
                 <MemeDropArtistInfo drop={drop} />
                 <div className="tw-flex tw-flex-col tw-mt-2 sm:tw-mt-1.5 sm:tw-ml-[3.25rem]">
-                  <MemeDropHeader
-                    title={title}
-                    rank={drop.rank}
-                    decisionTime={drop.winning_context?.decision_time || null}
-                  />
+                  <MemeDropHeader title={title} />
                   <MemeDropDescription description={description} />
                 </div>
               </div>
@@ -133,7 +127,7 @@ export default function MemeParticipationDrop({
                   realtimeRating={drop.realtime_rating}
                   votingCreditType={drop.wave.voting_credit_type}
                   ratersCount={drop.raters_count}
-                  topVoters={drop.top_raters || []}
+                  topVoters={drop.top_raters ?? []}
                 />
               </div>
             </>

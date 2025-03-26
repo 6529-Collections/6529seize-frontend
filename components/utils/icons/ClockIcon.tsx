@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
 interface ClockIconProps {
-  className?: string;
+  readonly className?: string;
 }
 
 /**

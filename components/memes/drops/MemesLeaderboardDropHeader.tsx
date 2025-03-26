@@ -2,8 +2,6 @@ import React from "react";
 
 interface MemesLeaderboardDropHeaderProps {
   readonly title: string;
-  readonly rank: number | null;
-  readonly decisionTime: number | null;
 }
 
 export const MemesLeaderboardDropHeader: React.FC<

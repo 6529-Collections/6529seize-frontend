@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
-import { faCompress, faExpand } from "@fortawesome/free-solid-svg-icons";
+import { faCompress } from "@fortawesome/free-solid-svg-icons";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import { WinnerBadge } from "./WinnerBadge";
@@ -62,8 +62,6 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             {isWinner && <WinnerBadge drop={drop} showBadge={true} />}
           </div>
           <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3 tw-px-6">
-            
-
             <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
               {title}
             </h3>
