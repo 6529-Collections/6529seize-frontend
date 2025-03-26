@@ -24,7 +24,7 @@ export const SingleWaveDropInfoPanel: React.FC<
   const { isWinner } = useDropInteractionRules(drop);
   return (
     <SingleWaveDropInfoContainer activeTab={activeTab}>
-      {isWinner && <WinnerBadge drop={drop} showBadge={true} />}
+   
       <div className="tw-hidden lg:tw-block">
         <SingleWaveDropClose onClose={onClose} />
       </div>
