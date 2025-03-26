@@ -18,8 +18,8 @@ const MetadataItem: React.FC<{
 
   // Skip empty values
   if (
-    (typeof value === "string" && !value) ??
-    (typeof value === "number" && value === 0) ??
+    (typeof value === "string" && !value) ||
+    (typeof value === "number" && value === 0) ||
     (typeof value === "boolean" && !value)
   ) {
     return null;
@@ -203,13 +203,13 @@ const extractTraitsFromMetadata = (
       if (booleanKeys.includes(traitKey as keyof TraitsData)) {
         const boolKey = traitKey as keyof TraitsData;
         const boolValue =
-          value.toLowerCase() === "true" ??
-          value === "1" ??
+          value.toLowerCase() === "true" ||
+          value === "1" ||
           value.toLowerCase() === "yes";
 
         // Safe assignment with type checking
         if (
-          typeof traits[boolKey] === "boolean" ??
+          typeof traits[boolKey] === "boolean" ||
           traits[boolKey] === undefined
         ) {
           (traits as Record<keyof TraitsData, any>)[boolKey] = boolValue;
@@ -233,7 +233,7 @@ const extractTraitsFromMetadata = (
 
         // Safe assignment with type checking
         if (
-          typeof traits[traitKey] === "number" ??
+          typeof traits[traitKey] === "number" ||
           traits[traitKey] === undefined
         ) {
           (traits as Record<keyof TraitsData, any>)[traitKey] = numValue;
@@ -244,7 +244,7 @@ const extractTraitsFromMetadata = (
 
       // Safe assignment with type checking
       if (
-        typeof traits[textKey] === "string" ??
+        typeof traits[textKey] === "string" ||
         traits[textKey] === undefined
       ) {
         (traits as Record<keyof TraitsData, any>)[textKey] = value;
@@ -263,7 +263,7 @@ const extractTraitsFromMetadata = (
 
         // Safe assignment with type checking
         if (
-          typeof traits[camelCaseKey] === "number" ??
+          typeof traits[camelCaseKey] === "number" ||
           traits[camelCaseKey] === undefined
         ) {
           (traits as Record<keyof TraitsData, any>)[camelCaseKey] = pointValue;
@@ -374,12 +374,16 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 md:tw-grid-cols-3 tw-gap-2">
         {/* Always show first 2 items (changed from 4) */}
         {traitItems.slice(0, 2).map((item) => (
-          <MetadataItem key={item.label} label={item.label} value={item.value} />
+          <MetadataItem
+            key={item.label}
+            label={item.label}
+            value={item.value}
+          />
         ))}
 
         {/* Show more button or additional items */}
-        {traitItems.length > 2 && (
-          showAllTraits ? (
+        {traitItems.length > 2 &&
+          (showAllTraits ? (
             <>
               {traitItems.slice(2).map((item) => (
                 <MetadataItem
@@ -402,8 +406,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
             >
               Show all
             </button>
-          )
-        )}
+          ))}
       </div>
     </div>
   );

@@ -47,12 +47,7 @@ export const VotingPhaseCard: React.FC<VotingPhaseCardProps> = ({ wave }) => {
       {!isCompleted ? (
         <TimeCountdownDisplay timeLeft={timeLeft} />
       ) : (
-        <TimePhaseStatus
-          isCompleted={isCompleted}
-          isUpcoming={isUpcoming}
-          isInProgress={isInProgress}
-          phaseType="Voting"
-        />
+        <TimePhaseStatus isCompleted={isCompleted} phaseType="Voting" />
       )}
     </div>
   );

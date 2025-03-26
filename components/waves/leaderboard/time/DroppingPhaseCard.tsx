@@ -26,30 +26,22 @@ export const DroppingPhaseCard: React.FC<DroppingPhaseCardProps> = ({
     participation: { isUpcoming, isCompleted, isInProgress, timeLeft },
   } = useWaveTimers(wave);
 
-
-
   return (
     <div className="tw-rounded-lg tw-bg-gradient-to-br tw-from-[#1E1E2E]/80 tw-via-[#2E2E3E]/60 tw-to-[#3E2E3E]/40 tw-px-4 tw-py-3 tw-backdrop-blur-sm tw-border tw-border-[#3E2E3E]/20">
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-gap-y-2 tw-mb-3.5">
-        <TimePhaseIcon 
-          isCompleted={isCompleted} 
-          color="emerald" 
-        />
+        <TimePhaseIcon isCompleted={isCompleted} color="emerald" />
 
         <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
-          <TimePhaseTitle 
-            isCompleted={isCompleted} 
+          <TimePhaseTitle
+            isCompleted={isCompleted}
             isUpcoming={isUpcoming}
             isInProgress={isInProgress}
-            phaseType="Dropping" 
+            phaseType="Dropping"
           />
           <p className="tw-text-xs tw-text-white/60 tw-mb-0">
-            {isUpcoming &&
-              new Date(startTime).toLocaleDateString()}
-            {isInProgress &&
-              new Date(endTime).toLocaleDateString()}
-            {isCompleted &&
-              new Date(endTime).toLocaleDateString()}
+            {isUpcoming && new Date(startTime).toLocaleDateString()}
+            {isInProgress && new Date(endTime).toLocaleDateString()}
+            {isCompleted && new Date(endTime).toLocaleDateString()}
           </p>
         </div>
       </div>
@@ -57,12 +49,7 @@ export const DroppingPhaseCard: React.FC<DroppingPhaseCardProps> = ({
       {!isCompleted ? (
         <TimeCountdownDisplay timeLeft={timeLeft} />
       ) : (
-        <TimePhaseStatus 
-          isCompleted={isCompleted} 
-          isUpcoming={isUpcoming}
-          isInProgress={isInProgress}
-          phaseType="Dropping" 
-        />
+        <TimePhaseStatus isCompleted={isCompleted} phaseType="Dropping" />
       )}
     </div>
   );

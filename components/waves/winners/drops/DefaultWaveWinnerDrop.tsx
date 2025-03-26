@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { WaveWinnersDropHeader } from "./header/WaveWinnersDropHeader";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
 import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
-import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
 import WaveWinnersDropHeaderTotalVotes from "./header/WaveWinnersDropHeaderTotalVotes";

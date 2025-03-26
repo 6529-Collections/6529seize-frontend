@@ -46,8 +46,6 @@ export default function CreateWave({
   // Use the hook for configuration state management
   const {
     config,
-    endDateConfig,
-    setEndDateConfig,
     step,
     selectedOutcomeType,
     errors,
@@ -205,10 +203,7 @@ export default function CreateWave({
       <CreateWaveDates
         waveType={config.overview.type}
         dates={config.dates}
-        errors={errors}
         setDates={setDates}
-        endDateConfig={endDateConfig}
-        setEndDateConfig={setEndDateConfig}
       />
     ),
     [CreateWaveStep.DROPS]: (
