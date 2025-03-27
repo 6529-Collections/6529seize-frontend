@@ -10,13 +10,13 @@ import WavePicture from "../../../waves/WavePicture";
 interface BrainLeftSidebarWaveProps {
   readonly wave: EnhancedWave;
   readonly resetWaveCount: (waveId: string) => void;
-  readonly isHighlighted?: boolean;
+  readonly activeWaveId: string | null;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
   resetWaveCount,
-  isHighlighted = false,
+  activeWaveId,
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
@@ -39,6 +39,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
+    if (activeWaveId) {
+      resetWaveCount(activeWaveId);
+    }
     resetWaveCount(wave.id);
     // Navigate to the new wave
     router.push(getHref(wave.id), undefined, { shallow: true });
