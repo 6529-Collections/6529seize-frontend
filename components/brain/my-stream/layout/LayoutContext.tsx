@@ -107,7 +107,7 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { isCapacitor } = useCapacitor();
+  const { isCapacitor, isAndroid, isIos } = useCapacitor();
 
   // Internal ref storage (source of truth)
   const refMap = useRef<Record<LayoutRefType, HTMLDivElement | null>>({
@@ -304,9 +304,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
 
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 20 : 0}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 20 : 0}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -315,7 +317,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace,
     spaces.mobileTabsSpace,
-    isCapacitor
+    isCapacitor,
+    isAndroid,
+    isIos
   ]);
 
   // Calculate style for leaderboard view
@@ -324,9 +328,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
 
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 64 : 0}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 64 : 0}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -335,7 +341,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace,
     spaces.mobileTabsSpace,
-    isCapacitor
+    isCapacitor,
+    isAndroid,
+    isIos
   ]);
 
   // Calculate style for winners view
@@ -344,9 +352,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
 
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 60 : 0}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 60 : 0}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -355,7 +365,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace,
     spaces.mobileTabsSpace,
-    isCapacitor
+    isCapacitor,
+    isAndroid,
+    isIos
   ]);
 
   // Calculate style for outcome view
@@ -364,9 +376,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
 
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 60 : 0}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 60 : 0}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -375,7 +389,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace,
     spaces.mobileTabsSpace,
-    isCapacitor
+    isCapacitor,
+    isAndroid,
+    isIos
   ]);
 
   // Calculate style for notifications view
@@ -384,9 +400,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
 
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -395,7 +413,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace,
     spaces.mobileTabsSpace,
-    isCapacitor
+    isCapacitor,
+    isAndroid,
+    isIos
   ]);
 
   // Calculate style for feed view
@@ -404,9 +424,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
 
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -415,7 +437,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace,
     spaces.mobileTabsSpace,
-    isCapacitor
+    isCapacitor,
+    isAndroid,
+    isIos
   ]);
 
   // Calculate style for mobile waves view
@@ -424,9 +448,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
     
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -435,7 +461,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace,
     spaces.mobileTabsSpace,
-    isCapacitor
+    isCapacitor,
+    isAndroid,
+    isIos
   ]);
 
   // Calculate style for mobile about view
@@ -444,9 +472,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
     
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${isCapacitor ? 80 : 0}px)`
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
     };
   }, [
     spaces.measurementsComplete,
@@ -455,7 +485,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.tabsSpace,
     spaces.spacerSpace,
     spaces.mobileTabsSpace,
-    isCapacitor
+    isCapacitor,
+    isAndroid,
+    isIos
   ]);
   
   // Calculate style for single drop view (with extra 47px margin after header on non-lg screens only)
@@ -464,7 +496,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
     
-    // Use CSS media query directly in the calc expression for better responsiveness
     return {
       height: `calc(100vh - ${spaces.headerSpace}px - var(--single-drop-margin, 0px))`,
       maxHeight: `calc(100vh - ${spaces.headerSpace}px - var(--single-drop-margin, 0px))`,
@@ -478,7 +509,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     } as React.CSSProperties;
   }, [
     spaces.measurementsComplete,
-    spaces.headerSpace
+    spaces.headerSpace,
   ]);
 
   // Memoize the context value to prevent unnecessary re-renders
