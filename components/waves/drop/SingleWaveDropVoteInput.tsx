@@ -10,19 +10,15 @@ interface SingleWaveDropVoteInputProps {
   readonly onSubmit: () => void;
 }
 
-export const SingleWaveDropVoteInput: React.FC<SingleWaveDropVoteInputProps> = ({
-  voteValue,
-  setVoteValue,
-  minValue,
-  maxValue,
-  creditType,
-  onSubmit,
-}) => {
+export const SingleWaveDropVoteInput: React.FC<
+  SingleWaveDropVoteInputProps
+> = ({ voteValue, setVoteValue, minValue, maxValue, creditType, onSubmit }) => {
   const memeticValues: number[] = [
     -69420, -42069, -6529, -420, -69, 69, 420, 6529, 42069, 69420,
   ];
 
   const quickPercentages = [-100, -75, -50, -25, 25, 50, 75, 100];
+  const mobileQuickPercentages = [-75, -50, -25, 25, 50, 75];
 
   const handleQuickPercentage = (percentage: number) => {
     let value: number;
@@ -216,7 +212,7 @@ export const SingleWaveDropVoteInput: React.FC<SingleWaveDropVoteInputProps> = (
             className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-rose-400/50 tw-text-rose-400 desktop-hover:hover:tw-text-rose-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95"
           >
             <svg
-              className="tw-w-4 tw-h-4 tw-flex-shrink-0" 
+              className="tw-w-4 tw-h-4 tw-flex-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -235,20 +231,40 @@ export const SingleWaveDropVoteInput: React.FC<SingleWaveDropVoteInputProps> = (
 
       {/* Quick percentage buttons below */}
       <div className="tw-mt-1.5 tw-flex tw-gap-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
-        {quickPercentages.map((percentage) => (
-          <button
-            key={percentage}
-            onClick={() => handleQuickPercentage(percentage)}
-            className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
-              percentage,
-              voteValue
-            )}`}
-          >
-            {percentage > 0 ? "+" : ""}
-            {percentage}%
-          </button>
-        ))}
+        {/* Mobile percentages */}
+        <div className="sm:tw-hidden tw-flex tw-gap-1">
+          {mobileQuickPercentages.map((percentage) => (
+            <button
+              key={percentage}
+              onClick={() => handleQuickPercentage(percentage)}
+              className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
+                percentage,
+                voteValue
+              )}`}
+            >
+              {percentage > 0 ? "+" : ""}
+              {percentage}%
+            </button>
+          ))}
+        </div>
+
+        {/* Full percentages for sm and above */}
+        <div className="tw-hidden sm:tw-flex tw-gap-1">
+          {quickPercentages.map((percentage) => (
+            <button
+              key={percentage}
+              onClick={() => handleQuickPercentage(percentage)}
+              className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
+                percentage,
+                voteValue
+              )}`}
+            >
+              {percentage > 0 ? "+" : ""}
+              {percentage}%
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
-}; 
+};

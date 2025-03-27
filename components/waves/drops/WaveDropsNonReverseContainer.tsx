@@ -34,6 +34,11 @@ export const WaveDropsNonReverseContainer = forwardRef<
     const [lastScrollTop, setLastScrollTop] = useState(0);
     const previousHeightRef = useRef<number>(0);
     const previousNewItemsCountRef = useRef<number>(0);
+    
+    // Track loading state for top scrolling edge case
+    const loadingFromTopRef = useRef(false);
+    const heightBeforeLoadingRef = useRef(0);
+    const wasFetchingRef = useRef(false);
 
     // Create observers to detect when we reach the bottom (for older items)
     // and top (for newer items)
@@ -105,6 +110,48 @@ export const WaveDropsNonReverseContainer = forwardRef<
         previousNewItemsCountRef.current = newItemsCount;
       }
     }, []);
+    
+    // Track loading and scroll position for absolute top edge case
+    useEffect(() => {
+      // Check if we just started fetching
+      const justStartedFetching = !wasFetchingRef.current && isFetchingNextPage;
+      
+      // Check if we just finished fetching
+      const justFinishedFetching = wasFetchingRef.current && !isFetchingNextPage;
+      
+      // Handle loading start when at absolute top
+      if (justStartedFetching && ref && "current" in ref && ref.current && ref.current.scrollTop < 5) {
+        // We're at the top and just started to fetch
+        loadingFromTopRef.current = true;
+        
+        if (contentRef.current) {
+          heightBeforeLoadingRef.current = contentRef.current.scrollHeight;
+        }
+      }
+      
+      // Handle loading end when we were at absolute top
+      if (justFinishedFetching && loadingFromTopRef.current) {
+        // Small delay to ensure content is rendered
+        setTimeout(() => {
+          if (ref && "current" in ref && ref.current && contentRef.current) {
+            const newHeight = contentRef.current.scrollHeight;
+            const oldHeight = heightBeforeLoadingRef.current;
+            const heightDiff = newHeight - oldHeight;
+            
+            if (heightDiff > 0) {
+              // Adjust scroll position to maintain view of the same content
+              ref.current.scrollTop = heightDiff;
+            }
+          }
+          
+          // Reset the loading state
+          loadingFromTopRef.current = false;
+        }, 50);
+      }
+      
+      // Update previous fetch state
+      wasFetchingRef.current = isFetchingNextPage;
+    }, [isFetchingNextPage]);
 
     const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 

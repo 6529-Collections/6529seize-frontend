@@ -15,7 +15,7 @@ export default function FollowersListWrapper({
   readonly onBottomIntersection: (state: boolean) => void;
 }) {
   return (
-    <div className="tw-overflow-hidden">
+    <div className="tw-overflow-hidden tw-h-full">
       <FollowersList followers={followers} />
       {loading && (
         <div className="tw-w-full tw-text-center tw-mt-8">
