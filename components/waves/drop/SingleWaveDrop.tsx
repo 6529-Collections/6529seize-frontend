@@ -1,8 +1,8 @@
 import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { isMemesWave } from "../../../helpers/waves/waves.helpers";
 import { DefaultSingleWaveDrop } from "./DefaultSingleWaveDrop";
 import { MemesSingleWaveDrop } from "./MemesSingleWaveDrop";
+import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 
 interface SingleWaveDropProps {
   readonly drop: ExtendedDrop;
@@ -19,6 +19,7 @@ export const SingleWaveDrop: React.FC<SingleWaveDropProps> = ({
   onClose,
 }) => {
   // Check if this is the memes wave
+  const { isMemesWave } = useSeizeSettings();
   const isMemes = isMemesWave(initialDrop.wave.id);
 
   if (isMemes) {

@@ -23,7 +23,7 @@ interface WaveRatingProps {
 }
 
 export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
-  const seizeSettings = useSeizeSettings();
+  const { seizeSettings } = useSeizeSettings();
   const disableSelection =
     wave.metrics.subscribers_count >=
     seizeSettings.all_drops_notifications_subscribers_limit;

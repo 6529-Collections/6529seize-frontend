@@ -1,11 +1,11 @@
 import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { isMemesWave } from "../../../helpers/waves/waves.helpers";
 import { ApiDropType } from "../../../generated/models/ObjectSerializer";
 import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { MemesSingleWaveDropContent } from "./MemesSingleWaveDropContent";
 import { WinnerBadge } from "./WinnerBadge";
+import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 
 interface SingleWaveDropInfoContentProps {
   readonly drop: ExtendedDrop | undefined;
@@ -14,6 +14,8 @@ interface SingleWaveDropInfoContentProps {
 export const SingleWaveDropInfoContent: React.FC<
   SingleWaveDropInfoContentProps
 > = ({ drop }) => {
+  const { isMemesWave } = useSeizeSettings();
+
   if (!drop) {
     return null;
   }
