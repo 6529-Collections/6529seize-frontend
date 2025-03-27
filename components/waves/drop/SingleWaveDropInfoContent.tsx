@@ -14,11 +14,12 @@ interface SingleWaveDropInfoContentProps {
 export const SingleWaveDropInfoContent: React.FC<
   SingleWaveDropInfoContentProps
 > = ({ drop }) => {
+  const { isMemesWave } = useSeizeSettings();
+
   if (!drop) {
     return null;
   }
   // Check if this is a memes wave drop
-  const { isMemesWave } = useSeizeSettings();
   const isMemes = isMemesWave(drop.wave.id);
 
   return (

@@ -37,11 +37,10 @@ export const SeizeSettingsProvider = ({
     );
   }, []);
 
-  const isMemesWave = (waveId: string | undefined | null): boolean =>
-    useMemo(() => {
-      if (!waveId) return false;
-      return seizeSettings?.memes_wave_id === waveId;
-    }, [waveId, seizeSettings]);
+  const isMemesWave = (waveId: string | undefined | null): boolean => {
+    if (!waveId) return false;
+    return seizeSettings?.memes_wave_id === waveId;
+  };
 
   const value: SeizeSettingsContextType = useMemo(
     () => ({
