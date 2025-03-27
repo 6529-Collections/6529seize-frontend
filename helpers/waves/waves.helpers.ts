@@ -5,17 +5,6 @@ import { ApiWave } from "../../generated/models/ApiWave";
 import { commonApiPost } from "../../services/api/common-api";
 import { CreateWaveStepStatus } from "../../types/waves.types";
 
-/**
- * Checks if a wave is the Memes wave based on the wave ID
- * 
- * @param waveId The wave ID to check
- * @returns True if the wave is the Memes wave, false otherwise
- */
-export const isMemesWave = (waveId: string | undefined | null): boolean => {
-  if (!waveId) return false;
-  return waveId.toLowerCase() === process.env.MEMES_WAVE_ID?.toLowerCase();
-};
-
 export const getCreateWaveStepStatus = ({
   stepIndex,
   activeStepIndex,
@@ -85,7 +74,6 @@ export const convertWaveToUpdateWave = (
     decisions_strategy: wave.wave.decisions_strategy,
   },
   outcomes: wave.outcomes,
-
 });
 
 export const canEditWave = ({

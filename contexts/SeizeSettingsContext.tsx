@@ -4,22 +4,30 @@ import React, {
   useState,
   useEffect,
   ReactNode,
+  useMemo,
 } from "react";
 import { ApiSeizeSettings } from "../generated/models/ApiSeizeSettings";
 import { fetchUrl } from "../services/6529api";
 
-const SeizeSettingsContext = createContext<ApiSeizeSettings | undefined>(
-  undefined
-);
+type SeizeSettingsContextType = {
+  seizeSettings: ApiSeizeSettings;
+  isMemesWave: (waveId: string | undefined | null) => boolean;
+};
+
+const SeizeSettingsContext = createContext<
+  SeizeSettingsContextType | undefined
+>(undefined);
 
 export const SeizeSettingsProvider = ({
   children,
 }: {
   children: ReactNode;
 }) => {
-  const [seizeSettings, setSeizeSettings] = useState<
-    ApiSeizeSettings | undefined
-  >(undefined);
+  const [seizeSettings, setSeizeSettings] = useState<ApiSeizeSettings>({
+    rememes_submission_tdh_threshold: 0,
+    all_drops_notifications_subscribers_limit: 0,
+    memes_wave_id: null,
+  });
 
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/settings`).then(
@@ -29,14 +37,28 @@ export const SeizeSettingsProvider = ({
     );
   }, []);
 
+  const isMemesWave = (waveId: string | undefined | null): boolean =>
+    useMemo(() => {
+      if (!waveId) return false;
+      return seizeSettings?.memes_wave_id === waveId;
+    }, [waveId, seizeSettings]);
+
+  const value: SeizeSettingsContextType = useMemo(
+    () => ({
+      seizeSettings,
+      isMemesWave,
+    }),
+    [seizeSettings, isMemesWave]
+  );
+
   return (
-    <SeizeSettingsContext.Provider value={seizeSettings}>
+    <SeizeSettingsContext.Provider value={value}>
       {children}
     </SeizeSettingsContext.Provider>
   );
 };
 
-export const useSeizeSettings = (): ApiSeizeSettings => {
+export const useSeizeSettings = (): SeizeSettingsContextType => {
   const context = useContext(SeizeSettingsContext);
   if (context === undefined) {
     throw new Error(

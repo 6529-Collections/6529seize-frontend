@@ -5,7 +5,7 @@ import { useSeizeSettings } from "../contexts/SeizeSettingsContext";
 import { GetWaveSubscription200Response } from "../generated/models/GetWaveSubscription200Response";
 
 export function useWaveNotificationSubscription(wave: ApiWave) {
-  const seizeSettings = useSeizeSettings();
+  const { seizeSettings } = useSeizeSettings();
   return useQuery({
     queryKey: ["wave-notification-subscription", wave.id],
     queryFn: () => {
