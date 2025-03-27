@@ -716,6 +716,18 @@ paths:
             format: int64
             minimum: 1
             maximum: 100
+        - name: group_id
+          description: Search only users who can view given group
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: ignore_authenticated_user
+          description: Ignore authenticated user
+          in: query
+          required: false
+          schema:
+            type: boolean
       responses:
         "200":
           description: successful operation
@@ -1409,7 +1421,7 @@ paths:
                 $ref: "#/components/schemas/ApiChangeProfileCicRatingResponse"
         "400":
           description: Invalid request
-  /profiles/{identity}/repcic/ratings/by-rater:
+  /profiles/{identity}/cic/ratings/by-rater:
     get:
       tags:
         - ProfileCIC
@@ -2245,6 +2257,32 @@ paths:
                 $ref: "#/components/schemas/ApiWave"
         "400":
           description: Invalid request
+  /waves/direct-message/new:
+    post:
+      tags:
+        - Waves
+      summary: Create a direct message wave
+      operationId: createDirectMessageWave
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                identity_addresses:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWave"
+        "400":
+          description: Invalid request
   /waves/{id}:
     get:
       tags:
@@ -2387,6 +2425,18 @@ paths:
           required: true
           schema:
             type: string
+        - name: voter_identity
+          in: query
+          description: Filter drops where given identity has voted
+          required: false
+          schema:
+            type: string
+        - name: author_identity
+          in: query
+          description: Filter drops by given author
+          required: false
+          schema:
+            type: string
         - name: page_size
           in: query
           description: Default is 50
@@ -2422,12 +2472,6 @@ paths:
             enum:
               - RANK
               - CREATION_TIME
-        - name: author_identity
-          in: query
-          description: Identity of author to filter by
-          required: false
-          schema:
-            type: string
       responses:
         "200":
           description: successful operation
@@ -3384,7 +3428,6 @@ components:
         - chat
         - wave
         - outcomes
-        - decisions_strategy
       properties:
         name:
           description: The name of the wave
@@ -3429,6 +3472,7 @@ components:
         - signature_required
         - no_of_applications_allowed_per_participant
         - required_media
+        - terms
       properties:
         scope:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
@@ -3454,6 +3498,12 @@ components:
         signature_required:
           description: If true then the votes must be signed by voters.
           type: boolean
+        terms:
+          description: >-
+            If this is and the "signature_required" is set then this will be
+            embedded as a signature input data component for each drop.
+          type: string
+          nullable: true
         period:
           $ref: "#/components/schemas/ApiIntRange"
     ApiCreateNewWaveScope:
@@ -3512,6 +3562,7 @@ components:
         - max_winners
         - admin_group
         - decisions_strategy
+        - admin_drop_deletion_enabled
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
@@ -3547,6 +3598,8 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiWaveDecisionsStrategy"
+        admin_drop_deletion_enabled:
+          type: boolean
     ApiCreateWaveDropRequest:
       type: object
       required:
@@ -3554,6 +3607,7 @@ components:
         - mentioned_users
         - metadata
         - parts
+        - signature
       properties:
         title:
           type: string
@@ -3576,6 +3630,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropMetadata"
+        signature:
+          description: >-
+            If wave requires drop signatures then this needs to be set.
+            Signature of a drop is ethSign(creatorWallet,
+            sha256(oneLineJsonWithAlphabeticallySortedFieldsRecursive(ApiCreateDropRequest
+            - signature (+ wave.participation.terms if it exists))))
+          type: string
+          nullable: true
     ApiDrop:
       type: object
       required:
@@ -3592,12 +3654,14 @@ components:
         - parts
         - parts_count
         - rating
+        - realtime_rating
         - top_raters
         - raters_count
         - title
         - context_profile_context
         - subscribed_actions
         - rank
+        - is_signed
       properties:
         id:
           type: string
@@ -3611,6 +3675,8 @@ components:
           type: number
           format: int64
           nullable: true
+        winning_context:
+          $ref: "#/components/schemas/ApiDropWinningContext"
         wave:
           $ref: "#/components/schemas/ApiWaveMin"
         reply_to:
@@ -3657,6 +3723,9 @@ components:
         rating:
           type: number
           format: int64
+        realtime_rating:
+          type: number
+          format: int64
         top_raters:
           type: array
           items:
@@ -3672,6 +3741,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
+        is_signed:
+          type: boolean
     ApiDropAndDropVote:
       type: object
       required:
@@ -3889,6 +3960,7 @@ components:
       enum:
         - CHAT
         - PARTICIPATORY
+        - WINNER
     ApiDropVote:
       type: object
       required:
@@ -3903,6 +3975,23 @@ components:
           $ref: "#/components/schemas/ApiProfileMin"
         time:
           type: number
+          format: int64
+    ApiDropWinningContext:
+      type: object
+      required:
+        - place
+        - awards
+        - decision_time
+      properties:
+        place:
+          type: integer
+          format: int64
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionAward"
+        decision_time:
+          type: integer
           format: int64
     ApiDropWithoutWave:
       type: object
@@ -3919,12 +4008,14 @@ components:
         - parts
         - parts_count
         - rating
+        - realtime_rating
         - top_raters
         - raters_count
         - title
         - subscribed_actions
         - context_profile_context
         - rank
+        - is_signed
       properties:
         id:
           type: string
@@ -3938,6 +4029,8 @@ components:
           type: number
           format: int64
           nullable: true
+        winning_context:
+          $ref: "#/components/schemas/ApiDropWinningContext"
         reply_to:
           $ref: "#/components/schemas/ApiReplyToDropResponse"
         author:
@@ -3982,6 +4075,9 @@ components:
         rating:
           type: number
           format: int64
+        realtime_rating:
+          type: number
+          format: int64
         top_raters:
           type: array
           items:
@@ -3997,6 +4093,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
+        is_signed:
+          type: boolean
     ApiFeedItem:
       type: object
       required:
@@ -5396,6 +5494,8 @@ components:
         - admin_group
         - authenticated_user_eligible_for_admin
         - decisions_strategy
+        - next_decision_time
+        - admin_drop_deletion_enabled
       properties:
         type:
           $ref: "#/components/schemas/ApiWaveType"
@@ -5431,6 +5531,12 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiWaveDecisionsStrategy"
+        next_decision_time:
+          type: number
+          format: int64
+          nullable: true
+        admin_drop_deletion_enabled:
+          type: boolean
     ApiWaveContributorOverview:
       required:
         - contributor_identity
@@ -5533,14 +5639,18 @@ components:
       type: object
       required:
         - place
-        - award
+        - awards
         - drop
       properties:
         place:
           type: integer
           format: int64
-        award:
-          $ref: "#/components/schemas/ApiWaveDecisionAward"
+        awards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionAward"
+        drop:
+          $ref: "#/components/schemas/ApiDrop"
     ApiWaveDropsFeed:
       type: object
       required:
@@ -5629,9 +5739,16 @@ components:
         - authenticated_user_eligible_to_vote
         - authenticated_user_eligible_to_participate
         - authenticated_user_eligible_to_chat
+        - authenticated_user_admin
         - voting_period_start
         - voting_period_end
         - voting_credit_type
+        - visibility_group_id
+        - participation_group_id
+        - chat_group_id
+        - voting_group_id
+        - admin_group_id
+        - admin_drop_deletion_enabled
       properties:
         id:
           type: string
@@ -5647,6 +5764,23 @@ components:
           type: boolean
         authenticated_user_eligible_to_chat:
           type: boolean
+        authenticated_user_admin:
+          type: boolean
+        visibility_group_id:
+          type: string
+          nullable: true
+        participation_group_id:
+          type: string
+          nullable: true
+        chat_group_id:
+          type: string
+          nullable: true
+        voting_group_id:
+          type: string
+          nullable: true
+        admin_group_id:
+          type: string
+          nullable: true
         voting_period_start:
           type: number
           format: int64
@@ -5657,6 +5791,8 @@ components:
           nullable: true
         voting_credit_type:
           $ref: "#/components/schemas/ApiWaveCreditType"
+        admin_drop_deletion_enabled:
+          type: boolean
     ApiWaveOutcome:
       type: object
       required:
@@ -5713,6 +5849,7 @@ components:
         - no_of_applications_allowed_per_participant
         - required_media
         - authenticated_user_eligible
+        - terms
       properties:
         scope:
           $ref: "#/components/schemas/ApiWaveScope"
@@ -5742,6 +5879,9 @@ components:
           $ref: "#/components/schemas/ApiIntRange"
         authenticated_user_eligible:
           type: boolean
+        terms:
+          type: string
+          nullable: true
     ApiWaveParticipationRequirement:
       type: string
       enum:

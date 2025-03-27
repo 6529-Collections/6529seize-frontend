@@ -214,8 +214,15 @@ export default function CreateDrop({
         authenticated_user_eligible_to_chat:
           waveDetailed.chat.authenticated_user_eligible,
         voting_credit_type: waveDetailed.voting.credit_type,
-        voting_period_start: null,
-        voting_period_end: null,
+        voting_period_start: waveDetailed.voting.period?.min ?? null,
+        voting_period_end: waveDetailed.voting.period?.max ?? null,
+        visibility_group_id: null,
+        participation_group_id: null,
+        chat_group_id: null,
+        voting_group_id: null,
+        admin_group_id: null,
+        admin_drop_deletion_enabled: waveDetailed.wave.admin_drop_deletion_enabled,
+        authenticated_user_admin: waveDetailed.wave.authenticated_user_eligible_for_admin,
       },
       author: {
         ...profileMin,
@@ -251,6 +258,8 @@ export default function CreateDrop({
       subscribed_actions: [],
       drop_type: ApiDropType.Chat,
       rank: null,
+      realtime_rating: 0,
+      is_signed: false,
     };
   };
 

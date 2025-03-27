@@ -40,7 +40,7 @@ export default function WaveHeader({
 
   const ringClasses = useRing
     ? "tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
-    : "tw-rounded-t-xl lg:tw-rounded-t-none";
+    : useRounded ? "tw-rounded-t-xl lg:tw-rounded-t-none" : "";
 
   return (
     <div>
@@ -50,10 +50,11 @@ export default function WaveHeader({
           className={`${
             useRounded
               ? "tw-rounded-t-xl tw-ring-1 tw-ring-inset tw-ring-iron-800"
-              : "tw-rounded-t-xl"
-          } tw-overflow-hidden`}>
+              : ""
+          } tw-overflow-hidden`}
+        >
           <div
-            className="tw-h-14 tw-w-full tw-object-cover"
+            className="tw-h-14 tw-w-full tw-object-cover tw-rounded-t-xl lg:tw-rounded-t-none"
             style={{
               background: `linear-gradient(45deg, ${wave.author.banner1_color} 0%, ${wave.author.banner2_color} 100%)`,
             }}></div>
@@ -125,7 +126,7 @@ export default function WaveHeader({
                   {firstXContributors.map((item) => (
                     <img
                       key={item.contributor_identity}
-                      className="tw-inline-block tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-bg-iron-900"
+                      className="tw-inline-block tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-bg-iron-900 tw-object-contain"
                       src={getScaledImageUri(
                         item.contributor_pfp,
                         ImageScale.W_AUTO_H_50

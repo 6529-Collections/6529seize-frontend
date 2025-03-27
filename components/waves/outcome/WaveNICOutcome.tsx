@@ -2,6 +2,8 @@ import { FC, useEffect, useState } from "react";
 import { ApiWaveOutcome } from "../../../generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import { motion, AnimatePresence } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAddressCard } from "@fortawesome/free-regular-svg-icons";
 
 interface WaveNICOutcomeProps {
   readonly outcome: ApiWaveOutcome;
@@ -43,20 +45,10 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-4">
             <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-xl tw-bg-gradient-to-br tw-from-[#A4C2DB]/20 tw-to-[#A4C2DB]/10 tw-shadow-inner">
-              <svg
-                className="tw-size-6 tw-text-[#A4C2DB] tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(164,194,219,0.5)]"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M9 6.75H15M9 12H15M9 17.25H12M3.75 19.5H20.25C21.0784 19.5 21.75 18.8284 21.75 18V6C21.75 5.17157 21.0784 4.5 20.25 4.5H3.75C2.92157 4.5 2.25 5.17157 2.25 6V18C2.25 18.8284 2.92157 19.5 3.75 19.5Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <FontAwesomeIcon 
+                icon={faAddressCard} 
+                className="tw-size-5 tw-text-[#A4C2DB] tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(164,194,219,0.5)]"
+              />
             </div>
             <div className="tw-text-left">
               <div className="tw-text-base tw-font-semibold tw-text-[#A4C2DB]">

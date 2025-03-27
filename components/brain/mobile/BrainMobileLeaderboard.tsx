@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderboardDrops";
-import {
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../hooks/useWaveDropsLeaderboard";
 import { motion, AnimatePresence } from "framer-motion";
 import { WaveDropCreate } from "../../waves/leaderboard/create/WaveDropCreate";
 import useCapacitor from "../../../hooks/useCapacitor";
@@ -47,9 +43,6 @@ const BrainMobileLeaderboard: React.FC<BrainMobileLeaderboardProps> = ({
 
         <WaveLeaderboardDrops
           wave={wave}
-          dropsSortBy={WaveDropsLeaderboardSortBy.RANK}
-          sortDirection={WaveDropsLeaderboardSortDirection.DESC}
-          showMyDrops={false}
           onCreateDrop={() => setIsCreatingDrop(true)}
         />
       </div>

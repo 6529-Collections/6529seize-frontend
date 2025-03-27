@@ -110,21 +110,6 @@ export default function WaveDropsAll({
 
   const [newItemsCount, setNewItemsCount] = useState(0);
 
-  const handleUserScroll = useCallback(
-    (direction: "up" | "down", currentIsAtBottom: boolean) => {
-      // If user was at the bottom and is now scrolling up, mark as manual scroll
-      if (direction === "up" && !currentIsAtBottom && isAtBottom) {
-        setUserHasManuallyScrolled(true);
-      }
-
-      // If user manually returned to bottom, reset the flag
-      if (currentIsAtBottom && userHasManuallyScrolled) {
-        setUserHasManuallyScrolled(false);
-      }
-    },
-    [isAtBottom, userHasManuallyScrolled]
-  );
-
   useEffect(() => {
     setTitle({
       title: haveNewDrops ? "New Drops Available | 6529.io" : null,
@@ -324,8 +309,7 @@ export default function WaveDropsAll({
           newItemsCount={newItemsCount}
           isFetchingNextPage={isFetchingNextPage}
           onTopIntersection={handleTopIntersection}
-          disableAutoPosition={disableAutoPosition}
-          onUserScroll={handleUserScroll}>
+          disableAutoPosition={disableAutoPosition}>
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
             <DropsList
               scrollContainerRef={scrollContainerRef}

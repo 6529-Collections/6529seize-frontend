@@ -7,6 +7,7 @@ import {
 } from "../../../../types/waves.types";
 import CreateWaveDropsMetadata from "./metadata/CreateWaveDropsMetadata";
 import CreateWaveDropsTypes from "./types/CreateWaveDropsTypes";
+import CreateWaveTermsOfService from "./terms/CreateWaveTermsOfService";
 
 export default function CreateWaveDrops({
   waveType,
@@ -19,7 +20,6 @@ export default function CreateWaveDrops({
   readonly errors: CREATE_WAVE_VALIDATION_ERROR[];
   readonly setDrops: (drops: CreateWaveDropsConfig) => void;
 }) {
-
   const onNoOfApplicationsAllowedPerParticipantChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -52,6 +52,14 @@ export default function CreateWaveDrops({
   };
 
   const isNotChatType = waveType !== ApiWaveType.Chat;
+
+  const onTermsChange = (terms: string | null) => {
+    setDrops({
+      ...drops,
+      terms,
+      signatureRequired: !!terms,
+    });
+  };
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-6">
@@ -92,6 +100,16 @@ export default function CreateWaveDrops({
         errors={errors}
         onRequiredMetadataChange={onRequiredMetadataChange}
       />
+      {/* Terms of Service section */}
+      {isNotChatType && (
+        <div className="tw-border-t tw-border-iron-800 tw-pt-6">
+          <CreateWaveTermsOfService
+            waveType={waveType}
+            terms={drops.terms}
+            setTerms={onTermsChange}
+          />
+        </div>
+      )}
     </div>
   );
 }

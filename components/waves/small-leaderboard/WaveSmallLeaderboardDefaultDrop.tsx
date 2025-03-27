@@ -8,6 +8,8 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import WaveDropActionsRate from "../drops/WaveDropActionsRate";
+import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 
 interface WaveSmallLeaderboardDefaultDropProps {
   readonly drop: ExtendedDrop;
@@ -41,12 +43,13 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<WaveSmallLeaderboardDefau
         <div className="tw-@container tw-p-4 tw-rounded-xl desktop-hover:hover:tw-bg-iron-800/70 tw-transition tw-duration-300 tw-ease-out tw-group">
           <div>
             <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center">
-              <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-min-w-6 tw-h-6 tw-px-2 tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
-                {drop.rank ? (
-                  <span className="tw-text-iron-300 tw-text-sm">
-                    #{drop.rank}
-                  </span>
-                ) : (
+              {drop.rank ? (
+                <WinnerDropBadge 
+                  rank={drop.rank} 
+                  decisionTime={drop.winning_context?.decision_time || null}
+                />
+              ) : (
+                <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-min-w-6 tw-h-6 tw-px-2 tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -62,8 +65,8 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<WaveSmallLeaderboardDefau
                       d="M5 12h14"
                     />
                   </svg>
-                )}
-              </div>
+                </div>
+              )}
               <WaveDropActionsRate drop={drop} />
             </div>
 
@@ -119,6 +122,10 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<WaveSmallLeaderboardDefau
                   <span className="tw-text-xs tw-font-medium tw-text-iron-400">
                     {formatNumberWithCommas(drop.rating)}
                   </span>
+                  <DropVoteProgressing
+                    rating={drop.rating}
+                    realtimeRating={drop.realtime_rating}
+                  />
                 </div>
               </div>
 

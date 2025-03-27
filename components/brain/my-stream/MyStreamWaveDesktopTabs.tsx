@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { TabToggle } from "../../common/TabToggle";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { useWaveState, WaveVotingState } from "../../../hooks/useWaveState";
-import { MyStreamWaveTab } from "./MyStreamWave";
+import { MyStreamWaveTab } from "../../../types/waves.types";
+import { useContentTab, WaveVotingState } from "../ContentTabContext";
+import { useWave } from "../../../hooks/useWave";
+import { useWaveTimers } from "../../../hooks/useWaveTimers";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -10,22 +13,77 @@ interface MyStreamWaveDesktopTabsProps {
   readonly setActiveTab: (tab: MyStreamWaveTab) => void;
 }
 
-export const getWaveTabOptions = (votingState: WaveVotingState) => [
-  { key: MyStreamWaveTab.CHAT, label: "Chat" },
-  {
-    key: MyStreamWaveTab.LEADERBOARD,
-    label: votingState === WaveVotingState.ENDED ? "Winners" : "Leaderboard",
-  },
-  { key: MyStreamWaveTab.OUTCOME, label: "Outcome" },
-] as const;
+interface TabOption {
+  key: MyStreamWaveTab;
+  label: string;
+}
 
 const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
   setActiveTab,
 }) => {
-  const { votingState } = useWaveState(wave);
-  const options = getWaveTabOptions(votingState);
+  // Use the available tabs from context instead of recalculating
+  const { availableTabs, updateAvailableTabs, setActiveContentTab } =
+    useContentTab();
+
+  const { isChatWave, isMemesWave } = useWave(wave);
+  const {
+    voting: { isUpcoming, isCompleted, isInProgress },
+    decisions: { firstDecisionDone },
+  } = useWaveTimers(wave);
+
+  // Update available tabs when wave changes
+  useEffect(() => {
+    const votingState = isUpcoming
+      ? WaveVotingState.NOT_STARTED
+      : isCompleted
+      ? WaveVotingState.ENDED
+      : WaveVotingState.ONGOING;
+    updateAvailableTabs(
+      wave
+        ? {
+            isMemesWave,
+            isChatWave,
+            votingState,
+            hasFirstDecisionPassed: firstDecisionDone,
+          }
+        : null
+    );
+  }, [
+    wave,
+    isUpcoming,
+    isCompleted,
+    isInProgress,
+    firstDecisionDone,
+    updateAvailableTabs,
+  ]);
+
+  // Always switch to Chat for Chat-type waves
+  useEffect(() => {
+    if (wave?.wave?.type === ApiWaveType.Chat) {
+      setActiveContentTab(MyStreamWaveTab.CHAT);
+    }
+  }, [wave?.wave?.type, setActiveContentTab]);
+
+  // For simple waves, don't render any tabs
+  if (isChatWave) {
+    return null;
+  }
+
+  // Map enum values to label names
+  const tabLabels: Record<MyStreamWaveTab, string> = {
+    [MyStreamWaveTab.CHAT]: "Chat",
+    [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
+    [MyStreamWaveTab.WINNERS]: "Winners",
+    [MyStreamWaveTab.OUTCOME]: "Outcome",
+  };
+
+  // Generate options based on available tabs
+  const options: TabOption[] = availableTabs.map((tab) => ({
+    key: tab,
+    label: tabLabels[tab],
+  }));
 
   return (
     <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full">

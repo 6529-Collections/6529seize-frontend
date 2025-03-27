@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
+import { useContentTab } from "../ContentTabContext";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
-import MyStreamWaveDesktopTabs from "./MyStreamWaveDesktopTabs";
 import { useWaveData } from "../../../hooks/useWaveData";
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { createBreakpoint } from "react-use";
 import { useRouter } from "next/router";
-
-export enum MyStreamWaveTab {
-  CHAT = "CHAT",
-  LEADERBOARD = "LEADERBOARD",
-  OUTCOME = "OUTCOME",
-}
+import { WaveWinners } from "../../waves/winners/WaveWinners";
+import { MyStreamWaveTab } from "../../../types/waves.types";
+import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -26,6 +22,22 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const router = useRouter();
   const { data: wave } = useWaveData(waveId);
 
+  // Track mount status to prevent post-unmount updates
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // Create a stable key for proper remounting
+  const stableWaveKey = `wave-${waveId}`;
+
+  // Get the active tab and utilities from global context
+  const { activeContentTab } = useContentTab();
+
+  // For handling clicks on drops
   const onDropClick = (drop: ExtendedDrop) => {
     const currentQuery = { ...router.query };
     currentQuery.drop = drop.id;
@@ -39,48 +51,36 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     );
   };
 
-  const [activeTab, setActiveTab] = useState<MyStreamWaveTab>(
-    MyStreamWaveTab.CHAT
-  );
-
-  useEffect(() => {
-    if (wave?.wave.type === ApiWaveType.Chat) {
-      setActiveTab(MyStreamWaveTab.CHAT);
-    }
-  }, [breakpoint, wave?.wave.type]);
-
+  // Early return if no wave data - all hooks must be called before this
   if (!wave) {
     return null;
   }
 
+  // Create component instances with wave-specific props and stable measurements
   const components: Record<MyStreamWaveTab, JSX.Element> = {
     [MyStreamWaveTab.CHAT]: <MyStreamWaveChat wave={wave} />,
     [MyStreamWaveTab.LEADERBOARD]: (
       <MyStreamWaveLeaderboard wave={wave} onDropClick={onDropClick} />
     ),
+    [MyStreamWaveTab.WINNERS]: (
+      <WaveWinners wave={wave} onDropClick={onDropClick} />
+    ),
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
   };
 
   return (
-    <div className="tw-relative">
-      {breakpoint !== "S" && wave.wave.type !== ApiWaveType.Chat && (
-        <div
-          className={
-            activeTab === MyStreamWaveTab.CHAT
-              ? "tw-absolute tw-top-0 tw-left-0 tw-z-50"
-              : ""
-          }
-        >
-          <MyStreamWaveDesktopTabs
-            activeTab={activeTab}
-            wave={wave}
-            setActiveTab={setActiveTab}
-          />
-        </div>
-      )}
-      {components[activeTab]}
+    <div
+      className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
+      key={stableWaveKey}
+    >
+      {/* Don't render tab container for simple waves */}
+      {breakpoint !== "S" && <MyStreamWaveTabs wave={wave} />}
+
+      <div className="tw-flex-grow tw-overflow-hidden">
+        {components[activeContentTab]}
+      </div>
     </div>
   );
 };
 
-export default MyStreamWave;
+export default React.memo(MyStreamWave);

@@ -1,19 +1,19 @@
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderVoter from "./WaveWinnersDropHeaderVoter";
 
 interface WaveWinnersDropHeaderVotersProps {
-  readonly drop: ExtendedDrop;
+  readonly winner: ApiWaveDecisionWinner;
 }
 
 export default function WaveWinnersDropHeaderVoters({
-  drop,
+  winner,
 }: WaveWinnersDropHeaderVotersProps) {
   const hasUserVoted =
-    drop.context_profile_context?.rating !== undefined &&
-    drop.context_profile_context?.rating !== 0;
+    winner.drop.context_profile_context?.rating !== undefined &&
+    winner.drop.context_profile_context?.rating !== 0;
 
-  const userVote = drop.context_profile_context?.rating ?? 0;
+  const userVote = winner.drop.context_profile_context?.rating ?? 0;
   const isNegativeVote = userVote < 0;
 
   const topThreeRankStyles: { [key: number]: string } = {
@@ -26,7 +26,7 @@ export default function WaveWinnersDropHeaderVoters({
     if (rank && rank <= 3) {
       return topThreeRankStyles[rank];
     }
-    
+
     if (isNegative) {
       return "tw-bg-gradient-to-r tw-from-red tw-to-red tw-bg-clip-text tw-text-transparent";
     }
@@ -34,23 +34,26 @@ export default function WaveWinnersDropHeaderVoters({
     return "tw-bg-gradient-to-r tw-from-emerald-400 tw-to-emerald-500 tw-bg-clip-text tw-text-transparent";
   };
 
-  const rankStyle = getVoteStyle(drop.rank, isNegativeVote);
+  const rankStyle = getVoteStyle(winner.place, isNegativeVote);
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
       <div className="tw-flex -tw-space-x-1.5 tw-items-center">
-        {drop.top_raters.map((voter, index) => (
+        {winner.drop.top_raters.map((voter, index) => (
           <WaveWinnersDropHeaderVoter
             voter={voter}
-            drop={drop}
+            winner={winner}
             index={index}
             key={voter.profile.handle}
           />
         ))}
       </div>
       <span className="tw-text-sm tw-text-iron-400">
-        {formatNumberWithCommas(drop.raters_count)}{" "}
-        {drop.raters_count === 1 ? "voter" : "voters"}
+        <span className="tw-font-semibold">
+          {" "}
+          {formatNumberWithCommas(winner.drop.raters_count)}{" "}
+        </span>
+        {winner.drop.raters_count === 1 ? "voter" : "voters"}
       </span>
 
       {hasUserVoted && (
@@ -58,7 +61,8 @@ export default function WaveWinnersDropHeaderVoters({
           <span className="tw-text-sm">
             <span className="tw-text-iron-400">Your vote: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
-              {formatNumberWithCommas(userVote)} {drop.wave.voting_credit_type}
+              {formatNumberWithCommas(userVote)}{" "}
+              {winner.drop.wave.voting_credit_type}
             </span>
           </span>
         </div>

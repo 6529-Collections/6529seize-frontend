@@ -1,22 +1,22 @@
 import React from "react";
-import { ApiWave } from "../../../../generated/models/ApiWave";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
+import { EnhancedWave } from "../../../../hooks/useWavesList";
 import WavePicture from "../../../waves/WavePicture";
 
 interface BrainLeftSidebarWaveProps {
-  readonly wave: ApiWave;
-  readonly newDropsCounts: Record<string, number>;
+  readonly wave: EnhancedWave;
   readonly resetWaveCount: (waveId: string) => void;
+  readonly isHighlighted?: boolean;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
-  newDropsCounts,
   resetWaveCount,
+  isHighlighted = false,
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
@@ -29,7 +29,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       : `/my-stream?wave=${waveId}`;
   };
 
-  const haveNewDrops = newDropsCounts[wave.id] > 0;
+  const haveNewDrops = wave.newDropsCount > 0;
 
   const onHover = (waveId: string) => {
     if (waveId !== router.query.wave) prefetchWaveData(waveId);
@@ -40,6 +40,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     resetWaveCount(wave.id);
+    // Navigate to the new wave
     router.push(getHref(wave.id), undefined, { shallow: true });
   };
 
@@ -52,15 +53,15 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   return (
     <div
       className={`tw-flex tw-px-5 tw-py-2 tw-group tw-transition-colors tw-duration-200 tw-ease-in-out ${
-        isActive
-          ? "tw-bg-primary-300/5 desktop-hover:hover:tw-bg-primary-300/10"
+        isActive 
+          ? "tw-bg-primary-300/10 desktop-hover:hover:tw-bg-primary-300/10" 
           : "desktop-hover:hover:tw-bg-iron-900"
       }`}>
       <Link
         href={getHref(wave.id)}
         onMouseEnter={() => onHover(wave.id)}
         onClick={onLinkClick}
-        className={`tw-flex tw-relative tw-items-center tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 ${
+        className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 ${
           isActive
             ? "tw-text-primary-400 hover:tw-text-primary-400"
             : "tw-text-iron-200 hover:tw-text-iron-200"
@@ -72,6 +73,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             {isDropWave && (
               <div className="tw-absolute tw-inset-0 tw-border-2 tw-border-blue-400/40 tw-rounded-full" />
             )}
+
           </div>
           {isDropWave && (
             <div className="tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-size-3.5 tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-full tw-shadow-lg">
@@ -89,7 +91,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           )}
           {!isActive && haveNewDrops && (
             <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-px-1 tw-shadow-sm">
-              {newDropsCounts[wave.id]}
+              {wave.newDropsCount}
             </div>
           )}
         </div>

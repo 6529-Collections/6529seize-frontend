@@ -14,7 +14,7 @@ export const SingleWaveDropInfoAuthorSection: React.FC<
   SingleWaveDropInfoAuthorSectionProps
 > = ({ drop, wave }) => {
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-4 tw-justify-between tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-4 tw-mt-4 tw-px-6">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-4 tw-justify-between">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         {drop && <SingleWaveDropAuthor drop={drop} />}
         <div className="tw-flex tw-gap-x-2 tw-items-center">

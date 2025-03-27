@@ -7,6 +7,7 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../../helpers/image.helpers";
+import DropVoteProgressing from "../../../../drops/view/utils/DropVoteProgressing";
 
 interface WaveLeaderboardDropRatersProps {
   readonly drop: ExtendedDrop;
@@ -44,9 +45,16 @@ export const WaveLeaderboardDropRaters: React.FC<
   return (
     <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-1.5 tw-justify-end">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
-        <span className={`tw-text-sm tw-font-semibold ${rankStyle}`}>
-          {formatNumberWithCommas(drop.rating)}
-        </span>
+        <div className="tw-relative tw-inline-flex tw-items-center tw-gap-x-1">
+          {" "}
+          <span className={`tw-text-sm tw-font-semibold ${rankStyle}`}>
+            {formatNumberWithCommas(drop.rating)}
+          </span>
+          <DropVoteProgressing
+            rating={drop.rating}
+            realtimeRating={drop.realtime_rating}
+          />
+        </div>
         <span className="tw-text-iron-400 tw-text-sm tw-whitespace-nowrap">
           {drop.wave.voting_credit_type} total
         </span>

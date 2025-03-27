@@ -18,24 +18,13 @@ import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
 import useCapacitor from "./useCapacitor";
 
-export enum WaveDropsLeaderboardSortBy {
-  RANK = "RANK",
-  CREATION_TIME = "CREATION_TIME",
-}
 
-export enum WaveDropsLeaderboardSortDirection {
-  ASC = "ASC",
-  DESC = "DESC",
-}
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | undefined;
-  readonly reverse: boolean;
-  readonly dropsSortBy: WaveDropsLeaderboardSortBy;
-  readonly sortDirection: WaveDropsLeaderboardSortDirection;
-  readonly handle?: string;
   readonly pollingEnabled?: boolean;
+  readonly enabled?: boolean;
 }
 
 const POLLING_DELAY = 3000;
@@ -58,11 +47,8 @@ function useTabVisibility() {
 export function useWaveDropsLeaderboard({
   waveId,
   connectedProfileHandle,
-  reverse,
-  dropsSortBy,
-  sortDirection,
-  handle,
   pollingEnabled = true,
+  enabled = true,
 }: UseWaveDropsLeaderboardProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -81,28 +67,22 @@ export function useWaveDropsLeaderboard({
     {
       waveId,
       page_size: WAVE_DROPS_PARAMS.limit,
-      sort: dropsSortBy,
-      sort_direction: sortDirection,
-      handle,
     },
   ];
 
   useEffect(() => {
+    // Only prefetch if enabled
+    if (!enabled) return;
+    
     queryClient.prefetchInfiniteQuery({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
           page_size: WAVE_DROPS_PARAMS.limit.toString(),
-          sort: dropsSortBy,
-          sort_direction: sortDirection,
         };
 
         if (pageParam) {
           params.page = `${pageParam}`;
-        }
-
-        if (handle) {
-          params.author_identity = handle;
         }
 
         return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -116,7 +96,7 @@ export function useWaveDropsLeaderboard({
       pages: 3,
       staleTime: 60000,
     });
-  }, [waveId, dropsSortBy]);
+  }, [waveId, enabled]);
 
   const {
     data,
@@ -130,16 +110,10 @@ export function useWaveDropsLeaderboard({
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         page_size: WAVE_DROPS_PARAMS.limit.toString(),
-        sort: dropsSortBy,
-        sort_direction: sortDirection,
       };
 
       if (pageParam) {
         params.page = `${pageParam}`;
-      }
-
-      if (handle) {
-        params.author_identity = handle;
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -152,7 +126,7 @@ export function useWaveDropsLeaderboard({
     initialPageParam: null,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
     placeholderData: keepPreviousData,
-    enabled: !!connectedProfileHandle,
+    enabled: enabled && !!connectedProfileHandle,
     staleTime: 60000,
   });
 
@@ -165,13 +139,12 @@ export function useWaveDropsLeaderboard({
               drops: page.drops,
             })),
             prev,
-            reverse
           )
         : [];
       return generateUniqueKeys(newDrops, prev);
     });
     setHasInitialized(true);
-  }, [data, reverse]);
+  }, [data]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
 
@@ -180,28 +153,22 @@ export function useWaveDropsLeaderboard({
     queryFn: async () => {
       const params: Record<string, string> = {
         page_size: "1",
-        sort: dropsSortBy,
-        sort_direction: sortDirection,
       };
-
-      if (handle) {
-        params.author_identity = handle;
-      }
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,
         params,
       });
     },
-    enabled: !haveNewDrops && canPoll && pollingEnabled,
+    enabled: enabled && !haveNewDrops && canPoll && pollingEnabled,
     refetchInterval:
-      isTabVisible && pollingEnabled
+      isTabVisible && pollingEnabled && enabled
         ? ACTIVE_POLLING_INTERVAL
         : INACTIVE_POLLING_INTERVAL,
-    refetchOnWindowFocus: pollingEnabled,
-    refetchOnMount: pollingEnabled,
-    refetchOnReconnect: pollingEnabled,
-    refetchIntervalInBackground: !isCapacitor && pollingEnabled,
+    refetchOnWindowFocus: pollingEnabled && enabled,
+    refetchOnMount: pollingEnabled && enabled,
+    refetchOnReconnect: pollingEnabled && enabled,
+    refetchIntervalInBackground: !isCapacitor && pollingEnabled && enabled,
   });
 
   useEffect(() => {

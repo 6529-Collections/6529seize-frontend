@@ -1,11 +1,7 @@
 import React, { useContext, useMemo } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { AuthContext } from "../../auth/Auth";
-import {
-  useWaveDropsLeaderboard,
-  WaveDropsLeaderboardSortBy,
-  WaveDropsLeaderboardSortDirection,
-} from "../../../hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard } from "../../../hooks/useWaveDropsLeaderboard";
 import { WaveSmallLeaderboardDrop } from "./WaveSmallLeaderboardDrop";
 import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
 import { ExtendedDrop } from "../../../helpers/waves/wave-drops.helpers";
@@ -15,15 +11,15 @@ interface WaveSmallLeaderboardProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({ wave, onDropClick }) => {
+export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
+  wave,
+  onDropClick,
+}) => {
   const { connectedProfile } = useContext(AuthContext);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
-      reverse: true,
-      dropsSortBy: WaveDropsLeaderboardSortBy.RANK,
-      sortDirection: WaveDropsLeaderboardSortDirection.DESC,
     });
 
   const memoizedDrops = useMemo(() => drops, [drops]);
@@ -62,4 +58,4 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({ wave
       </div>
     </div>
   );
-}; 
+};

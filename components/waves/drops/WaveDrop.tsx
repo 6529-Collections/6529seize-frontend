@@ -43,26 +43,37 @@ const shouldGroupWithDrop = (
 };
 
 const RANK_STYLES = {
-  1: "tw-border tw-border-solid tw-border-[#E8D48A]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(66,56,41,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(217,169,98,0.15)] hover:tw-shadow-[inset_0_0_25px_rgba(217,169,98,0.2)]",
-  2: "tw-border tw-border-solid tw-border-[#DDDDDD]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(45,45,50,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(192,192,192,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(192,192,192,0.15)]",
-  3: "tw-border tw-border-solid tw-border-[#CD7F32]/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.9)_0%,rgba(60,46,36,0.95)_100%)] tw-shadow-[inset_0_0_20px_rgba(205,127,50,0.1)] hover:tw-shadow-[inset_0_0_25px_rgba(205,127,50,0.15)]",
-  default:
-    "tw-border tw-border-solid tw-border tw-border-iron-600/40 tw-bg-[linear-gradient(90deg,rgba(31,31,37,0.95)_0%,rgba(35,35,40,0.98)_100%)] tw-shadow-[inset_0_0_16px_rgba(255,255,255,0.03)] hover:tw-shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]",
+  1: "tw-border-l tw-border-[#E8D48A]/40 tw-border-y-0 tw-border-r-0",
+  2: "tw-border-l tw-border-[#DDDDDD]/40 tw-border-y-0 tw-border-r-0",
+  3: "tw-border-l tw-border-[#CD7F32]/40 tw-border-y-0 tw-border-r-0",
+  default: "tw-border-l tw-border-iron-600/40 tw-border-y-0 tw-border-r-0",
 } as const;
 
 const getColorClasses = ({
   isActiveDrop,
   rank,
   isDrop,
+  location,
 }: {
   isActiveDrop: boolean;
   rank: number | null;
   isDrop: boolean;
+  location: DropLocation;
 }): string => {
   if (isActiveDrop) {
-    return "tw-bg-[#3CCB7F]/10 tw-border-l-2 tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0 tw-mt-1";
+    return "tw-bg-[#3CCB7F]/10 tw-border-l tw-border-l-[#3CCB7F] tw-border-solid tw-border-y-0 tw-border-r-0 tw-mt-1";
   }
-  if (!isDrop) return "tw-bg-iron-950 desktop-hover:hover:tw-bg-iron-900/50";
+  if (!isDrop) {
+    const hoverClass =
+      location === DropLocation.WAVE
+        ? "desktop-hover:hover:tw-bg-iron-900/50"
+        : "";
+    const ringClasses =
+      location !== DropLocation.WAVE
+        ? "tw-ring-1 tw-ring-inset tw-ring-iron-800"
+        : "";
+    return `tw-bg-iron-950 ${ringClasses} ${hoverClass}`;
+  }
 
   const rankClass =
     RANK_STYLES[rank as keyof typeof RANK_STYLES] ?? RANK_STYLES.default;
@@ -79,13 +90,11 @@ const getDropClasses = (
   const baseClasses =
     "tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-px-4 tw-transition-colors tw-duration-300";
 
-  const streamClasses = `tw-rounded-xl ${
-    !isDrop && "tw-ring-1 tw-ring-inset tw-ring-iron-800"
-  }`;
+  const streamClasses = "tw-rounded-xl";
 
   const chatDropClasses = isDrop ? "tw-rounded-lg tw-my-0.5" : "";
 
-  const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop });
+  const rankClasses = getColorClasses({ isActiveDrop, rank, isDrop, location });
 
   return `${baseClasses} ${groupingClass} ${
     location === DropLocation.MY_STREAM ? streamClasses : chatDropClasses
@@ -253,7 +262,13 @@ const WaveDrop = ({
                 partsCount={drop.parts.length}
               />
             )}
-            <div className={shouldGroupWithPreviousDrop ? "tw-ml-[3.25rem] tw-py-[0.15625rem]" : ""}>
+            <div
+              className={
+                shouldGroupWithPreviousDrop
+                  ? "tw-ml-[3.25rem] tw-py-[0.15625rem]"
+                  : ""
+              }
+            >
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}

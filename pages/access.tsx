@@ -28,6 +28,7 @@ export default function Access() {
           setImage(response.image);
         });
         if (r.status != 401) {
+          router.push("/");
           setInputDisabled(true);
         }
       });

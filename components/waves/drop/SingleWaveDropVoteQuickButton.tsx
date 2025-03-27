@@ -48,7 +48,7 @@ export const SingleWaveDropVoteQuickButton: React.FC<
           key={`${rank}-${value}`}
           disabled={disabled}
           onClick={() => setValue(value)}
-          className={`tw-border-0 tw-group/icon tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-lg tw-ring-1 tw-transition-all tw-bg-iron-950/50 ${baseColors} ${
+          className={`tw-border-0 tw-group/icon tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1.5 tw-rounded-lg tw-ring-1 tw-transition-all tw-bg-iron-950/50 tw-whitespace-nowrap ${baseColors} ${
             disabled ? "tw-opacity-50 tw-cursor-not-allowed" : hoverColors
           }`}
         >

@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useDrop } from "../../../hooks/useDrop";
-import { useWaveData } from "../../../hooks/useWaveData";
-import { SingleWaveDropInfoPanel } from "./SingleWaveDropInfoPanel";
-import { SingleWaveDropHeader } from "./SingleWaveDropHeader";
-import { SingleWaveDropChat } from "./SingleWaveDropChat";
+import { isMemesWave } from "../../../helpers/waves/waves.helpers";
+import { DefaultSingleWaveDrop } from "./DefaultSingleWaveDrop";
+import { MemesSingleWaveDrop } from "./MemesSingleWaveDrop";
 
 interface SingleWaveDropProps {
   readonly drop: ExtendedDrop;
@@ -20,40 +18,12 @@ export const SingleWaveDrop: React.FC<SingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<SingleWaveDropTab>(SingleWaveDropTab.INFO);
-  const { drop } = useDrop({ dropId: initialDrop.id });
-  const { data: wave } = useWaveData(drop?.wave.id ?? null);
+  // Check if this is the memes wave
+  const isMemes = isMemesWave(initialDrop.wave.id);
 
-  return (
-    <div className="tw-w-full">
-      <SingleWaveDropHeader
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onClose={onClose}
-      />
+  if (isMemes) {
+    return <MemesSingleWaveDrop drop={initialDrop} onClose={onClose} />;
+  }
 
-      <div className="tw-flex tw-flex-col lg:tw-flex-row tw-flex-1">
-        {!!drop && !!wave && (
-          <SingleWaveDropInfoPanel
-            drop={{
-              ...drop,
-              stableHash: initialDrop.stableHash,
-              stableKey: initialDrop.stableKey,
-            }}
-            wave={wave}
-            activeTab={activeTab}
-            onClose={onClose}
-          />
-        )}
-
-        <div
-          className={`${
-            activeTab === SingleWaveDropTab.CHAT ? "tw-flex" : "tw-hidden"
-          } lg:tw-flex lg:tw-flex-1 `}
-        >
-          {wave && drop && <SingleWaveDropChat wave={wave} drop={drop} />}
-        </div>
-      </div>
-    </div>
-  );
-}; 
+  return <DefaultSingleWaveDrop drop={initialDrop} onClose={onClose} />;
+};

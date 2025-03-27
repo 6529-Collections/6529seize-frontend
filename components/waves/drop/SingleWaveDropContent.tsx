@@ -10,7 +10,7 @@ interface SingleWaveDropContentProps {
 export const SingleWaveDropContent: React.FC<SingleWaveDropContentProps> = ({ drop }) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   return (
-    <div className="tw-mb-2 tw-flex tw-flex-col">
+    <div className="tw-mb-4 tw-flex tw-flex-col tw-gap-y-4">
       <WaveDropContent
         drop={drop}
         activePartIndex={activePartIndex}
