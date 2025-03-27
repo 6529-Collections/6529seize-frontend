@@ -1,9 +1,9 @@
-import { useState, useContext } from 'react';
-import { useSignMessage } from 'wagmi';
-import { UserRejectedRequestError } from 'viem';
-import { ApiCreateDropRequest } from '../../generated/models/ApiCreateDropRequest';
-import { DropHasher } from '../../utils/drop-hasher';
-import { AuthContext } from '../../components/auth/Auth';
+import { useState, useContext } from "react";
+import { useSignMessage } from "wagmi";
+import { UserRejectedRequestError } from "viem";
+import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
+import { DropHasher } from "../../utils/drop-hasher";
+import { AuthContext } from "../../components/auth/Auth";
 
 /**
  * Hook for hashing drop data and requesting user signature
@@ -28,17 +28,17 @@ export const useDropSignature = () => {
   }): Promise<{ success: boolean; signature?: string }> => {
     try {
       setIsLoading(true);
-      
+
       // Create hash of drop data
       const dropHasher = new DropHasher();
       const hash = dropHasher.hash({
         drop,
         termsOfService,
       });
-      
+
       // Request user to sign the hash
       const clientSignature = await getSignature({ message: hash });
-      
+
       if (clientSignature.userRejected) {
         setToast({
           message: "Authentication rejected",
@@ -54,7 +54,7 @@ export const useDropSignature = () => {
         });
         return { success: false };
       }
-      
+
       return { success: true, signature: clientSignature.signature };
     } catch (error) {
       setToast({
