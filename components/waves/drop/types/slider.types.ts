@@ -84,22 +84,22 @@ export const SLIDER_THEMES: Record<RankKey, SliderTheme> = {
   },
   default: {
     track: {
-      background: "tw-bg-gradient-to-r tw-from-iron-800/50 tw-via-iron-700/30 tw-to-iron-800/50",
-      hover: "group-hover:tw-from-iron-700/60 group-hover:tw-via-iron-600/40 group-hover:tw-to-iron-700/60",
+      background: "tw-bg-gradient-to-r tw-from-iron-700/50 tw-via-iron-600/30 tw-to-iron-700/50",
+      hover: "group-hover:tw-from-iron-600/60 group-hover:tw-via-iron-500/40 group-hover:tw-to-iron-600/60",
     },
     progress: {
-      background: "tw-bg-gradient-to-r tw-from-iron-400/20 tw-via-iron-300/30 tw-to-iron-400/20",
-      glow: "tw-shadow-[0_0_15px_rgba(255,255,255,0.05)]",
+      background: "tw-bg-gradient-to-r tw-from-iron-300/20 tw-via-iron-200/30 tw-to-iron-300/20",
+      glow: "tw-shadow-[0_0_15px_rgba(255,255,255,0.08)]",
     },
     thumb: {
-      background: "tw-bg-gradient-to-b tw-from-iron-400 tw-to-iron-500",
-      glow: "tw-shadow-[0_0_15px_rgba(255,255,255,0.1)]",
-      border: "tw-border-iron-400",
-      hover: "hover:tw-shadow-[0_0_20px_rgba(255,255,255,0.2)]",
+      background: "tw-bg-gradient-to-b tw-from-iron-300 tw-to-iron-400",
+      glow: "tw-shadow-[0_0_15px_rgba(255,255,255,0.15)]",
+      border: "tw-border-iron-300",
+      hover: "hover:tw-shadow-[0_0_20px_rgba(255,255,255,0.25)]",
     },
     tooltip: {
-      background: "tw-bg-iron-700",
-      text: "tw-text-iron-200",
+      background: "tw-bg-iron-600",
+      text: "tw-text-iron-100",
     },
   },
 } as const; 

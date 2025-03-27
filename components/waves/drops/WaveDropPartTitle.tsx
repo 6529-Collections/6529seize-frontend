@@ -1,12 +1,16 @@
 import React from 'react';
 
-const WaveDropPartTitle: React.FC<{ title: string | null }> = ({
+interface WaveDropPartTitleProps {
+  title: string | null;
+}
+
+const WaveDropPartTitle: React.FC<WaveDropPartTitleProps> = ({
   title,
 }) => {
   if (!title) return null;
 
   return (
-    <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
+    <p className="tw-font-semibold tw-text-iron-100 tw-text-md tw-mb-0">
       {title}
     </p>
   );

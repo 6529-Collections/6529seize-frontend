@@ -36,7 +36,7 @@ export default function UserFollowBtn({
   readonly directMessageLoading?: boolean;
 }) {
   const BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
-    [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-2 tw-text-xs",
+    [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-1.5 tw-text-xs",
     [UserFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2.5 tw-text-sm",
   };
 

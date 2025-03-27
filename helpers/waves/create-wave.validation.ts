@@ -40,6 +40,8 @@ export enum CREATE_WAVE_VALIDATION_ERROR {
   VOTING_CATEGORY_CANNOT_BE_EMPTY = "VOTING_CATEGORY_CANNOT_BE_EMPTY",
   VOTING_PROFILE_ID_CANNOT_BE_EMPTY = "VOTING_PROFILE_ID_CANNOT_BE_EMPTY",
   APPROVAL_THRESHOLD_MUST_BE_NULL = "APPROVAL_THRESHOLD_MUST_BE_NULL",
+  TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL",
+  TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE = "TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE",
 }
 
 const MAX_NAME_LENGTH = 250;
@@ -193,6 +195,29 @@ const getVotingValidationErrors = ({
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
     } else if (voting.profileId.trim() === "") {
       errors.push(CREATE_WAVE_VALIDATION_ERROR.REP_VOTING_REQUIRES_PROFILE_ID);
+    }
+  }
+
+  // Validate time-weighted voting settings for Rank waves
+  if (waveType === ApiWaveType.Rank && voting.timeWeighted.enabled) {
+    // Constants for validation
+    const MIN_MINUTES = 5;
+    const MAX_HOURS = 24;
+    const MAX_MINUTES = MAX_HOURS * 60;
+    
+    // Calculate the interval in minutes for validation
+    const intervalInMinutes = voting.timeWeighted.averagingIntervalUnit === "minutes" 
+      ? voting.timeWeighted.averagingInterval 
+      : voting.timeWeighted.averagingInterval * 60;
+    
+    // Validate minimum
+    if (intervalInMinutes < MIN_MINUTES) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL);
+    }
+    
+    // Validate maximum
+    if (intervalInMinutes > MAX_MINUTES) {
+      errors.push(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_LARGE);
     }
   }
 

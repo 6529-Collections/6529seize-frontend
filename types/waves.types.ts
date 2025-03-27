@@ -4,11 +4,11 @@ import { ApiWaveParticipationRequirement } from "../generated/models/ApiWavePart
 import { ApiWavesOverviewType } from "../generated/models/ApiWavesOverviewType";
 import { ApiWaveType } from "../generated/models/ApiWaveType";
 
-export enum WaveSignatureType {
-  NONE = "NONE",
-  DROPS = "DROPS",
-  VOTING = "VOTING",
-  DROPS_AND_VOTING = "DROPS_AND_VOTING",
+export enum MyStreamWaveTab {
+  CHAT = "CHAT",
+  LEADERBOARD = "LEADERBOARD",
+  WINNERS = "WINNERS",
+  OUTCOME = "OUTCOME",
 }
 
 export enum CreateWaveGroupConfigType {
@@ -21,7 +21,6 @@ export enum CreateWaveGroupConfigType {
 
 export interface WaveOverviewConfig {
   readonly type: ApiWaveType;
-  readonly signatureType: WaveSignatureType;
   readonly name: string;
   readonly image: File | null;
 }
@@ -43,12 +42,22 @@ export interface CreateWaveDropsConfig {
   readonly noOfApplicationsAllowedPerParticipant: number | null;
   readonly requiredTypes: ApiWaveParticipationRequirement[];
   readonly requiredMetadata: CreateWaveDropsRequiredMetadata[];
+  readonly terms: string | null;
+  readonly signatureRequired: boolean;
+  readonly adminCanDeleteDrops: boolean;
+}
+
+export interface TimeWeightedVotingSettings {
+  readonly enabled: boolean;
+  readonly averagingInterval: number;
+  readonly averagingIntervalUnit: "minutes" | "hours";
 }
 
 export interface CreateWaveVotingConfig {
   readonly type: ApiWaveCreditType | null;
   readonly category: string | null;
   readonly profileId: string | null;
+  readonly timeWeighted: TimeWeightedVotingSettings;
 }
 
 export enum CreateWaveStep {
@@ -66,6 +75,9 @@ export interface CreateWaveDatesConfig {
   readonly submissionStartDate: number;
   readonly votingStartDate: number;
   readonly endDate: number | null;
+  readonly firstDecisionTime: number;
+  readonly subsequentDecisions: number[];
+  readonly isRolling: boolean;
 }
 
 export interface CreateWaveApprovalConfig {

@@ -1,50 +1,30 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";
 import CreateWaveOverview from "./overview/CreateWaveOverview";
 import CreateWaveGroups from "./groups/CreateWaveGroups";
 import CreateWaveDates from "./dates/CreateWaveDates";
 import CreateWaveOutcomes from "./outcomes/CreateWaveOutcomes";
-import {
-  CreateWaveConfig,
-  CreateWaveGroupConfigType,
-  CreateWaveOutcomeType,
-  CreateWaveStep,
-  WaveSignatureType,
-} from "../../../types/waves.types";
-import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
+import { CreateWaveStep } from "../../../types/waves.types";
 import CreateWaveVoting from "./voting/CreateWaveVoting";
 import CreateWaveApproval from "./approval/CreateWaveApproval";
-import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
-import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import CreateWaveActions from "./utils/CreateWaveActions";
 import CreateWaveDescription, {
   CreateWaveDescriptionHandles,
 } from "./description/CreateWaveDescription";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { getCreateNewWaveBody } from "../../../helpers/waves/create-wave.helpers";
-import { ApiCreateNewWave } from "../../../generated/models/ApiCreateNewWave";
 import { AuthContext } from "../../auth/Auth";
-import {
-  CreateDropPart,
-  CreateDropRequestPart,
-  DropMedia,
-} from "../../../entities/IDrop";
-import { commonApiPost } from "../../../services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { ApiCreateWaveDropRequest } from "../../../generated/models/ApiCreateWaveDropRequest";
-import { ApiWave } from "../../../generated/models/ApiWave";
 import { useRouter } from "next/router";
-import { ApiGroupFilterDirection } from "../../../generated/models/ApiGroupFilterDirection";
-import { ApiCreateGroup } from "../../../generated/models/ApiCreateGroup";
-import { Time } from "../../../helpers/time";
 import {
-  CREATE_WAVE_VALIDATION_ERROR,
-  getCreateWaveValidationErrors,
-} from "../../../helpers/waves/create-wave.validation";
-import { Period } from "../../../helpers/Types";
+  generateMediaForOverview,
+  generateDropPart,
+} from "./services/waveMediaService";
+import { getAdminGroupId } from "./services/waveGroupService";
+import { useAddWaveMutation } from "./services/waveApiService";
+import { useWaveConfig } from "./hooks/useWaveConfig";
 import useCapacitor from "../../../hooks/useCapacitor";
 import CreateWaveFlow from "./CreateWaveFlow";
 
@@ -61,367 +41,52 @@ export default function CreateWave({
   const { waitAndInvalidateDrops, onWaveCreated } = useContext(
     ReactQueryWrapperContext
   );
-  const initialType = ApiWaveType.Chat;
-  const initialStep = CreateWaveStep.OVERVIEW;
-  const getInitialConfig = ({
-    type,
-  }: {
-    readonly type: ApiWaveType;
-  }): CreateWaveConfig => {
-    const now = Time.currentMillis();
-    return {
-      overview: {
-        type,
-        signatureType: WaveSignatureType.NONE,
-        name: "",
-        image: null,
-      },
-      groups: {
-        canView: null,
-        canDrop: null,
-        canVote: null,
-        canChat: null,
-        admin: null,
-      },
-      chat: {
-        enabled: true,
-      },
-      dates: {
-        submissionStartDate: now,
-        votingStartDate: now,
-        endDate: null,
-      },
-      drops: {
-        noOfApplicationsAllowedPerParticipant: null,
-        requiredTypes: [],
-        requiredMetadata: [],
-      },
-      voting: {
-        type: ApiWaveCreditType.Tdh,
-        category: null,
-        profileId: null,
-      },
-      outcomes: [],
-      approval: {
-        threshold: null,
-        thresholdTimeMs: null,
-      },
-    };
-  };
-
-  const [config, setConfig] = useState<CreateWaveConfig>(
-    getInitialConfig({
-      type: initialType,
-    })
-  );
-
-  const [endDateConfig, setEndDateConfig] = useState<{
-    time: number | null;
-    period: Period | null;
-  }>({
-    time: null,
-    period: null,
-  });
-
-  useEffect(() => {
-    if (config.dates.endDate === null) {
-      setEndDateConfig({ time: null, period: null });
-    }
-  }, [config.dates.endDate]);
-
   const [submitting, setSubmitting] = useState(false);
 
-  const [step, setStep] = useState<CreateWaveStep>(initialStep);
-  const [selectedOutcomeType, setSelectedOutcomeType] =
-    useState<CreateWaveOutcomeType | null>(null);
-
-  const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
-
-  const onOutcomeTypeChange = (outcomeType: CreateWaveOutcomeType | null) => {
-    setSelectedOutcomeType(outcomeType);
-    setErrors([]);
-  };
-
-  useEffect(() => {
-    setErrors([]);
-  }, [config]);
-
-  const onStep = ({
-    step: newStep,
-    direction,
-  }: {
-    readonly step: CreateWaveStep;
-    readonly direction: "forward" | "backward";
-  }) => {
-    if (direction === "forward") {
-      const newErrors = getCreateWaveValidationErrors({ config, step });
-      if (newErrors.length) {
-        setErrors(newErrors);
-        return;
-      }
-    }
-    setErrors([]);
-    setSelectedOutcomeType(null);
-    setStep(newStep);
-  };
-
-  const setOverview = (overview: CreateWaveConfig["overview"]) => {
-    setConfig((prev) => ({
-      ...getInitialConfig({ type: overview.type }),
-      overview,
-    }));
-  };
-
-  const setDates = (dates: CreateWaveConfig["dates"]) => {
-    setConfig((prev) => ({
-      ...prev,
-      dates,
-    }));
-  };
-
-  const setDrops = (drops: CreateWaveConfig["drops"]) => {
-    setConfig((prev) => ({
-      ...prev,
-      drops,
-    }));
-  };
-
-  const setOutcomes = (outcomes: CreateWaveConfig["outcomes"]) => {
-    setConfig((prev) => ({
-      ...prev,
-      outcomes,
-    }));
-  };
-
-  const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
-    {}
-  );
-
-  const onGroupSelect = ({
-    group,
-    groupType,
-  }: {
-    readonly group: ApiGroupFull | null;
-    readonly groupType: CreateWaveGroupConfigType;
-  }) => {
-    if (group) {
-      setGroupsCache((prev) => ({
-        ...prev,
-        [group.id]: group,
-      }));
-    }
-    switch (groupType) {
-      case CreateWaveGroupConfigType.CAN_VIEW:
-        setConfig((prev) => ({
-          ...prev,
-          groups: {
-            ...prev.groups,
-            canView: group?.id ?? null,
-          },
-        }));
-        break;
-      case CreateWaveGroupConfigType.CAN_DROP:
-        setConfig((prev) => ({
-          ...prev,
-          groups: {
-            ...prev.groups,
-            canDrop: group?.id ?? null,
-          },
-        }));
-        break;
-      case CreateWaveGroupConfigType.CAN_VOTE:
-        setConfig((prev) => ({
-          ...prev,
-          groups: {
-            ...prev.groups,
-            canVote: group?.id ?? null,
-          },
-        }));
-        break;
-      case CreateWaveGroupConfigType.CAN_CHAT:
-        setConfig((prev) => ({
-          ...prev,
-          groups: {
-            ...prev.groups,
-            canChat: group?.id ?? null,
-          },
-        }));
-        break;
-      case CreateWaveGroupConfigType.ADMIN:
-        setConfig((prev) => ({
-          ...prev,
-          groups: {
-            ...prev.groups,
-            admin: group?.id ?? null,
-          },
-        }));
-        break;
-      default:
-        assertUnreachable(groupType);
-    }
-  };
-
-  const onVotingTypeChange = (type: ApiWaveCreditType) => {
-    setConfig((prev) => ({
-      ...prev,
-      voting: {
-        type,
-        category: null,
-        profileId: null,
-      },
-    }));
-  };
-
-  const onChatEnabledChange = (enabled: boolean) => {
-    setConfig((prev) => ({
-      ...prev,
-      chat: {
-        enabled,
-      },
-    }));
-  };
-
-  const onCategoryChange = (category: string | null) => {
-    setConfig((prev) => ({
-      ...prev,
-      voting: {
-        ...prev.voting,
-        category,
-      },
-    }));
-  };
-
-  const onProfileIdChange = (profileId: string | null) => {
-    setConfig((prev) => ({
-      ...prev,
-      voting: {
-        ...prev.voting,
-        profileId,
-      },
-    }));
-  };
-
-  const onThresholdChange = (threshold: number | null) => {
-    setConfig((prev) => ({
-      ...prev,
-      approval: {
-        ...prev.approval,
-        threshold,
-      },
-    }));
-  };
-
-  const onThresholdTimeChange = (thresholdTimeMs: number | null) => {
-    setConfig((prev) => ({
-      ...prev,
-      approval: {
-        ...prev.approval,
-        thresholdTimeMs,
-      },
-    }));
-  };
+  // Use the hook for configuration state management
+  const {
+    config,
+    step,
+    selectedOutcomeType,
+    errors,
+    groupsCache,
+    // Section updaters
+    setOverview,
+    setDates,
+    setDrops,
+    setOutcomes,
+    setDropsAdminCanDelete,
+    // Navigation
+    onStep,
+    // Outcome management
+    onOutcomeTypeChange,
+    // Group handling
+    onGroupSelect,
+    // Voting
+    onVotingTypeChange,
+    onCategoryChange,
+    onProfileIdChange,
+    onTimeWeightedVotingChange,
+    // Approval
+    onThresholdChange,
+    onThresholdTimeChange,
+    // Chat
+    onChatEnabledChange,
+  } = useWaveConfig();
 
   const createWaveDescriptionRef = useRef<CreateWaveDescriptionHandles | null>(
     null
   );
 
-  const generateMediaForPart = async (media: File): Promise<DropMedia> => {
-    const prep = await commonApiPost<
-      {
-        content_type: string;
-        file_name: string;
-        file_size: number;
-      },
-      {
-        upload_url: string;
-        content_type: string;
-        media_url: string;
-      }
-    >({
-      endpoint: "drop-media/prep",
-      body: {
-        content_type: media.type,
-        file_name: media.name,
-        file_size: media.size,
-      },
-    });
-    const myHeaders = new Headers({ "Content-Type": prep.content_type });
-    await fetch(prep.upload_url, {
-      method: "PUT",
-      headers: myHeaders,
-      body: media,
-    });
-    return {
-      url: prep.media_url,
-      mime_type: prep.content_type,
-    };
-  };
-
-  const generateMediaForOverview = async (
-    file: File | null
-  ): Promise<{
-    readonly url: string;
-    readonly mime_type: string;
-  } | null> => {
-    if (!file) return null;
-    const prep = await commonApiPost<
-      {
-        content_type: string;
-        file_name: string;
-        file_size: number;
-      },
-      {
-        upload_url: string;
-        content_type: string;
-        media_url: string;
-      }
-    >({
-      endpoint: "wave-media/prep",
-      body: {
-        content_type: file.type,
-        file_name: file.name,
-        file_size: file.size,
-      },
-    });
-    const myHeaders = new Headers({ "Content-Type": prep.content_type });
-    await fetch(prep.upload_url, {
-      method: "PUT",
-      headers: myHeaders,
-      body: file,
-    });
-    return {
-      url: prep.media_url,
-      mime_type: prep.content_type,
-    };
-  };
-
-  const generateDropPart = async (
-    part: CreateDropPart
-  ): Promise<CreateDropRequestPart> => {
-    const media = await Promise.all(
-      part.media.map((media) => generateMediaForPart(media))
-    );
-    return {
-      ...part,
-      media,
-    };
-  };
-
-  const addWaveMutation = useMutation({
-    mutationFn: async (body: ApiCreateNewWave) =>
-      await commonApiPost<ApiCreateNewWave, ApiWave>({
-        endpoint: `waves`,
-        body,
-      }),
+  const addWaveMutation = useAddWaveMutation({
     onSuccess: (response) => {
       waitAndInvalidateDrops();
       onWaveCreated();
       router.push(`/my-stream?wave=${response.id}`);
-      return response;
     },
     onError: (error) => {
       setToast({
-        message: error as unknown as string,
+        message: error as string,
         type: "error",
       });
     },
@@ -434,98 +99,6 @@ export default function CreateWave({
 
   const onHaveDropToSubmitChange = (haveDrop: boolean) => {
     if (haveDrop) setShowDropError(false);
-  };
-
-  const makeGroupVisibleMutation = useMutation({
-    mutationFn: async (param: {
-      id: string;
-      body: { visible: true; old_version_id: string | null };
-    }) =>
-      await commonApiPost<
-        { visible: true; old_version_id: string | null },
-        ApiGroupFull
-      >({
-        endpoint: `groups/${param.id}/visible`,
-        body: param.body,
-      }),
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-      setSubmitting(false);
-    },
-  });
-
-  const createNewGroupMutation = useMutation({
-    mutationFn: async (body: ApiCreateGroup) =>
-      await commonApiPost<ApiCreateGroup, ApiGroupFull>({
-        endpoint: `groups`,
-        body,
-      }),
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-      setSubmitting(false);
-    },
-  });
-
-  const createOnlyMeGroup = async ({
-    primaryWallet,
-  }: {
-    readonly primaryWallet: string;
-  }): Promise<string | null> => {
-    const groupConfig: ApiCreateGroup = {
-      name: `Only ${connectedProfile?.profile?.handle}`,
-      group: {
-        tdh: { min: null, max: null },
-        rep: {
-          min: null,
-          max: null,
-          direction: ApiGroupFilterDirection.Received,
-          user_identity: null,
-          category: null,
-        },
-        cic: {
-          min: null,
-          max: null,
-          direction: ApiGroupFilterDirection.Received,
-          user_identity: null,
-        },
-        level: { min: null, max: null },
-        owns_nfts: [],
-        identity_addresses: [primaryWallet],
-        excluded_identity_addresses: null,
-      },
-    };
-    const group = await createNewGroupMutation.mutateAsync(groupConfig);
-    if (!group) {
-      return null;
-    }
-    await makeGroupVisibleMutation.mutateAsync({
-      id: group.id,
-      body: { visible: true, old_version_id: null },
-    });
-    return group.id;
-  };
-
-  const getAdminGroupId = async (): Promise<string | null> => {
-    if (config.groups.admin) {
-      return config.groups.admin;
-    }
-    const primaryWallet = connectedProfile?.profile?.primary_wallet;
-    if (!primaryWallet) {
-      setSubmitting(false);
-      setToast({
-        message: "You need to have a primary wallet to create a wave",
-        type: "error",
-      });
-      return null;
-    }
-
-    return await createOnlyMeGroup({ primaryWallet });
   };
 
   const onComplete = async () => {
@@ -542,7 +115,18 @@ export default function CreateWave({
       return;
     }
 
-    const adminGroupId = await getAdminGroupId();
+    const adminGroupId = await getAdminGroupId({
+      adminGroupId: config.groups.admin,
+      primaryWallet: connectedProfile?.profile?.primary_wallet,
+      handle: connectedProfile?.profile?.handle,
+      onError: (error) => {
+        setToast({
+          message:
+            typeof error === "string" ? error : "Failed to get admin group",
+          type: "error",
+        });
+      },
+    });
     if (!adminGroupId) {
       setSubmitting(false);
       return;
@@ -575,6 +159,7 @@ export default function CreateWave({
         data_key: meta.data_key,
         data_value: meta.data_value,
       })),
+      signature: null,
     };
 
     const picture = await generateMediaForOverview(config.overview.image);
@@ -590,6 +175,7 @@ export default function CreateWave({
       picture: picture?.url ?? null,
       drop: dropRequest,
     });
+
     await addWaveMutation.mutateAsync(waveBody);
   };
 
@@ -607,18 +193,17 @@ export default function CreateWave({
         groups={config.groups}
         groupsCache={groupsCache}
         chatEnabled={config.chat.enabled}
+        adminCanDeleteDrops={config.drops.adminCanDeleteDrops}
         setChatEnabled={onChatEnabledChange}
         onGroupSelect={onGroupSelect}
+        setDropsAdminCanDelete={setDropsAdminCanDelete}
       />
     ),
     [CreateWaveStep.DATES]: (
       <CreateWaveDates
         waveType={config.overview.type}
         dates={config.dates}
-        errors={errors}
         setDates={setDates}
-        endDateConfig={endDateConfig}
-        setEndDateConfig={setEndDateConfig}
       />
     ),
     [CreateWaveStep.DROPS]: (
@@ -639,6 +224,8 @@ export default function CreateWave({
         onTypeChange={onVotingTypeChange}
         setCategory={onCategoryChange}
         setProfileId={onProfileIdChange}
+        timeWeighted={config.voting.timeWeighted}
+        onTimeWeightedChange={onTimeWeightedVotingChange}
       />
     ),
     [CreateWaveStep.APPROVAL]: (
@@ -683,7 +270,8 @@ export default function CreateWave({
       onBack={onBack}
       title={`Create Wave ${
         !!config.overview.name && `"${config.overview.name}"`
-      }`}>
+      }`}
+    >
       <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
         <div className="tw-1/4">
           <CreateWavesMainSteps
@@ -693,9 +281,8 @@ export default function CreateWave({
           />
         </div>
         <div
-          className={`tw-flex-1 ${
-            isIos && !keyboardVisible ? "tw-mb-10" : ""
-          }`}>
+          className={`tw-flex-1 ${isIos && !keyboardVisible ? "tw-mb-10" : ""}`}
+        >
           <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
             <div className="tw-relative tw-h-full">
               <div className="tw-flex tw-flex-col tw-h-full">

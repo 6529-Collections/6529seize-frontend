@@ -2,6 +2,8 @@ import { FC, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ApiWaveOutcome } from "../../../generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar } from "@fortawesome/free-regular-svg-icons";
 
 interface WaveRepOutcomeProps {
   readonly outcome: ApiWaveOutcome;
@@ -44,20 +46,10 @@ export const WaveRepOutcome: FC<WaveRepOutcomeProps> = ({
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-4">
             <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-xl tw-bg-gradient-to-br tw-from-[#C3B5D9]/20 tw-to-[#C3B5D9]/10 tw-shadow-inner">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="tw-size-6 tw-text-[#C3B5D9] tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(195,181,217,0.5)]"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-                />
-              </svg>
+              <FontAwesomeIcon 
+                icon={faStar} 
+                className="tw-size-5 tw-text-[#C3B5D9] tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(195,181,217,0.5)]"
+              />
             </div>
             <div className="tw-text-left">
               <div className="tw-text-base tw-font-medium tw-text-[#C3B5D9]">

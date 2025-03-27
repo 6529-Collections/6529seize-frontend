@@ -24,15 +24,17 @@ export default function MyStream({
   onDropContentClick,
 }: MyStreamProps) {
   return (
-    <FeedWrapper
-      items={items}
-      loading={isFetching}
-      showWaveInfo={true}
-      activeDrop={activeDrop}
-      onBottomIntersection={onBottomIntersection}
-      onReply={onReply}
-      onQuote={onQuote}
-      onDropContentClick={onDropContentClick}
-    />
+    <div className="tw-h-full">
+      <FeedWrapper
+        items={items}
+        loading={isFetching}
+        showWaveInfo={true}
+        activeDrop={activeDrop}
+        onBottomIntersection={onBottomIntersection}
+        onReply={onReply}
+        onQuote={onQuote}
+        onDropContentClick={onDropContentClick}
+      />
+    </div>
   );
 }

@@ -240,7 +240,7 @@ export const getProfileRatingsByRater = async ({
 
   try {
     return await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-      endpoint: `profiles/${handleOrWallet}/${matter.toLowerCase()}/ratings/by-rater`,
+      endpoint: `profiles/${handleOrWallet}/${handleOrWallet}/${matter === RateMatter.NIC ? 'cic' : matter.toLowerCase()}/ratings/by-rater`,
       params: {
         page: `${page}`,
         page_size: `${pageSize}`,

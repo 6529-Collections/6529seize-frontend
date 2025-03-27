@@ -33,6 +33,7 @@ export class ApiWaveParticipationConfig {
     'signature_required': boolean;
     'period'?: ApiIntRange;
     'authenticated_user_eligible': boolean;
+    'terms': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -77,6 +78,12 @@ export class ApiWaveParticipationConfig {
             "name": "authenticated_user_eligible",
             "baseName": "authenticated_user_eligible",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "terms",
+            "baseName": "terms",
+            "type": "string",
             "format": ""
         }    ];
 

@@ -4,6 +4,7 @@ import WaveDrop from "./WaveDrop";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import ParticipationDrop from "./participation/ParticipationDrop";
+import WinnerDrop from "./winner/WinnerDrop";
 
 export interface DropInteractionParams {
   drop: ExtendedDrop;
@@ -57,6 +58,25 @@ export default function Drop({
         location={location}
         onReply={onReply}
         onQuote={onQuote}
+        onQuoteClick={onQuoteClick}
+        onDropContentClick={onDropContentClick}
+        showReplyAndQuote={showReplyAndQuote}
+        parentContainerRef={parentContainerRef}
+      />
+    );
+  } else if (drop.drop_type === ApiDropType.Winner) {    
+    return (
+      <WinnerDrop
+        drop={drop}
+        previousDrop={previousDrop}
+        nextDrop={nextDrop}
+        showWaveInfo={showWaveInfo}
+        activeDrop={activeDrop}
+        location={location}
+        dropViewDropId={dropViewDropId}
+        onReply={onReply}
+        onQuote={onQuote}
+        onReplyClick={onReplyClick}
         onQuoteClick={onQuoteClick}
         onDropContentClick={onDropContentClick}
         showReplyAndQuote={showReplyAndQuote}

@@ -1,13 +1,28 @@
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-import React from "react";
+import React, { useMemo } from "react";
+import { useAuth } from "../../auth/Auth";
 
 interface BrainLeftSidebarCreateADirectMessageButtonProps {}
 
 const BrainLeftSidebarCreateADirectMessageButton: React.FC<
   BrainLeftSidebarCreateADirectMessageButtonProps
 > = () => {
+  const { connectedProfile, activeProfileProxy } = useAuth();
+
+  const isConnectedIdentity = useMemo(() => {
+    return !!connectedProfile?.profile?.handle && !activeProfileProxy;
+  }, [connectedProfile?.profile?.handle, activeProfileProxy]);
+
+
+  const label = useMemo(() => {
+    if (isConnectedIdentity) {
+      return "DM";
+    }
+    return "Direct Message";
+  }, [isConnectedIdentity]);
+
   return (
     <Link
       href="/waves?new-dm=true"
@@ -16,7 +31,7 @@ const BrainLeftSidebarCreateADirectMessageButton: React.FC<
         icon={faPaperPlane}
         className="tw-size-3 tw-mr-1.5 -tw-ml-1.5 tw-flex-shrink-0"
       />
-      <span>Direct Message</span>
+      <span>{label}</span>
     </Link>
   );
 };

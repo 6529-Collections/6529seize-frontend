@@ -2,6 +2,8 @@ import { FC, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ApiWaveOutcome } from "../../../generated/models/ApiWaveOutcome";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAward } from "@fortawesome/free-solid-svg-icons";
 
 interface WaveManualOutcomeProps {
   readonly outcome: ApiWaveOutcome;
@@ -43,20 +45,10 @@ export const WaveManualOutcome: FC<WaveManualOutcomeProps> = ({
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-4">
             <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-xl tw-bg-gradient-to-br tw-from-amber-400/20 tw-to-amber-600/10 tw-shadow-inner">
-              <svg
-                className="tw-size-6 tw-text-amber-300 tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(217,119,6,0.5)]"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                fill="none"
-              >
-                <path
-                  d="M12 18v-3m0-3v.01M12.75 3.25h-1.5L8.5 7H4.75l.5 3.5L2 13l3.25 2.5-.5 3.5h3.75l2.75 3.75h1.5L15.5 19h3.75l-.5-3.5L22 13l-3.25-2.5.5-3.5H15.5l-2.75-3.75z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+              <FontAwesomeIcon 
+                icon={faAward} 
+                className="tw-size-5 tw-text-amber-300 tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(217,119,6,0.5)]"
+              />
             </div>
             <div className="tw-text-left">
               <div className="tw-text-base tw-font-medium tw-text-amber-100">

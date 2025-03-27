@@ -20,58 +20,58 @@ export default function ParticipationDropRatingsVoterSection({
   const { hasRaters } = ratingsData;
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-1.5">
-      <div className="tw-h-5 tw-flex tw-items-center tw-gap-2.5">
-        <span className="tw-text-xs tw-font-medium tw-text-iron-500">
-          Voters
-        </span>
-        {hasRaters && (
-          <div className="tw-flex tw-items-center -tw-space-x-1.5">
-            {drop.top_raters.slice(0, 5).map((rater, index) => (
-              <Tippy
-                key={rater.profile.id}
-                content={
-                  <span className="tw-text-xs tw-font-medium">
-                    {rater.profile.handle} •{" "}
-                    {formatNumberWithCommas(rater.rating)} {drop.wave.voting_credit_type}
-                  </span>
-                }
-                interactive={true}
-                delay={[0, 0]}
-                hideOnClick={false}
-                appendTo={() => document.body}
-                zIndex={1000}
-              >
-                <div
-                  className="tw-relative tw-transition-transform hover:tw-scale-110 hover:tw-z-10"
-                  style={{ zIndex: drop.top_raters.length - index }}
-                >
-                  {rater.profile.pfp && (
-                    <Link href={`/${rater.profile.handle}`}>
-                      <img
-                        src={getScaledImageUri(
-                          rater.profile.pfp,
-                          ImageScale.W_AUTO_H_50
-                        )}
-                        alt={`${rater.profile.handle}'s avatar`}
-                        className={`tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 ${theme.ring} tw-bg-iron-900`}
-                      />
-                    </Link>
-                  )}
-                </div>
-              </Tippy>
-            ))}
-            {drop.raters_count > 5 && (
+    <div className="tw-flex tw-items-center tw-gap-x-1">
+      <span className="tw-text-sm tw-font-medium tw-text-iron-500">
+        Voters
+      </span>
+      
+      {hasRaters && (
+        <div className="tw-flex tw-items-center -tw-space-x-1.5">
+          {drop.top_raters.slice(0, 5).map((rater, index) => (
+            <Tippy
+              key={rater.profile.id}
+              content={
+                <span className="tw-text-sm tw-font-medium">
+                  {rater.profile.handle} •{" "}
+                  {formatNumberWithCommas(rater.rating)} {drop.wave.voting_credit_type}
+                </span>
+              }
+              interactive={true}
+              delay={[0, 0]}
+              hideOnClick={false}
+              appendTo={() => document.body}
+              zIndex={1000}
+            >
               <div
-                className={`tw-relative tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900 tw-ring-1 ${theme.ring} ${theme.text} tw-text-[10px] tw-font-medium hover:tw-scale-110 tw-transition-transform`}
+                className="tw-relative tw-transition-transform hover:tw-scale-110 hover:tw-z-10"
+                style={{ zIndex: drop.top_raters.length - index }}
               >
-                +{drop.raters_count - 5}
+                {rater.profile.pfp && (
+                  <Link href={`/${rater.profile.handle}`}>
+                    <img
+                      src={getScaledImageUri(
+                        rater.profile.pfp,
+                        ImageScale.W_AUTO_H_50
+                      )}
+                      alt={`${rater.profile.handle}'s avatar`}
+                      className={`tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 ${theme.ring} tw-bg-iron-900`}
+                    />
+                  </Link>
+                )}
               </div>
-            )}
-          </div>
-        )}
-      </div>
-      <span className={`tw-text-2xl tw-font-bold ${theme.text}`}>
+            </Tippy>
+          ))}
+          {drop.raters_count > 5 && (
+            <div
+              className={`tw-relative tw-h-5 tw-w-5 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-900 tw-ring-1 ${theme.ring} ${theme.text} tw-text-[10px] tw-font-medium hover:tw-scale-110 tw-transition-transform`}
+            >
+              +{drop.raters_count - 5}
+            </div>
+          )}
+        </div>
+      )}
+      
+      <span className={`tw-text-sm tw-font-bold tw-ml-1 ${theme.text}`}>
         {drop.raters_count}
       </span>
     </div>
