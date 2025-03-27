@@ -1,6 +1,7 @@
 import React from "react";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
 import { ApiWave } from "../../../../../generated/models/ApiWave";
+import AgreementStepAgreement from "./AgreementStepAgreement";
 
 interface AgreementStepProps {
   readonly wave: ApiWave;
@@ -24,13 +25,12 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
 
       <div className="tw-mt-4 tw-flex tw-flex-col tw-bg-iron-900 tw-rounded-lg tw-p-3 lg:tw-p-5 tw-border tw-border-iron-800/50 tw-border-solid">
         {/* Terms content separate from checkbox for better readability */}
-        <div className="tw-text-sm tw-text-iron-300 tw-whitespace-pre-wrap">
-          {wave.participation.terms}
-        </div>
+
+        <AgreementStepAgreement text={wave.participation.terms ?? ""} />
 
         <button
           onClick={() => setAgreements(!agreements)}
-          className="tw-flex tw-items-start tw-p-0 tw-gap-3 tw-text-left hover:tw-opacity-80 tw-transition-opacity tw-bg-transparent tw-border-0"
+          className="tw-flex tw-pt-4 tw-items-start tw-p-0 tw-gap-3 tw-text-left hover:tw-opacity-80 tw-transition-opacity tw-bg-transparent tw-border-0"
           aria-label={
             agreements ? "Uncheck terms agreement" : "Check terms agreement"
           }
@@ -58,8 +58,8 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
               </svg>
             )}
           </div>
-          <span className="tw-text-sm tw-text-iron-300 tw-font-medium">
-            I have read and agree to the terms and conditions
+          <span className="tw-text-sm tw-text-iron-300 tw-font-bold">
+          I have read and understood the above and will certify it with a signature from my wallet.
           </span>
         </button>
       </div>
