@@ -18,9 +18,18 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
 }) => {
   return (
     <div className="tw-flex tw-flex-col tw-pb-6 lg:tw-pb-8">
-      <div className="tw-text-iron-300 tw-text-base">
-        Before submitting your artwork to The Memes, please review and agree to
-        the following terms:
+      <div className="tw-text-iron-300 tw-text-sm">
+        <p>
+          {" "}
+          Before you submit your work to The Memes, we would like to make sure
+          we are all on the same page about what this means for you and your
+          work!
+        </p>
+        <p>
+          Please read the important information below and confirm that you
+          understand and agree. If you have any questions, please reach out to
+          one of the team members before you submit!
+        </p>
       </div>
 
       <div className="tw-mt-4 tw-flex tw-flex-col tw-bg-iron-900 tw-rounded-lg tw-p-3 lg:tw-p-5 tw-border tw-border-iron-800/50 tw-border-solid">
@@ -59,7 +68,8 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
             )}
           </div>
           <span className="tw-text-sm tw-text-iron-300 tw-font-bold">
-          I have read and understood the above and will certify it with a signature from my wallet.
+            I have read and understood the above and will certify it with a
+            signature from my wallet.
           </span>
         </button>
       </div>
