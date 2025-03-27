@@ -121,7 +121,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
                   key={wave.id}
                   wave={wave}
                   resetWaveCount={resetWaveCount}
-                  isHighlighted={wave.id === activeWaveId}
+                  activeWaveId={activeWaveId}
                 />
               ))}
             </div>
