@@ -43,7 +43,7 @@ const MobileMemesArtSubmissionBtn: React.FC<
 
   // Determine appropriate aria-label based on state
   const getAriaLabel = () => {
-    if (!waveInfo) return "Submit Artwork to Memes";
+    if (!waveInfo) return "Submit Work to The Memes";
 
     const status = waveInfo.participation.status;
 
@@ -60,8 +60,8 @@ const MobileMemesArtSubmissionBtn: React.FC<
     }
 
     return isUrgent
-      ? "Submit Artwork to Memes - Deadline approaching!"
-      : "Submit Artwork to Memes";
+      ? "Submit Work to The Memes - Deadline approaching!"
+      : "Submit Work to The Memes";
   };
 
   return (

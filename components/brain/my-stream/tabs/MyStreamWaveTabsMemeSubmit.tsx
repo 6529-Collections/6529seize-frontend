@@ -225,14 +225,14 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <div className="tw-flex tw-items-center tw-gap-2">
         <span>
           {!canSubmit
-            ? "Submit Art for The Memes"
+            ? "Submit Work to The Memes"
             : isEndingVerySoon 
               ? "Submit Meme" 
               : isEndingHighlyUrgent
                 ? "Submit Meme"
                 : isEndingSoon 
                   ? "Submit Meme (Closes Soon!)" 
-                  : "Submit Art for The Memes"
+                  : "Submit Work to The Memes"
           }
         </span>
         
