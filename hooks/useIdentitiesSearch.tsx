@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { ApiIdentity } from "../generated/models/ApiIdentity";
 import { commonApiFetch } from "../services/api/common-api";
+import { useWaveById } from "./useWaveById";
 
 interface UseIdentitiesSearchProps {
   readonly handle: string;
@@ -12,6 +13,8 @@ export function useIdentitiesSearch({
   handle,
   waveId,
 }: UseIdentitiesSearchProps) {
+  const { wave } = useWaveById(waveId);
+
   const { data: identities } = useQuery<ApiIdentity[]>({
     queryKey: [QueryKey.IDENTITY_SEARCH, { handle, waveId }],
     queryFn: async () => {
@@ -19,7 +22,12 @@ export function useIdentitiesSearch({
         handle,
       };
       if (waveId) {
-        params.wave_id = waveId;
+        if (wave?.visibility.scope.group?.id) {
+          params.group_id = wave.visibility.scope.group.id;
+        } else {
+          params.wave_id = waveId;
+        }
+        params.ignore_authenticated_user = "true";
       }
       return await commonApiFetch<ApiIdentity[]>({
         endpoint: `identities`,

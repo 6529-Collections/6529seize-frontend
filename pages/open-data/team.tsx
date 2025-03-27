@@ -28,7 +28,7 @@ export default function TeamDownloads() {
 
   useEffect(() => {
     setTitle({
-      title: "Team Downloads | 6529 SEIZE",
+      title: "Team Downloads | 6529.io",
     });
   }, []);
 
@@ -37,16 +37,16 @@ export default function TeamDownloads() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Team Downloads | 6529 SEIZE" />
+        <meta name="description" content="Team Downloads | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/open-data/team`}
         />
         <meta property="og:title" content={`Team Downloads`} />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
 

@@ -26,7 +26,7 @@ export default function TheMemesPage() {
 
   useEffect(() => {
     setTitle({
-      title: "The Memes | 6529 SEIZE",
+      title: "The Memes | 6529.io",
     });
   }, []);
 
@@ -35,13 +35,13 @@ export default function TheMemesPage() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="The Memes | 6529 SEIZE" />
+        <meta name="description" content="The Memes | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/the-memes`}
         />
         <meta property="og:title" content="The Memes" />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/memes-preview.png`}

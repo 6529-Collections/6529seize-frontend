@@ -29,7 +29,7 @@ export default function CommunityMetricsDownloads() {
 
   useEffect(() => {
     setTitle({
-      title: "Network Metrics Downloads | 6529 SEIZE",
+      title: "Network Metrics Downloads | 6529.io",
     });
   }, []);
 
@@ -40,17 +40,17 @@ export default function CommunityMetricsDownloads() {
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content="Network Metrics Downloads | 6529 SEIZE"
+          content="Network Metrics Downloads | 6529.io"
         />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/open-data/network-metrics`}
         />
         <meta property="og:title" content={`Network Metrics Downloads`} />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
 

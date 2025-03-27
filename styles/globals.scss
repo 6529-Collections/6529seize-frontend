@@ -592,10 +592,15 @@ pre code {
 
 .emoji-node {
   width: auto;
-  height: 1.5em;
-  vertical-align: -0.3em;
+  height: 1.2em;
+}
 
-  @media (max-width: 800px) {
-    vertical-align: -0.4em;
-  }
+.emoji-node-big {
+  width: auto;
+  height: 3em;
+}
+
+.emoji-text-node {
+  font-size: 3em;
+  vertical-align: text-top;
 }

@@ -112,7 +112,7 @@ export default function WaveDropsAll({
 
   useEffect(() => {
     setTitle({
-      title: haveNewDrops ? "New Drops Available | 6529 SEIZE" : null,
+      title: haveNewDrops ? "New Drops Available | 6529.io" : null,
       type: TitleType.WAVE,
     });
 
@@ -309,8 +309,7 @@ export default function WaveDropsAll({
           newItemsCount={newItemsCount}
           isFetchingNextPage={isFetchingNextPage}
           onTopIntersection={handleTopIntersection}
-          disableAutoPosition={disableAutoPosition}
-        >
+          disableAutoPosition={disableAutoPosition}>
           <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
             <DropsList
               scrollContainerRef={scrollContainerRef}

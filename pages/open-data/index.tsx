@@ -27,7 +27,7 @@ export default function Downloads() {
 
   useEffect(() => {
     setTitle({
-      title: "Open Data | 6529 SEIZE",
+      title: "Open Data | 6529.io",
     });
   }, []);
 
@@ -36,16 +36,16 @@ export default function Downloads() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Open Data | 6529 SEIZE" />
+        <meta name="description" content="Open Data | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/open-data`}
         />
         <meta property="og:title" content={`Open Data`} />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
 

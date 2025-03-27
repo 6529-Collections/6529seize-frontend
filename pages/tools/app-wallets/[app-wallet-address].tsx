@@ -33,7 +33,7 @@ export default function AppWalletPage(props: any) {
 
   useEffect(() => {
     setTitle({
-      title: `${formatAddress(address)} | App Wallets | 6529 SEIZE`,
+      title: `${formatAddress(address)} | App Wallets | 6529.io`,
     });
   }, []);
 
@@ -49,7 +49,7 @@ export default function AppWalletPage(props: any) {
         />
         <meta property="og:title" content={pageProps.name} />
         <meta property="og:image" content={pageProps.image} />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
       </Head>
 
       <main className={styles.main}>

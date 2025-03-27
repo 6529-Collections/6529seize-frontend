@@ -16,7 +16,7 @@ export default function DisputeResolution() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Dispute Resolution | 6529 SEIZE",
+      title: "Dispute Resolution | 6529.io",
     });
   }, []);
 
@@ -25,16 +25,16 @@ export default function DisputeResolution() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Dispute Resolution | 6529 SEIZE" />
+        <meta name="description" content="Dispute Resolution | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/dispute-resolution`}
         />
         <meta property="og:title" content="Dispute Resolution" />
-        <meta property="og:description" content="6529 Seize" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
 

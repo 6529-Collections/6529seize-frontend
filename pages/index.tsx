@@ -101,7 +101,7 @@ export default function Home({
   const { connectedProfile, setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "6529 SEIZE",
+      title: "6529",
     });
   }, []);
 
@@ -166,14 +166,15 @@ export default function Home({
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="6529 SEIZE" />
+        <meta name="description" content="6529.io" />
         <meta property="og:url" content={`${process.env.BASE_ENDPOINT}`} />
-        <meta property="og:title" content="6529 SEIZE" />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:title" content="6529" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io-banner.png`}
         />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       <main className={styles.main}>

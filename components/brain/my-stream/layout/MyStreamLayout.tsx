@@ -50,7 +50,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     { display: "My Stream" },
   ];
 
-  useEffect(() => setTitle({ title: "My Stream | 6529 SEIZE" }), []);
+  useEffect(() => setTitle({ title: "My Stream | 6529.io" }), []);
   const containerClassName = `tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope`;
 
   return (
@@ -58,7 +58,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="My Stream | 6529 SEIZE" />
+        <meta name="description" content="My Stream | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/my-stream`}
@@ -66,9 +66,9 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
         <meta property="og:title" content="My Stream" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <style>{`
         body {
           overflow: hidden !important;
@@ -79,8 +79,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
         <div
           ref={setHeaderRef}
-          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black"
-        >
+          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
           <Header isSmall={true} />
           <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />

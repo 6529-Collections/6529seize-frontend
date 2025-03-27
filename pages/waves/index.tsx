@@ -19,7 +19,7 @@ export default function WavesPage() {
 
   useEffect(() => {
     setTitle({
-      title: "Waves | 6529 SEIZE",
+      title: "Waves | 6529.io",
     });
   }, []);
 
@@ -28,7 +28,7 @@ export default function WavesPage() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Waves | 6529 SEIZE" />
+        <meta name="description" content="Waves | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/waves`}
@@ -36,9 +36,9 @@ export default function WavesPage() {
         <meta property="og:title" content="Waves" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
       </Head>
       <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
         <div>

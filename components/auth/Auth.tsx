@@ -67,7 +67,7 @@ type AuthContextType = {
   readonly title: string;
 };
 
-const DEFAULT_TITLE = "6529 SEIZE";
+const DEFAULT_TITLE = "6529";
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,

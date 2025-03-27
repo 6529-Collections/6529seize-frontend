@@ -8,7 +8,10 @@ import {
   useMyStreamQuery,
   usePollingQuery,
 } from "../../../hooks/useMyStreamQuery";
-import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
+import {
+  ActiveDropAction,
+  ActiveDropState,
+} from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 
@@ -18,7 +21,6 @@ const MyStreamWrapper: React.FC = () => {
   const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
 
   useEffect(() => {
-    
     const { wave: waveId } = router.query;
     setSerialisedWaveId(typeof waveId === "string" ? waveId : null);
   }, [router.query]);
@@ -84,7 +86,7 @@ const MyStreamWrapper: React.FC = () => {
 
   useEffect(() => {
     setTitle({
-      title: haveNewItems ? "New Stream Items Available | 6529 SEIZE" : null,
+      title: haveNewItems ? "New Stream Items Available | 6529.io" : null,
       type: TitleType.MY_STREAM,
     });
 
@@ -114,10 +116,7 @@ const MyStreamWrapper: React.FC = () => {
   // Add a key prop based on wave ID to force component remount on wave change
   // This breaks the update cycle and ensures clean state when navigating between waves
   const component = serialisedWaveId ? (
-    <MyStreamWave 
-      key={`wave-${serialisedWaveId}`} 
-      waveId={serialisedWaveId} 
-    />
+    <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
   ) : (
     <MyStream
       key="my-stream-feed"
@@ -134,8 +133,7 @@ const MyStreamWrapper: React.FC = () => {
   return (
     <BrainContent
       activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}
-    >
+      onCancelReplyQuote={onCancelReplyQuote}>
       {component}
     </BrainContent>
   );
