@@ -22,6 +22,7 @@ export function parseSeizeQueryLink(
 ): string | null {
   try {
     const url = new URL(href);
+    if (url.origin !== process.env.BASE_ENDPOINT) return null;
     if (url.pathname !== path) return null;
 
     const value = url.searchParams.get(query);

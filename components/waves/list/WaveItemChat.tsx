@@ -1,5 +1,7 @@
+import { removeBaseEndpoint } from "../../../helpers/Helpers";
 import { useWaveById } from "../../../hooks/useWaveById";
 import WaveItem from "./WaveItem";
+import Link from "next/link";
 
 export default function WaveItemChat({
   href,
@@ -9,14 +11,19 @@ export default function WaveItemChat({
   readonly waveId: string;
 }) {
   const wave = useWaveById(waveId);
+  const relativeLink = removeBaseEndpoint(href);
 
   if (!wave.wave) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer">
+      <Link className="tw-no-underline" href={relativeLink}>
         {href}
-      </a>
+      </Link>
     );
   }
 
-  return <WaveItem wave={wave.wave} />;
+  return (
+    <Link className="tw-no-underline" href={relativeLink}>
+      <WaveItem wave={wave.wave} />
+    </Link>
+  );
 }

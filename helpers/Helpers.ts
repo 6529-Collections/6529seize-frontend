@@ -606,7 +606,9 @@ export const amIUser = ({
   connectedHandle?: string;
 }): boolean => {
   if (connectedHandle && profile.profile?.handle) {
-    if (connectedHandle.toLowerCase() === profile.profile.handle.toLowerCase()) {
+    if (
+      connectedHandle.toLowerCase() === profile.profile.handle.toLowerCase()
+    ) {
       return true;
     }
   }
@@ -614,7 +616,7 @@ export const amIUser = ({
   if (!address || !profile.consolidation?.wallets) {
     return false;
   }
-  
+
   return profile.consolidation.wallets.some(
     (wallet) => wallet.wallet.address.toLowerCase() === address.toLowerCase()
   );
@@ -896,4 +898,8 @@ export function getNameForContract(contract: string) {
 
 export const wait = async (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const removeBaseEndpoint = (link: string) => {
+  return link.replace(process.env.BASE_ENDPOINT ?? "", "");
 };
