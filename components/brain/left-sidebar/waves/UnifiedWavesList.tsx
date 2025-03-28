@@ -5,6 +5,7 @@ import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreat
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface UnifiedWavesListProps {
   readonly waves: EnhancedWave[];
@@ -35,7 +36,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   // Sort waves to prioritize the active wave (if present)
   const sortedWaves = useMemo(() => {
     if (!activeWaveId) return waves;
-    
+
     return waves.reduce<EnhancedWave[]>((acc, wave) => {
       if (wave.id === activeWaveId) {
         // Place active wave at the beginning
@@ -96,11 +97,24 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  const waveAnimationVariants = {
+    hidden: { opacity: 0, y: 5 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut",
+      },
+    }),
+    exit: { opacity: 0, transition: { duration: 0.15 } },
+  };
+
   return (
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
         {/* Create Wave Button */}
-        <div className="tw-px-4 tw-mb-4 tw-flex tw-items-center tw-gap-2">
+        <div className="tw-px-4 tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-2">
           <BrainLeftSidebarCreateADirectMessageButton />
           {isConnectedIdentity && (
             <CommonSwitch
@@ -116,14 +130,26 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           {/* Unified Waves List */}
           {sortedWaves.length > 0 && (
             <div className="tw-flex tw-flex-col">
-              {sortedWaves.map((wave) => (
-                <BrainLeftSidebarWave
-                  key={wave.id}
-                  wave={wave}
-                  resetWaveCount={resetWaveCount}
-                  activeWaveId={activeWaveId}
-                />
-              ))}
+              <AnimatePresence initial={false}>
+                {sortedWaves.map((wave, index) => (
+                  <motion.div
+                    key={wave.id}
+                    custom={index}
+                    variants={waveAnimationVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    layout
+                    layoutId={wave.id}
+                  >
+                    <BrainLeftSidebarWave
+                      wave={wave}
+                      resetWaveCount={resetWaveCount}
+                      activeWaveId={activeWaveId}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
 
@@ -134,20 +160,30 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
               className="tw-flex tw-justify-center tw-items-center tw-py-4"
             >
               {isFetchingNextPage && (
-                <div className="tw-flex tw-justify-center tw-items-center tw-gap-1">
+                <motion.div
+                  className="tw-flex tw-justify-center tw-items-center tw-gap-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <div className="tw-w-1.5 tw-h-1.5 tw-bg-iron-400 tw-rounded-full tw-animate-pulse"></div>
                   <div className="tw-w-1.5 tw-h-1.5 tw-bg-iron-400 tw-rounded-full tw-animate-pulse tw-animation-delay-200"></div>
                   <div className="tw-w-1.5 tw-h-1.5 tw-bg-iron-400 tw-rounded-full tw-animate-pulse tw-animation-delay-400"></div>
-                </div>
+                </motion.div>
               )}
             </div>
           )}
 
           {/* Empty state */}
           {sortedWaves.length === 0 && !isFetchingNextPage && (
-            <div className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500">
+            <motion.div
+              className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
               <p>No waves to display</p>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

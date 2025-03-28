@@ -304,7 +304,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       return {};
     }
 
-    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const capacitorSpace = isAndroid ? 56 : isIos ? 20 : isCapacitor ? 80 : 0;
 
     return {
       height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,

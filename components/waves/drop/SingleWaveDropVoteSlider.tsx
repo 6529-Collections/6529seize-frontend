@@ -160,7 +160,7 @@ export default function WaveDropVoteSlider({
       onClick={(e) => e.stopPropagation()}
     >
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
-        <div className="tw-relative tw-h-[6px] tw-group">
+        <div className="tw-relative tw-h-[6px] tw-group tw-mt-6 sm:tw-mt-0">
           {/* Base range input for track clicks */}
           <input
             type="range"
