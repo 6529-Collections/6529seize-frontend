@@ -22,24 +22,28 @@ export default function GroupCard({
   group,
   activeGroupIdVoteAll,
   setActiveGroupIdVoteAll,
+  userPlaceholder,
+  titlePlaceholder,
 }: {
-  readonly group: ApiGroupFull;
+  readonly group?: ApiGroupFull;
   readonly activeGroupIdVoteAll?: string | null;
   readonly setActiveGroupIdVoteAll?: (value: string | null) => void;
+  readonly userPlaceholder?: string;
+  readonly titlePlaceholder?: string;
 }) {
   const router = useRouter();
   const { connectedProfile } = useContext(AuthContext);
   const [state, setState] = useState<GroupCardState>(GroupCardState.IDLE);
 
   const banner1 =
-    group.created_by.banner1_color ??
-    getRandomColorWithSeed(group.created_by.handle);
+    group?.created_by.banner1_color ??
+    getRandomColorWithSeed(group?.created_by.handle ?? "");
   const banner2 =
-    group.created_by.banner2_color ??
-    getRandomColorWithSeed(group.created_by.handle);
+    group?.created_by.banner2_color ??
+    getRandomColorWithSeed(group?.created_by.handle ?? "");
 
   const onGroupStateChange = (state: GroupCardState) => {
-    if (!setActiveGroupIdVoteAll) return;
+    if (!setActiveGroupIdVoteAll || !group) return;
     if (state === GroupCardState.IDLE) {
       setActiveGroupIdVoteAll(null);
     } else {
@@ -49,7 +53,7 @@ export default function GroupCard({
   };
 
   const getIsActiveGroupVoteAll = () => {
-    return activeGroupIdVoteAll === group.id;
+    return activeGroupIdVoteAll === group?.id;
   };
 
   const isActiveGroupVoteAll = getIsActiveGroupVoteAll();
@@ -79,6 +83,8 @@ export default function GroupCard({
         setState={setActiveGroupIdVoteAll ? onGroupStateChange : undefined}
         haveActiveGroupVoteAll={!!activeGroupIdVoteAll}
         onEditClick={setActiveGroupIdVoteAll ? onEditClick : undefined}
+        userPlaceholder={userPlaceholder}
+        titlePlaceholder={titlePlaceholder}
       />
     ),
     [GroupCardState.REP]: (
@@ -99,7 +105,7 @@ export default function GroupCard({
 
   const goToCommunityView = () => {
     if (state !== GroupCardState.IDLE) return;
-    router.push(`/network?page=1&group=${group.id}`);
+    router.push(`/network?page=1&group=${group?.id}`);
   };
 
   return (

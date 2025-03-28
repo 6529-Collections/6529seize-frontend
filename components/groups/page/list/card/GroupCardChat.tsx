@@ -4,6 +4,7 @@ import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import GroupCard from "./GroupCard";
+import Link from "next/link";
 
 export default function GroupCardChat({
   href,
@@ -22,13 +23,11 @@ export default function GroupCardChat({
     enabled: !!groupId,
   });
 
-  if (!group) {
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer">
-        {href}
-      </a>
-    );
-  }
-
-  return <GroupCard group={group} />;
+  return (
+    <GroupCard
+      group={group}
+      userPlaceholder={href}
+      titlePlaceholder={groupId}
+    />
+  );
 }
