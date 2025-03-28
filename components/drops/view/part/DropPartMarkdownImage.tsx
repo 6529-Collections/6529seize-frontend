@@ -7,8 +7,7 @@ import { fullScreenSupported } from "../../../../helpers/Helpers";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
 import useCapacitor from "../../../../hooks/useCapacitor";
-import { ImageScale } from "../../../../helpers/image.helpers";
-import { getScaledImageUri } from "../../../../helpers/image.helpers";
+import { ImageScale, getScaledImageUri } from "../../../../helpers/image.helpers";
 
 interface DropPartMarkdownImageProps {
   readonly src: string;

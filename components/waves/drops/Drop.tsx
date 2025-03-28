@@ -6,6 +6,7 @@ import { ApiDropType } from "../../../generated/models/ApiDropType";
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WinnerDrop from "./winner/WinnerDrop";
 import DropContext from "./DropContext";
+import { useMemo } from "react";
 
 export interface DropInteractionParams {
   drop: ExtendedDrop;
@@ -103,8 +104,10 @@ export default function Drop({
     ),
   };
 
+  const memoizedValue = useMemo(() => ({ drop, location }), [drop, location]);
+
   return (
-    <DropContext.Provider value={{ drop, location }}>
+    <DropContext.Provider value={memoizedValue}>
       {components[drop.drop_type]}
     </DropContext.Provider>
   );

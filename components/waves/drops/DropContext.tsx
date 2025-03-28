@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode, useMemo } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropLocation } from "./Drop";
 
@@ -10,22 +10,19 @@ interface DropContextType {
 const DropContext = createContext<DropContextType | undefined>(undefined);
 
 interface DropProviderProps {
-  children: ReactNode;
-  drop: ExtendedDrop | null;
-  location: DropLocation;
+  readonly children: ReactNode;
+  readonly drop: ExtendedDrop | null;
+  readonly location: DropLocation;
 }
 
-export function DropProvider({
-  children,
-  drop,
-  location,
-}: DropProviderProps) {
-  const value = {
-    drop,
-    location,
-  };
+export function DropProvider({ children, drop, location }: DropProviderProps) {
+  const memoizedValue = useMemo(() => ({ drop, location }), [drop, location]);
 
-  return <DropContext.Provider value={value}>{children}</DropContext.Provider>;
+  return (
+    <DropContext.Provider value={memoizedValue}>
+      {children}
+    </DropContext.Provider>
+  );
 }
 
 export function useDropContext() {
