@@ -32,6 +32,22 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     return !!connectedProfile?.profile?.handle && !activeProfileProxy;
   }, [connectedProfile?.profile?.handle, activeProfileProxy]);
 
+  // Sort waves to prioritize the active wave (if present)
+  const sortedWaves = useMemo(() => {
+    if (!activeWaveId) return waves;
+    
+    return waves.reduce<EnhancedWave[]>((acc, wave) => {
+      if (wave.id === activeWaveId) {
+        // Place active wave at the beginning
+        acc.unshift(wave);
+      } else {
+        // Place all other waves at the end
+        acc.push(wave);
+      }
+      return acc;
+    }, []);
+  }, [waves, activeWaveId]);
+
   // Ref for intersection observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -98,14 +114,14 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
         {/* Non-scrollable container for all waves - parent will handle scrolling */}
         <div className="tw-w-full">
           {/* Unified Waves List */}
-          {waves.length > 0 && (
+          {sortedWaves.length > 0 && (
             <div className="tw-flex tw-flex-col">
-              {waves.map((wave) => (
+              {sortedWaves.map((wave) => (
                 <BrainLeftSidebarWave
                   key={wave.id}
                   wave={wave}
                   resetWaveCount={resetWaveCount}
-                  isHighlighted={wave.id === activeWaveId}
+                  activeWaveId={activeWaveId}
                 />
               ))}
             </div>
@@ -128,7 +144,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           )}
 
           {/* Empty state */}
-          {waves.length === 0 && !isFetchingNextPage && (
+          {sortedWaves.length === 0 && !isFetchingNextPage && (
             <div className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500">
               <p>No waves to display</p>
             </div>

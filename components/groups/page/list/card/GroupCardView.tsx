@@ -11,8 +11,8 @@ export default function GroupCardView({
 }: {
   readonly group: ApiGroupFull;
   readonly haveActiveGroupVoteAll: boolean;
-  readonly setState: (state: GroupCardState) => void;
-  readonly onEditClick: (group: ApiGroupFull) => void;
+  readonly setState?: (state: GroupCardState) => void;
+  readonly onEditClick?: (group: ApiGroupFull) => void;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-h-full">

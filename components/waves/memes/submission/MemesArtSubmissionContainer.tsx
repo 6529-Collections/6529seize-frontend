@@ -132,7 +132,7 @@ const MemesArtSubmissionContainer: React.FC<
   };
 
   return (
-    <ModalLayout title="Submit Artwork to Memes" onCancel={onClose}>
+    <ModalLayout title="Submit Work to The Memes" onCancel={onClose}>
       {/* Step Content - Render the current step from the map */}
       {stepComponents[form.currentStep]}
     </ModalLayout>

@@ -1,0 +1,34 @@
+import { keepPreviousData } from "@tanstack/query-core";
+import { useQuery } from "@tanstack/react-query";
+import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
+import { commonApiFetch } from "../../../../../services/api/common-api";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import GroupCard from "./GroupCard";
+
+export default function GroupCardChat({
+  href,
+  groupId,
+}: {
+  readonly href: string;
+  readonly groupId: string;
+}) {
+  const { data: group } = useQuery<ApiGroupFull>({
+    queryKey: [QueryKey.GROUP, groupId],
+    queryFn: async () =>
+      await commonApiFetch<ApiGroupFull>({
+        endpoint: `groups/${groupId}`,
+      }),
+    placeholderData: keepPreviousData,
+    enabled: !!groupId,
+  });
+
+  if (!group) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {href}
+      </a>
+    );
+  }
+
+  return <GroupCard group={group} />;
+}

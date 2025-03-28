@@ -10,7 +10,7 @@ export default function PositiveOnlyToggle({
   setPositiveOnly,
 }: PositiveOnlyToggleProps) {
   return (
-    <div>
+    <div className="tw-hidden">
       <label htmlFor="positive-only-toggle" className="tw-flex tw-cursor-pointer">
         <div className="tw-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-3">
           <div

@@ -74,7 +74,10 @@ const DropsList = memo(function DropsList({
           ref={serialNo === drop.serial_no ? targetDropRef : null}
           className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
         >
-          <VirtualScrollWrapper scrollContainerRef={scrollContainerRef}>
+          <VirtualScrollWrapper
+            scrollContainerRef={scrollContainerRef}
+            drop={drop}
+          >
             <MemoizedDrop
               dropViewDropId={dropViewDropId}
               onReplyClick={handleReplyClick}

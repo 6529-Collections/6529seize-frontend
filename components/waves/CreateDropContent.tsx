@@ -633,7 +633,9 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const getUpdatedDropRequest = async (
     requestBody: ApiCreateDropRequest
   ): Promise<ApiCreateDropRequest | null> => {
-    console.log({ wave });
+    if (requestBody.drop_type === ApiDropType.Chat) {
+      return requestBody;
+    }
     if (!wave.participation.signature_required) {
       return requestBody;
     }

@@ -58,7 +58,7 @@ export default function WavePicture({ wave }: { readonly wave: ApiWave }) {
       <img
         src={wave.picture}
         alt={wave.name}
-        className="tw-w-full tw-h-full tw-object-cover"
+        className="tw-w-full tw-h-full tw-object-cover tw-rounded-full"
       />
     );
   }
@@ -70,7 +70,7 @@ export default function WavePicture({ wave }: { readonly wave: ApiWave }) {
   // 3) If no PFPS, show fallback background
   if (pfps.length === 0) {
     return (
-      <div className="tw-w-full tw-h-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700" />
+      <div className="tw-w-full tw-h-full tw-bg-gradient-to-br tw-from-iron-800 tw-to-iron-700 tw-rounded-full" />
     );
   }
 
@@ -82,7 +82,7 @@ export default function WavePicture({ wave }: { readonly wave: ApiWave }) {
   const polygons = polygonsByCount[sliceCount];
 
   return (
-    <div className="tw-relative tw-w-full tw-h-full tw-overflow-hidden">
+    <div className="tw-relative tw-w-full tw-h-full">
       {pfps.slice(0, sliceCount).map((pfp, i) => {
         const clip = polygons[i];
         return (
@@ -93,7 +93,7 @@ export default function WavePicture({ wave }: { readonly wave: ApiWave }) {
             <img
               src={pfp}
               alt={`Contributor-${i}`}
-              className="tw-w-full tw-h-full tw-object-cover tw-block"
+              className="tw-w-full tw-h-full tw-object-cover tw-block tw-rounded-full"
             />
           </div>
         );

@@ -88,9 +88,9 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
         {position > 1 && <span className="tw-ml-1">#{position}</span>}
       </span>
 
-      {/* Date part - always show if available */}
+      {/* Date part - hidden on mobile, visible from md up */}
       {dateString && (
-        <span className="tw-flex tw-items-center">
+        <span className="tw-hidden md:tw-flex tw-items-center">
           <div
             style={{
               backgroundColor: `${accentColor}70`,
