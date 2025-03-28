@@ -23,9 +23,11 @@ export default function GroupCardChat({
     enabled: !!groupId,
   });
 
-  if (!group) {
-    return <Link href={href}>{href}</Link>;
-  }
-
-  return <GroupCard group={group} />;
+  return (
+    <GroupCard
+      group={group}
+      userPlaceholder={href}
+      titlePlaceholder={groupId}
+    />
+  );
 }

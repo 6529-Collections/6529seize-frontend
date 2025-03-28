@@ -13,17 +13,13 @@ export default function WaveItemChat({
   const wave = useWaveById(waveId);
   const relativeLink = removeBaseEndpoint(href);
 
-  if (!wave.wave) {
-    return (
-      <Link className="tw-no-underline" href={relativeLink}>
-        {href}
-      </Link>
-    );
-  }
-
   return (
     <Link className="tw-no-underline" href={relativeLink}>
-      <WaveItem wave={wave.wave} />
+      <WaveItem
+        wave={wave?.wave}
+        userPlaceholder={href}
+        titlePlaceholder={waveId}
+      />
     </Link>
   );
 }
