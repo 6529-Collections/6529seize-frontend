@@ -35,7 +35,7 @@ export default function GroupsPage() {
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/network/groups`}
         />
-        <meta property="og:title" content={title} />
+        <meta property="og:title" content="Network Groups" />
         <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
