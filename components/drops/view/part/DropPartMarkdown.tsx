@@ -17,11 +17,14 @@ import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropI
 import WaveDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import {
-  parseSeizeLink,
-  SeizeLinkInfo,
+  parseSeizeQueryLink,
+  parseSeizeQuoteLink,
+  SeizeQuoteLinkInfo,
 } from "../../../../helpers/SeizeLinkParser";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { useEmoji } from "../../../../contexts/EmojiContext";
+import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
+import WaveItemChat from "../../../waves/list/WaveItemChat";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -206,22 +209,28 @@ function DropPartMarkdown({
     ExtraProps) => {
     const { href } = props;
 
-    if (!href) {
+    if (!href || !isValidLink(href)) {
       return null;
     }
 
-    const seizeLinkInfo = parseSeizeLink(href);
-    if (seizeLinkInfo) {
-      return renderSeizeQuote(seizeLinkInfo, onQuoteClick);
+    const quoteInfo = parseSeizeQuoteLink(href);
+    if (quoteInfo) {
+      return renderSeizeQuote(quoteInfo, onQuoteClick);
+    }
+
+    const groupId = parseSeizeQueryLink(href, "/network", "group");
+    if (groupId) {
+      return <GroupCardChat href={href} groupId={groupId} />;
+    }
+
+    const waveId = parseSeizeQueryLink(href, "/my-stream", "wave");
+    if (waveId) {
+      return <WaveItemChat href={href} waveId={waveId} />;
     }
 
     const twitterMatch = parseTwitterLink(href);
     if (twitterMatch) {
       return renderTweetEmbed(twitterMatch, href);
-    }
-
-    if (!isValidLink(href)) {
-      return <p>[invalid link]</p>;
     }
 
     return renderExternalOrInternalLink(href, props);
@@ -283,10 +292,10 @@ function DropPartMarkdown({
   };
 
   const renderSeizeQuote = (
-    seizeLinkInfo: SeizeLinkInfo,
+    quoteLinkInfo: SeizeQuoteLinkInfo,
     onQuoteClick: (drop: ApiDrop) => void
   ) => {
-    const { waveId, serialNo, dropId } = seizeLinkInfo;
+    const { waveId, serialNo, dropId } = quoteLinkInfo;
 
     if (serialNo) {
       return (

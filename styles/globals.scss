@@ -451,17 +451,36 @@ h5:not(.tailwind-scope h5) {
 // Scroll shadow for content overflow indication
 .scroll-shadow {
   background:
-    /* Shadow at the top */ 
-    linear-gradient(to bottom, rgba(14, 16, 21, 0.8) 0%, rgba(14, 16, 21, 0) 10px) 0 0,
+    /* Shadow at the top */ linear-gradient(
+        to bottom,
+        rgba(14, 16, 21, 0.8) 0%,
+        rgba(14, 16, 21, 0) 10px
+      )
+      0 0,
     /* Shadow at the bottom */
-    linear-gradient(to top, rgba(14, 16, 21, 0.8) 0%, rgba(14, 16, 21, 0) 10px) 0 100%,
+      linear-gradient(
+        to top,
+        rgba(14, 16, 21, 0.8) 0%,
+        rgba(14, 16, 21, 0) 10px
+      )
+      0 100%,
     /* Preventing the shadows from overlapping the content */
-    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) 0 0,
-    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0)) 0 100%;
-  
+      radial-gradient(
+        farthest-side at 50% 0,
+        rgba(0, 0, 0, 0.2),
+        rgba(0, 0, 0, 0)
+      )
+      0 0,
+    radial-gradient(
+        farthest-side at 50% 100%,
+        rgba(0, 0, 0, 0.2),
+        rgba(0, 0, 0, 0)
+      )
+      0 100%;
+
   background-repeat: no-repeat;
   background-size: 100% 10px, 100% 10px, 100% 10px, 100% 10px;
-  
+
   /* Make sure the shadows remain fixed during scrolling */
   background-attachment: local, local, scroll, scroll;
 }
@@ -602,5 +621,6 @@ pre code {
 
 .emoji-text-node {
   font-size: 3em;
-  vertical-align: text-top;
+  line-height: 1.2em;
+  vertical-align: middle;
 }

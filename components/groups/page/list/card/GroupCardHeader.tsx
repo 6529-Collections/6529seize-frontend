@@ -14,7 +14,7 @@ export default function GroupCardHeader({
   onEditClick,
 }: {
   readonly group: ApiGroupFull;
-  readonly onEditClick: (group: ApiGroupFull) => void;
+  readonly onEditClick?: (group: ApiGroupFull) => void;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const timeAgo = getTimeAgo(new Date(group.created_at).getTime());
@@ -48,9 +48,11 @@ export default function GroupCardHeader({
           <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
             {timeAgo}
           </span>
-          {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
-            <GroupCardEditActions group={group} onEditClick={onEditClick} />
-          )}
+          {!!connectedProfile?.profile?.handle &&
+            !activeProfileProxy &&
+            onEditClick && (
+              <GroupCardEditActions group={group} onEditClick={onEditClick} />
+            )}
         </div>
       </div>
     </div>
