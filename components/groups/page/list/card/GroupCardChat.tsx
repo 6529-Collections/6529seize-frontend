@@ -4,7 +4,6 @@ import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import GroupCard from "./GroupCard";
-import Link from "next/link";
 
 export default function GroupCardChat({
   href,
