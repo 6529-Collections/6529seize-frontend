@@ -7,6 +7,7 @@ import { fullScreenSupported } from "../../../../../../helpers/Helpers";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
 import useCapacitor from "../../../../../../hooks/useCapacitor";
+import { getScaledImageUri, ImageScale } from "../../../../../../helpers/image.helpers";
 
 function DropListItemContentMediaImage({ 
   src
@@ -181,7 +182,7 @@ function DropListItemContentMediaImage({
         )}
         <img
           ref={imgRef}
-          src={src}
+          src={getScaledImageUri(src, ImageScale.AUTOx450)}
           alt="Drop media"
           className={`tw-object-center tw-object-contain ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"

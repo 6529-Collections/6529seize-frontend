@@ -32,7 +32,13 @@ export const SeizeSettingsProvider = ({
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/settings`).then(
       (settings: ApiSeizeSettings) => {
-        setSeizeSettings(settings);
+        setSeizeSettings({
+          ...settings,
+          memes_wave_id:
+            process.env.NODE_ENV === "development"
+              ? "4bb2b8a7-0a51-485c-8a6f-b40d68bd61f9"
+              : null,
+        });
       }
     );
   }, []);

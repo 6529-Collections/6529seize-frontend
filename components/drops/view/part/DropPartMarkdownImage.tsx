@@ -7,6 +7,8 @@ import { fullScreenSupported } from "../../../../helpers/Helpers";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Link from "next/link";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { ImageScale } from "../../../../helpers/image.helpers";
+import { getScaledImageUri } from "../../../../helpers/image.helpers";
 
 interface DropPartMarkdownImageProps {
   readonly src: string;
@@ -179,7 +181,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
         )}
         <img
           ref={imgRef}
-          src={src}
+          src={getScaledImageUri(src, ImageScale.AUTOx450)}
           alt={alt}
           onLoad={handleImageLoad}
           onClick={handleImageClick}
