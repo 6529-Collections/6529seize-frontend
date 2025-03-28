@@ -35,7 +35,7 @@ export const MemesSingleWaveDropContent: React.FC<
       )}
 
       {/* Full width artwork */}
-      <div className="tw-relative tw-bg-iron-900/30 tw-w-full">
+      <div className="tw-relative tw-bg-iron-900/40 tw-w-full">
         <div className="tw-aspect-video tw-w-full tw-flex tw-items-center tw-justify-center">
           {artworkMedia ? (
             <img

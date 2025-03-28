@@ -109,7 +109,7 @@ export default function MemeParticipationDrop({
                   className={`tw-flex tw-justify-center ${
                     location === DropLocation.WAVE
                       ? "tw-bg-iron-800/30"
-                      : "tw-bg-iron-900/30"
+                      : "tw-bg-iron-900/40"
                   }`}
                 >
                   <DropListItemContentMedia
