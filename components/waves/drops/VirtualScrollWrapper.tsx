@@ -49,7 +49,7 @@ interface VirtualScrollWrapperProps {
  * </VirtualScrollWrapper>
  */
 export default function VirtualScrollWrapper({
-  delay = 2000,
+  delay = 10000,
   scrollContainerRef,
   children,
   drop,
@@ -58,7 +58,11 @@ export default function VirtualScrollWrapper({
     const haveQuoteOrMedia = drop.parts.some(
       (part) => !!part.quoted_drop || !!part.media.length
     );
-    return haveQuoteOrMedia;
+    const haveReply = !!drop.reply_to;
+    const haveEmbeddedTweet = drop.parts.some(
+      (part) => !!part.content?.match(/https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/)
+    );
+    return haveQuoteOrMedia || haveReply || haveEmbeddedTweet;
   };
 
   const [shouldAlwaysRender, setShouldAlwaysRender] = useState<boolean>(
@@ -203,7 +207,7 @@ export default function VirtualScrollWrapper({
         // For a reversed layout, we need a large margin at both top and bottom
         // This ensures elements are detected well before they enter/leave the viewport
         // Using a large value for both directions ensures smooth operation in both regular and reversed layouts
-        rootMargin: "500px 0px 500px 0px",
+        rootMargin: "1500px 0px 15000px 0px",
         threshold: 0.0,
         root: scrollContainerRef.current,
       }
