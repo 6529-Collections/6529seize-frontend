@@ -10,11 +10,21 @@ import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 import Tippy from "@tippyjs/react";
 import "tippy.js/dist/tippy.css";
 
-export default function WaveItem({ wave }: { readonly wave: ApiWave }) {
+export default function WaveItem({
+  wave,
+  userPlaceholder,
+  titlePlaceholder,
+}: {
+  readonly wave?: ApiWave;
+  readonly userPlaceholder?: string;
+  readonly titlePlaceholder?: string;
+}) {
   const banner1 =
-    wave.author.banner1_color ?? getRandomColorWithSeed(wave.author.handle);
+    wave?.author.banner1_color ??
+    getRandomColorWithSeed(wave?.author.handle ?? "");
   const banner2 =
-    wave.author.banner2_color ?? getRandomColorWithSeed(wave.author.handle);
+    wave?.author.banner2_color ??
+    getRandomColorWithSeed(wave?.author.handle ?? "");
 
   const LEVEL_CLASSES: { minLevel: number; classes: string }[] = [
     { minLevel: 0, classes: "tw-text-[#DA8C60] tw-ring-[#DA8C60]" },
@@ -25,8 +35,9 @@ export default function WaveItem({ wave }: { readonly wave: ApiWave }) {
   ].reverse();
 
   const getColorClasses = () =>
-    LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= wave.author.level)
-      ?.classes ?? LEVEL_CLASSES[0].classes;
+    LEVEL_CLASSES.find(
+      (levelClass) => levelClass.minLevel <= (wave?.author.level ?? 0)
+    )?.classes ?? LEVEL_CLASSES[0].classes;
 
   return (
     <div className="tw-rounded-xl tw-bg-gradient-to-b tw-p-[1px] tw-from-iron-700 tw-to-iron-800">
@@ -37,32 +48,37 @@ export default function WaveItem({ wave }: { readonly wave: ApiWave }) {
             background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
           }}></div>
         <div className="tw-flex tw-gap-x-2 tw-px-4">
-          {wave.picture && (
-            <div className="-tw-mt-5 tw-relative tw-flex-shrink-0">
-              <div className="tw-h-16 tw-w-16">
+          <div className="-tw-mt-5 tw-relative tw-flex-shrink-0">
+            <div className="tw-h-16 tw-w-16">
+              {wave?.picture ? (
                 <img
                   className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900"
                   src={getScaledImageUri(wave.picture, ImageScale.W_AUTO_H_50)}
                   alt="#"
                 />
-              </div>
+              ) : (
+                <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900" />
+              )}
             </div>
-          )}
+          </div>
+
           <div className="tw-mt-2">
             <Link
-              href={`/my-stream?wave=${wave.id}`}
+              href={
+                wave ? `/my-stream?wave=${wave?.id}` : userPlaceholder ?? ""
+              }
               className="tw-no-underline tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-              {wave.name}
+              {wave?.name ?? titlePlaceholder}
             </Link>
           </div>
         </div>
         <div className="tw-mt-4 tw-px-4">
           <div>
             <Link
-              href={`${wave.author.handle}`}
+              href={wave ? `${wave?.author.handle}` : userPlaceholder ?? ""}
               className="tw-group tw-no-underline tw-inline-flex tw-items-center tw-gap-x-2">
               <div className="tw-h-6 tw-w-6">
-                {wave.author.pfp ? (
+                {wave?.author.pfp ? (
                   <img
                     className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
                     src={getScaledImageUri(
@@ -76,12 +92,14 @@ export default function WaveItem({ wave }: { readonly wave: ApiWave }) {
                 )}
               </div>
               <span className="tw-text-sm tw-font-semibold tw-text-white group-hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
-                {wave.author.handle}
+                {wave?.author.handle ?? userPlaceholder}
               </span>
-              <div
-                className={`${getColorClasses()} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}>
-                Level {wave.author.level}
-              </div>
+              {wave && (
+                <div
+                  className={`${getColorClasses()} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}>
+                  Level {wave.author.level}
+                </div>
+              )}
             </Link>
           </div>
           <div className="tw-flex tw-items-center tw-gap-x-4 tw-mt-6">
@@ -119,18 +137,20 @@ export default function WaveItem({ wave }: { readonly wave: ApiWave }) {
                   />
                 </svg>
                 <span className="tw-font-medium">
-                  {numberWithCommas(wave.metrics.subscribers_count)}
+                  {numberWithCommas(wave?.metrics.subscribers_count ?? 0)}
                 </span>
                 <span className="tw-text-iron-400 xl:tw-hidden">Followers</span>
               </div>
             </Tippy>
           </div>
           <div className="tw-flex lg:tw-flex-col min-[1400px]:tw-flex-row tw-justify-between tw-gap-y-4 tw-mt-4">
-            <WaveItemDropped wave={wave} />
+            {wave && <WaveItemDropped wave={wave} />}
             <div className="tw-flex tw-items-center tw-gap-x-3 min-w-[1400px]:tw-ml-auto tw-mt-auto">
               <Link
                 title="View Wave"
-                href={`/my-stream?wave=${wave.id}`}
+                href={
+                  wave ? `/my-stream?wave=${wave?.id}` : userPlaceholder ?? ""
+                }
                 className="tw-no-underline tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm hover:tw-bg-iron-700 hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out">
                 <svg
                   className="tw-size-5 tw-flex-shrink-0"
@@ -152,7 +172,7 @@ export default function WaveItem({ wave }: { readonly wave: ApiWave }) {
                   />
                 </svg>
               </Link>
-              <WaveItemFollow wave={wave} />
+              {wave && <WaveItemFollow wave={wave} />}
             </div>
           </div>
         </div>

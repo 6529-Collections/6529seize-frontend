@@ -9,11 +9,11 @@ import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
 import MemeDropTraits from "./MemeDropTraits";
 import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
+import { useDropContext } from "../../waves/drops/DropContext";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
   readonly showReplyAndQuote: boolean;
-  readonly location: DropLocation;
   readonly onReply: (param: DropInteractionParams) => void;
   readonly onQuote: (param: DropInteractionParams) => void;
 }
@@ -21,11 +21,11 @@ interface MemeWinnerDropProps {
 export default function MemeWinnerDrop({
   drop,
   showReplyAndQuote,
-  location,
   onReply,
   onQuote,
 }: MemeWinnerDropProps) {
   const isMobile = useIsMobileDevice();
+  const { location } = useDropContext();
 
   // Extract metadata
   const title =

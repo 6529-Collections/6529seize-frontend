@@ -30,7 +30,7 @@ export default function GroupCardVoteAll({
   onCancel,
 }: {
   readonly matter: ApiRateMatter;
-  readonly group: ApiGroupFull;
+  readonly group?: ApiGroupFull;
   readonly onCancel: () => void;
 }) {
   const SUCCESS_LABEL: Record<ApiRateMatter, string> = {
@@ -67,7 +67,7 @@ export default function GroupCardVoteAll({
           pageSize: 1,
           sort: CommunityMembersSortOption.LEVEL,
           sortDirection: SortDirection.DESC,
-          groupId: group.id,
+          groupId: group?.id ?? null,
         },
       ],
       queryFn: async () =>
@@ -81,7 +81,7 @@ export default function GroupCardVoteAll({
             page_size: 1,
             sort: CommunityMembersSortOption.LEVEL,
             sort_direction: SortDirection.DESC,
-            group_id: group.id,
+            group_id: group?.id,
           },
         }),
       placeholderData: keepPreviousData,
@@ -159,7 +159,7 @@ export default function GroupCardVoteAll({
         page_size: 100,
         sort: CommunityMembersSortOption.LEVEL,
         sort_direction: SortDirection.DESC,
-        group_id: group.id,
+        group_id: group?.id,
       },
     });
   };
@@ -224,18 +224,19 @@ export default function GroupCardVoteAll({
       membersCount={membersCount}
       doneMembersCount={doneMembersCount}
       matter={matter}
-      onSave={onSave}
-    >
-      <GroupCardVoteAllInputs
-        matter={matter}
-        category={category}
-        setCategory={setCategory}
-        group={group}
-        amountToAdd={amountToAdd}
-        creditDirection={creditDirection}
-        setCreditDirection={setCreditDirection}
-        setAmountToAdd={setAmountToAdd}
-      />
+      onSave={onSave}>
+      {group && (
+        <GroupCardVoteAllInputs
+          matter={matter}
+          category={category}
+          setCategory={setCategory}
+          group={group}
+          amountToAdd={amountToAdd}
+          creditDirection={creditDirection}
+          setCreditDirection={setCreditDirection}
+          setAmountToAdd={setAmountToAdd}
+        />
+      )}
       <GroupCardActionStats
         matter={matter}
         membersCount={membersCount}
