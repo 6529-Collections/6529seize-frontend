@@ -32,7 +32,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               </p>
             </div>
             <div className="md:tw-ml-auto tw-flex tw-items-center tw-gap-x-4 tw-mt-2 sm:tw-mt-0">
-              <div
+              {/*  <div
                 id="tabsId"
                 className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-overflow-hidden"
               >
@@ -42,7 +42,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                 <button className="tw-px-2.5 tw-py-1.5 tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent tw-border-0 tw-rounded-md tw-transition tw-duration-300 tw-ease-out">
                   24-Hour Vote
                 </button>
-              </div>
+              </div> */}
               <div className="tw-w-auto">
                 {connectedProfile && (
                   <PrimaryButton
