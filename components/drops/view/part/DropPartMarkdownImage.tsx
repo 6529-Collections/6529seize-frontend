@@ -141,7 +141,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                   <img
                     src={src}
                     alt={alt}
-                    className="tw-max-w-full tw-max-h-[calc(95vh-60px)] tw-object-contain"
+                    className="tw-max-w-full tw-max-h-[calc(100vh-120px)] lg:tw-max-h-[calc(100vh-60px)] tw-object-contain"
                     style={{
                       pointerEvents: "auto",
                     }}
