@@ -41,7 +41,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
       className="tw-w-full tw-cursor-pointer"
       onClick={() => onDropClick(drop)}
     >
-      <div className="tw-w-full tw-group tw-relative">
+      <div className="tw-w-full tw-group">
         <MemesLeaderboardDropCard drop={drop}>
           <div>
             <div className="tw-p-4">
