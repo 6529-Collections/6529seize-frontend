@@ -16,6 +16,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
       activeTab={activeContentTab}
       wave={wave}
       setActiveTab={setActiveContentTab}
+      hideMyVotes={true}
     />
   );
 };
