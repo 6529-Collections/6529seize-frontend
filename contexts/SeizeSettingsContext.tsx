@@ -36,7 +36,7 @@ export const SeizeSettingsProvider = ({
           ...settings,
           memes_wave_id:
             process.env.NODE_ENV === "development"
-              ? "b6128077-ea78-4dd9-b381-52c4eadb2077"
+              ? "dd7de85f-37c6-443b-839a-1ce01f9b89aa"
               : settings.memes_wave_id,
         });
       }

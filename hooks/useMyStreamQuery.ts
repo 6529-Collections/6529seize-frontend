@@ -14,7 +14,6 @@ interface UseMyStreamQueryProps {
 }
 
 export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
-
   const queryClient = useQueryClient();
   const [items, setItems] = useState<TypedFeedItem[]>([]);
   const [isInitialQueryDone, setIsInitialQueryDone] = useState(false);
@@ -36,15 +35,6 @@ export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     pages: 3,
     staleTime: 60000,
-    retry: (failureCount) => {
-      if (failureCount >= 3) {
-        return false;
-      }
-      return true;
-    },
-    retryDelay: (failureCount) => {
-      return failureCount * 1000;
-    },
   });
 
   const query = useInfiniteQuery({
@@ -59,19 +49,8 @@ export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
         params,
       });
     },
-    enabled: false,
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
-    retry: (failureCount, error) => {
-      console.log("retry", failureCount, error);
-      if (failureCount >= 3) {
-        return false;
-      }
-      return true;
-    },
-    retryDelay: (failureCount) => {
-      return failureCount * 1000;
-    },
   });
 
   useEffect(() => {
@@ -126,16 +105,6 @@ export function usePollingQuery(
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
-    retry: (failureCount, error) => {
-
-      if (failureCount >= 3) {
-        return false;
-      }
-      return true;
-    },
-    retryDelay: (failureCount) => {
-      return failureCount * 1000;
-    },
   });
 
   useEffect(() => {
