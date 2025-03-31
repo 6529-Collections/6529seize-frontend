@@ -9,6 +9,7 @@ import { WaveLeaderboardDrops } from "../../waves/leaderboard/drops/WaveLeaderbo
 import { WaveLeaderboardGallery } from "../../waves/leaderboard/gallery/WaveLeaderboardGallery";
 import { useWave } from "../../../hooks/useWave";
 import { useLayout } from "./layout/LayoutContext";
+import { WaveDropsLeaderboardSort } from "../../../hooks/useWaveDropsLeaderboard";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -36,6 +37,15 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
 
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [sort, setSort] = useState<WaveDropsLeaderboardSort>(
+    WaveDropsLeaderboardSort.RANK
+  );
+
+  useEffect(() => {
+    if (!isMemesWave) {
+      setViewMode("list");
+    }
+  }, [isMemesWave]);
 
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
@@ -47,12 +57,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         <WaveLeaderboardHeader
           wave={wave}
           viewMode={viewMode}
+          sort={sort}
           onViewModeChange={(mode) => setViewMode(mode)}
           onCreateDrop={() => {
             if (mountedRef.current) {
               setIsCreatingDrop(true);
             }
           }}
+          onSortChange={(sort) => setSort(sort)}
         />
       </div>
 
@@ -86,6 +98,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         {viewMode === "list" ? (
           <WaveLeaderboardDrops
             wave={wave}
+            sort={sort}
             onCreateDrop={() => {
               if (mountedRef.current) {
                 setIsCreatingDrop(true);
@@ -94,7 +107,11 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
           />
         ) : (
           <div className="tw-mb-6">
-            <WaveLeaderboardGallery wave={wave} onDropClick={onDropClick} />
+            <WaveLeaderboardGallery
+              wave={wave}
+              sort={sort}
+              onDropClick={onDropClick}
+            />
           </div>
         )}
       </div>

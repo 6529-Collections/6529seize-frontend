@@ -1,9 +1,8 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import React from "react";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 export default function WaveDropThreadTraceItem({
   dropId,
   showLine,

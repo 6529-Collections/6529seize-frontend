@@ -87,6 +87,7 @@ export enum QueryKey {
   WAVE_FOLLOWERS = "WAVE_FOLLOWERS",
   FOLLOWING_WAVES = "FOLLOWING_WAVES",
   FEED_ITEMS = "FEED_ITEMS",
+  WAVE_DECISIONS = "WAVE_DECISIONS",
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];

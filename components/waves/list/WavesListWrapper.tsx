@@ -5,12 +5,12 @@ import WaveItem from "./WaveItem";
 import { AuthContext } from "../../auth/Auth";
 import { WavesOverviewParams } from "../../../types/waves.types";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 const LABELS: Record<ApiWavesOverviewType, string> = {
   [ApiWavesOverviewType.Latest]: "Latest",

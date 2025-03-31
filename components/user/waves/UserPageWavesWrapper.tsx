@@ -3,11 +3,10 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageWaves from "./UserPageWaves";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 export default function UserPageWavesWrapper({
   profile: initialProfile,
 }: {

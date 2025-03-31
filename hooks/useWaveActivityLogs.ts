@@ -1,4 +1,3 @@
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 import {
   keepPreviousData,
@@ -8,6 +7,7 @@ import {
 import { commonApiFetch } from "../services/api/common-api";
 import { WAVE_LOGS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiWaveLog } from "../generated/models/ApiWaveLog";
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWaveActivityLogsProps {
   readonly waveId: string;

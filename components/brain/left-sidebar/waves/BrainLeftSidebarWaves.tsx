@@ -33,6 +33,7 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
     resetWaveNewDropsCount, 
     fetchNextPage,
     hasNextPage,
+    isFetching,
     isFetchingNextPage
   } = useWavesList(refetchInterval, activeWaveIdRef.current);
 
@@ -46,12 +47,18 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
     }
   }, [router.query]); // Intentionally omit addPinnedWave to avoid dependency cycle
 
+  const onNextPage = () => {
+    if (hasNextPage && !isFetchingNextPage && !isFetching) {
+      fetchNextPage();
+    }
+  }
+
   return (
     <UnifiedWavesList
       waves={waves}
       activeWaveId={activeWaveId}
       resetWaveCount={resetWaveNewDropsCount}
-      fetchNextPage={fetchNextPage}
+      fetchNextPage={onNextPage}
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
     />

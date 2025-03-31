@@ -7,11 +7,10 @@ import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
 import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import Link from "next/link";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
-
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 export default function UserPageRepNewRepSearchHeader({
   repRates,
   profile,

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { AuthContext } from "../../../auth/Auth";
-import { useWaveDropsLeaderboard } from "../../../../hooks/useWaveDropsLeaderboard";
+import { useWaveDropsLeaderboard, WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
 import { WaveLeaderboardDrop } from "./WaveLeaderboardDrop";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
@@ -12,11 +12,13 @@ import { WaveLeaderboardLoadingBar } from "./WaveLeaderboardLoadingBar";
 
 interface WaveLeaderboardDropsProps {
   readonly wave: ApiWave;
+  readonly sort: WaveDropsLeaderboardSort;
   readonly onCreateDrop: () => void;
 }
 
 export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   wave,
+  sort,
   onCreateDrop,
 }) => {
   const router = useRouter();
@@ -25,6 +27,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     useWaveDropsLeaderboard({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
+      sort,
     });
 
   const intersectionElementRef = useIntersectionObserver(() => {

@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 
 import WaveDropQuote from "./WaveDropQuote";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { WaveDropsSearchStrategy } from "../../../hooks/useWaveDrops";
 import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 interface WaveDropQuoteWithSerialNoProps {
   readonly serialNo: number;
   readonly waveId: string;

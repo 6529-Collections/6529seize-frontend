@@ -3,11 +3,10 @@ import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageIdentity from "./UserPageIdentity";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 export default function UserPageIdentityWrapper({
   profile: initialProfile,
   initialCICReceivedParams,

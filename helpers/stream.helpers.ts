@@ -2,7 +2,6 @@ import { QueryClient } from "@tanstack/react-query";
 
 import { commonApiFetch } from "../services/api/common-api";
 import { ApiWave } from "../generated/models/ApiWave";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
@@ -12,6 +11,7 @@ import { getUserProfile } from "./server.helpers";
 import { TypedFeedItem, TypedNotificationsResponse } from "../types/feed.types";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
 import { GetServerSidePropsContext } from "next";
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 const getWalletFromJwt = (headers: Record<string, string>): string | null => {
   const jwt = headers["Authorization"]?.split(" ")[1] ?? null;

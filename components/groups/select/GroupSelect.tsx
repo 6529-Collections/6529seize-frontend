@@ -1,7 +1,6 @@
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { useContext, useEffect, useState } from "react";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 
 import GroupItems from "./GroupItems";
@@ -15,7 +14,7 @@ import IdentitySearch, {
 } from "../../utils/input/identity/IdentitySearch";
 import { useDebounce } from "react-use";
 import { AuthContext } from "../../auth/Auth";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 export default function GroupSelect() {
   const activeGroupId = useSelector(selectActiveGroupId);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);

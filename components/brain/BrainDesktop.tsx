@@ -9,11 +9,11 @@ import { useRouter } from "next/router";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../generated/models/ApiDrop";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useLayout } from "./my-stream/layout/LayoutContext";
 import Cookies from "js-cookie";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 
 interface Props {
   readonly children: ReactNode;

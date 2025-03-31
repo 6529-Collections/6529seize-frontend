@@ -3,10 +3,10 @@ import { useContext, useEffect, useState } from "react";
 import { CommunityMemberMinimal } from "../../../../../entities/IProfile";
 import { useDebounce } from "react-use";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import { AuthContext } from "../../../../auth/Auth";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper"; 
 
 const MIN_SEARCH_LENGTH = 3;
 function classNames(...classes: any) {
