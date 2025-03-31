@@ -1,7 +1,8 @@
 import { QueryClient } from "@tanstack/react-query";
-import { QueryKey } from "../ReactQueryWrapper";
+
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "./query-utils";
 import { ApiWave } from "../../../generated/models/ApiWave";
+import { QueryKey } from "../ReactQueryWrapper";
 
 export const toggleWaveFollowing = async ({
   waveId,

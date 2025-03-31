@@ -6,7 +6,6 @@ import {
 } from "../../entities/IProfile";
 import { CountlessPage } from "../../helpers/Types";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
@@ -18,6 +17,7 @@ import CommonCardSkeleton from "../utils/animation/CommonCardSkeleton";
 import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "../../store/groupSlice";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 
 export interface ActivityLogParams {
   readonly page: number;

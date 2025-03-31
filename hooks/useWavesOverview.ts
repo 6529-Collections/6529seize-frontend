@@ -3,9 +3,9 @@ import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { AuthContext } from "../components/auth/Auth";
 import { WavesOverviewParams } from "../types/waves.types";
 import { ApiWavesOverviewType } from "../generated/models/ApiWavesOverviewType";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
 import { ApiWave } from "../generated/models/ApiWave";
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWavesOverviewProps {
   readonly type: ApiWavesOverviewType;

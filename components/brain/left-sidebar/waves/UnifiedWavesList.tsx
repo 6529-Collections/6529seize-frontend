@@ -5,7 +5,7 @@ import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreat
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface UnifiedWavesListProps {
   readonly waves: EnhancedWave[];
@@ -97,19 +97,6 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const waveAnimationVariants = {
-    hidden: { opacity: 0, y: 5 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut",
-      },
-    }),
-    exit: { opacity: 0, transition: { duration: 0.15 } },
-  };
-
   return (
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
@@ -130,26 +117,15 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           {/* Unified Waves List */}
           {sortedWaves.length > 0 && (
             <div className="tw-flex tw-flex-col">
-              <AnimatePresence initial={false}>
-                {sortedWaves.map((wave, index) => (
-                  <motion.div
-                    key={wave.id}
-                    custom={index}
-                    variants={waveAnimationVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    layout
-                    layoutId={wave.id}
-                  >
-                    <BrainLeftSidebarWave
-                      wave={wave}
-                      resetWaveCount={resetWaveCount}
-                      activeWaveId={activeWaveId}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {sortedWaves.map((wave) => (
+                <div key={wave.id}>
+                  <BrainLeftSidebarWave
+                    wave={wave}
+                    resetWaveCount={resetWaveCount}
+                    activeWaveId={activeWaveId}
+                  />
+                </div>
+              ))}
             </div>
           )}
 
@@ -176,14 +152,9 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
           {/* Empty state */}
           {sortedWaves.length === 0 && !isFetchingNextPage && (
-            <motion.div
-              className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
+            <div className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500">
               <p>No waves to display</p>
-            </motion.div>
+            </div>
           )}
         </div>
       </div>

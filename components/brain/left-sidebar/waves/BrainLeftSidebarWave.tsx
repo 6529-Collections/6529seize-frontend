@@ -6,7 +6,6 @@ import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { EnhancedWave } from "../../../../hooks/useWavesList";
 import WavePicture from "../../../waves/WavePicture";
-import { motion } from "framer-motion";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: EnhancedWave;
@@ -55,14 +54,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   };
 
   return (
-    <motion.div
+    <div
       className={`tw-flex tw-px-5 tw-py-2 tw-group tw-transition-colors tw-duration-200 tw-ease-in-out ${
         isActive
           ? "tw-bg-primary-300/10 desktop-hover:hover:tw-bg-primary-300/20"
           : "desktop-hover:hover:tw-bg-iron-900"
       }`}
-      layout
-      transition={{ duration: 0.2 }}
     >
       <Link
         href={getHref(wave.id)}
@@ -98,14 +95,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
               </div>
             )}
             {!isActive && haveNewDrops && (
-              <motion.div
-                className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-px-1 tw-shadow-sm"
-                animate={{ opacity: 1 }}
-                initial={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
+              <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-px-1 tw-shadow-sm">
                 {wave.newDropsCount}
-              </motion.div>
+              </div>
             )}
           </div>
         </div>
@@ -119,7 +111,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 };
 

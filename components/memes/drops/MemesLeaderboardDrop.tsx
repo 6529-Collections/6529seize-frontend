@@ -1,5 +1,6 @@
 import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropLocation } from "../../waves/drops/Drop";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import MemesLeaderboardDropCard from "./MemesLeaderboardDropCard";
 import MemesLeaderboardDropHeader from "./MemesLeaderboardDropHeader";
@@ -14,11 +15,13 @@ import DropListItemContentMedia from "../../drops/view/item/content/media/DropLi
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly location?: DropLocation;
 }
 
 export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   drop,
   onDropClick,
+  location = DropLocation.WAVE,
 }) => {
   const { canShowVote } = useDropInteractionRules(drop);
 
@@ -55,7 +58,13 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             </div>
 
             {artworkMedia && (
-              <div className="tw-flex tw-justify-center">
+              <div
+                className={`tw-flex tw-justify-center ${
+                  location === DropLocation.WAVE
+                    ? "tw-bg-iron-800/30"
+                    : "tw-bg-iron-900/40"
+                }`}
+              >
                 <DropListItemContentMedia
                   media_mime_type={artworkMedia.mime_type}
                   media_url={artworkMedia.url}

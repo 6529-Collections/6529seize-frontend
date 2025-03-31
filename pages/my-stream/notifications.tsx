@@ -11,9 +11,8 @@ import {
 import { GetServerSidePropsContext } from "next";
 import { getCommonHeaders } from "../../helpers/server.helpers";
 import { prefetchAuthenticatedNotifications } from "../../helpers/stream.helpers";
-import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "../../helpers/time";
-
+import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 interface Props {
   dehydratedState: DehydratedState;
 }

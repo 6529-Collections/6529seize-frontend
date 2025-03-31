@@ -2,7 +2,6 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { CommunityMemberOverview } from "../../entities/IProfile";
 import { Page } from "../../helpers/Types";
 import { CommunityMembersQuery } from "../../pages/network/index";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../services/api/common-api";
 import { SortDirection } from "../../entities/ISort";
@@ -16,6 +15,7 @@ import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "../../store/groupSlice";
 import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 import { CommunityMembersSortOption } from "../../enums";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 
 interface QueryUpdateInput {
   name: keyof typeof SEARCH_PARAMS_FIELDS;

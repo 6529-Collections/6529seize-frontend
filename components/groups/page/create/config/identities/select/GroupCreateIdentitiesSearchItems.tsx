@@ -1,9 +1,9 @@
 import { CommunityMemberMinimal } from "../../../../../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../../../services/api/common-api";
 import { AnimatePresence, motion } from "framer-motion";
 import GroupCreateIdentitiesSearchItemsContent from "./GroupCreateIdentitiesSearchItemsContent";
+import { QueryKey } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupCreateIdentitiesSearchItems({
   open,

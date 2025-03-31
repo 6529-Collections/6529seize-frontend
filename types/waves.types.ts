@@ -9,6 +9,7 @@ export enum MyStreamWaveTab {
   LEADERBOARD = "LEADERBOARD",
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
+  MY_VOTES = "MY_VOTES",
 }
 
 export enum CreateWaveGroupConfigType {

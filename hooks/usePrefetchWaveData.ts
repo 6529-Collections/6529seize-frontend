@@ -1,10 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { commonApiFetch } from "../services/api/common-api";
 import { ApiWave } from "../generated/models/ApiWave";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
-
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 export const usePrefetchWaveData = () => {
   const queryClient = useQueryClient();
 

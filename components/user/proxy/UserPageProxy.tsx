@@ -5,12 +5,11 @@ import ProxyCreate from "./create/ProxyCreate";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiProfileProxy } from "../../../generated/models/ApiProfileProxy";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
 import { groupProfileProxies } from "../../../helpers/profile-proxy.helpers";
 import { useRouter } from "next/router";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 export enum ProxyMode {
   LIST = "LIST",
   CREATE = "CREATE",

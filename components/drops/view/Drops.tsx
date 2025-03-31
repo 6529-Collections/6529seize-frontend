@@ -1,12 +1,12 @@
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useContext, useEffect, useState, useRef, useCallback } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "./DropsList";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 const REQUEST_SIZE = 10;
 
