@@ -49,7 +49,7 @@ export default function WaveLeaderboardGalleryItemVotesProgressing({
           icon={faArrowRight}
           className="tw-flex-shrink-0 tw-size-3"
         />
-        <span>{realtimeRating}</span>
+        <span>{formatNumberWithCommas(realtimeRating)}</span>
       </span>
     </Tippy>
   );
