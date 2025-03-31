@@ -21,19 +21,13 @@ function DropListItemContentMediaImage({
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
+
   const imgRef = useRef<HTMLImageElement>(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const { isCapacitor } = useCapacitor();
 
   const handleImageLoad = useCallback(() => {
     setIsLoading(false);
-    if (imgRef.current) {
-      setNaturalSize({
-        width: imgRef.current.naturalWidth,
-        height: imgRef.current.naturalHeight,
-      });
-    }
   }, []);
 
   const handleImageClick = useCallback(

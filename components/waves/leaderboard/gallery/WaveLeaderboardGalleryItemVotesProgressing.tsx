@@ -1,5 +1,4 @@
 import React from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

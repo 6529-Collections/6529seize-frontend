@@ -68,11 +68,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     }
   }, [wave?.wave?.type, setActiveContentTab]);
 
-  // For simple waves, don't render any tabs
-  if (isChatWave) {
-    return null;
-  }
-
   // Map enum values to label names
   const tabLabels: Record<MyStreamWaveTab, string> = {
     [MyStreamWaveTab.CHAT]: "Chat",
@@ -84,7 +79,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   // Generate options based on available tabs, filtering out MY_VOTES if hideMyVotes is true
   const options: TabOption[] = availableTabs
-    .filter(tab => !hideMyVotes || tab !== MyStreamWaveTab.MY_VOTES)
+    .filter((tab) => !hideMyVotes || tab !== MyStreamWaveTab.MY_VOTES)
     .map((tab) => ({
       key: tab,
       label: tabLabels[tab],
@@ -92,10 +87,19 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   // If activeTab is MY_VOTES and it's hidden, switch to another tab
   useEffect(() => {
-    if (hideMyVotes && activeTab === MyStreamWaveTab.MY_VOTES && options.length > 0) {
+    if (
+      hideMyVotes &&
+      activeTab === MyStreamWaveTab.MY_VOTES &&
+      options.length > 0
+    ) {
       setActiveTab(options[0].key);
     }
   }, [hideMyVotes, activeTab, options]);
+
+  // For simple waves, don't render any tabs
+  if (isChatWave) {
+    return null;
+  }
 
   return (
     <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full">

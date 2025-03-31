@@ -1,17 +1,12 @@
 import React, { useContext } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { useWaveDropsLeaderboard } from "../../../../hooks/useWaveDropsLeaderboard";
 import { AuthContext } from "../../../auth/Auth";
-import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowRight,
-  faChartLine,
-  faUsers,
-} from "@fortawesome/free-solid-svg-icons";
 import { WaveLeaderboardGalleryItem } from "./WaveLeaderboardGalleryItem";
-import { WaveDropsLeaderboardSort } from "../../../../hooks/useWaveDropsLeaderboard";
+import {
+  WaveDropsLeaderboardSort,
+  useWaveDropsLeaderboard,
+} from "../../../../hooks/useWaveDropsLeaderboard";
 interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
