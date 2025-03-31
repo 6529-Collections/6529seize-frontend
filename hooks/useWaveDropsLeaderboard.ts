@@ -17,12 +17,16 @@ import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboard
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
+export enum WaveDropsLeaderboardSort {
+  RANK = "RANK",
+  REALTIME_VOTE = "REALTIME_VOTE",
+  MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
+}
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | undefined;
-  readonly pollingEnabled?: boolean;
-  readonly enabled?: boolean;
+  readonly sort?: WaveDropsLeaderboardSort;
 }
 
 const POLLING_DELAY = 3000;
@@ -45,8 +49,7 @@ function useTabVisibility() {
 export function useWaveDropsLeaderboard({
   waveId,
   connectedProfileHandle,
-  pollingEnabled = true,
-  enabled = true,
+  sort = WaveDropsLeaderboardSort.RANK,
 }: UseWaveDropsLeaderboardProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -65,18 +68,17 @@ export function useWaveDropsLeaderboard({
     {
       waveId,
       page_size: WAVE_DROPS_PARAMS.limit,
+      sort: sort,
     },
   ];
 
   useEffect(() => {
-    // Only prefetch if enabled
-    if (!enabled) return;
-    
     queryClient.prefetchInfiniteQuery({
       queryKey,
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
           page_size: WAVE_DROPS_PARAMS.limit.toString(),
+          sort: sort,
         };
 
         if (pageParam) {
@@ -94,7 +96,7 @@ export function useWaveDropsLeaderboard({
       pages: 3,
       staleTime: 60000,
     });
-  }, [waveId, enabled]);
+  }, [waveId, sort]);
 
   const {
     data,
@@ -108,6 +110,7 @@ export function useWaveDropsLeaderboard({
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         page_size: WAVE_DROPS_PARAMS.limit.toString(),
+        sort: sort,
       };
 
       if (pageParam) {
@@ -124,7 +127,7 @@ export function useWaveDropsLeaderboard({
     initialPageParam: null,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
     placeholderData: keepPreviousData,
-    enabled: enabled && !!connectedProfileHandle,
+    enabled: !!connectedProfileHandle,
     staleTime: 60000,
   });
 
@@ -136,7 +139,7 @@ export function useWaveDropsLeaderboard({
               wave: page.wave,
               drops: page.drops,
             })),
-            prev,
+            prev
           )
         : [];
       return generateUniqueKeys(newDrops, prev);
@@ -151,6 +154,7 @@ export function useWaveDropsLeaderboard({
     queryFn: async () => {
       const params: Record<string, string> = {
         page_size: "1",
+        sort: sort,
       };
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -158,15 +162,14 @@ export function useWaveDropsLeaderboard({
         params,
       });
     },
-    enabled: enabled && !haveNewDrops && canPoll && pollingEnabled,
-    refetchInterval:
-      isTabVisible && pollingEnabled && enabled
-        ? ACTIVE_POLLING_INTERVAL
-        : INACTIVE_POLLING_INTERVAL,
-    refetchOnWindowFocus: pollingEnabled && enabled,
-    refetchOnMount: pollingEnabled && enabled,
-    refetchOnReconnect: pollingEnabled && enabled,
-    refetchIntervalInBackground: !isCapacitor && pollingEnabled && enabled,
+    enabled: !haveNewDrops && canPoll,
+    refetchInterval: isTabVisible
+      ? ACTIVE_POLLING_INTERVAL
+      : INACTIVE_POLLING_INTERVAL,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: !isCapacitor,
   });
 
   useEffect(() => {
