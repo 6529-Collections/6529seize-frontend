@@ -4,14 +4,13 @@ import SelectGroupModalSearch from "./SelectGroupModalSearch";
 import SelectGroupModalHeader from "./SelectGroupModalHeader";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { Mutable, NonNullableNotRequired } from "../../../helpers/Types";
 import { commonApiFetch } from "../../../services/api/common-api";
 import SelectGroupModalItems from "./SelectGroupModalItems";
 import { ApiGroupFull } from "../../../generated/models/ApiGroupFull";
 import { GroupsRequestParams } from "../../../entities/IGroup";
 import { createPortal } from "react-dom";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 export default function SelectGroupModal({
   onClose,
   onGroupSelect,

@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import DropPfp from "../../../drops/create/utils/DropPfp";
 import { formatNumberWithCommasOrDash } from "../../../../helpers/Helpers";
-
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 export default function UserProfileTooltip({
   user,
 }: {

@@ -14,7 +14,6 @@ import {
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useRouter } from "next/router";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../helpers/Types";
@@ -23,6 +22,7 @@ import dynamic from "next/dynamic";
 import UserFollowBtn from "../utils/UserFollowBtn";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { createDirectMessageWave } from "../../../helpers/waves/waves.helpers";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();

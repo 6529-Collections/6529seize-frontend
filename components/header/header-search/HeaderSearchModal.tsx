@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import HeaderSearchModalItem, {
   NFTSearchResult,
@@ -13,7 +12,7 @@ import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
 import { createPortal } from "react-dom";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 enum STATE {
   INITIAL = "INITIAL",
   LOADING = "LOADING",

@@ -1,5 +1,3 @@
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
-
 import { useCallback, useEffect, useState } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import {
@@ -17,7 +15,7 @@ import { useDebounce } from "react-use";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
 import useCapacitor from "./useCapacitor";
-
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 
 interface UseWaveDropsLeaderboardProps {

@@ -12,10 +12,9 @@ import { STATEMENT_GROUP } from "../../../../helpers/Types";
 import UserPageIdentityStatementsSocialMediaAccounts from "./social-media-accounts/UserPageIdentityStatementsSocialMediaAccounts";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
 import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-media-verification-posts/UserPageIdentityStatementsSocialMediaVerificationPosts";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import UserPageIdentityStatementsNFTAccounts from "./nft-accounts/UserPageIdentityStatementsNFTAccounts";
 import Tippy from "@tippyjs/react";
-
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 export default function UserPageIdentityStatements({
   profile,
 }: {

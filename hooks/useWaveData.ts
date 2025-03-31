@@ -3,6 +3,7 @@ import { ApiWave } from "../generated/models/ApiWave";
 import { commonApiFetch } from "../services/api/common-api";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
+
 export const useWaveData = (
   waveId: string | null,
   refetchInterval?: number

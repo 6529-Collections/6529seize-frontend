@@ -1,11 +1,12 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { ApiIncomingIdentitySubscriptionsPage } from "../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { useEffect, useState } from "react";
 import { ApiIdentityAndSubscriptionActions } from "../../../generated/models/ApiIdentityAndSubscriptionActions";
 import FollowersListWrapper from "../../utils/followers/FollowersListWrapper";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+
 const REQUEST_SIZE = 100;
 
 type Query = {

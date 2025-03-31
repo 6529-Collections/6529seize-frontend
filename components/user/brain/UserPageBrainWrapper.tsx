@@ -1,13 +1,12 @@
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageDrops from "./UserPageDrops";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 export default function UserPageBrainWrapper({
   profile: initialProfile,
 }: {

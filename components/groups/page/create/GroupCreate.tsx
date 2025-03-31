@@ -8,10 +8,10 @@ import { ApiGroupFilterDirection } from "../../../../generated/models/ApiGroupFi
 import { ApiCreateGroup } from "../../../../generated/models/ApiCreateGroup";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import GroupCreateIncludeMeAndPrivate from "./config/include-me-and-private/GroupCreateIncludeMeAndPrivate";
 import { AuthContext } from "../../../auth/Auth";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupCreate({
   edit,
