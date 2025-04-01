@@ -2,12 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { ApiIncomingIdentitySubscriptionsPage } from "../../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../distribution-plan-tool/common/CircleLoader";
 import Link from "next/link";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageFollowers({
   profile,

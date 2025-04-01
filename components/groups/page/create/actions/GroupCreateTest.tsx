@@ -12,8 +12,8 @@ import { CommunityMembersQuery } from "../../../../../pages/network/index";
 import { SortDirection } from "../../../../../entities/ISort";
 import { Page } from "../../../../../helpers/Types";
 import { CommunityMemberOverview } from "../../../../../entities/IProfile";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { CommunityMembersSortOption } from "../../../../../enums";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function GroupCreateTest({
   groupConfig,

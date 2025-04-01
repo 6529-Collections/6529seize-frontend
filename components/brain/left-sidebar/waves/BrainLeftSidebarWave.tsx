@@ -57,7 +57,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     <div
       className={`tw-flex tw-px-5 tw-py-2 tw-group tw-transition-colors tw-duration-200 tw-ease-in-out ${
         isActive
-          ? "tw-bg-primary-300/10 desktop-hover:hover:tw-bg-primary-300/10"
+          ? "tw-bg-primary-300/10 desktop-hover:hover:tw-bg-primary-300/20"
           : "desktop-hover:hover:tw-bg-iron-900"
       }`}
     >

@@ -64,7 +64,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
 
   return (
     <div
-      className="tw-px-3 tw-py-2 tw-group tw-bg-iron-900 tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800/60 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-px-3 tw-py-2 tw-group tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center tw-justify-between tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800/60 tw-transition tw-duration-300 tw-ease-out"
       onClick={() => setIsOpen(!isOpen)}
     >
       {/* First row for mobile: Title, date, and chevron */}

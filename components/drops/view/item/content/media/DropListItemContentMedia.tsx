@@ -23,9 +23,11 @@ const DropListItemContentMediaGLB = dynamic(
 export default function DropListItemContentMedia({
   media_mime_type,
   media_url,
+  onContainerClick
 }: {
   readonly media_mime_type: string;
   readonly media_url: string;
+  readonly onContainerClick?: () => void;
 }) {
   const getMediaType = (): MediaType => {
     if (media_mime_type.includes("image")) {
@@ -50,6 +52,7 @@ export default function DropListItemContentMedia({
       return (
         <DropListItemContentMediaImage
           src={media_url}
+          onContainerClick={onContainerClick}
         />
       );
     case MediaType.VIDEO:

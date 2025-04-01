@@ -1,4 +1,3 @@
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useState } from "react";
 import {
   keepPreviousData,
@@ -8,6 +7,7 @@ import {
 import { commonApiFetch } from "../services/api/common-api";
 import { ApiWaveVotersPage } from "../generated/models/ApiWaveVotersPage";
 import { ApiWaveVoter } from "../generated/models/ApiWaveVoter";
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseWaveTopVotersProps {
   readonly waveId: string;

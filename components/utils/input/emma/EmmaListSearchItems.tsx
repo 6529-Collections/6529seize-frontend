@@ -2,11 +2,10 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
 import { AllowlistDescription } from "../../../allowlist-tool/allowlist-tool.types";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { distributionPlanApiFetch } from "../../../../services/distribution-plan-api";
 import { AnimatePresence, motion } from "framer-motion";
 import EmmaListSearchItemsContent from "./EmmaListSearchItemsContent";
-
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 export default function EmmaListSearchItems({
   open,
   searchCriteria,

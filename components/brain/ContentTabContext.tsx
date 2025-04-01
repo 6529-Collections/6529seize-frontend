@@ -73,6 +73,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       }
       
       tabs.push(MyStreamWaveTab.OUTCOME);
+      tabs.push(MyStreamWaveTab.MY_VOTES);
       
       setAvailableTabs(tabs);
       
@@ -99,6 +100,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
     
     // Always add Outcome
     tabs.push(MyStreamWaveTab.OUTCOME);
+    tabs.push(MyStreamWaveTab.MY_VOTES);
     
     // Update available tabs
     setAvailableTabs(tabs);

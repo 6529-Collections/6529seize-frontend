@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
 import {
   TypedNotification,
   TypedNotificationsResponse,
 } from "../types/feed.types";
 import { ApiNotificationCause } from "../generated/models/ApiNotificationCause";
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 interface UseNotificationsQueryProps {
   /**

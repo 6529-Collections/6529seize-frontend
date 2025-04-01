@@ -82,7 +82,9 @@ export default function MemeWinnerDrop({
               </div>
 
               {artworkMedia && (
-                <div className="tw-flex tw-justify-center">
+                <div className={`tw-flex tw-justify-center tw-mx-[1px] ${
+                  location === DropLocation.WAVE ? "tw-bg-iron-800/30" : ""
+                }`}>
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { Page } from "../../../../../helpers/Types";
 import { Distribution } from "../../../../../entities/IDistribution";
 import { commonApiFetch } from "../../../../../services/api/common-api";
@@ -9,6 +8,7 @@ import UserPageStatsActivityDistributionsTableWrapper from "./UserPageStatsActiv
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { WALLET_DISTRIBUTION_PAGE_PARAM } from "../UserPageActivityWrapper";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageStatsActivityDistributions({
   profile,

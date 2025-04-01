@@ -17,5 +17,14 @@ export function useWaveNotificationSubscription(wave: ApiWave) {
       !!wave.id &&
       wave.metrics.subscribers_count <=
         seizeSettings.all_drops_notifications_subscribers_limit,
+    retry: (failureCount, error) => {
+      if (failureCount >= 3) {
+        return false;
+      }
+      return true;
+    },
+    retryDelay: (failureCount) => {
+      return failureCount * 1000;
+    },
   });
 }

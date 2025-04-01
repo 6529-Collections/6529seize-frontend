@@ -5,7 +5,6 @@ import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import { useRouter } from "next/router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop, ApiWaveType } from "../../generated/models/ObjectSerializer";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
@@ -16,6 +15,7 @@ import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
 import Notifications from "./notifications/Notifications";
 import { WaveWinners } from "../waves/winners/WaveWinners";
 import { useWaveTimers } from "../../hooks/useWaveTimers";
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",

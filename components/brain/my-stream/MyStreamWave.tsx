@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
+import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -66,6 +67,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       <WaveWinners wave={wave} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
+    [MyStreamWaveTab.MY_VOTES]: <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />,
   };
 
   return (

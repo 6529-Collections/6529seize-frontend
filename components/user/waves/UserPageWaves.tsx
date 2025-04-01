@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { AuthContext } from "../../auth/Auth";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import WaveItem from "../../waves/list/WaveItem";
@@ -13,6 +12,8 @@ import CommonIntersectionElement from "../../utils/CommonIntersectionElement";
 import UserPageWavesSearch from "./UserPageWavesSearch";
 import { useDebounce } from "react-use";
 import { useRouter } from "next/router";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+
 export interface SearchWavesParams {
   readonly author?: string;
   readonly name?: string;

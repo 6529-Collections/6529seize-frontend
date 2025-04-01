@@ -25,10 +25,10 @@ export default function ContentDisplay({
 
   return (
     <span
-      className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-flex tw-items-center tw-flex-wrap tw-gap-1 tw-line-clamp-2 lg:tw-line-clamp-1"
+      className="tw-break-all tw-text-iron-300 tw-font-normal tw-text-sm hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-flex tw-items-center tw-gap-1.5 tw-line-clamp-1"
       onClick={handleClick}
     >
-      <span className="tw-line-clamp-2 lg:tw-line-clamp-1">
+      <span className="tw-line-clamp-1">
         {/* Render segments in their original order */}
         {content.segments.map((segment, i) => (
           <ContentSegmentComponent

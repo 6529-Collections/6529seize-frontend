@@ -34,7 +34,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 }) => {
   // Get wave information including participation status
   const waveInfo = useWave(wave);
-
+  
   // Call hooks before any conditional returns
   // This ensures hooks are called consistently in the same order
   const targetTime =

@@ -4,7 +4,6 @@ import {
   ReservoirTokensResponse,
   ReservoirTokensResponseTokenElement,
 } from "../../../../../../entities/IReservoir";
-import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { useEffect, useRef, useState } from "react";
 import DropListItemContentNftDetails from "./DropListItemContentNftDetails";
 import { areEqualAddresses } from "../../../../../../helpers/Helpers";
@@ -16,6 +15,7 @@ import {
 } from "../../../../../../constants";
 import Link from "next/link";
 import { isMemesEcosystemContract } from "../../../../../../helpers/nft.helpers";
+import { QueryKey } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 
 export default function DropListItemContentNft({
   nft: { contract, token, name },

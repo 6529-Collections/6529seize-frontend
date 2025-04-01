@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { ApiDropsLeaderboardPage } from "../../../generated/models/ApiDropsLeaderboardPage";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useEffect, useState } from "react";
 import { SingleWaveDropVoteQuickButton } from "./SingleWaveDropVoteQuickButton";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface SingleWaveDropVoteQuickProps {
   readonly drop: ApiDrop;

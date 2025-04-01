@@ -7,13 +7,12 @@ import {
 import { useRouter } from "next/router";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../helpers/Types";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import { SortDirection } from "../../../../../entities/ISort";
 import ProfileRatersTable from "../ProfileRatersTable";
 import CommonSkeletonLoader from "../../../../utils/animation/CommonSkeletonLoader";
-
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 export enum ProfileRatersTableType {
   CIC_RECEIVED = "CIC_RECEIVED",
   CIC_GIVEN = "CIC_GIVEN",
@@ -91,7 +90,7 @@ export default function ProfileRatersTableWrapper({
     ],
     queryFn: async () =>
       await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-        endpoint: `profiles/${handleOrWallet}/${handleOrWallet}/${matter === RateMatter.NIC ? 'cic' : matter.toLowerCase()}/ratings/by-rater`,
+        endpoint: `profiles/${handleOrWallet}/${matter === RateMatter.NIC ? 'cic' : matter.toLowerCase()}/ratings/by-rater`,
         params: {
           page: `${currentPage}`,
           page_size: `${pageSize}`,

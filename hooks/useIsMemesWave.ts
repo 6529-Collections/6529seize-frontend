@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ApiWave } from "../generated/models/ApiWave";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../services/api/common-api";
-
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 export const useIsMemesWave = (waveId: string | null) => {
   const { data } = useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id: "1e618a16-f093-4e1b-94aa-3e86a5889bb0" }],

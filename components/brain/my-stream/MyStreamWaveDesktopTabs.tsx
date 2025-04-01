@@ -11,6 +11,7 @@ interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
   readonly wave: ApiWave;
   readonly setActiveTab: (tab: MyStreamWaveTab) => void;
+  readonly hideMyVotes?: boolean;
 }
 
 interface TabOption {
@@ -22,6 +23,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
   setActiveTab,
+  hideMyVotes = true,
 }) => {
   // Use the available tabs from context instead of recalculating
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
@@ -66,24 +68,38 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     }
   }, [wave?.wave?.type, setActiveContentTab]);
 
-  // For simple waves, don't render any tabs
-  if (isChatWave) {
-    return null;
-  }
-
   // Map enum values to label names
   const tabLabels: Record<MyStreamWaveTab, string> = {
     [MyStreamWaveTab.CHAT]: "Chat",
     [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
     [MyStreamWaveTab.WINNERS]: "Winners",
     [MyStreamWaveTab.OUTCOME]: "Outcome",
+    [MyStreamWaveTab.MY_VOTES]: "My Votes",
   };
 
-  // Generate options based on available tabs
-  const options: TabOption[] = availableTabs.map((tab) => ({
-    key: tab,
-    label: tabLabels[tab],
-  }));
+  // Generate options based on available tabs, filtering out MY_VOTES if hideMyVotes is true
+  const options: TabOption[] = availableTabs
+    .filter((tab) => !hideMyVotes || tab !== MyStreamWaveTab.MY_VOTES)
+    .map((tab) => ({
+      key: tab,
+      label: tabLabels[tab],
+    }));
+
+  // If activeTab is MY_VOTES and it's hidden, switch to another tab
+  useEffect(() => {
+    if (
+      hideMyVotes &&
+      activeTab === MyStreamWaveTab.MY_VOTES &&
+      options.length > 0
+    ) {
+      setActiveTab(options[0].key);
+    }
+  }, [hideMyVotes, activeTab, options]);
+
+  // For simple waves, don't render any tabs
+  if (isChatWave) {
+    return null;
+  }
 
   return (
     <div className="tw-flex tw-items-center tw-gap-4 tw-justify-between tw-w-full">

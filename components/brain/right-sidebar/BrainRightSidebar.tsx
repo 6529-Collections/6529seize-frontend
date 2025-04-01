@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveContent } from "./WaveContent";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface BrainRightSidebarProps {
   readonly isCollapsed: boolean;
