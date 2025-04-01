@@ -21,8 +21,14 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
-  const { data: wave } = useWaveData(waveId);
-
+  const { data: wave } = useWaveData({
+    waveId,
+    onWaveNotFound: () => {
+      router.push({ pathname: router.pathname, query: { wave: null } }, undefined, {
+        shallow: true,
+      });
+    },
+  });
   // Track mount status to prevent post-unmount updates
   const mountedRef = useRef(true);
 
