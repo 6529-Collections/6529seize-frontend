@@ -144,7 +144,7 @@ export default function UserFollowBtn({
   };
 
   return (
-    <div className="tw-flex tw-items-center">
+    <div>
       {onDirectMessage && following && (
         <Tippy
           content="Direct Message"
