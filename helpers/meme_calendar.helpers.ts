@@ -143,6 +143,17 @@ const CALENDAR_2025: YearCalendar = {
       title: "Winter SZN10",
       szn: 10,
     },
+    {
+      start: Time.fromString("2025-03-15"),
+      end: Time.fromString("2025-03-31"),
+      title: "Awakening",
+    },
+    {
+      start: Time.fromString("2025-04-02"),
+      end: Time.fromString("2025-06-13"),
+      title: "Spring SZN11",
+      szn: 11,
+    },
   ],
 };
 

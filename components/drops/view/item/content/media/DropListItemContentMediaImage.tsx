@@ -12,10 +12,10 @@ import {
   ImageScale,
 } from "../../../../../../helpers/image.helpers";
 
-function DropListItemContentMediaImage({ 
+function DropListItemContentMediaImage({
   src,
-  onContainerClick
-}: { 
+  onContainerClick,
+}: {
   readonly src: string;
   readonly onContainerClick?: () => void;
 }) {
@@ -80,32 +80,28 @@ function DropListItemContentMediaImage({
       onClick={handleCloseModal}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}
-    >
+      onTouchMove={(e) => e.stopPropagation()}>
       <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-backdrop-blur-[1px] tw-pointer-events-none"></div>
       <TransformWrapper
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
         smooth
-        onZoom={(e) => setIsZoomed(e.state.scale > 1)}
-      >
+        onZoom={(e) => setIsZoomed(e.state.scale > 1)}>
         {({ resetTransform }) => (
           <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
             <div className="tw-relative tw-max-w-[95vw] tw-max-h-[95vh] tw-m-4">
               <div className="tw-flex tw-flex-row-reverse lg:tw-flex-col tw-gap-2 tw-items-center tw-absolute -tw-top-12 lg:tw-top-0 tw-right-0 lg:-tw-right-12">
                 <button
                   onClick={handleCloseModal}
-                  className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 lg:tw-top-0 tw-right-0 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                  aria-label="Close modal"
-                >
+                  className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute tw-top-2 tw-right-0 lg:tw-top-0 lg:-tw-right-2 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                  aria-label="Close modal">
                   <svg
                     className="tw-h-6 tw-w-6 tw-flex-shrink-0"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    aria-hidden="true"
-                  >
+                    aria-hidden="true">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -117,9 +113,8 @@ function DropListItemContentMediaImage({
                 {fullScreenSupported() && !isCapacitor && (
                   <button
                     onClick={handleFullScreen}
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 tw-right-10 lg:tw-top-10 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                    aria-label="Full screen"
-                  >
+                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute tw-top-2 tw-right-10 lg:tw-top-10 lg:-tw-right-2 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    aria-label="Full screen">
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
                   </button>
                 )}
@@ -130,9 +125,8 @@ function DropListItemContentMediaImage({
                       resetTransform();
                       setIsZoomed(false);
                     }}
-                    className="tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                    aria-label="Reset"
-                  >
+                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute tw-top-2 tw-right-20 lg:tw-top-20 lg:-tw-right-2 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    aria-label="Reset">
                     <FontAwesomeIcon
                       icon={faRotateLeft}
                       className="tw-size-4"
@@ -149,8 +143,7 @@ function DropListItemContentMediaImage({
                   if (e.key === "Enter" || e.key === " ") {
                     e.stopPropagation();
                   }
-                }}
-              >
+                }}>
                 <TransformComponent>
                   <img
                     src={src}
