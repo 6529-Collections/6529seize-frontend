@@ -71,9 +71,9 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       if (hasFirstDecisionPassed) {
         tabs.push(MyStreamWaveTab.WINNERS);
       }
-      
-      tabs.push(MyStreamWaveTab.OUTCOME);
       tabs.push(MyStreamWaveTab.MY_VOTES);
+      tabs.push(MyStreamWaveTab.OUTCOME);
+
       
       setAvailableTabs(tabs);
       
