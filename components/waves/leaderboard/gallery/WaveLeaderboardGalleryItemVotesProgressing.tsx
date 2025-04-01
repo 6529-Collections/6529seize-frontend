@@ -25,8 +25,8 @@ export default function WaveLeaderboardGalleryItemVotesProgressing({
 
   const isPositiveProgressing = rating < realtimeRating;
   const color = isPositiveProgressing
-    ? "tw-text-emerald-400 tw-bg-emerald-950/40"
-    : "tw-text-rose-400 tw-bg-rose-950/40";
+    ? "tw-text-emerald-400 tw-bg-emerald-950/60"
+    : "tw-text-rose-400 tw-bg-rose-950/60";
 
   const tooltipContent = isPositiveProgressing
     ? `Gradually increasing to ${formatNumberWithCommas(
@@ -39,7 +39,7 @@ export default function WaveLeaderboardGalleryItemVotesProgressing({
   return (
     <Tippy content={tooltipContent}>
       <span
-        className={`tw-text-xs tw-font-medium tw-animate-pulse tw-ml-0.5 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-flex tw-items-center tw-gap-x-1 ${color}`}
+        className={`tw-text-xs tw-font-medium tw-ml-0.5 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-flex tw-items-center tw-gap-x-1 ${color}`}
         style={{
           animationDuration: "2s",
         }}
