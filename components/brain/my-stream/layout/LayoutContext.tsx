@@ -60,6 +60,12 @@ interface LayoutContextType {
   // Style for outcome view
   outcomeViewStyle: React.CSSProperties;
 
+  // Style for my votes view
+  myVotesViewStyle: React.CSSProperties;
+
+  // Style for FAQ view
+  faqViewStyle: React.CSSProperties;
+
   // Style for notifications view
   notificationsViewStyle: React.CSSProperties;
 
@@ -95,7 +101,9 @@ const LayoutContext = createContext<LayoutContextType>({
   waveViewStyle: {}, // Empty style object as default
   leaderboardViewStyle: {}, // Empty style object as default
   winnersViewStyle: {}, // Empty style object as default
+  myVotesViewStyle: {}, // Empty style object as default
   outcomeViewStyle: {}, // Empty style object as default
+  faqViewStyle: {}, // Empty style object as default for FAQ
   notificationsViewStyle: {}, // Empty style object as default
   feedViewStyle: {}, // Empty style object as default
   mobileWavesViewStyle: {}, // Empty style object as default
@@ -370,8 +378,56 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     isIos
   ]);
 
+  // Calculate style for my votes view
+  const myVotesViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+      }
+  
+      const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+  
+      return {
+        height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+        maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      };
+    }, [
+      spaces.measurementsComplete,
+      spaces.headerSpace,
+      spaces.pinnedSpace,
+      spaces.tabsSpace,
+      spaces.spacerSpace,
+      spaces.mobileTabsSpace,
+      isCapacitor,
+      isAndroid,
+      isIos
+    ]);
+
   // Calculate style for outcome view
   const outcomeViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor,
+    isAndroid,
+    isIos
+  ]);
+  
+  // Calculate style for FAQ view
+  const faqViewStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
       return {};
     }
@@ -520,7 +576,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     waveViewStyle,
     leaderboardViewStyle,
     winnersViewStyle,
+    myVotesViewStyle,
     outcomeViewStyle,
+    faqViewStyle,
     notificationsViewStyle,
     feedViewStyle,
     mobileWavesViewStyle,
@@ -533,7 +591,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     waveViewStyle,
     leaderboardViewStyle,
     winnersViewStyle,
+    myVotesViewStyle,
     outcomeViewStyle,
+    faqViewStyle,
     notificationsViewStyle,
     feedViewStyle,
     mobileWavesViewStyle,

@@ -42,7 +42,6 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
           activeTab={activeContentTab}
           wave={wave}
           setActiveTab={setActiveContentTab}
-          hideMyVotes={true}
         />
       </div>
       <MemesArtSubmissionModal

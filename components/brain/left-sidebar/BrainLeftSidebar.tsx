@@ -36,6 +36,7 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
     [MyStreamWaveTab.WINNERS]: "Winners",
     [MyStreamWaveTab.OUTCOME]: "Outcome",
     [MyStreamWaveTab.MY_VOTES]: "My Votes",
+    [MyStreamWaveTab.FAQ]: "FAQ",
   };
 
   // Generate options based on available tabs

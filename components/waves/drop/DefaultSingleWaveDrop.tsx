@@ -6,6 +6,7 @@ import { SingleWaveDropTab } from "./SingleWaveDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useDrop } from "../../../hooks/useDrop";
 import { useWaveData } from "../../../hooks/useWaveData";
+import { useRouter } from "next/router";
 
 interface DefaultSingleWaveDropProps {
   readonly drop: ExtendedDrop;
@@ -16,8 +17,16 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
+  const router = useRouter();
   const { drop } = useDrop({ dropId: initialDrop.id });
-  const { data: wave } = useWaveData(drop?.wave.id ?? null);
+  const { data: wave } = useWaveData({
+    waveId: drop?.wave.id ?? null,
+    onWaveNotFound: () => {
+      router.push({ pathname: router.pathname, query: { wave: null } }, undefined, {
+        shallow: true,
+      });
+    },
+  });
   const [activeTab, setActiveTab] = useState<SingleWaveDropTab>(
     SingleWaveDropTab.INFO
   );
