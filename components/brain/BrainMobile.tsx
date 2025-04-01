@@ -17,6 +17,7 @@ import { WaveWinners } from "../waves/winners/WaveWinners";
 import { useWaveTimers } from "../../hooks/useWaveTimers";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import MyStreamWaveMyVotes from "./my-stream/votes/MyStreamWaveMyVotes";
+import MyStreamWaveFAQ from "./my-stream/MyStreamWaveFAQ";
 import { useWave } from "../../hooks/useWave";
 
 export enum BrainView {
@@ -27,6 +28,7 @@ export enum BrainView {
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
   MY_VOTES = "MY_VOTES",
+  FAQ = "FAQ",
   NOTIFICATIONS = "NOTIFICATIONS",
 }
 
@@ -104,12 +106,15 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       activeView === BrainView.WINNERS && !firstDecisionDone;
     const isInMyVotesAndIsNotMemeWave =
       activeView === BrainView.MY_VOTES && !isMemesWave;
+    const isInFAQAndIsNotMemeWave =
+      activeView === BrainView.FAQ && !isMemesWave;
 
     // If on Leaderboard tab and voting has ended, switch to Default
     if (
       isInLeaderboardAndVotingHasEnded ||
       isInWinnersAndFirstDecisionHasntPassed ||
-      isInMyVotesAndIsNotMemeWave
+      isInMyVotesAndIsNotMemeWave ||
+      isInFAQAndIsNotMemeWave
     ) {
       setActiveView(BrainView.DEFAULT);
     }
@@ -139,6 +144,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       isRankWave && !!wave ? (
         <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
       ) : null,
+    [BrainView.FAQ]:
+      isRankWave && isMemesWave && !!wave ? <MyStreamWaveFAQ wave={wave} /> : null,
     [BrainView.NOTIFICATIONS]: <Notifications />,
   };
 

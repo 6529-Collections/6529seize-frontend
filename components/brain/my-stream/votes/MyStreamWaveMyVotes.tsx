@@ -39,12 +39,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
 
   return (
     <div
-      className="tw-space-y-4 lg:tw-space-y-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
+      className="tw-space-y-4 lg:tw-space-y-6 lg:tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
       style={myVotesViewStyle}
     >
       {drops.length === 0 && !isFetching ? (
-        <div className="tw-bg-iron-900 tw-rounded-lg tw-p-4">
-          <p className="tw-text-iron-300">
+        <div className="tw-mt-10">
+          <p className="tw-text-iron-500 tw-text-sm tw-text-center">
             You haven't voted on any submissions in this wave yet.
           </p>
         </div>

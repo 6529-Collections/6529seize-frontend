@@ -1,7 +1,5 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import MyStreamWaveMyVoteVotesProgress from "./MyStreamWaveMyVoteVotesProgress";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 

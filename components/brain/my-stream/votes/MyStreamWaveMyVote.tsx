@@ -1,8 +1,6 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
 import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";
 
@@ -19,37 +17,33 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   return (
     <div
       key={drop.id}
-      className="tw-bg-iron-900 tw-rounded-lg tw-p-3 tw-border tw-border-iron-700 hover:tw-border-iron-600 tw-transition-colors tw-cursor-pointer"
+      className="tw-bg-iron-900 tw-rounded-lg tw-p-3 tw-border tw-border-iron-800 tw-border-solid hover:tw-border-iron-700 tw-transition-colors tw-cursor-pointer"
       onClick={() => onDropClick(drop)}
     >
-      <div className="tw-flex tw-items-center">
-        {/* Artwork thumbnail */}
-        <div className="tw-w-14 tw-h-14 tw-flex-shrink-0 tw-mr-3 tw-bg-iron-800/30 tw-rounded-md tw-overflow-hidden">
-          {artWork && (
-            <DropListItemContentMedia
-              media_mime_type={artWork.mime_type}
-              media_url={artWork.url}
-            />
-          )}
-        </div>
-
-        {/* Title and author */}
-        <div className="tw-flex-grow tw-min-w-0">
+      <div className="tw-grid tw-grid-cols-12 tw-gap-x-6">
+        <div className="tw-col-span-4 tw-flex tw-items-center">
+          <div className="tw-w-14 tw-h-14 tw-flex-shrink-0 tw-mr-3 tw-bg-iron-800 tw-overflow-hidden">
+            {artWork && (
+              <DropListItemContentMedia
+                media_mime_type={artWork.mime_type}
+                media_url={artWork.url}
+              />
+            )}
+          </div>
           <div className="tw-flex tw-flex-col">
             <h3 className="tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
               {drop.title}
             </h3>
             <span className="tw-text-sm tw-text-iron-400 tw-truncate">
-              @{drop.author.handle}
+              {drop.author.handle}
             </span>
           </div>
         </div>
-
-        {/* Vote controls */}
-        <div className="tw-flex tw-items-center tw-gap-x-4 tw-ml-auto">
-          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
+        <div className="tw-col-span-8 tw-flex tw-items-center tw-justify-between tw-gap-x-4">
+          <div className="tw-flex tw-justify-end tw-ml-auto tw-text-left">
             <MyStreamWaveMyVoteVotes drop={drop} />
-
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-x-4">
             <div className="tw-flex tw-items-center tw-gap-x-1.5">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -69,9 +63,6 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 {drop.raters_count}
               </span>
             </div>
-          </div>
-
-          <div className="tw-flex tw-items-center">
             <MyStreamWaveMyVoteInput drop={drop} />
           </div>
         </div>

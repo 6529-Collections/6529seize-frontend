@@ -192,14 +192,14 @@ export const WaveLeaderboardGalleryItem: React.FC<
           />
         </div>
         <button
-          className="tw-absolute tw-bottom-2 tw-right-2 tw-bg-black/40 tw-text-iron-300 desktop-hover:hover:tw-bg-black/60 tw-rounded-full tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-backdrop-blur-sm tw-z-10"
+          className="tw-absolute tw-bottom-2 tw-right-2 tw-bg-black/40 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 tw-rounded-full tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-backdrop-blur-sm tw-z-10"
           onClick={handleExpandClick}
           aria-label="View image"
         >
           <FontAwesomeIcon icon={faExpand} className="tw-size-3.5" />
         </button>
       </div>
-      <div className="tw-flex tw-flex-col tw-mt-1 tw-gap-y-1">
+      <div className="tw-flex tw-flex-col tw-mt-2 tw-gap-y-2">
         <div className="tw-flex tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <WinnerDropBadge

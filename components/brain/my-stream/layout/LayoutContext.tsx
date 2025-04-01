@@ -63,6 +63,9 @@ interface LayoutContextType {
   // Style for my votes view
   myVotesViewStyle: React.CSSProperties;
 
+  // Style for FAQ view
+  faqViewStyle: React.CSSProperties;
+
   // Style for notifications view
   notificationsViewStyle: React.CSSProperties;
 
@@ -100,6 +103,7 @@ const LayoutContext = createContext<LayoutContextType>({
   winnersViewStyle: {}, // Empty style object as default
   myVotesViewStyle: {}, // Empty style object as default
   outcomeViewStyle: {}, // Empty style object as default
+  faqViewStyle: {}, // Empty style object as default for FAQ
   notificationsViewStyle: {}, // Empty style object as default
   feedViewStyle: {}, // Empty style object as default
   mobileWavesViewStyle: {}, // Empty style object as default
@@ -421,6 +425,30 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     isAndroid,
     isIos
   ]);
+  
+  // Calculate style for FAQ view
+  const faqViewStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor,
+    isAndroid,
+    isIos
+  ]);
 
   // Calculate style for notifications view
   const notificationsViewStyle = useMemo(() => {
@@ -550,6 +578,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     winnersViewStyle,
     myVotesViewStyle,
     outcomeViewStyle,
+    faqViewStyle,
     notificationsViewStyle,
     feedViewStyle,
     mobileWavesViewStyle,
@@ -564,6 +593,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     winnersViewStyle,
     myVotesViewStyle,
     outcomeViewStyle,
+    faqViewStyle,
     notificationsViewStyle,
     feedViewStyle,
     mobileWavesViewStyle,

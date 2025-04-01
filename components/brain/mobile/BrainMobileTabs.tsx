@@ -157,7 +157,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               activeView={activeView}
               onViewChange={onViewChange}
             />
-            {isMemesWave && (
+            {/*   {isMemesWave && (
               <>
                 <button
                   onClick={() => onViewChange(BrainView.MY_VOTES)}
@@ -165,14 +165,35 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 >
                   <span className={myVotesButtonTextClasses}>My Votes</span>
                 </button>
+               
               </>
-            )}
+            )} */}
             <button
               onClick={() => onViewChange(BrainView.OUTCOME)}
               className={outcomeButtonClasses}
             >
               <span className={otucomeButtonTextClasses}>Outcome</span>
             </button>
+            {isMemesWave && (
+              <button
+                onClick={() => onViewChange(BrainView.FAQ)}
+                className={`tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
+                  activeView === BrainView.FAQ
+                    ? "tw-bg-iron-800"
+                    : "tw-bg-iron-950"
+                }`}
+              >
+                <span
+                  className={`tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+                    activeView === BrainView.FAQ
+                      ? "tw-text-iron-300"
+                      : "tw-text-iron-400"
+                  }`}
+                >
+                  FAQ
+                </span>
+              </button>
+            )}
           </>
         )}
 

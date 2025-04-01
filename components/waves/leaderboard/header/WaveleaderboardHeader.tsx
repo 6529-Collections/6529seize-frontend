@@ -83,7 +83,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="tw-hidden tw-sm:tw-block">Drop</span>
+              <span className="tw-hidden sm:tw-block">Drop</span>
             </PrimaryButton>
           </div>
         )}

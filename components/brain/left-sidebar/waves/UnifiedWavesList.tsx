@@ -131,13 +131,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
           {/* Loading indicator and intersection trigger */}
           {(hasNextPage || isFetchingNextPage) && (
-            <div
-              ref={loadMoreRef}
-              className="tw-flex tw-justify-center tw-items-center tw-py-4"
-            >
+            <div ref={loadMoreRef}>
               {isFetchingNextPage && (
                 <motion.div
-                  className="tw-flex tw-justify-center tw-items-center tw-gap-1"
+                  className="tw-flex tw-justify-center tw-items-center tw-gap-1  tw-py-4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.2 }}

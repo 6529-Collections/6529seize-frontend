@@ -73,10 +73,11 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [MyStreamWaveTab.WINNERS]: "Winners",
     [MyStreamWaveTab.OUTCOME]: "Outcome",
     [MyStreamWaveTab.MY_VOTES]: "My Votes",
+    [MyStreamWaveTab.FAQ]: "FAQ",
   };
 
   const options: TabOption[] = availableTabs
-    .filter((tab) => isMemesWave || tab !== MyStreamWaveTab.MY_VOTES)
+    .filter((tab) => isMemesWave || ![MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(tab))
     .map((tab) => ({
       key: tab,
       label: tabLabels[tab],
@@ -85,7 +86,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   useEffect(() => {
     if (
       !isMemesWave &&
-      activeTab === MyStreamWaveTab.MY_VOTES &&
+      [MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(activeTab) &&
       options.length > 0
     ) {
       setActiveTab(options[0].key);
