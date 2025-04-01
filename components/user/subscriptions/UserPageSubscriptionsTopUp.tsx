@@ -81,8 +81,7 @@ export default function UserPageSubscriptionsTopUp() {
               sendTransaction.data
             )}
             target="_blank"
-            rel="noreferrer"
-          >
+            rel="noreferrer">
             view
           </a>
         </>
@@ -101,8 +100,7 @@ export default function UserPageSubscriptionsTopUp() {
             <Tippy
               content={
                 <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
-              }
-            >
+              }>
               <span>
                 {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
                 {formatAddress(SUBSCRIPTIONS_ADDRESS)}
@@ -180,8 +178,7 @@ export default function UserPageSubscriptionsTopUp() {
               } else {
                 submit(count * MEMES_MINT_PRICE);
               }
-            }}
-          >
+            }}>
             <Form.Group className="mb-3">
               <Row className="d-flex align-items-center">
                 <Col xs={9} sm={8} className="d-flex align-items-center gap-2">
@@ -213,12 +210,10 @@ export default function UserPageSubscriptionsTopUp() {
                 <Col xs={3} sm={4}>
                   <Button
                     className={styles.sendBtn}
-                    size="lg"
                     type="submit"
                     disabled={
                       sendTransaction.isPending || waitSendTransaction.isLoading
-                    }
-                  >
+                    }>
                     Send
                   </Button>
                 </Col>
@@ -254,8 +249,7 @@ function CardCountTopup(
       onSubmit={(e) => {
         e.preventDefault();
         props.submit(props.count * MEMES_MINT_PRICE);
-      }}
-    >
+      }}>
       <Form.Group>
         <Row className="d-flex align-items-center no-wrap">
           <Col xs={9} sm={8} className="d-flex">
@@ -266,10 +260,8 @@ function CardCountTopup(
           <Col xs={3} sm={4}>
             <Button
               className={styles.sendBtn}
-              size="lg"
               type="submit"
-              disabled={props.disabled}
-            >
+              disabled={props.disabled}>
               Send
             </Button>
           </Col>
