@@ -31,7 +31,7 @@ interface MultiPartUploadParams {
   file: File;
 
   /**
-   * "drop" or "wave"; used to build endpoint strings: "/drop-media/multipart-upload", etc.
+   * "drop" or "wave"; used to build endpoints
    */
   path: "drop" | "wave";
 
