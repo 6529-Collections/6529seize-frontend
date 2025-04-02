@@ -191,22 +191,24 @@ export interface UploadingFile {
   progress: number;
 }
 
-const generateMediaForPart = (
+const generateMediaForPart = async (
   media: File,
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
 ) => {
-  return multiPartUpload({
-    file: media,
-    path: "drop",
-    onProgress: (progress) =>
-      setUploadingFiles((curr) => [
-        ...curr,
-        { file: media, isUploading: true, progress },
-      ]),
-  }).catch((error) => {
+  try {
+    return await multiPartUpload({
+      file: media,
+      path: "drop",
+      onProgress: (progress) =>
+        setUploadingFiles((curr) => [
+          ...curr,
+          { file: media, isUploading: true, progress },
+        ]),
+    });
+  } catch (error) {
     setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
     throw error;
-  });
+  }
 };
 
 const generatePart = async (
