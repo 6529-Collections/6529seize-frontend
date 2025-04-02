@@ -1,19 +1,17 @@
 import { removeBaseEndpoint } from "../../../helpers/Helpers";
 import Link from "next/link";
-import { SingleWaveDropPosition } from "./SingleWaveDropPosition";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { useDrop } from "../../../hooks/useDrop";
-import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { useRouter } from "next/router";
+import { SingleWaveDropPosition } from "../drop/SingleWaveDropPosition";
+import { SingleWaveDropVotes } from "../drop/SingleWaveDropVotes";
 
-export default function MemesSingleWaveDropChat({
+export default function DropItemChat({
   href,
-  waveId,
   dropId,
 }: {
   readonly href: string;
-  readonly waveId: string;
   readonly dropId: string;
 }) {
   const router = useRouter();

@@ -25,7 +25,7 @@ import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { useEmoji } from "../../../../contexts/EmojiContext";
 import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
-import MemesSingleWaveDropChat from "../../../waves/drop/MemesSingleWaveDropChat";
+import DropItemChat from "../../../waves/drops/DropItemChat";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -236,13 +236,7 @@ function DropPartMarkdown({
       true
     );
     if (dropResult) {
-      return (
-        <MemesSingleWaveDropChat
-          href={href}
-          waveId={dropResult.wave}
-          dropId={dropResult.drop}
-        />
-      );
+      return <DropItemChat href={href} dropId={dropResult.drop} />;
     }
 
     const twitterMatch = parseTwitterLink(href);
