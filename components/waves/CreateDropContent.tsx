@@ -195,20 +195,20 @@ const generateMediaForPart = async (
   media: File,
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
 ) => {
-  try {
-    return await multiPartUpload({
-      file: media,
-      path: "drop",
-      onProgress: (progress) =>
-        setUploadingFiles((curr) => [
-          ...curr,
-          { file: media, isUploading: true, progress },
-        ]),
-    });
-  } catch (error) {
-    setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
-    throw error;
-  }
+  setUploadingFiles((prev) => [
+    ...prev,
+    { file: media, isUploading: true, progress: 0 },
+  ]);
+  const uploadResponse = await multiPartUpload({
+    file: media,
+    path: "drop",
+    onProgress: (progress) =>
+      setUploadingFiles((prev) =>
+        prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
+      ),
+  });
+  setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
+  return uploadResponse;
 };
 
 const generatePart = async (

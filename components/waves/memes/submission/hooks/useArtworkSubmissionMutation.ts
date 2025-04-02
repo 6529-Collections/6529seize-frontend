@@ -23,48 +23,6 @@ interface ArtworkSubmissionData {
 }
 
 /**
- * Upload file with progress tracking
- */
-const uploadFileWithProgress = async (
-  uploadUrl: string,
-  file: File,
-  contentType: string,
-  onProgress: (progress: number) => void
-): Promise<Response> => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    xhr.upload.addEventListener("progress", (event) => {
-      if (event.lengthComputable) {
-        const progress = Math.round((event.loaded / event.total) * 100);
-        onProgress(progress);
-      }
-    });
-
-    xhr.addEventListener("load", () => {
-      resolve(
-        new Response(null, {
-          status: xhr.status,
-          statusText: xhr.statusText,
-        })
-      );
-    });
-
-    xhr.addEventListener("error", () => {
-      reject(new Error("Upload failed"));
-    });
-
-    xhr.addEventListener("abort", () => {
-      reject(new Error("Upload aborted"));
-    });
-
-    xhr.open("PUT", uploadUrl);
-    xhr.setRequestHeader("Content-Type", contentType);
-    xhr.send(file);
-  });
-};
-
-/**
  * Function to transform form data into API request format
  */
 const transformToApiRequest = (data: {
@@ -163,9 +121,7 @@ export function useArtworkSubmissionMutation() {
       return multiPartUpload({
         file,
         path: "drop",
-        onProgress: (progress) => {
-          setUploadProgress(progress);
-        },
+        onProgress: setUploadProgress,
       });
     },
     onError: (error, variables) => {

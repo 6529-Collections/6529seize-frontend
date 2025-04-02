@@ -102,7 +102,7 @@ export async function multiPartUpload({
         { upload_id: string; key: string; part_no: number },
         PartSignedUrlResponse
       >({
-        endpoint: `${path}/multipart-upload/part`,
+        endpoint: `${path}-media/multipart-upload/part`,
         body: {
           upload_id,
           key,
@@ -176,7 +176,7 @@ export async function multiPartUpload({
     },
     CompleteMultipartResponse
   >({
-    endpoint: `${path}/multipart-upload/completion`,
+    endpoint: `${path}-media/multipart-upload/completion`,
     body: {
       upload_id,
       key,

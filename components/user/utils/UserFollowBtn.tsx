@@ -144,7 +144,7 @@ export default function UserFollowBtn({
   };
 
   return (
-    <div>
+    <div className="tw-flex tw-items-center tw-gap-x-2">
       {onDirectMessage && following && (
         <Tippy
           content="Direct Message"
@@ -153,7 +153,7 @@ export default function UserFollowBtn({
           delay={250}>
           <button
             onClick={onDirectMessage}
-            className={`${BUTTON_CLASSES[size]} tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700 tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out tw-mr-2`}>
+            className={`${BUTTON_CLASSES[size]} tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700 tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
             {directMessageLoading ? (
               <CircleLoader size={CircleLoaderSize.SMALL} />
             ) : (
