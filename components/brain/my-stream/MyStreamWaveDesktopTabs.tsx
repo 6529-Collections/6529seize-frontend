@@ -11,7 +11,6 @@ interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
   readonly wave: ApiWave;
   readonly setActiveTab: (tab: MyStreamWaveTab) => void;
-  readonly hideMyVotes?: boolean;
 }
 
 interface TabOption {
@@ -23,7 +22,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeTab,
   wave,
   setActiveTab,
-  hideMyVotes = true,
 }) => {
   // Use the available tabs from context instead of recalculating
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
@@ -75,26 +73,25 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [MyStreamWaveTab.WINNERS]: "Winners",
     [MyStreamWaveTab.OUTCOME]: "Outcome",
     [MyStreamWaveTab.MY_VOTES]: "My Votes",
+    [MyStreamWaveTab.FAQ]: "FAQ",
   };
 
-  // Generate options based on available tabs, filtering out MY_VOTES if hideMyVotes is true
   const options: TabOption[] = availableTabs
-    .filter((tab) => !hideMyVotes || tab !== MyStreamWaveTab.MY_VOTES)
+    .filter((tab) => isMemesWave || ![MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(tab))
     .map((tab) => ({
       key: tab,
       label: tabLabels[tab],
     }));
 
-  // If activeTab is MY_VOTES and it's hidden, switch to another tab
   useEffect(() => {
     if (
-      hideMyVotes &&
-      activeTab === MyStreamWaveTab.MY_VOTES &&
+      !isMemesWave &&
+      [MyStreamWaveTab.MY_VOTES, MyStreamWaveTab.FAQ].includes(activeTab) &&
       options.length > 0
     ) {
       setActiveTab(options[0].key);
     }
-  }, [hideMyVotes, activeTab, options]);
+  }, [isMemesWave, activeTab, options]);
 
   // For simple waves, don't render any tabs
   if (isChatWave) {

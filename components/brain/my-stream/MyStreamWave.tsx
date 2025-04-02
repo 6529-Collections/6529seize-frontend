@@ -11,6 +11,7 @@ import { WaveWinners } from "../../waves/winners/WaveWinners";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
+import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -21,8 +22,14 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
-  const { data: wave } = useWaveData(waveId);
-
+  const { data: wave } = useWaveData({
+    waveId,
+    onWaveNotFound: () => {
+      router.push({ pathname: router.pathname, query: { wave: null } }, undefined, {
+        shallow: true,
+      });
+    },
+  });
   // Track mount status to prevent post-unmount updates
   const mountedRef = useRef(true);
 
@@ -68,6 +75,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     ),
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
     [MyStreamWaveTab.MY_VOTES]: <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />,
+    [MyStreamWaveTab.FAQ]: <MyStreamWaveFAQ wave={wave} />,
   };
 
   return (

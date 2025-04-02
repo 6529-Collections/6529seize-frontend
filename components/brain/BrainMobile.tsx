@@ -16,6 +16,9 @@ import Notifications from "./notifications/Notifications";
 import { WaveWinners } from "../waves/winners/WaveWinners";
 import { useWaveTimers } from "../../hooks/useWaveTimers";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import MyStreamWaveMyVotes from "./my-stream/votes/MyStreamWaveMyVotes";
+import MyStreamWaveFAQ from "./my-stream/MyStreamWaveFAQ";
+import { useWave } from "../../hooks/useWave";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -24,6 +27,8 @@ export enum BrainView {
   LEADERBOARD = "LEADERBOARD",
   WINNERS = "WINNERS",
   OUTCOME = "OUTCOME",
+  MY_VOTES = "MY_VOTES",
+  FAQ = "FAQ",
   NOTIFICATIONS = "NOTIFICATIONS",
 }
 
@@ -44,7 +49,21 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     enabled: !!router.query.drop,
   });
 
-  const { data: wave } = useWaveData(router.query.wave as string);
+  const { data: wave } = useWaveData({
+    waveId: router.query.wave as string,
+    onWaveNotFound: () => {
+      router.push(
+        { pathname: router.pathname, query: { wave: null } },
+        undefined,
+        {
+          shallow: true,
+        }
+      );
+    },
+  });
+
+  const { isMemesWave } = useWave(wave);
+
   const {
     voting: { isCompleted },
     decisions: { firstDecisionDone },
@@ -85,15 +104,21 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       activeView === BrainView.LEADERBOARD && isCompleted;
     const isInWinnersAndFirstDecisionHasntPassed =
       activeView === BrainView.WINNERS && !firstDecisionDone;
+    const isInMyVotesAndIsNotMemeWave =
+      activeView === BrainView.MY_VOTES && !isMemesWave;
+    const isInFAQAndIsNotMemeWave =
+      activeView === BrainView.FAQ && !isMemesWave;
 
     // If on Leaderboard tab and voting has ended, switch to Default
     if (
       isInLeaderboardAndVotingHasEnded ||
-      isInWinnersAndFirstDecisionHasntPassed
+      isInWinnersAndFirstDecisionHasntPassed ||
+      isInMyVotesAndIsNotMemeWave ||
+      isInFAQAndIsNotMemeWave
     ) {
       setActiveView(BrainView.DEFAULT);
     }
-  }, [wave, isCompleted, firstDecisionDone, activeView]);
+  }, [wave, isCompleted, firstDecisionDone, activeView, isMemesWave]);
 
   const viewComponents: Record<BrainView, ReactNode> = {
     [BrainView.WAVES]: (
@@ -115,6 +140,12 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       ) : null,
     [BrainView.OUTCOME]:
       isRankWave && !!wave ? <MyStreamWaveOutcome wave={wave} /> : null,
+    [BrainView.MY_VOTES]:
+      isRankWave && !!wave ? (
+        <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
+      ) : null,
+    [BrainView.FAQ]:
+      isRankWave && isMemesWave && !!wave ? <MyStreamWaveFAQ wave={wave} /> : null,
     [BrainView.NOTIFICATIONS]: <Notifications />,
   };
 

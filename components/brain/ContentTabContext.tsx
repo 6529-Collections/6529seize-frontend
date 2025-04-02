@@ -71,9 +71,10 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
       if (hasFirstDecisionPassed) {
         tabs.push(MyStreamWaveTab.WINNERS);
       }
-      
+     /*  tabs.push(MyStreamWaveTab.MY_VOTES); */
       tabs.push(MyStreamWaveTab.OUTCOME);
-      tabs.push(MyStreamWaveTab.MY_VOTES);
+      tabs.push(MyStreamWaveTab.FAQ);
+
       
       setAvailableTabs(tabs);
       
@@ -100,7 +101,9 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children
     
     // Always add Outcome
     tabs.push(MyStreamWaveTab.OUTCOME);
-    tabs.push(MyStreamWaveTab.MY_VOTES);
+  /*   tabs.push(MyStreamWaveTab.MY_VOTES); */
+    
+    // FAQ tab is only available for Memes waves, which is handled in the isMemesWave block above
     
     // Update available tabs
     setAvailableTabs(tabs);

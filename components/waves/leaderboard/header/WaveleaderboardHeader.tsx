@@ -28,7 +28,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   const { isMemesWave } = useWave(wave);
 
   return (
-    <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-y-4 tw-@container">
+    <div className="tw-flex tw-flex-col tw-gap-y-4 tw-@container">
       <div className="tw-flex tw-items-start sm:tw-items-center tw-justify-between tw-pb-4">
         <div className="tw-flex tw-items-center tw-gap-x-4 tw-mt-2 sm:tw-mt-0">
           {isMemesWave && (
@@ -83,7 +83,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="tw-hidden tw-sm:tw-block">Drop</span>
+              <span className="tw-hidden sm:tw-block">Drop</span>
             </PrimaryButton>
           </div>
         )}
