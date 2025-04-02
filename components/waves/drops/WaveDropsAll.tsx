@@ -162,35 +162,35 @@ export default function WaveDropsAll({
   const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
 
-  // useEffect(() => {
-  //   if (drops.length > 0) {
-  //     setInit(true);
-  //     setNewItemsCount((prevCount) => {
-  //       const newCount = drops.length - prevCount;
-  //       return prevCount !== newCount ? newCount : prevCount;
-  //     });
-  //     const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
-  //     smallestSerialNo.current = minSerialNo;
+  useEffect(() => {
+    if (drops.length > 0) {
+      setInit(true);
+      setNewItemsCount((prevCount) => {
+        const newCount = drops.length - prevCount;
+        return prevCount !== newCount ? newCount : prevCount;
+      });
+      const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
+      smallestSerialNo.current = minSerialNo;
 
-  //     // Check if the last drop is a temp drop (your own post)
-  //     const lastDrop = drops[drops.length - 1];
-  //     if (lastDrop.id.startsWith("temp-")) {
-  //       // For user's own new drop, scroll to bottom - but only if they haven't manually scrolled away
-  //       if (isAtBottom && !userHasManuallyScrolled) {
-  //         setTimeout(() => {
-  //           scrollToVisualBottom();
-  //         }, 100);
-  //       } else if (!userHasManuallyScrolled) {
-  //         // If not at bottom, use the serialNo approach to scroll to the specific drop
-  //         // Again, only if they haven't manually scrolled away
-  //         setSerialNo(lastDrop.serial_no);
-  //       }
-  //       // If they've manually scrolled, respect their intention and don't auto-scroll
-  //     }
-  //   } else {
-  //     smallestSerialNo.current = null;
-  //   }
-  // }, [drops, isAtBottom, scrollToVisualBottom]);
+      // Check if the last drop is a temp drop (your own post)
+      const lastDrop = drops[drops.length - 1];
+      if (lastDrop.id.startsWith("temp-")) {
+        // For user's own new drop, scroll to bottom - but only if they haven't manually scrolled away
+        if (isAtBottom && !userHasManuallyScrolled) {
+          setTimeout(() => {
+            scrollToVisualBottom();
+          }, 100);
+        } else if (!userHasManuallyScrolled) {
+          // If not at bottom, use the serialNo approach to scroll to the specific drop
+          // Again, only if they haven't manually scrolled away
+          setSerialNo(lastDrop.serial_no);
+        }
+        // If they've manually scrolled, respect their intention and don't auto-scroll
+      }
+    } else {
+      smallestSerialNo.current = null;
+    }
+  }, [drops, isAtBottom, scrollToVisualBottom]);
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -276,7 +276,7 @@ export default function WaveDropsAll({
         setUserHasManuallyScrolled(false); // Reset when navigating to specific content
       }
     },
-    [router, waveId, setSerialNo]
+    [router, waveId] // removed setSerialNo from deps as it's a setState function that never changes
   );
 
   const renderContent = () => {
@@ -323,6 +323,7 @@ export default function WaveDropsAll({
             parentContainerRef={scrollContainerRef}
             dropViewDropId={dropId}
             onDropContentClick={onDropContentClick}
+            key="drops-list" // Add a stable key to help React with reconciliation
           />
         </WaveDropsReverseContainer>
         <WaveDropsScrollBottomButton
