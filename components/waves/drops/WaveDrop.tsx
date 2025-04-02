@@ -255,8 +255,11 @@ const WaveDrop = ({
           {!shouldGroupWithPreviousDrop && <WaveDropAuthorPfp drop={drop} />}
           <div
             className="tw-flex tw-flex-col tw-w-full tw-gap-y-1"
-            style={{ maxWidth: "calc(100% - 2.5rem - 0.75rem)" }}
-          >
+            style={{
+              maxWidth: !shouldGroupWithPreviousDrop
+                ? "calc(100% - 3.25rem)"
+                : "100%",
+            }}>
             {!shouldGroupWithPreviousDrop && (
               <WaveDropHeader
                 drop={drop}

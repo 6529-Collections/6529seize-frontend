@@ -25,6 +25,7 @@ import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "../../constants";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 import { Distribution } from "../../entities/IDistribution";
+import { DateTime } from "luxon";
 
 interface Props {
   title: string;
@@ -43,38 +44,53 @@ interface MemePhase {
   end: Time;
 }
 
-function buildMemesPhases(mint_date: Time) {
-  const phases: MemePhase[] = [
+function buildMemesPhases(mintDate: Time): MemePhase[] {
+  const zone = "America/New_York";
+
+  const base = DateTime.fromJSDate(mintDate.toDate()).setZone(zone);
+
+  const toUtc = (hour: number, minute: number): Time =>
+    Time.seconds(base.set({ hour, minute, second: 0 }).toUTC().toSeconds());
+
+  const toUtcNextDay = (hour: number, minute: number): Time =>
+    Time.seconds(
+      base
+        .plus({ days: 1 })
+        .set({ hour, minute, second: 0 })
+        .toUTC()
+        .toSeconds()
+    );
+
+  return [
     {
       id: "0",
       name: "Phase 0 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: mint_date.setTime(15, 40, 0),
-      end: mint_date.setTime(16, 20, 0),
+      start: toUtc(10, 40),
+      end: toUtc(11, 20),
     },
     {
       id: "1",
       name: "Phase 1 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: mint_date.setTime(16, 30, 0),
-      end: mint_date.setTime(16, 50, 0),
+      start: toUtc(11, 30),
+      end: toUtc(11, 50),
     },
     {
       id: "2",
       name: "Phase 2 (Allowlist)",
       type: ManifoldPhase.ALLOWLIST,
-      start: mint_date.setTime(17, 0, 0),
-      end: mint_date.setTime(17, 20, 0),
+      start: toUtc(12, 0),
+      end: toUtc(12, 20),
     },
     {
       id: "public",
       name: "Public Phase",
       type: ManifoldPhase.PUBLIC,
-      start: mint_date.setTime(17, 20, 0),
-      end: mint_date.plusDays(1).setTime(15, 0, 0),
+      start: toUtc(12, 20),
+      end: toUtcNextDay(10, 0),
     },
   ];
-  return phases;
 }
 
 function getDateTimeString(time: Time, local_timezone: boolean) {
@@ -85,7 +101,7 @@ function getDateTimeString(time: Time, local_timezone: boolean) {
   const d = time.toIsoDateString();
   const t = time.toIsoTimeString().split(" ")[0];
 
-  return `${d} ${t.slice(0, 5)} UTC`;
+  return `${d} ${t.slice(0, 5)}`;
 }
 
 export default function ManifoldMinting(props: Readonly<Props>) {
@@ -629,6 +645,9 @@ function ManifoldMemesMintingPhase(
     endDate = Time.seconds(props.claim.endDate);
   }
 
+  const startDisplay = getDateTimeString(startDate, props.local_timezone);
+  const endDisplay = getDateTimeString(endDate, props.local_timezone);
+
   return (
     <Col xs={12} sm={6} md={3} className="pt-1 pb-1">
       <Container
@@ -659,17 +678,13 @@ function ManifoldMemesMintingPhase(
             xs={12}
             className="d-flex align-items-center justify-content-between gap-2">
             <span className="font-lighter font-smaller">{startText}</span>
-            <span className="text-right">
-              {getDateTimeString(startDate, props.local_timezone)}
-            </span>
+            <span className="text-right">{startDisplay}</span>
           </Col>
           <Col
             xs={12}
             className="d-flex align-items-center justify-content-between gap-2">
             <span className="font-lighter font-smaller">{endText}</span>
-            <span className="text-right">
-              {getDateTimeString(endDate, props.local_timezone)}
-            </span>
+            <span className="text-right">{endDisplay}</span>
           </Col>
           {props.address && (
             <Col xs={12} className={`pt-3 text-center ${eligibleMintsStyle}`}>
