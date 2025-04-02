@@ -50,6 +50,7 @@ const DropsList = memo(function DropsList({
   onDropContentClick,
   dropViewDropId,
 }: DropsListProps) {
+  console.log("dropslist")
   const handleReply = useCallback<DropActionHandler>(
     ({ drop, partId }) => onReply({ drop, partId }),
     [onReply]
@@ -110,16 +111,7 @@ const DropsList = memo(function DropsList({
     ]
   );
 
-  return (
-    <div className="tw-flex tw-flex-col tw-pb-2">
-      {isFetchingNextPage && (
-        <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
-          <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
-        </div>
-      )}
-      {memoizedDrops}
-    </div>
-  );
+  return ( memoizedDrops);
 });
 
 export default DropsList;
