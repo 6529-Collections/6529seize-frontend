@@ -4,6 +4,7 @@ import pRetry from "p-retry";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { ApiDropMedia } from "../../../../generated/models/ApiDropMedia";
 
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
 const PART_SIZE = 5 * 1024 * 1024; // 5 MB per chunk
 const CONCURRENCY = 5; // how many parts to upload in parallel
 const RETRIES = 3; // retry each chunk up to 3 times
@@ -49,6 +50,10 @@ export async function multiPartUpload({
   path,
   onProgress,
 }: MultiPartUploadParams): Promise<ApiDropMedia> {
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error("File size exceeds maximum allowed size of 500 MB");
+  }
+
   // -----------------------------------------------------
   // 1) Start the multi-part upload on your backend
   //    e.g. POST /api/<path>-media/multipart-upload
