@@ -18,15 +18,13 @@ import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { ApiCreateWaveDropRequest } from "../../../generated/models/ApiCreateWaveDropRequest";
 import { useRouter } from "next/router";
-import {
-  generateMediaForOverview,
-  generateDropPart,
-} from "./services/waveMediaService";
+import { generateDropPart } from "./services/waveMediaService";
 import { getAdminGroupId } from "./services/waveGroupService";
 import { useAddWaveMutation } from "./services/waveApiService";
 import { useWaveConfig } from "./hooks/useWaveConfig";
 import useCapacitor from "../../../hooks/useCapacitor";
 import CreateWaveFlow from "./CreateWaveFlow";
+import { multiPartUpload } from "./services/multiPartUpload";
 
 export default function CreateWave({
   profile,
@@ -162,7 +160,9 @@ export default function CreateWave({
       signature: null,
     };
 
-    const picture = await generateMediaForOverview(config.overview.image);
+    const picture = config.overview.image
+      ? await multiPartUpload({ file: config.overview.image, path: "wave" })
+      : null;
 
     const waveBody = getCreateNewWaveBody({
       config: {
@@ -270,8 +270,7 @@ export default function CreateWave({
       onBack={onBack}
       title={`Create Wave ${
         !!config.overview.name && `"${config.overview.name}"`
-      }`}
-    >
+      }`}>
       <div className="tw-mt-4 md:tw-mt-8 xl:tw-max-w-[60rem] tw-mx-auto lg:tw-flex tw-gap-x-16 tw-justify-between tw-h-full tw-w-full">
         <div className="tw-1/4">
           <CreateWavesMainSteps
@@ -281,8 +280,9 @@ export default function CreateWave({
           />
         </div>
         <div
-          className={`tw-flex-1 ${isIos && !keyboardVisible ? "tw-mb-10" : ""}`}
-        >
+          className={`tw-flex-1 ${
+            isIos && !keyboardVisible ? "tw-mb-10" : ""
+          }`}>
           <div className="tw-relative tw-w-full tw-bg-iron-900 tw-p-4 lg:tw-p-8 tw-rounded-xl">
             <div className="tw-relative tw-h-full">
               <div className="tw-flex tw-flex-col tw-h-full">

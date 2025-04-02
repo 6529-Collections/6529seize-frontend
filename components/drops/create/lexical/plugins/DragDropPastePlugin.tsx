@@ -17,37 +17,8 @@ const ACCEPTABLE_IMAGE_TYPES = [
 
 async function uploadImage(file: File): Promise<string> {
   alert("uploadImage - drag drop paste plugin");
-  const multiPart = await multiPartUpload(file, "drop-media");
+  const multiPart = await multiPartUpload({ file, path: "drop" });
   return multiPart.url;
-
-  // const prep = await commonApiPost<
-  //   {
-  //     content_type: string;
-  //     file_name: string;
-  //     file_size: number;
-  //   },
-  //   {
-  //     upload_url: string;
-  //     content_type: string;
-  //     media_url: string;
-  //   }
-  // >({
-  //   endpoint: "drop-media/prep",
-  //   body: {
-  //     content_type: file.type,
-  //     file_name: file.name,
-  //     file_size: file.size,
-  //   },
-  // });
-  // const myHeaders = new Headers({
-  //   "Content-Type": prep.content_type,
-  // });
-  // await fetch(prep.upload_url, {
-  //   method: "PUT",
-  //   headers: myHeaders,
-  //   body: file,
-  // });
-  // return prep.media_url;
 }
 
 export default function DragDropPaste(): null {

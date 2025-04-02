@@ -25,6 +25,7 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { getOptimisticDropId } from "../../../helpers/waves/drop.helpers";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
+import { multiPartUpload } from "../../waves/create-wave/services/multiPartUpload";
 
 export enum CreateDropType {
   DROP = "DROP",
@@ -115,39 +116,6 @@ export default function CreateDrop({
     return null;
   }
 
-  const generateMediaForPart = async (media: File): Promise<ApiDropMedia> => {
-    alert("generateMediaForPart - create drop");
-    const prep = await commonApiPost<
-      {
-        content_type: string;
-        file_name: string;
-        file_size: number;
-      },
-      {
-        upload_url: string;
-        content_type: string;
-        media_url: string;
-      }
-    >({
-      endpoint: "drop-media/prep",
-      body: {
-        content_type: media.type,
-        file_name: media.name,
-        file_size: media.size,
-      },
-    });
-    const myHeaders = new Headers({ "Content-Type": prep.content_type });
-    await fetch(prep.upload_url, {
-      method: "PUT",
-      headers: myHeaders,
-      body: media,
-    });
-    return {
-      url: prep.media_url,
-      mime_type: prep.content_type,
-    };
-  };
-
   const filterMentionedUsers = ({
     mentionedUsers,
     parts,
@@ -165,7 +133,7 @@ export default function CreateDrop({
     part: CreateDropPart
   ): Promise<CreateDropRequestPart> => {
     const media = await Promise.all(
-      part.media.map((media) => generateMediaForPart(media))
+      part.media.map((media) => multiPartUpload({ file: media, path: "drop" }))
     );
     return {
       ...part,
