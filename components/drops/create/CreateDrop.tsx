@@ -116,6 +116,7 @@ export default function CreateDrop({
   }
 
   const generateMediaForPart = async (media: File): Promise<ApiDropMedia> => {
+    alert("generateMediaForPart - create drop");
     const prep = await commonApiPost<
       {
         content_type: string;
@@ -221,8 +222,10 @@ export default function CreateDrop({
         chat_group_id: null,
         voting_group_id: null,
         admin_group_id: null,
-        admin_drop_deletion_enabled: waveDetailed.wave.admin_drop_deletion_enabled,
-        authenticated_user_admin: waveDetailed.wave.authenticated_user_eligible_for_admin,
+        admin_drop_deletion_enabled:
+          waveDetailed.wave.admin_drop_deletion_enabled,
+        authenticated_user_admin:
+          waveDetailed.wave.authenticated_user_eligible_for_admin,
       },
       author: {
         ...profileMin,

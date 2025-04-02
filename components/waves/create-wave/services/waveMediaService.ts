@@ -1,4 +1,8 @@
-import { DropMedia, CreateDropPart, CreateDropRequestPart } from "../../../../entities/IDrop";
+import {
+  DropMedia,
+  CreateDropPart,
+  CreateDropRequestPart,
+} from "../../../../entities/IDrop";
 import { commonApiPost } from "../../../../services/api/common-api";
 
 /**
@@ -89,6 +93,7 @@ export const generateMediaForOverview = async (
 export const generateDropPart = async (
   part: CreateDropPart
 ): Promise<CreateDropRequestPart> => {
+  alert("generateDropPart");
   const media = await Promise.all(
     part.media.map((media) => generateMediaForPart(media))
   );
