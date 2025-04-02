@@ -206,8 +206,9 @@ const generateMediaForPart = async (
       setUploadingFiles((prev) =>
         prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
       ),
+  }).finally(() => {
+    setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
   });
-  setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
   return uploadResponse;
 };
 

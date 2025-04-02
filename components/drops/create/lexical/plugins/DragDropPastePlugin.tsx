@@ -5,6 +5,7 @@ import { $getNodeByKey, $insertNodes, COMMAND_PRIORITY_LOW } from "lexical";
 import { useEffect } from "react";
 import { $createImageNode } from "../nodes/ImageNode";
 import { multiPartUpload } from "../../../../waves/create-wave/services/multiPartUpload";
+import { useAuth } from "../../../../auth/Auth";
 
 const ACCEPTABLE_IMAGE_TYPES = [
   "image/",
@@ -15,12 +16,13 @@ const ACCEPTABLE_IMAGE_TYPES = [
 ];
 
 async function uploadImage(file: File): Promise<string> {
-  alert("uploadImage - drag drop paste plugin");
   const multiPart = await multiPartUpload({ file, path: "drop" });
   return multiPart.url;
 }
 
 export default function DragDropPaste(): null {
+  const { setToast } = useAuth();
+
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
     return editor.registerCommand(
@@ -31,6 +33,13 @@ export default function DragDropPaste(): null {
             files,
             [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x)
           );
+          if (filesResult.length === 0) {
+            setToast({
+              message: "Unsupported file type for Drag & Drop / Paste.",
+              type: "error",
+            });
+            return;
+          }
           for (const { file } of filesResult) {
             if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
               editor.update(() => {
