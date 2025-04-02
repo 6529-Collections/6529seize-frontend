@@ -25,6 +25,7 @@ import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { useEmoji } from "../../../../contexts/EmojiContext";
 import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
+import MemesSingleWaveDropChat from "../../../waves/drop/MemesSingleWaveDropChat";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -218,14 +219,30 @@ function DropPartMarkdown({
       return renderSeizeQuote(quoteInfo, onQuoteClick);
     }
 
-    const groupId = parseSeizeQueryLink(href, "/network", "group");
-    if (groupId) {
-      return <GroupCardChat href={href} groupId={groupId} />;
+    const groupResult = parseSeizeQueryLink(href, "/network", ["group"]);
+    if (groupResult) {
+      return <GroupCardChat href={href} groupId={groupResult.group} />;
     }
 
-    const waveId = parseSeizeQueryLink(href, "/my-stream", "wave");
-    if (waveId) {
-      return <WaveItemChat href={href} waveId={waveId} />;
+    const waveResult = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
+    if (waveResult) {
+      return <WaveItemChat href={href} waveId={waveResult.wave} />;
+    }
+
+    const dropResult = parseSeizeQueryLink(
+      href,
+      "/my-stream",
+      ["wave", "drop"],
+      true
+    );
+    if (dropResult) {
+      return (
+        <MemesSingleWaveDropChat
+          href={href}
+          waveId={dropResult.wave}
+          dropId={dropResult.drop}
+        />
+      );
     }
 
     const twitterMatch = parseTwitterLink(href);
