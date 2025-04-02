@@ -417,10 +417,10 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             </div>
             What is TDH?
           </h3>
-          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed">
+          <p className="tw-text-iron-300 tw-mb-4 tw-leading-relaxed tw-text-base">
             TDH is the central metric of 6529 ecosystem.
           </p>
-          <p className="tw-text-iron-300 tw-mb-5 tw-leading-relaxed">
+          <p className="tw-text-iron-300 tw-mb-5 tw-leading-relaxed tw-text-base">
             It is a quantitative metric reflecting how long you have held a 6529
             NFT, how many you have held and how diverse your holdings are. It
             primarily rewards longevity.
@@ -430,7 +430,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               href="https://x.com/punk6529/status/1906753171751412006"
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
+              className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
             >
               Theory
               <FontAwesomeIcon
@@ -442,7 +442,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               href="https://6529.io/network/metrics"
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
+              className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
             >
               Formula
               <FontAwesomeIcon
