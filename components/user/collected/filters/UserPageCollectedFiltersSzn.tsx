@@ -15,15 +15,17 @@ export default function UserPageCollectedFiltersSzn({
   readonly setSelected: (selected: SelectedType) => void;
 }) {
   const labels: { [key in MEMES_SEASON]: string } = {
-    [MEMES_SEASON.SZN1]: "Szn 1",
-    [MEMES_SEASON.SZN2]: "Szn 2",
-    [MEMES_SEASON.SZN3]: "Szn 3",
-    [MEMES_SEASON.SZN4]: "Szn 4",
-    [MEMES_SEASON.SZN5]: "Szn 5",
-    [MEMES_SEASON.SZN6]: "Szn 6",
-    [MEMES_SEASON.SZN7]: "Szn 7",
-    [MEMES_SEASON.SZN8]: "Szn 8",
-    [MEMES_SEASON.SZN9]: "Szn 9",
+    [MEMES_SEASON.SZN1]: "SZN 1",
+    [MEMES_SEASON.SZN2]: "SZN 2",
+    [MEMES_SEASON.SZN3]: "SZN 3",
+    [MEMES_SEASON.SZN4]: "SZN 4",
+    [MEMES_SEASON.SZN5]: "SZN 5",
+    [MEMES_SEASON.SZN6]: "SZN 6",
+    [MEMES_SEASON.SZN7]: "SZN 7",
+    [MEMES_SEASON.SZN8]: "SZN 8",
+    [MEMES_SEASON.SZN9]: "SZN 9",
+    [MEMES_SEASON.SZN10]: "SZN 10",
+    [MEMES_SEASON.SZN11]: "SZN 11",
   };
 
   const items: CommonSelectItem<SelectedType>[] = [

@@ -32,6 +32,8 @@ export default function UserPageCollectedCardsNoCards({
           case MEMES_SEASON.SZN7:
           case MEMES_SEASON.SZN8:
           case MEMES_SEASON.SZN9:
+          case MEMES_SEASON.SZN10:
+          case MEMES_SEASON.SZN11:
             return `Congratulations, ${filters.szn} full setter!`;
           default:
             assertUnreachable(filters.szn);
