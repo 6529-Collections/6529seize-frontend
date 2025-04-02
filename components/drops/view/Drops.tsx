@@ -141,7 +141,6 @@ export default function Drops() {
         targetDropRef={null}
         showReplyAndQuote={false}
         activeDrop={null}
-        isFetchingNextPage={isFetchingNextPage}
         onQuoteClick={onQuoteClick}
         dropViewDropId={null}
       />

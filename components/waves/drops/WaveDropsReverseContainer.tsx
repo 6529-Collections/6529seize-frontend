@@ -1,12 +1,12 @@
 import React, { forwardRef, useRef, useEffect, useCallback } from "react";
 import { useIntersectionObserver } from "../../../hooks/scroll/useIntersectionObserver";
-import { useScrollPositionRestorer } from "../../../hooks/scroll/useScrollPositionRestorer";
-import { useStickToBottom } from "../../../hooks/scroll/useStickToBottom";
+
 
 interface WaveDropsReverseContainerProps {
   readonly children: React.ReactNode;
   readonly onTopIntersection: () => void;
   readonly isFetchingNextPage: boolean;
+  readonly hasNextPage: boolean;
   readonly onUserScroll?: (
     direction: "up" | "down",
     isAtBottom: boolean
@@ -16,20 +16,12 @@ interface WaveDropsReverseContainerProps {
 export const WaveDropsReverseContainer = forwardRef<
   HTMLDivElement,
   WaveDropsReverseContainerProps
->(({ children, onTopIntersection, isFetchingNextPage, onUserScroll }, ref) => {
+>(({ children, onTopIntersection, isFetchingNextPage, hasNextPage, onUserScroll }, ref) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const topSentinelRef = useRef<HTMLDivElement>(null);
   const lastScrollTop = useRef<number>(0);
   const isAtBottom = useRef<boolean>(true);
   const scrollRafId = useRef<number | null>(null);
-
-  // // Apply the custom hooks
-  // useScrollPositionRestorer(scrollContainerRef, isFetchingNextPage);
-  // useStickToBottom(
-  //   scrollContainerRef,
-  //   React.Children.count(children),
-  //   isAtBottom.current
-  // );
 
   const handleIntersection = useCallback(
     (entry: IntersectionObserverEntry) => {
@@ -52,23 +44,23 @@ export const WaveDropsReverseContainer = forwardRef<
   );
 
   const handleScroll = useCallback(() => {
-    // if (scrollRafId.current) {
-    //   cancelAnimationFrame(scrollRafId.current);
-    // }
-    // scrollRafId.current = requestAnimationFrame(() => {
-    //   const container = scrollContainerRef.current;
-    //   if (!container) return;
-    //   const { scrollTop } = container;
-    //   // In a flex-col-reverse container, we're at the visual bottom when scrollTop is near 0
-    //   const currentIsAtBottom = scrollTop > -5;
-    //   isAtBottom.current = currentIsAtBottom;
-    //   // In a flex-col-reverse container, scrolling "up" means the scrollTop is increasing
-    //   // and scrolling "down" means the scrollTop is decreasing
-    //   const direction = scrollTop < lastScrollTop.current ? "up" : "down";
-    //   onUserScroll?.(direction, currentIsAtBottom);
-    //   lastScrollTop.current = scrollTop;
-    //   scrollRafId.current = null;
-    // });
+    if (scrollRafId.current) {
+      cancelAnimationFrame(scrollRafId.current);
+    }
+    scrollRafId.current = requestAnimationFrame(() => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      const { scrollTop } = container;
+      // In a flex-col-reverse container, we're at the visual bottom when scrollTop is near 0
+      const currentIsAtBottom = scrollTop > -5;
+      isAtBottom.current = currentIsAtBottom;
+      // In a flex-col-reverse container, scrolling "up" means the scrollTop is increasing
+      // and scrolling "down" means the scrollTop is decreasing
+      const direction = scrollTop < lastScrollTop.current ? "up" : "down";
+      onUserScroll?.(direction, currentIsAtBottom);
+      lastScrollTop.current = scrollTop;
+      scrollRafId.current = null;
+    });
   }, [onUserScroll]);
 
   // Cleanup for any pending animation frames
@@ -90,7 +82,7 @@ export const WaveDropsReverseContainer = forwardRef<
     >
       <div className="tw-flex tw-flex-col-reverse">
         {children}
-        {true && (
+        {hasNextPage && (
           <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
             <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
           </div>

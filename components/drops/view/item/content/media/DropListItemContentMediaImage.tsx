@@ -197,7 +197,7 @@ function DropListItemContentMediaImage({
           ref={imgRef}
           src={getScaledImageUri(src, ImageScale.AUTOx450)}
           alt="Drop media"
-          className={`tw-object-contain tw-max-w-full tw-max-h-full ${
+          className={`tw-object-contain tw-max-w-full tw-max-h-[516px] ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           } tw-cursor-pointer`}
           style={{

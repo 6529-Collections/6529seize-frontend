@@ -145,6 +145,7 @@ const WaveDrop = ({
 
   const shouldGroupWithPreviousDrop =
     !isDrop && shouldGroupWithDrop(drop, previousDrop);
+
   const shouldGroupWithNextDrop =
     !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
@@ -227,12 +228,14 @@ const WaveDrop = ({
     <div
       className={`${
         isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""
-      } tw-w-full`}>
+      } tw-w-full`}
+    >
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}>
+        onTouchMove={handleTouchMove}
+      >
         {drop.reply_to &&
           (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
             drop.author.handle !== previousDrop?.author.handle) &&
@@ -252,7 +255,8 @@ const WaveDrop = ({
           {!shouldGroupWithPreviousDrop && <WaveDropAuthorPfp drop={drop} />}
           <div
             className="tw-flex tw-flex-col tw-w-full tw-gap-y-1"
-            style={{ maxWidth: "calc(100% - 2.5rem - 0.75rem)" }}>
+            style={{ maxWidth: "calc(100% - 2.5rem - 0.75rem)" }}
+          >
             {!shouldGroupWithPreviousDrop && (
               <WaveDropHeader
                 drop={drop}
@@ -267,7 +271,8 @@ const WaveDrop = ({
                 shouldGroupWithPreviousDrop
                   ? "tw-ml-[3.25rem] tw-py-[0.15625rem]"
                   : ""
-              }>
+              }
+            >
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}

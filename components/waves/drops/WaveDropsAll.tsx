@@ -54,7 +54,6 @@ export default function WaveDropsAll({
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
-  const [disableAutoPosition, setDisableAutoPosition] = useState(false);
   const {
     drops,
     fetchNextPage,
@@ -62,7 +61,6 @@ export default function WaveDropsAll({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-    refetch,
   } = useWaveDrops({
     waveId,
     connectedProfileHandle: connectedProfile?.profile?.handle,
@@ -70,12 +68,8 @@ export default function WaveDropsAll({
     dropId,
   });
 
-  const {
-    scrollContainerRef,
-    isAtBottom: hookIsAtBottom,
-    scrollToVisualTop,
-    scrollToVisualBottom,
-  } = useScrollBehavior();
+  const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
+    useScrollBehavior();
 
   const [isAtBottom, setIsAtBottom] = useState(true);
 
@@ -109,8 +103,6 @@ export default function WaveDropsAll({
     [serialNo]
   );
 
-  const [newItemsCount, setNewItemsCount] = useState(0);
-
   useEffect(() => {
     setTitle({
       title: haveNewDrops ? "New Drops Available | 6529.io" : null,
@@ -128,52 +120,18 @@ export default function WaveDropsAll({
   // Auto-scroll to bottom when new drops are available and user is already at bottom
   const [isHandlingNewDrops, setIsHandlingNewDrops] = useState(false);
 
-  // useEffect(() => {
-  //   if (
-  //     haveNewDrops &&
-  //     isAtBottom &&
-  //     !isHandlingNewDrops &&
-  //     !isFetching &&
-  //     !userHasManuallyScrolled
-  //   ) {
-  //     setIsHandlingNewDrops(true);
-  //     refetch()
-  //       .then(() => {
-  //         setTimeout(() => {
-  //           scrollToVisualBottom();
-  //           setIsHandlingNewDrops(false);
-  //         }, 100); // Small delay to ensure DOM is updated
-  //       })
-  //       .catch(() => {
-  //         // In case of error, still reset the handling state
-  //         setIsHandlingNewDrops(false);
-  //       });
-  //   }
-  // }, [
-  //   haveNewDrops,
-  //   isAtBottom,
-  //   isHandlingNewDrops,
-  //   isFetching,
-  //   refetch,
-  //   scrollToVisualBottom,
-  //   userHasManuallyScrolled,
-  // ]);
-
   const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
 
   useEffect(() => {
     if (drops.length > 0) {
       setInit(true);
-      setNewItemsCount((prevCount) => {
-        const newCount = drops.length - prevCount;
-        return prevCount !== newCount ? newCount : prevCount;
-      });
+
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
 
       // Check if the last drop is a temp drop (your own post)
-      const lastDrop = drops[drops.length - 1];
+      const lastDrop = drops[0];
       if (lastDrop.id.startsWith("temp-")) {
         // For user's own new drop, scroll to bottom - but only if they haven't manually scrolled away
         if (isAtBottom && !userHasManuallyScrolled) {
@@ -199,54 +157,52 @@ export default function WaveDropsAll({
     }).catch((error) => console.error("Failed to mark feed as read:", error));
   }, [waveId]);
 
-  // const fetchAndScrollToDrop = useCallback(async () => {
-  //   if (!serialNo) return;
-  //   let found = false;
-  //   setIsScrolling(true);
+  const fetchAndScrollToDrop = useCallback(async () => {
+    if (!serialNo) return;
+    let found = false;
+    setIsScrolling(true);
 
-  //   const checkAndFetchNext = async () => {
-  //     if (found || !hasNextPage || isFetching || isFetchingNextPage) {
-  //       setIsScrolling(false);
-  //       return;
-  //     }
-  //     await fetchNextPage();
+    const checkAndFetchNext = async () => {
+      if (found || !hasNextPage || isFetching || isFetchingNextPage) {
+        setIsScrolling(false);
+        return;
+      }
+      await fetchNextPage();
 
-  //     if (smallestSerialNo.current && smallestSerialNo.current <= serialNo) {
-  //       found = true;
-  //       await new Promise((resolve) => setTimeout(resolve, 1000));
-  //       scrollToSerialNo("smooth");
-  //       setIsScrolling(false);
-  //       setSerialNo(null);
-  //     } else {
-  //       scrollToVisualTop();
-  //       setTimeout(checkAndFetchNext, 1000);
-  //     }
-  //   };
+      if (smallestSerialNo.current && smallestSerialNo.current <= serialNo) {
+        found = true;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        scrollToSerialNo("smooth");
+        setIsScrolling(false);
+        setSerialNo(null);
+      } else {
+        scrollToVisualTop();
+        setTimeout(checkAndFetchNext, 1000);
+      }
+    };
 
-  //   checkAndFetchNext();
-  // }, [
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   isFetching,
-  //   isFetchingNextPage,
-  //   scrollToSerialNo,
-  //   serialNo,
-  //   setSerialNo,
-  //   scrollToVisualTop,
-  // ]);
+    checkAndFetchNext();
+  }, [
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    scrollToSerialNo,
+    serialNo,
+    setSerialNo,
+    scrollToVisualTop,
+  ]);
 
-  // useEffect(() => {
-  //   if (init && serialNo) {
-  //     setDisableAutoPosition(true);
-  //     const success = scrollToSerialNo("smooth");
-  //     if (success) {
-  //       setSerialNo(null);
-  //     } else {
-  //       fetchAndScrollToDrop();
-  //     }
-  //     setTimeout(() => setDisableAutoPosition(false), 1000);
-  //   }
-  // }, [init, serialNo]);
+  useEffect(() => {
+    if (init && serialNo) {
+      const success = scrollToSerialNo("smooth");
+      if (success) {
+        setSerialNo(null);
+      } else {
+        fetchAndScrollToDrop();
+      }
+    }
+  }, [init, serialNo]);
 
   const handleTopIntersection = useCallback(() => {
     if (
@@ -294,11 +250,10 @@ export default function WaveDropsAll({
 
     return (
       <>
-
-
         <WaveDropsReverseContainer
           ref={scrollContainerRef}
           isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
           onTopIntersection={handleTopIntersection}
           onUserScroll={(direction, isAtBottom) => {
             setIsAtBottom(isAtBottom);
@@ -312,7 +267,6 @@ export default function WaveDropsAll({
             onReplyClick={setSerialNo}
             drops={drops}
             showWaveInfo={false}
-            isFetchingNextPage={isFetchingNextPage}
             onReply={onReply}
             onQuote={onQuote}
             showReplyAndQuote={true}

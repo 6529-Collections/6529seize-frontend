@@ -19,7 +19,6 @@ interface DropsListProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
-  readonly isFetchingNextPage: boolean;
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
@@ -39,7 +38,6 @@ const DropsList = memo(function DropsList({
   showWaveInfo,
   activeDrop,
   showReplyAndQuote,
-  isFetchingNextPage,
   onReply,
   onQuote,
   onReplyClick,
@@ -50,8 +48,6 @@ const DropsList = memo(function DropsList({
   onDropContentClick,
   dropViewDropId,
 }: DropsListProps) {
-  // Track renders for debugging
-  // console.log("DropsList render", drops.length);
   const handleReply = useCallback<DropActionHandler>(
     ({ drop, partId }) => onReply({ drop, partId }),
     [onReply]
@@ -105,9 +101,9 @@ const DropsList = memo(function DropsList({
   const memoizedDrops = useMemo(
     () =>
       drops.map((drop, i) => {
-        const previousDrop = drops[i - 1] ?? null;
-        const nextDrop = drops[i + 1] ?? null;
-        
+        const previousDrop = drops[i + 1] ?? null;
+        const nextDrop = drops[i - 1] ?? null;
+
         return (
           <div
             key={drop.stableKey}
