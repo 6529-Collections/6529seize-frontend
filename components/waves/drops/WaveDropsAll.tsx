@@ -117,8 +117,6 @@ export default function WaveDropsAll({
     };
   }, [haveNewDrops]);
 
-  // Auto-scroll to bottom when new drops are available and user is already at bottom
-  const [isHandlingNewDrops, setIsHandlingNewDrops] = useState(false);
 
   const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
@@ -208,8 +206,7 @@ export default function WaveDropsAll({
     if (
       hasNextPage &&
       !isFetching &&
-      !isFetchingNextPage &&
-      !isHandlingNewDrops
+      !isFetchingNextPage
     ) {
       fetchNextPage();
     }
@@ -218,7 +215,6 @@ export default function WaveDropsAll({
     isFetching,
     isFetchingNextPage,
     fetchNextPage,
-    isHandlingNewDrops,
   ]);
 
   const onQuoteClick = useCallback(

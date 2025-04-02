@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef } from 'react';
+import { RefObject, useEffect } from "react";
 
 interface UseIntersectionObserverOptions extends IntersectionObserverInit {
   freezeOnceVisible?: boolean;
@@ -12,23 +12,20 @@ export function useIntersectionObserver(
 ): void {
   useEffect(() => {
     const target = targetRef.current;
-    
+
     if (!enabled || !target) {
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]) {
-          callback(entries[0]);
-          
-          if (options.freezeOnceVisible && entries[0].isIntersecting) {
-            observer.disconnect();
-          }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]) {
+        callback(entries[0]);
+
+        if (options.freezeOnceVisible && entries[0].isIntersecting) {
+          observer.disconnect();
         }
-      },
-      options
-    );
+      }
+    }, options);
 
     observer.observe(target);
 
