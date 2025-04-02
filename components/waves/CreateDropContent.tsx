@@ -6,7 +6,6 @@ import {
   CreateDropConfig,
   CreateDropPart,
   CreateDropRequestPart,
-  DropMedia,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -16,7 +15,6 @@ import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/Mentio
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
 import { AuthContext } from "../auth/Auth";
-import { commonApiPost } from "../../services/api/common-api";
 import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
 import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
 import { ApiDrop } from "../../generated/models/ApiDrop";
@@ -193,25 +191,30 @@ export interface UploadingFile {
   progress: number;
 }
 
+const generateMediaForPart = (
+  media: File,
+  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
+) => {
+  return multiPartUpload({
+    file: media,
+    path: "drop",
+    onProgress: (progress) =>
+      setUploadingFiles((curr) => [
+        ...curr,
+        { file: media, isUploading: true, progress },
+      ]),
+  }).catch((error) => {
+    setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
+    throw error;
+  });
+};
+
 const generatePart = async (
   part: CreateDropPart,
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
 ): Promise<CreateDropRequestPart> => {
   const media = await Promise.all(
-    part.media.map((media) =>
-      multiPartUpload({
-        file: media,
-        path: "drop",
-        onProgress: (progress) =>
-          setUploadingFiles((curr) => [
-            ...curr,
-            { file: media, isUploading: true, progress },
-          ]),
-      }).catch((error) => {
-        setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
-        throw error;
-      })
-    )
+    part.media.map((media) => generateMediaForPart(media, setUploadingFiles))
   );
   return {
     ...part,

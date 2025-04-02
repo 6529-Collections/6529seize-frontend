@@ -3,7 +3,6 @@ import { DRAG_DROP_PASTE } from "@lexical/rich-text";
 import { isMimeType, mediaFileReader } from "@lexical/utils";
 import { $getNodeByKey, $insertNodes, COMMAND_PRIORITY_LOW } from "lexical";
 import { useEffect } from "react";
-import { commonApiPost } from "../../../../../services/api/common-api";
 import { $createImageNode } from "../nodes/ImageNode";
 import { multiPartUpload } from "../../../../waves/create-wave/services/multiPartUpload";
 

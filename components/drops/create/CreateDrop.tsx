@@ -15,7 +15,6 @@ import {
   QueryKey,
   ReactQueryWrapperContext,
 } from "../../react-query-wrapper/ReactQueryWrapper";
-import { ApiDropMedia } from "../../../generated/models/ApiDropMedia";
 import DropEditor from "./DropEditor";
 import { ApiCreateDropRequest } from "../../../generated/models/ApiCreateDropRequest";
 import { profileAndConsolidationsToProfileMin } from "../../../helpers/ProfileHelpers";
