@@ -181,15 +181,34 @@ export const WaveLeaderboardGalleryItem: React.FC<
         className="tw-aspect-square tw-bg-iron-900 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer"
         onClick={handleImageClick}
       >
-        <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out">
-          <img
-            src={getScaledImageUri(
-              drop.parts[0].media[0].url,
-              ImageScale.AUTOx450
-            )}
-            alt="Drop media"
-            className="tw-object-contain tw-max-w-full tw-max-h-full"
-          />
+        <div
+          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleImageClick();
+          }}
+        >
+          <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+            <DropListItemContentMedia
+              media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
+              media_url={getScaledImageUri(
+                drop.parts[0].media[0].url,
+                ImageScale.AUTOx450
+              )}
+              onContainerClick={() => {
+                // This prevents the default modal from opening in DropListItemContentMedia
+                // and lets the parent div's onClick handle navigation instead
+              }}
+            />
+            {/* Overlay div to intercept clicks so DropListItemContentMedia doesn't open its own modal */}
+            <div
+              className="tw-absolute tw-inset-0 tw-z-[1]"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleImageClick();
+              }}
+            />
+          </div>
         </div>
         <button
           className="tw-absolute tw-bottom-2 tw-right-2 tw-bg-black/40 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 tw-rounded-full tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-backdrop-blur-sm tw-z-10"
