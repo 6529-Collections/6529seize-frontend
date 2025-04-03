@@ -252,7 +252,6 @@ function DropPartMarkdown({
     AnchorHTMLAttributes<HTMLAnchorElement> &
     ExtraProps) => {
     const { href } = props;
-
     if (!href || !isValidLink(href)) {
       return null;
     }
@@ -322,7 +321,7 @@ function DropPartMarkdown({
     href: string,
     props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
   ) => {
-    const baseEndpoint = process.env.BASE_ENDPOINT || "";
+    const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
     const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
 
     if (isExternalLink) {
