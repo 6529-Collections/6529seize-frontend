@@ -9,13 +9,12 @@ import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdent
 import { amIUser } from "../../../../../helpers/Helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { useQueries } from "@tanstack/react-query";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { Page } from "../../../../../helpers/Types";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
 import { AuthContext } from "../../../../auth/Auth";
 import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
 }: {

@@ -1,4 +1,4 @@
-import { test, expect } from '../testHelpers';
+import { test, expect } from "../testHelpers";
 
 test.describe("Meme Gas Page", () => {
   test.beforeEach(async ({ page }, testInfo) => {
@@ -6,7 +6,7 @@ test.describe("Meme Gas Page", () => {
   });
 
   test("should load with correct title and heading", async ({ page }) => {
-    await expect(page).toHaveTitle("Meme Gas | 6529 SEIZE");
+    await expect(page).toHaveTitle("Meme Gas | 6529.io");
 
     const heading = page.locator("h1");
     await expect(heading).toContainText("Meme Gas");

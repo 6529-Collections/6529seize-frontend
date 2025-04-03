@@ -29,7 +29,7 @@ export default function ReMeme(props: any) {
 
   useEffect(() => {
     setTitle({
-      title: `${pageProps.name} | ReMemes | 6529 SEIZE`,
+      title: `${pageProps.name} | ReMemes | 6529.io`,
     });
   }, []);
 
@@ -40,7 +40,7 @@ export default function ReMeme(props: any) {
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content={`${pageProps.name} | ReMemes | 6529 SEIZE`}
+          content={`${pageProps.name} | ReMemes | 6529.io`}
         />
         <meta
           property="og:url"
@@ -48,11 +48,11 @@ export default function ReMeme(props: any) {
         />
         <meta
           property="og:title"
-          content={`${pageProps.name} | ReMemes | 6529 SEIZE`}
+          content={`${pageProps.name} | ReMemes | 6529.io`}
         />
         <meta
           property="og:description"
-          content={`${pageProps.name} | ReMemes | 6529 SEIZE`}
+          content={`${pageProps.name} | ReMemes | 6529.io`}
         />
         <meta property="og:image" content={parseIpfsUrl(pageProps.image)} />
       </Head>
@@ -76,7 +76,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
 
   let name = `${formatAddress(contract)} #${id}`;
 
-  let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
+  let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
   if (response && response.data && response.data.length > 0) {
     if (response.data[0].metadata?.name) {
       name = response.data[0].metadata.name;

@@ -5,7 +5,7 @@ import { useSeizeSettings } from "../contexts/SeizeSettingsContext";
 import { GetWaveSubscription200Response } from "../generated/models/GetWaveSubscription200Response";
 
 export function useWaveNotificationSubscription(wave: ApiWave) {
-  const seizeSettings = useSeizeSettings();
+  const { seizeSettings } = useSeizeSettings();
   return useQuery({
     queryKey: ["wave-notification-subscription", wave.id],
     queryFn: () => {
@@ -17,5 +17,14 @@ export function useWaveNotificationSubscription(wave: ApiWave) {
       !!wave.id &&
       wave.metrics.subscribers_count <=
         seizeSettings.all_drops_notifications_subscribers_limit,
+    retry: (failureCount, error) => {
+      if (failureCount >= 3) {
+        return false;
+      }
+      return true;
+    },
+    retryDelay: (failureCount) => {
+      return failureCount * 1000;
+    },
   });
 }

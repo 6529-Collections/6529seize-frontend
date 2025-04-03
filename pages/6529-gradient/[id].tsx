@@ -22,9 +22,8 @@ const GradientPageComponent = dynamic(
 export default function GradientPageIndex(props: any) {
   const { setTitle, title } = useContext(AuthContext);
 
-
   const pageProps = props.pageProps;
-  const pagenameFull = `${pageProps.name} | 6529 SEIZE`;
+  const pagenameFull = `${pageProps.name} | 6529.io`;
 
   useEffect(() => {
     setTitle({
@@ -44,7 +43,7 @@ export default function GradientPageIndex(props: any) {
         />
         <meta property="og:title" content={pageProps.name} />
         <meta property="og:image" content={pageProps.image} />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
       </Head>
 
       <main className={styles.main}>
@@ -61,7 +60,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     `${process.env.API_ENDPOINT}/api/nfts?contract=${GRADIENT_CONTRACT}&id=${id}`
   );
   let name = `Gradient #${id}`;
-  let image = `${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`;
+  let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
   if (response && response.data && response.data.length > 0) {
     name = response.data[0].name;
     image = response.data[0].thumbnail

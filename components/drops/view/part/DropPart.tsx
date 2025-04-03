@@ -155,7 +155,7 @@ const DropPart = memo(
               }`}
             >
               {dropTitle && (
-                <p className="tw-font-semibold tw-text-primary-400 tw-text-md tw-mb-1">
+                <p className="tw-font-semibold tw-text-iron-100 tw-text-md tw-mb-0">
                   {dropTitle}
                 </p>
               )}

@@ -25,7 +25,7 @@ export default function RememeAddPage() {
   const { address, isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();
 
-  const seizeSettings = useSeizeSettings();
+  const { seizeSettings } = useSeizeSettings();
 
   const signMessage = useSignMessage();
   const [memes, setMemes] = useState<NFT[]>([]);

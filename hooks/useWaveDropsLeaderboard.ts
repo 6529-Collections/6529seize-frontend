@@ -1,5 +1,3 @@
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
-
 import { useCallback, useEffect, useState } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import {
@@ -17,25 +15,18 @@ import { useDebounce } from "react-use";
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
 import useCapacitor from "./useCapacitor";
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
-export enum WaveDropsLeaderboardSortBy {
+export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
-  CREATION_TIME = "CREATION_TIME",
-}
-
-export enum WaveDropsLeaderboardSortDirection {
-  ASC = "ASC",
-  DESC = "DESC",
+  REALTIME_VOTE = "REALTIME_VOTE",
+  MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
 }
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | undefined;
-  readonly reverse: boolean;
-  readonly dropsSortBy: WaveDropsLeaderboardSortBy;
-  readonly sortDirection: WaveDropsLeaderboardSortDirection;
-  readonly handle?: string;
-  readonly pollingEnabled?: boolean;
+  readonly sort?: WaveDropsLeaderboardSort;
 }
 
 const POLLING_DELAY = 3000;
@@ -58,11 +49,7 @@ function useTabVisibility() {
 export function useWaveDropsLeaderboard({
   waveId,
   connectedProfileHandle,
-  reverse,
-  dropsSortBy,
-  sortDirection,
-  handle,
-  pollingEnabled = true,
+  sort = WaveDropsLeaderboardSort.RANK,
 }: UseWaveDropsLeaderboardProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -81,9 +68,7 @@ export function useWaveDropsLeaderboard({
     {
       waveId,
       page_size: WAVE_DROPS_PARAMS.limit,
-      sort: dropsSortBy,
-      sort_direction: sortDirection,
-      handle,
+      sort: sort,
     },
   ];
 
@@ -93,16 +78,11 @@ export function useWaveDropsLeaderboard({
       queryFn: async ({ pageParam }: { pageParam: number | null }) => {
         const params: Record<string, string> = {
           page_size: WAVE_DROPS_PARAMS.limit.toString(),
-          sort: dropsSortBy,
-          sort_direction: sortDirection,
+          sort: sort,
         };
 
         if (pageParam) {
           params.page = `${pageParam}`;
-        }
-
-        if (handle) {
-          params.author_identity = handle;
         }
 
         return await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -116,7 +96,7 @@ export function useWaveDropsLeaderboard({
       pages: 3,
       staleTime: 60000,
     });
-  }, [waveId, dropsSortBy]);
+  }, [waveId, sort]);
 
   const {
     data,
@@ -130,16 +110,11 @@ export function useWaveDropsLeaderboard({
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         page_size: WAVE_DROPS_PARAMS.limit.toString(),
-        sort: dropsSortBy,
-        sort_direction: sortDirection,
+        sort: sort,
       };
 
       if (pageParam) {
         params.page = `${pageParam}`;
-      }
-
-      if (handle) {
-        params.author_identity = handle;
       }
 
       const results = await commonApiFetch<ApiDropsLeaderboardPage>({
@@ -164,14 +139,13 @@ export function useWaveDropsLeaderboard({
               wave: page.wave,
               drops: page.drops,
             })),
-            prev,
-            reverse
+            prev
           )
         : [];
       return generateUniqueKeys(newDrops, prev);
     });
     setHasInitialized(true);
-  }, [data, reverse]);
+  }, [data]);
 
   useDebounce(() => setCanPoll(true), 10000, [data]);
 
@@ -180,28 +154,22 @@ export function useWaveDropsLeaderboard({
     queryFn: async () => {
       const params: Record<string, string> = {
         page_size: "1",
-        sort: dropsSortBy,
-        sort_direction: sortDirection,
+        sort: sort,
       };
-
-      if (handle) {
-        params.author_identity = handle;
-      }
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,
         params,
       });
     },
-    enabled: !haveNewDrops && canPoll && pollingEnabled,
-    refetchInterval:
-      isTabVisible && pollingEnabled
-        ? ACTIVE_POLLING_INTERVAL
-        : INACTIVE_POLLING_INTERVAL,
-    refetchOnWindowFocus: pollingEnabled,
-    refetchOnMount: pollingEnabled,
-    refetchOnReconnect: pollingEnabled,
-    refetchIntervalInBackground: !isCapacitor && pollingEnabled,
+    enabled: !haveNewDrops && canPoll,
+    refetchInterval: isTabVisible
+      ? ACTIVE_POLLING_INTERVAL
+      : INACTIVE_POLLING_INTERVAL,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
+    refetchIntervalInBackground: !isCapacitor,
   });
 
   useEffect(() => {

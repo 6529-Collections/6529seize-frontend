@@ -23,7 +23,7 @@ interface WaveRatingProps {
 }
 
 export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
-  const seizeSettings = useSeizeSettings();
+  const { seizeSettings } = useSeizeSettings();
   const disableSelection =
     wave.metrics.subscribers_count >=
     seizeSettings.all_drops_notifications_subscribers_limit;
@@ -39,12 +39,8 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
   const [loadingMentions, setLoadingMentions] = useState<boolean>(false);
 
   useEffect(() => {
-    if (data) {
-      setIsAllEnabled(data.subscribed);
-    } else {
-      setIsAllEnabled(false);
-    }
-  }, [data]);
+    setIsAllEnabled(data?.subscribed && !disableSelection);
+  }, [data, disableSelection]);
 
   const toggleAllNotifications = useCallback(async () => {
     if (isAllEnabled) {

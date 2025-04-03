@@ -4,6 +4,9 @@ import WaveDrop from "./WaveDrop";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import ParticipationDrop from "./participation/ParticipationDrop";
+import WinnerDrop from "./winner/WinnerDrop";
+import DropContext from "./DropContext";
+import { useMemo } from "react";
 
 export interface DropInteractionParams {
   drop: ExtendedDrop;
@@ -48,8 +51,8 @@ export default function Drop({
   showReplyAndQuote,
   parentContainerRef,
 }: DropProps) {
-  if (drop.drop_type === ApiDropType.Participatory) {
-    return (
+  const components: Record<ApiDropType, React.ReactNode> = {
+    [ApiDropType.Participatory]: (
       <ParticipationDrop
         drop={drop}
         showWaveInfo={showWaveInfo}
@@ -62,24 +65,50 @@ export default function Drop({
         showReplyAndQuote={showReplyAndQuote}
         parentContainerRef={parentContainerRef}
       />
-    );
-  }
+    ),
+    [ApiDropType.Winner]: (
+      <WinnerDrop
+        drop={drop}
+        previousDrop={previousDrop}
+        nextDrop={nextDrop}
+        showWaveInfo={showWaveInfo}
+        activeDrop={activeDrop}
+        location={location}
+        dropViewDropId={dropViewDropId}
+        onReply={onReply}
+        onQuote={onQuote}
+        onReplyClick={onReplyClick}
+        onQuoteClick={onQuoteClick}
+        onDropContentClick={onDropContentClick}
+        showReplyAndQuote={showReplyAndQuote}
+        parentContainerRef={parentContainerRef}
+      />
+    ),
+    [ApiDropType.Chat]: (
+      <WaveDrop
+        drop={drop}
+        previousDrop={previousDrop}
+        nextDrop={nextDrop}
+        showWaveInfo={showWaveInfo}
+        activeDrop={activeDrop}
+        location={location}
+        dropViewDropId={dropViewDropId}
+        onReply={onReply}
+        onQuote={onQuote}
+        onReplyClick={onReplyClick}
+        onQuoteClick={onQuoteClick}
+        onDropContentClick={onDropContentClick}
+        showReplyAndQuote={showReplyAndQuote}
+        parentContainerRef={parentContainerRef}
+      />
+    ),
+  };
+
+  const memoizedValue = useMemo(() => ({ drop, location }), [drop, location]);
+
   return (
-    <WaveDrop
-      drop={drop}
-      previousDrop={previousDrop}
-      nextDrop={nextDrop}
-      showWaveInfo={showWaveInfo}
-      activeDrop={activeDrop}
-      location={location}
-      dropViewDropId={dropViewDropId}
-      onReply={onReply}
-      onQuote={onQuote}
-      onReplyClick={onReplyClick}
-      onQuoteClick={onQuoteClick}
-      onDropContentClick={onDropContentClick}
-      showReplyAndQuote={showReplyAndQuote}
-      parentContainerRef={parentContainerRef}
-    />
+    <DropContext.Provider value={memoizedValue}>
+      {components[drop.drop_type]}
+    </DropContext.Provider>
   );
 }

@@ -15,12 +15,12 @@ import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 import {
   COLLECTED_COLLECTIONS_META,
   convertAddressToLowerCase,
 } from "./filters/user-page-collected-filters.helpers";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;

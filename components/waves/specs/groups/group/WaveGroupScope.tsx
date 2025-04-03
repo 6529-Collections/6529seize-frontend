@@ -18,7 +18,7 @@ export default function WaveGroupScope({
   return (
     <Link
       href={`/network?page=1&group=${group.id}`}
-      className="tw-no-underline hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
+      className="tw-no-underline desktop-hover:hover:tw-underline hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-gap-x-2"
     >
       {group.author?.pfp ? (
         <img

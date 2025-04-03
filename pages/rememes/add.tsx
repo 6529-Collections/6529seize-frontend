@@ -26,7 +26,7 @@ export default function ReMemes() {
 
   useEffect(() => {
     setTitle({
-      title: "Add ReMemes | 6529 SEIZE",
+      title: "Add ReMemes | 6529.io",
     });
   }, []);
 
@@ -35,13 +35,13 @@ export default function ReMemes() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Add ReMemes | 6529 SEIZE" />
+        <meta name="description" content="Add ReMemes | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/rememes/add`}
         />
         <meta property="og:title" content="ReMemes" />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
           content={`${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`}

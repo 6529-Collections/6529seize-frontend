@@ -5,6 +5,7 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import FeedItems from "./FeedItems";
 import { FeedScrollContainer } from "./FeedScrollContainer";
+import { useLayout } from "../my-stream/layout/LayoutContext";
 
 interface FeedWrapperProps {
   readonly items: TypedFeedItem[];
@@ -28,25 +29,32 @@ export default function FeedWrapper({
   onDropContentClick,
 }: FeedWrapperProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { feedViewStyle } = useLayout();
 
   const handleScrollUpNearTop = () => {
     onBottomIntersection(true);
   };
 
   return (
-    <FeedScrollContainer
-      ref={scrollRef}
-      onScrollUpNearTop={handleScrollUpNearTop}
-      isFetchingNextPage={loading}
+    <div 
+      className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl"
+      style={feedViewStyle}
     >
-      <FeedItems
-        items={items}
-        showWaveInfo={showWaveInfo}
-        activeDrop={activeDrop}
-        onReply={onReply}
-        onQuote={onQuote}
-        onDropContentClick={onDropContentClick}
-      />
-    </FeedScrollContainer>
+      <FeedScrollContainer
+        ref={scrollRef}
+        onScrollUpNearTop={handleScrollUpNearTop}
+        isFetchingNextPage={loading}
+        className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 lg:tw-pr-2"
+      >
+        <FeedItems
+          items={items}
+          showWaveInfo={showWaveInfo}
+          activeDrop={activeDrop}
+          onReply={onReply}
+          onQuote={onQuote}
+          onDropContentClick={onDropContentClick}
+        />
+      </FeedScrollContainer>
+    </div>
   );
 }

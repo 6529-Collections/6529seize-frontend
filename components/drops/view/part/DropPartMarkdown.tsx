@@ -1,4 +1,10 @@
-import { AnchorHTMLAttributes, ClassAttributes, memo, ReactNode } from "react";
+import {
+  AnchorHTMLAttributes,
+  ClassAttributes,
+  HTMLAttributes,
+  memo,
+  ReactNode,
+} from "react";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -17,11 +23,15 @@ import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropI
 import WaveDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import {
-  parseSeizeLink,
-  SeizeLinkInfo,
+  parseSeizeQueryLink,
+  parseSeizeQuoteLink,
+  SeizeQuoteLinkInfo,
 } from "../../../../helpers/SeizeLinkParser";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { useEmoji } from "../../../../contexts/EmojiContext";
+import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
+import WaveItemChat from "../../../waves/list/WaveItemChat";
+import DropItemChat from "../../../waves/drops/DropItemChat";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -50,7 +60,7 @@ function DropPartMarkdown({
       case "sm":
         return isMobile ? "tw-text-xs" : "tw-text-sm";
       default:
-        return isMobile ? "tw-text-sm" : "tw-text-md";
+        return "tw-text-md"; // Always use medium text for both mobile and desktop
     }
   })();
 
@@ -114,11 +124,30 @@ function DropPartMarkdown({
           const emojiRegex = /(:\w+:)/g;
           const parts = part.split(emojiRegex);
 
+          const isEmoji = (str: string): boolean => {
+            const emojiTextRegex =
+              /^(?:\ud83c[\udffb-\udfff]|\ud83d[\udc00-\ude4f\ude80-\udfff]|\ud83e[\udd00-\uddff]|\u00a9|\u00ae|\u200d|\u203c|\u2049|\u2122|\u2139|\u2194-\u21aa|\u231a-\u23fa|\u24c2|\u25aa-\u25fe|\u2600-\u27bf|\u2934-\u2b55|\u3030|\u303d|\u3297|\u3299|\ufe0f)$/;
+            return emojiTextRegex.test(str.trim());
+          };
+
+          const areAllPartsEmojis = parts
+            .filter((p) => !!p)
+            .every((part) => part.match(emojiRegex) || isEmoji(part));
+
           return parts.map((part) =>
             part.match(emojiRegex) ? (
-              <span key={getRandomObjectId()}>{renderEmoji(part)}</span>
+              <span key={getRandomObjectId()}>
+                {renderEmoji(part, areAllPartsEmojis)}
+              </span>
             ) : (
-              <span key={getRandomObjectId()}>{part}</span>
+              <span
+                key={getRandomObjectId()}
+                className={`${
+                  areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
+                }`}
+              >
+                {part}
+              </span>
             )
           );
         }
@@ -161,7 +190,7 @@ function DropPartMarkdown({
     return content;
   };
 
-  const renderEmoji = (emojiProps: string) => {
+  const renderEmoji = (emojiProps: string, bigEmoji: boolean) => {
     const emojiId = emojiProps.replaceAll(":", "");
     const emoji = emojiMap
       .flatMap((cat) => cat.emojis)
@@ -172,7 +201,11 @@ function DropPartMarkdown({
     }
 
     return (
-      <img src={emoji.skins[0].src} alt={emojiId} className="emoji-node" />
+      <img
+        src={emoji.skins[0].src}
+        alt={emojiId}
+        className={`${bigEmoji ? "emoji-node-big" : "emoji-node"}`}
+      />
     );
   };
 
@@ -184,22 +217,38 @@ function DropPartMarkdown({
     ExtraProps) => {
     const { href } = props;
 
-    if (!href) {
+    if (!href || !isValidLink(href)) {
       return null;
     }
 
-    const seizeLinkInfo = parseSeizeLink(href);
-    if (seizeLinkInfo) {
-      return renderSeizeQuote(seizeLinkInfo, onQuoteClick);
+    const quoteInfo = parseSeizeQuoteLink(href);
+    if (quoteInfo) {
+      return renderSeizeQuote(quoteInfo, onQuoteClick);
+    }
+
+    const groupResult = parseSeizeQueryLink(href, "/network", ["group"]);
+    if (groupResult) {
+      return <GroupCardChat href={href} groupId={groupResult.group} />;
+    }
+
+    const waveResult = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
+    if (waveResult) {
+      return <WaveItemChat href={href} waveId={waveResult.wave} />;
+    }
+
+    const dropResult = parseSeizeQueryLink(
+      href,
+      "/my-stream",
+      ["wave", "drop"],
+      true
+    );
+    if (dropResult) {
+      return <DropItemChat href={href} dropId={dropResult.drop} />;
     }
 
     const twitterMatch = parseTwitterLink(href);
     if (twitterMatch) {
       return renderTweetEmbed(twitterMatch, href);
-    }
-
-    if (!isValidLink(href)) {
-      return <p>[invalid link]</p>;
     }
 
     return renderExternalOrInternalLink(href, props);
@@ -218,7 +267,8 @@ function DropPartMarkdown({
         className="tw-no-underline"
         target="_blank"
         href={href}
-        data-theme="dark">
+        data-theme="dark"
+      >
         <Tweet id={tweetId} />
       </Link>
     </div>
@@ -261,10 +311,10 @@ function DropPartMarkdown({
   };
 
   const renderSeizeQuote = (
-    seizeLinkInfo: SeizeLinkInfo,
+    quoteLinkInfo: SeizeQuoteLinkInfo,
     onQuoteClick: (drop: ApiDrop) => void
   ) => {
-    const { waveId, serialNo, dropId } = seizeLinkInfo;
+    const { waveId, serialNo, dropId } = quoteLinkInfo;
 
     if (serialNo) {
       return (
@@ -288,6 +338,26 @@ function DropPartMarkdown({
     return null;
   };
 
+  const renderP = (
+    params: ClassAttributes<HTMLParagraphElement> &
+      HTMLAttributes<HTMLParagraphElement> &
+      ExtraProps
+  ) => {
+    if (typeof params.children === "string") {
+      return (
+        <p
+          className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+          })}
+        </p>
+      );
+    }
+    return null;
+  };
   return (
     <Markdown
       rehypePlugins={[
@@ -349,16 +419,7 @@ function DropPartMarkdown({
             })}
           </h1>
         ),
-        p: (params) => (
-          <p
-            className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-            })}
-          </p>
-        ),
+        p: renderP,
         li: (params) => (
           <li className="tw-text-md tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
@@ -371,7 +432,8 @@ function DropPartMarkdown({
         code: (params) => (
           <code
             style={{ textOverflow: "unset" }}
-            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words">
+            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words"
+          >
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -390,7 +452,8 @@ function DropPartMarkdown({
             })}
           </blockquote>
         ),
-      }}>
+      }}
+    >
       {partContent}
     </Markdown>
   );

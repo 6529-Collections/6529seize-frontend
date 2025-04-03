@@ -59,6 +59,7 @@ export * from '../models/ApiDropSubscriptionTargetAction';
 export * from '../models/ApiDropTraceItem';
 export * from '../models/ApiDropType';
 export * from '../models/ApiDropVote';
+export * from '../models/ApiDropWinningContext';
 export * from '../models/ApiDropWithoutWave';
 export * from '../models/ApiDropsLeaderboardPage';
 export * from '../models/ApiDropsPage';
@@ -154,6 +155,7 @@ export * from '../models/ApiWaveVoter';
 export * from '../models/ApiWaveVotersPage';
 export * from '../models/ApiWaveVotingConfig';
 export * from '../models/ApiWavesOverviewType';
+export * from '../models/CreateDirectMessageWaveRequest';
 export * from '../models/GetWaveSubscription200Response';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
@@ -180,7 +182,7 @@ import { ApiChangeProfileCicRatingResponse } from '../models/ApiChangeProfileCic
 import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
 import { ApiChangeProfileRepRatingResponse } from '../models/ApiChangeProfileRepRatingResponse';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
-import { ApiCreateDropRequest          } from '../models/ApiCreateDropRequest';
+import { ApiCreateDropRequest           } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription } from '../models/ApiCreateGroupDescription';
 import { ApiCreateMediaUploadUrlRequest } from '../models/ApiCreateMediaUploadUrlRequest';
@@ -198,9 +200,9 @@ import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveP
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
 import { ApiCreateNewWaveVotingConfig        } from '../models/ApiCreateNewWaveVotingConfig';
-import { ApiCreateWaveConfig       } from '../models/ApiCreateWaveConfig';
+import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
-import { ApiDrop                     } from '../models/ApiDrop';
+import { ApiDrop                        } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropContextProfileContext   , ApiDropContextProfileContextRatingCurrencyEnum   } from '../models/ApiDropContextProfileContext';
 import { ApiDropMedia } from '../models/ApiDropMedia';
@@ -217,7 +219,8 @@ import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTa
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropVote } from '../models/ApiDropVote';
-import { ApiDropWithoutWave                    } from '../models/ApiDropWithoutWave';
+import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
+import { ApiDropWithoutWave                       } from '../models/ApiDropWithoutWave';
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsPage } from '../models/ApiDropsPage';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
@@ -281,7 +284,7 @@ import { ApiUploadItem } from '../models/ApiUploadItem';
 import { ApiUploadsPage } from '../models/ApiUploadsPage';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
-import { ApiWaveConfig        } from '../models/ApiWaveConfig';
+import { ApiWaveConfig          } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
@@ -294,7 +297,7 @@ import { ApiWaveDropsFeed } from '../models/ApiWaveDropsFeed';
 import { ApiWaveLog } from '../models/ApiWaveLog';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin           } from '../models/ApiWaveMin';
+import { ApiWaveMin                  } from '../models/ApiWaveMin';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
 import { ApiWaveOutcomeDistributionItem } from '../models/ApiWaveOutcomeDistributionItem';
@@ -312,6 +315,7 @@ import { ApiWaveVoter } from '../models/ApiWaveVoter';
 import { ApiWaveVotersPage } from '../models/ApiWaveVotersPage';
 import { ApiWaveVotingConfig        } from '../models/ApiWaveVotingConfig';
 import { ApiWavesOverviewType } from '../models/ApiWavesOverviewType';
+import { CreateDirectMessageWaveRequest } from '../models/CreateDirectMessageWaveRequest';
 import { GetWaveSubscription200Response } from '../models/GetWaveSubscription200Response';
 
 /* tslint:disable:no-unused-variable */
@@ -412,6 +416,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropSubscriptionActions": ApiDropSubscriptionActions,
     "ApiDropTraceItem": ApiDropTraceItem,
     "ApiDropVote": ApiDropVote,
+    "ApiDropWinningContext": ApiDropWinningContext,
     "ApiDropWithoutWave": ApiDropWithoutWave,
     "ApiDropsLeaderboardPage": ApiDropsLeaderboardPage,
     "ApiDropsPage": ApiDropsPage,
@@ -490,6 +495,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveVoter": ApiWaveVoter,
     "ApiWaveVotersPage": ApiWaveVotersPage,
     "ApiWaveVotingConfig": ApiWaveVotingConfig,
+    "CreateDirectMessageWaveRequest": CreateDirectMessageWaveRequest,
     "GetWaveSubscription200Response": GetWaveSubscription200Response,
 }
 

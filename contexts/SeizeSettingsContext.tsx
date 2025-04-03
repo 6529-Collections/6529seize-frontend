@@ -4,39 +4,66 @@ import React, {
   useState,
   useEffect,
   ReactNode,
+  useMemo,
 } from "react";
 import { ApiSeizeSettings } from "../generated/models/ApiSeizeSettings";
 import { fetchUrl } from "../services/6529api";
 
-const SeizeSettingsContext = createContext<ApiSeizeSettings | undefined>(
-  undefined
-);
+type SeizeSettingsContextType = {
+  seizeSettings: ApiSeizeSettings;
+  isMemesWave: (waveId: string | undefined | null) => boolean;
+};
+
+const SeizeSettingsContext = createContext<
+  SeizeSettingsContextType | undefined
+>(undefined);
 
 export const SeizeSettingsProvider = ({
   children,
 }: {
   children: ReactNode;
 }) => {
-  const [seizeSettings, setSeizeSettings] = useState<
-    ApiSeizeSettings | undefined
-  >(undefined);
+  const [seizeSettings, setSeizeSettings] = useState<ApiSeizeSettings>({
+    rememes_submission_tdh_threshold: 0,
+    all_drops_notifications_subscribers_limit: 0,
+    memes_wave_id: null,
+  });
 
   useEffect(() => {
     fetchUrl(`${process.env.API_ENDPOINT}/api/settings`).then(
       (settings: ApiSeizeSettings) => {
-        setSeizeSettings(settings);
+        setSeizeSettings({
+          ...settings,
+          memes_wave_id:
+            process.env.NODE_ENV === "development"
+              ? "b6128077-ea78-4dd9-b381-52c4eadb2077"
+              : settings.memes_wave_id,
+        });
       }
     );
   }, []);
 
+  const isMemesWave = (waveId: string | undefined | null): boolean => {
+    if (!waveId) return false;
+    return seizeSettings?.memes_wave_id === waveId;
+  };
+
+  const value: SeizeSettingsContextType = useMemo(
+    () => ({
+      seizeSettings,
+      isMemesWave,
+    }),
+    [seizeSettings, isMemesWave]
+  );
+
   return (
-    <SeizeSettingsContext.Provider value={seizeSettings}>
+    <SeizeSettingsContext.Provider value={value}>
       {children}
     </SeizeSettingsContext.Provider>
   );
 };
 
-export const useSeizeSettings = (): ApiSeizeSettings => {
+export const useSeizeSettings = (): SeizeSettingsContextType => {
   const context = useContext(SeizeSettingsContext);
   if (context === undefined) {
     throw new Error(

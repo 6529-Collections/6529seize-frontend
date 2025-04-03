@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveContent } from "./WaveContent";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 interface BrainRightSidebarProps {
   readonly isCollapsed: boolean;
@@ -24,6 +25,7 @@ export enum Mode {
 export enum SidebarTab {
   ABOUT = "ABOUT",
   LEADERBOARD = "LEADERBOARD",
+  WINNERS = "WINNERS",
   TOP_VOTERS = "TOP_VOTERS",
   ACTIVITY_LOG = "ACTIVITY_LOG",
 }
@@ -67,7 +69,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       <button
         type="button"
         aria-label="Toggle sidebar"
-        className={`tw-absolute tw-z-50 tw-top-28 tw-bg-primary-500 desktop-hover:hover:tw-opacity-80 tw-border tw-border-solid
+        className={`tw-absolute tw-z-50 tw-top-[7.25rem] tw-bg-primary-500 desktop-hover:hover:tw-opacity-80 tw-border tw-border-solid
           tw-border-primary-400 tw-size-7 tw-text-white desktop-hover:hover:tw-text-white tw-ring-1 tw-ring-white/20
           focus:tw-outline-none tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300 tw-ease-out
           ${isCollapsed ? 
@@ -93,7 +95,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
         </svg>
       </button>
       <div
-        className="tw-mt-[5.25rem] min-[1200px]:tw-mt-[6rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto 
+        className="tw-mt-[6.2rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto 
         tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 
         hover:tw-scrollbar-thumb-iron-300 tw-h-full"
       >

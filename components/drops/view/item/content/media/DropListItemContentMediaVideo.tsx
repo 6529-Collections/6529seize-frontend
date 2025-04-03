@@ -7,7 +7,7 @@ function DropListItemContentMediaVideo({
   readonly src: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-const capacitor = useCapacitor();
+  const capacitor = useCapacitor();
 
   const handleVideoClick = useCallback((event: React.MouseEvent<HTMLVideoElement>) => {
     if (videoRef.current) {
@@ -48,7 +48,7 @@ const capacitor = useCapacitor();
   }, []);
 
   return (
-    <div>
+    <div className="tw-h-full">
       <video
         ref={videoRef}
         playsInline 
@@ -56,7 +56,7 @@ const capacitor = useCapacitor();
         autoPlay={!capacitor.isCapacitor}
         muted
         loop
-        className="tw-w-full tw-rounded-xl tw-overflow-hidden tw-max-h-[516px]"
+        className="tw-w-full tw-rounded-xl tw-overflow-hidden tw-max-h-full tw-object-contain"
         onClick={handleVideoClick}
       >
         <source src={src} type="video/mp4" />

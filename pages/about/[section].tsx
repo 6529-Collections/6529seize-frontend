@@ -165,7 +165,7 @@ export default function About(props: any) {
 
   useEffect(() => {
     setTitle({
-      title: `About - ${sectionTitle} | 6529 SEIZE`,
+      title: `About - ${sectionTitle} | 6529.io`,
     });
   }, [sectionTitle]);
 
@@ -176,17 +176,17 @@ export default function About(props: any) {
         <link rel="icon" href="/favicon.ico" />
         <meta
           name="description"
-          content={`About - ${sectionTitle} | 6529 SEIZE`}
+          content={`About - ${sectionTitle} | 6529.io`}
         />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/about/${section}`}
         />
         <meta property="og:title" content={`About - ${sectionTitle}`} />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
       <main className={styles.main}>

@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import HeaderUserConnecting from "./HeaderUserConnecting";
 import HeaderUserContext from "./HeaderUserContext";
-
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 export default function HeaderUserConnected({
   connectedAddress,
 }: {

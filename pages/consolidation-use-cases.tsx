@@ -16,7 +16,7 @@ export default function ConsolidationUseCases() {
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Consolidation Use Cases | 6529 SEIZE",
+      title: "Consolidation Use Cases | 6529.io",
     });
   }, []);
 
@@ -47,19 +47,16 @@ export default function ConsolidationUseCases() {
       <Head>
         <title>{title}</title>
         <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content="Consolidation Use Cases | 6529 SEIZE"
-        />
+        <meta name="description" content="Consolidation Use Cases | 6529.io" />
         <meta
           property="og:url"
           content={`${process.env.BASE_ENDPOINT}/consolidation-use-cases`}
         />
         <meta property="og:title" content="Consolidation Use Cases" />
-        <meta property="og:description" content="6529 SEIZE" />
+        <meta property="og:description" content="6529.io" />
         <meta
           property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/Seize_Logo_Glasses_2.png`}
+          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
       <main className={`${styles.main} ${styles.tdhMain}`}>

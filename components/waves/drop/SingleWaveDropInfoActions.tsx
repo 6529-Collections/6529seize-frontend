@@ -9,18 +9,24 @@ import { useDropInteractionRules } from "../../../hooks/drops/useDropInteraction
 interface SingleWaveDropInfoActionsProps {
   readonly drop: ExtendedDrop;
   readonly wave: ApiWave | null;
+  readonly showVotes?: boolean;
+  readonly className?: string;
 }
 
-export const SingleWaveDropInfoActions: React.FC<SingleWaveDropInfoActionsProps> = ({
-  drop,
-  wave,
-}) => {
-  const { canShowVote } = useDropInteractionRules(drop);
+export const SingleWaveDropInfoActions: React.FC<
+  SingleWaveDropInfoActionsProps
+> = ({ drop, wave, showVotes = true, className = "tw-px-6" }) => {
+  const { canShowVote, isWinner } = useDropInteractionRules(drop);
+
   return (
-    <div className="tw-px-6 tw-flex tw-flex-col tw-gap-y-3">
-      {wave && <SingleWaveDropTime wave={wave} />}
+    <div
+      className={`tw-flex tw-flex-col tw-gap-y-2 tw-mt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 ${className}`}
+    >
+      {/* Display time only for non-winner drops */}
+      {wave && !isWinner && <SingleWaveDropTime wave={wave} />}
+
       {canShowVote && <SingleWaveDropVote drop={drop} />}
-      {drop && <SingleWaveDropVotes drop={drop} />}
+      {showVotes && drop && <SingleWaveDropVotes drop={drop} />}
     </div>
   );
-}; 
+};

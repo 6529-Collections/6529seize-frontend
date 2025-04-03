@@ -1,5 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
-import useCapacitor from "../../../hooks/useCapacitor";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   ActiveDropAction,
   ActiveDropState,
@@ -13,42 +12,22 @@ import PrivilegedDropCreator, {
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
-import { useElectron } from "../../../hooks/useElectron";
+import { useLayout } from "./layout/LayoutContext";
+import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
+import { useWave } from "../../../hooks/useWave";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
 
-const calculateHeight = (
-  platform: string,
-  keyboardVisible: boolean,
-  isElectron: boolean
-) => {
-  if (platform === "ios") {
-    if (keyboardVisible) {
-      return "tw-h-[calc(100vh-16rem)]";
-    }
-    return "tw-h-[calc(100vh-18rem)]";
-  } else if (platform === "android") {
-    if (keyboardVisible) {
-      return "tw-h-[calc(100vh-12.5rem)]";
-    }
-    return "tw-h-[calc(100vh-16.5rem)]";
-  }
-  if (isElectron) {
-    return "tw-h-[calc(100vh-12.5rem)]";
-  }
-  return `tw-h-[calc(100vh-11.875rem)] lg:tw-h-[calc(100vh-9.125rem)] min-[1200px]:tw-h-[calc(100vh-9.875rem)]`;
-};
-
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
-  const capacitor = useCapacitor();
-  const isElectron = useElectron();
-
   const router = useRouter();
   const searchParams = useSearchParams();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const [searchParamsDone, setSearchParamsDone] = useState(false);
+  const { isMemesWave } = useWave(wave);
+  // Handle URL parameters
   useEffect(() => {
     const dropParam = searchParams.get("serialNo");
     if (dropParam) {
@@ -62,13 +41,18 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     setSearchParamsDone(true);
   }, [searchParams, router]);
 
+  const { waveViewStyle } = useLayout();
+
+  // Create container class based on wave type
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-hidden ${calculateHeight(
-      capacitor.platform,
-      capacitor.keyboardVisible,
-      isElectron
-    )}`;
-  }, [capacitor.platform, capacitor.keyboardVisible, isElectron]);
+    const baseStyles =
+      "tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow";
+
+    // Always use flex-grow for consistent height handling
+    const heightClass = "tw-flex-grow";
+
+    return `${baseStyles} ${heightClass}`;
+  }, []);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   useEffect(() => setActiveDrop(null), [wave]);
@@ -101,37 +85,40 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     setActiveDrop(null);
   };
 
+  // We don't need to calculate height style anymore as we're using chatContainerStyle from LayoutContext
+
   if (!searchParamsDone) {
     return null;
   }
-
   return (
-    <div className="tw-relative tw-h-full">
-      <div className="tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
-        <div className={containerClassName}>
-          <WaveDropsAll
-            key={wave.id}
-            waveId={wave.id}
-            onReply={handleReply}
-            onQuote={handleQuote}
+    <div
+      ref={containerRef}
+      className={`${containerClassName}`}
+      style={waveViewStyle}
+    >
+      <WaveDropsAll
+        key={wave.id}
+        waveId={wave.id}
+        onReply={handleReply}
+        onQuote={handleQuote}
+        activeDrop={activeDrop}
+        initialDrop={initialDrop}
+        dropId={null}
+      />
+      <div className="tw-mt-auto">
+        <CreateDropWaveWrapper>
+          <PrivilegedDropCreator
             activeDrop={activeDrop}
-            initialDrop={initialDrop}
+            onCancelReplyQuote={onCancelReplyQuote}
+            onDropAddedToQueue={onCancelReplyQuote}
+            wave={wave}
             dropId={null}
+            fixedDropMode={DropMode.BOTH}
           />
-          <div className="tw-mt-auto">
-            <CreateDropWaveWrapper>
-              <PrivilegedDropCreator
-                activeDrop={activeDrop}
-                onCancelReplyQuote={onCancelReplyQuote}
-                onDropAddedToQueue={onCancelReplyQuote}
-                wave={wave}
-                dropId={null}
-                fixedDropMode={DropMode.BOTH}
-              />
-            </CreateDropWaveWrapper>
-          </div>
-        </div>
+        </CreateDropWaveWrapper>
       </div>
+      {/* Floating submission button */}
+      {isMemesWave && <MobileMemesArtSubmissionBtn wave={wave} />}
     </div>
   );
 };

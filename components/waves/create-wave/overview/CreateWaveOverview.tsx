@@ -2,8 +2,6 @@ import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-w
 import { WaveOverviewConfig } from "../../../../types/waves.types";
 import CreateWaveImageInput from "./CreateWaveImageInput";
 import CreateWaveNameInput from "./CreateWaveNameInput";
-
-import CreateWaveSignature from "./signature/CreateWaveSignature";
 import CreateWaveType from "./type/CreateWaveType";
 
 export default function CreateWaveOverview({
@@ -56,11 +54,6 @@ export default function CreateWaveOverview({
             value: type,
           })
         }
-      />
-      <CreateWaveSignature
-        selectedWaveType={overview.type}
-        selectedSignatureType={overview.signatureType}
-        onChange={(type) => onChange({ key: "signatureType", value: type })}
       />
     </div>
   );

@@ -1,4 +1,3 @@
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { useCallback, useEffect, useState } from "react";
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
@@ -15,7 +14,7 @@ import {
 import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { useWavePolling } from "./useWavePolling";
 import useCapacitor from "./useCapacitor";
-
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 export enum WaveDropsSearchStrategy {
   FIND_OLDER = "FIND_OLDER",
   FIND_NEWER = "FIND_NEWER",
@@ -90,7 +89,7 @@ export function useWaveDrops({
 
   const {
     data,
-    fetchNextPage,
+    fetchNextPage: onFetchNextPage,
     hasNextPage,
     isFetching,
     isFetchingNextPage,
@@ -142,6 +141,12 @@ export function useWaveDrops({
     refetchIntervalInBackground: !isCapacitor,
   });
 
+  const fetchNextPage = useCallback(async () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      await onFetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
+
   const processDrops = (
     pages: ApiWaveDropsFeed[] | undefined,
     previousDrops: ExtendedDrop[],
@@ -165,11 +170,15 @@ export function useWaveDrops({
     setDrops((prev) => processDrops(data?.pages, prev, reverse));
   }, [data, reverse]);
 
+  const onRefetch = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
   const {
     hasNewDrops,
     error: pollingError,
     lastPolledData,
-  } = useWavePolling(queryKey, waveId, dropId, drops, isTabVisible, refetch);
+  } = useWavePolling(queryKey, waveId, dropId, drops, isTabVisible, onRefetch);
 
   const manualFetch = useCallback(async () => {
     if (hasNextPage) {

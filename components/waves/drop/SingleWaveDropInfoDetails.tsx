@@ -7,13 +7,14 @@ interface SingleWaveDropInfoDetailsProps {
   readonly drop: ExtendedDrop | undefined;
 }
 
-export const SingleWaveDropInfoDetails: React.FC<SingleWaveDropInfoDetailsProps> = ({
-  drop,
-}) => {
+export const SingleWaveDropInfoDetails: React.FC<
+  SingleWaveDropInfoDetailsProps
+> = ({ drop }) => {
+
   return (
-    <div className="tw-px-6 tw-mt-4 tw-space-y-4 tw-pb-6">
+    <div className="tw-px-6 tw-space-y-4 tw-pb-6 tw-pt-2">
       {drop && <SingleWaveDropVoters drop={drop} />}
       {drop && <SingleWaveDropLogs drop={drop} />}
     </div>
   );
-}; 
+};

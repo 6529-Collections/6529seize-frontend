@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useRouter } from "next/router";
 import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageRep from "./UserPageRep";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageRepWrapper({
   profile: initialProfile,

@@ -57,8 +57,10 @@ export const convertWaveToUpdateWave = (
     required_metadata: wave.participation.required_metadata,
     signature_required: !!wave.participation.signature_required,
     period: wave.participation.period,
+    terms: wave.participation.terms,
   },
   wave: {
+    admin_drop_deletion_enabled: wave.wave.admin_drop_deletion_enabled,
     type: wave.wave.type,
     winning_thresholds:
       wave.wave.winning_thresholds?.max || wave.wave.winning_thresholds?.min

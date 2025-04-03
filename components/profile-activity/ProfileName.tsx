@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
 import { useEffect, useState } from "react";
 import { createPossessionStr } from "../../helpers/Helpers";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
-
+import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 export enum ProfileNameType {
   POSSESSION = "POSSESSION",
   DEFAULT = "DEFAULT",

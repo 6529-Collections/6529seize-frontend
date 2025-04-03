@@ -268,7 +268,10 @@ const SingleWaveDropVoteSubmit = forwardRef<SingleWaveDropVoteSubmitHandles, Pro
           className={`${styles.voteButton} ${
             isProcessing ? styles.processing : ""
           }`}
-          onClick={handleClick}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClick();
+          }}
         >
           {getButtonContent()}
         </button>

@@ -5,37 +5,28 @@ import SingleWaveDropVoteSubmit, {
   SingleWaveDropVoteSubmitHandles,
 } from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSlider from "./SingleWaveDropVoteSlider";
-import { TabToggle } from "../../common/TabToggle";
 import { SingleWaveDropVoteInput } from "./SingleWaveDropVoteInput";
 import { SingleWaveDropVoteStats } from "./SingleWaveDropVoteStats";
-import SingleWaveDropVoteQuick from "./SingleWaveDropVoteQuick";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExchange } from "@fortawesome/free-solid-svg-icons";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
   readonly size: SingleWaveDropVoteSize;
 }
 
-export const SingleWaveDropVoteContent: React.FC<SingleWaveDropVoteContentProps> = ({
-  drop,
-  size,
-}) => {
+export const SingleWaveDropVoteContent: React.FC<
+  SingleWaveDropVoteContentProps
+> = ({ drop, size }) => {
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
   const [voteValue, setVoteValue] = useState<number | string>(currentVoteValue);
+  const [isSliderMode, setIsSliderMode] = useState(true);
 
   useEffect(() => {
     setVoteValue(currentVoteValue);
   }, [drop.context_profile_context?.rating]);
-
-  const [isSliderMode, setIsSliderMode] = useState(true);
-
-  const voteOptions = [
-    { key: "slider", label: "Slider" },
-    { key: "numeric", label: "Numeric" },
-  ] as const;
-
-  const isCompact = size === SingleWaveDropVoteSize.COMPACT;
 
   const submitRef = useRef<SingleWaveDropVoteSubmitHandles | null>(null);
 
@@ -45,114 +36,70 @@ export const SingleWaveDropVoteContent: React.FC<SingleWaveDropVoteContentProps>
     }
   };
 
-  if (isCompact) {
-    return (
-      <div
-        className="tw-flex tw-items-center tw-gap-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="tw-flex-1">
-          <SingleWaveDropVoteSlider
-            voteValue={voteValue}
-            minValue={minRating}
-            maxValue={maxRating}
-            creditType={drop.wave.voting_credit_type}
-            setVoteValue={setVoteValue}
-            rank={drop.rank}
-          />
-        </div>
-        <SingleWaveDropVoteSubmit
-          drop={drop}
-          newRating={Number(voteValue)}
-          ref={submitRef}
-        />
-      </div>
-    );
-  }
-
+  // Clean, sleek design with flexbox ordering for responsive layout
   return (
     <div
-      className="tw-@container tw-flex tw-flex-col tw-gap-4 tw-p-4 md:tw-p-5 tw-rounded-xl tw-bg-iron-900 tw-backdrop-blur-lg tw-border tw-border-iron-800 tw-border-solid tw-relative"
+      className="tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-2 tw-py-3 sm:tw-p-4"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="tw-relative">
-        <div className="tw-flex tw-justify-end tw-w-full">
-          <TabToggle
-            options={voteOptions}
-            activeKey={isSliderMode ? "slider" : "numeric"}
-            onSelect={(key) => setIsSliderMode(key === "slider")}
+      {/* Main container using flexbox and wrapping */}
+      <div className="tw-flex tw-flex-wrap tw-gap-3 sm:tw-gap-2.5">
+        {/* Toggle button - first item in both layouts */}
+        <div className="tw-order-1 sm:tw-order-1 tw-flex-shrink-0">
+          <button
+            onClick={() => setIsSliderMode(!isSliderMode)}
+            className="tw-h-8 tw-w-8 tw-rounded-md tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-700 
+                    tw-flex tw-items-center tw-justify-center tw-transition-colors
+                    desktop-hover:hover:tw-bg-iron-650"
+            title="Switch mode"
+          >
+            <FontAwesomeIcon
+              icon={faExchange}
+              className="tw-text-iron-300 tw-size-3.5 tw-flex-shrink-0"
+              flip={isSliderMode ? "horizontal" : "vertical"}
+            />
+          </button>
+        </div>
+
+        {/* Stats - second item in mobile (first row), fourth in desktop (second row) */}
+        <div className="tw-order-2 sm:tw-order-4 tw-ml-auto sm:tw-ml-0 sm:tw-w-full sm:tw-mt-2">
+          <SingleWaveDropVoteStats
+            currentRating={drop.context_profile_context?.rating ?? 0}
+            maxRating={maxRating}
+            creditType={drop.wave.voting_credit_type}
           />
         </div>
-      </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-6">
-        <div className="tw-h-[38px] tw-w-full">
-          <div className="tw-relative tw-w-full tw-h-full">
-            <div
-              className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out tw-mt-6
-              ${
-                isSliderMode
-                  ? "tw-opacity-100 tw-translate-y-0"
-                  : "tw-opacity-0 tw-translate-y-2 tw-pointer-events-none"
-              }`}
-            >
-              <SingleWaveDropVoteSlider
-                voteValue={voteValue}
-                setVoteValue={setVoteValue}
-                minValue={minRating}
-                maxValue={maxRating}
-                rank={drop.rank}
-                creditType={drop.wave.voting_credit_type}
-              />
-            </div>
-
-            <div>
-              <div
-                className={`tw-absolute tw-inset-0 tw-transition-all tw-duration-300 tw-ease-in-out
-              ${
-                !isSliderMode
-                  ? "tw-opacity-100 tw-translate-y-0"
-                  : "tw-opacity-0 tw-translate-y-2 tw-pointer-events-none"
-              }`}
-              >
-                <SingleWaveDropVoteInput
-                  voteValue={voteValue}
-                  minValue={minRating}
-                  maxValue={maxRating}
-                  setVoteValue={setVoteValue}
-                  onSubmit={handleSubmit}
-                  creditType={drop.wave.voting_credit_type}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="tw-flex tw-flex-col md:tw-gap-y-2 tw-mt-4">
-          {drop.rank !== 1 && (
-            <SingleWaveDropVoteStats
-              currentRating={drop.context_profile_context?.rating ?? 0}
-              maxRating={maxRating}
+        {/* Input controls - third item in mobile (second row), second in desktop (first row) */}
+        <div className="tw-order-3 sm:tw-order-2 tw-w-full sm:tw-w-auto sm:tw-flex-1 sm:tw-min-w-0 tw-h-14">
+          {isSliderMode ? (
+            <SingleWaveDropVoteSlider
+              voteValue={voteValue}
+              minValue={minRating}
+              maxValue={maxRating}
+              creditType={drop.wave.voting_credit_type}
+              setVoteValue={setVoteValue}
+              rank={drop.rank}
+            />
+          ) : (
+            <SingleWaveDropVoteInput
+              voteValue={voteValue}
+              minValue={minRating}
+              maxValue={maxRating}
+              setVoteValue={setVoteValue}
+              onSubmit={handleSubmit}
               creditType={drop.wave.voting_credit_type}
             />
           )}
+        </div>
 
-          <div className="tw-flex tw-justify-between tw-flex-wrap tw-items-center tw-gap-3 tw-mt-2 md:tw-mt-0">
-            {drop.rank === 1 ? (
-              <SingleWaveDropVoteStats
-                currentRating={drop.context_profile_context?.rating ?? 0}
-                maxRating={maxRating}
-                creditType={drop.wave.voting_credit_type}
-              />
-            ) : (
-              <SingleWaveDropVoteQuick drop={drop} setValue={setVoteValue} />
-            )}
-            <SingleWaveDropVoteSubmit
-              drop={drop}
-              newRating={Number(voteValue)}
-              ref={submitRef}
-            />
-          </div>
+        {/* Submit button - fourth item in mobile (third row), third in desktop (first row) */}
+        <div className="tw-order-4 sm:tw-order-3 tw-ml-auto sm:tw-ml-0 tw-flex-shrink-0">
+          <SingleWaveDropVoteSubmit
+            drop={drop}
+            newRating={Number(voteValue)}
+            ref={submitRef}
+          />
         </div>
       </div>
     </div>

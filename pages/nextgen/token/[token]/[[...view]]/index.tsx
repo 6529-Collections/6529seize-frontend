@@ -87,12 +87,12 @@ export default function NextGenCollectionToken(props: any) {
         />
         <meta property="og:title" content={pagenameFull} />
         <meta property="og:image" content={pageImage} />
-        <meta property="og:description" content="NEXTGEN | 6529 SEIZE" />
+        <meta property="og:description" content="NEXTGEN | 6529.io" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image:alt" content={pagenameFull} />
         <meta name="twitter:title" content={pagenameFull} />
-        <meta name="twitter:description" content="NEXTGEN | 6529 SEIZE" />
+        <meta name="twitter:description" content="NEXTGEN | 6529.io" />
         <meta name="twitter:image" content={pageImage} />
       </Head>
 

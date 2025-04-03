@@ -26,7 +26,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
   const haveMedia = !!drop.parts.filter((part) => !!part.media.length).length;
 
   return (
-    <div className="tw-mt-4">
+    <div>
       <div
         ref={contentRef}
         onClick={() => onDropClick(drop)}

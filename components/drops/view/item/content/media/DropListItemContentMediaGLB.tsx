@@ -6,7 +6,7 @@ export default function DropListItemContentMediaGLB({
   readonly src: string;
 }) {
   return (
-    <div >
+    <div>
       <model-viewer
         src={src}
         ar

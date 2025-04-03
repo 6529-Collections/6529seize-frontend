@@ -10,10 +10,10 @@ import UserPageStatsActivityWalletTableWrapper from "./table/UserPageStatsActivi
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../helpers/Types";
 import { Transaction } from "../../../../../entities/ITransaction";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { MemeLite } from "../../../settings/UserSettingsImgSelectMeme";
 import { NextGenCollection } from "../../../../../entities/INextgen";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 export enum UserPageStatsActivityWalletFilterType {
   ALL = "ALL",

@@ -67,7 +67,7 @@ type AuthContextType = {
   readonly title: string;
 };
 
-const DEFAULT_TITLE = "6529 SEIZE";
+const DEFAULT_TITLE = "6529";
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
@@ -103,7 +103,7 @@ export default function Auth({
     useState<IProfileAndConsolidations>();
 
   useEffect(() => {
-    if (address && getAuthJwt()) {
+    if (address) {
       commonApiFetch<IProfileAndConsolidations>({
         endpoint: `profiles/${address}`,
       }).then((profile) => {
@@ -112,7 +112,7 @@ export default function Auth({
     } else {
       setConnectedProfile(undefined);
     }
-  }, [address, getAuthJwt()]);
+  }, [address]);
 
   const { data: profileProxies } = useQuery<ApiProfileProxy[]>({
     queryKey: [

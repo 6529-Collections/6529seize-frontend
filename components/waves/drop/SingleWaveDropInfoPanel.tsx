@@ -16,12 +16,9 @@ interface SingleWaveDropInfoPanelProps {
   readonly onClose: () => void;
 }
 
-export const SingleWaveDropInfoPanel: React.FC<SingleWaveDropInfoPanelProps> = ({
-  drop,
-  wave,
-  activeTab,
-  onClose,
-}) => {
+export const SingleWaveDropInfoPanel: React.FC<
+  SingleWaveDropInfoPanelProps
+> = ({ drop, wave, activeTab, onClose }) => {
   return (
     <SingleWaveDropInfoContainer activeTab={activeTab}>
       <div className="tw-hidden lg:tw-block">
@@ -29,17 +26,14 @@ export const SingleWaveDropInfoPanel: React.FC<SingleWaveDropInfoPanelProps> = (
       </div>
 
       <SingleWaveDropInfoContent drop={drop} />
-
-      <div className="tw-border-t tw-border-iron-800 tw-pt-3 tw-border-solid tw-border-x-0 tw-border-b-0">
-        <SingleWaveDropInfoActions
-          drop={drop}
-          wave={wave}
-        />
-
+      <div className="tw-px-6">
         <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
+      </div>
+      <SingleWaveDropInfoActions drop={drop} wave={wave} />
 
+      <div className="tw-mt-4 tw-pt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
         <SingleWaveDropInfoDetails drop={drop} />
       </div>
     </SingleWaveDropInfoContainer>
   );
-}; 
+};

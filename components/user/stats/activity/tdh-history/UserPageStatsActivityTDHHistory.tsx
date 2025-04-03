@@ -2,10 +2,10 @@ import { useRouter } from "next/router";
 import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
 import { TDHHistory } from "../../../../../entities/ITDH";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHistoryCharts";
 import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
 const PAGE_SIZE = 30;
 

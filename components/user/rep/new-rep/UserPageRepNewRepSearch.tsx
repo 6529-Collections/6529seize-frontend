@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
@@ -12,6 +11,7 @@ import UserPageRepNewRepSearchHeader from "./UserPageRepNewRepSearchHeader";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import UserPageRepNewRepError from "./UserPageRepNewRepError";
+import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 const SEARCH_LENGTH = {
   MIN: 3,

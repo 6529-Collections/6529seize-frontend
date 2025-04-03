@@ -1,11 +1,12 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-
 import { cicToType } from "../../../../../helpers/Helpers";
+
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../../user/utils/UserCICAndLevel";
+import WinnerDropBadge from "../../../../waves/drops/winner/WinnerDropBadge";
 import { Time } from "../../../../../helpers/time";
 
 interface WaveLeaderboardDropAuthorProps {
@@ -16,36 +17,58 @@ export const WaveLeaderboardDropAuthor: React.FC<
   WaveLeaderboardDropAuthorProps
 > = ({ drop }) => {
   return (
-    <Link
-      href={`/${drop.author.handle}`}
-      onClick={(e) => e.stopPropagation()}
-      className="tw-flex tw-items-center tw-gap-x-3.5 tw-no-underline group">
-      <div className="tw-relative">
-        {drop.author.pfp ? (
-          <img
-            className="tw-size-9 md:tw-size-11 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-object-contain tw-flex-shrink-0"
-            src={drop.author.pfp}
-            alt="User avatar"
-          />
-        ) : (
-          <div className="tw-size-9 md:tw-size-11 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
-        )}
-        <div className="tw-absolute -tw-bottom-1 -tw-right-1">
+    <div className="tw-flex tw-items-center tw-gap-x-3">
+      <Link
+        href={`/${drop.author.handle}`}
+        onClick={(e) => e.stopPropagation()}
+        className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
+      >
+        <div className="tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
+          {drop.author.pfp ? (
+            <div className="tw-rounded-lg tw-h-full tw-w-full">
+              <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10">
+                <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-overflow-hidden">
+                  <img
+                    src={drop.author.pfp}
+                    alt="Profile picture"
+                    className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="tw-h-full tw-w-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-lg"></div>
+          )}
+        </div>
+      </Link>
+      <div className="tw-flex tw-items-center tw-gap-x-4">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
           <UserCICAndLevel
             level={drop.author.level}
             cicType={cicToType(drop.author.cic)}
             size={UserCICAndLevelSize.SMALL}
           />
+          <Link
+            href={`/${drop.author.handle}`}
+            onClick={(e) => e.stopPropagation()}
+            className="tw-no-underline"
+          >
+            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+              {drop.author.handle}
+            </span>
+          </Link>
+
+          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
+            {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
+          </span>
         </div>
+        <WinnerDropBadge
+          rank={drop.rank}
+          decisionTime={drop.winning_context?.decision_time || null}
+        />
       </div>
-      <div className="tw-flex tw-flex-col tw-gap-y-1.5 sm:tw-gap-y-0">
-        <span className="tw-text-base md:tw-text-lg tw-font-semibold tw-text-iron-100 tw-leading-none group-hover:tw-text-iron-50 tw-transition-colors">
-          {drop.author.handle}
-        </span>
-        <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
-          {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
-        </span>
-      </div>
-    </Link>
+    </div>
   );
 };

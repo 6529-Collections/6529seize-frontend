@@ -1,15 +1,9 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { AuthContext, TitleType } from "../../auth/Auth";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
-import { WaveDropsNonReverseContainer } from "./WaveDropsNonReverseContainer";
+import { WaveDropsReverseContainer } from "./WaveDropsReverseContainer";
 import { useWaveDrops } from "../../../hooks/useWaveDrops";
 import { useScrollBehavior } from "../../../hooks/useScrollBehavior";
 import CircleLoader, {
@@ -60,7 +54,6 @@ export default function WaveDropsAll({
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
-  const [disableAutoPosition, setDisableAutoPosition] = useState(false);
   const {
     drops,
     fetchNextPage,
@@ -68,21 +61,17 @@ export default function WaveDropsAll({
     isFetching,
     isFetchingNextPage,
     haveNewDrops,
-    refetch,
   } = useWaveDrops({
     waveId,
     connectedProfileHandle: connectedProfile?.profile?.handle,
-    reverse: true,
+    reverse: false,
     dropId,
   });
 
-  const {
-    scrollContainerRef,
-    isAtBottom,
-    scrollToBottom,
-    scrollToTop,
-    handleScroll,
-  } = useScrollBehavior();
+  const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
+    useScrollBehavior();
+
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
 
@@ -114,23 +103,9 @@ export default function WaveDropsAll({
     [serialNo]
   );
 
-  const [newItemsCount, setNewItemsCount] = useState(0);
-  
-  const handleUserScroll = useCallback((direction: 'up' | 'down', currentIsAtBottom: boolean) => {
-    // If user was at the bottom and is now scrolling up, mark as manual scroll
-    if (direction === 'up' && !currentIsAtBottom && isAtBottom) {
-      setUserHasManuallyScrolled(true);
-    }
-    
-    // If user manually returned to bottom, reset the flag
-    if (currentIsAtBottom && userHasManuallyScrolled) {
-      setUserHasManuallyScrolled(false);
-    }
-  }, [isAtBottom, userHasManuallyScrolled]);
-
   useEffect(() => {
     setTitle({
-      title: haveNewDrops ? "New Drops Available | 6529 SEIZE" : null,
+      title: haveNewDrops ? "New Drops Available | 6529.io" : null,
       type: TitleType.WAVE,
     });
 
@@ -141,36 +116,7 @@ export default function WaveDropsAll({
       });
     };
   }, [haveNewDrops]);
-  
-  // Auto-scroll to bottom when new drops are available and user is already at bottom
-  const [isHandlingNewDrops, setIsHandlingNewDrops] = useState(false);
-  
-  useEffect(() => {
-    if (haveNewDrops && isAtBottom && !isHandlingNewDrops && !isFetching && !userHasManuallyScrolled) {
-      setIsHandlingNewDrops(true);
-      refetch()
-        .then(() => {
-          setTimeout(() => {
-            scrollToBottom();
-            setIsHandlingNewDrops(false);
-          }, 100); // Small delay to ensure DOM is updated
-        })
-        .catch(() => {
-          // In case of error, still reset the handling state
-          setIsHandlingNewDrops(false);
-        });
-    }
-  }, [haveNewDrops, isAtBottom, isHandlingNewDrops, isFetching, refetch, scrollToBottom, userHasManuallyScrolled]);
-  
-  // Auto-scroll to bottom on initial load
-  useEffect(() => {
-    if (drops.length > 0 && scrollContainerRef.current && !initialDrop) {
-      // Need setTimeout to ensure all content is rendered before scrolling
-      setTimeout(() => {
-        scrollToBottom();
-      }, 100);
-    }
-  }, [drops.length > 0]);
+
 
   const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
@@ -178,20 +124,17 @@ export default function WaveDropsAll({
   useEffect(() => {
     if (drops.length > 0) {
       setInit(true);
-      setNewItemsCount((prevCount) => {
-        const newCount = drops.length - prevCount;
-        return prevCount !== newCount ? newCount : prevCount;
-      });
+
       const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
-      
+
       // Check if the last drop is a temp drop (your own post)
-      const lastDrop = drops[drops.length - 1];
+      const lastDrop = drops[0];
       if (lastDrop.id.startsWith("temp-")) {
         // For user's own new drop, scroll to bottom - but only if they haven't manually scrolled away
         if (isAtBottom && !userHasManuallyScrolled) {
           setTimeout(() => {
-            scrollToBottom();
+            scrollToVisualBottom();
           }, 100);
         } else if (!userHasManuallyScrolled) {
           // If not at bottom, use the serialNo approach to scroll to the specific drop
@@ -203,7 +146,7 @@ export default function WaveDropsAll({
     } else {
       smallestSerialNo.current = null;
     }
-  }, [drops, isAtBottom, scrollToBottom]);
+  }, [drops, isAtBottom, scrollToVisualBottom]);
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -231,7 +174,7 @@ export default function WaveDropsAll({
         setIsScrolling(false);
         setSerialNo(null);
       } else {
-        scrollToTop();
+        scrollToVisualTop();
         setTimeout(checkAndFetchNext, 1000);
       }
     };
@@ -245,27 +188,34 @@ export default function WaveDropsAll({
     scrollToSerialNo,
     serialNo,
     setSerialNo,
-    scrollToTop,
+    scrollToVisualTop,
   ]);
 
   useEffect(() => {
     if (init && serialNo) {
-      setDisableAutoPosition(true);
       const success = scrollToSerialNo("smooth");
       if (success) {
         setSerialNo(null);
       } else {
         fetchAndScrollToDrop();
       }
-      setTimeout(() => setDisableAutoPosition(false), 1000);
     }
   }, [init, serialNo]);
 
   const handleTopIntersection = useCallback(() => {
-    if (hasNextPage && !isFetching && !isFetchingNextPage && !isHandlingNewDrops) {
+    if (
+      hasNextPage &&
+      !isFetching &&
+      !isFetchingNextPage
+    ) {
       fetchNextPage();
     }
-  }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage, isHandlingNewDrops]);
+  }, [
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+  ]);
 
   const onQuoteClick = useCallback(
     (drop: ApiDrop) => {
@@ -278,7 +228,7 @@ export default function WaveDropsAll({
         setUserHasManuallyScrolled(false); // Reset when navigating to specific content
       }
     },
-    [router, waveId, setSerialNo]
+    [router, waveId] // removed setSerialNo from deps as it's a setState function that never changes
   );
 
   const renderContent = () => {
@@ -296,39 +246,40 @@ export default function WaveDropsAll({
 
     return (
       <>
-        <WaveDropsNonReverseContainer
+        <WaveDropsReverseContainer
           ref={scrollContainerRef}
-          onScroll={handleScroll}
-          newItemsCount={newItemsCount}
           isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
           onTopIntersection={handleTopIntersection}
-          disableAutoPosition={disableAutoPosition}
-          onUserScroll={handleUserScroll}>
-          <div className="tw-divide-y-2 tw-divide-iron-700 tw-divide-solid tw-divide-x-0">
-            <DropsList
-              scrollContainerRef={scrollContainerRef}
-              onReplyClick={setSerialNo}
-              drops={drops}
-              showWaveInfo={false}
-              isFetchingNextPage={isFetchingNextPage}
-              onReply={onReply}
-              onQuote={onQuote}
-              showReplyAndQuote={true}
-              activeDrop={activeDrop}
-              serialNo={serialNo}
-              targetDropRef={targetDropRef}
-              onQuoteClick={onQuoteClick}
-              parentContainerRef={scrollContainerRef}
-              dropViewDropId={dropId}
-              onDropContentClick={onDropContentClick}
-            />
-          </div>
-        </WaveDropsNonReverseContainer>
-
+          onUserScroll={(direction, isAtBottom) => {
+            setIsAtBottom(isAtBottom);
+            if (direction === "up") {
+              setUserHasManuallyScrolled(true);
+            }
+          }}
+        >
+          <DropsList
+            scrollContainerRef={scrollContainerRef}
+            onReplyClick={setSerialNo}
+            drops={drops}
+            showWaveInfo={false}
+            onReply={onReply}
+            onQuote={onQuote}
+            showReplyAndQuote={true}
+            activeDrop={activeDrop}
+            serialNo={serialNo}
+            targetDropRef={targetDropRef}
+            onQuoteClick={onQuoteClick}
+            parentContainerRef={scrollContainerRef}
+            dropViewDropId={dropId}
+            onDropContentClick={onDropContentClick}
+            key="drops-list" // Add a stable key to help React with reconciliation
+          />
+        </WaveDropsReverseContainer>
         <WaveDropsScrollBottomButton
           isAtBottom={isAtBottom}
           scrollToBottom={() => {
-            scrollToBottom();
+            scrollToVisualBottom();
             setUserHasManuallyScrolled(false); // Reset manual scroll flag when user clicks to bottom
           }}
         />

@@ -6,7 +6,6 @@ import {
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import UserPageRepReps from "./reps/UserPageRepReps";
@@ -18,6 +17,7 @@ import ProfileRatersTableWrapper, {
 import UserPageRepActivityLog from "./UserPageRepActivityLog";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
+import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 export default function UserPageRep({
   profile,

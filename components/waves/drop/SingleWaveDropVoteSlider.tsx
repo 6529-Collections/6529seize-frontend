@@ -107,9 +107,6 @@ export default function WaveDropVoteSlider({
 }: WaveDropVoteSliderProps) {
   const thumbRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [hoveredPreset, setHoveredPreset] = useState<number | null>(null);
-
-  const presetMarks = calculatePresetMarks(minValue, maxValue);
 
   const getTheme = (rank: number | null): SliderTheme => {
     if (rank === 1 || rank === 2 || rank === 3) {
@@ -123,18 +120,6 @@ export default function WaveDropVoteSlider({
   const handleSliderChange = (newValue: number) => {
     const transformedValue = transformFromLog(newValue, minValue, maxValue);
     setVoteValue(transformedValue);
-  };
-
-  const handlePresetClick = (percentage: number) => {
-    if (percentage < 0) {
-      const negativeRange = Math.abs(minValue);
-      const value = Math.round(-(negativeRange * Math.abs(percentage)) / 100);
-      setVoteValue(value);
-    } else {
-      const positiveRange = maxValue;
-      const value = Math.round((positiveRange * percentage) / 100);
-      setVoteValue(value);
-    }
   };
 
   const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;
@@ -171,11 +156,11 @@ export default function WaveDropVoteSlider({
 
   return (
     <div
-      className="tw-h-[20px] tw-flex tw-items-center"
+      className="tw-h-9 tw-flex tw-items-center"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
-        <div className="tw-relative tw-h-[8px] tw-group">
+        <div className="tw-relative tw-h-[6px] tw-group tw-mt-6 sm:tw-mt-0">
           {/* Base range input for track clicks */}
           <input
             type="range"
@@ -206,7 +191,7 @@ export default function WaveDropVoteSlider({
           <div
             className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-z-30"
             style={{
-              clipPath: `circle(12px at ${currentPercentage}% 50%)`,
+              clipPath: `circle(10px at ${currentPercentage}% 50%)`,
             }}
           >
             <input
@@ -235,69 +220,7 @@ export default function WaveDropVoteSlider({
             />
           </div>
 
-          {/* Ticks */}
-          {presetMarks.map((mark) => (
-            <div
-              key={mark.percentage}
-              className="tw-absolute tw-z-20"
-              style={{ left: `${mark.position}%` }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePresetClick(mark.percentage);
-              }}
-            >
-              <div
-                className="tw-relative -tw-top-[2px] tw-cursor-pointer tw-group"
-                onMouseEnter={() => setHoveredPreset(mark.percentage)}
-                onMouseLeave={() => setHoveredPreset(null)}
-              >
-                <div className="tw-absolute tw-h-4 tw-w-8 -tw-left-4" />
-                <div
-                  className="tw-h-4 tw-w-0.5 tw-bg-iron-400/30 tw-rounded-full tw-mx-auto
-                  group-hover:tw-bg-iron-400/60 tw-transition-colors tw-duration-200"
-                />
-              </div>
-              <div className="tw-relative">
-                <motion.div
-                  className={`tw-absolute tw-top-1 tw-left-1/2 -tw-translate-x-1/2 
-                    tw-text-[10px] tw-font-medium
-                    tw-whitespace-nowrap tw-select-none
-                    tw-transition-all tw-duration-200
-                    ${
-                      hoveredPreset === mark.percentage
-                        ? "tw-opacity-0"
-                        : "tw-text-iron-400 tw-opacity-60"
-                    }`}
-                >
-                  {mark.label}
-                </motion.div>
-                <motion.div
-                  className={`tw-absolute tw-top-1 tw-left-1/2 -tw-translate-x-1/2 
-                    tw-text-[10px] tw-font-medium tw-text-iron-200
-                    tw-whitespace-nowrap tw-select-none
-                    tw-transition-all tw-duration-200
-                    ${
-                      hoveredPreset === mark.percentage
-                        ? "tw-opacity-100"
-                        : "tw-opacity-0"
-                    }`}
-                >
-                  {formatNumberWithCommas(
-                    mark.percentage === 0
-                      ? 0
-                      : mark.percentage < 0
-                      ? Math.round(
-                          -(Math.abs(minValue) * Math.abs(mark.percentage)) / 100
-                        )
-                      : Math.round((maxValue * mark.percentage) / 100)
-                  )}{" "}
-                  {creditType}
-                </motion.div>
-              </div>
-            </div>
-          ))}
-
-          {/* Thumb visual */}
+          {/* Thumb visual - Compact */}
           <motion.div
             ref={thumbRef}
             style={{
@@ -338,7 +261,7 @@ export default function WaveDropVoteSlider({
               </div>
 
               <motion.div
-                className={`tw-w-5 tw-h-5 tw-rounded-full 
+                className={`tw-w-4 tw-h-4 tw-rounded-full 
                   tw-bg-gradient-to-b tw-from-gray-700 tw-to-gray-800
                   tw-border-2 ${theme.thumb.border} 
                   tw-shadow-lg tw-transition-shadow
@@ -352,7 +275,7 @@ export default function WaveDropVoteSlider({
                 whileTap={{ scale: 0.95 }}
                 animate={{
                   boxShadow: isDragging
-                    ? "0 0 20px rgba(255,255,255,0.2)"
+                    ? "0 0 15px rgba(255,255,255,0.2)"
                     : "0 0 0 rgba(255,255,255,0)",
                 }}
                 transition={{ duration: 0.2 }}
