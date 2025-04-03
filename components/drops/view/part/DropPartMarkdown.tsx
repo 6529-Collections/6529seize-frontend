@@ -215,7 +215,6 @@ function DropPartMarkdown({
     AnchorHTMLAttributes<HTMLAnchorElement> &
     ExtraProps) => {
     const { href } = props;
-
     if (!href || !isValidLink(href)) {
       return null;
     }
@@ -285,7 +284,7 @@ function DropPartMarkdown({
     href: string,
     props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
   ) => {
-    const baseEndpoint = process.env.BASE_ENDPOINT || "";
+    const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
     const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
 
     if (isExternalLink) {
@@ -341,16 +340,23 @@ function DropPartMarkdown({
       HTMLAttributes<HTMLParagraphElement> &
       ExtraProps
   ) => {
-    return (
-      <p
-        className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
-        {customRenderer({
-          content: params.children,
-          mentionedUsers,
-          referencedNfts,
-        })}
-      </p>
-    );
+    if (typeof params.children === "string") {
+      return (
+        <p
+          className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+          })}
+        </p>
+      );
+    }
+    return customRenderer({
+      content: params.children,
+      mentionedUsers,
+      referencedNfts,
+    });
   };
   return (
     <Markdown
