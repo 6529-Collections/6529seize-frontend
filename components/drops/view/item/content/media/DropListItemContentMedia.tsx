@@ -44,6 +44,7 @@ export default function DropListItemContentMedia({
     }
     return MediaType.UNKNOWN;
   };
+  
 
   const mediaType = getMediaType();
 

@@ -18,11 +18,12 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
       className={`${activePart.content ? "tw-mt-3" : "tw-mt-1"} tw-space-y-3`}
     >
       {activePart.media.map((media, i) => (
-        <DropListItemContentMedia
-          key={`part-${i}-media-${media.url}`}
-          media_mime_type={media.mime_type}
-          media_url={media.url}
-        />
+        <div key={`part-${i}-media-${media.url}`} className="tw-h-64">
+          <DropListItemContentMedia
+            media_mime_type={media.mime_type}
+            media_url={media.url}
+          />
+        </div>
       ))}
     </div>
   );

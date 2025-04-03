@@ -1,4 +1,10 @@
-import { AnchorHTMLAttributes, ClassAttributes, memo, ReactNode } from "react";
+import {
+  AnchorHTMLAttributes,
+  ClassAttributes,
+  HTMLAttributes,
+  memo,
+  ReactNode,
+} from "react";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -330,6 +336,22 @@ function DropPartMarkdown({
     return null;
   };
 
+  const renderP = (
+    params: ClassAttributes<HTMLParagraphElement> &
+      HTMLAttributes<HTMLParagraphElement> &
+      ExtraProps
+  ) => {
+    return (
+      <p
+        className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
+        {customRenderer({
+          content: params.children,
+          mentionedUsers,
+          referencedNfts,
+        })}
+      </p>
+    );
+  };
   return (
     <Markdown
       rehypePlugins={[
@@ -391,16 +413,7 @@ function DropPartMarkdown({
             })}
           </h1>
         ),
-        p: (params) => (
-          <p
-            className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-            })}
-          </p>
-        ),
+        p: renderP,
         li: (params) => (
           <li className="tw-text-md tw-text-iron-200 tw-break-words word-break">
             {customRenderer({

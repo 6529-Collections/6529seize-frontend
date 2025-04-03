@@ -49,7 +49,7 @@ export const setAuthJwt = (
   }
 };
 
- export const getAuthJwt = () => {
+export const getAuthJwt = () => {
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
 

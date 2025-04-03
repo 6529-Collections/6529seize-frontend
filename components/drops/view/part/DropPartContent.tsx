@@ -35,11 +35,12 @@ const DropPartContent: React.FC<DropPartContentProps> = ({
       {!!partMedias.length && (
         <div className={`${partContent ? "tw-mt-4" : "tw-mt-1"} tw-space-y-2`}>
           {partMedias.map((media, i) => (
-            <DropListItemContentMedia
-              key={`part-${currentPartCount}-media-${i}-${media.mediaSrc}`}
+           <div key={`part-${currentPartCount}-media-${i}-${media.mediaSrc}`} className="tw-h-64">
+             <DropListItemContentMedia
               media_mime_type={media.mimeType}
               media_url={media.mediaSrc}
             />
+           </div>
           ))}
         </div>
       )}
