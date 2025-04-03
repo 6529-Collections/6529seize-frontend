@@ -216,7 +216,6 @@ function DropPartMarkdown({
     AnchorHTMLAttributes<HTMLAnchorElement> &
     ExtraProps) => {
     const { href } = props;
-
     if (!href || !isValidLink(href)) {
       return null;
     }
@@ -356,7 +355,11 @@ function DropPartMarkdown({
         </p>
       );
     }
-    return null;
+    return customRenderer({
+      content: params.children,
+      mentionedUsers,
+      referencedNfts,
+    });
   };
   return (
     <Markdown
