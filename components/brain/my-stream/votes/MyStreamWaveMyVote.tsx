@@ -25,7 +25,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   return (
     <div
       key={drop.id}
-      className="tw-bg-iron-900 tw-rounded-xl tw-p-5 tw-border tw-border-iron-800 tw-border-solid desktop-hover:hover:tw-border-iron-700 tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg"
+      className="tw-bg-iron-950 tw-rounded-xl tw-p-5 tw-border tw-border-iron-800 tw-border-solid desktop-hover:hover:tw-border-iron-700 tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg"
       onClick={() => onDropClick(drop)}
     >
       <div className="tw-flex tw-gap-4">
