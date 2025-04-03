@@ -19,7 +19,6 @@ interface DropsListProps {
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
-  readonly isFetchingNextPage: boolean;
   readonly onReply: DropActionHandler;
   readonly onQuote: DropActionHandler;
   readonly onReplyClick: (serialNo: number) => void;
@@ -39,7 +38,6 @@ const DropsList = memo(function DropsList({
   showWaveInfo,
   activeDrop,
   showReplyAndQuote,
-  isFetchingNextPage,
   onReply,
   onQuote,
   onReplyClick,
@@ -65,39 +63,9 @@ const DropsList = memo(function DropsList({
     [onReplyClick]
   );
 
-  const memoizedDrops = useMemo(
-    () =>
-      drops.map((drop, i) => (
-        <div
-          key={drop.stableKey}
-          id={`drop-${drop.serial_no}`}
-          ref={serialNo === drop.serial_no ? targetDropRef : null}
-          className={serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
-        >
-          <VirtualScrollWrapper
-            scrollContainerRef={scrollContainerRef}
-            drop={drop}
-          >
-            <MemoizedDrop
-              dropViewDropId={dropViewDropId}
-              onReplyClick={handleReplyClick}
-              drop={drop}
-              previousDrop={drops[i - 1] ?? null}
-              nextDrop={drops[i + 1] ?? null}
-              showWaveInfo={showWaveInfo}
-              activeDrop={activeDrop}
-              onReply={handleReply}
-              onQuote={handleQuote}
-              location={DropLocation.WAVE}
-              showReplyAndQuote={showReplyAndQuote}
-              onQuoteClick={onQuoteClick}
-              parentContainerRef={parentContainerRef}
-              onDropContentClick={onDropContentClick}
-            />
-          </VirtualScrollWrapper>
-        </div>
-      )),
-    [
+  // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
+  const getItemData = useMemo(() => {
+    return {
       drops,
       showWaveInfo,
       activeDrop,
@@ -107,19 +75,70 @@ const DropsList = memo(function DropsList({
       serialNo,
       targetDropRef,
       handleReplyClick,
-    ]
+      onQuoteClick,
+      parentContainerRef,
+      dropViewDropId,
+      onDropContentClick,
+      scrollContainerRef
+    };
+  }, [
+    drops,
+    showWaveInfo,
+    activeDrop,
+    handleReply,
+    handleQuote,
+    showReplyAndQuote,
+    serialNo,
+    targetDropRef,
+    handleReplyClick,
+    onQuoteClick,
+    parentContainerRef,
+    dropViewDropId,
+    onDropContentClick,
+    scrollContainerRef
+  ]);
+
+  const memoizedDrops = useMemo(
+    () =>
+      drops.map((drop, i) => {
+        const previousDrop = drops[i + 1] ?? null;
+        const nextDrop = drops[i - 1] ?? null;
+
+        return (
+          <div
+            key={drop.stableKey}
+            id={`drop-${drop.serial_no}`}
+            ref={getItemData.serialNo === drop.serial_no ? getItemData.targetDropRef : null}
+            className={getItemData.serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
+          >
+            <VirtualScrollWrapper
+              scrollContainerRef={getItemData.scrollContainerRef}
+              drop={drop}
+            >
+              <MemoizedDrop
+                dropViewDropId={getItemData.dropViewDropId}
+                onReplyClick={getItemData.handleReplyClick}
+                drop={drop}
+                previousDrop={previousDrop}
+                nextDrop={nextDrop}
+                showWaveInfo={getItemData.showWaveInfo}
+                activeDrop={getItemData.activeDrop}
+                onReply={getItemData.handleReply}
+                onQuote={getItemData.handleQuote}
+                location={DropLocation.WAVE}
+                showReplyAndQuote={getItemData.showReplyAndQuote}
+                onQuoteClick={getItemData.onQuoteClick}
+                parentContainerRef={getItemData.parentContainerRef}
+                onDropContentClick={getItemData.onDropContentClick}
+              />
+            </VirtualScrollWrapper>
+          </div>
+        );
+      }),
+    [drops, getItemData] // Only depends on drops array and the memoized item data
   );
 
-  return (
-    <div className="tw-flex tw-flex-col tw-pb-2">
-      {isFetchingNextPage && (
-        <div className="tw-w-full tw-h-0.5 tw-bg-iron-800 tw-overflow-hidden">
-          <div className="tw-w-full tw-h-full tw-bg-indigo-400 tw-animate-loading-bar"></div>
-        </div>
-      )}
-      {memoizedDrops}
-    </div>
-  );
+  return ( memoizedDrops);
 });
 
 export default DropsList;

@@ -49,36 +49,11 @@ interface VirtualScrollWrapperProps {
  * </VirtualScrollWrapper>
  */
 export default function VirtualScrollWrapper({
-  delay = 10000,
+  delay = 1000,
   scrollContainerRef,
   children,
   drop,
 }: VirtualScrollWrapperProps) {
-  const getShouldAlwaysRender = () => {
-    const haveQuoteOrMedia = drop.parts.some(
-      (part) => !!part.quoted_drop || !!part.media.length
-    );
-    const haveReply = !!drop.reply_to;
-    const haveEmbeddedTweet = drop.parts.some(
-      (part) => !!part.content?.match(/https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/)
-    );
-    return haveQuoteOrMedia || haveReply || haveEmbeddedTweet;
-  };
-
-  const [shouldAlwaysRender, setShouldAlwaysRender] = useState<boolean>(
-    getShouldAlwaysRender()
-  );
-
-  useEffect(() => {
-    setShouldAlwaysRender(getShouldAlwaysRender());
-  }, [drop]);
-
-  /**
-   * allMediaLoaded: Tracks whether all media elements inside
-   * the wrapper have loaded or errored.
-   */
-  const [allMediaLoaded, setAllMediaLoaded] = useState<boolean>(false);
-
   /**
    * isInView: Tracks if the component is currently in the viewport.
    */
@@ -106,64 +81,6 @@ export default function VirtualScrollWrapper({
       setMeasuredHeight(rect.height);
     }
   }, []);
-  /**
-   * useEffect to detect when images/videos are loaded.
-   * Once all media elements are loaded (or errored),
-   * it sets allMediaLoaded to true.
-   */
-  useEffect(() => {
-    if (shouldAlwaysRender) return;
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Select all images and videos
-    const mediaElements = container.querySelectorAll("img, video");
-
-    // If none found, we consider them all "loaded" immediately
-    if (mediaElements.length === 0) {
-      setAllMediaLoaded(true);
-      return;
-    }
-
-    let loadedCount = 0;
-    const totalCount = mediaElements.length;
-
-    /**
-     * handleLoadOrError: Increments loadedCount and checks if
-     * all have finished loading or errored.
-     */
-    const handleLoadOrError = () => {
-      loadedCount += 1;
-      if (loadedCount >= totalCount) {
-        setAllMediaLoaded(true);
-      }
-    };
-
-    // Attach load/error listeners
-    mediaElements.forEach((media) => {
-      const tagName = media.tagName.toLowerCase();
-      // For images, media.complete indicates loaded
-      // For videos, readyState >= 3 means can play without buffering
-      const isAlreadyLoaded =
-        (tagName === "img" && (media as HTMLImageElement).complete) ||
-        (tagName === "video" && (media as HTMLVideoElement).readyState >= 3);
-
-      if (isAlreadyLoaded) {
-        handleLoadOrError();
-      } else {
-        media.addEventListener("load", handleLoadOrError);
-        media.addEventListener("error", handleLoadOrError);
-      }
-    });
-
-    // Cleanup event listeners
-    return () => {
-      mediaElements.forEach((media) => {
-        media.removeEventListener("load", handleLoadOrError);
-        media.removeEventListener("error", handleLoadOrError);
-      });
-    };
-  }, [children]);
 
   /**
    * Once all media are loaded, optionally wait the provided `delay`
@@ -171,15 +88,12 @@ export default function VirtualScrollWrapper({
    * async changes to settle.
    */
   useEffect(() => {
-    if (shouldAlwaysRender) return;
-    if (allMediaLoaded) {
-      const timer = setTimeout(() => {
-        measureHeight();
-      }, delay);
+    const timer = setTimeout(() => {
+      measureHeight();
+    }, delay);
 
-      return () => clearTimeout(timer);
-    }
-  }, [allMediaLoaded, delay, measureHeight]);
+    return () => clearTimeout(timer);
+  }, [delay, measureHeight]);
 
   /**
    * Intersection Observer to track if the element is in the viewport.
@@ -188,7 +102,6 @@ export default function VirtualScrollWrapper({
    * - Update isInView state accordingly.
    */
   useEffect(() => {
-    if (shouldAlwaysRender) return;
     // Avoid running Intersection Observer on the server
     if (typeof window === "undefined") return;
 
@@ -237,8 +150,7 @@ export default function VirtualScrollWrapper({
    *    also render children so we can measure them.
    */
   const isServer = typeof window === "undefined";
-  const shouldRenderChildren =
-    shouldAlwaysRender || isServer || isInView || measuredHeight === null;
+  const shouldRenderChildren = isServer || isInView || measuredHeight === null;
 
   return (
     <div ref={containerRef}>

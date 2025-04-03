@@ -89,7 +89,7 @@ export function useWaveDrops({
 
   const {
     data,
-    fetchNextPage,
+    fetchNextPage: onFetchNextPage,
     hasNextPage,
     isFetching,
     isFetchingNextPage,
@@ -141,6 +141,12 @@ export function useWaveDrops({
     refetchIntervalInBackground: !isCapacitor,
   });
 
+  const fetchNextPage = useCallback(async () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      await onFetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
+
   const processDrops = (
     pages: ApiWaveDropsFeed[] | undefined,
     previousDrops: ExtendedDrop[],
@@ -164,11 +170,15 @@ export function useWaveDrops({
     setDrops((prev) => processDrops(data?.pages, prev, reverse));
   }, [data, reverse]);
 
+  const onRefetch = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
   const {
     hasNewDrops,
     error: pollingError,
     lastPolledData,
-  } = useWavePolling(queryKey, waveId, dropId, drops, isTabVisible, refetch);
+  } = useWavePolling(queryKey, waveId, dropId, drops, isTabVisible, onRefetch);
 
   const manualFetch = useCallback(async () => {
     if (hasNextPage) {

@@ -1,4 +1,10 @@
-import { AnchorHTMLAttributes, ClassAttributes, memo, ReactNode } from "react";
+import {
+  AnchorHTMLAttributes,
+  ClassAttributes,
+  HTMLAttributes,
+  memo,
+  ReactNode,
+} from "react";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize from "rehype-sanitize";
@@ -138,7 +144,8 @@ function DropPartMarkdown({
                 key={getRandomObjectId()}
                 className={`${
                   areAllPartsEmojis ? "emoji-text-node" : "tw-align-middle"
-                }`}>
+                }`}
+              >
                 {part}
               </span>
             )
@@ -260,7 +267,8 @@ function DropPartMarkdown({
         className="tw-no-underline"
         target="_blank"
         href={href}
-        data-theme="dark">
+        data-theme="dark"
+      >
         <Tweet id={tweetId} />
       </Link>
     </div>
@@ -330,6 +338,26 @@ function DropPartMarkdown({
     return null;
   };
 
+  const renderP = (
+    params: ClassAttributes<HTMLParagraphElement> &
+      HTMLAttributes<HTMLParagraphElement> &
+      ExtraProps
+  ) => {
+    if (typeof params.children === "string") {
+      return (
+        <p
+          className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}
+        >
+          {customRenderer({
+            content: params.children,
+            mentionedUsers,
+            referencedNfts,
+          })}
+        </p>
+      );
+    }
+    return null;
+  };
   return (
     <Markdown
       rehypePlugins={[
@@ -391,16 +419,7 @@ function DropPartMarkdown({
             })}
           </h1>
         ),
-        p: (params) => (
-          <p
-            className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
-            {customRenderer({
-              content: params.children,
-              mentionedUsers,
-              referencedNfts,
-            })}
-          </p>
-        ),
+        p: renderP,
         li: (params) => (
           <li className="tw-text-md tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
@@ -413,7 +432,8 @@ function DropPartMarkdown({
         code: (params) => (
           <code
             style={{ textOverflow: "unset" }}
-            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words">
+            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words"
+          >
             {customRenderer({
               content: params.children,
               mentionedUsers,
@@ -432,7 +452,8 @@ function DropPartMarkdown({
             })}
           </blockquote>
         ),
-      }}>
+      }}
+    >
       {partContent}
     </Markdown>
   );
