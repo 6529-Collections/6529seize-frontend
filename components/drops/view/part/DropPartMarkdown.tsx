@@ -49,6 +49,11 @@ export enum DropContentPartType {
   HASHTAG = "HASHTAG",
 }
 
+type SmartLinkHandler<T> = {
+  parse: (href: string) => T | null;
+  render: (result: T, href: string) => JSX.Element | null;
+};
+
 function DropPartMarkdown({
   mentionedUsers,
   referencedNfts,
@@ -211,38 +216,48 @@ function DropPartMarkdown({
     );
   };
 
+  const parseTwitterLink = (href: string): string | null => {
+    const twitterRegex =
+      /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
+    const match = href.match(twitterRegex);
+    return match ? match[3] : null;
+  };
+
+  const smartLinkHandlers: SmartLinkHandler<any>[] = [
+    {
+      parse: parseSeizeQuoteLink,
+      render: (result: SeizeQuoteLinkInfo, href: string) =>
+        renderSeizeQuote(result, onQuoteClick, href),
+    },
+    {
+      parse: (href: string) => parseSeizeQueryLink(href, "/network", ["group"]),
+      render: (result: { group: string }, href: string) => (
+        <GroupCardChat href={href} groupId={result.group} />
+      ),
+    },
+    {
+      parse: (href: string) =>
+        parseSeizeQueryLink(href, "/my-stream", ["wave"], true),
+      render: (result: { wave: string }, href: string) => (
+        <WaveItemChat href={href} waveId={result.wave} />
+      ),
+    },
+    {
+      parse: (href: string) =>
+        parseSeizeQueryLink(href, "/my-stream", ["wave", "drop"], true),
+      render: (result: { drop: string }, href: string) => (
+        <DropItemChat href={href} dropId={result.drop} />
+      ),
+    },
+    {
+      parse: parseTwitterLink,
+      render: (tweetId: string, href: string) =>
+        renderTweetEmbed(tweetId, href),
+    },
+  ];
+
   const isSmartLink = (href: string): boolean => {
-    const quoteInfo = parseSeizeQuoteLink(href);
-    if (quoteInfo) {
-      return true;
-    }
-
-    const groupResult = parseSeizeQueryLink(href, "/network", ["group"]);
-    if (groupResult) {
-      return true;
-    }
-
-    const waveResult = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
-    if (waveResult) {
-      return true;
-    }
-
-    const dropResult = parseSeizeQueryLink(
-      href,
-      "/my-stream",
-      ["wave", "drop"],
-      true
-    );
-    if (dropResult) {
-      return true;
-    }
-
-    const twitterMatch = parseTwitterLink(href);
-    if (twitterMatch) {
-      return true;
-    }
-
-    return false;
+    return smartLinkHandlers.some((handler) => !!handler.parse(href));
   };
 
   const aHrefRenderer = ({
@@ -256,44 +271,14 @@ function DropPartMarkdown({
       return null;
     }
 
-    const quoteInfo = parseSeizeQuoteLink(href);
-    if (quoteInfo) {
-      return renderSeizeQuote(quoteInfo, onQuoteClick, href);
-    }
-
-    const groupResult = parseSeizeQueryLink(href, "/network", ["group"]);
-    if (groupResult) {
-      return <GroupCardChat href={href} groupId={groupResult.group} />;
-    }
-
-    const waveResult = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
-    if (waveResult) {
-      return <WaveItemChat href={href} waveId={waveResult.wave} />;
-    }
-
-    const dropResult = parseSeizeQueryLink(
-      href,
-      "/my-stream",
-      ["wave", "drop"],
-      true
-    );
-    if (dropResult) {
-      return <DropItemChat href={href} dropId={dropResult.drop} />;
-    }
-
-    const twitterMatch = parseTwitterLink(href);
-    if (twitterMatch) {
-      return renderTweetEmbed(twitterMatch, href);
+    for (const { parse, render } of smartLinkHandlers) {
+      const result = parse(href);
+      if (result) {
+        return render(result, href);
+      }
     }
 
     return renderExternalOrInternalLink(href, props);
-  };
-
-  const parseTwitterLink = (href: string): string | null => {
-    const twitterRegex =
-      /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
-    const match = href.match(twitterRegex);
-    return match ? match[3] : null;
   };
 
   const renderTweetEmbed = (tweetId: string, href: string) => (
@@ -361,10 +346,7 @@ function DropPartMarkdown({
               onQuoteClick={onQuoteClick}
             />
           </div>
-          <ChatItemHrefButtons
-            href={href}
-            relativeHref={`/my-stream?wave=${waveId}&serialNo=${serialNo}`}
-          />
+          <ChatItemHrefButtons href={href} />
         </div>
       );
     } else if (dropId) {
