@@ -99,7 +99,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
-      <div className="tw-relative tw-w-full lg:tw-max-w-36">
+      <div className="tw-relative tw-w-full md:tw-w-36">
         <input
           onClick={(e) => {
             e.stopPropagation();

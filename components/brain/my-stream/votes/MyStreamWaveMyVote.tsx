@@ -25,12 +25,11 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   return (
     <div
       key={drop.id}
-      className="tw-bg-iron-950 tw-rounded-xl tw-p-5 tw-border tw-border-iron-800 tw-border-solid desktop-hover:hover:tw-border-iron-700 tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg"
+      className="tw-bg-iron-950 tw-rounded-xl tw-p-5 tw-border tw-border-iron-800 tw-border-solid desktop-hover:hover:tw-border-iron-700 tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg tw-@container"
       onClick={() => onDropClick(drop)}
     >
-      <div className="tw-flex tw-gap-4">
-        {/* Artwork thumbnail */}
-        <div className="tw-size-28 tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800">
+      <div className="tw-flex @md:tw-flex-row @sm:tw-flex-col @xs:tw-flex-col tw-gap-4">
+        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-900 tw-min-h-[144px] tw-min-w-[144px] @md:tw-size-36 @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2">
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
               {artWork && (
@@ -43,17 +42,15 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
         </div>
 
-        {/* Main content */}
         <div className="tw-flex tw-flex-col tw-flex-1 tw-min-w-0 tw-gap-y-4">
-          {/* Title row with rank */}
-          <div className="tw-flex tw-gap-3">
-            {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
+          <div className="@md:tw-flex-row @sm:tw-flex-col tw-space-y-2 tw-gap-x-3">
+            <div>
+              {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
+            </div>
             <h3 className="tw-text-base tw-font-semibold tw-text-iron-50 tw-mb-0">
               {drop.title}
             </h3>
           </div>
-
-          {/* Author info */}
           <div className="tw-flex tw-items-center tw-gap-2">
             <div className="tw-size-6 tw-relative tw-flex-shrink-0 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-800">
               {drop.author.pfp ? (
@@ -83,16 +80,16 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               {drop.author.handle}
             </Link>
           </div>
-
-          {/* Stats and vote area - responsive layout */}
-          <div className="tw-flex tw-flex-wrap sm:tw-flex-nowrap tw-justify-between tw-gap-4 tw-mt-auto">
-            <div className="tw-flex tw-gap-x-6">
-              <MyStreamWaveMyVoteVotes drop={drop} />
-
+          <div className="tw-flex tw-flex-col @lg:tw-flex-col @[42rem]:tw-flex-row tw-justify-between tw-gap-4 tw-mt-auto">
+            <div className="tw-flex tw-items-center tw-gap-x-6">
+              <div onClick={(e) => e.stopPropagation()}>
+                <MyStreamWaveMyVoteVotes drop={drop} />
+              </div>
               <div className="tw-flex tw-items-center tw-gap-1.5">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
+                  aria-hidden="true"
                   viewBox="0 0 24 24"
                   strokeWidth="2"
                   stroke="currentColor"
@@ -109,7 +106,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 </span>
               </div>
             </div>
-            <div className="tw-ml-auto" onClick={(e) => e.stopPropagation()}>
+            <div onClick={(e) => e.stopPropagation()}>
               <MyStreamWaveMyVoteInput drop={drop} />
             </div>
           </div>
