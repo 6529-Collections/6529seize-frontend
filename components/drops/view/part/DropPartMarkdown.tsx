@@ -1,7 +1,9 @@
 import {
   AnchorHTMLAttributes,
+  Children,
   ClassAttributes,
   HTMLAttributes,
+  isValidElement,
   memo,
   ReactNode,
 } from "react";
@@ -32,6 +34,7 @@ import { useEmoji } from "../../../../contexts/EmojiContext";
 import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
 import WaveItemChat from "../../../waves/list/WaveItemChat";
 import DropItemChat from "../../../waves/drops/DropItemChat";
+import ChatItemHrefButtons from "../../../waves/ChatItemHrefButtons";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -208,6 +211,40 @@ function DropPartMarkdown({
     );
   };
 
+  const isSmartLink = (href: string): boolean => {
+    const quoteInfo = parseSeizeQuoteLink(href);
+    if (quoteInfo) {
+      return true;
+    }
+
+    const groupResult = parseSeizeQueryLink(href, "/network", ["group"]);
+    if (groupResult) {
+      return true;
+    }
+
+    const waveResult = parseSeizeQueryLink(href, "/my-stream", ["wave"], true);
+    if (waveResult) {
+      return true;
+    }
+
+    const dropResult = parseSeizeQueryLink(
+      href,
+      "/my-stream",
+      ["wave", "drop"],
+      true
+    );
+    if (dropResult) {
+      return true;
+    }
+
+    const twitterMatch = parseTwitterLink(href);
+    if (twitterMatch) {
+      return true;
+    }
+
+    return false;
+  };
+
   const aHrefRenderer = ({
     node,
     ...props
@@ -221,7 +258,7 @@ function DropPartMarkdown({
 
     const quoteInfo = parseSeizeQuoteLink(href);
     if (quoteInfo) {
-      return renderSeizeQuote(quoteInfo, onQuoteClick);
+      return renderSeizeQuote(quoteInfo, onQuoteClick, href);
     }
 
     const groupResult = parseSeizeQueryLink(href, "/network", ["group"]);
@@ -309,55 +346,100 @@ function DropPartMarkdown({
 
   const renderSeizeQuote = (
     quoteLinkInfo: SeizeQuoteLinkInfo,
-    onQuoteClick: (drop: ApiDrop) => void
+    onQuoteClick: (drop: ApiDrop) => void,
+    href: string
   ) => {
     const { waveId, serialNo, dropId } = quoteLinkInfo;
 
     if (serialNo) {
       return (
-        <WaveDropQuoteWithSerialNo
-          serialNo={parseInt(serialNo)}
-          waveId={waveId}
-          onQuoteClick={onQuoteClick}
-        />
+        <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+          <div className="tw-flex-1">
+            <WaveDropQuoteWithSerialNo
+              serialNo={parseInt(serialNo)}
+              waveId={waveId}
+              onQuoteClick={onQuoteClick}
+            />
+          </div>
+          <ChatItemHrefButtons
+            href={href}
+            relativeHref={`/my-stream?wave=${waveId}&serialNo=${serialNo}`}
+          />
+        </div>
       );
     } else if (dropId) {
       return (
-        <WaveDropQuoteWithDropId
-          dropId={dropId}
-          partId={1}
-          maybeDrop={null}
-          onQuoteClick={onQuoteClick}
-        />
+        <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+          <div className="tw-flex-1">
+            <WaveDropQuoteWithDropId
+              dropId={dropId}
+              partId={1}
+              maybeDrop={null}
+              onQuoteClick={onQuoteClick}
+            />
+          </div>
+          <ChatItemHrefButtons
+            href={href}
+            relativeHref={`/my-stream?wave=${waveId}&drop=${dropId}`}
+          />
+        </div>
       );
     }
 
     return null;
   };
 
-  const renderP = (
+  const renderParagraph = (
     params: ClassAttributes<HTMLParagraphElement> &
       HTMLAttributes<HTMLParagraphElement> &
       ExtraProps
   ) => {
-    if (typeof params.children === "string") {
-      return (
-        <p
-          className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
-          {customRenderer({
-            content: params.children,
-            mentionedUsers,
-            referencedNfts,
-          })}
-        </p>
-      );
+    const renderP = (
+      params: ClassAttributes<HTMLParagraphElement> &
+        HTMLAttributes<HTMLParagraphElement> &
+        ExtraProps
+    ) => (
+      <p
+        key={getRandomObjectId()}
+        className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
+        {customRenderer({
+          content: params.children,
+          mentionedUsers,
+          referencedNfts,
+        })}
+      </p>
+    );
+
+    const { children } = params;
+
+    // Flatten children (could be string, JSX, or array)
+    const flattened = Children.toArray(children);
+
+    const elements: React.ReactNode[] = [];
+    let currentTextChunk: React.ReactNode[] = [];
+
+    const flushTextChunk = () => {
+      if (currentTextChunk.length > 0) {
+        elements.push(renderP({ children: currentTextChunk }));
+        currentTextChunk = [];
+      }
+    };
+
+    for (const node of flattened) {
+      const href = isValidElement(node) && node.props?.href;
+      if (href && isSmartLink(href)) {
+        flushTextChunk();
+        elements.push(node);
+      } else {
+        currentTextChunk.push(node);
+      }
     }
-    return customRenderer({
-      content: params.children,
-      mentionedUsers,
-      referencedNfts,
-    });
+
+    flushTextChunk();
+
+    return <>{elements}</>;
   };
+
   return (
     <Markdown
       rehypePlugins={[
@@ -419,7 +501,7 @@ function DropPartMarkdown({
             })}
           </h1>
         ),
-        p: renderP,
+        p: renderParagraph,
         li: (params) => (
           <li className="tw-text-md tw-text-iron-200 tw-break-words word-break">
             {customRenderer({
