@@ -51,6 +51,7 @@
     "ethers": "^6.13.5",
     "framer-motion": "^11.2.11",
     "fs": "^0.0.1-security",
+    "gif-picker-react": "^1.4.0",
     "hammerjs": "^2.0.8",
     "js-cookie": "^3.0.5",
     "js-sha256": "^0.11.0",

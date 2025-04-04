@@ -469,6 +469,32 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     return null;
   };
 
+  const createGifDrop = (gif: string): CreateDropConfig => {
+    return {
+      title: null,
+      drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
+      reply_to: getReplyTo(),
+      parts: [
+        ...(drop?.parts ?? []),
+        {
+          content: gif,
+          quoted_drop:
+            activeDrop?.action === ActiveDropAction.QUOTE
+              ? {
+                  drop_id: activeDrop.drop.id,
+                  drop_part_id: activeDrop.partId,
+                }
+              : null,
+          media: files,
+        },
+      ],
+      mentioned_users: [],
+      referenced_nfts: [],
+      metadata: [],
+      signature: null,
+    };
+  };
+
   const createCurrentDrop = (
     markdown: string | null,
     allMentions: ApiDropMentionedUser[],
@@ -674,6 +700,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(getUpdatedDrop());
   };
 
+  const onGifDrop = async (gif: string): Promise<void> => {
+    if (submitting) {
+      return;
+    }
+    await prepareAndSubmitDrop(createGifDrop(gif));
+  };
+
   useEffect(() => {
     if (!activeDrop) {
       return;
@@ -814,6 +847,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             onAddMetadataClick={onAddMetadataClick}
             breakIntoStorm={breakIntoStorm}
             setShowOptions={setShowOptions}
+            onGifDrop={onGifDrop}
           />
           <div className="tw-flex-grow tw-w-full">
             <CreateDropInput

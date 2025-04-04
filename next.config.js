@@ -74,6 +74,7 @@ const nextConfig = {
     IPFS_API_ENDPOINT: process.env.IPFS_API_ENDPOINT,
     IPFS_GATEWAY_ENDPOINT: process.env.IPFS_GATEWAY_ENDPOINT,
     IPFS_MFS_PATH: process.env.IPFS_MFS_PATH,
+    TENOR_API_KEY: process.env.TENOR_API_KEY,
   },
   async generateBuildId() {
     return VERSION;
