@@ -282,15 +282,7 @@ function DropPartMarkdown({
   };
 
   const renderTweetEmbed = (tweetId: string, href: string) => (
-    <div className="tweet-card">
-      <Link
-        className="tw-no-underline"
-        target="_blank"
-        href={href}
-        data-theme="dark">
-        <Tweet id={tweetId} />
-      </Link>
-    </div>
+    <Tweet id={tweetId} />
   );
 
   const isValidLink = (href: string): boolean => {
@@ -408,8 +400,10 @@ function DropPartMarkdown({
     };
 
     for (const node of flattened) {
-      const href = isValidElement(node) && node.props?.href;
-      if (href && isSmartLink(href)) {
+      const isValid = isValidElement(node);
+      const src = isValid && node.props?.src;
+      const href = isValid && node.props?.href;
+      if (src || (href && isSmartLink(href))) {
         flushTextChunk();
         elements.push(node);
       } else {
