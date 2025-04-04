@@ -295,7 +295,7 @@ function DropPartMarkdown({
     <img
       src={url}
       alt={url}
-      className="tw-h-[20rem] tw-max-w-[100%] tw-h-auto"
+      className="tw-max-h-[25rem] tw-max-w-[100%] tw-h-auto"
     />
   );
 

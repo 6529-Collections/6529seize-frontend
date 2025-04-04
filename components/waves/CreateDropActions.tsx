@@ -3,6 +3,7 @@ import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import React, { memo, useEffect, useState } from "react";
 import StormButton from "./StormButton";
 import CreateDropGifPicker from "./CreateDropGifPicker";
+import useIsMobileScreen from "../../hooks/isMobileScreen";
 
 interface CreateDropActionsProps {
   readonly isStormMode: boolean;
@@ -32,6 +33,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     setShowOptions,
     onGifDrop,
   }) => {
+    const isMobile = useIsMobileScreen();
     const gifPickerKey = process.env.TENOR_API_KEY;
     const gifPickerEnabled = !!gifPickerKey;
     const [showGifPicker, setShowGifPicker] = useState(false);
@@ -77,6 +79,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 className="tw-flex tw-items-center tw-gap-x-2 tw-overflow-hidden">
                 <Tippy
                   content={<span className="tw-text-xs">Add metadata</span>}
+                  disabled={isMobile}
                   trigger="mouseenter">
                   <button
                     onClick={onAddMetadataClick}
@@ -109,6 +112,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   className="tw-flex tw-items-center tw-gap-x-2">
                   <Tippy
                     content={<span className="tw-text-xs">Upload a file</span>}
+                    disabled={isMobile}
                     trigger="mouseenter">
                     <label
                       aria-label="Upload a file"
@@ -143,6 +147,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   {gifPickerEnabled && (
                     <Tippy
                       content={<span className="tw-text-xs">Add GIF</span>}
+                      disabled={isMobile}
                       trigger="mouseenter">
                       <button
                         onClick={() => setShowGifPicker(true)}
