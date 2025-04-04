@@ -21,7 +21,7 @@ export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
   REALTIME_VOTE = "REALTIME_VOTE",
   MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
-  CREATED_AT = "CREATED_AT_DESC",
+  CREATED_AT = "CREATED_AT",
 }
 
 interface UseWaveDropsLeaderboardProps {
@@ -70,6 +70,8 @@ export function useWaveDropsLeaderboard({
       waveId,
       page_size: WAVE_DROPS_PARAMS.limit,
       sort: sort,
+      sort_direction:
+        sort === WaveDropsLeaderboardSort.CREATED_AT ? "DESC" : undefined,
     },
   ];
 
@@ -81,6 +83,10 @@ export function useWaveDropsLeaderboard({
           page_size: WAVE_DROPS_PARAMS.limit.toString(),
           sort: sort,
         };
+
+        if (sort === WaveDropsLeaderboardSort.CREATED_AT) {
+          params.sort_direction = "DESC";
+        }
 
         if (pageParam) {
           params.page = `${pageParam}`;
@@ -113,6 +119,10 @@ export function useWaveDropsLeaderboard({
         page_size: WAVE_DROPS_PARAMS.limit.toString(),
         sort: sort,
       };
+
+      if (sort === WaveDropsLeaderboardSort.CREATED_AT) {
+        params.sort_direction = "DESC";
+      }
 
       if (pageParam) {
         params.page = `${pageParam}`;
@@ -157,6 +167,10 @@ export function useWaveDropsLeaderboard({
         page_size: "1",
         sort: sort,
       };
+
+      if (sort === WaveDropsLeaderboardSort.CREATED_AT) {
+        params.sort_direction = "DESC";
+      }
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({
         endpoint: `waves/${waveId}/leaderboard`,
