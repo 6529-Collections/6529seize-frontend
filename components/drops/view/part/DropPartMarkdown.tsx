@@ -223,6 +223,11 @@ function DropPartMarkdown({
     return match ? match[3] : null;
   };
 
+  const parseGifLink = (href: string): string | null => {
+    const gifRegex = /^https?:\/\/media\.tenor\.com\/[\w\-]+\/[\w\-]+\.gif$/;
+    return gifRegex.test(href) ? href : null;
+  };
+
   const smartLinkHandlers: SmartLinkHandler<any>[] = [
     {
       parse: parseSeizeQuoteLink,
@@ -251,8 +256,11 @@ function DropPartMarkdown({
     },
     {
       parse: parseTwitterLink,
-      render: (tweetId: string, href: string) =>
-        renderTweetEmbed(tweetId, href),
+      render: (tweetId: string) => renderTweetEmbed(tweetId),
+    },
+    {
+      parse: parseGifLink,
+      render: (url: string) => renderGifEmbed(url),
     },
   ];
 
@@ -281,8 +289,14 @@ function DropPartMarkdown({
     return renderExternalOrInternalLink(href, props);
   };
 
-  const renderTweetEmbed = (tweetId: string, href: string) => (
-    <Tweet id={tweetId} />
+  const renderTweetEmbed = (tweetId: string) => <Tweet id={tweetId} />;
+
+  const renderGifEmbed = (url: string) => (
+    <img
+      src={url}
+      alt={url}
+      className="tw-h-[20rem] tw-max-w-[100%] tw-h-auto"
+    />
   );
 
   const isValidLink = (href: string): boolean => {
