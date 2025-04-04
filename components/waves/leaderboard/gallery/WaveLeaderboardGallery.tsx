@@ -36,7 +36,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   if (isFetching && dropsWithMedia.length === 0) {
     return (
       <div className="tw-flex tw-justify-center tw-items-center tw-h-32">
-        <div className="tw-animate-pulse tw-text-iron-500">
+        <div className="tw-text-iron-500">
           Loading drops...
         </div>
       </div>

@@ -99,7 +99,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
                     className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 tw-right-10 lg:tw-top-10 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
                     aria-label="Full screen"
                   >
-                    <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
+                    <FontAwesomeIcon icon={faExpand} className="tw-size-4 tw-flex-shrink-0" />
                   </button>
                 )}
                 {isZoomed && (
@@ -215,7 +215,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
           onClick={handleExpandClick}
           aria-label="View image"
         >
-          <FontAwesomeIcon icon={faExpand} className="tw-size-3.5" />
+          <FontAwesomeIcon icon={faExpand} className="tw-size-3.5 tw-flex-shrink-0" />
         </button>
       </div>
       <div className="tw-flex tw-flex-col tw-mt-2 tw-gap-y-2">
