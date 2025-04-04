@@ -59,6 +59,8 @@ const SZN_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
   [MEMES_SEASON.SZN7]: "7",
   [MEMES_SEASON.SZN8]: "8",
   [MEMES_SEASON.SZN9]: "9",
+  [MEMES_SEASON.SZN10]: "10",
+  [MEMES_SEASON.SZN11]: "11",
 };
 
 export default function UserPageCollected({
