@@ -3,6 +3,12 @@ import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
 import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
 import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "../../../user/utils/UserCICAndLevel";
+import { SingleWaveDropPosition } from "../../../waves/drop/SingleWaveDropPosition";
+import { cicToType } from "../../../../helpers/Helpers";
+import Link from "next/link";
 
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
@@ -14,56 +20,102 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   onDropClick,
 }) => {
   const artWork = drop.parts.at(0)?.media.at(0);
+  const cicType = cicToType(drop.author.cic || 0);
+
+  const handleClick = () => {
+    if (window.getSelection()?.toString()) {
+      return;
+    }
+    onDropClick(drop);
+  };
+
   return (
     <div
       key={drop.id}
-      className="tw-bg-iron-900 tw-rounded-lg tw-p-3 tw-border tw-border-iron-800 tw-border-solid hover:tw-border-iron-700 tw-transition-colors tw-cursor-pointer"
-      onClick={() => onDropClick(drop)}
+      className="tw-bg-iron-950 tw-rounded-xl tw-p-5 tw-border tw-border-iron-800 tw-border-solid desktop-hover:hover:tw-border-iron-700 tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg tw-@container"
+      onClick={handleClick}
     >
-      <div className="tw-grid tw-grid-cols-12 tw-gap-x-6">
-        <div className="tw-col-span-4 tw-flex tw-items-center">
-          <div className="tw-w-14 tw-h-14 tw-flex-shrink-0 tw-mr-3 tw-bg-iron-800 tw-overflow-hidden">
-            {artWork && (
-              <DropListItemContentMedia
-                media_mime_type={artWork.mime_type}
-                media_url={artWork.url}
-              />
-            )}
-          </div>
-          <div className="tw-flex tw-flex-col">
-            <h3 className="tw-text-sm tw-font-medium tw-text-iron-50 tw-truncate">
-              {drop.title}
-            </h3>
-            <span className="tw-text-sm tw-text-iron-400 tw-truncate">
-              {drop.author.handle}
-            </span>
+      <div className="tw-flex @md:tw-flex-row @sm:tw-flex-col @xs:tw-flex-col tw-gap-4">
+        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[112px] tw-min-w-[112px] @md:tw-size-28 @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2">
+          <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out">
+            <div className="tw-absolute tw-inset-0 tw-z-[1]">
+              {artWork && (
+                <DropListItemContentMedia
+                  media_mime_type={artWork.mime_type}
+                  media_url={artWork.url}
+                />
+              )}
+            </div>
           </div>
         </div>
-        <div className="tw-col-span-8 tw-flex tw-items-center tw-justify-between tw-gap-x-4">
-          <div className="tw-flex tw-justify-end tw-ml-auto tw-text-left">
-            <MyStreamWaveMyVoteVotes drop={drop} />
-          </div>
-          <div className="tw-flex tw-items-center tw-gap-x-4">
-            <div className="tw-flex tw-items-center tw-gap-x-1.5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="2.25"
-                stroke="currentColor"
-                className="tw-size-4 tw-text-iron-400 tw-flex-shrink-0"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
-                />
-              </svg>
-              <span className="tw-text-sm tw-font-medium tw-text-iron-200">
-                {drop.raters_count}
-              </span>
+
+        <div className="tw-flex tw-flex-col tw-flex-1 tw-min-w-0 tw-gap-y-4">
+          <div className="tw-flex tw-flex-col @md:tw-flex-row @sm:tw-flex-col tw-gap-y-2 tw-gap-x-3">
+            <div>
+              {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
             </div>
-            <MyStreamWaveMyVoteInput drop={drop} />
+            <h3 className="tw-text-base tw-font-semibold tw-text-iron-50 tw-mb-0">
+              {drop.title}
+            </h3>
+          </div>
+          <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-size-6 tw-relative tw-flex-shrink-0 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-800">
+              {drop.author.pfp ? (
+                <img
+                  src={drop.author.pfp}
+                  alt="Profile"
+                  className="tw-h-full tw-w-full tw-object-contain tw-bg-iron-800"
+                />
+              ) : (
+                <div className="tw-h-full tw-w-full tw-bg-iron-800 tw-rounded-md tw-ring-1 tw-ring-white/10"></div>
+              )}
+            </div>
+            <UserCICAndLevel
+              level={drop.author.level || 0}
+              cicType={cicType}
+              size={UserCICAndLevelSize.SMALL}
+            />
+            <Link
+              href={`/${drop.author.handle}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                window.open(`/${drop.author.handle}`, "_blank");
+              }}
+              className="tw-text-sm tw-text-iron-300 desktop-hover:hover:tw-text-iron-100 tw-transition-colors tw-duration-200 tw-no-underline tw-font-medium tw-truncate"
+            >
+              {drop.author.handle}
+            </Link>
+          </div>
+          <div className="tw-flex tw-flex-col @lg:tw-flex-col @[42rem]:tw-flex-row tw-justify-between tw-gap-4 tw-mt-auto">
+            <div className="tw-flex tw-items-center tw-gap-x-6">
+              <div onClick={(e) => e.stopPropagation()}>
+                <MyStreamWaveMyVoteVotes drop={drop} />
+              </div>
+              <div className="tw-flex tw-items-center tw-gap-1.5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  className="tw-size-4 tw-text-iron-400 tw-flex-shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
+                  />
+                </svg>
+                <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+                  {drop.raters_count}
+                </span>
+              </div>
+            </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <MyStreamWaveMyVoteInput drop={drop} />
+            </div>
           </div>
         </div>
       </div>

@@ -39,7 +39,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
 
   return (
     <div
-      className="tw-space-y-4 lg:tw-space-y-6 lg:tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
+      className="tw-space-y-4 lg:tw-space-y-6 tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-pl-0 lg:tw-pr-2 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
       style={myVotesViewStyle}
     >
       {drops.length === 0 && !isFetching ? (

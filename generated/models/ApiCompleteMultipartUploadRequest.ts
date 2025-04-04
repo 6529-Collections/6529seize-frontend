@@ -10,30 +10,38 @@
  * Do not edit the class manually.
  */
 
+import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { HttpFile } from '../http/http';
 
-export class ApiDropPartContextProfileContext {
-    'replies_count': number;
-    'quotes_count': number;
+export class ApiCompleteMultipartUploadRequest {
+    'upload_id': string;
+    'key': string;
+    'parts': Array<ApiCompleteMultipartUploadRequestPart>;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "replies_count",
-            "baseName": "replies_count",
-            "type": "number",
-            "format": "int64"
+            "name": "upload_id",
+            "baseName": "upload_id",
+            "type": "string",
+            "format": ""
         },
         {
-            "name": "quotes_count",
-            "baseName": "quotes_count",
-            "type": "number",
-            "format": "int64"
+            "name": "key",
+            "baseName": "key",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "parts",
+            "baseName": "parts",
+            "type": "Array<ApiCompleteMultipartUploadRequestPart>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropPartContextProfileContext.attributeTypeMap;
+        return ApiCompleteMultipartUploadRequest.attributeTypeMap;
     }
 
     public constructor() {

@@ -546,23 +546,18 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     isIos
   ]);
   
-  // Calculate style for single drop view (with extra 47px margin after header on non-lg screens only)
+  // Calculate style for single drop view
   const singleDropViewStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
       return {};
     }
     
+    // On mobile/medium screens, only the info panel needs the 47px offset
+    // The chat panel should use the full height
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - var(--single-drop-margin, 0px))`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - var(--single-drop-margin, 0px))`,
-      // Define the CSS variable based on screen size
-      // This will be applied by the browser based on viewport size
-      // and will update automatically when the screen size changes
-      '--single-drop-margin': '47px',
-      '@media (min-width: 1024px)': {
-        '--single-drop-margin': '0px',
-      }
-    } as React.CSSProperties;
+      height: `calc(100vh - ${spaces.headerSpace}px)`,
+      maxHeight: `calc(100vh - ${spaces.headerSpace}px)`,
+    };
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,

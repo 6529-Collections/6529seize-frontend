@@ -99,7 +99,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
                     className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 tw-right-10 lg:tw-top-10 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
                     aria-label="Full screen"
                   >
-                    <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
+                    <FontAwesomeIcon icon={faExpand} className="tw-size-4 tw-flex-shrink-0" />
                   </button>
                 )}
                 {isZoomed && (
@@ -178,11 +178,11 @@ export const WaveLeaderboardGalleryItem: React.FC<
   return (
     <div>
       <div
-        className="tw-aspect-square tw-bg-iron-900 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer"
+        className="tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer"
         onClick={handleImageClick}
       >
         <div
-          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out"
+          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center hover:tw-scale-105 supports-[hover]:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out touch-none"
           onClick={(e) => {
             e.stopPropagation();
             handleImageClick();
@@ -211,11 +211,11 @@ export const WaveLeaderboardGalleryItem: React.FC<
           </div>
         </div>
         <button
-          className="tw-absolute tw-bottom-2 tw-right-2 tw-bg-black/40 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 tw-rounded-full tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-backdrop-blur-sm tw-z-10"
+          className="tw-absolute tw-bottom-2 tw-right-2 tw-bg-black/40 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-text-iron-50 tw-rounded-full tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-transition-none md:tw-transition tw-duration-300 tw-ease-out tw-backdrop-blur-sm tw-z-10 touch-none"
           onClick={handleExpandClick}
           aria-label="View image"
         >
-          <FontAwesomeIcon icon={faExpand} className="tw-size-3.5" />
+          <FontAwesomeIcon icon={faExpand} className="tw-size-3.5 tw-flex-shrink-0" />
         </button>
       </div>
       <div className="tw-flex tw-flex-col tw-mt-2 tw-gap-y-2">

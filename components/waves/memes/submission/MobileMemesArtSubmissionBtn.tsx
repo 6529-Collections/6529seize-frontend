@@ -69,7 +69,7 @@ const MobileMemesArtSubmissionBtn: React.FC<
       <button
         onClick={() => setIsOpen(true)}
         disabled={!canSubmit}
-        className={`tw-absolute tw-top-4 tw-right-4 tw-z-50 tw-text-white tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-full tw-size-10 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out ${
+        className={`tw-absolute tw-top-4 tw-right-4 tw-z-40 tw-text-white tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-full tw-size-10 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out ${
           !canSubmit
             ? "tw-bg-gray-400 tw-border-gray-400 tw-cursor-not-allowed"
             : isUrgent

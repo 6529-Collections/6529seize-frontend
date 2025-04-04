@@ -152,7 +152,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   return (
     <div className="tw-relative tw-flex tw-flex-col tw-h-full">
       {isDropOpen && (
-        <div className="tw-absolute tw-inset-0 tw-z-[1000]">
+        <div className="tw-absolute tw-inset-0 tw-z-[49]">
           <BrainDesktopDrop
             drop={{
               ...drop,

@@ -11,6 +11,7 @@ import {
 } from "../CreateDropWaveWrapper";
 import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
 import PrivilegedDropCreator, { DropMode } from "../PrivilegedDropCreator";
+import { useLayout } from "../../../components/brain/my-stream/layout/LayoutContext";
 
 interface SingleWaveDropChatProps {
   readonly wave: ApiWave;
@@ -20,13 +21,22 @@ interface SingleWaveDropChatProps {
 export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({ wave, drop }) => {
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const capacitor = useCapacitor();
+  const { spaces } = useLayout();
+  
+  const containerStyle = useMemo(() => {
+    if (!spaces.measurementsComplete) {
+      return {};
+    }
+    
+    // Use similar calculation to SingleWaveDropInfoContainer
+    return {
+      height: `calc(100vh - ${spaces.headerSpace}px - var(--tab-height, 47px))`,
+    };
+  }, [spaces.measurementsComplete, spaces.headerSpace]);
+  
   const containerClassName = useMemo(() => {
-    return `tw-w-full tw-flex tw-flex-col ${
-      capacitor.isCapacitor
-        ? "tw-h-[calc(100vh-14.7rem)]"
-        : `tw-h-[calc(100vh-8.8rem)] lg:tw-h-[calc(100vh-102px)]`
-    }`;
-  }, [capacitor.isCapacitor]);
+    return `tw-w-full tw-flex tw-flex-col lg:[--tab-height:0px]`;
+  }, []);
 
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
     action: ActiveDropAction.REPLY,
@@ -54,7 +64,10 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({ wave, dr
       >
         <div className="tw-relative tw-h-full">
           <div className="tw-h-full tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
-            <div className={containerClassName}>
+            <div 
+              className={containerClassName}
+              style={containerStyle}
+            >
               <WaveDropsAll
                 waveId={wave.id}
                 onReply={({ drop, partId }: { drop: ApiDrop; partId: number }) => 

@@ -109,7 +109,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
               {children}
               {isDropOpen && (
                 <div
-                  className="tw-absolute tw-inset-0 tw-z-[1000]"
+                  className="tw-absolute tw-inset-0 tw-z-[49]"
                   style={{ transition: "none" }}>
                   <BrainDesktopDrop
                     drop={{

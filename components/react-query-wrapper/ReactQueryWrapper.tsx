@@ -916,20 +916,8 @@ export default function ReactQueryWrapper({
                       item.item.id === qd.drop_id &&
                       part.part_id === qd.drop_part_id
                   );
-                  if (isQuoted) {
-                    return {
-                      ...part,
-                      quotes_count: part.quotes_count + 1,
-                      context_profile_context: {
-                        replies_count:
-                          part.context_profile_context?.replies_count ?? 0,
-                        quotes_count:
-                          (part.context_profile_context?.quotes_count ?? 0) + 1,
-                      },
-                    };
-                  } else {
-                    return part;
-                  }
+
+                  return part;
                 });
                 return {
                   ...item,
@@ -948,20 +936,7 @@ export default function ReactQueryWrapper({
                       part.part_id === qd.drop_part_id
                   );
 
-                  if (isQuoted) {
-                    return {
-                      ...part,
-                      quotes_count: part.quotes_count + 1,
-                      context_profile_context: {
-                        replies_count:
-                          part.context_profile_context?.replies_count ?? 0,
-                        quotes_count:
-                          (part.context_profile_context?.quotes_count ?? 0) + 1,
-                      },
-                    };
-                  } else {
-                    return part;
-                  }
+                  return part;
                 });
                 return {
                   ...item,
@@ -1030,20 +1005,7 @@ export default function ReactQueryWrapper({
                     item.id === qd.drop_id &&
                     part.part_id === qd.drop_part_id
                 );
-                if (isQuoted) {
-                  return {
-                    ...part,
-                    quotes_count: part.quotes_count + 1,
-                    context_profile_context: {
-                      replies_count:
-                        part.context_profile_context?.replies_count ?? 0,
-                      quotes_count:
-                        (part.context_profile_context?.quotes_count ?? 0) + 1,
-                    },
-                  };
-                } else {
-                  return part;
-                }
+                return part;
               });
 
               return {
@@ -1139,21 +1101,8 @@ export default function ReactQueryWrapper({
                   const isReplied =
                     item.item.id === repliedDrop.drop_id &&
                     part.part_id === repliedDrop.drop_part_id;
-                  if (isReplied) {
-                    return {
-                      ...part,
-                      replies_count: part.replies_count + 1,
-                      context_profile_context: {
-                        replies_count:
-                          (part.context_profile_context?.replies_count ?? 0) +
-                          1,
-                        quotes_count:
-                          part.context_profile_context?.quotes_count ?? 0,
-                      },
-                    };
-                  } else {
-                    return part;
-                  }
+
+                  return part;
                 });
                 return {
                   ...item,
@@ -1169,21 +1118,7 @@ export default function ReactQueryWrapper({
                     item.item.reply.id === repliedDrop.drop_id &&
                     part.part_id === repliedDrop.drop_part_id;
 
-                  if (isReplied) {
-                    return {
-                      ...part,
-                      replies_count: part.replies_count + 1,
-                      context_profile_context: {
-                        replies_count:
-                          (part.context_profile_context?.replies_count ?? 0) +
-                          1,
-                        quotes_count:
-                          part.context_profile_context?.quotes_count ?? 0,
-                      },
-                    };
-                  } else {
-                    return part;
-                  }
+                  return part;
                 });
                 return {
                   ...item,
