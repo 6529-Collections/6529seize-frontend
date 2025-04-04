@@ -157,7 +157,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               activeView={activeView}
               onViewChange={onViewChange}
             />
-            {/*   {isMemesWave && (
+              {isMemesWave && (
               <>
                 <button
                   onClick={() => onViewChange(BrainView.MY_VOTES)}
@@ -167,7 +167,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 </button>
                
               </>
-            )} */}
+            )} 
             <button
               onClick={() => onViewChange(BrainView.OUTCOME)}
               className={outcomeButtonClasses}

@@ -462,73 +462,6 @@ paths:
                 $ref: "#/components/schemas/ApiDropSubscriptionActions"
         "404":
           description: Wave not found
-  /drops/{dropId}/parts/{dropPartId}/replies:
-    get:
-      tags:
-        - Drops
-      summary: Get reply drops
-      operationId: getReplyDrops
-      parameters:
-        - name: dropId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: dropPartId
-          in: path
-          required: true
-          schema:
-            type: number
-            format: int64
-        - name: sort_direction
-          in: query
-          required: false
-          schema:
-            description: Default is DESC
-            type: string
-            enum:
-              - ASC
-              - DESC
-        - name: sort
-          in: query
-          required: false
-          schema:
-            description: Default is created_at
-            type: string
-            enum:
-              - created_at
-        - name: page
-          in: query
-          required: false
-          schema:
-            description: Default is 1
-            type: number
-            format: int64
-            minimum: 1
-        - name: page_size
-          in: query
-          required: false
-          schema:
-            description: Default is 20
-            type: number
-            format: int64
-            minimum: 1
-            maximum: 50
-        - name: drop_type
-          in: query
-          description: Filter by drop type
-          required: false
-          schema:
-            $ref: "#/components/schemas/ApiDropType"
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiDropsPage"
-        "404":
-          description: Drop not found
   /drop-media/prep:
     post:
       tags:
@@ -549,6 +482,72 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCreateMediaUrlResponse"
+        "400":
+          description: Invalid request
+  /drop-media/multipart-upload:
+    post:
+      tags:
+        - Drops
+      summary: Get upload ID and key for multipart upload
+      description: Requires the user to be authenticated
+      operationId: createMultipartDropMediaUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateMediaUploadUrlRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiStartMultipartMediaUploadResponse"
+        "400":
+          description: Invalid request
+  /drop-media/multipart-upload/part:
+    post:
+      tags:
+        - Drops
+      summary: Upload a part of multipart upload
+      description: Requires the user to be authenticated
+      operationId: uploadPartOfDropMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadResponse"
+        "400":
+          description: Invalid request
+  /drop-media/multipart-upload/completion:
+    post:
+      tags:
+        - Drops
+      summary: Complete the multipart upload
+      description: Requires the user to be authenticated
+      operationId: completeDropMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCompleteMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
         "400":
           description: Invalid request
   /feed:
@@ -2136,6 +2135,72 @@ paths:
                 $ref: "#/components/schemas/ApiCreateMediaUrlResponse"
         "400":
           description: Invalid request
+  /wave-media/multipart-upload:
+    post:
+      tags:
+        - Drops
+      summary: Get upload ID and key for multipart upload
+      description: Requires the user to be authenticated
+      operationId: createMultipartWaveMediaUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateMediaUploadUrlRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiStartMultipartMediaUploadResponse"
+        "400":
+          description: Invalid request
+  /wave-media/multipart-upload/part:
+    post:
+      tags:
+        - Drops
+      summary: Upload a part of multipart upload
+      description: Requires the user to be authenticated
+      operationId: uploadPartOfWaveMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadResponse"
+        "400":
+          description: Invalid request
+  /wave-media/multipart-upload/completion:
+    post:
+      tags:
+        - Drops
+      summary: Complete the multipart upload
+      description: Requires the user to be authenticated
+      operationId: completeWaveMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCompleteMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
+        "400":
+          description: Invalid request
   /waves-overview:
     get:
       tags:
@@ -2461,6 +2526,7 @@ paths:
               - RANK
               - REALTIME_VOTE
               - MY_REALTIME_VOTE
+              - CREATED_AT
       responses:
         "200":
           description: successful operation
@@ -3290,10 +3356,6 @@ components:
         file_name:
           type: string
           example: image.png
-        file_size:
-          type: number
-          format: int64
-          example: 1000
     ApiCreateMediaUrlResponse:
       required:
         - upload_url
@@ -3309,6 +3371,64 @@ components:
         media_url:
           type: string
           example: https://example.com/final/image.png
+    ApiStartMultipartMediaUploadResponse:
+      required:
+        - upload_id
+        - key
+      properties:
+        upload_id:
+          type: string
+        key:
+          type: string
+    ApiUploadPartOfMultipartUploadRequest:
+      required:
+        - upload_id
+        - key
+        - part_no
+      properties:
+        upload_id:
+          type: string
+        key:
+          type: string
+        part_no:
+          type: integer
+          format: int64
+    ApiUploadPartOfMultipartUploadResponse:
+      required:
+        - upload_url
+      properties:
+        upload_url:
+          type: string
+    ApiCompleteMultipartUploadRequestPart:
+      required:
+        - etag
+        - part_no
+      properties:
+        etag:
+          type: string
+        part_no:
+          type: integer
+          format: int64
+    ApiCompleteMultipartUploadRequest:
+      required:
+        - upload_id
+        - key
+        - parts
+      properties:
+        upload_id:
+          type: string
+        key:
+          type: string
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompleteMultipartUploadRequestPart"
+    ApiCompleteMultipartUploadResponse:
+      required:
+        - media_url
+      properties:
+        media_url:
+          type: string
     ApiCreateNewProfileProxy:
       type: object
       required:
@@ -3807,8 +3927,6 @@ components:
       required:
         - part_id
         - media
-        - replies_count
-        - quotes_count
         - quoted_drop
         - content
       properties:
@@ -3828,28 +3946,6 @@ components:
           anyOf:
             - $ref: "#/components/schemas/ApiQuotedDropResponse"
             - type: "null"
-        replies_count:
-          type: number
-          format: int64
-        quotes_count:
-          type: number
-          format: int64
-        context_profile_context:
-          anyOf:
-            - type: "null"
-            - $ref: "#/components/schemas/ApiDropPartContextProfileContext"
-    ApiDropPartContextProfileContext:
-      type: object
-      required:
-        - replies_count
-        - quotes_count
-      properties:
-        replies_count:
-          type: number
-          format: int64
-        quotes_count:
-          type: number
-          format: int64
     ApiDropRater:
       type: object
       required:

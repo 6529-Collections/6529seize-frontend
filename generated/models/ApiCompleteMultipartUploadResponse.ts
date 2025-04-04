@@ -12,28 +12,21 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiCreateMediaUploadUrlRequest {
-    'content_type': string;
-    'file_name': string;
+export class ApiCompleteMultipartUploadResponse {
+    'media_url': string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "content_type",
-            "baseName": "content_type",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "file_name",
-            "baseName": "file_name",
+            "name": "media_url",
+            "baseName": "media_url",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiCreateMediaUploadUrlRequest.attributeTypeMap;
+        return ApiCompleteMultipartUploadResponse.attributeTypeMap;
     }
 
     public constructor() {

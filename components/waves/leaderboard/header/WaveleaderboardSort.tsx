@@ -15,7 +15,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       "tw-px-2.5 tw-py-1.5 tw-border-0 tw-rounded-md tw-transition tw-duration-300 tw-ease-out";
 
     if (sort === buttonSort) {
-      return `${baseClass} tw-bg-iron-800 tw-text-iron-300 tw-font-medium`;
+      return `${baseClass} tw-bg-iron-800 tw-text-iron-50 tw-font-medium`;
     }
 
     return `${baseClass} tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent`;
@@ -38,7 +38,12 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       >
         24-Hour Vote
       </button>
-      {/* Add MY_REALTIME_VOTE option if needed */}
+      <button
+        className={getButtonClassName(WaveDropsLeaderboardSort.CREATED_AT)}
+        onClick={() => onSortChange(WaveDropsLeaderboardSort.CREATED_AT)}
+      >
+        Newest
+      </button>
     </div>
   );
 };

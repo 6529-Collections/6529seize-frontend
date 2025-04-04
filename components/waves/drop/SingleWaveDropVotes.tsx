@@ -14,7 +14,7 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({ drop }
   const isPositive = drop.rating >= 0;
   
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-pt-4">
+    <div className="tw-flex tw-items-center tw-justify-between">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <span className={`tw-text-md tw-font-semibold ${
           isPositive 

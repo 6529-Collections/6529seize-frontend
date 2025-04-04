@@ -11,7 +11,6 @@
  */
 
 import { ApiDropMedia } from '../models/ApiDropMedia';
-import { ApiDropPartContextProfileContext } from '../models/ApiDropPartContextProfileContext';
 import { ApiQuotedDropResponse } from '../models/ApiQuotedDropResponse';
 import { HttpFile } from '../http/http';
 
@@ -23,9 +22,6 @@ export class ApiDropPart {
     'content': string | null;
     'media': Array<ApiDropMedia>;
     'quoted_drop': ApiQuotedDropResponse | null;
-    'replies_count': number;
-    'quotes_count': number;
-    'context_profile_context'?: ApiDropPartContextProfileContext | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -52,24 +48,6 @@ export class ApiDropPart {
             "name": "quoted_drop",
             "baseName": "quoted_drop",
             "type": "ApiQuotedDropResponse",
-            "format": ""
-        },
-        {
-            "name": "replies_count",
-            "baseName": "replies_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "quotes_count",
-            "baseName": "quotes_count",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "context_profile_context",
-            "baseName": "context_profile_context",
-            "type": "ApiDropPartContextProfileContext",
             "format": ""
         }    ];
 
