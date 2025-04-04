@@ -1,15 +1,11 @@
-
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { DRAG_DROP_PASTE } from "@lexical/rich-text";
 import { isMimeType, mediaFileReader } from "@lexical/utils";
-import {
-  $getNodeByKey,
-  $insertNodes,
-  COMMAND_PRIORITY_LOW
-} from "lexical";
+import { $getNodeByKey, $insertNodes, COMMAND_PRIORITY_LOW } from "lexical";
 import { useEffect } from "react";
-import { commonApiPost } from "../../../../../services/api/common-api";
 import { $createImageNode } from "../nodes/ImageNode";
+import { multiPartUpload } from "../../../../waves/create-wave/services/multiPartUpload";
+import { useAuth } from "../../../../auth/Auth";
 
 const ACCEPTABLE_IMAGE_TYPES = [
   "image/",
@@ -20,37 +16,13 @@ const ACCEPTABLE_IMAGE_TYPES = [
 ];
 
 async function uploadImage(file: File): Promise<string> {
-  const prep = await commonApiPost<
-    {
-      content_type: string;
-      file_name: string;
-      file_size: number;
-    },
-    {
-      upload_url: string;
-      content_type: string;
-      media_url: string;
-    }
-  >({
-    endpoint: "drop-media/prep",
-    body: {
-      content_type: file.type,
-      file_name: file.name,
-      file_size: file.size,
-    },
-  });
-  const myHeaders = new Headers({
-    "Content-Type": prep.content_type,
-  });
-  await fetch(prep.upload_url, {
-    method: "PUT",
-    headers: myHeaders,
-    body: file,
-  });
-  return prep.media_url;
+  const multiPart = await multiPartUpload({ file, path: "drop" });
+  return multiPart.url;
 }
 
 export default function DragDropPaste(): null {
+  const { setToast } = useAuth();
+
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
     return editor.registerCommand(
@@ -61,6 +33,13 @@ export default function DragDropPaste(): null {
             files,
             [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x)
           );
+          if (filesResult.length === 0) {
+            setToast({
+              message: "Unsupported file type for Drag & Drop / Paste.",
+              type: "error",
+            });
+            return;
+          }
           for (const { file } of filesResult) {
             if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
               editor.update(() => {
