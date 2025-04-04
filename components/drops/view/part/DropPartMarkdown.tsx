@@ -224,7 +224,7 @@ function DropPartMarkdown({
   };
 
   const parseGifLink = (href: string): string | null => {
-    const gifRegex = /^https?:\/\/media\.tenor\.com\/[\w-]+\/[\w-]+\.gif$/;
+    const gifRegex = /^https?:\/\/media\.tenor\.com\/[^\s]+\.gif$/i;
     return gifRegex.test(href) ? href : null;
   };
 
