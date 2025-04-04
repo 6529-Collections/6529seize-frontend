@@ -12,12 +12,8 @@ interface WaveDropActionsQuoteProps {
 const WaveDropActionsQuote: React.FC<WaveDropActionsQuoteProps> = ({
   onQuote,
   drop,
-  activePartIndex,
 }) => {
   const canQuote = drop.wave.authenticated_user_eligible_to_chat;
-  const quotesCount = drop.parts[activePartIndex].quotes_count;
-  const contextProfileQuoted =
-    !!drop.parts[activePartIndex].context_profile_context?.quotes_count;
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const isQuoteAllowed = canQuote && !isTemporaryDrop;
 
@@ -60,11 +56,6 @@ const WaveDropActionsQuote: React.FC<WaveDropActionsQuoteProps> = ({
               fill="currentColor"
             />
           </svg>
-          {!!quotesCount && (
-            <span className={contextProfileQuoted ? "tw-text-blue-500" : ""}>
-              {quotesCount}
-            </span>
-          )}
         </button>
       </div>
     </Tippy>

@@ -178,11 +178,11 @@ export const WaveLeaderboardGalleryItem: React.FC<
   return (
     <div>
       <div
-        className="tw-aspect-square tw-bg-iron-900 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer"
+        className="tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer"
         onClick={handleImageClick}
       >
         <div
-          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out"
+          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center hover:tw-scale-105 supports-[hover]:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out touch-none"
           onClick={(e) => {
             e.stopPropagation();
             handleImageClick();
@@ -211,7 +211,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
           </div>
         </div>
         <button
-          className="tw-absolute tw-bottom-2 tw-right-2 tw-bg-black/40 tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 tw-rounded-full tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-backdrop-blur-sm tw-z-10"
+          className="tw-absolute tw-bottom-2 tw-right-2 tw-bg-black/40 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-text-iron-50 tw-rounded-full tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-transition-none md:tw-transition tw-duration-300 tw-ease-out tw-backdrop-blur-sm tw-z-10 touch-none"
           onClick={handleExpandClick}
           aria-label="View image"
         >

@@ -38,7 +38,12 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
       >
         24-Hour Vote
       </button>
-      {/* Add MY_REALTIME_VOTE option if needed */}
+      <button
+        className={getButtonClassName(WaveDropsLeaderboardSort.CREATED_AT)}
+        onClick={() => onSortChange(WaveDropsLeaderboardSort.CREATED_AT)}
+      >
+        Newest
+      </button>
     </div>
   );
 };

@@ -21,6 +21,7 @@ export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
   REALTIME_VOTE = "REALTIME_VOTE",
   MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
+  CREATED_AT = "CREATED_AT_DESC",
 }
 
 interface UseWaveDropsLeaderboardProps {

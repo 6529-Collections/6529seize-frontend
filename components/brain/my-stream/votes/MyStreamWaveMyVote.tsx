@@ -22,14 +22,21 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const artWork = drop.parts.at(0)?.media.at(0);
   const cicType = cicToType(drop.author.cic || 0);
 
+  const handleClick = () => {
+    if (window.getSelection()?.toString()) {
+      return;
+    }
+    onDropClick(drop);
+  };
+
   return (
     <div
       key={drop.id}
       className="tw-bg-iron-950 tw-rounded-xl tw-p-5 tw-border tw-border-iron-800 tw-border-solid desktop-hover:hover:tw-border-iron-700 tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg tw-@container"
-      onClick={() => onDropClick(drop)}
+      onClick={handleClick}
     >
       <div className="tw-flex @md:tw-flex-row @sm:tw-flex-col @xs:tw-flex-col tw-gap-4">
-        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-900 tw-min-h-[144px] tw-min-w-[144px] @md:tw-size-36 @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2">
+        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[112px] tw-min-w-[112px] @md:tw-size-28 @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2">
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
               {artWork && (
@@ -43,7 +50,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         </div>
 
         <div className="tw-flex tw-flex-col tw-flex-1 tw-min-w-0 tw-gap-y-4">
-          <div className="@md:tw-flex-row @sm:tw-flex-col tw-space-y-2 tw-gap-x-3">
+          <div className="tw-flex tw-flex-col @md:tw-flex-row @sm:tw-flex-col tw-gap-y-2 tw-gap-x-3">
             <div>
               {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
             </div>

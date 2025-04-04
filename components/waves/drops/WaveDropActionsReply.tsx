@@ -12,14 +12,10 @@ interface WaveDropActionsReplyProps {
 const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   onReply,
   drop,
-  activePartIndex,
 }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
   const canReply =
     drop.wave.authenticated_user_eligible_to_chat && !isTemporaryDrop;
-  const repliesCount = drop.parts[activePartIndex].replies_count;
-  const contextProfileReplied =
-    !!drop.parts[activePartIndex].context_profile_context?.replies_count;
 
   return (
     <Tippy
@@ -59,11 +55,6 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
               d="M7.49 12 3.74 8.248m0 0 3.75-3.75m-3.75 3.75h16.5V19.5"
             />
           </svg>
-          {!!repliesCount && (
-            <span className={contextProfileReplied ? "tw-text-blue-500" : ""}>
-              {repliesCount}
-            </span>
-          )}
         </button>
       </div>
     </Tippy>
