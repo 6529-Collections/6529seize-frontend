@@ -10,6 +10,7 @@ import { commonApiPost } from "../../../../../services/api/common-api";
 import { TraitsData } from "../types/TraitsData";
 import { SubmissionPhase } from "../ui/SubmissionProgress";
 import { useDropSignature } from "../../../../../hooks/drops/useDropSignature";
+import { multiPartUpload } from "../../../create-wave/services/multiPartUpload";
 
 /**
  * Interface for the artwork submission data
@@ -20,101 +21,6 @@ interface ArtworkSubmissionData {
   waveId: string;
   termsOfService: string | null;
 }
-
-/**
- * Upload file with progress tracking
- */
-const uploadFileWithProgress = async (
-  uploadUrl: string,
-  file: File,
-  contentType: string,
-  onProgress: (progress: number) => void
-): Promise<Response> => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    xhr.upload.addEventListener("progress", (event) => {
-      if (event.lengthComputable) {
-        const progress = Math.round((event.loaded / event.total) * 100);
-        onProgress(progress);
-      }
-    });
-
-    xhr.addEventListener("load", () => {
-      resolve(
-        new Response(null, {
-          status: xhr.status,
-          statusText: xhr.statusText,
-        })
-      );
-    });
-
-    xhr.addEventListener("error", () => {
-      reject(new Error("Upload failed"));
-    });
-
-    xhr.addEventListener("abort", () => {
-      reject(new Error("Upload aborted"));
-    });
-
-    xhr.open("PUT", uploadUrl);
-    xhr.setRequestHeader("Content-Type", contentType);
-    xhr.send(file);
-  });
-};
-
-/**
- * Prepare and upload media file to get a media URL
- */
-const uploadMediaFile = async (
-  file: File,
-  setUploadProgress: (progress: number) => void
-): Promise<ApiDropMedia> => {
-  try {
-    // Step 1: Prepare the upload by getting URLs from the server
-    const prep = await commonApiPost<
-      {
-        content_type: string;
-        file_name: string;
-        file_size: number;
-      },
-      {
-        upload_url: string;
-        content_type: string;
-        media_url: string;
-      }
-    >({
-      endpoint: "drop-media/prep",
-      body: {
-        content_type: file.type,
-        file_name: file.name,
-        file_size: file.size,
-      },
-    });
-
-    // Step 2: Upload the file with progress tracking
-    const response = await uploadFileWithProgress(
-      prep.upload_url,
-      file,
-      prep.content_type,
-      setUploadProgress
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to upload file: ${response.statusText}`);
-    }
-
-    // Step 3: Return the media object with URL and mime type
-    return {
-      url: prep.media_url,
-      mime_type: prep.content_type,
-    };
-  } catch (error) {
-    throw new Error(
-      `Error uploading ${file.name}: ${(error as Error).message}`
-    );
-  }
-};
 
 /**
  * Function to transform form data into API request format
@@ -212,8 +118,10 @@ export function useArtworkSubmissionMutation() {
     mutationFn: async ({ file, callbacks }) => {
       updatePhase("uploading", callbacks);
 
-      return uploadMediaFile(file, (progress) => {
-        setUploadProgress(progress);
+      return multiPartUpload({
+        file,
+        path: "drop",
+        onProgress: setUploadProgress,
       });
     },
     onError: (error, variables) => {

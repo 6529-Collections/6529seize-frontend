@@ -6,7 +6,6 @@ import {
   CreateDropConfig,
   CreateDropPart,
   CreateDropRequestPart,
-  DropMedia,
   DropMetadata,
   MentionedUser,
   ReferencedNft,
@@ -16,7 +15,6 @@ import { MENTION_TRANSFORMER } from "../drops/create/lexical/transformers/Mentio
 import { HASHTAG_TRANSFORMER } from "../drops/create/lexical/transformers/HastagTransformer";
 import { IMAGE_TRANSFORMER } from "../drops/create/lexical/transformers/ImageTransformer";
 import { AuthContext } from "../auth/Auth";
-import { commonApiPost } from "../../services/api/common-api";
 import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
 import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
 import { ApiDrop } from "../../generated/models/ApiDrop";
@@ -52,6 +50,7 @@ import {
 import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTransformer";
 import { useDropSignature } from "../../hooks/drops/useDropSignature";
 import { useWave } from "../../hooks/useWave";
+import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 
 export type CreateDropMetadataType =
   | {
@@ -192,100 +191,25 @@ export interface UploadingFile {
   progress: number;
 }
 
-const uploadFileWithProgress = (
-  url: string,
-  file: File,
-  contentType: string,
-  onProgress: (progress: number) => void
-): Promise<Response> => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
-    xhr.setRequestHeader("Content-Type", contentType);
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const progress = Math.round((event.loaded / event.total) * 100);
-        onProgress(progress);
-      }
-    };
-
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(
-          new Response(xhr.response, {
-            status: xhr.status,
-            statusText: xhr.statusText,
-          })
-        );
-      } else {
-        reject(new Error(`HTTP error! status: ${xhr.status}`));
-      }
-    };
-
-    xhr.onerror = () => reject(new Error("Network error"));
-
-    xhr.send(file);
-  });
-};
-
 const generateMediaForPart = async (
   media: File,
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
-): Promise<DropMedia> => {
-  try {
-    setUploadingFiles((prev) => [
-      ...prev,
-      { file: media, isUploading: true, progress: 0 },
-    ]);
-
-    const prep = await commonApiPost<
-      {
-        content_type: string;
-        file_name: string;
-        file_size: number;
-      },
-      {
-        upload_url: string;
-        content_type: string;
-        media_url: string;
-      }
-    >({
-      endpoint: "drop-media/prep",
-      body: {
-        content_type: media.type,
-        file_name: media.name,
-        file_size: media.size,
-      },
-    });
-
-    const response = await uploadFileWithProgress(
-      prep.upload_url,
-      media,
-      prep.content_type,
-      (progress) => {
-        setUploadingFiles((prev) =>
-          prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
-        );
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to upload file: ${response.statusText}`);
-    }
-
+) => {
+  setUploadingFiles((prev) => [
+    ...prev,
+    { file: media, isUploading: true, progress: 0 },
+  ]);
+  const uploadResponse = await multiPartUpload({
+    file: media,
+    path: "drop",
+    onProgress: (progress) =>
+      setUploadingFiles((prev) =>
+        prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
+      ),
+  }).finally(() => {
     setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
-
-    return {
-      url: prep.media_url,
-      mime_type: prep.content_type,
-    };
-  } catch (error) {
-    setUploadingFiles((prev) => prev.filter((uf) => uf.file !== media));
-    throw new Error(
-      `Error uploading ${media.name}: ${(error as Error).message}`
-    );
-  }
+  });
+  return uploadResponse;
 };
 
 const generatePart = async (
@@ -944,8 +868,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+            transition={{ duration: 0.3 }}>
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}

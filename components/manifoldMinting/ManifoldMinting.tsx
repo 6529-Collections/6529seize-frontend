@@ -606,15 +606,13 @@ function ManifoldMemesMintingPhase(
   );
 
   let eligibleMintsText =
-    props.phase.id === "public"
-      ? "Unlimited eligible mints"
-      : "No eligible mints";
+    props.phase.id === "public" ? "Unlimited spots" : "No eligible spots";
   let eligibleMintsStyle =
     props.phase.id === "public" ? "font-color-green font-bolder" : "";
 
   if (eligibleMints) {
     const count = eligibleMints.spots;
-    eligibleMintsText = `${count} eligible mint${count > 1 ? "s" : ""}`;
+    eligibleMintsText = `${count} eligible spot${count > 1 ? "s" : ""}`;
     eligibleMintsStyle = "font-color-green font-bolder";
   }
 

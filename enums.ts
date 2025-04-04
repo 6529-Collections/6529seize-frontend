@@ -20,6 +20,8 @@ export enum MEMES_SEASON {
   SZN7 = "SZN7",
   SZN8 = "SZN8",
   SZN9 = "SZN9",
+  SZN10 = "SZN10",
+  SZN11 = "SZN11",
 }
 
 export enum MemesSort {
