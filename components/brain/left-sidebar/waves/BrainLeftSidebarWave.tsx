@@ -1,24 +1,22 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
-import { EnhancedWave } from "../../../../hooks/useWavesList";
 import WavePicture from "../../../waves/WavePicture";
+import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
+import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
 
 interface BrainLeftSidebarWaveProps {
-  readonly wave: EnhancedWave;
-  readonly activeWaveId: string | null;
+  readonly wave: MinimalWave;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
-  activeWaveId,
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
-  const isDropWave = wave.wave.type !== ApiWaveType.Chat;
+  const isDropWave = wave.type !== ApiWaveType.Chat;
 
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
@@ -27,7 +25,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
       : `/my-stream?wave=${waveId}`;
   };
 
-  const haveNewDrops = wave.newDropsCount > 0;
+  const haveNewDrops = wave.newDropsCount.count > 0;
 
   const onHover = (waveId: string) => {
     if (waveId !== router.query.wave) prefetchWaveData(waveId);
@@ -69,7 +67,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           <div
             className={`tw-relative tw-size-8 tw-rounded-full tw-transition tw-duration-300 group-hover:tw-brightness-110 ${getAvatarRingClasses()}`}
           >
-            <WavePicture wave={wave} />
+            <WavePicture
+              name={wave.name}
+              picture={wave.picture}
+              contributors={wave.contributors}
+            />
             {isDropWave && (
               <div className="tw-absolute tw-inset-0 tw-border-2 tw-border-blue-400/40 tw-overflow-hidden tw-rounded-full" />
             )}
@@ -90,19 +92,21 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             )}
             {!isActive && haveNewDrops && (
               <div className="tw-absolute tw-top-[-4px] tw-right-[-4px] tw-bg-indigo-500 tw-text-white tw-rounded-full tw-h-4 tw-min-w-4 tw-flex tw-items-center tw-justify-center tw-text-[10px] tw-font-medium tw-px-1 tw-shadow-sm">
-                {wave.newDropsCount}
+                {wave.newDropsCount.count}
               </div>
             )}
           </div>
         </div>
         <div className="tw-flex-1">
           <div className="tw-font-medium tw-text-sm">{wave.name}</div>
-          <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
-            <span className="tw-pr-1">Last drop:</span>
-            <span className="tw-text-iron-400">
-              {getTimeAgoShort(wave.metrics.latest_drop_timestamp)}
-            </span>
-          </div>
+          {!!wave.newDropsCount.latestDropTimestamp && (
+            <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
+              <span className="tw-pr-1">Last drop:</span>
+              <BrainLeftSidebarWaveDropTime
+                time={wave.newDropsCount.latestDropTimestamp}
+              />
+            </div>
+          )}
         </div>
       </Link>
     </div>

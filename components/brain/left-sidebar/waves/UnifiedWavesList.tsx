@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { EnhancedWave } from "../../../../hooks/useWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
 import { motion } from "framer-motion";
+import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
+
 
 interface UnifiedWavesListProps {
-  readonly waves: EnhancedWave[];
+  readonly waves: MinimalWave[];
   readonly activeWaveId: string | null;
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
@@ -35,7 +36,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   const sortedWaves = useMemo(() => {
     if (!activeWaveId) return waves;
 
-    return waves.reduce<EnhancedWave[]>((acc, wave) => {
+    return waves.reduce<MinimalWave[]>((acc, wave) => {
       if (wave.id === activeWaveId) {
         // Place active wave at the beginning
         acc.unshift(wave);
@@ -117,10 +118,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
             <div className="tw-flex tw-flex-col">
               {sortedWaves.map((wave) => (
                 <div key={wave.id}>
-                  <BrainLeftSidebarWave
-                    wave={wave}
-                    activeWaveId={activeWaveId}
-                  />
+                  <BrainLeftSidebarWave wave={wave} />
                 </div>
               ))}
             </div>

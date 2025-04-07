@@ -3,13 +3,11 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { getTimeAgo, numberWithCommas } from "../../../helpers/Helpers";
 import WaveHeaderFollow from "./WaveHeaderFollow";
 import { AuthContext } from "../../auth/Auth";
-import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 import WaveHeaderOptions from "./options/WaveHeaderOptions";
 import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
 import WaveHeaderPinned from "./WaveHeaderPinned";
 import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
-import Link from "next/link";
 import WavePicture from "../WavePicture";
 import { Time } from "../../../helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
@@ -74,7 +72,13 @@ export default function WaveHeader({
                   isDropWave ? "tw-ring-2 tw-ring-primary-400/90" : ""
                 }`}
               >
-                <WavePicture wave={wave} />
+                <WavePicture
+                  name={wave.name}
+                  picture={wave.picture}
+                  contributors={wave.contributors_overview.map((c) => ({
+                    pfp: c.contributor_pfp,
+                  }))}
+                />
               </div>
               {isDropWave && (
                 <div className="tw-absolute tw-bottom-0 tw-right-0 tw-size-6 tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-full tw-shadow-md tw-border tw-border-iron-800/50">

@@ -223,6 +223,11 @@ function DropPartMarkdown({
     return match ? match[3] : null;
   };
 
+  const parseGifLink = (href: string): string | null => {
+    const gifRegex = /^https?:\/\/media\.tenor\.com\/[^\s]+\.gif$/i;
+    return gifRegex.test(href) ? href : null;
+  };
+
   const smartLinkHandlers: SmartLinkHandler<any>[] = [
     {
       parse: parseSeizeQuoteLink,
@@ -251,8 +256,11 @@ function DropPartMarkdown({
     },
     {
       parse: parseTwitterLink,
-      render: (tweetId: string, href: string) =>
-        renderTweetEmbed(tweetId, href),
+      render: (tweetId: string) => renderTweetEmbed(tweetId),
+    },
+    {
+      parse: parseGifLink,
+      render: (url: string) => renderGifEmbed(url),
     },
   ];
 
@@ -281,8 +289,14 @@ function DropPartMarkdown({
     return renderExternalOrInternalLink(href, props);
   };
 
-  const renderTweetEmbed = (tweetId: string, href: string) => (
-    <Tweet id={tweetId} />
+  const renderTweetEmbed = (tweetId: string) => <Tweet id={tweetId} />;
+
+  const renderGifEmbed = (url: string) => (
+    <img
+      src={url}
+      alt={url}
+      className="tw-max-h-[25rem] tw-max-w-[100%] tw-h-auto"
+    />
   );
 
   const isValidLink = (href: string): boolean => {
@@ -331,7 +345,7 @@ function DropPartMarkdown({
     if (serialNo) {
       return (
         <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-          <div className="tw-flex-1">
+          <div className="tw-flex-1 tw-min-w-0">
             <WaveDropQuoteWithSerialNo
               serialNo={parseInt(serialNo)}
               waveId={waveId}
@@ -344,7 +358,7 @@ function DropPartMarkdown({
     } else if (dropId) {
       return (
         <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-          <div className="tw-flex-1">
+          <div className="tw-flex-1 tw-min-w-0">
             <WaveDropQuoteWithDropId
               dropId={dropId}
               partId={1}
