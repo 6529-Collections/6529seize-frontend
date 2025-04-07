@@ -6,7 +6,6 @@ import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { MemesSingleWaveDropContent } from "./MemesSingleWaveDropContent";
 import { WinnerBadge } from "./WinnerBadge";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
-import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 // import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
 
 interface SingleWaveDropInfoContentProps {
@@ -17,8 +16,6 @@ export const SingleWaveDropInfoContent: React.FC<
   SingleWaveDropInfoContentProps
 > = ({ drop }) => {
   const { isMemesWave } = useSeizeSettings();
-  // For delete functionality - moved before conditional return
-  const { /* canDelete */ } = drop ? useDropInteractionRules(drop) : { /* canDelete: false */ };
 
   if (!drop) {
     return null;
