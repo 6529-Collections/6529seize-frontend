@@ -6,6 +6,7 @@ import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
 import { LayoutProvider, useLayout } from "./LayoutContext";
+import { MyStreamProvider } from "../../../../contexts/wave/MyStreamContext";
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -79,7 +80,8 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
         <div
           ref={setHeaderRef}
-          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
+          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black"
+        >
           <Header isSmall={true} />
           <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />
@@ -106,8 +108,10 @@ export default function MyStreamLayout({
   readonly children: ReactNode;
 }) {
   return (
-    <LayoutProvider>
-      <MyStreamLayoutContent>{children}</MyStreamLayoutContent>
-    </LayoutProvider>
+    <MyStreamProvider>
+      <LayoutProvider>
+        <MyStreamLayoutContent>{children}</MyStreamLayoutContent>
+      </LayoutProvider>
+    </MyStreamProvider>
   );
 }

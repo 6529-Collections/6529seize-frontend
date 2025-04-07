@@ -8,6 +8,7 @@ import { commonApiFetch } from "../services/api/common-api";
 import { ApiWaveVotersPage } from "../generated/models/ApiWaveVotersPage";
 import { ApiWaveVoter } from "../generated/models/ApiWaveVoter";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
 
 interface UseWaveTopVotersProps {
   readonly waveId: string;
@@ -16,6 +17,7 @@ interface UseWaveTopVotersProps {
   readonly dropId: string | null;
   readonly sortDirection?: "ASC" | "DESC";
   readonly sort?: "ABSOLUTE" | "POSITIVE" | "NEGATIVE";
+  readonly refetchInterval?: number;
 }
 
 export function useWaveTopVoters({
@@ -25,6 +27,7 @@ export function useWaveTopVoters({
   dropId,
   sortDirection = "ASC",
   sort = "ABSOLUTE",
+  refetchInterval = Infinity,
 }: UseWaveTopVotersProps) {
   const queryClient = useQueryClient();
   const [voters, setVoters] = useState<ApiWaveVoter[]>([]);
@@ -64,6 +67,7 @@ export function useWaveTopVoters({
         lastPage.next ? allPages.length + 1 : null,
       pages: 3,
       staleTime: 60000,
+      ...getDefaultQueryRetry(),
     });
   }, [waveId, dropId, sortDirection, sort]);
 
@@ -100,7 +104,8 @@ export function useWaveTopVoters({
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
-    refetchInterval: 30000,
+    refetchInterval,
+    ...getDefaultQueryRetry(),
   });
 
   useEffect(() => {

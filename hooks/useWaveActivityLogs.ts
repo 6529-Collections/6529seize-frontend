@@ -5,7 +5,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { commonApiFetch } from "../services/api/common-api";
-import { WAVE_LOGS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
+import {
+  getDefaultQueryRetry,
+  WAVE_LOGS_PARAMS,
+} from "../components/react-query-wrapper/utils/query-utils";
 import { ApiWaveLog } from "../generated/models/ApiWaveLog";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
@@ -66,6 +69,7 @@ export function useWaveActivityLogs({
           : null,
       pages: 3,
       staleTime: 60000,
+      ...getDefaultQueryRetry(),
     });
   }, [waveId]);
 
@@ -102,10 +106,11 @@ export function useWaveActivityLogs({
       enabled: !!connectedProfileHandle,
       staleTime: 60000,
       refetchInterval: 30000,
+      ...getDefaultQueryRetry(),
     });
 
   useEffect(() => {
-    setLogs((prev) => {
+    setLogs(() => {
       const newLogs = data?.pages ? data.pages.flat() : [];
       return reverse ? newLogs.reverse() : newLogs;
     });
