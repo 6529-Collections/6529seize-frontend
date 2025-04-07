@@ -394,7 +394,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
               ))}
               <button
                 onClick={handleShowLess}
-                className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
+                className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
               >
                 Show less
               </button>
@@ -402,7 +402,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
           ) : (
             <button
               onClick={handleShowMore}
-              className="tw-text-xs tw-text-iron-400 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
+              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
             >
               Show all
             </button>

@@ -11,10 +11,10 @@ const BrainRightSidebarContent: React.FC<BrainRightSidebarContentProps> = ({
   wave,
 }) => {
   return (
-    <>
+    <div className="tw-flex tw-flex-col">
       <WaveSpecs wave={wave} useRing={false} />
       <WaveGroups wave={wave} useRing={false} />
-    </>
+    </div>
   );
 };
 
