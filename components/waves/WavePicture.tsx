@@ -1,5 +1,12 @@
 import React from "react";
-import { ApiWave } from "../../generated/models/ApiWave";
+
+export interface WavePictureProps {
+  readonly name: string;
+  readonly picture: string | null;
+  readonly contributors: {
+    readonly pfp: string;
+  }[];
+}
 
 const polygonsByCount: Record<number, string[]> = {
   // 1 entire area
@@ -52,20 +59,22 @@ const polygonsByCount: Record<number, string[]> = {
   ],
 };
 
-export default function WavePicture({ wave }: { readonly wave: ApiWave }) {
-  if (wave.picture) {
+export default function WavePicture({
+  name,
+  picture,
+  contributors,
+}: WavePictureProps) {
+  if (picture) {
     return (
       <img
-        src={wave.picture}
-        alt={wave.name}
+        src={picture}
+        alt={name}
         className="tw-w-full tw-h-full tw-object-cover tw-rounded-full"
       />
     );
   }
 
-  const pfps = wave.contributors_overview
-    .map((c) => c.contributor_pfp)
-    .filter(Boolean);
+  const pfps = contributors.map((c) => c.pfp).filter(Boolean);
 
   // 3) If no PFPS, show fallback background
   if (pfps.length === 0) {
@@ -89,7 +98,8 @@ export default function WavePicture({ wave }: { readonly wave: ApiWave }) {
           <div
             key={pfp + i}
             className="tw-absolute tw-inset-0"
-            style={{ clipPath: clip }}>
+            style={{ clipPath: clip }}
+          >
             <img
               src={pfp}
               alt={`Contributor-${i}`}
