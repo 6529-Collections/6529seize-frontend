@@ -29,7 +29,7 @@ export default function DropItemChat({
 
   return (
     <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1">
+      <div className="tw-flex-1 tw-min-w-0">
         <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4">
           <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3">
             <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">

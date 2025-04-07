@@ -37,10 +37,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
 
   const goToOpensea = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
-    window.open(
-      `https://opensea.io/accounts/${address.wallet.address}`,
-      "_blank"
-    );
+    window.open(`https://opensea.io/${address.wallet.address}`, "_blank");
   };
 
   const goToEtherscan = () => {

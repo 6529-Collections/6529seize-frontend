@@ -9,25 +9,28 @@ interface SingleWaveDropVotesProps {
   readonly drop: ApiDrop;
 }
 
-export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({ drop }) => {
+export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
+  drop,
+}) => {
   const firstThreeVoters = drop.top_raters.slice(0, 3);
   const isPositive = drop.rating >= 0;
-  
+
   return (
-    <div className="tw-flex tw-items-center tw-justify-between">
+    <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-overflow-x-auto">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
-        <span className={`tw-text-md tw-font-semibold ${
-          isPositive 
-            ? 'tw-text-emerald-500' 
-            : 'tw-text-rose-500'
-        } `}>
+        <span
+          className={`tw-text-md tw-font-semibold ${
+            isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
+          } `}>
           {formatNumberWithCommas(drop.rating)}
         </span>
         <DropVoteProgressing
           rating={drop.rating}
           realtimeRating={drop.realtime_rating}
         />
-        <span className="tw-text-md tw-text-iron-400">{drop.wave.voting_credit_type} total</span>
+        <span className="tw-text-md tw-text-iron-400 text-nowrap">
+          {drop.wave.voting_credit_type} total
+        </span>
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-end tw-gap-x-3">
         <div className="tw-flex tw-items-center -tw-space-x-1.5">
@@ -36,8 +39,7 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({ drop }
               key={voter.profile.handle}
               content={`${voter.profile.handle} - ${formatNumberWithCommas(
                 voter.rating
-              )}`}
-            >
+              )}`}>
               <Link href={`/${voter.profile.handle}`}>
                 {voter.profile.pfp ? (
                   <img
@@ -56,11 +58,11 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({ drop }
           <span className="tw-text-md tw-font-medium tw-text-iron-100">
             {formatNumberWithCommas(drop.raters_count)}
           </span>
-          <span className="tw-text-md tw-text-iron-400">
+          <span className="tw-text-md tw-text-iron-400 text-nowrap">
             {drop.raters_count === 1 ? "voter" : "voters"}
           </span>
         </div>
       </div>
     </div>
   );
-}; 
+};
