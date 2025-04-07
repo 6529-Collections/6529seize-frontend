@@ -9,10 +9,12 @@ import { commonApiPost } from "../../../../services/api/common-api";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
+  readonly isResetting?: boolean;
 }
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   drop,
+  isResetting = false,
 }) => {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { onDropRateChange } = useContext(ReactQueryWrapperContext);
@@ -74,7 +76,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   });
 
   const handleSubmit = async () => {
-    if (isProcessing) return;
+    if (isProcessing || isResetting) return;
 
     setIsProcessing(true);
 
@@ -121,6 +123,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           value={voteValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          disabled={isResetting}
           pattern="-?[0-9]*"
           inputMode="numeric"
           className="tw-w-full tw-px-3 tw-h-8 tw-bg-iron-900 tw-rounded-lg tw-text-iron-50 tw-placeholder-iron-400 tw-text-base tw-font-medium tw-border-0 tw-ring-1 tw-ring-iron-700 focus:tw-ring-primary-400 desktop-hover:hover:tw-ring-primary-400 tw-outline-none tw-transition-all desktop-hover:hover:tw-bg-iron-950/60 focus:tw-bg-iron-950/80"
@@ -136,11 +139,11 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             e.stopPropagation();
             handleSubmit();
           }}
-          disabled={!isEditing || isProcessing}
+          disabled={!isEditing || isProcessing || isResetting}
           className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-px-3 tw-h-8 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-600 tw-text-iron-300 desktop-hover:hover:tw-text-iron-100 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95 tw-text-sm tw-font-medium tw-min-w-[60px]"
           aria-label="Submit vote"
         >
-          {isProcessing ? (
+          {isProcessing || isResetting ? (
             <svg
               aria-hidden="true"
               role="status"
