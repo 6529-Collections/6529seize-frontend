@@ -56,7 +56,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           onClick={handleCheckboxClick}
         >
           <div
-            className={`tw-size-6 lg:tw-size-5 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
+            className={`tw-size-5 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
               isChecked
                 ? "tw-border-primary-400 tw-bg-primary-400/20"
                 : "tw-border-iron-600 tw-bg-iron-800"
@@ -67,7 +67,8 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="tw-size-5 lg:tw-size-4 tw-text-primary-400"
+                aria-hidden="true"
+                className="tw-size-4 tw-text-primary-400"
               >
                 <path
                   fillRule="evenodd"
@@ -79,7 +80,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
         </div>
 
-        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[112px] tw-min-w-[112px] @md:tw-size-28 @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2 tw-relative">
+        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[106px] tw-min-w-[106px] @md:tw-size-[106px] @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2 tw-relative">
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
               {artWork && (
@@ -92,7 +93,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
         </div>
 
-        <div className="tw-flex tw-flex-col tw-flex-1 tw-min-w-0 tw-gap-y-4">
+        <div className="tw-flex tw-flex-col tw-flex-1 tw-min-w-0">
           <div className="tw-flex tw-flex-col @md:tw-flex-row @sm:tw-flex-col tw-gap-y-2 tw-gap-x-3">
             <div>
               {drop.rank && <SingleWaveDropPosition rank={drop.rank} />}
@@ -101,7 +102,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               {drop.title}
             </h3>
           </div>
-          <div className="tw-flex tw-items-center tw-gap-2">
+          <div className="tw-flex tw-items-center tw-gap-2 tw-mt-4">
             <div className="tw-size-6 tw-relative tw-flex-shrink-0 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-800">
               {drop.author.pfp ? (
                 <img
@@ -130,7 +131,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               {drop.author.handle}
             </Link>
           </div>
-          <div className="tw-flex tw-flex-col @lg:tw-flex-col @[42rem]:tw-flex-row tw-justify-between tw-gap-4 tw-mt-auto">
+          <div className="tw-flex tw-flex-col @lg:tw-flex-col @[42rem]:tw-flex-row tw-justify-between tw-gap-4 tw-mt-3.5 xl:tw-mt-3">
             <div className="tw-flex tw-items-center tw-gap-x-6">
               <div onClick={(e) => e.stopPropagation()}>
                 <MyStreamWaveMyVoteVotes drop={drop} />
