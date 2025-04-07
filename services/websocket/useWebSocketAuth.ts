@@ -15,7 +15,6 @@ import { WALLET_AUTH_COOKIE } from '../../constants';
  * @returns
  *   - isAuthenticated: Whether the WebSocket is connected with auth
  *   - status: Current WebSocket connection status
- *   - manualConnect: Function to manually connect with a token
  *   - disconnect: Function to manually disconnect
  */
 export function useWebSocketAuth() {
@@ -69,20 +68,9 @@ export function useWebSocketAuth() {
     setIsAuthenticated(status === WebSocketStatus.CONNECTED && !!authToken);
   }, [status, authToken]);
   
-  // Manual connect function with token
-  const manualConnect = (token?: string) => {
-    const tokenToUse = token || authToken;
-    if (tokenToUse) {
-      connect(tokenToUse);
-    } else {
-      connect(); // Connect without auth
-    }
-  };
-  
   return {
     isAuthenticated,
     status,
-    manualConnect,
     disconnect
   };
 }

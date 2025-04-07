@@ -8,8 +8,7 @@ import React, {
   ReactNode,
 } from "react";
 import { useRouter } from "next/router";
-import useWavesList from "../../hooks/useWavesList";
-import { EnhancedWave } from "../../hooks/useWavesList";
+import useWavesList, { EnhancedWave } from "../../hooks/useWavesList";
 import { useWebSocketMessage } from "../../services/websocket/useWebSocketMessage";
 import { ApiWave } from "../../generated/models/ApiWave";
 import { WsDropUpdateMessage, WsMessageType } from "../../helpers/Types";
@@ -74,11 +73,9 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const { wave: waveId } = router.query;
     if (typeof waveId === "string") {
-      
       setActiveWaveId(waveId);
       // Reset count for the active wave
       resetWaveNewDropsCount(waveId);
-
     } else if (waveId === undefined && activeWaveId) {
       // URL no longer has wave parameter
       setActiveWaveId(null);
@@ -130,7 +127,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
     useCallback(
       (message) => {
         // Skip if no waveId
-        if (!message || !message.wave.id) return;
+        if (!message?.wave.id) return;
 
         if (
           connectedProfile?.profile?.handle?.toLowerCase() ===
@@ -147,7 +144,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
 
         // Update the count for this wave
         setNewDropsCounts((prev) => {
-          const currentCount = prev[waveId] || 0;
+          const currentCount = prev[waveId] ?? 0;
           // Optional: Cap the maximum count at 99
           const MAX_COUNT = 99;
           return {
@@ -164,7 +161,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
   const enhancedWaves = useMemo(() => {
     return wavesData.waves.map((wave) => ({
       ...wave,
-      newDropsCount: newDropsCounts[wave.id] || 0,
+      newDropsCount: newDropsCounts[wave.id] ?? 0,
     }));
   }, [wavesData.waves, newDropsCounts]);
 
@@ -172,7 +169,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
   const enhancedPinnedWaves = useMemo(() => {
     return wavesData.pinnedWaves.map((wave) => ({
       ...wave,
-      newDropsCount: newDropsCounts[wave.id] || 0,
+      newDropsCount: newDropsCounts[wave.id] ?? 0,
     }));
   }, [wavesData.pinnedWaves, newDropsCounts]);
 

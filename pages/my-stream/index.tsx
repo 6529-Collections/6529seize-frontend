@@ -13,7 +13,6 @@ import { prefetchWavesOverview } from "../../helpers/stream.helpers";
 import { GetServerSidePropsContext } from "next";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "../../helpers/time";
-import { MyStreamProvider } from "../../contexts/wave/MyStreamContext";
 
 interface Props {
   dehydratedState: DehydratedState;

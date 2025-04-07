@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WebSocketContext, WebSocketContextValue, WebSocketProviderProps } from './WebSocketContext';
 import { MessageCallback, SubscriberMap, WebSocketMessage, WebSocketStatus } from './WebSocketTypes';
 
@@ -244,13 +244,13 @@ export function WebSocketProvider({ children, config }: WebSocketProviderProps) 
   }, [clearReconnectTimer]);
   
   // Create context value
-  const contextValue: WebSocketContextValue = {
+  const contextValue: WebSocketContextValue = useMemo(() => ({
     status,
     connect,
     disconnect,
     subscribe,
     config
-  };
+  }), [status, connect, disconnect, subscribe, config]);
   
   return (
     <WebSocketContext.Provider value={contextValue}>

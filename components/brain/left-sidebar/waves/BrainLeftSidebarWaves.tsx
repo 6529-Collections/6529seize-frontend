@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import useWavesList from "../../../../hooks/useWavesList";
 import { useRouter } from "next/router";
 import UnifiedWavesList from "./UnifiedWavesList";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
@@ -59,8 +58,6 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
     <UnifiedWavesList
       waves={waves}
       activeWaveId={activeWaveId}
-      // TODO: remove this
-      resetWaveCount={() => {}}
       fetchNextPage={onNextPage}
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}

@@ -107,34 +107,34 @@ export const useWavesList = () => {
 
   // We'll use fixed variables for the first 10 possible pinned waves
   // This avoids React Hooks rules violation by ensuring hooks are always called in the same order
-  const wave1 = useIndividualWaveData(missingPinnedIds[0] || null, () => {
+  const wave1 = useIndividualWaveData(missingPinnedIds[0] ?? null, () => {
     removePinnedId(missingPinnedIds[0]);
   });
-  const wave2 = useIndividualWaveData(missingPinnedIds[1] || null, () => {
+  const wave2 = useIndividualWaveData(missingPinnedIds[1] ?? null, () => {
     removePinnedId(missingPinnedIds[1]);
   });
-  const wave3 = useIndividualWaveData(missingPinnedIds[2] || null, () => {
+  const wave3 = useIndividualWaveData(missingPinnedIds[2] ?? null, () => {
     removePinnedId(missingPinnedIds[2]);
   });
-  const wave4 = useIndividualWaveData(missingPinnedIds[3] || null, () => {
+  const wave4 = useIndividualWaveData(missingPinnedIds[3] ?? null, () => {
     removePinnedId(missingPinnedIds[3]);
   });
-  const wave5 = useIndividualWaveData(missingPinnedIds[4] || null, () => {
+  const wave5 = useIndividualWaveData(missingPinnedIds[4] ?? null, () => {
     removePinnedId(missingPinnedIds[4]);
   });
-  const wave6 = useIndividualWaveData(missingPinnedIds[5] || null, () => {
+  const wave6 = useIndividualWaveData(missingPinnedIds[5] ?? null, () => {
     removePinnedId(missingPinnedIds[5]);
   });
-  const wave7 = useIndividualWaveData(missingPinnedIds[6] || null, () => {
+  const wave7 = useIndividualWaveData(missingPinnedIds[6] ?? null, () => {
     removePinnedId(missingPinnedIds[6]);
   });
-  const wave8 = useIndividualWaveData(missingPinnedIds[7] || null, () => {
+  const wave8 = useIndividualWaveData(missingPinnedIds[7] ?? null, () => {
     removePinnedId(missingPinnedIds[7]);
   });
-  const wave9 = useIndividualWaveData(missingPinnedIds[8] || null, () => {
+  const wave9 = useIndividualWaveData(missingPinnedIds[8] ?? null, () => {
     removePinnedId(missingPinnedIds[8]);
   });
-  const wave10 = useIndividualWaveData(missingPinnedIds[9] || null, () => {
+  const wave10 = useIndividualWaveData(missingPinnedIds[9] ?? null, () => {
     removePinnedId(missingPinnedIds[9]);
   });
 
