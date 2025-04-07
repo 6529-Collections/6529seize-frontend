@@ -20,7 +20,7 @@ export enum WaveFollowBtnSize {
 
 const BUTTON_CLASSES: Record<WaveFollowBtnSize, string> = {
   [WaveFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-2 tw-text-xs",
-  [WaveFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2.5 tw-text-sm",
+  [WaveFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2 tw-text-sm",
 };
 
 const SVG_CLASSES: Record<WaveFollowBtnSize, string> = {
@@ -148,7 +148,7 @@ export default function WaveHeaderFollow({
     } else {
       return (
         <svg
-          className={`${SVG_CLASSES[size]} tw-flex-shrink-0 -tw-ml-1`}
+          className={`${SVG_CLASSES[size]} tw-h-3 tw-w-3 tw-flex-shrink-0 -tw-ml-1`}
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

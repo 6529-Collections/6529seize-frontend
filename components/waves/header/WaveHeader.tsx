@@ -98,12 +98,9 @@ export default function WaveHeader({
             <div className="tw-min-w-0 tw-flex-1">
               <div className="tw-flex tw-flex-col tw-items-end">
                 {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
-                  <div className="tw-inline-flex tw-space-x-3 tw-items-center">
-                    <WaveHeaderFollow wave={wave} />
+                  <div className="tw-inline-flex tw-space-x-2 tw-items-center">
                     <WaveNotificationSettings wave={wave} />
-                    {connectedProfile.profile.handle === wave.author.handle && (
-                      <WaveHeaderOptions wave={wave} />
-                    )}
+                    <WaveHeaderFollow wave={wave} />
                   </div>
                 )}
               </div>
@@ -112,7 +109,16 @@ export default function WaveHeader({
         </div>
 
         <div className="tw-px-4 tw-pb-4 tw-mt-2 tw-min-w-0 tw-flex-1">
-          <WaveHeaderName wave={wave} />
+          <div className="tw-flex tw-justify-between">
+            <WaveHeaderName wave={wave} />
+            {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
+              <div>
+                {connectedProfile.profile.handle === wave.author.handle && (
+                  <WaveHeaderOptions wave={wave} />
+                )}
+              </div>
+            )}
+          </div>
           <div className="tw-flex tw-items-center tw-mt-1">
             <div className="tw-text-sm">
               <span className="tw-font-normal tw-text-iron-400/90">
@@ -130,19 +136,6 @@ export default function WaveHeader({
                 />
                 {!!firstXContributors.length && (
                   <div className="tw-flex tw-items-center">
-                    {/*   <div className="tw-flex -tw-space-x-1.5">
-                    {firstXContributors.map((item) => (
-                      <img
-                        key={item.contributor_identity}
-                        className="tw-inline-block tw-size-6 tw-rounded-md tw-ring-1 tw-ring-iron-800/80 tw-bg-iron-900 tw-object-contain tw-shadow-sm"
-                        src={getScaledImageUri(
-                          item.contributor_pfp,
-                          ImageScale.W_AUTO_H_50
-                        )}
-                        alt={`${item.contributor_identity} avatar`}
-                      />
-                    ))}
-                  </div> */}
                     <span className="tw-font-normal tw-ml-2.5 tw-text-iron-400 tw-text-sm">
                       <span className="tw-text-iron-50 tw-pr-0.5 tw-font-medium">
                         {numberWithCommas(wave.metrics.drops_count)}

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAt, faBullhorn } from "@fortawesome/free-solid-svg-icons";
+import { faAt } from "@fortawesome/free-solid-svg-icons";
 import { useWaveNotificationSubscription } from "../../../hooks/useWaveNotificationSubscription";
 import {
   commonApiDelete,
@@ -36,73 +36,95 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
   const { setToast } = useAuth();
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingTarget, setLoadingTarget] = useState<"mentions" | "all" | null>(
+    null
+  );
 
   useEffect(() => {
     setIsAllEnabled(data?.subscribed && !disableSelection);
   }, [data, disableSelection]);
 
-  const toggleNotifications = useCallback(async () => {
-    if (isAllEnabled) {
-      try {
-        setLoading(true);
-        await commonApiDelete({
-          endpoint: `notifications/wave-subscription/${wave.id}`,
-        });
-        await refetch();
-        setLoading(false);
-        setToast({
-          message:
-            "You will only receive notifications for mentions in this wave",
-          type: "success",
-        });
-      } catch (error) {
-        setLoading(false);
-        setToast({
-          message:
-            typeof error === "string"
-              ? error
-              : "Unable to subscribe to mentions",
-          type: "error",
-        });
+  const toggleNotifications = useCallback(
+    async (enableAll: boolean) => {
+      if (enableAll === isAllEnabled) return;
+
+      setLoadingTarget(enableAll ? "all" : "mentions");
+      setLoading(true);
+
+      if (enableAll) {
+        try {
+          await commonApiPost({
+            endpoint: `notifications/wave-subscription/${wave.id}`,
+            body: {},
+          });
+          await refetch();
+          setLoading(false);
+          setLoadingTarget(null);
+        } catch (error) {
+          setLoading(false);
+          setLoadingTarget(null);
+          setToast({
+            message:
+              typeof error === "string"
+                ? error
+                : "Unable to subscribe to all drops",
+            type: "error",
+          });
+        }
+      } else {
+        try {
+          await commonApiDelete({
+            endpoint: `notifications/wave-subscription/${wave.id}`,
+          });
+          await refetch();
+          setLoading(false);
+          setLoadingTarget(null);
+        } catch (error) {
+          setLoading(false);
+          setLoadingTarget(null);
+          setToast({
+            message:
+              typeof error === "string"
+                ? error
+                : "Unable to subscribe to mentions",
+            type: "error",
+          });
+        }
       }
-    } else {
-      try {
-        setLoading(true);
-        await commonApiPost({
-          endpoint: `notifications/wave-subscription/${wave.id}`,
-          body: {},
-        });
-        await refetch();
-        setLoading(false);
-        setToast({
-          message: "You will receive notifications for all drops in this wave",
-          type: "success",
-        });
-      } catch (error) {
-        setLoading(false);
-        setToast({
-          message:
-            typeof error === "string"
-              ? error
-              : "Unable to subscribe to all drops",
-          type: "error",
-        });
-      }
-    }
-  }, [isAllEnabled, wave.id, refetch, setToast]);
+    },
+    [isAllEnabled, wave.id, refetch, setToast]
+  );
 
   useEffect(() => {
     setFollowing(!!wave.subscribed_actions.length);
     refetch();
   }, [wave.subscribed_actions.length, refetch]);
 
-  const getTooltipContent = () => {
+  const getMentionsTooltip = () => {
+    return isAllEnabled
+      ? "Click to switch to mentions-only notifications"
+      : "";
+  };
+
+  const getAllTooltip = () => {
     if (disableSelection) {
       return `'All' notifications unavailable for waves with ${seizeSettings.all_drops_notifications_subscribers_limit.toLocaleString()}+ followers.`;
     }
-    return isAllEnabled
-      ? "Click to switch to mentions-only notifications"
-      : "Click to enable notifications for all drops";
+    return !isAllEnabled
+      ? "Click to enable notifications for all drops"
+      : "";
+  };
+
+  const getActiveButtonStyle = () => {
+    return "tw-bg-iron-800 tw-text-primary-400 tw-font-medium";
+  };
+
+  const getInactiveButtonStyle = () => {
+    return "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent";
+  };
+
+  const getDisabledButtonStyle = () => {
+    return "tw-text-iron-500 tw-bg-transparent tw-cursor-not-allowed";
   };
 
   if (!following) {
@@ -112,42 +134,143 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
   return (
     <div className="tw-space-y-1.5">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-1.5">
-        <OverlayTrigger
-          placement="top"
-          overlay={
-            <Tooltip id={`notification-tooltip-${wave.id}`}>
-              {getTooltipContent()}
-            </Tooltip>
-          }
-        >
-          <span className="tw-inline-block">
-            <button
-              disabled={disableSelection || loading}
-              onClick={toggleNotifications}
-              className={`tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-w-10 tw-h-10 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
-                disableSelection 
-                  ? "tw-bg-iron-800 tw-border-iron-700 tw-text-iron-500 tw-cursor-not-allowed" 
-                  : isAllEnabled
-                    ? "tw-bg-iron-800 tw-border-iron-700 tw-border tw-border-solid tw-text-primary-400 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-650"
-                    : "tw-bg-iron-800 tw-border-iron-700 tw-border tw-border-solid tw-text-primary-400 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-650"
-              }`}
-              aria-label={
-                isAllEnabled
-                  ? "Receiving all notifications (click to change)"
-                  : "Receiving mention notifications (click to change)"
+        <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-10 lg:tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden">
+          {isAllEnabled ? (
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip id={`mentions-tooltip-${wave.id}`}>
+                  {getMentionsTooltip()}
+                </Tooltip>
               }
             >
-              {loading ? (
-                <Spinner dimension={16} />
+              <button
+                disabled={loading}
+                onClick={() => toggleNotifications(false)}
+                className={`tw-px-3 tw-py-2 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
+                aria-label="Receive mentions-only notifications"
+              >
+                {loading && loadingTarget === "mentions" ? (
+                  <Spinner dimension={12} />
+                ) : (
+                  <FontAwesomeIcon
+                    icon={faAt}
+                    className="tw-size-3.5 tw-flex-shrink-0"
+                  />
+                )}
+              </button>
+            </OverlayTrigger>
+          ) : (
+            <button
+              disabled={loading}
+              onClick={() => toggleNotifications(false)}
+              className={`tw-px-3 tw-py-2 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
+              aria-label="Receive mentions-only notifications"
+            >
+              {loading && loadingTarget === "mentions" ? (
+                <Spinner dimension={12} />
               ) : (
                 <FontAwesomeIcon
-                  icon={isAllEnabled ? faBullhorn : faAt}
-                  className="tw-size-3.5"
+                  icon={faAt}
+                  className="tw-size-3.5 tw-flex-shrink-0"
                 />
               )}
             </button>
-          </span>
-        </OverlayTrigger>
+          )}
+
+          {disableSelection ? (
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip id={`all-tooltip-${wave.id}`}>{getAllTooltip()}</Tooltip>
+              }
+            >
+              <button
+                disabled={true}
+                className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getDisabledButtonStyle()}`}
+                aria-label="Receive all notifications"
+              >
+                {loading && loadingTarget === "all" ? (
+                  <Spinner dimension={12} />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    className="tw-size-4 tw-flex-shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46"
+                    />
+                  </svg>
+                )}
+              </button>
+            </OverlayTrigger>
+          ) : isAllEnabled ? (
+            <button
+              disabled={loading}
+              onClick={() => toggleNotifications(true)}
+              className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
+              aria-label="Receive all notifications"
+            >
+              {loading && loadingTarget === "all" ? (
+                <Spinner dimension={12} />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  className="tw-size-4 tw-flex-shrink-0"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46"
+                  />
+                </svg>
+              )}
+            </button>
+          ) : (
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip id={`all-tooltip-${wave.id}`}>{getAllTooltip()}</Tooltip>
+              }
+            >
+              <button
+                disabled={loading}
+                onClick={() => toggleNotifications(true)}
+                className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
+                aria-label="Receive all notifications"
+              >
+                {loading && loadingTarget === "all" ? (
+                  <Spinner dimension={12} />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    className="tw-size-4 tw-flex-shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 0 1-1.44-4.282m3.102.069a18.03 18.03 0 0 1-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 0 1 8.835 2.535M10.34 6.66a23.847 23.847 0 0 0 8.835-2.535m0 0A23.74 23.74 0 0 0 18.795 3m.38 1.125a23.91 23.91 0 0 1 1.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 0 0 1.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 0 1 0 3.46"
+                    />
+                  </svg>
+                )}
+              </button>
+            </OverlayTrigger>
+          )}
+        </div>
       </div>
     </div>
   );

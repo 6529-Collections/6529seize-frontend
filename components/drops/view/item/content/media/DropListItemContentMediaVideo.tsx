@@ -48,7 +48,7 @@ function DropListItemContentMediaVideo({
   }, []);
 
   return (
-    <div className="tw-h-full">
+    <div>
       <video
         ref={videoRef}
         playsInline 

@@ -6,6 +6,7 @@ import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
 import { LayoutProvider, useLayout } from "./LayoutContext";
+import { useRouter } from "next/router";
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -14,12 +15,26 @@ const Header = dynamic(() => import("../../../header/Header"), {
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
+  const router = useRouter();
   const { setTitle, title, showWaves } = useContext(AuthContext);
   const { registerRef, spaces } = useLayout();
 
   // Local refs for component-specific needs
   const headerElementRef = useRef<HTMLDivElement | null>(null);
   const spacerElementRef = useRef<HTMLDivElement | null>(null);
+
+  // Check if drop modal is active
+  const isDropModalOpen = !!router.query.drop;
+
+  // When drop modal state changes, force a resize to update layout
+  useEffect(() => {
+    // Small delay to ensure DOM has updated
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 50);
+    
+    return () => clearTimeout(timer);
+  }, [isDropModalOpen]);
 
   // Callback ref for registration with LayoutContext (header)
   const setHeaderRef = useCallback(
@@ -38,11 +53,16 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     (element: HTMLDivElement | null) => {
       // Update local ref
       spacerElementRef.current = element;
-
-      // Register with LayoutContext
-      registerRef("spacer", element);
+      
+      // When drop modal is open, we don't want the spacer in layout calculations
+      // But we do want to keep it in DOM to avoid layout shifts
+      if (isDropModalOpen) {
+        registerRef("spacer", null);
+      } else {
+        registerRef("spacer", element);
+      }
     },
-    [registerRef]
+    [registerRef, isDropModalOpen]
   );
 
   const breadcrumbs: Crumb[] = [
@@ -88,7 +108,15 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
 
         {showWaves && spaces.measurementsComplete && (
           <div className="tw-flex-1" id="my-stream-content">
-            <div ref={setSpacerRef} className="tw-h-4"></div>
+            <div 
+              ref={setSpacerRef}
+              className="tw-h-4"
+              style={{
+                position: isDropModalOpen ? 'absolute' : 'relative',
+                visibility: isDropModalOpen ? 'hidden' : 'visible',
+                height: isDropModalOpen ? 0 : 16
+              }}
+            ></div>
             <Brain>
               <div className={containerClassName}>{children}</div>
             </Brain>
