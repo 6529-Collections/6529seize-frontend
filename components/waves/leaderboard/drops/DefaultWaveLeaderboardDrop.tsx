@@ -7,6 +7,7 @@ import { ApiWave } from "../../../../generated/models/ObjectSerializer";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 import { SingleWaveDropVote } from "../../drop/SingleWaveDropVote";
+// import WaveDropActionsOptions from "../../../waves/drops/WaveDropActionsOptions";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -17,7 +18,11 @@ interface DefaultWaveLeaderboardDropProps {
 export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
 > = ({ drop, wave, onDropClick }) => {
-  const { canShowVote } = useDropInteractionRules(drop);
+  const { canShowVote /* canDelete */ } = useDropInteractionRules(drop);
+
+  // const handleDeleteClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation();
+  // };
 
   const getBorderClasses = () => {
     const rank = drop.rank && drop.rank <= 3 ? drop.rank : "default";
@@ -42,9 +47,17 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   return (
     <div
       onClick={() => onDropClick(drop)}
-      className="tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full"
+      className="tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full tw-relative"
     >
       <div className={getBorderClasses()}>
+        {/* {canDelete && (
+          <div 
+            className="tw-absolute tw-z-20 tw-right-4 tw-top-4"
+            onClick={handleDeleteClick}
+          >
+            <WaveDropActionsOptions drop={drop} />
+          </div>
+        )} */}
         <div className="tw-flex tw-flex-col">
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">

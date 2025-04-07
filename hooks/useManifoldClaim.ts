@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { areEqualAddresses } from "../helpers/Helpers";
 import { mainnet } from "viem/chains";
 import { Time } from "../helpers/time";
+import { DateTime } from "luxon";
 
 export const MANIFOLD_NETWORK = mainnet;
 
@@ -22,40 +23,60 @@ export interface MemePhase {
   id: string;
   name: string;
   type: ManifoldPhase;
-  start: string;
-  end: string;
+  start: Time;
+  end: Time;
 }
 
-export const MEME_PHASES: MemePhase[] = [
-  {
-    id: "0",
-    name: "Phase 0 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: "15:40:00 UTC",
-    end: "16:20:00 UTC",
-  },
-  {
-    id: "1",
-    name: "Phase 1 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: "16:30:00 UTC",
-    end: "16:50:00 UTC",
-  },
-  {
-    id: "2",
-    name: "Phase 2 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: "17:00:00 UTC",
-    end: "17:20:00 UTC",
-  },
-  {
-    id: "public",
-    name: "Public Phase",
-    type: ManifoldPhase.PUBLIC,
-    start: "17:20:00 UTC",
-    end: "15:00:00 UTC tomorrow",
-  },
-];
+export function buildMemesPhases(mintDate: Time): MemePhase[] {
+  const zone = "America/New_York";
+
+  const base = DateTime.fromJSDate(mintDate.toDate()).setZone(zone);
+
+  const toUtc = (hour: number, minute: number): Time =>
+    Time.seconds(base.set({ hour, minute, second: 0 }).toUTC().toSeconds());
+
+  const toUtcNextDay = (hour: number, minute: number): Time =>
+    Time.seconds(
+      base
+        .plus({ days: 1 })
+        .set({ hour, minute, second: 0 })
+        .toUTC()
+        .toSeconds()
+    );
+
+  return [
+    {
+      id: "0",
+      name: "Phase 0 (Allowlist)",
+      type: ManifoldPhase.ALLOWLIST,
+      start: toUtc(10, 40),
+      end: toUtc(11, 20),
+    },
+    {
+      id: "1",
+      name: "Phase 1 (Allowlist)",
+      type: ManifoldPhase.ALLOWLIST,
+      start: toUtc(11, 30),
+      end: toUtc(11, 50),
+    },
+    {
+      id: "2",
+      name: "Phase 2 (Allowlist)",
+      type: ManifoldPhase.ALLOWLIST,
+      start: toUtc(12, 0),
+      end: toUtc(12, 20),
+    },
+    {
+      id: "public",
+      name: "Public Phase",
+      type: ManifoldPhase.PUBLIC,
+      start: toUtc(12, 20),
+      end: toUtcNextDay(10, 0),
+    },
+  ];
+}
+
+const MEME_PHASES = buildMemesPhases(Time.now());
 
 export interface ManifoldClaim {
   instanceId: number;
@@ -102,10 +123,7 @@ export default function useManifoldClaim(
         return MEME_PHASES.find((mp) => mp.id === "public");
       }
 
-      const endTime = `${Time.seconds(
-        end
-      ).toIsoTimeStringWithoutSeconds()} UTC`;
-      return MEME_PHASES.filter((mp) => mp.end >= endTime)[0];
+      return MEME_PHASES.filter((mp) => mp.end >= Time.seconds(end))[0];
     },
     []
   );

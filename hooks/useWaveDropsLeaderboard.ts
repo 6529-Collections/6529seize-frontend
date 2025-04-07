@@ -12,7 +12,10 @@ import {
   mapToExtendedDrops,
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
-import { getDefaultQueryRetry, WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
+import {
+  getDefaultQueryRetry,
+  WAVE_DROPS_PARAMS,
+} from "../components/react-query-wrapper/utils/query-utils";
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
@@ -28,6 +31,7 @@ interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
   readonly connectedProfileHandle: string | undefined;
   readonly sort?: WaveDropsLeaderboardSort;
+  readonly pausePolling?: boolean;
 }
 
 const POLLING_DELAY = 3000;
@@ -51,6 +55,7 @@ export function useWaveDropsLeaderboard({
   waveId,
   connectedProfileHandle,
   sort = WaveDropsLeaderboardSort.RANK,
+  pausePolling = false,
 }: UseWaveDropsLeaderboardProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -75,6 +80,21 @@ export function useWaveDropsLeaderboard({
     },
   ];
 
+  const getNextPageParam = useCallback(
+    (lastPage: ApiDropsLeaderboardPage) => {
+      if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
+        const haveZeroVotes = lastPage.drops.some(
+          (drop) => drop.context_profile_context?.rating === 0
+        );
+        if (haveZeroVotes) {
+          return null;
+        }
+      }
+      return lastPage.next ? lastPage.page + 1 : null;
+    },
+    [sort]
+  );
+
   useEffect(() => {
     queryClient.prefetchInfiniteQuery({
       queryKey,
@@ -98,11 +118,10 @@ export function useWaveDropsLeaderboard({
         });
       },
       initialPageParam: null,
-      getNextPageParam: (lastPage) =>
-        lastPage.next ? lastPage.page + 1 : null,
+      getNextPageParam,
       pages: 3,
       staleTime: 60000,
-      ...getDefaultQueryRetry()
+      ...getDefaultQueryRetry(),
     });
   }, [waveId, sort]);
 
@@ -137,11 +156,11 @@ export function useWaveDropsLeaderboard({
       return results;
     },
     initialPageParam: null,
-    getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
+    getNextPageParam,
     placeholderData: keepPreviousData,
-    enabled: !!connectedProfileHandle,
+    enabled: !!connectedProfileHandle && !pausePolling,
     staleTime: 60000,
-    ...getDefaultQueryRetry()
+    ...getDefaultQueryRetry(),
   });
 
   useEffect(() => {
@@ -155,7 +174,13 @@ export function useWaveDropsLeaderboard({
             prev
           )
         : [];
-      return generateUniqueKeys(newDrops, prev);
+      const uniqueDrops = generateUniqueKeys(newDrops, prev);
+      if (sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE) {
+        return uniqueDrops.filter(
+          (drop) => drop.context_profile_context?.rating !== 0
+        );
+      }
+      return uniqueDrops;
     });
     setHasInitialized(true);
   }, [data]);
@@ -179,7 +204,7 @@ export function useWaveDropsLeaderboard({
         params,
       });
     },
-    enabled: !haveNewDrops && canPoll,
+    enabled: !haveNewDrops && canPoll && !pausePolling,
     refetchInterval: isTabVisible
       ? ACTIVE_POLLING_INTERVAL
       : INACTIVE_POLLING_INTERVAL,
@@ -187,18 +212,18 @@ export function useWaveDropsLeaderboard({
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
-    ...getDefaultQueryRetry()
+    ...getDefaultQueryRetry(),
   });
 
   useEffect(() => {
-    if (pollingResult) {
+    if (pollingResult && !pausePolling) {
       const timer = setTimeout(() => {
         setDelayedPollingResult(pollingResult);
       }, POLLING_DELAY);
 
       return () => clearTimeout(timer);
     }
-  }, [pollingResult]);
+  }, [pollingResult, pausePolling]);
 
   useEffect(() => {
     if (delayedPollingResult !== undefined) {

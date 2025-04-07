@@ -18,6 +18,7 @@ import { useDropInteractionRules } from "../../../hooks/drops/useDropInteraction
 import { WinnerBadge } from "./WinnerBadge";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
+// import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -31,7 +32,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 > = ({ drop, wave, activeTab, onClose }) => {
   // State for fullscreen artwork view
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { isWinner } = useDropInteractionRules(drop);
+  const { isWinner /* canDelete */ } = useDropInteractionRules(drop);
   // Extract metadata
   const title =
     drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
@@ -61,17 +62,22 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             )}
             {isWinner && <WinnerBadge drop={drop} showBadge={true} />}
           </div>
-          <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3 tw-px-6">
+          <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3 tw-px-6">
             <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
               {title}
             </h3>
+            {/* {canDelete && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <WaveDropActionsOptions drop={drop} />
+              </div>
+            )} */}
           </div>
           <div className="tw-px-6 tw-mt-2">
             <SingleWaveDropVotes drop={drop} />
           </div>
           <div className="tw-mt-4">
             {artworkMedia && (
-              <div className="tw-flex tw-justify-center tw-h-full tw-max-h-96">
+              <div className="tw-flex tw-justify-center h-96">
                 <DropListItemContentMedia
                   media_mime_type={artworkMedia.mime_type}
                   media_url={artworkMedia.url}
