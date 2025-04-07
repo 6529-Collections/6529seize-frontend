@@ -104,7 +104,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           <BrainLeftSidebarCreateADirectMessageButton />
           {isConnectedIdentity && (
             <CommonSwitch
-              label="Following"
+              label="Joined"
               isOn={following}
               setIsOn={setFollowing}
             />

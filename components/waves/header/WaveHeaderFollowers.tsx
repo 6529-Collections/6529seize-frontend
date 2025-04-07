@@ -18,7 +18,7 @@ export default function WaveHeaderFollowers({
           {numberWithCommas(wave.metrics.subscribers_count)}
         </span>{" "}
         <span className="tw-text-iron-400">
-          {wave.metrics.subscribers_count === 1 ? "Follower" : "Followers"}
+          Joined
         </span>
       </span>
     </button>
