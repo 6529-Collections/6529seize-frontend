@@ -13,11 +13,15 @@ import Link from "next/link";
 interface MyStreamWaveMyVoteProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly isChecked?: boolean;
+  readonly onToggleCheck?: (dropId: string) => void;
 }
 
 const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   drop,
   onDropClick,
+  isChecked = false,
+  onToggleCheck,
 }) => {
   const artWork = drop.parts.at(0)?.media.at(0);
   const cicType = cicToType(drop.author.cic || 0);
@@ -29,14 +33,53 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     onDropClick(drop);
   };
 
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleCheck) {
+      onToggleCheck(drop.id);
+    }
+  };
+
   return (
     <div
       key={drop.id}
-      className="tw-bg-iron-950 tw-rounded-xl tw-p-5 tw-border tw-border-iron-800 tw-border-solid desktop-hover:hover:tw-border-iron-700 tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg tw-@container"
+      className={`tw-bg-iron-950 tw-rounded-xl tw-p-5 tw-border tw-border-solid tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg tw-@container ${
+        isChecked
+          ? "tw-border-primary-400"
+          : "tw-border-iron-800 desktop-hover:hover:tw-border-iron-700"
+      }`}
       onClick={handleClick}
     >
       <div className="tw-flex @md:tw-flex-row @sm:tw-flex-col @xs:tw-flex-col tw-gap-4">
-        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[112px] tw-min-w-[112px] @md:tw-size-28 @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2">
+        <div
+          className="tw-flex-shrink-0 tw-self-start tw-mr-1"
+          onClick={handleCheckboxClick}
+        >
+          <div
+            className={`tw-size-6 lg:tw-size-5 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid ${
+              isChecked
+                ? "tw-border-primary-400 tw-bg-primary-400/20"
+                : "tw-border-iron-600 tw-bg-iron-800"
+            } tw-cursor-pointer tw-shadow-sm hover:tw-shadow-md tw-transition-all tw-duration-200`}
+          >
+            {isChecked && (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="tw-size-5 lg:tw-size-4 tw-text-primary-400"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 0 1 1.04-.208Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </div>
+        </div>
+
+        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[112px] tw-min-w-[112px] @md:tw-size-28 @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2 tw-relative">
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
               {artWork && (
