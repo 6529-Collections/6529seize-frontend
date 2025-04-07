@@ -6,6 +6,7 @@ import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { EnhancedWave } from "../../../../hooks/useWavesList";
 import WavePicture from "../../../waves/WavePicture";
+import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: EnhancedWave;
@@ -99,9 +100,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           <div className="tw-font-medium tw-text-sm">{wave.name}</div>
           <div className="tw-mt-0.5 tw-text-xs tw-text-iron-500">
             <span className="tw-pr-1">Last drop:</span>
-            <span className="tw-text-iron-400">
-              {getTimeAgoShort(wave.metrics.latest_drop_timestamp)}
-            </span>
+            <BrainLeftSidebarWaveDropTime
+              time={wave.metrics.latest_drop_timestamp}
+            />
           </div>
         </div>
       </Link>
