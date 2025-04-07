@@ -153,7 +153,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
           };
         });
       },
-      [activeWaveId]
+      [activeWaveId, connectedProfile]
     ) // Make sure to include activeWaveId as a dependency
   );
 
