@@ -4,6 +4,7 @@ import { ApiNotificationsResponse } from "../generated/models/ApiNotificationsRe
 import { commonApiFetch } from "../services/api/common-api";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
 export function useUnreadNotifications(handle: string | undefined) {
   const { isCapacitor } = useCapacitor();
 
@@ -20,11 +21,12 @@ export function useUnreadNotifications(handle: string | undefined) {
         },
       }),
     enabled: !!handle,
-    refetchInterval: Infinity || 30000,
+    refetchInterval: 30000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
+    ...getDefaultQueryRetry(),
   });
 
   const [haveUnreadNotifications, setHaveUnreadNotifications] = useState(false);

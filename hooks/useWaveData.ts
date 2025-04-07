@@ -9,10 +9,9 @@ interface UseWaveDataProps {
   onWaveNotFound?: () => void;
 }
 
-
 export const useWaveData = ({
   waveId,
-  refetchInterval,
+  refetchInterval = Infinity,
   onWaveNotFound = () => {},
 }: UseWaveDataProps) => {
   return useQuery<ApiWave>({
@@ -24,7 +23,7 @@ export const useWaveData = ({
 
     staleTime: 60000,
     enabled: !!waveId,
-    refetchInterval: Infinity || refetchInterval,
+    refetchInterval,
     retry: (failureCount, error) => {
       if ((error as any) === `Wave ${waveId} not found`) {
         onWaveNotFound();
@@ -32,7 +31,7 @@ export const useWaveData = ({
       }
       return failureCount < 3;
     },
-    retryDelay(failureCount, error) {
+    retryDelay(failureCount) {
       return failureCount * 1000;
     },
   });

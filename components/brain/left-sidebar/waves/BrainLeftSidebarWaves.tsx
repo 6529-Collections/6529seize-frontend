@@ -25,7 +25,6 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
   }, [activeWaveId]);
 
   // Use fixed refetch interval to avoid dependency issues
-  const refetchInterval = Infinity;
 
   const {
     waves,

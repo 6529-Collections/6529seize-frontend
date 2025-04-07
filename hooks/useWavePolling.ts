@@ -8,6 +8,7 @@ import {
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 import useCapacitor from "./useCapacitor";
 import { useNotificationsContext } from "../components/notifications/NotificationsContext";
+import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
 
 interface PollingState {
   hasNewDrops: boolean;
@@ -86,14 +87,14 @@ export function useWavePolling(
       }
     },
     enabled: !pollingState.hasNewDrops && !!waveId,
-    refetchInterval:
-      Infinity ||
-      (isTabVisible ? activePollingInterval : inactivePollingInterval),
+    refetchInterval: isTabVisible
+      ? activePollingInterval
+      : inactivePollingInterval,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
-    retry: 3,
+    ...getDefaultQueryRetry(),
   });
 
   const readAllForWave = async () => {

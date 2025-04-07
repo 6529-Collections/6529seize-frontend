@@ -14,7 +14,6 @@ import { useWaveData } from "./useWaveData";
 import { ApiWave } from "../generated/models/ApiWave";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 
-
 // Enhanced wave interface with isPinned field and newDropsCount
 export interface EnhancedWave extends ApiWave {
   isPinned: boolean;
@@ -43,7 +42,6 @@ const useIndividualWaveData = (
 ) => {
   const { data, isLoading, isError } = useWaveData({
     waveId,
-    refetchInterval: Infinity,
     onWaveNotFound,
   });
   return { data, isLoading, isError };
@@ -54,7 +52,6 @@ const useIndividualWaveData = (
  * @returns Wave list data and loading states
  */
 export const useWavesList = () => {
-
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   const [following] = useShowFollowingWaves();
@@ -82,7 +79,6 @@ export const useWavesList = () => {
     type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity && following,
-    refetchInterval: Infinity
   });
 
   // Create a map of mainWaves by ID for easy lookup
@@ -111,66 +107,36 @@ export const useWavesList = () => {
 
   // We'll use fixed variables for the first 10 possible pinned waves
   // This avoids React Hooks rules violation by ensuring hooks are always called in the same order
-  const wave1 = useIndividualWaveData(
-    missingPinnedIds[0] || null,
-    () => {
-      removePinnedId(missingPinnedIds[0]);
-    }
-  );
-  const wave2 = useIndividualWaveData(
-    missingPinnedIds[1] || null,
-    () => {
-      removePinnedId(missingPinnedIds[1]);
-    }
-  );
-  const wave3 = useIndividualWaveData(
-    missingPinnedIds[2] || null,
-    () => {
-      removePinnedId(missingPinnedIds[2]);
-    }
-  );
-  const wave4 = useIndividualWaveData(
-    missingPinnedIds[3] || null,
-    () => {
-      removePinnedId(missingPinnedIds[3]);
-    }
-  );
-  const wave5 = useIndividualWaveData(
-    missingPinnedIds[4] || null,
-    () => {
-      removePinnedId(missingPinnedIds[4]);
-    }
-  );
-  const wave6 = useIndividualWaveData(
-    missingPinnedIds[5] || null,
-    () => {
-      removePinnedId(missingPinnedIds[5]);
-    }
-  );
-  const wave7 = useIndividualWaveData(
-    missingPinnedIds[6] || null,
-    () => {
-      removePinnedId(missingPinnedIds[6]);
-    }
-  );
-  const wave8 = useIndividualWaveData(
-    missingPinnedIds[7] || null,
-    () => {
-      removePinnedId(missingPinnedIds[7]);
-    }
-  );
-  const wave9 = useIndividualWaveData(
-    missingPinnedIds[8] || null,
-    () => {
-      removePinnedId(missingPinnedIds[8]);
-    }
-  );
-  const wave10 = useIndividualWaveData(
-    missingPinnedIds[9] || null,
-    () => {
-      removePinnedId(missingPinnedIds[9]);
-    }
-  );
+  const wave1 = useIndividualWaveData(missingPinnedIds[0] || null, () => {
+    removePinnedId(missingPinnedIds[0]);
+  });
+  const wave2 = useIndividualWaveData(missingPinnedIds[1] || null, () => {
+    removePinnedId(missingPinnedIds[1]);
+  });
+  const wave3 = useIndividualWaveData(missingPinnedIds[2] || null, () => {
+    removePinnedId(missingPinnedIds[2]);
+  });
+  const wave4 = useIndividualWaveData(missingPinnedIds[3] || null, () => {
+    removePinnedId(missingPinnedIds[3]);
+  });
+  const wave5 = useIndividualWaveData(missingPinnedIds[4] || null, () => {
+    removePinnedId(missingPinnedIds[4]);
+  });
+  const wave6 = useIndividualWaveData(missingPinnedIds[5] || null, () => {
+    removePinnedId(missingPinnedIds[5]);
+  });
+  const wave7 = useIndividualWaveData(missingPinnedIds[6] || null, () => {
+    removePinnedId(missingPinnedIds[6]);
+  });
+  const wave8 = useIndividualWaveData(missingPinnedIds[7] || null, () => {
+    removePinnedId(missingPinnedIds[7]);
+  });
+  const wave9 = useIndividualWaveData(missingPinnedIds[8] || null, () => {
+    removePinnedId(missingPinnedIds[8]);
+  });
+  const wave10 = useIndividualWaveData(missingPinnedIds[9] || null, () => {
+    removePinnedId(missingPinnedIds[9]);
+  });
 
   // Collect all wave data in an array for easier processing
   const waveDataArray = [
@@ -306,44 +272,47 @@ export const useWavesList = () => {
 
   // Memoize the entire return object to prevent unnecessary re-renders in consumer components
   // Components using this hook will only re-render when the values they use actually change
-  return useMemo(() => ({
-    // Main data - now using state instead of ref, with enhanced type
-    waves: allWaves,
+  return useMemo(
+    () => ({
+      // Main data - now using state instead of ref, with enhanced type
+      waves: allWaves,
 
-    // Original waves pagination and loading
-    isFetching,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage: fetchNextPageStable,
-    status: mainWavesStatus,
+      // Original waves pagination and loading
+      isFetching,
+      isFetchingNextPage,
+      hasNextPage,
+      fetchNextPage: fetchNextPageStable,
+      status: mainWavesStatus,
 
-    // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
-    pinnedWaves: allPinnedWaves,
-    isPinnedWavesLoading,
-    hasPinnedWavesError,
+      // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
+      pinnedWaves: allPinnedWaves,
+      isPinnedWavesLoading,
+      hasPinnedWavesError,
 
-    // Pinned waves management functions
-    addPinnedWave: addId,
-    removePinnedWave: removeId,
+      // Pinned waves management functions
+      addPinnedWave: addId,
+      removePinnedWave: removeId,
 
-    // Additional data that might be useful
-    mainWaves: prevMainWavesRef.current,
-    missingPinnedIds,
-  }), [
-    allWaves,
-    isFetching,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPageStable,
-    mainWavesStatus,
-    allPinnedWaves,
-    isPinnedWavesLoading,
-    hasPinnedWavesError,
-    addId,
-    removeId,
-    prevMainWavesRef.current,
-    missingPinnedIds
-  ]);
+      // Additional data that might be useful
+      mainWaves: prevMainWavesRef.current,
+      missingPinnedIds,
+    }),
+    [
+      allWaves,
+      isFetching,
+      isFetchingNextPage,
+      hasNextPage,
+      fetchNextPageStable,
+      mainWavesStatus,
+      allPinnedWaves,
+      isPinnedWavesLoading,
+      hasPinnedWavesError,
+      addId,
+      removeId,
+      prevMainWavesRef.current,
+      missingPinnedIds,
+    ]
+  );
 };
 
 export default useWavesList;

@@ -74,9 +74,11 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const { wave: waveId } = router.query;
     if (typeof waveId === "string") {
+      
       setActiveWaveId(waveId);
       // Reset count for the active wave
       resetWaveNewDropsCount(waveId);
+
     } else if (waveId === undefined && activeWaveId) {
       // URL no longer has wave parameter
       setActiveWaveId(null);
@@ -131,7 +133,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
         if (!message || !message.wave.id) return;
 
         if (
-          connectedProfile?.profile?.handle?.toLowerCase() !==
+          connectedProfile?.profile?.handle?.toLowerCase() ===
           message.author.handle?.toLowerCase()
         )
           return;

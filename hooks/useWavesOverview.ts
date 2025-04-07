@@ -6,6 +6,7 @@ import { ApiWavesOverviewType } from "../generated/models/ApiWavesOverviewType";
 import { commonApiFetch } from "../services/api/common-api";
 import { ApiWave } from "../generated/models/ApiWave";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
 
 interface UseWavesOverviewProps {
   readonly type: ApiWavesOverviewType;
@@ -18,7 +19,7 @@ export const useWavesOverview = ({
   type,
   limit = 20,
   following = false,
-  refetchInterval,
+  refetchInterval = Infinity,
 }: UseWavesOverviewProps) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -57,7 +58,8 @@ export const useWavesOverview = ({
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
     enabled: !usePublicWaves,
     placeholderData: keepPreviousData,
-    refetchInterval: Infinity || (refetchInterval ?? false),
+    refetchInterval,
+    ...getDefaultQueryRetry(),
   });
 
   const publicQuery = useInfiniteQuery({
@@ -80,7 +82,8 @@ export const useWavesOverview = ({
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
     enabled: usePublicWaves,
     placeholderData: keepPreviousData,
-    refetchInterval: Infinity || (refetchInterval ?? false),
+    refetchInterval,
+    ...getDefaultQueryRetry(),
   });
 
   const getWaves = (): ApiWave[] => {

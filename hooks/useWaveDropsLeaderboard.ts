@@ -12,7 +12,7 @@ import {
   mapToExtendedDrops,
 } from "../helpers/waves/wave-drops.helpers";
 import { useDebounce } from "react-use";
-import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
+import { getDefaultQueryRetry, WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiDropsLeaderboardPage } from "../generated/models/ApiDropsLeaderboardPage";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
@@ -102,6 +102,7 @@ export function useWaveDropsLeaderboard({
         lastPage.next ? lastPage.page + 1 : null,
       pages: 3,
       staleTime: 60000,
+      ...getDefaultQueryRetry()
     });
   }, [waveId, sort]);
 
@@ -140,6 +141,7 @@ export function useWaveDropsLeaderboard({
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
+    ...getDefaultQueryRetry()
   });
 
   useEffect(() => {
@@ -178,13 +180,14 @@ export function useWaveDropsLeaderboard({
       });
     },
     enabled: !haveNewDrops && canPoll,
-    refetchInterval: Infinity || isTabVisible
+    refetchInterval: isTabVisible
       ? ACTIVE_POLLING_INTERVAL
       : INACTIVE_POLLING_INTERVAL,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
+    ...getDefaultQueryRetry()
   });
 
   useEffect(() => {
