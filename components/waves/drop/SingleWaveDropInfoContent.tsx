@@ -6,6 +6,8 @@ import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { MemesSingleWaveDropContent } from "./MemesSingleWaveDropContent";
 import { WinnerBadge } from "./WinnerBadge";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
+import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
+// import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
 
 interface SingleWaveDropInfoContentProps {
   readonly drop: ExtendedDrop | undefined;
@@ -19,18 +21,32 @@ export const SingleWaveDropInfoContent: React.FC<
   if (!drop) {
     return null;
   }
+  
+  // For delete functionality
+  const { /* canDelete */ } = useDropInteractionRules(drop);
+  
   // Check if this is a memes wave drop
   const isMemes = isMemesWave(drop.wave.id);
 
   return (
     <div className="tw-flex tw-flex-col tw-items-start tw-gap-y-4">
-      <div className="tw-px-6">
-        {drop?.drop_type === ApiDropType.Participatory && (
-          <SingleWaveDropPosition rank={drop.rank} />
-        )}
-        {drop.drop_type === ApiDropType.Winner && (
-          <WinnerBadge drop={drop} showBadge={true} />
-        )}
+      <div className="tw-px-6 tw-w-full">
+        <div className="tw-flex tw-items-center tw-justify-between">
+          <div>
+            {drop?.drop_type === ApiDropType.Participatory && (
+              <SingleWaveDropPosition rank={drop.rank} />
+            )}
+            {drop.drop_type === ApiDropType.Winner && (
+              <WinnerBadge drop={drop} showBadge={true} />
+            )}
+          </div>
+          
+          {/* {canDelete && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <WaveDropActionsOptions drop={drop} />
+            </div>
+          )} */}
+        </div>
       </div>
 
       <div className="tw-flex-1 tw-w-full">
