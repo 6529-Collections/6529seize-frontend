@@ -548,7 +548,8 @@ export default function Auth({
         setActiveProfileProxy: onActiveProfileProxy,
         setTitle,
         title: pageTitle,
-      }}>
+      }}
+    >
       {children}
       <ToastContainer />
       <Modal
@@ -556,7 +557,8 @@ export default function Auth({
         onHide={() => setShowSignModal(false)}
         backdrop="static"
         keyboard={false}
-        centered>
+        centered
+      >
         <Modal.Header className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </Modal.Header>
@@ -582,13 +584,15 @@ export default function Auth({
             onClick={() => {
               setShowSignModal(false);
               seizeDisconnectAndLogout();
-            }}>
+            }}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}>
+            disabled={signMessage.isPending}
+          >
             {signMessage.isPending ? (
               <>
                 Confirm in your wallet <DotLoader />
