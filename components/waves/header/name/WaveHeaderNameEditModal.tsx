@@ -71,7 +71,7 @@ export default function WaveHeaderNameEditModal({
     await editNameMutation.mutateAsync(body);
   };
   return createPortal(
-    <div className="tw-relative tw-z-10">
+    <div className="tw-relative tw-z-50">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
