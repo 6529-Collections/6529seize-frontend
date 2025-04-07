@@ -15,7 +15,7 @@ export default function WaveHeaderName({ wave }: { readonly wave: ApiWave }) {
   return (
     <div className="tw-group tw-flex tw-items-center tw-space-x-2">
       <Link href={`/my-stream?wave=${wave.id}`} className="tw-no-underline">
-        <h1 className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-text-iron-200 tw-font-semibold tw-tracking-tight hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+        <h1 className="tw-mb-0 tw-text-lg sm:tw-text-xl tw-text-iron-50 tw-font-semibold tw-tracking-tight hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
           {wave.name}
         </h1>
       </Link>

@@ -132,7 +132,7 @@ export default function WaveHeaderFollow({
     } else if (following) {
       return (
         <svg
-          className="tw-h-3 tw-w-3"
+          className="tw-h-3 tw-w-3 tw-flex-shrink-0 -tw-ml-1"
           viewBox="0 0 17 15"
           fill="none"
           aria-hidden="true"
@@ -148,7 +148,7 @@ export default function WaveHeaderFollow({
     } else {
       return (
         <svg
-          className={SVG_CLASSES[size]}
+          className={`${SVG_CLASSES[size]} tw-flex-shrink-0 -tw-ml-1`}
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -173,7 +173,7 @@ export default function WaveHeaderFollow({
         type="button"
         className={`${BUTTON_CLASSES[size]} ${
           following
-            ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
+            ? "tw-bg-iron-800 tw-ring-iron-700 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
             : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
         } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
         {printIcon()}

@@ -3,7 +3,6 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAt, faBullhorn } from "@fortawesome/free-solid-svg-icons";
-import { Button, ButtonGroup } from "react-bootstrap";
 import { useWaveNotificationSubscription } from "../../../hooks/useWaveNotificationSubscription";
 import {
   commonApiDelete,
@@ -12,6 +11,7 @@ import {
 import { useAuth } from "../../auth/Auth";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 import { Spinner } from "../../dotLoader/DotLoader";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 const CREDIT_TYPE_LABELS: Record<ApiWaveCreditType, string> = {
   [ApiWaveCreditType.Tdh]: "TDH",
@@ -35,28 +35,28 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
 
   const { setToast } = useAuth();
 
-  const [loadingAll, setLoadingAll] = useState<boolean>(false);
-  const [loadingMentions, setLoadingMentions] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setIsAllEnabled(data?.subscribed && !disableSelection);
   }, [data, disableSelection]);
 
-  const toggleAllNotifications = useCallback(async () => {
+  const toggleNotifications = useCallback(async () => {
     if (isAllEnabled) {
       try {
-        setLoadingMentions(true);
+        setLoading(true);
         await commonApiDelete({
           endpoint: `notifications/wave-subscription/${wave.id}`,
         });
         await refetch();
-        setLoadingMentions(false);
+        setLoading(false);
         setToast({
           message:
             "You will only receive notifications for mentions in this wave",
           type: "success",
         });
       } catch (error) {
+        setLoading(false);
         setToast({
           message:
             typeof error === "string"
@@ -67,18 +67,19 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
       }
     } else {
       try {
-        setLoadingAll(true);
+        setLoading(true);
         await commonApiPost({
           endpoint: `notifications/wave-subscription/${wave.id}`,
           body: {},
         });
         await refetch();
-        setLoadingAll(false);
+        setLoading(false);
         setToast({
           message: "You will receive notifications for all drops in this wave",
           type: "success",
         });
       } catch (error) {
+        setLoading(false);
         setToast({
           message:
             typeof error === "string"
@@ -88,79 +89,66 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
         });
       }
     }
-  }, [isAllEnabled, wave.id, refetch]);
+  }, [isAllEnabled, wave.id, refetch, setToast]);
 
   useEffect(() => {
     setFollowing(!!wave.subscribed_actions.length);
     refetch();
   }, [wave.subscribed_actions.length, refetch]);
 
-  const printSubtext = () => {
-    if (!following) {
-      return (
-        <div className="tw-text-xs tw-text-iron-400">
-          You must follow this wave to change notification settings.
-        </div>
-      );
-    }
+  const getTooltipContent = () => {
     if (disableSelection) {
-      return (
-        <div className="tw-text-xs tw-text-iron-400">
-          &apos;All&apos; notifications are not available for waves with{" "}
-          {seizeSettings.all_drops_notifications_subscribers_limit.toLocaleString()}{" "}
-          or more followers.
-        </div>
-      );
+      return `'All' notifications unavailable for waves with ${seizeSettings.all_drops_notifications_subscribers_limit.toLocaleString()}+ followers.`;
     }
+    return isAllEnabled
+      ? "Click to switch to mentions-only notifications"
+      : "Click to enable notifications for all drops";
   };
 
+  if (!following) {
+    return null;
+  }
+
   return (
-    <div className="tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
-      <span className="tw-font-medium tw-text-iron-500">
-        Notification Settings
-      </span>
-      {following && (
-        <ButtonGroup
-          aria-label="Notification settings"
-          style={{ width: "100%" }}>
-          <Button
-            disabled={
-              disableSelection || !following || loadingAll || loadingMentions
-            }
-            onClick={toggleAllNotifications}
-            variant={isAllEnabled && following ? "light" : "outline-light"}
-            className="tw-hover:tw-bg-red-500"
-            style={{
-              flex: 1,
-            }}>
-            <div className="tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-font-medium tw-text-md">
-              {loadingAll ? (
-                <Spinner dimension={14} />
+    <div className="tw-space-y-1.5">
+      <div className="tw-flex tw-items-center tw-justify-between tw-gap-1.5">
+        <OverlayTrigger
+          placement="top"
+          overlay={
+            <Tooltip id={`notification-tooltip-${wave.id}`}>
+              {getTooltipContent()}
+            </Tooltip>
+          }
+        >
+          <span className="tw-inline-block">
+            <button
+              disabled={disableSelection || loading}
+              onClick={toggleNotifications}
+              className={`tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-w-10 tw-h-10 tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
+                disableSelection 
+                  ? "tw-bg-iron-800 tw-border-iron-700 tw-text-iron-500 tw-cursor-not-allowed" 
+                  : isAllEnabled
+                    ? "tw-bg-iron-800 tw-border-iron-700 tw-border tw-border-solid tw-text-primary-400 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-650"
+                    : "tw-bg-iron-800 tw-border-iron-700 tw-border tw-border-solid tw-text-primary-400 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-650"
+              }`}
+              aria-label={
+                isAllEnabled
+                  ? "Receiving all notifications (click to change)"
+                  : "Receiving mention notifications (click to change)"
+              }
+            >
+              {loading ? (
+                <Spinner dimension={16} />
               ) : (
-                <FontAwesomeIcon icon={faBullhorn} width={14} height={14} />
+                <FontAwesomeIcon
+                  icon={isAllEnabled ? faBullhorn : faAt}
+                  className="tw-size-3.5"
+                />
               )}
-              All
-            </div>
-          </Button>
-          <Button
-            disabled={
-              disableSelection || !following || loadingMentions || loadingAll
-            }
-            onClick={toggleAllNotifications}
-            variant={!isAllEnabled && following ? "light" : "outline-light"}
-            style={{ flex: 1 }}>
-            <div className="tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-font-medium tw-text-md">
-              {loadingMentions ? (
-                <Spinner dimension={14} />
-              ) : (
-                <FontAwesomeIcon icon={faAt} width={14} height={14} />
-              )}
-              Mentions
-            </div>
-          </Button>
-        </ButtonGroup>
-      )}
-      {printSubtext()}
+            </button>
+          </span>
+        </OverlayTrigger>
+      </div>
     </div>
   );
 }

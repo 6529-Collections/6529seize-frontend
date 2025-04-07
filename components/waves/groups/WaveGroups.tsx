@@ -14,17 +14,17 @@ export default function WaveGroups({ wave, useRing = true }: WaveGroupsProps) {
     : "tw-rounded-b-xl lg:tw-rounded-b-none";
 
   return (
-    <div className="tw-w-full">
+    <div className="tw-w-full tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
       <div
         className={`tw-h-full tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
       >
-        <div>
-          <div className="tw-px-5 tw-pt-4 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
-            <p className="tw-mb-0 tw-text-lg tw-text-iron-200 tw-font-semibold tw-tracking-tight">
-              Groups
+        <div className="tw-pb-4">
+          <div className="tw-px-4 tw-pt-4 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
+            <p className="tw-mb-0 tw-text-base tw-text-iron-200 tw-font-semibold tw-tracking-tight">
+              Eligible
             </p>
           </div>
-          <div className="tw-px-5 tw-py-5 tw-flex tw-flex-col tw-gap-y-6">
+          <div className="tw-px-4 tw-flex tw-flex-col tw-gap-y-2 tw-mt-2">
             <WaveGroup
               scope={wave.visibility.scope}
               type={WaveGroupType.VIEW}

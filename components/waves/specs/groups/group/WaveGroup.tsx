@@ -35,14 +35,14 @@ export default function WaveGroup({
   useEffect(() => setShowEdit(canEditGroup()), [connectedProfile, wave]);
 
   return (
-    <div className="tw-group tw-text-sm tw-flex tw-flex-col tw-gap-y-1.5">
+    <div className="tw-relative tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-h-6">
       <WaveGroupTitle type={type} />
-      <div className="tw-inline-flex tw-w-full tw-justify-between">
-        <div className="tw-inline-flex tw-items-center tw-gap-x-2">
+      <div className="tw-flex tw-items-center">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
           {scope.group ? (
             <WaveGroupScope group={scope.group} />
           ) : (
-            <span className="tw-font-medium tw-text-iron-200 tw-text-md">
+            <span className="tw-font-medium tw-text-iron-200 tw-text-sm">
               Anyone
             </span>
           )}
@@ -65,14 +65,19 @@ export default function WaveGroup({
             </div>
           )}
         </div>
-        {showEdit && (
-          <WaveGroupEditButtons
-            wave={wave}
-            type={type}
-            haveGroup={!!scope.group}
-          />
-        )}
       </div>
+      
+      {showEdit && (
+        <div className="tw-absolute -tw-top-6 tw-right-0 tw-opacity-0 group-hover:tw-opacity-100 tw-transition-opacity tw-duration-300 tw-ease-in-out tw-z-10">
+          <div className="tw-flex tw-items-center tw-bg-iron-900/90 tw-backdrop-blur-sm tw-rounded-md tw-shadow-md tw-py-1 tw-pr-0.5 tw-pl-4">
+            <WaveGroupEditButtons
+              wave={wave}
+              type={type}
+              haveGroup={!!scope.group}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
