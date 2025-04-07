@@ -15,6 +15,7 @@ interface MyStreamWaveMyVoteProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly isChecked?: boolean;
   readonly onToggleCheck?: (dropId: string) => void;
+  readonly isResetting?: boolean;
 }
 
 const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
@@ -22,6 +23,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   onDropClick,
   isChecked = false,
   onToggleCheck,
+  isResetting = false,
 }) => {
   const artWork = drop.parts.at(0)?.media.at(0);
   const cicType = cicToType(drop.author.cic || 0);
@@ -158,7 +160,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               </div>
             </div>
             <div onClick={(e) => e.stopPropagation()}>
-              <MyStreamWaveMyVoteInput drop={drop} />
+              <MyStreamWaveMyVoteInput
+                drop={drop}
+                isResetting={isResetting}
+              />
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ import MyStreamWaveMyVote from "./MyStreamWaveMyVote";
 import { useLayout } from "../layout/LayoutContext";
 import { WaveLeaderboardLoadingBar } from "../../../waves/leaderboard/drops/WaveLeaderboardLoadingBar";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
-import SecondaryButton from "../../../utils/button/SecondaryButton";
+import MyStreamWaveMyVotesReset from "./MyStreamWaveMyVotesReset";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
@@ -22,98 +22,54 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   onDropClick,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
+  const [pausePolling, setPausePolling] = useState(false);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
       connectedProfileHandle: connectedProfile?.profile?.handle,
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
+      pausePolling,
     });
 
   const { myVotesViewStyle } = useLayout();
 
   // State to track checked drops
-  const [checkedDrops, setCheckedDrops] = useState<Record<string, boolean>>({});
-
-  // State for reset progress
-  const [isResetting, setIsResetting] = useState(false);
-  const [resetProgress, setResetProgress] = useState(0);
-
-  // Check if at least one checkbox is selected
-  const hasCheckedItems = useMemo(() => {
-    return Object.values(checkedDrops).some((isChecked) => isChecked);
-  }, [checkedDrops]);
+  const [checkedDrops, setCheckedDrops] = useState<Set<string>>(new Set());
 
   // Check if all items are selected
   const allItemsSelected = useMemo(() => {
-    return drops.length > 0 && drops.every((drop) => checkedDrops[drop.id]);
+    return !!drops.length && drops.every((drop) => checkedDrops.has(drop.id));
   }, [drops, checkedDrops]);
 
-  // Count total selected items
-  const selectedCount = useMemo(() => {
-    return Object.values(checkedDrops).filter(Boolean).length;
-  }, [checkedDrops]);
-
   const handleToggleCheck = (dropId: string) => {
-    setCheckedDrops((prev) => ({
-      ...prev,
-      [dropId]: !prev[dropId],
-    }));
+    setCheckedDrops((prev) => {
+      if (prev.has(dropId)) {
+        prev.delete(dropId);
+      } else {
+        prev.add(dropId);
+      }
+      return new Set(prev);
+    });
   };
 
   const handleToggleSelectAll = () => {
     if (allItemsSelected) {
       // If all items are selected, deselect all
-      setCheckedDrops({});
+      setCheckedDrops(new Set());
     } else {
       // Otherwise, select all
-      const allChecked = drops.reduce((acc, drop) => {
-        acc[drop.id] = true;
-        return acc;
-      }, {} as Record<string, boolean>);
-
-      setCheckedDrops(allChecked);
+      setCheckedDrops(new Set(drops.map((drop) => drop.id)));
     }
   };
 
-  const handleResetAll = async () => {
-    if (!hasCheckedItems || isResetting) return;
-
-    setIsResetting(true);
-    setResetProgress(0);
-
-    // Get all selected drop IDs
-    const selectedDropIds = Object.entries(checkedDrops)
-      .filter(([_, isChecked]) => isChecked)
-      .map(([dropId, _]) => dropId);
-
-    // Simulate reset process with delay
-    let completed = 0;
-
-    for (const dropId of selectedDropIds) {
-      // Simulate API call for each drop (replace with actual reset logic)
-      await new Promise((resolve) =>
-        setTimeout(resolve, 200 + Math.random() * 300)
-      );
-
-      completed++;
-      setResetProgress(completed);
-
-      // Update the checked state for this drop
-      setCheckedDrops((prev) => ({
-        ...prev,
-        [dropId]: false,
-      }));
-    }
-
-    // Finish resetting
-    setTimeout(() => {
-      setIsResetting(false);
-      setResetProgress(0);
-    }, 500);
+  const removeSelected = (dropId: string) => {
+    setCheckedDrops((prev) => {
+      prev.delete(dropId);
+      return new Set(prev);
+    });
   };
 
   const intersectionElementRef = useIntersectionObserver(() => {
-    console.log("intersectionElementRef");
     if (hasNextPage && !isFetching && !isFetchingNextPage) {
       fetchNextPage();
     }
@@ -132,54 +88,23 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
         </div>
       ) : (
         <div className="tw-space-y-4 tw-mt-2">
-          {drops.length > 0 && (
-            <div className="tw-pl-1">
-              <div className="tw-flex tw-items-center tw-gap-x-2">
-                <SecondaryButton
-                  onClicked={handleToggleSelectAll}
-                  size="sm"
-                  disabled={isResetting}
-                >
-                  {allItemsSelected ? "Deselect All" : "Select All"}
-                </SecondaryButton>
-                <SecondaryButton
-                  onClicked={handleResetAll}
-                  size="sm"
-                  disabled={!hasCheckedItems || isResetting}
-                >
-                  {isResetting ? "Resetting..." : "Reset Votes"}
-                </SecondaryButton>
-              </div>
-
-              {isResetting && (
-                <div className="tw-mt-3 tw-px-0.5">
-                  <div className="tw-flex tw-items-center tw-justify-between tw-mb-1 tw-text-xs tw-text-iron-400">
-                    <span>Resetting votes...</span>
-                    <span className="tw-font-medium">
-                      {resetProgress} / {selectedCount}
-                    </span>
-                  </div>
-                  <div className="tw-h-1 tw-w-full tw-bg-iron-800 tw-rounded-full tw-overflow-hidden">
-                    <div
-                      className="tw-h-full tw-bg-primary-500 tw-rounded-full tw-transition-all tw-duration-200 tw-ease-out"
-                      style={{
-                        width: `${(resetProgress / selectedCount) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
+          <MyStreamWaveMyVotesReset
+            haveDrops={!!drops.length}
+            selected={checkedDrops}
+            onToggleSelectAll={handleToggleSelectAll}
+            allItemsSelected={allItemsSelected}
+            removeSelected={removeSelected}
+            setPausePolling={setPausePolling}
+          />
           <div className="tw-space-y-2">
             {drops.map((drop) => (
               <MyStreamWaveMyVote
                 key={drop.id}
                 drop={drop}
                 onDropClick={onDropClick}
-                isChecked={!!checkedDrops[drop.id]}
+                isChecked={checkedDrops.has(drop.id)}
                 onToggleCheck={handleToggleCheck}
+                isResetting={pausePolling}
               />
             ))}
             {isFetchingNextPage && <WaveLeaderboardLoadingBar />}
