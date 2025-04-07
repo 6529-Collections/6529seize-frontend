@@ -13,7 +13,7 @@ export default function WaveItemChat({
 
   return (
     <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1">
+      <div className="tw-flex-1 tw-min-w-0">
         <WaveItem
           wave={wave?.wave}
           userPlaceholder={href}

@@ -345,7 +345,7 @@ function DropPartMarkdown({
     if (serialNo) {
       return (
         <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-          <div className="tw-flex-1">
+          <div className="tw-flex-1 tw-min-w-0">
             <WaveDropQuoteWithSerialNo
               serialNo={parseInt(serialNo)}
               waveId={waveId}
@@ -358,7 +358,7 @@ function DropPartMarkdown({
     } else if (dropId) {
       return (
         <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-          <div className="tw-flex-1">
+          <div className="tw-flex-1 tw-min-w-0">
             <WaveDropQuoteWithDropId
               dropId={dropId}
               partId={1}
