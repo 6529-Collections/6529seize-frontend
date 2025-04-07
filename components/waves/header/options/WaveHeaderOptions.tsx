@@ -4,7 +4,11 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import WaveDelete from "./delete/WaveDelete";
 
-export default function WaveHeaderOptions({ wave }: { readonly wave: ApiWave }) {
+export default function WaveHeaderOptions({
+  wave,
+}: {
+  readonly wave: ApiWave;
+}) {
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -14,7 +18,7 @@ export default function WaveHeaderOptions({ wave }: { readonly wave: ApiWave }) 
     <div className="tw-relative tw-z-20" ref={listRef}>
       <button
         type="button"
-        className="tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-py-2.5 tw-px-2.5 tw-border-0 tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
+        className="tw-bg-transparent tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-size-8 tw-border-0 tw-text-iron-300 hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-iron-700 desktop-hover:hover:tw-ring-inset tw-transition tw-duration-300 tw-ease-out"
         id="options-menu-0-button"
         aria-expanded="false"
         aria-haspopup="true"

@@ -14,6 +14,8 @@ interface WaveHeaderPinnedProps {
 const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave, side }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [maxHeight, setMaxHeight] = useState<number | undefined>(undefined);
+  const [position, setPosition] = useState<"bottom" | "top">("bottom");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -24,6 +26,36 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave, side }) => {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  useEffect(() => {
+    if (isOpen && portalRef.current) {
+      const updatePosition = () => {
+        const buttonRect = buttonRef.current?.getBoundingClientRect();
+        const dropdownRect = portalRef.current?.getBoundingClientRect();
+
+        if (!buttonRect || !dropdownRect) return;
+
+        const viewportHeight = window.innerHeight;
+        const bottomSpace = viewportHeight - buttonRect.bottom;
+        const topSpace = buttonRect.top;
+        const contentHeight = dropdownRect.height;
+
+        // Check if content fits below
+        if (bottomSpace >= contentHeight || bottomSpace >= topSpace) {
+          setPosition("bottom");
+          setMaxHeight(bottomSpace - 16); // Subtract padding
+        } else {
+          setPosition("top");
+          setMaxHeight(topSpace - 16); // Subtract padding
+        }
+      };
+
+      // Run once after render and add resize listener
+      updatePosition();
+      window.addEventListener("resize", updatePosition);
+      return () => window.removeEventListener("resize", updatePosition);
+    }
+  }, [isOpen]);
 
   useClickAway(dropdownRef, () => {
     if (isOpen) setIsOpen(false);
@@ -70,16 +102,36 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave, side }) => {
               transition={{ duration: 0.2 }}
               style={{
                 position: "absolute",
+                maxHeight: maxHeight,
+                overflowY: "auto",
                 ...(isMobile
                   ? {
                       top:
-                        (buttonRef.current?.getBoundingClientRect().bottom ??
-                          0) + 8,
+                        position === "bottom"
+                          ? (buttonRef.current?.getBoundingClientRect()
+                              .bottom ?? 0) + 8
+                          : undefined,
+                      bottom:
+                        position === "top"
+                          ? window.innerHeight -
+                            (buttonRef.current?.getBoundingClientRect().top ??
+                              0) +
+                            8
+                          : undefined,
                       left: 0,
                       right: 0,
                     }
                   : {
-                      top: buttonRef.current?.getBoundingClientRect().top ?? 0,
+                      top:
+                        position === "bottom"
+                          ? buttonRef.current?.getBoundingClientRect().top ?? 0
+                          : undefined,
+                      bottom:
+                        position === "top"
+                          ? window.innerHeight -
+                            (buttonRef.current?.getBoundingClientRect().top ??
+                              0)
+                          : undefined,
                       left:
                         side === WaveHeaderPinnedSide.RIGHT
                           ? (buttonRef.current?.getBoundingClientRect().right ??
@@ -89,7 +141,7 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave, side }) => {
                         side === WaveHeaderPinnedSide.LEFT ? 56 : undefined,
                     }),
               }}
-              className={`tw-z-50 tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1 ${
+              className={`tw-z-50 tw-bg-iron-800 tw-p-1 tw-shadow-xl tw-ring-1 tw-ring-iron-800 tw-focus:tw-outline-none tw-space-y-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden ${
                 isMobile
                   ? "tw-w-full tw-rounded-lg"
                   : "lg:tw-max-w-[672px] tw-w-full tw-rounded-lg tw-origin-top-left"

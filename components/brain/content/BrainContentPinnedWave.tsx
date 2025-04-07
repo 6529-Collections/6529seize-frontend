@@ -90,7 +90,13 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
           >
             <div className="tw-relative tw-size-3.5 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-overflow-hidden tw-bg-iron-900">
               {wave ? (
-                <WavePicture wave={wave} />
+                <WavePicture
+                  name={wave.name}
+                  picture={wave.picture}
+                  contributors={wave.contributors_overview.map((c) => ({
+                    pfp: c.contributor_pfp,
+                  }))}
+                />
               ) : (
                 <div className="tw-w-full tw-h-full tw-bg-iron-800" />
               )}

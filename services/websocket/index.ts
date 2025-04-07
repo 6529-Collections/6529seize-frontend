@@ -22,7 +22,7 @@ export { useWebSocketAuth } from './useWebSocketAuth';
 
 // Default configuration
 export const DEFAULT_WEBSOCKET_CONFIG = {
-  url: 'wss://ws.6529.io',
+  url: (process.env.API_ENDPOINT?.replace('https://api', 'wss://ws')) || 'wss://default-fallback-url',
   reconnectDelay: 2000,
   maxReconnectAttempts: 20
 };

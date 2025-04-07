@@ -17,7 +17,6 @@ import { useShowFollowingWaves } from "./useShowFollowingWaves";
 // Enhanced wave interface with isPinned field and newDropsCount
 export interface EnhancedWave extends ApiWave {
   isPinned: boolean;
-  newDropsCount: number;
 }
 
 // Helper function for deep comparison of wave arrays
@@ -175,13 +174,13 @@ export const useWavesList = () => {
       const waveFromMain = mainWavesMap.get(id);
       if (waveFromMain) {
         // Add isPinned property
-        result.push({ ...waveFromMain, isPinned: true, newDropsCount: 0 });
+        result.push({ ...waveFromMain, isPinned: true });
       }
     });
 
     // Then add separately fetched pinned waves
     separatelyFetchedPinnedWaves.forEach((wave) => {
-      result.push({ ...wave, isPinned: true, newDropsCount: 0 });
+      result.push({ ...wave, isPinned: true });
     });
 
     // Update the ref if content changed - still useful for comparison and memoization
@@ -229,7 +228,6 @@ export const useWavesList = () => {
       allWavesArray.push({
         ...wave,
         isPinned,
-        newDropsCount: 0, // Default to 0, will be managed by context
       });
     });
 
