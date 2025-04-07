@@ -3,7 +3,6 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import WaveAuthor from "./WaveAuthor";
 import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
-import WaveNotificationSettings from "./WaveNotificationSettings";
 
 interface WaveSpecsProps {
   readonly wave: ApiWave;
@@ -18,18 +17,36 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
   return (
     <div>
       <div
-        className={`tw-h-full tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}>
-        <div>
-          <div className="tw-px-5 tw-pt-4 tw-flex tw-justify-between tw-items-start tw-gap-x-6">
-            <p className="tw-mb-0 tw-text-lg tw-text-iron-200 tw-font-semibold tw-tracking-tight">
+        className={`tw-h-full tw-bg-iron-950 tw-relative tw-overflow-auto ${ringClasses}`}
+      >
+        <div className="tw-pb-4">
+          <div className="tw-px-4 tw-pt-3 tw-flex tw-justify-between tw-items-center">
+            <p className="tw-mb-0 tw-text-base tw-text-iron-200 tw-font-semibold tw-tracking-tight">
               General
             </p>
           </div>
-          <div className="tw-px-5 tw-py-5 tw-flex tw-flex-col tw-gap-y-4">
-            <WaveNotificationSettings wave={wave} />
-            <WaveTypeIcon waveType={wave.wave.type} />
-            <WaveRating wave={wave} />
-            <WaveAuthor wave={wave} />
+
+          <div className="tw-px-4 tw-mt-2.5 tw-flex tw-flex-col tw-gap-2">
+            <div className="tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-1.5 tw-h-6">
+              <span className="tw-font-medium tw-text-iron-400">Type</span>
+              <div className="tw-flex tw-items-center tw-gap-x-1">
+                <WaveTypeIcon waveType={wave.wave.type} />
+              </div>
+            </div>
+
+            <div className="tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-1.5 tw-h-6">
+              <span className="tw-font-medium tw-text-iron-400">Rating</span>
+              <div className="tw-flex tw-items-center tw-gap-x-1">
+                <WaveRating wave={wave} />
+              </div>
+            </div>
+
+            <div className="tw-group tw-text-sm tw-flex tw-items-center tw-justify-between tw-w-full tw-gap-1.5 tw-h-6">
+              <span className="tw-font-medium tw-text-iron-400">Creator</span>
+              <div className="tw-flex tw-items-center tw-gap-x-1">
+                <WaveAuthor wave={wave} />
+              </div>
+            </div>
           </div>
         </div>
       </div>

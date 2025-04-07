@@ -288,7 +288,7 @@ export default function WaveDropsAll({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-h-full tw-justify-center tw-relative tw-overflow-y-auto tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-border-x tw-border-t tw-border-b-0">
+    <div className="tw-flex tw-flex-col tw-h-full tw-justify-end tw-relative tw-overflow-y-auto tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-border-x tw-border-t tw-border-b-0">
       {renderContent()}
       <WaveDropsScrollingOverlay isVisible={isScrolling} />
     </div>
