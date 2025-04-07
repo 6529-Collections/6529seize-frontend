@@ -17,13 +17,12 @@ export const SingleWaveDropInfoContent: React.FC<
   SingleWaveDropInfoContentProps
 > = ({ drop }) => {
   const { isMemesWave } = useSeizeSettings();
+  // For delete functionality - moved before conditional return
+  const { /* canDelete */ } = drop ? useDropInteractionRules(drop) : { /* canDelete: false */ };
 
   if (!drop) {
     return null;
   }
-  
-  // For delete functionality
-  const { /* canDelete */ } = useDropInteractionRules(drop);
   
   // Check if this is a memes wave drop
   const isMemes = isMemesWave(drop.wave.id);
