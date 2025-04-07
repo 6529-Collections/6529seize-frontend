@@ -24,7 +24,7 @@ export const useWaveData = ({
 
     staleTime: 60000,
     enabled: !!waveId,
-    refetchInterval,
+    refetchInterval: Infinity || refetchInterval,
     retry: (failureCount, error) => {
       if ((error as any) === `Wave ${waveId} not found`) {
         onWaveNotFound();

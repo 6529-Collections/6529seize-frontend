@@ -86,9 +86,9 @@ export function useWavePolling(
       }
     },
     enabled: !pollingState.hasNewDrops && !!waveId,
-    refetchInterval: isTabVisible
-      ? activePollingInterval
-      : inactivePollingInterval,
+    refetchInterval:
+      Infinity ||
+      (isTabVisible ? activePollingInterval : inactivePollingInterval),
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,

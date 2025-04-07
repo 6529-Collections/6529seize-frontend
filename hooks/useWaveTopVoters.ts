@@ -100,7 +100,7 @@ export function useWaveTopVoters({
     placeholderData: keepPreviousData,
     enabled: !!connectedProfileHandle,
     staleTime: 60000,
-    refetchInterval: 30000,
+    refetchInterval: Infinity || 30000,
   });
 
   useEffect(() => {

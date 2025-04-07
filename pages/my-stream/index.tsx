@@ -13,6 +13,7 @@ import { prefetchWavesOverview } from "../../helpers/stream.helpers";
 import { GetServerSidePropsContext } from "next";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "../../helpers/time";
+import { MyStreamProvider } from "../../contexts/wave/MyStreamContext";
 
 interface Props {
   dehydratedState: DehydratedState;
@@ -37,7 +38,6 @@ export async function getServerSideProps(
   const headers = getCommonHeaders(context);
   const feedItemsFetched =
     context?.req.cookies[[QueryKey.FEED_ITEMS].toString()];
-
 
   if (feedItemsFetched && +feedItemsFetched < Time.now().toMillis() - 60000) {
     const waveId = (context.query.wave as string | undefined) ?? null;

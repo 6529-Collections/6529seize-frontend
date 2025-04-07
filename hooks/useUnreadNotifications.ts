@@ -20,7 +20,7 @@ export function useUnreadNotifications(handle: string | undefined) {
         },
       }),
     enabled: !!handle,
-    refetchInterval: 30000,
+    refetchInterval: Infinity || 30000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,

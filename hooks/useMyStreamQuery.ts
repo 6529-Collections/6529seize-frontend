@@ -100,11 +100,11 @@ export function usePollingQuery(
       });
     },
     enabled: !haveNewItems && isInitialQueryDone,
-    refetchInterval: isTabVisible ? 5000 : 30000,
+    refetchInterval: Infinity || (isTabVisible ? 5000 : 30000),
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    refetchIntervalInBackground: !isCapacitor,
+    refetchIntervalInBackground:  !isCapacitor,
   });
 
   useEffect(() => {

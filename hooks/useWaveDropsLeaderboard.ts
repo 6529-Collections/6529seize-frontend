@@ -178,7 +178,7 @@ export function useWaveDropsLeaderboard({
       });
     },
     enabled: !haveNewDrops && canPoll,
-    refetchInterval: isTabVisible
+    refetchInterval: Infinity || isTabVisible
       ? ACTIVE_POLLING_INTERVAL
       : INACTIVE_POLLING_INTERVAL,
     refetchOnWindowFocus: true,

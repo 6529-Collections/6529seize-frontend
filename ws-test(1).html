@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Local WebSocket Test</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 1rem;
+      }
+      #logs {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Local WebSocket Test</h1>
+
+    <label for="tokenInput">Token (optional):</label>
+    <input id="tokenInput" type="text" placeholder="abc123" />
+    <br /><br />
+
+    <button id="connectBtn">Connect</button>
+    <button id="disconnectBtn" disabled>Disconnect</button>
+    <button id="sendBtn" disabled>Send Message</button>
+
+    <div id="logs"></div>
+
+    <script>
+      let ws;
+      const logsEl = document.getElementById('logs');
+      const tokenInput = document.getElementById('tokenInput');
+      const connectBtn = document.getElementById('connectBtn');
+      const disconnectBtn = document.getElementById('disconnectBtn');
+      const sendBtn = document.getElementById('sendBtn');
+
+      function log(message) {
+        // Append a new line to the logs
+        const line = document.createElement('div');
+        line.textContent = message;
+        logsEl.appendChild(line);
+        logsEl.scrollTop = logsEl.scrollHeight; // auto-scroll
+      }
+
+      connectBtn.addEventListener('click', () => {
+        const token = tokenInput.value.trim();
+        let url = 'wss://ws.staging.6529.io';
+        if (token) {
+          // If you have a JWT or some token
+          url += '?token=' + encodeURIComponent(token);
+        }
+
+        log(`Connecting to: ${url}`);
+        ws = new WebSocket(url);
+
+        ws.onopen = () => {
+          log('WebSocket: OPEN');
+          connectBtn.disabled = true;
+          disconnectBtn.disabled = false;
+          sendBtn.disabled = false;
+        };
+
+        ws.onmessage = (event) => {
+          log('WebSocket: MESSAGE => ' + event.data);
+        };
+
+        ws.onclose = () => {
+          log('WebSocket: CLOSE');
+          connectBtn.disabled = false;
+          disconnectBtn.disabled = true;
+          sendBtn.disabled = true;
+        };
+
+        ws.onerror = (err) => {
+          log('WebSocket: ERROR => ' + JSON.stringify(err));
+        };
+      });
+
+      disconnectBtn.addEventListener('click', () => {
+        if (ws) {
+          log('Closing connection...');
+          ws.close();
+        }
+      });
+
+      sendBtn.addEventListener('click', () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          // For example, send a JSON message
+          const payload = { message: 'Hello from client' };
+          log('Sending: ' + JSON.stringify(payload));
+          ws.send(JSON.stringify(payload));
+        }
+      });
+    </script>
+  </body>
+</html>

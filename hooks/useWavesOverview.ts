@@ -57,7 +57,7 @@ export const useWavesOverview = ({
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
     enabled: !usePublicWaves,
     placeholderData: keepPreviousData,
-    refetchInterval: refetchInterval ?? false,
+    refetchInterval: Infinity || (refetchInterval ?? false),
   });
 
   const publicQuery = useInfiniteQuery({
@@ -80,7 +80,7 @@ export const useWavesOverview = ({
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
     enabled: usePublicWaves,
     placeholderData: keepPreviousData,
-    refetchInterval: refetchInterval ?? false,
+    refetchInterval: Infinity || (refetchInterval ?? false),
   });
 
   const getWaves = (): ApiWave[] => {

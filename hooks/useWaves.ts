@@ -73,7 +73,7 @@ export function useWaves({
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     enabled: !usePublicWaves,
-    refetchInterval: refetchInterval ?? false,
+    refetchInterval: Infinity || (refetchInterval ?? false),
   });
 
   const publicQuery = useInfiniteQuery({
@@ -97,7 +97,7 @@ export function useWaves({
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     enabled: usePublicWaves,
-    refetchInterval: refetchInterval ?? false,
+    refetchInterval: Infinity || (refetchInterval ?? false),
   });
 
   const getWaves = (): ApiWave[] => {
