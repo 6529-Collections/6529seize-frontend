@@ -1,9 +1,11 @@
 import styles from "./ManifoldMinting.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import useManifoldClaim, {
+  buildMemesPhases,
   ManifoldClaim,
   ManifoldClaimStatus,
   ManifoldPhase,
+  MemePhase,
 } from "../../hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
 import { ManifoldInstance, getTraitValue } from "./manifold-types";
@@ -34,63 +36,6 @@ interface Props {
   abi: any;
   token_id: number;
   mint_date: Time;
-}
-
-interface MemePhase {
-  id: string;
-  name: string;
-  type: ManifoldPhase;
-  start: Time;
-  end: Time;
-}
-
-function buildMemesPhases(mintDate: Time): MemePhase[] {
-  const zone = "America/New_York";
-
-  const base = DateTime.fromJSDate(mintDate.toDate()).setZone(zone);
-
-  const toUtc = (hour: number, minute: number): Time =>
-    Time.seconds(base.set({ hour, minute, second: 0 }).toUTC().toSeconds());
-
-  const toUtcNextDay = (hour: number, minute: number): Time =>
-    Time.seconds(
-      base
-        .plus({ days: 1 })
-        .set({ hour, minute, second: 0 })
-        .toUTC()
-        .toSeconds()
-    );
-
-  return [
-    {
-      id: "0",
-      name: "Phase 0 (Allowlist)",
-      type: ManifoldPhase.ALLOWLIST,
-      start: toUtc(10, 40),
-      end: toUtc(11, 20),
-    },
-    {
-      id: "1",
-      name: "Phase 1 (Allowlist)",
-      type: ManifoldPhase.ALLOWLIST,
-      start: toUtc(11, 30),
-      end: toUtc(11, 50),
-    },
-    {
-      id: "2",
-      name: "Phase 2 (Allowlist)",
-      type: ManifoldPhase.ALLOWLIST,
-      start: toUtc(12, 0),
-      end: toUtc(12, 20),
-    },
-    {
-      id: "public",
-      name: "Public Phase",
-      type: ManifoldPhase.PUBLIC,
-      start: toUtc(12, 20),
-      end: toUtcNextDay(10, 0),
-    },
-  ];
 }
 
 function getDateTimeString(time: Time, local_timezone: boolean) {
