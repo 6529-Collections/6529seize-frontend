@@ -8,17 +8,34 @@ import React, {
   ReactNode,
 } from "react";
 import { useRouter } from "next/router";
-import useWavesList, { EnhancedWave } from "../../hooks/useWavesList";
+import useWavesList from "../../hooks/useWavesList";
 import { useWebSocketMessage } from "../../services/websocket/useWebSocketMessage";
 import { ApiWave } from "../../generated/models/ApiWave";
 import { WsDropUpdateMessage, WsMessageType } from "../../helpers/Types";
 import { AuthContext } from "../../components/auth/Auth";
+import { ApiWaveType } from "../../generated/models/ApiWaveType";
+
+interface MinimalWaveNewDropsCount {
+  readonly count: number;
+  readonly latestDropTimestamp: number | null;
+}
+
+export interface MinimalWave {
+  id: string;
+  name: string;
+  type: ApiWaveType;
+  newDropsCount: MinimalWaveNewDropsCount;
+  picture: string | null;
+  contributors: {
+    pfp: string;
+  }[];
+}
 
 // Define the type for our context
 interface MyStreamContextType {
   // Wave data
-  waves: EnhancedWave[];
-  pinnedWaves: EnhancedWave[];
+  waves: MinimalWave[];
+  pinnedWaves: MinimalWave[];
 
   // Loading states
   isFetching: boolean;
@@ -43,7 +60,7 @@ interface MyStreamContextType {
   resetWaveNewDropsCount: (waveId: string) => void;
 
   // Additional data
-  newDropsCounts: Record<string, number>;
+  newDropsCounts: Record<string, MinimalWaveNewDropsCount>;
   mainWaves: ApiWave[];
   missingPinnedIds: string[];
 }
@@ -61,13 +78,13 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
   // Track active wave ID for filtering new messages
   const [activeWaveId, setActiveWaveId] = useState<string | null>(null);
 
-  // Keep track of new drop counts separately
-  const [newDropsCounts, setNewDropsCounts] = useState<Record<string, number>>(
-    {}
-  );
-
   // Get waves data from the optimized hook
   const wavesData = useWavesList();
+
+  // Keep track of new drop counts separately
+  const [newDropsCounts, setNewDropsCounts] = useState<
+    Record<string, MinimalWaveNewDropsCount>
+  >({});
 
   // Sync activeWaveId with URL
   useEffect(() => {
@@ -98,12 +115,22 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   // Reset counts for a specific wave
-  const resetWaveNewDropsCount = useCallback((waveId: string) => {
-    setNewDropsCounts((prev) => ({
-      ...prev,
-      [waveId]: 0,
-    }));
-  }, []);
+  const resetWaveNewDropsCount = useCallback(
+    (waveId: string) => {
+      setNewDropsCounts((prev) => ({
+        ...prev,
+        [waveId]: {
+          count: 0,
+          latestDropTimestamp:
+            prev[waveId]?.latestDropTimestamp ??
+            wavesData.waves.find((wave) => wave.id === waveId)?.metrics
+              .latest_drop_timestamp ??
+            null,
+        },
+      }));
+    },
+    [wavesData.waves]
+  );
 
   // Handle visibility changes for active wave
   useEffect(() => {
@@ -129,27 +156,63 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
         // Skip if no waveId
         if (!message?.wave.id) return;
 
+        const waveId = message.wave.id;
+
         if (
           connectedProfile?.profile?.handle?.toLowerCase() ===
           message.author.handle?.toLowerCase()
         )
-          return;
-
-        const waveId = message.wave.id;
+          return setNewDropsCounts((prev) => {
+            const currentCount = prev[waveId]?.count ?? 0;
+            const currentLatestDropTimestamp =
+              prev[waveId]?.latestDropTimestamp ?? null;
+            return {
+              ...prev,
+              [waveId]: {
+                count: currentCount,
+                latestDropTimestamp: Math.max(
+                  message.created_at,
+                  currentLatestDropTimestamp ?? 0
+                ),
+              },
+            };
+          });
 
         // Skip incrementing if this is the active wave AND the document is visible
         if (waveId === activeWaveId && document.visibilityState === "visible") {
-          return;
+          return setNewDropsCounts((prev) => {
+            const currentCount = prev[waveId]?.count ?? 0;
+            const currentLatestDropTimestamp =
+              prev[waveId]?.latestDropTimestamp ?? null;
+            return {
+              ...prev,
+              [waveId]: {
+                count: currentCount,
+                latestDropTimestamp: Math.max(
+                  message.created_at,
+                  currentLatestDropTimestamp ?? 0
+                ),
+              },
+            };
+          });
         }
 
         // Update the count for this wave
         setNewDropsCounts((prev) => {
-          const currentCount = prev[waveId] ?? 0;
+          const currentCount = prev[waveId]?.count ?? 0;
+          const currentLatestDropTimestamp =
+            prev[waveId]?.latestDropTimestamp ?? null;
           // Optional: Cap the maximum count at 99
           const MAX_COUNT = 99;
           return {
             ...prev,
-            [waveId]: Math.min(currentCount + 1, MAX_COUNT),
+            [waveId]: {
+              count: Math.min(currentCount + 1, MAX_COUNT),
+              latestDropTimestamp: Math.max(
+                message.created_at,
+                currentLatestDropTimestamp ?? 0
+              ),
+            },
           };
         });
       },
@@ -157,28 +220,54 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
     ) // Make sure to include activeWaveId as a dependency
   );
 
+  // Helper function to map API wave data to MinimalWave format
+  const mapWaveToMinimalWave = useCallback(
+    (wave: ApiWave): MinimalWave => {
+      const newDropsData = {
+        count: newDropsCounts[wave.id]?.count ?? 0,
+        latestDropTimestamp:
+          newDropsCounts[wave.id]?.latestDropTimestamp ??
+          wave.metrics.latest_drop_timestamp ??
+          null,
+      };
+      return {
+        id: wave.id, // Add the missing id property
+        name: wave.name,
+        type: wave.wave.type,
+        picture: wave.picture,
+        contributors: wave.contributors_overview.map((c) => ({
+          pfp: c.contributor_pfp,
+        })),
+        newDropsCount: newDropsData,
+      };
+    },
+    [newDropsCounts]
+  );
+
   // Combine wave data with counts for consumers
   const enhancedWaves = useMemo(() => {
-    return wavesData.waves.map((wave) => ({
-      ...wave,
-      newDropsCount: newDropsCounts[wave.id] ?? 0,
-    }));
-  }, [wavesData.waves, newDropsCounts]);
+    return wavesData.waves.map(mapWaveToMinimalWave);
+  }, [wavesData.waves, mapWaveToMinimalWave]);
 
   // Enhanced pinned waves with counts
   const enhancedPinnedWaves = useMemo(() => {
-    return wavesData.pinnedWaves.map((wave) => ({
-      ...wave,
-      newDropsCount: newDropsCounts[wave.id] ?? 0,
-    }));
-  }, [wavesData.pinnedWaves, newDropsCounts]);
+    return wavesData.pinnedWaves.map(mapWaveToMinimalWave);
+  }, [wavesData.pinnedWaves, mapWaveToMinimalWave]);
 
   // Create the context value
   const contextValue = useMemo<MyStreamContextType>(
     () => ({
       // Enhanced waves with new drop counts
-      waves: enhancedWaves,
-      pinnedWaves: enhancedPinnedWaves,
+      waves: enhancedWaves.sort(
+        (a, b) =>
+          (b.newDropsCount.latestDropTimestamp ?? 0) -
+          (a.newDropsCount.latestDropTimestamp ?? 0)
+      ),
+      pinnedWaves: enhancedPinnedWaves.sort(
+        (a, b) =>
+          (b.newDropsCount.latestDropTimestamp ?? 0) -
+          (a.newDropsCount.latestDropTimestamp ?? 0)
+      ),
 
       // Pass through loading states
       isFetching: wavesData.isFetching,
