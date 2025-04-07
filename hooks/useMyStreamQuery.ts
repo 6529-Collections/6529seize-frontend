@@ -8,6 +8,7 @@ import { TypedFeedItem } from "../types/feed.types";
 import { commonApiFetch } from "../services/api/common-api";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
 
 interface UseMyStreamQueryProps {
   readonly reverse: boolean;
@@ -35,6 +36,7 @@ export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     pages: 3,
     staleTime: 60000,
+    ...getDefaultQueryRetry(),
   });
 
   const query = useInfiniteQuery({
@@ -51,6 +53,7 @@ export function useMyStreamQuery({ reverse }: UseMyStreamQueryProps) {
     },
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
+    ...getDefaultQueryRetry(),
   });
 
   useEffect(() => {
@@ -105,6 +108,7 @@ export function usePollingQuery(
     refetchOnMount: true,
     refetchOnReconnect: true,
     refetchIntervalInBackground: !isCapacitor,
+    ...getDefaultQueryRetry(),
   });
 
   useEffect(() => {

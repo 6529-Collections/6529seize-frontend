@@ -129,6 +129,7 @@ import { Capacitor } from "@capacitor/core";
 import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
 import { SeizeSettingsProvider } from "../contexts/SeizeSettingsContext";
 import { EmojiProvider } from "../contexts/EmojiContext";
+import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider";
 
 library.add(
   faArrowUp,
@@ -403,8 +404,10 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                         <NotificationsProvider>
                           <CookieConsentProvider>
                             <EULAConsentProvider>
-                              {getLayout(<Component {...props} />)}
-                              {appWalletPasswordModal.modal}
+                              <AppWebSocketProvider>
+                                {getLayout(<Component {...props} />)}
+                                {appWalletPasswordModal.modal}
+                              </AppWebSocketProvider>
                             </EULAConsentProvider>
                           </CookieConsentProvider>
                         </NotificationsProvider>

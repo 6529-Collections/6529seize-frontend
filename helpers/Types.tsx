@@ -1,4 +1,5 @@
 import { SortDirection } from "../entities/ISort";
+import { ApiDrop } from "../generated/models/ApiDrop";
 
 export interface FullPageRequest<SORT_BY_OPTIONS> {
   readonly sort_direction: SortDirection;
@@ -318,4 +319,14 @@ export enum Period {
   DAYS = "DAYS",
   WEEKS = "WEEKS",
   MONTHS = "MONTHS",
+}
+
+export enum WsMessageType {
+  DROP_UPDATE = 'DROP_UPDATE',
+  DROP_DELETE = 'DROP_DELETE'
+}
+
+export interface WsDropUpdateMessage {
+  type: WsMessageType.DROP_UPDATE;
+  data: ApiDrop;
 }

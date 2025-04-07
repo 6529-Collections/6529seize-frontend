@@ -7,6 +7,7 @@ import { AuthContext } from "../components/auth/Auth";
 import { commonApiFetch } from "../services/api/common-api";
 import { ApiWave } from "../generated/models/ApiWave";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
 export interface SearchWavesParams {
   readonly author?: string;
   readonly name?: string;
@@ -26,7 +27,7 @@ export function useWaves({
   identity,
   waveName,
   limit = 20,
-  refetchInterval,
+  refetchInterval = Infinity,
 }: UseWavesParams) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -47,7 +48,8 @@ export function useWaves({
   const [params, setParams] = useState<SearchWavesParams>(getParams());
   useEffect(() => setParams(getParams()), [identity, waveName]);
 
-  const [debouncedParams, setDebouncedParams] = useState<SearchWavesParams>(params);
+  const [debouncedParams, setDebouncedParams] =
+    useState<SearchWavesParams>(params);
   useDebounce(() => setDebouncedParams(params), 200, [params]);
 
   const authQuery = useInfiniteQuery({
@@ -55,7 +57,7 @@ export function useWaves({
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const queryParams: Record<string, string> = {};
       queryParams.limit = `${limit}`;
-      
+
       if (pageParam) {
         queryParams.serial_no_less_than = `${pageParam}`;
       }
@@ -73,7 +75,8 @@ export function useWaves({
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     enabled: !usePublicWaves,
-    refetchInterval: refetchInterval ?? false,
+    refetchInterval,
+    ...getDefaultQueryRetry(),
   });
 
   const publicQuery = useInfiniteQuery({
@@ -97,7 +100,8 @@ export function useWaves({
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.at(-1)?.serial_no ?? null,
     enabled: usePublicWaves,
-    refetchInterval: refetchInterval ?? false,
+    refetchInterval,
+    ...getDefaultQueryRetry(),
   });
 
   const getWaves = (): ApiWave[] => {
@@ -108,7 +112,10 @@ export function useWaves({
   };
 
   const [waves, setWaves] = useState<ApiWave[]>(getWaves());
-  useEffect(() => setWaves(getWaves()), [authQuery.data, publicQuery.data, usePublicWaves]);
+  useEffect(
+    () => setWaves(getWaves()),
+    [authQuery.data, publicQuery.data, usePublicWaves]
+  );
 
   const activeQuery = usePublicWaves ? publicQuery : authQuery;
 
