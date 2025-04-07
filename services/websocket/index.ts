@@ -22,7 +22,7 @@ export { useWebSocketAuth } from './useWebSocketAuth';
 
 // Default configuration
 export const DEFAULT_WEBSOCKET_CONFIG = {
-  url: 'wss://ws.staging.6529.io',
+  url: 'wss://ws.6529.io',
   reconnectDelay: 2000,
   maxReconnectAttempts: 20
 };
