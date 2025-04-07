@@ -10,7 +10,6 @@ import { motion } from "framer-motion";
 interface UnifiedWavesListProps {
   readonly waves: EnhancedWave[];
   readonly activeWaveId: string | null;
-  readonly resetWaveCount: (waveId: string) => void;
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetchingNextPage: boolean;
@@ -19,7 +18,6 @@ interface UnifiedWavesListProps {
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   waves,
   activeWaveId,
-  resetWaveCount,
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
@@ -121,7 +119,6 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
                 <div key={wave.id}>
                   <BrainLeftSidebarWave
                     wave={wave}
-                    resetWaveCount={resetWaveCount}
                     activeWaveId={activeWaveId}
                   />
                 </div>
