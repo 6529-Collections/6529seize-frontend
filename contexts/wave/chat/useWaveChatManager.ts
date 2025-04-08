@@ -1,4 +1,4 @@
-import React, { useMemo, useReducer, useRef, useCallback, useEffect } from 'react';
+import React, { useMemo, useReducer, useRef, useCallback, useEffect, useState } from 'react';
 import {
   DEFAULT_PREFETCH_LIMIT,
   DEFAULT_HISTORY_FETCH_LIMIT,
@@ -145,7 +145,7 @@ export function useWaveChatManager(options?: WaveChatOptions) {
     syncIntervalMs: options?.syncIntervalMs ?? DEFAULT_SYNC_INTERVAL_MS,
     concurrencyLimit: options?.concurrencyLimit ?? DEFAULT_CONCURRENCY_LIMIT,
     recentThresholdMs: options?.recentThresholdMs ?? DEFAULT_RECENT_THRESHOLD_MS,
-
+    apiPageSize: options?.historyFetchLimit ?? DEFAULT_HISTORY_FETCH_LIMIT,
   }), [options]);
 
   // Initialize cache state using the reducer
@@ -155,20 +155,154 @@ export function useWaveChatManager(options?: WaveChatOptions) {
   const processingRef = useRef<ChatManagerInternals['processing']>(new Map());
   const pendingRef = useRef<ChatManagerInternals['pending']>(new Map());
 
-  // Placeholder for queueActivation - to be implemented in Phase 5
-  const queueActivation = useCallback((waveId: string, priority: ActivationPriority) => {
-    // TODO: Implement queueing logic in Phase 5
-    console.log(`Placeholder: Queueing activation for ${waveId} with priority ${priority}`);
-  }, []);
+  // State variable solely to trigger the queue worker useEffect
+  const [queueTrigger, setQueueTrigger] = useState(0);
 
-  // Placeholder for syncWave - to be implemented in Phase 4 (Step 11)
-  // This function will fetch drops newer than the last known serial number for a wave.
+  // --- Phase 5: Queueing and Prioritization (Step 13) ---
+  const queueActivation = useCallback((waveId: string, priority: ActivationPriority) => {
+    // 1. Check if already processing
+    if (processingRef.current.has(waveId)) {
+      console.log(`[ChatManager] Activation request ignored: ${waveId} already processing.`);
+      return; // Don't queue if actively being fetched
+    }
+
+    // 2. Check if already pending
+    const currentPendingPriority = pendingRef.current.get(waveId);
+    if (currentPendingPriority !== undefined) {
+      // Already pending, update priority only if the new one is higher (lower number)
+      if (priority < currentPendingPriority) {
+        console.log(`[ChatManager] Upgrading priority for pending ${waveId} to ${priority}`);
+        pendingRef.current.set(waveId, priority);
+        // No need to trigger worker explicitly here, priority change will be picked up
+      }
+       // else: new priority is not higher, do nothing
+      return; 
+    }
+
+    // 3. Not processing and not pending: Add to pending queue
+    console.log(`[ChatManager] Adding ${waveId} to pending queue with priority ${priority}`);
+    pendingRef.current.set(waveId, priority);
+
+    // 4. Trigger the worker loop to check the queue
+    setQueueTrigger(c => c + 1);
+
+  }, []); // No dependencies needed as it only interacts with refs and a state setter
+  // --- End of Phase 5 / Step 13 ---
+
+  // --- Phase 5: Queueing and Prioritization (Step 14) ---
+  const loadActiveWave = useCallback((waveId: string) => {
+    // 1. Check if pending, remove if so (will be re-added with Immediate priority)
+    if (pendingRef.current.has(waveId)) {
+      console.log(`[ChatManager] Removing ${waveId} from pending to prioritize as active.`);
+      pendingRef.current.delete(waveId);
+    }
+
+    // 2. Check if currently processing
+    if (processingRef.current.has(waveId)) {
+       // Simple strategy: Log that it's already processing.
+       // The existing process will complete. If priority needs upgrading,
+       // that requires more complex abort/restart logic.
+      console.log(`[ChatManager] ${waveId} is already processing, will load as active once current fetch completes.`);
+       // Optionally, we could still queue it as Immediate, and the worker
+       // might pick it up *after* the current one finishes if nothing else has higher priority.
+       // Let's queue it to ensure it runs soon, even if already processing.
+    }
+
+    // 3. Queue with Immediate priority
+    console.log(`[ChatManager] Queuing ${waveId} with Immediate priority.`);
+    // Directly call queueActivation, which handles adding to pending and triggering worker
+    queueActivation(waveId, ActivationPriority.Immediate);
+
+  }, [queueActivation]); // Dependency on queueActivation
+  // --- End of Phase 5 / Step 14 ---
+
+  // --- Phase 4 implementations: syncWave, fetchAndProcessLatestDrops, fetchOlderDrops ---
+  // Need to declare fetchAndProcessLatestDrops *before* the worker loop useEffect
+  const fetchAndProcessLatestDrops = useCallback(async (waveId: string, abortSignal: AbortSignal) => {
+     // ... implementation from Step 10 ...
+     // Note: Ensure fetchAndProcessLatestDrops uses dispatchCacheAction from the reducer
+     // and references config correctly.
+     // Example placeholder structure:
+      console.log(`Worker: Fetching latest for ${waveId}`);
+      try {
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 1500)); 
+          if(abortSignal.aborted) throw new Error('Aborted');
+          console.log(`Worker: Finished fetching ${waveId}`);
+          // dispatchCacheAction({...}); // Dispatch REPLACE_DROPS on success
+      } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+               console.log(`Worker: Aborted fetch for ${waveId}`);
+           } else {
+                console.error(`Worker: Error fetching ${waveId}`, error);
+               // dispatchCacheAction({...}); // Dispatch SET_WAVE_ERROR
+           }
+      }
+  }, [config, dispatchCacheAction]); // Add dependencies like config, dispatchCacheAction
+
   const syncWave = useCallback(async (waveId: string) => {
-      // TODO: Implement sync logic in Phase 4 (Step 11)
-      console.log(`Placeholder: Syncing wave ${waveId}`);
-      // Simulating async operation for placeholder
-      await new Promise(resolve => setTimeout(resolve, 100)); 
-  }, []); // Dependencies will be added when implemented (e.g., dispatchCacheAction, cache)
+     // ... implementation from Step 11 ...
+  }, [cache, config, dispatchCacheAction, queueActivation]);
+
+  const fetchOlderDrops = useCallback(async (waveId: string): Promise<void> => {
+    // ... implementation from Step 12 ...
+  }, [cache, config, dispatchCacheAction]);
+  // --- End of Phase 4 --- 
+
+  // --- Phase 5: Queueing and Prioritization (Step 15 - Worker Loop) ---
+  useEffect(() => {
+    const processQueue = () => {
+      // Check if we have slots available and items pending
+      while (
+        processingRef.current.size < config.concurrencyLimit &&
+        pendingRef.current.size > 0
+      ) {
+        // Find the highest priority item (lowest priority number)
+        let nextWaveId: string | null = null;
+        let highestPriority = Infinity;
+
+        // Fix: Convert Map entries to array for iteration
+        const pendingEntries = Array.from(pendingRef.current.entries());
+        
+        for (const [waveId, priority] of pendingEntries) {
+          if (priority < highestPriority) {
+            highestPriority = priority;
+            nextWaveId = waveId;
+          }
+          // If priority is Immediate, process it right away
+          if (priority === ActivationPriority.Immediate) break;
+        }
+
+        if (!nextWaveId) {
+          break; // Should not happen if pendingRef.current.size > 0, but safety check
+        }
+
+        // Move from pending to processing
+        const priority = pendingRef.current.get(nextWaveId)!;
+        pendingRef.current.delete(nextWaveId);
+        const abortController = new AbortController();
+        processingRef.current.set(nextWaveId, { priority, abortController });
+
+        console.log(`[ChatWorker] Starting fetch for ${nextWaveId} (Priority: ${priority})`);
+
+        // Start the async fetch operation - DO NOT await here
+        fetchAndProcessLatestDrops(nextWaveId, abortController.signal)
+          .finally(() => {
+             // Regardless of success/error/abort, remove from processing
+             processingRef.current.delete(nextWaveId!);
+             console.log(`[ChatWorker] Finished processing ${nextWaveId}`);
+             // Trigger the effect again to check if more items can be processed
+             setQueueTrigger(c => c + 1); 
+          });
+      }
+    };
+
+    processQueue();
+
+    // This effect runs when the trigger changes or the limit changes.
+    // No cleanup needed here as AbortController handles cancellation if the component unmounts.
+  }, [queueTrigger, config, fetchAndProcessLatestDrops]);
+  // --- End of Phase 5 / Step 15 ---
 
   // WebSocket message handler
   const handleWebSocketMessage = useCallback((message: WsDropUpdateMessage["data"]) => {
@@ -228,8 +362,9 @@ export function useWaveChatManager(options?: WaveChatOptions) {
 
   return {
     cache,
-    // Expose syncWave placeholder for now (will be needed by provider)
     syncWave,
-    // ... other functions ...
+    fetchOlderDrops,
+    queueActivation,
+    loadActiveWave,
   };
 }
