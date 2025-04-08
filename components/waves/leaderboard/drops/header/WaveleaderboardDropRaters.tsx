@@ -110,7 +110,7 @@ export const WaveLeaderboardDropRaters: React.FC<
           <span className="tw-text-sm tw-whitespace-nowrap">
             <span className="tw-text-iron-400">Your vote: </span>
             <span className={`tw-font-semibold ${rankStyle}`}>
-              {formatNumberWithCommas(userVote)} <span className="tw-text-iron-400">{drop.wave.voting_credit_type}</span>
+              {formatNumberWithCommas(userVote)} {drop.wave.voting_credit_type}
             </span>
           </span>
         </div>
