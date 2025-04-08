@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 import { WavesOverviewParams } from "../types/waves.types";
@@ -27,6 +27,10 @@ export const useWavesOverview = ({
     only_waves_followed_by_authenticated_user: following,
   };
 
+  const [lastErrorTimestamp, setLastErrorTimestamp] = useState<number | null>(
+    null
+  );
+
   const query = useInfiniteQuery({
     queryKey: [QueryKey.WAVES_OVERVIEW, params],
     queryFn: async ({ pageParam }: { pageParam: number }) => {
@@ -47,7 +51,7 @@ export const useWavesOverview = ({
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
     placeholderData: keepPreviousData,
     refetchInterval,
-    ...getDefaultQueryRetry(),
+    ...getDefaultQueryRetry(() => setLastErrorTimestamp(Date.now())),
   });
 
   const getWaves = (): ApiWave[] => query.data?.pages.flat() ?? [];
@@ -57,17 +61,37 @@ export const useWavesOverview = ({
     setWaves(getWaves());
   }, [query.data]);
 
+  const fetchNextPage = useCallback(() => {
+    if (lastErrorTimestamp && Date.now() - lastErrorTimestamp < 30000) {
+      setTimeout(() => {
+        query.fetchNextPage();
+      }, 30000);
+      return;
+    }
+    query.fetchNextPage();
+  }, [lastErrorTimestamp, query]);
+
+  const refetch = useCallback(() => {
+    if (lastErrorTimestamp && Date.now() - lastErrorTimestamp < 30000) {
+      setTimeout(() => {
+        query.refetch();
+      }, 30000);
+      return;
+    }
+    query.refetch();
+  }, [lastErrorTimestamp, query]);
+
   const returnValue = useMemo(() => {
     return {
       waves,
       isFetching: query.isFetching,
       isFetchingNextPage: query.isFetchingNextPage,
       hasNextPage: query.hasNextPage,
-      fetchNextPage: query.fetchNextPage,
+      fetchNextPage,
       status: query.status,
-      refetch: query.refetch,
+      refetch,
     };
-  }, [waves, query]);
+  }, [waves, query, fetchNextPage, refetch]);
 
   return returnValue;
 };
