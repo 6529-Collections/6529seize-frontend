@@ -6,7 +6,7 @@ import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import WinnerDropBadge from "../../drops/winner/WinnerDropBadge";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExpand, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { faExpand } from "@fortawesome/free-solid-svg-icons";
 import { createPortal } from "react-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { faRotateLeft } from "@fortawesome/free-solid-svg-icons";
@@ -47,15 +47,13 @@ export const WaveLeaderboardGalleryItem: React.FC<
 
   const voteStyle = getVoteStyle(isNegativeVote);
 
-  // Open the image in full screen
-  const handleImageClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsModalOpen(true);
+  const handleImageClick = (e?: React.MouseEvent) => {
+    onDropClick(drop);
   };
 
-  // Navigate to drop details page
-  const handleDropClick = () => {
-    onDropClick(drop);
+  const handleExpandClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
@@ -92,7 +90,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
               <div className="tw-flex tw-flex-row-reverse lg:tw-flex-col tw-gap-2 tw-items-center tw-absolute -tw-top-12 lg:tw-top-0 tw-right-0 lg:-tw-right-12">
                 <button
                   onClick={handleCloseModal}
-                  className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 lg:tw-top-0 tw-right-0 lg:-tw-right-12 tw-text-iron-300 hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                  className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-absolute -tw-top-12 lg:tw-top-0 tw-right-0 lg:-tw-right-12 tw-text-iron-300 desktop-hover:hover:tw-text-iron-50 tw-z-10 tw-bg-white/10 desktop-hover:hover:tw-bg-white/20 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
                   aria-label="Close modal"
                 >
                   <svg
@@ -156,7 +154,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
                     ref={imgRef}
                     src={drop.parts[0].media[0].url}
                     alt="Full size drop media"
-                    className="tw-max-w-[90vw] tw-max-h-[calc(100vh-120px)] lg:tw-max-h-[calc(100vh-60px)] tw-object-contain"
+                    className="tw-max-w-full tw-max-h-[calc(100vh-120px)] lg:tw-max-h-[calc(100vh-60px)] tw-object-contain"
                     style={{
                       pointerEvents: "auto",
                     }}
@@ -197,13 +195,19 @@ export const WaveLeaderboardGalleryItem: React.FC<
   ) : null;
 
   return (
-    <div>
+    <div className="tw-relative">
       {/* Art Section */}
       <div
-        className="tw-group tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer"
+        className="tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer"
         onClick={handleImageClick}
       >
-        <div className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center desktop-hover:group-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out touch-none">
+        <div
+          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out touch-none"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleImageClick();
+          }}
+        >
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
             <DropListItemContentMedia
               media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
@@ -213,12 +217,16 @@ export const WaveLeaderboardGalleryItem: React.FC<
               )}
               onContainerClick={() => {
                 // This prevents the default modal from opening in DropListItemContentMedia
+                // and lets the parent div's onClick handle navigation instead
               }}
             />
-            {/* Overlay div to intercept clicks so the image opens the modal view */}
+            {/* Overlay div to intercept clicks so DropListItemContentMedia doesn't open its own modal */}
             <div
               className="tw-absolute tw-inset-0 tw-z-[1]"
-              onClick={handleImageClick}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleImageClick();
+              }}
             />
           </div>
         </div>
@@ -282,17 +290,6 @@ export const WaveLeaderboardGalleryItem: React.FC<
               </div>
             </div>
           )}
-
-          <button
-            onClick={handleDropClick}
-            className="tw-flex tw-items-center tw-gap-x-1 tw-text-xs tw-font-medium tw-text-iron-300 tw-border-0 tw-bg-iron-800 tw-rounded-full tw-py-1 tw-px-2.5 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 tw-transition-colors tw-duration-200 tw-ease-out"
-          >
-            View Drop
-            <FontAwesomeIcon
-              icon={faArrowRight}
-              className="tw-size-3 tw-ml-0.5"
-            />
-          </button>
         </div>
       </div>
       {isModalOpen && createPortal(modalContent, document.body)}
