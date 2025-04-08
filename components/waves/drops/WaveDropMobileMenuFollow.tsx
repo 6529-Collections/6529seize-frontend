@@ -2,9 +2,7 @@ import React, { useContext, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import {
-  commonApiPost,
-} from "../../../services/api/common-api";
+import { commonApiPost } from "../../../services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
 import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
@@ -19,11 +17,6 @@ const WaveDropMobileMenuFollow: React.FC<WaveDropMobileMenuFollowProps> = ({
   onFollowChange,
 }) => {
   const isFollowing = !!drop.author.subscribed_actions.length;
-  
-  // Don't show Follow button if already following
-  if (isFollowing) {
-    return null;
-  }
 
   const { setToast, requestAuth } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -67,7 +60,11 @@ const WaveDropMobileMenuFollow: React.FC<WaveDropMobileMenuFollowProps> = ({
     }
     await followMutation.mutateAsync();
   };
-  
+  // Don't show Follow button if already following
+  if (isFollowing) {
+    return null;
+  }
+
   return (
     <button
       onClick={onFollow}
