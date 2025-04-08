@@ -6,7 +6,6 @@ import { SingleWaveDropContent } from "./SingleWaveDropContent";
 import { MemesSingleWaveDropContent } from "./MemesSingleWaveDropContent";
 import { WinnerBadge } from "./WinnerBadge";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
-// import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
 
 interface SingleWaveDropInfoContentProps {
   readonly drop: ExtendedDrop | undefined;
@@ -20,7 +19,7 @@ export const SingleWaveDropInfoContent: React.FC<
   if (!drop) {
     return null;
   }
-  
+
   // Check if this is a memes wave drop
   const isMemes = isMemesWave(drop.wave.id);
 
@@ -36,12 +35,6 @@ export const SingleWaveDropInfoContent: React.FC<
               <WinnerBadge drop={drop} showBadge={true} />
             )}
           </div>
-          
-          {/* {canDelete && (
-            <div onClick={(e) => e.stopPropagation()}>
-              <WaveDropActionsOptions drop={drop} />
-            </div>
-          )} */}
         </div>
       </div>
 
@@ -54,6 +47,7 @@ export const SingleWaveDropInfoContent: React.FC<
           )}
         </div>
       </div>
+      
     </div>
   );
 };

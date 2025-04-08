@@ -18,7 +18,7 @@ import { useDropInteractionRules } from "../../../hooks/drops/useDropInteraction
 import { WinnerBadge } from "./WinnerBadge";
 import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
-// import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
+import WaveDropDeleteButton from "../../utils/button/WaveDropDeleteButton";
 
 interface MemesSingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -32,7 +32,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 > = ({ drop, wave, activeTab, onClose }) => {
   // State for fullscreen artwork view
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { isWinner /* canDelete */ } = useDropInteractionRules(drop);
+  const { isWinner, canDelete } = useDropInteractionRules(drop);
   // Extract metadata
   const title =
     drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
@@ -66,11 +66,6 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
               {title}
             </h3>
-            {/* {canDelete && (
-              <div onClick={(e) => e.stopPropagation()}>
-                <WaveDropActionsOptions drop={drop} />
-              </div>
-            )} */}
           </div>
           <div className="tw-px-6 tw-mt-2">
             <SingleWaveDropVotes drop={drop} />
@@ -100,6 +95,12 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           </div>
 
           <SingleWaveDropInfoDetails drop={drop} />
+
+          {canDelete && (
+            <div className="tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-4 tw-px-6 tw-pb-6">
+              <WaveDropDeleteButton drop={drop} />
+            </div>
+          )}
         </div>
       </SingleWaveDropInfoContainer>
 

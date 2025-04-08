@@ -49,8 +49,29 @@ export const setAuthJwt = (
     Cookies.set(WALLET_ROLE_COOKIE, role, COOKIE_OPTIONS_LONG);
   }
 };
+ export const getAuthJwt = () => {
+  if (true) {
+    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNhZTVjMzg4LTk2NWMtNDYzMi04OTRhLWQ0NTYwZDIzN2JjNyIsInN1YiI6IjB4OWI4Nzc1ZTdhMWU2YmYwNzQ1NmJiODEwZmIwN2VmODIzNzViYTEzMiIsInJvbGUiOiJhZmNiOWRhMy05NzY5LTRjNWUtOGQwMi0xMzdlNmNmZjY3YWUiLCJpYXQiOjE3NDM1MDc0MjcsImV4cCI6MTc0NjEzNTcxNX0.QMBPoJXWZL-0HX2fXyOtgCmWHNx25pjZ_agDYEE4_vQ";
+  }
+  return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
+};
 
-export const getAuthJwt = () => {
+export const getRefreshToken = () => {
+  if (true) {
+    return "77ce023da5e8e3f57fa5012b36c0635ec1b0e4a83e6d414150a215fb70afcdbb8d4cb0b224cbb87580ddd4cc5aeec1c74fc5fd731b970f9706b1f9fcdcb22b7d";
+  }
+  return Cookies.get(WALLET_REFRESH_TOKEN_COOKIE) ?? null;
+};
+
+export const getWalletAddress = () => {
+  if (true) {
+    return "0x9B8775e7A1e6BF07456bB810fb07ef82375ba132";
+  }
+  return Cookies.get(WALLET_ADDRESS_COOKIE) ?? null;
+}; 
+
+
+/* export const getAuthJwt = () => {
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
 
@@ -64,7 +85,7 @@ export const getWalletAddress = () => {
 
 export const getWalletRole = () => {
   return Cookies.get(WALLET_ROLE_COOKIE) ?? null;
-};
+}; */
 
 export const removeAuthJwt = () => {
   Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);

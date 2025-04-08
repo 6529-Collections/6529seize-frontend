@@ -1,12 +1,19 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
-import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
 import { motion } from "framer-motion";
 import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlus,
+  faChevronDown,
+  faPaperPlane,
+  faWaveSquare,
+} from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
+import SecondaryButton from "../../../utils/button/SecondaryButton";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -96,12 +103,82 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  const CreateButton = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const buttonRef = useRef<HTMLDivElement>(null);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (
+          buttonRef.current &&
+          !buttonRef.current.contains(event.target as Node)
+        ) {
+          setIsOpen(false);
+        }
+      };
+
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+      <div className="tw-relative" ref={buttonRef}>
+        <SecondaryButton
+          onClicked={() => {
+            setIsOpen(!isOpen);
+          }}
+          size="sm"
+        >
+          <FontAwesomeIcon icon={faPlus} className="tw-size-3.5" />
+          <span className="tw-text-sm tw-font-semibold">Create</span>
+        </SecondaryButton>
+
+        {isOpen && (
+          <div
+            className="tw-absolute tw-left-0 tw-top-full tw-mt-1.5 
+                    tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700 tw-rounded-md 
+                    tw-shadow-xl tw-shadow-black/40 tw-py-1 tw-z-20 tw-w-48
+                    tw-backdrop-blur-md tw-animate-fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Link
+              href="/waves?new-dm=true"
+              className="tw-flex tw-items-center tw-whitespace-nowrap tw-gap-2.5 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-no-underline tw-text-iron-300
+                       desktop-hover:hover:tw-bg-primary-900/30 desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <FontAwesomeIcon
+                icon={faPaperPlane}
+                className="tw-size-3.5 tw-text-primary-400 tw-flex-shrink-0"
+              />
+              <span>Direct Message</span>
+            </Link>
+            <Link
+              href="/waves?new=true"
+              className="tw-flex tw-items-center tw-whitespace-nowrap tw-gap-2.5 tw-px-3 tw-py-2.5 tw-text-sm tw-font-medium tw-no-underline tw-text-iron-300
+                       desktop-hover:hover:tw-bg-primary-900/30 desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <FontAwesomeIcon
+                icon={faWaveSquare}
+                className="tw-size-3.5 tw-text-primary-400 tw-flex-shrink-0"
+              />
+              <span>New Wave</span>
+            </Link>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
         {/* Create Wave Button */}
         <div className="tw-px-4 tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-2">
-          <BrainLeftSidebarCreateADirectMessageButton />
+          <CreateButton />
           {isConnectedIdentity && (
             <CommonSwitch
               label="Joined"

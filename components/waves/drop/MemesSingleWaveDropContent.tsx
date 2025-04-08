@@ -28,7 +28,6 @@ export const MemesSingleWaveDropContent: React.FC<
       <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-3">
         {title}
       </h3>
-
       {/* Description if available */}
       {description && (
         <p className="tw-text-iron-300 tw-mb-4 tw-text-md">{description}</p>
