@@ -107,5 +107,6 @@ export const useWavesOverview = ({
     hasNextPage: activeQuery.hasNextPage,
     fetchNextPage: activeQuery.fetchNextPage,
     status: activeQuery.status,
+    refetch: activeQuery.refetch,
   };
 };
