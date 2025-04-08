@@ -8,6 +8,7 @@ import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteract
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 import { SingleWaveDropVote } from "../../drop/SingleWaveDropVote";
 import WaveDropActionsOptions from "../../drops/WaveDropActionsOptions";
+import WaveDropActionsOpen from "../../drops/WaveDropActionsOpen";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -50,11 +51,14 @@ export const DefaultWaveLeaderboardDrop: React.FC<
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
               <WaveLeaderboardDropHeader drop={drop} />
-              {canDelete && (
-                <div className="tw-h-8">
-                  <WaveDropActionsOptions drop={drop} />
+              <div className="tw-flex tw-items-center">
+                <div className="tw-h-8 tw-hidden lg:tw-block">
+                  <WaveDropActionsOpen drop={drop} />
                 </div>
-              )}
+                <div className="tw-h-8 tw-hidden lg:tw-block">
+                  {canDelete && <WaveDropActionsOptions drop={drop} />}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -69,7 +73,6 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               </div>
             )}
           </div>
-          {/* Responsive footer layout with pure Tailwind */}
           <div className="tw-mt-3 tw-grid tw-grid-cols-[auto,1fr] tw-gap-x-4 tw-items-center sm:tw-ml-[3.25rem]">
             <div className="tw-contents">
               <WaveLeaderboardDropRaters drop={drop} />

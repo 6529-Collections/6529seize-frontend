@@ -99,7 +99,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                       className={`tw-text-sm tw-font-medium ${userVoteStyle}`}
                     >
                       {formatNumberWithCommas(userVote)}{" "}
-                      {drop.wave.voting_credit_type}
+                      <span className="tw-text-iron-400">{drop.wave.voting_credit_type}</span>
                     </span>
                   </div>
                 )}

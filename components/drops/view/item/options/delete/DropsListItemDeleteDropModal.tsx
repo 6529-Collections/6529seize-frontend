@@ -6,11 +6,12 @@ import { createPortal } from "react-dom";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiDelete } from "../../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
+import { ApiDropType } from "../../../../../../generated/models/ApiDropType";
 
 export default function DropsListItemDeleteDropModal({
   drop,
   closeModal,
-  onDropDeleted
+  onDropDeleted,
 }: {
   readonly drop: ApiDrop;
   readonly closeModal: () => void;
@@ -22,6 +23,9 @@ export default function DropsListItemDeleteDropModal({
   useClickAway(modalRef, closeModal);
   useKeyPressEvent("Escape", closeModal);
 
+  const contentType =
+    drop.drop_type === ApiDropType.Participatory ? "Drop" : "Post";
+
   const [mutating, setMutating] = useState<boolean>(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
@@ -30,7 +34,7 @@ export default function DropsListItemDeleteDropModal({
       }),
     onSuccess: () => {
       setToast({
-        message: "Drop deleted.",
+        message: `${contentType} deleted.`,
         type: "warning",
       });
       invalidateDrops();
@@ -80,6 +84,7 @@ export default function DropsListItemDeleteDropModal({
                       className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-red tw-transition tw-duration-300 tw-ease-out"
                       viewBox="0 0 24 24"
                       fill="none"
+                      ara-hidden="true"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -94,10 +99,11 @@ export default function DropsListItemDeleteDropModal({
                 </div>
                 <div className="tw-mt-3 sm:tw-mt-0 sm:tw-max-w-sm tw-flex tw-flex-col">
                   <p className=" tw-text-lg tw-text-iron-50 tw-font-medium tw-mb-0">
-                    Delete Post
+                    Delete {contentType}
                   </p>
                   <p className="tw-mt-1 tw-mb-0 tw-text-sm tw-text-iron-400">
-                    Are you sure you want to delete this post?
+                    Are you sure you want to delete this{" "}
+                    {contentType.toLowerCase()}?
                   </p>
                 </div>
               </div>
