@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
-import { AuthContext } from "../components/auth/Auth";
+
 import { WavesOverviewParams } from "../types/waves.types";
 import { ApiWavesOverviewType } from "../generated/models/ApiWavesOverviewType";
 import { commonApiFetch } from "../services/api/common-api";
@@ -21,24 +21,13 @@ export const useWavesOverview = ({
   following = false,
   refetchInterval = Infinity,
 }: UseWavesOverviewProps) => {
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-
-  const getUsePublicWaves = () =>
-    !connectedProfile?.profile?.handle || !!activeProfileProxy;
-  const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
-
-  useEffect(
-    () => setUsePublicWaves(getUsePublicWaves()),
-    [connectedProfile, activeProfileProxy]
-  );
-
   const params: Omit<WavesOverviewParams, "offset"> = {
     limit,
     type,
     only_waves_followed_by_authenticated_user: following,
   };
 
-  const authQuery = useInfiniteQuery({
+  const query = useInfiniteQuery({
     queryKey: [QueryKey.WAVES_OVERVIEW, params],
     queryFn: async ({ pageParam }: { pageParam: number }) => {
       const queryParams: Record<string, string> = {
@@ -56,56 +45,29 @@ export const useWavesOverview = ({
     initialPageParam: 0,
     getNextPageParam: (_, allPages) =>
       allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
-    enabled: !usePublicWaves,
     placeholderData: keepPreviousData,
     refetchInterval,
     ...getDefaultQueryRetry(),
   });
 
-  const publicQuery = useInfiniteQuery({
-    queryKey: [QueryKey.WAVES_OVERVIEW_PUBLIC, params],
-    queryFn: async ({ pageParam }: { pageParam: number }) => {
-      const queryParams: Record<string, string> = {
-        limit: `${params.limit}`,
-        offset: `${pageParam}`,
-        type: params.type,
-        only_waves_followed_by_authenticated_user: `${params.only_waves_followed_by_authenticated_user}`,
-      };
-
-      return await commonApiFetch<ApiWave[]>({
-        endpoint: `public/waves-overview`,
-        params: queryParams,
-      });
-    },
-    initialPageParam: 0,
-    getNextPageParam: (_, allPages) =>
-      allPages.at(-1)?.length === params.limit ? allPages.flat().length : null,
-    enabled: usePublicWaves,
-    placeholderData: keepPreviousData,
-    refetchInterval,
-    ...getDefaultQueryRetry(),
-  });
-
-  const getWaves = (): ApiWave[] => {
-    if (usePublicWaves) {
-      return publicQuery.data?.pages.flat() ?? [];
-    }
-    return authQuery.data?.pages.flat() ?? [];
-  };
+  const getWaves = (): ApiWave[] => query.data?.pages.flat() ?? [];
 
   const [waves, setWaves] = useState<ApiWave[]>(getWaves());
   useEffect(() => {
     setWaves(getWaves());
-  }, [authQuery.data, publicQuery.data, usePublicWaves]);
+  }, [query.data]);
 
-  const activeQuery = usePublicWaves ? publicQuery : authQuery;
+  const returnValue = useMemo(() => {
+    return {
+      waves,
+      isFetching: query.isFetching,
+      isFetchingNextPage: query.isFetchingNextPage,
+      hasNextPage: query.hasNextPage,
+      fetchNextPage: query.fetchNextPage,
+      status: query.status,
+      refetch: query.refetch,
+    };
+  }, [waves, query]);
 
-  return {
-    waves,
-    isFetching: activeQuery.isFetching,
-    isFetchingNextPage: activeQuery.isFetchingNextPage,
-    hasNextPage: activeQuery.hasNextPage,
-    fetchNextPage: activeQuery.fetchNextPage,
-    status: activeQuery.status,
-  };
+  return returnValue;
 };

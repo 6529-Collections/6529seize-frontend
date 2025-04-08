@@ -35,18 +35,14 @@ export interface MinimalWave {
 interface MyStreamContextType {
   // Wave data
   waves: MinimalWave[];
-  pinnedWaves: MinimalWave[];
 
   // Loading states
   isFetching: boolean;
   isFetchingNextPage: boolean;
-  isPinnedWavesLoading: boolean;
-  hasPinnedWavesError: boolean;
 
   // Pagination
   hasNextPage: boolean;
   fetchNextPage: () => void;
-  status: "error" | "success" | "pending";
 
   // Active wave management
   activeWaveId: string | null;
@@ -55,14 +51,6 @@ interface MyStreamContextType {
   // Pinned waves management
   addPinnedWave: (id: string) => void;
   removePinnedWave: (id: string) => void;
-
-  // New drops count management
-  resetWaveNewDropsCount: (waveId: string) => void;
-
-  // Additional data
-  newDropsCounts: Record<string, MinimalWaveNewDropsCount>;
-  mainWaves: ApiWave[];
-  missingPinnedIds: string[];
 }
 
 // Create the context
@@ -157,6 +145,11 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
         if (!message?.wave.id) return;
 
         const waveId = message.wave.id;
+        const wave = wavesData.waves.find((w) => w.id === waveId);
+
+        if (!wave) {
+          wavesData.mainWavesRefetch();
+        }
 
         if (
           connectedProfile?.profile?.handle?.toLowerCase() ===
@@ -249,11 +242,6 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
     return wavesData.waves.map(mapWaveToMinimalWave);
   }, [wavesData.waves, mapWaveToMinimalWave]);
 
-  // Enhanced pinned waves with counts
-  const enhancedPinnedWaves = useMemo(() => {
-    return wavesData.pinnedWaves.map(mapWaveToMinimalWave);
-  }, [wavesData.pinnedWaves, mapWaveToMinimalWave]);
-
   // Create the context value
   const contextValue = useMemo<MyStreamContextType>(
     () => ({
@@ -263,22 +251,14 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
           (b.newDropsCount.latestDropTimestamp ?? 0) -
           (a.newDropsCount.latestDropTimestamp ?? 0)
       ),
-      pinnedWaves: enhancedPinnedWaves.sort(
-        (a, b) =>
-          (b.newDropsCount.latestDropTimestamp ?? 0) -
-          (a.newDropsCount.latestDropTimestamp ?? 0)
-      ),
 
       // Pass through loading states
       isFetching: wavesData.isFetching,
       isFetchingNextPage: wavesData.isFetchingNextPage,
-      isPinnedWavesLoading: wavesData.isPinnedWavesLoading,
-      hasPinnedWavesError: wavesData.hasPinnedWavesError,
 
       // Pass through pagination
       hasNextPage: wavesData.hasNextPage,
       fetchNextPage: wavesData.fetchNextPage,
-      status: wavesData.status,
 
       // Active wave management
       activeWaveId,
@@ -287,33 +267,17 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
       // Pinned waves management
       addPinnedWave: wavesData.addPinnedWave,
       removePinnedWave: wavesData.removePinnedWave,
-
-      // New drops count management
-      resetWaveNewDropsCount,
-
-      // Additional data
-      newDropsCounts,
-      mainWaves: wavesData.mainWaves,
-      missingPinnedIds: wavesData.missingPinnedIds,
     }),
     [
       enhancedWaves,
-      enhancedPinnedWaves,
       wavesData.isFetching,
       wavesData.isFetchingNextPage,
-      wavesData.isPinnedWavesLoading,
-      wavesData.hasPinnedWavesError,
       wavesData.hasNextPage,
       wavesData.fetchNextPage,
-      wavesData.status,
       wavesData.addPinnedWave,
       wavesData.removePinnedWave,
-      wavesData.mainWaves,
-      wavesData.missingPinnedIds,
       activeWaveId,
       setActiveWave,
-      resetWaveNewDropsCount,
-      newDropsCounts,
     ]
   );
 

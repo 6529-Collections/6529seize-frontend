@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
-import { motion } from "framer-motion";
 import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
-
+import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
+import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
+import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -114,40 +114,20 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
         {/* Non-scrollable container for all waves - parent will handle scrolling */}
         <div className="tw-w-full">
           {/* Unified Waves List */}
-          {sortedWaves.length > 0 && (
-            <div className="tw-flex tw-flex-col">
-              {sortedWaves.map((wave) => (
-                <div key={wave.id}>
-                  <BrainLeftSidebarWave wave={wave} />
-                </div>
-              ))}
-            </div>
-          )}
+          <UnifiedWavesListWaves waves={sortedWaves} />
 
           {/* Loading indicator and intersection trigger */}
-          {(hasNextPage || isFetchingNextPage) && (
-            <div ref={loadMoreRef}>
-              {isFetchingNextPage && (
-                <motion.div
-                  className="tw-flex tw-justify-center tw-items-center tw-gap-1  tw-py-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="tw-w-1.5 tw-h-1.5 tw-bg-iron-400 tw-rounded-full tw-animate-pulse"></div>
-                  <div className="tw-w-1.5 tw-h-1.5 tw-bg-iron-400 tw-rounded-full tw-animate-pulse tw-animation-delay-200"></div>
-                  <div className="tw-w-1.5 tw-h-1.5 tw-bg-iron-400 tw-rounded-full tw-animate-pulse tw-animation-delay-400"></div>
-                </motion.div>
-              )}
-            </div>
-          )}
+          <UnifiedWavesListLoader
+            loadMoreRef={loadMoreRef}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={!!hasNextPage}
+          />
 
           {/* Empty state */}
-          {sortedWaves.length === 0 && !isFetchingNextPage && (
-            <div className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500">
-              <p>No waves to display</p>
-            </div>
-          )}
+          <UnifiedWavesListEmpty
+            sortedWaves={sortedWaves}
+            isFetchingNextPage={isFetchingNextPage}
+          />
         </div>
       </div>
     </div>
