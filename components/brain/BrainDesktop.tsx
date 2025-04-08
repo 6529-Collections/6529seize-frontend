@@ -78,23 +78,6 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
     );
   };
   
-  const setActiveWaveId = (waveId: string | null) => {
-    const currentQuery = { ...router.query };
-    if (waveId) {
-      currentQuery.wave = waveId;
-    } else {
-      delete currentQuery.wave;
-    }
-    router.push(
-      {
-        pathname: router.pathname,
-        query: currentQuery,
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-
   const isDropOpen =
     drop &&
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();
@@ -121,7 +104,6 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
           >
             <BrainLeftSidebar 
               activeWaveId={router.query.wave as string}
-              setActiveWaveId={setActiveWaveId}
             />
             <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full">
               {children}

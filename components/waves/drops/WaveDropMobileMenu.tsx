@@ -149,7 +149,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             </button>
           </>
         )}
-        <WaveDropMobileMenuOpen drop={drop} onOpenChange={closeMenu} />
+        <WaveDropMobileMenuOpen drop={{
+          ...drop,
+          stableHash: drop.id,
+          stableKey: drop.id,
+        }} onOpenChange={closeMenu} />
 
         <button
           className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
