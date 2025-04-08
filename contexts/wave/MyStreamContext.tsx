@@ -145,6 +145,11 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
         if (!message?.wave.id) return;
 
         const waveId = message.wave.id;
+        const wave = wavesData.waves.find((w) => w.id === waveId);
+
+        if (!wave) {
+          wavesData.mainWavesRefetch();
+        }
 
         if (
           connectedProfile?.profile?.handle?.toLowerCase() ===

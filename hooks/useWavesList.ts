@@ -295,6 +295,7 @@ export const useWavesList = () => {
       // Additional data that might be useful
       mainWaves: prevMainWavesRef.current,
       missingPinnedIds,
+      mainWavesRefetch,
     }),
     [
       allWaves,
