@@ -5,7 +5,7 @@ import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import WavePicture from "../../../waves/WavePicture";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
-import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
+import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;

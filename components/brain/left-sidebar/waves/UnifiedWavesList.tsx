@@ -3,10 +3,11 @@ import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreat
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
-import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
+
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
 import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
+import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];

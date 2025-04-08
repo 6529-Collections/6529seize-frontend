@@ -3,36 +3,21 @@ import { useRouter } from "next/router";
 import UnifiedWavesList from "./UnifiedWavesList";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 
-interface BrainLeftSidebarWavesProps {
-  readonly activeWaveId: string | null;
-}
-
-const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
-  activeWaveId,
-}) => {
+const BrainLeftSidebarWaves: React.FC = () => {
   const router = useRouter();
+
+  const { waves, activeWave } = useMyStream();
 
   // Store the wave ID from router.query to compare against and avoid unnecessary pins
   const lastPinnedWaveIdRef = useRef<string | null>(null);
 
   // Use useRef instead of useMemo to completely disconnect from render cycle
-  const activeWaveIdRef = useRef<string | null>(activeWaveId);
+  const activeWaveIdRef = useRef<string | null>(activeWave.id);
 
   // Update the ref when activeWaveId changes, but don't trigger re-renders
   useEffect(() => {
-    activeWaveIdRef.current = activeWaveId;
-  }, [activeWaveId]);
-
-  // Use fixed refetch interval to avoid dependency issues
-
-  const {
-    waves,
-    addPinnedWave,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-  } = useMyStream();
+    activeWaveIdRef.current = activeWave.id;
+  }, [activeWave.id]);
 
   // Use separate useEffect for handling router query to avoid dependency cycles
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -44,23 +29,23 @@ const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
       waveId !== lastPinnedWaveIdRef.current
     ) {
       lastPinnedWaveIdRef.current = waveId;
-      addPinnedWave(waveId);
+      waves.addPinnedWave(waveId);
     }
   }, [router.query]); // Intentionally omit addPinnedWave to avoid dependency cycle
 
   const onNextPage = () => {
-    if (hasNextPage && !isFetchingNextPage && !isFetching) {
-      fetchNextPage();
+    if (waves.hasNextPage && !waves.isFetchingNextPage && !waves.isFetching) {
+      waves.fetchNextPage();
     }
   };
 
   return (
     <UnifiedWavesList
-      waves={waves}
-      activeWaveId={activeWaveId}
+      waves={waves.list}
+      activeWaveId={activeWave.id}
       fetchNextPage={onNextPage}
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
+      hasNextPage={waves.hasNextPage}
+      isFetchingNextPage={waves.isFetchingNextPage}
     />
   );
 };

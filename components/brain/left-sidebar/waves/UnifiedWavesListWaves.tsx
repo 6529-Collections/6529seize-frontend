@@ -1,5 +1,5 @@
 import React from "react";
-import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
+import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 
 interface UnifiedWavesListWavesProps {
