@@ -24,7 +24,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   onDropClick,
   location = DropLocation.WAVE,
 }) => {
-  const { canShowVote /* canDelete */ } = useDropInteractionRules(drop);
+  const { canShowVote, canDelete } = useDropInteractionRules(drop);
 
   // Extract metadata
   const title =
@@ -40,10 +40,6 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   // Get top voters for votes display
   const firstThreeVoters = drop.top_raters?.slice(0, 3) || [];
 
-  // const handleDeleteClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-  // };
-
   return (
     <div
       className="tw-w-full tw-cursor-pointer"
@@ -56,9 +52,11 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               <div className="tw-flex tw-flex-col tw-gap-y-1">
                 <div className="tw-flex tw-items-center tw-justify-between">
                   <MemesLeaderboardDropArtistInfo drop={drop} />
-                  <div className="tw-h-8">
-                    <WaveDropActionsOptions drop={drop} />
-                  </div>
+                  {canDelete && (
+                    <div className="tw-h-8">
+                      <WaveDropActionsOptions drop={drop} />
+                    </div>
+                  )}
                 </div>
                 <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
                   <MemesLeaderboardDropHeader title={title} />

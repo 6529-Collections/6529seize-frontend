@@ -18,11 +18,7 @@ interface DefaultWaveLeaderboardDropProps {
 export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
 > = ({ drop, wave, onDropClick }) => {
-  const { canShowVote /* canDelete */ } = useDropInteractionRules(drop);
-
-  // const handleDeleteClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-  // };
+  const { canShowVote, canDelete } = useDropInteractionRules(drop);
 
   const getBorderClasses = () => {
     const rank = drop.rank && drop.rank <= 3 ? drop.rank : "default";
@@ -54,9 +50,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
               <WaveLeaderboardDropHeader drop={drop} />
-              <div className="tw-h-8">
-                <WaveDropActionsOptions drop={drop} />
-              </div>
+              {canDelete && (
+                <div className="tw-h-8">
+                  <WaveDropActionsOptions drop={drop} />
+                </div>
+              )}
             </div>
           </div>
 

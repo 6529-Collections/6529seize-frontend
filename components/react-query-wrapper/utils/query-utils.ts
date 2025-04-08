@@ -18,10 +18,11 @@ export const WAVE_LOGS_PARAMS = {
   limit: 20,
 };
 
-export const getDefaultQueryRetry = () => {
+export const getDefaultQueryRetry = (errorCallback?: () => void) => {
   return {
     retry: (failureCount: number) => {
       if (failureCount >= 3) {
+        errorCallback?.();
         return false;
       }
       return true;
