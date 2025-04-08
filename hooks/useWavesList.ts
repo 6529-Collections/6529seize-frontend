@@ -74,6 +74,7 @@ export const useWavesList = () => {
     hasNextPage,
     fetchNextPage,
     status: mainWavesStatus,
+    refetch: mainWavesRefetch,
   } = useWavesOverview({
     type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
@@ -294,6 +295,7 @@ export const useWavesList = () => {
       // Additional data that might be useful
       mainWaves: prevMainWavesRef.current,
       missingPinnedIds,
+      mainWavesRefetch,
     }),
     [
       allWaves,
@@ -309,6 +311,7 @@ export const useWavesList = () => {
       removeId,
       prevMainWavesRef.current,
       missingPinnedIds,
+      mainWavesRefetch,
     ]
   );
 };
