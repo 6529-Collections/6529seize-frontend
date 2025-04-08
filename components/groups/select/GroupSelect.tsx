@@ -29,7 +29,7 @@ export default function GroupSelect() {
   useDebounce(() => setDebouncedFilters(filters), 200, [filters]);
 
   const { data } = useInfiniteQuery({
-    queryKey: [QueryKey.GROUPS, debouncedFilters],
+    queryKey: [QueryKey.GROUPS_INFINITE, debouncedFilters],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Mutable<NonNullableNotRequired<GroupsRequestParams>> = {};
       if (debouncedFilters.group_name) {
