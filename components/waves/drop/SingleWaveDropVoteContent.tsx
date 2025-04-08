@@ -48,16 +48,19 @@ export const SingleWaveDropVoteContent: React.FC<
         <div className="tw-order-1 sm:tw-order-1 tw-flex-shrink-0">
           <button
             onClick={() => setIsSliderMode(!isSliderMode)}
-            className="tw-h-8 tw-w-8 tw-rounded-md tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-700 
-                    tw-flex tw-items-center tw-justify-center tw-transition-colors
-                    desktop-hover:hover:tw-bg-iron-650"
+            className="tw-h-8 tw-px-2.5 tw-rounded-md tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-600
+                    tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all
+                    desktop-hover:hover:tw-bg-iron-600"
             title="Switch mode"
           >
             <FontAwesomeIcon
               icon={faExchange}
-              className="tw-text-iron-300 tw-size-3.5 tw-flex-shrink-0"
+              className="tw-text-white tw-size-3 tw-flex-shrink-0"
               flip={isSliderMode ? "horizontal" : "vertical"}
             />
+            <span className="tw-text-xs tw-font-medium tw-text-white">
+              {isSliderMode ? "Numeric" : "Slider"}
+            </span>
           </button>
         </div>
 

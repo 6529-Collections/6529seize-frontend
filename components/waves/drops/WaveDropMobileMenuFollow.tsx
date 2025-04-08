@@ -2,10 +2,7 @@ import React, { useContext, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
-import {
-  commonApiDeleWithBody,
-  commonApiPost,
-} from "../../../services/api/common-api";
+import { commonApiPost } from "../../../services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
 import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
@@ -20,7 +17,6 @@ const WaveDropMobileMenuFollow: React.FC<WaveDropMobileMenuFollowProps> = ({
   onFollowChange,
 }) => {
   const isFollowing = !!drop.author.subscribed_actions.length;
-  const label = isFollowing ? "Unfollow" : "Follow";
 
   const { setToast, requestAuth } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
@@ -55,35 +51,6 @@ const WaveDropMobileMenuFollow: React.FC<WaveDropMobileMenuFollowProps> = ({
     },
   });
 
-  const unFollowMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiDeleWithBody<
-        ApiIdentitySubscriptionActions,
-        ApiIdentitySubscriptionActions
-      >({
-        endpoint: `identities/${drop.author.id}/subscriptions`,
-        body: {
-          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
-            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
-          ),
-        },
-      });
-    },
-    onSuccess: () => {
-      invalidateDrops();
-      onFollowChange();
-    },
-    onError: (error) => {
-      setToast({
-        message: error as unknown as string,
-        type: "error",
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
   const onFollow = async (): Promise<void> => {
     setMutating(true);
     const { success } = await requestAuth();
@@ -91,12 +58,13 @@ const WaveDropMobileMenuFollow: React.FC<WaveDropMobileMenuFollowProps> = ({
       setMutating(false);
       return;
     }
-    if (isFollowing) {
-      await unFollowMutation.mutateAsync();
-      return;
-    }
     await followMutation.mutateAsync();
   };
+  // Don't show Follow button if already following
+  if (isFollowing) {
+    return null;
+  }
+
   return (
     <button
       onClick={onFollow}
@@ -120,7 +88,7 @@ const WaveDropMobileMenuFollow: React.FC<WaveDropMobileMenuFollowProps> = ({
         />
       </svg>
       <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
-        {label} {drop.author.handle}
+        Follow {drop.author.handle}
       </span>
     </button>
   );

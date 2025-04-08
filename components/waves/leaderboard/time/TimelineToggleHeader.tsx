@@ -126,13 +126,6 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
         </div>
       )}
 
-      {/* Second row for mobile: Countdown */}
-      {hasNextDecision && (
-        <div className="tw-mt-2 sm:tw-hidden">
-          <TimeCountdown timeLeft={timeLeft} />
-        </div>
-      )}
-
       {/* Date and chevron for desktop */}
       <div className="tw-hidden sm:tw-flex tw-items-center tw-ml-auto">
         <div className="tw-text-xs tw-text-iron-400 tw-mr-2 tw-whitespace-nowrap">

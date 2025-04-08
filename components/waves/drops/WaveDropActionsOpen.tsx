@@ -44,7 +44,7 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
       hideOnClick={false}
     >
       <button
-        className="tw-text-yellow/80 tw-px-2 desktop-hover:hover:tw-text-yellow tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
+        className="tw-text-iron-400 tw-px-2 desktop-hover:hover:tw-text-iron-50 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
         onClick={() => onDropClick(drop)}
       >
         <svg

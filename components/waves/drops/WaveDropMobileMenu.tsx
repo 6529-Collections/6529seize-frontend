@@ -5,6 +5,7 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuFollow from "./WaveDropMobileMenuFollow";
+import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 
 interface WaveDropMobileMenuProps {
@@ -148,6 +149,12 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             </button>
           </>
         )}
+        <WaveDropMobileMenuOpen drop={{
+          ...drop,
+          stableHash: drop.id,
+          stableKey: drop.id,
+        }} onOpenChange={closeMenu} />
+
         <button
           className={`tw-border-0 tw-flex tw-items-center tw-gap-x-4 tw-p-4 tw-bg-iron-950 tw-rounded-xl ${
             isTemporaryDrop

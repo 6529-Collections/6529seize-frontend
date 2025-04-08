@@ -11,7 +11,8 @@ import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
 import MemesLeaderboardDropVotingSection from "./MemesLeaderboardDropVotingSection";
 import MemeDropTraits from "./MemeDropTraits";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
-// import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
+import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
+import WaveDropActionsOpen from "../../waves/drops/WaveDropActionsOpen";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -24,7 +25,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   onDropClick,
   location = DropLocation.WAVE,
 }) => {
-  const { canShowVote /* canDelete */ } = useDropInteractionRules(drop);
+  const { canShowVote, canDelete } = useDropInteractionRules(drop);
 
   // Extract metadata
   const title =
@@ -40,10 +41,6 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   // Get top voters for votes display
   const firstThreeVoters = drop.top_raters?.slice(0, 3) || [];
 
-  // const handleDeleteClick = (e: React.MouseEvent) => {
-  //   e.stopPropagation();
-  // };
-
   return (
     <div
       className="tw-w-full tw-cursor-pointer"
@@ -51,18 +48,20 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     >
       <div className="tw-w-full tw-group">
         <MemesLeaderboardDropCard drop={drop}>
-          {/* {canDelete && (
-            <div 
-              className="tw-absolute tw-z-20 tw-right-4 tw-top-4"
-              onClick={handleDeleteClick}
-            >
-              <WaveDropActionsOptions drop={drop} />
-            </div>
-          )} */}
           <div>
             <div className="tw-p-4">
               <div className="tw-flex tw-flex-col tw-gap-y-1">
-                <MemesLeaderboardDropArtistInfo drop={drop} />
+                <div className="tw-flex tw-items-center tw-justify-between">
+                  <MemesLeaderboardDropArtistInfo drop={drop} />
+                  <div className="tw-flex tw-items-center">
+                    <div className="tw-h-8 tw-hidden lg:tw-block">
+                      <WaveDropActionsOpen drop={drop} />
+                    </div>
+                    <div className="tw-h-8 tw-hidden lg:tw-block">
+                      {canDelete && <WaveDropActionsOptions drop={drop} />}
+                    </div>
+                  </div>
+                </div>
                 <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
                   <MemesLeaderboardDropHeader title={title} />
                   <MemesLeaderboardDropDescription description={description} />

@@ -8,6 +8,8 @@ import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
 import { SingleWaveDropInfoActions } from "./SingleWaveDropInfoActions";
 import { SingleWaveDropInfoContent } from "./SingleWaveDropInfoContent";
+import WaveDropDeleteButton from "../../utils/button/WaveDropDeleteButton";
+import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 
 interface SingleWaveDropInfoPanelProps {
   readonly drop: ExtendedDrop;
@@ -19,6 +21,8 @@ interface SingleWaveDropInfoPanelProps {
 export const SingleWaveDropInfoPanel: React.FC<
   SingleWaveDropInfoPanelProps
 > = ({ drop, wave, activeTab, onClose }) => {
+  const { canDelete } = useDropInteractionRules(drop);
+
   return (
     <SingleWaveDropInfoContainer activeTab={activeTab}>
       <div className="tw-hidden lg:tw-block">
@@ -34,6 +38,11 @@ export const SingleWaveDropInfoPanel: React.FC<
       <div className="tw-mt-4 tw-pt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
         <SingleWaveDropInfoDetails drop={drop} />
       </div>
+      {canDelete && (
+        <div className="tw-w-full tw-px-6 tw-pb-6 tw-pt-6 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
+          <WaveDropDeleteButton drop={drop} onDelete={onClose} />
+        </div>
+      )}
     </SingleWaveDropInfoContainer>
   );
 };
