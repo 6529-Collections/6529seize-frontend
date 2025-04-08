@@ -1,4 +1,4 @@
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers"; // Adjust path if needed
 
 export enum WaveChatStatus {
   Idle = "IDLE",
@@ -17,6 +17,20 @@ export interface WaveChatState {
   readonly lastSyncTime: number | null;
   readonly error: Error | null;
 }
+
+/**
+ * Creates the default initial state for a wave's chat cache.
+ */
+export const createInitialWaveState = (): WaveChatState => ({
+  drops: [],
+  status: WaveChatStatus.Idle,
+  hasReachedOldest: false,
+  newestSerialNo: null,
+  oldestSerialNo: null,
+  lastSyncTime: null,
+  error: null,
+});
+
 
 export enum ActivationPriority {
   Immediate = 0,
@@ -43,5 +57,5 @@ export interface ChatManagerInternals {
     }
   >;
   readonly pending: Map<string, ActivationPriority>;
-  readonly cache: Map<string, WaveChatState>;
+  readonly cache: Map<string, WaveChatState>; // Kept for internal ref typing
 }

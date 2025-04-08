@@ -7,7 +7,14 @@ import {
   DEFAULT_CONCURRENCY_LIMIT,
   DEFAULT_RECENT_THRESHOLD_MS
 } from './config';
-import { WaveChatOptions, WaveChatState, WaveChatStatus, ActivationPriority, ChatManagerInternals } from "./types"; // Assuming ExtendedDrop is imported where needed or globally available
+import {
+  WaveChatOptions,
+  WaveChatState,
+  WaveChatStatus,
+  ActivationPriority,
+  ChatManagerInternals,
+  createInitialWaveState
+} from "./types";
 import { ExtendedDrop } from '../../../helpers/waves/drop.helpers'; // Adjust path as necessary
 import { WsMessageType, WsDropUpdateMessage } from '../../../helpers/Types'; // Adjust path as needed
 import { useWebSocketMessage } from '../../../services/websocket/useWebSocketMessage'; // Adjust path as needed
@@ -26,17 +33,6 @@ type CacheAction =
 
 // Initial State
 const initialCacheState: ReadonlyMap<string, WaveChatState> = new Map();
-
-// Helper to create initial state for a *new* wave being added to the cache
-const createInitialWaveState = (): WaveChatState => ({
-  drops: [],
-  status: WaveChatStatus.Idle,
-  hasReachedOldest: false,
-  newestSerialNo: null,
-  oldestSerialNo: null,
-  lastSyncTime: null,
-  error: null,
-});
 
 // Reducer function
 function cacheReducer(
