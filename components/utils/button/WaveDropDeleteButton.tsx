@@ -31,7 +31,7 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
     <>
       <button
         className={className || defaultButtonClasses}
-        onClick={() => setIsDeleteModalOpen(true)}
+        onClick={onDeleteClick}
       >
         {/* Using the same SVG icon as in WaveDropActionsOptions but with red color */}
         <svg
