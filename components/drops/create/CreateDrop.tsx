@@ -229,6 +229,7 @@ export default function CreateDrop({
       drop_type: ApiDropType.Chat,
       rank: null,
       realtime_rating: 0,
+      rating_prediction: 0,
       is_signed: false,
     };
   };

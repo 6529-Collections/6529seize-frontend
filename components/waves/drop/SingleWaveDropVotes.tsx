@@ -25,8 +25,8 @@ export const SingleWaveDropVotes: React.FC<SingleWaveDropVotesProps> = ({
           {formatNumberWithCommas(drop.rating)}
         </span>
         <DropVoteProgressing
-          rating={drop.rating}
-          realtimeRating={drop.realtime_rating}
+          current={drop.rating}
+          projected={drop.rating_prediction}
         />
         <span className="tw-text-md tw-text-iron-400 text-nowrap">
           {drop.wave.voting_credit_type} total
