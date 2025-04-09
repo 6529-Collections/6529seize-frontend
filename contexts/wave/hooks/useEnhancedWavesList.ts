@@ -1,8 +1,11 @@
-import { useCallback, useMemo } from 'react';
-import useWavesList from '../../../hooks/useWavesList';
-import useNewDropCounter, { MinimalWaveNewDropsCount } from './useNewDropCounter';
-import { ApiWave } from '../../../generated/models/ApiWave';
-import { ApiWaveType } from '../../../generated/models/ApiWaveType';
+import { useCallback, useMemo } from "react";
+import useWavesList from "../../../hooks/useWavesList";
+import useNewDropCounter, {
+  MinimalWaveNewDropsCount,
+} from "./useNewDropCounter";
+import { ApiWave } from "../../../generated/models/ApiWave";
+import { ApiWaveType } from "../../../generated/models/ApiWaveType";
+import useWaveMessages from "./useWaveMessages";
 
 /**
  * Represents a minimal version of a wave with essential data
@@ -20,13 +23,14 @@ export interface MinimalWave {
 
 /**
  * Hook to provide an enhanced list of waves with new drop counts
- * 
+ *
  * @param activeWaveId The currently active wave ID
  * @returns Object containing waves data, loading states, pagination, and pinning functions
  */
 export function useEnhancedWavesList(activeWaveId: string | null) {
   // Get waves data from the optimized hook
   const wavesData = useWavesList();
+  const waveMessages = useWaveMessages();
 
   const { newDropsCounts } = useNewDropCounter(
     activeWaveId,
@@ -34,7 +38,7 @@ export function useEnhancedWavesList(activeWaveId: string | null) {
     wavesData.mainWavesRefetch
   );
 
-// Helper function to map API wave data to MinimalWave format
+  // Helper function to map API wave data to MinimalWave format
   const mapWaveToMinimalWave = useCallback(
     (wave: ApiWave): MinimalWave => {
       const newDropsData = {
@@ -58,8 +62,8 @@ export function useEnhancedWavesList(activeWaveId: string | null) {
     [newDropsCounts]
   );
 
-   // Combine wave data with counts for consumers
-   const mappedWaves = useMemo(() => {
+  // Combine wave data with counts for consumers
+  const mappedWaves = useMemo(() => {
     return wavesData.waves.map(mapWaveToMinimalWave);
   }, [wavesData.waves, mapWaveToMinimalWave]);
 
@@ -76,15 +80,15 @@ export function useEnhancedWavesList(activeWaveId: string | null) {
   return {
     // Data
     waves: sortedWaves,
-    
+
     // Loading states
     isFetching: wavesData.isFetching,
     isFetchingNextPage: wavesData.isFetchingNextPage,
-    
+
     // Pagination
     hasNextPage: wavesData.hasNextPage,
     fetchNextPage: wavesData.fetchNextPage,
-    
+
     // Pinning functions
     addPinnedWave: wavesData.addPinnedWave,
     removePinnedWave: wavesData.removePinnedWave,
