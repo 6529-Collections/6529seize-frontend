@@ -30,7 +30,7 @@ export const VotingModalButton: React.FC<VotingModalButtonProps> = ({
       className="tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-px-3 tw-py-1.5 
         tw-rounded-md tw-bg-primary-500 tw-border tw-border-solid tw-border-primary-500 tw-text-white tw-shadow-sm tw-text-xs tw-font-semibold
         hover:tw-bg-primary-600 hover:tw-shadow-md tw-transition-all tw-duration-150 tw-ease-in-out
-        active:tw-transform active:tw-translate-y-0.5 active:tw-shadow-sm"
+        active:tw-transform active:tw-translate-y-0.5 active:tw-shadow-sm tw-whitespace-nowrap"
     >
       Vote for this!
     </button>

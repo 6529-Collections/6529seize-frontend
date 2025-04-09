@@ -7,7 +7,6 @@ export interface RatingsSectionProps {
 }
 
 export interface ThemeColors {
-  gradient: string;
   text: string;
   ring: string;
   indicator?: string;

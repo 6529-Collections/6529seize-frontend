@@ -13,11 +13,12 @@ import { faExchange } from "@fortawesome/free-solid-svg-icons";
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
   readonly size: SingleWaveDropVoteSize;
+  readonly onVoteSuccess?: () => void;
 }
 
 export const SingleWaveDropVoteContent: React.FC<
   SingleWaveDropVoteContentProps
-> = ({ drop, size }) => {
+> = ({ drop, size, onVoteSuccess }) => {
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
@@ -102,6 +103,7 @@ export const SingleWaveDropVoteContent: React.FC<
             drop={drop}
             newRating={Number(voteValue)}
             ref={submitRef}
+            onVoteSuccess={onVoteSuccess}
           />
         </div>
       </div>

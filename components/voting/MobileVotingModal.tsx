@@ -29,7 +29,7 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
       title="Vote for this artwork"
     >
       <div className="tw-py-4 tw-px-4">
-        <SingleWaveDropVote drop={drop} />
+        <SingleWaveDropVote drop={drop} onVoteSuccess={onClose} />
       </div>
     </MobileWrapperDialog>
   );

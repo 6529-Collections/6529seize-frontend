@@ -36,7 +36,7 @@ export const VotingModal: React.FC<VotingModalProps> = ({
       >
         <ModalLayout title="Vote for this artwork" onCancel={onClose}>
           <div className="tw-pb-6 tw-pt-1">
-            <SingleWaveDropVote drop={drop} />
+            <SingleWaveDropVote drop={drop} onVoteSuccess={onClose} />
 
             <div className="tw-mt-4 tw-flex tw-justify-end">
               <SecondaryButton onClicked={onClose}>Cancel</SecondaryButton>

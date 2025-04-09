@@ -40,10 +40,11 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 interface Props {
   readonly drop: ApiDrop;
   readonly newRating: number;
+  readonly onVoteSuccess?: () => void;
 }
 
 const SingleWaveDropVoteSubmit = forwardRef<SingleWaveDropVoteSubmitHandles, Props>(
-  ({ drop, newRating }: Props, ref) => {
+  ({ drop, newRating, onVoteSuccess }: Props, ref) => {
     const position = drop.rank;
     const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
     const { onDropRateChange } = useContext(ReactQueryWrapperContext);
@@ -220,6 +221,13 @@ const SingleWaveDropVoteSubmit = forwardRef<SingleWaveDropVoteSubmitHandles, Pro
       if (animationTimeline) {
         animationTimeline.replay();
       }
+
+      // Allow animation to show before closing modal
+      setTimeout(() => {
+        if (onVoteSuccess) {
+          onVoteSuccess();
+        }
+      }, 1000); // Shorter time than totalParticlesTime to allow user to see the "Voted!" message
 
       await new Promise((resolve) => setTimeout(resolve, totalParticlesTime));
 
