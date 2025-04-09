@@ -16,7 +16,7 @@ interface MemesLeaderboardDropVoteSummaryProps {
 export const MemesLeaderboardDropVoteSummary: React.FC<
   MemesLeaderboardDropVoteSummaryProps
 > = ({ current, projected, creditType, ratersCount, topVoters }) => {
-  const isPositive = (current || 0) >= 0;
+  const isPositive = current >= 0;
 
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between sm:tw-justify-start tw-gap-x-4 tw-gap-y-4">
@@ -26,7 +26,7 @@ export const MemesLeaderboardDropVoteSummary: React.FC<
             isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
           }`}
         >
-          {formatNumberWithCommas(current || 0)}
+          {formatNumberWithCommas(current)}
         </span>
         <DropVoteProgressing current={current} projected={projected} />
         <span className="tw-text-md tw-text-iron-400 text-nowrap">
@@ -61,7 +61,7 @@ export const MemesLeaderboardDropVoteSummary: React.FC<
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
           <span className="tw-text-md tw-font-medium tw-text-iron-100">
-            {formatNumberWithCommas(ratersCount || 0)}
+            {formatNumberWithCommas(ratersCount)}
           </span>
           <span className="tw-text-md tw-text-iron-400 text-nowrap">
             {ratersCount === 1 ? "voter" : "voters"}

@@ -34,7 +34,10 @@ interface UseWaveDropsLeaderboardProps {
   readonly pausePolling?: boolean;
 }
 
-export const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> = {
+export const SORT_DIRECTION_MAP: Record<
+  WaveDropsLeaderboardSort,
+  string | undefined
+> = {
   [WaveDropsLeaderboardSort.RANK]: undefined,
   [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
   [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
@@ -285,7 +288,7 @@ export function useWaveDropsLeaderboard({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching: isFetching || !hasInitialized,
+    isFetching: isFetching ?? !hasInitialized,
     isFetchingNextPage,
     refetch,
     haveNewDrops,
