@@ -18,11 +18,11 @@ export default function ParticipationDropRatingsContainer({
   const ratingsData: RatingsData = {
     hasRaters: drop.top_raters && drop.top_raters.length > 0,
     userRating: drop.context_profile_context?.rating ?? 0,
-    totalRating: drop.rating ?? 0,
+    currentRating: drop.rating ?? 0,
   };
 
   // Generate themes
-  const theme = getThemeColors(rank, ratingsData.totalRating < 0);
+  const theme = getThemeColors(rank, ratingsData.currentRating < 0);
   const userTheme = getThemeColors(rank, ratingsData.userRating < 0);
 
   return (

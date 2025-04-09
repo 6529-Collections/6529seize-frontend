@@ -6,21 +6,21 @@ import { ApiDropRater } from "../../../../generated/models/ApiDropRater";
 import DropVoteProgressing from "../../../drops/view/utils/DropVoteProgressing";
 
 interface MemeDropVoteStatsProps {
-  readonly rating: number | null | undefined;
-  readonly realtimeRating: number | null | undefined;
+  readonly current: number | null | undefined;
+  readonly projected: number | null | undefined;
   readonly votingCreditType: string;
   readonly ratersCount: number | null | undefined;
   readonly topVoters: ApiDropRater[];
 }
 
 export default function MemeDropVoteStats({
-  rating,
-  realtimeRating,
+  current,
+  projected,
   votingCreditType,
   ratersCount,
   topVoters,
 }: MemeDropVoteStatsProps) {
-  const isPositive = (rating ?? 0) >= 0;
+  const isPositive = (current ?? 0) >= 0;
   const firstThreeVoters = topVoters?.slice(0, 3) ?? [];
 
   return (
@@ -30,7 +30,7 @@ export default function MemeDropVoteStats({
           className={`tw-text-md tw-font-semibold ${
             isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
           } `}>
-          {formatNumberWithCommas(rating ?? 0)}
+          {formatNumberWithCommas(current ?? 0)}
         </span>
 
         <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
@@ -39,8 +39,8 @@ export default function MemeDropVoteStats({
           </span>
 
           <DropVoteProgressing
-            rating={rating}
-            realtimeRating={realtimeRating}
+            current={current}
+            projected={projected}
           />
         </div>
       </div>

@@ -77,7 +77,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
       { shallow: true }
     );
   };
-
+  
   const isDropOpen =
     drop &&
     drop?.id?.toLowerCase() === (router.query.drop as string)?.toLowerCase();

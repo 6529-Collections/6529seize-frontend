@@ -4,7 +4,6 @@ import useManifoldClaim, {
   buildMemesPhases,
   ManifoldClaim,
   ManifoldClaimStatus,
-  ManifoldPhase,
   MemePhase,
 } from "../../hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
@@ -27,7 +26,6 @@ import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import { ETHEREUM_ICON_TEXT, MEMES_CONTRACT } from "../../constants";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
 import { Distribution } from "../../entities/IDistribution";
-import { DateTime } from "luxon";
 
 interface Props {
   title: string;

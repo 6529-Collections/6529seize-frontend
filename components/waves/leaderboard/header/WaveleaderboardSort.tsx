@@ -33,10 +33,10 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         Current Vote
       </button>
       <button
-        className={getButtonClassName(WaveDropsLeaderboardSort.REALTIME_VOTE)}
-        onClick={() => onSortChange(WaveDropsLeaderboardSort.REALTIME_VOTE)}
+        className={getButtonClassName(WaveDropsLeaderboardSort.RATING_PREDICTION)}
+        onClick={() => onSortChange(WaveDropsLeaderboardSort.RATING_PREDICTION)}
       >
-        24-Hour Vote
+        Projected Vote
       </button>
       <button
         className={getButtonClassName(WaveDropsLeaderboardSort.CREATED_AT)}

@@ -69,7 +69,7 @@ export default function WaveHeader({
             <div className="tw-relative tw-size-20">
               <div
                 className={`tw-absolute tw-inset-0 tw-rounded-full tw-bg-iron-900 tw-overflow-hidden tw-shadow-md ${
-                  isDropWave ? "tw-ring-2 tw-ring-primary-400/90" : ""
+                  isDropWave ? "tw-ring-2 tw-ring-white/10" : ""
                 }`}
               >
                 <WavePicture

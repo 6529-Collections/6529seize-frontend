@@ -29,8 +29,8 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4 tw-@container">
-      <div className="tw-flex tw-items-start sm:tw-items-center tw-pb-4">
-        <div className="tw-flex tw-items-center tw-gap-x-4 tw-mt-2 sm:tw-mt-0">
+      <div className="tw-flex tw-items-center tw-gap-2 tw-pb-4 tw-mt-2 sm:tw-mt-0 tw-overflow-x-auto">
+        <div className="tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-4">
           {isMemesWave && (
             <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-overflow-hidden">
               <button
@@ -83,7 +83,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="tw-hidden sm:tw-block">Drop</span>
+              <span>Drop</span>
             </PrimaryButton>
           </div>
         )}
