@@ -40,12 +40,19 @@ export default function MobileWrapperDialog({
           leaveTo="tw-opacity-0"
           beforeLeave={onBeforeLeave}
           afterLeave={onAfterLeave}>
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-transition-opacity" />
+          <div className="tw-fixed tw-inset-0 tw-bg-iron-700/60 tw-backdrop-blur-sm tw-transition-opacity" />
         </TransitionChild>
 
-        <div className="tw-fixed tw-inset-0">
-          <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
-            <div className="tw-flex tw-justify-center tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
+        <div 
+          className="tw-fixed tw-inset-0" 
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}>
+          <div 
+            className="tw-absolute tw-inset-0 tw-overflow-hidden"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="tw-flex tw-justify-center tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-max-w-full tw-pt-10">
               <TransitionChild
                 as={Fragment}
                 enter="tw-transform tw-transition tw-ease-in-out tw-duration-250 sm:tw-duration-350"
@@ -54,7 +61,9 @@ export default function MobileWrapperDialog({
                 leave="tw-transform tw-transition tw-ease-in-out tw-duration-250 sm:tw-duration-350"
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full">
-                <DialogPanel className="tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md">
+                <DialogPanel 
+                  className="tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md"
+                  onClick={(e) => e.stopPropagation()}>
                   <TransitionChild
                     as={Fragment}
                     enter="tw-ease-in-out tw-duration-250"

@@ -73,7 +73,7 @@ const DropContentWrapper: React.FC<DropContentWrapperProps> = ({
       <div
         ref={contentRef}
         className={`tw-overflow-y-hidden tw-transition-all tw-duration-300 ${
-          exceedsThreshold && !isExpanded ? "tw-max-h-[720px]" : ""
+          exceedsThreshold && !isExpanded ? "" : ""
         }`}
       >
         {children}

@@ -1,18 +1,20 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../../waves/drops/Drop";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
+import useIsMobileScreen from "../../../hooks/isMobileScreen";
 import MemeDropHeader from "./meme-participation-drop/MemeDropHeader";
 import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
 import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
-import MemeDropVotingSection from "./meme-participation-drop/MemeDropVotingSection";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
 import MemeDropTraits from "./MemeDropTraits";
 import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
+import { VotingModal, MobileVotingModal } from "../../voting";
+import VotingModalButton from "../../voting/VotingModalButton";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -51,9 +53,11 @@ export default function MemeParticipationDrop({
   onReply,
   onQuote,
 }: MemeParticipationDropProps) {
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { canShowVote } = useDropInteractionRules(drop);
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const isMobile = useIsMobileDevice();
+  const isMobileScreen = useIsMobileScreen();
 
   // Extract metadata
   const title =
@@ -121,18 +125,30 @@ export default function MemeParticipationDrop({
               <div className="tw-px-2 tw-py-4 sm:tw-px-4">
                 <MemeDropTraits drop={drop} />
               </div>
-              <div className="tw-px-4 tw-pb-4">
-                <MemeDropVoteStats
-                  rating={drop.rating}
-                  realtimeRating={drop.realtime_rating}
-                  votingCreditType={drop.wave.voting_credit_type}
-                  ratersCount={drop.raters_count}
-                  topVoters={drop.top_raters ?? []}
-                />
-              </div>
             </>
           </DropMobileMenuHandler>
-          {canShowVote && <MemeDropVotingSection drop={drop} />}
+          <div className="tw-flex tw-flex-col sm:tw-flex-row tw-gap-y-2 sm:tw-gap-y-0 tw-justify-between sm:tw-items-center sm:tw-px-4 tw-pb-4">
+            <div className="tw-px-4 sm:tw-px-0">
+              <MemeDropVoteStats
+                rating={drop.rating}
+                realtimeRating={drop.realtime_rating}
+                votingCreditType={drop.wave.voting_credit_type}
+                ratersCount={drop.raters_count}
+                topVoters={drop.top_raters ?? []}
+              />
+            </div>
+
+            {canShowVote && (
+              <div className="tw-mx-auto sm:tw-mx-0 tw-px-4 tw-pt-4 sm:tw-pt-0 sm:tw-pb-0 sm:tw-px-0">
+                <div onClick={(e) => e.stopPropagation()}>
+                  <VotingModalButton
+                    drop={drop}
+                    onClick={() => setIsVotingModalOpen(true)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="tw-absolute tw-right-4 tw-top-2">
             <MemeDropActions
@@ -144,6 +160,20 @@ export default function MemeParticipationDrop({
             />
           </div>
         </div>
+
+        {isMobileScreen ? (
+          <MobileVotingModal
+            drop={drop}
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+          />
+        ) : (
+          <VotingModal
+            drop={drop}
+            isOpen={isVotingModalOpen}
+            onClose={() => setIsVotingModalOpen(false)}
+          />
+        )}
       </div>
     </div>
   );

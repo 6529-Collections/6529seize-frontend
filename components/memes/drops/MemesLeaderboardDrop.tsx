@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropLocation } from "../../waves/drops/Drop";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
@@ -8,11 +8,13 @@ import MemesLeaderboardDropDescription from "./MemesLeaderboardDropDescription";
 import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
 
-import MemesLeaderboardDropVotingSection from "./MemesLeaderboardDropVotingSection";
 import MemeDropTraits from "./MemeDropTraits";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
 import WaveDropActionsOpen from "../../waves/drops/WaveDropActionsOpen";
+import { VotingModal, MobileVotingModal } from "../../voting";
+import VotingModalButton from "../../voting/VotingModalButton";
+import useIsMobileScreen from "../../../hooks/isMobileScreen";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -25,7 +27,9 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   onDropClick,
   location = DropLocation.WAVE,
 }) => {
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
+  const isMobile = useIsMobileScreen();
 
   // Extract metadata
   const title =
@@ -86,22 +90,42 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             <div className="tw-p-4">
               <MemeDropTraits drop={drop} />
             </div>
-            <div className="tw-flex tw-flex-col tw-px-4 tw-pb-4">
-              <MemesLeaderboardDropVoteSummary
-                rating={drop.rating || 0}
-                realtimeRating={drop.realtime_rating || 0}
-                creditType={drop.wave.voting_credit_type}
-                ratersCount={drop.raters_count || 0}
-                topVoters={firstThreeVoters}
-              />
+            <div className="tw-flex tw-flex-col tw-gap-y-2 sm:tw-flex-row tw-justify-between sm:tw-pb-4 sm:tw-px-4 tw-items-center">
+              <div className="tw-px-6 sm:tw-px-0">
+                <MemesLeaderboardDropVoteSummary
+                  rating={drop.rating || 0}
+                  realtimeRating={drop.realtime_rating || 0}
+                  creditType={drop.wave.voting_credit_type}
+                  ratersCount={drop.raters_count || 0}
+                  topVoters={firstThreeVoters}
+                />
+              </div>
+
+              <div 
+                className="tw-pt-4 tw-pb-4 tw-px-6 tw-flex tw-justify-center sm:tw-pt-0 sm:tw-pb-0 sm:tw-px-0 tw-w-full sm:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 sm:tw-border-none tw-border-x-0 tw-border-b-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <VotingModalButton
+                  drop={drop}
+                  onClick={() => setIsVotingModalOpen(true)}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Voting section - spanning both columns */}
-          <MemesLeaderboardDropVotingSection
-            drop={drop}
-            canShowVote={canShowVote}
-          />
+          {isMobile ? (
+            <MobileVotingModal
+              drop={drop}
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+            />
+          ) : (
+            <VotingModal
+              drop={drop}
+              isOpen={isVotingModalOpen}
+              onClose={() => setIsVotingModalOpen(false)}
+            />
+          )}
 
           {/* Actions component (desktop only) - Moved outside the card to work with hover */}
         </MemesLeaderboardDropCard>
