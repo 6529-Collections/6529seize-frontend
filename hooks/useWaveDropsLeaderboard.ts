@@ -22,7 +22,7 @@ import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 
 export enum WaveDropsLeaderboardSort {
   RANK = "RANK",
-  REALTIME_VOTE = "REALTIME_VOTE",
+  RATING_PREDICTION = "RATING_PREDICTION",
   MY_REALTIME_VOTE = "MY_REALTIME_VOTE",
   CREATED_AT = "CREATED_AT",
 }
@@ -33,6 +33,13 @@ interface UseWaveDropsLeaderboardProps {
   readonly sort?: WaveDropsLeaderboardSort;
   readonly pausePolling?: boolean;
 }
+
+export const SORT_DIRECTION_MAP: Record<WaveDropsLeaderboardSort, string | undefined> = {
+  [WaveDropsLeaderboardSort.RANK]: undefined,
+  [WaveDropsLeaderboardSort.RATING_PREDICTION]: "DESC",
+  [WaveDropsLeaderboardSort.MY_REALTIME_VOTE]: undefined,
+  [WaveDropsLeaderboardSort.CREATED_AT]: "DESC",
+};
 
 const POLLING_DELAY = 3000;
 const ACTIVE_POLLING_INTERVAL = 5000;
@@ -69,14 +76,15 @@ export function useWaveDropsLeaderboard({
   >(undefined);
   const isTabVisible = useTabVisibility();
 
+  const sortDirection = SORT_DIRECTION_MAP[sort];
+
   const queryKey = [
     QueryKey.DROPS_LEADERBOARD,
     {
       waveId,
       page_size: WAVE_DROPS_PARAMS.limit,
       sort: sort,
-      sort_direction:
-        sort === WaveDropsLeaderboardSort.CREATED_AT ? "DESC" : undefined,
+      sort_direction: sortDirection,
     },
   ];
 
@@ -104,8 +112,8 @@ export function useWaveDropsLeaderboard({
           sort: sort,
         };
 
-        if (sort === WaveDropsLeaderboardSort.CREATED_AT) {
-          params.sort_direction = "DESC";
+        if (sortDirection) {
+          params.sort_direction = sortDirection;
         }
 
         if (pageParam) {
@@ -140,8 +148,8 @@ export function useWaveDropsLeaderboard({
         sort: sort,
       };
 
-      if (sort === WaveDropsLeaderboardSort.CREATED_AT) {
-        params.sort_direction = "DESC";
+      if (sortDirection) {
+        params.sort_direction = sortDirection;
       }
 
       if (pageParam) {
@@ -195,8 +203,8 @@ export function useWaveDropsLeaderboard({
         sort: sort,
       };
 
-      if (sort === WaveDropsLeaderboardSort.CREATED_AT) {
-        params.sort_direction = "DESC";
+      if (sortDirection) {
+        params.sort_direction = sortDirection;
       }
 
       return await commonApiFetch<ApiDropsLeaderboardPage>({

@@ -1,7 +1,7 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import MyStreamWaveMyVoteVotesProgress from "./MyStreamWaveMyVoteVotesProgress";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
+import DropVoteProgressing from "../../../drops/view/utils/DropVoteProgressing";
 
 interface MyStreamWaveMyVoteVotesProps {
   readonly drop: ExtendedDrop;
@@ -19,9 +19,9 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
         {formatNumberWithCommas(drop.rating)}
       </span>
 
-      <MyStreamWaveMyVoteVotesProgress
-        rating={drop.rating}
-        realtimeRating={drop.realtime_rating}
+      <DropVoteProgressing
+        current={drop.rating}
+        projected={drop.rating_prediction}
       />
     </div>
   );

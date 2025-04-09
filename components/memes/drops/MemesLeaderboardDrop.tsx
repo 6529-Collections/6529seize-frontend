@@ -88,8 +88,8 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             </div>
             <div className="tw-flex tw-flex-col tw-px-4 tw-pb-4">
               <MemesLeaderboardDropVoteSummary
-                rating={drop.rating || 0}
-                realtimeRating={drop.realtime_rating || 0}
+                current={drop.rating || 0}
+                projected={drop.rating_prediction || 0}
                 creditType={drop.wave.voting_credit_type}
                 ratersCount={drop.raters_count || 0}
                 topVoters={firstThreeVoters}

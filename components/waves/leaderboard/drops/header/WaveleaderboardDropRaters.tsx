@@ -51,8 +51,8 @@ export const WaveLeaderboardDropRaters: React.FC<
             {formatNumberWithCommas(drop.rating)}
           </span>
           <DropVoteProgressing
-            rating={drop.rating}
-            realtimeRating={drop.realtime_rating}
+            current={drop.rating}
+            projected={drop.rating_prediction}
           />
         </div>
         <span className="tw-text-iron-400 tw-text-sm tw-whitespace-nowrap">

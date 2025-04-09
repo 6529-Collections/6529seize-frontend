@@ -2527,6 +2527,7 @@ paths:
               - REALTIME_VOTE
               - MY_REALTIME_VOTE
               - CREATED_AT
+              - RATING_PREDICTION
       responses:
         "200":
           description: successful operation
@@ -3764,6 +3765,7 @@ components:
         - parts_count
         - rating
         - realtime_rating
+        - rating_prediction
         - top_raters
         - raters_count
         - title
@@ -3833,6 +3835,9 @@ components:
           type: number
           format: int64
         realtime_rating:
+          type: number
+          format: int64
+        rating_prediction:
           type: number
           format: int64
         top_raters:
@@ -4093,6 +4098,7 @@ components:
         - parts
         - parts_count
         - rating
+        - rating_prediction
         - realtime_rating
         - top_raters
         - raters_count
@@ -4161,6 +4167,9 @@ components:
           type: number
           format: int64
         realtime_rating:
+          type: number
+          format: int64
+        rating_prediction:
           type: number
           format: int64
         top_raters:

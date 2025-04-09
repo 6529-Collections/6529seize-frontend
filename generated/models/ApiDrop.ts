@@ -55,6 +55,7 @@ export class ApiDrop {
     'metadata': Array<ApiDropMetadata>;
     'rating': number;
     'realtime_rating': number;
+    'rating_prediction': number;
     'top_raters': Array<ApiDropRater>;
     'raters_count': number;
     'context_profile_context': ApiDropContextProfileContext | null;
@@ -169,6 +170,12 @@ export class ApiDrop {
         {
             "name": "realtime_rating",
             "baseName": "realtime_rating",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "rating_prediction",
+            "baseName": "rating_prediction",
             "type": "number",
             "format": "int64"
         },

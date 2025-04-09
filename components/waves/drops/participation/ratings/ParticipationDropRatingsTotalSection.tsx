@@ -13,7 +13,7 @@ export default function ParticipationDropRatingsTotalSection({
   theme,
   ratingsData,
 }: ParticipationDropRatingsTotalSectionProps) {
-  const { totalRating } = ratingsData;
+  const { currentRating } = ratingsData;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1">
@@ -32,10 +32,10 @@ export default function ParticipationDropRatingsTotalSection({
         <span
           className={`tw-text-sm tw-font-bold tw-bg-gradient-to-r ${theme.gradient} tw-bg-clip-text tw-text-transparent`}
         >
-          {totalRating < 0 && "-"}
-          {formatNumberWithCommas(Math.abs(totalRating))}
+          {currentRating < 0 && "-"}
+          {formatNumberWithCommas(Math.abs(currentRating))}
         </span>
-        <DropVoteProgressing rating={totalRating} realtimeRating={drop.realtime_rating} />
+        <DropVoteProgressing current={currentRating} projected={drop.rating_prediction} />
       </div>
     </div>
   );
