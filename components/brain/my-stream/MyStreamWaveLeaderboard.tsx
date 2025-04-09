@@ -10,6 +10,7 @@ import { WaveLeaderboardGallery } from "../../waves/leaderboard/gallery/WaveLead
 import { useWave } from "../../../hooks/useWave";
 import { useLayout } from "./layout/LayoutContext";
 import { WaveDropsLeaderboardSort } from "../../../hooks/useWaveDropsLeaderboard";
+import MemesArtSubmissionModal from "../../waves/memes/MemesArtSubmissionModal";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -94,6 +95,14 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {isMemesWave && isCreatingDrop && (
+          <MemesArtSubmissionModal
+            isOpen={isCreatingDrop}
+            wave={wave}
+            onClose={() => setIsCreatingDrop(false)}
+          />
+        )}
 
         {viewMode === "list" ? (
           <WaveLeaderboardDrops

@@ -25,7 +25,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   onSortChange,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
-  const { isMemesWave } = useWave(wave);
+  const { isMemesWave, participation } = useWave(wave);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4 tw-@container">
@@ -62,8 +62,12 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             <WaveleaderboardSort sort={sort} onSortChange={onSortChange} />
           )}
         </div>
-        {connectedProfile && (
-          <div className={`tw-w-auto ${isMemesWave ? "tw-ml-auto" : ""}`}>
+        {connectedProfile && participation.isEligible && (
+          <div
+            className={`tw-w-auto  ${
+              isMemesWave ? "tw-ml-auto lg:tw-hidden" : ""
+            }`}
+          >
             <PrimaryButton
               loading={false}
               disabled={false}
