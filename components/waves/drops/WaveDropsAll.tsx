@@ -60,7 +60,6 @@ export default function WaveDropsAll({
     hasNextPage,
     isFetching,
     isFetchingNextPage,
-    haveNewDrops,
   } = useWaveDrops({
     waveId,
     connectedProfileHandle: connectedProfile?.profile?.handle,
@@ -102,21 +101,6 @@ export default function WaveDropsAll({
     },
     [serialNo]
   );
-
-  useEffect(() => {
-    setTitle({
-      title: haveNewDrops ? "New Drops Available | 6529.io" : null,
-      type: TitleType.WAVE,
-    });
-
-    return () => {
-      setTitle({
-        title: null,
-        type: TitleType.WAVE,
-      });
-    };
-  }, [haveNewDrops]);
-
 
   const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
