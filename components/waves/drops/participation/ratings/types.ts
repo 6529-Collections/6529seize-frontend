@@ -15,5 +15,5 @@ export interface ThemeColors {
 export interface RatingsData {
   hasRaters: boolean;
   userRating: number;
-  totalRating: number;
+  currentRating: number;
 } 

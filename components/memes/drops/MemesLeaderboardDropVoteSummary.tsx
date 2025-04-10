@@ -6,8 +6,8 @@ import { ApiDropRater } from "../../../generated/models/ApiDropRater";
 import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 
 interface MemesLeaderboardDropVoteSummaryProps {
-  readonly rating: number;
-  readonly realtimeRating: number;
+  readonly current: number;
+  readonly projected: number;
   readonly creditType: string;
   readonly ratersCount: number;
   readonly topVoters: ApiDropRater[];
@@ -15,8 +15,8 @@ interface MemesLeaderboardDropVoteSummaryProps {
 
 export const MemesLeaderboardDropVoteSummary: React.FC<
   MemesLeaderboardDropVoteSummaryProps
-> = ({ rating, realtimeRating, creditType, ratersCount, topVoters }) => {
-  const isPositive = (rating || 0) >= 0;
+> = ({ current, projected, creditType, ratersCount, topVoters }) => {
+  const isPositive = current >= 0;
 
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between sm:tw-justify-start tw-gap-x-6 tw-gap-y-4">
@@ -26,9 +26,9 @@ export const MemesLeaderboardDropVoteSummary: React.FC<
             isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
           }`}
         >
-          {formatNumberWithCommas(rating || 0)}
+          {formatNumberWithCommas(current)}
         </span>
-        <DropVoteProgressing rating={rating} realtimeRating={realtimeRating} />
+        <DropVoteProgressing current={current} projected={projected} />
         <span className="tw-text-md tw-text-iron-400 text-nowrap">
           {creditType} total
         </span>
@@ -60,8 +60,8 @@ export const MemesLeaderboardDropVoteSummary: React.FC<
           ))}
         </div>
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
-          <span className="tw-text-md tw-font-medium tw-text-iron-50">
-            {formatNumberWithCommas(ratersCount || 0)}
+          <span className="tw-text-md tw-font-medium tw-text-iron-100">
+            {formatNumberWithCommas(ratersCount)}
           </span>
           <span className="tw-text-md tw-text-iron-400 text-nowrap">
             {ratersCount === 1 ? "voter" : "voters"}

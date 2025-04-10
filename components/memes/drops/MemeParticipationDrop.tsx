@@ -130,8 +130,8 @@ export default function MemeParticipationDrop({
           <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-y-3 md:tw-gap-y-0 tw-justify-between md:tw-items-center md:tw-px-4 tw-pb-4">
             <div className="tw-px-4 md:tw-px-0">
               <MemeDropVoteStats
-                rating={drop.rating}
-                realtimeRating={drop.realtime_rating}
+                current={drop.rating}
+                projected={drop.rating_prediction}
                 votingCreditType={drop.wave.voting_credit_type}
                 ratersCount={drop.raters_count}
                 topVoters={drop.top_raters ?? []}

@@ -344,6 +344,7 @@ const getOptimisticDrop = (
     rank: null,
     realtime_rating: 0,
     is_signed: false,
+    rating_prediction: 0,
   };
 };
 
@@ -902,7 +903,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}>
+            transition={{ duration: 0.3 }}
+          >
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}

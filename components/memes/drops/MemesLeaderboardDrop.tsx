@@ -43,7 +43,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   const artworkMedia = drop.parts.at(0)?.media.at(0);
 
   // Get top voters for votes display
-  const firstThreeVoters = drop.top_raters?.slice(0, 3) || [];
+  const firstThreeVoters = drop.top_raters?.slice(0, 3) ?? [];
 
   return (
     <div
@@ -93,10 +93,10 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             <div className="tw-flex tw-flex-col tw-gap-y-2 sm:tw-flex-row tw-justify-between sm:tw-pb-4 sm:tw-px-4 tw-items-center">
               <div className="tw-px-6 sm:tw-px-0">
                 <MemesLeaderboardDropVoteSummary
-                  rating={drop.rating || 0}
-                  realtimeRating={drop.realtime_rating || 0}
+                  current={drop.rating}
+                  projected={drop.rating_prediction}
                   creditType={drop.wave.voting_credit_type}
-                  ratersCount={drop.raters_count || 0}
+                  ratersCount={drop.raters_count}
                   topVoters={firstThreeVoters}
                 />
               </div>

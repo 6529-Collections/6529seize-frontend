@@ -162,8 +162,8 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                     {formatNumberWithCommas(drop.rating)}
                   </span>
                   <DropVoteProgressing
-                    rating={drop.rating}
-                    realtimeRating={drop.realtime_rating}
+                    current={drop.rating}
+                    projected={drop.rating_prediction}
                   />
                 </div>
                 <div className="tw-mt-3">

@@ -48,7 +48,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
               {drop.rank ? (
                 <WinnerDropBadge
                   rank={drop.rank}
-                  decisionTime={drop.winning_context?.decision_time || null}
+                  decisionTime={drop.winning_context?.decision_time ?? null}
                 />
               ) : (
                 <div className="tw-font-semibold tw-text-xs tw-text-iron-400 tw-flex tw-items-center tw-min-w-6 tw-h-6 tw-px-2 tw-rounded-xl tw-bg-gradient-to-br tw-from-iron-700/90 tw-to-iron-800 tw-justify-center tw-ring-1 tw-ring-iron-600/50 tw-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
@@ -126,8 +126,8 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                   {formatNumberWithCommas(drop.rating)}
                 </span>
                 <DropVoteProgressing
-                  rating={drop.rating}
-                  realtimeRating={drop.realtime_rating}
+                  current={drop.rating}
+                  projected={drop.rating_prediction}
                 />
               </div>
               <div className="tw-mt-3">
