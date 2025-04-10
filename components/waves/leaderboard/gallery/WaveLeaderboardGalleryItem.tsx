@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
@@ -9,6 +9,10 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../helpers/image.helpers";
+import { VotingModal, MobileVotingModal } from "../../../../components/voting";
+import VotingModalButton from "../../../../components/voting/VotingModalButton";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
 
 interface WaveLeaderboardGalleryItemProps {
   readonly drop: ExtendedDrop;
@@ -18,6 +22,10 @@ interface WaveLeaderboardGalleryItemProps {
 export const WaveLeaderboardGalleryItem: React.FC<
   WaveLeaderboardGalleryItemProps
 > = ({ drop, onDropClick }) => {
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const isMobileScreen = useIsMobileScreen();
+  const { canShowVote } = useDropInteractionRules(drop);
+
   const hasUserVoted =
     drop.context_profile_context?.rating !== undefined &&
     drop.context_profile_context?.rating !== 0;
@@ -36,6 +44,10 @@ export const WaveLeaderboardGalleryItem: React.FC<
 
   const handleImageClick = (e?: React.MouseEvent) => {
     onDropClick(drop);
+  };
+
+  const handleVoteButtonClick = () => {
+    setIsVotingModalOpen(true);
   };
 
   return (
@@ -116,24 +128,49 @@ export const WaveLeaderboardGalleryItem: React.FC<
         </div>
 
         <div className="tw-flex tw-items-center tw-justify-between">
-          {hasUserVoted && (
-            <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-rounded">
-              <div className="tw-flex tw-items-baseline tw-gap-x-1">
-                <span className="tw-text-xs tw-font-medium tw-text-iron-400">
-                  Your vote:
-                </span>
-                <span className={`tw-text-xs tw-font-semibold ${voteStyle}`}>
-                  {isNegativeVote && "-"}
-                  {formatNumberWithCommas(Math.abs(userVote))}{" "}
-                  <span className="tw-text-iron-400">
-                    {drop.wave.voting_credit_type}
-                  </span>
-                </span>
-              </div>
+          {canShowVote && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <VotingModalButton
+                drop={drop}
+                onClick={handleVoteButtonClick}
+              />
             </div>
           )}
+          <div>
+            {hasUserVoted && (
+              <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-rounded">
+                <div className="tw-flex tw-items-baseline tw-gap-x-1">
+                  <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+                    Your vote:
+                  </span>
+                  <span className={`tw-text-xs tw-font-semibold ${voteStyle}`}>
+                    {isNegativeVote && "-"}
+                    {formatNumberWithCommas(Math.abs(userVote))}{" "}
+                    <span className="tw-text-iron-400">
+                      {drop.wave.voting_credit_type}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Voting modal */}
+      {isMobileScreen ? (
+        <MobileVotingModal
+          drop={drop}
+          isOpen={isVotingModalOpen}
+          onClose={() => setIsVotingModalOpen(false)}
+        />
+      ) : (
+        <VotingModal
+          drop={drop}
+          isOpen={isVotingModalOpen}
+          onClose={() => setIsVotingModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

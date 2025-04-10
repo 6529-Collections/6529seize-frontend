@@ -8,7 +8,7 @@ interface BrainLeftSidebarWaveDropTimeProps {
 const BrainLeftSidebarWaveDropTime: React.FC<
   BrainLeftSidebarWaveDropTimeProps
 > = ({ time }) => {
-  const [, setTick] = useState(0);
+  const [_, setTick] = useState(0);
 
   useEffect(() => {
     const intervalId = setInterval(() => {

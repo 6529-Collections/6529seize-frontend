@@ -1,28 +1,19 @@
-interface ThemeColors {
-  gradient: string;
-  text: string;
-  ring: string;
-  indicator?: string;
-}
+import { ThemeColors } from "./types";
 
 const baseTheme = {
   1: {
-    gradient: "tw-from-[#E8D48A] tw-to-[#D9A962]",
     text: "tw-text-[#E8D48A]",
     ring: "tw-ring-[#E8D48A]/20",
   },
   2: {
-    gradient: "tw-from-[#DDDDDD] tw-to-[#C0C0C0]",
     text: "tw-text-[#DDDDDD]",
     ring: "tw-ring-[#DDDDDD]/20",
   },
   3: {
-    gradient: "tw-from-[#CD7F32] tw-to-[#B87333]",
     text: "tw-text-[#CD7F32]",
     ring: "tw-ring-[#CD7F32]/20",
   },
   default: {
-    gradient: "tw-from-iron-300 tw-to-iron-400",
     text: "tw-text-iron-300",
     ring: "tw-ring-iron-600",
   },
@@ -33,7 +24,6 @@ export function getThemeColors(rank: number | null, isNegative: boolean): ThemeC
 
   if (isNegative) {
     return {
-      gradient: `${theme.gradient} tw-opacity-60`,
       text: `${theme.text} tw-opacity-60`,
       ring: theme.ring,
       indicator:
@@ -42,7 +32,6 @@ export function getThemeColors(rank: number | null, isNegative: boolean): ThemeC
   }
 
   return {
-    gradient: theme.gradient,
     text: theme.text,
     ring: theme.ring,
     indicator: "",

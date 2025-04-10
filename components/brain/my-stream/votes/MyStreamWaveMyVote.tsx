@@ -45,7 +45,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   return (
     <div
       key={drop.id}
-      className={`tw-bg-iron-950 tw-rounded-xl tw-p-5 tw-border tw-border-solid tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg tw-@container ${
+      className={`tw-bg-iron-950 tw-rounded-xl tw-px-5 tw-py-4 tw-border tw-border-solid tw-transition-all tw-duration-300 tw-cursor-pointer tw-shadow-md desktop-hover:hover:tw-shadow-lg tw-@container ${
         isChecked
           ? "tw-border-primary-400"
           : "tw-border-iron-800 desktop-hover:hover:tw-border-iron-700"

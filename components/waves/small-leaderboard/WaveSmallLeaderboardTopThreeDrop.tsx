@@ -7,7 +7,6 @@ import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 import { WaveSmallLeaderboardItemContent } from "./WaveSmallLeaderboardItemContent";
 import { WaveSmallLeaderboardItemOutcomes } from "./WaveSmallLeaderboardItemOutcomes";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import WaveDropActionsRate from "../drops/WaveDropActionsRate";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import DropVoteProgressing from "../../drops/view/utils/DropVoteProgressing";
 
@@ -99,7 +98,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
             <div>
               <div className="tw-w-full tw-inline-flex tw-items-center tw-justify-between">
                 {trophyIcon(drop.rank, drop.winning_context?.decision_time)}
-                <WaveDropActionsRate drop={drop} />
+                {/* Removed WaveDropActionsRate (clap icon) */}
               </div>
 
               <div className="tw-flex-1">

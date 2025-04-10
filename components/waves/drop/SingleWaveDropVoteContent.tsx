@@ -13,11 +13,12 @@ import { faExchange } from "@fortawesome/free-solid-svg-icons";
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
   readonly size: SingleWaveDropVoteSize;
+  readonly onVoteSuccess?: () => void;
 }
 
 export const SingleWaveDropVoteContent: React.FC<
   SingleWaveDropVoteContentProps
-> = ({ drop, size }) => {
+> = ({ drop, size, onVoteSuccess }) => {
   const currentVoteValue = drop.context_profile_context?.rating ?? 0;
   const minRating = drop.context_profile_context?.min_rating ?? 0;
   const maxRating = drop.context_profile_context?.max_rating ?? 0;
@@ -48,7 +49,7 @@ export const SingleWaveDropVoteContent: React.FC<
         <div className="tw-order-1 sm:tw-order-1 tw-flex-shrink-0">
           <button
             onClick={() => setIsSliderMode(!isSliderMode)}
-            className="tw-h-8 tw-px-2.5 tw-rounded-md tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-600
+            className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-650
                     tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all
                     desktop-hover:hover:tw-bg-iron-600"
             title="Switch mode"
@@ -102,6 +103,7 @@ export const SingleWaveDropVoteContent: React.FC<
             drop={drop}
             newRating={Number(voteValue)}
             ref={submitRef}
+            onVoteSuccess={onVoteSuccess}
           />
         </div>
       </div>

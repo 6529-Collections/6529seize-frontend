@@ -27,6 +27,8 @@ export default function MemeDropActions({
         activePartIndex={0}
         onReply={onReply}
         onQuote={onQuote}
+        // No need to set showVoting=false here as WaveDropActions already has logic
+        // to hide voting for memes participation drops
       />
   );
 }

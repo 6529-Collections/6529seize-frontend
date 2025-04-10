@@ -28,7 +28,7 @@ export default function MobileWrapperDialog({
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-relative tw-z-[1000]"
+        className="tailwind-scope tw-relative tw-z-[1010]"
         onClose={onClose}>
         <TransitionChild
           as={Fragment}
@@ -40,12 +40,19 @@ export default function MobileWrapperDialog({
           leaveTo="tw-opacity-0"
           beforeLeave={onBeforeLeave}
           afterLeave={onAfterLeave}>
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-transition-opacity" />
+          <div className="tw-fixed tw-inset-0 tw-bg-iron-700/60 tw-backdrop-blur-sm tw-transition-opacity" />
         </TransitionChild>
 
-        <div className="tw-fixed tw-inset-0">
-          <div className="tw-absolute tw-inset-0 tw-overflow-hidden">
-            <div className="tw-flex tw-justify-center tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-flex tw-max-w-full tw-pt-10">
+        <div 
+          className="tw-fixed tw-inset-0" 
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}>
+          <div 
+            className="tw-absolute tw-inset-0 tw-overflow-hidden"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="tw-flex tw-justify-center tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-max-w-full tw-pt-10">
               <TransitionChild
                 as={Fragment}
                 enter="tw-transform tw-transition tw-ease-in-out tw-duration-250 sm:tw-duration-350"
@@ -54,7 +61,9 @@ export default function MobileWrapperDialog({
                 leave="tw-transform tw-transition tw-ease-in-out tw-duration-250 sm:tw-duration-350"
                 leaveFrom="tw-translate-y-0"
                 leaveTo="tw-translate-y-full">
-                <DialogPanel className="tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md">
+                <DialogPanel 
+                  className="tw-pointer-events-auto tw-relative tw-w-screen md:tw-max-w-screen-md"
+                  onClick={(e) => e.stopPropagation()}>
                   <TransitionChild
                     as={Fragment}
                     enter="tw-ease-in-out tw-duration-250"
@@ -91,7 +100,7 @@ export default function MobileWrapperDialog({
                     className={`tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 ${
                       noPadding ? "tw-py-0" : "tw-py-6 "
                     }`}
-                    style={{ maxHeight: "calc(100dvh - 12rem)" }}>
+                    style={{ maxHeight: "calc(100dvh - 10rem)" }}>
                     <div className="tw-px-4 sm:tw-px-6">
                       {title && (
                         <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">
