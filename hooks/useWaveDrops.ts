@@ -194,7 +194,7 @@ export function useWaveDrops({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching: isFetching || !init,
+    isFetching: isFetching ?? !init,
     isFetchingNextPage,
     refetch,
     haveNewDrops: hasNewDrops,
