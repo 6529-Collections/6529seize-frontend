@@ -5,7 +5,6 @@ import useNewDropCounter, {
 } from "./useNewDropCounter";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveType } from "../../../generated/models/ApiWaveType";
-import useWaveMessages from "./useWaveMessages";
 
 /**
  * Represents a minimal version of a wave with essential data
@@ -30,7 +29,6 @@ export interface MinimalWave {
 export function useEnhancedWavesList(activeWaveId: string | null) {
   // Get waves data from the optimized hook
   const wavesData = useWavesList();
-  const waveMessages = useWaveMessages();
 
   const { newDropsCounts } = useNewDropCounter(
     activeWaveId,

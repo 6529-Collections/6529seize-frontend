@@ -9,6 +9,7 @@ import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import useEnhancedWavesList, {
   MinimalWave,
 } from "./hooks/useEnhancedWavesList";
+import useWaveMessages from "./hooks/useWaveMessages";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -45,7 +46,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 }) => {
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
   const wavesHookData = useEnhancedWavesList(activeWaveId);
-
+  const waveMessagesHookData = useWaveMessages();
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
     const waves: WavesContextData = {
