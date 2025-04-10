@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, KeyboardEvent } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ParticipationDropRatings } from "./ParticipationDropRatings";
 import { format } from "date-fns";
@@ -23,7 +23,9 @@ export default function ParticipationDropFooter({
       {canShowVote && (
         <div
           className="@container tw-ml-[3.25rem] tw-pt-4 tw-pb-4"
+          role="presentation"
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e: KeyboardEvent) => e.stopPropagation()}
         >
           <div className="tw-flex @[700px]:tw-justify-between tw-flex-col @[700px]:tw-flex-row @[700px]:tw-items-center tw-gap-x-4 tw-gap-y-3">
             <div className="tw-px-4">

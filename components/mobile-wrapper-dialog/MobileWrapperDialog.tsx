@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, KeyboardEvent } from "react";
 import {
   Dialog,
   DialogPanel,
@@ -24,6 +24,13 @@ export default function MobileWrapperDialog({
   readonly children: React.ReactNode;
   readonly noPadding?: boolean;
 }) {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      onClose();
+    }
+  };
+
   return (
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
@@ -45,13 +52,17 @@ export default function MobileWrapperDialog({
 
         <div 
           className="tw-fixed tw-inset-0" 
+          role="presentation"
           onClick={(e) => {
             e.stopPropagation();
             onClose();
-          }}>
+          }}
+          onKeyDown={handleKeyDown}>
           <div 
             className="tw-absolute tw-inset-0 tw-overflow-hidden"
-            onClick={(e) => e.stopPropagation()}>
+            role="presentation"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}>
             <div className="tw-flex tw-justify-center tw-pointer-events-none tw-fixed tw-inset-x-0 tw-bottom-0 tw-max-w-full tw-pt-10">
               <TransitionChild
                 as={Fragment}

@@ -14,7 +14,7 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const handleClose = (e?: React.MouseEvent) => {
+  const handleClose = (e?: React.MouseEvent | React.KeyboardEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
