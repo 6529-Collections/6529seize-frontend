@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   PushNotifications,
   PushNotificationSchema,
@@ -15,6 +21,7 @@ import {
 import { getStableDeviceId } from "./stable-device-id";
 
 type NotificationsContextType = {
+  removeNotificationById: (id: string) => Promise<void>;
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
   removeAllDeliveredNotifications: () => Promise<void>;
 };
@@ -41,6 +48,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const { isCapacitor } = useCapacitor();
   const { connectedProfile } = useAuth();
   const router = useRouter();
+  const [notifications, setNotifications] = useState<{
+    [key: string]: PushNotificationSchema;
+  }>({});
 
   useEffect(() => {
     initializeNotifications(connectedProfile ?? undefined);
@@ -84,7 +94,15 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     await PushNotifications.addListener(
       "pushNotificationReceived",
       (notification) => {
-        console.log("Push notification received: ", notification);
+        const id = notification.data.notification_id;
+        if (!id) {
+          console.info("Notification received but no id found", notification);
+          return;
+        }
+        setNotifications((prev) => ({
+          ...prev,
+          [id]: notification,
+        }));
       }
     );
 
@@ -112,17 +130,30 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const removeNotificationById = async (id: string) => {
+    if (!isCapacitor) return;
+
+    await PushNotifications.removeDeliveredNotifications({
+      notifications: [notifications[id]],
+    });
+    setNotifications((prev) => {
+      const newNotifications = { ...prev };
+      delete newNotifications[id];
+      return newNotifications;
+    });
+  };
+
   const removeWaveDeliveredNotifications = async (waveId: string) => {
-    if (isCapacitor) {
-      const deliveredNotifications =
-        await PushNotifications.getDeliveredNotifications();
-      const waveNotifications = deliveredNotifications.notifications.filter(
-        (notification) => notification.data.wave_id === waveId
-      );
-      await PushNotifications.removeDeliveredNotifications({
-        notifications: waveNotifications,
-      });
-    }
+    if (!isCapacitor) return;
+
+    const deliveredNotifications =
+      await PushNotifications.getDeliveredNotifications();
+    const waveNotifications = deliveredNotifications.notifications.filter(
+      (notification) => notification.data.wave_id === waveId
+    );
+    await PushNotifications.removeDeliveredNotifications({
+      notifications: waveNotifications,
+    });
   };
 
   const removeAllDeliveredNotifications = async () => {
@@ -133,6 +164,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const value = useMemo(
     () => ({
+      removeNotificationById,
       removeWaveDeliveredNotifications,
       removeAllDeliveredNotifications,
     }),

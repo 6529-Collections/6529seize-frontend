@@ -93,10 +93,8 @@ export default function NotificationsCauseFilter({
 
   const isActive = (filter: NotificationFilter) => activeFilter === filter;
 
-  const paddingClass = isMobile ? "tw-p-2" : "tw-pb-2";
-
   return (
-    <div className={`${paddingClass} tw-w-full`}>
+    <div className="tw-w-full">
       <div
         ref={containerRef}
         className="tw-relative tw-flex tw-nowrap tw-items-center tw-gap-1 tw-h-10 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg tw-overflow-x-auto">

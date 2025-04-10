@@ -12,6 +12,7 @@ import { ApiWave } from "../../../../generated/models/ApiWave";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import NotificationsMarkReadButton from "../NotificationsMarkReadButton";
 
 export default function NotificationWaveCreated({
   notification,
@@ -65,11 +66,14 @@ export default function NotificationWaveCreated({
         </span>
       </div>
       {wave && (
-        <WaveHeaderFollow
-          wave={wave}
-          subscribeToAllDrops={true}
-          size={WaveFollowBtnSize.SMALL}
-        />
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <WaveHeaderFollow
+            wave={wave}
+            subscribeToAllDrops={true}
+            size={WaveFollowBtnSize.SMALL}
+          />
+          <NotificationsMarkReadButton notification={notification} />
+        </div>
       )}
     </div>
   );
