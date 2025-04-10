@@ -22,15 +22,17 @@ export default function ParticipationDropFooter({
     <>
       {canShowVote && (
         <div
-          className="tw-px-4 sm:tw-ml-[3.25rem] tw-pt-4 tw-pb-4"
+          className="sm:tw-ml-[3.25rem] tw-pt-4 tw-pb-4"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="tw-flex sm:tw-justify-between tw-flex-wrap sm:tw-flex-nowrap tw-items-center">
-            {!!drop.raters_count && (
-              <ParticipationDropRatings drop={drop} rank={drop.rank} />
-            )}
+          <div className="tw-flex md:tw-justify-between tw-flex-col md:tw-flex-row md:tw-items-center tw-gap-x-4 tw-gap-y-3">
+            <div className="tw-px-4">
+              {!!drop.raters_count && (
+                <ParticipationDropRatings drop={drop} rank={drop.rank} />
+              )}
+            </div>
 
-            <div className="sm:tw-ml-auto tw-pt-4">
+            <div className="md:tw-ml-auto tw-pt-4 tw-px-6 md:tw-px-4 tw-flex tw-justify-center md:tw-pt-0 tw-w-full sm:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 md:tw-border-none tw-border-x-0 tw-border-b-0">
               <VotingModalButton
                 drop={drop}
                 onClick={() => setIsVotingModalOpen(true)}

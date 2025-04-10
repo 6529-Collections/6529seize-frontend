@@ -82,7 +82,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 
           {canShowVote && (
             <div
-              className="tw-pt-4 tw-mt-4 sm:tw-ml-[3.25rem] tw-flex tw-justify-center sm:tw-justify-end tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 lg:tw-border-t-0 lg:mt-0 lg:tw-pt-0"
+              className="tw-flex tw-justify-center md:tw-ml-auto tw-pt-4 tw-mt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 md:tw-border-t-0 md:mt-0 md:tw-pt-0"
               onClick={(e) => e.stopPropagation()}
             >
               <VotingModalButton

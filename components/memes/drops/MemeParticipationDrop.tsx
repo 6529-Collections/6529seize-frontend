@@ -127,8 +127,8 @@ export default function MemeParticipationDrop({
               </div>
             </>
           </DropMobileMenuHandler>
-          <div className="tw-flex tw-flex-col sm:tw-flex-row tw-gap-y-2 sm:tw-gap-y-0 tw-justify-between sm:tw-items-center sm:tw-px-4 tw-pb-4">
-            <div className="tw-px-4 sm:tw-px-0">
+          <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-y-3 md:tw-gap-y-0 tw-justify-between md:tw-items-center md:tw-px-4 tw-pb-4">
+            <div className="tw-px-4 md:tw-px-0">
               <MemeDropVoteStats
                 rating={drop.rating}
                 realtimeRating={drop.realtime_rating}
@@ -139,7 +139,7 @@ export default function MemeParticipationDrop({
             </div>
 
             {canShowVote && (
-              <div className="tw-mx-auto sm:tw-mx-0 tw-px-4 tw-pt-4 sm:tw-pt-0 sm:tw-pb-0 sm:tw-px-0">
+              <div className="tw-pt-4 tw-px-6 tw-flex tw-justify-center md:tw-pt-0 md:tw-px-0 tw-w-full sm:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 md:tw-border-none tw-border-x-0 tw-border-b-0">
                 <div onClick={(e) => e.stopPropagation()}>
                   <VotingModalButton
                     drop={drop}

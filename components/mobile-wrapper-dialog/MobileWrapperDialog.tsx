@@ -100,7 +100,7 @@ export default function MobileWrapperDialog({
                     className={`tw-flex tw-flex-col tw-bg-iron-950 tw-rounded-t-xl tw-overflow-y-auto tw-scroll-py-3 ${
                       noPadding ? "tw-py-0" : "tw-py-6 "
                     }`}
-                    style={{ maxHeight: "calc(100dvh - 12rem)" }}>
+                    style={{ maxHeight: "calc(100dvh - 10rem)" }}>
                     <div className="tw-px-4 sm:tw-px-6">
                       {title && (
                         <DialogTitle className="tw-text-base tw-font-semibold tw-text-iron-50">

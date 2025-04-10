@@ -49,7 +49,7 @@ export const SingleWaveDropVoteContent: React.FC<
         <div className="tw-order-1 sm:tw-order-1 tw-flex-shrink-0">
           <button
             onClick={() => setIsSliderMode(!isSliderMode)}
-            className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-700
+            className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-650
                     tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all
                     desktop-hover:hover:tw-bg-iron-600"
             title="Switch mode"
