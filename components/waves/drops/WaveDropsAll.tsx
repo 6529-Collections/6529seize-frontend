@@ -21,6 +21,7 @@ import {
   useMyStreamWaveMessages,
 } from "../../../contexts/wave/MyStreamContext";
 import useWaveMessagesStore from "../../../contexts/wave/hooks/useWaveMessagesStore";
+import { useVirtualizedWaveDrops } from "../../../hooks/useVirtualizedWaveDrops";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -58,8 +59,7 @@ export default function WaveDropsAll({
 
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
-  const waveMessages = useMyStreamWaveMessages(waveId);
-  const { fetchNextPageForWave } = useMyStream();
+  const { waveMessages, fetchNextPageForWave } = useVirtualizedWaveDrops(waveId);
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
   // const {
