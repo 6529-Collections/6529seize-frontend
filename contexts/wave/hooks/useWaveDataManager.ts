@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { WaveMessages } from "./useWaveMessagesStore";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { fetchWaveMessages } from "../utils/wave-messages-utils";
@@ -21,6 +21,21 @@ export function useWaveDataManager({
 }: WaveDataStoreUpdater) {
   // Keep track of loading states
   const loadingStates = useRef<Record<string, LoadingState>>({});
+  // Track abort controllers for cancellation
+  const abortControllers = useRef<Record<string, AbortController>>({});
+
+  // Function to cancel a specific wave data fetch
+  const cancelWaveDataFetch = useCallback((waveId: string) => {
+    if (abortControllers.current[waveId]) {
+      abortControllers.current[waveId].abort();
+      delete abortControllers.current[waveId];
+    }
+    
+    if (loadingStates.current[waveId]) {
+      loadingStates.current[waveId].isLoading = false;
+      loadingStates.current[waveId].promise = null;
+    }
+  }, []);
 
   const activateWave = useCallback(
     async (waveId: string) => {
@@ -50,8 +65,17 @@ export function useWaveDataManager({
         drops: [],
       });
 
-      // Create a new promise
-      const fetchPromise = fetchWaveMessages(waveId, null)
+      // Cancel any existing request for this wave
+      if (abortControllers.current[waveId]) {
+        abortControllers.current[waveId].abort();
+      }
+
+      // Create a new abort controller
+      const controller = new AbortController();
+      abortControllers.current[waveId] = controller;
+
+      // Create a new promise with the abort signal
+      const fetchPromise = fetchWaveMessages(waveId, null, controller.signal)
         .then((drops) => {
           // Clear loading state when done
           if (loadingStates.current[waveId]) {
@@ -75,6 +99,12 @@ export function useWaveDataManager({
           return drops;
         })
         .catch((error) => {
+          // Handle abort errors differently than other errors
+          if (error.name === 'AbortError') {
+            console.log(`[WaveDataManager] Request for wave ${waveId} was cancelled`);
+            return null;
+          }
+
           // Clear loading state on error
           if (loadingStates.current[waveId]) {
             loadingStates.current[waveId].isLoading = false;
@@ -92,6 +122,12 @@ export function useWaveDataManager({
             error
           );
           return null;
+        })
+        .finally(() => {
+          // Clean up abort controller reference
+          if (abortControllers.current[waveId] === controller) {
+            delete abortControllers.current[waveId];
+          }
         });
 
       // Store the promise
@@ -109,5 +145,14 @@ export function useWaveDataManager({
     [activateWave]
   );
 
-  return { registerWave };
+  // Clean up all pending requests when the hook unmounts
+  useEffect(() => {
+    return () => {
+      Object.keys(abortControllers.current).forEach((waveId) => {
+        cancelWaveDataFetch(waveId);
+      });
+    };
+  }, [cancelWaveDataFetch]);
+
+  return { registerWave, cancelWaveDataFetch };
 }

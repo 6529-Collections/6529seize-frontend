@@ -84,12 +84,12 @@ export default function DropListItemContentNft({
       target={target}
     >
       <div className="tw-mt-2 tw-gap-y-2 tw-flex tw-flex-col" ref={elementRef}>
-        <div className="tw-w-full tw-h-full">
+        <div className="tw-w-full tw-h-64">
           {nft && (
             <img
               src={nft.token.imageLarge}
               alt="NFT token"
-              className="tw-w-full tw-h-full tw-object-center tw-object-contain lg:tw-max-h-[516px]"
+              className="tw-w-full tw-h-full tw-object-center tw-object-contain"
             />
           )}
         </div>

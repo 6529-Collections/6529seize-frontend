@@ -27,9 +27,9 @@ export default function WaveGroupScope({
       ) : (
         <div className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800/80" />
       )}
-      <span className="tw-font-medium tw-text-primary-300 desktop-hover:hover:tw-text-primary-300/80 tw-underline tw-transition tw-duration-300 tw-ease-out">
+      <div className="tw-truncate tw-max-w-40 tw-font-medium tw-text-primary-300 desktop-hover:hover:tw-text-primary-300/80 tw-underline tw-transition tw-duration-300 tw-ease-out">
         {group.name}
-      </span>
+      </div>
     </Link>
   );
 }

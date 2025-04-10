@@ -1,4 +1,4 @@
-$btn-dimension: 64px;
+$btn-dimension: 72px;
 
 @keyframes shockwave {
   0% {
@@ -95,24 +95,22 @@ $btn-dimension: 64px;
 
 .voteButton {
   position: relative;
+  font-size:16px;
   border-radius: 12px;
   width: $btn-dimension;
   height: 40px;
-  background: rgba(55, 55, 62, 1);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #406AFE;
+  border: 1px solid #406AFE;
   outline: none;
-  color: rgba(255, 255, 255, 0.9);
+  color: white;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 
   &:not(:disabled):hover {
-    background: rgba(45, 48, 52, 0.5);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 1);
+    background: #395FE4;
+    border-color: #395FE4;
   }
 
   &:disabled {

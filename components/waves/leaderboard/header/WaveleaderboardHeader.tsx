@@ -25,45 +25,49 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   onSortChange,
 }) => {
   const { connectedProfile } = useContext(AuthContext);
-  const { isMemesWave } = useWave(wave);
+  const { isMemesWave, participation } = useWave(wave);
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-y-4 tw-@container">
-      <div className="tw-flex tw-items-center tw-gap-2 tw-pb-4 tw-mt-2 sm:tw-mt-0 tw-overflow-x-auto">
+      <div className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto">
         <div className="tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-4">
           {isMemesWave && (
-            <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-overflow-hidden">
-              <button
-                className={`tw-px-2.5 tw-py-1.5 ${
-                  viewMode === "list"
-                    ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
-                    : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
-                } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
-                onClick={() => onViewModeChange("list")}
-              >
-                <FontAwesomeIcon icon={faList} className="tw-w-4 tw-h-4" />
-              </button>
-              <button
-                className={`tw-px-2.5 tw-py-1.5 ${
-                  viewMode === "grid"
-                    ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
-                    : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
-                } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
-                onClick={() => onViewModeChange("grid")}
-              >
-                <FontAwesomeIcon
-                  icon={faTableCells}
-                  className="tw-w-4 tw-h-4"
-                />
-              </button>
+            <div className="tw-mb-4 tw-flex tw-items-center tw-gap-x-2">
+              <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-overflow-hidden">
+                <button
+                  className={`tw-px-2.5 tw-py-1.5 ${
+                    viewMode === "list"
+                      ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
+                      : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
+                  } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
+                  onClick={() => onViewModeChange("list")}
+                >
+                  <FontAwesomeIcon icon={faList} className="tw-w-4 tw-h-4" />
+                </button>
+                <button
+                  className={`tw-px-2.5 tw-py-1.5 ${
+                    viewMode === "grid"
+                      ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
+                      : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
+                  } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
+                  onClick={() => onViewModeChange("grid")}
+                >
+                  <FontAwesomeIcon
+                    icon={faTableCells}
+                    className="tw-w-4 tw-h-4"
+                  />
+                </button>
+              </div>
+              <WaveleaderboardSort sort={sort} onSortChange={onSortChange} />
             </div>
           )}
-          {isMemesWave && (
-            <WaveleaderboardSort sort={sort} onSortChange={onSortChange} />
-          )}
         </div>
-        {connectedProfile && (
-          <div className={`tw-w-auto ${isMemesWave ? "tw-ml-auto" : ""}`}>
+        {connectedProfile && participation.isEligible && (
+          <div
+            className={`tw-w-auto tw-mb-4  ${
+              isMemesWave ? "tw-ml-auto lg:tw-hidden" : ""
+            }`}
+          >
             <PrimaryButton
               loading={false}
               disabled={false}

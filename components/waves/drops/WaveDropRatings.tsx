@@ -10,7 +10,7 @@ interface WaveDropRatingsProps {
 
 const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-bg-iron-900/40 tw-border tw-border-solid tw-border-primary-300/5">
+    <div className="tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-bg-iron-900/40 tw-border tw-border-solid tw-border-primary-300/5">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-items-center -tw-space-x-2">
           {drop.top_raters.map((rater) => (

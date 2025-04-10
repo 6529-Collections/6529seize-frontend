@@ -8,11 +8,13 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
  * Fetches wave messages (drops) for a specific wave
  * @param waveId The ID of the wave to fetch messages for
  * @param serialNo Optional serial number to fetch messages before (for pagination)
+ * @param signal Optional AbortSignal for cancellation
  * @returns Array of ApiDrop with wave data attached, or null if the request fails
  */
 export async function fetchWaveMessages(
   waveId: string,
-  serialNo: number | null
+  serialNo: number | null,
+  signal?: AbortSignal
 ): Promise<ApiDrop[] | null> {
   const params: Record<string, string> = {
     limit: WAVE_DROPS_PARAMS.limit.toString(),
@@ -25,12 +27,18 @@ export async function fetchWaveMessages(
     const data = await commonApiFetch<ApiWaveDropsFeed>({
       endpoint: `waves/${waveId}/drops`,
       params,
+      signal,
     });
     return data.drops.map((drop) => ({
       ...drop,
       wave: data.wave,
     }));
   } catch (error) {
+    // Check if this is an abort error
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw error; // Re-throw abort errors to be handled by the caller
+    }
+    
     // TODO: add some retry logic
     console.error(
       `[WaveDataManager] Failed to fetch messages for ${waveId}:`,

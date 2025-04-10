@@ -42,7 +42,15 @@ export default function ParticipationDropHeader({
 
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
           <p className="tw-text-xs tw-m-0 tw-whitespace-nowrap tw-font-medium tw-leading-none tw-text-iron-400">
-            {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
+            <span className="md:tw-inline tw-hidden">
+              {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
+            </span>
+            <span className="md:tw-hidden tw-inline">
+              {Time.millis(drop.created_at).toDate().toLocaleDateString(undefined, {
+                month: "short", 
+                day: "2-digit"
+              })}
+            </span>
           </p>
         </div>
 

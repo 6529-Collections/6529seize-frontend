@@ -2,11 +2,13 @@ import { FC, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { AuthContext } from "../../auth/Auth";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuFollow from "./WaveDropMobileMenuFollow";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsRate from "./WaveDropActionsRate";
+import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 
 interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -28,7 +30,14 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   onQuote,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { isMemesWave } = useSeizeSettings();
   const isTemporaryDrop = drop.id.startsWith("temp-");
+  
+  // Check if we should hide the clap icon
+  // Hide only for memes participation drops
+  const shouldHideClap = 
+    drop.drop_type === ApiDropType.Participatory && 
+    isMemesWave(drop.wave?.id); // Only hide for memes participation drops
 
   const [copied, setCopied] = useState(false);
 
@@ -187,7 +196,9 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         {!isAuthor && (
           <WaveDropMobileMenuFollow drop={drop} onFollowChange={closeMenu} />
         )}
-        <WaveDropActionsRate drop={drop} isMobile={true} onRated={closeMenu} />
+        {!shouldHideClap && (
+          <WaveDropActionsRate drop={drop} isMobile={true} onRated={closeMenu} />
+        )}
         {showOptions && (
           <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
         )}

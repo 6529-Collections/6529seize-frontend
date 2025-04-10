@@ -50,7 +50,6 @@ export default function WaveWinnersDropHeaderVoters({
       </div>
       <span className="tw-text-sm tw-text-iron-400">
         <span className="tw-font-semibold">
-          {" "}
           {formatNumberWithCommas(winner.drop.raters_count)}{" "}
         </span>
         {winner.drop.raters_count === 1 ? "voter" : "voters"}

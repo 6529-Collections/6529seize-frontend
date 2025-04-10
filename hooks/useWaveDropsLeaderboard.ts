@@ -175,6 +175,7 @@ export function useWaveDropsLeaderboard({
   });
 
   useEffect(() => {
+    if (!data) return;
     setDrops((prev) => {
       const newDrops = data?.pages
         ? mapToExtendedDrops(
