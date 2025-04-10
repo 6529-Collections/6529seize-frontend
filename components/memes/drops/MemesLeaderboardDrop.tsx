@@ -28,7 +28,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   location = DropLocation.WAVE,
 }) => {
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const { canShowVote, canDelete } = useDropInteractionRules(drop);
+  const { canDelete } = useDropInteractionRules(drop);
   const isMobile = useIsMobileScreen();
 
   // Extract metadata

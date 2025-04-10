@@ -140,12 +140,12 @@ export default function MemeParticipationDrop({
 
             {canShowVote && (
               <div className="tw-pt-4 tw-px-6 tw-flex tw-justify-center @[700px]:tw-pt-0 @[700px]:tw-px-0 tw-w-full @[700px]:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 @[700px]:tw-border-none tw-border-x-0 tw-border-b-0">
-                <span onClick={(e) => e.stopPropagation()}>
+                <div onClick={(e) => e.stopPropagation()}>
                   <VotingModalButton
                     drop={drop}
                     onClick={() => setIsVotingModalOpen(true)}
                   />
-                </span>
+                </div>
               </div>
             )}
           </div>

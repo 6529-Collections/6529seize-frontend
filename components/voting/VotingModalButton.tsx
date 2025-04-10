@@ -5,7 +5,6 @@ import { useDropInteractionRules } from "../../hooks/drops/useDropInteractionRul
 interface VotingModalButtonProps {
   readonly drop: ExtendedDrop;
   readonly onClick: () => void;
-  readonly className?: string;
 }
 
 export const VotingModalButton: React.FC<VotingModalButtonProps> = ({

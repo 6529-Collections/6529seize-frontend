@@ -19,7 +19,6 @@ import useCapacitor from "./useCapacitor";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { useWebSocketMessage } from "../services/websocket";
 import { WsDropUpdateMessage, WsMessageType } from "../helpers/Types";
-import { useNotificationsContext } from "../components/notifications/NotificationsContext";
 export enum WaveDropsSearchStrategy {
   FIND_OLDER = "FIND_OLDER",
   FIND_NEWER = "FIND_NEWER",
@@ -297,7 +296,7 @@ export function useWaveDrops({
     manualFetch,
   };
 }
-function removeWaveDeliveredNotifications(waveId: string) {
-  throw new Error("Function not implemented.");
+function removeWaveDeliveredNotifications(waveId: string): Promise<void> {
+  return Promise.reject(new Error("Function not implemented."));
 }
 

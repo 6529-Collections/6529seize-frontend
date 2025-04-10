@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { AuthContext, TitleType } from "../../auth/Auth";
+import { AuthContext } from "../../auth/Auth";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
@@ -49,7 +49,7 @@ export default function WaveDropsAll({
   onDropContentClick,
 }: WaveDropsAllProps) {
   const router = useRouter();
-  const { connectedProfile, setTitle } = useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
 
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
