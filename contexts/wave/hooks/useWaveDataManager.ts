@@ -1,4 +1,5 @@
 import { useWaveDataFetching } from "./useWaveDataFetching";
+import { useWavePagination } from "./useWavePagination";
 import { WaveDataStoreUpdater } from "./types";
 
 /**
@@ -14,7 +15,21 @@ export function useWaveDataManager({
     updateData,
     getData,
   });
+  
+  // Add pagination functionality
+  const { fetchNextPage, cancelPaginationFetch } = useWavePagination({
+    updateData,
+    getData,
+  });
 
   // Expose a clean, focused API
-  return { registerWave, cancelWaveDataFetch };
+  return { 
+    // Initial data loading
+    registerWave, 
+    cancelWaveDataFetch,
+    
+    // Pagination
+    fetchNextPage,
+    cancelPaginationFetch
+  };
 }

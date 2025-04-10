@@ -30,16 +30,17 @@ export async function fetchWaveMessages(
       params,
       signal,
     });
+
     return data.drops.map((drop) => ({
       ...drop,
       wave: data.wave,
     }));
   } catch (error) {
     // Check if this is an abort error
-    if (error instanceof DOMException && error.name === 'AbortError') {
+    if (error instanceof DOMException && error.name === "AbortError") {
       throw error; // Re-throw abort errors to be handled by the caller
     }
-    
+
     // TODO: add some retry logic
     console.error(
       `[WaveDataManager] Failed to fetch messages for ${waveId}:`,
@@ -53,17 +54,25 @@ export async function fetchWaveMessages(
  * Transforms API drops into the format needed for the WaveMessages store
  * @param waveId ID of the wave
  * @param drops Array of drops to transform
- * @param isLoading Loading state to set
+ * @param options Additional options for formatting
  * @returns Formatted WaveMessages object
  */
 export function formatWaveMessages(
   waveId: string,
   drops: ApiDrop[],
-  isLoading: boolean = false
+  options: {
+    isLoading?: boolean;
+    isLoadingNextPage?: boolean;
+    hasNextPage?: boolean;
+  } = {}
 ): WaveMessages {
+  const { isLoading = false, isLoadingNextPage = false, hasNextPage = true } = options;
+  
   return {
     id: waveId,
     isLoading,
+    isLoadingNextPage,
+    hasNextPage: hasNextPage && drops.length > 0, // If we have drops, there might be more
     drops: drops.map((drop) => ({
       ...drop,
       stableKey: drop.id,
@@ -75,16 +84,24 @@ export function formatWaveMessages(
 /**
  * Creates an empty wave message store entry
  * @param waveId ID of the wave
- * @param isLoading Loading state to set
+ * @param options Additional options for the empty state
  * @returns Empty WaveMessages object
  */
 export function createEmptyWaveMessages(
   waveId: string,
-  isLoading: boolean = false
+  options: {
+    isLoading?: boolean;
+    isLoadingNextPage?: boolean;
+    hasNextPage?: boolean;
+  } = {}
 ): WaveMessages {
+  const { isLoading = false, isLoadingNextPage = false, hasNextPage = false } = options;
+  
   return {
     id: waveId,
     isLoading,
+    isLoadingNextPage,
+    hasNextPage,
     drops: [],
   };
 }
@@ -98,10 +115,10 @@ export function createEmptyWaveMessages(
  */
 export function handleWaveMessagesError(error: unknown, waveId: string): null {
   // Check if this is an abort error
-  if (error instanceof DOMException && error.name === 'AbortError') {
+  if (error instanceof DOMException && error.name === "AbortError") {
     throw error; // Re-throw abort errors to be handled by the caller
   }
-  
+
   console.error(
     `[WaveDataManager] Error fetching messages for ${waveId}:`,
     error
@@ -139,5 +156,5 @@ export function mergeDrops(
   const mergedDrops = Array.from(dropsMap.values());
 
   // Sort by serial_no in descending order (older first)
-  return mergedDrops.sort((a, b) => a.serial_no - b.serial_no);
+  return mergedDrops.sort((a, b) => b.serial_no - a.serial_no);
 }

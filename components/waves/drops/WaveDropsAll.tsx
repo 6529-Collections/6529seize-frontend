@@ -16,7 +16,10 @@ import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
-import { useMyStreamWaveMessages } from "../../../contexts/wave/MyStreamContext";
+import {
+  useMyStream,
+  useMyStreamWaveMessages,
+} from "../../../contexts/wave/MyStreamContext";
 import useWaveMessagesStore from "../../../contexts/wave/hooks/useWaveMessagesStore";
 
 export interface WaveDropsAllProps {
@@ -56,8 +59,7 @@ export default function WaveDropsAll({
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   const waveMessages = useMyStreamWaveMessages(waveId);
-
-
+  const { fetchNextPageForWave } = useMyStream();
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
   // const {
@@ -74,10 +76,7 @@ export default function WaveDropsAll({
   //   dropId,
   // });
 
-  const haveNewDrops = false
-  const hasNextPage = false
-  const isFetchingNextPage = false
-  const fetchNextPage = () => {}
+  const haveNewDrops = false;
 
   const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
     useScrollBehavior();
@@ -121,7 +120,9 @@ export default function WaveDropsAll({
     if (waveMessages && waveMessages.drops.length > 0) {
       setInit(true);
 
-      const minSerialNo = Math.min(...waveMessages.drops.map((drop) => drop.serial_no));
+      const minSerialNo = Math.min(
+        ...waveMessages.drops.map((drop) => drop.serial_no)
+      );
       smallestSerialNo.current = minSerialNo;
 
       // Check if the last drop is a temp drop (your own post)
@@ -157,11 +158,16 @@ export default function WaveDropsAll({
     setIsScrolling(true);
 
     const checkAndFetchNext = async () => {
-      if (found || !hasNextPage || waveMessages?.isLoading || isFetchingNextPage) {
+      if (
+        found ||
+        !waveMessages?.hasNextPage ||
+        waveMessages?.isLoading ||
+        waveMessages?.isLoadingNextPage
+      ) {
         setIsScrolling(false);
         return;
       }
-      await fetchNextPage();
+      await fetchNextPageForWave(waveId);
 
       if (smallestSerialNo.current && smallestSerialNo.current <= serialNo) {
         found = true;
@@ -177,10 +183,10 @@ export default function WaveDropsAll({
 
     checkAndFetchNext();
   }, [
-    fetchNextPage,
-    hasNextPage,
+    fetchNextPageForWave,
+    waveMessages?.hasNextPage,
     waveMessages?.isLoading,
-    isFetchingNextPage,
+    waveMessages?.isLoadingNextPage,
     scrollToSerialNo,
     serialNo,
     setSerialNo,
@@ -200,17 +206,17 @@ export default function WaveDropsAll({
 
   const handleTopIntersection = useCallback(() => {
     if (
-      hasNextPage &&
+      waveMessages?.hasNextPage &&
       !waveMessages?.isLoading &&
-      !isFetchingNextPage
+      !waveMessages?.isLoadingNextPage
     ) {
-      fetchNextPage();
+      fetchNextPageForWave(waveId);
     }
   }, [
-    hasNextPage,
+    waveMessages?.hasNextPage,
     waveMessages?.isLoading,
-    isFetchingNextPage,
-    fetchNextPage,
+    waveMessages?.isLoadingNextPage,
+    fetchNextPageForWave,
   ]);
 
   const onQuoteClick = useCallback(
@@ -228,7 +234,11 @@ export default function WaveDropsAll({
   );
 
   const renderContent = () => {
-    if (waveMessages?.isLoading && !isFetchingNextPage && !waveMessages?.drops.length) {
+    if (
+      waveMessages?.isLoading &&
+      !waveMessages?.isLoadingNextPage &&
+      !waveMessages?.drops.length
+    ) {
       return (
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-10">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
@@ -244,8 +254,8 @@ export default function WaveDropsAll({
       <>
         <WaveDropsReverseContainer
           ref={scrollContainerRef}
-          isFetchingNextPage={isFetchingNextPage}
-          hasNextPage={hasNextPage}
+          isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
+          hasNextPage={!!waveMessages?.hasNextPage}
           onTopIntersection={handleTopIntersection}
           onUserScroll={(direction, isAtBottom) => {
             setIsAtBottom(isAtBottom);

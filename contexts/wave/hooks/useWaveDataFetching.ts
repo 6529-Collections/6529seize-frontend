@@ -49,7 +49,7 @@ export function useWaveDataFetching({
 
       // Update data in store if we got results
       if (drops) {
-        updateData(waveId, formatWaveMessages(waveId, drops, false));
+        updateData(waveId, formatWaveMessages(waveId, drops, { isLoading: false }));
       }
 
       return drops;
@@ -72,7 +72,7 @@ export function useWaveDataFetching({
       clearLoadingState(waveId);
 
       // Update store with empty data
-      updateData(waveId, createEmptyWaveMessages(waveId, false));
+      updateData(waveId, createEmptyWaveMessages(waveId, { isLoading: false }));
 
       console.error(
         `[WaveDataManager] Error fetching messages for ${waveId}:`,
@@ -101,7 +101,7 @@ export function useWaveDataFetching({
 
       // Mark as loading
       setLoadingState(waveId, true);
-      updateData(waveId, createEmptyWaveMessages(waveId, true));
+      updateData(waveId, createEmptyWaveMessages(waveId, { isLoading: true }));
 
       // Setup abort controller
       const controller = createController(waveId);

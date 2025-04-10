@@ -5,6 +5,8 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 export type WaveMessages = {
   readonly id: string;
   readonly isLoading: boolean;
+  readonly isLoadingNextPage: boolean;
+  readonly hasNextPage: boolean;
   readonly drops: ExtendedDrop[];
 };
 export type Listener = (data: WaveMessages | undefined) => void;
