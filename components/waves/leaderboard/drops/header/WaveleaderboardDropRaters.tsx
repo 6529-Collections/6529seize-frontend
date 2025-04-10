@@ -89,7 +89,7 @@ export const WaveLeaderboardDropRaters: React.FC<
                         voter.profile.pfp,
                         ImageScale.W_AUTO_H_50
                       )}
-                  /*     alt={`${voter.profile.handle}'s Profile`} */
+                      alt={`${voter.profile.handle}'s Profile`}
                       className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800"
                     />
                   ) : (
