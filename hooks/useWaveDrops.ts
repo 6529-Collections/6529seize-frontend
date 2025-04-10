@@ -50,6 +50,8 @@ export function useWaveDrops({
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
   const isTabVisible = useTabVisibility();
+  const [init, setInit] = useState(false);
+  
 
   const queryKey = [
     QueryKey.DROPS,
@@ -167,7 +169,9 @@ export function useWaveDrops({
   );
 
   useEffect(() => {
+    if (!data) return;
     setDrops((prev) => processDrops(data?.pages, prev, reverse));
+    setInit(true);
   }, [data, reverse]);
 
   const onRefetch = useCallback(() => {
@@ -190,7 +194,7 @@ export function useWaveDrops({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isFetching: isFetching ?? !init,
     isFetchingNextPage,
     refetch,
     haveNewDrops: hasNewDrops,
