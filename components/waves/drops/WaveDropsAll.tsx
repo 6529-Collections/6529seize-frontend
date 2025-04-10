@@ -16,6 +16,8 @@ import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
+import { useMyStreamWaveMessages } from "../../../contexts/wave/MyStreamContext";
+import useWaveMessagesStore from "../../../contexts/wave/hooks/useWaveMessagesStore";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -52,6 +54,12 @@ export default function WaveDropsAll({
   const { connectedProfile, setTitle } = useContext(AuthContext);
 
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
+
+  const waveMessages = useMyStreamWaveMessages(waveId);
+
+  useEffect(() => {
+    console.log("waveMessages", waveMessages);
+  }, [waveMessages]);
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
   const {
