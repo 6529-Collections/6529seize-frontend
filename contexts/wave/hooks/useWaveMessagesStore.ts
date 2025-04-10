@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 // Export the types so they can be imported elsewhere
 export type WaveMessages = {
-    readonly id: string;
-    // Add other message properties here, e.g.:
-    // readonly text?: string;
-    // readonly senderId?: string;
-    // readonly timestamp?: number;
+  readonly id: string;
+  readonly isLoading: boolean;
+  readonly drops: ExtendedDrop[];
 };
 export type Listener = (data: WaveMessages | undefined) => void;
 

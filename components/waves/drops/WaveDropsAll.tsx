@@ -57,24 +57,27 @@ export default function WaveDropsAll({
 
   const waveMessages = useMyStreamWaveMessages(waveId);
 
-  useEffect(() => {
-    console.log("waveMessages", waveMessages);
-  }, [waveMessages]);
+
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
-  const {
-    drops,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    haveNewDrops,
-  } = useWaveDrops({
-    waveId,
-    connectedProfileHandle: connectedProfile?.profile?.handle,
-    reverse: false,
-    dropId,
-  });
+  // const {
+  //   drops,
+  //   fetchNextPage,
+  //   hasNextPage,
+  //   isFetching,
+  //   isFetchingNextPage,
+  //   haveNewDrops,
+  // } = useWaveDrops({
+  //   waveId,
+  //   connectedProfileHandle: connectedProfile?.profile?.handle,
+  //   reverse: false,
+  //   dropId,
+  // });
+
+  const haveNewDrops = false
+  const hasNextPage = false
+  const isFetchingNextPage = false
+  const fetchNextPage = () => {}
 
   const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
     useScrollBehavior();
@@ -130,14 +133,14 @@ export default function WaveDropsAll({
   const [init, setInit] = useState(false);
 
   useEffect(() => {
-    if (drops.length > 0) {
+    if (waveMessages && waveMessages.drops.length > 0) {
       setInit(true);
 
-      const minSerialNo = Math.min(...drops.map((drop) => drop.serial_no));
+      const minSerialNo = Math.min(...waveMessages.drops.map((drop) => drop.serial_no));
       smallestSerialNo.current = minSerialNo;
 
       // Check if the last drop is a temp drop (your own post)
-      const lastDrop = drops[0];
+      const lastDrop = waveMessages.drops[0];
       if (lastDrop.id.startsWith("temp-")) {
         // For user's own new drop, scroll to bottom - but only if they haven't manually scrolled away
         if (isAtBottom && !userHasManuallyScrolled) {
@@ -154,7 +157,7 @@ export default function WaveDropsAll({
     } else {
       smallestSerialNo.current = null;
     }
-  }, [drops, isAtBottom, scrollToVisualBottom]);
+  }, [waveMessages?.drops, isAtBottom, scrollToVisualBottom]);
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -169,7 +172,7 @@ export default function WaveDropsAll({
     setIsScrolling(true);
 
     const checkAndFetchNext = async () => {
-      if (found || !hasNextPage || isFetching || isFetchingNextPage) {
+      if (found || !hasNextPage || waveMessages?.isLoading || isFetchingNextPage) {
         setIsScrolling(false);
         return;
       }
@@ -191,7 +194,7 @@ export default function WaveDropsAll({
   }, [
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    waveMessages?.isLoading,
     isFetchingNextPage,
     scrollToSerialNo,
     serialNo,
@@ -213,14 +216,14 @@ export default function WaveDropsAll({
   const handleTopIntersection = useCallback(() => {
     if (
       hasNextPage &&
-      !isFetching &&
+      !waveMessages?.isLoading &&
       !isFetchingNextPage
     ) {
       fetchNextPage();
     }
   }, [
     hasNextPage,
-    isFetching,
+    waveMessages?.isLoading,
     isFetchingNextPage,
     fetchNextPage,
   ]);
@@ -240,7 +243,7 @@ export default function WaveDropsAll({
   );
 
   const renderContent = () => {
-    if (isFetching && !isFetchingNextPage && !drops.length) {
+    if (waveMessages?.isLoading && !isFetchingNextPage && !waveMessages?.drops.length) {
       return (
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-10">
           <CircleLoader size={CircleLoaderSize.XXLARGE} />
@@ -248,7 +251,7 @@ export default function WaveDropsAll({
       );
     }
 
-    if (drops.length === 0) {
+    if (waveMessages?.drops.length === 0) {
       return <WaveDropsEmptyPlaceholder dropId={dropId} />;
     }
 
@@ -269,7 +272,7 @@ export default function WaveDropsAll({
           <DropsList
             scrollContainerRef={scrollContainerRef}
             onReplyClick={setSerialNo}
-            drops={drops}
+            drops={waveMessages?.drops ?? []}
             showWaveInfo={false}
             onReply={onReply}
             onQuote={onQuote}

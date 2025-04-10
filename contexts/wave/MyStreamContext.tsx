@@ -5,6 +5,7 @@ import React, {
   ReactNode,
   useEffect,
   useState,
+  useCallback,
 } from "react";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import useEnhancedWavesList, {
@@ -14,6 +15,7 @@ import useWaveMessagesStore, {
   WaveMessages,
   Listener as WaveMessagesListener,
 } from "./hooks/useWaveMessagesStore";
+import { useWaveDataManager } from "./hooks/useWaveDataManager";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -36,8 +38,6 @@ interface WaveMessagesStoreData {
   readonly getData: (key: string) => WaveMessages | undefined;
   readonly subscribe: (key: string, listener: WaveMessagesListener) => void;
   readonly unsubscribe: (key: string, listener: WaveMessagesListener) => void;
-  // Expose updateData only if components outside the provider need to update messages directly
-  readonly updateData: (key: string, value: WaveMessages | undefined) => void;
 }
 
 // Define the type for our context using nested structures
@@ -45,6 +45,7 @@ interface MyStreamContextType {
   readonly waves: WavesContextData;
   readonly activeWave: ActiveWaveContextData;
   readonly waveMessagesStore: WaveMessagesStoreData;
+  readonly registerWave: (waveId: string) => void;
 }
 
 interface MyStreamProviderProps {
@@ -61,6 +62,18 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
   const wavesHookData = useEnhancedWavesList(activeWaveId);
   const waveMessagesStore = useWaveMessagesStore();
+
+  // Instantiate the data manager, passing the updater function from the store
+  const { registerWave } = useWaveDataManager({
+    updateData: waveMessagesStore.updateData,
+    getData: waveMessagesStore.getData,
+  });
+
+  useEffect(() => {
+    if (activeWaveId) {
+      registerWave(activeWaveId);
+    }
+  }, [activeWaveId]);
 
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
@@ -79,18 +92,18 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       set: setActiveWave,
     };
 
-    // Prepare the store data for the context
+    // Prepare the store data for the context (only read/subscribe parts)
     const waveMessagesStoreData: WaveMessagesStoreData = {
       getData: waveMessagesStore.getData,
       subscribe: waveMessagesStore.subscribe,
       unsubscribe: waveMessagesStore.unsubscribe,
-      updateData: waveMessagesStore.updateData,
     };
 
     return {
       waves,
       activeWave,
       waveMessagesStore: waveMessagesStoreData,
+      registerWave,
     };
   }, [
     wavesHookData.waves,
@@ -105,7 +118,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     waveMessagesStore.getData,
     waveMessagesStore.subscribe,
     waveMessagesStore.unsubscribe,
-    waveMessagesStore.updateData,
+    registerWave,
   ]);
 
   return (
@@ -145,7 +158,9 @@ export function useMyStreamWaveMessages(
     }
 
     // Define the listener callback
-    const listener: WaveMessagesListener = (newData: WaveMessages | undefined) => {
+    const listener: WaveMessagesListener = (
+      newData: WaveMessages | undefined
+    ) => {
       // Update local state only if data actually differs
       // Use a proper comparison if needed (e.g., deep compare for complex objects)
       setData((currentData: WaveMessages | undefined) => {
