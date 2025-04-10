@@ -48,7 +48,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   return (
     <div
       onClick={() => onDropClick(drop)}
-      className="tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full tw-relative"
+      className="tw-@container tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full tw-relative"
     >
       <div className={getBorderClasses()}>
         <div className="tw-flex tw-flex-col">
@@ -71,26 +71,23 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               <WaveLeaderboardDropContent drop={drop} />
             </div>
           </div>
-          <div className="tw-mt-3 sm:tw-grid sm:tw-grid-cols-[auto,1fr] tw-gap-x-4 sm:tw-items-center sm:tw-ml-[3.25rem] tw-space-y-3 sm:tw-space-y-0">
-            <div className="sm:tw-contents">
+          <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.25rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2 tw-gap-x-4">
               <WaveLeaderboardDropRaters drop={drop} />
-            </div>
-            <div className="sm:tw-justify-self-end">
               <WaveLeaderboardDropFooter drop={drop} wave={wave} />
             </div>
+            {canShowVote && (
+              <div
+                className="tw-flex tw-justify-center tw-pt-4 @[700px]:tw-pt-0 @[700px]:tw-ml-auto tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 @[700px]:tw-border-t-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <VotingModalButton
+                  drop={drop}
+                  onClick={() => setIsVotingModalOpen(true)}
+                />
+              </div>
+            )}
           </div>
-
-          {canShowVote && (
-            <div
-              className="tw-flex tw-justify-center md:tw-ml-auto tw-pt-4 tw-mt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 md:tw-border-t-0 md:mt-0 md:tw-pt-0"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <VotingModalButton
-                drop={drop}
-                onClick={() => setIsVotingModalOpen(true)}
-              />
-            </div>
-          )}
         </div>
       </div>
 

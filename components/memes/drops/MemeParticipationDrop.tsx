@@ -81,7 +81,7 @@ export default function MemeParticipationDrop({
   }, [onQuote, drop]);
 
   return (
-    <div className="tw-w-full">
+    <div className="tw-w-full tw-@container ">
       <div
         className={`tw-w-full tw-group tw-relative ${
           location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
@@ -127,8 +127,8 @@ export default function MemeParticipationDrop({
               </div>
             </>
           </DropMobileMenuHandler>
-          <div className="tw-flex tw-flex-col md:tw-flex-row tw-gap-y-3 md:tw-gap-y-0 tw-justify-between md:tw-items-center md:tw-px-4 tw-pb-4">
-            <div className="tw-px-4 md:tw-px-0">
+          <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-gap-y-3 @[700px]:tw-gap-y-0 tw-justify-between @[700px]:tw-items-center @[700px]:tw-px-4 tw-pb-4">
+            <div className="tw-px-4 @[700px]:tw-px-0">
               <MemeDropVoteStats
                 current={drop.rating}
                 projected={drop.rating_prediction}
@@ -139,7 +139,7 @@ export default function MemeParticipationDrop({
             </div>
 
             {canShowVote && (
-              <div className="tw-pt-4 tw-px-6 tw-flex tw-justify-center md:tw-pt-0 md:tw-px-0 tw-w-full sm:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 md:tw-border-none tw-border-x-0 tw-border-b-0">
+              <div className="tw-pt-4 tw-px-6 tw-flex tw-justify-center @[700px]:tw-pt-0 @[700px]:tw-px-0 tw-w-full @[700px]:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 @[700px]:tw-border-none tw-border-x-0 tw-border-b-0">
                 <div onClick={(e) => e.stopPropagation()}>
                   <VotingModalButton
                     drop={drop}

@@ -28,7 +28,7 @@ export default function MobileWrapperDialog({
     <Transition appear={true} show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-relative tw-z-[1000]"
+        className="tailwind-scope tw-relative tw-z-[1010]"
         onClose={onClose}>
         <TransitionChild
           as={Fragment}

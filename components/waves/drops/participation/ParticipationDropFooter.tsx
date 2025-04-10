@@ -22,17 +22,17 @@ export default function ParticipationDropFooter({
     <>
       {canShowVote && (
         <div
-          className="sm:tw-ml-[3.25rem] tw-pt-4 tw-pb-4"
+          className="@container tw-ml-[3.25rem] tw-pt-4 tw-pb-4"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="tw-flex md:tw-justify-between tw-flex-col md:tw-flex-row md:tw-items-center tw-gap-x-4 tw-gap-y-3">
+          <div className="tw-flex @[700px]:tw-justify-between tw-flex-col @[700px]:tw-flex-row @[700px]:tw-items-center tw-gap-x-4 tw-gap-y-3">
             <div className="tw-px-4">
               {!!drop.raters_count && (
                 <ParticipationDropRatings drop={drop} rank={drop.rank} />
               )}
             </div>
 
-            <div className="md:tw-ml-auto tw-pt-4 tw-px-6 md:tw-px-4 tw-flex tw-justify-center md:tw-pt-0 tw-w-full sm:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 md:tw-border-none tw-border-x-0 tw-border-b-0">
+            <div className="@[700px]:tw-ml-auto tw-pt-4 tw-px-6 @[700px]:tw-px-4 tw-flex tw-justify-center @[700px]:tw-pt-0 tw-w-full @[700px]:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 @[700px]:tw-border-none tw-border-x-0 tw-border-b-0">
               <VotingModalButton
                 drop={drop}
                 onClick={() => setIsVotingModalOpen(true)}
@@ -58,12 +58,12 @@ export default function ParticipationDropFooter({
 
       {/* Show ratings if no vote button */}
       {!canShowVote && !!drop.raters_count && (
-        <div className="tw-px-4 sm:tw-ml-[3.25rem] tw-pb-4">
+        <div className="tw-px-4 tw-ml-[3.25rem] tw-pb-4">
           <ParticipationDropRatings drop={drop} rank={drop.rank} />
         </div>
       )}
 
-      <div className="tw-px-4 sm:tw-ml-[3.25rem] tw-pb-3 tw-text-[11px] tw-text-iron-500 tw-border-t tw-border-iron-800/30">
+      <div className="tw-px-4 tw-ml-[3.25rem] tw-pb-3 tw-text-[11px] tw-text-iron-500 tw-border-t tw-border-iron-800/30">
         {format(new Date(drop.created_at), "h:mm a · MMM d, yyyy")}
       </div>
     </>

@@ -47,7 +47,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
 
   return (
     <div
-      className="tw-w-full tw-cursor-pointer"
+      className="tw-w-full tw-cursor-pointer tw-@container"
       onClick={() => onDropClick(drop)}
     >
       <div className="tw-w-full tw-group">
@@ -90,8 +90,8 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             <div className="tw-p-4">
               <MemeDropTraits drop={drop} />
             </div>
-            <div className="tw-flex tw-flex-col tw-gap-y-2 sm:tw-flex-row tw-justify-between sm:tw-pb-4 sm:tw-px-4 tw-items-center">
-              <div className="tw-px-6 sm:tw-px-0">
+            <div className="tw-flex tw-flex-col tw-gap-y-2 @[700px]:tw-flex-row tw-justify-between @[700px]:tw-pb-4 @[700px]:tw-px-4 @[700px]:tw-items-center">
+              <div className="tw-px-6 @[700px]:tw-px-0">
                 <MemesLeaderboardDropVoteSummary
                   current={drop.rating}
                   projected={drop.rating_prediction}
@@ -102,7 +102,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
               </div>
 
               <div 
-                className="tw-pt-4 tw-pb-4 tw-px-6 tw-flex tw-justify-center sm:tw-pt-0 sm:tw-pb-0 sm:tw-px-0 tw-w-full sm:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 sm:tw-border-none tw-border-x-0 tw-border-b-0"
+                className="tw-pt-4 tw-pb-4 tw-px-6 tw-flex tw-justify-center @[700px]:tw-pt-0 @[700px]:tw-pb-0 @[700px]:tw-px-0 tw-w-full @[700px]:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 @[700px]:tw-border-none tw-border-x-0 tw-border-b-0"
                 onClick={(e) => e.stopPropagation()}
               >
                 <VotingModalButton

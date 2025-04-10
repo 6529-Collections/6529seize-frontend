@@ -41,7 +41,6 @@ export function useWaveDrops({
 }: UseWaveDropsProps) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
-  const isTabVisible = useTabVisibility();
   const [init, setInit] = useState(false);
   
 
@@ -298,3 +297,7 @@ export function useWaveDrops({
     manualFetch,
   };
 }
+function removeWaveDeliveredNotifications(waveId: string) {
+  throw new Error("Function not implemented.");
+}
+
