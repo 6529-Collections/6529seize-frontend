@@ -3,6 +3,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { WaveMessages } from "../hooks/useWaveMessagesStore";
 
 /**
  * Fetches wave messages (drops) for a specific wave
@@ -46,6 +47,66 @@ export async function fetchWaveMessages(
     );
     return null;
   }
+}
+
+/**
+ * Transforms API drops into the format needed for the WaveMessages store
+ * @param waveId ID of the wave
+ * @param drops Array of drops to transform
+ * @param isLoading Loading state to set
+ * @returns Formatted WaveMessages object
+ */
+export function formatWaveMessages(
+  waveId: string,
+  drops: ApiDrop[],
+  isLoading: boolean = false
+): WaveMessages {
+  return {
+    id: waveId,
+    isLoading,
+    drops: drops.map((drop) => ({
+      ...drop,
+      stableKey: drop.id,
+      stableHash: drop.id,
+    })),
+  };
+}
+
+/**
+ * Creates an empty wave message store entry
+ * @param waveId ID of the wave
+ * @param isLoading Loading state to set
+ * @returns Empty WaveMessages object
+ */
+export function createEmptyWaveMessages(
+  waveId: string,
+  isLoading: boolean = false
+): WaveMessages {
+  return {
+    id: waveId,
+    isLoading,
+    drops: [],
+  };
+}
+
+/**
+ * Handles an error when fetching wave messages
+ * @param error The error that occurred
+ * @param waveId ID of the wave that failed
+ * @throws Re-throws abort errors
+ * @returns null
+ */
+export function handleWaveMessagesError(error: unknown, waveId: string): null {
+  // Check if this is an abort error
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    throw error; // Re-throw abort errors to be handled by the caller
+  }
+  
+  console.error(
+    `[WaveDataManager] Error fetching messages for ${waveId}:`,
+    error
+  );
+  return null;
 }
 
 /**
