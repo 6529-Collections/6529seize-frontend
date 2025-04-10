@@ -133,7 +133,6 @@ export const WaveLeaderboardGalleryItem: React.FC<
               <VotingModalButton
                 drop={drop}
                 onClick={handleVoteButtonClick}
-                className="tw-whitespace-nowrap"
               />
             </div>
           )}
