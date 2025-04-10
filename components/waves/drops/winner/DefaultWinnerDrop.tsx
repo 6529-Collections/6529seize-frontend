@@ -214,13 +214,11 @@ const DefaultWinnerDrop = ({
             />
           </div>
         )}
-        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-ml-[3.25rem] tw-mt-1.5">
-          <div className="tw-flex tw-items-center tw-gap-x-2">
-            {drop.metadata.length > 0 && (
-              <WaveDropMetadata metadata={drop.metadata} />
-            )}
-            {!!drop.raters_count && <WaveDropRatings drop={drop} />}
-          </div>
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-ml-[3.25rem] tw-mt-1.5">
+          {drop.metadata.length > 0 && (
+            <WaveDropMetadata metadata={drop.metadata} />
+          )}
+          <div>{!!drop.raters_count && <WaveDropRatings drop={drop} />}</div>
         </div>
       </div>
       <WaveDropMobileMenu

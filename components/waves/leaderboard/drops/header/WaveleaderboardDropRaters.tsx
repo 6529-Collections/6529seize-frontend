@@ -43,7 +43,7 @@ export const WaveLeaderboardDropRaters: React.FC<
     drop.context_profile_context?.rating !== 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-1.5 tw-justify-end">
+    <div className="tw-flex tw-items-center tw-gap-x-4 tw-gap-y-1.5 sm:tw-justify-end">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <div className="tw-relative tw-inline-flex tw-items-center tw-gap-x-1">
           {" "}
@@ -51,8 +51,8 @@ export const WaveLeaderboardDropRaters: React.FC<
             {formatNumberWithCommas(drop.rating)}
           </span>
           <DropVoteProgressing
-            rating={drop.rating}
-            realtimeRating={drop.realtime_rating}
+            current={drop.rating}
+            projected={drop.rating_prediction}
           />
         </div>
         <span className="tw-text-iron-400 tw-text-sm tw-whitespace-nowrap">

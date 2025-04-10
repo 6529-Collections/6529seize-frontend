@@ -7,7 +7,6 @@ export interface RatingsSectionProps {
 }
 
 export interface ThemeColors {
-  gradient: string;
   text: string;
   ring: string;
   indicator?: string;
@@ -16,5 +15,5 @@ export interface ThemeColors {
 export interface RatingsData {
   hasRaters: boolean;
   userRating: number;
-  totalRating: number;
+  currentRating: number;
 } 

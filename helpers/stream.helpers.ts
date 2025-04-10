@@ -62,6 +62,7 @@ const prefetchAuthenticatedWavesOverview = async ({
         only_waves_followed_by_authenticated_user: `${WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user}`,
       };
 
+
       return await commonApiFetch<ApiWave[]>({
         endpoint: `waves-overview`,
         params: queryParams,

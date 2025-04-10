@@ -39,11 +39,11 @@ export default function OngoingParticipationDrop({
   parentContainerRef,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
+  const isMobile = useIsMobileDevice();
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const [isSlideUp, setIsSlideUp] = useState(false);
-  const isMobile = useIsMobileDevice();
 
   const handleLongPress = useCallback(() => {
     if (!isMobile) return;
@@ -97,6 +97,8 @@ export default function OngoingParticipationDrop({
         <ParticipationDropMetadata metadata={drop.metadata} />
         <ParticipationDropFooter drop={drop} />
       </div>
+      
+      {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}
         isOpen={isSlideUp}

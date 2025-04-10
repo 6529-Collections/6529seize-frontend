@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
@@ -6,9 +6,11 @@ import { WaveLeaderboardDropFooter } from "./footer/WaveLeaderboardDropFooter";
 import { ApiWave } from "../../../../generated/models/ObjectSerializer";
 import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteractionRules";
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
-import { SingleWaveDropVote } from "../../drop/SingleWaveDropVote";
 import WaveDropActionsOptions from "../../drops/WaveDropActionsOptions";
 import WaveDropActionsOpen from "../../drops/WaveDropActionsOpen";
+import { VotingModal, MobileVotingModal } from "../../../../components/voting";
+import VotingModalButton from "../../../../components/voting/VotingModalButton";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -20,6 +22,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   DefaultWaveLeaderboardDropProps
 > = ({ drop, wave, onDropClick }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const isMobileScreen = useIsMobileScreen();
 
   const getBorderClasses = () => {
     const rank = drop.rank && drop.rank <= 3 ? drop.rank : "default";
@@ -44,7 +48,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   return (
     <div
       onClick={() => onDropClick(drop)}
-      className="tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full tw-relative"
+      className="tw-@container tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full tw-relative"
     >
       <div className={getBorderClasses()}>
         <div className="tw-flex tw-flex-col">
@@ -66,23 +70,41 @@ export const DefaultWaveLeaderboardDrop: React.FC<
             <div className="tw-ml-[3.35rem]">
               <WaveLeaderboardDropContent drop={drop} />
             </div>
-
+          </div>
+          <div className="tw-mt-3 tw-inline-flex tw-flex-col @[700px]:tw-flex-row tw-justify-between @[700px]:tw-items-center sm:tw-ml-[3.25rem] tw-space-y-3 @[700px]:tw-space-y-0 tw-gap-x-2">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-y-2 tw-gap-x-4">
+              <WaveLeaderboardDropRaters drop={drop} />
+              <WaveLeaderboardDropFooter drop={drop} wave={wave} />
+            </div>
             {canShowVote && (
-              <div className="tw-pb-3 tw-pt-2 sm:tw-ml-[3.25rem]">
-                <SingleWaveDropVote drop={drop} />
+              <div
+                className="tw-flex tw-justify-center tw-pt-4 @[700px]:tw-pt-0 @[700px]:tw-ml-auto tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 @[700px]:tw-border-t-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <VotingModalButton
+                  drop={drop}
+                  onClick={() => setIsVotingModalOpen(true)}
+                />
               </div>
             )}
           </div>
-          <div className="tw-mt-3 tw-grid tw-grid-cols-[auto,1fr] tw-gap-x-4 tw-items-center sm:tw-ml-[3.25rem]">
-            <div className="tw-contents">
-              <WaveLeaderboardDropRaters drop={drop} />
-            </div>
-            <div className="tw-justify-self-end">
-              <WaveLeaderboardDropFooter drop={drop} wave={wave} />
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* Voting modal */}
+      {isMobileScreen ? (
+        <MobileVotingModal
+          drop={drop}
+          isOpen={isVotingModalOpen}
+          onClose={() => setIsVotingModalOpen(false)}
+        />
+      ) : (
+        <VotingModal
+          drop={drop}
+          isOpen={isVotingModalOpen}
+          onClose={() => setIsVotingModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

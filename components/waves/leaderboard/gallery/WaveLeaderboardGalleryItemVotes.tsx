@@ -1,7 +1,7 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
-import WaveLeaderboardGalleryItemVotesProgressing from "./WaveLeaderboardGalleryItemVotesProgressing";
+import DropVoteProgressing from "../../../drops/view/utils/DropVoteProgressing";
 
 interface WaveLeaderboardGalleryItemVotesProps {
   readonly drop: ExtendedDrop;
@@ -10,8 +10,8 @@ interface WaveLeaderboardGalleryItemVotesProps {
 export default function WaveLeaderboardGalleryItemVotes({
   drop,
 }: WaveLeaderboardGalleryItemVotesProps) {
-  const rating = drop.rating ?? 0;
-  const isPositive = rating >= 0;
+  const current = drop.rating ?? 0;
+  const isPositive = current >= 0;
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1.5">
       <span
@@ -19,12 +19,9 @@ export default function WaveLeaderboardGalleryItemVotes({
           isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
         }`}
       >
-        {formatNumberWithCommas(rating)}
+        {formatNumberWithCommas(current)}
       </span>
-      <WaveLeaderboardGalleryItemVotesProgressing
-        rating={rating}
-        realtimeRating={drop.realtime_rating}
-      />
+      <DropVoteProgressing current={current} projected={drop.rating_prediction} />
     </div>
   );
 }

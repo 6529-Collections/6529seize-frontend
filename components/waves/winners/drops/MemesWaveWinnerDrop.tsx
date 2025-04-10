@@ -53,7 +53,8 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
           stableHash: winner.drop.id,
         })
       }
-      className="tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full">
+      className="tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full"
+    >
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/40 tw-shadow-[0_0_15px_rgba(251,191,36,0.15)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
         <div className="tw-flex tw-flex-col">
           <div className="tw-p-4">
@@ -62,7 +63,8 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 <Link
                   href={`/${winner.drop.author?.handle}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group">
+                  className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
+                >
                   <WaveWinnersDropHeaderAuthorPfp winner={winner} />
                 </Link>
                 <div className="tw-flex tw-items-center tw-gap-x-4">
@@ -77,7 +79,8 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     <Link
                       href={`/${winner.drop.author?.handle}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="tw-no-underline hover:tw-opacity-80 tw-transition-opacity">
+                      className="tw-no-underline hover:tw-opacity-80 tw-transition-opacity"
+                    >
                       <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
                         {winner.drop.author?.handle}
                       </span>
@@ -101,9 +104,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0 tw-whitespace-nowrap">
                   {title}
                 </h3>
-                <div className="tw-text-md tw-text-iron-400">
-                  {description}
-                </div>
+                <div className="tw-text-md tw-text-iron-400">{description}</div>
               </div>
             </div>
           </div>
@@ -120,16 +121,15 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             <MemeDropTraits drop={winner.drop} />
           </div>
           <div className="tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0 tw-px-4 tw-pb-4">
-            <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
+            <div className="tw-flex tw-items-center tw-gap-x-1.5">
               <span
                 className={`tw-text-md tw-font-semibold ${
                   isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-                } `}>
+                } `}
+              >
                 {formatNumberWithCommas(rating)}
               </span>
-              <span className="tw-text-sm tw-text-iron-400 tw-tracking-wide">
-                {creditType}
-              </span>
+              <span className="tw-text-md tw-text-iron-400">{creditType}</span>
             </div>
 
             <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -139,29 +139,31 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     key={voter.profile.handle}
                     content={`${
                       voter.profile.handle
-                    } - ${formatNumberWithCommas(voter.rating)}`}>
+                    } - ${formatNumberWithCommas(voter.rating)}`}
+                  >
                     <Link
                       href={`/${voter.profile.handle}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="tw-transition-transform hover:tw-translate-y-[-2px]">
+                      className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
+                    >
                       {voter.profile.pfp ? (
                         <img
-                          className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-border tw-border-iron-800/60"
+                          className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-object-contain tw-bg-iron-800"
                           src={voter.profile.pfp}
                           alt="Recent voter"
                         />
                       ) : (
-                        <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-iron-950 tw-bg-iron-800" />
+                        <div className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-object-contain tw-bg-iron-800" />
                       )}
                     </Link>
                   </Tippy>
                 ))}
               </div>
               <div className="tw-flex tw-items-baseline tw-gap-x-1">
-                <span className="tw-text-md tw-font-medium tw-text-iron-100">
+                <span className="tw-text-md tw-font-medium tw-text-iron-50">
                   {formatNumberWithCommas(ratersCount)}
                 </span>
-                <span className="tw-text-sm tw-text-iron-400">
+                <span className="tw-text-md tw-text-iron-400">
                   {ratersCount === 1 ? "voter" : "voters"}
                 </span>
               </div>

@@ -22,9 +22,7 @@ export default function ParticipationDropRatingsUserSection({
       </span>
       <div className="tw-flex tw-items-baseline tw-gap-1">
         <div className={`tw-relative tw-inline-flex ${userTheme.indicator}`}>
-          <span
-            className={`tw-text-sm tw-font-bold tw-bg-gradient-to-r ${userTheme.gradient} tw-bg-clip-text tw-text-transparent`}
-          >
+          <span className={`tw-text-sm tw-font-bold ${userTheme.text}`}>
             {userRating < 0 && "-"}
             {formatNumberWithCommas(Math.abs(userRating))}
           </span>

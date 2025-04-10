@@ -294,6 +294,7 @@ export const getWavesOverview = async ({
       onlyWavesFollowedByAuthenticatedUser.toString(),
   };
 
+
   return await commonApiFetch<ApiWave[]>({
     endpoint: `waves-overview`,
     params: queryParams,

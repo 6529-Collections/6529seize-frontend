@@ -186,7 +186,7 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
           isTouch ? "tw-cursor-pointer" : ""
         }`}
       >
-        <span className="tw-text-sm [@container_(max-width:32rem)]:tw-text-xs tw-font-normal tw-text-iron-200">
+        <span className="tw-text-xs tw-font-medium tw-text-iron-200">
           Outcome:
         </span>
         <div className="tw-flex tw-items-center tw-gap-2">

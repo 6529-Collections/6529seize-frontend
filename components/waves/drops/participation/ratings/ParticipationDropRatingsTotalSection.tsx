@@ -13,7 +13,7 @@ export default function ParticipationDropRatingsTotalSection({
   theme,
   ratingsData,
 }: ParticipationDropRatingsTotalSectionProps) {
-  const { totalRating } = ratingsData;
+  const { currentRating } = ratingsData;
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1">
@@ -24,18 +24,18 @@ export default function ParticipationDropRatingsTotalSection({
         appendTo={() => document.body}
         zIndex={1000}
       >
-        <span className="tw-text-sm tw-font-medium tw-text-iron-500 tw-cursor-help">
+        <span className="tw-text-sm tw-font-medium tw-text-iron-400 tw-cursor-help">
           Total {drop.wave.voting_credit_type}
         </span>
       </Tippy>
       <div className={`tw-relative tw-inline-flex tw-items-center tw-gap-x-1 ${theme.indicator}`}>
         <span
-          className={`tw-text-sm tw-font-bold tw-bg-gradient-to-r ${theme.gradient} tw-bg-clip-text tw-text-transparent`}
+          className={`tw-text-sm tw-font-bold ${theme.text}`}
         >
-          {totalRating < 0 && "-"}
-          {formatNumberWithCommas(Math.abs(totalRating))}
+          {currentRating < 0 && "-"}
+          {formatNumberWithCommas(Math.abs(currentRating))}
         </span>
-        <DropVoteProgressing rating={totalRating} realtimeRating={drop.realtime_rating} />
+        <DropVoteProgressing current={currentRating} projected={drop.rating_prediction} />
       </div>
     </div>
   );
