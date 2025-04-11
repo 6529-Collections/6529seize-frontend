@@ -91,9 +91,9 @@ export default function MemeWinnerDrop({
                   />
                 </div>
               )}
-              <div className="tw-p-4">
+            
                 <MemeDropTraits drop={drop} />
-              </div>
+             
             </>
           </DropMobileMenuHandler>
           {/* Actions for desktop */}

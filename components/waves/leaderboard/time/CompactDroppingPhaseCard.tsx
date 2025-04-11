@@ -23,11 +23,11 @@ export const CompactDroppingPhaseCard: React.FC<
   return (
     <div className="tw-px-2">
       {!isCompleted ? (
-        <div className="tw-flex tw-items-center tw-justify-between tw-flex-nowrap">
-          <span className="tw-font-normal">
-            <span className="tw-text-xs tw-text-iron-400">
-              {isUpcoming ? "Dropping starts in" : "Dropping ends in"}
-            </span>{" "}
+        <div className="tw-flex sm:tw-items-center tw-flex-col sm:tw-flex-row tw-justify-between sm:tw-flex-nowrap tw-gap-y-1">
+          <span className="tw-text-xs tw-text-iron-400">
+            {isUpcoming ? "Dropping starts in" : "Dropping ends in"}
+          </span>{" "}
+          <span>
             <span className="tw-text-xs tw-font-mono tw-text-iron-300 tw-tracking-tight tw-ml-1">
               {timeLeft.days > 0 && `${timeLeft.days}d `}
               {timeLeft.hours}h {timeLeft.minutes}m

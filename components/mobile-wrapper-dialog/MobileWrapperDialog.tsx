@@ -40,7 +40,7 @@ export default function MobileWrapperDialog({
           leaveTo="tw-opacity-0"
           beforeLeave={onBeforeLeave}
           afterLeave={onAfterLeave}>
-          <div className="tw-fixed tw-inset-0 tw-bg-iron-700/60 tw-backdrop-blur-sm tw-transition-opacity" />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-backdrop-blur-[1px]" />
         </TransitionChild>
 
         <div 

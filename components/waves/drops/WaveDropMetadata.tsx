@@ -47,7 +47,7 @@ export default function WaveDropMetadata({ metadata }: WaveDropMetadataProps) {
   };
   
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
+    <div className="tw-flex-col tw-gap-2 tw-hidden lg:tw-flex">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
         {/* Always show first 2 items */}
         {metadata.slice(0, 2).map((item) => (

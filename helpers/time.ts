@@ -281,6 +281,58 @@ export class Time {
 
     return `${dateStr} - ${timeStr}`;
   }
+  
+  public toLocaleDropDateString(): string {
+    const date = this.toDate();
+    const now = new Date();
+
+    const isToday = date.toDateString() === now.toDateString();
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    if (isToday) {
+      return "Today";
+    }
+
+    if (isYesterday) {
+      return "Yesterday";
+    }
+
+    const sameYear = date.getFullYear() === now.getFullYear();
+
+    return date.toLocaleDateString(undefined, {
+      month: "short",
+      day: "2-digit",
+      ...(sameYear ? {} : { year: "numeric" }),
+    });
+  }
+  
+  public toShortRelativeTime(): string {
+    const currentTime = new Date().getTime();
+    const timeDifference = currentTime - this.ms;
+
+    const seconds = Math.floor(timeDifference / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 1) {
+      return this.toDate().toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    } else if (days === 1) {
+      return "Yesterday";
+    } else if (hours > 0) {
+      return `${hours}h`;
+    } else if (minutes > 0) {
+      return `${minutes}m`;
+    } else {
+      return `Just now`;
+    }
+  }
 
   public toString = (): string => {
     return this.formatAsDuration();
