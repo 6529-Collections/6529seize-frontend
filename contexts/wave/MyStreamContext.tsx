@@ -17,6 +17,7 @@ import useWaveMessagesStore, {
 } from "./hooks/useWaveMessagesStore";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import { ApiDrop } from "../../generated/models/ApiDrop";
+import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -69,6 +70,15 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveDataManager = useWaveDataManager({
     updateData: waveMessagesStore.updateData,
     getData: waveMessagesStore.getData,
+  });
+
+  // Instantiate the real-time updater hook
+  // It works in the background, no need to capture its return value
+  useWaveRealtimeUpdater({
+    getData: waveMessagesStore.getData,
+    updateData: waveMessagesStore.updateData,
+    registerWave: waveDataManager.registerWave,
+    fetchNewestMessages: waveDataManager.fetchNewestMessages,
   });
 
   useEffect(() => {

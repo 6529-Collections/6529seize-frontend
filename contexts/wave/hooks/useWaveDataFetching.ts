@@ -7,6 +7,7 @@ import {
   fetchWaveMessages,
   formatWaveMessages,
   createEmptyWaveMessages,
+  getHighestSerialNo,
 } from "../utils/wave-messages-utils";
 
 export function useWaveDataFetching({
@@ -131,6 +132,67 @@ export function useWaveDataFetching({
   );
 
   /**
+   * Fetches messages newer than a given serial number.
+   * This is intended for background reconciliation after WebSocket updates.
+   */
+  const fetchNewestMessages = useCallback(
+    async (
+      waveId: string,
+      sinceSerialNo: number | null,
+      signal: AbortSignal
+    ): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> => {
+      // We need a slightly different API call here, fetching *newer* messages
+      // Assuming a commonApiFetch structure or similar needs adjustment
+      // For now, let's simulate the expected API call structure
+      const params: Record<string, string> = {
+        limit: "50", // Or another appropriate limit for fetching newest
+      };
+      if (sinceSerialNo !== null) {
+        // IMPORTANT: Parameter name might differ, e.g., 'serial_no_greater_than'
+        params.serial_no_greater_than = `${sinceSerialNo}`;
+      }
+
+      try {
+        // TODO: Replace with actual API call using the correct endpoint/params
+        // const data = await commonApiFetch<ApiWaveDropsFeed>({
+        //   endpoint: `waves/${waveId}/drops`,
+        //   params,
+        //   signal,
+        // });
+        // MOCK IMPLEMENTATION - Replace with real fetch
+        console.log(`[Mock Fetch] Fetching newest for ${waveId} since ${sinceSerialNo}`);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+        const mockDrops: ApiDrop[] = []; // Replace with actual data.drops
+        const mockWaveData = { id: waveId, name: "Mock Wave" }; // Replace with actual data.wave
+        
+        const fetchedDrops = mockDrops.map((drop) => ({ // Replace mockDrops with data.drops
+          ...drop,
+          wave: mockWaveData, // Replace mockWaveData with data.wave
+        }));
+        
+        // Cast to ApiDrop[] for the helper function during mock phase
+        const highestSerialNo = getHighestSerialNo(fetchedDrops as ApiDrop[]);
+        console.log(`[Mock Fetch] Fetched ${fetchedDrops.length} new drops for ${waveId}. Highest serial: ${highestSerialNo}`);
+        
+        // Cast drops in the return object as well for the mock
+        return { drops: fetchedDrops as ApiDrop[], highestSerialNo };
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          console.log(`[WaveDataFetching] Fetch newest for ${waveId} aborted.`);
+          // Re-throw abort errors to be handled by the caller (useWaveRealtimeUpdater)
+          throw error;
+        }
+        console.error(
+          `[WaveDataFetching] Error fetching newest messages for ${waveId}:`,
+          error
+        );
+        return { drops: null, highestSerialNo: null }; // Return null on other errors
+      }
+    },
+    [] // No dependencies needed for this fetch logic itself
+  );
+
+  /**
    * Simplified interface to activate a wave
    */
   const registerWave = useCallback(
@@ -145,6 +207,6 @@ export function useWaveDataFetching({
   return {
     registerWave,
     cancelWaveDataFetch,
-    activateWave,
+    fetchNewestMessages,
   };
 }

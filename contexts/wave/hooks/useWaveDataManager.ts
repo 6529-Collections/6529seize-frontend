@@ -1,6 +1,7 @@
 import { useWaveDataFetching } from "./useWaveDataFetching";
 import { useWavePagination } from "./useWavePagination";
 import { WaveDataStoreUpdater } from "./types";
+import { ApiDrop } from "../../../generated/models/ApiDrop";
 
 /**
  * Main hook that manages wave data loading and caching
@@ -11,7 +12,7 @@ export function useWaveDataManager({
   getData,
 }: WaveDataStoreUpdater) {
   // Use composition to build the complete functionality
-  const { registerWave, cancelWaveDataFetch } = useWaveDataFetching({
+  const { registerWave, cancelWaveDataFetch, fetchNewestMessages } = useWaveDataFetching({
     updateData,
     getData,
   });
@@ -23,11 +24,12 @@ export function useWaveDataManager({
   });
 
   // Expose a clean, focused API
-  return { 
-    // Initial data loading
-    registerWave, 
+  return {
+    // Initial data loading & updates
+    registerWave,
     cancelWaveDataFetch,
-    
+    fetchNewestMessages,
+
     // Pagination
     fetchNextPage,
     cancelPaginationFetch

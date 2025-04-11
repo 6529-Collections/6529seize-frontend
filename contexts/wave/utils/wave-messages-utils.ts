@@ -68,6 +68,11 @@ export function formatWaveMessages(
 ): WaveMessages {
   const { isLoading = false, isLoadingNextPage = false, hasNextPage = true } = options;
   
+  // Calculate the highest serial number from the fetched drops
+  const latestFetchedSerialNo = drops.length > 0
+    ? Math.max(...drops.map(drop => drop.serial_no))
+    : null;
+
   return {
     id: waveId,
     isLoading,
@@ -78,6 +83,7 @@ export function formatWaveMessages(
       stableKey: drop.id,
       stableHash: drop.id,
     })),
+    latestFetchedSerialNo,
   };
 }
 
@@ -103,6 +109,7 @@ export function createEmptyWaveMessages(
     isLoadingNextPage,
     hasNextPage,
     drops: [],
+    latestFetchedSerialNo: null,
   };
 }
 
@@ -157,4 +164,12 @@ export function mergeDrops(
 
   // Sort by serial_no in descending order (older first)
   return mergedDrops.sort((a, b) => b.serial_no - a.serial_no);
+}
+
+// Helper function to get the highest serial number from an array of drops
+export function getHighestSerialNo(drops: ApiDrop[] | ExtendedDrop[]): number | null {
+  if (!drops || drops.length === 0) {
+    return null;
+  }
+  return Math.max(...drops.map(drop => drop.serial_no));
 }

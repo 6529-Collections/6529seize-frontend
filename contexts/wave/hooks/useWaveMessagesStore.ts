@@ -8,6 +8,7 @@ export type WaveMessages = {
   readonly isLoadingNextPage: boolean;
   readonly hasNextPage: boolean;
   readonly drops: ExtendedDrop[];
+  readonly latestFetchedSerialNo: number | null;
 };
 export type Listener = (data: WaveMessages | undefined) => void;
 
