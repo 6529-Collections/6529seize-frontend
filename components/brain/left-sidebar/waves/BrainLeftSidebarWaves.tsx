@@ -6,7 +6,7 @@ import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 const BrainLeftSidebarWaves: React.FC = () => {
   const router = useRouter();
 
-  const { waves, activeWave } = useMyStream();
+  const { waves, activeWave, registerWave } = useMyStream();
 
   // Store the wave ID from router.query to compare against and avoid unnecessary pins
   const lastPinnedWaveIdRef = useRef<string | null>(null);
@@ -46,6 +46,7 @@ const BrainLeftSidebarWaves: React.FC = () => {
       fetchNextPage={onNextPage}
       hasNextPage={waves.hasNextPage}
       isFetchingNextPage={waves.isFetchingNextPage}
+      onHover={registerWave}
     />
   );
 };

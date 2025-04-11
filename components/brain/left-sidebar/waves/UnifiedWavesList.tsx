@@ -17,6 +17,7 @@ interface UnifiedWavesListProps {
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetchingNextPage: boolean;
+  readonly onHover: (waveId: string) => void;
 }
 
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
@@ -25,6 +26,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
+  onHover,
 }) => {
   // No longer splitting waves into separate categories
 
@@ -127,7 +129,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
         <div className="tw-w-full">
           {/* Unified Waves List */}
-          <UnifiedWavesListWaves waves={sortedWaves} />
+          <UnifiedWavesListWaves
+            waves={sortedWaves}
+            onHover={onHover}
+          />
 
           {/* Loading indicator and intersection trigger */}
           <UnifiedWavesListLoader

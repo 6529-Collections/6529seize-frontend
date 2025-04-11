@@ -17,19 +17,11 @@ export function useWaveDataFetching({
   getData,
 }: WaveDataStoreUpdater) {
   // Compose with the smaller hooks
-  const {
-    getLoadingState,
-    setLoadingState,
-    setPromise,
-    clearLoadingState,
-  } = useWaveLoadingState();
-  
-  const {
-    cancelFetch,
-    createController,
-    cleanupController,
-    cancelAllFetches,
-  } = useWaveAbortController();
+  const { getLoadingState, setLoadingState, setPromise, clearLoadingState } =
+    useWaveLoadingState();
+
+  const { cancelFetch, createController, cleanupController } =
+    useWaveAbortController();
 
   /**
    * Checks if a wave already has data, returns true if loading should continue
@@ -52,7 +44,10 @@ export function useWaveDataFetching({
 
       // Update data in store if we got results
       if (drops) {
-        updateData(waveId, formatWaveMessages(waveId, drops, { isLoading: false }));
+        updateData(
+          waveId,
+          formatWaveMessages(waveId, drops, { isLoading: false })
+        );
       }
 
       return drops;
@@ -66,8 +61,10 @@ export function useWaveDataFetching({
   const handleFetchError = useCallback(
     (waveId: string, error: unknown) => {
       // Handle abort errors differently than other errors
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        console.log(`[WaveDataManager] Request for wave ${waveId} was cancelled`);
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.log(
+          `[WaveDataManager] Request for wave ${waveId} was cancelled`
+        );
         return null;
       }
 
@@ -162,16 +159,18 @@ export function useWaveDataFetching({
           signal,
         });
 
-        
-        const fetchedDrops = data.drops.map((drop) => ({ // Replace mockDrops with data.drops
+        const fetchedDrops = data.drops.map((drop) => ({
+          // Replace mockDrops with data.drops
           ...drop,
           wave: data.wave, // Replace mockWaveData with data.wave
         }));
-        
+
         // Cast to ApiDrop[] for the helper function during mock phase
         const highestSerialNo = getHighestSerialNo(fetchedDrops as ApiDrop[]);
-        console.log(`[Mock Fetch] Fetched ${fetchedDrops.length} new drops for ${waveId}. Highest serial: ${highestSerialNo}`);
-        
+        console.log(
+          `[Mock Fetch] Fetched ${fetchedDrops.length} new drops for ${waveId}. Highest serial: ${highestSerialNo}`
+        );
+
         // Cast drops in the return object as well for the mock
         return { drops: fetchedDrops as ApiDrop[], highestSerialNo };
       } catch (error) {

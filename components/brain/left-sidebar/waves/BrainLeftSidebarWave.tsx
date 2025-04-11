@@ -9,10 +9,12 @@ import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesLis
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
+  readonly onHover: (waveId: string) => void;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
+  onHover,
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
@@ -27,8 +29,11 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 
   const haveNewDrops = wave.newDropsCount.count > 0;
 
-  const onHover = (waveId: string) => {
-    if (waveId !== router.query.wave) prefetchWaveData(waveId);
+  const onWaveHover = (waveId: string) => {
+    if (waveId !== router.query.wave) {
+      onHover(waveId);
+      prefetchWaveData(waveId);
+    }
   };
 
   const isActive = wave.id === router.query.wave;
@@ -55,7 +60,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     >
       <Link
         href={getHref(wave.id)}
-        onMouseEnter={() => onHover(wave.id)}
+        onMouseEnter={() => onWaveHover(wave.id)}
         onClick={onLinkClick}
         className={`tw-flex tw-flex-1 tw-space-x-3 tw-no-underline tw-py-1 ${
           isActive

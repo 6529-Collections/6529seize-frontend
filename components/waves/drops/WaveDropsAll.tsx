@@ -1,10 +1,8 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { AuthContext } from "../../auth/Auth";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "../../drops/view/DropsList";
 import { WaveDropsScrollBottomButton } from "./WaveDropsScrollBottomButton";
 import { WaveDropsReverseContainer } from "./WaveDropsReverseContainer";
-import { useWaveDrops } from "../../../hooks/useWaveDrops";
 import { useScrollBehavior } from "../../../hooks/useScrollBehavior";
 import CircleLoader, {
   CircleLoaderSize,
@@ -16,13 +14,7 @@ import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
-import {
-  useMyStream,
-  useMyStreamWaveMessages,
-} from "../../../contexts/wave/MyStreamContext";
-import useWaveMessagesStore from "../../../contexts/wave/hooks/useWaveMessagesStore";
 import { useVirtualizedWaveDrops } from "../../../hooks/useVirtualizedWaveDrops";
-import { Time } from "../../../helpers/time";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -56,8 +48,6 @@ export default function WaveDropsAll({
   onDropContentClick,
 }: WaveDropsAllProps) {
   const router = useRouter();
-  const { connectedProfile } = useContext(AuthContext);
-
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   const { waveMessages, fetchNextPageForWave } =
@@ -77,8 +67,6 @@ export default function WaveDropsAll({
   //   reverse: false,
   //   dropId,
   // });
-
-  const haveNewDrops = false;
 
   const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
     useScrollBehavior();
@@ -226,7 +214,6 @@ export default function WaveDropsAll({
   // Effect to trigger the fetch loop when serialNo is set and we are initialized
   useEffect(() => {
     if (init && serialNo) {
-      const currentMessages = latestWaveMessagesRef.current;
       const currentSmallestSerial = smallestSerialNo.current;
 
       // Check if already loaded before attempting scroll or fetch
