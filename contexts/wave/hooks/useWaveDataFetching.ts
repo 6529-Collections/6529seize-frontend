@@ -9,6 +9,8 @@ import {
   createEmptyWaveMessages,
   getHighestSerialNo,
 } from "../utils/wave-messages-utils";
+import { commonApiFetch } from "../../../services/api/common-api";
+import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 
 export function useWaveDataFetching({
   updateData,
@@ -149,25 +151,21 @@ export function useWaveDataFetching({
       };
       if (sinceSerialNo !== null) {
         // IMPORTANT: Parameter name might differ, e.g., 'serial_no_greater_than'
-        params.serial_no_greater_than = `${sinceSerialNo}`;
+        params.serial_no_limit = `${sinceSerialNo}`;
+        params.search_strategy = "FIND_NEWER";
       }
 
       try {
-        // TODO: Replace with actual API call using the correct endpoint/params
-        // const data = await commonApiFetch<ApiWaveDropsFeed>({
-        //   endpoint: `waves/${waveId}/drops`,
-        //   params,
-        //   signal,
-        // });
-        // MOCK IMPLEMENTATION - Replace with real fetch
-        console.log(`[Mock Fetch] Fetching newest for ${waveId} since ${sinceSerialNo}`);
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-        const mockDrops: ApiDrop[] = []; // Replace with actual data.drops
-        const mockWaveData = { id: waveId, name: "Mock Wave" }; // Replace with actual data.wave
+        const data = await commonApiFetch<ApiWaveDropsFeed>({
+          endpoint: `waves/${waveId}/drops`,
+          params,
+          signal,
+        });
+
         
-        const fetchedDrops = mockDrops.map((drop) => ({ // Replace mockDrops with data.drops
+        const fetchedDrops = data.drops.map((drop) => ({ // Replace mockDrops with data.drops
           ...drop,
-          wave: mockWaveData, // Replace mockWaveData with data.wave
+          wave: data.wave, // Replace mockWaveData with data.wave
         }));
         
         // Cast to ApiDrop[] for the helper function during mock phase
