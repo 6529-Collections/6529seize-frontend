@@ -115,37 +115,44 @@ export default function WaveDropsAll({
     [serialNo]
   );
 
+  // Ref to hold the latest waveMessages state to avoid stale closures
+  const latestWaveMessagesRef = useRef(waveMessages);
+
   const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
 
+  // Effect to update the ref whenever waveMessages changes
   useEffect(() => {
+    latestWaveMessagesRef.current = waveMessages;
+    // Recalculate smallestSerialNo based on the potentially updated data
     if (waveMessages && waveMessages.drops.length > 0) {
-      setInit(true);
-
       const minSerialNo = Math.min(
         ...waveMessages.drops.map((drop) => drop.serial_no)
       );
       smallestSerialNo.current = minSerialNo;
+    } else {
+      smallestSerialNo.current = null;
+    }
+  }, [waveMessages]);
 
-      // Check if the last drop is a temp drop (your own post)
-      const lastDrop = waveMessages.drops[0];
+  // Effect for initial load and handling own temporary drops
+  useEffect(() => {
+    const currentMessages = latestWaveMessagesRef.current;
+    if (currentMessages && currentMessages.drops.length > 0) {
+      if (!init) setInit(true);
+
+      const lastDrop = currentMessages.drops[0];
       if (lastDrop.id.startsWith("temp-")) {
-        // For user's own new drop, scroll to bottom - but only if they haven't manually scrolled away
         if (isAtBottom && !userHasManuallyScrolled) {
           setTimeout(() => {
             scrollToVisualBottom();
           }, 100);
         } else if (!userHasManuallyScrolled) {
-          // If not at bottom, use the serialNo approach to scroll to the specific drop
-          // Again, only if they haven't manually scrolled away
           setSerialNo(lastDrop.serial_no);
         }
-        // If they've manually scrolled, respect their intention and don't auto-scroll
       }
-    } else {
-      smallestSerialNo.current = null;
     }
-  }, [waveMessages?.drops, isAtBottom, scrollToVisualBottom]);
+  }, [waveMessages, isAtBottom, userHasManuallyScrolled, scrollToVisualBottom, init]); // Keep dependencies, logic uses ref
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -157,56 +164,101 @@ export default function WaveDropsAll({
 
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo) return;
-    let found = false;
-    setIsScrolling(true);
+    
+    console.log(`[WaveDropsAll] fetchAndScrollToDrop (waveId: ${waveId}): Starting loop. Target serialNo: ${serialNo}`);
+    setIsScrolling(true); // Set scrolling true for the entire process
+    
+    let found = false; // Keep track locally if found
 
     const checkAndFetchNext = async () => {
-      if (
-        found ||
-        !waveMessages?.hasNextPage ||
-        waveMessages?.isLoading ||
-        waveMessages?.isLoadingNextPage
-      ) {
-        setIsScrolling(false);
-        return;
+      // Always get the latest state from the ref
+      const currentMessages = latestWaveMessagesRef.current;
+      const currentSmallestSerial = smallestSerialNo.current;
+
+      // Check if target is now loaded
+      if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
+        found = true;
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Short delay for render
+        scrollToSerialNo("smooth");
+        setSerialNo(null);
+        setIsScrolling(false); // **** Stop scrolling only AFTER successful scroll ****
+        return; // Exit the loop
       }
+
+      // Check if we should stop fetching (no more pages or already fetching)
+      if (
+        !currentMessages?.hasNextPage ||
+        currentMessages?.isLoading ||
+        currentMessages?.isLoadingNextPage
+      ) {
+         if (!currentMessages?.hasNextPage) {
+             console.log(`[WaveDropsAll] checkAndFetchNext (waveId: ${waveId}): Target ${serialNo} NOT FOUND and no more pages. Stopping.`);
+             setSerialNo(null); // Clear the target
+         } else {
+             console.log(`[WaveDropsAll] checkAndFetchNext (waveId: ${waveId}): Already loading. Will retry check shortly.`);
+             // Don't set isScrolling false here, just wait and retry check
+             setTimeout(checkAndFetchNext, 1000); // Retry check later
+             return;
+         }
+        setIsScrolling(false); // **** Stop scrolling if no more pages or error ****
+        return; // Exit the loop
+      }
+
+      // --- If target not found and we can fetch more --- 
+      console.log(`[WaveDropsAll] checkAndFetchNext (waveId: ${waveId}): Target ${serialNo} NOT found (smallest loaded: ${currentSmallestSerial}). Fetching next page.`);
+      
       await fetchNextPageForWave(waveId);
 
-      if (smallestSerialNo.current && smallestSerialNo.current <= serialNo) {
-        found = true;
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        scrollToSerialNo("smooth");
-        setIsScrolling(false);
-        setSerialNo(null);
-      } else {
-        scrollToVisualTop();
-        setTimeout(checkAndFetchNext, 1000);
-      }
+      // ** Crucial:** After await, state *might* have updated. 
+      // The ref is updated by useEffect, so the *next* call to checkAndFetchNext will see it.
+      
+      // Scroll to top after fetch completes to show newly loaded older messages
+      console.log(`[WaveDropsAll] checkAndFetchNext (waveId: ${waveId}): Fetch complete. Scrolling to visual top.`);
+      scrollToVisualTop(); // <--- SCROLL TO TOP HERE
+      
+      // Schedule the next check without altering isScrolling state
+      setTimeout(checkAndFetchNext, 1000); 
     };
 
+    // Start the first check
     checkAndFetchNext();
+
   }, [
     waveId,
     fetchNextPageForWave,
-    waveMessages?.hasNextPage,
-    waveMessages?.isLoading,
-    waveMessages?.isLoadingNextPage,
     scrollToSerialNo,
     serialNo,
     setSerialNo,
-    scrollToVisualTop,
+    setIsScrolling,
+    scrollToVisualTop, // <-- Add scrollToVisualTop dependency
+    init, 
   ]);
 
+  // Effect to trigger the fetch loop when serialNo is set and we are initialized
   useEffect(() => {
     if (init && serialNo) {
-      const success = scrollToSerialNo("smooth");
-      if (success) {
-        setSerialNo(null);
+      const currentMessages = latestWaveMessagesRef.current;
+      const currentSmallestSerial = smallestSerialNo.current;
+      
+      // Check if already loaded before attempting scroll or fetch
+      if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
+         console.log(`[WaveDropsAll] Initial effect: Target serialNo ${serialNo} already loaded (smallest: ${currentSmallestSerial}). Attempting scroll.`);
+         const success = scrollToSerialNo("smooth");
+         if (success) {
+           setSerialNo(null);
+         } else {
+            console.log(`[WaveDropsAll] Initial effect: Scroll failed for already loaded serialNo ${serialNo}. Triggering fetch loop as fallback.`);
+            fetchAndScrollToDrop(); 
+         }
       } else {
+        console.log(`[WaveDropsAll] Initial effect: Target serialNo ${serialNo} not loaded (smallest: ${currentSmallestSerial}). Starting fetch loop.`);
         fetchAndScrollToDrop();
       }
     }
-  }, [init, serialNo]);
+    return () => {
+      // Cleanup logic if needed
+    };
+  }, [init, serialNo, fetchAndScrollToDrop, scrollToSerialNo, setSerialNo]); 
 
   const handleTopIntersection = useCallback(() => {
     if (
