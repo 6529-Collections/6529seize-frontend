@@ -47,14 +47,22 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
 
     // Check if voting period has started or ended
     const now = Time.currentMillis();
-    
+
     // Check if voting period hasn't started yet
-    if (drop.wave.voting_period_start && now < drop.wave.voting_period_start) {
+    if (
+      drop.drop_type !== ApiDropType.Chat &&
+      drop.wave.voting_period_start &&
+      now < drop.wave.voting_period_start
+    ) {
       return DropVoteState.VOTING_NOT_STARTED;
     }
-    
+
     // Check if voting period has ended
-    if (drop.wave.voting_period_end && now > drop.wave.voting_period_end) {
+    if (
+      drop.drop_type !== ApiDropType.Chat &&
+      drop.wave.voting_period_end &&
+      now > drop.wave.voting_period_end
+    ) {
       return DropVoteState.VOTING_ENDED;
     }
 
@@ -104,18 +112,18 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     !!connectedProfile?.profile?.handle &&
     connectedProfile.profile.handle === drop.author.handle;
 
-
   const isAdmin = drop.wave.authenticated_user_admin;
   const adminDropDeletionEnabled = drop.wave.admin_drop_deletion_enabled;
   const canDeleteAsAdmin = isAdmin && adminDropDeletionEnabled;
   // Delete rules
   const canDelete = baseRules && (isAuthor || canDeleteAsAdmin);
-  
+
   // Check if voting has ended by comparing current time with voting period end time
   const now = Time.currentMillis();
-  const isVotingEnded = drop.wave.voting_period_end 
-    ? now > drop.wave.voting_period_end 
-    : false;
+  const isVotingEnded =
+    drop.drop_type === ApiDropType.Participatory && drop.wave.voting_period_end
+      ? now > drop.wave.voting_period_end
+      : false;
 
   return {
     canShowVote,
