@@ -10,13 +10,9 @@ import {
 } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
-import { Spinner } from "../../dotLoader/DotLoader";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-
-const CREDIT_TYPE_LABELS: Record<ApiWaveCreditType, string> = {
-  [ApiWaveCreditType.Tdh]: "TDH",
-  [ApiWaveCreditType.Rep]: "REP",
-};
+import { CircleLoaderSize } from "../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 
 interface WaveRatingProps {
   readonly wave: ApiWave;
@@ -145,7 +141,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                 className={`tw-px-3 tw-py-2 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
                 aria-label="Receive mentions-only notifications">
                 {loading && loadingTarget === "mentions" ? (
-                  <Spinner dimension={12} />
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
                 ) : (
                   <FontAwesomeIcon
                     icon={faAt}
@@ -161,7 +157,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
               className={`tw-px-3 tw-py-2 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
               aria-label="Receive mentions-only notifications">
               {loading && loadingTarget === "mentions" ? (
-                <Spinner dimension={12} />
+                <CircleLoader size={CircleLoaderSize.SMALL} />
               ) : (
                 <FontAwesomeIcon
                   icon={faAt}
@@ -184,7 +180,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                 className={`tw-px-2.5 tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getDisabledButtonStyle()}`}
                 aria-label="Receive all notifications">
                 {loading && loadingTarget === "all" ? (
-                  <Spinner dimension={12} />
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
                 ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -209,7 +205,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
               className={`tw-px-2.5 tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
               aria-label="Receive all notifications">
               {loading && loadingTarget === "all" ? (
-                <Spinner dimension={12} />
+                <CircleLoader size={CircleLoaderSize.SMALL} />
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -240,7 +236,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                 className={`tw-px-2.5 tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
                 aria-label="Receive all notifications">
                 {loading && loadingTarget === "all" ? (
-                  <Spinner dimension={12} />
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
                 ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

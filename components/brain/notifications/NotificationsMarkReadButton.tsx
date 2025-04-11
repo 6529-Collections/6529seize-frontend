@@ -4,11 +4,8 @@ import {
   faEnvelope,
   faEnvelopeOpenText,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-  INotificationAllDrops,
-  TypedNotification,
-} from "../../../types/feed.types";
-import { useContext, useState } from "react";
+import { TypedNotification } from "../../../types/feed.types";
+import { useRef, useState } from "react";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
@@ -16,7 +13,6 @@ import CircleLoader, {
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useQueryClient } from "@tanstack/react-query";
 import { ApiNotificationsResponse } from "../../../generated/models/ApiNotificationsResponse";
-import { ApiNotification } from "../../../generated/models/ApiNotification";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 
 export default function NotificationsMarkReadButton({
@@ -40,9 +36,10 @@ export default function NotificationsMarkReadButton({
     ? faEnvelopeOpenText // read → default
     : faEnvelope; // unread → default
 
-  const tooltip = isRead ? "Mark as unread" : "Mark as read";
+  const tooltip = isLoading ? "" : isRead ? "Mark as unread" : "Mark as read";
 
   const toggleRead = async () => {
+    setIsHovered(false);
     setIsLoading(true);
 
     const endpoint = isRead
