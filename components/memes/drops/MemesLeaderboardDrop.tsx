@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropLocation } from "../../waves/drops/Drop";

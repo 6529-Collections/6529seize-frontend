@@ -4,7 +4,6 @@ interface UseLongPressInteractionOptions {
   longPressDuration?: number;
   moveThreshold?: number;
   onInteractionStart?: () => void;
-  onInteractionEnd?: () => void;
   hasTouchScreen?: boolean;
 }
 
@@ -21,7 +20,6 @@ export default function useLongPressInteraction(options: UseLongPressInteraction
     longPressDuration = 500, 
     moveThreshold = 10,
     onInteractionStart,
-    onInteractionEnd,
     hasTouchScreen = false // default to false, should be provided by component
   } = options;
   
