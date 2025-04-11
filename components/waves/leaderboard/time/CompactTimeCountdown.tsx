@@ -21,11 +21,6 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
   showLabelAtWidth = 700,
   className = "",
 }) => {
-  // Format time for display - no leading zeros for hours, but yes for minutes and seconds
-  const formatTime = (value: number, pad: boolean = false): string => {
-    return pad ? value.toString().padStart(2, "0") : value.toString();
-  };
-
   return (
     <div
       className={`tw-hidden md:tw-flex tw-items-center tw-gap-1.5 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-rounded-lg tw-border tw-border-emerald-600/20 tw-flex-shrink-0 ${className}`}

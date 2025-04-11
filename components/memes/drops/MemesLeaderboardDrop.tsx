@@ -49,15 +49,6 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
     hasTouchScreen
   });
   
-  // Empty handlers for reply/quote (not used in leaderboard)
-  const handleOnReply = useCallback(() => {
-    setIsActive(false);
-  }, [setIsActive]);
-  
-  const handleOnQuote = useCallback(() => {
-    setIsActive(false);
-  }, [setIsActive]);
-
   // Extract metadata
   const title =
     drop.metadata?.find((m) => m.data_key === "title")?.data_value ??

@@ -36,7 +36,6 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   const { 
     isActive, 
     setIsActive, 
-    longPressTriggered, 
     touchHandlers 
   } = useLongPressInteraction({
     hasTouchScreen

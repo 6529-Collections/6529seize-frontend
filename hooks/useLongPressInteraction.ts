@@ -38,11 +38,6 @@ export default function useLongPressInteraction(options: UseLongPressInteraction
     onInteractionStart?.();
   }, [onInteractionStart]);
   
-  const endInteraction = useCallback(() => {
-    setIsActive(false);
-    onInteractionEnd?.();
-  }, [onInteractionEnd]);
-  
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (!hasTouchScreen) return;
     
