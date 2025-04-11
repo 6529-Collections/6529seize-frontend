@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ExtendedDrop, convertApiDropToExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
@@ -79,15 +79,12 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   const topVoters = winner.drop.top_raters?.slice(0, 3) || [];
   const creditType = wave.voting?.credit_type || "votes";
 
+  // Convert the drop to ExtendedDrop using the helper function
+  const extendedDrop = convertApiDropToExtendedDrop(winner.drop);
+
   return (
     <div
-      onClick={() =>
-        onDropClick({
-          ...winner.drop,
-          stableKey: winner.drop.id,
-          stableHash: winner.drop.id,
-        })
-      }
+      onClick={() => onDropClick(extendedDrop)}
       className="tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full"
     >
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/40 tw-shadow-[0_0_15px_rgba(251,191,36,0.15)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
@@ -147,13 +144,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 {!hasTouchScreen && (
                   <div className="tw-flex tw-items-center">
                     <div className="tw-h-8">
-                      <WaveDropActionsOpen 
-                        drop={{
-                          ...winner.drop,
-                          stableHash: winner.drop.id,
-                          stableKey: winner.drop.id,
-                        }} 
-                      />
+                      <WaveDropActionsOpen drop={extendedDrop} />
                     </div>
                   </div>
                 )}
@@ -234,11 +225,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
                 {/* Open drop option */}
                 <WaveDropMobileMenuOpen 
-                  drop={{
-                    ...winner.drop,
-                    stableHash: winner.drop.id,
-                    stableKey: winner.drop.id,
-                  }} 
+                  drop={extendedDrop} 
                   onOpenChange={() => setIsActive(false)} 
                 />
               </div>

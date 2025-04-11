@@ -168,11 +168,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
             <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
               {/* Open drop option */}
               <WaveDropMobileMenuOpen 
-                drop={{
-                  ...drop,
-                  stableHash: drop.id,
-                  stableKey: drop.id,
-                }} 
+                drop={drop} 
                 onOpenChange={() => setIsActive(false)} 
               />
               

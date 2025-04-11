@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
@@ -14,8 +14,9 @@ import WaveDropMobileMenuDelete from "../../drops/WaveDropMobileMenuDelete";
 import { VotingModal, MobileVotingModal } from "../../../../components/voting";
 import VotingModalButton from "../../../../components/voting/VotingModalButton";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
-import useIsMobileDevice from "../../../../hooks/isMobileDevice";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import useLongPressInteraction from "../../../../hooks/useLongPressInteraction";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -28,55 +29,18 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 > = ({ drop, wave, onDropClick }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const [isSlideUp, setIsSlideUp] = useState(false);
-  const [longPressTriggered, setLongPressTriggered] = useState(false);
+  const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
-  const isMobileDevice = useIsMobileDevice();
   
-  // For long press detection
-  const LONG_PRESS_DURATION = 500; // milliseconds
-  const MOVE_THRESHOLD = 10; // pixels
-  const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-  
-  // Touch handlers
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!isMobileDevice) return;
-    
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    
-    longPressTimeout.current = setTimeout(() => {
-      setLongPressTriggered(true);
-      setIsSlideUp(true);
-    }, LONG_PRESS_DURATION);
-  };
-  
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!longPressTimeout.current) return;
-    
-    const touchX = e.touches[0].clientX;
-    const touchY = e.touches[0].clientY;
-    
-    const deltaX = Math.abs(touchX - touchStartX.current);
-    const deltaY = Math.abs(touchY - touchStartY.current);
-    
-    if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
-      if (longPressTimeout.current) {
-        clearTimeout(longPressTimeout.current);
-        longPressTimeout.current = null;
-      }
-    }
-  };
-  
-  const handleTouchEnd = () => {
-    if (longPressTimeout.current) {
-      clearTimeout(longPressTimeout.current);
-      longPressTimeout.current = null;
-    }
-    setLongPressTriggered(false);
-  };
+  // Use the hook for long press interactions
+  const { 
+    isActive, 
+    setIsActive, 
+    longPressTriggered, 
+    touchHandlers 
+  } = useLongPressInteraction({
+    hasTouchScreen
+  });
 
   const getBorderClasses = () => {
     const rank = drop.rank && drop.rank <= 3 ? drop.rank : "default";
@@ -105,10 +69,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
     >
       <div 
         className={getBorderClasses()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
+        {...touchHandlers}
       >
         <div className="tw-flex tw-flex-col">
           <div className="tw-flex tw-flex-col tw-gap-3">
@@ -166,24 +127,20 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       )}
       
       {/* Mobile menu slide-up */}
-      {isMobileDevice && createPortal(
-        <CommonDropdownItemsMobileWrapper isOpen={isSlideUp} setOpen={setIsSlideUp}>
+      {hasTouchScreen && createPortal(
+        <CommonDropdownItemsMobileWrapper isOpen={isActive} setOpen={setIsActive}>
           <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
             {/* Open drop option */}
             <WaveDropMobileMenuOpen 
-              drop={{
-                ...drop,
-                stableHash: drop.id,
-                stableKey: drop.id,
-              }} 
-              onOpenChange={() => setIsSlideUp(false)} 
+              drop={drop}
+              onOpenChange={() => setIsActive(false)} 
             />
             
             {/* Delete option - only if user can delete */}
             {canDelete && (
               <WaveDropMobileMenuDelete 
                 drop={drop} 
-                onDropDeleted={() => setIsSlideUp(false)} 
+                onDropDeleted={() => setIsActive(false)} 
               />
             )}
           </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { ExtendedDrop, convertApiDropToExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { WaveWinnersDropHeader } from "./header/WaveWinnersDropHeader";
 import { WaveWinnersDropContent } from "./WaveWinnersDropContent";
 import WaveWinnersDropOutcome from "./header/WaveWinnersDropOutcome";
@@ -52,15 +52,14 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
   });
   
   const shadowClass = getRankShadowClass(winner.place);
+  
+  // Convert the drop to ExtendedDrop using the helper function
+  const extendedDrop = convertApiDropToExtendedDrop(winner.drop);
 
   return (
     <div
       onClick={() =>
-        onDropClick({
-          ...winner.drop,
-          stableKey: winner.drop.id,
-          stableHash: winner.drop.id,
-        })
+        onDropClick(extendedDrop)
       }
       className={`tw-group tw-cursor-pointer tw-rounded-xl tw-bg-iron-950 tw-border tw-border-solid tw-border-transparent tw-border-l ${shadowClass}`}
     >
@@ -82,11 +81,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
             <div className="tw-flex tw-items-start">
               <div className="tw-h-8">
                 <WaveDropActionsOpen 
-                  drop={{
-                    ...winner.drop,
-                    stableHash: winner.drop.id,
-                    stableKey: winner.drop.id,
-                  }} 
+                  drop={extendedDrop} 
                 />
               </div>
             </div>
@@ -111,11 +106,7 @@ export const DefaultWaveWinnersDrop: React.FC<DefaultWaveWinnersDropProps> = ({
           <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
             {/* Open drop option */}
             <WaveDropMobileMenuOpen 
-              drop={{
-                ...winner.drop,
-                stableHash: winner.drop.id,
-                stableKey: winner.drop.id,
-              }} 
+              drop={extendedDrop} 
               onOpenChange={() => setIsActive(false)} 
             />
           </div>
