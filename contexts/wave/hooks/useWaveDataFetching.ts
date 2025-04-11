@@ -26,10 +26,10 @@ export function useWaveDataFetching({
   /**
    * Checks if a wave already has data, returns true if loading should continue
    */
-  const shouldFetchWaveData = useCallback(
+  const hasWaveData = useCallback(
     (waveId: string): boolean => {
       const existingData = getData(waveId);
-      return !existingData?.drops.length;
+      return !!existingData?.drops.length;
     },
     [getData]
   );
@@ -89,7 +89,7 @@ export function useWaveDataFetching({
   const activateWave = useCallback(
     async (waveId: string) => {
       // Check if we need to fetch data
-      if (!shouldFetchWaveData(waveId)) {
+      if (hasWaveData(waveId)) {
         return;
       }
 
@@ -118,7 +118,7 @@ export function useWaveDataFetching({
       return fetchPromise;
     },
     [
-      shouldFetchWaveData,
+      hasWaveData,
       getLoadingState,
       setLoadingState,
       updateData,
