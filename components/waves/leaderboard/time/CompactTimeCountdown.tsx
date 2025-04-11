@@ -7,7 +7,6 @@ import { TimeUnitDisplay } from "./TimeUnitDisplay";
 interface CompactTimeCountdownProps {
   readonly timeLeft: TimeLeft;
   readonly label?: string;
-  readonly showLabelAtWidth?: number;
   readonly className?: string;
 }
 
@@ -17,8 +16,6 @@ interface CompactTimeCountdownProps {
  */
 export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
   timeLeft,
-  label = "Next winner:",
-  showLabelAtWidth = 700,
   className = "",
 }) => {
   return (
@@ -30,9 +27,9 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <span
-          className={`tw-text-xs tw-text-emerald-500 tw-font-medium tw-hidden @[${showLabelAtWidth}px]:tw-flex`}
+          className={`tw-text-xs tw-text-emerald-500 tw-font-medium tw-hidden @[700px]:tw-flex`}
         >
-          {label}
+          Next winner:
         </span>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           {/* Days - only show when > 0 */}
