@@ -48,7 +48,7 @@ interface MyStreamContextType {
   readonly activeWave: ActiveWaveContextData;
   readonly waveMessagesStore: WaveMessagesStoreData;
   readonly registerWave: (waveId: string) => void;
-  readonly fetchNextPageForWave: (waveId: string) => Promise<ApiDrop[] | null>
+  readonly fetchNextPageForWave: (waveId: string) => Promise<ApiDrop[] | null>;
 }
 
 interface MyStreamProviderProps {
@@ -78,12 +78,12 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     getData: waveMessagesStore.getData,
     updateData: waveMessagesStore.updateData,
     registerWave: waveDataManager.registerWave,
-    fetchNewestMessages: waveDataManager.fetchNewestMessages,
+    syncNewestMessages: waveDataManager.syncNewestMessages,
   });
 
   useEffect(() => {
     if (activeWaveId) {
-      waveDataManager.registerWave(activeWaveId);
+      waveDataManager.registerWave(activeWaveId, true);
     }
   }, [activeWaveId]);
 

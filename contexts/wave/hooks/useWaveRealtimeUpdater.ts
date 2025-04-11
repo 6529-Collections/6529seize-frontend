@@ -8,7 +8,7 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly registerWave: (waveId: string) => void;
-  readonly fetchNewestMessages: (
+  readonly syncNewestMessages: (
     waveId: string,
     sinceSerialNo: number,
     signal: AbortSignal
@@ -19,7 +19,7 @@ export function useWaveRealtimeUpdater({
   getData,
   updateData,
   registerWave,
-  fetchNewestMessages,
+  syncNewestMessages,
 }: UseWaveRealtimeUpdaterProps) {
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
@@ -46,7 +46,7 @@ export function useWaveRealtimeUpdater({
 
       try {
         const { drops: fetchedDrops, highestSerialNo: fetchedHighestSerial } =
-          await fetchNewestMessages(waveId, sinceSerialNo, controller.signal);
+          await syncNewestMessages(waveId, sinceSerialNo, controller.signal);
 
         if (fetchedDrops) {
           const currentData = getData(waveId);
@@ -108,7 +108,7 @@ export function useWaveRealtimeUpdater({
         }
       }
     },
-    [getData, updateData, fetchNewestMessages, cleanupController]
+    [getData, updateData, syncNewestMessages, cleanupController]
   );
 
   // WebSocket message handler

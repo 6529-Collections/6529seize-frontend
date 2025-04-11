@@ -12,7 +12,7 @@ export function useWaveDataManager({
   getData,
 }: WaveDataStoreUpdater) {
   // Use composition to build the complete functionality
-  const { registerWave, cancelWaveDataFetch, fetchNewestMessages } = useWaveDataFetching({
+  const { registerWave, cancelWaveDataFetch, syncNewestMessages } = useWaveDataFetching({
     updateData,
     getData,
   });
@@ -28,7 +28,7 @@ export function useWaveDataManager({
     // Initial data loading & updates
     registerWave,
     cancelWaveDataFetch,
-    fetchNewestMessages,
+    syncNewestMessages,
 
     // Pagination
     fetchNextPage,
