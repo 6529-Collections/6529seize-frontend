@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAt } from "@fortawesome/free-solid-svg-icons";
 import { useWaveNotificationSubscription } from "../../../hooks/useWaveNotificationSubscription";
@@ -11,8 +10,9 @@ import {
 import { useAuth } from "../../auth/Auth";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { CircleLoaderSize } from "../../distribution-plan-tool/common/CircleLoader";
-import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../distribution-plan-tool/common/CircleLoader";
 
 interface WaveRatingProps {
   readonly wave: ApiWave;

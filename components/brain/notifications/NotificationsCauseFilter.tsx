@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from "react";
 import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
-import useIsMobileScreen from "../../../hooks/isMobileScreen";
 
 export interface NotificationFilter {
   cause: ApiNotificationCause[];
@@ -29,7 +28,6 @@ export default function NotificationsCauseFilter({
   readonly activeFilter: NotificationFilter | null;
   readonly setActiveFilter: (filter: NotificationFilter | null) => void;
 }) {
-  const isMobile = useIsMobileScreen();
   const [activeFilterIndex, setActiveFilterIndex] = useState<number>(0);
 
   const [highlightStyle, setHighlightStyle] = useState<{

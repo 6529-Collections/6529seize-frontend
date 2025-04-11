@@ -18,14 +18,6 @@ export default function NotificationsUnreadToggle({
   readonly isLoadingReadAll: boolean;
   readonly isDisabledReadAll: boolean;
 }) {
-  const getAllTooltip = () => {
-    return showUnreadNotifications ? "All Notifications" : "";
-  };
-
-  const getUnreadTooltip = () => {
-    return !showUnreadNotifications ? "Unread Notifications" : "";
-  };
-
   const getActiveButtonStyle = () => {
     return "tw-bg-iron-800 tw-text-primary-400 tw-font-medium";
   };
@@ -42,7 +34,7 @@ export default function NotificationsUnreadToggle({
             placement="top"
             overlay={
               <Tooltip id="show-all-notifications-tooltip">
-                {getAllTooltip()}
+                All Notifications
               </Tooltip>
             }>
             <button
@@ -85,7 +77,7 @@ export default function NotificationsUnreadToggle({
             placement="top"
             overlay={
               <Tooltip id="show-unread-notifications-tooltip">
-                {getUnreadTooltip()}
+                Unread Notifications
               </Tooltip>
             }>
             <button

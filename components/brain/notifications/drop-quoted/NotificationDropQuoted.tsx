@@ -10,8 +10,10 @@ import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import NotificationsMarkReadButton from "../NotificationsMarkReadButton";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import Link from "next/link";
-import { ImageScale } from "../../../../helpers/image.helpers";
-import { getScaledImageUri } from "../../../../helpers/image.helpers";
+import {
+  ImageScale,
+  getScaledImageUri,
+} from "../../../../helpers/image.helpers";
 
 export default function NotificationDropQuoted({
   notification,

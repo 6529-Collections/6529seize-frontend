@@ -5,7 +5,7 @@ import {
   faEnvelopeOpenText,
 } from "@fortawesome/free-solid-svg-icons";
 import { TypedNotification } from "../../../types/feed.types";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import CircleLoader, {
   CircleLoaderSize,
@@ -28,15 +28,64 @@ export default function NotificationsMarkReadButton({
   const queryClient = useQueryClient();
 
   const isRead = wasRead;
-  const buttonIcon = isHovered
-    ? isRead
-      ? faEnvelope // read → hover → show closed
-      : faEnvelopeOpenText // unread → hover → show open
-    : isRead
-    ? faEnvelopeOpenText // read → default
-    : faEnvelope; // unread → default
+  let buttonIcon;
+  if (isHovered) {
+    buttonIcon = isRead ? faEnvelope : faEnvelopeOpenText;
+  } else {
+    buttonIcon = isRead ? faEnvelopeOpenText : faEnvelope;
+  }
 
-  const tooltip = isLoading ? "" : isRead ? "Mark as unread" : "Mark as read";
+  let tooltip = "";
+  if (!isLoading) {
+    tooltip = isRead ? "Mark as unread" : "Mark as read";
+  }
+
+  const updateNotificationsQuery = async () => {
+    const queriesUnread = queryClient.getQueriesData({
+      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { unread: true }],
+    });
+
+    const queriesRead = queryClient.getQueriesData({
+      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { unread: false }],
+    });
+
+    queriesUnread.forEach(([key, data]) => {
+      queryClient.setQueryData(
+        key,
+        (oldData: { pages: ApiNotificationsResponse[] } | undefined) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              notifications: page.notifications.filter(
+                (n) => n.id !== notification.id
+              ),
+            })),
+          };
+        }
+      );
+    });
+    queriesRead.forEach(([key, data]) => {
+      queryClient.setQueryData(
+        key,
+        (oldData: { pages: ApiNotificationsResponse[] } | undefined) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              notifications: page.notifications.map((n) =>
+                n.id === notification.id ? { ...n, read_at: new Date() } : n
+              ),
+            })),
+          };
+        }
+      );
+    });
+  };
 
   const toggleRead = async () => {
     setIsHovered(false);
@@ -50,53 +99,8 @@ export default function NotificationsMarkReadButton({
       endpoint,
     })
       .then(async () => {
-        const queriesUnread = queryClient.getQueriesData({
-          queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { unread: true }],
-        });
-
-        const queriesRead = queryClient.getQueriesData({
-          queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { unread: false }],
-        });
-
-        queriesUnread.forEach(([key, data]) => {
-          queryClient.setQueryData(
-            key,
-            (oldData: { pages: ApiNotificationsResponse[] } | undefined) => {
-              if (!oldData) return oldData;
-
-              return {
-                ...oldData,
-                pages: oldData.pages.map((page) => ({
-                  ...page,
-                  notifications: page.notifications.filter(
-                    (n) => n.id !== notification.id
-                  ),
-                })),
-              };
-            }
-          );
-        });
-        queriesRead.forEach(([key, data]) => {
-          queryClient.setQueryData(
-            key,
-            (oldData: { pages: ApiNotificationsResponse[] } | undefined) => {
-              if (!oldData) return oldData;
-
-              return {
-                ...oldData,
-                pages: oldData.pages.map((page) => ({
-                  ...page,
-                  notifications: page.notifications.map((n) =>
-                    n.id === notification.id ? { ...n, read_at: new Date() } : n
-                  ),
-                })),
-              };
-            }
-          );
-        });
-
+        await updateNotificationsQuery();
         await removeNotificationById(notification.id.toString());
-
         setWasRead(!isRead);
       })
       .catch((error) => {
