@@ -40,6 +40,40 @@ export default function NotificationsMarkReadButton({
     tooltip = isRead ? "Mark as unread" : "Mark as read";
   }
 
+  const removeNotificationFromPages = (
+    data: { pages: ApiNotificationsResponse[] } | undefined,
+    notificationId: number
+  ) => {
+    if (!data) return data;
+
+    return {
+      ...data,
+      pages: data.pages.map((page) => ({
+        ...page,
+        notifications: page.notifications.filter(
+          (n) => n.id !== notificationId
+        ),
+      })),
+    };
+  };
+
+  const markNotificationReadInPages = (
+    data: { pages: ApiNotificationsResponse[] } | undefined,
+    notificationId: number
+  ) => {
+    if (!data) return data;
+
+    return {
+      ...data,
+      pages: data.pages.map((page) => ({
+        ...page,
+        notifications: page.notifications.map((n) =>
+          n.id === notificationId ? { ...n, read_at: new Date() } : n
+        ),
+      })),
+    };
+  };
+
   const updateNotificationsQuery = async () => {
     const queriesUnread = queryClient.getQueriesData({
       queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { unread: true }],
@@ -49,40 +83,19 @@ export default function NotificationsMarkReadButton({
       queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { unread: false }],
     });
 
-    queriesUnread.forEach(([key, data]) => {
+    queriesUnread.forEach(([key]) => {
       queryClient.setQueryData(
         key,
-        (oldData: { pages: ApiNotificationsResponse[] } | undefined) => {
-          if (!oldData) return oldData;
-
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) => ({
-              ...page,
-              notifications: page.notifications.filter(
-                (n) => n.id !== notification.id
-              ),
-            })),
-          };
-        }
+        (oldData: { pages: ApiNotificationsResponse[] } | undefined) =>
+          removeNotificationFromPages(oldData, notification.id)
       );
     });
-    queriesRead.forEach(([key, data]) => {
+
+    queriesRead.forEach(([key]) => {
       queryClient.setQueryData(
         key,
-        (oldData: { pages: ApiNotificationsResponse[] } | undefined) => {
-          if (!oldData) return oldData;
-
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) => ({
-              ...page,
-              notifications: page.notifications.map((n) =>
-                n.id === notification.id ? { ...n, read_at: new Date() } : n
-              ),
-            })),
-          };
-        }
+        (oldData: { pages: ApiNotificationsResponse[] } | undefined) =>
+          markNotificationReadInPages(oldData, notification.id)
       );
     });
   };
