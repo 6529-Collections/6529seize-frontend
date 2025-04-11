@@ -173,3 +173,55 @@ export function getHighestSerialNo(drops: ApiDrop[] | ExtendedDrop[]): number | 
   }
   return Math.max(...drops.map(drop => drop.serial_no));
 }
+
+/**
+ * Fetches wave messages (drops) newer than a specific serial number for a wave
+ * @param waveId The ID of the wave to fetch messages for
+ * @param sinceSerialNo Fetch messages with serial_no strictly greater than this. If null, fetches latest.
+ * @param limit The maximum number of messages to fetch.
+ * @param signal Optional AbortSignal for cancellation
+ * @returns Object containing fetched drops and the highest serial number among them, or nulls on error.
+ */
+export async function fetchNewestWaveMessages(
+  waveId: string,
+  sinceSerialNo: number | null,
+  limit: number,
+  signal?: AbortSignal
+): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> {
+  const params: Record<string, string> = {
+    limit: limit.toString(),
+  };
+  if (sinceSerialNo !== null) {
+    // Assuming API uses these parameters for fetching newer messages
+    params.serial_no_limit = `${sinceSerialNo}`;
+    params.search_strategy = "FIND_NEWER";
+  }
+
+  try {
+    const data = await commonApiFetch<ApiWaveDropsFeed>({
+      endpoint: `waves/${waveId}/drops`,
+      params,
+      signal,
+    });
+
+    const fetchedDrops = data.drops.map((drop) => ({
+      ...drop,
+      wave: data.wave,
+    }));
+    
+    const highestSerialNo = getHighestSerialNo(fetchedDrops);
+
+    return { drops: fetchedDrops, highestSerialNo };
+
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      console.log(`[Utils] Fetch newest for ${waveId} aborted.`);
+      throw error; // Re-throw abort errors
+    }
+    console.error(
+      `[Utils] Error fetching newest messages for ${waveId}:`,
+      error
+    );
+    return { drops: null, highestSerialNo: null }; // Return nulls on other errors
+  }
+}

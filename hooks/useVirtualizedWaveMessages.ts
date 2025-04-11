@@ -93,7 +93,5 @@ export function useVirtualizedWaveMessages(
     allDropsCount: fullWaveMessages.drops.length,
     loadMoreLocally,
     hasMoreLocal,
-    // Override the fetchNextPage function with our virtualized version
-    fetchNextPage
   };
 }
