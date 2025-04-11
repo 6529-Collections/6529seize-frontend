@@ -54,18 +54,13 @@ export default function WaveDropsAll({
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
-  const {
-    drops,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-  } = useWaveDrops({
-    waveId,
-    connectedProfileHandle: connectedProfile?.profile?.handle,
-    reverse: false,
-    dropId,
-  });
+  const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useWaveDrops({
+      waveId,
+      connectedProfileHandle: connectedProfile?.profile?.handle,
+      reverse: false,
+      dropId,
+    });
 
   const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
     useScrollBehavior();
@@ -187,19 +182,10 @@ export default function WaveDropsAll({
   }, [init, serialNo]);
 
   const handleTopIntersection = useCallback(() => {
-    if (
-      hasNextPage &&
-      !isFetching &&
-      !isFetchingNextPage
-    ) {
+    if (hasNextPage && !isFetching && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    fetchNextPage,
-  ]);
+  }, [hasNextPage, isFetching, isFetchingNextPage, fetchNextPage]);
 
   const onQuoteClick = useCallback(
     (drop: ApiDrop) => {
@@ -240,8 +226,7 @@ export default function WaveDropsAll({
             if (direction === "up") {
               setUserHasManuallyScrolled(true);
             }
-          }}
-        >
+          }}>
           <DropsList
             scrollContainerRef={scrollContainerRef}
             onReplyClick={setSerialNo}

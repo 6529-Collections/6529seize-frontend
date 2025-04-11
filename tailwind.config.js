@@ -25,7 +25,7 @@ module.exports = {
         "3xl": "2048px",
       },
       fontSize: {
-        xxs: ["0.8125rem", "20px"],
+        xxs: ["0.625rem", "10px"],
         md: ["0.9375rem", "24px"],
       },
       colors: {
@@ -82,39 +82,39 @@ module.exports = {
           "50%": {
             "background-position": "100% 50%",
           },
-          '100%': { 
-            'background-position': '0% 50%'
-          }
-        },
-        'gradient-x': {
-          '0%, 100%': {
-            'background-position': '0% 50%'
+          "100%": {
+            "background-position": "0% 50%",
           },
-          '50%': {
-            'background-position': '100% 50%'
-          }
         },
-        'fadeIn': {
-          '0%': { 
-            opacity: '0'
+        "gradient-x": {
+          "0%, 100%": {
+            "background-position": "0% 50%",
           },
-          '100%': { 
-            opacity: '1'
-          }
-        }
+          "50%": {
+            "background-position": "100% 50%",
+          },
+        },
+        fadeIn: {
+          "0%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "1",
+          },
+        },
       },
       animation: {
-        'loading-bar': 'loading-bar 1.5s infinite',
-        'trophy-appear': 'trophy-appear 0.3s ease-out forwards',
-        'gradient-shift': 'gradient-shift 8s ease infinite',
-        'gradient-x': 'gradient-x 3s ease infinite',
-        'spin-slow': 'spin 15s linear infinite',
-        'fadeIn': 'fadeIn 0.3s ease-out forwards'
+        "loading-bar": "loading-bar 1.5s infinite",
+        "trophy-appear": "trophy-appear 0.3s ease-out forwards",
+        "gradient-shift": "gradient-shift 8s ease infinite",
+        "gradient-x": "gradient-x 3s ease infinite",
+        "spin-slow": "spin 15s linear infinite",
+        fadeIn: "fadeIn 0.3s ease-out forwards",
       },
       backgroundSize: {
-        'gradient-pos': '200% 200%',
-        '200': '200% 200%'
-      }
+        "gradient-pos": "200% 200%",
+        200: "200% 200%",
+      },
     },
   },
   variants: {

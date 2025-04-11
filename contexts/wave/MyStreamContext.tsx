@@ -18,6 +18,7 @@ import { ApiWaveType } from "../../generated/models/ApiWaveType";
 interface MinimalWaveNewDropsCount {
   readonly count: number;
   readonly latestDropTimestamp: number | null;
+  readonly youHaveUnreadDrops: boolean;
 }
 
 export interface MinimalWave {
@@ -114,6 +115,9 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
             wavesData.waves.find((wave) => wave.id === waveId)?.metrics
               .latest_drop_timestamp ??
             null,
+          youHaveUnreadDrops:
+            wavesData.waves.find((wave) => wave.id === waveId)?.metrics
+              .you_have_unread_drops ?? false,
         },
       }));
     },
@@ -159,6 +163,8 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
             const currentCount = prev[waveId]?.count ?? 0;
             const currentLatestDropTimestamp =
               prev[waveId]?.latestDropTimestamp ?? null;
+            const currentYouHaveUnreadDrops =
+              prev[waveId]?.youHaveUnreadDrops ?? false;
             return {
               ...prev,
               [waveId]: {
@@ -167,6 +173,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
                   message.created_at,
                   currentLatestDropTimestamp ?? 0
                 ),
+                youHaveUnreadDrops: currentYouHaveUnreadDrops,
               },
             };
           });
@@ -177,6 +184,8 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
             const currentCount = prev[waveId]?.count ?? 0;
             const currentLatestDropTimestamp =
               prev[waveId]?.latestDropTimestamp ?? null;
+            const currentYouHaveUnreadDrops =
+              prev[waveId]?.youHaveUnreadDrops ?? false;
             return {
               ...prev,
               [waveId]: {
@@ -185,6 +194,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
                   message.created_at,
                   currentLatestDropTimestamp ?? 0
                 ),
+                youHaveUnreadDrops: currentYouHaveUnreadDrops,
               },
             };
           });
@@ -195,6 +205,8 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
           const currentCount = prev[waveId]?.count ?? 0;
           const currentLatestDropTimestamp =
             prev[waveId]?.latestDropTimestamp ?? null;
+          const currentYouHaveUnreadDrops =
+            prev[waveId]?.youHaveUnreadDrops ?? false;
           // Optional: Cap the maximum count at 99
           const MAX_COUNT = 99;
           return {
@@ -205,6 +217,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
                 message.created_at,
                 currentLatestDropTimestamp ?? 0
               ),
+              youHaveUnreadDrops: currentYouHaveUnreadDrops,
             },
           };
         });
@@ -222,6 +235,10 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
           newDropsCounts[wave.id]?.latestDropTimestamp ??
           wave.metrics.latest_drop_timestamp ??
           null,
+        youHaveUnreadDrops:
+          newDropsCounts[wave.id]?.youHaveUnreadDrops ??
+          wave.metrics.you_have_unread_drops ??
+          false,
       };
       return {
         id: wave.id, // Add the missing id property
