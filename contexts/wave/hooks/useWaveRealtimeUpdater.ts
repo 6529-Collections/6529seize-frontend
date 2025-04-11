@@ -15,12 +15,16 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
 }
 
+export type ProcessIncomingDropFn = (dropData: ApiDrop) => void;
+
 export function useWaveRealtimeUpdater({
   getData,
   updateData,
   registerWave,
   syncNewestMessages,
-}: UseWaveRealtimeUpdaterProps) {
+}: UseWaveRealtimeUpdaterProps): {
+  processIncomingDrop: ProcessIncomingDropFn;
+} {
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
   const abortControllersRef = useRef<Record<string, AbortController>>({});
@@ -112,43 +116,31 @@ export function useWaveRealtimeUpdater({
   );
 
   // WebSocket message handler
-  const handleWebSocketMessage = useCallback(
-    (message: WsDropUpdateMessage["data"]) => {
-      if (!message?.wave?.id) {
-        console.warn(
-          "[RealtimeUpdater] Received WS message without wave ID:",
-          message
-        );
+  const processIncomingDrop: ProcessIncomingDropFn = useCallback(
+    (drop: ApiDrop) => {
+      if (!drop?.wave?.id) {
         return;
       }
-      const waveId = message.wave.id;
-
-      console.log(
-        `[RealtimeUpdater] Received WS message for wave ${waveId}:`,
-        message
-      );
+      const waveId = drop.wave.id;
 
       const currentData = getData(waveId);
 
       if (!currentData) {
         // Wave not registered or data not loaded yet.
         // Registering will trigger initial fetch which should get this message.
-        console.log(
-          `[RealtimeUpdater] Wave ${waveId} not found locally. Registering.`
-        );
         registerWave(waveId);
         return;
       }
 
       // Wave is registered, perform optimistic update
       console.log(
-        `[RealtimeUpdater] Optimistically adding drop ${message.id} to ${waveId}.`
+        `[RealtimeUpdater] Optimistically adding drop ${drop.id} to ${waveId}.`
       );
       const optimisticDrop: ExtendedDrop = {
-        ...message,
-        wave: message.wave, // Assuming message structure matches ApiDrop + ApiWaveMin
-        stableKey: message.id,
-        stableHash: message.id, // Use ID for hash temporarily
+        ...drop,
+        wave: drop.wave, // Assuming message structure matches ApiDrop + ApiWaveMin
+        stableKey: drop.id,
+        stableHash: drop.id, // Use ID for hash temporarily
       };
 
       // Important: Identify the serial number *before* adding the optimistic drop
@@ -176,7 +168,7 @@ export function useWaveRealtimeUpdater({
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
-    handleWebSocketMessage
+    processIncomingDrop
   );
 
   // Cleanup: Cancel all ongoing fetches on unmount
@@ -195,4 +187,5 @@ export function useWaveRealtimeUpdater({
   }, []);
 
   // No return value needed as this hook works in the background
+  return { processIncomingDrop };
 }

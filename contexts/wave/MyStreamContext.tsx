@@ -5,7 +5,6 @@ import React, {
   ReactNode,
   useEffect,
   useState,
-  useCallback,
 } from "react";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import useEnhancedWavesList, {
@@ -49,6 +48,7 @@ interface MyStreamContextType {
   readonly waveMessagesStore: WaveMessagesStoreData;
   readonly registerWave: (waveId: string) => void;
   readonly fetchNextPageForWave: (waveId: string) => Promise<ApiDrop[] | null>;
+  readonly processIncomingDrop: (drop: ApiDrop) => void;
 }
 
 interface MyStreamProviderProps {
@@ -73,8 +73,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
 
   // Instantiate the real-time updater hook
-  // It works in the background, no need to capture its return value
-  useWaveRealtimeUpdater({
+  const { processIncomingDrop } = useWaveRealtimeUpdater({
     getData: waveMessagesStore.getData,
     updateData: waveMessagesStore.updateData,
     registerWave: waveDataManager.registerWave,
@@ -117,6 +116,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       waveMessagesStore: waveMessagesStoreData,
       registerWave: waveDataManager.registerWave,
       fetchNextPageForWave: waveDataManager.fetchNextPage,
+      processIncomingDrop,
     };
   }, [
     wavesHookData.waves,
@@ -133,6 +133,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     waveMessagesStore.unsubscribe,
     waveDataManager.registerWave,
     waveDataManager.fetchNextPage,
+    processIncomingDrop,
   ]);
 
   return (

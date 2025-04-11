@@ -51,6 +51,7 @@ import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTra
 import { useDropSignature } from "../../hooks/drops/useDropSignature";
 import { useWave } from "../../hooks/useWave";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
+import { useMyStream } from "../../contexts/wave/MyStreamContext";
 
 export type CreateDropMetadataType =
   | {
@@ -365,6 +366,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const breakpoint = useBreakpoint();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
+  console.log('rere')
+  const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
   const { isMemesWave } = useWave(wave);
 
@@ -653,6 +656,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       );
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
+        processIncomingDrop(optimisticDrop);
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);

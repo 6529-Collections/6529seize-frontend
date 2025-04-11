@@ -162,8 +162,17 @@ export function mergeDrops(
   // Convert the map back to an array
   const mergedDrops = Array.from(dropsMap.values());
 
-  // Sort by serial_no in descending order (older first)
-  return mergedDrops.sort((a, b) => b.serial_no - a.serial_no);
+  // Sort by serial_no
+  return mergedDrops.sort((a, b) => {
+    const aIsTemp = a.id?.startsWith('temp-') ?? false;
+    const bIsTemp = b.id?.startsWith('temp-') ?? false;
+
+    if (aIsTemp && !bIsTemp) return -1;
+    if (!aIsTemp && bIsTemp) return 1;
+    if (aIsTemp && bIsTemp) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+
+    return b.serial_no - a.serial_no;
+  });
 }
 
 // Helper function to get the highest serial number from an array of drops
