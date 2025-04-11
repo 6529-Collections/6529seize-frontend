@@ -20,7 +20,7 @@ export function useVirtualizedWaveDrops(
   const virtualizedWaveMessages = useVirtualizedWaveMessages(waveId, pageSize);
 
   // Create a wrapper for fetchNextPageForWave that first tries to get data locally
-  const fetchNextPageForWave = useCallback((id: string) => {
+  const fetchNextPageForWave = useCallback(async (id: string) => {
     if (waveId === id && virtualizedWaveMessages) {
       // First try to load more from cache if available
       if (virtualizedWaveMessages.hasMoreLocal) {
@@ -30,7 +30,7 @@ export function useVirtualizedWaveDrops(
     }
     
     // If no more local data or different waveId, use the original function
-    return originalFetchNextPage(id);
+    return await originalFetchNextPage(id);
   }, [waveId, virtualizedWaveMessages, originalFetchNextPage]);
 
   return {

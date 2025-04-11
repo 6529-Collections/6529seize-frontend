@@ -22,6 +22,7 @@ import {
 } from "../../../contexts/wave/MyStreamContext";
 import useWaveMessagesStore from "../../../contexts/wave/hooks/useWaveMessagesStore";
 import { useVirtualizedWaveDrops } from "../../../hooks/useVirtualizedWaveDrops";
+import { Time } from "../../../helpers/time";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -59,7 +60,8 @@ export default function WaveDropsAll({
 
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
-  const { waveMessages, fetchNextPageForWave } = useVirtualizedWaveDrops(waveId);
+  const { waveMessages, fetchNextPageForWave } =
+    useVirtualizedWaveDrops(waveId);
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
   // const {
@@ -151,6 +153,7 @@ export default function WaveDropsAll({
       endpoint: `notifications/wave/${waveId}/read`,
     }).catch((error) => console.error("Failed to mark feed as read:", error));
   }, [waveId]);
+  
 
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo) return;
@@ -183,6 +186,7 @@ export default function WaveDropsAll({
 
     checkAndFetchNext();
   }, [
+    waveId,
     fetchNextPageForWave,
     waveMessages?.hasNextPage,
     waveMessages?.isLoading,

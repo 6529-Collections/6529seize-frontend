@@ -16,6 +16,7 @@ import useWaveMessagesStore, {
   Listener as WaveMessagesListener,
 } from "./hooks/useWaveMessagesStore";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
+import { ApiDrop } from "../../generated/models/ApiDrop";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -46,7 +47,7 @@ interface MyStreamContextType {
   readonly activeWave: ActiveWaveContextData;
   readonly waveMessagesStore: WaveMessagesStoreData;
   readonly registerWave: (waveId: string) => void;
-  readonly fetchNextPageForWave: (waveId: string) => void;
+  readonly fetchNextPageForWave: (waveId: string) => Promise<ApiDrop[] | null>
 }
 
 interface MyStreamProviderProps {

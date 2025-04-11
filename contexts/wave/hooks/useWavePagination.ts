@@ -136,6 +136,7 @@ export function useWavePagination({
   const fetchNextPage = useCallback(
     async (waveId: string): Promise<ApiDrop[] | null> => {
       console.log(`[WaveDataManager] Fetching next page for wave ${waveId}`);
+      
       // Get current state
       const currentData = getData(waveId);
       if (!currentData) {
