@@ -35,6 +35,11 @@ interface UseNotificationsQueryProps {
    * The cause of the notifications to fetch.
    */
   cause?: ApiNotificationCause[] | null;
+
+  /**
+   * If true, only fetch unread notifications.
+   */
+  unread?: boolean;
 }
 
 export function useNotificationsQuery({
@@ -43,6 +48,7 @@ export function useNotificationsQuery({
   activeProfileProxy = false,
   limit = "30",
   cause = null,
+  unread = false,
 }: UseNotificationsQueryProps) {
   const queryClient = useQueryClient();
 
@@ -54,7 +60,10 @@ export function useNotificationsQuery({
    * This is similar to how `useMyStreamQuery` sets up prefetching.
    */
   queryClient.prefetchInfiniteQuery({
-    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }],
+    queryKey: [
+      QueryKey.IDENTITY_NOTIFICATIONS,
+      { identity, limit, cause, unread },
+    ],
     queryFn: async ({ pageParam }: { pageParam?: number | null }) => {
       const params: Record<string, string> = { limit };
       if (pageParam) {
@@ -63,6 +72,7 @@ export function useNotificationsQuery({
       if (cause?.length) {
         params.cause = cause.join(",");
       }
+      params.unread_only = unread ? "true" : "false";
       return await commonApiFetch<TypedNotificationsResponse>({
         endpoint: "notifications",
         params,
@@ -78,7 +88,10 @@ export function useNotificationsQuery({
    * Now the actual Infinite Query for notifications
    */
   const query = useInfiniteQuery({
-    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }],
+    queryKey: [
+      QueryKey.IDENTITY_NOTIFICATIONS,
+      { identity, limit, cause, unread },
+    ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
       const params: Record<string, string> = {
         limit,
@@ -89,6 +102,7 @@ export function useNotificationsQuery({
       if (cause) {
         params.cause = cause.join(",");
       }
+      params.unread_only = unread ? "true" : "false";
       return await commonApiFetch<TypedNotificationsResponse>({
         endpoint: "notifications",
         params,

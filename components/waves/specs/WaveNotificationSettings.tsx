@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAt } from "@fortawesome/free-solid-svg-icons";
 import { useWaveNotificationSubscription } from "../../../hooks/useWaveNotificationSubscription";
@@ -10,13 +9,10 @@ import {
 } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
-import { Spinner } from "../../dotLoader/DotLoader";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-
-const CREDIT_TYPE_LABELS: Record<ApiWaveCreditType, string> = {
-  [ApiWaveCreditType.Tdh]: "TDH",
-  [ApiWaveCreditType.Rep]: "REP",
-};
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../distribution-plan-tool/common/CircleLoader";
 
 interface WaveRatingProps {
   readonly wave: ApiWave;
@@ -101,18 +97,14 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
   }, [wave.subscribed_actions.length, refetch]);
 
   const getMentionsTooltip = () => {
-    return isAllEnabled
-      ? "Click to switch to mentions-only notifications"
-      : "";
+    return isAllEnabled ? "Click to switch to mentions-only notifications" : "";
   };
 
   const getAllTooltip = () => {
     if (disableSelection) {
       return `'All' notifications unavailable for waves with ${seizeSettings.all_drops_notifications_subscribers_limit.toLocaleString()}+ followers.`;
     }
-    return !isAllEnabled
-      ? "Click to enable notifications for all drops"
-      : "";
+    return !isAllEnabled ? "Click to enable notifications for all drops" : "";
   };
 
   const getActiveButtonStyle = () => {
@@ -142,16 +134,14 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                 <Tooltip id={`mentions-tooltip-${wave.id}`}>
                   {getMentionsTooltip()}
                 </Tooltip>
-              }
-            >
+              }>
               <button
                 disabled={loading}
                 onClick={() => toggleNotifications(false)}
                 className={`tw-px-3 tw-py-2 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
-                aria-label="Receive mentions-only notifications"
-              >
+                aria-label="Receive mentions-only notifications">
                 {loading && loadingTarget === "mentions" ? (
-                  <Spinner dimension={12} />
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
                 ) : (
                   <FontAwesomeIcon
                     icon={faAt}
@@ -165,10 +155,9 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
               disabled={loading}
               onClick={() => toggleNotifications(false)}
               className={`tw-px-3 tw-py-2 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
-              aria-label="Receive mentions-only notifications"
-            >
+              aria-label="Receive mentions-only notifications">
               {loading && loadingTarget === "mentions" ? (
-                <Spinner dimension={12} />
+                <CircleLoader size={CircleLoaderSize.SMALL} />
               ) : (
                 <FontAwesomeIcon
                   icon={faAt}
@@ -182,16 +171,16 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
             <OverlayTrigger
               placement="top"
               overlay={
-                <Tooltip id={`all-tooltip-${wave.id}`}>{getAllTooltip()}</Tooltip>
-              }
-            >
+                <Tooltip id={`all-tooltip-${wave.id}`}>
+                  {getAllTooltip()}
+                </Tooltip>
+              }>
               <button
                 disabled={true}
-                className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getDisabledButtonStyle()}`}
-                aria-label="Receive all notifications"
-              >
+                className={`tw-px-2.5 tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getDisabledButtonStyle()}`}
+                aria-label="Receive all notifications">
                 {loading && loadingTarget === "all" ? (
-                  <Spinner dimension={12} />
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
                 ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -199,8 +188,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                     viewBox="0 0 24 24"
                     strokeWidth="2"
                     stroke="currentColor"
-                    className="tw-size-4 tw-flex-shrink-0"
-                  >
+                    className="tw-size-4 tw-flex-shrink-0">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -214,11 +202,10 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
             <button
               disabled={loading}
               onClick={() => toggleNotifications(true)}
-              className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
-              aria-label="Receive all notifications"
-            >
+              className={`tw-px-2.5 tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
+              aria-label="Receive all notifications">
               {loading && loadingTarget === "all" ? (
-                <Spinner dimension={12} />
+                <CircleLoader size={CircleLoaderSize.SMALL} />
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -226,8 +213,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                   viewBox="0 0 24 24"
                   strokeWidth="2"
                   stroke="currentColor"
-                  className="tw-size-4 tw-flex-shrink-0"
-                >
+                  className="tw-size-4 tw-flex-shrink-0">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -240,17 +226,17 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
             <OverlayTrigger
               placement="top"
               overlay={
-                <Tooltip id={`all-tooltip-${wave.id}`}>{getAllTooltip()}</Tooltip>
-              }
-            >
+                <Tooltip id={`all-tooltip-${wave.id}`}>
+                  {getAllTooltip()}
+                </Tooltip>
+              }>
               <button
                 disabled={loading}
                 onClick={() => toggleNotifications(true)}
-                className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
-                aria-label="Receive all notifications"
-              >
+                className={`tw-px-2.5 tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
+                aria-label="Receive all notifications">
                 {loading && loadingTarget === "all" ? (
-                  <Spinner dimension={12} />
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
                 ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -258,8 +244,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                     viewBox="0 0 24 24"
                     strokeWidth="2"
                     stroke="currentColor"
-                    className="tw-size-4 tw-flex-shrink-0"
-                  >
+                    className="tw-size-4 tw-flex-shrink-0">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

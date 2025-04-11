@@ -8,6 +8,7 @@ import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import UserFollowBtn, {
   UserFollowBtnSize,
 } from "../../../user/utils/UserFollowBtn";
+import NotificationsMarkReadButton from "../NotificationsMarkReadButton";
 
 export default function NotificationIdentitySubscribed({
   notification,
@@ -46,10 +47,13 @@ export default function NotificationIdentitySubscribed({
           </span>
         </div>
 
-        <UserFollowBtn
-          handle={notification.related_identity.handle}
-          size={UserFollowBtnSize.SMALL}
-        />
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <UserFollowBtn
+            handle={notification.related_identity.handle}
+            size={UserFollowBtnSize.SMALL}
+          />
+          <NotificationsMarkReadButton notification={notification} />
+        </div>
       </div>
     </div>
   );
