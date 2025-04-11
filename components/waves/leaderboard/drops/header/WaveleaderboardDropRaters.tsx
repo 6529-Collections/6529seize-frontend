@@ -43,7 +43,7 @@ export const WaveLeaderboardDropRaters: React.FC<
     drop.context_profile_context?.rating !== 0;
 
   return (
-    <div className="tw-flex tw-items-center tw-gap-x-4 tw-gap-y-1.5 sm:tw-justify-end">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-2 sm:tw-justify-end">
       <div className="tw-flex tw-items-baseline tw-gap-x-1">
         <div className="tw-relative tw-inline-flex tw-items-center tw-gap-x-1">
           {" "}
@@ -90,7 +90,7 @@ export const WaveLeaderboardDropRaters: React.FC<
                         ImageScale.W_AUTO_H_50
                       )}
                       alt={`${voter.profile.handle}'s Profile`}
-                      className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800"
+                      className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800 tw-object-contain"
                     />
                   ) : (
                     <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800" />

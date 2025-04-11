@@ -186,7 +186,7 @@ function DropListItemContentMediaImage({
 
   return (
     <>
-      <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative sm:tw-max-w-lg tw-mx-[1px]">
+      <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-mx-[1px]">
         {isLoading && (
           <div
             className="tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
@@ -197,7 +197,7 @@ function DropListItemContentMediaImage({
           ref={imgRef}
           src={getScaledImageUri(src, ImageScale.AUTOx450)}
           alt="Drop media"
-          className={`tw-object-contain tw-max-w-full tw-max-h-[516px] ${
+          className={`tw-object-contain tw-max-w-full ${
             isLoading ? "tw-opacity-0" : "tw-opacity-100"
           } tw-cursor-pointer`}
           style={{

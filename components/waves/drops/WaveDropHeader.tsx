@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { cicToType } from "../../../helpers/Helpers";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
@@ -26,6 +27,22 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
 }) => {
   const router = useRouter();
   const cicType = cicToType(drop.author.cic);
+  const [isMobile, setIsMobile] = useState(false);
+
+  function checkMobile() {
+    const screenSize = window.innerWidth;
+    if (screenSize <= 640) { // Tailwind's sm breakpoint
+      setIsMobile(true);
+    } else {
+      setIsMobile(false);
+    }
+  }
+
+  useEffect(() => {
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleNavigation = (e: React.MouseEvent, path: string) => {
     e.preventDefault();
@@ -55,7 +72,10 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             </p>
             <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
             <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-              {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
+              {isMobile 
+                ? Time.millis(drop.created_at).toLocaleDropDateString()
+                : Time.millis(drop.created_at).toLocaleDropDateAndTimeString()
+              }
             </p>
           </div>
           {badge && <div className="tw-ml-2">{badge}</div>}

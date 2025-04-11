@@ -34,7 +34,7 @@ const MemeDropTraits: React.FC<MemeDropTraitsProps> = ({ drop }) => {
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2">
+    <div className="lg:tw-flex tw-flex-col tw-gap-2 tw-hidden tw-p-4">
       <div className="tw-grid tw-grid-cols-2 sm:tw-grid-cols-4 tw-gap-2">
         <MemeDropTrait
           label={FIELD_TO_LABEL_MAP.artist}

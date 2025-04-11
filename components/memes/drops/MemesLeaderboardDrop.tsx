@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropLocation } from "../../waves/drops/Drop";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
@@ -15,6 +16,11 @@ import WaveDropActionsOpen from "../../waves/drops/WaveDropActionsOpen";
 import { VotingModal, MobileVotingModal } from "../../voting";
 import VotingModalButton from "../../voting/VotingModalButton";
 import useIsMobileScreen from "../../../hooks/isMobileScreen";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import useLongPressInteraction from "../../../hooks/useLongPressInteraction";
+import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import WaveDropMobileMenuDelete from "../../waves/drops/WaveDropMobileMenuDelete";
+import WaveDropMobileMenuOpen from "../../waves/drops/WaveDropMobileMenuOpen";
 
 interface MemesLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -27,9 +33,30 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   onDropClick,
   location = DropLocation.WAVE,
 }) => {
-  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const isMobileScreen = useIsMobileScreen();
   const { canDelete } = useDropInteractionRules(drop);
-  const isMobile = useIsMobileScreen();
+  const [isVotingModalOpen, setIsVotingModalOpen] = useState<boolean>(false);
+  
+  // Get device info from useDeviceInfo hook
+  const { hasTouchScreen } = useDeviceInfo();
+  
+  // Use long press interaction hook with touch screen info from device hook
+  const { 
+    isActive, 
+    setIsActive, 
+    touchHandlers 
+  } = useLongPressInteraction({
+    hasTouchScreen
+  });
+  
+  // Empty handlers for reply/quote (not used in leaderboard)
+  const handleOnReply = useCallback(() => {
+    setIsActive(false);
+  }, [setIsActive]);
+  
+  const handleOnQuote = useCallback(() => {
+    setIsActive(false);
+  }, [setIsActive]);
 
   // Extract metadata
   const title =
@@ -51,84 +78,115 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
       onClick={() => onDropClick(drop)}
     >
       <div className="tw-w-full tw-group">
-        <MemesLeaderboardDropCard drop={drop}>
-          <div>
-            <div className="tw-p-4">
-              <div className="tw-flex tw-flex-col tw-gap-y-1">
-                <div className="tw-flex tw-items-center tw-justify-between">
-                  <MemesLeaderboardDropArtistInfo drop={drop} />
-                  <div className="tw-flex tw-items-center">
-                    <div className="tw-h-8 tw-hidden lg:tw-block">
-                      <WaveDropActionsOpen drop={drop} />
-                    </div>
-                    <div className="tw-h-8 tw-hidden lg:tw-block">
-                      {canDelete && <WaveDropActionsOptions drop={drop} />}
+        <div
+          {...touchHandlers}
+        >
+          <MemesLeaderboardDropCard drop={drop}>
+            <div>
+              <div className="tw-p-4">
+                <div className="tw-flex tw-flex-col tw-gap-y-1">
+                  <div className="tw-flex tw-items-center tw-justify-between">
+                    <MemesLeaderboardDropArtistInfo drop={drop} />
+                    <div className="tw-flex tw-items-center">
+                      {/* Show action buttons when not a touch device */}
+                      {!hasTouchScreen && (
+                        <>
+                          <div className="tw-h-8">
+                            <WaveDropActionsOpen drop={drop} />
+                          </div>
+                          <div className="tw-h-8">
+                            {canDelete && <WaveDropActionsOptions drop={drop} />}
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
+                  <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
+                    <MemesLeaderboardDropHeader title={title} />
+                    <MemesLeaderboardDropDescription description={description} />
+                  </div>
                 </div>
-                <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
-                  <MemesLeaderboardDropHeader title={title} />
-                  <MemesLeaderboardDropDescription description={description} />
+              </div>
+
+              {artworkMedia && (
+                <div
+                  className={`tw-flex tw-justify-center tw-h-96 ${
+                    location === DropLocation.WAVE
+                      ? "tw-bg-iron-800/30"
+                      : "tw-bg-iron-900/40"
+                  }`}
+                >
+                  <DropListItemContentMedia
+                    media_mime_type={artworkMedia.mime_type}
+                    media_url={artworkMedia.url}
+                  />
+                </div>
+              )}
+                <MemeDropTraits drop={drop} />
+              <div className="tw-mt-4 lg:tw-mt-0 tw-flex tw-flex-col tw-gap-y-2 @[700px]:tw-flex-row tw-justify-between @[700px]:tw-pb-4 @[700px]:tw-px-4 @[700px]:tw-items-center">
+                <div className="tw-px-6 @[700px]:tw-px-0">
+                  <MemesLeaderboardDropVoteSummary
+                    current={drop.rating}
+                    projected={drop.rating_prediction}
+                    creditType={drop.wave.voting_credit_type}
+                    ratersCount={drop.raters_count}
+                    topVoters={firstThreeVoters}
+                  />
+                </div>
+
+                <div 
+                  className="tw-pt-4 tw-pb-4 tw-px-6 tw-flex tw-justify-center @[700px]:tw-pt-0 @[700px]:tw-pb-0 @[700px]:tw-px-0 tw-w-full @[700px]:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 @[700px]:tw-border-none tw-border-x-0 tw-border-b-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <VotingModalButton
+                    drop={drop}
+                    onClick={() => setIsVotingModalOpen(true)}
+                  />
                 </div>
               </div>
             </div>
 
-            {artworkMedia && (
-              <div
-                className={`tw-flex tw-justify-center tw-h-96 ${
-                  location === DropLocation.WAVE
-                    ? "tw-bg-iron-800/30"
-                    : "tw-bg-iron-900/40"
-                }`}
-              >
-                <DropListItemContentMedia
-                  media_mime_type={artworkMedia.mime_type}
-                  media_url={artworkMedia.url}
-                />
-              </div>
+            {isMobileScreen ? (
+              <MobileVotingModal
+                drop={drop}
+                isOpen={isVotingModalOpen}
+                onClose={() => setIsVotingModalOpen(false)}
+              />
+            ) : (
+              <VotingModal
+                drop={drop}
+                isOpen={isVotingModalOpen}
+                onClose={() => setIsVotingModalOpen(false)}
+              />
             )}
-            <div className="tw-p-4">
-              <MemeDropTraits drop={drop} />
-            </div>
-            <div className="tw-flex tw-flex-col tw-gap-y-2 @[700px]:tw-flex-row tw-justify-between @[700px]:tw-pb-4 @[700px]:tw-px-4 @[700px]:tw-items-center">
-              <div className="tw-px-6 @[700px]:tw-px-0">
-                <MemesLeaderboardDropVoteSummary
-                  current={drop.rating}
-                  projected={drop.rating_prediction}
-                  creditType={drop.wave.voting_credit_type}
-                  ratersCount={drop.raters_count}
-                  topVoters={firstThreeVoters}
+          </MemesLeaderboardDropCard>
+        </div>
+
+        {/* Touch slide-up menu for leaderboard */}
+        {hasTouchScreen && createPortal(
+          <CommonDropdownItemsMobileWrapper isOpen={isActive} setOpen={setIsActive}>
+            <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
+              {/* Open drop option */}
+              <WaveDropMobileMenuOpen 
+                drop={{
+                  ...drop,
+                  stableHash: drop.id,
+                  stableKey: drop.id,
+                }} 
+                onOpenChange={() => setIsActive(false)} 
+              />
+              
+              {/* Delete option - only if user can delete */}
+              {canDelete && (
+                <WaveDropMobileMenuDelete 
+                  drop={drop} 
+                  onDropDeleted={() => setIsActive(false)} 
                 />
-              </div>
-
-              <div 
-                className="tw-pt-4 tw-pb-4 tw-px-6 tw-flex tw-justify-center @[700px]:tw-pt-0 @[700px]:tw-pb-0 @[700px]:tw-px-0 tw-w-full @[700px]:tw-w-auto tw-border-t tw-border-solid tw-border-iron-800 @[700px]:tw-border-none tw-border-x-0 tw-border-b-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <VotingModalButton
-                  drop={drop}
-                  onClick={() => setIsVotingModalOpen(true)}
-                />
-              </div>
+              )}
             </div>
-          </div>
-
-          {isMobile ? (
-            <MobileVotingModal
-              drop={drop}
-              isOpen={isVotingModalOpen}
-              onClose={() => setIsVotingModalOpen(false)}
-            />
-          ) : (
-            <VotingModal
-              drop={drop}
-              isOpen={isVotingModalOpen}
-              onClose={() => setIsVotingModalOpen(false)}
-            />
-          )}
-
-          {/* Actions component (desktop only) - Moved outside the card to work with hover */}
-        </MemesLeaderboardDropCard>
+          </CommonDropdownItemsMobileWrapper>,
+          document.body
+        )}
       </div>
     </div>
   );

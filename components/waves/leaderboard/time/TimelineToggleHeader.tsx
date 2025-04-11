@@ -71,22 +71,22 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full sm:tw-w-auto">
         {/* Title with clock icon */}
         <div className="tw-flex tw-items-center">
-          <div className="tw-flex-shrink-0 tw-mr-2 tw-text-emerald-400">
+          <div className="tw-flex-shrink-0 tw-mr-2 tw-text-emerald-500">
             <FontAwesomeIcon
               icon={icon}
               className="tw-size-4 tw-flex-shrink-0"
             />
           </div>
-          <div className="tw-text-xs tw-text-iron-300">
+          <div className={`tw-text-xs tw-font-medium ${hasNextDecision ? "tw-text-emerald-500" : "tw-text-iron-300"}`}>
             {hasNextDecision
-              ? "Next winner announcement"
+              ? "Next winner:"
               : "Announcement history"}
           </div>
         </div>
 
         {/* Date and chevron for mobile only */}
         <div className="tw-flex sm:tw-hidden tw-items-center tw-flex-shrink-0">
-          <div className="tw-text-xs tw-text-iron-400 tw-mr-2 tw-whitespace-nowrap">
+          <div className="tw-text-xs tw-text-iron-300 tw-mr-2 tw-whitespace-nowrap">
             {nextDecisionTime
               ? new Date(nextDecisionTime).toLocaleDateString("en-US", {
                   month: "short",
@@ -128,7 +128,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
 
       {/* Date and chevron for desktop */}
       <div className="tw-hidden sm:tw-flex tw-items-center tw-ml-auto">
-        <div className="tw-text-xs tw-text-iron-400 tw-mr-2 tw-whitespace-nowrap">
+        <div className="tw-text-xs tw-text-iron-300 tw-mr-2 tw-whitespace-nowrap">
           {nextDecisionTime
             ? new Date(nextDecisionTime).toLocaleDateString("en-US", {
                 month: "short",
