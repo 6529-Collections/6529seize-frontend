@@ -6,6 +6,7 @@ import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import WavePicture from "../../../waves/WavePicture";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
+import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
@@ -47,7 +48,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
 
   return (
     <div
-      className={`tw-flex tw-px-5 tw-py-2 tw-group tw-transition-colors tw-duration-200 tw-ease-in-out ${
+      className={`tw-flex tw-items-start tw-gap-x-4 tw-px-5 tw-py-2 tw-group tw-transition-colors tw-duration-200 tw-ease-in-out ${
         isActive
           ? "tw-bg-primary-300/10 desktop-hover:hover:tw-bg-primary-300/20"
           : "desktop-hover:hover:tw-bg-iron-900"
@@ -109,6 +110,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           )}
         </div>
       </Link>
+      <BrainLeftSidebarWavePin waveId={wave.id} isPinned={!!wave.isPinned} />
     </div>
   );
 };

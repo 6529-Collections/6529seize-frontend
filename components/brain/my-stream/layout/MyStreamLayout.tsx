@@ -90,7 +90,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
 
         {showWaves && spaces.measurementsComplete && (
           <div className="tw-flex-1" id="my-stream-content">
-            <div ref={setSpacerRef} className="tw-h-4"></div>
             <Brain>
               <div className={containerClassName}>{children}</div>
             </Brain>

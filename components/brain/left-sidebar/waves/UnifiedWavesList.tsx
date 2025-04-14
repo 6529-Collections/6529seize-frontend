@@ -35,21 +35,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     return !!connectedProfile?.profile?.handle && !activeProfileProxy;
   }, [connectedProfile?.profile?.handle, activeProfileProxy]);
 
-  // Sort waves to prioritize the active wave (if present)
-  const sortedWaves = useMemo(() => {
-    if (!activeWaveId) return waves;
-
-    return waves.reduce<MinimalWave[]>((acc, wave) => {
-      if (wave.id === activeWaveId) {
-        // Place active wave at the beginning
-        acc.unshift(wave);
-      } else {
-        // Place all other waves at the end
-        acc.push(wave);
-      }
-      return acc;
-    }, []);
-  }, [waves, activeWaveId]);
+  // We no longer need to sort waves to prioritize active wave
+  // as this is now handled in the UnifiedWavesListWaves component
+  // by creating separate sections for pinned, active, and regular waves
+  const sortedWaves = waves;
 
   // Ref for intersection observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -127,7 +116,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
         <div className="tw-w-full">
           {/* Unified Waves List */}
-          <UnifiedWavesListWaves waves={sortedWaves} />
+          <UnifiedWavesListWaves 
+            waves={sortedWaves} 
+            activeWaveId={activeWaveId} 
+          />
 
           {/* Loading indicator and intersection trigger */}
           <UnifiedWavesListLoader
