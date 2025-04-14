@@ -52,6 +52,7 @@ import { useDropSignature } from "../../hooks/drops/useDropSignature";
 import { useWave } from "../../hooks/useWave";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import { useMyStream } from "../../contexts/wave/MyStreamContext";
+import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 
 export type CreateDropMetadataType =
   | {
@@ -366,7 +367,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const breakpoint = useBreakpoint();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
-  console.log('rere')
   const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
   const { isMemesWave } = useWave(wave);
@@ -647,6 +647,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         return;
       }
 
+      const randomStableKey = getRandomObjectId();
+
       const optimisticDrop = getOptimisticDrop(
         updatedDropRequest,
         connectedProfile,
@@ -656,7 +658,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       );
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
-        processIncomingDrop(optimisticDrop);
+        setTimeout(() => processIncomingDrop(optimisticDrop), 0);
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);

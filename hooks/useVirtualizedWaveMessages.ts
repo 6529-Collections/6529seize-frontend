@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useMyStream, useMyStreamWaveMessages } from '../contexts/wave/MyStreamContext';
-import { WaveMessages } from '../contexts/wave/hooks/useWaveMessagesStore';
-import { ExtendedDrop } from '../helpers/waves/drop.helpers';
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  useMyStream,
+  useMyStreamWaveMessages,
+} from "../contexts/wave/MyStreamContext";
+import { WaveMessages } from "../contexts/wave/hooks/useWaveMessagesStore";
+import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 
-interface VirtualizedWaveMessages extends Omit<WaveMessages, 'drops'> {
+interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   readonly drops: ExtendedDrop[];
   readonly allDropsCount: number; // Total number of available drops in cache
   readonly loadMoreLocally: () => void; // Function to load more from cache
@@ -13,7 +16,7 @@ interface VirtualizedWaveMessages extends Omit<WaveMessages, 'drops'> {
 /**
  * Hook that provides virtualized pagination for wave messages
  * Instead of returning all cached messages at once, it returns them in chunks
- * 
+ *
  * @param waveId - The ID of the wave to get messages for
  * @param pageSize - Number of drops to load at a time (default: 50)
  * @returns VirtualizedWaveMessages with pagination controls
@@ -28,10 +31,10 @@ export function useVirtualizedWaveMessages(
 
   // Track the number of items to show from the cache
   const [virtualLimit, setVirtualLimit] = useState<number>(pageSize);
-  
+
   // Track whether we have more local items to load
   const [hasMoreLocal, setHasMoreLocal] = useState<boolean>(false);
-  
+
   // Keep track of whether we've initialized with the first batch
   const hasInitialized = useRef<boolean>(false);
 
@@ -40,7 +43,7 @@ export function useVirtualizedWaveMessages(
     if (fullWaveMessages) {
       const totalDrops = fullWaveMessages.drops.length;
       setHasMoreLocal(totalDrops > virtualLimit);
-      
+
       // If we haven't initialized yet and we have drops, set the flag
       if (!hasInitialized.current && totalDrops > 0) {
         hasInitialized.current = true;
@@ -60,7 +63,7 @@ export function useVirtualizedWaveMessages(
   // Function to load more messages from local cache
   const loadMoreLocally = useCallback(() => {
     if (fullWaveMessages && fullWaveMessages.drops.length > virtualLimit) {
-      setVirtualLimit(prevLimit => prevLimit + pageSize);
+      setVirtualLimit((prevLimit) => prevLimit + pageSize);
     }
   }, [fullWaveMessages, virtualLimit, pageSize]);
 

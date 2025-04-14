@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { mergeDrops } from "../utils/wave-messages-utils";
 
 // Export the types so they can be imported elsewhere
 export type WaveMessages = {
@@ -61,7 +62,10 @@ function useWaveMessagesStore() {
         if (value === undefined) {
           delete newWaveMessages[key];
         } else {
-          newWaveMessages[key] = value;
+          newWaveMessages[key] = {
+            ...value,
+            drops: mergeDrops(newWaveMessages[key]?.drops ?? [], value.drops),
+          };
         }
         return newWaveMessages;
       });
@@ -77,6 +81,9 @@ function useWaveMessagesStore() {
     },
     []
   ); // No dependencies needed
+
+
+
 
   // Optional: Effect to notify listeners if state changes outside updateData
   // This is a more robust way to ensure listeners are called *after* the state has definitively updated.

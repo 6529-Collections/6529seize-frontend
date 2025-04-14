@@ -162,15 +162,8 @@ export function useWaveDataFetching({
       let keepFetching = true;
       let overallHighestSerialNo: number | null = initialSinceSerialNo; // Track highest overall
 
-      console.log(
-        `[WaveDataFetching] Starting fetchNewest loop for ${waveId}, since: ${initialSinceSerialNo}`
-      );
-
       while (keepFetching && !signal.aborted) {
         try {
-          console.log(
-            `[WaveDataFetching] Loop iteration for ${waveId}, since: ${currentSinceSerialNo}`
-          );
           const { drops: fetchedChunk, highestSerialNo: chunkHighestSerial } =
             await fetchNewestWaveMessages(
               // Call the utility function
@@ -182,16 +175,10 @@ export function useWaveDataFetching({
 
           // Check if aborted during the fetch utility call
           if (signal.aborted) {
-            console.log(
-              `[WaveDataFetching] Loop for ${waveId} aborted during fetch.`
-            );
             throw new DOMException("Aborted", "AbortError");
           }
 
           if (fetchedChunk && fetchedChunk.length > 0) {
-            console.log(
-              `[WaveDataFetching] Loop fetched chunk of ${fetchedChunk.length} for ${waveId}.`
-            );
             allFetchedDrops = allFetchedDrops.concat(fetchedChunk);
             // Update highest serial number seen so far
             if (chunkHighestSerial !== null) {
@@ -204,9 +191,6 @@ export function useWaveDataFetching({
             if (chunkHighestSerial !== null) {
               currentSinceSerialNo = chunkHighestSerial; // Use the highest from this chunk for the next iteration
             } else {
-              console.log(
-                `[WaveDataFetching] Loop finished for ${waveId}: No highest serial number found.`
-              );
               keepFetching = false;
             }
 
@@ -215,20 +199,9 @@ export function useWaveDataFetching({
               fetchedChunk.length < FETCH_NEWEST_LIMIT ||
               currentSinceSerialNo === null
             ) {
-              console.log(
-                `[WaveDataFetching] Loop finished for ${waveId}: Fetched ${fetchedChunk.length} < ${FETCH_NEWEST_LIMIT} or null serial.`
-              );
               keepFetching = false;
-            } else {
-              console.log(
-                `[WaveDataFetching] Loop limit hit for ${waveId}, continuing fetch.`
-              );
             }
           } else if (fetchedChunk) {
-            // Success, but 0 drops returned
-            console.log(
-              `[WaveDataFetching] Loop finished for ${waveId}: 0 drops returned.`
-            );
             keepFetching = false; // No more drops found
           } else {
             // fetchNewestWaveMessages utility returned null drops (error occurred)
@@ -241,9 +214,6 @@ export function useWaveDataFetching({
         } catch (error) {
           // Handle errors specifically from the fetchNewestWaveMessages call or aborts
           if (error instanceof DOMException && error.name === "AbortError") {
-            console.log(
-              `[WaveDataFetching] Loop for ${waveId} caught abort error.`
-            );
             throw error; // Re-throw abort to be handled by caller
           }
           // Log other errors from within the loop/utility call
@@ -256,15 +226,8 @@ export function useWaveDataFetching({
       } // end while loop
 
       if (signal.aborted) {
-        console.log(
-          `[WaveDataFetching] Fetch newest loop for ${waveId} detected abort after loop.`
-        );
         throw new DOMException("Aborted", "AbortError");
       }
-
-      console.log(
-        `[WaveDataFetching] Fetch newest loop completed for ${waveId}. Total drops: ${allFetchedDrops.length}. Final highest serial: ${overallHighestSerialNo}`
-      );
 
       // Return all accumulated drops and the overall highest serial number found
       return {

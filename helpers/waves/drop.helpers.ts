@@ -10,9 +10,14 @@ export interface ExtendedDrop extends ApiDrop {
   stableHash: string;
 }
 
-export const getStableDropKey = (drop: ApiDrop, existingDrops: ExtendedDrop[] = []): { key: string, hash: string } => {
+export const getStableDropKey = (
+  drop: ApiDrop,
+  existingDrops: ExtendedDrop[] = []
+): { key: string; hash: string } => {
   const closestMatch = findClosestMatch(drop, existingDrops);
-  const stableCreatedAt = closestMatch ? closestMatch.created_at : drop.created_at;
+  const stableCreatedAt = closestMatch
+    ? closestMatch.created_at
+    : drop.created_at;
 
   const input = {
     wave_id: drop.wave.id,
@@ -31,21 +36,37 @@ export const getStableDropKey = (drop: ApiDrop, existingDrops: ExtendedDrop[] = 
   const decoder = new TextDecoder("utf-8");
   const key = decoder.decode(hash);
 
-  return { key, hash: Buffer.from(hash).toString('hex') };
+  return { key, hash: Buffer.from(hash).toString("hex") };
 };
 
-const findClosestMatch = (newDrop: ApiDrop, existingDrops: ExtendedDrop[]): ExtendedDrop | null => {
-  const MAX_TIME_DIFFERENCE = 10000; // 10 seconds in milliseconds
+export const findClosestMatch = (
+  newDrop: ApiDrop,
+  existingDrops: ExtendedDrop[],
+  maxDiff?: number
+): ExtendedDrop | null => {
+  const MAX_TIME_DIFFERENCE = maxDiff ?? 10000;
 
   return existingDrops.reduce((closest, current) => {
     if (
       current.author.handle === newDrop.author.handle &&
-      current.parts.map(p => p.content).join("") === newDrop.parts.map(p => p.content).join("") &&
-      Math.abs(new Date(current.created_at).getTime() - new Date(newDrop.created_at).getTime()) < MAX_TIME_DIFFERENCE
+      current.parts.map((p) => p.content).join("") ===
+        newDrop.parts.map((p) => p.content).join("") &&
+      Math.abs(
+        new Date(current.created_at).getTime() -
+          new Date(newDrop.created_at).getTime()
+      ) < MAX_TIME_DIFFERENCE
     ) {
-      if (!closest || 
-          Math.abs(new Date(current.created_at).getTime() - new Date(newDrop.created_at).getTime()) <
-          Math.abs(new Date(closest.created_at).getTime() - new Date(newDrop.created_at).getTime())) {
+      if (
+        !closest ||
+        Math.abs(
+          new Date(current.created_at).getTime() -
+            new Date(newDrop.created_at).getTime()
+        ) <
+          Math.abs(
+            new Date(closest.created_at).getTime() -
+              new Date(newDrop.created_at).getTime()
+          )
+      ) {
         return current;
       }
     }
@@ -63,7 +84,7 @@ export const convertApiDropToExtendedDrop = (drop: ApiDrop): ExtendedDrop => {
   return {
     ...drop,
     stableKey: key,
-    stableHash: hash
+    stableHash: hash,
   };
 };
 

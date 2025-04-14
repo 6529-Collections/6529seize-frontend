@@ -74,13 +74,6 @@ export function useWaveRealtimeUpdater({
                   : currentData.latestFetchedSerialNo,
               // Optionally reset hasNextPage if needed, though fetchNewest shouldn't affect it
             });
-            console.log(
-              `[RealtimeUpdater] Updated ${waveId} with merged drops. New highest serial: ${finalHighestSerial}.`
-            );
-          } else {
-            console.log(
-              `[RealtimeUpdater] No current data found for ${waveId} after fetch, skipping update.`
-            );
           }
         }
       } catch (error) {
@@ -103,10 +96,9 @@ export function useWaveRealtimeUpdater({
           needsRefetchAfterCurrentRef.current[waveId] = false;
           const latestData = getData(waveId);
           if (latestData?.latestFetchedSerialNo) {
-            initiateFetchNewestCycle(waveId, latestData.latestFetchedSerialNo);
-          } else {
-            console.log(
-              `[RealtimeUpdater] No latest data found for ${waveId} after fetch, skipping update.`
+            await initiateFetchNewestCycle(
+              waveId,
+              latestData.latestFetchedSerialNo
             );
           }
         }
@@ -115,12 +107,16 @@ export function useWaveRealtimeUpdater({
     [getData, updateData, syncNewestMessages, cleanupController]
   );
 
+  const isProcessingIncomingDrop = useRef(false);
+
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
-    (drop: ApiDrop) => {
+    async (drop: ApiDrop) => {
       if (!drop?.wave?.id) {
         return;
       }
+
+      isProcessingIncomingDrop.current = true;
       const waveId = drop.wave.id;
 
       const currentData = getData(waveId);
@@ -132,10 +128,6 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
-      // Wave is registered, perform optimistic update
-      console.log(
-        `[RealtimeUpdater] Optimistically adding drop ${drop.id} to ${waveId}.`
-      );
       const optimisticDrop: ExtendedDrop = {
         ...drop,
         wave: drop.wave, // Assuming message structure matches ApiDrop + ApiWaveMin
@@ -157,13 +149,16 @@ export function useWaveRealtimeUpdater({
       if (serialNoForFetch) {
         // Initiate the background fetch for reconciliation
         initiateFetchNewestCycle(waveId, serialNoForFetch);
-      } else {
-        console.log(
-          `[RealtimeUpdater] No serial number found for ${waveId} after fetch, skipping update.`
-        );
       }
+
     },
-    [getData, updateData, registerWave, initiateFetchNewestCycle]
+    [
+      getData,
+      updateData,
+      registerWave,
+      initiateFetchNewestCycle,
+      isProcessingIncomingDrop,
+    ]
   );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
@@ -174,9 +169,6 @@ export function useWaveRealtimeUpdater({
   // Cleanup: Cancel all ongoing fetches on unmount
   useEffect(() => {
     return () => {
-      console.log(
-        "[RealtimeUpdater] Cleaning up: Aborting all ongoing fetches."
-      );
       Object.values(abortControllersRef.current).forEach((controller) =>
         controller.abort()
       );

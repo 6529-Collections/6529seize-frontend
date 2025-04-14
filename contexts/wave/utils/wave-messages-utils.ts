@@ -2,7 +2,10 @@ import { WAVE_DROPS_PARAMS } from "../../../components/react-query-wrapper/utils
 import { commonApiFetch } from "../../../services/api/common-api";
 import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import {
+  ExtendedDrop,
+  getStableDropKey,
+} from "../../../helpers/waves/drop.helpers";
 import { WaveMessages } from "../hooks/useWaveMessagesStore";
 
 /**
@@ -66,12 +69,15 @@ export function formatWaveMessages(
     hasNextPage?: boolean;
   } = {}
 ): WaveMessages {
-  const { isLoading = false, isLoadingNextPage = false, hasNextPage = true } = options;
-  
+  const {
+    isLoading = false,
+    isLoadingNextPage = false,
+    hasNextPage = true,
+  } = options;
+
   // Calculate the highest serial number from the fetched drops
-  const latestFetchedSerialNo = drops.length > 0
-    ? Math.max(...drops.map(drop => drop.serial_no))
-    : null;
+  const latestFetchedSerialNo =
+    drops.length > 0 ? Math.max(...drops.map((drop) => drop.serial_no)) : null;
 
   return {
     id: waveId,
@@ -101,8 +107,12 @@ export function createEmptyWaveMessages(
     hasNextPage?: boolean;
   } = {}
 ): WaveMessages {
-  const { isLoading = false, isLoadingNextPage = false, hasNextPage = false } = options;
-  
+  const {
+    isLoading = false,
+    isLoadingNextPage = false,
+    hasNextPage = false,
+  } = options;
+
   return {
     id: waveId,
     isLoading,
@@ -148,39 +158,47 @@ export function mergeDrops(
   // Create a map for fast lookup by id
   const dropsMap = new Map<string, ExtendedDrop>();
 
+  const newDropsWithStableKey = newDrops.map((drop) => {
+    const { key, hash } = getStableDropKey(drop, currentDrops);
+    return {
+      ...drop,
+      stableHash: hash,
+      stableKey: key,
+    };
+  });
+
   // First, add all current drops to the map
   currentDrops.forEach((drop) => {
-    dropsMap.set(drop.id, drop);
+    dropsMap.set(drop.stableKey, drop);
   });
 
   // Then add all new drops, overwriting any duplicates
   // This ensures we keep the newest version of each drop
-  newDrops.forEach((drop) => {
-    dropsMap.set(drop.id, drop);
+  newDropsWithStableKey.forEach((drop) => {
+    dropsMap.set(drop.stableKey, drop);
   });
 
   // Convert the map back to an array
   const mergedDrops = Array.from(dropsMap.values());
 
-  // Sort by serial_no
-  return mergedDrops.sort((a, b) => {
-    const aIsTemp = a.id?.startsWith('temp-') ?? false;
-    const bIsTemp = b.id?.startsWith('temp-') ?? false;
+  const sorted = mergedDrops.sort((a, b) => {
+    if (a.created_at === b.created_at) {
+      return b.serial_no - a.serial_no;
+    }
 
-    if (aIsTemp && !bIsTemp) return -1;
-    if (!aIsTemp && bIsTemp) return 1;
-    if (aIsTemp && bIsTemp) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-
-    return b.serial_no - a.serial_no;
+    return b.created_at - a.created_at;
   });
+  return mergedDrops;
 }
 
 // Helper function to get the highest serial number from an array of drops
-export function getHighestSerialNo(drops: ApiDrop[] | ExtendedDrop[]): number | null {
+export function getHighestSerialNo(
+  drops: ApiDrop[] | ExtendedDrop[]
+): number | null {
   if (!drops || drops.length === 0) {
     return null;
   }
-  return Math.max(...drops.map(drop => drop.serial_no));
+  return Math.max(...drops.map((drop) => drop.serial_no));
 }
 
 /**
@@ -217,11 +235,10 @@ export async function fetchNewestWaveMessages(
       ...drop,
       wave: data.wave,
     }));
-    
+
     const highestSerialNo = getHighestSerialNo(fetchedDrops);
 
     return { drops: fetchedDrops, highestSerialNo };
-
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       console.log(`[Utils] Fetch newest for ${waveId} aborted.`);
