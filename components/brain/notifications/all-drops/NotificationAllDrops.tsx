@@ -14,6 +14,7 @@ import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { getNotificationVoteColor } from "../drop-voted/NotificationDropVoted";
+import NotificationsMarkReadButton from "../NotificationsMarkReadButton";
 
 export default function NotificationAllDrops({
   notification,
@@ -108,28 +109,31 @@ export default function NotificationAllDrops({
             </svg>
           </div>
 
-          <div className="tw-flex tw-gap-x-2 tw-items-center">
-            <div className="tw-h-7 tw-w-7">
-              {notification.related_identity.pfp ? (
-                <img
-                  src={getScaledImageUri(
-                    notification.related_identity.pfp,
-                    ImageScale.W_AUTO_H_50
-                  )}
-                  alt="#"
-                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
-                />
-              ) : (
-                <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
-              )}
-            </div>
-            <span className="tw-text-sm tw-font-normal tw-text-iron-50">
-              {getContent()}{" "}
-              <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
-                <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
-                {getTimeAgoShort(notification.created_at)}
+          <div className="tw-flex tw-w-full tw-gap-2 tw-items-center tw-justify-between">
+            <div className="tw-flex tw-gap-x-2 tw-items-center">
+              <div className="tw-h-7 tw-w-7">
+                {notification.related_identity.pfp ? (
+                  <img
+                    src={getScaledImageUri(
+                      notification.related_identity.pfp,
+                      ImageScale.W_AUTO_H_50
+                    )}
+                    alt="#"
+                    className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+                  />
+                ) : (
+                  <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+                )}
+              </div>
+              <span className="tw-text-sm tw-font-normal tw-text-iron-50">
+                {getContent()}{" "}
+                <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+                  <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+                  {getTimeAgoShort(notification.created_at)}
+                </span>
               </span>
-            </span>
+            </div>
+            <NotificationsMarkReadButton notification={notification} />
           </div>
         </div>
 

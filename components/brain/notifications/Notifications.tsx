@@ -15,6 +15,10 @@ import { useLayout } from "../my-stream/layout/LayoutContext";
 import NotificationsCauseFilter, {
   NotificationFilter,
 } from "./NotificationsCauseFilter";
+import NotificationsUnreadToggle from "./NotificationsUnreadToggle";
+import Cookies from "js-cookie";
+
+const SHOW_UNREAD_NOTIFICATIONS_COOKIE = "SHOW_UNREAD_NOTIFICATIONS";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -27,6 +31,12 @@ export default function Notifications() {
     null
   );
 
+  const [showUnreadNotifications, setShowUnreadNotifications] =
+    useState<boolean>(() => {
+      const cookie = Cookies.get(SHOW_UNREAD_NOTIFICATIONS_COOKIE);
+      return cookie ? JSON.parse(cookie) : false;
+    });
+
   const { removeAllDeliveredNotifications } = useNotificationsContext();
 
   const router = useRouter();
@@ -34,13 +44,9 @@ export default function Notifications() {
 
   useEffect(() => {
     if (reload === "true") {
-      refetch()
-        .then(() => {
-          return markAllAsReadMutation.mutateAsync();
-        })
-        .catch((error) => {
-          console.error("Error during refetch:", error);
-        });
+      refetch().catch((error) => {
+        console.error("Error during refetch:", error);
+      });
       const { reload, ...restQuery } = router.query;
       router.replace(
         {
@@ -72,10 +78,6 @@ export default function Notifications() {
     },
   });
 
-  useEffect(() => {
-    markAllAsReadMutation.mutateAsync();
-  }, []);
-
   const {
     items,
     isFetching,
@@ -89,6 +91,7 @@ export default function Notifications() {
     limit: "30",
     reverse: true,
     cause: activeFilter?.cause,
+    unread: showUnreadNotifications,
   });
 
   const onBottomIntersection = (state: boolean) => {
@@ -116,17 +119,35 @@ export default function Notifications() {
   };
 
   return (
-    <div 
+    <div
       className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow"
-      style={notificationsViewStyle}
-    >
+      style={notificationsViewStyle}>
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
-      <NotificationsCauseFilter
-          activeFilter={activeFilter}
-          setActiveFilter={setActiveFilter}
-        />
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-1.5 tw-pb-3">
+          <NotificationsUnreadToggle
+            showUnreadNotifications={showUnreadNotifications}
+            toggleNotifications={() => {
+              const newShowUnreadNotifications = !showUnreadNotifications;
+              setShowUnreadNotifications(newShowUnreadNotifications);
+              Cookies.set(
+                SHOW_UNREAD_NOTIFICATIONS_COOKIE,
+                JSON.stringify(newShowUnreadNotifications),
+                {
+                  expires: 365,
+                }
+              );
+            }}
+            onReadAll={() => markAllAsReadMutation.mutateAsync()}
+            isLoadingReadAll={markAllAsReadMutation.isPending}
+            isDisabledReadAll={items.length === 0}
+          />
+          <NotificationsCauseFilter
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
+          />
+        </div>
         {!items.length && !isFetching ? (
-          <MyStreamNoItems />
+          <MyStreamNoItems unread={showUnreadNotifications} />
         ) : (
           <FeedScrollContainer
             ref={scrollRef}
