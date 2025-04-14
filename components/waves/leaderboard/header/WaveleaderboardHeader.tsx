@@ -35,27 +35,54 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             <div className="tw-mb-4 tw-flex tw-items-center tw-gap-x-2">
               <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-overflow-hidden">
                 <button
-                  className={`tw-px-2.5 tw-py-1.5 ${
+                  aria-label="List view"
+                  className={`tw-w-8 tw-h-7 ${
                     viewMode === "list"
                       ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
                       : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
                   } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
                   onClick={() => onViewModeChange("list")}
                 >
-                  <FontAwesomeIcon icon={faList} className="tw-w-4 tw-h-4" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    className="tw-size-5 tw-flex-shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                    />
+                  </svg>
                 </button>
                 <button
-                  className={`tw-px-2.5 tw-py-1.5 ${
+                  aria-label="Grid view"
+                  className={`tw-w-8 tw-h-7 ${
                     viewMode === "grid"
                       ? "tw-bg-iron-800 tw-text-iron-300 tw-font-medium"
                       : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent"
                   } tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out`}
                   onClick={() => onViewModeChange("grid")}
                 >
-                  <FontAwesomeIcon
-                    icon={faTableCells}
-                    className="tw-w-4 tw-h-4"
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    className="tw-size-5 tw-flex-shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"
+                    />
+                  </svg>
                 </button>
               </div>
               <WaveleaderboardSort sort={sort} onSortChange={onSortChange} />

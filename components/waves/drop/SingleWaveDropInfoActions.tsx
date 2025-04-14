@@ -20,7 +20,7 @@ export const SingleWaveDropInfoActions: React.FC<
 
   return (
     <div
-      className={`tw-flex tw-flex-col tw-gap-y-2 tw-mt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 ${className}`}
+      className={`tw-flex tw-flex-col tw-gap-y-2 tw-mt-4 ${className}`}
     >
       {/* Display time only for non-winner drops */}
       {wave && !isWinner && <SingleWaveDropTime wave={wave} />}

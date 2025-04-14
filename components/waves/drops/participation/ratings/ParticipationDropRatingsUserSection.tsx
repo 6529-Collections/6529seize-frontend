@@ -14,6 +14,11 @@ export default function ParticipationDropRatingsUserSection({
   ratingsData,
 }: ParticipationDropRatingsUserSectionProps) {
   const { userRating } = ratingsData;
+  
+  // Don't show anything if the user hasn't voted
+  if (userRating === 0) {
+    return null;
+  }
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1">

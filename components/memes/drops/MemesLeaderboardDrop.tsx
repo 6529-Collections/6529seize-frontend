@@ -122,6 +122,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                     creditType={drop.wave.voting_credit_type}
                     ratersCount={drop.raters_count}
                     topVoters={firstThreeVoters}
+                    userContext={drop.context_profile_context}
                   />
                 </div>
 
