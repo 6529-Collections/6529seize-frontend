@@ -72,10 +72,29 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             </p>
             <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
             <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-              {isMobile 
-                ? Time.millis(drop.created_at).toLocaleDropDateString()
-                : Time.millis(drop.created_at).toLocaleDropDateAndTimeString()
-              }
+              {(() => {
+                const timeObj = Time.millis(drop.created_at);
+                const date = new Date(drop.created_at);
+                const now = new Date();
+                const isToday = date.toDateString() === now.toDateString();
+                
+                if (isMobile) {
+                  // On mobile: for today, show only time; otherwise show only date
+                  if (isToday) {
+                    // Show only time for today on mobile
+                    return date.toLocaleTimeString(undefined, {
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    });
+                  } else {
+                    // For older dates, show just the date without time
+                    return timeObj.toLocaleDropDateString();
+                  }
+                } else {
+                  // On desktop: always show date and time (no change)
+                  return timeObj.toLocaleDropDateAndTimeString();
+                }
+              })()}
             </p>
           </div>
           {badge && <div className="tw-ml-2">{badge}</div>}

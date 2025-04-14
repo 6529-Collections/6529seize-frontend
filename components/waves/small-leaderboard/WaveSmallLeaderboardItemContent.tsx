@@ -33,7 +33,10 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         className="tw-relative tw-cursor-pointer tw-max-h-52 tw-overflow-hidden tw-space-y-3"
       >
         {!!drop.parts[0].media.length && (
-          <WaveDropPartContentMedias activePart={drop.parts[0]} />
+          <WaveDropPartContentMedias
+            activePart={drop.parts[0]}
+            disableMediaInteraction={true}
+          />
         )}
         <WaveDropPartContentMarkdown
           mentionedUsers={drop.mentioned_users}
@@ -43,7 +46,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
           onQuoteClick={() => {}}
         />
         {showGradient && (
-          <div className="tw-absolute tw-z-[1] tw-bottom-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900 tw-to-transparent desktop-hover:group-hover:tw-from-iron-800 desktop-hover:group-hover:tw-via-iron-800/50" />
+          <div className="tw-absolute tw-z-[1] tw-bottom-0 tw-left-0 tw-right-0 tw-h-12 tw-bg-gradient-to-t tw-from-iron-900 tw-via-iron-900 tw-to-transparent" />
         )}
       </div>
       <div className="tw-flex tw-items-center tw-mt-3 tw-gap-x-2 tw-mb-3">
@@ -104,4 +107,4 @@ export const WaveSmallLeaderboardItemContent: React.FC<
       </div>
     </div>
   );
-}; 
+};

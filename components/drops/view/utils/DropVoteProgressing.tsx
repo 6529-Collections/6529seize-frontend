@@ -35,7 +35,7 @@ export default function DropVoteProgressing({
       )}`}
     >
       <span
-        className={`${color} tw-text-xs tw-font-medium tw-animate-pulse tw-ml-0.5 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-flex tw-items-center tw-gap-x-1`}
+        className={`${color} tw-text-xs tw-font-medium tw-ml-0.5 tw-px-1.5 tw-py-0.5 tw-rounded-md tw-flex tw-items-center tw-gap-x-1`}
         style={{
           animationDuration: "2s",
         }}

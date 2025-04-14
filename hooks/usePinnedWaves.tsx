@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 
-const MAX_PINNED_WAVES = 10
-const STORAGE_KEY = 'pinnedWaves'
+export const MAX_PINNED_WAVES = 10
+const STORAGE_KEY = 'pinnedWave'
 
 export function usePinnedWaves() {
   const [pinnedIds, setPinnedIds] = useState<string[]>(() => {
