@@ -3,14 +3,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 import Tippy from "@tippyjs/react";
-import { usePinnedWaves } from "../../../../hooks/usePinnedWaves";
+import { usePinnedWaves, MAX_PINNED_WAVES } from "../../../../hooks/usePinnedWaves";
 
 interface BrainLeftSidebarWavePinProps {
   readonly waveId: string;
   readonly isPinned: boolean;
 }
-
-const MAX_PINNED_WAVES = 10;
 
 const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   waveId,
@@ -29,7 +27,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     // Check if we have room for another pinned wave
     try {
       // Get the most up-to-date pinned waves from localStorage
-      const storedPinnedWaves = localStorage.getItem('pinnedWaves');
+      const storedPinnedWaves = localStorage.getItem('pinnedWave');
       const currentPinnedIds = storedPinnedWaves ? JSON.parse(storedPinnedWaves) : [];
       
       // Return true if we have less than MAX_PINNED_WAVES waves pinned
@@ -92,14 +90,6 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     }
   };
 
-  // Determine tooltip content based on state
-  const getTooltipContent = () => {
-    if (showMaxLimitTooltip && !isPinned) {
-      return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
-    }
-    return isPinned ? "Unpin" : "Pin";
-  };
-
   // Apply same hover behavior to both pin and unpin states
   const opacityClass = isTouchDevice 
     ? "tw-opacity-100" // Always visible on touch devices
@@ -121,7 +111,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
         onClick={handleClick}
         className={`tw-mt-0.5 -tw-mr-2 tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-7 sm:tw-size-6 tw-rounded-md tw-transition-all tw-duration-200 ${opacityClass} ${
           isPinned 
-            ? "tw-text-primary-400 tw-bg-primary-400/10 desktop-hover:hover:tw-bg-primary-400/20" 
+            ? "tw-text-iron-300 tw-bg-iron-700/40 desktop-hover:hover:tw-bg-iron-700/60" 
             : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 tw-bg-iron-800"
         }`}
         aria-label={isPinned ? "Unpin wave" : "Pin wave"}

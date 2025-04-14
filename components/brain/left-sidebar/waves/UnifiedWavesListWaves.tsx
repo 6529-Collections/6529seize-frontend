@@ -12,44 +12,27 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
   waves,
   activeWaveId,
 }) => {
-  // Split waves into pinned, active (unpinned), and regular waves
-  const { pinnedWaves, activeUnpinnedWave, regularWaves } = useMemo(() => {
+  // Split waves into pinned and regular waves (no separate active section)
+  const { pinnedWaves, regularWaves } = useMemo(() => {
     const pinned: MinimalWave[] = [];
     const regular: MinimalWave[] = [];
-    let activeWave: MinimalWave | null = null;
 
     waves.forEach((wave) => {
-      // Check if this is the active wave
-      const isActive = wave.id === activeWaveId;
-
       if (wave.isPinned) {
-        // Always add pinned waves to the pinned section
+        // Add pinned waves to the pinned section
         pinned.push(wave);
-      } else if (isActive) {
-        // Store active unpinned wave separately
-        activeWave = wave;
       } else {
-        // Regular unpinned waves
+        // All unpinned waves go to the regular section
         regular.push(wave);
       }
     });
 
-    // Sort pinned waves to prioritize the active pinned wave at the top
-    const sortedPinnedWaves = [...pinned].sort((a, b) => {
-      // If a is active, it should come first
-      if (a.id === activeWaveId) return -1;
-      // If b is active, it should come first
-      if (b.id === activeWaveId) return 1;
-      // Otherwise maintain their order
-      return 0;
-    });
-
+    // No special sorting for active waves - keep them in their original position
     return {
-      pinnedWaves: sortedPinnedWaves,
-      activeUnpinnedWave: activeWave as MinimalWave | null,
+      pinnedWaves: pinned,
       regularWaves: regular,
     };
-  }, [waves, activeWaveId]);
+  }, [waves]);
 
   if (!waves.length) {
     return null;
@@ -57,16 +40,6 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
 
   return (
     <div className="tw-flex tw-flex-col">
-      {activeUnpinnedWave && (
-        <>
-          <SectionHeader label="Active" />
-          <div className="tw-flex tw-flex-col tw-mb-3">
-            <div>
-              <BrainLeftSidebarWave wave={activeUnpinnedWave} />
-            </div>
-          </div>
-        </>
-      )}
       {pinnedWaves.length > 0 && (
         <>
           <SectionHeader label="Pinned" icon={faThumbtack} />
