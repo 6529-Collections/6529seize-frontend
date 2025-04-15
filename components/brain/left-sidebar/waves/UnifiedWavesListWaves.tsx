@@ -3,6 +3,10 @@ import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
+import CommonSwitch from "../../../utils/switch/CommonSwitch";
+import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
+import { useAuth } from "../../../auth/Auth";
+
 interface UnifiedWavesListWavesProps {
   readonly waves: MinimalWave[];
   readonly activeWaveId: string | null;
@@ -12,6 +16,13 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
   waves,
   activeWaveId,
 }) => {
+  const [following, setFollowing] = useShowFollowingWaves();
+  const { connectedProfile, activeProfileProxy } = useAuth();
+
+  const isConnectedIdentity = useMemo(() => {
+    return !!connectedProfile?.profile?.handle && !activeProfileProxy;
+  }, [connectedProfile?.profile?.handle, activeProfileProxy]);
+
   // Split waves into pinned and regular waves (no separate active section)
   const { pinnedWaves, regularWaves } = useMemo(() => {
     const pinned: MinimalWave[] = [];
@@ -38,6 +49,14 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
     return null;
   }
 
+  const joinedToggle = isConnectedIdentity ? (
+    <CommonSwitch
+      label="Joined"
+      isOn={following}
+      setIsOn={setFollowing}
+    />
+  ) : null;
+
   return (
     <div className="tw-flex tw-flex-col">
       {pinnedWaves.length > 0 && (
@@ -54,7 +73,10 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
       )}
       {regularWaves.length > 0 && (
         <>
-          <SectionHeader label="All Waves" />
+          <SectionHeader 
+            label="All Waves" 
+            rightContent={joinedToggle}
+          />
           <div className="tw-flex tw-flex-col">
             {regularWaves.map((wave) => (
               <div key={wave.id}>
