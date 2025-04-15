@@ -18,7 +18,7 @@ import { AuthContext } from "../auth/Auth";
 import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
 import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
 import { ApiDrop } from "../../generated/models/ApiDrop";
-import { getOptimisticDropId } from "../../helpers/waves/drop.helpers";
+import { getOptimisticDropId, getOptimisticDropSerialNo } from "../../helpers/waves/drop.helpers";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropMetadata from "./CreateDropMetadata";
@@ -53,6 +53,7 @@ import { useWave } from "../../hooks/useWave";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import { useMyStream } from "../../contexts/wave/MyStreamContext";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
+import useWaveMessagesStore from "../../contexts/wave/hooks/useWaveMessagesStore";
 
 export type CreateDropMetadataType =
   | {
@@ -277,7 +278,7 @@ const getOptimisticDrop = (
 
   return {
     id: getOptimisticDropId(),
-    serial_no: 1,
+    serial_no: getOptimisticDropSerialNo(),
     reply_to: getReplyTo(),
     wave: {
       id: wave.id,

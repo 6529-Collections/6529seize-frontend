@@ -13,6 +13,10 @@ export type WaveMessages = {
 };
 export type Listener = (data: WaveMessages | undefined) => void;
 
+export type WaveMessagesUpdate = Partial<WaveMessages> & {
+  key: string;
+};
+
 type Listeners = Set<Listener>; // Keep internal types non-exported
 type KeyListeners = Record<string, Listeners>; // Keep internal types non-exported
 
@@ -56,34 +60,64 @@ function useWaveMessagesStore() {
 
   // Function to update data and notify listeners for a specific key
   const updateData = useCallback(
-    (key: string, value: WaveMessages | undefined) => {
+    (update: WaveMessagesUpdate) => {
+      let notify: WaveMessages | undefined;
       setWaveMessages((prevWaveMessages) => {
         const newWaveMessages = { ...prevWaveMessages };
-        if (value === undefined) {
-          delete newWaveMessages[key];
-        } else {
-          newWaveMessages[key] = {
-            ...value,
-            drops: mergeDrops(newWaveMessages[key]?.drops ?? [], value.drops),
+        if (!newWaveMessages[update.key]) {
+          newWaveMessages[update.key] = {
+            id: update.key,
+            isLoading: false,
+            isLoadingNextPage: false,
+            hasNextPage: false,
+            drops: [],
+            latestFetchedSerialNo: null,
           };
         }
-        return newWaveMessages;
+
+        const updatedWaveMessages = {
+          ...newWaveMessages[update.key],
+        };
+
+        if (update.isLoading !== undefined) {
+          updatedWaveMessages.isLoading = update.isLoading;
+        }
+        if (update.isLoadingNextPage !== undefined) {
+          updatedWaveMessages.isLoadingNextPage = update.isLoadingNextPage;
+        }
+        if (update.hasNextPage !== undefined) {
+          updatedWaveMessages.hasNextPage = update.hasNextPage;
+        }
+        if (update.drops !== undefined) {
+          updatedWaveMessages.drops = mergeDrops(
+            updatedWaveMessages.drops,
+            update.drops
+          );
+        }
+        if (update.latestFetchedSerialNo !== undefined) {
+          updatedWaveMessages.latestFetchedSerialNo =
+            update.latestFetchedSerialNo;
+        }
+
+        notify = updatedWaveMessages;
+        return {
+          ...newWaveMessages,
+          [update.key]: updatedWaveMessages,
+        };
       });
 
       // Notify listeners *after* state update is triggered
       // Note: state updates might be async, listeners get the *new* state idea
       // For more robust notification, you might useEffect on `store` change
-      const keyListeners = listenersRef.current[key];
+      const keyListeners = listenersRef.current[update.key];
+
       if (keyListeners) {
         // Pass the new value directly
-        keyListeners.forEach((listener) => listener(value));
+        keyListeners.forEach((listener) => listener(notify));
       }
     },
-    []
-  ); // No dependencies needed
-
-
-
+    [waveMessages]
+  );
 
   // Optional: Effect to notify listeners if state changes outside updateData
   // This is a more robust way to ensure listeners are called *after* the state has definitively updated.

@@ -3,7 +3,6 @@ import { useWebSocketMessage } from "../../../services/websocket/useWebSocketMes
 import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { mergeDrops, getHighestSerialNo } from "../utils/wave-messages-utils";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
@@ -61,17 +60,14 @@ export function useWaveRealtimeUpdater({
               stableHash: drop.id, // Assuming ApiDrop has id
             }));
 
-            const mergedDrops = mergeDrops(currentData.drops, newDrops);
-            const finalHighestSerial = getHighestSerialNo(mergedDrops);
-
-            updateData(waveId, {
-              ...currentData,
-              drops: mergedDrops,
+            updateData({
+              key: waveId,
+              drops: newDrops,
               // Update latestFetchedSerialNo only if the fetch returned drops
               latestFetchedSerialNo:
                 fetchedHighestSerial !== null
                   ? fetchedHighestSerial
-                  : currentData.latestFetchedSerialNo,
+                  : undefined,
               // Optionally reset hasNextPage if needed, though fetchNewest shouldn't affect it
             });
           }
@@ -107,7 +103,6 @@ export function useWaveRealtimeUpdater({
     [getData, updateData, syncNewestMessages, cleanupController]
   );
 
-  const isProcessingIncomingDrop = useRef(false);
 
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
@@ -116,7 +111,6 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
-      isProcessingIncomingDrop.current = true;
       const waveId = drop.wave.id;
 
       const currentData = getData(waveId);
@@ -138,26 +132,21 @@ export function useWaveRealtimeUpdater({
       // Important: Identify the serial number *before* adding the optimistic drop
       const serialNoForFetch = currentData.latestFetchedSerialNo;
 
-      const mergedDrops = mergeDrops(currentData.drops, [optimisticDrop]);
-
-      updateData(waveId, {
-        ...currentData,
-        drops: mergedDrops,
-        // DO NOT update latestFetchedSerialNo here, it's an optimistic update
+      updateData({
+        key: waveId,
+        drops: [optimisticDrop],
       });
 
-      if (serialNoForFetch) {
+      if (serialNoForFetch && !optimisticDrop.id.startsWith("temp-")) {
         // Initiate the background fetch for reconciliation
         initiateFetchNewestCycle(waveId, serialNoForFetch);
       }
-
     },
     [
       getData,
       updateData,
       registerWave,
       initiateFetchNewestCycle,
-      isProcessingIncomingDrop,
     ]
   );
 

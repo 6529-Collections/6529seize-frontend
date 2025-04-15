@@ -1,9 +1,9 @@
-import { WaveMessages } from "./useWaveMessagesStore";
+import { WaveMessages, WaveMessagesUpdate } from "./useWaveMessagesStore";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 
 // Define the shape of the functions passed from the store
 export interface WaveDataStoreUpdater {
-  readonly updateData: (key: string, value: WaveMessages | undefined) => void;
+  readonly updateData: (value: WaveMessagesUpdate) => void;
   readonly getData: (key: string) => WaveMessages | undefined;
 }
 

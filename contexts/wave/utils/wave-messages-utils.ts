@@ -6,7 +6,10 @@ import {
   ExtendedDrop,
   getStableDropKey,
 } from "../../../helpers/waves/drop.helpers";
-import { WaveMessages } from "../hooks/useWaveMessagesStore";
+import {
+  WaveMessages,
+  WaveMessagesUpdate,
+} from "../hooks/useWaveMessagesStore";
 
 /**
  * Fetches wave messages (drops) for a specific wave
@@ -68,7 +71,7 @@ export function formatWaveMessages(
     isLoadingNextPage?: boolean;
     hasNextPage?: boolean;
   } = {}
-): WaveMessages {
+): WaveMessagesUpdate {
   const {
     isLoading = false,
     isLoadingNextPage = false,
@@ -80,6 +83,7 @@ export function formatWaveMessages(
     drops.length > 0 ? Math.max(...drops.map((drop) => drop.serial_no)) : null;
 
   return {
+    key: waveId,
     id: waveId,
     isLoading,
     isLoadingNextPage,
@@ -106,7 +110,7 @@ export function createEmptyWaveMessages(
     isLoadingNextPage?: boolean;
     hasNextPage?: boolean;
   } = {}
-): WaveMessages {
+): WaveMessagesUpdate {
   const {
     isLoading = false,
     isLoadingNextPage = false,
@@ -114,6 +118,7 @@ export function createEmptyWaveMessages(
   } = options;
 
   return {
+    key: waveId,
     id: waveId,
     isLoading,
     isLoadingNextPage,
@@ -156,7 +161,7 @@ export function mergeDrops(
   newDrops: ExtendedDrop[]
 ): ExtendedDrop[] {
   // Create a map for fast lookup by id
-  const dropsMap = new Map<string, ExtendedDrop>();
+  const dropsMapStableKey = new Map<string, ExtendedDrop>();
 
   const newDropsWithStableKey = newDrops.map((drop) => {
     const { key, hash } = getStableDropKey(drop, currentDrops);
@@ -167,28 +172,35 @@ export function mergeDrops(
     };
   });
 
-  // First, add all current drops to the map
-  currentDrops.forEach((drop) => {
-    dropsMap.set(drop.stableKey, drop);
-  });
+  for (const drop of currentDrops) {
+    dropsMapStableKey.set(drop.stableKey, drop);
+  }
 
   // Then add all new drops, overwriting any duplicates
   // This ensures we keep the newest version of each drop
-  newDropsWithStableKey.forEach((drop) => {
-    dropsMap.set(drop.stableKey, drop);
-  });
+  for (const drop of newDropsWithStableKey) {
+    dropsMapStableKey.set(drop.stableKey, drop);
+  }
 
   // Convert the map back to an array
-  const mergedDrops = Array.from(dropsMap.values());
+  const mergedDrops = Array.from(dropsMapStableKey.values());
 
-  const sorted = mergedDrops.sort((a, b) => {
+  const dropsMapSerialNo = new Map<number, ExtendedDrop>();
+
+  for (const drop of mergedDrops) {
+    dropsMapSerialNo.set(drop.serial_no, drop);
+  }
+
+  const finalDrops = Array.from(dropsMapSerialNo.values());
+
+  finalDrops.sort((a, b) => {
     if (a.created_at === b.created_at) {
       return b.serial_no - a.serial_no;
     }
 
     return b.created_at - a.created_at;
   });
-  return mergedDrops;
+  return finalDrops;
 }
 
 // Helper function to get the highest serial number from an array of drops

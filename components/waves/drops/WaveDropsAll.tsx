@@ -81,9 +81,6 @@ export default function WaveDropsAll({
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
       if (serialNo && targetDropRef.current && scrollContainerRef.current) {
-        console.log(
-          `[WaveDropsAll] scrollToSerialNo (behavior: ${behavior}): serialNo: ${serialNo}`
-        );
         targetDropRef.current.scrollIntoView({
           behavior: behavior,
           block: "center", // Tries to vertically center the element

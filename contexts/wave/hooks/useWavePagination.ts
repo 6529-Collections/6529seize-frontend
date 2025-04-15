@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { useWaveAbortController } from "./useWaveAbortController";
 import { WaveDataStoreUpdater } from "./types";
-import { fetchWaveMessages, mergeDrops } from "../utils/wave-messages-utils";
+import { fetchWaveMessages } from "../utils/wave-messages-utils";
 
 // Tracks which waves are currently loading next page
 interface PaginationState {
@@ -56,8 +56,8 @@ export function useWavePagination({
         // No more drops to load, update hasNextPage
         const currentData = getData(waveId);
         if (currentData) {
-          updateData(waveId, {
-            ...currentData,
+          updateData({
+            key: waveId,
             isLoadingNextPage: false,
             hasNextPage: false,
           });
@@ -65,27 +65,20 @@ export function useWavePagination({
         return null;
       }
 
-      // Merge new drops with existing drops
       const currentData = getData(waveId);
       if (!currentData) {
         return null;
       }
 
-      const mergedDrops = mergeDrops(
-        currentData.drops,
-        newDrops.map((drop) => ({
+      updateData({
+        key: waveId,
+        isLoadingNextPage: false,
+        hasNextPage: newDrops.length > 0, // If we got drops, assume there might be more
+        drops: newDrops.map((drop) => ({
           ...drop,
           stableKey: drop.id,
           stableHash: drop.id,
-        }))
-      );
-
-      // Update the store with merged data
-      updateData(waveId, {
-        ...currentData,
-        isLoadingNextPage: false,
-        hasNextPage: newDrops.length > 0, // If we got drops, assume there might be more
-        drops: mergedDrops,
+        })),
       });
 
       return newDrops;
@@ -107,8 +100,8 @@ export function useWavePagination({
       // Reset loading indicator in store
       const currentData = getData(waveId);
       if (currentData) {
-        updateData(waveId, {
-          ...currentData,
+        updateData({
+          key: waveId,
           isLoadingNextPage: false,
         });
       }
@@ -168,8 +161,8 @@ export function useWavePagination({
       paginationState.isLoading = true;
 
       // Update store to show loading state
-      updateData(waveId, {
-        ...currentData,
+      updateData({
+        key: waveId,
         isLoadingNextPage: true,
       });
 
@@ -219,8 +212,8 @@ export function useWavePagination({
       // Reset loading indicator in store
       const currentData = getData(waveId);
       if (currentData?.isLoadingNextPage) {
-        updateData(waveId, {
-          ...currentData,
+        updateData({
+          key: waveId,
           isLoadingNextPage: false,
         });
       }

@@ -75,6 +75,8 @@ export const findClosestMatch = (
 };
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
+export const getOptimisticDropSerialNo = (): number =>
+  Math.floor(Math.random() * 1000000);
 
 /**
  * Convert an ApiDrop to ExtendedDrop by adding stable keys
