@@ -7,11 +7,13 @@ import Tippy from "@tippyjs/react";
 interface DropVoteProgressingProps {
   readonly current: number | null | undefined;
   readonly projected: number | null | undefined;
+  readonly subtle?: boolean;
 }
 
 export default function DropVoteProgressing({
   current,
   projected,
+  subtle = false,
 }: DropVoteProgressingProps): React.ReactElement | null {
   if (typeof current !== "number" || typeof projected !== "number") {
     return null;
@@ -24,9 +26,18 @@ export default function DropVoteProgressing({
   }
 
   const isPositiveProgressing = current < projected;
-  const color = isPositiveProgressing
-    ? "tw-text-emerald-400 tw-bg-emerald-900/40"
-    : "tw-text-rose-400 tw-bg-rose-900/40";
+  
+  // Define styles based on subtle mode
+  let color;
+  if (subtle) {
+    color = isPositiveProgressing
+      ? "tw-text-iron-400 tw-bg-iron-800 tw-transition-colors tw-duration-200"
+      : "tw-text-iron-400 tw-bg-iron-800 tw-transition-colors tw-duration-200";
+  } else {
+    color = isPositiveProgressing
+      ? "tw-text-emerald-400 tw-bg-emerald-900/40"
+      : "tw-text-rose-400 tw-bg-rose-900/40";
+  }
 
   return (
     <Tippy
