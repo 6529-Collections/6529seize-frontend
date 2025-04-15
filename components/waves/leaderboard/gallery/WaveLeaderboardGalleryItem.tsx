@@ -43,7 +43,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
     if (artFocused) {
       // Subtle styling for art-focused mode
       if (isZero) return "tw-text-iron-400";
-      return isNegative ? "tw-text-iron-300" : "tw-text-iron-300";
+      return isNegative ? "tw-text-iron-400" : "tw-text-iron-300";
     }
     // Original styling
     if (isZero) return "tw-text-iron-400";
@@ -55,6 +55,12 @@ export const WaveLeaderboardGalleryItem: React.FC<
 
   const handleImageClick = (e?: React.MouseEvent) => {
     onDropClick(drop);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      onDropClick(drop);
+    }
   };
 
   const handleVoteButtonClick = () => {
@@ -81,13 +87,27 @@ export const WaveLeaderboardGalleryItem: React.FC<
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className={imageContainerClass} onClick={handleImageClick}>
+      <div 
+        className={imageContainerClass} 
+        onClick={handleImageClick}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={0}
+      >
         <div
           className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center"
           onClick={(e) => {
             e.stopPropagation();
             handleImageClick();
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.stopPropagation();
+              handleImageClick();
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
             <MediaDisplay
@@ -179,7 +199,10 @@ export const WaveLeaderboardGalleryItem: React.FC<
             )}
           </div>
           {canShowVote && (
-            <div onClick={(e) => e.stopPropagation()}>
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
               <VotingModalButton
                 drop={drop}
                 onClick={handleVoteButtonClick}

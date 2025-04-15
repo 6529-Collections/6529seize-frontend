@@ -31,8 +31,8 @@ export default function DropVoteProgressing({
   let color;
   if (subtle) {
     color = isPositiveProgressing
-      ? "tw-text-iron-400 tw-bg-iron-800 tw-transition-colors tw-duration-200"
-      : "tw-text-iron-400 tw-bg-iron-800 tw-transition-colors tw-duration-200";
+      ? "tw-text-iron-300 tw-bg-iron-800 tw-transition-colors tw-duration-200"
+      : "tw-text-iron-400 tw-bg-iron-900 tw-transition-colors tw-duration-200";
   } else {
     color = isPositiveProgressing
       ? "tw-text-emerald-400 tw-bg-emerald-900/40"

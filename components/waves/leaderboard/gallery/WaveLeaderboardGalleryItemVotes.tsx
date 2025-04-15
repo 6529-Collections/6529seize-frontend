@@ -21,7 +21,7 @@ export default function WaveLeaderboardGalleryItemVotes({
       // More subtle coloring that doesn't draw focus from the artwork
       return isPositive 
         ? "tw-text-iron-300" 
-        : "tw-text-iron-300";
+        : "tw-text-iron-400";
     }
     // Original bright coloring
     return isPositive ? "tw-text-emerald-500" : "tw-text-rose-500";
