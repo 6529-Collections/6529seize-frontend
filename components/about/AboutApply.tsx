@@ -297,12 +297,13 @@ export default function AboutApply() {
                   <div className="mb-1 fw-bold">Need Artistic Feedback?</div>
                   <div style={{ color: "rgb(154, 154, 154)" }}>
                     <span className="text-success me-2">✓</span>
-                    DM <span className="text-light">@6529er</span>
+                    DM{" "}
+                    <span className="text-light">@6529er</span>
                     {", "}
                     <span className="text-light">@teexels</span>
                     {", and "}
-                    <span className="text-light">@darrensrs</span> into a group
-                    chat for feedback and creative guidance.
+                    <span className="text-light">@darrensrs</span>{" "}
+                    into a group chat for feedback and creative guidance.
                   </div>
                 </div>
 
