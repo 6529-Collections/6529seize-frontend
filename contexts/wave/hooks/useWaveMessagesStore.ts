@@ -111,7 +111,7 @@ function useWaveMessagesStore() {
       // For more robust notification, you might useEffect on `store` change
       const keyListeners = listenersRef.current[update.key];
 
-      if (keyListeners) {
+      if (keyListeners && notify) {
         // Pass the new value directly
         keyListeners.forEach((listener) => listener(notify));
       }

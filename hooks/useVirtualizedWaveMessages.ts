@@ -27,7 +27,6 @@ export function useVirtualizedWaveMessages(
 ): VirtualizedWaveMessages | undefined {
   // Get the original data from the real hooks
   const fullWaveMessages = useMyStreamWaveMessages(waveId);
-  const { fetchNextPageForWave } = useMyStream();
 
   // Track the number of items to show from the cache
   const [virtualLimit, setVirtualLimit] = useState<number>(pageSize);
@@ -66,20 +65,6 @@ export function useVirtualizedWaveMessages(
       setVirtualLimit((prevLimit) => prevLimit + pageSize);
     }
   }, [fullWaveMessages, virtualLimit, pageSize]);
-
-  // Wrapper around the real fetchNextPageForWave
-  const fetchNextPage = useCallback(async () => {
-    // If we have more local data, load that first
-    if (hasMoreLocal) {
-      loadMoreLocally();
-      return;
-    }
-
-    // If no more local data, fetch from server
-    if (waveId) {
-      await fetchNextPageForWave(waveId);
-    }
-  }, [waveId, fetchNextPageForWave, hasMoreLocal, loadMoreLocally]);
 
   // If no full wave messages, return undefined
   if (!fullWaveMessages) {

@@ -214,8 +214,6 @@ export default function CreateDrop({
               is_deleted: false,
             }
           : null,
-        replies_count: 0,
-        quotes_count: 0,
       })),
       parts_count: dropRequest.parts.length,
       referenced_nfts: dropRequest.referenced_nfts,

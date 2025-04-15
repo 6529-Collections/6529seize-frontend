@@ -19,7 +19,6 @@ interface VirtualScrollWrapperProps {
 
   readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
 
-  readonly drop: ExtendedDrop;
 
   /**
    * The child components to be rendered or virtualized.
@@ -52,8 +51,8 @@ export default function VirtualScrollWrapper({
   delay = 1000,
   scrollContainerRef,
   children,
-  drop,
 }: VirtualScrollWrapperProps) {
+
   /**
    * isInView: Tracks if the component is currently in the viewport.
    */
