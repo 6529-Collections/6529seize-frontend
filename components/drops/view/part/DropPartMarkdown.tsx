@@ -216,11 +216,13 @@ function DropPartMarkdown({
     );
   };
 
-  const parseTwitterLink = (href: string): string | null => {
+  const parseTwitterLink = (
+    href: string
+  ): { href: string; tweetId: string } | null => {
     const twitterRegex =
       /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
     const match = href.match(twitterRegex);
-    return match ? match[3] : null;
+    return match ? { href, tweetId: match[3] } : null;
   };
 
   const parseGifLink = (href: string): string | null => {
@@ -256,7 +258,8 @@ function DropPartMarkdown({
     },
     {
       parse: parseTwitterLink,
-      render: (tweetId: string) => renderTweetEmbed(tweetId),
+      render: (result: { href: string; tweetId: string }) =>
+        renderTweetEmbed(result),
     },
     {
       parse: parseGifLink,
@@ -289,7 +292,14 @@ function DropPartMarkdown({
     return renderExternalOrInternalLink(href, props);
   };
 
-  const renderTweetEmbed = (tweetId: string) => <Tweet id={tweetId} />;
+  const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
+    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+      <div className="tw-flex-1 tw-min-w-0">
+        <Tweet id={result.tweetId} />
+      </div>
+      <ChatItemHrefButtons href={result.href} />
+    </div>
+  );
 
   const renderGifEmbed = (url: string) => (
     <img
