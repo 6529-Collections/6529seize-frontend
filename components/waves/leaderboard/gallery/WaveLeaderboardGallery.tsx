@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { AuthContext } from "../../../auth/Auth";

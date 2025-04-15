@@ -23,9 +23,7 @@ interface WaveLeaderboardGalleryItemProps {
 export const WaveLeaderboardGalleryItem: React.FC<
   WaveLeaderboardGalleryItemProps
 > = ({ drop, onDropClick, artFocused = true }) => {
-  // Always art-focused in grid view
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const isMobileScreen = useIsMobileScreen();
   const { canShowVote } = useDropInteractionRules(drop);
 
@@ -67,10 +65,6 @@ export const WaveLeaderboardGalleryItem: React.FC<
     setIsVotingModalOpen(true);
   };
 
-  // Enhanced hover effects for art-focused mode
-  const handleMouseEnter = () => setIsHovered(true);
-  const handleMouseLeave = () => setIsHovered(false);
-
   // Determine container class based on art-focused mode
   const containerClass = artFocused
     ? "group tw-transition-all tw-duration-300 tw-ease-out"
@@ -84,18 +78,15 @@ export const WaveLeaderboardGalleryItem: React.FC<
   return (
     <div
       className={containerClass}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
     >
-      <div 
-        className={imageContainerClass} 
+      <button 
+        className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-w-full tw-text-left tw-bg-transparent`} 
         onClick={handleImageClick}
         onKeyDown={handleKeyDown}
-        role="button"
-        tabIndex={0}
+        type="button"
       >
-        <div
-          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center"
+        <button
+          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-border-none tw-m-0 tw-p-0 tw-w-full tw-h-full tw-bg-transparent"
           onClick={(e) => {
             e.stopPropagation();
             handleImageClick();
@@ -106,8 +97,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
               handleImageClick();
             }
           }}
-          role="button"
-          tabIndex={0}
+          type="button"
         >
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
             <MediaDisplay
@@ -119,10 +109,10 @@ export const WaveLeaderboardGalleryItem: React.FC<
               disableMediaInteraction={true}
             />
           </div>
-        </div>
+        </button>
 
         {/* No overlay for winners */}
-      </div>
+      </button>
       <div className="tw-flex tw-flex-col tw-mt-2 tw-gap-y-2">
         <div className="tw-flex tw-items-center tw-justify-between">
           {/* Rank badge aligned to the left */}
@@ -199,16 +189,18 @@ export const WaveLeaderboardGalleryItem: React.FC<
             )}
           </div>
           {canShowVote && (
-            <div 
+            <button 
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
+              type="button"
+              className="tw-border-none tw-m-0 tw-p-0 tw-bg-transparent"
             >
               <VotingModalButton
                 drop={drop}
                 onClick={handleVoteButtonClick}
                 variant={artFocused ? "subtle" : "default"}
               />
-            </div>
+            </button>
           )}
         </div>
       </div>

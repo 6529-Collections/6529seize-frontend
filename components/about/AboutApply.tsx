@@ -1,5 +1,4 @@
 import { Col, Container, Row } from "react-bootstrap";
-import styles from "./About.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendar, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 
@@ -298,8 +297,10 @@ export default function AboutApply() {
                   <div className="mb-1 fw-bold">Need Artistic Feedback?</div>
                   <div style={{ color: "rgb(154, 154, 154)" }}>
                     <span className="text-success me-2">✓</span>
-                    DM <span className="text-light">@6529er</span>,{" "}
-                    <span className="text-light">@teexels</span>, and{" "}
+                    DM <span className="text-light">@6529er</span>
+                    {", "}
+                    <span className="text-light">@teexels</span>
+                    {", and "}
                     <span className="text-light">@darrensrs</span> into a group
                     chat for feedback and creative guidance.
                   </div>
@@ -316,7 +317,8 @@ export default function AboutApply() {
                       className="link-info"
                     >
                       The Memes - FAQ wave
-                    </a>{" "}
+                    </a>
+                    {" "}
                     after reading the{" "}
                     <a
                       href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
@@ -326,7 +328,7 @@ export default function AboutApply() {
                     >
                       Artist Brief
                     </a>
-                    .
+                    {"."}
                   </div>
                   <div style={{ color: "rgb(154, 154, 154)" }} className="mt-2">
                     <span className="text-success me-2">✓</span>
@@ -339,7 +341,7 @@ export default function AboutApply() {
                     >
                       collections@6529.io
                     </a>
-                    .
+                    {"."}
                   </div>
                 </div>
               </div>
