@@ -36,30 +36,29 @@ export default function ChatItemHrefButtons({
           />
         </svg>
       </button>
-      {relativeHref && (
-        <Link
-          href={relativeHref}
-          className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl`}>
-          <svg
-            className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
-            viewBox="0 0 64 64"
-            xmlns="http://www.w3.org/2000/svg"
-            strokeWidth="3"
-            stroke="currentColor"
-            fill="none">
-            <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-            <g
-              id="SVGRepo_tracerCarrier"
-              strokeLinecap="round"
-              strokeLinejoin="round"></g>
-            <g id="SVGRepo_iconCarrier">
-              <path d="M55.4,32V53.58a1.81,1.81,0,0,1-1.82,1.82H10.42A1.81,1.81,0,0,1,8.6,53.58V10.42A1.81,1.81,0,0,1,10.42,8.6H32"></path>
-              <polyline points="40.32 8.6 55.4 8.6 55.4 24.18"></polyline>
-              <line x1="19.32" y1="45.72" x2="54.61" y2="8.91"></line>
-            </g>
-          </svg>
-        </Link>
-      )}
+      <Link
+        href={relativeHref ?? href}
+        target={relativeHref ? undefined : "_blank"}
+        className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl`}>
+        <svg
+          className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
+          viewBox="0 0 64 64"
+          xmlns="http://www.w3.org/2000/svg"
+          strokeWidth="3"
+          stroke="currentColor"
+          fill="none">
+          <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            strokeLinecap="round"
+            strokeLinejoin="round"></g>
+          <g id="SVGRepo_iconCarrier">
+            <path d="M55.4,32V53.58a1.81,1.81,0,0,1-1.82,1.82H10.42A1.81,1.81,0,0,1,8.6,53.58V10.42A1.81,1.81,0,0,1,10.42,8.6H32"></path>
+            <polyline points="40.32 8.6 55.4 8.6 55.4 24.18"></polyline>
+            <line x1="19.32" y1="45.72" x2="54.61" y2="8.91"></line>
+          </g>
+        </svg>
+      </Link>
     </div>
   );
 }
