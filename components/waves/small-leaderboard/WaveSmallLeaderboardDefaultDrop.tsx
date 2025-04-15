@@ -42,7 +42,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
   return (
     <div>
       <div className="tw-relative tw-flex tw-flex-col tw-border-b tw-border-solid tw-border-iron-800 tw-border-x-0 tw-border-t-0">
-        <div className="tw-@container tw-p-4 tw-rounded-xl desktop-hover:hover:tw-bg-iron-800/70 tw-transition tw-duration-300 tw-ease-out tw-group">
+        <div className="tw-@container tw-p-4 tw-rounded-xl desktop-hover:hover:tw-bg-iron-800/80 tw-transition tw-duration-300 tw-ease-out tw-group">
           <div>
             <div className="tw-w-full tw-inline-flex tw-justify-between tw-items-center">
               {drop.rank ? (

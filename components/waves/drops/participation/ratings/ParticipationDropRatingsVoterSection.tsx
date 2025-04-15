@@ -20,7 +20,7 @@ export default function ParticipationDropRatingsVoterSection({
   const { hasRaters } = ratingsData;
 
   return (
-    <div className="tw-flex tw-items-baseline tw-gap-x-1.5">
+    <div className="tw-flex tw-items-center tw-gap-x-1.5">
       {hasRaters && (
         <div className="tw-flex tw-items-center -tw-space-x-1.5">
           {drop.top_raters.slice(0, 5).map((rater, index) => (

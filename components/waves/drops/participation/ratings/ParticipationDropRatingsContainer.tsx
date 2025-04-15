@@ -26,8 +26,8 @@ export default function ParticipationDropRatingsContainer({
   const userTheme = getThemeColors(rank, ratingsData.userRating < 0);
 
   return (
-    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-4">
-      <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
+    <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-gap-x-6">
+      <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-6 tw-gap-y-2">
         <ParticipationDropRatingsTotalSection
           drop={drop}
           rank={rank}

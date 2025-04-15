@@ -59,7 +59,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
         onClick={handleDropClick}
         className="tw-w-full tw-text-left tw-cursor-pointer tw-group tw-rounded-xl tw-overflow-hidden"
       >
-        <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/60 tw-transition-all tw-duration-300 tw-ease-out">
+        <div className="tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-relative desktop-hover:hover:tw-bg-iron-800/80 tw-transition-all tw-duration-300 tw-ease-out">
           <div className="tw-flex tw-flex-col tw-relative">
             <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
               <div className="tw-flex tw-items-center tw-gap-x-3">

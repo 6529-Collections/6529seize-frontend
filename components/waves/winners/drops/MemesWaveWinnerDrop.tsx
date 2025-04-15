@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ExtendedDrop, convertApiDropToExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import {
+  ExtendedDrop,
+  convertApiDropToExtendedDrop,
+} from "../../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 import WaveWinnersDropHeaderAuthorPfp from "./header/WaveWinnersDropHeaderAuthorPfp";
@@ -8,10 +11,7 @@ import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
-import {
-  cicToType,
-  formatNumberWithCommas,
-} from "../../../../helpers/Helpers";
+import { cicToType, formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { Time } from "../../../../helpers/time";
 import Tippy from "@tippyjs/react";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
@@ -37,21 +37,18 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
 }) => {
   // Get device info from useDeviceInfo hook
   const { hasTouchScreen } = useDeviceInfo();
-  
+
   // Use long press interaction hook with touch screen info from device hook
-  const { 
-    isActive, 
-    setIsActive, 
-    touchHandlers 
-  } = useLongPressInteraction({
-    hasTouchScreen
+  const { isActive, setIsActive, touchHandlers } = useLongPressInteraction({
+    hasTouchScreen,
   });
-  
+
   const [isMobile, setIsMobile] = useState(false);
 
   function checkMobile() {
     const screenSize = window.innerWidth;
-    if (screenSize <= 640) { // Tailwind's sm breakpoint
+    if (screenSize <= 640) {
+      // Tailwind's sm breakpoint
       setIsMobile(true);
     } else {
       setIsMobile(false);
@@ -63,7 +60,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-  
+
   const title =
     winner.drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
     "Artwork Title";
@@ -79,6 +76,13 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   const topVoters = winner.drop.top_raters?.slice(0, 3) || [];
   const creditType = wave.voting?.credit_type || "votes";
 
+  // Check if user has voted
+  const hasUserVoted =
+    winner.drop.context_profile_context?.rating !== undefined &&
+    winner.drop.context_profile_context?.rating !== 0;
+  const userVote = winner.drop.context_profile_context?.rating ?? 0;
+  const isUserVoteNegative = userVote < 0;
+
   // Convert the drop to ExtendedDrop using the helper function
   const extendedDrop = convertApiDropToExtendedDrop(winner.drop);
 
@@ -88,10 +92,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
       className="tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full"
     >
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/40 tw-shadow-[0_0_15px_rgba(251,191,36,0.15)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
-        <div 
-          className="tw-flex tw-flex-col"
-          {...touchHandlers}
-        >
+        <div className="tw-flex tw-flex-col" {...touchHandlers}>
           <div className="tw-p-4">
             <div className="tw-flex tw-flex-col tw-gap-y-1.5">
               <div className="tw-flex tw-items-center tw-justify-between">
@@ -117,7 +118,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         onClick={(e) => e.stopPropagation()}
                         className="tw-no-underline hover:tw-opacity-80 tw-transition-opacity"
                       >
-                        <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
+                        <span className="tw-text-sm tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
                           {winner.drop.author?.handle}
                         </span>
                       </Link>
@@ -125,10 +126,13 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                       <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
 
                       <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
-                        {isMobile 
-                          ? Time.millis(winner.drop.created_at).toShortRelativeTime()
-                          : Time.millis(winner.drop.created_at).toLocaleDropDateAndTimeString()
-                        }
+                        {isMobile
+                          ? Time.millis(
+                              winner.drop.created_at
+                            ).toShortRelativeTime()
+                          : Time.millis(
+                              winner.drop.created_at
+                            ).toLocaleDropDateAndTimeString()}
                       </span>
                     </div>
                   </div>
@@ -139,7 +143,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     />
                   </div>
                 </div>
-                
+
                 {/* Show open icon when not a touch device */}
                 {!hasTouchScreen && (
                   <div className="tw-flex tw-items-center">
@@ -153,7 +157,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0 tw-whitespace-nowrap">
                   {title}
                 </h3>
-                <div className="tw-text-md tw-text-iron-400">{description}</div>
+                <div className="tw-text-sm tw-text-iron-400">{description}</div>
               </div>
             </div>
           </div>
@@ -166,19 +170,19 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
               />
             </div>
           )}
-        
-            <MemeDropTraits drop={winner.drop} />
-        
-          <div className="tw-flex tw-items-center tw-gap-x-4 tw-flex-shrink-0 tw-px-4 tw-pt-4 lg:tw-pt-0 tw-pb-4">
+
+          <MemeDropTraits drop={winner.drop} />
+
+          <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-6 tw-gap-y-2 tw-px-4 tw-pt-4 lg:tw-pt-0 tw-pb-4">
             <div className="tw-flex tw-items-center tw-gap-x-1.5">
               <span
-                className={`tw-text-md tw-font-semibold ${
+                className={`tw-text-sm tw-font-semibold ${
                   isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
                 } `}
               >
                 {formatNumberWithCommas(rating)}
               </span>
-              <span className="tw-text-md tw-text-iron-400">{creditType}</span>
+              <span className="tw-text-sm tw-text-iron-400">{creditType}</span>
             </div>
 
             <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -209,29 +213,57 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 ))}
               </div>
               <div className="tw-flex tw-items-baseline tw-gap-x-1">
-                <span className="tw-text-md tw-font-medium tw-text-iron-50">
+                <span className="tw-text-sm tw-font-medium tw-text-iron-50">
                   {formatNumberWithCommas(ratersCount)}
                 </span>
-                <span className="tw-text-md tw-text-iron-400">
+                <span className="tw-text-sm tw-text-iron-400">
                   {ratersCount === 1 ? "voter" : "voters"}
                 </span>
               </div>
             </div>
-          </div>
-          
-          {/* Touch slide-up menu */}
-          {hasTouchScreen && createPortal(
-            <CommonDropdownItemsMobileWrapper isOpen={isActive} setOpen={setIsActive}>
-              <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
-                {/* Open drop option */}
-                <WaveDropMobileMenuOpen 
-                  drop={extendedDrop} 
-                  onOpenChange={() => setIsActive(false)} 
-                />
+
+            {/* User's vote */}
+            {hasUserVoted && (
+              <div className="tw-flex tw-items-center tw-gap-x-1.5">
+                <div className="tw-flex tw-items-baseline tw-gap-x-1">
+                  <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+                    Your vote:
+                  </span>
+                  <span
+                    className={`tw-text-sm tw-font-semibold ${
+                      isUserVoteNegative
+                        ? "tw-text-rose-500"
+                        : "tw-text-emerald-500"
+                    }`}
+                  >
+                    {isUserVoteNegative && "-"}
+                    {formatNumberWithCommas(Math.abs(userVote))}{" "}
+                    <span className="tw-text-iron-400 tw-font-normal">
+                      {creditType}
+                    </span>
+                  </span>
+                </div>
               </div>
-            </CommonDropdownItemsMobileWrapper>,
-            document.body
-          )}
+            )}
+          </div>
+
+          {/* Touch slide-up menu */}
+          {hasTouchScreen &&
+            createPortal(
+              <CommonDropdownItemsMobileWrapper
+                isOpen={isActive}
+                setOpen={setIsActive}
+              >
+                <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
+                  {/* Open drop option */}
+                  <WaveDropMobileMenuOpen
+                    drop={extendedDrop}
+                    onOpenChange={() => setIsActive(false)}
+                  />
+                </div>
+              </CommonDropdownItemsMobileWrapper>,
+              document.body
+            )}
         </div>
       </div>
     </div>

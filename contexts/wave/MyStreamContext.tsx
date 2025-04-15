@@ -29,6 +29,7 @@ export interface MinimalWave {
   contributors: {
     pfp: string;
   }[];
+  isPinned?: boolean;
 }
 
 // Define the type for our context
@@ -223,6 +224,8 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
           wave.metrics.latest_drop_timestamp ??
           null,
       };
+      // @ts-ignore: This is to handle isPinned from EnhancedWave
+      const isPinned = !!wave.isPinned;
       return {
         id: wave.id, // Add the missing id property
         name: wave.name,
@@ -232,6 +235,7 @@ export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
           pfp: c.contributor_pfp,
         })),
         newDropsCount: newDropsData,
+        isPinned: isPinned,
       };
     },
     [newDropsCounts]
