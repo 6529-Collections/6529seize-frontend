@@ -96,7 +96,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
 
           <SingleWaveDropInfoDetails drop={drop} />
 
-          {canDelete && (
+          {canDelete && drop.drop_type !== ApiDropType.Winner && (
             <div className="tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0 tw-pt-4 tw-px-6 tw-pb-6">
               <WaveDropDeleteButton drop={drop} onDelete={onClose} />
             </div>

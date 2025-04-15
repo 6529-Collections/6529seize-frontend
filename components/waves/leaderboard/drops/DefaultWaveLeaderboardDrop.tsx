@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { WaveLeaderboardDropHeader } from "./header/WaveLeaderboardDropHeader";
 import { WaveLeaderboardDropContent } from "../content/WaveLeaderboardDropContent";
@@ -8,9 +9,14 @@ import { useDropInteractionRules } from "../../../../hooks/drops/useDropInteract
 import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 import WaveDropActionsOptions from "../../drops/WaveDropActionsOptions";
 import WaveDropActionsOpen from "../../drops/WaveDropActionsOpen";
+import WaveDropMobileMenuOpen from "../../drops/WaveDropMobileMenuOpen";
+import WaveDropMobileMenuDelete from "../../drops/WaveDropMobileMenuDelete";
 import { VotingModal, MobileVotingModal } from "../../../../components/voting";
 import VotingModalButton from "../../../../components/voting/VotingModalButton";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
+import useLongPressInteraction from "../../../../hooks/useLongPressInteraction";
 
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
@@ -23,7 +29,17 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 > = ({ drop, wave, onDropClick }) => {
   const { canShowVote, canDelete } = useDropInteractionRules(drop);
   const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
+  const { hasTouchScreen } = useDeviceInfo();
   const isMobileScreen = useIsMobileScreen();
+  
+  // Use the hook for long press interactions
+  const { 
+    isActive, 
+    setIsActive, 
+    touchHandlers 
+  } = useLongPressInteraction({
+    hasTouchScreen
+  });
 
   const getBorderClasses = () => {
     const rank = drop.rank && drop.rank <= 3 ? drop.rank : "default";
@@ -50,7 +66,10 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       onClick={() => onDropClick(drop)}
       className="tw-@container tw-group tw-cursor-pointer tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full tw-relative"
     >
-      <div className={getBorderClasses()}>
+      <div 
+        className={getBorderClasses()}
+        {...touchHandlers}
+      >
         <div className="tw-flex tw-flex-col">
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
@@ -104,6 +123,28 @@ export const DefaultWaveLeaderboardDrop: React.FC<
           isOpen={isVotingModalOpen}
           onClose={() => setIsVotingModalOpen(false)}
         />
+      )}
+      
+      {/* Mobile menu slide-up */}
+      {hasTouchScreen && createPortal(
+        <CommonDropdownItemsMobileWrapper isOpen={isActive} setOpen={setIsActive}>
+          <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
+            {/* Open drop option */}
+            <WaveDropMobileMenuOpen 
+              drop={drop}
+              onOpenChange={() => setIsActive(false)} 
+            />
+            
+            {/* Delete option - only if user can delete */}
+            {canDelete && (
+              <WaveDropMobileMenuDelete 
+                drop={drop} 
+                onDropDeleted={() => setIsActive(false)} 
+              />
+            )}
+          </div>
+        </CommonDropdownItemsMobileWrapper>,
+        document.body
       )}
     </div>
   );

@@ -18,6 +18,7 @@ export interface MinimalWave {
   contributors: {
     pfp: string;
   }[];
+  isPinned: boolean;
 }
 
 /**
@@ -55,6 +56,7 @@ export function useEnhancedWavesList(activeWaveId: string | null) {
           pfp: c.contributor_pfp,
         })),
         newDropsCount: newDropsData,
+        isPinned: wavesData.pinnedWaves.some((w) => w.id === wave.id),
       };
     },
     [newDropsCounts]

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
-import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
+import MediaDisplay from "../../../drops/view/item/content/media/MediaDisplay";
 import WaveLeaderboardGalleryItemVotes from "./WaveLeaderboardGalleryItemVotes";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
@@ -53,35 +53,24 @@ export const WaveLeaderboardGalleryItem: React.FC<
   return (
     <div>
       <div
-        className="tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer"
+        className="tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out touch-none"
         onClick={handleImageClick}
       >
         <div
-          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out touch-none"
+          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center"
           onClick={(e) => {
             e.stopPropagation();
             handleImageClick();
           }}
         >
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-            <DropListItemContentMedia
+            <MediaDisplay
               media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
               media_url={getScaledImageUri(
                 drop.parts[0].media[0].url,
                 ImageScale.AUTOx450
               )}
-              onContainerClick={() => {
-                // This prevents the default modal from opening in DropListItemContentMedia
-                // and lets the parent div's onClick handle navigation instead
-              }}
-            />
-            {/* Overlay div to intercept clicks so DropListItemContentMedia doesn't open its own modal */}
-            <div
-              className="tw-absolute tw-inset-0 tw-z-[1]"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleImageClick();
-              }}
+              disableMediaInteraction={true}
             />
           </div>
         </div>
@@ -130,10 +119,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
         <div className="tw-flex tw-items-center tw-justify-between">
           {canShowVote && (
             <div onClick={(e) => e.stopPropagation()}>
-              <VotingModalButton
-                drop={drop}
-                onClick={handleVoteButtonClick}
-              />
+              <VotingModalButton drop={drop} onClick={handleVoteButtonClick} />
             </div>
           )}
           <div>

@@ -14,23 +14,27 @@ export default function ParticipationDropRatingsUserSection({
   ratingsData,
 }: ParticipationDropRatingsUserSectionProps) {
   const { userRating } = ratingsData;
+  
+  // Don't show anything if the user hasn't voted
+  if (userRating === 0) {
+    return null;
+  }
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1">
-      <span className="tw-text-sm tw-font-medium tw-text-iron-500">
+      <span className="tw-text-sm tw-font-normal tw-text-iron-500">
         Your votes
       </span>
-      <div className="tw-flex tw-items-baseline tw-gap-1">
-        <div className={`tw-relative tw-inline-flex ${userTheme.indicator}`}>
-          <span className={`tw-text-sm tw-font-bold ${userTheme.text}`}>
-            {userRating < 0 && "-"}
-            {formatNumberWithCommas(Math.abs(userRating))}
-          </span>
-        </div>
-        <span className="tw-text-sm tw-font-medium tw-text-iron-500">
-          {drop.wave.voting_credit_type}
+
+      <div className={`tw-relative ${userTheme.indicator}`}>
+        <span className={`tw-text-sm tw-font-semibold ${userTheme.text}`}>
+          {userRating < 0 && "-"}
+          {formatNumberWithCommas(Math.abs(userRating))}
         </span>
       </div>
+      <span className="tw-text-sm tw-font-normal tw-text-iron-500">
+        {drop.wave.voting_credit_type}
+      </span>
     </div>
   );
 }

@@ -30,7 +30,6 @@ export const setAuthJwt = (
   refreshToken: string,
   role?: string
 ) => {
-
   const jwtExpiration = getJwtExpiration(jwt);
   const now = Math.floor(Date.now() / 1000);
   const expiresInSeconds = jwtExpiration - now;

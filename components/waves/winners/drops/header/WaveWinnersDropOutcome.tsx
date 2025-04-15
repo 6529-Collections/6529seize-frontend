@@ -61,18 +61,18 @@ export default function WaveWinnersDropOutcome({
 
   return (
     <div className="tw-flex tw-items-start tw-gap-2">
-      <div className="tw-text-iron-400 tw-text-sm tw-font-normal">
+      <span className="tw-text-iron-400 tw-text-sm tw-font-normal">
         Outcome:
-      </div>
+      </span>
       <div className="tw-flex tw-flex-wrap tw-gap-1.5">
         {nicOutcomes.map((nicOutcome) => (
-          <div
+          <span
             key={`NIC-${nicOutcome.value}`}
             className="tw-flex tw-items-center tw-gap-1.5"
           >
             <FontAwesomeIcon
               icon={faAddressCard}
-              className="tw-size-3.5 tw-text-blue-300/70"
+              className="tw-size-3.5 tw-text-blue-300/70 tw-mt-1"
             />
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">
               NIC
@@ -80,17 +80,17 @@ export default function WaveWinnersDropOutcome({
             <span className="tw-text-sm tw-font-normal tw-text-blue-200/90">
               {formatNumberWithCommas(nicOutcome.value)}
             </span>
-          </div>
+          </span>
         ))}
 
         {repOutcomes.map((repOutcome) => (
-          <div
+          <span
             key={`REP-${repOutcome.category}-${repOutcome.value}`}
-            className="tw-flex tw-items-center tw-gap-1.5"
+            className="tw-flex tw-gap-1.5"
           >
             <FontAwesomeIcon
               icon={faStar}
-              className="tw-size-3.5 tw-text-purple-300/70"
+              className="tw-size-3.5 tw-text-purple-300/70 tw-mt-1"
             />
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">
               Rep
@@ -106,22 +106,22 @@ export default function WaveWinnersDropOutcome({
                 </span>
               </>
             )}
-          </div>
+          </span>
         ))}
 
         {manualOutcomes.map((outcome) => (
-          <div
+          <span
             key={`MANUAL-${outcome.description}`}
-            className="tw-flex tw-items-center tw-gap-1.5"
+            className="tw-flex tw-gap-1.5"
           >
             <FontAwesomeIcon
               icon={faAward}
-              className="tw-size-3.5 tw-text-amber-300/70"
+              className="tw-size-3.5 tw-text-amber-300/70 tw-mt-1"
             />
             <span className="tw-text-sm tw-font-normal tw-text-amber-100/90">
               {outcome.description}
             </span>
-          </div>
+          </span>
         ))}
       </div>
     </div>

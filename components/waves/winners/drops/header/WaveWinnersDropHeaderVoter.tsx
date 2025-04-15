@@ -43,10 +43,10 @@ export default function WaveWinnersDropHeaderVoter({
             <img
               src={getScaledImageUri(voter.profile.pfp, ImageScale.W_AUTO_H_50)}
               alt={`${voter.profile.handle}'s Profile`}
-              className={`tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800`}
+              className={`tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800 tw-object-contain`}
             />
           ) : (
-            <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800"></div>
+            <div className="tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-black tw-bg-iron-800 tw-object-contain"></div>
           )}
         </Link>
       </div>

@@ -37,21 +37,6 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     return !!connectedProfile?.profile?.handle && !activeProfileProxy;
   }, [connectedProfile?.profile?.handle, activeProfileProxy]);
 
-  // Sort waves to prioritize the active wave (if present)
-  const sortedWaves = useMemo(() => {
-    if (!activeWaveId) return waves;
-
-    return waves.reduce<MinimalWave[]>((acc, wave) => {
-      if (wave.id === activeWaveId) {
-        // Place active wave at the beginning
-        acc.unshift(wave);
-      } else {
-        // Place all other waves at the end
-        acc.push(wave);
-      }
-      return acc;
-    }, []);
-  }, [waves, activeWaveId]);
 
   // Ref for intersection observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -130,7 +115,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
         <div className="tw-w-full">
           {/* Unified Waves List */}
           <UnifiedWavesListWaves
-            waves={sortedWaves}
+            waves={waves}
             onHover={onHover}
           />
 
@@ -143,7 +128,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
           {/* Empty state */}
           <UnifiedWavesListEmpty
-            sortedWaves={sortedWaves}
+            sortedWaves={waves}
             isFetchingNextPage={isFetchingNextPage}
           />
         </div>

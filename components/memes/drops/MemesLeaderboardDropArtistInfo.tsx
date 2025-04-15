@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { cicToType, getTimeAgoShort } from "../../../helpers/Helpers";
+import { cicToType } from "../../../helpers/Helpers";
+import { Time } from "../../../helpers/time";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
@@ -15,6 +16,23 @@ interface MemesLeaderboardDropArtistInfoProps {
 export const MemesLeaderboardDropArtistInfo: React.FC<
   MemesLeaderboardDropArtistInfoProps
 > = ({ drop }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  function checkMobile() {
+    const screenSize = window.innerWidth;
+    if (screenSize <= 640) { // Tailwind's sm breakpoint
+      setIsMobile(true);
+    } else {
+      setIsMobile(false);
+    }
+  }
+
+  useEffect(() => {
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+  
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
       <Link
@@ -45,8 +63,11 @@ export const MemesLeaderboardDropArtistInfo: React.FC<
 
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
 
-          <span className="tw-text-md tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-            {getTimeAgoShort(drop.created_at)}
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
+            {isMobile 
+              ? Time.millis(drop.created_at).toShortRelativeTime()
+              : Time.millis(drop.created_at).toLocaleDropDateAndTimeString()
+            }
           </span>
         </div>
         <WinnerDropBadge

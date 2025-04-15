@@ -16,7 +16,7 @@ export default function CommonDropdownItemsMobileWrapper({
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="tailwind-scope tw-relative tw-z-[999] lg:tw-hidden"
+        className="tailwind-scope tw-z-[1000] tw-absolute lg:tw-hidden"
         onClose={setOpen}
       >
         <Transition.Child
@@ -28,7 +28,7 @@ export default function CommonDropdownItemsMobileWrapper({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-transition-opacity" />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-backdrop-blur-[1px] tw-transition-opacity" />
         </Transition.Child>
 
         <div className="tw-fixed tw-inset-0 tw-overflow-hidden">

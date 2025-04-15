@@ -81,7 +81,7 @@ export default function MemeParticipationDrop({
   }, [onQuote, drop]);
 
   return (
-    <div className="tw-w-full tw-@container ">
+    <div className="tw-w-full tw-@container">
       <div
         className={`tw-w-full tw-group tw-relative ${
           location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
@@ -122,12 +122,11 @@ export default function MemeParticipationDrop({
                   />
                 </div>
               )}
-              <div className="tw-px-2 tw-py-4 sm:tw-px-4">
-                <MemeDropTraits drop={drop} />
-              </div>
+
+              <MemeDropTraits drop={drop} />
             </>
           </DropMobileMenuHandler>
-          <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-gap-y-3 @[700px]:tw-gap-y-0 tw-justify-between @[700px]:tw-items-center @[700px]:tw-px-4 tw-pb-4">
+          <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-gap-3 @[700px]:tw-gap-y-0 tw-justify-between @[700px]:tw-items-center @[700px]:tw-px-4 tw-pb-4">
             <div className="tw-px-4 @[700px]:tw-px-0">
               <MemeDropVoteStats
                 current={drop.rating}
@@ -135,6 +134,7 @@ export default function MemeParticipationDrop({
                 votingCreditType={drop.wave.voting_credit_type}
                 ratersCount={drop.raters_count}
                 topVoters={drop.top_raters ?? []}
+                userContext={drop.context_profile_context}
               />
             </div>
 

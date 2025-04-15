@@ -1,13 +1,15 @@
 import React from "react";
 import { ApiDropPart } from "../../../generated/models/ApiDropPart";
-import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
+import MediaDisplay from "../../drops/view/item/content/media/MediaDisplay";
 
 interface WaveDropPartContentMediasProps {
   readonly activePart: ApiDropPart;
+  readonly disableMediaInteraction?: boolean;
 }
 
 const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
   activePart,
+  disableMediaInteraction = false,
 }) => {
   if (!activePart.media.length) {
     return null;
@@ -19,9 +21,10 @@ const WaveDropPartContentMedias: React.FC<WaveDropPartContentMediasProps> = ({
     >
       {activePart.media.map((media, i) => (
         <div key={`part-${i}-media-${media.url}`} className="tw-flex tw-justify-center tw-h-64">
-          <DropListItemContentMedia
+          <MediaDisplay
             media_mime_type={media.mime_type}
             media_url={media.url}
+            disableMediaInteraction={disableMediaInteraction}
           />
         </div>
       ))}

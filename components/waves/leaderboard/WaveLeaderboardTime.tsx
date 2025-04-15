@@ -62,7 +62,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
       ) : (
         // For regular waves: Show phase cards directly in the header
         <div className="tw-rounded-lg tw-bg-iron-950 tw-px-3 tw-py-2 tw-overflow-hidden">
-          <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-y-2 tw-justify-between">
+          <div className="tw-flex tw-items-center tw-gap-2">
             <CompactDroppingPhaseCard wave={wave} />
             <CompactVotingPhaseCard wave={wave} />
           </div>
