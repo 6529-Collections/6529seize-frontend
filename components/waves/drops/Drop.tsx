@@ -51,9 +51,6 @@ export default function Drop({
   showReplyAndQuote,
   parentContainerRef,
 }: DropProps) {
-
-
-
   const components: Record<ApiDropType, React.ReactNode> = {
     [ApiDropType.Participatory]: (
       <ParticipationDrop

@@ -5,6 +5,7 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 export interface WaveDataStoreUpdater {
   readonly updateData: (value: WaveMessagesUpdate) => void;
   readonly getData: (key: string) => WaveMessages | undefined;
+  readonly removeDrop: (waveId: string, dropId: string) => void;
 }
 
 // Tracks loading state for each wave

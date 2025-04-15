@@ -49,4 +49,3 @@ const WaveDropPartContentMarkdown: React.FC<WaveDropPartContentMarkdownProps> = 
 };
 
 export default WaveDropPartContentMarkdown;
-

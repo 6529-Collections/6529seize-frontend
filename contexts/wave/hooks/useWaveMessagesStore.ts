@@ -119,6 +119,49 @@ function useWaveMessagesStore() {
     [waveMessages]
   );
 
+  const removeDrop = useCallback(
+    (waveId: string, dropId: string) => {
+      let notify: WaveMessages | undefined;
+      setWaveMessages((prevWaveMessages) => {
+        const newWaveMessages = { ...prevWaveMessages };
+        if (!newWaveMessages[waveId]) {
+          newWaveMessages[waveId] = {
+            id: waveId,
+            isLoading: false,
+            isLoadingNextPage: false,
+            hasNextPage: false,
+            drops: [],
+            latestFetchedSerialNo: null,
+          };
+        }
+
+        const updatedWaveMessages = {
+          ...newWaveMessages[waveId],
+          drops: newWaveMessages[waveId].drops.filter(
+            (drop) => drop.id !== dropId
+          ),
+        };
+
+        notify = updatedWaveMessages;
+        return {
+          ...newWaveMessages,
+          [waveId]: updatedWaveMessages,
+        };
+      });
+
+      // Notify listeners *after* state update is triggered
+      // Note: state updates might be async, listeners get the *new* state idea
+      // For more robust notification, you might useEffect on `store` change
+      const keyListeners = listenersRef.current[waveId];
+
+      if (keyListeners && notify) {
+        // Pass the new value directly
+        keyListeners.forEach((listener) => listener(notify));
+      }
+    },
+    [waveMessages]
+  );
+
   // Optional: Effect to notify listeners if state changes outside updateData
   // This is a more robust way to ensure listeners are called *after* the state has definitively updated.
   useEffect(() => {
@@ -135,7 +178,7 @@ function useWaveMessagesStore() {
     });
   }, [waveMessages]); // Run when the store state changes
 
-  return { getData, subscribe, unsubscribe, updateData };
+  return { getData, subscribe, unsubscribe, updateData, removeDrop };
 }
 
 export default useWaveMessagesStore;

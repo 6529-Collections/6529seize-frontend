@@ -194,11 +194,14 @@ export function mergeDrops(
   const finalDrops = Array.from(dropsMapSerialNo.values());
 
   finalDrops.sort((a, b) => {
-    if (a.created_at === b.created_at) {
-      return b.serial_no - a.serial_no;
-    }
+    const aIsTemp = a.id?.startsWith('temp-') ?? false;
+    const bIsTemp = b.id?.startsWith('temp-') ?? false;
 
-    return b.created_at - a.created_at;
+    if (aIsTemp && !bIsTemp) return -1;
+    if (!aIsTemp && bIsTemp) return 1;
+    if (aIsTemp && bIsTemp) return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+
+    return b.serial_no - a.serial_no;
   });
   return finalDrops;
 }

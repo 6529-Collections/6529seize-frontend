@@ -278,7 +278,7 @@ const getOptimisticDrop = (
 
   return {
     id: getOptimisticDropId(),
-    serial_no: getOptimisticDropSerialNo(),
+    serial_no: Date.now(),
     reply_to: getReplyTo(),
     wave: {
       id: wave.id,

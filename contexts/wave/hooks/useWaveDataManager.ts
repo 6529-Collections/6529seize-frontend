@@ -10,17 +10,20 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 export function useWaveDataManager({
   updateData,
   getData,
+  removeDrop,
 }: WaveDataStoreUpdater) {
   // Use composition to build the complete functionality
   const { registerWave, cancelWaveDataFetch, syncNewestMessages } = useWaveDataFetching({
     updateData,
     getData,
+    removeDrop,
   });
   
   // Add pagination functionality
   const { fetchNextPage, cancelPaginationFetch } = useWavePagination({
     updateData,
     getData,
+    removeDrop,
   });
 
   // Expose a clean, focused API

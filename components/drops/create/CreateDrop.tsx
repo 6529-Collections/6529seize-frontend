@@ -169,7 +169,7 @@ export default function CreateDrop({
 
     return {
       id: getOptimisticDropId(),
-      serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
+      serial_no:1,
       wave: {
         id: waveDetailed.id,
         name: waveDetailed.name,

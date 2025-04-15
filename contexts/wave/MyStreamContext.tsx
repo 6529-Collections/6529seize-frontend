@@ -49,6 +49,7 @@ interface MyStreamContextType {
   readonly registerWave: (waveId: string) => void;
   readonly fetchNextPageForWave: (waveId: string) => Promise<ApiDrop[] | null>;
   readonly processIncomingDrop: (drop: ApiDrop) => void;
+  readonly processDropRemoved: (waveId: string, dropId: string) => void;
 }
 
 interface MyStreamProviderProps {
@@ -70,14 +71,16 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveDataManager = useWaveDataManager({
     updateData: waveMessagesStore.updateData,
     getData: waveMessagesStore.getData,
+    removeDrop: waveMessagesStore.removeDrop,
   });
 
   // Instantiate the real-time updater hook
-  const { processIncomingDrop } = useWaveRealtimeUpdater({
+  const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
     getData: waveMessagesStore.getData,
     updateData: waveMessagesStore.updateData,
     registerWave: waveDataManager.registerWave,
     syncNewestMessages: waveDataManager.syncNewestMessages,
+    removeDrop: waveMessagesStore.removeDrop,
   });
 
   useEffect(() => {
@@ -117,6 +120,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       registerWave: waveDataManager.registerWave,
       fetchNextPageForWave: waveDataManager.fetchNextPage,
       processIncomingDrop,
+      processDropRemoved,
     };
   }, [
     wavesHookData.waves,
@@ -134,6 +138,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     waveDataManager.registerWave,
     waveDataManager.fetchNextPage,
     processIncomingDrop,
+    processDropRemoved,
   ]);
 
   return (

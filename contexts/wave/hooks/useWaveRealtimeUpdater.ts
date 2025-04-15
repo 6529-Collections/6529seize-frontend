@@ -21,8 +21,10 @@ export function useWaveRealtimeUpdater({
   updateData,
   registerWave,
   syncNewestMessages,
+  removeDrop,
 }: UseWaveRealtimeUpdaterProps): {
   processIncomingDrop: ProcessIncomingDropFn;
+  processDropRemoved: (waveId: string, dropId: string) => void;
 } {
   const isFetchingNewestRef = useRef<Record<string, boolean>>({});
   const needsRefetchAfterCurrentRef = useRef<Record<string, boolean>>({});
@@ -150,8 +152,6 @@ export function useWaveRealtimeUpdater({
         drops: [optimisticDrop],
       });
 
-      console.log(JSON.stringify(optimisticDrop, null, 2));
-
       if (serialNoForFetch && !optimisticDrop.id.startsWith("temp-")) {
         // Initiate the background fetch for reconciliation
         initiateFetchNewestCycle(waveId, serialNoForFetch);
@@ -159,6 +159,10 @@ export function useWaveRealtimeUpdater({
     },
     [getData, updateData, registerWave, initiateFetchNewestCycle]
   );
+
+  const processDropRemoved = useCallback((waveId: string, dropId: string) => {
+    removeDrop(waveId, dropId);
+  }, [removeDrop]);
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
@@ -178,5 +182,5 @@ export function useWaveRealtimeUpdater({
   }, []);
 
   // No return value needed as this hook works in the background
-  return { processIncomingDrop };
+  return { processIncomingDrop, processDropRemoved };
 }
