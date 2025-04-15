@@ -297,7 +297,7 @@ export default function AboutApply() {
                   <div className="mb-1 fw-bold">Need Artistic Feedback?</div>
                   <div style={{ color: "rgb(154, 154, 154)" }}>
                     <span className="text-success me-2">✓</span>
-                    DM{" "}
+                    {" "}DM{" "}
                     <span className="text-light">@6529er</span>
                     {", "}
                     <span className="text-light">@teexels</span>
