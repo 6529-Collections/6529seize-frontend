@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { AllowlistToolResponse } from "../components/allowlist-tool/allowlist-tool.types";
 import { makeErrorToast } from "./distribution-plan.utils";
 import { getAuthJwt, removeAuthJwt } from "./auth/auth.utils";

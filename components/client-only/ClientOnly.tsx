@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 export default function ClientOnly({
   children,
 }: {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }) {
   const [hasMounted, setHasMounted] = useState(false);
 

@@ -4,7 +4,7 @@ import { safeLocalStorage } from "../../helpers/safeLocalStorage";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 
-// TODO: remove these cookies
+// TODO: remove these cookies once migration is complete
 const WALLET_ADDRESS_COOKIE = "wallet-address";
 const WALLET_REFRESH_TOKEN_COOKIE = "wallet-refresh-token";
 const WALLET_ROLE_COOKIE = "wallet-role";
@@ -25,6 +25,7 @@ const getJwtExpiration = (jwt: string): number => {
   return decodedJwt.exp;
 };
 
+// TODO: remove these cookies once migration is complete
 export const migrateCookiesToLocalStorage = () => {
   const walletAddress = Cookies.get(WALLET_ADDRESS_COOKIE);
   const walletRefreshToken = Cookies.get(WALLET_REFRESH_TOKEN_COOKIE);
