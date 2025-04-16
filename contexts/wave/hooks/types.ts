@@ -1,6 +1,6 @@
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { DropWithStableOrderKey } from "./useWaveMessagesStore";
+
 
 // Define the shape of the functions passed from the store
 export interface WaveDataStoreUpdater {

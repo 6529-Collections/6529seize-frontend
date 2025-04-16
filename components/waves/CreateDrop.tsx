@@ -138,7 +138,6 @@ export default function CreateDrop({
     },
     onError: (error, body) => {
       setTimeout(() => {
-        console.log("body", body);
         if (body.dropId) {
           processDropRemoved(body.drop.wave_id, body.dropId);
         }
