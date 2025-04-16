@@ -1,20 +1,21 @@
 import Cookies from "js-cookie";
-import {
-  WALLET_REFRESH_TOKEN_COOKIE,
-  WALLET_AUTH_COOKIE,
-  WALLET_ADDRESS_COOKIE,
-  WALLET_ROLE_COOKIE,
-} from "../../constants";
 import { jwtDecode } from "jwt-decode";
+import { safeLocalStorage } from "../../helpers/safeLocalStorage";
+
+export const WALLET_AUTH_COOKIE = "wallet-auth";
+
+// TODO: remove these cookies
+const WALLET_ADDRESS_COOKIE = "wallet-address";
+const WALLET_REFRESH_TOKEN_COOKIE = "wallet-refresh-token";
+const WALLET_ROLE_COOKIE = "wallet-role";
+
+const WALLET_ADDRESS_STORAGE_KEY = "6529-wallet-address";
+const WALLET_REFRESH_TOKEN_STORAGE_KEY = "6529-wallet-refresh-token";
+const WALLET_ROLE_STORAGE_KEY = "6529-wallet-role";
 
 const COOKIE_OPTIONS = {
   secure: true,
   sameSite: "strict" as const,
-};
-
-const COOKIE_OPTIONS_LONG = {
-  ...COOKIE_OPTIONS,
-  expires: 365,
 };
 
 const getJwtExpiration = (jwt: string): number => {
@@ -22,6 +23,28 @@ const getJwtExpiration = (jwt: string): number => {
     exp: number;
   }>(jwt);
   return decodedJwt.exp;
+};
+
+export const migrateCookiesToLocalStorage = () => {
+  const walletAddress = Cookies.get(WALLET_ADDRESS_COOKIE);
+  const walletRefreshToken = Cookies.get(WALLET_REFRESH_TOKEN_COOKIE);
+  const walletRole = Cookies.get(WALLET_ROLE_COOKIE);
+
+  if (walletAddress) {
+    safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, walletAddress);
+    Cookies.remove(WALLET_ADDRESS_COOKIE);
+  }
+  if (walletRefreshToken) {
+    safeLocalStorage.setItem(
+      WALLET_REFRESH_TOKEN_STORAGE_KEY,
+      walletRefreshToken
+    );
+    Cookies.remove(WALLET_REFRESH_TOKEN_COOKIE);
+  }
+  if (walletRole) {
+    safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, walletRole);
+    Cookies.remove(WALLET_ROLE_COOKIE);
+  }
 };
 
 export const setAuthJwt = (
@@ -41,11 +64,10 @@ export const setAuthJwt = (
     expires: expiresInDays,
   });
 
-  // long expiry for address, refresh token and role
-  Cookies.set(WALLET_ADDRESS_COOKIE, address, COOKIE_OPTIONS_LONG);
-  Cookies.set(WALLET_REFRESH_TOKEN_COOKIE, refreshToken, COOKIE_OPTIONS_LONG);
+  safeLocalStorage.setItem(WALLET_ADDRESS_STORAGE_KEY, address);
+  safeLocalStorage.setItem(WALLET_REFRESH_TOKEN_STORAGE_KEY, refreshToken);
   if (role) {
-    Cookies.set(WALLET_ROLE_COOKIE, role, COOKIE_OPTIONS_LONG);
+    safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, role);
   }
 };
 
@@ -54,20 +76,20 @@ export const getAuthJwt = () => {
 };
 
 export const getRefreshToken = () => {
-  return Cookies.get(WALLET_REFRESH_TOKEN_COOKIE) ?? null;
+  return safeLocalStorage.getItem(WALLET_REFRESH_TOKEN_STORAGE_KEY) ?? null;
 };
 
 export const getWalletAddress = () => {
-  return Cookies.get(WALLET_ADDRESS_COOKIE) ?? null;
+  return safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY) ?? null;
 };
 
 export const getWalletRole = () => {
-  return Cookies.get(WALLET_ROLE_COOKIE) ?? null;
+  return safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY) ?? null;
 };
 
 export const removeAuthJwt = () => {
   Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-  Cookies.remove(WALLET_ADDRESS_COOKIE, COOKIE_OPTIONS_LONG);
-  Cookies.remove(WALLET_REFRESH_TOKEN_COOKIE, COOKIE_OPTIONS_LONG);
-  Cookies.remove(WALLET_ROLE_COOKIE, COOKIE_OPTIONS_LONG);
+  safeLocalStorage.removeItem(WALLET_ADDRESS_STORAGE_KEY);
+  safeLocalStorage.removeItem(WALLET_REFRESH_TOKEN_STORAGE_KEY);
+  safeLocalStorage.removeItem(WALLET_ROLE_STORAGE_KEY);
 };
