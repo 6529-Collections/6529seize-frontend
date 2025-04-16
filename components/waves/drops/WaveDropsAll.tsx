@@ -15,6 +15,8 @@ import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import { useVirtualizedWaveDrops } from "../../../hooks/useVirtualizedWaveDrops";
+import useCapacitor from "../../../hooks/useCapacitor";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -47,6 +49,18 @@ export default function WaveDropsAll({
   initialDrop,
   onDropContentClick,
 }: WaveDropsAllProps) {
+  const { registerWave } = useMyStream();
+  const { isActive } = useCapacitor();
+  const previousIsActiveRef = useRef<boolean | undefined>(isActive);
+
+  useEffect(() => {
+    const previousIsActive = previousIsActiveRef.current;
+    if (previousIsActive === false && isActive === true) {
+      registerWave(waveId, true);
+    }
+    previousIsActiveRef.current = isActive;
+  }, [isActive, registerWave, waveId]);
+
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 

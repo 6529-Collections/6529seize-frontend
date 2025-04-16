@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Capacitor, PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
+import { App } from "@capacitor/app";
 
 export enum CapacitorOrientationType {
   PORTRAIT,
@@ -13,6 +14,26 @@ const useCapacitor = () => {
 
   const isIos = platform === "ios";
   const isAndroid = platform === "android";
+  const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    if (!isCapacitor) {
+      setIsActive(false);
+      return;
+    } else {
+      App.getState().then((state) => {
+        setIsActive(state.isActive);
+      });
+    }
+
+    App.addListener("appStateChange", (state) => {
+      setIsActive(state.isActive);
+    });
+
+    return () => {
+      App.removeAllListeners();
+    };
+  }, [isCapacitor]);
 
   const [orientation, setOrientation] = useState<CapacitorOrientationType>(
     CapacitorOrientationType.PORTRAIT
@@ -83,6 +104,7 @@ const useCapacitor = () => {
     isAndroid,
     orientation,
     keyboardVisible,
+    isActive,
   };
 };
 

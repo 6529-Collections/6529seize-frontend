@@ -46,7 +46,7 @@ interface MyStreamContextType {
   readonly waves: WavesContextData;
   readonly activeWave: ActiveWaveContextData;
   readonly waveMessagesStore: WaveMessagesStoreData;
-  readonly registerWave: (waveId: string) => void;
+  readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
   readonly fetchNextPageForWave: (waveId: string) => Promise<ApiDrop[] | null>;
   readonly processIncomingDrop: (drop: ApiDrop) => void;
   readonly processDropRemoved: (waveId: string, dropId: string) => void;

@@ -108,9 +108,6 @@ export function useWavePagination({
 
       // Handle abort errors differently
       if (error instanceof DOMException && error.name === "AbortError") {
-        console.log(
-          `[WaveDataManager] Pagination request for wave ${waveId} was cancelled`
-        );
         return null;
       }
 

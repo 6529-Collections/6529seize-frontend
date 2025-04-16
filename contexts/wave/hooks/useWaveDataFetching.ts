@@ -60,9 +60,6 @@ export function useWaveDataFetching({
     (waveId: string, error: unknown) => {
       // Handle abort errors differently than other errors
       if (error instanceof DOMException && error.name === "AbortError") {
-        console.log(
-          `[WaveDataManager] Request for wave ${waveId} was cancelled`
-        );
         return null;
       }
 
@@ -225,7 +222,7 @@ export function useWaveDataFetching({
       if (signal.aborted) {
         throw new DOMException("Aborted", "AbortError");
       }
-
+      updateData(formatWaveMessages(waveId, allFetchedDrops));
       // Return all accumulated drops and the overall highest serial number found
       return {
         drops: allFetchedDrops,
