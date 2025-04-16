@@ -39,7 +39,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
     drop.title ??
     "Artwork Title";
   const description =
-    drop.metadata?.find((m) => m.data_key === "description")?.data_value || "";
+    drop.metadata?.find((m) => m.data_key === "description")?.data_value ?? "";
 
   // Get artwork media URL if available
   const artworkMedia = drop.parts?.at(0)?.media?.at(0);
@@ -124,7 +124,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             <div className="tw-w-full tw-max-w-5xl tw-flex tw-justify-between tw-items-center tw-mb-4">
               <div className="tw-flex tw-flex-col">
                 <div className="tw-flex tw-items-center tw-gap-x-3">
-                  <SingleWaveDropPosition rank={drop.rank || 1} drop={drop} />
+                  <SingleWaveDropPosition rank={drop.rank ?? 1} drop={drop} />
                   <h3 className="tw-text-xl tw-font-semibold tw-text-iron-100">
                     {title}
                   </h3>
