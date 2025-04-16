@@ -40,7 +40,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
   
   // Generate a unique preference key for this wave
-  const viewPreferenceKey = `waveViewMode_${wave.id || 'default'}`;
+  const viewPreferenceKey = `waveViewMode_${wave.id ?? 'default'}`;
   
   // Determine the default view mode based on wave type
   const defaultViewMode = isMemesWave ? "grid" : "list";
@@ -53,7 +53,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   );
   
   // Use our custom hook for sort preference too
-  const sortPreferenceKey = `waveSortMode_${wave.id || 'default'}`;
+  const sortPreferenceKey = `waveSortMode_${wave.id ?? 'default'}`;
   const [sort, setSort] = useLocalPreference<WaveDropsLeaderboardSort>(
     sortPreferenceKey,
     WaveDropsLeaderboardSort.RANK,

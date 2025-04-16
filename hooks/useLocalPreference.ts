@@ -14,7 +14,7 @@ function useLocalPreference<T>(
   validator?: (value: any) => boolean
 ): [T, (value: T) => void] {
   // Initialize state with a function to avoid unnecessary localStorage lookups
-  const [preference, setPreferenceState] = useState<T>(() => {
+  const [preference, setState] = useState<T>(() => {
     if (typeof window === 'undefined') {
       return defaultValue; // Return default during SSR
     }
@@ -52,7 +52,7 @@ function useLocalPreference<T>(
           if (validator && !validator(newValue)) {
             return;
           }
-          setPreferenceState(newValue);
+          setState(newValue);
         } catch (e) {
           console.warn(`Error processing storage event:`, e);
         }
@@ -69,20 +69,20 @@ function useLocalPreference<T>(
   // Update localStorage when the preference changes
   const setPreference = (value: T) => {
     if (typeof window === 'undefined') {
-      setPreferenceState(value);
+      setState(value);
       return;
     }
 
     try {
       // Save to state
-      setPreferenceState(value);
+      setState(value);
       
       // Save to localStorage
       localStorage.setItem(key, JSON.stringify(value));
     } catch (e) {
       // If there's an error writing to localStorage, just update the state
       console.warn(`Error writing ${key} to localStorage:`, e);
-      setPreferenceState(value);
+      setState(value);
     }
   };
 
