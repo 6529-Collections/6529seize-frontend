@@ -362,7 +362,7 @@ function DropPartMarkdown({
               onQuoteClick={onQuoteClick}
             />
           </div>
-          <ChatItemHrefButtons href={href} />
+          <ChatItemHrefButtons href={href} hideLink />
         </div>
       );
     } else if (dropId) {

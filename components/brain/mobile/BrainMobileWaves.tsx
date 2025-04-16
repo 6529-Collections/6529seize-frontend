@@ -3,13 +3,8 @@ import BrainLeftSidebarSearchWave from "../left-sidebar/search-wave/BrainLeftSid
 import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 
-interface BrainMobileWavesProps {
-  readonly activeWaveId: string;
-}
 
-const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
-  activeWaveId,
-}) => {
+const BrainMobileWaves: React.FC = () => {
   const { mobileWavesViewStyle } = useLayout();
 
   // We'll use the mobileWavesViewStyle for capacitor spacing
@@ -18,7 +13,7 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
   return (
     <div className={containerClassName} style={mobileWavesViewStyle}>
       <BrainLeftSidebarSearchWave />
-      <BrainLeftSidebarWaves activeWaveId={activeWaveId} />
+      <BrainLeftSidebarWaves />
     </div>
   );
 };

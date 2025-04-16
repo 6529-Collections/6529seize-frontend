@@ -5,7 +5,7 @@ import { ApiWave } from "../../../../generated/models/ApiWave";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import WavePicture from "../../../waves/WavePicture";
-
+import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 interface BrainLeftSidebarSearchWaveItemProps {
   readonly wave: ApiWave;
   readonly onClose: () => void;
@@ -16,6 +16,7 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
 > = ({ wave, onClose }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
+  const { registerWave } = useMyStream();
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
   const getHref = (waveId: string) => {
     const currentWaveId = router.query.wave as string | undefined;
@@ -24,12 +25,6 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
     }
     return `/my-stream?wave=${waveId}`;
   };
-
-  const onHover = (waveId: string) => {
-    if (waveId === router.query.wave) return;
-    prefetchWaveData(waveId);
-  };
-
   const isActive = wave.id === router.query.wave;
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -37,12 +32,19 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
     router.push(getHref(wave.id), undefined, { shallow: true });
     onClose();
   };
+
+  const onWaveHover = (waveId: string) => {
+    if (waveId !== router.query.wave) {
+      registerWave(waveId);
+      prefetchWaveData(waveId);
+    }
+  };
   return (
     <li className="tw-px-2 tw-h-full tw-flex tw-items-center tw-justify-between tw-gap-x-2 hover:tw-bg-iron-800 tw-rounded-lg">
       <Link
         href={getHref(wave.id)}
         onClick={onLinkClick}
-        onMouseEnter={() => onHover(wave.id)}
+        onMouseEnter={() => onWaveHover(wave.id)}
         className="tw-no-underline md:hover:tw-bg-iron-800 tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-1 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
       >
         <div className="tw-w-full tw-flex tw-justify-between tw-items-center">

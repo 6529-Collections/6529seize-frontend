@@ -7,6 +7,7 @@ import { useWaveData } from "../../../hooks/useWaveData";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
 import WavePicture from "../../waves/WavePicture";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 
 interface BrainContentPinnedWaveProps {
   readonly waveId: string;
@@ -25,6 +26,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
+  const { registerWave } = useMyStream();
   const { data: wave } = useWaveData({
     waveId,
     onWaveNotFound: () => onRemove(waveId),
@@ -49,6 +51,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
   const onHover = () => {
     onMouseEnter(waveId);
     if (waveId === router.query.wave) return;
+    registerWave(waveId);
     prefetchWaveData(waveId);
   };
 
