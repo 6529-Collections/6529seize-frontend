@@ -73,7 +73,6 @@ export function useWaveDataFetching({
         `[WaveDataManager] Error fetching messages for ${waveId}:`,
         error
       );
-      return;
     },
     [updateData, clearLoadingState]
   );

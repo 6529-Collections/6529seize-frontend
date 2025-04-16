@@ -115,7 +115,6 @@ export function useWavePagination({
         `[WaveDataManager] Error fetching more messages for ${waveId}:`,
         error
       );
-      return;
     },
     [getData, updateData]
   );
@@ -173,7 +172,10 @@ export function useWavePagination({
         controller.signal
       )
         .then((drops) => updateWithPaginatedData(waveId, drops))
-        .catch((error) => handlePaginationError(waveId, error))
+        .catch((error) => {
+          handlePaginationError(waveId, error);
+          return null;
+        })
         .finally(() => cleanupController(waveId, controller));
 
       // Store the promise
