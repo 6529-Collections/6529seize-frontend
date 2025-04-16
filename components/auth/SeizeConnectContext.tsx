@@ -9,6 +9,7 @@ import React, {
 import { useAccount, useConnections, useDisconnect } from "wagmi";
 import { useWeb3Modal, useWeb3ModalState } from "@web3modal/wagmi/react";
 import {
+  migrateCookiesToLocalStorage,
   getWalletAddress,
   removeAuthJwt,
 } from "../../services/auth/auth.utils";
@@ -40,6 +41,10 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(
     account.address ?? getWalletAddress() ?? undefined
   );
+
+  useEffect(() => {
+    migrateCookiesToLocalStorage();
+  }, []);
 
   useEffect(() => {
     if (account.address && account.isConnected) {

@@ -1,10 +1,11 @@
 import styles from "./DownloadUrlWidget.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
-import { API_AUTH_COOKIE, WALLET_AUTH_COOKIE } from "../../constants";
+import { API_AUTH_COOKIE } from "../../constants";
 import Cookies from "js-cookie";
 import { Spinner } from "../dotLoader/DotLoader";
 import { Button, Modal } from "react-bootstrap";
+import { getAuthJwt } from "../../services/auth/auth.utils";
 
 interface Props {
   preview: string;
@@ -19,7 +20,7 @@ export default function DownloadUrlWidget(props: Readonly<Props>) {
     headers["x-6529-auth"] = apiAuth;
   }
 
-  const allowlistAuth = Cookies.get(WALLET_AUTH_COOKIE);
+  const allowlistAuth = getAuthJwt();
   if (allowlistAuth) {
     headers["Authorization"] = `Bearer ${allowlistAuth}`;
   }
