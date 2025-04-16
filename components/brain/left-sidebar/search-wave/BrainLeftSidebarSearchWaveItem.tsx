@@ -25,12 +25,6 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
     }
     return `/my-stream?wave=${waveId}`;
   };
-
-  const onHover = (waveId: string) => {
-    if (waveId === router.query.wave) return;
-    prefetchWaveData(waveId);
-  };
-
   const isActive = wave.id === router.query.wave;
 
   const onLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {

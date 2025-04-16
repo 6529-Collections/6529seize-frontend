@@ -60,7 +60,7 @@ export function useWaveDataFetching({
     (waveId: string, error: unknown) => {
       // Handle abort errors differently than other errors
       if (error instanceof DOMException && error.name === "AbortError") {
-        return null;
+        return;
       }
 
       // Clear loading state on error
@@ -73,7 +73,7 @@ export function useWaveDataFetching({
         `[WaveDataManager] Error fetching messages for ${waveId}:`,
         error
       );
-      return null;
+      return;
     },
     [updateData, clearLoadingState]
   );

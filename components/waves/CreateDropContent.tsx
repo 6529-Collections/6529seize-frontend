@@ -18,10 +18,7 @@ import { AuthContext } from "../auth/Auth";
 import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
 import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
 import { ApiDrop } from "../../generated/models/ApiDrop";
-import {
-  getOptimisticDropId,
-  getOptimisticDropSerialNo,
-} from "../../helpers/waves/drop.helpers";
+import { getOptimisticDropId } from "../../helpers/waves/drop.helpers";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropMetadata from "./CreateDropMetadata";
@@ -55,8 +52,6 @@ import { useDropSignature } from "../../hooks/drops/useDropSignature";
 import { useWave } from "../../hooks/useWave";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import { useMyStream } from "../../contexts/wave/MyStreamContext";
-import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
-import useWaveMessagesStore from "../../contexts/wave/hooks/useWaveMessagesStore";
 import { DropMutationBody } from "./CreateDrop";
 
 export type CreateDropMetadataType =

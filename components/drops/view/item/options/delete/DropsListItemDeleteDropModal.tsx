@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { commonApiDelete } from "../../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { ApiDropType } from "../../../../../../generated/models/ApiDropType";
-import { MyStreamContext, useMyStream } from "../../../../../../contexts/wave/MyStreamContext";
+import { useMyStream } from "../../../../../../contexts/wave/MyStreamContext";
 
 export default function DropsListItemDeleteDropModal({
   drop,

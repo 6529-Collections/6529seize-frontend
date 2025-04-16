@@ -108,14 +108,14 @@ export function useWavePagination({
 
       // Handle abort errors differently
       if (error instanceof DOMException && error.name === "AbortError") {
-        return null;
+        return;
       }
 
       console.error(
         `[WaveDataManager] Error fetching more messages for ${waveId}:`,
         error
       );
-      return null;
+      return;
     },
     [getData, updateData]
   );
@@ -137,7 +137,7 @@ export function useWavePagination({
       }
 
       // Check if already has a pagination loading state
-      const paginationState = paginationStates.current[waveId] || {
+      const paginationState = paginationStates.current[waveId] ?? {
         isLoading: false,
         promise: null,
       };

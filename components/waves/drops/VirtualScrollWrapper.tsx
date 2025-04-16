@@ -5,7 +5,6 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 /**
  * Props for VirtualScrollWrapper

@@ -44,7 +44,6 @@ export async function fetchWaveMessages(
       throw error; // Re-throw abort errors to be handled by the caller
     }
 
-    // TODO: add some retry logic
     console.error(
       `[WaveDataManager] Failed to fetch messages for ${waveId}:`,
       error

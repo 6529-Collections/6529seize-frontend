@@ -152,7 +152,6 @@ export default function WaveDropsAll({
     if (!serialNo) return;
     setIsScrolling(true); // Set scrolling true for the entire process
 
-    let found = false; // Keep track locally if found
 
     const checkAndFetchNext = async () => {
       // Always get the latest state from the ref
@@ -161,7 +160,6 @@ export default function WaveDropsAll({
 
       // Check if target is now loaded
       if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
-        found = true;
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Short delay for render
         scrollToSerialNo("smooth");
         setSerialNo(null);

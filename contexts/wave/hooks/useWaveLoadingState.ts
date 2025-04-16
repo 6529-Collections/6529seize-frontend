@@ -12,7 +12,7 @@ export function useWaveLoadingState() {
   const getLoadingState = useCallback(
     (waveId: string): { state: LoadingState; shouldContinue: boolean } => {
       // Get or initialize loading state
-      const loadingState = loadingStates.current[waveId] || {
+      const loadingState = loadingStates.current[waveId] ?? {
         isLoading: false,
         promise: null,
       };
@@ -20,7 +20,7 @@ export function useWaveLoadingState() {
 
       // If already loading, we should not continue with a new fetch
       const shouldContinue = !(loadingState.isLoading && loadingState.promise);
-      
+
       return { state: loadingState, shouldContinue };
     },
     []

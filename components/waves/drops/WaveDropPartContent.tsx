@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useMemo } from "react";
 import { ApiDropPart } from "../../../generated/models/ApiDropPart";
 import WaveDropPartContentMedias from "./WaveDropPartContentMedias";
 import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
