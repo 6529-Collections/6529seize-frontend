@@ -8,7 +8,7 @@ import {
   faShare,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigationHistory } from "../../../hooks/useNavigationHistory";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Share } from "@capacitor/share";
 import Hammer from "hammerjs";
 import useCapacitor from "../../../hooks/useCapacitor";
@@ -77,26 +77,20 @@ export default function CapacitorWidget() {
     };
   }, [canGoBack, canGoForward]);
 
-  const doNavigation = (
-    pathname: string,
-    queryParams: Record<string, string | number>
-  ) => {
-    console.log("deep link doNavigation", pathname, queryParams);
+  const doNavigation = useCallback(
+    (pathname: string, queryParams: Record<string, string | number>) => {
+      const isSamePath = router.asPath.includes(pathname);
+      const navigationMethod = isSamePath ? "replace" : "push";
 
-    const isSamePath = router.asPath.includes(pathname);
-    const navigationMethod = isSamePath ? "replace" : "push";
-
-    console.log("deep link doNavigation", isSamePath, navigationMethod);
-
-    router[navigationMethod]({ pathname, query: queryParams }, undefined, {
-      shallow: false,
-    });
-  };
+      router[navigationMethod]({ pathname, query: queryParams }, undefined, {
+        shallow: false,
+      });
+    },
+    [router]
+  );
 
   useEffect(() => {
     const listener = App.addListener("appUrlOpen", (data) => {
-      console.log("deep link appUrlOpen", data);
-
       const urlString = data.url;
 
       const schemeEndIndex = urlString.indexOf("://") + 3;
@@ -114,8 +108,6 @@ export default function CapacitorWidget() {
       );
       queryParams["_t"] = Date.now() / 1000;
 
-      console.log("deep link queryParams", queryParams);
-
       switch (scope) {
         case DeepLinkScope.NAVIGATE:
           doNavigation(`/${pathParts.join("/")}`, queryParams);
@@ -132,7 +124,7 @@ export default function CapacitorWidget() {
     return () => {
       listener.then((handle) => handle.remove());
     };
-  }, [router]);
+  }, [doNavigation]);
 
   if (capacitor.keyboardVisible) {
     return <></>;
