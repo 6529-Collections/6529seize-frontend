@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useRouter } from "next/router";
-import { MOBILE_APP_IOS } from "../../../constants";
-import { MOBILE_APP_ANDROID } from "../../../constants";
 
 export default function HeaderOpenMobile() {
   const capacitor = useCapacitor();
