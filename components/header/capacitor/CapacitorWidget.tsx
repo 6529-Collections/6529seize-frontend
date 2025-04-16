@@ -81,8 +81,12 @@ export default function CapacitorWidget() {
     pathname: string,
     queryParams: Record<string, string | number>
   ) => {
+    console.log("deep link doNavigation", pathname, queryParams);
+
     const isSamePath = router.asPath.includes(pathname);
     const navigationMethod = isSamePath ? "replace" : "push";
+
+    console.log("deep link doNavigation", isSamePath, navigationMethod);
 
     router[navigationMethod]({ pathname, query: queryParams }, undefined, {
       shallow: false,
@@ -91,6 +95,8 @@ export default function CapacitorWidget() {
 
   useEffect(() => {
     const listener = App.addListener("appUrlOpen", (data) => {
+      console.log("deep link appUrlOpen", data);
+
       const urlString = data.url;
 
       const schemeEndIndex = urlString.indexOf("://") + 3;
@@ -107,6 +113,8 @@ export default function CapacitorWidget() {
         searchParams.entries()
       );
       queryParams["_t"] = Date.now() / 1000;
+
+      console.log("deep link queryParams", queryParams);
 
       switch (scope) {
         case DeepLinkScope.NAVIGATE:
