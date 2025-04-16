@@ -20,7 +20,7 @@ export type WaveMessages = {
   readonly isLoading: boolean;
   readonly isLoadingNextPage: boolean;
   readonly hasNextPage: boolean;
-  readonly drops: DropWithStableOrderKey[];
+  readonly drops: ExtendedDrop[];
   readonly latestFetchedSerialNo: number | null;
 };
 

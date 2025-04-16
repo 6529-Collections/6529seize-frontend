@@ -167,13 +167,14 @@ export default function CreateDrop({
   );
 
   const removeFromQueue = useCallback(() => {
+    if (queueRef.current.length === 0) {
+      return undefined;
+    }
     const item = queueRef.current.shift();
     const newQueueSize = queueRef.current.length;
-    if (newQueueSize !== queueSize) {
-      setQueueSize(newQueueSize);
-    }
+    setQueueSize(newQueueSize);
     return item;
-  }, [queueSize]);
+  }, []);
 
   useProgressiveDebounce(
     () => {
@@ -192,7 +193,7 @@ export default function CreateDrop({
   );
 
   const processQueue = useCallback(async () => {
-    if (isProcessing || queueSize === 0) return;
+    if (isProcessing) return;
     setIsProcessing(true);
 
     const dropRequest = removeFromQueue();
@@ -203,17 +204,13 @@ export default function CreateDrop({
       } catch (error) {
         console.error("Error processing drop:", error);
       }
-    } else {
-      console.warn("No drop request found in queue, but queue.size was not 0");
     }
 
     setIsProcessing(false);
   }, [
     isProcessing,
-    queueSize,
     removeFromQueue,
     addDropMutation,
-    waitAndInvalidateDrops,
   ]);
 
   useEffect(() => {
