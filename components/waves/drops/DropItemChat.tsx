@@ -5,7 +5,6 @@ import { useDrop } from "../../../hooks/useDrop";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { SingleWaveDropPosition } from "../drop/SingleWaveDropPosition";
 import { SingleWaveDropVotes } from "../drop/SingleWaveDropVotes";
-import { useState } from "react";
 import ChatItemHrefButtons from "../ChatItemHrefButtons";
 
 export default function DropItemChat({

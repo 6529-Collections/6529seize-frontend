@@ -137,7 +137,7 @@
     },
     "axios": "1.8.2",
     "@nestjs/axios": "4.0.0",
-    "@nestjs/core": "11.0.12",
-    "@nestjs/common": "11.0.12"
+    "@nestjs/core": "11.0.20",
+    "@nestjs/common": "11.0.20"
   }
 }
