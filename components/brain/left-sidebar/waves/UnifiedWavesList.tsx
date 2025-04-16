@@ -84,16 +84,18 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
             <div className="tw-flex-1">
               <BrainLeftSidebarCreateADirectMessageButton />
             </div>
-            <Link
-              href="/waves?new=true"
-              className="tw-flex-1 tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300"
-            >
-              <FontAwesomeIcon
-                icon={faPlus}
-                className="tw-size-3.5 -tw-ml-1.5 tw-flex-shrink-0"
-              />
-              <span className="tw-text-xs tw-font-semibold">Wave</span>
-            </Link>
+            <div className="tw-flex-1">
+              <Link
+                href="/waves?new=true"
+                className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300"
+              >
+                <FontAwesomeIcon
+                  icon={faPlus}
+                  className="tw-size-3.5 -tw-ml-1.5 tw-flex-shrink-0"
+                />
+                <span className="tw-text-xs tw-font-semibold">Wave</span>
+              </Link>
+            </div>
           </div>
         </div>
 

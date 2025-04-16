@@ -45,10 +45,10 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
           }
         >
           <div
-            className={`tw-w-5 tw-h-5 tw-flex-shrink-0 tw-rounded tw-border ${
+            className={`tw-w-5 tw-h-5 tw-flex-shrink-0 tw-rounded tw-border tw-border-solid ${
               agreements
                 ? "tw-bg-primary-500 tw-border-primary-600"
-                : "tw-bg-iron-800/70 tw-border-iron-700"
+                : "tw-bg-iron-700 tw-border-iron-650"
             } tw-flex tw-items-center tw-justify-center tw-transition-colors`}
           >
             {agreements && (

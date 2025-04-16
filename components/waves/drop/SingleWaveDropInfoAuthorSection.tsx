@@ -3,7 +3,7 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { WaveSmallLeaderboardItemOutcomes } from "../small-leaderboard/WaveSmallLeaderboardItemOutcomes";
 import { SingleWaveDropAuthor } from "./SingleWaveDropAuthor";
-import { Time } from "../../../helpers/time";
+import WaveDropTime from "../drops/time/WaveDropTime";
 
 interface SingleWaveDropInfoAuthorSectionProps {
   readonly drop: ExtendedDrop | undefined;
@@ -19,10 +19,7 @@ export const SingleWaveDropInfoAuthorSection: React.FC<
         {drop && <SingleWaveDropAuthor drop={drop} />}
         <div className="tw-flex tw-gap-x-2 tw-items-center">
           <div className="tw-w-[3px] tw-h-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-            {drop &&
-              Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
-          </p>
+          {drop && <WaveDropTime timestamp={drop.created_at} />}
         </div>
       </div>
       {wave && drop && (

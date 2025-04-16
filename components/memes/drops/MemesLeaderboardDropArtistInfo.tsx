@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { cicToType } from "../../../helpers/Helpers";
-import { Time } from "../../../helpers/time";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../user/utils/UserCICAndLevel";
 import WaveDropAuthorPfp from "../../waves/drops/WaveDropAuthorPfp";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WinnerDropBadge from "../../waves/drops/winner/WinnerDropBadge";
+import WaveDropTime from "../../waves/drops/time/WaveDropTime";
 
 interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -16,23 +16,6 @@ interface MemesLeaderboardDropArtistInfoProps {
 export const MemesLeaderboardDropArtistInfo: React.FC<
   MemesLeaderboardDropArtistInfoProps
 > = ({ drop }) => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  function checkMobile() {
-    const screenSize = window.innerWidth;
-    if (screenSize <= 640) { // Tailwind's sm breakpoint
-      setIsMobile(true);
-    } else {
-      setIsMobile(false);
-    }
-  }
-
-  useEffect(() => {
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-  
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3">
       <Link
@@ -61,14 +44,11 @@ export const MemesLeaderboardDropArtistInfo: React.FC<
             </span>
           </Link>
 
+          {/* Divider followed by WaveDropTime component */}
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-
-          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
-            {isMobile 
-              ? Time.millis(drop.created_at).toShortRelativeTime()
-              : Time.millis(drop.created_at).toLocaleDropDateAndTimeString()
-            }
-          </span>
+          <WaveDropTime 
+            timestamp={drop.created_at}
+          />
         </div>
         <WinnerDropBadge
           rank={drop.rank}

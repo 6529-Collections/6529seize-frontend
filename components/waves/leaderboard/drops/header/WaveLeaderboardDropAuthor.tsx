@@ -1,13 +1,13 @@
 import React from "react";
 import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
-import { cicToType, getTimeAgoShort } from "../../../../../helpers/Helpers";
+import { cicToType } from "../../../../../helpers/Helpers";
 
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../../user/utils/UserCICAndLevel";
 import WinnerDropBadge from "../../../../waves/drops/winner/WinnerDropBadge";
-import { Time } from "../../../../../helpers/time";
+import WaveDropTime from "../../../../waves/drops/time/WaveDropTime";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -60,14 +60,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
 
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
 
-          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
-            <span className="md:tw-inline tw-hidden">
-              {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
-            </span>
-            <span className="md:tw-hidden tw-inline">
-              {getTimeAgoShort(drop.created_at)}
-            </span>
-          </span>
+          <WaveDropTime timestamp={drop.created_at} />
         </div>
         <WinnerDropBadge
           rank={drop.rank}
