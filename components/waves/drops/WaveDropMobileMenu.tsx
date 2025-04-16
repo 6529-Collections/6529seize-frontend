@@ -98,14 +98,6 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
     [connectedProfile, activeProfileProxy]
   );
 
-  // Log values to help debug why menu might be empty
-  console.log("Mobile menu values:", {
-    shouldHideClap,
-    showOptions,
-    isAuthor,
-    dropType: drop.drop_type,
-  });
-
   const closeMenu = () => setOpen(false);
 
   return createPortal(

@@ -68,7 +68,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       break;
     default:
       accentColor = "#848490"; // iron-600 from Tailwind config
-      bgColor = "rgba(96,96,108,0.1)";
+      bgColor = "rgba(96,96,108,0.2)";
       rankText = `${rankNumber}th`;
   }
 
@@ -78,7 +78,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       style={{
         backgroundColor: bgColor,
         color: accentColor,
-        border: `1px solid ${accentColor}30`,
+        border: `1px solid ${accentColor}40`,
       }}
     >
       {/* Rank part */}
@@ -88,7 +88,6 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
         {position > 1 && <span className="tw-ml-1">#{position}</span>}
       </span>
 
-      {/* Date part - hidden on mobile, visible from md up */}
       {dateString && (
         <span className="tw-hidden md:tw-flex tw-items-center">
           <div
@@ -100,12 +99,11 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
           <span
             className="tw-border-l tw-px-2 tw-py-0.5 tw-flex tw-items-center tw-text-xs"
             style={{
-              borderColor: `${accentColor}30`,
+              borderColor: `${accentColor}40`,
             }}
           >
             <FontAwesomeIcon icon={faClock} className="tw-mr-1.5 tw-size-2.5" />
             {dateString}
-            {/* Time only shows on sm breakpoint and up */}
             {timeString && (
               <span className="tw-hidden sm:tw-inline">, {timeString}</span>
             )}

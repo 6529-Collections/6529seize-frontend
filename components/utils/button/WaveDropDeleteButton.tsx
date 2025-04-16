@@ -7,23 +7,19 @@ import DropsListItemDeleteDropModal from "../../drops/view/item/options/delete/D
 interface WaveDropDeleteButtonProps {
   readonly drop: ApiDrop;
   readonly className?: string;
-  readonly onDelete?: () => void;
 }
 
 const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
   drop,
   className = "",
-  onDelete,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const onDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDeleteModalOpen(true);
-    onDelete?.();
   };
 
-  // Dark themed delete button styling with subtle red only for the icon initially
   const defaultButtonClasses =
     "tw-w-full tw-border tw-border-solid tw-border-iron-800 hover:tw-border-red/60 tw-rounded-lg tw-bg-iron-950 hover:tw-bg-iron-900 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-red tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-800 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center tw-gap-2";
 
@@ -33,7 +29,6 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
         className={className || defaultButtonClasses}
         onClick={onDeleteClick}
       >
-        {/* Using the same SVG icon as in WaveDropActionsOptions but with red color */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -63,7 +58,11 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
             <DropsListItemDeleteDropModal
               drop={drop}
               closeModal={() => setIsDeleteModalOpen(false)}
-              onDropDeleted={onDelete}
+              onDropDeleted={() => {
+                setTimeout(() => {
+                  window.history.back();
+                }, 300);
+              }}
             />
           </CommonAnimationOpacity>
         )}

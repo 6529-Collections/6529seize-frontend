@@ -20,7 +20,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
 
   // Local refs for component-specific needs
   const headerElementRef = useRef<HTMLDivElement | null>(null);
-  const spacerElementRef = useRef<HTMLDivElement | null>(null);
 
   // Callback ref for registration with LayoutContext (header)
   const setHeaderRef = useCallback(
@@ -30,18 +29,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
 
       // Register with LayoutContext
       registerRef("header", element);
-    },
-    [registerRef]
-  );
-
-  // Callback ref for registration with LayoutContext (spacer)
-  const setSpacerRef = useCallback(
-    (element: HTMLDivElement | null) => {
-      // Update local ref
-      spacerElementRef.current = element;
-
-      // Register with LayoutContext
-      registerRef("spacer", element);
     },
     [registerRef]
   );
@@ -100,7 +87,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   );
 }
 
-// Wrapper component that provides the LayoutContext
 export default function MyStreamLayout({
   children,
 }: {

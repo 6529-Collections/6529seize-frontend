@@ -41,7 +41,7 @@ export const SingleWaveDropInfoPanel: React.FC<
       </div>
       {canDelete && drop.drop_type !== ApiDropType.Winner && (
         <div className="tw-w-full tw-px-6 tw-pb-6 tw-pt-6 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
-          <WaveDropDeleteButton drop={drop} onDelete={onClose} />
+          <WaveDropDeleteButton drop={drop} />
         </div>
       )}
     </SingleWaveDropInfoContainer>
