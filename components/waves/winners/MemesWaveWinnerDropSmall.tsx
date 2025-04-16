@@ -4,12 +4,12 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import Link from "next/link";
 import {
   formatNumberWithCommas,
-  getTimeAgoShort,
 } from "../../../helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "../../../helpers/image.helpers";
 import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
+import WaveDropTime from "../drops/time/WaveDropTime";
 
 interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
@@ -140,9 +140,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
                 </span>
               </Link>
               <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></span>
-              <span className="tw-text-sm tw-text-iron-400 tw-flex-shrink-0">
-                {getTimeAgoShort(drop.created_at)}
-              </span>
+              <WaveDropTime timestamp={drop.created_at} />
             </div>
           </div>
 

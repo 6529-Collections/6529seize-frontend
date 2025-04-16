@@ -1,3 +1,4 @@
+
 import "../styles/seize-bootstrap.scss";
 import "../styles/globals.scss";
 import "tippy.js/dist/tippy.css";

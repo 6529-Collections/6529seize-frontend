@@ -22,6 +22,7 @@ import { useKeyPressEvent } from "react-use";
 import { ActiveDropState } from "../../types/dropInteractionTypes";
 import { DropMode } from "./PrivilegedDropCreator";
 import { DropPrivileges } from "../../hooks/useDropPriviledges";
+import { useMyStream } from "../../contexts/wave/MyStreamContext";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -32,6 +33,11 @@ interface CreateDropProps {
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
   readonly privileges: DropPrivileges;
+}
+
+export interface DropMutationBody {
+  readonly drop: ApiCreateDropRequest;
+  readonly dropId: string | null;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -51,7 +57,7 @@ export default function CreateDrop({
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
-
+  const { processDropRemoved } = useMyStream();
   const getIsDropMode = () => {
     if (fixedDropMode === DropMode.CHAT) {
       return false;
@@ -124,13 +130,18 @@ export default function CreateDrop({
   }, []);
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: ApiCreateDropRequest) =>
+    mutationFn: async (body: DropMutationBody) => {
       await commonApiPost<ApiCreateDropRequest, ApiDrop>({
         endpoint: `drops`,
-        body,
-      }),
-
-    onError: (error) => {
+        body: body.drop,
+      });
+    },
+    onError: (error, body) => {
+      setTimeout(() => {
+        if (body.dropId) {
+          processDropRemoved(body.drop.wave_id, body.dropId);
+        }
+      }, 0);
       setToast({
         message: error instanceof Error ? error.message : String(error),
         type: "error",
@@ -141,10 +152,10 @@ export default function CreateDrop({
   const [queueSize, setQueueSize] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasQueueChanged, setHasQueueChanged] = useState(false);
-  const queueRef = useRef<ApiCreateDropRequest[]>([]);
+  const queueRef = useRef<DropMutationBody[]>([]);
 
   const addToQueue = useCallback(
-    (dropRequest: ApiCreateDropRequest) => {
+    (dropRequest: DropMutationBody) => {
       queueRef.current.push(dropRequest);
       const newQueueSize = queueRef.current.length;
       if (newQueueSize !== queueSize) {
@@ -156,13 +167,14 @@ export default function CreateDrop({
   );
 
   const removeFromQueue = useCallback(() => {
+    if (queueRef.current.length === 0) {
+      return undefined;
+    }
     const item = queueRef.current.shift();
     const newQueueSize = queueRef.current.length;
-    if (newQueueSize !== queueSize) {
-      setQueueSize(newQueueSize);
-    }
+    setQueueSize(newQueueSize);
     return item;
-  }, [queueSize]);
+  }, []);
 
   useProgressiveDebounce(
     () => {
@@ -181,7 +193,7 @@ export default function CreateDrop({
   );
 
   const processQueue = useCallback(async () => {
-    if (isProcessing || queueSize === 0) return;
+    if (isProcessing) return;
     setIsProcessing(true);
 
     const dropRequest = removeFromQueue();
@@ -192,17 +204,13 @@ export default function CreateDrop({
       } catch (error) {
         console.error("Error processing drop:", error);
       }
-    } else {
-      console.warn("No drop request found in queue, but queue.size was not 0");
     }
 
     setIsProcessing(false);
   }, [
     isProcessing,
-    queueSize,
     removeFromQueue,
     addDropMutation,
-    waitAndInvalidateDrops,
   ]);
 
   useEffect(() => {
@@ -210,7 +218,7 @@ export default function CreateDrop({
   }, [processQueue, queueSize]);
 
   const submitDrop = useCallback(
-    (dropRequest: ApiCreateDropRequest) => {
+    (dropRequest: DropMutationBody) => {
       addToQueue(dropRequest);
       onDropAddedToQueue();
     },

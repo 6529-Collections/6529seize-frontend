@@ -1,289 +1,145 @@
 import React, {
   createContext,
   useContext,
-  useState,
-  useEffect,
-  useCallback,
   useMemo,
   ReactNode,
+  useEffect,
+  useState,
 } from "react";
-import { useRouter } from "next/router";
-import useWavesList from "../../hooks/useWavesList";
-import { useWebSocketMessage } from "../../services/websocket/useWebSocketMessage";
-import { ApiWave } from "../../generated/models/ApiWave";
-import { WsDropUpdateMessage, WsMessageType } from "../../helpers/Types";
-import { AuthContext } from "../../components/auth/Auth";
-import { ApiWaveType } from "../../generated/models/ApiWaveType";
+import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
+import useEnhancedWavesList, {
+  MinimalWave,
+} from "./hooks/useEnhancedWavesList";
+import useWaveMessagesStore, {
+  Listener as WaveMessagesListener,
+} from "./hooks/useWaveMessagesStore";
+import { useWaveDataManager } from "./hooks/useWaveDataManager";
+import { ApiDrop } from "../../generated/models/ApiDrop";
+import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+import { WaveMessages } from "./hooks/types";
 
-interface MinimalWaveNewDropsCount {
-  readonly count: number;
-  readonly latestDropTimestamp: number | null;
+// Define nested structures for context data
+interface WavesContextData {
+  readonly list: MinimalWave[];
+  readonly isFetching: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly hasNextPage: boolean;
+  readonly fetchNextPage: () => void;
+  readonly addPinnedWave: (id: string) => void;
+  readonly removePinnedWave: (id: string) => void;
 }
 
-export interface MinimalWave {
-  id: string;
-  name: string;
-  type: ApiWaveType;
-  newDropsCount: MinimalWaveNewDropsCount;
-  picture: string | null;
-  contributors: {
-    pfp: string;
-  }[];
-  isPinned?: boolean;
+interface ActiveWaveContextData {
+  readonly id: string | null;
+  readonly set: (waveId: string | null) => void;
 }
 
-// Define the type for our context
+// Define the interface for the wave messages store functions
+interface WaveMessagesStoreData {
+  readonly getData: (key: string) => WaveMessages | undefined;
+  readonly subscribe: (key: string, listener: WaveMessagesListener) => void;
+  readonly unsubscribe: (key: string, listener: WaveMessagesListener) => void;
+}
+
+// Define the type for our context using nested structures
 interface MyStreamContextType {
-  // Wave data
-  waves: MinimalWave[];
+  readonly waves: WavesContextData;
+  readonly activeWave: ActiveWaveContextData;
+  readonly waveMessagesStore: WaveMessagesStoreData;
+  readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
+  readonly fetchNextPageForWave: (waveId: string) => Promise<ApiDrop[] | null>;
+  readonly processIncomingDrop: (drop: ApiDrop) => void;
+  readonly processDropRemoved: (waveId: string, dropId: string) => void;
+}
 
-  // Loading states
-  isFetching: boolean;
-  isFetchingNextPage: boolean;
-
-  // Pagination
-  hasNextPage: boolean;
-  fetchNextPage: () => void;
-
-  // Active wave management
-  activeWaveId: string | null;
-  setActiveWave: (waveId: string | null) => void;
-
-  // Pinned waves management
-  addPinnedWave: (id: string) => void;
-  removePinnedWave: (id: string) => void;
+interface MyStreamProviderProps {
+  readonly children: ReactNode;
 }
 
 // Create the context
 export const MyStreamContext = createContext<MyStreamContextType | null>(null);
 
 // Create a provider component
-export const MyStreamProvider: React.FC<{ children: ReactNode }> = ({
+export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   children,
 }) => {
-  const router = useRouter();
-  const { connectedProfile } = useContext(AuthContext);
+  const { activeWaveId, setActiveWave } = useActiveWaveManager();
+  const wavesHookData = useEnhancedWavesList(activeWaveId);
+  const waveMessagesStore = useWaveMessagesStore();
 
-  // Track active wave ID for filtering new messages
-  const [activeWaveId, setActiveWaveId] = useState<string | null>(null);
+  // Instantiate the data manager, passing the updater function from the store
+  const waveDataManager = useWaveDataManager({
+    updateData: waveMessagesStore.updateData,
+    getData: waveMessagesStore.getData,
+    removeDrop: waveMessagesStore.removeDrop,
+  });
 
-  // Get waves data from the optimized hook
-  const wavesData = useWavesList();
+  // Instantiate the real-time updater hook
+  const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
+    getData: waveMessagesStore.getData,
+    updateData: waveMessagesStore.updateData,
+    registerWave: waveDataManager.registerWave,
+    syncNewestMessages: waveDataManager.syncNewestMessages,
+    removeDrop: waveMessagesStore.removeDrop,
+  });
 
-  // Keep track of new drop counts separately
-  const [newDropsCounts, setNewDropsCounts] = useState<
-    Record<string, MinimalWaveNewDropsCount>
-  >({});
-
-  // Sync activeWaveId with URL
   useEffect(() => {
-    const { wave: waveId } = router.query;
-    if (typeof waveId === "string") {
-      setActiveWaveId(waveId);
-      // Reset count for the active wave
-      resetWaveNewDropsCount(waveId);
-    } else if (waveId === undefined && activeWaveId) {
-      // URL no longer has wave parameter
-      setActiveWaveId(null);
+    if (activeWaveId) {
+      waveDataManager.registerWave(activeWaveId, true);
     }
-  }, [router.query]);
+  }, [activeWaveId]);
 
-  // Function to programmatically change active wave (and update URL)
-  const setActiveWave = useCallback(
-    (waveId: string | null) => {
-      setActiveWaveId(waveId);
-
-      // Update URL
-      if (waveId) {
-        router.push(`/my-stream?wave=${waveId}`, undefined, { shallow: true });
-      } else {
-        router.push("/my-stream", undefined, { shallow: true });
-      }
-    },
-    [router]
-  );
-
-  // Reset counts for a specific wave
-  const resetWaveNewDropsCount = useCallback(
-    (waveId: string) => {
-      setNewDropsCounts((prev) => ({
-        ...prev,
-        [waveId]: {
-          count: 0,
-          latestDropTimestamp:
-            prev[waveId]?.latestDropTimestamp ??
-            wavesData.waves.find((wave) => wave.id === waveId)?.metrics
-              .latest_drop_timestamp ??
-            null,
-        },
-      }));
-    },
-    [wavesData.waves]
-  );
-
-  // Handle visibility changes for active wave
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      // If user returns to the tab and there's an active wave, reset its count
-      if (document.visibilityState === "visible" && activeWaveId) {
-        resetWaveNewDropsCount(activeWaveId);
-      }
+  // Create the context value using the nested structure
+  const contextValue = useMemo<MyStreamContextType>(() => {
+    const waves: WavesContextData = {
+      list: wavesHookData.waves,
+      isFetching: wavesHookData.isFetching,
+      isFetchingNextPage: wavesHookData.isFetchingNextPage,
+      hasNextPage: wavesHookData.hasNextPage,
+      fetchNextPage: wavesHookData.fetchNextPage,
+      addPinnedWave: wavesHookData.addPinnedWave,
+      removePinnedWave: wavesHookData.removePinnedWave,
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    const activeWave: ActiveWaveContextData = {
+      id: activeWaveId,
+      set: setActiveWave,
     };
-  }, [activeWaveId, resetWaveNewDropsCount]);
 
-  // WebSocket subscription for new drops using callback pattern
-  useWebSocketMessage<WsDropUpdateMessage["data"]>(
-    WsMessageType.DROP_UPDATE,
-    useCallback(
-      (message) => {
-        // Skip if no waveId
-        if (!message?.wave.id) return;
+    // Prepare the store data for the context (only read/subscribe parts)
+    const waveMessagesStoreData: WaveMessagesStoreData = {
+      getData: waveMessagesStore.getData,
+      subscribe: waveMessagesStore.subscribe,
+      unsubscribe: waveMessagesStore.unsubscribe,
+    };
 
-        const waveId = message.wave.id;
-        const wave = wavesData.waves.find((w) => w.id === waveId);
-
-        if (!wave) {
-          wavesData.mainWavesRefetch();
-        }
-
-        if (
-          connectedProfile?.profile?.handle?.toLowerCase() ===
-          message.author.handle?.toLowerCase()
-        )
-          return setNewDropsCounts((prev) => {
-            const currentCount = prev[waveId]?.count ?? 0;
-            const currentLatestDropTimestamp =
-              prev[waveId]?.latestDropTimestamp ?? null;
-            return {
-              ...prev,
-              [waveId]: {
-                count: currentCount,
-                latestDropTimestamp: Math.max(
-                  message.created_at,
-                  currentLatestDropTimestamp ?? 0
-                ),
-              },
-            };
-          });
-
-        // Skip incrementing if this is the active wave AND the document is visible
-        if (waveId === activeWaveId && document.visibilityState === "visible") {
-          return setNewDropsCounts((prev) => {
-            const currentCount = prev[waveId]?.count ?? 0;
-            const currentLatestDropTimestamp =
-              prev[waveId]?.latestDropTimestamp ?? null;
-            return {
-              ...prev,
-              [waveId]: {
-                count: currentCount,
-                latestDropTimestamp: Math.max(
-                  message.created_at,
-                  currentLatestDropTimestamp ?? 0
-                ),
-              },
-            };
-          });
-        }
-
-        // Update the count for this wave
-        setNewDropsCounts((prev) => {
-          const currentCount = prev[waveId]?.count ?? 0;
-          const currentLatestDropTimestamp =
-            prev[waveId]?.latestDropTimestamp ?? null;
-          // Optional: Cap the maximum count at 99
-          const MAX_COUNT = 99;
-          return {
-            ...prev,
-            [waveId]: {
-              count: Math.min(currentCount + 1, MAX_COUNT),
-              latestDropTimestamp: Math.max(
-                message.created_at,
-                currentLatestDropTimestamp ?? 0
-              ),
-            },
-          };
-        });
-      },
-      [activeWaveId, connectedProfile]
-    ) // Make sure to include activeWaveId as a dependency
-  );
-
-  // Helper function to map API wave data to MinimalWave format
-  const mapWaveToMinimalWave = useCallback(
-    (wave: ApiWave): MinimalWave => {
-      const newDropsData = {
-        count: newDropsCounts[wave.id]?.count ?? 0,
-        latestDropTimestamp:
-          newDropsCounts[wave.id]?.latestDropTimestamp ??
-          wave.metrics.latest_drop_timestamp ??
-          null,
-      };
-      // @ts-ignore: This is to handle isPinned from EnhancedWave
-      const isPinned = !!wave.isPinned;
-      return {
-        id: wave.id, // Add the missing id property
-        name: wave.name,
-        type: wave.wave.type,
-        picture: wave.picture,
-        contributors: wave.contributors_overview.map((c) => ({
-          pfp: c.contributor_pfp,
-        })),
-        newDropsCount: newDropsData,
-        isPinned: isPinned,
-      };
-    },
-    [newDropsCounts]
-  );
-
-  // Combine wave data with counts for consumers
-  const enhancedWaves = useMemo(() => {
-    return wavesData.waves.map(mapWaveToMinimalWave);
-  }, [wavesData.waves, mapWaveToMinimalWave]);
-
-  // Create the context value
-  const contextValue = useMemo<MyStreamContextType>(
-    () => ({
-      // Enhanced waves with new drop counts
-      waves: enhancedWaves.sort(
-        (a, b) =>
-          (b.newDropsCount.latestDropTimestamp ?? 0) -
-          (a.newDropsCount.latestDropTimestamp ?? 0)
-      ),
-
-      // Pass through loading states
-      isFetching: wavesData.isFetching,
-      isFetchingNextPage: wavesData.isFetchingNextPage,
-
-      // Pass through pagination
-      hasNextPage: wavesData.hasNextPage,
-      fetchNextPage: wavesData.fetchNextPage,
-
-      // Active wave management
-      activeWaveId,
-      setActiveWave,
-
-      // Pinned waves management
-      addPinnedWave: wavesData.addPinnedWave,
-      removePinnedWave: wavesData.removePinnedWave,
-    }),
-    [
-      enhancedWaves,
-      wavesData.isFetching,
-      wavesData.isFetchingNextPage,
-      wavesData.hasNextPage,
-      wavesData.fetchNextPage,
-      wavesData.addPinnedWave,
-      wavesData.removePinnedWave,
-      activeWaveId,
-      setActiveWave,
-    ]
-  );
+    return {
+      waves,
+      activeWave,
+      waveMessagesStore: waveMessagesStoreData,
+      registerWave: waveDataManager.registerWave,
+      fetchNextPageForWave: waveDataManager.fetchNextPage,
+      processIncomingDrop,
+      processDropRemoved,
+    };
+  }, [
+    wavesHookData.waves,
+    wavesHookData.isFetching,
+    wavesHookData.isFetchingNextPage,
+    wavesHookData.hasNextPage,
+    wavesHookData.fetchNextPage,
+    wavesHookData.addPinnedWave,
+    wavesHookData.removePinnedWave,
+    activeWaveId,
+    setActiveWave,
+    waveMessagesStore.getData,
+    waveMessagesStore.subscribe,
+    waveMessagesStore.unsubscribe,
+    waveDataManager.registerWave,
+    waveDataManager.fetchNextPage,
+    processIncomingDrop,
+    processDropRemoved,
+  ]);
 
   return (
     <MyStreamContext.Provider value={contextValue}>
@@ -300,3 +156,56 @@ export const useMyStream = () => {
   }
   return context;
 };
+
+// Create the selector hook for wave messages
+export function useMyStreamWaveMessages(
+  waveId: string | null | undefined
+): WaveMessages | undefined {
+  const { waveMessagesStore } = useMyStream();
+  const { getData, subscribe, unsubscribe } = waveMessagesStore;
+
+  // Use useState to hold the data for the specific waveId
+  // Initialize with the current data for that waveId
+  const [data, setData] = useState<WaveMessages | undefined>(() =>
+    waveId ? getData(waveId) : undefined
+  );
+
+  useEffect(() => {
+    // If waveId is null or undefined, don't subscribe
+    if (!waveId) {
+      setData(undefined); // Clear data if waveId becomes null/undefined
+      return;
+    }
+
+    // Define the listener callback
+    const listener: WaveMessagesListener = (
+      newData: WaveMessages | undefined
+    ) => {
+      // Update local state only if data actually differs
+      // Use a proper comparison if needed (e.g., deep compare for complex objects)
+      setData((currentData: WaveMessages | undefined) => {
+        if (JSON.stringify(currentData) !== JSON.stringify(newData)) {
+          return newData;
+        }
+        return currentData;
+      });
+    };
+
+    // Subscribe to changes for the specific waveId
+    subscribe(waveId, listener);
+
+    // Cleanup function: Unsubscribe when component unmounts or waveId changes
+    return () => {
+      unsubscribe(waveId, listener);
+    };
+    // Re-run effect if waveId changes or if the stable subscribe/unsubscribe functions change (unlikely but safe)
+  }, [waveId, subscribe, unsubscribe]);
+
+  // Re-initialize state if the key changes and getData is available
+  // This handles cases where the component using the hook changes the key it's interested in.
+  useEffect(() => {
+    setData(waveId ? getData(waveId) : undefined);
+  }, [waveId, getData]);
+
+  return data;
+}

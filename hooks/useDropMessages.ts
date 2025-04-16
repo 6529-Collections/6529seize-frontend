@@ -1,47 +1,25 @@
-import { useCallback, useEffect, useState, useRef } from "react";
-import { ExtendedDrop } from "../helpers/waves/drop.helpers";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
+import useCapacitor from "./useCapacitor";
+import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
+import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
-import {
-  keepPreviousData,
-  useInfiniteQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  commonApiFetch,
-  commonApiPostWithoutBodyAndResponse,
-} from "../services/api/common-api";
 import {
   generateUniqueKeys,
   mapToExtendedDrops,
 } from "../helpers/waves/wave-drops.helpers";
-import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
-import useCapacitor from "./useCapacitor";
-import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
-import { useWebSocketMessage } from "../services/websocket";
-import { WsDropUpdateMessage, WsMessageType } from "../helpers/Types";
-export enum WaveDropsSearchStrategy {
-  FIND_OLDER = "FIND_OLDER",
-  FIND_NEWER = "FIND_NEWER",
-  FIND_BOTH = "FIND_BOTH",
-}
 
-interface UseWaveDropsProps {
-  readonly waveId: string;
-  readonly connectedProfileHandle: string | undefined;
-  readonly reverse: boolean;
-  readonly dropId: string | null;
-}
+import { commonApiFetch } from "../services/api/common-api";
+import { ExtendedDrop } from "../helpers/waves/drop.helpers";
 
-export function useWaveDrops({
-  waveId,
-  connectedProfileHandle,
-  reverse,
-  dropId,
-}: UseWaveDropsProps) {
+import { WsMessageType, WsDropUpdateMessage } from "../helpers/Types";
+import { useWebSocketMessage } from "../services/websocket/useWebSocketMessage";
+import { WaveDropsSearchStrategy } from "../contexts/wave/hooks/types";
+
+export function useDropMessages(waveId: string, dropId: string | null) {
   const { isCapacitor } = useCapacitor();
-  const queryClient = useQueryClient();
   const [init, setInit] = useState(false);
-  
 
   const queryKey = [
     QueryKey.DROPS,
@@ -51,33 +29,6 @@ export function useWaveDrops({
       dropId,
     },
   ];
-
-  useEffect(() => {
-    queryClient.prefetchInfiniteQuery({
-      queryKey,
-      queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-        const params: Record<string, string> = {
-          limit: WAVE_DROPS_PARAMS.limit.toString(),
-        };
-        if (dropId) {
-          params.drop_id = dropId;
-        }
-
-        if (pageParam) {
-          params.serial_no_less_than = `${pageParam}`;
-        }
-
-        return await commonApiFetch<ApiWaveDropsFeed>({
-          endpoint: `waves/${waveId}/drops`,
-          params,
-        });
-      },
-      initialPageParam: null,
-      getNextPageParam: (lastPage) => lastPage.drops.at(-1)?.serial_no ?? null,
-      pages: 3,
-      staleTime: 60000,
-    });
-  }, [waveId]);
 
   const {
     data,
@@ -98,11 +49,9 @@ export function useWaveDrops({
     }) => {
       const params: Record<string, string> = {
         limit: WAVE_DROPS_PARAMS.limit.toString(),
+        drop_id: dropId ?? "",
       };
 
-      if (dropId) {
-        params.drop_id = dropId;
-      }
       if (pageParam?.serialNo) {
         params.serial_no_limit = `${pageParam.serialNo}`;
         params.search_strategy = `${pageParam.strategy}`;
@@ -115,6 +64,7 @@ export function useWaveDrops({
 
       return results;
     },
+    enabled: !!dropId,
     initialPageParam: null,
     getNextPageParam: (lastPage) =>
       lastPage.drops.at(-1)?.serial_no
@@ -124,7 +74,6 @@ export function useWaveDrops({
           }
         : null,
     placeholderData: keepPreviousData,
-    enabled: !!connectedProfileHandle,
     staleTime: 60000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
@@ -154,29 +103,18 @@ export function useWaveDrops({
   };
 
   const [drops, setDrops] = useState<ExtendedDrop[]>(() =>
-    processDrops(data?.pages, [], reverse)
+    processDrops(data?.pages, [], false)
   );
 
   useEffect(() => {
     if (!data) return;
-    setDrops((prev) => processDrops(data?.pages, prev, reverse));
+    setDrops((prev) => processDrops(data?.pages, prev, false));
     setInit(true);
-  }, [data, reverse]);
+  }, [data]);
 
   const lastRefetchTimeRef = useRef<number>(0);
   const pendingRefetchRef = useRef<boolean>(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const readAllForWave = async () => {
-    try {
-      await removeWaveDeliveredNotifications(waveId);
-      await commonApiPostWithoutBodyAndResponse({
-        endpoint: `notifications/wave/${waveId}/read`,
-      });
-    } catch (error) {
-      console.error("Failed to mark feed as read:", error);
-    }
-  };
 
   const onRefetch = useCallback(() => {
     const now = Date.now();
@@ -214,7 +152,6 @@ export function useWaveDrops({
             return;
           }
           executeRefetch();
-          readAllForWave();
         }, minDebounceTime - timeSinceLastRefetch);
       }
       return;
@@ -267,8 +204,8 @@ export function useWaveDrops({
     WsMessageType.DROP_UPDATE,
     useCallback(
       (message) => {
-        // Skip if no waveId
-        if (!message?.wave.id) return;
+        // Skip if no dropId
+        if (!dropId) return;
 
         if (waveId !== message.wave.id) {
           return;
@@ -276,7 +213,7 @@ export function useWaveDrops({
 
         onRefetch();
       },
-      [waveId, onRefetch]
+      [waveId, dropId, onRefetch]
     )
   );
 
@@ -296,7 +233,3 @@ export function useWaveDrops({
     manualFetch,
   };
 }
-function removeWaveDeliveredNotifications(waveId: string): Promise<void> {
-  return Promise.reject(new Error("Function not implemented."));
-}
-
