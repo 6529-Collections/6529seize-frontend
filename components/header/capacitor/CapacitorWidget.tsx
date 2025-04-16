@@ -8,7 +8,7 @@ import {
   faShare,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigationHistory } from "../../../hooks/useNavigationHistory";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Share } from "@capacitor/share";
 import Hammer from "hammerjs";
 import useCapacitor from "../../../hooks/useCapacitor";
@@ -77,21 +77,21 @@ export default function CapacitorWidget() {
     };
   }, [canGoBack, canGoForward]);
 
-  const doNavigation = (
-    pathname: string,
-    queryParams: Record<string, string | number>
-  ) => {
-    console.log("deep link doNavigation", pathname, queryParams);
+  const doNavigation = useCallback(
+    (pathname: string, queryParams: Record<string, string | number>) => {
+      console.log("deep link doNavigation", pathname, queryParams);
 
-    const isSamePath = router.asPath.includes(pathname);
-    const navigationMethod = isSamePath ? "replace" : "push";
+      const isSamePath = router.asPath.includes(pathname);
+      const navigationMethod = isSamePath ? "replace" : "push";
 
-    console.log("deep link doNavigation", isSamePath, navigationMethod);
+      console.log("deep link doNavigation", isSamePath, navigationMethod);
 
-    router[navigationMethod]({ pathname, query: queryParams }, undefined, {
-      shallow: false,
-    });
-  };
+      router[navigationMethod]({ pathname, query: queryParams }, undefined, {
+        shallow: false,
+      });
+    },
+    [router]
+  );
 
   useEffect(() => {
     const listener = App.addListener("appUrlOpen", (data) => {
@@ -132,7 +132,7 @@ export default function CapacitorWidget() {
     return () => {
       listener.then((handle) => handle.remove());
     };
-  }, [router]);
+  }, [doNavigation]);
 
   if (capacitor.keyboardVisible) {
     return <></>;
