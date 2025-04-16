@@ -11,6 +11,7 @@ import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
 import Image from "next/image";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import ClientOnly from "../../../client-only/ClientOnly";
+import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -19,7 +20,8 @@ const Header = dynamic(() => import("../../../header/Header"), {
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
-  const { setTitle, title, showWaves } = useContext(AuthContext);
+  const { setTitle, title, showWaves, connectedProfile } =
+    useContext(AuthContext);
   const { registerRef, spaces } = useLayout();
   const connectContext = useSeizeConnectContext();
 
@@ -108,6 +110,13 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
                     Connect your wallet to continue.
                   </p>
                   <HeaderUserConnect />
+                </div>
+              ) : !connectedProfile?.profile?.handle ? (
+                <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+                  <h1 className="tw-text-xl tw-font-bold">
+                    You need to set up a profile to continue.
+                  </h1>
+                  <UserSetUpProfileCta />
                 </div>
               ) : (
                 <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
