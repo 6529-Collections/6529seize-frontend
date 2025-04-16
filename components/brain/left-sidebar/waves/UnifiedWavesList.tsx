@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import BrainLeftSidebarCreateADirectMessageButton from "../BrainLeftSidebarCreateADirectMessageButton";
-import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
 import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
+import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -14,6 +14,7 @@ interface UnifiedWavesListProps {
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetchingNextPage: boolean;
+  readonly onHover: (waveId: string) => void;
 }
 
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
@@ -22,12 +23,8 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
+  onHover,
 }) => {
-  // We no longer need to sort waves to prioritize active wave
-  // as this is now handled in the UnifiedWavesListWaves component
-  // by creating separate sections for pinned, active, and regular waves
-  const sortedWaves = waves;
-
   // Ref for intersection observer
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -99,10 +96,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
         <div className="tw-w-full">
           {/* Unified Waves List */}
-          <UnifiedWavesListWaves
-            waves={sortedWaves}
-            activeWaveId={activeWaveId}
-          />
+          <UnifiedWavesListWaves waves={waves} onHover={onHover} />
 
           {/* Loading indicator and intersection trigger */}
           <UnifiedWavesListLoader
@@ -113,7 +107,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
           {/* Empty state */}
           <UnifiedWavesListEmpty
-            sortedWaves={sortedWaves}
+            sortedWaves={waves}
             isFetchingNextPage={isFetchingNextPage}
           />
         </div>

@@ -38,7 +38,6 @@ function areEqual(
       }
     }
   }
-
   return true;
 }
 
