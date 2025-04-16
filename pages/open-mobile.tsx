@@ -55,11 +55,9 @@ const OpenMobilePage = () => {
           {printShareMobileApps}
         </div>
       </div>
-      <div
-        onClick={handleBack}
-        className="tw-mt-10 tw-cursor-pointer tw-underline hover:tw-text-gray-300">
+      <button onClick={handleBack} className="tw-mt-10 btn-link">
         Back to 6529.io
-      </div>
+      </button>
     </div>
   );
 };
