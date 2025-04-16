@@ -26,3 +26,9 @@ export type WaveMessages = {
 export type WaveMessagesUpdate = Partial<WaveMessages> & {
   key: string;
 };
+
+export enum WaveDropsSearchStrategy {
+  FIND_OLDER = "FIND_OLDER",
+  FIND_NEWER = "FIND_NEWER",
+  FIND_BOTH = "FIND_BOTH",
+}

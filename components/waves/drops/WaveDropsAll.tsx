@@ -50,23 +50,13 @@ export default function WaveDropsAll({
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
 
-  const { waveMessages, fetchNextPageForWave } =
-    useVirtualizedWaveDrops(waveId);
+  const { waveMessages, fetchNextPage } = useVirtualizedWaveDrops(
+    waveId,
+    dropId
+  );
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
-  // const {
-  //   drops,
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   isFetching,
-  //   isFetchingNextPage,
-  //   haveNewDrops,
-  // } = useWaveDrops({
-  //   waveId,
-  //   connectedProfileHandle: connectedProfile?.profile?.handle,
-  //   reverse: false,
-  //   dropId,
-  // });
+
 
   const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
     useScrollBehavior();
@@ -183,7 +173,7 @@ export default function WaveDropsAll({
       }
 
       // --- If target not found and we can fetch more ---
-      await fetchNextPageForWave(waveId);
+      await fetchNextPage(waveId, dropId);
 
       // ** Crucial:** After await, state *might* have updated.
       // The ref is updated by useEffect, so the *next* call to checkAndFetchNext will see it.
@@ -199,7 +189,7 @@ export default function WaveDropsAll({
     checkAndFetchNext();
   }, [
     waveId,
-    fetchNextPageForWave,
+    fetchNextPage,
     scrollToSerialNo,
     serialNo,
     setSerialNo,
@@ -236,13 +226,13 @@ export default function WaveDropsAll({
       !waveMessages?.isLoading &&
       !waveMessages?.isLoadingNextPage
     ) {
-      fetchNextPageForWave(waveId);
+      fetchNextPage(waveId, dropId);
     }
   }, [
     waveMessages?.hasNextPage,
     waveMessages?.isLoading,
     waveMessages?.isLoadingNextPage,
-    fetchNextPageForWave,
+    fetchNextPage,
   ]);
 
   const onQuoteClick = useCallback(
