@@ -7,6 +7,10 @@ import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
 import { LayoutProvider, useLayout } from "./LayoutContext";
 import { MyStreamProvider } from "../../../../contexts/wave/MyStreamContext";
+import HeaderUserConnect from "../../../header/user/HeaderUserConnect";
+import Image from "next/image";
+import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
+import ClientOnly from "../../../client-only/ClientOnly";
 
 const Header = dynamic(() => import("../../../header/Header"), {
   ssr: false,
@@ -17,6 +21,7 @@ const Header = dynamic(() => import("../../../header/Header"), {
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   const { setTitle, title, showWaves } = useContext(AuthContext);
   const { registerRef, spaces } = useLayout();
+  const connectContext = useSeizeConnectContext();
 
   // Local refs for component-specific needs
   const headerElementRef = useRef<HTMLDivElement | null>(null);
@@ -77,24 +82,56 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       `}</style>
       </Head>
 
-      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black">
+      <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black">
         <div
           ref={setHeaderRef}
-          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black"
-        >
+          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
           <Header isSmall={true} />
           <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />
           </div>
         </div>
 
-        {showWaves && spaces.measurementsComplete && (
-          <div className="tw-flex-1" id="my-stream-content">
-            <Brain>
-              <div className={containerClassName}>{children}</div>
-            </Brain>
-          </div>
-        )}
+        <ClientOnly>
+          {showWaves && spaces.measurementsComplete ? (
+            <div className="tw-flex-1" id="my-stream-content">
+              <Brain>
+                <div className={containerClassName}>{children}</div>
+              </Brain>
+            </div>
+          ) : (
+            <div
+              className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-p-6"
+              id="my-stream-connect">
+              <Image
+                priority
+                loading="eager"
+                src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
+                alt="Brain"
+                width={304}
+                height={450}
+                className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+              />
+              {!connectContext.isAuthenticated ? (
+                <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+                  <h1 className="tw-text-xl tw-font-bold">
+                    This content is only available to connected wallets.
+                  </h1>
+                  <p className="tw-text-base tw-text-gray-400">
+                    Connect your wallet to continue.
+                  </p>
+                  <HeaderUserConnect />
+                </div>
+              ) : (
+                <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+                  <h1 className="tw-text-xl tw-font-bold tw-animate-pulse">
+                    Loading...
+                  </h1>
+                </div>
+              )}
+            </div>
+          )}
+        </ClientOnly>
       </div>
     </>
   );
