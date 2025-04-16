@@ -57,6 +57,7 @@ import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import { useMyStream } from "../../contexts/wave/MyStreamContext";
 import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 import useWaveMessagesStore from "../../contexts/wave/hooks/useWaveMessagesStore";
+import { DropMutationBody } from "./CreateDrop";
 
 export type CreateDropMetadataType =
   | {
@@ -91,7 +92,7 @@ interface CreateDropContentProps {
   >;
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
-  readonly submitDrop: (dropRequest: ApiCreateDropRequest) => void;
+  readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly privileges: DropPrivileges;
 }
 
@@ -665,7 +666,10 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);
       refreshState();
-      submitDrop(updatedDropRequest);
+      submitDrop({
+        drop: updatedDropRequest,
+        dropId: optimisticDrop?.id ?? null,
+      });
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),
