@@ -90,6 +90,31 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     );
   }, [isAuthenticated, connectedProfile]);
 
+  const content = shouldShowContent ? (
+    <div className="tw-flex-1" id="my-stream-content">
+      <Brain>
+        <div className={containerClassName}>{children}</div>
+      </Brain>
+    </div>
+  ) : (
+    <div
+      id="my-stream-connect"
+      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-p-6">
+      <Image
+        priority
+        loading="eager"
+        src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
+        alt="Brain"
+        width={304}
+        height={450}
+        className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+      />
+      <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+        {connectPrompt}
+      </div>
+    </div>
+  );
+
   return (
     <>
       <Head>
@@ -119,32 +144,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
           </div>
         </div>
 
-        <ClientOnly>
-          {shouldShowContent ? (
-            <div className="tw-flex-1" id="my-stream-content">
-              <Brain>
-                <div className={containerClassName}>{children}</div>
-              </Brain>
-            </div>
-          ) : (
-            <div
-              id="my-stream-connect"
-              className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-p-6">
-              <Image
-                priority
-                loading="eager"
-                src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
-                alt="Brain"
-                width={304}
-                height={450}
-                className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
-              />
-              <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
-                {connectPrompt}
-              </div>
-            </div>
-          )}
-        </ClientOnly>
+        <ClientOnly>{content}</ClientOnly>
       </div>
     </>
   );
