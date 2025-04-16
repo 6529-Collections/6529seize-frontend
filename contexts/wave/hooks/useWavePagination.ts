@@ -46,10 +46,15 @@ export function useWavePagination({
    */
   const updateWithPaginatedData = useCallback(
     (waveId: string, newDrops: ApiDrop[] | null) => {
+
       // Clear the loading state
       if (paginationStates.current[waveId]) {
         paginationStates.current[waveId].isLoading = false;
         paginationStates.current[waveId].promise = null;
+      }
+
+      if (newDrops === null) {
+        return null;
       }
 
       if (!newDrops?.length) {
