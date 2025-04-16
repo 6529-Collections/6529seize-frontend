@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  useMyStream,
-  useMyStreamWaveMessages,
-} from "../contexts/wave/MyStreamContext";
-import { WaveMessages } from "../contexts/wave/hooks/useWaveMessagesStore";
+import { useMyStreamWaveMessages } from "../contexts/wave/MyStreamContext";
+
 import { ExtendedDrop } from "../helpers/waves/drop.helpers";
+import { WaveMessages } from "../contexts/wave/hooks/types";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   readonly drops: ExtendedDrop[];

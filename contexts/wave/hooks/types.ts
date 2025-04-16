@@ -1,5 +1,5 @@
-import { WaveMessages, WaveMessagesUpdate } from "./useWaveMessagesStore";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 // Define the shape of the functions passed from the store
 export interface WaveDataStoreUpdater {
@@ -13,3 +13,16 @@ export interface LoadingState {
   isLoading: boolean;
   promise: Promise<ApiDrop[] | null> | null;
 }
+
+export type WaveMessages = {
+  readonly id: string;
+  readonly isLoading: boolean;
+  readonly isLoadingNextPage: boolean;
+  readonly hasNextPage: boolean;
+  readonly drops: ExtendedDrop[];
+  readonly latestFetchedSerialNo: number | null;
+};
+
+export type WaveMessagesUpdate = Partial<WaveMessages> & {
+  key: string;
+};

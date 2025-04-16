@@ -1,21 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { mergeDrops } from "../utils/wave-messages-utils";
+import { WaveMessages, WaveMessagesUpdate } from "./types";
 
-// Export the types so they can be imported elsewhere
-export type WaveMessages = {
-  readonly id: string;
-  readonly isLoading: boolean;
-  readonly isLoadingNextPage: boolean;
-  readonly hasNextPage: boolean;
-  readonly drops: ExtendedDrop[];
-  readonly latestFetchedSerialNo: number | null;
-};
 export type Listener = (data: WaveMessages | undefined) => void;
-
-export type WaveMessagesUpdate = Partial<WaveMessages> & {
-  key: string;
-};
 
 type Listeners = Set<Listener>; // Keep internal types non-exported
 type KeyListeners = Record<string, Listeners>; // Keep internal types non-exported

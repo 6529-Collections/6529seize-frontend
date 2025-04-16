@@ -11,12 +11,12 @@ import useEnhancedWavesList, {
   MinimalWave,
 } from "./hooks/useEnhancedWavesList";
 import useWaveMessagesStore, {
-  WaveMessages,
   Listener as WaveMessagesListener,
 } from "./hooks/useWaveMessagesStore";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+import { WaveMessages } from "./hooks/types";
 
 // Define nested structures for context data
 interface WavesContextData {

@@ -6,10 +6,8 @@ import {
   ExtendedDrop,
   getStableDropKey,
 } from "../../../helpers/waves/drop.helpers";
-import {
-  WaveMessages,
-  WaveMessagesUpdate,
-} from "../hooks/useWaveMessagesStore";
+import { WaveMessagesUpdate } from "../hooks/types";
+
 
 /**
  * Fetches wave messages (drops) for a specific wave
