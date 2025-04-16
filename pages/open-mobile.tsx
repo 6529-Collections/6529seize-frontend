@@ -52,7 +52,7 @@ const OpenMobilePage = () => {
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1">
         <p className="tw-text-xl tw-font-bold">Get 6529 Mobile</p>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-4">
-          {printShareMobileApps()}
+          {printShareMobileApps}
         </div>
       </div>
       <div
