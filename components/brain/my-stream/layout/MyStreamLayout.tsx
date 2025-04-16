@@ -27,7 +27,7 @@ const Header = dynamic(() => import("../../../header/Header"), {
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
-  const { setTitle, title, showWaves, connectedProfile } =
+  const { setTitle, title, showWaves, connectedProfile, fetchingProfile } =
     useContext(AuthContext);
   const { registerRef, spaces } = useLayout();
   const { isAuthenticated } = useSeizeConnectContext();
@@ -74,7 +74,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       );
     }
 
-    if (!connectedProfile?.profile?.handle) {
+    if (!connectedProfile?.profile?.handle && !fetchingProfile) {
       return (
         <>
           <h1 className="tw-text-xl tw-font-bold">
@@ -88,7 +88,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     return (
       <h1 className="tw-text-xl tw-font-bold tw-animate-pulse">Loading...</h1>
     );
-  }, [isAuthenticated, connectedProfile]);
+  }, [isAuthenticated, connectedProfile, fetchingProfile]);
 
   const content = shouldShowContent ? (
     <div className="tw-flex-1" id="my-stream-content">
