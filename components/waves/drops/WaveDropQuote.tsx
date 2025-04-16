@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ApiDropPart } from "../../../generated/models/ApiDropPart";
 import DropPartMarkdownWithPropLogger from "../../drops/view/part/DropPartMarkdownWithPropLogger";
-import { Time } from "../../../helpers/time";
+import WaveDropTime from "./time/WaveDropTime";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -108,11 +108,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
               {!!drop && (
                 <>
                   <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-                  <p className="tw-text-xs tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500">
-                    {Time.millis(
-                      drop.created_at
-                    ).toLocaleDropDateAndTimeString()}
-                  </p>
+                  <WaveDropTime timestamp={drop.created_at} />
                 </>
               )}
             </div>
