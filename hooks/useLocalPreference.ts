@@ -6,15 +6,15 @@ import { useState, useEffect } from 'react';
  * @param key The localStorage key to use
  * @param defaultValue The default value to use if no preference is found
  * @param validator Optional function to validate stored value
- * @returns [preference, setPreference] - current preference and setter function
+ * @returns [preference, updatePreference] - current preference value and function to update it
  */
 function useLocalPreference<T>(
   key: string,
   defaultValue: T,
   validator?: (value: any) => boolean
-): [T, (value: T) => void] {
+): [T, (newValue: T) => void] {
   // Initialize state with a function to avoid unnecessary localStorage lookups
-  const [preference, setState] = useState<T>(() => {
+  const [preference, setPreference] = useState<T>(() => {
     if (typeof window === 'undefined') {
       return defaultValue; // Return default during SSR
     }
@@ -53,7 +53,7 @@ function useLocalPreference<T>(
           if (validator && !validator(newValue)) {
             return;
           }
-          setState(newValue);
+          setPreference(newValue);
         } catch (e) {
           console.warn(`Error processing storage event:`, e);
         }
@@ -65,29 +65,29 @@ function useLocalPreference<T>(
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [key, validator]);
+  }, [key, validator, setPreference]);
 
-  // Update localStorage when the preference changes
-  const setPreference = (value: T) => {
+  // Renamed wrapper function that updates state and localStorage
+  const updatePreference = (newValue: T) => {
     if (typeof window === 'undefined') {
-      setState(value);
+      setPreference(newValue);
       return;
     }
 
     try {
       // Save to state
-      setState(value);
+      setPreference(newValue);
       
       // Save to localStorage
-      localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem(key, JSON.stringify(newValue));
     } catch (e) {
       // If there's an error writing to localStorage, just update the state
       console.warn(`Error writing ${key} to localStorage:`, e);
-      setState(value);
+      setPreference(newValue);
     }
   };
 
-  return [preference, setPreference];
+  return [preference, updatePreference];
 }
 
 export default useLocalPreference;
