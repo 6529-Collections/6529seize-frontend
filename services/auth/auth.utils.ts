@@ -50,8 +50,6 @@ export const setAuthJwt = (
 };
 
 export const getAuthJwt = () => {
-  // TODO: remove this
-  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjUwZmJiN2UzLTVkNzYtNGQwNy04ZDc0LTljYjFmOWI2OWNjYyIsInN1YiI6IjB4MjNhODY3YzliMzljOTQwZTk0NjdmNWIzYjQzZmEwZTVhMmJkMWU2ZSIsInJvbGUiOiIwZjgzMmZlOS04N2I0LTExZWUtOWQ4Mi0wMjlhMGU0YjYxNTkiLCJpYXQiOjE3NDQyMDY2NzMsImV4cCI6MTc0NjgzNDk2MX0.zzi259KlrkJAHYMn280R8z3IPpg33Iwzu4iJtGH6tCk"
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
 
@@ -60,8 +58,6 @@ export const getRefreshToken = () => {
 };
 
 export const getWalletAddress = () => {
-  // TODO: remove this
-  return "0x23a867C9b39c940E9467f5b3B43FA0e5a2bD1e6E"
   return Cookies.get(WALLET_ADDRESS_COOKIE) ?? null;
 };
 
