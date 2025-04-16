@@ -233,6 +233,7 @@ export default function WaveDropsAll({
   }, [init, serialNo, fetchAndScrollToDrop, scrollToSerialNo, setSerialNo]);
 
   const handleTopIntersection = useCallback(() => {
+    
     if (
       waveMessages?.hasNextPage &&
       !waveMessages?.isLoading &&

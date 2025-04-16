@@ -83,7 +83,7 @@ export function formatWaveMessages(
     id: waveId,
     isLoading,
     isLoadingNextPage,
-    hasNextPage: hasNextPage && drops.length > 0, // If we have drops, there might be more
+    hasNextPage: hasNextPage,
     drops: drops.map((drop) => ({
       ...drop,
       stableKey: drop.id,
