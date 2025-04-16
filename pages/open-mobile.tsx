@@ -26,13 +26,21 @@ const OpenMobilePage = () => {
     window.location.href = `${window.location.origin}${decodedPath}`;
   };
 
-  const printShareMobileApps = useMemo(() => {
+  const printShareMobileApps = () => {
     const shareIos = <ShareMobileApp platform="ios" target="_self" />;
     const shareAndroid = <ShareMobileApp platform="android" target="_self" />;
 
-    if (capacitor.isIos) {
+    const userAgent =
+      typeof navigator === "undefined" ? "" : navigator.userAgent;
+
+    const isIos = /iPad|iPhone|iPod/.test(userAgent);
+    const isAndroid = /android/i.test(userAgent);
+
+    console.log(capacitor.platform, capacitor.isIos, capacitor.isAndroid);
+
+    if (isIos) {
       return shareIos;
-    } else if (capacitor.isAndroid) {
+    } else if (isAndroid) {
       return shareAndroid;
     }
 
@@ -42,7 +50,7 @@ const OpenMobilePage = () => {
         {shareAndroid}
       </>
     );
-  }, [capacitor.isIos, capacitor.isAndroid]);
+  };
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen tw-text-center tw-p-4 tw-gap-10">
@@ -52,7 +60,7 @@ const OpenMobilePage = () => {
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1">
         <p className="tw-text-xl tw-font-bold">Get 6529 Mobile</p>
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-4">
-          {printShareMobileApps}
+          {printShareMobileApps()}
         </div>
       </div>
       <button onClick={handleBack} className="tw-mt-10 btn-link">
