@@ -14,7 +14,7 @@ function useLocalPreference<T>(
   validator?: (value: any) => boolean
 ): [T, (value: T) => void] {
   // Initialize state with a function to avoid unnecessary localStorage lookups
-  const value = useState<T>(() => {
+  const [preference, setState] = useState<T>(() => {
     if (typeof window === 'undefined') {
       return defaultValue; // Return default during SSR
     }
@@ -40,8 +40,6 @@ function useLocalPreference<T>(
     }
   });
   
-  const preference = value[0];
-  const setState = value[1];
 
   // Listen for storage events from other tabs
   useEffect(() => {
