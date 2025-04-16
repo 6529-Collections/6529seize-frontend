@@ -42,7 +42,7 @@ const OpenMobilePage = () => {
         {shareAndroid}
       </>
     );
-  }, [capacitor]);
+  }, [capacitor.isIos, capacitor.isAndroid]);
 
   return (
     <div className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen tw-text-center tw-p-4 tw-gap-10">
