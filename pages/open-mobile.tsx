@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { ShareMobileApp } from "../components/header/share/HeaderShareMobileApps";
+import ClientOnly from "../components/client-only/ClientOnly";
 
 const OpenMobilePage = () => {
   const router = useRouter();
@@ -48,20 +49,22 @@ const OpenMobilePage = () => {
   };
 
   return (
-    <div className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen tw-text-center tw-p-4 tw-gap-10">
-      <p className="tw-text-2xl tw-font-bold tw-animate-pulse">
-        Opening 6529 Mobile...
-      </p>
-      <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1">
-        <p className="tw-text-xl tw-font-bold">Get 6529 Mobile</p>
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-4">
-          {printShareMobileApps()}
+    <ClientOnly>
+      <div className="tailwind-scope tw-flex tw-flex-col tw-items-center tw-justify-center tw-h-screen tw-text-center tw-p-4 tw-gap-10">
+        <p className="tw-text-2xl tw-font-bold tw-animate-pulse">
+          Opening 6529 Mobile...
+        </p>
+        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1">
+          <p className="tw-text-xl tw-font-bold">Get 6529 Mobile</p>
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-4">
+            {printShareMobileApps()}
+          </div>
         </div>
+        <button onClick={handleBack} className="tw-mt-10 btn-link">
+          Back to 6529.io
+        </button>
       </div>
-      <button onClick={handleBack} className="tw-mt-10 btn-link">
-        Back to 6529.io
-      </button>
-    </div>
+    </ClientOnly>
   );
 };
 
