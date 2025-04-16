@@ -22,6 +22,7 @@ import { useKeyPressEvent } from "react-use";
 import { ActiveDropState } from "../../types/dropInteractionTypes";
 import { DropMode } from "./PrivilegedDropCreator";
 import { DropPrivileges } from "../../hooks/useDropPriviledges";
+import { useMyStream } from "../../contexts/wave/MyStreamContext";
 
 interface CreateDropProps {
   readonly activeDrop: ActiveDropState | null;
@@ -32,6 +33,11 @@ interface CreateDropProps {
   readonly dropId: string | null;
   readonly fixedDropMode: DropMode;
   readonly privileges: DropPrivileges;
+}
+
+export interface DropMutationBody {
+  readonly drop: ApiCreateDropRequest;
+  readonly dropId: string;
 }
 
 const ANIMATION_DURATION = 0.3;
@@ -51,7 +57,7 @@ export default function CreateDrop({
   useKeyPressEvent("Escape", () => onCancelReplyQuote());
   const [isStormMode, setIsStormMode] = useState(false);
   const [drop, setDrop] = useState<CreateDropConfig | null>(null);
-
+  const { processIncomingDrop } = useMyStream();
   const getIsDropMode = () => {
     if (fixedDropMode === DropMode.CHAT) {
       return false;
@@ -129,7 +135,6 @@ export default function CreateDrop({
         endpoint: `drops`,
         body,
       }),
-
     onError: (error) => {
       setToast({
         message: error instanceof Error ? error.message : String(error),

@@ -18,7 +18,10 @@ import { AuthContext } from "../auth/Auth";
 import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
 import { ApiDropMentionedUser } from "../../generated/models/ApiDropMentionedUser";
 import { ApiDrop } from "../../generated/models/ApiDrop";
-import { getOptimisticDropId, getOptimisticDropSerialNo } from "../../helpers/waves/drop.helpers";
+import {
+  getOptimisticDropId,
+  getOptimisticDropSerialNo,
+} from "../../helpers/waves/drop.helpers";
 import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import { AnimatePresence, motion } from "framer-motion";
 import CreateDropMetadata from "./CreateDropMetadata";
@@ -647,8 +650,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         setSubmitting(false);
         return;
       }
-
-      const randomStableKey = getRandomObjectId();
 
       const optimisticDrop = getOptimisticDrop(
         updatedDropRequest,

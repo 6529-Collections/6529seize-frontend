@@ -7,6 +7,7 @@ import {
   WaveDropsLeaderboardSort,
   useWaveDropsLeaderboard,
 } from "../../../../hooks/useWaveDropsLeaderboard";
+
 interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;
   readonly sort: WaveDropsLeaderboardSort;
@@ -16,7 +17,7 @@ interface WaveLeaderboardGalleryProps {
 export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   wave,
   sort,
-  onDropClick,
+  onDropClick
 }) => {
   const { connectedProfile } = useContext(AuthContext);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
@@ -25,6 +26,8 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
       connectedProfileHandle: connectedProfile?.profile?.handle,
       sort,
     });
+  
+  // Always use art-focused mode in grid view
 
   // Filter drops to only include those with media
   const dropsWithMedia =
@@ -53,7 +56,8 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
 
   return (
     <div className="tw-@container">
-      <div className="tw-grid @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-6">
+      
+      <div className="tw-grid @lg:tw-grid-cols-2 @3xl:tw-grid-cols-3 tw-gap-x-4 tw-gap-y-8">
         {dropsWithMedia.map((drop) => (
           <WaveLeaderboardGalleryItem
             key={drop.id}
@@ -67,7 +71,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
             <button
               onClick={() => fetchNextPage()}
               disabled={isFetchingNextPage}
-              className="tw-px-4 tw-py-2 tw-bg-iron-800 tw-text-iron-300 tw-rounded-lg tw-text-sm desktop-hover:hover:tw-bg-iron-700 tw-transition"
+              className="tw-px-4 tw-py-2 tw-rounded-lg tw-text-sm tw-transition tw-bg-iron-900 tw-text-iron-400 tw-border tw-border-iron-800 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300"
             >
               {isFetchingNextPage ? "Loading more..." : "Load more drops"}
             </button>
