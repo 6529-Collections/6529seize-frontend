@@ -21,6 +21,7 @@ import Tippy from "@tippyjs/react";
 import { useElectron } from "../../../hooks/useElectron";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import yaml from "js-yaml";
+import { ShareMobileApp } from "./HeaderShareMobileApps";
 
 const QRCode = require("qrcode");
 
@@ -45,7 +46,7 @@ const squareStyle = {
   justifyContent: "center",
 };
 
-export default function HeaderQR() {
+export default function HeaderShare() {
   const capacitor = useCapacitor();
   const isMobileDevice = useIsMobileDevice();
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
@@ -277,37 +278,8 @@ function HeaderQRModal({
             <div
               className="tw-p-10 tw-flex tw-flex-col tw-gap-12 tw-items-center tw-justify-center"
               style={squareStyle}>
-              <a
-                href="https://apps.apple.com/us/app/6529-mobile/id6654923687"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
-                <Image
-                  priority
-                  loading="eager"
-                  src="/app-store.png"
-                  alt="6529 Mobile iOS"
-                  width={0}
-                  height={0}
-                  placeholder="empty"
-                  className="tw-w-[200px] tw-h-auto hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
-                />
-              </a>
-              <a
-                href="https://play.google.com/store/apps/details?id=com.core6529.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
-                <Image
-                  priority
-                  loading="eager"
-                  src="/play-store.png"
-                  alt="6529 Mobile Android"
-                  width={0}
-                  height={0}
-                  className="tw-w-[200px] tw-h-auto hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
-                />
-              </a>
+              <ShareMobileApp platform="ios" />
+              <ShareMobileApp platform="android" />
             </div>
           );
           break;
