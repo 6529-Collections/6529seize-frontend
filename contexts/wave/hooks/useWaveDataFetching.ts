@@ -118,7 +118,10 @@ export function useWaveDataFetching({
       // Create a new promise with the abort signal
       const fetchPromise = fetchWaveMessages(waveId, null, controller.signal)
         .then((drops) => handleFetchSuccess(waveId, drops))
-        .catch((error) => handleFetchError(waveId, error))
+        .catch((error) => {
+          handleFetchError(waveId, error);
+          return null;
+        })
         .finally(() => cleanupController(waveId, controller));
 
       // Store the promise
