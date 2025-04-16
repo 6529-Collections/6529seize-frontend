@@ -12,9 +12,7 @@ interface WaveDropTimeProps {
 const WaveDropTime: React.FC<WaveDropTimeProps> = ({
   timestamp,
 }) => {
-  // Don't render if no timestamp
-  if (!timestamp) return null;
-
+  // Hooks must be called at the top level
   const [isMobile, setIsMobile] = useState(false);
 
   // Check mobile on mount and window resize
@@ -33,6 +31,9 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Don't render if no timestamp
+  if (!timestamp) return null;
 
   // Updated time formatting logic to just show time for today
   const formatTime = () => {
