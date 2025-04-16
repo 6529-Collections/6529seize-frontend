@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import {
   ExtendedDrop,
@@ -12,7 +12,6 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { cicToType, formatNumberWithCommas } from "../../../../helpers/Helpers";
-import { Time } from "../../../../helpers/time";
 import Tippy from "@tippyjs/react";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,6 +22,7 @@ import useLongPressInteraction from "../../../../hooks/useLongPressInteraction";
 import WaveDropActionsOpen from "../../../waves/drops/WaveDropActionsOpen";
 import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropMobileMenuOpen from "../../../waves/drops/WaveDropMobileMenuOpen";
+import WaveDropTime from "../../../waves/drops/time/WaveDropTime";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -43,23 +43,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
     hasTouchScreen,
   });
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  function checkMobile() {
-    const screenSize = window.innerWidth;
-    if (screenSize <= 640) {
-      // Tailwind's sm breakpoint
-      setIsMobile(true);
-    } else {
-      setIsMobile(false);
-    }
-  }
-
-  useEffect(() => {
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  // Mobile detection is now handled by the WaveDropTime component
 
   const title =
     winner.drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
@@ -124,16 +108,8 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                       </Link>
 
                       <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-
-                      <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400 tw-leading-none">
-                        {isMobile
-                          ? Time.millis(
-                              winner.drop.created_at
-                            ).toShortRelativeTime()
-                          : Time.millis(
-                              winner.drop.created_at
-                            ).toLocaleDropDateAndTimeString()}
-                      </span>
+                      
+                      <WaveDropTime timestamp={winner.drop.created_at} />
                     </div>
                   </div>
                   <div className="tw-flex tw-items-center tw-rounded-md tw-font-medium tw-whitespace-nowrap tw-bg-[rgba(251,191,36,0.1)] tw-px-2 tw-py-1 tw-border tw-border-solid tw-border-[#fbbf24]/20">

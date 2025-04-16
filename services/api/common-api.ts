@@ -20,6 +20,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   endpoint: string;
   headers?: Record<string, string>;
   params?: U;
+  signal?: AbortSignal;
 }): Promise<T> => {
   let url = `${process.env.API_ENDPOINT}/api/${param.endpoint}`;
   if (param.params) {
@@ -33,6 +34,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   }
   const res = await fetch(url, {
     headers: getHeaders(param.headers),
+    signal: param.signal,
   });
   if (!res.ok) {
     const body: any = await res.json();

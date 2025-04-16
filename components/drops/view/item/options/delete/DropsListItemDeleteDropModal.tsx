@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { commonApiDelete } from "../../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import { ApiDropType } from "../../../../../../generated/models/ApiDropType";
+import { useMyStream } from "../../../../../../contexts/wave/MyStreamContext";
 
 export default function DropsListItemDeleteDropModal({
   drop,
@@ -19,6 +20,7 @@ export default function DropsListItemDeleteDropModal({
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
+  const { processDropRemoved } = useMyStream();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, closeModal);
   useKeyPressEvent("Escape", closeModal);
@@ -38,6 +40,7 @@ export default function DropsListItemDeleteDropModal({
         type: "warning",
       });
       invalidateDrops();
+      processDropRemoved(drop.wave.id, drop.id);
       if (onDropDeleted) {
         onDropDeleted();
       } else {

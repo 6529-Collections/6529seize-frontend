@@ -8,7 +8,6 @@ import MemesLeaderboardDropHeader from "./MemesLeaderboardDropHeader";
 import MemesLeaderboardDropDescription from "./MemesLeaderboardDropDescription";
 import MemesLeaderboardDropVoteSummary from "./MemesLeaderboardDropVoteSummary";
 import MemesLeaderboardDropArtistInfo from "./MemesLeaderboardDropArtistInfo";
-
 import MemeDropTraits from "./MemeDropTraits";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import WaveDropActionsOptions from "../../waves/drops/WaveDropActionsOptions";
@@ -79,7 +78,6 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                   <div className="tw-flex tw-items-center tw-justify-between">
                     <MemesLeaderboardDropArtistInfo drop={drop} />
                     <div className="tw-flex tw-items-center">
-                      {/* Show action buttons when not a touch device */}
                       {!hasTouchScreen && (
                         <>
                           <div className="tw-h-8">

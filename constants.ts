@@ -70,3 +70,8 @@ export const SUBSCRIPTIONS_ADMIN_WALLETS = [
 ];
 
 export const MEMES_MINT_PRICE = 0.06529;
+
+export const MOBILE_APP_IOS =
+  "https://apps.apple.com/us/app/6529-mobile/id6654923687";
+export const MOBILE_APP_ANDROID =
+  "https://play.google.com/store/apps/details?id=com.core6529.app";

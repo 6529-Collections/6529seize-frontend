@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { MinimalWave } from "../../../../contexts/wave/MyStreamContext";
+import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
@@ -9,12 +9,12 @@ import { useAuth } from "../../../auth/Auth";
 
 interface UnifiedWavesListWavesProps {
   readonly waves: MinimalWave[];
-  readonly activeWaveId: string | null;
+  readonly onHover: (waveId: string) => void;
 }
 
 const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
   waves,
-  activeWaveId,
+  onHover,
 }) => {
   const [following, setFollowing] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -65,7 +65,7 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
           <div className="tw-flex tw-flex-col tw-mb-3">
             {pinnedWaves.map((wave) => (
               <div key={wave.id}>
-                <BrainLeftSidebarWave wave={wave} />
+                <BrainLeftSidebarWave wave={wave} onHover={onHover} />
               </div>
             ))}
           </div>
@@ -80,7 +80,7 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
           <div className="tw-flex tw-flex-col">
             {regularWaves.map((wave) => (
               <div key={wave.id}>
-                <BrainLeftSidebarWave wave={wave} />
+                <BrainLeftSidebarWave wave={wave} onHover={onHover} />
               </div>
             ))}
           </div>

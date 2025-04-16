@@ -51,6 +51,8 @@ import { EMOJI_TRANSFORMER } from "../drops/create/lexical/transformers/EmojiTra
 import { useDropSignature } from "../../hooks/drops/useDropSignature";
 import { useWave } from "../../hooks/useWave";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
+import { useMyStream } from "../../contexts/wave/MyStreamContext";
+import { DropMutationBody } from "./CreateDrop";
 
 export type CreateDropMetadataType =
   | {
@@ -85,7 +87,7 @@ interface CreateDropContentProps {
   >;
   readonly setIsStormMode: React.Dispatch<React.SetStateAction<boolean>>;
   readonly onDropModeChange: (newIsDropMode: boolean) => void;
-  readonly submitDrop: (dropRequest: ApiCreateDropRequest) => void;
+  readonly submitDrop: (dropRequest: DropMutationBody) => void;
   readonly privileges: DropPrivileges;
 }
 
@@ -275,7 +277,7 @@ const getOptimisticDrop = (
 
   return {
     id: getOptimisticDropId(),
-    serial_no: 1,
+    serial_no: Date.now(),
     reply_to: getReplyTo(),
     wave: {
       id: wave.id,
@@ -365,6 +367,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   const breakpoint = useBreakpoint();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
+  const { processIncomingDrop } = useMyStream();
   const { signDrop } = useDropSignature();
   const { isMemesWave } = useWave(wave);
 
@@ -653,11 +656,15 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       );
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
+        setTimeout(() => processIncomingDrop(optimisticDrop), 0);
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);
       refreshState();
-      submitDrop(updatedDropRequest);
+      submitDrop({
+        drop: updatedDropRequest,
+        dropId: optimisticDrop?.id ?? null,
+      });
     } catch (error) {
       setToast({
         message: error instanceof Error ? error.message : String(error),

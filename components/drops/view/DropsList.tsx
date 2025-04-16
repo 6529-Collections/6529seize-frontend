@@ -113,7 +113,6 @@ const DropsList = memo(function DropsList({
           >
             <VirtualScrollWrapper
               scrollContainerRef={getItemData.scrollContainerRef}
-              drop={drop}
             >
               <MemoizedDrop
                 dropViewDropId={getItemData.dropViewDropId}

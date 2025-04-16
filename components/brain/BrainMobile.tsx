@@ -121,9 +121,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   }, [wave, isCompleted, firstDecisionDone, activeView, isMemesWave]);
 
   const viewComponents: Record<BrainView, ReactNode> = {
-    [BrainView.WAVES]: (
-      <BrainMobileWaves activeWaveId={router.query.wave as string} />
-    ),
+    [BrainView.WAVES]: <BrainMobileWaves />,
     [BrainView.ABOUT]: (
       <BrainMobileAbout activeWaveId={router.query.wave as string} />
     ),
@@ -145,7 +143,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
       ) : null,
     [BrainView.FAQ]:
-      isRankWave && isMemesWave && !!wave ? <MyStreamWaveFAQ wave={wave} /> : null,
+      isRankWave && isMemesWave && !!wave ? (
+        <MyStreamWaveFAQ wave={wave} />
+      ) : null,
     [BrainView.NOTIFICATIONS]: <Notifications />,
   };
 

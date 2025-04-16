@@ -2,34 +2,23 @@ import React from "react";
 import UnifiedWavesList from "./UnifiedWavesList";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 
-interface BrainLeftSidebarWavesProps {
-  readonly activeWaveId: string | null;
-}
-
-const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
-  activeWaveId,
-}) => {
-  const {
-    waves,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-  } = useMyStream();
+const BrainLeftSidebarWaves: React.FC = () => {
+  const { waves, activeWave, registerWave } = useMyStream();
 
   const onNextPage = () => {
-    if (hasNextPage && !isFetchingNextPage && !isFetching) {
-      fetchNextPage();
+    if (waves.hasNextPage && !waves.isFetchingNextPage && !waves.isFetching) {
+      waves.fetchNextPage();
     }
   };
 
   return (
     <UnifiedWavesList
-      waves={waves}
-      activeWaveId={activeWaveId}
+      waves={waves.list}
+      activeWaveId={activeWave.id}
       fetchNextPage={onNextPage}
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
+      hasNextPage={waves.hasNextPage}
+      isFetchingNextPage={waves.isFetchingNextPage}
+      onHover={registerWave}
     />
   );
 };

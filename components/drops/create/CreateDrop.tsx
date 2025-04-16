@@ -169,7 +169,7 @@ export default function CreateDrop({
 
     return {
       id: getOptimisticDropId(),
-      serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
+      serial_no:1,
       wave: {
         id: waveDetailed.id,
         name: waveDetailed.name,
@@ -214,8 +214,6 @@ export default function CreateDrop({
               is_deleted: false,
             }
           : null,
-        replies_count: 0,
-        quotes_count: 0,
       })),
       parts_count: dropRequest.parts.length,
       referenced_nfts: dropRequest.referenced_nfts,

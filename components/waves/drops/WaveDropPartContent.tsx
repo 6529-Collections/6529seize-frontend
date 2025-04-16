@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { motion } from "framer-motion";
 import { ApiDropPart } from "../../../generated/models/ApiDropPart";
 import WaveDropPartContentMedias from "./WaveDropPartContentMedias";
 import { ApiDropMentionedUser } from "../../../generated/models/ApiDropMentionedUser";
@@ -104,13 +103,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
         )}
 
         <div className="tw-h-full tw-w-full" ref={contentRef}>
-          <motion.div
-            key={activePartIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <div>
             <WaveDropPartContentMarkdown
               mentionedUsers={memoizedMentionedUsers}
               referencedNfts={memoizedReferencedNfts}
@@ -118,7 +111,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
               wave={wave}
               onQuoteClick={onQuoteClick}
             />
-          </motion.div>
+          </div>
           {!!activePart.media.length && (
             <WaveDropPartContentMedias activePart={activePart} />
           )}

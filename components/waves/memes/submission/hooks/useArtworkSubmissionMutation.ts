@@ -170,7 +170,7 @@ export function useArtworkSubmissionMutation() {
       });
     },
     onError: (error, variables) => {
-      console.log(error);
+      console.error(error);
       const errorMsg = `Submission failed: ${error}`;
       updatePhase("error", variables.callbacks, errorMsg);
 

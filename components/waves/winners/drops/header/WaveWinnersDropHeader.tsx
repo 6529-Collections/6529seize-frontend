@@ -2,9 +2,9 @@ import React from "react";
 import WaveWinnersDropHeaderTotalVotes from "./WaveWinnersDropHeaderTotalVotes";
 import WaveWinnersDropHeaderVoters from "./WaveWinnersDropHeaderVoters";
 import WaveWinnersDropHeaderAuthorHandle from "./WaveWinnersDropHeaderAuthorHandle";
-import WaveWinnersDropHeaderCreated from "./WaveWinnersDropHeaderCreated";
 import { ApiWaveDecisionWinner } from "../../../../../generated/models/ApiWaveDecisionWinner";
 import WinnerDropBadge from "../../../drops/winner/WinnerDropBadge";
+import WaveDropTime from "../../../drops/time/WaveDropTime";
 
 interface WaveWinnersDropHeaderProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -24,7 +24,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <WaveWinnersDropHeaderAuthorHandle winner={winner} />
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-          <WaveWinnersDropHeaderCreated winner={winner} />
+          <WaveDropTime timestamp={winner.drop.created_at} />
         </div>
 
         <div className="tw-ml-2">

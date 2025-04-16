@@ -24,7 +24,7 @@ export default function WaveDropFollowAuthor({
 }: {
   readonly drop: ApiDrop;
 }) {
-  const followState = drop.author.subscribed_actions.length
+  const followState = drop.author?.subscribed_actions?.length
     ? FOLLOW_STATE.FOLLOWING
     : FOLLOW_STATE.NOT_FOLLOWING;
 

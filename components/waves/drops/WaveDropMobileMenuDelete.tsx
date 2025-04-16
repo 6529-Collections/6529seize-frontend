@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { commonApiDelete } from "../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../auth/Auth";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 
 interface WaveDropMobileMenuDeleteProps {
   readonly drop: ApiDrop;
@@ -18,6 +19,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
   const [isDeleteMode, setIsDeleteMode] = useState<boolean>(false);
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
+  const { processDropRemoved } = useMyStream();
   const [mutating, setMutating] = useState<boolean>(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
@@ -30,6 +32,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
         type: "warning",
       });
       invalidateDrops();
+      processDropRemoved(drop.wave.id, drop.id);
       onDropDeleted();
     },
     onError: (error) => {
