@@ -6,7 +6,7 @@ import {
   ExtendedDrop,
   getStableDropKey,
 } from "../../../helpers/waves/drop.helpers";
-import { DropWithStableOrderKey, WaveMessagesUpdate } from "../hooks/types";
+import { WaveMessagesUpdate } from "../hooks/types";
 
 /**
  * Fetches wave messages (drops) for a specific wave
@@ -158,7 +158,7 @@ export function mergeDrops(
   newDrops: ExtendedDrop[]
 ): ExtendedDrop[] {
   // Create a map for fast lookup by id
-  const dropsMapStableKey = new Map<string, DropWithStableOrderKey>();
+  const dropsMapStableKey = new Map<string, ExtendedDrop>();
 
   const newDropsWithStableKey = newDrops.map((drop) => {
     const { key, hash } = getStableDropKey(drop, currentDrops);
@@ -168,44 +168,39 @@ export function mergeDrops(
       stableKey: key,
     };
   });
-  let order = 0;
+
   for (const drop of currentDrops) {
-    dropsMapStableKey.set(drop.stableKey, {
-      ...drop,
-      order,
-    });
-    order++;
+    dropsMapStableKey.set(drop.stableKey, drop);
   }
 
   // Then add all new drops, overwriting any duplicates
   // This ensures we keep the newest version of each drop
-  order = -1
   for (const drop of newDropsWithStableKey) {
-    const existingDrop = dropsMapStableKey.get(drop.stableKey);
-    const newOrder = existingDrop ? existingDrop.order : order;
-    dropsMapStableKey.set(drop.stableKey, {
-      ...drop,
-      order: newOrder,
-    });
-    order--;
+    dropsMapStableKey.set(drop.stableKey, drop);
   }
 
   // Convert the map back to an array
   const mergedDrops = Array.from(dropsMapStableKey.values());
 
-  const dropsMapSerialNo = new Map<number, DropWithStableOrderKey>();
+  const dropsMapSerialNo = new Map<number, ExtendedDrop>();
 
   for (const drop of mergedDrops) {
-    const existingDrop = dropsMapSerialNo.get(drop.serial_no);
-    const newOrder = existingDrop ? existingDrop.order : drop.order;
-    dropsMapSerialNo.set(drop.serial_no, {
-      ...drop,
-      order: newOrder,
-    });
+    dropsMapSerialNo.set(drop.serial_no, drop);
   }
 
   const finalDrops = Array.from(dropsMapSerialNo.values());
-  finalDrops.sort((a, b) => a.order - b.order);
+
+  finalDrops.sort((a, b) => {
+    const aIsTemp = a.id?.startsWith("temp-") ?? false;
+    const bIsTemp = b.id?.startsWith("temp-") ?? false;
+
+    if (aIsTemp || !bIsTemp)
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+    return b.serial_no - a.serial_no;
+  });
   return finalDrops;
 }
 
