@@ -1,13 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { ShareMobileApp } from "../components/header/share/HeaderShareMobileApps";
-import useCapacitor from "../hooks/useCapacitor";
 
 const OpenMobilePage = () => {
   const router = useRouter();
   const { path = "/" } = router.query;
-
-  const capacitor = useCapacitor();
 
   const [decodedPath, setDecodedPath] = useState<string | null>(null);
 
@@ -35,8 +32,6 @@ const OpenMobilePage = () => {
 
     const isIos = /iPad|iPhone|iPod/.test(userAgent);
     const isAndroid = /android/i.test(userAgent);
-
-    console.log(capacitor.platform, capacitor.isIos, capacitor.isAndroid);
 
     if (isIos) {
       return shareIos;
