@@ -49,7 +49,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
 
   useEffect(() => {
     setTitle({ title: "My Stream | 6529.io" });
-  }, [setTitle]);
+  }, []);
 
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
