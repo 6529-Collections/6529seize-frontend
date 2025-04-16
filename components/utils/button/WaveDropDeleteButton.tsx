@@ -13,7 +13,6 @@ interface WaveDropDeleteButtonProps {
 const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
   drop,
   className = "",
-  onDelete,
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -61,7 +60,6 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
               drop={drop}
               closeModal={() => setIsDeleteModalOpen(false)}
               onDropDeleted={() => {
-                // Force close any modal by going back in history after successful deletion
                 setTimeout(() => {
                   window.history.back();
                 }, 300);

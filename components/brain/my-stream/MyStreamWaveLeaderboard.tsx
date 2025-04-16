@@ -10,6 +10,7 @@ import { WaveLeaderboardGallery } from "../../waves/leaderboard/gallery/WaveLead
 import { useWave } from "../../../hooks/useWave";
 import { useLayout } from "./layout/LayoutContext";
 import { WaveDropsLeaderboardSort } from "../../../hooks/useWaveDropsLeaderboard";
+import useLocalPreference from "../../../hooks/useLocalPreference";
 import MemesArtSubmissionModal from "../../waves/memes/MemesArtSubmissionModal";
 
 interface MyStreamWaveLeaderboardProps {
@@ -37,16 +38,27 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   }, []);
 
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
-  const [sort, setSort] = useState<WaveDropsLeaderboardSort>(
-    WaveDropsLeaderboardSort.RANK
+  
+  // Generate a unique preference key for this wave
+  const viewPreferenceKey = `waveViewMode_${wave.id || 'default'}`;
+  
+  // Determine the default view mode based on wave type
+  const defaultViewMode = isMemesWave ? "grid" : "list";
+  
+  // Use our custom hook to manage view mode preference
+  const [viewMode, setViewMode] = useLocalPreference<"list" | "grid">(
+    viewPreferenceKey,
+    defaultViewMode,
+    (value) => value === "list" || value === "grid"
   );
-
-  useEffect(() => {
-    if (!isMemesWave) {
-      setViewMode("list");
-    }
-  }, [isMemesWave]);
+  
+  // Use our custom hook for sort preference too
+  const sortPreferenceKey = `waveSortMode_${wave.id || 'default'}`;
+  const [sort, setSort] = useLocalPreference<WaveDropsLeaderboardSort>(
+    sortPreferenceKey,
+    WaveDropsLeaderboardSort.RANK,
+    (value) => Object.values(WaveDropsLeaderboardSort).includes(value)
+  );
 
   return (
     <div className={containerClassName} style={leaderboardViewStyle}>
