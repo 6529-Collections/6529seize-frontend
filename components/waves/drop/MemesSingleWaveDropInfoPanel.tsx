@@ -35,8 +35,8 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
   const { isWinner, canDelete } = useDropInteractionRules(drop);
   // Extract metadata
   const title =
-    drop.metadata?.find((m) => m.data_key === "title")?.data_value ||
-    drop.title ||
+    drop.metadata?.find((m) => m.data_key === "title")?.data_value ??
+    drop.title ??
     "Artwork Title";
   const description =
     drop.metadata?.find((m) => m.data_key === "description")?.data_value || "";
