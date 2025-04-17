@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import useWavesList from "../../../hooks/useWavesList";
 import useNewDropCounter, {
   MinimalWaveNewDropsCount,
@@ -30,8 +30,6 @@ export interface MinimalWave {
 export function useEnhancedWavesList(activeWaveId: string | null) {
   // Get waves data from the optimized hook
   const wavesData = useWavesList();
-
-
 
   const { newDropsCounts } = useNewDropCounter(
     activeWaveId,

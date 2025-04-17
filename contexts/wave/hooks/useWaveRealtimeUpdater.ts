@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import {
-  useWebSocketMessage,
-  useWebsocketStatus,
-} from "../../../services/websocket/useWebSocketMessage";
+import { useWebSocketMessage } from "../../../services/websocket/useWebSocketMessage";
 import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
