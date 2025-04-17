@@ -1,5 +1,4 @@
 import React, { useRef, useCallback, useEffect } from "react";
-import useCapacitor from "../../../../../../hooks/useCapacitor";
 
 /**
  * Video display component without interactive modal functionality.
@@ -15,7 +14,6 @@ function MediaDisplayVideo({
   readonly disableClickHandler?: boolean; // Set to true in gallery context
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const capacitor = useCapacitor();
 
   const handleVideoClick = useCallback((event: React.MouseEvent<HTMLVideoElement>) => {
     if (videoRef.current) {
