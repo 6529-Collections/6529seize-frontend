@@ -17,6 +17,7 @@ import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 import { WaveMessages } from "./hooks/types";
+import { useWebsocketStatus } from "../../services/websocket/useWebSocketMessage";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -66,6 +67,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
   const wavesHookData = useEnhancedWavesList(activeWaveId);
   const waveMessagesStore = useWaveMessagesStore();
+  const websocketStatus = useWebsocketStatus();
 
   // Instantiate the data manager, passing the updater function from the store
   const waveDataManager = useWaveDataManager({
@@ -82,6 +84,12 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     syncNewestMessages: waveDataManager.syncNewestMessages,
     removeDrop: waveMessagesStore.removeDrop,
   });
+
+  useEffect(() => {
+    if (websocketStatus === "connected" && activeWaveId) {
+      waveDataManager.registerWave(activeWaveId, true);
+    }
+  }, [websocketStatus, activeWaveId]);
 
   useEffect(() => {
     if (activeWaveId) {
