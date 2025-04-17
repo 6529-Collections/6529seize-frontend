@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
-import { useWebSocketMessage } from "../../../services/websocket/useWebSocketMessage";
+import {
+  useWebSocketMessage,
+  useWebsocketStatus,
+} from "../../../services/websocket/useWebSocketMessage";
 import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
@@ -122,11 +125,9 @@ export function useWaveRealtimeUpdater({
         registerWave(waveId);
         return;
       }
-
+      // TODO: if its from vote update, we need to return if the drop is not in the currentData.drops
+      // TODO: context_profile_context needs to be updated, how?!?! refetch the drop?
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
-      if (!existingDrop) {
-        return;
-      }
 
       const optimisticDrop: ExtendedDrop = {
         ...drop,
@@ -183,11 +184,6 @@ export function useWaveRealtimeUpdater({
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
-    processIncomingDrop
-  );
-
-  useWebSocketMessage<WsDropUpdateMessage["data"]>(
-    WsMessageType.DROP_RATING_UPDATE,
     processIncomingDrop
   );
 

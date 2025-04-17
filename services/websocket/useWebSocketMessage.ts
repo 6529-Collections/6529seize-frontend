@@ -91,3 +91,8 @@ export function useWebSocketMessages<
     isConnected,
   };
 }
+
+export function useWebsocketStatus() {
+  const { status } = useWebSocket();
+  return status;
+}
