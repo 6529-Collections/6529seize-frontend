@@ -4,6 +4,7 @@ import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly registerWave: (waveId: string) => void;
@@ -14,7 +15,15 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
 }
 
-export type ProcessIncomingDropFn = (dropData: ApiDrop) => void;
+export enum ProcessIncomingDropType {
+  DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
+  DROP_INSERT = "DROP_INSERT",
+}
+
+export type ProcessIncomingDropFn = (
+  dropData: ApiDrop,
+  type: ProcessIncomingDropType
+) => void;
 
 export function useWaveRealtimeUpdater({
   getData,
@@ -107,7 +116,7 @@ export function useWaveRealtimeUpdater({
 
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
-    async (drop: ApiDrop) => {
+    async (drop: ApiDrop, type: ProcessIncomingDropType) => {
       if (!drop?.wave?.id) {
         return;
       }
@@ -123,25 +132,62 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
+      const existingDrop = currentData.drops.find((d) => d.id === drop.id);
+
+      if (
+        type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
+        !existingDrop
+      ) {
+        return;
+      }
+
+      if (type === ProcessIncomingDropType.DROP_RATING_UPDATE && existingDrop) {
+        const apiDrop = await commonApiFetch<ApiDrop>({
+          endpoint: `drops/${drop.id}`,
+        });
+        if (apiDrop) {
+          updateData({
+            key: waveId,
+            drops: [
+              {
+                ...apiDrop,
+                stableHash: existingDrop.stableHash,
+                stableKey: existingDrop.stableKey,
+              },
+            ],
+          });
+        }
+        return;
+      }
+
       const optimisticDrop: ExtendedDrop = {
         ...drop,
         author: {
           ...drop.author,
-          subscribed_actions: drop.author.subscribed_actions ?? [],
+          subscribed_actions: existingDrop
+            ? existingDrop.author.subscribed_actions
+            : drop.author.subscribed_actions ?? [],
         },
         wave: {
           ...drop.wave,
-          authenticated_user_eligible_to_participate:
-            drop.wave.authenticated_user_eligible_to_participate ?? false,
-          authenticated_user_eligible_to_vote:
-            drop.wave.authenticated_user_eligible_to_vote ?? false,
-          authenticated_user_eligible_to_chat:
-            drop.wave.authenticated_user_eligible_to_chat ?? false,
-          authenticated_user_admin: drop.wave.authenticated_user_admin ?? false,
+          authenticated_user_eligible_to_participate: existingDrop
+            ? existingDrop.wave.authenticated_user_eligible_to_participate
+            : drop.wave.authenticated_user_eligible_to_participate ?? false,
+          authenticated_user_eligible_to_vote: existingDrop
+            ? existingDrop.wave.authenticated_user_eligible_to_vote
+            : drop.wave.authenticated_user_eligible_to_vote ?? false,
+          authenticated_user_eligible_to_chat: existingDrop
+            ? existingDrop.wave.authenticated_user_eligible_to_chat
+            : drop.wave.authenticated_user_eligible_to_chat ?? false,
+          authenticated_user_admin: existingDrop
+            ? existingDrop.wave.authenticated_user_admin
+            : drop.wave.authenticated_user_admin ?? false,
         }, // Assuming message structure matches ApiDrop + ApiWaveMin
         stableKey: drop.id,
         stableHash: drop.id, // Use ID for hash temporarily
-        context_profile_context: drop.context_profile_context ?? null,
+        context_profile_context: existingDrop
+          ? existingDrop.context_profile_context
+          : drop.context_profile_context ?? null,
       };
 
       // Important: Identify the serial number *before* adding the optimistic drop
@@ -169,7 +215,19 @@ export function useWaveRealtimeUpdater({
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
-    processIncomingDrop
+    (messageData) => {
+      processIncomingDrop(messageData, ProcessIncomingDropType.DROP_INSERT);
+    }
+  );
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_RATING_UPDATE,
+    (messageData) => {
+      processIncomingDrop(
+        messageData,
+        ProcessIncomingDropType.DROP_RATING_UPDATE
+      );
+    }
   );
 
   // Cleanup: Cancel all ongoing fetches on unmount

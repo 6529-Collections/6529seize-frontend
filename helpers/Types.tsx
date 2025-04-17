@@ -322,8 +322,11 @@ export enum Period {
 }
 
 export enum WsMessageType {
-  DROP_UPDATE = 'DROP_UPDATE',
-  DROP_DELETE = 'DROP_DELETE'
+  DROP_UPDATE = "DROP_UPDATE",
+  DROP_DELETE = "DROP_DELETE",
+  DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
+  USER_IS_TYPING = "USER_IS_TYPING",
+  SUBSCRIBE_TO_WAVE = "SUBSCRIBE_TO_WAVE",
 }
 
 export interface WsDropUpdateMessage {
