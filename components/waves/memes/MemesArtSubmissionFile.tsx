@@ -200,6 +200,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           videoCompatibility={state.videoCompatibility}
           isCheckingCompatibility={state.isCheckingCompatibility}
         />
+
       )}
     </motion.div>
   );
@@ -212,3 +213,4 @@ export default React.memo(MemesArtSubmissionFile, (prevProps, nextProps) => {
     prevProps.artworkUrl === nextProps.artworkUrl
   );
 });
+
