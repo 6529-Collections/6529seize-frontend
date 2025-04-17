@@ -4,6 +4,7 @@ import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly registerWave: (waveId: string) => void;
@@ -130,18 +131,34 @@ export function useWaveRealtimeUpdater({
         registerWave(waveId);
         return;
       }
-      // TODO: if its from vote update, we need to return if the drop is not in the currentData.drops
-      // TODO: context_profile_context needs to be updated, how?!?! refetch the drop?
+
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
 
-      if (type === ProcessIncomingDropType.DROP_RATING_UPDATE) {
-        console.log("DROP_RATING_UPDATE", drop);
-        return
+      if (
+        type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
+        !existingDrop
+      ) {
+        return;
       }
 
-      // TODO: if its from vote update, we need to return if the drop is not in the currentData.drops
-      // TODO: context_profile_context needs to be updated, how?!?! refetch the drop?
-      const existingDrop = currentData.drops.find((d) => d.id === drop.id);
+      if (type === ProcessIncomingDropType.DROP_RATING_UPDATE && existingDrop) {
+        const apiDrop = await commonApiFetch<ApiDrop>({
+          endpoint: `drops/${drop.id}`,
+        });
+        if (apiDrop) {
+          updateData({
+            key: waveId,
+            drops: [
+              {
+                ...apiDrop,
+                stableHash: existingDrop.stableHash,
+                stableKey: existingDrop.stableKey,
+              },
+            ],
+          });
+        }
+        return;
+      }
 
       const optimisticDrop: ExtendedDrop = {
         ...drop,
@@ -206,7 +223,10 @@ export function useWaveRealtimeUpdater({
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_RATING_UPDATE,
     (messageData) => {
-      processIncomingDrop(messageData, ProcessIncomingDropType.DROP_RATING_UPDATE);
+      processIncomingDrop(
+        messageData,
+        ProcessIncomingDropType.DROP_RATING_UPDATE
+      );
     }
   );
 
