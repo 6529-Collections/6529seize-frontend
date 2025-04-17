@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { mergeDrops } from "../utils/wave-messages-utils";
+import { maxOrNull, mergeDrops } from "../utils/wave-messages-utils";
 import { WaveMessages, WaveMessagesUpdate } from "./types";
 
 export type Listener = (data: WaveMessages | undefined) => void;
@@ -94,9 +94,12 @@ function useWaveMessagesStore() {
           update.drops
         );
       }
-      if (update.latestFetchedSerialNo !== undefined) {
-        updatedWaveMessages.latestFetchedSerialNo =
-          update.latestFetchedSerialNo;
+
+      if (typeof update.latestFetchedSerialNo === "number") {
+        updatedWaveMessages.latestFetchedSerialNo = maxOrNull(
+          updatedWaveMessages.latestFetchedSerialNo,
+          update.latestFetchedSerialNo
+        );
       }
 
       notifyValue = updatedWaveMessages; // Capture the value to notify
@@ -120,7 +123,6 @@ function useWaveMessagesStore() {
       // Trigger processing for the next item if queue is not empty
       processQueue();
     }, 0);
-
   }, []); // Dependencies: setWaveMessages (implicitly stable), listenersRef (stable)
 
   // Function to add an update to the queue and trigger processing

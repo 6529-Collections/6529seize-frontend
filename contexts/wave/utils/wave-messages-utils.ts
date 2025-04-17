@@ -76,9 +76,11 @@ export function formatWaveMessages(
 
   // Calculate the highest serial number from the fetched drops
   const latestFetchedSerialNo =
-    drops.length > 0 ? Math.max(...drops.map((drop) => drop.serial_no)) : null;
+    drops.length > 0
+      ? Math.max(...drops.map((drop) => drop.serial_no))
+      : undefined;
 
-  return {
+  const update: WaveMessagesUpdate = {
     key: waveId,
     id: waveId,
     isLoading,
@@ -91,6 +93,8 @@ export function formatWaveMessages(
     })),
     latestFetchedSerialNo,
   };
+
+  return update;
 }
 
 /**
@@ -120,7 +124,6 @@ export function createEmptyWaveMessages(
     isLoadingNextPage,
     hasNextPage,
     drops: [],
-    latestFetchedSerialNo: null,
   };
 }
 
@@ -263,3 +266,15 @@ export async function fetchNewestWaveMessages(
     return { drops: null, highestSerialNo: null }; // Return nulls on other errors
   }
 }
+
+export const maxOrNull = (
+  a: number | null | undefined,
+  b: number | null | undefined
+): number | null => {
+  // this signature “x is number” tells TS that inside `filter` we only keep numbers
+  const nums = [a, b].filter(
+    (x): x is number => typeof x === "number" && Number.isFinite(x)
+  );
+
+  return nums.length > 0 ? Math.max(...nums) : null;
+};
