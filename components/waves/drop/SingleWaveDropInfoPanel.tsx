@@ -9,6 +9,7 @@ import { SingleWaveDropInfoDetails } from "./SingleWaveDropInfoDetails";
 import { SingleWaveDropInfoAuthorSection } from "./SingleWaveDropInfoAuthorSection";
 import { SingleWaveDropInfoActions } from "./SingleWaveDropInfoActions";
 import { SingleWaveDropInfoContent } from "./SingleWaveDropInfoContent";
+import { SingleWaveDropVotes } from "./SingleWaveDropVotes";
 import WaveDropDeleteButton from "../../utils/button/WaveDropDeleteButton";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 
@@ -29,14 +30,16 @@ export const SingleWaveDropInfoPanel: React.FC<
       <div className="tw-hidden lg:tw-block">
         <SingleWaveDropClose onClose={onClose} />
       </div>
-
       <SingleWaveDropInfoContent drop={drop} />
       <div className="tw-px-6">
+        <SingleWaveDropVotes drop={drop} />
+      </div>
+      <div className="tw-px-6 tw-mt-4">
         <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
       </div>
       <SingleWaveDropInfoActions drop={drop} wave={wave} />
 
-      <div className="tw-mt-4 tw-pt-4 tw-border-t tw-border-iron-800 tw-border-solid tw-border-x-0 tw-border-b-0">
+      <div className="tw-mt-2">
         <SingleWaveDropInfoDetails drop={drop} />
       </div>
       {canDelete && drop.drop_type !== ApiDropType.Winner && (

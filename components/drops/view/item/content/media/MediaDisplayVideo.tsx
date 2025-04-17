@@ -61,7 +61,7 @@ function MediaDisplayVideo({
         ref={videoRef}
         playsInline
         controls={showControls}
-        autoPlay={!capacitor.isCapacitor}
+        autoPlay
         muted
         loop
         className="tw-w-full tw-rounded-xl tw-overflow-hidden tw-max-h-full tw-object-contain"

@@ -71,12 +71,12 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
           </div>
           {description && (
             <div className="tw-px-6 tw-mt-2">
-              <p className="tw-text-iron-400 tw-text-md tw-mb-0">{description}</p>
+              <p className="!tw-text-iron-400 tw-text-md tw-mb-0">
+                {description}
+              </p>
             </div>
           )}
-          <div className="tw-px-6 tw-mt-2">
-            <SingleWaveDropVotes drop={drop} />
-          </div>
+
           <div className="tw-mt-4">
             {artworkMedia && (
               <div className="tw-flex tw-justify-center tw-h-96">
@@ -90,15 +90,13 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
               <SingleWaveDropTraits drop={drop} />
             </div>
             <div className="tw-px-6 tw-mt-4">
+              <SingleWaveDropVotes drop={drop} />
+            </div>
+            <div className="tw-px-6 tw-mt-4">
               <SingleWaveDropInfoAuthorSection drop={drop} wave={wave} />
             </div>
-            <div>
-              <SingleWaveDropInfoActions
-                drop={drop}
-                wave={wave}
-                showVotes={false}
-              />
-            </div>
+
+            <SingleWaveDropInfoActions drop={drop} wave={wave} />
           </div>
 
           <SingleWaveDropInfoDetails drop={drop} />
@@ -130,7 +128,9 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                   </h3>
                 </div>
                 {description && (
-                  <p className="tw-text-iron-400 tw-text-md tw-mt-1 tw-ml-10">{description}</p>
+                  <p className="tw-text-iron-400 tw-text-md tw-mt-1 tw-ml-10">
+                    {description}
+                  </p>
                 )}
               </div>
 
