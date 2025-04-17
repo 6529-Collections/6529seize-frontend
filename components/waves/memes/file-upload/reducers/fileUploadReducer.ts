@@ -22,7 +22,8 @@ export const initialFileUploaderState: FileUploaderState = {
   // Enhanced properties
   currentFile: null,
   videoCompatibility: null,
-  isCheckingCompatibility: false
+  isCheckingCompatibility: false,
+  thumbnailUrl: null
 };
 
 /**
@@ -67,7 +68,9 @@ export const fileUploaderReducer = (
         hasRecoveryOption: false,
         // Reset compatibility results when starting a new process
         videoCompatibility: null,
-        isCheckingCompatibility: false
+        isCheckingCompatibility: false,
+        // Reset thumbnail on new processing
+        thumbnailUrl: null
       };
       
     case 'PROCESSING_SUCCESS':
@@ -83,7 +86,8 @@ export const fileUploaderReducer = (
         processingTimeout: null,
         hasRecoveryOption: false,
         // Start compatibility check if it's a video
-        isCheckingCompatibility: action.payload.file.type.startsWith('video/')
+        isCheckingCompatibility: action.payload.file.type.startsWith('video/'),
+        // Thumbnail will be set by a separate action after this
       };
       
     case 'PROCESSING_ERROR':
@@ -94,7 +98,9 @@ export const fileUploaderReducer = (
         visualState: 'invalid', 
         error: action.payload,
         hasRecoveryOption: hasRetryOption,
-        isCheckingCompatibility: false
+        isCheckingCompatibility: false,
+        // Clear thumbnail on error
+        thumbnailUrl: null
       };
       
     case 'PROCESSING_RETRY':
@@ -104,7 +110,9 @@ export const fileUploaderReducer = (
         visualState: 'processing',
         error: null,
         hasRecoveryOption: false,
-        videoCompatibility: null
+        videoCompatibility: null,
+        // Clear thumbnail on retry
+        thumbnailUrl: null
       };
       
     case 'PROCESSING_TIMEOUT':
@@ -115,7 +123,9 @@ export const fileUploaderReducer = (
         error: 'File processing timed out. Please try again.',
         processingTimeout: null,
         hasRecoveryOption: true,
-        isCheckingCompatibility: false
+        isCheckingCompatibility: false,
+        // Clear thumbnail on timeout
+        thumbnailUrl: null
       };
       
     case 'START_COMPATIBILITY_CHECK':
@@ -130,6 +140,12 @@ export const fileUploaderReducer = (
         ...state,
         videoCompatibility: action.payload,
         isCheckingCompatibility: false
+      };
+      
+    case 'SET_THUMBNAIL_URL':
+      return {
+        ...state,
+        thumbnailUrl: action.payload
       };
       
     default:

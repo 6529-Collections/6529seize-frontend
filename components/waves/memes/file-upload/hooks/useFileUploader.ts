@@ -4,6 +4,76 @@ import { validateFile, testVideoCompatibility } from '../utils/fileValidation';
 import { PROCESSING_TIMEOUT_MS } from '../utils/constants';
 import type { FileUploaderState } from '../reducers/types';
 
+// Helper function to generate video thumbnail
+const generateVideoThumbnail = (file: File): Promise<string | null> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const fileURL = URL.createObjectURL(file);
+
+    if (!context) {
+      URL.revokeObjectURL(fileURL);
+      return reject(new Error('Could not get 2D context from canvas'));
+    }
+
+    video.src = fileURL;
+    video.crossOrigin = 'anonymous';
+    video.preload = 'metadata'; // Only load metadata initially
+
+    let seeked = false;
+
+    const onLoadedMetadata = () => {
+      // Set canvas dimensions
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      // Seek to a small offset (e.g., 0.1s) to capture a frame
+      // Use requestAnimationFrame to ensure rendering cycle allows seek
+      requestAnimationFrame(() => {
+        video.currentTime = 0.1; 
+      });
+    };
+
+    const onSeeked = () => {
+      if (seeked) return; // Prevent multiple captures
+      seeked = true;
+
+      // Draw the frame onto the canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Get the Data URL (JPEG is generally smaller for photos/thumbnails)
+      const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8); 
+      
+      // Clean up the object URL
+      URL.revokeObjectURL(fileURL);
+      
+      // Remove listeners to prevent memory leaks
+      video.removeEventListener('loadedmetadata', onLoadedMetadata);
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+
+      resolve(thumbnailUrl);
+    };
+
+    const onError = (e: Event | string) => {
+      // Clean up the object URL
+      URL.revokeObjectURL(fileURL);
+      console.error('Error processing video for thumbnail:', e);
+      // Remove listeners
+      video.removeEventListener('loadedmetadata', onLoadedMetadata);
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+      reject(new Error('Failed to load video for thumbnail generation'));
+    };
+
+    video.addEventListener('loadedmetadata', onLoadedMetadata);
+    video.addEventListener('seeked', onSeeked);
+    video.addEventListener('error', onError);
+
+    // Some browsers might need load() called explicitly
+    video.load();
+  });
+};
+
 /**
  * Interface for the return value of the useFileUploader hook
  */
@@ -86,17 +156,31 @@ export const useFileUploader = ({
           }
         });
         
-        // Start compatibility check for video files
+        // Start compatibility check and thumbnail generation for video files
         if (file.type.startsWith('video/')) {
-          // Use a small delay to avoid blocking the main thread
-          setTimeout(() => {
-            testVideoCompatibility(file).then(result => {
-              dispatch({ 
-                type: 'SET_COMPATIBILITY_RESULT', 
-                payload: result 
-              });
+          // Compatibility Check (async)
+          testVideoCompatibility(file).then(result => {
+            dispatch({ 
+              type: 'SET_COMPATIBILITY_RESULT', 
+              payload: result 
             });
-          }, 100);
+          });
+          
+          // Thumbnail Generation (async)
+          generateVideoThumbnail(file)
+            .then(thumbnailUrl => {
+              dispatch({ type: 'SET_THUMBNAIL_URL', payload: thumbnailUrl });
+            })
+            .catch(error => {
+              console.error('Thumbnail generation failed:', error);
+              // Optionally dispatch an error or show a toast
+              if (showToast) {
+                showToast({
+                  type: 'warning' as any,
+                  message: 'Could not generate video thumbnail.'
+                });
+              }
+            });
         }
         
         // Handle file selection (delegated to parent)
@@ -157,7 +241,7 @@ export const useFileUploader = ({
     // Reset artwork state
     setUploaded(false);
     
-    // Reset all state with the reducer
+    // Reset all state with the reducer (this will clear thumbnailUrl too)
     dispatch({ type: 'RESET_STATE' });
   }, [state.objectUrl, setUploaded]);
   

@@ -42,6 +42,8 @@ export interface FileUploaderState {
   videoCompatibility: VideoCompatibilityResult | null;
   /** Whether compatibility check is in progress */
   isCheckingCompatibility: boolean;
+  /** Generated thumbnail data URL for videos */
+  thumbnailUrl: string | null;
 }
 
 /**
@@ -58,7 +60,8 @@ export type FileUploaderAction =
   | { type: 'PROCESSING_RETRY' }
   | { type: 'PROCESSING_TIMEOUT' }
   | { type: 'START_COMPATIBILITY_CHECK'; payload: File }
-  | { type: 'SET_COMPATIBILITY_RESULT'; payload: VideoCompatibilityResult };
+  | { type: 'SET_COMPATIBILITY_RESULT'; payload: VideoCompatibilityResult }
+  | { type: 'SET_THUMBNAIL_URL'; payload: string | null };
 
 /**
  * Props for the MemesArtSubmissionFile component
@@ -124,6 +127,8 @@ export interface FilePreviewProps {
   readonly videoCompatibility: VideoCompatibilityResult | null;
   /** Whether compatibility check is in progress */
   readonly isCheckingCompatibility: boolean;
+  /** Generated thumbnail data URL for videos */
+  readonly thumbnailUrl?: string | null;
 }
 
 /**

@@ -121,6 +121,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
 
   // Get state from the reducer
   const { visualState, error, objectUrl } = state;
+  const { thumbnailUrl } = state;
 
   // Cleanup object URLs when component unmounts or when file changes
   useEffect(() => {
@@ -199,6 +200,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           onRemove={handleRemoveFile}
           videoCompatibility={state.videoCompatibility}
           isCheckingCompatibility={state.isCheckingCompatibility}
+          thumbnailUrl={thumbnailUrl}
         />
       )}
     </motion.div>
