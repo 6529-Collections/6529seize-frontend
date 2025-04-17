@@ -53,6 +53,7 @@ import { useWave } from "../../hooks/useWave";
 import { multiPartUpload } from "./create-wave/services/multiPartUpload";
 import { useMyStream } from "../../contexts/wave/MyStreamContext";
 import { DropMutationBody } from "./CreateDrop";
+import { ProcessIncomingDropType } from "../../contexts/wave/hooks/useWaveRealtimeUpdater";
 
 export type CreateDropMetadataType =
   | {
@@ -656,7 +657,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       );
       if (optimisticDrop) {
         addOptimisticDrop({ drop: optimisticDrop });
-        setTimeout(() => processIncomingDrop(optimisticDrop), 0);
+        setTimeout(
+          () =>
+            processIncomingDrop(
+              optimisticDrop,
+              ProcessIncomingDropType.DROP_INSERT
+            ),
+          0
+        );
       }
       !!getMarkdown?.length && createDropInputRef.current?.clearEditorState();
       setFiles([]);

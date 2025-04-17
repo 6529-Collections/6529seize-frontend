@@ -14,7 +14,15 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
 }
 
-export type ProcessIncomingDropFn = (dropData: ApiDrop) => void;
+export enum ProcessIncomingDropType {
+  DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
+  DROP_INSERT = "DROP_INSERT",
+}
+
+export type ProcessIncomingDropFn = (
+  dropData: ApiDrop,
+  type: ProcessIncomingDropType
+) => void;
 
 export function useWaveRealtimeUpdater({
   getData,
@@ -107,7 +115,7 @@ export function useWaveRealtimeUpdater({
 
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
-    async (drop: ApiDrop) => {
+    async (drop: ApiDrop, type: ProcessIncomingDropType) => {
       if (!drop?.wave?.id) {
         return;
       }
@@ -122,6 +130,12 @@ export function useWaveRealtimeUpdater({
         registerWave(waveId);
         return;
       }
+
+      if (type === ProcessIncomingDropType.DROP_RATING_UPDATE) {
+        console.log("DROP_RATING_UPDATE", drop);
+        return
+      }
+
       // TODO: if its from vote update, we need to return if the drop is not in the currentData.drops
       // TODO: context_profile_context needs to be updated, how?!?! refetch the drop?
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
@@ -181,7 +195,16 @@ export function useWaveRealtimeUpdater({
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
-    processIncomingDrop
+    (messageData) => {
+      processIncomingDrop(messageData, ProcessIncomingDropType.DROP_INSERT);
+    }
+  );
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_RATING_UPDATE,
+    (messageData) => {
+      processIncomingDrop(messageData, ProcessIncomingDropType.DROP_RATING_UPDATE);
+    }
   );
 
   // Cleanup: Cancel all ongoing fetches on unmount
