@@ -20,8 +20,6 @@ import {
 import { SortDirection } from "../entities/ISort";
 import { ApiProfileProxy } from "../generated/models/ApiProfileProxy";
 import { ApiWave } from "../generated/models/ApiWave";
-import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
-import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
@@ -300,26 +298,6 @@ export const getWavesOverview = async ({
     params: queryParams,
     headers,
   });
-};
-
-export const getWaveDrops = async ({
-  waveId,
-  headers,
-}: {
-  readonly waveId: string;
-  readonly headers: Record<string, string>;
-}): Promise<ApiWaveDropsFeed> => {
-  const params: Record<string, string> = {
-    limit: WAVE_DROPS_PARAMS.limit.toString(),
-  };
-
-  const results = await commonApiFetch<ApiWaveDropsFeed>({
-    endpoint: `waves/${waveId}/drops`,
-    params,
-    headers,
-  });
-
-  return results;
 };
 
 export const getCommonHeaders = (req: any): Record<string, string> => {

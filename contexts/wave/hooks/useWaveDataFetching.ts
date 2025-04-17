@@ -42,10 +42,10 @@ export function useWaveDataFetching({
     (waveId: string, drops: ApiDrop[] | null) => {
       // Clear loading state when done
       clearLoadingState(waveId);
-
       // Update data in store if we got results
       if (drops) {
-        updateData(formatWaveMessages(waveId, drops, { isLoading: false }));
+        const update = formatWaveMessages(waveId, drops, { isLoading: false });
+        updateData(update);
       }
 
       return drops;
@@ -224,7 +224,8 @@ export function useWaveDataFetching({
       if (signal.aborted) {
         throw new DOMException("Aborted", "AbortError");
       }
-      updateData(formatWaveMessages(waveId, allFetchedDrops));
+      const update = formatWaveMessages(waveId, allFetchedDrops);
+      updateData(update);
       // Return all accumulated drops and the overall highest serial number found
       return {
         drops: allFetchedDrops,

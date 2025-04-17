@@ -160,9 +160,12 @@ export function useWaveRealtimeUpdater({
     [getData, updateData, registerWave, initiateFetchNewestCycle]
   );
 
-  const processDropRemoved = useCallback((waveId: string, dropId: string) => {
-    removeDrop(waveId, dropId);
-  }, [removeDrop]);
+  const processDropRemoved = useCallback(
+    (waveId: string, dropId: string) => {
+      removeDrop(waveId, dropId);
+    },
+    [removeDrop]
+  );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
