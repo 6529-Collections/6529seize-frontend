@@ -59,7 +59,7 @@ export function useEnhancedWavesList(activeWaveId: string | null) {
         isPinned: wavesData.pinnedWaves.some((w) => w.id === wave.id),
       };
     },
-    [newDropsCounts]
+    [newDropsCounts, wavesData.pinnedWaves]
   );
 
   // Combine wave data with counts for consumers
