@@ -124,6 +124,9 @@ export function useWaveRealtimeUpdater({
       }
 
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
+      if (!existingDrop) {
+        return;
+      }
 
       const optimisticDrop: ExtendedDrop = {
         ...drop,
