@@ -108,6 +108,9 @@ export function useWaveRealtimeUpdater({
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop) => {
+      if (drop.wave.id === "0c113c3e-9ef1-4ea1-9628-9049c8ca19b0") {
+        console.log(drop)
+      }
       if (!drop?.wave?.id) {
         return;
       }
@@ -171,6 +174,12 @@ export function useWaveRealtimeUpdater({
     WsMessageType.DROP_UPDATE,
     processIncomingDrop
   );
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_RATING_UPDATE,
+    processIncomingDrop
+  );
+  
 
   // Cleanup: Cancel all ongoing fetches on unmount
   useEffect(() => {
