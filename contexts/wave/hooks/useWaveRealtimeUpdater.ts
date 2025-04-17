@@ -4,6 +4,7 @@ import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { commonApiFetch } from "../../../services/api/common-api";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly registerWave: (waveId: string) => void;
@@ -14,7 +15,15 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   ) => Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }>;
 }
 
-export type ProcessIncomingDropFn = (dropData: ApiDrop) => void;
+export enum ProcessIncomingDropType {
+  DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
+  DROP_INSERT = "DROP_INSERT",
+}
+
+export type ProcessIncomingDropFn = (
+  dropData: ApiDrop,
+  type: ProcessIncomingDropType
+) => void;
 
 export function useWaveRealtimeUpdater({
   getData,
@@ -107,7 +116,7 @@ export function useWaveRealtimeUpdater({
 
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
-    async (drop: ApiDrop) => {
+    async (drop: ApiDrop, type: ProcessIncomingDropType) => {
       if (!drop?.wave?.id) {
         return;
       }
@@ -122,9 +131,34 @@ export function useWaveRealtimeUpdater({
         registerWave(waveId);
         return;
       }
-      // TODO: if its from vote update, we need to return if the drop is not in the currentData.drops
-      // TODO: context_profile_context needs to be updated, how?!?! refetch the drop?
+
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
+
+      if (
+        type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
+        !existingDrop
+      ) {
+        return;
+      }
+
+      if (type === ProcessIncomingDropType.DROP_RATING_UPDATE && existingDrop) {
+        const apiDrop = await commonApiFetch<ApiDrop>({
+          endpoint: `drops/${drop.id}`,
+        });
+        if (apiDrop) {
+          updateData({
+            key: waveId,
+            drops: [
+              {
+                ...apiDrop,
+                stableHash: existingDrop.stableHash,
+                stableKey: existingDrop.stableKey,
+              },
+            ],
+          });
+        }
+        return;
+      }
 
       const optimisticDrop: ExtendedDrop = {
         ...drop,
@@ -181,7 +215,19 @@ export function useWaveRealtimeUpdater({
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
-    processIncomingDrop
+    (messageData) => {
+      processIncomingDrop(messageData, ProcessIncomingDropType.DROP_INSERT);
+    }
+  );
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_RATING_UPDATE,
+    (messageData) => {
+      processIncomingDrop(
+        messageData,
+        ProcessIncomingDropType.DROP_RATING_UPDATE
+      );
+    }
   );
 
   // Cleanup: Cancel all ongoing fetches on unmount
