@@ -20,8 +20,6 @@ import {
 import { SortDirection } from "../entities/ISort";
 import { ApiProfileProxy } from "../generated/models/ApiProfileProxy";
 import { ApiWave } from "../generated/models/ApiWave";
-import { ApiWaveDropsFeed } from "../generated/models/ApiWaveDropsFeed";
-import { WAVE_DROPS_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
 
 export interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
