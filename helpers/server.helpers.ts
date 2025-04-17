@@ -302,26 +302,6 @@ export const getWavesOverview = async ({
   });
 };
 
-export const getWaveDrops = async ({
-  waveId,
-  headers,
-}: {
-  readonly waveId: string;
-  readonly headers: Record<string, string>;
-}): Promise<ApiWaveDropsFeed> => {
-  const params: Record<string, string> = {
-    limit: WAVE_DROPS_PARAMS.limit.toString(),
-  };
-
-  const results = await commonApiFetch<ApiWaveDropsFeed>({
-    endpoint: `waves/${waveId}/drops`,
-    params,
-    headers,
-  });
-
-  return results;
-};
-
 export const getCommonHeaders = (req: any): Record<string, string> => {
   const authCookie = req?.req.cookies["x-6529-auth"] ?? null;
   const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
