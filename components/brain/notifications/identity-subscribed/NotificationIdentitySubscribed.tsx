@@ -5,15 +5,15 @@ import {
   ImageScale,
 } from "../../../../helpers/image.helpers";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
-import UserFollowBtn, {
-  UserFollowBtnSize,
-} from "../../../user/utils/UserFollowBtn";
+import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
+import NotificationIdentitySubscribedFollowBtn from "./NotificationIdentitySubscribedFollowBtn";
 
 export default function NotificationIdentitySubscribed({
   notification,
 }: {
   readonly notification: INotificationIdentitySubscribed;
 }) {
+  console.log(notification);
   return (
     <div className="tw-w-full tw-flex tw-items-start md:tw-items-center tw-gap-x-3 tw-flex-wrap">
       <div className="tw-h-7 tw-w-7 tw-flex-shrink-0">
@@ -35,7 +35,8 @@ export default function NotificationIdentitySubscribed({
           <span className="tw-text-sm tw-font-normal tw-text-iron-400">
             <Link
               href={`/${notification.related_identity.handle}`}
-              className="tw-no-underline tw-font-semibold">
+              className="tw-no-underline tw-font-semibold"
+            >
               {notification.related_identity.handle}
             </Link>{" "}
             started following you
@@ -46,8 +47,8 @@ export default function NotificationIdentitySubscribed({
           </span>
         </div>
 
-        <UserFollowBtn
-          handle={notification.related_identity.handle}
+        <NotificationIdentitySubscribedFollowBtn
+          profile={notification.related_identity}
           size={UserFollowBtnSize.SMALL}
         />
       </div>

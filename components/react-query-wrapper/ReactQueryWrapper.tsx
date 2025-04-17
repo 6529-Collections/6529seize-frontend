@@ -1273,6 +1273,9 @@ export default function ReactQueryWrapper({
     queryClient.invalidateQueries({
       queryKey: [QueryKey.IDENTITY_FOLLOWERS],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS],
+    });
   };
 
   const invalidateAll = () => {
