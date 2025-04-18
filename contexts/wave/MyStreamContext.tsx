@@ -92,6 +92,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     if (websocketStatus === "connected" && activeWaveId) {
       waveDataManager.registerWave(activeWaveId, true);
     }
+    wavesHookData.refetchAllWaves();
   }, [websocketStatus, activeWaveId]);
 
   useEffect(() => {

@@ -9,6 +9,7 @@ import { AuthContext } from "../components/auth/Auth";
 
 export default function Access() {
   const { setTitle, title } = useContext(AuthContext);
+  
   useEffect(() => {
     setTitle({
       title: "Access Page | 6529.io",

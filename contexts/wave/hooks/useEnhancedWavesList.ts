@@ -94,7 +94,7 @@ export function useEnhancedWavesList(activeWaveId: string | null) {
     removePinnedWave: wavesData.removePinnedWave,
 
     // Utilities
-    refetchWaves: wavesData.mainWavesRefetch,
+    refetchAllWaves: wavesData.refetchAllWaves,
   };
 }
 
