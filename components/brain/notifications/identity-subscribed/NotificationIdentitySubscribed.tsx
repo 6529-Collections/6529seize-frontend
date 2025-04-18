@@ -13,7 +13,6 @@ export default function NotificationIdentitySubscribed({
 }: {
   readonly notification: INotificationIdentitySubscribed;
 }) {
-  console.log(notification);
   return (
     <div className="tw-w-full tw-flex tw-items-start md:tw-items-center tw-gap-x-3 tw-flex-wrap">
       <div className="tw-h-7 tw-w-7 tw-flex-shrink-0">

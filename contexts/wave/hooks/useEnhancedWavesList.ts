@@ -31,7 +31,7 @@ export function useEnhancedWavesList(activeWaveId: string | null) {
   // Get waves data from the optimized hook
   const wavesData = useWavesList();
 
-  const { newDropsCounts } = useNewDropCounter(
+  const { newDropsCounts, resetAllWavesNewDropsCount } = useNewDropCounter(
     activeWaveId,
     wavesData.waves,
     wavesData.mainWavesRefetch
@@ -94,7 +94,8 @@ export function useEnhancedWavesList(activeWaveId: string | null) {
     removePinnedWave: wavesData.removePinnedWave,
 
     // Utilities
-    refetchWaves: wavesData.mainWavesRefetch,
+    refetchAllWaves: wavesData.refetchAllWaves,
+    resetAllWavesNewDropsCount,
   };
 }
 

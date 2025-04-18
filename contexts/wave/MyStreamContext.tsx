@@ -15,9 +15,13 @@ import useWaveMessagesStore, {
 } from "./hooks/useWaveMessagesStore";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import { ApiDrop } from "../../generated/models/ApiDrop";
-import { ProcessIncomingDropType, useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
+import {
+  ProcessIncomingDropType,
+  useWaveRealtimeUpdater,
+} from "./hooks/useWaveRealtimeUpdater";
 import { WaveMessages } from "./hooks/types";
 import { useWebsocketStatus } from "../../services/websocket/useWebSocketMessage";
+import useCapacitor from "../../hooks/useCapacitor";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -67,6 +71,7 @@ export const MyStreamContext = createContext<MyStreamContextType | null>(null);
 export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   children,
 }) => {
+  const { isCapacitor } = useCapacitor();
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
   const wavesHookData = useEnhancedWavesList(activeWaveId);
   const waveMessagesStore = useWaveMessagesStore();
@@ -92,7 +97,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     if (websocketStatus === "connected" && activeWaveId) {
       waveDataManager.registerWave(activeWaveId, true);
     }
-  }, [websocketStatus, activeWaveId]);
+    wavesHookData.refetchAllWaves();
+    if (!isCapacitor) {
+      wavesHookData.resetAllWavesNewDropsCount();
+    }
+  }, [websocketStatus, activeWaveId, isCapacitor]);
 
   useEffect(() => {
     if (activeWaveId) {

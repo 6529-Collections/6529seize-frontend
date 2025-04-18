@@ -49,6 +49,19 @@ export function useNewDropCounter(
     },
     [waves]
   );
+  // Reset counts for all waves
+  const resetAllWavesNewDropsCount = useCallback(() => {
+    setNewDropsCounts(() => {
+      const newCounts: Record<string, MinimalWaveNewDropsCount> = {};
+      waves.forEach((wave) => {
+        newCounts[wave.id] = {
+          count: 0,
+          latestDropTimestamp: wave.metrics.latest_drop_timestamp ?? null,
+        };
+      });
+      return newCounts;
+    });
+  }, [waves]);
 
   // Handle visibility changes for active wave
   useEffect(() => {
@@ -153,6 +166,8 @@ export function useNewDropCounter(
   return {
     newDropsCounts,
     resetWaveNewDropsCount,
+    // Reset counts for all tracked waves
+    resetAllWavesNewDropsCount,
   };
 }
 
