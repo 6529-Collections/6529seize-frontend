@@ -101,7 +101,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     if (!isCapacitor) {
       wavesHookData.resetAllWavesNewDropsCount();
     }
-  }, [websocketStatus, activeWaveId]);
+  }, [websocketStatus, activeWaveId, isCapacitor]);
 
   useEffect(() => {
     if (activeWaveId) {
