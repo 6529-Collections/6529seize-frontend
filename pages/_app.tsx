@@ -1,4 +1,3 @@
-
 import "../styles/seize-bootstrap.scss";
 import "../styles/globals.scss";
 import "tippy.js/dist/tippy.css";
@@ -406,9 +405,6 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                           <CookieConsentProvider>
                             <EULAConsentProvider>
                               <AppWebSocketProvider>
-                                <div className="tw-bg-red-500 tw-p-4 tw-text-white tw-font-bold">
-                                  Testing Tailwind CSS v4
-                                </div>
                                 {getLayout(<Component {...props} />)}
                                 {appWalletPasswordModal.modal}
                               </AppWebSocketProvider>

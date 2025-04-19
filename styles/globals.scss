@@ -1,6 +1,7 @@
 @import "./variables.scss";
 @import "react-toggle/style.css";
 @import "tailwindcss";
+@import "tailwindcss" prefix(tw);
 
 // add the code bellow
 @layer utilities {

@@ -13,7 +13,6 @@ export default {
     // Or if using `src` directory:
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  prefix: "tw-",
   theme: {
     extend: {
       boxShadow: {
