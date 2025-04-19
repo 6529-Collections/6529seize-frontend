@@ -191,13 +191,13 @@ export const WaveSmallLeaderboardItemOutcomes: React.FC<
         </span>
         <div className="tw-flex tw-items-center tw-gap-2">
           {!!nicTotal && (
-            <FontAwesomeIcon icon={faAddressCard} className="tw-size-4 tw-text-blue-300/70 tw-flex-shrink-0" />
+            <FontAwesomeIcon icon={faAddressCard} className="tw-size-4 tw-text-blue-300/70 tw-shrink-0" />
           )}
           {!!repTotal && (
-            <FontAwesomeIcon icon={faStar} className="tw-size-4 tw-text-purple-300/70 tw-flex-shrink-0" />
+            <FontAwesomeIcon icon={faStar} className="tw-size-4 tw-text-purple-300/70 tw-shrink-0" />
           )}
           {manualOutcomes.length > 0 && (
-            <FontAwesomeIcon icon={faAward} className="tw-size-4 tw-text-amber-300/70 tw-flex-shrink-0" />
+            <FontAwesomeIcon icon={faAward} className="tw-size-4 tw-text-amber-300/70 tw-shrink-0" />
           )}
         </div>
       </button>

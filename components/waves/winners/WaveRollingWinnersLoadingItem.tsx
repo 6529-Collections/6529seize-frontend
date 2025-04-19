@@ -14,7 +14,7 @@ export const WaveRollingWinnersLoadingItem: React.FC<WaveRollingWinnersLoadingIt
     <div className="tw-rounded-lg tw-bg-iron-900 tw-border tw-border-iron-800 tw-animate-pulse">
       <div className="tw-w-full tw-flex tw-items-center tw-justify-between tw-px-4 tw-py-3">
         <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-flex-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800/50"></div>
+          <div className="tw-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800/50"></div>
           <div className="tw-flex tw-items-center">
             <div className="tw-h-4 tw-w-40 tw-bg-iron-800/50 tw-rounded"></div>
             

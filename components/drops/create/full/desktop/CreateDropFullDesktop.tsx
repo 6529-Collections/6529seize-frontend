@@ -153,7 +153,7 @@ const CreateDropFullDesktop = forwardRef<
             tw-px-3 tw-py-2 tw-text-iron-300 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 hover:tw-text-iron-200 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
-                className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
+                className="tw-shrink-0 tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
@@ -222,10 +222,10 @@ const CreateDropFullDesktop = forwardRef<
                       onClick={() => onFileRemove(file)}
                       type="button"
                       aria-label="Remove file"
-                      className="-tw-mr-1 tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
+                      className="-tw-mr-1 tw-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
                     >
                       <svg
-                        className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
+                        className="tw-shrink-0 tw-w-5 tw-h-5 tw-text-red"
                         viewBox="0 0 24 24"
                         fill="none"
                         aria-hidden="true"

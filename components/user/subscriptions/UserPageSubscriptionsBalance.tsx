@@ -54,7 +54,7 @@ export default function UserPageSubscriptionsBalance(
                         )
                       : 0}
                   </b>
-                  <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                  <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                     <EthereumIcon />
                   </div>
                 </div>

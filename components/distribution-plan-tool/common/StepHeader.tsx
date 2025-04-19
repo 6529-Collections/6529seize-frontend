@@ -124,7 +124,7 @@ export default function StepHeader({
               tw-w-full tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
               onClick={downloadOperations}>
               <svg
-                className="tw-flex-shrink-0 -tw-ml-0.5 tw-h-4 tw-w-4 group-hover:tw-translate-y-0.5 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-shrink-0 -tw-ml-0.5 tw-h-4 tw-w-4 group-hover:tw-translate-y-0.5 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg">

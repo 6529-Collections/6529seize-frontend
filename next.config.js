@@ -95,6 +95,9 @@ const nextConfig = {
     config.resolve.alias.encoding = false;
     return config;
   },
+  experimental: {
+    esmExternals: true
+  },
 };
 
 module.exports = withBundleAnalyzer(nextConfig);

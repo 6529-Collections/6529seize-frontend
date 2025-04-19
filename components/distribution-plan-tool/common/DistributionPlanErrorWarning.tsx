@@ -8,7 +8,7 @@ export default function DistributionPlanErrorWarning() {
   return (
     <div className="tw-relative tw-rounded-lg tw-bg-[#282026]/80 tw-ring-1 tw-ring-[#632c28] tw-p-4">
       <div className="tw-flex">
-        <div className="tw-flex-shrink-0">
+        <div className="tw-shrink-0">
           <svg
             className="tw-h-5 tw-w-5 tw-text-error -tw-mt-2"
             viewBox="0 0 24 24"

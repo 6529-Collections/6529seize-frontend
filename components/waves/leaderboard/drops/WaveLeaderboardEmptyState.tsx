@@ -69,7 +69,7 @@ export const WaveLeaderboardEmptyState: React.FC<
         padding="tw-px-4 tw-py-2"
       >
         <svg
-          className="tw-w-4 tw-h-4 tw-flex-shrink-0 -tw-ml-1"
+          className="tw-w-4 tw-h-4 tw-shrink-0 -tw-ml-1"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"

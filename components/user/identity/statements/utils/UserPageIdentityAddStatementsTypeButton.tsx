@@ -40,7 +40,7 @@ export default function UserPageIdentityAddStatementsTypeButton({
       type="button"
       className={`${dynamicClasses} tw-relative -tw-ml-px tw-flex tw-items-center tw-justify-center tw-flex-1 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-50 tw-border-none tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out tw-focus:tw-z-10`}
     >
-      <div className="tw-flex-shrink-0 tw-w-5 tw-h-5">
+      <div className="tw-shrink-0 tw-w-5 tw-h-5">
         <SocialStatementIcon statementType={statementType} />
       </div>
       <span className="tw-sr-only">{STATEMENT_META[statementType].title}</span>

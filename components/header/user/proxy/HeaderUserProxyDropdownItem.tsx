@@ -28,7 +28,7 @@ export default function HeaderUserProxyDropdownItem({
           <img
             src={profileProxy.created_by.pfp}
             alt="Profile Picture"
-            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
+            className="tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
           />
         ) : (
           <div
@@ -36,7 +36,7 @@ export default function HeaderUserProxyDropdownItem({
               isActive
                 ? "tw-bg-iron-600"
                 : "tw-bg-iron-700 group-hover:tw-bg-iron-600"
-            } tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
+            } tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
           ></div>
         )}
         <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
@@ -51,7 +51,7 @@ export default function HeaderUserProxyDropdownItem({
           <div>
             {isActive && (
               <svg
-                className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                className="tw-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"

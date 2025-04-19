@@ -84,7 +84,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             {isDropWave && (
               <div className="tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-size-3.5 tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-full tw-shadow-lg">
                 <svg
-                  className="tw-size-2.5 tw-flex-shrink-0 tw-text-[#E8D48A]"
+                  className="tw-size-2.5 tw-shrink-0 tw-text-[#E8D48A]"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 576 512"

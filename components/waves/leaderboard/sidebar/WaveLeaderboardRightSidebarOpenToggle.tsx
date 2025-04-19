@@ -24,7 +24,7 @@ export const WaveLeaderboardRightSidebarOpenToggle: React.FC<WaveLeaderboardRigh
       strokeWidth="1.5"
       aria-hidden="true"
       stroke="currentColor"
-      className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-300 tw-ease-in-out"
+      className="tw-size-4 tw-shrink-0 tw-transition-transform tw-duration-300 tw-ease-in-out"
       animate={{ rotate: isOpen ? 0 : 180 }}
     >
       <path

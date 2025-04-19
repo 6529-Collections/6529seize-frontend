@@ -30,7 +30,7 @@ export default function FinalizeSnapshotsTableRow({
           maxWidth={500}
         >
           <svg
-            className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+            className="tw-ml-2 tw-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,7 @@ export default function FinalizeSnapshotsTableRow({
             maxWidth={500}
           >
             <svg
-              className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+              className="tw-ml-2 tw-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -91,7 +91,7 @@ export default function FinalizeSnapshotsTableRow({
             maxWidth={500}
           >
             <svg
-              className="tw-ml-2 tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
+              className="tw-ml-2 tw-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-500 tw-cursor-pointer"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

@@ -141,7 +141,7 @@ export default function UserPageIdentityStatements({
                       tabIndex={0}
                       className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400">
                       <svg
-                        className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"
+                        className="tw-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"
                         viewBox="0 0 24 24"
                         fill="none"
                         aria-hidden="true"

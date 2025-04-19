@@ -1,7 +1,7 @@
 export default function WaveGroupViewIcon() {
   return (
     <svg
-      className="tw-mr-2 tw-flex-shrink-0 tw-size-5 tw-text-iron-300"
+      className="tw-mr-2 tw-shrink-0 tw-size-5 tw-text-iron-300"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"

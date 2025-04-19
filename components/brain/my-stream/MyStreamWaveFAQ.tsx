@@ -42,7 +42,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
               <FontAwesomeIcon
                 icon={faBook}
-                className="tw-text-primary-400 tw-size-4 tw-flex-shrink-0"
+                className="tw-text-primary-400 tw-size-4 tw-shrink-0"
               />
             </div>
             Intro
@@ -85,7 +85,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
               <FontAwesomeIcon
                 icon={faCrown}
-                className="tw-text-indigo-500 tw-size-4 tw-flex-shrink-0"
+                className="tw-text-indigo-500 tw-size-4 tw-shrink-0"
               />
             </div>
             <div className="tw-mt-0.5">What are the goals of the voting?</div>
@@ -109,7 +109,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               "Several of the above",
             ].map((item, idx) => (
               <li key={idx} className="tw-flex tw-items-center">
-                <div className="tw-h-0.5 tw-w-3 tw-flex-shrink-0 tw-rounded-full tw-bg-primary-400 tw-mr-3"></div>
+                <div className="tw-h-0.5 tw-w-3 tw-shrink-0 tw-rounded-full tw-bg-primary-400 tw-mr-3"></div>
                 {item}
               </li>
             ))}
@@ -147,7 +147,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
               <FontAwesomeIcon
                 icon={faUser}
-                className="tw-text-red tw-size-4 tw-flex-shrink-0"
+                className="tw-text-red tw-size-4 tw-shrink-0"
               />
             </div>
             <span className="tw-mt-0.5">
@@ -200,7 +200,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
               <FontAwesomeIcon
                 icon={faVoteYea}
-                className="tw-text-purple-500 tw-size-4 tw-flex-shrink-0"
+                className="tw-text-purple-500 tw-size-4 tw-shrink-0"
               />
             </div>
             <span className="tw-mt-0.5">How Does Voting Work?</span>
@@ -328,13 +328,13 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             </p>
             <ul className="tw-space-y-3 tw-text-iron-300 tw-pl-0">
               <li className="tw-flex tw-text-base">
-                <span className="tw-text-emerald-500 tw-size-4 tw-flex-shrink-0 tw-mr-2">
+                <span className="tw-text-emerald-500 tw-size-4 tw-shrink-0 tw-mr-2">
                   ✓
                 </span>
                 You have previously dropped a Meme Card
               </li>
               <li className="tw-flex tw-text-base">
-                <span className="tw-text-emerald-500 tw-size-4 tw-flex-shrink-0 tw-mr-2">
+                <span className="tw-text-emerald-500 tw-size-4 tw-shrink-0 tw-mr-2">
                   ✓
                 </span>
                 You have been nominated in a decentralized way by one or more
@@ -373,12 +373,12 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
           </p>
           <ul className="tw-space-y-2 tw-text-iron-300 tw-mb-5 tw-pl-1 tw-text-base">
             <li className="tw-flex">
-              <div className="tw-h-0.5 tw-w-3 tw-mt-2.5 tw-rounded-full tw-flex-shrink-0 tw-bg-primary-400 tw-mr-3"></div>
+              <div className="tw-h-0.5 tw-w-3 tw-mt-2.5 tw-rounded-full tw-shrink-0 tw-bg-primary-400 tw-mr-3"></div>
               High quality submissions, in line with the collection mission,
               will do very well
             </li>
             <li className="tw-flex">
-              <div className="tw-h-0.5 tw-w-3 tw-mt-2.5 tw-rounded-full tw-flex-shrink-0 tw-bg-primary-400 tw-mr-3"></div>
+              <div className="tw-h-0.5 tw-w-3 tw-mt-2.5 tw-rounded-full tw-shrink-0 tw-bg-primary-400 tw-mr-3"></div>
               Low effort submissions will not get selected
             </li>
           </ul>
@@ -403,7 +403,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             FAQ Wave
             <FontAwesomeIcon
               icon={faArrowRight}
-              className="tw-ml-2 tw-text-base tw-size-3 tw-flex-shrink-0 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
+              className="tw-ml-2 tw-text-base tw-size-3 tw-shrink-0 tw-transition-transform desktop-hover:group-hover:tw-translate-x-0.5"
             />
           </a>
         </section>
@@ -412,7 +412,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
               <FontAwesomeIcon
                 icon={faChartLine}
-                className="tw-text-yellow-500 tw-size-4 tw-flex-shrink-0"
+                className="tw-text-yellow-500 tw-size-4 tw-shrink-0"
               />
             </div>
             What is TDH?
@@ -457,7 +457,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
               <FontAwesomeIcon
                 icon={faCubes}
-                className="tw-text-orange-500 tw-size-4 tw-flex-shrink-0"
+                className="tw-text-orange-500 tw-size-4 tw-shrink-0"
               />
             </div>
             Minting a Meme Card

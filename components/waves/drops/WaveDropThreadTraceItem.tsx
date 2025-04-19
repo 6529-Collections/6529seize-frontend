@@ -25,7 +25,7 @@ export default function WaveDropThreadTraceItem({
 
   return (
     <React.Fragment key={`trace-pfp-${drop.id}`}>
-      <div className="tw-flex-shrink-0 tw-transition-transform tw-duration-300 hover:tw-scale-110">
+      <div className="tw-shrink-0 tw-transition-transform tw-duration-300 hover:tw-scale-110">
         {drop.author.pfp ? (
           <img
             src={drop.author.pfp}
@@ -37,7 +37,7 @@ export default function WaveDropThreadTraceItem({
         )}
       </div>
       {showLine && (
-        <div className="tw-flex-shrink-0 tw-w-4 tw-h-[2px] tw-bg-iron-700 tw-self-center tw-transition-colors tw-duration-300 hover:tw-bg-iron-500" />
+        <div className="tw-shrink-0 tw-w-4 tw-h-[2px] tw-bg-iron-700 tw-self-center tw-transition-colors tw-duration-300 hover:tw-bg-iron-500" />
       )}
     </React.Fragment>
   );

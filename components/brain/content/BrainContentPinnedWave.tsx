@@ -113,7 +113,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
             </span>
             {isDropWave && (
               <svg
-                className="tw-size-3 tw-flex-shrink-0 tw-text-[#E8D48A]"
+                className="tw-size-3 tw-shrink-0 tw-text-[#E8D48A]"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 576 512"
@@ -131,7 +131,7 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               className="tw-relative -tw-mr-0.5 tw-border-0 tw-bg-transparent tw-p-0.5 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-100 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red tw-transition-all tw-duration-300"
             >
               <svg
-                className="tw-size-3 tw-flex-shrink-0"
+                className="tw-size-3 tw-shrink-0"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"

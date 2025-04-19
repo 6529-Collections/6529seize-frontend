@@ -6,7 +6,7 @@ export const WaveWinnersRoundEmpty: React.FC = () => {
       <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-text-center tw-py-8">
         <div className="tw-h-16 tw-w-16 tw-mx-auto tw-rounded-xl tw-flex tw-items-center tw-justify-center tw-bg-iron-800/40 tw-mb-4">
           <svg
-            className="tw-mx-auto tw-flex-shrink-0 tw-h-8 tw-w-8 tw-text-iron-400"
+            className="tw-mx-auto tw-shrink-0 tw-h-8 tw-w-8 tw-text-iron-400"
             aria-hidden="true"
             fill="none"
             viewBox="0 0 24 24"

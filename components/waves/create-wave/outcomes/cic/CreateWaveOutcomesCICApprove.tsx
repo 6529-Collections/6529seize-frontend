@@ -91,7 +91,7 @@ export default function CreateWaveOutcomesCICApprove({
           {creditError && (
             <div className="tw-pt-1.5 tw-flex tw-items-center tw-gap-x-2">
               <svg
-                className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+                className="tw-size-5 tw-shrink-0 tw-text-error"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"

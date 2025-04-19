@@ -45,7 +45,7 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
           }
         >
           <div
-            className={`tw-w-5 tw-h-5 tw-flex-shrink-0 tw-rounded tw-border tw-border-solid ${
+            className={`tw-w-5 tw-h-5 tw-shrink-0 tw-rounded tw-border tw-border-solid ${
               agreements
                 ? "tw-bg-primary-500 tw-border-primary-600"
                 : "tw-bg-iron-700 tw-border-iron-650"
@@ -55,7 +55,7 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
               <svg
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
-                className="tw-w-3 tw-h-3 tw-text-white tw-flex-shrink-0"
+                className="tw-w-3 tw-h-3 tw-text-white tw-shrink-0"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >

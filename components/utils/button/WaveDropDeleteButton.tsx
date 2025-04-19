@@ -36,7 +36,7 @@ const WaveDropDeleteButton: React.FC<WaveDropDeleteButtonProps> = ({
           strokeWidth="1.5"
           aria-hidden="true"
           stroke="currentColor"
-          className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 tw-text-red"
+          className="tw-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 tw-text-red"
         >
           <path
             strokeLinecap="round"

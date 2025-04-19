@@ -47,7 +47,7 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
             <div className="tw-flex tw-items-center tw-justify-center tw-size-10 tw-rounded-xl tw-bg-gradient-to-br tw-from-[#A4C2DB]/20 tw-to-[#A4C2DB]/10 tw-shadow-inner">
               <FontAwesomeIcon 
                 icon={faAddressCard} 
-                className="tw-size-5 tw-text-[#A4C2DB] tw-flex-shrink-0 tw-drop-shadow-[0_0_3px_rgba(164,194,219,0.5)]"
+                className="tw-size-5 tw-text-[#A4C2DB] tw-shrink-0 tw-drop-shadow-[0_0_3px_rgba(164,194,219,0.5)]"
               />
             </div>
             <div className="tw-text-left">
@@ -74,7 +74,7 @@ export const WaveNICOutcome: FC<WaveNICOutcomeProps> = ({
               strokeWidth="2"
               stroke="currentColor"
               aria-hidden="true"
-              className="tw-flex-shrink-0 tw-size-4 tw-text-iron-400"
+              className="tw-shrink-0 tw-size-4 tw-text-iron-400"
               animate={{ rotate: isOpen ? 0 : -90 }}
               transition={{ duration: 0.2 }}
             >

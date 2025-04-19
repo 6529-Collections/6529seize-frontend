@@ -31,7 +31,7 @@ export default function WaveDropFollowAuthor({
   const components: Record<FOLLOW_STATE, React.ReactNode> = {
     [FOLLOW_STATE.FOLLOWING]: (
       <svg
-        className="tw-flex-shrink-0 tw-size-4 tw-transition tw-ease-out tw-duration-300"
+        className="tw-shrink-0 tw-size-4 tw-transition tw-ease-out tw-duration-300"
         width="17"
         height="15"
         viewBox="0 0 17 15"
@@ -49,7 +49,7 @@ export default function WaveDropFollowAuthor({
     ),
     [FOLLOW_STATE.NOT_FOLLOWING]: (
       <svg
-        className="tw-flex-shrink-0 tw-size-4 tw-transition tw-ease-out tw-duration-300"
+        className="tw-shrink-0 tw-size-4 tw-transition tw-ease-out tw-duration-300"
         width="17"
         height="15"
         viewBox="0 0 17 15"

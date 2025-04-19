@@ -53,7 +53,7 @@ export default function DropVoteProgressing({
       >
         <FontAwesomeIcon
           icon={faArrowRight}
-          className="tw-flex-shrink-0 tw-size-3"
+          className="tw-shrink-0 tw-size-3"
         />
         <span>{formatNumberWithCommas(projected)}</span>
       </span>

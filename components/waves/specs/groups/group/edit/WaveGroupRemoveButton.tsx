@@ -22,7 +22,7 @@ export default function WaveGroupRemoveButton({
         className="tw-border-none tw-bg-transparent tw-p-0 tw-items-center"
       >
         <svg
-          className="tw-flex-shrink-0 tw-size-5 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
+          className="tw-shrink-0 tw-size-5 tw-text-red tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

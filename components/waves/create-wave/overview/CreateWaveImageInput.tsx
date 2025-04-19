@@ -65,7 +65,7 @@ export default function CreateWaveImageInput({
   return (
     <div className="tw-flex tw-gap-x-5">
       <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2">
-        <div className="tw-flex-shrink-0">
+        <div className="tw-shrink-0">
           {imageToShow ? (
             <img
               src={URL.createObjectURL(imageToShow)}
@@ -106,9 +106,9 @@ export default function CreateWaveImageInput({
         >
           <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
             <div className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 group-hover:tw-bg-iron-800 tw-border tw-border-solid tw-border-iron-700 tw-transition tw-duration-300 tw-ease-out">
-              <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+              <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                 <svg
-                  className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50"
+                  className="tw-shrink-0 tw-h-6 tw-w-6 tw-text-iron-50"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden="true"

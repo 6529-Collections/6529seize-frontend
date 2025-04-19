@@ -54,7 +54,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
             >
               <div className="tw-flex tw-items-center tw-gap-2">
                 <svg
-                  className="tw-size-4 tw-text-[#A4C2DB] tw-flex-shrink-0"
+                  className="tw-size-4 tw-text-[#A4C2DB] tw-shrink-0"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                   fill="none"
@@ -84,7 +84,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
               <div className="tw-flex tw-items-center tw-justify-between">
                 <div className="tw-flex tw-items-center tw-gap-2">
                   <svg
-                    className="tw-size-4 tw-text-[#C3B5D9] tw-flex-shrink-0"
+                    className="tw-size-4 tw-text-[#C3B5D9] tw-shrink-0"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
                     fill="none"
@@ -115,7 +115,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
             >
               <div className="tw-flex tw-items-center tw-gap-2">
                 <svg
-                  className="tw-size-4 tw-text-[#D4C5AA] tw-flex-shrink-0"
+                  className="tw-size-4 tw-text-[#D4C5AA] tw-shrink-0"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                   fill="none"
@@ -160,7 +160,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
         <div className="tw-flex tw-items-center tw-gap-2">
           {!!nicOutcomes.length && (
             <svg
-              className="tw-size-4 tw-text-[#A4C2DB] tw-flex-shrink-0"
+              className="tw-size-4 tw-text-[#A4C2DB] tw-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -176,7 +176,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
           )}
           {!!repOutcomes.length && (
             <svg
-              className="tw-size-4 tw-text-[#C3B5D9] tw-flex-shrink-0"
+              className="tw-size-4 tw-text-[#C3B5D9] tw-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -190,7 +190,7 @@ export const WaveWinnersSmallOutcome: React.FC<WaveWinnersSmallOutcomeProps> = (
           )}
           {!!manualOutcomes.length && (
             <svg
-              className="tw-size-4 tw-text-[#D4C5AA] tw-flex-shrink-0"
+              className="tw-size-4 tw-text-[#D4C5AA] tw-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"

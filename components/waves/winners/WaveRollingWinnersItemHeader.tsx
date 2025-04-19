@@ -18,7 +18,7 @@ export const WaveRollingWinnersItemHeader: React.FC<
     <div className="tw-flex tw-flex-col tw-w-full sm:tw-hidden">
       <div className="tw-flex tw-items-center tw-justify-between tw-w-full tw-mb-1 tw-pr-8">
         <div className="tw-flex tw-items-center tw-gap-3">
-          <div className="tw-flex-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
+          <div className="tw-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <span
               className={`tw-text-xs tw-font-medium ${
                 index === 0
@@ -57,7 +57,7 @@ export const WaveRollingWinnersItemHeader: React.FC<
   // Desktop view
   const desktopView = (
     <div className="tw-hidden sm:tw-flex tw-items-center tw-gap-3">
-      <div className="tw-flex-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
+      <div className="tw-shrink-0 tw-size-6 tw-rounded-md tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
         <span
           className={`tw-text-xs tw-font-medium ${
             index === 0
@@ -108,7 +108,7 @@ export const WaveRollingWinnersItemHeader: React.FC<
             ${isExpanded ? "tw-rotate-180 tw-bg-primary-900/50" : ""}`}
         >
           <svg
-            className="tw-size-4 tw-text-iron-300 tw-flex-shrink-0"
+            className="tw-size-4 tw-text-iron-300 tw-shrink-0"
             fill="none"
             aria-hidden="true"
             viewBox="0 0 24 24"

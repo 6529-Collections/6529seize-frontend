@@ -14,7 +14,7 @@ const WaveDropReplyAuthor: React.FC<WaveDropReplyAuthorProps> = ({
   if (isFetching) {
     return (
       <div className="tw-flex tw-items-center tw-gap-x-1.5">
-        <div className="tw-h-6 tw-w-6 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-md z-10">
+        <div className="tw-h-6 tw-w-6 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-shrink-0 tw-rounded-md z-10">
           <div className="tw-h-full tw-w-full tw-animate-pulse tw-bg-iron-700 tw-rounded-md" />
         </div>
         <p className="tw-mb-0 tw-text-sm tw-text-iron-200 tw-font-semibold tw-animate-pulse">
@@ -30,7 +30,7 @@ const WaveDropReplyAuthor: React.FC<WaveDropReplyAuthorProps> = ({
         href={`/${drop.author.handle}`}
         className="tw-no-underline tw-flex tw-items-center tw-gap-x-1.5"
       >
-        <div className="tw-h-6 tw-w-6 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-md z-10">
+        <div className="tw-h-6 tw-w-6 tw-bg-iron-800 tw-relative tw-shrink-0 tw-rounded-md z-10">
           {drop.author.pfp ? (
             <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900">
               <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-md tw-overflow-hidden">
@@ -54,7 +54,7 @@ const WaveDropReplyAuthor: React.FC<WaveDropReplyAuthorProps> = ({
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-1.5">
-      <div className="tw-h-6 tw-w-6 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-md z-10">
+      <div className="tw-h-6 tw-w-6 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-relative tw-shrink-0 tw-rounded-md z-10">
         <div className="tw-h-full tw-w-full tw-bg-iron-800 tw-rounded-md" />
       </div>
       <p className="tw-mb-0 tw-text-sm tw-text-iron-200 tw-font-semibold">

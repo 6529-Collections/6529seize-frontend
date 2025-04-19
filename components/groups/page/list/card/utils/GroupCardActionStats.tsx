@@ -119,7 +119,7 @@ export default function GroupCardActionStats({
       <p className="tw-text-sm tw-block tw-mb-0 tw-text-iron-50 tw-font-medium">
         <img
           src="/pepe-xglasses.png"
-          className="-tw-mt-0.5 tw-w-4 tw-h-4 tw-ml-1 tw-mr-1.5 tw-object-contain tw-flex-shrink-0 tw-inline"
+          className="-tw-mt-0.5 tw-w-4 tw-h-4 tw-ml-1 tw-mr-1.5 tw-object-contain tw-shrink-0 tw-inline"
           alt="pepe-xglasses"
         />
         You can grant up to{" "}

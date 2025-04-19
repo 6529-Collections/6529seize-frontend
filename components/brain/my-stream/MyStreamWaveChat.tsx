@@ -49,7 +49,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
       "tw-w-full tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden lg:tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow";
 
     // Always use flex-grow for consistent height handling
-    const heightClass = "tw-flex-grow";
+    const heightClass = "tw-grow";
 
     return `${baseStyles} ${heightClass}`;
   }, []);

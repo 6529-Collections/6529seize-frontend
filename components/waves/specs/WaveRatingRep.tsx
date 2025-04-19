@@ -20,12 +20,12 @@ export default function WaveRatingRep({ wave }: WaveRatingRepProps) {
         <div className="tw-flex tw-items-center tw-gap-x-2">
           {wave.voting.creditor?.pfp ? (
             <img
-              className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
+              className="tw-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800"
               src={wave.voting.creditor.pfp}
               alt={wave.voting.creditor.handle}
             />
           ) : (
-            <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
+            <div className="tw-shrink-0 tw-h-6 tw-w-6 tw-rounded-md tw-bg-iron-800" />
           )}
           {wave.voting.creditor?.handle && (
             <Link

@@ -59,7 +59,7 @@ export default function GroupCreateNftsSelectedItem({
   return (
     <div className="tw-flex tw-items-center tw-gap-x-3 tw-rounded-lg tw-bg-iron-950 tw-px-2 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700">
       <div className="tw-py-1 tw-flex tw-items-center tw-gap-x-2">
-        <div className="tw-h-7 tw-w-7 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-sm">
+        <div className="tw-h-7 tw-w-7 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-800 tw-relative tw-shrink-0 tw-rounded-sm">
           <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-sm tw-overflow-hidden tw-bg-iron-800">
             <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-sm tw-overflow-hidden">
               {data?.data?.[0]?.image ? (
@@ -97,7 +97,7 @@ export default function GroupCreateNftsSelectedItem({
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
-          className="tw-size-4 tw-flex-shrink-0"
+          className="tw-size-4 tw-shrink-0"
         >
           <path
             strokeLinecap="round"

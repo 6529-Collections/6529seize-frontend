@@ -127,7 +127,7 @@ export default function GroupCreateTest({
         <div className="tw-self-center">
           <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2">
             <svg
-              className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300"
+              className="tw-size-5 tw-shrink-0 tw-text-iron-300"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               aria-hidden="true"

@@ -109,7 +109,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             {props.token.mint_price ? (
               <span className="d-flex align-items-center">
                 {props.token.mint_price}
-                <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                   <EthereumIcon />
                 </div>
               </span>
@@ -208,7 +208,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                       <span className="d-flex gap-2 align-items-center">
                         <span className="d-flex align-items-center">
                           <span>{props.token.opensea_price}</span>
-                          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                          <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                             <EthereumIcon />
                           </div>
                         </span>
@@ -264,7 +264,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                       <span className="d-flex gap-2 align-items-center">
                         <span className="d-flex align-items-center">
                           <span>{props.token.blur_price}</span>
-                          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                          <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                             <EthereumIcon />
                           </div>
                         </span>
@@ -313,7 +313,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                       <span className="d-flex gap-2 align-items-center">
                         <span className="d-flex align-items-center">
                           <span>{props.token.me_price}</span>
-                          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
+                          <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50">
                             <EthereumIcon />
                           </div>
                         </span>

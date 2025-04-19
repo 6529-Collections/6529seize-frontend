@@ -16,7 +16,7 @@ export const TimePhaseIcon: React.FC<TimePhaseIconProps> = ({
   color,
 }) => {
   const containerClasses = {
-    base: "tw-flex-shrink-0 tw-size-6 md:tw-size-8 tw-rounded-md tw-bg-gradient-to-br tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10",
+    base: "tw-shrink-0 tw-size-6 md:tw-size-8 tw-rounded-md tw-bg-gradient-to-br tw-flex tw-items-center tw-justify-center tw-ring-1 tw-ring-white/10",
     emerald: "tw-from-emerald-300/10 tw-to-emerald-400/5",
     violet: "tw-from-violet-300/10 tw-to-violet-400/5",
     blue: "tw-from-blue-300/10 tw-to-blue-400/5",

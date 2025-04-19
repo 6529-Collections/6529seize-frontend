@@ -36,7 +36,7 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
           >
             <FontAwesomeIcon
               icon={faXmark}
-              className="tw-size-5 lg:tw-size-6 tw-flex-shrink-0"
+              className="tw-size-5 lg:tw-size-6 tw-shrink-0"
             />
           </motion.button>
 

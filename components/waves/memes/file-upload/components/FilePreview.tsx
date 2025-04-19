@@ -114,7 +114,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         >
           <FontAwesomeIcon
             icon={faXmark}
-            className="tw-size-4 tw-flex-shrink-0"
+            className="tw-size-4 tw-shrink-0"
           />
         </button>
       </div>

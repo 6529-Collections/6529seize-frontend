@@ -23,7 +23,7 @@ export default function ProfileActivityLogClassification({
               CLASSIFICATIONS[log.contents.old_value].title}
           </span>
           <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-400"
+            className="tw-shrink-0 tw-h-5 tw-w-5 tw-text-iron-400"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"

@@ -11,7 +11,7 @@ export default function CreateWaveBackStep({
       tw-text-base tw-font-semibold tw-border tw-border-solid tw-border-transparent tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"
     >
       <svg
-        className="tw-size-6 tw-mr-2 tw-flex-shrink-0"
+        className="tw-size-6 tw-mr-2 tw-shrink-0"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

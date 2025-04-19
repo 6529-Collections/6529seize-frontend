@@ -119,7 +119,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
               disabled={isTemporaryDrop}
             >
               <svg
-                className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
+                className="tw-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
                 fill="none"
@@ -147,7 +147,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
               disabled={isTemporaryDrop}
             >
               <svg
-                className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
+                className="tw-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
                 fill="none"
@@ -191,7 +191,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
             disabled={isTemporaryDrop}
           >
             <svg
-              className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
+              className="tw-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"

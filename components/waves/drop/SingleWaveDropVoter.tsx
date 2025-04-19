@@ -19,7 +19,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
   const hasPositiveVotes = !!voter.positive_votes_summed;
   const hasNegativeVotes = !!voter.negative_votes_summed;
 
-  const pfpClasses = "tw-size-6 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0";
+  const pfpClasses = "tw-size-6 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-shrink-0";
   const dotClasses = "tw-w-1.5 tw-h-1.5 tw-rounded-sm";
 
   return (

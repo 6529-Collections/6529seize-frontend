@@ -20,9 +20,9 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
 }) => {
   return (
     <div
-      className={`tw-hidden md:tw-flex tw-items-center tw-gap-1.5 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-rounded-lg tw-border tw-border-emerald-600/20 tw-flex-shrink-0 ${className}`}
+      className={`tw-hidden md:tw-flex tw-items-center tw-gap-1.5 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-rounded-lg tw-border tw-border-emerald-600/20 tw-shrink-0 ${className}`}
     >
-      <div className="tw-flex-shrink-0 tw-text-emerald-500">
+      <div className="tw-shrink-0 tw-text-emerald-500">
         <FontAwesomeIcon icon={faClock} className="tw-size-3.5 -tw-mt-0.5" />
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-2">

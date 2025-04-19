@@ -39,9 +39,9 @@ export default function FeedItemWaveCreated({
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-space-y-2">
         <div className="tw-inline-flex tw-items-center">
-          <div className="tw-mr-2 tw-size-6 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
+          <div className="tw-mr-2 tw-size-6 tw-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
-              className="tw-flex-shrink-0 tw-size-4 md:tw-size-5 tw-text-iron-300"
+              className="tw-shrink-0 tw-size-4 md:tw-size-5 tw-text-iron-300"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               aria-hidden="true"

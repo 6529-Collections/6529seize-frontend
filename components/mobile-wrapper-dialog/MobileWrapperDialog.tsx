@@ -40,7 +40,7 @@ export default function MobileWrapperDialog({
           leaveTo="tw-opacity-0"
           beforeLeave={onBeforeLeave}
           afterLeave={onAfterLeave}>
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-backdrop-blur-[1px]" />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-500/75 tw-backdrop-blur-[1px]" />
         </TransitionChild>
 
         <div 
@@ -80,7 +80,7 @@ export default function MobileWrapperDialog({
                         className="tw-p-2.5 tw-relative tw-bg-transparent tw-rounded-md focus:tw-outline-none tw-border-none focus:tw-ring-2 focus:tw-ring-white"
                         onClick={onClose}>
                         <svg
-                          className="tw-w-6 tw-h-6 tw-flex-shrink-0 tw-text-white"
+                          className="tw-w-6 tw-h-6 tw-shrink-0 tw-text-white"
                           viewBox="0 0 24 24"
                           fill="none"
                           aria-hidden="true"

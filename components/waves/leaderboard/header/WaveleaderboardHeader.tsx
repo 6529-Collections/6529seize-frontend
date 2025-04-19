@@ -53,7 +53,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                       viewBox="0 0 24 24"
                       stroke-width="1.5"
                       stroke="currentColor"
-                      className="tw-size-5 tw-flex-shrink-0"
+                      className="tw-size-5 tw-shrink-0"
                     >
                       <path
                         strokeLinecap="round"
@@ -83,7 +83,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                       viewBox="0 0 24 24"
                       stroke-width="1.5"
                       stroke="currentColor"
-                      className="tw-size-5 tw-flex-shrink-0"
+                      className="tw-size-5 tw-shrink-0"
                     >
                       <path
                         strokeLinecap="round"
@@ -111,7 +111,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
               padding="tw-px-3 tw-py-1.5"
             >
               <svg
-                className="tw-w-4 tw-h-4 tw-flex-shrink-0 -tw-ml-1"
+                className="tw-w-4 tw-h-4 tw-shrink-0 -tw-ml-1"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"

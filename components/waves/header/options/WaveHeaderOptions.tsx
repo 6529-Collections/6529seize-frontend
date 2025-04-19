@@ -29,7 +29,7 @@ export default function WaveHeaderOptions({
       >
         <span className="tw-sr-only">Open options</span>
         <svg
-          className="tw-size-5 tw-flex-shrink-0"
+          className="tw-size-5 tw-shrink-0"
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"

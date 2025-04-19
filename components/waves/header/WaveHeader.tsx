@@ -83,7 +83,7 @@ export default function WaveHeader({
               {isDropWave && (
                 <div className="tw-absolute tw-bottom-0 tw-right-0 tw-size-6 tw-flex tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-full tw-shadow-md tw-border tw-border-iron-800/50">
                   <svg
-                    className="tw-size-4 tw-flex-shrink-0 tw-text-[#E8D48A]"
+                    className="tw-size-4 tw-shrink-0 tw-text-[#E8D48A]"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 576 512"

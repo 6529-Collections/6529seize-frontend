@@ -154,7 +154,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
               strokeWidth="2.25"
               stroke="currentColor"
               aria-hidden="true"
-              className="tw-size-4 tw-flex-shrink-0 tw-text-iron-500"
+              className="tw-size-4 tw-shrink-0 tw-text-iron-500"
             >
               <path
                 strokeLinecap="round"

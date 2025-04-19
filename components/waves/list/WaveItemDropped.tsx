@@ -12,7 +12,7 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
           <Link href={`${c.contributor_identity}`} key={c.contributor_identity}>
             <div className="tw-h-6 tw-w-6">
               <img
-                className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black"
+                className="tw-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black"
                 src={getScaledImageUri(
                   c.contributor_pfp,
                   ImageScale.W_AUTO_H_50

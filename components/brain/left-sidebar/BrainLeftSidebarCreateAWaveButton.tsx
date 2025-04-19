@@ -12,7 +12,7 @@ const BrainLeftSidebarCreateAWaveButton: React.FC<
       className="tw-no-underline tw-text-iron-300 tw-w-full tw-flex tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-py-2 tw-px-2.5 tw-text-sm tw-bg-iron-900 tw-border tw-border-iron-800 tw-border-solid desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-colors tw-duration-300"
     >
       <svg
-        className="tw-size-4 tw-flex-shrink-0"
+        className="tw-size-4 tw-shrink-0"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

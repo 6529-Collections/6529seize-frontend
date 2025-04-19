@@ -9,8 +9,8 @@ export default function PencilIcon({
   readonly size?: PencilIconSize;
 }) {
   const classes: Record<PencilIconSize, string> = {
-    [PencilIconSize.SMALL]: "tw-w-4 tw-h-4 tw-flex-shrink-0",
-    [PencilIconSize.MEDIUM]: "tw-w-5 tw-h-5 tw-flex-shrink-0",
+    [PencilIconSize.SMALL]: "tw-w-4 tw-h-4 tw-shrink-0",
+    [PencilIconSize.MEDIUM]: "tw-w-5 tw-h-5 tw-shrink-0",
   };
 
   return (

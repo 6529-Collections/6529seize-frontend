@@ -64,7 +64,7 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
           >
             <img
               src="/pepe-smile.png"
-              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
+              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-shrink-0"
               alt="pepe-smile"
             />
           </div>
@@ -78,7 +78,7 @@ export default function UserPageStatsActivityWalletTableRowRoyalties({
           >
             <img
               src="/pepe-xglasses.png"
-              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-flex-shrink-0"
+              className="tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-object-contain tw-shrink-0"
               alt="pepe-xglasses"
             />
           </div>

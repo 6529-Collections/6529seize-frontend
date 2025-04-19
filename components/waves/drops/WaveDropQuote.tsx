@@ -80,7 +80,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
       tabIndex={0}>
       <div className="tw-relative tw-group tw-w-full tw-flex tw-flex-col">
         <div className="tw-flex tw-gap-x-2">
-          <div className="tw-h-6 tw-w-6 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-md">
+          <div className="tw-h-6 tw-w-6 tw-bg-iron-900 tw-relative tw-shrink-0 tw-rounded-md">
             <div className="tw-rounded-md tw-h-full tw-w-full">
               {renderProfilePicture()}
             </div>
@@ -107,7 +107,7 @@ const WaveDropQuote: React.FC<WaveDropQuoteProps> = ({
 
               {!!drop && (
                 <>
-                  <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+                  <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-shrink-0"></div>
                   <WaveDropTime timestamp={drop.created_at} />
                 </>
               )}

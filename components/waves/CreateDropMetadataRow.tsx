@@ -81,7 +81,7 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
           {metadata.required && (
             metadata.type === "NUMBER" ? (
               <svg
-                className="tw-size-3.5 tw-flex-shrink-0 tw-absolute tw-left-3 tw-top-[15px] tw-text-iron-400"
+                className="tw-size-3.5 tw-shrink-0 tw-absolute tw-left-3 tw-top-[15px] tw-text-iron-400"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 256 512"
                 aria-hidden="true"
@@ -93,7 +93,7 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
               </svg>
             ) : (
               <svg
-                className="tw-size-4 tw-flex-shrink-0 tw-absolute tw-left-3 tw-top-3.5 tw-text-iron-400"
+                className="tw-size-4 tw-shrink-0 tw-absolute tw-left-3 tw-top-3.5 tw-text-iron-400"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"

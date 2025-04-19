@@ -74,7 +74,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
         </label>
         <div className="tw-pointer-events-none tw-absolute tw-flex tw-items-center tw-inset-y-0 tw-pl-3">
           <svg
-            className="tw-text-iron-300 tw-w-5 tw-h-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out"
+            className="tw-text-iron-300 tw-w-5 tw-h-5 tw-shrink-0 tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -92,7 +92,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
           <svg
             className={`${isOpen ? "-tw-rotate-180" : "tw-rotate-0"} 
-             tw-text-iron-300 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
+             tw-text-iron-300 tw-h-5 tw-w-5 tw-shrink-0 tw-transition tw-duration-300 tw-ease-out`}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -141,7 +141,7 @@ export default function CreateWaveDatesEndDateSelectPeriod({
         <div className="tw-relative tw-mt-1.5 tw-text-error tw-text-xs tw-font-medium">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
-              className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+              className="tw-size-5 tw-shrink-0 tw-text-error"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

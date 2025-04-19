@@ -168,7 +168,7 @@ export default function SubsequentDecisions({
           <div className="tw-flex tw-items-center tw-justify-center tw-w-8 tw-h-8 tw-rounded-full tw-bg-primary-500/20 tw-text-primary-400 tw-text-xs tw-font-medium tw-mr-3">
             <FontAwesomeIcon
               icon={faCalendarPlus}
-              className="tw-size-4 tw-flex-shrink-0"
+              className="tw-size-4 tw-shrink-0"
             />
           </div>
           <div>
@@ -203,7 +203,7 @@ export default function SubsequentDecisions({
             />
           </div>
 
-          <div className="tw-ml-3 tw-flex-shrink-0">
+          <div className="tw-ml-3 tw-shrink-0">
             <PrimaryButton
               onClicked={handleAddTimeframe}
               disabled={!additionalTime}

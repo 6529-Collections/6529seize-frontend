@@ -174,7 +174,7 @@ const DropPart = memo(
                     }}
                   >
                     <svg
-                      className="tw-size-5 tw-flex-shrink-0"
+                      className="tw-size-5 tw-shrink-0"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       aria-hidden="true"
@@ -214,7 +214,7 @@ const DropPart = memo(
                     }}
                   >
                     <svg
-                      className="tw-size-5 tw-flex-shrink-0"
+                      className="tw-size-5 tw-shrink-0"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       aria-hidden="true"

@@ -9,7 +9,7 @@ export default function DistributionPlanEmptyTablePlaceholder({
     <div className="tw-py-8 tw-text-center tw-flex tw-flex-col tw-items-center tw-border tw-border-solid tw-border-neutral-700 tw-rounded-lg">
       <div className="tw-h-10 tw-w-10 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-bg-neutral-700/60 tw-ring-[8px] tw-ring-neutral-800/60">
         <svg
-          className="tw-mx-auto tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-400"
+          className="tw-mx-auto tw-shrink-0 tw-h-6 tw-w-6 tw-text-neutral-400"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

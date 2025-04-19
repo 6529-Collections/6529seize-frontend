@@ -1,5 +1,9 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import formsPlugin from '@tailwindcss/forms';
+// import containerQueriesPlugin from '@tailwindcss/container-queries'; // Removed earlier
+import scrollbarPlugin from 'tailwind-scrollbar';
+
+export default {
   darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx}",
@@ -10,9 +14,6 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   prefix: "tw-",
-  corePlugins: {
-    preflight: false,
-  },
   theme: {
     extend: {
       boxShadow: {
@@ -82,7 +83,7 @@ module.exports = {
           "50%": {
             "background-position": "100% 50%",
           },
-          '100%': { 
+          '100%': {
             'background-position': '0% 50%'
           }
         },
@@ -95,10 +96,10 @@ module.exports = {
           }
         },
         'fadeIn': {
-          '0%': { 
+          '0%': {
             opacity: '0'
           },
-          '100%': { 
+          '100%': {
             opacity: '1'
           }
         }
@@ -117,19 +118,15 @@ module.exports = {
       }
     },
   },
-  variants: {
-    extend: {
-      fontSize: ["placeholder"],
-    },
-  },
   plugins: [
-    require("@tailwindcss/forms")({
+    formsPlugin({
       strategy: "class",
     }),
-    require("tailwind-scrollbar")({ nocompatible: true }),
-    require("@tailwindcss/container-queries"),
-    function ({ addVariant }) {
-      addVariant("desktop-hover", "@media (hover: hover) and (pointer: fine)");
-    },
+    // scrollbarPlugin({ nocompatible: true }),
+    // {
+    //   handler: function ({ addVariant }) {
+    //     addVariant("desktop-hover", "@media (hover: hover) and (pointer: fine)");
+    //   }
+    // }
   ],
-};
+}; 

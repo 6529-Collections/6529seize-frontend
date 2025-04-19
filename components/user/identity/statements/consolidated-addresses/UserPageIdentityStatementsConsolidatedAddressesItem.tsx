@@ -158,7 +158,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             onClick={goToOpensea}
             aria-label="Go to Opensea"
             className="tw-bg-transparent tw-border-none tw-p-0">
-            <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+            <div className="tw-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
               <OpenseaIcon />
             </div>
           </button>
@@ -172,7 +172,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             onClick={goToEtherscan}
             aria-label="Go to Etherscan"
             className="tw-bg-transparent tw-border-none tw-p-0">
-            <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
+            <div className="tw-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
               <EtherscanIcon />
             </div>
           </button>
@@ -186,7 +186,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           </div>
           <div className="tw-inline-flex tw-items-center">
             <svg
-              className="tw-flex-shrink-0 tw-w-5 tw-h-5"
+              className="tw-shrink-0 tw-w-5 tw-h-5"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

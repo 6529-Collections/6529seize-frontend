@@ -97,7 +97,7 @@ export default function UserSettingsImgSelectMeme({
                       <img
                         src={meme.thumbnail ?? meme.image ?? meme.scaled ?? ""}
                         alt=""
-                        className="tw-flex-shrink-0 tw-ml-0 tw-pl-0 tw-rounded-full tw-bg-iron-700 tw-h-6 tw-w-6"
+                        className="tw-shrink-0 tw-ml-0 tw-pl-0 tw-rounded-full tw-bg-iron-700 tw-h-6 tw-w-6"
                       />
                       <span className="tw-inline-block tw-ml-2 tw-text-sm tw-font-medium tw-text-iron-50">
                         {`#${meme.id} ${meme.name ?? ""}`}

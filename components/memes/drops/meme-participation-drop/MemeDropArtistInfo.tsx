@@ -41,7 +41,7 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
               {drop.author?.handle}
             </span>
           </Link>
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-shrink-0"></div>
           <WaveDropTime timestamp={drop.created_at} />
           <div className="tw-ml-2">
             <WinnerDropBadge

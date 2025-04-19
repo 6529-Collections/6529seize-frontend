@@ -30,7 +30,7 @@ export default function DistributionPlanSwitch({
       <button
         onClick={() => setIsOn(!isOn)}
         type="button"
-        className={`${backGroundColor} tw-p-0 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500`}
+        className={`${backGroundColor} tw-p-0 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500`}
         role="switch"
         aria-checked="false"
       >

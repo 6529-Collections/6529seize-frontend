@@ -21,7 +21,7 @@ export default function CreateWaveDropsMetadataRowType({
       <button
         onClick={() => onTypeChange(ApiWaveMetadataType.String)}
         title="Text"
-        className={`${STRING_CLASSES} tw-flex-shrink-0 tw-ring-1 tw-ring-inset focus:tw-z-10 tw-rounded-l-lg tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
+        className={`${STRING_CLASSES} tw-shrink-0 tw-ring-1 tw-ring-inset focus:tw-z-10 tw-rounded-l-lg tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
         type="button"
       >
         <svg
@@ -43,7 +43,7 @@ export default function CreateWaveDropsMetadataRowType({
       <button
         onClick={() => onTypeChange(ApiWaveMetadataType.Number)}
         title="Number"
-        className={`${NUMBER_CLASSES} tw-flex-shrink-0 -tw-ml-px focus:tw-z-10 tw-ring-1 tw-ring-inset tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
+        className={`${NUMBER_CLASSES} tw-shrink-0 -tw-ml-px focus:tw-z-10 tw-ring-1 tw-ring-inset tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-w-12 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-transition-all tw-duration-300 tw-ease-out`}
         type="button"
       >
         <svg

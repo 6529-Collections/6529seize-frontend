@@ -21,7 +21,7 @@ export default function CreateDropContentMissingMediaWarning({
     <Tippy content={TOOLTIP[missingMedia[0]]}>
       <div className="tw-inline-flex tw-items-center tw-gap-x-2">
         <svg
-          className="tw-size-4 tw-flex-shrink-0 tw-text-yellow"
+          className="tw-size-4 tw-shrink-0 tw-text-yellow"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

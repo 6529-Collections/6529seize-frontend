@@ -53,7 +53,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         {isStorm && (
           <Tippy content="Storm">
             <svg
-              className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
+              className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -71,7 +71,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         {!!haveMetadata && (
           <Tippy content="Metadata">
             <svg
-              className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
+              className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -89,7 +89,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         {!!haveMedia && (
           <Tippy content="Media">
             <svg
-              className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
+              className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"

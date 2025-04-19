@@ -205,7 +205,7 @@ const CreateDropFullMobile = forwardRef<
                       className="-tw-mb-0.5 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-iron-800"
                     >
                       <svg
-                        className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-red"
+                        className="tw-shrink-0 tw-w-5 tw-h-5 tw-text-red"
                         viewBox="0 0 24 24"
                         fill="none"
                         aria-hidden="true"

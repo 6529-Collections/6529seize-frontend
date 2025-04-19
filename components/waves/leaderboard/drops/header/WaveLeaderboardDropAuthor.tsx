@@ -23,7 +23,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
         onClick={(e) => e.stopPropagation()}
         className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
       >
-        <div className="tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
+        <div className="tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-shrink-0 tw-rounded-lg">
           {drop.author.pfp ? (
             <div className="tw-rounded-lg tw-h-full tw-w-full">
               <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10">
@@ -58,7 +58,7 @@ export const WaveLeaderboardDropAuthor: React.FC<
             </span>
           </Link>
 
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-shrink-0"></div>
 
           <WaveDropTime timestamp={drop.created_at} />
         </div>

@@ -843,7 +843,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
   };
 
   return (
-    <div className="tw-flex-grow">
+    <div className="tw-grow">
       <CreateDropReplyingWrapper
         activeDrop={activeDrop}
         submitting={submitting}
@@ -865,7 +865,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             setShowOptions={setShowOptions}
             onGifDrop={onGifDrop}
           />
-          <div className="tw-flex-grow tw-w-full">
+          <div className="tw-grow tw-w-full">
             <CreateDropInput
               waveId={wave.id}
               key={dropEditorRefreshKey}

@@ -1,7 +1,7 @@
 export default function RateClapSolidIcon() {
   return (
     <svg
-      className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
+      className="tw-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"
       width="47"
       height="49"
       viewBox="0 0 47 49"

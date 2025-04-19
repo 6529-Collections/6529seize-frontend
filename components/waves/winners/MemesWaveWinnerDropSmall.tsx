@@ -113,7 +113,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
-              className="tw-block tw-flex-shrink-0 desktop-hover:group-hover:tw-opacity-90 tw-transition-opacity"
+              className="tw-block tw-shrink-0 desktop-hover:group-hover:tw-opacity-90 tw-transition-opacity"
             >
               {drop.author.pfp ? (
                 <img
@@ -139,7 +139,7 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
                   {drop.author.handle}
                 </span>
               </Link>
-              <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></span>
+              <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-shrink-0"></span>
               <WaveDropTime timestamp={drop.created_at} />
             </div>
           </div>

@@ -100,7 +100,7 @@ export default function WaveWinnersDropOutcome({
             </span>
             {repOutcome.category && (
               <>
-                <span className="tw-size-[2px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-400/70"></span>
+                <span className="tw-size-[2px] tw-shrink-0 tw-rounded-full tw-bg-iron-400/70"></span>
                 <span className="tw-text-sm tw-font-normal tw-text-purple-200/90">
                   {repOutcome.category}
                 </span>

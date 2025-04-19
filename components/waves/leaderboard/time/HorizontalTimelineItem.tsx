@@ -22,7 +22,7 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
   return (
     <div
       className={`tw-relative tw-flex tw-flex-col tw-items-center tw-z-10 ${
-        flexGrow ? "tw-flex-1" : "tw-flex-shrink-0 tw-w-[80px]"
+        flexGrow ? "tw-flex-1" : "tw-shrink-0 tw-w-[80px]"
       }`}
     >
       {/* Dot indicator ABOVE the line */}

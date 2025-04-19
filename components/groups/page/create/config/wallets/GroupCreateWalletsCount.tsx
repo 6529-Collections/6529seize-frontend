@@ -14,7 +14,7 @@ export default function GroupCreateWalletsCount({
     <div className="tw-flex tw-gap-x-4 tw-items-center tw-h-8">
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
         <svg
-          className="tw-size-5 tw-flex-shrink-0 tw-text-iron-300"
+          className="tw-size-5 tw-shrink-0 tw-text-iron-300"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

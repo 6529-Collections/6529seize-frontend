@@ -86,7 +86,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       {/* Don't render tab container for simple waves */}
       {breakpoint !== "S" && <MyStreamWaveTabs wave={wave} />}
 
-      <div className="tw-flex-grow tw-overflow-hidden">
+      <div className="tw-grow tw-overflow-hidden">
         {components[activeContentTab]}
       </div>
     </div>

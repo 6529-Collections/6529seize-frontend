@@ -85,10 +85,10 @@ export default function ProxyCreateTargetSearch({
               <img
                 src={profileProxy.granted_to.pfp}
                 alt="Profile picture"
-                className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
+                className="tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"
               />
             ) : (
-              <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+              <div className="tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
             )}
             <span className="tw-font-semibold tw-text-iron-50 tw-text-base">
               {profileProxy.granted_to.handle}
@@ -99,7 +99,7 @@ export default function ProxyCreateTargetSearch({
               className="tw-bg-transparent tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 focus:tw-outline-none hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
             >
               <svg
-                className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-red"
+                className="tw-shrink-0 tw-h-5 tw-w-5 tw-text-red"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
@@ -159,10 +159,10 @@ export default function ProxyCreateTargetSearch({
                         <img
                           src={profile.pfp}
                           alt="Profile picture"
-                          className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full"
+                          className="tw-h-6 tw-w-6 tw-shrink-0 tw-rounded-full"
                         />
                       ) : (
-                        <div className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
+                        <div className="tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-white/30"></div>
                       )}
                       <span
                         className={classNames(

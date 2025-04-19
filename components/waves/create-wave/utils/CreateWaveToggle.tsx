@@ -33,7 +33,7 @@ export default function CreateWaveToggle({
               onChange={(e) => onChange(e.target.checked)}
             />
             <span
-              className={`tw-p-0 tw-relative tw-flex tw-items-center tw-h-5 tw-w-9 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out  
+              className={`tw-p-0 tw-relative tw-flex tw-items-center tw-h-5 tw-w-9 tw-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out  
                 ${
                   enabled
                     ? "tw-bg-primary-500 focus:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2"

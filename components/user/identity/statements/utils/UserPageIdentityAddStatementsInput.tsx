@@ -30,7 +30,7 @@ export default function UserPageIdentityAddStatementsContactInput({
       </label>
       <div className="tw-relative tw-mt-1.5">
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-flex tw-items-center tw-pl-3">
-          <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-flex-shrink-0">
+          <div className="tw-h-5 tw-w-5 tw-flex tw-items-center tw-shrink-0">
             <SocialStatementIcon statementType={activeType} />
           </div>
         </div>

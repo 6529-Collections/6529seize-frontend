@@ -20,7 +20,7 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
   return (
     <div className="tw-flex tw-flex-col tw-justify-between tw-gap-x-2 tw-gap-y-2 tw-w-full tw-p-3 tw-rounded-lg tw-bg-iron-900 tw-overflow-hidden">
       <div className="tw-flex tw-items-center tw-gap-3">
-        <span className="tw-text-iron-400 tw-font-medium tw-flex-shrink-0">{position}.</span>
+        <span className="tw-text-iron-400 tw-font-medium tw-shrink-0">{position}.</span>
         <Link
           href={`/${voter.voter.handle}`}
           className="tw-flex tw-items-center tw-gap-2 tw-no-underline tw-group desktop-hover:hover:tw-opacity-80 tw-transition-all tw-duration-300 tw-max-w-full tw-min-w-0"
@@ -29,10 +29,10 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
             <img
               src={voter.voter.pfp}
               alt=""
-              className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0 tw-object-contain"
+              className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-shrink-0 tw-object-contain"
             />
           ) : (
-            <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
+            <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-shrink-0" />
           )}
           <Tippy content={voter.voter.handle}>
             <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300 tw-truncate">

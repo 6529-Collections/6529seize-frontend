@@ -38,7 +38,7 @@ export default function WaveDropReply({
 
     return (
       <div className="tw-flex tw-gap-x-1.5">
-        <div className="tw-h-6 tw-w-6 tw-bg-iron-800 tw-relative tw-flex-shrink-0 tw-rounded-md z-10">
+        <div className="tw-h-6 tw-w-6 tw-bg-iron-800 tw-relative tw-shrink-0 tw-rounded-md z-10">
           {drop.author.pfp ? (
             <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-md tw-overflow-hidden tw-bg-iron-900">
               <div className="tw-h-full tw-text-center tw-flex tw-items-center tw-justify-center tw-rounded-md tw-overflow-hidden">

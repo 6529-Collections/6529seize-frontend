@@ -59,7 +59,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                     strokeWidth="2.5"
                     stroke="currentColor"
                     aria-hidden="true"
-                    className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400"
+                    className="tw-size-3.5 tw-shrink-0 tw-text-iron-400"
                   >
                     <path
                       strokeLinecap="round"
@@ -84,12 +84,12 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                 >
                   {drop.author.pfp ? (
                     <img
-                      className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10"
+                      className="tw-size-6 tw-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10"
                       src={drop.author.pfp}
                       alt=""
                     />
                   ) : (
-                    <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
+                    <div className="tw-size-6 tw-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-white/10" />
                   )}
                   <span className="tw-text-iron-50 tw-text-sm tw-font-semibold">
                     {drop.author.handle}
@@ -110,7 +110,7 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
               </div>
               <div className="tw-flex tw-items-center tw-gap-x-1.5 tw-mt-2">
                 <svg
-                  className="tw-size-3.5 -tw-mt-0.5 tw-text-iron-400 tw-flex-shrink-0"
+                  className="tw-size-3.5 -tw-mt-0.5 tw-text-iron-400 tw-shrink-0"
                   id="clap--icon-672c9d44f92440a3a313a608"
                   viewBox="0 0 346 360"
                   fill="none"

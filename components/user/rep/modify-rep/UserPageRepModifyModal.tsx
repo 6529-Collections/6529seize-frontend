@@ -373,7 +373,7 @@ export default function UserPageRepModifyModal({
 
   return (
     <div className="tw-relative tw-z-10">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-500/75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div
@@ -399,7 +399,7 @@ export default function UserPageRepModifyModal({
                 <div className="tw-relative tw-flex tw-mt-1.5">
                   <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
                     <svg
-                      className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
+                      className="tw-w-3.5 tw-h-3.5 tw-shrink-0 tw-text-iron-500"
                       viewBox="0 0 24 24"
                       fill="none"
                       aria-hidden="true"
@@ -414,7 +414,7 @@ export default function UserPageRepModifyModal({
                       />
                     </svg>
                     <svg
-                      className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
+                      className="tw-w-3.5 tw-h-3.5 tw-shrink-0 tw-text-iron-500"
                       viewBox="0 0 24 24"
                       fill="none"
                       aria-hidden="true"

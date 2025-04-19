@@ -71,10 +71,10 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
     >
       <div className="tw-flex tw-items-center tw-w-full sm:tw-w-auto">
         <div className="tw-flex tw-items-center">
-          <div className="tw-flex-shrink-0 tw-mr-2 tw-text-emerald-500">
+          <div className="tw-shrink-0 tw-mr-2 tw-text-emerald-500">
             <FontAwesomeIcon
               icon={icon}
-              className="tw-size-4 tw-flex-shrink-0"
+              className="tw-size-4 tw-shrink-0"
             />
           </div>
           <div

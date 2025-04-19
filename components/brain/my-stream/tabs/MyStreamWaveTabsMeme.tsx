@@ -30,7 +30,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
           <h1 className="tw-text-2xl tw-font-semibold tw-text-iron-100 tw-mb-0">
             {wave.name}
           </h1>
-          <div className="tw-flex-shrink-0">
+          <div className="tw-shrink-0">
             <MyStreamWaveTabsMemeSubmit
               handleMemesSubmit={handleMemesSubmit}
               wave={wave}

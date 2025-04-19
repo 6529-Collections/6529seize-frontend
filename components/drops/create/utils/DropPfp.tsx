@@ -19,7 +19,7 @@ export default function DropPfp({
 
   return (
     <div
-      className={`${SIZE_CLASSES[size]} tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg`}
+      className={`${SIZE_CLASSES[size]} tw-bg-iron-900 tw-relative tw-shrink-0 tw-rounded-lg`}
     >
       <div className="tw-rounded-lg tw-h-full tw-w-full">
         <div className="tw-ring-1 tw-ring-inset tw-ring-white/5 tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900">

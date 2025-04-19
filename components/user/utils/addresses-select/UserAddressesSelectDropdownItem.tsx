@@ -32,7 +32,7 @@ export default function UserAddressesSelectDropdownItem({
         className="tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
       >
         <svg
-          className="tw-flex-shrink-0 tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 tw-text-iron-400 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
+          className="tw-shrink-0 tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 tw-text-iron-400 group-hover:tw-text-white tw-transition tw-duration-300 tw-ease-out"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@ export default function UserAddressesSelectDropdownItem({
         className="tw-group tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
       >
         <svg
-          className="tw-flex-shrink-0 tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
+          className="tw-shrink-0 tw-h-6 tw-w-6 sm:tw-h-5 sm:tw-w-5 group-hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out"
           viewBox="0 0 90 90"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

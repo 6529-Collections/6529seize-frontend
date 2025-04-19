@@ -46,7 +46,7 @@ const TrophyOnlyBadge: React.FC<{ rank: number }> = ({ rank }) => {
       <span className="tw-px-2 tw-py-1 tw-text-xs tw-flex tw-items-center">
         <FontAwesomeIcon
           icon={faTrophy}
-          className="tw-size-2.5 tw-flex-shrink-0"
+          className="tw-size-2.5 tw-shrink-0"
         />
       </span>
     </div>

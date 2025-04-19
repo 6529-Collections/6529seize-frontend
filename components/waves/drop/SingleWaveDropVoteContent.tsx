@@ -46,7 +46,7 @@ export const SingleWaveDropVoteContent: React.FC<
       {/* Main container using flexbox and wrapping */}
       <div className="tw-flex tw-flex-wrap tw-gap-3 sm:tw-gap-2.5">
         {/* Toggle button - first item in both layouts */}
-        <div className="tw-order-1 sm:tw-order-1 tw-flex-shrink-0">
+        <div className="tw-order-1 sm:tw-order-1 tw-shrink-0">
           <button
             onClick={() => setIsSliderMode(!isSliderMode)}
             className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-650
@@ -56,7 +56,7 @@ export const SingleWaveDropVoteContent: React.FC<
           >
             <FontAwesomeIcon
               icon={faExchange}
-              className="tw-text-white tw-size-3 tw-flex-shrink-0"
+              className="tw-text-white tw-size-3 tw-shrink-0"
               flip={isSliderMode ? "horizontal" : "vertical"}
             />
             <span className="tw-text-xs tw-font-medium tw-text-white">
@@ -98,7 +98,7 @@ export const SingleWaveDropVoteContent: React.FC<
         </div>
 
         {/* Submit button - fourth item in mobile (third row), third in desktop (first row) */}
-        <div className="tw-order-4 sm:tw-order-3 tw-ml-auto sm:tw-ml-0 tw-flex-shrink-0">
+        <div className="tw-order-4 sm:tw-order-3 tw-ml-auto sm:tw-ml-0 tw-shrink-0">
           <SingleWaveDropVoteSubmit
             drop={drop}
             newRating={Number(voteValue)}

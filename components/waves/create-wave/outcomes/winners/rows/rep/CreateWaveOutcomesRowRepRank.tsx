@@ -33,7 +33,7 @@ export default function CreateWaveOutcomesRowRepRank({
         <div className="tw-col-span-2">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
-              className="tw-size-5 tw-text-primary-400 tw-flex-shrink-0"
+              className="tw-size-5 tw-text-primary-400 tw-shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -60,7 +60,7 @@ export default function CreateWaveOutcomesRowRepRank({
             className="tw-h-8 tw-w-8 tw-text-error tw-flex tw-items-center tw-justify-center tw-bg-transparent tw-border-0 tw-rounded-full hover:tw-bg-error/10 focus:tw-scale-90 tw-transform tw-transition tw-duration-300 tw-ease-out"
           >
             <svg
-              className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+              className="tw-shrink-0 tw-h-5 tw-w-5"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

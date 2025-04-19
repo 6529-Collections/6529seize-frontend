@@ -9,7 +9,7 @@ export default function CreateWaveWarning({
     <div className="tw-text-[#fef08a] tw-text-xs tw-font-medium">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <svg
-          className="tw-size-5 tw-flex-shrink-0 tw-text-[#fef08a]"
+          className="tw-size-5 tw-shrink-0 tw-text-[#fef08a]"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

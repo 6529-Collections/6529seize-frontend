@@ -1,7 +1,7 @@
 export default function RateClapOutlineIcon() {
   return (
     <svg
-      className="tw-flex-shrink-0 tw-h-full tw-w-full tw-transition tw-ease-out tw-duration-300"
+      className="tw-shrink-0 tw-h-full tw-w-full tw-transition tw-ease-out tw-duration-300"
       width="350"
       height="364"
       viewBox="0 0 350 364"

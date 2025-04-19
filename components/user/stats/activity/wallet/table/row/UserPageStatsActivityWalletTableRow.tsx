@@ -301,7 +301,7 @@ export default function UserPageStatsActivityWalletTableRow({
             </Link>
           </span>
           <img
-            className="tw-mx-0.5 tw-flex-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"
+            className="tw-mx-0.5 tw-shrink-0 tw-object-contain tw-max-h-10 tw-min-w-10 tw-w-auto tw-h-auto tw-rounded-sm tw-ring-1 tw-ring-white/30 tw-bg-iron-800"
             src={getImageSrc()}
             alt={meme?.name ?? ""}
           />
@@ -368,7 +368,7 @@ export default function UserPageStatsActivityWalletTableRow({
             aria-label="Go to etherscan"
             rel="noopener noreferrer"
             className="tw-bg-transparent tw-border-none tw-h-10 tw-w-10 tw-flex tw-justify-center tw-items-center hover:tw-scale-110 tw-rounded-full focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
-            <span className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5">
+            <span className="tw-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5">
               <EtherscanIcon />
             </span>
           </a>

@@ -43,9 +43,9 @@ export default function NotificationDropReplied({
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
         <div className="tw-inline-flex tw-items-center">
-          <div className="sm:tw-hidden tw-mr-2 tw-size-6 md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
+          <div className="sm:tw-hidden tw-mr-2 tw-size-6 md:tw-absolute md:-tw-left-12 tw-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
-              className="tw-flex-shrink-0 tw-size-4 md:tw-size-5 tw-text-iron-300"
+              className="tw-shrink-0 tw-size-4 md:tw-size-5 tw-text-iron-300"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               aria-hidden="true"
@@ -69,10 +69,10 @@ export default function NotificationDropReplied({
                     ImageScale.W_AUTO_H_50
                   )}
                   alt="#"
-                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+                  className="tw-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
                 />
               ) : (
-                <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+                <div className="tw-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
               )}
             </div>
             <span className="tw-text-sm tw-font-normal tw-text-iron-50">

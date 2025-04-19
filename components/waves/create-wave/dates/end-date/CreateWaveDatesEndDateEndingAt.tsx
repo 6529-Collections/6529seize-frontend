@@ -6,7 +6,7 @@ export default function CreateWaveDatesEndDateEndingAt({
   return (
     <div className="tw-mt-2 tw-flex tw-items-center tw-gap-x-1.5">
       <svg
-        className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-300"
+        className="tw-shrink-0 tw-h-4 tw-w-4 tw-text-iron-300"
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

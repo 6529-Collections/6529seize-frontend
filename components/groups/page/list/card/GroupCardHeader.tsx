@@ -28,7 +28,7 @@ export default function GroupCardHeader({
       <div className="-tw-mt-3 tw-flex tw-gap-x-4">
         {group?.created_by.pfp ? (
           <img
-            className="tw-flex-shrink-0 tw-object-contain tw-h-9 tw-w-9 tw-rounded-md tw-bg-iron-700 tw-ring-1 tw-ring-iron-700"
+            className="tw-shrink-0 tw-object-contain tw-h-9 tw-w-9 tw-rounded-md tw-bg-iron-700 tw-ring-1 tw-ring-iron-700"
             src={getScaledImageUri(
               group.created_by.pfp,
               ImageScale.W_AUTO_H_50

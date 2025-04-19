@@ -40,7 +40,7 @@ export default function GroupHeaderSelect() {
     <div className="tw-w-full tw-inline-flex tw-items-center tw-rounded-lg tw-bg-primary-400/5 tw-border tw-border-solid tw-border-primary-400/30 tw-px-4 tw-py-3">
       <div className="tw-flex tw-items-center">
         <svg
-          className="tw-flex-shrink-0 tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"
+          className="tw-shrink-0 tw-self-center tw-w-5 tw-h-5 tw-text-primary-300"
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

@@ -133,7 +133,7 @@ function TopUpEntry(
         <div className="d-flex align-items-center gap-3">
           <div className="d-flex align-items-center gap-1 no-wrap">
             <b>+ {props.topUp.amount}</b>
-            <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
+            <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5">
               <EthereumIcon />
             </div>
           </div>
@@ -143,7 +143,7 @@ function TopUpEntry(
           <div className="font-color-silver no-wrap">
             {getDateDisplay(new Date(props.topUp.transaction_date))}
           </div>
-          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
+          <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5">
             <a
               className="d-flex align-items-center"
               target="_blank"
@@ -211,7 +211,7 @@ function RedeemedEntry(
               new Date(props.redeem.transaction_date ?? props.redeem.created_at)
             )}
           </div>
-          <div className="tw-flex tw-items-center tw-justify-center tw-flex-shrink-0 tw-h-5 tw-w-5">
+          <div className="tw-flex tw-items-center tw-justify-center tw-shrink-0 tw-h-5 tw-w-5">
             <a
               className="d-flex align-items-center"
               target="_blank"

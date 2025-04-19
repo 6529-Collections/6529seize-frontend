@@ -86,7 +86,7 @@ export default function GroupsSelectActiveGroup({
             viewBox="0 0 24 24"
             strokeWidth="1.5"
             stroke="currentColor"
-            className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-iron-200"
+            className="tw-w-5 tw-h-5 tw-shrink-0 tw-text-iron-200"
           >
             <path
               strokeLinecap="round"

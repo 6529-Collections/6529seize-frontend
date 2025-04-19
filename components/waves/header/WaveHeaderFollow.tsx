@@ -132,7 +132,7 @@ export default function WaveHeaderFollow({
     } else if (following) {
       return (
         <svg
-          className="tw-h-3 tw-w-3 tw-flex-shrink-0 -tw-ml-1"
+          className="tw-h-3 tw-w-3 tw-shrink-0 -tw-ml-1"
           viewBox="0 0 17 15"
           fill="none"
           aria-hidden="true"
@@ -148,7 +148,7 @@ export default function WaveHeaderFollow({
     } else {
       return (
         <svg
-          className={`${SVG_CLASSES[size]} tw-h-3 tw-w-3 tw-flex-shrink-0 -tw-ml-1`}
+          className={`${SVG_CLASSES[size]} tw-h-3 tw-w-3 tw-shrink-0 -tw-ml-1`}
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

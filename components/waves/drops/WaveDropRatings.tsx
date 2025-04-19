@@ -40,7 +40,7 @@ const WaveDropRatings: React.FC<WaveDropRatingsProps> = ({ drop }) => {
           {formatNumberWithCommas(drop.raters_count)}{" "}
           {drop.raters_count === 1 ? "liker" : "likers"}
         </span>
-        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+        <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-shrink-0"></div>
       </div>
       <div className="tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-500 tw-text-xs tw-font-normal">
         {!!drop.rating && (

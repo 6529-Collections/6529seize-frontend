@@ -882,7 +882,7 @@ export default function EULAModal() {
             {!scrolledToBottom && (
               <button
                 onClick={scrollToBottom}
-                className="tw-absolute tw-border-none tw-bottom-2 tw-right-2 tw-bg-white tw-text-gray-800 tw-rounded-full tw-flex tw-items-center tw-justify-center hover:tw-bg-gray-200 tw-transition tw-duration-150 tw-bg-opacity-50 hover:tw-bg-opacity-80 tw-p-2">
+                className="tw-absolute tw-border-none tw-bottom-2 tw-right-2 tw-bg-white/80 tw-text-gray-800 tw-rounded-full tw-flex tw-items-center tw-justify-center hover:tw-bg-gray-200/80 tw-transition tw-duration-150 tw-p-2">
                 <FontAwesomeIcon icon={faArrowDown} height={16} width={16} />
               </button>
             )}

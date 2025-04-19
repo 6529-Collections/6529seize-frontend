@@ -54,7 +54,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     >
       <div className="tw-flex @md:tw-flex-row @sm:tw-flex-col @xs:tw-flex-col tw-gap-4">
         <div
-          className="tw-flex-shrink-0 tw-self-start tw-mr-1"
+          className="tw-shrink-0 tw-self-start tw-mr-1"
           onClick={handleCheckboxClick}
         >
           <div
@@ -82,7 +82,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
         </div>
 
-        <div className="tw-flex-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[106px] tw-min-w-[106px] @md:tw-size-[106px] @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2 tw-relative">
+        <div className="tw-shrink-0 tw-overflow-hidden tw-bg-iron-800 tw-min-h-[106px] tw-min-w-[106px] @md:tw-size-[106px] @xs:tw-w-full @xs:tw-h-56 @sm:tw-w-full @sm:tw-h-56 @sm:tw-mb-2 tw-relative">
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative desktop-hover:hover:tw-scale-105 tw-transform tw-duration-300 tw-ease-out">
             <div className="tw-absolute tw-inset-0 tw-z-[1]">
               {artWork && (
@@ -105,7 +105,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
             </h3>
           </div>
           <div className="tw-flex tw-items-center tw-gap-2 tw-mt-4">
-            <div className="tw-size-6 tw-relative tw-flex-shrink-0 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-800">
+            <div className="tw-size-6 tw-relative tw-shrink-0 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-800">
               {drop.author.pfp ? (
                 <img
                   src={drop.author.pfp}
@@ -146,7 +146,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   viewBox="0 0 24 24"
                   strokeWidth="2"
                   stroke="currentColor"
-                  className="tw-size-4 tw-text-iron-400 tw-flex-shrink-0"
+                  className="tw-size-4 tw-text-iron-400 tw-shrink-0"
                 >
                   <path
                     strokeLinecap="round"

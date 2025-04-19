@@ -21,7 +21,7 @@ export const CreateDropDropModeToggle: React.FC<
 
   const buttonClassName = useMemo(() => {
     const baseClasses =
-      "tw-flex-shrink-0 tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90";
+      "tw-shrink-0 tw-size-8 tw-flex tw-items-center tw-justify-center tw-border-0 tw-rounded-full tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 tw-transform tw-transition tw-duration-300 tw-ease-in-out active:tw-scale-90";
 
     if (isDisabled) {
       return `${baseClasses} tw-opacity-50 tw-cursor-not-allowed ${
@@ -100,7 +100,7 @@ export const CreateDropDropModeToggle: React.FC<
           className={buttonClassName}
         >
           <svg
-            className="tw-size-4 tw-flex-shrink-0"
+            className="tw-size-4 tw-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"

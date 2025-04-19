@@ -118,7 +118,7 @@ export default function CommonTimeSelect({
             }  tw-flex tw-items-center tw-gap-x-1.5`}
           >
             <svg
-              className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-400"
+              className="tw-shrink-0 tw-h-4 tw-w-4 tw-text-iron-400"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

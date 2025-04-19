@@ -74,7 +74,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
     return (
       <ClosedButton title={tooltipText}>
-        <CalendarClosedIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+        <CalendarClosedIcon className="tw-w-5 tw-h-5 tw-shrink-0" />
         <span>Submissions Closed</span>
       </ClosedButton>
     );
@@ -88,7 +88,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
     return (
       <InfoButton disabled={true} title={tooltipText}>
-        <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+        <ClockIcon className="tw-w-5 tw-h-5 tw-shrink-0" />
         <span>Submissions Open {countdown}</span>
       </InfoButton>
     );
@@ -100,7 +100,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
     
     return (
       <InfoButton disabled={true} title={tooltipText}>
-        <PermissionIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+        <PermissionIcon className="tw-w-5 tw-h-5 tw-shrink-0" />
         <span>Not Eligible to Submit</span>
       </InfoButton>
     );
@@ -116,7 +116,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 
     return (
       <InfoButton disabled={true} title={tooltipText}>
-        <LimitIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0" />
+        <LimitIcon className="tw-w-5 tw-h-5 tw-shrink-0" />
         <span>
           {maxSubmissions === 1
             ? "Submission Limit Reached (1)"
@@ -186,14 +186,14 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       title={tooltipText}
     >
       {isEndingVerySoon && canSubmit ? (
-        <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-red-500 tw-animate-pulse" />
+        <ClockIcon className="tw-w-5 tw-h-5 tw-shrink-0 tw-text-red-500 tw-animate-pulse" />
       ) : isEndingHighlyUrgent && canSubmit ? (
-        <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-amber-500 tw-animate-pulse" />
+        <ClockIcon className="tw-w-5 tw-h-5 tw-shrink-0 tw-text-amber-500 tw-animate-pulse" />
       ) : isEndingSoon && canSubmit ? (
-        <ClockIcon className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-text-amber-400" />
+        <ClockIcon className="tw-w-5 tw-h-5 tw-shrink-0 tw-text-amber-400" />
       ) : (
         <svg
-          className="tw-w-5 tw-h-5 tw-flex-shrink-0"
+          className="tw-w-5 tw-h-5 tw-shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

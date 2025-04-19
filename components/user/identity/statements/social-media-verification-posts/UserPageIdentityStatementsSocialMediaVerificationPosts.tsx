@@ -18,7 +18,7 @@ export default function UserPageIdentityStatementsSocialMediaVerificationPosts({
       <div className="tw-flex tw-items-center tw-space-x-4">
         <div className="tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-900 tw-border tw-border-solid tw-border-iron-700">
           <svg
-            className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50"
+            className="tw-shrink-0 tw-h-5 tw-w-5 tw-text-iron-50"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"

@@ -15,7 +15,7 @@ export default function CreateWaveDropsMetadataAddRowButton({
         tw-font-semibold tw-transition tw-duration-300 tw-ease-out"
       >
         <svg
-          className="tw-h-5 tw-w-5 tw-mr-2 tw-flex-shrink-0"
+          className="tw-h-5 tw-w-5 tw-mr-2 tw-shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

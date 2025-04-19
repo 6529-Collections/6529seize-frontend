@@ -29,7 +29,7 @@ export default function CreateWaveGroupItem({
           <div className="tw-flex tw-items-center tw-gap-x-2">
             {selectedGroup.created_by.pfp ? (
               <img
-                className="tw-flex-shrink-0 tw-object-contain tw-h-6 tw-w-6 tw-rounded-md tw-ring-1 tw-ring-iron-700"
+                className="tw-shrink-0 tw-object-contain tw-h-6 tw-w-6 tw-rounded-md tw-ring-1 tw-ring-iron-700"
                 src={getScaledImageUri(
                   selectedGroup.created_by.pfp,
                   ImageScale.W_AUTO_H_50
@@ -37,7 +37,7 @@ export default function CreateWaveGroupItem({
                 alt="Profile Picture"
               />
             ) : (
-              <div className="tw-flex-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-iron-700" />
+              <div className="tw-shrink-0 tw-object-contain tw-h-5 tw-w-5 tw-rounded-md tw-ring-1 tw-ring-iron-700" />
             )}
             <span className="tw-text-iron-50 tw-text-sm">
               {selectedGroup.created_by.handle}

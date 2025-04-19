@@ -304,7 +304,7 @@ export default function UserPageIdentityHeaderCICRate({
             <div className="tw-w-full tw-relative tw-flex tw-mt-1.5">
               <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
                 <svg
-                  className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
+                  className="tw-w-3.5 tw-h-3.5 tw-shrink-0 tw-text-iron-500"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg">
@@ -317,7 +317,7 @@ export default function UserPageIdentityHeaderCICRate({
                   />
                 </svg>
                 <svg
-                  className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
+                  className="tw-w-3.5 tw-h-3.5 tw-shrink-0 tw-text-iron-500"
                   viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg">

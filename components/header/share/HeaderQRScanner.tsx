@@ -158,7 +158,7 @@ function HeaderQRScannerIcon() {
       alt="QR Scanner"
       width={20}
       height={20}
-      className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+      className="tw-h-5 tw-w-5 tw-shrink-0"
     />
   );
 }

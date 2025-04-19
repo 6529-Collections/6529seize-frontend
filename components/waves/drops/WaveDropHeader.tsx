@@ -53,7 +53,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
                 {drop.author.handle}
               </Link>
             </p>
-            <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+            <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-shrink-0"></div>
             <WaveDropTime timestamp={drop.created_at} />
           </div>
           {badge && <div className="tw-ml-2">{badge}</div>}

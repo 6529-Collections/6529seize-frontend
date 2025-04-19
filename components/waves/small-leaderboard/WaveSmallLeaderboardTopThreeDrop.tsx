@@ -114,12 +114,12 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   >
                     {drop.author.pfp ? (
                       <img
-                        className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-object-contain tw-p-[1px]"
+                        className="tw-size-6 tw-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-object-contain tw-p-[1px]"
                         src={drop.author.pfp}
                         alt={drop.author.handle}
                       />
                     ) : (
-                      <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700" />
+                      <div className="tw-size-6 tw-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700" />
                     )}
                     <span className="tw-text-iron-50 tw-text-sm tw-font-semibold">
                       {drop.author.handle}
@@ -144,7 +144,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                   )}`}
                 >
                   <svg
-                    className="tw-size-3.5 -tw-mt-0.5 tw-flex-shrink-0"
+                    className="tw-size-3.5 -tw-mt-0.5 tw-shrink-0"
                     id="clap--icon-672c9d44f92440a3a313a608"
                     viewBox="0 0 346 360"
                     fill="none"

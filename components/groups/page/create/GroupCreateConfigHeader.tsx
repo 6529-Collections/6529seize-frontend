@@ -3,7 +3,7 @@ export default function GroupCreateConfigHeader() {
     <div className="tw-inline-flex tw-items-center tw-space-x-3 sm:tw-space-x-4">
       <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-size-10 sm:tw-size-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700">
         <svg
-          className="tw-flex-shrink-0 tw-size-5 tw-text-iron-50 sm:tw-size-6"
+          className="tw-shrink-0 tw-size-5 tw-text-iron-50 sm:tw-size-6"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"

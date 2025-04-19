@@ -17,7 +17,7 @@ const BrainLeftSidebarSearchWaveDropdownContent: React.FC<
         <svg
           aria-hidden="true"
           role="status"
-          className="tw-flex-shrink-0 tw-size-4 tw-inline tw-text-primary-400 tw-animate-spin"
+          className="tw-shrink-0 tw-size-4 tw-inline tw-text-primary-400 tw-animate-spin"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

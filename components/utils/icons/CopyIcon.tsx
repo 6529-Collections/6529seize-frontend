@@ -1,7 +1,7 @@
 export default function CopyIcon() {
   return (
     <svg
-      className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
+      className="tw-shrink-0 tw-w-5 tw-h-5 tw-transition tw-duration-300 tw-ease-out hover:tw-scale-110"
       width="24"
       height="24"
       viewBox="0 0 24 24"

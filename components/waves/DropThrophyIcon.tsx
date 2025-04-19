@@ -38,7 +38,7 @@ interface TrophyIconProps {
 function TrophyIcon({ color }: TrophyIconProps) {
   return (
     <svg
-      className={`tw-size-4 tw-flex-shrink-0 tw-text-[${color}]`}
+      className={`tw-size-4 tw-shrink-0 tw-text-[${color}]`}
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 576 512"
@@ -66,7 +66,7 @@ export const DropTrophyIcon: React.FC<DropTrophyIconProps> = ({ rank }) => {
           viewBox="0 0 24 24"
           strokeWidth="2.5"
           stroke="currentColor"
-          className="tw-size-3 tw-flex-shrink-0"
+          className="tw-size-3 tw-shrink-0"
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
         </svg>

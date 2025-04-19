@@ -15,7 +15,7 @@ export default function ProxyCreateActionConfigEndTimeSwitch({
         onChange={setIsActive}
         className={classNames(
           isActive ? "tw-bg-primary-500" : "tw-bg-iron-700",
-          "tw-p-0 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out"
+          "tw-p-0 tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out"
         )}
       >
         <span className="tw-sr-only">No end time</span>

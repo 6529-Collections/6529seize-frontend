@@ -22,7 +22,7 @@ export default function CreateDropActionsRow({
             aria-label="Select audio file"
             className="tw-cursor-pointer tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300">
             <svg
-              className="tw-flex-shrink-0 tw-h-5 tw-w-5"
+              className="tw-shrink-0 tw-h-5 tw-w-5"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               aria-hidden="true"
@@ -65,7 +65,7 @@ export default function CreateDropActionsRow({
           type="button"
           className="tw-border-0 tw-bg-transparent tw-cursor-pointer tw-flex tw-items-center tw-text-iron-300 hover:tw-text-iron-50 tw-ease-out tw-transition tw-duration-300">
           <svg
-            className="tw-h-4 tw-w-4 tw-flex-shrink-0 -tw-mr-0.5"
+            className="tw-h-4 tw-w-4 tw-shrink-0 -tw-mr-0.5"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -79,7 +79,7 @@ export default function CreateDropActionsRow({
             />
           </svg>
           <svg
-            className="tw-h-[1.15rem] tw-w-[1.15rem] tw-flex-shrink-0"
+            className="tw-h-[1.15rem] tw-w-[1.15rem] tw-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"

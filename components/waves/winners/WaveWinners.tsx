@@ -43,7 +43,7 @@ export const WaveWinners: React.FC<WaveWinnersProps> = ({
           isLoading={isDecisionsLoading}
         />
       ) : (
-        <div className="tw-space-y-2 tw-mt-2 tw-pb-6 lg:tw-pr-2 tw-flex-grow">
+        <div className="tw-space-y-2 tw-mt-2 tw-pb-6 lg:tw-pr-2 tw-grow">
           <WaveWinnersPodium
             onDropClick={onDropClick}
             winners={decisionPoints[0]?.winners || []}

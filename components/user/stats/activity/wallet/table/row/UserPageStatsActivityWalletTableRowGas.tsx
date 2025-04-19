@@ -36,7 +36,7 @@ export default function UserPageStatsActivityWalletTableRowGas({
       >
         <svg
           aria-hidden="true"
-          className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-text-iron-300"
+          className="tw-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 tw-text-iron-300"
           x="0px"
           y="0px"
           viewBox="0 0 494.06 494.06"

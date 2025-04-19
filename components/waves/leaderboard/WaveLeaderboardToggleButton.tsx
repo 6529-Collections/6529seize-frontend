@@ -26,7 +26,7 @@ export const WaveLeaderboardToggleButton: React.FC<WaveLeaderboardToggleButtonPr
           strokeWidth="1.5"
           stroke="currentColor"
           aria-hidden="true"
-          className="tw-w-5 tw-h-5 tw-text-iron-300 tw-flex-shrink-0"
+          className="tw-w-5 tw-h-5 tw-text-iron-300 tw-shrink-0"
         >
           <path
             strokeLinecap="round"
@@ -36,7 +36,7 @@ export const WaveLeaderboardToggleButton: React.FC<WaveLeaderboardToggleButtonPr
         </svg>
       ) : (
         <svg
-          className="tw-w-5 tw-h-5 tw-text-iron-300 tw-flex-shrink-0"
+          className="tw-w-5 tw-h-5 tw-text-iron-300 tw-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"

@@ -25,10 +25,10 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({ log, credi
               <img
                 src={log.invoker.pfp}
                 alt=""
-                className="tw-size-6 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0"
+                className="tw-size-6 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-shrink-0"
               />
             ) : (
-              <div className="tw-size-6 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
+              <div className="tw-size-6 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-shrink-0" />
             )}
             <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300 tw-truncate tw-max-w-32">
               {log.invoker.handle}
@@ -49,7 +49,7 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({ log, credi
 
         <div className="tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap">
           <svg
-            className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-flex-shrink-0"
+            className="tw-w-3.5 tw-h-3.5 tw-text-iron-400 tw-shrink-0"
             viewBox="0 0 24 24"
             aria-hidden="true"
             fill="none"

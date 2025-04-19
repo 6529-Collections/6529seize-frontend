@@ -25,7 +25,7 @@ export default function ChatItemHrefButtons({
         className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl hover:tw-text-iron-400`}
         onClick={copyToClipboard}>
         <svg
-          className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
+          className={`tw-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -44,7 +44,7 @@ export default function ChatItemHrefButtons({
           target={relativeHref ? undefined : "_blank"}
           className={`tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-p-2 tw-bg-iron-900 tw-rounded-xl`}>
           <svg
-            className={`tw-flex-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
+            className={`tw-shrink-0 tw-w-4 tw-h-4 tw-transition tw-ease-out tw-duration-300`}
             viewBox="0 0 64 64"
             xmlns="http://www.w3.org/2000/svg"
             strokeWidth="3"

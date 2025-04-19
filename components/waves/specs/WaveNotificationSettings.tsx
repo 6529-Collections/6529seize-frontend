@@ -155,7 +155,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                 ) : (
                   <FontAwesomeIcon
                     icon={faAt}
-                    className="tw-size-3.5 tw-flex-shrink-0"
+                    className="tw-size-3.5 tw-shrink-0"
                   />
                 )}
               </button>
@@ -172,7 +172,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
               ) : (
                 <FontAwesomeIcon
                   icon={faAt}
-                  className="tw-size-3.5 tw-flex-shrink-0"
+                  className="tw-size-3.5 tw-shrink-0"
                 />
               )}
             </button>
@@ -199,7 +199,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                     viewBox="0 0 24 24"
                     strokeWidth="2"
                     stroke="currentColor"
-                    className="tw-size-4 tw-flex-shrink-0"
+                    className="tw-size-4 tw-shrink-0"
                   >
                     <path
                       strokeLinecap="round"
@@ -226,7 +226,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                   viewBox="0 0 24 24"
                   strokeWidth="2"
                   stroke="currentColor"
-                  className="tw-size-4 tw-flex-shrink-0"
+                  className="tw-size-4 tw-shrink-0"
                 >
                   <path
                     strokeLinecap="round"
@@ -258,7 +258,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                     viewBox="0 0 24 24"
                     strokeWidth="2"
                     stroke="currentColor"
-                    className="tw-size-4 tw-flex-shrink-0"
+                    className="tw-size-4 tw-shrink-0"
                   >
                     <path
                       strokeLinecap="round"

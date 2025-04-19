@@ -56,7 +56,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
           isDisabled
             ? "tw-text-iron-700 tw-border-iron-700 tw-cursor-default"
             : "tw-text-primary-400 tw-border-primary-400 hover:tw-bg-primary-400 hover:tw-text-white"
-        } tw-bg-transparent tw-flex-shrink-0 tw-size-8 sm:tw-size-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
+        } tw-bg-transparent tw-shrink-0 tw-size-8 sm:tw-size-6 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition tw-duration-300 tw-ease-out`}
         onClick={(e) => {
           e.stopPropagation();
           onClick();
@@ -64,7 +64,7 @@ const WaveDropPartContent: React.FC<WaveDropPartContentProps> = ({
         aria-label={`${isPrevious ? "Previous" : "Next"} part`}
       >
         <svg
-          className="tw-size-5 sm:tw-size-4 tw-flex-shrink-0"
+          className="tw-size-5 sm:tw-size-4 tw-shrink-0"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           aria-hidden="true"

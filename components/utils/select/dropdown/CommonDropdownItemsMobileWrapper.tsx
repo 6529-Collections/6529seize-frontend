@@ -28,7 +28,7 @@ export default function CommonDropdownItemsMobileWrapper({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-backdrop-blur-[1px] tw-transition-opacity" />
+          <div className="tw-fixed tw-inset-0 tw-bg-gray-50/75 tw-backdrop-blur-[1px] tw-transition-opacity" />
         </Transition.Child>
 
         <div className="tw-fixed tw-inset-0 tw-overflow-hidden">
@@ -62,7 +62,7 @@ export default function CommonDropdownItemsMobileWrapper({
                         onClick={() => setOpen(false)}
                       >
                         <svg
-                          className="tw-w-6 tw-h-6 tw-flex-shrink-0 tw-text-white"
+                          className="tw-w-6 tw-h-6 tw-shrink-0 tw-text-white"
                           viewBox="0 0 24 24"
                           fill="none"
                           aria-hidden="true"

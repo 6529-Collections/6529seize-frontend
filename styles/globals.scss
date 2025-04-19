@@ -1,9 +1,6 @@
 @import "./variables.scss";
 @import "react-toggle/style.css";
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 // add the code bellow
 @layer utilities {

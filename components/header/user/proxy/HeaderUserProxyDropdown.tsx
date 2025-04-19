@@ -88,7 +88,7 @@ export default function HeaderUserProxyDropdown({
                           <img
                             src={profile.profile?.pfp_url}
                             alt="Profile Picture"
-                            className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+                            className="tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
                           />
                         ) : (
                           <div
@@ -96,7 +96,7 @@ export default function HeaderUserProxyDropdown({
                               !activeProfileProxy
                                 ? "tw-bg-iron-600"
                                 : "tw-bg-iron-700 group-hover:tw-bg-iron-600"
-                            } tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}></div>
+                            } tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}></div>
                         )}
                         <div className="tw-w-full tw-truncate tw-inline-flex tw-items-center tw-justify-between">
                           <span className="tw-text-md tw-font-medium tw-text-white">
@@ -104,7 +104,7 @@ export default function HeaderUserProxyDropdown({
                           </span>
                           {!activeProfileProxy && (
                             <svg
-                              className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                              className="tw-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
                               viewBox="0 0 24 24"
                               fill="none"
                               aria-hidden="true"

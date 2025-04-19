@@ -23,7 +23,7 @@ export const WaveWinnersDropHeader: React.FC<WaveWinnersDropHeaderProps> = ({
       <div className="tw-flex tw-items-center tw-gap-x-2 tw-w-full xl:tw-w-auto">
         <div className="tw-flex tw-items-center tw-gap-x-2">
           <WaveWinnersDropHeaderAuthorHandle winner={winner} />
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-shrink-0"></div>
           <WaveDropTime timestamp={winner.drop.created_at} />
         </div>
 

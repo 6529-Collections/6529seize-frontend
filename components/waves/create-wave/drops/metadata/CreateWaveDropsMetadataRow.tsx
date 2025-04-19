@@ -99,7 +99,7 @@ export default function CreateWaveDropsMetadataRow({
           <div className="tw-pt-1.5 tw-text-error tw-text-xs tw-font-medium">
             <div className="tw-flex tw-items-center tw-gap-x-2">
               <svg
-                className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+                className="tw-size-5 tw-shrink-0 tw-text-error"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"

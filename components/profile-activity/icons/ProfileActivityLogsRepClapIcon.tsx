@@ -1,7 +1,7 @@
 export default function ProfileActivityLogsRepClapIcon() {
   return (
     <svg
-      className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
+      className="tw-shrink-0 tw-h-4 tw-w-4 tw-text-neutral-100"
       width="350"
       height="364"
       viewBox="0 0 350 364"

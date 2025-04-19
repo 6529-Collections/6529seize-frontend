@@ -40,7 +40,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
           disabled={!canReply}
         >
           <svg
-            className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
+            className={`tw-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
               !canReply ? "tw-opacity-50" : ""
             }`}
             xmlns="http://www.w3.org/2000/svg"

@@ -81,7 +81,7 @@ export default function DropListItemRateGiveChangeButton({
       <svg
         className={`${
           isMobile ? "tw-size-6" : "tw-size-4"
-        } tw-rotate-90 tw-flex-shrink-0`}
+        } tw-rotate-90 tw-shrink-0`}
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"

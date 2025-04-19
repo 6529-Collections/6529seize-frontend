@@ -40,10 +40,10 @@ export default function NotificationWaveCreated({
                 ImageScale.W_AUTO_H_50
               )}
               alt="#"
-              className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
+              className="tw-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
             />
           ) : (
-            <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
+            <div className="tw-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
           )}
         </div>
         <span className="tw-text-sm tw-font-normal tw-text-iron-50">

@@ -74,10 +74,10 @@ const CreateDropStormViewPart = memo(
             onClick={() => removePart(partIndex)}
             role="button"
             aria-label="Remove part"
-            className="tw-flex-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full hover:tw-bg-iron-800 tw-text-iron-300 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
+            className="tw-shrink-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full hover:tw-bg-iron-800 tw-text-iron-300 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out"
           >
             <svg
-              className="tw-flex-shrink-0 tw-cursor-pointer tw-h-4 tw-w-4"
+              className="tw-shrink-0 tw-cursor-pointer tw-h-4 tw-w-4"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"

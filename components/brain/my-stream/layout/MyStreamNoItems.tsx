@@ -83,7 +83,7 @@ export default function MyStreamNoItems() {
           className="tw-no-underline tw-group tw-text-sm tw-flex tw-items-center tw-font-medium tw-justify-center tw-px-4 tw-py-2.5 tw-rounded-lg tw-bg-iron-900 tw-text-primary-400 tw-border tw-border-primary-400 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-950  hover:tw-border-primary-400 tw-border-solid hover:tw-text-primary-400">
           <span>Explore Waves</span>
           <svg
-            className="tw-ml-2 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transform tw-transition-transform group-hover:tw-translate-x-1"
+            className="tw-ml-2 tw-h-4 tw-w-4 tw-shrink-0 tw-transform tw-transition-transform group-hover:tw-translate-x-1"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -105,7 +105,7 @@ export default function MyStreamNoItems() {
           href="waves?new=true"
           className="tw-no-underline tw-text-sm tw-group tw-flex tw-items-center tw-justify-center tw-font-medium tw-px-4 tw-py-2.5 tw-rounded-lg tw-bg-primary-500 tw-text-white hover:tw-text-white hover:tw-bg-primary-600 tw-border tw-border-primary-500 hover:tw-border-primary-600 tw-border-solid tw-transition tw-duration-300 tw-ease-out">
           <svg
-            className="tw-mr-2 tw-h-4 tw-w-4 tw-flex-shrink-0"
+            className="tw-mr-2 tw-h-4 tw-w-4 tw-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg">

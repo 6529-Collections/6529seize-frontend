@@ -88,7 +88,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
               >
                 <FontAwesomeIcon
                   icon={faPlus}
-                  className="tw-size-3.5 -tw-ml-1.5 tw-flex-shrink-0"
+                  className="tw-size-3.5 -tw-ml-1.5 tw-shrink-0"
                 />
                 <span className="tw-text-xs tw-font-semibold">Wave</span>
               </Link>

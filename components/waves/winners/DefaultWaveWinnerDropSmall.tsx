@@ -111,7 +111,7 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
             <Link
               href={`/${drop.author.handle}`}
               onClick={(e) => e.stopPropagation()}
-              className="tw-block tw-flex-shrink-0 desktop-hover:group-hover:tw-opacity-90 tw-transition-opacity"
+              className="tw-block tw-shrink-0 desktop-hover:group-hover:tw-opacity-90 tw-transition-opacity"
             >
               {drop.author.pfp ? (
                 <img
@@ -137,8 +137,8 @@ export const DefaultWaveWinnerDropSmall = memo<DefaultWaveWinnerDropSmallProps>(
                   {drop.author.handle}
                 </span>
               </Link>
-              <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></span>
-              <span className="tw-text-xs tw-text-iron-400 tw-flex-shrink-0">
+              <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-shrink-0"></span>
+              <span className="tw-text-xs tw-text-iron-400 tw-shrink-0">
                 {Time.millis(drop.created_at).toLocaleDropDateAndTimeString()}
               </span>
             </div>

@@ -44,7 +44,7 @@ const WaveDropMobileMenuOpen: React.FC<WaveDropMobileMenuOpenProps> = ({
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
-        className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
+        className="tw-shrink-0 tw-w-5 tw-h-5 tw-text-iron-300"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path

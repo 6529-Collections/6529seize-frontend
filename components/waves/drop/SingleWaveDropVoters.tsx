@@ -49,7 +49,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop
         <motion.svg
           animate={{ rotate: isVotersOpen ? 0 : -90 }}
           transition={{ duration: 0.3 }}
-          className={`tw-w-4 tw-h-4 tw-flex-shrink-0 ${
+          className={`tw-w-4 tw-h-4 tw-shrink-0 ${
             isVotersOpen
               ? "tw-text-primary-300"
               : "tw-text-iron-400 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
@@ -104,7 +104,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop
                     <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-tr tw-from-iron-800/10 tw-via-indigo-500/10 tw-to-primary-400/20 tw-rounded-full tw-animate-[spin_5s_linear_infinite] group-hover:tw-to-primary-400/30"></div>
                     <div className="tw-absolute tw-inset-0 tw-bg-gradient-radial tw-from-primary-300/5 tw-to-transparent tw-animate-pulse"></div>
                     <svg
-                      className="tw-size-8 tw-flex-shrink-0 tw-relative tw-text-white/60"
+                      className="tw-size-8 tw-shrink-0 tw-relative tw-text-white/60"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"

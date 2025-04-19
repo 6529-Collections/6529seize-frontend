@@ -19,7 +19,7 @@ export default function HeaderProxyNewModal({
 
   return (
     <div className="tw-cursor-default tw-relative tw-z-10">
-      <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
+      <div className="tw-fixed tw-inset-0 tw-bg-gray-500/75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
@@ -31,7 +31,7 @@ export default function HeaderProxyNewModal({
                 <div>
                   <span className="tw-relative tw-inline-flex tw-items-center tw-justify-center tw-rounded-full tw-h-12 tw-w-12 tw-bg-green/20">
                     <svg
-                      className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-text-green tw-transition tw-duration-300 tw-ease-out"
+                      className="tw-shrink-0 tw-h-6 tw-w-6 tw-text-green tw-transition tw-duration-300 tw-ease-out"
                       width="24"
                       height="24"
                       viewBox="0 0 24 24"
@@ -158,10 +158,10 @@ export default function HeaderProxyNewModal({
                         <img
                           src={connectedProfile.profile.pfp_url}
                           alt="Profile Picture"
-                          className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700"
+                          className="tw-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700"
                         />
                       ) : (
-                        <div className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700 group-hover:tw-bg-iron-600 tw-transition tw-duration-300 tw-ease-out"></div>
+                        <div className="tw-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700 group-hover:tw-bg-iron-600 tw-transition tw-duration-300 tw-ease-out"></div>
                       )}
                       <div className="tw-flex tw-gap-x-2 tw-items-center">
                         <span>{connectedProfile.profile?.handle}</span>
@@ -169,7 +169,7 @@ export default function HeaderProxyNewModal({
                     </div>
                     <div className="tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-h-11  tw-ring-2 tw-ring-offset-4 tw-ring-offset-iron-700 tw-ring-primary-400 tw-border-0 tw-text-iron-50 tw-shadow-sm">
                       <svg
-                        className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+                        className="tw-h-5 tw-w-5 tw-shrink-0"
                         width="24"
                         height="24"
                         viewBox="0 0 24 24"
@@ -200,10 +200,10 @@ export default function HeaderProxyNewModal({
                                   <img
                                     src={connectedProfile.profile?.pfp_url}
                                     alt="Profile Picture"
-                                    className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
+                                    className="tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
                                   />
                                 ) : (
-                                  <div className="tw-bg-iron-600 tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"></div>
+                                  <div className="tw-bg-iron-600 tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"></div>
                                 )}
                                 <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
                                   <div className="tw-truncate tw-inline-flex tw-items-center tw-justify-between">
@@ -213,7 +213,7 @@ export default function HeaderProxyNewModal({
                                   </div>
                                   <div>
                                     <svg
-                                      className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                                      className="tw-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
                                       viewBox="0 0 24 24"
                                       fill="none"
                                       aria-hidden="true"
@@ -237,10 +237,10 @@ export default function HeaderProxyNewModal({
                                   <img
                                     src={proxyGrantor.pfp}
                                     alt="Profile Picture"
-                                    className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
+                                    className="tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-800"
                                   />
                                 ) : (
-                                  <div className="tw-bg-iron-600 tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"></div>
+                                  <div className="tw-bg-iron-600 tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out"></div>
                                 )}
                                 <div className="tw-flex tw-justify-between tw-items-center tw-w-full">
                                   <div className="tw-truncate tw-inline-flex tw-items-center tw-justify-between">
@@ -258,7 +258,7 @@ export default function HeaderProxyNewModal({
                           <div className="tw-h-full tw-px-2 tw-pt-2">
                             <div className="tw-bg-transparent tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 tw-rounded-lg tw-relative tw-px-3 focus:tw-outline-none">
                               <svg
-                                className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+                                className="tw-h-5 tw-w-5 tw-shrink-0"
                                 width="24"
                                 height="24"
                                 viewBox="0 0 24 24"

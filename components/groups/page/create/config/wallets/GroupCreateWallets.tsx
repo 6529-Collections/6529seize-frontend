@@ -110,7 +110,7 @@ export default function GroupCreateWallets({
       <div className="tw-inline-flex tw-items-center tw-space-x-3 sm:tw-space-x-4">
         <span className="tw-inline-flex tw-items-center tw-justify-center tw-rounded-xl tw-size-10 sm:tw-size-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-700">
           <svg
-            className="tw-flex-shrink-0 tw-text-iron-50 tw-size-5 sm:tw-size-6"
+            className="tw-shrink-0 tw-text-iron-50 tw-size-5 sm:tw-size-6"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -154,7 +154,7 @@ export default function GroupCreateWallets({
               } tw-bg-iron-950 tw-border tw-border-solid`}>
               <div className="tw-flex tw-items-center tw-gap-x-2 tw-text-sm">
                 <svg
-                  className="tw-size-6 tw-flex-shrink-0 tw-text-iron-300"
+                  className="tw-size-6 tw-shrink-0 tw-text-iron-300"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden="true"
@@ -207,7 +207,7 @@ export default function GroupCreateWallets({
         <div className="tw-pt-2 tw-text-error tw-text-xs tw-font-medium">
           <div className="tw-flex tw-items-center tw-gap-x-2">
             <svg
-              className="tw-size-5 tw-flex-shrink-0 tw-text-error"
+              className="tw-size-5 tw-shrink-0 tw-text-error"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg">

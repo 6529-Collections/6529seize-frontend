@@ -83,7 +83,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   trigger="mouseenter">
                   <button
                     onClick={onAddMetadataClick}
-                    className={`tw-flex-shrink-0 ${
+                    className={`tw-shrink-0 ${
                       isRequiredMetadataMissing
                         ? "tw-text-yellow"
                         : "tw-text-iron-400"
@@ -94,7 +94,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       viewBox="0 0 24 24"
                       strokeWidth="1.5"
                       stroke="currentColor"
-                      className="tw-flex-shrink-0 tw-size-5 lg:tw-size-4"
+                      className="tw-shrink-0 tw-size-5 lg:tw-size-4"
                       aria-hidden="true">
                       <path
                         strokeLinecap="round"
@@ -116,7 +116,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     trigger="mouseenter">
                     <label
                       aria-label="Upload a file"
-                      className={`tw-flex-shrink-0 ${
+                      className={`tw-shrink-0 ${
                         isRequiredMediaMissing
                           ? "tw-text-yellow"
                           : "tw-text-iron-400"
@@ -129,7 +129,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                         onChange={onFiles}
                       />
                       <svg
-                        className="tw-flex-shrink-0 tw-size-5 lg:tw-size-4"
+                        className="tw-shrink-0 tw-size-5 lg:tw-size-4"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         aria-hidden="true"
@@ -152,9 +152,9 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       <button
                         onClick={() => setShowGifPicker(true)}
                         aria-label="Add GIF"
-                        className={`tw-flex-shrink-0 tw-text-iron-400 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}>
+                        className={`tw-shrink-0 tw-text-iron-400 tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}>
                         <svg
-                          className="tw-flex-shrink-0 tw-size-5"
+                          className="tw-shrink-0 tw-size-5"
                           viewBox="0 0 24 24"
                           version="1.1"
                           xmlns="http://www.w3.org/2000/svg"
@@ -194,7 +194,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
               <motion.button
                 key="chevron-button"
                 onClick={onSetShowIconsClick}
-                className={`tw-flex-shrink-0 ${
+                className={`tw-shrink-0 ${
                   isRequiredMetadataMissing || isRequiredMediaMissing
                     ? "tw-text-yellow"
                     : "tw-text-iron-400"
@@ -206,7 +206,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                   strokeWidth="1.5"
                   stroke="currentColor"
                   aria-hidden="true"
-                  className="tw-size-4 tw-flex-shrink-0">
+                  className="tw-size-4 tw-shrink-0">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

@@ -28,7 +28,7 @@ export const WaveLeaderboardWinnerDrop: React.FC<WaveLeaderboardWinnerDropProps>
           <div className="tw-flex tw-flex-col tw-gap-3">
             <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
               <WaveLeaderboardDropHeader drop={drop} />
-              <div className="tw-flex-shrink-0">
+              <div className="tw-shrink-0">
                 <WaveLeaderboardDropRaters drop={drop} />
               </div>
             </div>

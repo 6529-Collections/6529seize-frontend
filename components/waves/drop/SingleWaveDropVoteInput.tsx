@@ -189,7 +189,7 @@ export const SingleWaveDropVoteInput: React.FC<
             className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-emerald-400/50 tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95"
           >
             <svg
-              className="tw-w-4 tw-h-4 tw-flex-shrink-0"
+              className="tw-w-4 tw-h-4 tw-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -212,7 +212,7 @@ export const SingleWaveDropVoteInput: React.FC<
             className="tw-border-0 tw-flex tw-items-center tw-justify-center tw-size-9 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800 desktop-hover:hover:tw-ring-rose-400/50 tw-text-rose-400 desktop-hover:hover:tw-text-rose-300 tw-transition-all tw-duration-300 desktop-hover:hover:tw-scale-105 desktop-hover:hover:tw-bg-iron-800/90 active:tw-scale-95"
           >
             <svg
-              className="tw-w-4 tw-h-4 tw-flex-shrink-0"
+              className="tw-w-4 tw-h-4 tw-shrink-0"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
@@ -237,7 +237,7 @@ export const SingleWaveDropVoteInput: React.FC<
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
+              className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-shrink-0 ${getQuickPercentageButtonClass(
                 percentage,
                 voteValue
               )}`}
@@ -254,7 +254,7 @@ export const SingleWaveDropVoteInput: React.FC<
             <button
               key={percentage}
               onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-flex-shrink-0 ${getQuickPercentageButtonClass(
+              className={`tw-px-1.5 tw-py-1 tw-text-[10px] tw-leading-none tw-font-medium tw-rounded-full tw-transition-all tw-duration-300 tw-ease-out tw-border-0 tw-shrink-0 ${getQuickPercentageButtonClass(
                 percentage,
                 voteValue
               )}`}

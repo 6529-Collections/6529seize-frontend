@@ -83,7 +83,7 @@ const DropContentWrapper: React.FC<DropContentWrapperProps> = ({
             >
               <span>Show full drop</span>
               <svg
-                className="tw-w-4 tw-h-4 tw-flex-shrink-0"
+                className="tw-w-4 tw-h-4 tw-shrink-0"
                 fill="currentColor"
                 aria-hidden="true"
                 viewBox="0 0 20 20"
