@@ -94,11 +94,14 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
 
   useEffect(() => {
-    if (websocketStatus === "connected" && activeWaveId) {
+    if (websocketStatus !== "connected") {
+      return;
+    }
+    if (activeWaveId) {
       waveDataManager.registerWave(activeWaveId, true);
     }
     wavesHookData.refetchAllWaves();
-    if (!isCapacitor) {
+    if (isCapacitor) {
       wavesHookData.resetAllWavesNewDropsCount();
     }
   }, [websocketStatus, activeWaveId, isCapacitor]);
