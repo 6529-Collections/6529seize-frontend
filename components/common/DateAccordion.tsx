@@ -28,14 +28,14 @@ export default function DateAccordion({
     >
       <div
         onClick={onToggle}
-        className="tw-px-5 tw-h-16 tw-cursor-pointer tw-flex tw-items-center tw-justify-between tw-w-full desktop-hover:hover:tw-bg-iron-800/50 tw-transition-colors tw-duration-200"
+        className="tw-px-5 tw-h-16 tw:cursor-pointer tw:flex tw:items-center tw:justify-between tw:w-full tw:desktop-hover:hover:bg-iron-800/50 tw:transition-colors tw:duration-200"
       >
-        <div className="tw-flex tw-items-center tw-justify-between tw-w-full">
-          <div className="tw-flex tw-items-center tw-gap-x-3">
+        <div className="tw-flex tw:items-center tw:justify-between tw:w-full">
+          <div className="tw:flex tw:items-center tw:gap-x-3">
             <motion.div
               animate={isExpanded ? { rotate: 0 } : { rotate: 180 }}
               transition={{ duration: 0.3 }}
-              className="tw-p-1.5 tw-rounded-full desktop-hover:hover:tw-bg-iron-700/30 tw-transition-colors tw-duration-200"
+              className="tw:p-1.5 tw:rounded-full tw:desktop-hover:hover:bg-iron-700/30 tw:transition-colors tw:duration-200"
             >
               <FontAwesomeIcon
                 icon={faChevronDown}
@@ -47,7 +47,7 @@ export default function DateAccordion({
             </p>
           </div>
           {!isExpanded && collapsedContent && (
-            <div className="tw-opacity-80 hover:tw-opacity-100 tw-transition-opacity tw-duration-200">
+            <div className="tw-opacity-80 tw:hover:opacity-100 tw:transition-opacity tw:duration-200">
               {collapsedContent}
             </div>
           )}

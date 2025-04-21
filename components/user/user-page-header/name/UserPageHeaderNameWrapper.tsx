@@ -22,13 +22,15 @@ export default function UserPageHeaderNameWrapper({
         onClick={() => setIsEditNameOpen(true)}
         disabled={!canEdit}
         className={`${
-          canEdit ? "hover:tw-text-neutral-400" : ""
-        } tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}
+          canEdit
+            ? "tw:group tw:relative tw:bg-transparent tw:border-none tw:p-0 tw:m-0 tw:cursor-pointer"
+            : "tw:bg-transparent tw:border-none tw:p-0 tw:m-0"
+        }`}
       >
         {children}
         {canEdit && (
-          <div className="group-hover:tw-block tw-hidden tw-absolute tw-inset-0 tw-text-neutral-400">
-            <div className="tw-absolute tw-top-1.5 -tw-left-5 sm:-tw-left-6">
+          <div className="tw:group-hover:block tw:hidden tw:absolute tw:inset-0 tw:text-neutral-400">
+            <div className="tw:absolute tw:top-1.5 tw:-left-5 sm:tw:-left-6">
               <PencilIcon />
             </div>
           </div>

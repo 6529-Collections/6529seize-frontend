@@ -37,12 +37,12 @@ export default function HeaderNotifications() {
   }, [router.pathname]);
 
   return (
-    <div className="tailwind-scope tw:relative min-[1200px]:tw:mr-3 tw:self-center">
+    <div className="tailwind-scope tw:relative tw:min-[1200px]:mr-3 tw:self-center">
       <Link
         href={linkHref}
         aria-label="Notifications"
         title="Notifications"
-        className="tw:relative tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-iron-800 tw:h-10 tw:w-10 tw:border tw:border-solid tw:border-iron-700 tw:text-iron-300 hover:tw:text-iron-50 tw:shadow-sm hover:tw:bg-iron-700 focus-visible:tw:outline focus-visible:tw:outline-2 focus-visible:tw:outline-offset-2 focus-visible:tw:outline-primary-400 tw:transition tw:duration-300 tw:ease-out">
+        className="tw:relative tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-iron-800 tw:h-10 tw:w-10 tw:border tw:border-solid tw:border-iron-700 tw:text-iron-300 tw:hover:text-iron-50 tw:shadow-sm tw:hover:bg-iron-700 tw:focus-visible:outline tw:focus-visible:outline-offset-2 tw:focus-visible:outline-primary-400 tw:transition tw:duration-300 tw:ease-out">
         <svg
           className="tw:w-5 tw:h-5 tw:shrink-0"
           xmlns="http://www.w3.org/2000/svg"
@@ -58,7 +58,7 @@ export default function HeaderNotifications() {
         </svg>
 
         {haveUnreadNotifications && (
-          <div className="tw:absolute tw:rounded-full -tw:right-1 -tw:top-1 tw:bg-red tw:h-3 tw:w-3"></div>
+          <div className="tw:absolute tw:rounded-full tw:-right-1 tw:-top-1 tw:bg-red tw:h-3 tw:w-3"></div>
         )}
       </Link>
     </div>

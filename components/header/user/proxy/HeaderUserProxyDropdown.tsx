@@ -64,47 +64,47 @@ export default function HeaderUserProxyDropdown({
       <AnimatePresence mode="wait" initial={false}>
         {isOpen && (
           <motion.div
-            className="tw-absolute tw-left-0 tw-z-10 tw-mt-1 tw-w-72 tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw:absolute tw:left-0 tw:z-10 tw:mt-1 tw:w-72 tw:rounded-lg tw:shadow-xl tw:bg-iron-800 tw:ring-1 tw:ring-black tw:ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}>
-            <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-              <div className="tw-py-2 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
+            <div className="tw:absolute tw:z-10 tw:mt-1 tw:overflow-hidden tw:w-full tw:rounded-md tw:bg-iron-800 tw:shadow-2xl tw:ring-1 tw:ring-white/10">
+              <div className="tw:py-2 tw:flow-root tw:overflow-x-hidden tw:overflow-y-auto">
                 <div
                   role="list"
-                  className="tw-flex tw-flex-col tw-gap-y-2 tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
-                  <div className="tw-flex tw-flex-col tw-px-2 tw-gap-y-2 tw-mx-0">
-                    <div className="tw-h-full">
+                  className="tw:flex tw:flex-col tw:gap-y-2 tw:divide-y tw:divide-solid tw:divide-iron-700 tw:divide-x-0">
+                  <div className="tw:flex tw:flex-col tw:px-2 tw:gap-y-2 tw:mx-0">
+                    <div className="tw:h-full">
                       <button
                         type="button"
                         className={`${
                           activeProfileProxy
-                            ? "tw-bg-transparent hover:tw-bg-iron-700"
-                            : "tw-bg-iron-700"
-                        } tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
+                            ? "tw:bg-transparent tw:hover:bg-iron-700"
+                            : "tw:bg-iron-700"
+                        } tw:group tw:py-2.5 tw:w-full tw:h-full tw:border-none tw:text-left tw:flex tw:items-center tw:gap-x-3 tw:text-white tw:rounded-lg tw:relative tw:cursor-pointer tw:select-none tw:px-3 tw:focus:outline-none tw:focus:ring-1 tw:focus:ring-primary-400 tw:transition tw:duration-300 tw:ease-out`}
                         onClick={() => onActivateProfileProxy(null)}>
                         {profile.profile?.pfp_url ? (
                           <img
                             src={profile.profile?.pfp_url}
                             alt="Profile Picture"
-                            className="tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
+                            className="tw:shrink-0 tw:h-6 tw:w-6 tw:flex-none tw:rounded-lg tw:bg-iron-700 tw:transition tw:duration-300 tw:ease-out"
                           />
                         ) : (
                           <div
                             className={`${
                               !activeProfileProxy
-                                ? "tw-bg-iron-600"
-                                : "tw-bg-iron-700 group-hover:tw-bg-iron-600"
-                            } tw-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}></div>
+                                ? "tw:bg-iron-600"
+                                : "tw:bg-iron-700 tw:group-hover:bg-iron-600"
+                            } tw:shrink-0 tw:h-6 tw:w-6 tw:flex-none tw:rounded-lg tw:transition tw:duration-300 tw:ease-out`}></div>
                         )}
-                        <div className="tw-w-full tw-truncate tw-inline-flex tw-items-center tw-justify-between">
-                          <span className="tw-text-md tw-font-medium tw-text-white">
+                        <div className="tw:w-full tw:truncate tw:inline-flex tw:items-center tw:justify-between">
+                          <span className="tw:text-md tw:font-medium tw:text-white">
                             {label}
                           </span>
                           {!activeProfileProxy && (
                             <svg
-                              className="tw-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                              className="tw:shrink-0 tw:h-5 tw:w-5 tw:ml-2 tw:text-primary-400 tw:transition tw:duration-300 tw:ease-out"
                               viewBox="0 0 24 24"
                               fill="none"
                               aria-hidden="true"
@@ -131,7 +131,7 @@ export default function HeaderUserProxyDropdown({
                     ))}
                   </div>
                   <HeaderUserProxyDropdownChains onSwitchChain={onClose} />
-                  <div className="tw-h-full tw-px-2 tw-pt-2">
+                  <div className="tw:h-full tw:px-2 tw:pt-2">
                     {isConnected ? (
                       <button
                         onClick={() => {
@@ -141,7 +141,7 @@ export default function HeaderUserProxyDropdown({
                         type="button"
                         aria-label="Disconnect"
                         title="Disconnect"
-                        className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                        className="tw:bg-transparent tw:hover:bg-iron-700 tw:py-2.5 tw:w-full tw:h-full tw:border-none tw:text-md tw:font-medium tw:text-left tw:flex tw:items-center tw:gap-x-3 tw:text-iron-300 tw:hover:text-iron-50 tw:rounded-lg tw:relative tw:cursor-pointer tw:select-none tw:px-3 tw:focus:outline-none tw:focus:ring-1 tw:focus:ring-primary-400 tw:transition tw:duration-300 tw:ease-out">
                         <FontAwesomeIcon
                           icon={faDoorOpen}
                           height={16}
@@ -158,7 +158,7 @@ export default function HeaderUserProxyDropdown({
                         type="button"
                         aria-label="Connect"
                         title="Connect"
-                        className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                        className="tw:bg-transparent tw:hover:bg-iron-700 tw:py-2.5 tw:w-full tw:h-full tw:border-none tw:text-md tw:font-medium tw:text-left tw:flex tw:items-center tw:gap-x-3 tw:text-iron-300 tw:hover:text-iron-50 tw:rounded-lg tw:relative tw:cursor-pointer tw:select-none tw:px-3 tw:focus:outline-none tw:focus:ring-1 tw:focus:ring-primary-400 tw:transition tw:duration-300 tw:ease-out">
                         <FontAwesomeIcon
                           icon={faDoorOpen}
                           height={16}
@@ -168,13 +168,13 @@ export default function HeaderUserProxyDropdown({
                       </button>
                     )}
                   </div>
-                  <div className="tw-h-full tw-px-2 tw-pt-2">
+                  <div className="tw:h-full tw:px-2 tw:pt-2">
                     <button
                       onClick={() => seizeDisconnectAndLogout(true)}
                       type="button"
                       aria-label="Switch Account"
                       title="Switch Account"
-                      className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                      className="tw:bg-transparent tw:hover:bg-iron-700 tw:py-2.5 tw:w-full tw:h-full tw:border-none tw:text-md tw:font-medium tw:text-left tw:flex tw:items-center tw:gap-x-3 tw:text-iron-300 tw:hover:text-iron-50 tw:rounded-lg tw:relative tw:cursor-pointer tw:select-none tw:px-3 tw:focus:outline-none tw:focus:ring-1 tw:focus:ring-primary-400 tw:transition tw:duration-300 tw:ease-out">
                       <FontAwesomeIcon icon={faRepeat} height={16} width={16} />
                       <span>Switch Account</span>
                     </button>
@@ -183,7 +183,7 @@ export default function HeaderUserProxyDropdown({
                       type="button"
                       aria-label="Disconnect & Logout"
                       title="Disconnect & Logout"
-                      className="tw-bg-transparent hover:tw-bg-iron-700 tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-md tw-font-medium tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-iron-300 hover:tw-text-iron-50 tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out">
+                      className="tw:bg-transparent tw:hover:bg-iron-700 tw:py-2.5 tw:w-full tw:h-full tw:border-none tw:text-md tw:font-medium tw:text-left tw:flex tw:items-center tw:gap-x-3 tw:text-iron-300 tw:hover:text-iron-50 tw:rounded-lg tw:relative tw:cursor-pointer tw:select-none tw:px-3 tw:focus:outline-none tw:focus:ring-1 tw:focus:ring-primary-400 tw:transition tw:duration-300 tw:ease-out">
                       <FontAwesomeIcon
                         icon={faRightFromBracket}
                         height={16}

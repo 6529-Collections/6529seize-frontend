@@ -22,12 +22,14 @@ export default function UserPageClassificationWrapper({
         onClick={() => setIsEditOpen(true)}
         disabled={!canEdit}
         className={`${
-          canEdit ? "hover:tw-text-neutral-400" : ""
-        } tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}>
+          canEdit
+            ? "tw:group tw:relative tw:bg-transparent tw:border-none tw:p-0 tw:m-0 tw:cursor-pointer"
+            : "tw:bg-transparent tw:border-none tw:p-0 tw:m-0"
+        }`}>
         {children}
         {canEdit && (
-          <div className="group-hover:tw-block tw-hidden tw-absolute tw-text-neutral-400">
-            <div className="tw-absolute -tw-top-4 sm:-tw-top-5 -tw-left-4 sm:-tw-left-5">
+          <div className="tw:group-hover:block tw:hidden tw:absolute tw:text-neutral-400">
+            <div className="tw:absolute -tw:top-4 tw:sm:-top-5 tw:-left-4 tw:sm:-left-5">
               <PencilIcon size={PencilIconSize.SMALL} />
             </div>
           </div>

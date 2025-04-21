@@ -39,7 +39,7 @@ export function ShareMobileApp({
         width={200}
         height={60}
         placeholder="empty"
-        className="hover:tw:scale-[1.03] tw:transition-all tw:duration-300 tw:ease-out"
+        className="tw:hover:scale-[1.03] tw:transition-all tw:duration-300 tw:ease-out"
       />
     </Link>
   );

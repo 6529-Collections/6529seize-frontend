@@ -65,15 +65,15 @@ export default function Groups() {
 
   return (
     <div>
-      <div className="tailwind-scope tw-mb-4">
+      <div className="tailwind-scope tw:mb-4">
         {viewMode === GroupsViewMode.CREATE && (
           <button
             onClick={() => onViewModeChange(GroupsViewMode.VIEW)}
             type="button"
-            className="tw-py-2 tw-px-2 -tw-ml-2 tw-flex tw-items-center tw-gap-x-2 tw-justify-center tw-text-sm tw-font-semibold tw-border-0 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out tw-cursor-pointer tw-text-iron-400 tw-bg-transparent hover:tw-text-iron-50"
+            className="tw:py-2 tw:px-2 tw:-ml-2 tw:flex tw:items-center tw:gap-x-2 tw:justify-center tw:text-sm tw:font-semibold tw:border-0 tw:rounded-lg tw:transition tw:duration-300 tw:ease-out tw:cursor-pointer tw:text-iron-400 tw:bg-transparent hover:tw:text-iron-50"
           >
             <svg
-              className="tw-shrink-0 tw-w-5 tw-h-5"
+              className="tw:shrink-0 tw:w-5 tw:h-5"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
@@ -92,7 +92,7 @@ export default function Groups() {
         )}
       </div>
 
-      <h1 className="tw-float-none">Groups</h1>
+      <h1 className="tw:float-none">Groups</h1>
 
       {components[viewMode]}
     </div>

@@ -64,7 +64,7 @@ export default function WaveHeader({
           ></div>
         </div>
 
-        <div className="-tw:mt-6 tw:px-4 tw:flex tw:space-x-5">
+        <div className="tw:-mt-6 tw:px-4 tw:flex tw:space-x-5">
           <div className="tw:flex">
             <div className="tw:relative tw:size-20">
               <div

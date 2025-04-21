@@ -554,7 +554,7 @@ export default function Header(props: Readonly<Props>) {
                             aria-label="Menu"
                             title="Menu"
                             onClick={() => setBurgerMenuOpen(true)}
-                            className="tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-iron-800 tw:ring-1 tw:ring-inset tw:ring-iron-700 tw:h-10 tw:w-10 tw:border-0 tw:text-iron-300 hover:tw:text-iron-50 tw:shadow-sm hover:tw:bg-iron-700 focus-visible:tw:outline focus-visible:tw:outline-2 focus-visible:tw:outline-primary-400 tw:transition tw:duration-300 tw:ease-out">
+                            className="tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-iron-800 tw:ring-1 tw:ring-inset tw:ring-iron-700 tw:h-10 tw:w-10 tw:border-0 tw:text-iron-300 tw:hover:text-iron-50 tw:shadow-sm tw:hover:bg-iron-700 tw:focus-visible:outline tw:focus-visible:outline-primary-400 tw:transition tw:duration-300 tw:ease-out">
                             <FontAwesomeIcon icon={faBars} height={20} />
                           </button>
                         </div>

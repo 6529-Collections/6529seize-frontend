@@ -107,27 +107,27 @@ export default function GroupCreateTest({
   const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => setLoading(isFetching || mutating), [isFetching, mutating]);
   return (
-    <div className="tw-flex tw-items-center tw-space-x-4">
+    <div className="tw:flex tw:items-center tw:space-x-4">
       <button
         type="button"
         disabled={disabled}
         onClick={onTest}
         className={`${
           disabled
-            ? "tw-opacity-70 tw-text-iron-500"
-            : "tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-300"
-        } tw-border tw-border-solid tw-border-iron-950 tw-ring-1 tw-ring-iron-700 tw-rounded-lg tw-bg-iron-950 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm hover:tw-border-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}
+            ? "tw:opacity-70 tw:text-iron-500"
+            : "tw:text-iron-400 tw:hover:bg-iron-800 tw:hover:text-iron-300"
+        } tw:border tw:border-solid tw:border-iron-950 tw:ring-1 tw:ring-iron-700 tw:rounded-lg tw:bg-iron-950 tw:px-3.5 tw:py-2.5 tw:text-sm tw:font-semibold tw:shadow-sm tw:hover:border-iron-800 tw:focus-visible:outline tw:focus-visible:outline-2 tw:focus-visible:outline-offset-2 tw:focus-visible:outline-iron-700 tw:transition tw:duration-300 tw:ease-out`}
       >
-        <div className="tw-flex tw-items-center tw-gap-x-3">
+        <div className="tw:flex tw:items-center tw:gap-x-3">
           {loading && <CircleLoader />}
           <span>Test</span>
         </div>
       </button>
       {!!members && (
-        <div className="tw-self-center">
-          <div className="tw-text-sm tw-flex tw-items-center tw-gap-x-2">
+        <div className="tw:self-center">
+          <div className="tw:text-sm tw:flex tw:items-center tw:gap-x-2">
             <svg
-              className="tw-size-5 tw-shrink-0 tw-text-iron-300"
+              className="tw:size-5 tw:shrink-0 tw:text-iron-300"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               aria-hidden="true"
@@ -141,11 +141,11 @@ export default function GroupCreateTest({
                 d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"
               />
             </svg>
-            <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
-              <span className="tw-text-iron-400 tw-font-normal">
+            <div className="tw:inline-flex tw:items-center tw:gap-x-1.5">
+              <span className="tw:text-iron-400 tw:font-normal">
                 Members count:
               </span>
-              <span className="tw-font-medium tw-text-primary-400">
+              <span className="tw:font-medium tw:text-primary-400">
                 {members.count}
               </span>
             </div>

@@ -137,31 +137,31 @@ export default function HeaderSearchModalItem({
     <div
       ref={ref}
       className={`${
-        isSelected ? "tw-bg-iron-800" : ""
-      } tw-rounded-md tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}>
+        isSelected ? "tw:bg-iron-800" : ""
+      } tw:rounded-md tw:px-2 tw:py-2 tw:my-1 tw:transition tw:duration-300 tw:ease-out tw:w-full`}>
       <Link
         href={getPath()}
         onClick={onClose}
-        className="tw-group tw-no-underline tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-items-center tw-w-full tw-text-left tw-text-sm tw-font-medium">
+        className="tw:group tw:no-underline tw:select-none tw:rounded-md tw:space-x-3 tw:flex tw:items-center tw:w-full tw:text-left tw:text-sm tw:font-medium">
         {getMedia()}
-        <div className="tw-w-full">
-          <div className="tw-inline-flex tw-justify-between tw-w-full">
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+        <div className="tw:w-full">
+          <div className="tw:inline-flex tw:justify-between tw:w-full">
+            <span className="tw:whitespace-nowrap tw:text-sm tw:font-semibold tw:text-iron-100">
               <HeaderSearchModalItemHighlight
                 text={getPrimaryText()}
                 highlight={searchValue}
               />
             </span>
             {isProfile() && !!getProfile().tdh && (
-              <span className="tw-inline-flex tw-items-center tw-gap-x-1 tw-text-sm tw-font-medium tw-text-iron-100">
+              <span className="tw:inline-flex tw:items-center tw:gap-x-1 tw:text-sm tw:font-medium tw:text-iron-100">
                 {formatNumberWithCommas(getProfile().tdh)}{" "}
-                <span className="tw-text-sm tw-font-medium tw-text-iron-400">
+                <span className="tw:text-sm tw:font-medium tw:text-iron-400">
                   TDH
                 </span>
               </span>
             )}
           </div>
-          <p className="tw-break-all tw-mb-0 tw-text-sm tw-text-iron-400">
+          <p className="tw:break-all tw:mb-0 tw:text-sm tw:text-iron-400">
             <HeaderSearchModalItemHighlight
               text={getSecondaryText()}
               highlight={searchValue}

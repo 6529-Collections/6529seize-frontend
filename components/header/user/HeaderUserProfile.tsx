@@ -81,15 +81,15 @@ export default function HeaderUserProfile({
   return (
     <Link
       href={`${userContent.path}`}
-      className="tailwind-scope tw:relative tw:group tw:no-underline tw:px-3.5 lg:tw:px-3 xl:tw:px-3.5 tw:h-10 tw:inline-flex tw:items-center tw:gap-x-2 tw:text-base lg:tw:text-sm xl:tw:text-base tw:font-semibold tw:ring-1 tw:ring-inset tw:ring-iron-700 tw:border-0 tw:rounded-s-lg focus:!tw:outline focus-visible:!tw:outline focus-visible:!tw:outline-2 focus-visible:!tw:outline-primary-400 tw:bg-iron-800 tw:text-white hover:tw:text-white hover:tw:bg-iron-700 tw:transition tw:duration-300 tw:ease-out">
+      className="tailwind-scope tw:relative tw:group tw:no-underline tw:px-3.5 tw:lg:px-3 tw:xl:px-3.5 tw:h-10 tw:inline-flex tw:items-center tw:gap-x-2 tw:text-base tw:lg:text-sm tw:xl:text-base tw:font-semibold tw:ring-1 tw:ring-inset tw:ring-iron-700 tw:border-0 tw:rounded-s-lg tw:focus:!outline tw:focus-visible:!outline tw:focus-visible:!outline-primary-400 tw:bg-iron-800 tw:text-white tw:hover:text-white tw:hover:bg-iron-700 tw:transition tw:duration-300 tw:ease-out">
       {userContent.pfpUrl ? (
         <img
           src={userContent.pfpUrl}
           alt="Profile Picture"
-          className="tw:shrink-0 tw:max-h-7 tw:max-w-7 -tw:ml-1 tw:flex-none tw:rounded-md tw:bg-iron-700"
+          className="tw:shrink-0 tw:max-h-7 tw:max-w-7 tw:-ml-1 tw:flex-none tw:rounded-md tw:bg-iron-700"
         />
       ) : (
-        <div className="tw:shrink-0 tw:h-7 tw:w-7 -tw:ml-1 tw:flex-none tw:rounded-md tw:bg-iron-700 group-hover:tw:bg-iron-600 tw:transition tw:duration-300 tw:ease-out"></div>
+        <div className="tw:shrink-0 tw:h-7 tw:w-7 tw:-ml-1 tw:flex-none tw:rounded-md tw:bg-iron-700 tw:group-hover:bg-iron-600 tw:transition tw:duration-300 tw:ease-out"></div>
       )}
       <div className="tw:flex tw:gap-x-2 tw:items-center">
         {isConnected ? (

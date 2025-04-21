@@ -166,20 +166,20 @@ export default function GroupCreateActions({
   };
 
   return (
-    <div className="tw-mt-6">
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-3">
+    <div className="tw:mt-6">
+      <div className="tw:flex tw:items-center tw:justify-between tw:gap-x-3">
         <GroupCreateTest
           groupConfig={groupConfig}
           disabled={isActionsDisabled}
         />
-        <div className="tw-flex tw-items-center tw-gap-x-3">
+        <div className="tw:flex tw:items-center tw:gap-x-3">
           <SecondaryButton onClicked={() => onCompleted()}>
             Cancel
           </SecondaryButton>
           <div
             className={`${
-              isActionsDisabled ? "" : "tw-from-primary-400 tw-to-primary-500"
-            }  tw-bg-gradient-to-b tw-p-[1px] tw-flex tw-rounded-lg`}
+              isActionsDisabled ? "" : "tw:from-primary-400 tw:to-primary-500"
+            }  tw:bg-gradient-to-b tw:p-[1px] tw:flex tw:rounded-lg`}
           >
             <button
               onClick={onSave}
@@ -187,11 +187,11 @@ export default function GroupCreateActions({
               type="button"
               className={`${
                 isActionsDisabled
-                  ? "tw-opacity-50 tw-text-iron-300"
-                  : "tw-text-white hover:tw-bg-primary-600 hover:tw-border-primary-600"
-              } tw-flex tw-items-center tw-whitespace-nowrap tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600 tw-transition tw-duration-300 tw-ease-out`}
+                  ? "tw:opacity-50 tw:text-iron-300"
+                  : "tw:text-white tw:hover:bg-primary-600 tw:hover:border-primary-600"
+              } tw:flex tw:items-center tw:whitespace-nowrap tw:border tw:border-solid tw:border-primary-500 tw:rounded-lg tw:bg-primary-500 tw:px-3.5 tw:py-2.5 tw:text-sm tw:font-semibold tw:shadow-sm tw:focus:outline tw:focus:outline-2 tw:focus:outline-offset-2 tw:focus:outline-primary-600 tw:transition tw:duration-300 tw:ease-out`}
             >
-              <div className="tw-flex tw-items-center tw-justify-center tw-gap-x-2">
+              <div className="tw:flex tw:items-center tw:justify-center tw:gap-x-2">
                 {mutating && <CircleLoader />}
                 <span>Create</span>
               </div>

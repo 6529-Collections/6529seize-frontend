@@ -56,13 +56,13 @@ export default function HeaderShare() {
   }
 
   return (
-    <div className="tailwind-scope tw-relative min-[1200px]:tw-mr-3 tw-self-center">
+    <div className="tailwind-scope tw:relative tw:min-[1200px]:mr-3 tw:self-center">
       <button
         type="button"
         aria-label="QR Code"
         title="QR Code"
         onClick={() => setShowQRModal(true)}
-        className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-light-400 tw-transition tw-duration-300 tw-ease-out">
+        className="tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-iron-800 tw:ring-1 tw:ring-inset tw:ring-iron-700 tw:h-10 tw:w-10 tw:border-0 tw:text-iron-300 hover:tw:text-iron-50 tw:shadow-sm hover:tw:bg-iron-700 focus-visible:tw:outline focus-visible:tw:outline-2 focus-visible:tw:outline-light-400 tw:transition tw:duration-300 tw:ease-out">
         <FontAwesomeIcon icon={faShareNodes} height={18} />
       </button>
       <HeaderQRModal show={showQRModal} onClose={() => setShowQRModal(false)} />
@@ -204,10 +204,10 @@ function HeaderQRModal({
 
     const renderCoreLink = (url: string) => {
       return (
-        <div className="tw-flex tw-items-center tw-gap-2" style={squareStyle}>
+        <div className="tw:flex tw:items-center tw:gap-2" style={squareStyle}>
           <a
             href={url}
-            className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
+            className="decoration-none tw:flex tw:flex-col tw:items-center tw:gap-8">
             <Image
               priority
               loading="eager"
@@ -219,7 +219,7 @@ function HeaderQRModal({
             />
             <Button
               variant="primary"
-              className="tw-flex tw-items-center tw-gap-2 tw-w-full">
+              className="tw:flex tw:items-center tw:gap-2 tw:w-full">
               <FontAwesomeIcon icon={faExternalLink} />
               <div className="no-wrap">Open in 6529 Core</div>
             </Button>
@@ -276,7 +276,7 @@ function HeaderQRModal({
         case SubMode.APP:
           content = (
             <div
-              className="tw-p-10 tw-flex tw-flex-col tw-gap-12 tw-items-center tw-justify-center"
+              className="tw:p-10 tw:flex tw:flex-col tw:gap-12 tw:items-center tw:justify-center"
               style={squareStyle}>
               <ShareMobileApp platform="ios" />
               <ShareMobileApp platform="android" />
@@ -484,7 +484,7 @@ function CoreAppsDownload() {
 
   return (
     <div style={squareStyle}>
-      <div className="tw-inline-flex tw-flex-col tw-gap-10">
+      <div className="tw:inline-flex tw:flex-col tw:gap-10">
         {versions.map((version) => (
           <CoreAppDownload
             key={version.name}
@@ -524,8 +524,8 @@ function CoreAppDownload({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-w-full tw-bg-black tw-px-5 tw-py-3 tw-border tw-border-solid tw-border-white tw-rounded-lg decoration-none tw-flex tw-items-center tw-gap-4 hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out">
-      <div className="tw-bg-white tw-rounded-full tw-p-4">
+      className="tw:w-full tw:bg-black tw:px-5 tw:py-3 tw:border tw:border-solid tw:border-white tw:rounded-lg decoration-none tw:flex tw:items-center tw:gap-4 hover:tw:scale-[1.03] tw:transition-all tw:duration-300 tw:ease-out">
+      <div className="tw:bg-white tw:rounded-full tw:p-4">
         <Image
           priority
           loading="eager"
@@ -536,8 +536,8 @@ function CoreAppDownload({
           className="unselectable"
         />
       </div>
-      <div className="tw-flex tw-items-center tw-gap-2 tw-w-full">
-        <div className="no-wrap tw-text-lg tw-font-semibold">
+      <div className="tw:flex tw:items-center tw:gap-2 tw:w-full">
+        <div className="no-wrap tw:text-lg tw:font-semibold">
           {platform} v{version}
         </div>
       </div>

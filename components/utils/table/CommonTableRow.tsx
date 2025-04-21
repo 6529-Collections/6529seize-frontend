@@ -10,12 +10,12 @@ export default function CommonTableRow({
   readonly values: CommonTableRowValues[];
 }) {
   return (
-    <tr className={"even:tw-bg-iron-900"}>
+    <tr className={"tw:even:bg-iron-900"}>
       {values.map((v) => (
         <td
           key={v.key}
-          className={`tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm tw-font-medium tw-text-iron-400 ${
-            v.alignRight ? "tw-text-center" : ""
+          className={`tw:px-4 sm:tw:px-6 lg:tw:pr-4 tw:whitespace-nowrap tw:group tw:py-3 tw:text-sm tw:font-medium tw:text-iron-400 ${
+            v.alignRight ? "tw:text-center" : ""
           }`}
         >
           {v.value}

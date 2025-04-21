@@ -2,6 +2,7 @@
 @import "react-toggle/style.css";
 @import "tailwindcss";
 @import "tailwindcss" prefix(tw);
+@config "../tailwind.config.mjs";
 
 // add the code bellow
 @layer utilities {
