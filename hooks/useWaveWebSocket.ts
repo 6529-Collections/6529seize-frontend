@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { WsMessageType } from "../helpers/Types";
 
-type ReadyState = number;
-
 interface UseWaveWebSocketResult {
   socket: WebSocket | null;
-  readyState: ReadyState;
+  readyState: number;
   /**
    * Manually disconnects the WebSocket and prevents further reconnect attempts.
    */
@@ -23,7 +21,7 @@ const MAX_RECONNECT_ATTEMPTS = 20;
  */
 export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   const socketRef = useRef<WebSocket | null>(null);
-  const [readyState, setReadyState] = useState<ReadyState>(WebSocket.CLOSED);
+  const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
   const reconnectAttemptsRef = useRef<number>(0);
   const reconnectTimeoutRef = useRef<number | null>(null);
   // flag controlling whether reconnection should be attempted

@@ -22,8 +22,6 @@ import {
 import { WaveMessages } from "./hooks/types";
 import { useWebsocketStatus } from "../../services/websocket/useWebSocketMessage";
 import useCapacitor from "../../hooks/useCapacitor";
-import { useWebSocket } from "../../services/websocket";
-import { WsMessageType } from "../../helpers/Types";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -78,7 +76,6 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const wavesHookData = useEnhancedWavesList(activeWaveId);
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
-  const { send } = useWebSocket();
 
   // Instantiate the data manager, passing the updater function from the store
   const waveDataManager = useWaveDataManager({
@@ -107,7 +104,6 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     if (isCapacitor) {
       wavesHookData.resetAllWavesNewDropsCount();
     }
-    // send(WsMessageType.SUBSCRIBE_TO_WAVE, { wave_id: activeWaveId });
   }, [websocketStatus, activeWaveId, isCapacitor]);
 
   useEffect(() => {

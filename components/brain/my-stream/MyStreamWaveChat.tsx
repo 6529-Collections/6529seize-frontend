@@ -15,7 +15,6 @@ import { useSearchParams } from "next/navigation";
 import { useLayout } from "./layout/LayoutContext";
 import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
 import { useWave } from "../../../hooks/useWave";
-import { useWaveWebSocket } from "../../../hooks/useWaveWebSocket";
 
 
 interface MyStreamWaveChatProps {

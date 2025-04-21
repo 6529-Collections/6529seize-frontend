@@ -28,7 +28,7 @@ import CreateDropContentRequirements from "./CreateDropContentRequirements";
 import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropActions from "./CreateDropActions";
-import { createBreakpoint, useThrottleFn } from "react-use";
+import { createBreakpoint } from "react-use";
 import "tippy.js/dist/tippy.css";
 import { ApiDropType } from "../../generated/models/ApiDropType";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
