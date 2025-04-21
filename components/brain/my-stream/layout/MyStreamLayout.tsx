@@ -52,7 +52,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   }, []);
 
   const containerClassName =
-    "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
+    "tw:relative tw:flex tw:flex-col tw:flex-1 tailwind-scope";
 
   const shouldShowContent = useMemo(
     () => showWaves && spaces.measurementsComplete,
@@ -63,10 +63,10 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     if (!isAuthenticated) {
       return (
         <>
-          <h1 className="tw-text-xl tw-font-bold">
+          <h1 className="tw:text-xl tw:font-bold">
             This content is only available to connected wallets.
           </h1>
-          <p className="tw-text-base tw-text-gray-400">
+          <p className="tw:text-base tw:text-gray-400">
             Connect your wallet to continue.
           </p>
           <HeaderUserConnect />
@@ -77,7 +77,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     if (!connectedProfile?.profile?.handle && !fetchingProfile) {
       return (
         <>
-          <h1 className="tw-text-xl tw-font-bold">
+          <h1 className="tw:text-xl tw:font-bold">
             You need to set up a profile to continue.
           </h1>
           <UserSetUpProfileCta />
@@ -86,12 +86,12 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     }
 
     return (
-      <h1 className="tw-text-xl tw-font-bold tw-animate-pulse">Loading...</h1>
+      <h1 className="tw:text-xl tw:font-bold tw:animate-pulse">Loading...</h1>
     );
   }, [isAuthenticated, connectedProfile, fetchingProfile]);
 
   const content = shouldShowContent ? (
-    <div className="tw-flex-1" id="my-stream-content">
+    <div className="tw:flex-1" id="my-stream-content">
       <Brain>
         <div className={containerClassName}>{children}</div>
       </Brain>
@@ -99,7 +99,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   ) : (
     <div
       id="my-stream-connect"
-      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-p-6">
+      className="tw:flex-1 tw:flex tw:flex-col md:tw:flex-row tw:items-center tw:justify-center tw:gap-8 tw:p-6">
       <Image
         priority
         loading="eager"
@@ -107,9 +107,9 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
         alt="Brain"
         width={304}
         height={450}
-        className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+        className="tw:rounded-md tw:shadow-lg tw:max-w-[30vw] md:tw:max-w-[200px] tw:h-auto"
       />
-      <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+      <div className="tw:flex tw:flex-col tw:items-center md:tw:items-start tw:text-center md:tw:text-left tw:gap-4">
         {connectPrompt}
       </div>
     </div>
@@ -134,12 +134,12 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
         <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
 
-      <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black">
+      <div className="tailwind-scope tw:min-h-screen tw:flex tw:flex-col tw:bg-black">
         <div
           ref={setHeaderRef}
-          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
+          className="tw:z-50 tw:top-0 tw:sticky tw:bg-black">
           <Header isSmall />
-          <div className="tw-z-50 tw-w-full">
+          <div className="tw:z-50 tw:w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />
           </div>
         </div>

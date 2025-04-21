@@ -20,7 +20,7 @@ export default function HeaderUser() {
       {address ? (
         <HeaderUserConnected connectedAddress={address} />
       ) : (
-        <div className="tw-mx-3">
+        <div className="tw:mx-3">
           <HeaderUserConnect />
         </div>
       )}
