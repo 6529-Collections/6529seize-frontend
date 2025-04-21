@@ -283,7 +283,6 @@ export function WebSocketProvider({
       return;
     }
     const message: WebSocketMessage<T> = { type: messageType, ...data };
-    console.log("sending message:", message);
     ws.send(JSON.stringify(message));
   }, []);
 

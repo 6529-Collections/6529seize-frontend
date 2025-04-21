@@ -15,6 +15,9 @@ import { useSearchParams } from "next/navigation";
 import { useLayout } from "./layout/LayoutContext";
 import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
 import { useWave } from "../../../hooks/useWave";
+import { useWaveWebSocket } from "../../../hooks/useWaveWebSocket";
+import { useWaveIsTyping } from "../../../hooks/useWaveIsTyping";
+import { useAuth } from "../../auth/Auth";
 
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
@@ -27,6 +30,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const [searchParamsDone, setSearchParamsDone] = useState(false);
   const { isMemesWave } = useWave(wave);
+  const { connectedProfile } = useAuth();
+
+  const typingMessage = useWaveIsTyping(
+    wave.id,
+    connectedProfile?.profile?.handle ?? null
+  );
+
   // Handle URL parameters
   useEffect(() => {
     const dropParam = searchParams.get("serialNo");
@@ -105,6 +115,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
         initialDrop={initialDrop}
         dropId={null}
       />
+      <div className="tw-text-xs tw-text-iron-300">
+        {typingMessage} Simo is typing...
+      </div>
       <div className="tw-mt-auto">
         <CreateDropWaveWrapper>
           <PrivilegedDropCreator
