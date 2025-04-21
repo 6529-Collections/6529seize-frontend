@@ -15,6 +15,10 @@ import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import { useVirtualizedWaveDrops } from "../../../hooks/useVirtualizedWaveDrops";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import { useWaveIsTyping } from "../../../hooks/useWaveIsTyping";
+import { useAuth } from "../../auth/Auth";
 
 export interface WaveDropsAllProps {
   readonly waveId: string;
@@ -47,9 +51,9 @@ export default function WaveDropsAll({
   initialDrop,
   onDropContentClick,
 }: WaveDropsAllProps) {
-
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
+  const { connectedProfile } = useAuth();
 
   const { waveMessages, fetchNextPage } = useVirtualizedWaveDrops(
     waveId,
@@ -57,7 +61,6 @@ export default function WaveDropsAll({
   );
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
-
 
   const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
     useScrollBehavior();
@@ -88,6 +91,11 @@ export default function WaveDropsAll({
 
   const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
+
+  const typingMessage = useWaveIsTyping(
+    waveId,
+    connectedProfile?.profile?.handle ?? null
+  );
 
   // Effect to update the ref whenever waveMessages changes
   useEffect(() => {
@@ -138,7 +146,6 @@ export default function WaveDropsAll({
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo) return;
     setIsScrolling(true); // Set scrolling true for the entire process
-
 
     const checkAndFetchNext = async () => {
       // Always get the latest state from the ref
@@ -220,7 +227,6 @@ export default function WaveDropsAll({
   }, [init, serialNo, fetchAndScrollToDrop, scrollToSerialNo, setSerialNo]);
 
   const handleTopIntersection = useCallback(() => {
-    
     if (
       waveMessages?.hasNextPage &&
       !waveMessages?.isLoading &&
@@ -305,6 +311,34 @@ export default function WaveDropsAll({
             setUserHasManuallyScrolled(false); // Reset manual scroll flag when user clicks to bottom
           }}
         />
+
+        <div
+          className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-py-1 tw-flex tw-items-center tw-gap-x-2 tw-bg-iron-950 tw-transition-opacity tw-duration-300 tw-ease-in-out ${
+            !typingMessage
+              ? 'tw-opacity-100 tw-visible'
+              : 'tw-opacity-0 tw-invisible tw-hidden'
+          }`}
+        >
+          <div className="tw-flex tw-items-center tw-gap-x-0.5">
+            <FontAwesomeIcon
+              icon={faCircle}
+              className="tw-text-iron-400 tw-h-1 tw-w-1 tw-animate-pulse"
+            />
+            <FontAwesomeIcon
+              icon={faCircle}
+              className="tw-text-iron-400 tw-h-1 tw-w-1 tw-animate-pulse"
+              style={{ animationDelay: "150ms" }}
+            />
+            <FontAwesomeIcon
+              icon={faCircle}
+              className="tw-text-iron-400 tw-h-1 tw-w-1 tw-animate-pulse"
+              style={{ animationDelay: "300ms" }}
+            />
+          </div>
+          <span className="tw-text-xs tw-text-iron-400">
+            {typingMessage} <span className="tw-font-bold">Simo</span> is typing...
+          </span>
+        </div>
       </>
     );
   };
