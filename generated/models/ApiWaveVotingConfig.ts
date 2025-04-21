@@ -30,6 +30,7 @@ export class ApiWaveVotingConfig {
     'signature_required': boolean;
     'period'?: ApiIntRange;
     'authenticated_user_eligible': boolean;
+    'forbid_negative_votes': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -73,6 +74,12 @@ export class ApiWaveVotingConfig {
         {
             "name": "authenticated_user_eligible",
             "baseName": "authenticated_user_eligible",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "forbid_negative_votes",
+            "baseName": "forbid_negative_votes",
             "type": "boolean",
             "format": ""
         }    ];

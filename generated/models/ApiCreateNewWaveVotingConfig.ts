@@ -33,6 +33,7 @@ export class ApiCreateNewWaveVotingConfig {
     */
     'signature_required': boolean;
     'period'?: ApiIntRange;
+    'forbid_negative_votes': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -77,6 +78,12 @@ export class ApiCreateNewWaveVotingConfig {
             "name": "period",
             "baseName": "period",
             "type": "ApiIntRange",
+            "format": ""
+        },
+        {
+            "name": "forbid_negative_votes",
+            "baseName": "forbid_negative_votes",
+            "type": "boolean",
             "format": ""
         }    ];
 

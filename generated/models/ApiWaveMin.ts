@@ -16,7 +16,7 @@ import { HttpFile } from '../http/http';
 export class ApiWaveMin {
     'id': string;
     'name': string;
-    'picture': string;
+    'picture': string | null;
     'description_drop_id': string;
     'authenticated_user_eligible_to_vote': boolean;
     'authenticated_user_eligible_to_participate': boolean;
@@ -31,6 +31,7 @@ export class ApiWaveMin {
     'voting_period_end': number | null;
     'voting_credit_type': ApiWaveCreditType;
     'admin_drop_deletion_enabled': boolean;
+    'forbid_negative_votes': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -134,6 +135,12 @@ export class ApiWaveMin {
         {
             "name": "admin_drop_deletion_enabled",
             "baseName": "admin_drop_deletion_enabled",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "forbid_negative_votes",
+            "baseName": "forbid_negative_votes",
             "type": "boolean",
             "format": ""
         }    ];

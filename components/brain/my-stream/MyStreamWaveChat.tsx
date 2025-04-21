@@ -16,6 +16,7 @@ import { useLayout } from "./layout/LayoutContext";
 import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
 import { useWave } from "../../../hooks/useWave";
 
+
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
@@ -27,6 +28,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const [initialDrop, setInitialDrop] = useState<number | null>(null);
   const [searchParamsDone, setSearchParamsDone] = useState(false);
   const { isMemesWave } = useWave(wave);
+
   // Handle URL parameters
   useEffect(() => {
     const dropParam = searchParams.get("serialNo");
@@ -84,8 +86,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const onCancelReplyQuote = () => {
     setActiveDrop(null);
   };
-
-  // We don't need to calculate height style anymore as we're using chatContainerStyle from LayoutContext
 
   if (!searchParamsDone) {
     return null;

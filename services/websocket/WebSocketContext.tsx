@@ -4,6 +4,7 @@ import {
   WebSocketStatus,
   WebSocketConfig,
 } from "./WebSocketTypes";
+import { WsMessageType } from "../../helpers/Types";
 
 /**
  * Interface for the WebSocket context
@@ -19,9 +20,12 @@ export interface WebSocketContextValue {
 
   // Subscription methods
   subscribe: <T>(
-    messageType: string,
+    messageType: WsMessageType,
     callback: MessageCallback<T>
   ) => () => void;
+
+  // Send method for dispatching messages
+  send: <T>(messageType: WsMessageType, data: T) => void;
 
   // Configuration
   config: WebSocketConfig;
