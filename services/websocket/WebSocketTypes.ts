@@ -1,18 +1,19 @@
+import { WsMessageType } from "../../helpers/Types";
+
 /**
  * WebSocket message structure for type-safe message handling
  */
-export interface WebSocketMessage<T = any> {
-  type: string;
-  data: T;
-}
+export type WebSocketMessage<T = {}> = {
+  type: WsMessageType;
+} & T;
 
 /**
  * Connection status for the WebSocket
  */
 export enum WebSocketStatus {
-  CONNECTED = 'connected',
-  CONNECTING = 'connecting',
-  DISCONNECTED = 'disconnected'
+  CONNECTED = "connected",
+  CONNECTING = "connecting",
+  DISCONNECTED = "disconnected",
 }
 
 /**

@@ -736,6 +736,25 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIdentity"
+  /identities/by-wallet/{wallet}:
+    get:
+      tags:
+        - Identities
+      summary: Get identity by wallet
+      operationId: getIdentityByWallet
+      parameters:
+        - name: wallet
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentity"
   /identities/{id}/subscriptions:
     get:
       tags:
@@ -3640,6 +3659,7 @@ components:
         - credit_category
         - signature_required
         - creditor_id
+        - forbid_negative_votes
       properties:
         scope:
           $ref: "#/components/schemas/ApiCreateNewWaveScope"
@@ -3663,6 +3683,8 @@ components:
           type: boolean
         period:
           $ref: "#/components/schemas/ApiIntRange"
+        forbid_negative_votes:
+          type: boolean
     ApiCreateWaveConfig:
       type: object
       required:
@@ -5847,6 +5869,7 @@ components:
         - voting_group_id
         - admin_group_id
         - admin_drop_deletion_enabled
+        - forbid_negative_votes
       properties:
         id:
           type: string
@@ -5854,6 +5877,7 @@ components:
           type: string
         picture:
           type: string
+          nullable: true
         description_drop_id:
           type: string
         authenticated_user_eligible_to_vote:
@@ -5890,6 +5914,8 @@ components:
         voting_credit_type:
           $ref: "#/components/schemas/ApiWaveCreditType"
         admin_drop_deletion_enabled:
+          type: boolean
+        forbid_negative_votes:
           type: boolean
     ApiWaveOutcome:
       type: object
@@ -6104,6 +6130,7 @@ components:
         - signature_required
         - creditor
         - authenticated_user_eligible
+        - forbid_negative_votes
       properties:
         scope:
           $ref: "#/components/schemas/ApiWaveScope"
@@ -6127,6 +6154,8 @@ components:
         period:
           $ref: "#/components/schemas/ApiIntRange"
         authenticated_user_eligible:
+          type: boolean
+        forbid_negative_votes:
           type: boolean
 security:
   - bearerAuth: []
