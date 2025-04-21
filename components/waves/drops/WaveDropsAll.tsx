@@ -314,9 +314,9 @@ export default function WaveDropsAll({
 
         <div
           className={`tw-absolute tw-bottom-0 tw-left-0 tw-z-10 tw-inset-x-0 tw-mr-2 tw-px-4 tw-py-1 tw-flex tw-items-center tw-gap-x-2 tw-bg-iron-950 tw-transition-opacity tw-duration-300 tw-ease-in-out ${
-            !typingMessage
-              ? 'tw-opacity-100 tw-visible'
-              : 'tw-opacity-0 tw-invisible tw-hidden'
+            typingMessage
+              ? "tw-opacity-100 tw-visible"
+              : "tw-opacity-0 tw-invisible tw-hidden"
           }`}
         >
           <div className="tw-flex tw-items-center tw-gap-x-0.5">
@@ -335,9 +335,7 @@ export default function WaveDropsAll({
               style={{ animationDelay: "300ms" }}
             />
           </div>
-          <span className="tw-text-xs tw-text-iron-400">
-            {typingMessage} <span className="tw-font-bold">Simo</span> is typing...
-          </span>
+          <span className="tw-text-xs tw-text-iron-400">{typingMessage}</span>
         </div>
       </>
     );

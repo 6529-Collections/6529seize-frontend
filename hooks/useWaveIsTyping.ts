@@ -44,14 +44,14 @@ function buildTypingString(entries: TypingEntry[]): string {
   const names = sorted.map((e) => e.profile.handle);
 
   if (names.length === 1) {
-    return `${names[0]} is typing…`;
+    return `${names[0]} is typing`;
   }
   if (names.length === 2) {
-    return `${names[0]}, ${names[1]} are typing…`;
+    return `${names[0]}, ${names[1]} are typing`;
   }
   return `${names[0]}, ${names[1]} and ${
     names.length - 2
-  } more people are typing…`;
+  } more people are typing`;
 }
 
 /* ------------------------------------------------------------------ */
