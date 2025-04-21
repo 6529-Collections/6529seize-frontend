@@ -1,24 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useWaveWebSocket } from "./useWaveWebSocket";
-import { WsMessageType } from "../helpers/Types";
-
+import {
+  WsDropUpdateMessage,
+  WsMessageType,
+  WsTypingMessage,
+} from "../helpers/Types";
+import { ApiProfileMin } from "../generated/models/ApiProfileMin";
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
 /* ------------------------------------------------------------------ */
 
-interface Profile {
-  handle: string;
-  level?: number; // “higher” means more important
-}
-
-interface TypingPayload {
-  wave_id: string;
-  profile: Profile;
-  timestamp: number; // server‑side event time (ignored for freshness)
-}
-
 interface TypingEntry {
-  profile: Profile;
+  profile: ApiProfileMin;
   lastTypingAt: number; // our local receive time (ms)
 }
 
@@ -87,14 +80,16 @@ export function useWaveIsTyping(
     if (!socket) return;
 
     const onMessage = (event: MessageEvent) => {
-      let msg: { type: WsMessageType; data?: TypingPayload };
+      let msg: WsTypingMessage | WsDropUpdateMessage;
       try {
         msg = JSON.parse(event.data);
       } catch (err) {
         console.error("Bad WebSocket JSON", err);
         return;
       }
-
+      if (msg.type === WsMessageType.DROP_UPDATE) {
+        typersRef.current.delete(msg.data?.author.handle ?? "");
+      }
       if (msg.type !== WsMessageType.USER_IS_TYPING) return;
       const data = msg.data;
       if (!data || data.wave_id !== waveId) return;

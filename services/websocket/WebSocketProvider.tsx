@@ -66,7 +66,6 @@ export function WebSocketProvider({
    * Parse and route incoming WebSocket messages
    */
   const handleMessage = useCallback((event: MessageEvent) => {
-    console.log("WebSocket message received:", event.data);
     try {
       // Parse the message
       const message: WebSocketMessage<{ data: any }> = JSON.parse(event.data);
