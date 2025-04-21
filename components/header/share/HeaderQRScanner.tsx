@@ -65,7 +65,7 @@ export default function HeaderQRScanner({
         message: (
           <>
             <p>Scan failed. Please try again.</p>
-            <p className="tw-font-light">
+            <p className="tw:font-light">
               Make sure you have the latest version of the app installed.
             </p>
           </>
@@ -135,14 +135,14 @@ export default function HeaderQRScanner({
   };
 
   return (
-    <div className="tailwind-scope tw-self-center">
+    <div className="tailwind-scope tw:self-center">
       <button
         disabled={scanning}
         type="button"
         aria-label="QR Code Scanner"
         title="QR Code Scanner"
         onClick={startScan}
-        className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out">
+        className="tw:flex tw:items-center tw:justify-center tw:rounded-lg tw:bg-iron-800 tw:ring-1 tw:ring-inset tw:ring-iron-700 tw:h-10 tw:w-10 tw:border-0 tw:text-iron-300 hover:tw:text-iron-50 tw:shadow-sm hover:tw:bg-iron-700 focus-visible:tw:outline focus-visible:tw:outline-2 focus-visible:tw:outline-primary-400 tw:transition tw:duration-300 tw:ease-out">
         <HeaderQRScannerIcon />
       </button>
     </div>
@@ -158,7 +158,7 @@ function HeaderQRScannerIcon() {
       alt="QR Scanner"
       width={20}
       height={20}
-      className="tw-h-5 tw-w-5 tw-shrink-0"
+      className="tw:h-5 tw:w-5 tw:shrink-0"
     />
   );
 }

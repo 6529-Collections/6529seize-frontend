@@ -30,7 +30,7 @@ export function ShareMobileApp({
       target={target}
       rel="noopener noreferrer"
       onClick={handleClick}
-      className="decoration-none tw-flex tw-flex-col tw-items-center tw-gap-8">
+      className="decoration-none tw:flex tw:flex-col tw:items-center tw:gap-8">
       <Image
         priority
         loading="eager"
@@ -39,7 +39,7 @@ export function ShareMobileApp({
         width={200}
         height={60}
         placeholder="empty"
-        className="hover:tw-scale-[1.03] tw-transition-all tw-duration-300 tw-ease-out"
+        className="hover:tw:scale-[1.03] tw:transition-all tw:duration-300 tw:ease-out"
       />
     </Link>
   );

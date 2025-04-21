@@ -9,11 +9,11 @@ export default function HeaderDesktopLink({
   readonly link: HeaderLink;
 }) {
   return (
-    <NavDropdown.Item as="div" className="tw-h-full">
+    <NavDropdown.Item as="div" className="tw:h-full">
       <Link
         href={link.path}
         passHref
-        className="tw-no-underline tw-h-full tw-w-full tw-p-0 tw-m-0 tw-inline-flex tw-justify-between">
+        className="tw:no-underline tw:h-full tw:w-full tw:p-0 tw:m-0 tw:inline-flex tw:justify-between">
         {link.name}
         {link.isNew && <span className={styles.new}>new</span>}
       </Link>
