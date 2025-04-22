@@ -34,10 +34,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     // Cleanup is likely handled internally by LayoutContext's ResizeObserver unobserve
   }, [headerRef, registerRef]);
 
-
-    setTitle({ title: "My Stream | 6529.io" });
-
-
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
 
@@ -119,7 +115,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
         <meta property="og:description" content="6529.io" />
-        {/*  <style>{`body { overflow: hidden !important; }`}</style> */}
+        <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
 
       <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">

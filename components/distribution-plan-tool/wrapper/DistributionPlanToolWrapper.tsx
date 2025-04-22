@@ -1,4 +1,3 @@
-import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
 import { Poppins } from "next/font/google";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -21,11 +20,6 @@ export default function DistributionPlanToolWrapper({
   const { setTitle, title } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
   const router = useRouter();
-  const [defaultBreadCrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "EMMA" },
-  ]);
-  const [breadcrumbs, setBreadCrumbs] = useState<Crumb[]>(defaultBreadCrumbs);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -56,7 +50,6 @@ export default function DistributionPlanToolWrapper({
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
         <div
           id="allowlist-tool"

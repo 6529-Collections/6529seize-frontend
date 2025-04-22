@@ -2,7 +2,6 @@ import Head from "next/head";
 import styles from "../../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import Breadcrumb from "../../../../../components/breadcrumb/Breadcrumb";
 import {
   NextGenCollection,
   NextGenToken,
@@ -47,19 +46,6 @@ export default function NextGenCollectionToken(props: any) {
   const pageImage = token?.image_url ?? collection.image;
   const tokenView = props.pageProps.view;
 
-  const breadcrumbs = [
-    { display: "Home", href: "/" },
-    { display: "NextGen", href: "/nextgen" },
-    {
-      display: collection.name,
-      href: `/nextgen/collection/${formatNameForUrl(collection.name)}`,
-    },
-    {
-      display: token
-        ? `#${token.normalised_id}`
-        : `#${tokenId - collection.id * 10000000000}`,
-    },
-  ];
 
   useEffect(() => {
     setTitle({
@@ -89,7 +75,6 @@ export default function NextGenCollectionToken(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <NextGenNavigationHeader />
         {token ? (
           <NextGenTokenComponent

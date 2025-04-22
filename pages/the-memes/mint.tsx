@@ -1,6 +1,5 @@
 import styles from "../../styles/Home.module.scss";
 
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import { MEMES_CONTRACT, MEMES_MANIFOLD_PROXY_CONTRACT } from "../../constants";
 import { MEMES_MANIFOLD_PROXY_ABI } from "../../abis";
@@ -22,12 +21,6 @@ const ManifoldMinting = dynamic(
 export default function TheMemesMint(props: any) {
   const { setTitle, title } = useContext(AuthContext);
   const nft: NFTWithMemesExtendedData = props.pageProps.nft;
-
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "The Memes", href: "/the-memes" },
-    { display: `Mint` },
-  ];
 
   const pagename = `Mint The Memes #${nft.id}`;
   const pagenameFull = `${pagename} | 6529.io`;
@@ -58,7 +51,6 @@ export default function TheMemesMint(props: any) {
         <meta name="twitter:image" content={pagename} />
       </Head>
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <ManifoldMinting
           title={`The Memes #${nft.id}`}
           contract={MEMES_CONTRACT}

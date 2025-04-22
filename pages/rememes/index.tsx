@@ -1,8 +1,7 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
 interface Props {
@@ -16,10 +15,6 @@ const RememesComponent = dynamic(
 
 export default function ReMemes(props: Readonly<Props>) {
   const { setTitle, title } = useContext(AuthContext);
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "ReMemes" },
-  ]);
 
   useEffect(() => {
     setTitle({
@@ -46,7 +41,6 @@ export default function ReMemes(props: Readonly<Props>) {
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <RememesComponent />
       </main>
     </>

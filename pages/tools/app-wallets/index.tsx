@@ -1,6 +1,5 @@
 import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../../components/auth/Auth";
@@ -15,10 +14,6 @@ const AppWalletsComponent = dynamic(
 
 export default function AppWallets() {
   const { setTitle, title } = useContext(AuthContext);
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "App Wallets" },
-  ];
 
   useEffect(() => {
     setTitle({
@@ -45,7 +40,6 @@ export default function AppWallets() {
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <AppWalletsComponent />
       </main>
     </>

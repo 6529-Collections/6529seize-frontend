@@ -1,6 +1,5 @@
 import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import { getCommonHeaders } from "../../../helpers/server.helpers";
@@ -40,18 +39,6 @@ export default function NextGen(props: any) {
   const [view, setView] = useState<NextGenView | undefined>(
     props.pageProps.view
   );
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
-
-  function setCrumbs() {
-    const crumbs: Crumb[] = [{ display: "Home", href: "/" }];
-    if (view) {
-      crumbs.push({ display: "NextGen", href: "/nextgen" });
-      crumbs.push({ display: view });
-    } else {
-      crumbs.push({ display: "NextGen" });
-    }
-    setBreadcrumbs(crumbs);
-  }
 
   useEffect(() => {
     if (view) {
@@ -61,7 +48,6 @@ export default function NextGen(props: any) {
     } else {
       router.push("/nextgen", undefined, { shallow: true });
     }
-    setCrumbs();
   }, [view]);
 
   const title = view ? view + " | NextGen | 6529.io" : "NextGen | 6529.io";
@@ -87,7 +73,6 @@ export default function NextGen(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         {collection?.id ? (
           <>
             <NextGenNavigationHeader view={view} setView={setView} />

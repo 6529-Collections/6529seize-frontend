@@ -8,7 +8,6 @@ import Tippy from "@tippyjs/react";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../services/6529api";
 import { capitalizeEveryWord, getDateFilters } from "../../helpers/Helpers";
-import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import router from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
@@ -85,17 +84,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
   const [fromBlock, setFromBlock] = useState<number>();
   const [toBlock, setToBlock] = useState<number>();
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
-
   useEffect(() => {
     if (props.focus) {
-      setBreadcrumbs([
-        { display: "Home", href: "/" },
-        { display: props.title },
-        {
-          display: capitalizeEveryWord(props.focus.replaceAll("-", " ")),
-        },
-      ]);
       router.push(
         {
           pathname: router.pathname,
@@ -163,7 +153,6 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
 
   return (
     <>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
       <Container className="pt-4">
         <Row className="d-flex align-items-center">
           <Col className="d-flex align-items-center justify-content-between">

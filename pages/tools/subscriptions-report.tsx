@@ -1,6 +1,5 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import {
   RedeemedSubscriptionCounts,
@@ -31,10 +30,6 @@ export default function SubscriptionsReport({
   readonly pageProps: SubscriptionsProps;
 }) {
   const { setTitle, title } = useContext(AuthContext);
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "Subscriptions Report" },
-  ];
 
   useEffect(() => {
     setTitle({
@@ -61,7 +56,6 @@ export default function SubscriptionsReport({
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <SubscriptionsReportComponent
           szn={pageProps.szn}
           upcomingCounts={pageProps.upcoming}

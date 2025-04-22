@@ -14,7 +14,6 @@ import {
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
-import Breadcrumb from "../breadcrumb/Breadcrumb";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
@@ -25,7 +24,6 @@ import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import { AuthContext } from "../auth/Auth";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import useCapacitor from "../../hooks/useCapacitor";
-import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -47,8 +45,6 @@ export default function GradientPage() {
   const [allNfts, setAllNfts] = useState<NftWithOwner[]>([]);
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
-
-  const hookBreadcrumbs = useBreadcrumbs();
 
   useEffect(() => {
     if (router.isReady) {
@@ -301,7 +297,6 @@ export default function GradientPage() {
 
   return (
     <>
-      <Breadcrumb breadcrumbs={hookBreadcrumbs} />
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>

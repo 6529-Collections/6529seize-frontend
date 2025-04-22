@@ -1,6 +1,5 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import { useContext, useEffect } from "react";
@@ -19,11 +18,6 @@ export default function TheMemesPage() {
       title: "NFT Activity | 6529.io",
     });
   }, []);
-
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "NFT Activity" },
-  ];
 
   return (
     <>
@@ -44,7 +38,6 @@ export default function TheMemesPage() {
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={styles.leaderboardContainer}>
           <Row>
             <Col>

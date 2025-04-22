@@ -1,6 +1,5 @@
 import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
 import { fetchUrl } from "../../../services/6529api";
 import { formatAddress, parseIpfsUrl } from "../../../helpers/Helpers";
@@ -15,11 +14,6 @@ const RememePageComponent = dynamic(
 export default function ReMeme(props: any) {
   const { setTitle, title } = useContext(AuthContext);
   const pageProps = props.pageProps;
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "ReMemes", href: "/rememes" },
-    { display: pageProps.name },
-  ]);
 
   useEffect(() => {
     setTitle({
@@ -52,7 +46,6 @@ export default function ReMeme(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <RememePageComponent contract={pageProps.contract} id={pageProps.id} />
       </main>
     </>

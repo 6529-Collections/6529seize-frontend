@@ -1,7 +1,4 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import GroupsSidebarToggleButton from "../../groups/sidebar/GroupsSidebarToggleButton";
 import GroupsSidebar from "../../groups/sidebar/GroupsSidebar";
 import { createBreakpoint } from "react-use";
@@ -12,16 +9,10 @@ import {
   setActiveGroupId,
 } from "../../../store/groupSlice";
 
-const Header = dynamic(() => import("../../header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function SidebarLayout({
-  breadcrumbs,
   children,
 }: {
-  readonly breadcrumbs: Crumb[];
   readonly children: ReactNode;
 }) {
   const useBreakpoint = createBreakpoint({ XXL: 2048, MD: 768, S: 0 });
