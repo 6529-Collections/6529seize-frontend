@@ -2,7 +2,7 @@ import { Action, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import type { AppState } from "./store";
 
-export interface CounterState {
+interface CounterState {
   value: number;
 }
 
@@ -38,9 +38,8 @@ export const counterSlice = createSlice({
   },
 });
 
-export const { incrementCounter, decrementCounter } = counterSlice.actions;
-export const selectCounter = (state: AppState) => state.counter.value;
-export default counterSlice.reducer;
+export const {   } = counterSlice.actions;
+const selectCounter = (state: AppState) => state.counter.value;
 
 // import { useDispatch, useSelector } from "react-redux";
 // import {

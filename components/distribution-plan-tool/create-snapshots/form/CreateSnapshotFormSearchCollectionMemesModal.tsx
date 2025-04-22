@@ -4,7 +4,7 @@ import { distributionPlanApiFetch } from "../../../../services/distribution-plan
 
 type MemesSeason = `SZN${number}`;
 
-export interface MemesSeasonApiResponse {
+interface MemesSeasonApiResponse {
   readonly season: number;
   readonly tokenIds: string;
 }

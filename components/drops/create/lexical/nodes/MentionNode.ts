@@ -20,7 +20,7 @@ import {
 } from "lexical";
 
 
-export type SerializedMentionNode = Spread<
+type SerializedMentionNode = Spread<
   {
     mentionName: string;
   },

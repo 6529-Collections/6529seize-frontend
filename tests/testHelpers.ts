@@ -51,7 +51,7 @@ export async function login(page: Page, baseURL: string) {
   }
 }
 
-export async function mockApiResponse(page: Page, url: string, response: any) {
+async function mockApiResponse(page: Page, url: string, response: any) {
   await page.route(url, async (route) => {
     await route.fulfill({
       status: 200,

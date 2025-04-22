@@ -15,7 +15,7 @@ export interface FileValidationResult {
 /**
  * Visual state for the upload area
  */
-export type VisualState = 'idle' | 'dragging' | 'invalid' | 'processing';
+type VisualState = 'idle' | 'dragging' | 'invalid' | 'processing';
 
 /**
  * Main state interface for the file uploader reducer

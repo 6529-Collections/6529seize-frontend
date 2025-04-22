@@ -10,7 +10,7 @@ interface VotingModalProps {
   readonly onClose: () => void;
 }
 
-export const VotingModal: React.FC<VotingModalProps> = ({
+const VotingModal: React.FC<VotingModalProps> = ({
   drop,
   isOpen,
   onClose,

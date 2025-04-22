@@ -471,7 +471,7 @@ export default function AppWalletComponent(
   );
 }
 
-export function AppWalletPhraseWord(
+function AppWalletPhraseWord(
   props: Readonly<{
     index?: number;
     word: string;

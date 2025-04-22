@@ -16,18 +16,18 @@ export enum DropPartSize {
   LARGE = "LARGE",
 }
 
-export interface DropPartPropsMedia {
+interface DropPartPropsMedia {
   readonly mimeType: string;
   readonly mediaSrc: string;
 }
 
-export interface DropPartPropsWave {
+interface DropPartPropsWave {
   readonly id: string | null;
   readonly name: string;
   readonly image: string | null;
 }
 
-export interface DropPartProps {
+interface DropPartProps {
   readonly profile: ProfileMinWithoutSubs;
   readonly dropTitle: string | null;
   readonly mentionedUsers: Array<ApiDropMentionedUser>;

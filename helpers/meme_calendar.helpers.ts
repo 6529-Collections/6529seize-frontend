@@ -164,7 +164,7 @@ export const MEMES_CALENDARS: YearCalendar[] = [
   CALENDAR_2022,
 ];
 
-export const MEMES_MINTING_DAYS = [
+const MEMES_MINTING_DAYS = [
   1, // Monday
   3, // Wednesday
   5, // Friday

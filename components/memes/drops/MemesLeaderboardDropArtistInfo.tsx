@@ -13,7 +13,7 @@ interface MemesLeaderboardDropArtistInfoProps {
   readonly drop: ExtendedDrop;
 }
 
-export const MemesLeaderboardDropArtistInfo: React.FC<
+const MemesLeaderboardDropArtistInfo: React.FC<
   MemesLeaderboardDropArtistInfoProps
 > = ({ drop }) => {
   return (

@@ -1,6 +1,5 @@
 export enum ImageScale {
   W_AUTO_H_50 = "AUTOx50",
-  W_100_H_AUTO = "100xAUTO",
   W_200_H_200 = "200x200",
   AUTOx450 = "AUTOx450",
 }

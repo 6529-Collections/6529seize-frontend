@@ -3,7 +3,7 @@ import { ApiWaveLog } from "../../../../generated/models/ApiWaveLog";
 import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
 import { useDrop } from "../../../../hooks/useDrop";
 
-export type WaveLeaderboardRightSidebarActivityLogDropProps = {
+type WaveLeaderboardRightSidebarActivityLogDropProps = {
   readonly log: ApiWaveLog;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 };

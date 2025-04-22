@@ -39,7 +39,7 @@ export const getStableDropKey = (
   return { key, hash: Buffer.from(hash).toString("hex") };
 };
 
-export const findClosestMatch = (
+const findClosestMatch = (
   newDrop: ApiDrop,
   existingDrops: ExtendedDrop[],
   maxDiff?: number
@@ -75,7 +75,7 @@ export const findClosestMatch = (
 };
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
-export const getOptimisticDropSerialNo = (): number =>
+const getOptimisticDropSerialNo = (): number =>
   Math.floor(Math.random() * 1000000);
 
 /**
@@ -90,7 +90,7 @@ export const convertApiDropToExtendedDrop = (drop: ApiDrop): ExtendedDrop => {
   };
 };
 
-export const getDropKey = ({
+const getDropKey = ({
   drop,
   returnOriginal,
 }: {

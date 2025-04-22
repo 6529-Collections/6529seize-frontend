@@ -43,7 +43,7 @@ interface UseFileUploaderProps {
  * @param props Hook props
  * @returns Object with state and handlers
  */
-export const useFileUploader = ({
+const useFileUploader = ({
   onFileSelect,
   setUploaded,
   showToast

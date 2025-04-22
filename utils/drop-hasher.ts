@@ -41,4 +41,4 @@ export class DropHasher {
   }
 }
 
-export const dropHasher = new DropHasher();
+const dropHasher = new DropHasher();

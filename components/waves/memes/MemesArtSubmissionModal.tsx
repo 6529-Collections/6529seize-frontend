@@ -11,7 +11,7 @@ interface MemesArtSubmissionModalProps {
   readonly onClose: () => void;
 }
 
-export const MemesArtSubmissionModal: React.FC<
+const MemesArtSubmissionModal: React.FC<
   MemesArtSubmissionModalProps
 > = ({ isOpen, wave, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);

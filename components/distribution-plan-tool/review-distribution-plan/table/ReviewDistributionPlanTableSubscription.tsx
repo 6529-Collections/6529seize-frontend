@@ -181,7 +181,7 @@ const mergeResults = (results: WalletResult[]): WalletResult[] => {
   }));
 };
 
-export const resetSubscriptions = async (
+const resetSubscriptions = async (
   contract: string,
   tokenId: string,
   planId: string

@@ -15,7 +15,7 @@ interface MemesLeaderboardDropVoteSummaryProps {
   readonly userContext?: ApiDropContextProfileContext | null;
 }
 
-export const MemesLeaderboardDropVoteSummary: React.FC<
+const MemesLeaderboardDropVoteSummary: React.FC<
   MemesLeaderboardDropVoteSummaryProps
 > = ({
   current,

@@ -15,7 +15,7 @@ import Tippy from "@tippyjs/react";
 import Image from "next/image";
 import { postData } from "../../services/6529api";
 
-export interface AddRememe {
+interface AddRememe {
   contract: string;
   token_ids: string[];
   references: number[];

@@ -36,7 +36,7 @@ interface LayoutSpaces {
 
 // Context type definition
 // Define valid ref types for type safety
-export type LayoutRefType = 'header' | 'pinned' | 'tabs' | 'spacer' | 'mobileTabs'
+type LayoutRefType = 'header' | 'pinned' | 'tabs' | 'spacer' | 'mobileTabs'
 
 interface LayoutContextType {
   // Calculated spaces

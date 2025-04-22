@@ -8,7 +8,7 @@ export interface ExtendedDrop extends ApiDrop {
   readonly stableHash: string;
 }
 
-export const createExtendedDrop = (
+const createExtendedDrop = (
   drop: ApiDropWithoutWave,
   wave: ApiWaveMin,
   prevDrops: ExtendedDrop[]
@@ -22,7 +22,7 @@ export const createExtendedDrop = (
   };
 };
 
-export const processWaveDropsFeed = (
+const processWaveDropsFeed = (
   page: { readonly wave: ApiWaveMin; readonly drops: ApiDropWithoutWave[] },
   prevDrops: ExtendedDrop[]
 ): ExtendedDrop[] => {

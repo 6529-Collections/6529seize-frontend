@@ -140,7 +140,7 @@ export enum CreateWaveGroupStatus {
   GROUP = "GROUP",
 }
 
-export interface SearchWavesParams {
+interface SearchWavesParams {
   readonly limit: number;
   readonly serial_no_less_than?: number;
   readonly group_id?: string;

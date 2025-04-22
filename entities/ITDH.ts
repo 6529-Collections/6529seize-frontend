@@ -7,7 +7,7 @@ export interface TDHBoostBreakdown {
   acquired_info: string[];
 }
 
-export interface BaseTDH {
+interface BaseTDH {
   block: number;
   tdh: number;
   boost: number;
@@ -70,7 +70,7 @@ export interface ConsolidatedTDH extends BaseTDH {
   consolidation_display: string;
 }
 
-export interface BaseTDHMetrics extends TDH {
+interface BaseTDHMetrics extends TDH {
   purchases_value: number;
   purchases_count: number;
   purchases_value_memes: number;

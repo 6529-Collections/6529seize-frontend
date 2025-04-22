@@ -110,7 +110,7 @@ export const formatDate = (timestamp: number): string => {
 /**
  * Generates decision point text
  */
-export const generateDecisionPointText = (
+const generateDecisionPointText = (
   firstDecisionTime: number,
   subsequentDecisions: number[]
 ): string[] => {
@@ -121,7 +121,7 @@ export const generateDecisionPointText = (
 /**
  * Convert milliseconds to time period for display
  */
-export const msToTimePeriod = (ms: number): { value: number, unit: string } => {
+const msToTimePeriod = (ms: number): { value: number, unit: string } => {
   const minute = 60 * 1000;
   const hour = 60 * minute;
   const day = 24 * hour;

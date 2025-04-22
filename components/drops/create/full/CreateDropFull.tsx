@@ -22,13 +22,13 @@ export interface CreateDropFullHandles {
   clearEditorState: () => void;
 }
 
-export interface CreateDropFullWaveProps {
+interface CreateDropFullWaveProps {
   readonly name: string;
   readonly image: string | null;
   readonly id: string | null;
 }
 
-export interface CreateDropFullProps {
+interface CreateDropFullProps {
   readonly screenType: CreateDropScreenType;
   readonly profile: ProfileMinWithoutSubs;
   readonly title: string | null;

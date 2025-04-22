@@ -44,4 +44,3 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({ wave }) => {
   );
 };
 
-export default MyStreamWaveTabs;

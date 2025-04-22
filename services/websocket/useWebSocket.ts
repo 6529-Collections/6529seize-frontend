@@ -25,6 +25,6 @@ export function useWebSocket(): WebSocketContextValue {
  * 
  * @returns WebSocket context or undefined if not available
  */
-export function useOptionalWebSocket(): WebSocketContextValue | undefined {
+function useOptionalWebSocket(): WebSocketContextValue | undefined {
   return useContext(WebSocketContext);
 }

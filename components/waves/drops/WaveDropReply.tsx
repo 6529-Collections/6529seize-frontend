@@ -5,7 +5,7 @@ import DropLoading from "./DropLoading";
 import DropNotFound from "./DropNotFound";
 import ContentDisplay from "./ContentDisplay";
 
-export interface WaveDropReplyProps {
+interface WaveDropReplyProps {
   readonly dropId: string;
   readonly dropPartId: number;
   readonly maybeDrop: ApiDrop | null;

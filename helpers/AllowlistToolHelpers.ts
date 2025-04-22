@@ -1,4 +1,4 @@
-export class ObjectId {
+class ObjectId {
   private static readonly hexChars = "0123456789abcdef";
 
   private readonly timestamp: number;

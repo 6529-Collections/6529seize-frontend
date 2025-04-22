@@ -20,7 +20,7 @@ export enum ProcessIncomingDropType {
   DROP_INSERT = "DROP_INSERT",
 }
 
-export type ProcessIncomingDropFn = (
+type ProcessIncomingDropFn = (
   dropData: ApiDrop,
   type: ProcessIncomingDropType
 ) => void;

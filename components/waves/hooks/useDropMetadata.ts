@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ApiWaveMetadataType } from "../../../generated/models/ApiWaveMetadataType";
 
-export type CreateDropMetadataType =
+type CreateDropMetadataType =
   | {
       key: string;
       readonly type: ApiWaveMetadataType.String;

@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 
-export enum SubmissionStatus {
+enum SubmissionStatus {
   NOT_STARTED = "NOT_STARTED",
   ACTIVE = "ACTIVE",
   ENDED = "ENDED",
 }
 
-export enum ChatStatus {
+enum ChatStatus {
   ACTIVE = "ACTIVE",
   DISABLED = "DISABLED",
 }
@@ -27,7 +27,7 @@ export enum ChatRestriction {
   DISABLED = "DISABLED",
 }
 
-export interface DropPrivilegesInput {
+interface DropPrivilegesInput {
   readonly isLoggedIn: boolean;
   readonly isProxy: boolean;
   readonly canChat: boolean;

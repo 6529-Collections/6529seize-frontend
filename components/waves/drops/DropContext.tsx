@@ -15,7 +15,7 @@ interface DropProviderProps {
   readonly location: DropLocation;
 }
 
-export function DropProvider({ children, drop, location }: DropProviderProps) {
+function DropProvider({ children, drop, location }: DropProviderProps) {
   const memoizedValue = useMemo(() => ({ drop, location }), [drop, location]);
 
   return (

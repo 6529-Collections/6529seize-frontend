@@ -8,7 +8,7 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 
-export interface FeedItemProps {
+interface FeedItemProps {
   readonly item: TypedFeedItem;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;

@@ -12,19 +12,13 @@
 export * from "./WebSocketTypes";
 
 // Context and Provider
-export {
-  WebSocketContext,
-  type WebSocketProviderProps,
-} from "./WebSocketContext";
-export { WebSocketProvider } from "./WebSocketProvider";
+;
+;
 
 // Hooks
-export { useWebSocket, useOptionalWebSocket } from "./useWebSocket";
-export {
-  useWebSocketMessage,
-  useWebSocketMessages,
-} from "./useWebSocketMessage";
-export { useWebSocketAuth } from "./useWebSocketAuth";
+export { useWebSocket,  } from "./useWebSocket";
+;
+;
 
 // Default configuration
 export const DEFAULT_WEBSOCKET_CONFIG = {

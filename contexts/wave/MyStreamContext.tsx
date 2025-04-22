@@ -65,7 +65,7 @@ interface MyStreamProviderProps {
 }
 
 // Create the context
-export const MyStreamContext = createContext<MyStreamContextType | null>(null);
+const MyStreamContext = createContext<MyStreamContextType | null>(null);
 
 // Create a provider component
 export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({

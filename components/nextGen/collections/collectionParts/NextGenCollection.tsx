@@ -26,7 +26,7 @@ export enum ContentView {
   TOP_TRAIT_SETS = "Trait Sets",
 }
 
-export function getContentViewKeyByValue(value: string): string {
+function getContentViewKeyByValue(value: string): string {
   for (const [key, val] of Object.entries(ContentView)) {
     if (val === value) {
       return key;

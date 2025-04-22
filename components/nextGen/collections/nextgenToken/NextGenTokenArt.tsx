@@ -28,7 +28,7 @@ enum Mode {
   HIGH_RES = "High Res",
 }
 
-export function NextGenTokenArtImage(
+function NextGenTokenArtImage(
   props: Readonly<{
     token: NextGenToken;
     mode: Mode;

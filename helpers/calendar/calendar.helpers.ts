@@ -74,7 +74,7 @@ export const generateCalendar = ({
   return result;
 };
 
-export const getCurrentDayStartTimestamp = (): number => {
+const getCurrentDayStartTimestamp = (): number => {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 };

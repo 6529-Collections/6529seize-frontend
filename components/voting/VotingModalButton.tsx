@@ -8,7 +8,7 @@ interface VotingModalButtonProps {
   readonly variant?: "default" | "subtle"; // Add variant prop for styling flexibility
 }
 
-export const VotingModalButton: React.FC<VotingModalButtonProps> = ({
+const VotingModalButton: React.FC<VotingModalButtonProps> = ({
   drop,
   onClick,
   variant = "default",

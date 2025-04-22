@@ -52,7 +52,7 @@ export interface NFT extends BaseNFT {
   hodl_rate: number;
 }
 
-export interface ExtendedDataBase {
+interface ExtendedDataBase {
   id: number;
   created_at: Date;
   collection_size: number;

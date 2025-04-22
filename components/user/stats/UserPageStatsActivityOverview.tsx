@@ -75,7 +75,7 @@ export default function UserPageStatsActivityOverview({
   );
 }
 
-export function UserPageStatsActivityOverviewTotals({
+function UserPageStatsActivityOverviewTotals({
   activity,
 }: {
   readonly activity: AggregatedActivity | undefined;
@@ -336,7 +336,7 @@ export function UserPageStatsActivityOverviewTotals({
   );
 }
 
-export function UserPageStatsActivityOverviewMemes({
+function UserPageStatsActivityOverviewMemes({
   activity,
 }: {
   readonly activity: AggregatedActivityMemes[];

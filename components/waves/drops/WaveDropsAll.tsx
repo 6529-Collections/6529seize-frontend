@@ -20,7 +20,7 @@ import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import { useWaveIsTyping } from "../../../hooks/useWaveIsTyping";
 import { useAuth } from "../../auth/Auth";
 
-export interface WaveDropsAllProps {
+interface WaveDropsAllProps {
   readonly waveId: string;
   readonly dropId: string | null;
   readonly onReply: ({

@@ -309,7 +309,7 @@ export function getNextGenImageUrl(tokenId: number) {
   return `${NEXTGEN_MEDIA_BASE_URL}/png/${tokenId}`;
 }
 
-export function getNextGenThumbnailUrl(tokenId: number) {
+function getNextGenThumbnailUrl(tokenId: number) {
   return `${NEXTGEN_MEDIA_BASE_URL}/png0.5k/${tokenId}`;
 }
 
