@@ -76,6 +76,7 @@ const nextConfig = {
     IPFS_MFS_PATH: process.env.IPFS_MFS_PATH,
     TENOR_API_KEY: process.env.TENOR_API_KEY,
     WS_ENDPOINT: process.env.WS_ENDPOINT,
+    DEV_MODE_MEMES_WAVE_ID: process.env.DEV_MODE_MEMES_WAVE_ID,
   },
   async generateBuildId() {
     return VERSION;

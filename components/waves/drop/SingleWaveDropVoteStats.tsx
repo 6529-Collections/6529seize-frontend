@@ -23,7 +23,7 @@ export const SingleWaveDropVoteStats: React.FC<SingleWaveDropVoteStatsProps> = (
         </span>
       </div>
       <div className="tw-flex tw-items-center tw-gap-1">
-        <span>Range: </span>
+        <span>Available: </span>
         <div className="tw-flex tw-items-center">
           <div className="tw-flex tw-flex-col tw-items-center tw-mr-1 tw-leading-[0.15rem] -tw-space-y-2.5 tw-mt-0.5">
             <span className="tw-text-xs tw-font-medium tw-text-emerald-400">+</span>

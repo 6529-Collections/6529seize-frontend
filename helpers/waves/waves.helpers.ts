@@ -35,6 +35,7 @@ export const convertWaveToUpdateWave = (
     creditor_id: wave.voting.creditor?.id ?? null,
     signature_required: !!wave.voting.signature_required,
     period: wave.voting.period,
+    forbid_negative_votes: wave.voting.forbid_negative_votes,
   },
   visibility: {
     scope: {

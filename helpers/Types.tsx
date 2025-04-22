@@ -1,5 +1,6 @@
 import { SortDirection } from "../entities/ISort";
 import { ApiDrop } from "../generated/models/ApiDrop";
+import { ApiProfileMin } from "../generated/models/ApiProfileMin";
 
 export interface FullPageRequest<SORT_BY_OPTIONS> {
   readonly sort_direction: SortDirection;
@@ -327,6 +328,17 @@ export enum WsMessageType {
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   USER_IS_TYPING = "USER_IS_TYPING",
   SUBSCRIBE_TO_WAVE = "SUBSCRIBE_TO_WAVE",
+}
+
+
+
+export interface WsTypingMessage {
+  readonly type: WsMessageType.USER_IS_TYPING;
+  readonly data: {
+    wave_id: string;
+    profile: ApiProfileMin;
+    timestamp: number; 
+  };
 }
 
 export interface WsDropUpdateMessage {

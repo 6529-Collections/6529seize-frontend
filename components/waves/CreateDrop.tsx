@@ -147,6 +147,15 @@ export default function CreateDrop({
         type: "error",
       });
     },
+    retry: (failureCount) => {
+      if (failureCount >= 3) {
+        return false;
+      }
+      return true;
+    },
+    retryDelay: (failureCount) => {
+      return failureCount * 1000;
+    },
   });
 
   const [queueSize, setQueueSize] = useState(0);

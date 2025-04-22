@@ -385,6 +385,7 @@ export const getCreateNewWaveBody = ({
         min: config.dates.votingStartDate,
         max: endDate,
       },
+      forbid_negative_votes: false,
     },
     visibility: {
       scope: {
