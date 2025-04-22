@@ -322,7 +322,7 @@ export default function WaveDropsAll({
           <div className="tw-flex tw-items-center tw-gap-x-0.5">
             <FontAwesomeIcon
               icon={faCircle}
-              className="tw-text-iron-400 tw-h-1 tw-w-1 tw-animate-pulse"
+              className="tw-text-iron-300 tw-h-1 tw-w-1 tw-animate-pulse"
             />
             <FontAwesomeIcon
               icon={faCircle}
@@ -331,7 +331,7 @@ export default function WaveDropsAll({
             />
             <FontAwesomeIcon
               icon={faCircle}
-              className="tw-text-iron-400 tw-h-1 tw-w-1 tw-animate-pulse"
+              className="tw-text-iron-500 tw-h-1 tw-w-1 tw-animate-pulse"
               style={{ animationDelay: "300ms" }}
             />
           </div>
