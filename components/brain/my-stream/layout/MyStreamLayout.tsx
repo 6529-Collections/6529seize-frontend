@@ -34,9 +34,9 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     // Cleanup is likely handled internally by LayoutContext's ResizeObserver unobserve
   }, [headerRef, registerRef]);
 
-  useEffect(() => {
+
     setTitle({ title: "My Stream | 6529.io" });
-  }, [setTitle]); // Added setTitle to dependency array
+
 
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";

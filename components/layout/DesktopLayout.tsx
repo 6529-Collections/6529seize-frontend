@@ -1,5 +1,6 @@
 import React, { ReactNode, useRef, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "../../contexts/HeaderContext";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
@@ -20,6 +21,8 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
   const { setHeaderRef } = useHeaderContext();
 
   const breadcrumbs = useBreadcrumbs();
+  const router = useRouter();
+  const isHomePage = router.pathname === "/";
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -35,7 +38,7 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
         className="tw-sticky tw-top-0 tw-z-50 tw-bg-black"
       >
         <Header isSmall={isSmall} />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
+        {!isHomePage && <Breadcrumb breadcrumbs={breadcrumbs} />}
       </div>
       <main>{children}</main>
     </>
