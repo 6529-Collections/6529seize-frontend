@@ -99,7 +99,8 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   ) : (
     <div
       id="my-stream-connect"
-      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-p-6">
+      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-p-6"
+    >
       <Image
         priority
         loading="eager"
@@ -140,10 +141,10 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
           className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
           <Header isSmall />
           <div className="tw-z-50 tw-w-full">
-            <Breadcrumb breadcrumbs={breadcrumbs} />
+          
           </div>
         </div> */}
-
+        <Breadcrumb breadcrumbs={breadcrumbs} />
         <ClientOnly>{content}</ClientOnly>
       </div>
     </>
