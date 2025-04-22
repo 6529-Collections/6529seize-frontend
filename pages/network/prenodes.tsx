@@ -1,6 +1,5 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import { AuthContext } from "../../components/auth/Auth";
@@ -17,13 +16,7 @@ export default function PrenodesPage() {
     setTitle({
       title: "Prenodes | Network",
     });
-  }, []);
-
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "Network", href: "/network" },
-    { display: "Prenodes" },
-  ];
+  }, [setTitle]);
 
   return (
     <>
@@ -44,7 +37,6 @@ export default function PrenodesPage() {
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={styles.leaderboardContainer}>
           <Row>
             <Col>

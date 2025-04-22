@@ -1,5 +1,4 @@
 import Head from "next/head";
-import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../components/auth/Auth";
 import { Container, Row, Col, Button } from "react-bootstrap";
@@ -30,11 +29,6 @@ export default function AcceptConnectionSharing(
     seizeDisconnectAndLogout,
     seizeAcceptConnection,
   } = useSeizeConnectContext();
-
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "Accept Connection Sharing" },
-  ];
 
   const router = useRouter();
 
@@ -104,7 +98,6 @@ export default function AcceptConnectionSharing(
 
       <main className="tw-min-h-[100dvh] tw-bg-iron-950">
 
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container className="pt-4 pb-4">
           <Row>
             <Col>

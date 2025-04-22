@@ -1,7 +1,6 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
@@ -13,12 +12,6 @@ export default function CommunityMetrics() {
       title: "Metrics | Network",
     });
   }, []);
-
-  const breadcrumbs = [
-    { display: "Home", href: "/" },
-    { display: "Network", href: "/network" },
-    { display: "Network Metrics" },
-  ];
 
   return (
     <>
@@ -39,7 +32,6 @@ export default function CommunityMetrics() {
       </Head>
 
       <main className={`${styles.main} ${styles.tdhMain}`}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid>
           <Row>
             <Col>

@@ -8,7 +8,7 @@ import {
   selectActiveGroupId,
   setActiveGroupId,
 } from "../../../store/groupSlice";
-
+import { useHeaderContext } from "../../../contexts/HeaderContext";
 
 export default function SidebarLayout({
   children,
@@ -22,7 +22,7 @@ export default function SidebarLayout({
   const activeGroupId = useSelector(selectActiveGroupId);
   const dispatch = useDispatch();
 
-  const headerRef = useRef<HTMLDivElement>(null);
+  const { headerRef } = useHeaderContext();
   const openButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -76,7 +76,7 @@ export default function SidebarLayout({
         ? headerRef.current.clientHeight
         : 0;
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-       const newPosition =
+      const newPosition =
         scrollTop <= headerHeight ? headerHeight - scrollTop : 0;
       sidebarRef.current!.style.top = `${newPosition}px`;
       openButtonRef.current!.style.top = `${newPosition}px`;
@@ -102,10 +102,6 @@ export default function SidebarLayout({
 
   return (
     <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
-    {/*   <div ref={headerRef}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
-      </div> */}
       <div
         className={`tw-transition-all tw-duration-300 tw-ease-out ${
           !open ? "tw-ml-0" : "tw-ml-[320px]"

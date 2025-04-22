@@ -1,6 +1,5 @@
 import Head from "next/head";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
 
@@ -410,17 +409,12 @@ const LEVELS: { minTdh: number; level: number }[] = [
 
 export default function Levels() {
   const { setTitle, title } = useContext(AuthContext);
-  const [breadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "Network", href: "/network" },
-    { display: "Levels" },
-  ]);
 
   useEffect(() => {
     setTitle({
       title: "Levels | Network",
     });
-  }, []);
+  }, [setTitle]);
 
   return (
     <>
@@ -439,7 +433,6 @@ export default function Levels() {
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className="tailwind-scope">
         <div className="tw-pt-12 tw-pb-12">
           <div className="tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">

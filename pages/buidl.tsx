@@ -1,8 +1,7 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import Image from "next/image";
-import { useContext, useEffect, useState } from "react";
-import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
+import { useContext, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { AuthContext } from "../components/auth/Auth";
 
@@ -14,11 +13,6 @@ export default function Buidl() {
       title: "BUIDL | 6529.io",
     });
   }, []);
-
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "BUIDL" },
-  ]);
 
   return (
     <>
@@ -39,7 +33,6 @@ export default function Buidl() {
       </Head>
 
       <main className={styles.main}>
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={`${styles.pageNotFound} text-center`}>
           <Row>
             <Col>
