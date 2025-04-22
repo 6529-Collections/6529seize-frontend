@@ -1,14 +1,8 @@
 import Head from "next/head";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import Waves from "../../components/waves/Waves";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { AuthContext } from "../../components/auth/Auth";
 import { useContext, useEffect } from "react";
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function WavesPage() {
   const { setTitle, title } = useContext(AuthContext);
@@ -42,7 +36,6 @@ export default function WavesPage() {
       </Head>
       <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
         <div>
-          <Header />
           <Breadcrumb breadcrumbs={breadcrumbs} />
         </div>
         <div className="tw-overflow-hidden tw-h-full tw-w-full">

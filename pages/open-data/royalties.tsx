@@ -2,14 +2,8 @@ import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
-
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const CommunityDownloadsRoyalties = dynamic(
   () =>
@@ -52,7 +46,6 @@ export default function RoyaltiesDownloads() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <CommunityDownloadsRoyalties />
       </main>

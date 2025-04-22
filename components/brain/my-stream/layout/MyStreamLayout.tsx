@@ -135,14 +135,14 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       </Head>
 
       <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black">
-        <div
+        {/* <div
           ref={setHeaderRef}
           className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
           <Header isSmall />
           <div className="tw-z-50 tw-w-full">
             <Breadcrumb breadcrumbs={breadcrumbs} />
           </div>
-        </div>
+        </div> */}
 
         <ClientOnly>{content}</ClientOnly>
       </div>

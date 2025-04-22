@@ -1,7 +1,6 @@
 import styles from "../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import Breadcrumb from "../../../../components/breadcrumb/Breadcrumb";
 import { useShallowRedirect } from "./[[...view]]";
@@ -12,10 +11,6 @@ import {
   getServerSideCollection,
 } from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader";
 
-const Header = dynamic(() => import("../../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const NextGenCollectionMintingPlanComponent = dynamic(
   () =>
@@ -35,7 +30,6 @@ export default function NextGenCollectionTokensPage(props: any) {
       <NextGenCollectionHead collection={collection} name={pagenameFull} />
 
       <main className={styles.main}>
-        <Header />
         <Breadcrumb
           breadcrumbs={getCollectionBaseBreadcrums(
             collection,

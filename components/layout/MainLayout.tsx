@@ -18,12 +18,17 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     router.pathname.startsWith(path)
   );
 
+  // Pages that should use the small header
+  const isSmall = router.pathname.startsWith("/my-stream");
+
   return (
     <ClientOnly>
       {isMobile ? (
         <MobileLayout>{children}</MobileLayout>
       ) : (
-        <DesktopLayout hideFooter={hideFooter}>{children}</DesktopLayout>
+        <DesktopLayout hideFooter={hideFooter} isSmall={isSmall}>
+          {children}
+        </DesktopLayout>
       )}
     </ClientOnly>
   );

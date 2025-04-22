@@ -5,12 +5,7 @@ import { Container, Row, Col, Table } from "react-bootstrap";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { useContext, useEffect, useState } from "react";
 import Image from "next/image";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { AuthContext } from "../components/auth/Auth";
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function ConsolidationUseCases() {
   const { setTitle, title } = useContext(AuthContext);
@@ -60,7 +55,6 @@ export default function ConsolidationUseCases() {
         />
       </Head>
       <main className={`${styles.main} ${styles.tdhMain}`}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid>
           <Row>

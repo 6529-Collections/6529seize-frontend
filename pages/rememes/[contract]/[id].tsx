@@ -2,16 +2,10 @@ import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { fetchUrl } from "../../../services/6529api";
 import { formatAddress, parseIpfsUrl } from "../../../helpers/Helpers";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../components/auth/Auth";
-
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const RememePageComponent = dynamic(
   () => import("../../../components/rememes/RememePage"),
@@ -58,7 +52,6 @@ export default function ReMeme(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <RememePageComponent contract={pageProps.contract} id={pageProps.id} />
       </main>

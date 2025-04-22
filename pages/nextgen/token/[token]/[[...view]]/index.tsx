@@ -2,7 +2,6 @@ import Head from "next/head";
 import styles from "../../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../../../components/header/HeaderPlaceholder";
 import Breadcrumb from "../../../../../components/breadcrumb/Breadcrumb";
 import {
   NextGenCollection,
@@ -18,13 +17,6 @@ import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_help
 import { AuthContext } from "../../../../../components/auth/Auth";
 import { useContext, useEffect } from "react";
 
-const Header = dynamic(
-  () => import("../../../../../components/header/Header"),
-  {
-    ssr: false,
-    loading: () => <HeaderPlaceholder />,
-  }
-);
 
 const NextGenTokenComponent = dynamic(
   () =>
@@ -97,7 +89,6 @@ export default function NextGenCollectionToken(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <NextGenNavigationHeader />
         {token ? (

@@ -51,7 +51,7 @@ export default function GradientsPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+       {/*  <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} /> */}
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <GradientsComponent wallets={connectedWallets} />
       </main>

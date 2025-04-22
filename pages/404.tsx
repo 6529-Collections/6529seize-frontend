@@ -1,15 +1,8 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import dynamic from "next/dynamic";
 import Image from "next/image";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../components/auth/Auth";
-
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function Seize404() {
   const { setTitle, title } = useContext(AuthContext);
@@ -35,7 +28,6 @@ export default function Seize404() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <div className={styles.pageNotFound}>
           <Image
             width="0"

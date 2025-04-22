@@ -1,16 +1,10 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { Container, Row, Col } from "react-bootstrap";
 import { AboutSection } from "./about/[section]";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../components/auth/Auth";
 
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function DisputeResolution() {
   const { setTitle, title } = useContext(AuthContext);
@@ -39,7 +33,6 @@ export default function DisputeResolution() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <Container>
           <Row className="pt-4 pb-4">
             <Col>

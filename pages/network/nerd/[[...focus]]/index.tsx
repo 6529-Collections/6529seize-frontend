@@ -5,7 +5,6 @@ import Breadcrumb, {
 } from "../../../../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
 import { LeaderboardFocus } from "../../../../components/leaderboard/Leaderboard";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -15,11 +14,6 @@ const Leaderboard = dynamic(
   () => import("../../../../components/leaderboard/Leaderboard"),
   { ssr: false }
 );
-
-const Header = dynamic(() => import("../../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function CommunityNerdPage(props: any) {
   const { setTitle, title } = useContext(AuthContext);
@@ -73,7 +67,6 @@ export default function CommunityNerdPage(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid>
           <Row>

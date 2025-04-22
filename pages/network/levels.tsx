@@ -1,14 +1,8 @@
 import Head from "next/head";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const LEVELS: { minTdh: number; level: number }[] = [
   { minTdh: 0, level: 0 },
@@ -445,7 +439,6 @@ export default function Levels() {
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
-      <Header />
       <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className="tailwind-scope">
         <div className="tw-pt-12 tw-pb-12">

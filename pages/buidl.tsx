@@ -4,14 +4,8 @@ import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { AuthContext } from "../components/auth/Auth";
 
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function Buidl() {
   const { setTitle, title } = useContext(AuthContext);
@@ -45,7 +39,6 @@ export default function Buidl() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={`${styles.pageNotFound} text-center`}>
           <Row>

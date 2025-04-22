@@ -4,13 +4,8 @@ import styles from "../../styles/Home.module.scss";
 import { useContext, useEffect, useState } from "react";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { AuthContext } from "../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const TheMemesComponent = dynamic(
   () => import("../../components/the-memes/TheMemes"),
@@ -49,7 +44,6 @@ export default function TheMemesPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <TheMemesComponent
           setCrumbs={function (crumbs: Crumb[]) {

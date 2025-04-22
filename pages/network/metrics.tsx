@@ -1,16 +1,10 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function CommunityMetrics() {
   const { setTitle, title } = useContext(AuthContext);
@@ -45,7 +39,6 @@ export default function CommunityMetrics() {
       </Head>
 
       <main className={`${styles.main} ${styles.tdhMain}`}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid>
           <Row>

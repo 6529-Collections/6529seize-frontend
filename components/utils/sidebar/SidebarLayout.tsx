@@ -111,10 +111,10 @@ export default function SidebarLayout({
 
   return (
     <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
-      <div ref={headerRef}>
+    {/*   <div ref={headerRef}>
         <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
-      </div>
+      </div> */}
       <div
         className={`tw-transition-all tw-duration-300 tw-ease-out ${
           !open ? "tw-ml-0" : "tw-ml-[320px]"

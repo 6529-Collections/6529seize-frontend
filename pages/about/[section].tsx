@@ -6,7 +6,6 @@ import { useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import { useRouter } from "next/router";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import AboutMemes from "../../components/about/AboutMemes";
 import AboutMemesCalendar from "../../components/about/AboutMemesCalendar";
 import AboutMemeLab from "../../components/about/AboutMemeLab";
@@ -60,10 +59,6 @@ export enum AboutSection {
   COPYRIGHT = "copyright",
 }
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 interface Props {
   section: AboutSection;
@@ -190,7 +185,6 @@ export default function About(props: any) {
         />
       </Head>
       <main className={styles.main}>
-        <Header />
         <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid>
           <Row>

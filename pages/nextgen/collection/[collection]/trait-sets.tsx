@@ -1,7 +1,6 @@
 import styles from "../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import { getCollectionBaseBreadcrums } from "../../../../components/nextGen/nextgen_helpers";
 import NextGenNavigationHeader from "../../../../components/nextGen/collections/NextGenNavigationHeader";
@@ -10,11 +9,6 @@ import {
   NextGenCollectionHead,
   getServerSideCollection,
 } from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader";
-
-const Header = dynamic(() => import("../../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const NextGenTraitSets = dynamic(
   () =>
@@ -33,7 +27,6 @@ export default function NextGenCollectionTraitSetsPage(props: any) {
       <NextGenCollectionHead collection={collection} name={pagenameFull} />
 
       <main className={styles.main}>
-        <Header />
         <Breadcrumb
           breadcrumbs={getCollectionBaseBreadcrums(collection, "Trait Sets")}
         />

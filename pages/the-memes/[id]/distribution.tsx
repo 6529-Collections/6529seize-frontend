@@ -2,16 +2,10 @@ import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { MEMES_CONTRACT } from "../../../constants";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import {
   SharedHead,
   getSharedServerSideProps,
 } from "../../../components/the-memes/MemeShared";
-
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const DistributionComponent = dynamic(
   () => import("../../../components/distribution/Distribution"),
@@ -31,7 +25,6 @@ export default function MemeDistributionPage(props: any) {
         isDistribution={true}
       />
       <main className={styles.main}>
-        <Header />
         <DistributionComponent
           header="The Memes"
           contract={MEMES_CONTRACT}
