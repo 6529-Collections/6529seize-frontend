@@ -109,6 +109,15 @@ export default function CreateDrop({
       waitAndInvalidateDrops();
       setSubmitting(false);
     },
+    retry: (failureCount) => {
+      if (failureCount >= 3) {
+        return false;
+      }
+      return true;
+    },
+    retryDelay: (failureCount) => {
+      return failureCount * 1000;
+    },
   });
 
   if (!init) {
@@ -169,7 +178,7 @@ export default function CreateDrop({
 
     return {
       id: getOptimisticDropId(),
-      serial_no:1,
+      serial_no: 1,
       wave: {
         id: waveDetailed.id,
         name: waveDetailed.name,

@@ -289,7 +289,7 @@ export function useWaveDropsLeaderboard({
     drops,
     fetchNextPage,
     hasNextPage,
-    isFetching: isFetching ?? !hasInitialized,
+    isFetching: isFetching || !hasInitialized,
     isFetchingNextPage,
     refetch,
     haveNewDrops,
