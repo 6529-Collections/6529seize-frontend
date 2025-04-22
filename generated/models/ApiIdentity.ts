@@ -10,12 +10,13 @@
  * Do not edit the class manually.
  */
 
+import { ApiWallet } from '../models/ApiWallet';
 import { HttpFile } from '../http/http';
 
 export class ApiIdentity {
-    'id': string;
-    'handle': string;
-    'normalised_handle': string;
+    'id': string | null;
+    'handle': string | null;
+    'normalised_handle': string | null;
     'pfp': string | null;
     'cic': number;
     'rep': number;
@@ -23,6 +24,10 @@ export class ApiIdentity {
     'tdh': number;
     'display': string;
     'primary_wallet': string;
+    'banner1': string | null;
+    'banner2': string | null;
+    'query'?: string | null;
+    'wallets'?: Array<ApiWallet>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -85,6 +90,30 @@ export class ApiIdentity {
             "name": "primary_wallet",
             "baseName": "primary_wallet",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "banner1",
+            "baseName": "banner1",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "banner2",
+            "baseName": "banner2",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "query",
+            "baseName": "query",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wallets",
+            "baseName": "wallets",
+            "type": "Array<ApiWallet>",
             "format": ""
         }    ];
 
