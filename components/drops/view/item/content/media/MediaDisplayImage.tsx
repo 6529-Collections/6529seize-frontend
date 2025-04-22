@@ -3,16 +3,14 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../../../helpers/image.helpers";
+import { useInView } from "../../../../../../hooks/useInView";
 
-/**
- * Image display component without interactive modal functionality.
- * Based on DropListItemContentMediaImage but without the modal functionality.
- */
-function MediaDisplayImage({
-  src,
-}: {
+interface Props {
   readonly src: string;
-}) {
+}
+
+function MediaDisplayImage({ src }: Props) {
+  const [ref, inView] = useInView<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(true);
 
   const handleImageLoad = useCallback(() => {
@@ -31,25 +29,32 @@ function MediaDisplayImage({
   };
 
   return (
-    <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-mx-[1px]">
+    <div
+      ref={ref}
+      className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-mx-[1px]"
+    >
       {isLoading && (
         <div
           className="tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"
           style={loadingPlaceholderStyle}
         />
       )}
-      <img
-        src={getScaledImageUri(src, ImageScale.AUTOx450)}
-        alt="Media content"
-        className={`tw-object-contain tw-max-w-full ${
-          isLoading ? "tw-opacity-0" : "tw-opacity-100"
-        }`}
-        style={{
-          maxWidth: "100%",
-          maxHeight: "100%",
-        }}
-        onLoad={handleImageLoad}
-      />
+      {inView && (
+        <img
+          src={getScaledImageUri(src, ImageScale.AUTOx450)}
+          alt="Media content"
+          loading="lazy"
+          decoding="async"
+          className={`tw-object-contain tw-max-w-full ${
+            isLoading ? "tw-opacity-0" : "tw-opacity-100"
+          }`}
+          style={{
+            maxWidth: "100%",
+            maxHeight: "100%",
+          }}
+          onLoad={handleImageLoad}
+        />
+      )}
     </div>
   );
 }
