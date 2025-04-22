@@ -2,9 +2,9 @@ import React, { useRef, useCallback, useEffect } from "react";
 import { useInView } from "../../../../../../hooks/useInView";
 
 interface Props {
-  src: string;
-  showControls?: boolean;
-  disableClickHandler?: boolean;
+  readonly src: string;
+  readonly showControls?: boolean;
+  readonly disableClickHandler?: boolean;
 }
 function MediaDisplayVideo({
   src,

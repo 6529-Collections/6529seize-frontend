@@ -6,11 +6,10 @@ import {
 import { useInView } from "../../../../../../hooks/useInView";
 
 interface Props {
-  src: string;
+  readonly src: string;
 }
 
 function MediaDisplayImage({ src }: Props) {
-  
   const [ref, inView] = useInView<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(true);
 
