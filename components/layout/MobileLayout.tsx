@@ -41,10 +41,7 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
       <div ref={headerWrapperRef}>
         <Header />
       </div>
-
       <main>{children}</main>
-
-      <MobileBottomNavigation currentPath={router.pathname} />
     </div>
   );
 };

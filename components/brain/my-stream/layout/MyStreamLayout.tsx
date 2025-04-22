@@ -118,7 +118,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
         <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
 
-      <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
+      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
         <ClientOnly>{content}</ClientOnly>
       </div>
     </>

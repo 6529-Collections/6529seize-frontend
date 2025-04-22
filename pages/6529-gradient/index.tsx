@@ -1,16 +1,9 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-
 import { useContext, useEffect, useState } from "react";
-import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { AuthContext } from "../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const GradientsComponent = dynamic(
   () => import("../../components/6529Gradient/6529Gradient"),
