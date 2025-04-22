@@ -25,9 +25,13 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const { data: wave } = useWaveData({
     waveId,
     onWaveNotFound: () => {
-      router.push({ pathname: router.pathname, query: { wave: null } }, undefined, {
-        shallow: true,
-      });
+      router.push(
+        { pathname: router.pathname, query: { wave: null } },
+        undefined,
+        {
+          shallow: true,
+        }
+      );
     },
   });
   // Track mount status to prevent post-unmount updates
@@ -74,7 +78,9 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       <WaveWinners wave={wave} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.OUTCOME]: <MyStreamWaveOutcome wave={wave} />,
-    [MyStreamWaveTab.MY_VOTES]: <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />,
+    [MyStreamWaveTab.MY_VOTES]: (
+      <MyStreamWaveMyVotes wave={wave} onDropClick={onDropClick} />
+    ),
     [MyStreamWaveTab.FAQ]: <MyStreamWaveFAQ wave={wave} />,
   };
 
