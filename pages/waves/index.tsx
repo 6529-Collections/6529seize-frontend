@@ -1,15 +1,10 @@
 import Head from "next/head";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import Waves from "../../components/waves/Waves";
 import { AuthContext } from "../../components/auth/Auth";
 import { useContext, useEffect } from "react";
 
 export default function WavesPage() {
   const { setTitle, title } = useContext(AuthContext);
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "Waves" },
-  ];
 
   useEffect(() => {
     setTitle({
@@ -35,9 +30,6 @@ export default function WavesPage() {
         <meta property="og:description" content="6529.io" />
       </Head>
       <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
-        <div>
-          <Breadcrumb breadcrumbs={breadcrumbs} />
-        </div>
         <div className="tw-overflow-hidden tw-h-full tw-w-full">
           <Waves />
         </div>

@@ -14,7 +14,7 @@ import {
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
-import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
+import Breadcrumb from "../breadcrumb/Breadcrumb";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
@@ -25,6 +25,7 @@ import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import { AuthContext } from "../auth/Auth";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import useCapacitor from "../../hooks/useCapacitor";
+import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -39,8 +40,6 @@ export default function GradientPage() {
 
   const [nftId, setNftId] = useState<string>();
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
-
   const [nft, setNft] = useState<NftWithOwner>();
   const [isOwner, setIsOwner] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -49,29 +48,15 @@ export default function GradientPage() {
   const [collectionCount, setCollectionCount] = useState(-1);
   const [collectionRank, setCollectionRank] = useState(-1);
 
+  const hookBreadcrumbs = useBreadcrumbs();
+
   useEffect(() => {
     if (router.isReady) {
       if (router.query.id) {
         setNftId(router.query.id as string);
       }
     }
-  }, [router.isReady]);
-
-  useEffect(() => {
-    if (nft) {
-      setBreadcrumbs([
-        { display: "Home", href: "/" },
-        { display: "6529 Gradient", href: "/6529-gradient" },
-        { display: `${nft.name}` },
-      ]);
-    } else {
-      setBreadcrumbs([
-        { display: "Home", href: "/" },
-        { display: "6529 Gradient", href: "/6529-gradient" },
-        { display: `${nftId}` },
-      ]);
-    }
-  }, [nft]);
+  }, [router.isReady, router.query.id]);
 
   useEffect(() => {
     setIsOwner(
@@ -316,7 +301,7 @@ export default function GradientPage() {
 
   return (
     <>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
+      <Breadcrumb breadcrumbs={hookBreadcrumbs} />
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>

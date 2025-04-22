@@ -1,12 +1,17 @@
-import React, { ReactNode } from "react";
-import dynamic from 'next/dynamic';
+import React, { ReactNode, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import MobileBottomNavigation from "./MobileBottomNavigation";
+import { useHeaderContext } from "../../contexts/HeaderContext";
 
 // Simple placeholder for the header while it loads client-side
 const HeaderPlaceholder = () => {
   // Style to roughly match header height
-  return <div style={{ height: '56px' /* Adjust height as needed for mobile */ }}>Loading Header...</div>;
+  return (
+    <div style={{ height: "56px" /* Adjust height as needed for mobile */ }}>
+      Loading Header...
+    </div>
+  );
 };
 
 // Dynamically import Header, disable SSR, and use the placeholder
@@ -21,29 +26,25 @@ interface MobileLayoutProps {
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
   const router = useRouter();
-  
+  const { setHeaderRef } = useHeaderContext();
+
+  // Use a callback ref to get the DOM node
+  const headerWrapperRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      setHeaderRef(node);
+    },
+    [setHeaderRef]
+  );
+
   return (
-    <div className="mobile-layout">
-      <Header />
-      
-      <main className="mobile-main-content">
-        {children}
-      </main>
-      
+    <div>
+      <div ref={headerWrapperRef}>
+        <Header />
+      </div>
+
+      <main>{children}</main>
+
       <MobileBottomNavigation currentPath={router.pathname} />
-      
-      <style jsx>{`
-        .mobile-layout {
-          display: flex;
-          flex-direction: column;
-          min-height: 100vh;
-        }
-        
-        .mobile-main-content {
-          flex: 1;
-          padding-bottom: 56px; /* Height of the bottom navigation */
-        }
-      `}</style>
     </div>
   );
 };

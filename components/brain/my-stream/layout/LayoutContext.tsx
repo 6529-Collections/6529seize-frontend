@@ -36,7 +36,12 @@ interface LayoutSpaces {
 
 // Context type definition
 // Define valid ref types for type safety
-export type LayoutRefType = 'header' | 'pinned' | 'tabs' | 'spacer' | 'mobileTabs'
+export type LayoutRefType =
+  | "header"
+  | "pinned"
+  | "tabs"
+  | "spacer"
+  | "mobileTabs";
 
 interface LayoutContextType {
   // Calculated spaces
@@ -71,10 +76,10 @@ interface LayoutContextType {
 
   // Style for feed view
   feedViewStyle: React.CSSProperties;
-  
+
   // Style for mobile waves view
   mobileWavesViewStyle: React.CSSProperties;
-  
+
   // Style for mobile about view
   mobileAboutViewStyle: React.CSSProperties;
 
@@ -96,7 +101,7 @@ const defaultSpaces: LayoutSpaces = {
 // Create context
 const LayoutContext = createContext<LayoutContextType>({
   spaces: defaultSpaces,
-  registerRef: () => { }, // No-op for default value
+  registerRef: () => {}, // No-op for default value
   contentContainerStyle: {}, // Empty style object as default
   waveViewStyle: {}, // Empty style object as default
   leaderboardViewStyle: {}, // Empty style object as default
@@ -133,35 +138,38 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   const [spaces, setSpaces] = useState<LayoutSpaces>(defaultSpaces);
 
   // Create refs for callback functions to solve circular dependency
-  const calculateSpacesRef = useRef<() => void>(() => { });
+  const calculateSpacesRef = useRef<() => void>(() => {});
 
   // Registration function for components to register their elements
-  const registerRef = useCallback((refType: LayoutRefType, element: HTMLDivElement | null) => {
-    // Skip if element is the same (no change)
-    if (refMap.current[refType] === element) return;
+  const registerRef = useCallback(
+    (refType: LayoutRefType, element: HTMLDivElement | null) => {
+      // Skip if element is the same (no change)
+      if (refMap.current[refType] === element) return;
 
-    // Get the previous element before updating
-    const previousElement = refMap.current[refType];
+      // Get the previous element before updating
+      const previousElement = refMap.current[refType];
 
-    // Store in our internal map (source of truth)
-    refMap.current[refType] = element;
+      // Store in our internal map (source of truth)
+      refMap.current[refType] = element;
 
-    // Handle observer management
-    if (resizeObserverRef.current) {
-      // Unobserve old element if it exists and isn't the new element
-      if (previousElement) {
-        resizeObserverRef.current.unobserve(previousElement);
+      // Handle observer management
+      if (resizeObserverRef.current) {
+        // Unobserve old element if it exists and isn't the new element
+        if (previousElement) {
+          resizeObserverRef.current.unobserve(previousElement);
+        }
+
+        // Observe new element if it exists
+        if (element) {
+          resizeObserverRef.current.observe(element);
+        }
       }
 
-      // Observe new element if it exists
-      if (element) {
-        resizeObserverRef.current.observe(element);
-      }
-    }
-
-    // Trigger a recalculation using the ref
-    requestAnimationFrame(() => calculateSpacesRef.current());
-  }, []);
+      // Trigger a recalculation using the ref
+      requestAnimationFrame(() => calculateSpacesRef.current());
+    },
+    []
+  );
 
   // Calculate spaces based on current measurements
   const calculateSpaces = useCallback(() => {
@@ -231,7 +239,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
     // Calculate total occupied space
     const totalOccupiedSpace =
-      headerHeight + pinnedHeight + tabsHeight + spacerHeight + mobileTabsHeight;
+      headerHeight +
+      pinnedHeight +
+      tabsHeight +
+      spacerHeight +
+      mobileTabsHeight;
 
     // Ensure content space is at least 0 to prevent negative values
     const calculatedContentSpace = Math.max(
@@ -295,7 +307,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
     return {
       height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.spacerSpace}px`,
-      display: 'flex'
+      display: "flex",
     };
   }, [
     spaces.measurementsComplete,
@@ -303,7 +315,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.pinnedSpace,
     spaces.tabsSpace,
     spaces.spacerSpace,
-    spaces.mobileTabsSpace
+    spaces.mobileTabsSpace,
   ]);
 
   // Style for chat view
@@ -313,10 +325,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const capacitorSpace = isAndroid ? 56 : isIos ? 20 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -327,7 +340,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
 
   // Calculate style for leaderboard view
@@ -337,10 +350,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -351,7 +365,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
 
   // Calculate style for winners view
@@ -361,10 +375,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -375,32 +390,33 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
 
   // Calculate style for my votes view
   const myVotesViewStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
       return {};
-      }
-  
-      const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-  
-      return {
-        height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-        maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
-      };
-    }, [
-      spaces.measurementsComplete,
-      spaces.headerSpace,
-      spaces.pinnedSpace,
-      spaces.tabsSpace,
-      spaces.spacerSpace,
-      spaces.mobileTabsSpace,
-      isCapacitor,
-      isAndroid,
-      isIos
-    ]);
+    }
+
+    const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
+
+    return {
+      height: heightCalc,
+      maxHeight: heightCalc,
+    };
+  }, [
+    spaces.measurementsComplete,
+    spaces.headerSpace,
+    spaces.pinnedSpace,
+    spaces.tabsSpace,
+    spaces.spacerSpace,
+    spaces.mobileTabsSpace,
+    isCapacitor,
+    isAndroid,
+    isIos,
+  ]);
 
   // Calculate style for outcome view
   const outcomeViewStyle = useMemo(() => {
@@ -409,10 +425,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -423,9 +440,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
-  
+
   // Calculate style for FAQ view
   const faqViewStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
@@ -433,10 +450,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -447,7 +465,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
 
   // Calculate style for notifications view
@@ -457,10 +475,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -471,7 +490,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
 
   // Calculate style for feed view
@@ -481,10 +500,11 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -495,7 +515,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
 
   // Calculate style for mobile waves view
@@ -503,12 +523,13 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-    
+
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -519,7 +540,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
 
   // Calculate style for mobile about view
@@ -527,12 +548,13 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-    
+
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
+    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
 
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`,
-      maxHeight: `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`
+      height: heightCalc,
+      maxHeight: heightCalc,
     };
   }, [
     spaces.measurementsComplete,
@@ -543,58 +565,56 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     spaces.mobileTabsSpace,
     isCapacitor,
     isAndroid,
-    isIos
+    isIos,
   ]);
-  
+
   // Calculate style for single drop view
   const singleDropViewStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
       return {};
     }
-    
-    // On mobile/medium screens, only the info panel needs the 47px offset
-    // The chat panel should use the full height
+
     return {
       height: `calc(100vh - ${spaces.headerSpace}px)`,
       maxHeight: `calc(100vh - ${spaces.headerSpace}px)`,
     };
-  }, [
-    spaces.measurementsComplete,
-    spaces.headerSpace,
-  ]);
+  }, [spaces.measurementsComplete, spaces.headerSpace]);
 
   // Memoize the context value to prevent unnecessary re-renders
-  const contextValue = useMemo<LayoutContextType>(() => ({
-    spaces,
-    registerRef,
-    contentContainerStyle,
-    waveViewStyle,
-    leaderboardViewStyle,
-    winnersViewStyle,
-    myVotesViewStyle,
-    outcomeViewStyle,
-    faqViewStyle,
-    notificationsViewStyle,
-    feedViewStyle,
-    mobileWavesViewStyle,
-    mobileAboutViewStyle,
-    singleDropViewStyle
-  }), [
-    spaces,
-    registerRef,
-    contentContainerStyle,
-    waveViewStyle,
-    leaderboardViewStyle,
-    winnersViewStyle,
-    myVotesViewStyle,
-    outcomeViewStyle,
-    faqViewStyle,
-    notificationsViewStyle,
-    feedViewStyle,
-    mobileWavesViewStyle,
-    mobileAboutViewStyle,
-    singleDropViewStyle
-  ]);
+  const contextValue = useMemo<LayoutContextType>(
+    () => ({
+      spaces,
+      registerRef,
+      contentContainerStyle,
+      waveViewStyle,
+      leaderboardViewStyle,
+      winnersViewStyle,
+      myVotesViewStyle,
+      outcomeViewStyle,
+      faqViewStyle,
+      notificationsViewStyle,
+      feedViewStyle,
+      mobileWavesViewStyle,
+      mobileAboutViewStyle,
+      singleDropViewStyle,
+    }),
+    [
+      spaces,
+      registerRef,
+      contentContainerStyle,
+      waveViewStyle,
+      leaderboardViewStyle,
+      winnersViewStyle,
+      myVotesViewStyle,
+      outcomeViewStyle,
+      faqViewStyle,
+      notificationsViewStyle,
+      feedViewStyle,
+      mobileWavesViewStyle,
+      mobileAboutViewStyle,
+      singleDropViewStyle,
+    ]
+  );
 
   return (
     <LayoutContext.Provider value={contextValue}>

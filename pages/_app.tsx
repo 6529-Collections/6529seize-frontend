@@ -1,4 +1,3 @@
-
 import "../styles/seize-bootstrap.scss";
 import "../styles/globals.scss";
 import "tippy.js/dist/tippy.css";
@@ -132,6 +131,7 @@ import { SeizeSettingsProvider } from "../contexts/SeizeSettingsContext";
 import { EmojiProvider } from "../contexts/EmojiContext";
 import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider";
 import MainLayout from "../components/layout/MainLayout";
+import { HeaderProvider } from '../contexts/HeaderContext';
 
 library.add(
   faArrowUp,
@@ -407,7 +407,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                           <CookieConsentProvider>
                             <EULAConsentProvider>
                               <AppWebSocketProvider>
-                                <MainLayout>{getLayout(<Component {...props} />)}</MainLayout>
+                                <HeaderProvider>
+                                  <MainLayout>{getLayout(<Component {...props} />)}</MainLayout>
+                                </HeaderProvider>
                                 {appWalletPasswordModal.modal}
                               </AppWebSocketProvider>
                             </EULAConsentProvider>

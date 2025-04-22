@@ -7,9 +7,6 @@ import {
   useRef,
 } from "react";
 import Head from "next/head";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../header/HeaderPlaceholder";
-import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
 import { LayoutProvider, useLayout } from "./LayoutContext";
@@ -19,11 +16,7 @@ import Image from "next/image";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import ClientOnly from "../../../client-only/ClientOnly";
 import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpProfileCta";
-
-const Header = dynamic(() => import("../../../header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import { useHeaderContext } from "../../../../contexts/HeaderContext";
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
@@ -31,25 +24,19 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
     useContext(AuthContext);
   const { registerRef, spaces } = useLayout();
   const { isAuthenticated } = useSeizeConnectContext();
+  const { headerRef } = useHeaderContext();
 
-  const headerRef = useRef<HTMLDivElement | null>(null);
-
-  const setHeaderRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      headerRef.current = el;
-      registerRef("header", el);
-    },
-    [registerRef]
-  );
-
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "My Stream" },
-  ];
+  // Effect to register the header ref from context with the layout context
+  useEffect(() => {
+    if (headerRef.current) {
+      registerRef("header", headerRef.current);
+    }
+    // Cleanup is likely handled internally by LayoutContext's ResizeObserver unobserve
+  }, [headerRef, registerRef]);
 
   useEffect(() => {
     setTitle({ title: "My Stream | 6529.io" });
-  }, []);
+  }, [setTitle]); // Added setTitle to dependency array
 
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
@@ -132,19 +119,10 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
         <meta property="og:description" content="6529.io" />
-        <style>{`body { overflow: hidden !important; }`}</style>
+        {/*  <style>{`body { overflow: hidden !important; }`}</style> */}
       </Head>
 
-      <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black">
-        {/* <div
-          ref={setHeaderRef}
-          className="tw-z-50 tw-top-0 tw-sticky tw-bg-black">
-          <Header isSmall />
-          <div className="tw-z-50 tw-w-full">
-          
-          </div>
-        </div> */}
-        <Breadcrumb breadcrumbs={breadcrumbs} />
+      <div className="tailwind-scope tw-min-h-screen tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
         <ClientOnly>{content}</ClientOnly>
       </div>
     </>

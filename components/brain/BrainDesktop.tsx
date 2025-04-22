@@ -105,7 +105,7 @@ export const BrainDesktop: React.FC<Props> = ({ children }) => {
             <BrainLeftSidebar 
               activeWaveId={router.query.wave as string}
             />
-            <div className="tw-flex-grow tw-flex tw-flex-col tw-h-full">
+            <div className="tw-flex-grow">
               {children}
               {isDropOpen && (
                 <div
