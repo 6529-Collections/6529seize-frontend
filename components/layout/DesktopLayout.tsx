@@ -13,8 +13,6 @@ const Header = dynamic(() => import("../header/Header"), {
 
 interface DesktopLayoutProps {
   readonly children: ReactNode;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Prop is passed down from MainLayout but not used directly here.
-  readonly hideFooter?: boolean;
   readonly isSmall?: boolean;
 }
 

@@ -12,11 +12,6 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const isMobile = useIsMobileScreen();
   const router = useRouter();
-  
-  // Pages that shouldn't display the footer
-  const hideFooter = ["/waves", "/my-stream", "/open-mobile"].some((path) =>
-    router.pathname.startsWith(path)
-  );
 
   // Pages that should use the small header
   const isSmall = router.pathname.startsWith("/my-stream");
@@ -26,9 +21,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {isMobile ? (
         <MobileLayout>{children}</MobileLayout>
       ) : (
-        <DesktopLayout hideFooter={hideFooter} isSmall={isSmall}>
-          {children}
-        </DesktopLayout>
+        <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
       )}
     </ClientOnly>
   );
