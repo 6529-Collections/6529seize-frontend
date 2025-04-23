@@ -154,31 +154,37 @@ export default function UserPageCollected({
   };
 
   const getFilters = (): ProfileCollectedFilters => {
-    const address = searchParams.get(SEARCH_PARAMS_FIELDS.address);
-    const collection = searchParams.get(SEARCH_PARAMS_FIELDS.collection);
-    const seized = searchParams.get(SEARCH_PARAMS_FIELDS.seized);
-    const szn = searchParams.get(SEARCH_PARAMS_FIELDS.szn);
-    const page = searchParams.get(SEARCH_PARAMS_FIELDS.page);
-    const sortBy = searchParams.get(SEARCH_PARAMS_FIELDS.sortBy);
-    const sortDirection = searchParams.get(SEARCH_PARAMS_FIELDS.sortDirection);
+    const address = searchParams?.get(SEARCH_PARAMS_FIELDS.address);
+    const collection = searchParams?.get(SEARCH_PARAMS_FIELDS.collection);
+    const seized = searchParams?.get(SEARCH_PARAMS_FIELDS.seized);
+    const szn = searchParams?.get(SEARCH_PARAMS_FIELDS.szn);
+    const page = searchParams?.get(SEARCH_PARAMS_FIELDS.page);
+    const sortBy = searchParams?.get(SEARCH_PARAMS_FIELDS.sortBy);
+    const sortDirection = searchParams?.get(SEARCH_PARAMS_FIELDS.sortDirection);
 
     const convertedAddress = convertAddressToLowerCase(address);
-    const convertedCollection = convertCollection(collection);
+    const convertedCollection = convertCollection(collection ?? null);
     return {
       handleOrWallet: convertedAddress ?? profile.profile?.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
-      seized: convertSeized({ seized, collection: convertedCollection }),
-      szn: convertSzn({ szn, collection: convertedCollection }),
+      seized: convertSeized({
+        seized: seized ?? null,
+        collection: convertedCollection,
+      }),
+      szn: convertSzn({ szn: szn ?? null, collection: convertedCollection }),
       page: page ? parseInt(page) : 1,
       pageSize: PAGE_SIZE,
-      sortBy: convertSortedBy({ sortBy, collection: convertedCollection }),
-      sortDirection: convertSortDirection(sortDirection),
+      sortBy: convertSortedBy({
+        sortBy: sortBy ?? null,
+        collection: convertedCollection,
+      }),
+      sortDirection: convertSortDirection(sortDirection ?? null),
     };
   };
 
   const createQueryString = (updateItems: QueryUpdateInput[]): string => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
     for (const { name, value } of updateItems) {
       const key = SEARCH_PARAMS_FIELDS[name];
       if (!value) {
@@ -195,9 +201,11 @@ export default function UserPageCollected({
   ): Promise<void> => {
     const queryString = createQueryString(updateItems);
     const path = queryString ? pathname + "?" + queryString : pathname;
-    await router.replace(path, undefined, {
-      shallow: true,
-    });
+    if (path) {
+      await router.replace(path, undefined, {
+        shallow: true,
+      });
+    }
   };
 
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
@@ -436,7 +444,8 @@ export default function UserPageCollected({
         <>
           <div
             className="tw-overflow-x-auto horizontal-menu-hide-scrollbar horizontal-menu-scrollable-x"
-            ref={scrollContainer}>
+            ref={scrollContainer}
+          >
             <UserPageCollectedFilters
               profile={profile}
               filters={filters}
