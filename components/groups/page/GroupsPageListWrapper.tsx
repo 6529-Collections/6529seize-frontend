@@ -36,18 +36,18 @@ export default function GroupsPageListWrapper({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const identity = searchParams.get(IDENTITY_SEARCH_PARAM);
-  const group = searchParams.get(GROUP_NAME_SEARCH_PARAM);
+  const identity = searchParams?.get(IDENTITY_SEARCH_PARAM);
+  const group = searchParams?.get(GROUP_NAME_SEARCH_PARAM);
 
   const [filters, setFilters] = useState<GroupsRequestParams>({
-    group_name: group,
-    author_identity: identity,
+    group_name: group ?? null,
+    author_identity: identity ?? null,
   });
 
   useEffect(() => {
     setFilters({
-      group_name: group,
-      author_identity: identity,
+      group_name: group ?? null,
+      author_identity: identity ?? null,
     });
   }, [group, identity]);
 
@@ -57,10 +57,10 @@ export default function GroupsPageListWrapper({
       value: string | null;
     }[]
   ): string => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString());
     for (const { name, value } of config) {
       if (!value) {
-        params.delete(name);
+        params?.delete(name);
       } else {
         params.set(name, value);
       }

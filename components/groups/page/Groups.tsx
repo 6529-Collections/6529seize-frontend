@@ -20,7 +20,7 @@ export default function Groups() {
   const { connectedProfile, requestAuth, activeProfileProxy } =
     useContext(AuthContext);
 
-  const edit = searchParams.get(GROUP_EDIT_SEARCH_PARAM);
+  const edit = searchParams?.get(GROUP_EDIT_SEARCH_PARAM);
 
   const [viewMode, setViewMode] = useState(GroupsViewMode.VIEW);
 
@@ -28,7 +28,7 @@ export default function Groups() {
     if (mode === GroupsViewMode.CREATE) {
       const { success } = await requestAuth();
       if (!success) return;
-    } else {
+    } else if (pathname) {
       router.replace(pathname, undefined, {
         shallow: true,
       });

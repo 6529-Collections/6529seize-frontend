@@ -29,8 +29,8 @@ export default function Waves() {
   const { connectedProfile, requestAuth, activeProfileProxy, showWaves } =
     useContext(AuthContext);
 
-  const isCreateNewWave = searchParams.get(NEW_WAVE_SEARCH_PARAM);
-  const isCreateNewDirectMessage = searchParams.get(
+  const isCreateNewWave = searchParams?.get(NEW_WAVE_SEARCH_PARAM);
+  const isCreateNewDirectMessage = searchParams?.get(
     NEW_DIRECT_MESSAGE_SEARCH_PARAM
   );
 

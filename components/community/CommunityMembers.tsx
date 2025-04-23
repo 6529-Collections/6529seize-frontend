@@ -66,15 +66,17 @@ export default function CommunityMembers() {
   };
 
   const getParamsFromUrl = (): CommunityMembersQuery => {
-    const page = parseInt(searchParams.get(SEARCH_PARAMS_FIELDS.page) || "");
-    const sortBy = searchParams.get(SEARCH_PARAMS_FIELDS.sortBy);
-    const sortDirection = searchParams.get(SEARCH_PARAMS_FIELDS.sortDirection);
-    const group = searchParams.get(SEARCH_PARAMS_FIELDS.group);
+    const page = parseInt(searchParams?.get(SEARCH_PARAMS_FIELDS.page) || "");
+    const sortBy = searchParams?.get(SEARCH_PARAMS_FIELDS.sortBy);
+    const sortDirection = searchParams?.get(SEARCH_PARAMS_FIELDS.sortDirection);
+    const group = searchParams?.get(SEARCH_PARAMS_FIELDS.group);
     const query: CommunityMembersQuery = {
       page: page || defaultPage,
       page_size: defaultPageSize,
-      sort: convertSortBy(sortBy),
-      sort_direction: convertSortDirection(sortDirection),
+      sort: sortBy ? convertSortBy(sortBy) : defaultSortBy,
+      sort_direction: sortDirection
+        ? convertSortDirection(sortDirection)
+        : defaultSortDirection,
     };
     if (group) {
       query.group_id = group;
@@ -86,7 +88,7 @@ export default function CommunityMembers() {
     updateItems: QueryUpdateInput[],
     lowerCase: boolean = true
   ): string => {
-    const searchParamsStr = new URLSearchParams(searchParams.toString());
+    const searchParamsStr = new URLSearchParams(searchParams?.toString());
     for (const { name, value } of updateItems) {
       const key = SEARCH_PARAMS_FIELDS[name];
       if (!value) {
@@ -156,9 +158,11 @@ export default function CommunityMembers() {
   ): Promise<void> => {
     const queryString = createQueryString(updateItems, lowerCase);
     const path = queryString ? pathname + "?" + queryString : pathname;
-    await router.replace(path, undefined, {
-      shallow: true,
-    });
+    if (path) {
+      await router.replace(path, undefined, {
+        shallow: true,
+      });
+    }
   };
 
   const setSortBy = async (
@@ -235,13 +239,15 @@ export default function CommunityMembers() {
           <button
             type="button"
             className="tw-text-sm tw-font-semibold tw-inline-flex tw-items-center tw-rounded-lg tw-bg-iron-800 tw-px-3 tw-py-2 tw-text-iron-200 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700 focus:tw-z-10 tw-transition tw-duration-300 tw-ease-out"
-            onClick={goToNerd}>
+            onClick={goToNerd}
+          >
             <span>Nerd view</span>
             <svg
               className="-tw-mr-1.5 tw-h-5 tw-w-5"
               viewBox="0 0 20 20"
               fill="currentColor"
-              aria-hidden="true">
+              aria-hidden="true"
+            >
               <path
                 fillRule="evenodd"
                 d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"

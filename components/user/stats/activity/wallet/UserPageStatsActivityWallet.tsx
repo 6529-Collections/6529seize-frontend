@@ -70,8 +70,8 @@ export default function UserPageStatsActivityWallet({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activity = searchParams.get(WALLET_ACTIVITY_FILTER_PARAM);
-  const page = searchParams.get(WALLET_ACTIVITY_PAGE_PARAM);
+  const activity = searchParams?.get(WALLET_ACTIVITY_FILTER_PARAM);
+  const page = searchParams?.get(WALLET_ACTIVITY_PAGE_PARAM);
 
   const [activeFilter, setActiveFilter] =
     useState<UserPageStatsActivityWalletFilterType>(
@@ -96,7 +96,7 @@ export default function UserPageStatsActivityWallet({
       value: string;
     }[]
   ): string => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
     for (const { name, value } of config) {
       params.set(name, value);
     }
