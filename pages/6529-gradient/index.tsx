@@ -2,8 +2,7 @@ import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import { useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { AuthContext } from "../../components/auth/Auth";
-
+import { AuthContext, useAuth } from "../../components/auth/Auth";
 
 const GradientsComponent = dynamic(
   () => import("../../components/6529Gradient/6529Gradient"),
@@ -18,7 +17,7 @@ export default function GradientsPage() {
     });
   }, []);
 
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const { connectedProfile } = useAuth();
 
   return (
     <>
@@ -39,8 +38,13 @@ export default function GradientsPage() {
       </Head>
 
       <main className={styles.main}>
-       {/*  <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} /> */}
-        <GradientsComponent wallets={connectedWallets} />
+        <GradientsComponent
+          wallets={
+            connectedProfile?.consolidation.wallets.map(
+              (w) => w.wallet.address
+            ) || []
+          }
+        />
       </main>
     </>
   );

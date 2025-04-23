@@ -98,7 +98,6 @@ export default function Home({
     });
   }, []);
 
-  const [isHeaderLoaded, setIsHeaderLoaded] = useState(false);
 
   const [nftBalance, setNftBalance] = useState<number>(0);
 

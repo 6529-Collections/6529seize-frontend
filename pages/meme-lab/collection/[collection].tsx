@@ -3,7 +3,7 @@ import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../components/auth/Auth";
+import { AuthContext, useAuth } from "../../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -20,7 +20,7 @@ const LabCollectionComponent = dynamic(
 export default function MemeLabIndex(props: any) {
   const { setTitle, title } = useContext(AuthContext);
   const pageProps = props.pageProps;
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const { connectedProfile } = useAuth();
 
   const pagenameFull = `${pageProps.name} | 6529.io`;
 
@@ -57,8 +57,13 @@ export default function MemeLabIndex(props: any) {
       </Head>
 
       <main className={styles.main}>
-        {/* <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} /> */}
-        <LabCollectionComponent wallets={connectedWallets} />
+        <LabCollectionComponent
+          wallets={
+            connectedProfile?.consolidation.wallets.map(
+              (w) => w.wallet.address
+            ) || []
+          }
+        />
       </main>
     </>
   );

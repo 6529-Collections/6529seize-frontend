@@ -3,7 +3,7 @@ import styles from "../../styles/Home.module.scss";
 import { useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { AuthContext } from "../../components/auth/Auth";
+import { AuthContext, useAuth } from "../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../components/header/Header"), {
   ssr: false,
@@ -24,7 +24,7 @@ export default function MemeLab() {
     });
   }, [setTitle]);
 
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const { connectedProfile } = useAuth();
 
   return (
     <>
@@ -45,8 +45,13 @@ export default function MemeLab() {
       </Head>
 
       <main className={styles.main}>
-        {/* <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} /> */}
-        <MemeLabComponent wallets={connectedWallets} />
+        <MemeLabComponent
+          wallets={
+            connectedProfile?.consolidation.wallets.map(
+              (w) => w.wallet.address
+            ) || []
+          }
+        />
       </main>
     </>
   );

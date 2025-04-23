@@ -8,6 +8,7 @@ import {
   getSharedServerSideProps,
 } from "../../../components/the-memes/MemeShared";
 import { MEMELAB_CONTRACT } from "../../../constants";
+import { useAuth } from "../../../components/auth/Auth";
 
 const Header = dynamic(() => import("../../../components/header/Header"), {
   ssr: false,
@@ -23,14 +24,19 @@ const LabPageComponent = dynamic(
 
 export default function MemeLabPage(props: any) {
   const pageProps = props.pageProps;
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const { connectedProfile } = useAuth();
 
   return (
     <>
       <SharedHead props={pageProps} contract={MEMELAB_CONTRACT} />
       <main className={styles.main}>
-        {/* <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} /> */}
-        <LabPageComponent wallets={connectedWallets} />
+        <LabPageComponent
+          wallets={
+            connectedProfile?.consolidation.wallets.map(
+              (w) => w.wallet.address
+            ) || []
+          }
+        />
       </main>
     </>
   );
