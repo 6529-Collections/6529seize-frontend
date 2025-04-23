@@ -108,10 +108,9 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
         <meta property="og:description" content="6529.io" />
-        <style>{`body { overflow: hidden !important; }`}</style>
+       {/*  <style>{`body { overflow: hidden !important; }`}</style> */}
       </Head>
-
-      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">
+      <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden tw-min-h-[80dvh]">
         <ClientOnly>{content}</ClientOnly>
       </div>
     </>
