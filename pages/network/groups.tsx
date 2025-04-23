@@ -3,7 +3,6 @@ import Head from "next/head";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
-
 export default function GroupsPage() {
   const { setTitle, title } = useContext(AuthContext);
 
@@ -11,7 +10,7 @@ export default function GroupsPage() {
     setTitle({
       title: "Groups | Network",
     });
-  }, [setTitle]);
+  }, []);
 
   return (
     <>
