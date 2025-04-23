@@ -3,7 +3,7 @@ import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { fetchUrl } from "../../../services/6529api";
 import { formatAddress, parseIpfsUrl } from "../../../helpers/Helpers";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect} from "react";
 import { AuthContext } from "../../../components/auth/Auth";
 
 const RememePageComponent = dynamic(

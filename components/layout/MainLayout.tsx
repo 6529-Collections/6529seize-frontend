@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode } from "react";
 import { useRouter } from "next/router";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
 import MobileLayout from "./MobileLayout";

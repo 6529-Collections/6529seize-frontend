@@ -315,7 +315,6 @@ export default function MemePage() {
   }
 
   return (
-    <>
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
@@ -372,7 +371,6 @@ export default function MemePage() {
           </Col>
         </Row>
       </Container>
-    </>
   );
 }
 

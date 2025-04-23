@@ -296,7 +296,6 @@ export default function GradientPage() {
   }
 
   return (
-    <>
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
@@ -358,6 +357,5 @@ export default function GradientPage() {
           </Col>
         </Row>
       </Container>
-    </>
   );
 }

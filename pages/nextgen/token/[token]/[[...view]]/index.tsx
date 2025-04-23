@@ -1,6 +1,5 @@
 import Head from "next/head";
 import styles from "../../../../../styles/Home.module.scss";
-
 import dynamic from "next/dynamic";
 import {
   NextGenCollection,
@@ -12,7 +11,6 @@ import { getCommonHeaders } from "../../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
-import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
 import { AuthContext } from "../../../../../components/auth/Auth";
 import { useContext, useEffect } from "react";
 

@@ -98,7 +98,6 @@ export default function Home({
     });
   }, []);
 
-
   const [nftBalance, setNftBalance] = useState<number>(0);
 
   const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
@@ -170,13 +169,6 @@ export default function Home({
       </Head>
 
       <main className={styles.main}>
-        {/*    <Header
-          onLoad={() => {
-            setIsHeaderLoaded(true);
-          }}
-        /> */}
-        {/* {isHeaderLoaded && (
-             )} */}
         <>
           <Container className="pt-4">
             <Row>

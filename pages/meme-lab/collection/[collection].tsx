@@ -1,14 +1,9 @@
 import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext, useAuth } from "../../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const LabCollectionComponent = dynamic(
   () => import("../../../components/memelab/MemeLabCollection"),
@@ -61,7 +56,7 @@ export default function MemeLabIndex(props: any) {
           wallets={
             connectedProfile?.consolidation.wallets.map(
               (w) => w.wallet.address
-            ) || []
+            ) ?? []
           }
         />
       </main>

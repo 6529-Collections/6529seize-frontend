@@ -1250,7 +1250,6 @@ export default function LabPage(props: Readonly<Props>) {
   }
 
   return (
-    <>
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
@@ -1344,6 +1343,5 @@ export default function LabPage(props: Readonly<Props>) {
           </Col>
         </Row>
       </Container>
-    </>
   );
 }

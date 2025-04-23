@@ -23,11 +23,10 @@ const fetchGradientName = async (
 ): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
-    // TODO: Optimize API call if possible (e.g., dedicated endpoint or field selection)
     const response = await fetchUrl(
       `${process.env.API_ENDPOINT}/api/nfts/gradients?id=${id}`
     );
-    const nftData = (response as any)?.data?.[0]; // Use safe parsing
+    const nftData = response?.data?.[0]; // Use safe parsing
     return nftData ? { name: nftData.name } : null;
   } catch (error) {
     return { name: `Gradient ${id}` }; // Fallback
@@ -60,7 +59,7 @@ const fetchWaveName = async (id: string): Promise<{ name: string } | null> => {
       `${process.env.API_ENDPOINT}/api/waves?id=${id}`
     );
     // Assuming response structure { data: [{ name: '...' }] }
-    const waveData = (response as any)?.data?.[0];
+    const waveData = response?.data?.[0];
     return waveData ? { name: waveData.name } : null;
   } catch (error) {
     // Fallback display
@@ -84,11 +83,13 @@ const getDynamicParam = (
   if (paramIndex >= segments.length) return undefined;
 
   // First try query param, then fallback to URL segment
-  return queryParam
-    ? Array.isArray(queryParam)
-      ? queryParam[0]
-      : queryParam
-    : segments[paramIndex];
+  if (queryParam) {
+    if (Array.isArray(queryParam)) {
+      return queryParam[0];
+    }
+    return queryParam;
+  }
+  return segments[paramIndex];
 };
 
 // Type definition for breadcrumb queue item
@@ -98,6 +99,162 @@ interface BreadcrumbQueueItem {
   query: Record<string, string | string[]>;
   timestamp: number;
 }
+
+// Type definition for dynamic route configuration
+type DynamicRouteConfig =
+  | { type: "gradient"; id: string }
+  | { type: "profile"; handle: string }
+  | { type: "meme"; id: string }
+  | { type: "collection"; contract: string; id?: string }
+  | { type: "wave"; id: string }
+  | { type: "static" };
+
+// Helper function to determine dynamic route configuration
+const determineRouteConfig = (
+  routeSegments: string[],
+  pathSegments: string[],
+  activePathname: string,
+  activeQuery: Record<string, string | string[]>
+): DynamicRouteConfig => {
+  const firstSegment = routeSegments[0];
+
+  // Handle specific pathnames first
+  if (
+    activePathname === "/my-stream" &&
+    activeQuery.wave &&
+    typeof activeQuery.wave === "string"
+  ) {
+    return { type: "wave", id: activeQuery.wave };
+  }
+
+  switch (firstSegment) {
+    case "6529-gradient": {
+      const id = getDynamicParam(pathSegments, firstSegment, 1, activeQuery.id);
+      return id ? { type: "gradient", id } : { type: "static" };
+    }
+    case "profile": {
+      const handle = getDynamicParam(
+        pathSegments,
+        firstSegment,
+        1,
+        activeQuery.handle
+      );
+      return handle ? { type: "profile", handle } : { type: "static" };
+    }
+    case "the-memes": {
+      const id = getDynamicParam(pathSegments, firstSegment, 1, activeQuery.id);
+      return id ? { type: "meme", id } : { type: "static" };
+    }
+    case "collection": {
+      const contract = getDynamicParam(
+        pathSegments,
+        firstSegment,
+        1,
+        activeQuery.contract
+      );
+      if (!contract) return { type: "static" };
+      const id = getDynamicParam(
+        pathSegments,
+        firstSegment,
+        2,
+        activeQuery.id
+      );
+      return { type: "collection", contract, id };
+    }
+    case "waves": {
+      const id = getDynamicParam(pathSegments, firstSegment, 1, activeQuery.id);
+      return id ? { type: "wave", id } : { type: "static" };
+    }
+    // Add more cases as needed
+    default:
+      return { type: "static" };
+  }
+};
+
+// --- Crumb Building Helper Functions ---
+
+const buildGradientCrumbs = (
+  config: Extract<DynamicRouteConfig, { type: "gradient" }>,
+  isLoading: boolean,
+  data: { name: string } | null | undefined
+): Crumb[] => {
+  const crumbs: Crumb[] = [
+    { display: "6529 Gradient", href: "/6529-gradient" },
+  ];
+  const display = isLoading
+    ? `Loading...`
+    : data?.name ?? `Gradient ${config.id}`;
+  crumbs.push({ display });
+  return crumbs;
+};
+
+const buildProfileCrumbs = (
+  config: Extract<DynamicRouteConfig, { type: "profile" }>,
+  isLoading: boolean,
+  data: { handle: string } | null | undefined
+): Crumb[] => {
+  const display = isLoading ? `Loading...` : data?.handle ?? config.handle;
+  return [{ display }];
+};
+
+const buildMemeCrumbs = (
+  config: Extract<DynamicRouteConfig, { type: "meme" }>
+): Crumb[] => {
+  const crumbs: Crumb[] = [{ display: "The Memes", href: "/the-memes" }];
+  if (config.id) {
+    crumbs.push({ display: `Meme ${config.id}` });
+  }
+  return crumbs;
+};
+
+const buildWaveCrumbs = (
+  config: Extract<DynamicRouteConfig, { type: "wave" }>,
+  waveHookData: ReturnType<typeof useWaveData>
+): Crumb[] => {
+  const crumbs: Crumb[] = [{ display: "My Stream", href: "/my-stream" }];
+  if (config.id) {
+    const waveName = (waveHookData.data as ApiWave | undefined)?.name;
+    const display = waveHookData.isLoading
+      ? "Loading..."
+      : waveName ?? `Wave ${config.id}`;
+    crumbs.push({ display });
+  }
+  return crumbs;
+};
+
+const buildCollectionCrumbs = (
+  config: Extract<DynamicRouteConfig, { type: "collection" }>
+): Crumb[] => {
+  const crumbs: Crumb[] = [
+    { display: "Collections", href: "/collections" },
+  ];
+  if (config.contract) {
+    crumbs.push({
+      display: `Collection ${config.contract}`,
+      href: config.id ? `/collection/${config.contract}` : undefined,
+    });
+    if (config.id) {
+      crumbs.push({ display: `Item ${config.id}` });
+    }
+  }
+  return crumbs;
+};
+
+const buildStaticCrumbs = (pathSegments: string[]): Crumb[] => {
+  const crumbs: Crumb[] = [];
+  let currentPath = "";
+  for (let i = 0; i < pathSegments.length; i++) {
+    const segment = pathSegments[i];
+    currentPath += `/${segment}`;
+    const display = formatCrumbDisplay(segment);
+    if (i === pathSegments.length - 1) {
+      crumbs.push({ display });
+    } else {
+      crumbs.push({ display, href: currentPath });
+    }
+  }
+  return crumbs;
+};
 
 // --- Main Hook ---
 export const useBreadcrumbs = (): Crumb[] => {
@@ -168,72 +325,14 @@ export const useBreadcrumbs = (): Crumb[] => {
     [activePathname]
   );
 
-  // Extract route pattern from router.pathname (contains [placeholders] for dynamic segments)
+  // Extract route pattern using the helper function
   const dynamicRouteConfig = useMemo(() => {
-    // Check specific dedicated routes first
-    if (routeSegments[0] === "6529-gradient") {
-      const id = getDynamicParam(
-        pathSegments,
-        "6529-gradient",
-        1,
-        activeQuery.id
-      );
-      if (id) return { type: "gradient", id: id.toString() };
-    }
-    if (routeSegments[0] === "profile") {
-      const handle = getDynamicParam(
-        pathSegments,
-        "profile",
-        1,
-        activeQuery.handle
-      );
-      if (handle) return { type: "profile", handle: handle.toString() };
-    }
-    if (routeSegments[0] === "the-memes") {
-      const id = getDynamicParam(pathSegments, "the-memes", 1, activeQuery.id);
-      if (id) return { type: "meme", id: id.toString() };
-    }
-    if (routeSegments[0] === "collection") {
-      const contract = getDynamicParam(
-        pathSegments,
-        "collection",
-        1,
-        activeQuery.contract
-      );
-      if (contract) {
-        const id = getDynamicParam(
-          pathSegments,
-          "collection",
-          2,
-          activeQuery.id
-        );
-        return {
-          type: "collection",
-          contract: contract.toString(),
-          id: id?.toString(),
-        };
-      }
-    }
-
-    // --- NEW: Check for /my-stream with wave query parameter ---
-    if (
-      activePathname === "/my-stream" &&
-      activeQuery.wave &&
-      typeof activeQuery.wave === "string"
-    ) {
-      return { type: "wave", id: activeQuery.wave };
-    }
-    // --- End New Check ---
-
-    // Handle dedicated /waves/[id] route (if it exists elsewhere, keep for robustness)
-    if (routeSegments[0] === "waves") {
-      const id = getDynamicParam(pathSegments, "waves", 1, activeQuery.id);
-      if (id) return { type: "wave", id: id.toString() };
-    }
-
-    // Add more dynamic route patterns as needed
-
-    return { type: "static" }; // Default for non-matching or static routes
+    return determineRouteConfig(
+      routeSegments,
+      pathSegments,
+      activePathname,
+      activeQuery
+    );
   }, [activePathname, routeSegments, pathSegments, activeQuery]);
 
   // --- React Query Hooks (Conditional) ---
@@ -241,9 +340,12 @@ export const useBreadcrumbs = (): Crumb[] => {
     queryKey: [
       "breadcrumb",
       "gradient",
-      dynamicRouteConfig.type === "gradient"
-        ? dynamicRouteConfig.id
-        : "invalid",
+      (() => {
+        if (dynamicRouteConfig.type === "gradient") {
+          return dynamicRouteConfig.id;
+        }
+        return "invalid";
+      })(),
     ],
     queryFn: () => {
       if (dynamicRouteConfig.type === "gradient" && dynamicRouteConfig.id) {
@@ -260,9 +362,12 @@ export const useBreadcrumbs = (): Crumb[] => {
     queryKey: [
       "breadcrumb",
       "profile",
-      dynamicRouteConfig.type === "profile"
-        ? dynamicRouteConfig.handle
-        : "invalid",
+      (() => {
+        if (dynamicRouteConfig.type === "profile") {
+          return dynamicRouteConfig.handle;
+        }
+        return "invalid";
+      })(),
     ],
     queryFn: () => {
       if (dynamicRouteConfig.type === "profile" && dynamicRouteConfig.handle) {
@@ -277,132 +382,57 @@ export const useBreadcrumbs = (): Crumb[] => {
   });
 
   // Use useWaveData hook conditionally
-  const waveIdForHook =
-    dynamicRouteConfig.type === "wave" && dynamicRouteConfig.id
-      ? dynamicRouteConfig.id
-      : null;
+  const waveIdForHook = (() => {
+    if (dynamicRouteConfig.type === "wave" && dynamicRouteConfig.id) {
+      return dynamicRouteConfig.id;
+    }
+    return null;
+  })();
   const waveDataFromHook = useWaveData({ waveId: waveIdForHook }); // Call the hook
 
   // --- Assemble Crumbs ---
   const finalCrumbs = useMemo(() => {
-    const generatedCrumbs: Crumb[] = [...baseCrumbs];
-
-    if (dynamicRouteConfig.type !== "static") {
-      switch (dynamicRouteConfig.type) {
-        case "gradient": {
-          // Add parent crumb
-          generatedCrumbs.push({
-            display: "6529 Gradient",
-            href: "/6529-gradient",
-          });
-
-          // Add dynamic entity crumb
-          const id = dynamicRouteConfig.id;
-          if (id) {
-            const display = isLoadingGradient
-              ? `Loading...`
-              : gradientData?.name || `Gradient ${id}`;
-            generatedCrumbs.push({ display });
-          }
-          break;
-        }
-        case "profile": {
-          // For profile pages, just add the profile crumb
-          const handle = dynamicRouteConfig.handle;
-          if (handle) {
-            const display = isLoadingProfile
-              ? `Loading...`
-              : profileData?.handle || handle;
-            generatedCrumbs.push({ display });
-          }
-          break;
-        }
-        case "meme": {
-          // Add parent crumb
-          generatedCrumbs.push({
-            display: "The Memes",
-            href: "/the-memes",
-          });
-
-          // Add dynamic entity crumb ONLY if an ID exists
-          const id = dynamicRouteConfig.id;
-          if (id) {
-            generatedCrumbs.push({ display: `Meme ${id}` });
-          }
-          break;
-        }
-        case "wave": {
-          const id = dynamicRouteConfig.id;
-          // Add parent crumbs: Home -> My Stream
-          generatedCrumbs.push({ display: "My Stream", href: "/my-stream" });
-
-          // Add dynamic wave crumb if ID exists
-          if (id) {
-            // Use data and loading state from useWaveData hook
-            const waveName = (waveDataFromHook.data as ApiWave | undefined)
-              ?.name; // Adjust '.name' if property is different
-            const display = waveDataFromHook.isLoading
-              ? "Loading..." // Updated loading text
-              : waveName || `Wave ${id}`; // Use fetched name or fallback
-            generatedCrumbs.push({ display }); // Last crumb is not clickable
-          }
-          break;
-        }
-        case "collection": {
-          // Add parent crumb
-          generatedCrumbs.push({
-            display: "Collections",
-            href: "/collections",
-          });
-
-          // Add collection crumb
-          const contract = dynamicRouteConfig.contract;
-          const id = dynamicRouteConfig.id;
-
-          if (contract) {
-            generatedCrumbs.push({
-              display: `Collection ${contract}`,
-              href: id ? `/collection/${contract}` : undefined,
-            });
-
-            // Add item crumb if available
-            if (id) {
-              generatedCrumbs.push({ display: `Item ${id}` });
-            }
-          }
-          break;
-        }
-        // Add more case handlers for other dynamic route types
-      }
-
-      return generatedCrumbs;
+    if (dynamicRouteConfig.type === "static") {
+      return [...baseCrumbs, ...buildStaticCrumbs(pathSegments)];
     }
 
-    // For static routes, build breadcrumbs from path segments
-    let currentPath = "";
-    for (let i = 0; i < pathSegments.length; i++) {
-      const segment = pathSegments[i];
-      currentPath += `/${segment}`;
-      const display = formatCrumbDisplay(segment);
-
-      // Last segment doesn't get a link
-      if (i === pathSegments.length - 1) {
-        generatedCrumbs.push({ display });
-      } else {
-        generatedCrumbs.push({ display, href: currentPath });
-      }
+    let dynamicCrumbs: Crumb[] = [];
+    switch (dynamicRouteConfig.type) {
+      case "gradient":
+        dynamicCrumbs = buildGradientCrumbs(
+          dynamicRouteConfig,
+          isLoadingGradient,
+          gradientData
+        );
+        break;
+      case "profile":
+        dynamicCrumbs = buildProfileCrumbs(
+          dynamicRouteConfig,
+          isLoadingProfile,
+          profileData
+        );
+        break;
+      case "meme":
+        dynamicCrumbs = buildMemeCrumbs(dynamicRouteConfig);
+        break;
+      case "wave":
+        dynamicCrumbs = buildWaveCrumbs(dynamicRouteConfig, waveDataFromHook);
+        break;
+      case "collection":
+        dynamicCrumbs = buildCollectionCrumbs(dynamicRouteConfig);
+        break;
+      // No default needed as 'static' is handled above
     }
-
-    return generatedCrumbs;
+    return [...baseCrumbs, ...dynamicCrumbs];
   }, [
     baseCrumbs,
     dynamicRouteConfig,
+    pathSegments,
     gradientData,
     isLoadingGradient,
     profileData,
     isLoadingProfile,
-    waveDataFromHook.data,
-    waveDataFromHook.isLoading,
+    waveDataFromHook,
   ]);
 
   return finalCrumbs;

@@ -1,7 +1,5 @@
 import React, { ReactNode, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
-import MobileBottomNavigation from "./MobileBottomNavigation";
 import { useHeaderContext } from "../../contexts/HeaderContext";
 
 // Simple placeholder for the header while it loads client-side
@@ -25,7 +23,6 @@ interface MobileLayoutProps {
 }
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
-  const router = useRouter();
   const { setHeaderRef } = useHeaderContext();
 
   // Use a callback ref to get the DOM node

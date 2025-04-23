@@ -8,7 +8,6 @@ import {
   NEXTGEN_MINTER,
 } from "../../../nextgen_contracts";
 import { NextGenCollection } from "../../../../../entities/INextgen";
-import { formatNameForUrl } from "../../../nextgen_helpers";
 import NextGenNavigationHeader from "../../NextGenNavigationHeader";
 
 interface Props {

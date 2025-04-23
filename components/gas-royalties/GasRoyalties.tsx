@@ -7,7 +7,7 @@ import Image from "next/image";
 import Tippy from "@tippyjs/react";
 import { useState, useEffect } from "react";
 import { fetchUrl } from "../../services/6529api";
-import { capitalizeEveryWord, getDateFilters } from "../../helpers/Helpers";
+import { getDateFilters } from "../../helpers/Helpers";
 import router from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DatePickerModal from "../datePickerModal/DatePickerModal";

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, RefObject, useRef, useCallback } from 'react';
+import React, { createContext, useState, useContext, ReactNode, RefObject, useRef, useCallback, useMemo } from 'react';
 
 interface HeaderContextType {
   headerRef: RefObject<HTMLDivElement | null>;
@@ -10,7 +10,7 @@ const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
 export const HeaderProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const headerRefInternal = useRef<HTMLDivElement | null>(null);
   // We need a state to trigger re-renders in consumers when the ref changes
-  const [, setRefState] = useState<HTMLDivElement | null>(null);
+  const [refState, setRefState] = useState<HTMLDivElement | null>(null);
 
   const setHeaderRef = useCallback((ref: HTMLDivElement | null) => {
     if (headerRefInternal.current !== ref) {
@@ -19,12 +19,12 @@ export const HeaderProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   }, []);
 
-  const contextValue = {
+  const contextValue = useMemo(() => ({
     // Provide the mutable ref object directly
     headerRef: headerRefInternal,
     // Provide the function to update the ref and trigger state change
     setHeaderRef: setHeaderRef,
-  };
+  }), [setHeaderRef]);
 
   return (
     <HeaderContext.Provider value={contextValue}>
