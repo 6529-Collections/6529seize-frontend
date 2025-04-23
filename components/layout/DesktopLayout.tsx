@@ -23,6 +23,7 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
   const breadcrumbs = useBreadcrumbs();
   const router = useRouter();
   const isHomePage = router.pathname === "/";
+  const isStreamView = router.pathname.startsWith('/my-stream');
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -35,7 +36,7 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
     <>
       <div
         ref={headerWrapperRef}
-        className="tw-sticky tw-top-0 tw-z-50 tw-bg-black"
+        className={`${isStreamView ? "tw-sticky tw-top-0 tw-z-50 tw-bg-black" : ""}`}
       >
         <Header isSmall={isSmall} />
         {!isHomePage && <Breadcrumb breadcrumbs={breadcrumbs} />}

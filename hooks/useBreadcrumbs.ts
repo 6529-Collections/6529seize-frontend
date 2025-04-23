@@ -1,8 +1,10 @@
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { Crumb } from "../components/breadcrumb/Breadcrumb"; // Adjust path if needed
 import { fetchUrl } from "../services/6529api"; // Adjust path if needed
+import { useWaveData } from "./useWaveData"; // Import useWaveData
+import { ApiWave } from "../generated/models/ApiWave"; // Import ApiWave if needed for type checks
 
 // Helper function to format path segments
 const formatCrumbDisplay = (segment: string): string => {
@@ -28,10 +30,6 @@ const fetchGradientName = async (
     const nftData = (response as any)?.data?.[0]; // Use safe parsing
     return nftData ? { name: nftData.name } : null;
   } catch (error) {
-    console.error(
-      `Failed to fetch gradient name for breadcrumb (ID: ${id})`,
-      error
-    );
     return { name: `Gradient ${id}` }; // Fallback
   }
 };
@@ -49,11 +47,24 @@ const fetchProfileHandle = async (
     await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate network delay
     return { handle: handle }; // Placeholder
   } catch (error) {
-    console.error(
-      `Failed to fetch profile handle for breadcrumb: ${handle}`,
-      error
-    );
     return { handle: handle }; // Fallback
+  }
+};
+
+// NEW: Fetcher for Wave Name
+const fetchWaveName = async (id: string): Promise<{ name: string } | null> => {
+  if (!id || typeof id !== "string") return null;
+  try {
+    // Adjust endpoint if needed based on useWaveData.ts or actual API
+    const response = await fetchUrl(
+      `${process.env.API_ENDPOINT}/api/waves?id=${id}`
+    );
+    // Assuming response structure { data: [{ name: '...' }] }
+    const waveData = (response as any)?.data?.[0];
+    return waveData ? { name: waveData.name } : null;
+  } catch (error) {
+    // Fallback display
+    return { name: `Wave ${id}` };
   }
 };
 
@@ -84,7 +95,7 @@ const getDynamicParam = (
 interface BreadcrumbQueueItem {
   pathname: string;
   asPath: string;
-  query: Record<string, string | string[] | undefined>;
+  query: Record<string, string | string[]>;
   timestamp: number;
 }
 
@@ -93,50 +104,47 @@ export const useBreadcrumbs = (): Crumb[] => {
   const router = useRouter();
   const { pathname, query, asPath } = router;
 
-  // Queue reference to handle navigation state updates
-  const queueRef = useRef<BreadcrumbQueueItem[]>([]);
-  const [activeItem, setActiveItem] = useState<BreadcrumbQueueItem | null>(
-    null
-  );
-
-  // Process queue on router change
-  useEffect(() => {
-    // Add current route to queue
-    // Filter out undefined query parameters to satisfy the type
+  // Initialize activeItem state with initial route data using a function
+  const [activeItem, setActiveItem] = useState<BreadcrumbQueueItem>(() => {
     const filteredQuery: Record<string, string | string[]> = {};
     for (const key in query) {
-      if (Object.prototype.hasOwnProperty.call(query, key) && query[key] !== undefined) {
+      if (
+        Object.prototype.hasOwnProperty.call(query, key) &&
+        query[key] !== undefined
+      ) {
         filteredQuery[key] = query[key]!;
       }
     }
-    
-    const newItem: BreadcrumbQueueItem = { 
-      pathname, 
-      asPath, 
-      query: filteredQuery, // Use the filtered query
+    return { pathname, asPath, query: filteredQuery, timestamp: Date.now() };
+  });
+
+  // Use stringified query for stable dependency
+  const queryString = JSON.stringify(query);
+
+  // Update activeItem whenever relevant router props change
+  useEffect(() => {
+    // Filter query params again inside effect to get current values
+    const filteredQuery: Record<string, string | string[]> = {};
+    for (const key in query) {
+      if (
+        Object.prototype.hasOwnProperty.call(query, key) &&
+        query[key] !== undefined
+      ) {
+        filteredQuery[key] = query[key]!;
+      }
+    }
+
+    // Create the new state based on current router values
+    const newItem: BreadcrumbQueueItem = {
+      pathname,
+      asPath,
+      query: filteredQuery,
       timestamp: Date.now(),
     };
 
-    queueRef.current.push(newItem);
-
-    // Process the queue (take the newest item)
-    if (queueRef.current.length > 0) {
-      // Sort by timestamp to ensure newest is processed
-      queueRef.current.sort((a, b) => b.timestamp - a.timestamp);
-
-      // Take the most recent navigation event
-      const mostRecent = queueRef.current[0];
-      setActiveItem(mostRecent);
-
-      // Clear older items
-      queueRef.current = [mostRecent];
-    }
-
-    // Clean up queue on unmount
-    return () => {
-      queueRef.current = [];
-    };
-  }, [pathname, asPath, query]);
+    // Update the state
+    setActiveItem(newItem);
+  }, [pathname, asPath, queryString]); // Use stable queryString dependency
 
   // Base crumb: Always start with Home
   const baseCrumbs: Crumb[] = useMemo(
@@ -151,8 +159,7 @@ export const useBreadcrumbs = (): Crumb[] => {
 
   // Determine route type and fetch data conditionally
   const pathSegments = useMemo(
-    // Split asPath at the query string '?' first, then by '/'
-    () => activeAsPath.split('?')[0].split('/').filter(Boolean), 
+    () => activeAsPath.split("?")[0].split("/").filter(Boolean),
     [activeAsPath]
   );
 
@@ -163,9 +170,8 @@ export const useBreadcrumbs = (): Crumb[] => {
 
   // Extract route pattern from router.pathname (contains [placeholders] for dynamic segments)
   const dynamicRouteConfig = useMemo(() => {
-    // Check if route starts with specific patterns
+    // Check specific dedicated routes first
     if (routeSegments[0] === "6529-gradient") {
-      // Route like /6529-gradient/[id]
       const id = getDynamicParam(
         pathSegments,
         "6529-gradient",
@@ -174,9 +180,7 @@ export const useBreadcrumbs = (): Crumb[] => {
       );
       if (id) return { type: "gradient", id: id.toString() };
     }
-
     if (routeSegments[0] === "profile") {
-      // Route like /profile/[handle]
       const handle = getDynamicParam(
         pathSegments,
         "profile",
@@ -185,15 +189,11 @@ export const useBreadcrumbs = (): Crumb[] => {
       );
       if (handle) return { type: "profile", handle: handle.toString() };
     }
-
     if (routeSegments[0] === "the-memes") {
-      // Route like /the-memes/[id]
       const id = getDynamicParam(pathSegments, "the-memes", 1, activeQuery.id);
       if (id) return { type: "meme", id: id.toString() };
     }
-
     if (routeSegments[0] === "collection") {
-      // Route like /collection/[contract]/[id]
       const contract = getDynamicParam(
         pathSegments,
         "collection",
@@ -213,6 +213,22 @@ export const useBreadcrumbs = (): Crumb[] => {
           id: id?.toString(),
         };
       }
+    }
+
+    // --- NEW: Check for /my-stream with wave query parameter ---
+    if (
+      activePathname === "/my-stream" &&
+      activeQuery.wave &&
+      typeof activeQuery.wave === "string"
+    ) {
+      return { type: "wave", id: activeQuery.wave };
+    }
+    // --- End New Check ---
+
+    // Handle dedicated /waves/[id] route (if it exists elsewhere, keep for robustness)
+    if (routeSegments[0] === "waves") {
+      const id = getDynamicParam(pathSegments, "waves", 1, activeQuery.id);
+      if (id) return { type: "wave", id: id.toString() };
     }
 
     // Add more dynamic route patterns as needed
@@ -260,14 +276,17 @@ export const useBreadcrumbs = (): Crumb[] => {
     refetchOnWindowFocus: false,
   });
 
-  // --- Add more useQuery hooks corresponding to fetchers and route types ---
+  // Use useWaveData hook conditionally
+  const waveIdForHook =
+    dynamicRouteConfig.type === "wave" && dynamicRouteConfig.id
+      ? dynamicRouteConfig.id
+      : null;
+  const waveDataFromHook = useWaveData({ waveId: waveIdForHook }); // Call the hook
 
   // --- Assemble Crumbs ---
   const finalCrumbs = useMemo(() => {
-    // Start with the home crumb
     const generatedCrumbs: Crumb[] = [...baseCrumbs];
 
-    // Special handling for dynamic routes
     if (dynamicRouteConfig.type !== "static") {
       switch (dynamicRouteConfig.type) {
         case "gradient": {
@@ -281,7 +300,7 @@ export const useBreadcrumbs = (): Crumb[] => {
           const id = dynamicRouteConfig.id;
           if (id) {
             const display = isLoadingGradient
-              ? `Loading Gradient #${id}...`
+              ? `Loading...`
               : gradientData?.name || `Gradient ${id}`;
             generatedCrumbs.push({ display });
           }
@@ -292,7 +311,7 @@ export const useBreadcrumbs = (): Crumb[] => {
           const handle = dynamicRouteConfig.handle;
           if (handle) {
             const display = isLoadingProfile
-              ? `Loading Profile ${handle}...`
+              ? `Loading...`
               : profileData?.handle || handle;
             generatedCrumbs.push({ display });
           }
@@ -300,15 +319,32 @@ export const useBreadcrumbs = (): Crumb[] => {
         }
         case "meme": {
           // Add parent crumb
-          generatedCrumbs.push({ 
-            display: "The Memes", 
-            href: "/the-memes"
+          generatedCrumbs.push({
+            display: "The Memes",
+            href: "/the-memes",
           });
-          
+
           // Add dynamic entity crumb ONLY if an ID exists
           const id = dynamicRouteConfig.id;
           if (id) {
             generatedCrumbs.push({ display: `Meme ${id}` });
+          }
+          break;
+        }
+        case "wave": {
+          const id = dynamicRouteConfig.id;
+          // Add parent crumbs: Home -> My Stream
+          generatedCrumbs.push({ display: "My Stream", href: "/my-stream" });
+
+          // Add dynamic wave crumb if ID exists
+          if (id) {
+            // Use data and loading state from useWaveData hook
+            const waveName = (waveDataFromHook.data as ApiWave | undefined)
+              ?.name; // Adjust '.name' if property is different
+            const display = waveDataFromHook.isLoading
+              ? "Loading..." // Updated loading text
+              : waveName || `Wave ${id}`; // Use fetched name or fallback
+            generatedCrumbs.push({ display }); // Last crumb is not clickable
           }
           break;
         }
@@ -360,12 +396,13 @@ export const useBreadcrumbs = (): Crumb[] => {
     return generatedCrumbs;
   }, [
     baseCrumbs,
-    pathSegments,
     dynamicRouteConfig,
     gradientData,
     isLoadingGradient,
     profileData,
     isLoadingProfile,
+    waveDataFromHook.data,
+    waveDataFromHook.isLoading,
   ]);
 
   return finalCrumbs;
