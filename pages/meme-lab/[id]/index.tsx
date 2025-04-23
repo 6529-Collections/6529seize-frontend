@@ -1,18 +1,12 @@
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import { useState } from "react";
 import {
   SharedHead,
   getSharedServerSideProps,
 } from "../../../components/the-memes/MemeShared";
 import { MEMELAB_CONTRACT } from "../../../constants";
-
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import { useAuth } from "../../../components/auth/Auth";
 
 const LabPageComponent = dynamic(
   () => import("../../../components/memelab/MemeLabPage"),
@@ -23,14 +17,19 @@ const LabPageComponent = dynamic(
 
 export default function MemeLabPage(props: any) {
   const pageProps = props.pageProps;
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const { connectedProfile } = useAuth();
 
   return (
     <>
       <SharedHead props={pageProps} contract={MEMELAB_CONTRACT} />
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        <LabPageComponent wallets={connectedWallets} />
+        <LabPageComponent
+          wallets={
+            connectedProfile?.consolidation.wallets.map(
+              (w) => w.wallet.address
+            ) ?? []
+          }
+        />
       </main>
     </>
   );

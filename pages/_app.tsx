@@ -130,6 +130,8 @@ import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
 import { SeizeSettingsProvider } from "../contexts/SeizeSettingsContext";
 import { EmojiProvider } from "../contexts/EmojiContext";
 import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider";
+import MainLayout from "../components/layout/MainLayout";
+import { HeaderProvider } from '../contexts/HeaderContext';
 import { useIsStale } from "../hooks/useVersion";
 
 library.add(
@@ -416,7 +418,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                           <CookieConsentProvider>
                             <EULAConsentProvider>
                               <AppWebSocketProvider>
-                                {getLayout(<Component {...props} />)}
+                                <HeaderProvider>
+                                  <MainLayout>{getLayout(<Component {...props} />)}</MainLayout>
+                                </HeaderProvider>
                                 {appWalletPasswordModal.modal}
                               </AppWebSocketProvider>
                             </EULAConsentProvider>

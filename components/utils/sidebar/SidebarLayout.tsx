@@ -1,7 +1,4 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import GroupsSidebarToggleButton from "../../groups/sidebar/GroupsSidebarToggleButton";
 import GroupsSidebar from "../../groups/sidebar/GroupsSidebar";
 import { createBreakpoint } from "react-use";
@@ -11,17 +8,11 @@ import {
   selectActiveGroupId,
   setActiveGroupId,
 } from "../../../store/groupSlice";
-
-const Header = dynamic(() => import("../../header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import { useHeaderContext } from "../../../contexts/HeaderContext";
 
 export default function SidebarLayout({
-  breadcrumbs,
   children,
 }: {
-  readonly breadcrumbs: Crumb[];
   readonly children: ReactNode;
 }) {
   const useBreakpoint = createBreakpoint({ XXL: 2048, MD: 768, S: 0 });
@@ -31,7 +22,7 @@ export default function SidebarLayout({
   const activeGroupId = useSelector(selectActiveGroupId);
   const dispatch = useDispatch();
 
-  const headerRef = useRef<HTMLDivElement>(null);
+  const { headerRef } = useHeaderContext();
   const openButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -85,7 +76,7 @@ export default function SidebarLayout({
         ? headerRef.current.clientHeight
         : 0;
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
-       const newPosition =
+      const newPosition =
         scrollTop <= headerHeight ? headerHeight - scrollTop : 0;
       sidebarRef.current!.style.top = `${newPosition}px`;
       openButtonRef.current!.style.top = `${newPosition}px`;
@@ -111,10 +102,6 @@ export default function SidebarLayout({
 
   return (
     <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
-      <div ref={headerRef}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
-      </div>
       <div
         className={`tw-transition-all tw-duration-300 tw-ease-out ${
           !open ? "tw-ml-0" : "tw-ml-[320px]"
@@ -129,7 +116,7 @@ export default function SidebarLayout({
       <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <div className="tw-flex">
           <div
-            className={`tw-fixed tw-z-50 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden no-scrollbar tw-transform tw-transition tw-duration-300 tw-ease-out ${
+            className={`tw-fixed tw-z-40 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden no-scrollbar tw-transform tw-transition tw-duration-300 tw-ease-out ${
               !open ? "-tw-translate-x-full" : ""
             }`}
             ref={sidebarRef}

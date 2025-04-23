@@ -1,6 +1,3 @@
-import dynamic from "next/dynamic";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
 import { useContext, useEffect, useState } from "react";
 import Head from "next/head";
@@ -21,10 +18,6 @@ export interface PredictBlockNumbersResponseApiModel {
   readonly blockNumbers: number[];
 }
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -65,11 +58,6 @@ const BlockPickerTimeWindowToMilliseconds = {
 
 export default function BlockPicker() {
   const { setTitle, title } = useContext(AuthContext);
-  const [defaultBreadCrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "Meme Blocks" },
-  ]);
-  const [breadcrumbs] = useState<Crumb[]>(defaultBreadCrumbs);
   const targetDate =
     new Date().getTime() +
     BlockPickerTimeWindowToMilliseconds[BlockPickerTimeWindow.ONE_HOUR];
@@ -205,7 +193,7 @@ export default function BlockPicker() {
     setTitle({
       title: "Meme Blocks | 6529.io",
     });
-  }, []);
+  }, [setTitle]);
 
   return (
     <>
@@ -224,8 +212,6 @@ export default function BlockPicker() {
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
-      <Header />
-      <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
         <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <h1 className="tw-text-white pb-4">

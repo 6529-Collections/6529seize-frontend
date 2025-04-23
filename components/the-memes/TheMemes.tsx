@@ -6,7 +6,6 @@ import { MEMES_CONTRACT } from "../../constants";
 import { VolumeType, NFTWithMemesExtendedData } from "../../entities/INFT";
 import { NftOwner } from "../../entities/IOwner";
 import { SortDirection } from "../../entities/ISort";
-import { Crumb } from "../breadcrumb/Breadcrumb";
 import {
   capitalizeEveryWord,
   numberWithCommas,
@@ -27,10 +26,6 @@ import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
 interface Meme {
   meme: number;
   meme_name: string;
-}
-
-interface Props {
-  setCrumbs(crumbs: Crumb[]): any;
 }
 
 export function printVolumeTypeDropdown(
@@ -63,7 +58,7 @@ export function printVolumeTypeDropdown(
   );
 }
 
-export default function TheMemesComponent(props: Readonly<Props>) {
+export default function TheMemesComponent() {
   const router = useRouter();
 
   const { connectedProfile } = useContext(AuthContext);
@@ -176,22 +171,6 @@ export default function TheMemesComponent(props: Readonly<Props>) {
       setSeasons(response);
     });
   }, []);
-
-  useEffect(() => {
-    const crumbs = [];
-    crumbs.push({ display: "Home", href: "/" });
-
-    if (selectedSeason > 0) {
-      crumbs.push({
-        display: "The Memes",
-        href: `/the-memes?sort=${sort}&sort_dir=${sortDir}`,
-      });
-      crumbs.push({ display: `SZN${selectedSeason}` });
-    } else {
-      crumbs.push({ display: "The Memes" });
-    }
-    props.setCrumbs(crumbs);
-  }, [selectedSeason]);
 
   useEffect(() => {
     if (routerLoaded) {

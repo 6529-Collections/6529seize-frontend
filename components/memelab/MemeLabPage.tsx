@@ -27,7 +27,6 @@ import {
   printMintDate,
   parseNftDescriptionToHtml,
 } from "../../helpers/Helpers";
-import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import Download from "../download/Download";
 import LatestActivityRow from "../latest-activity/LatestActivityRow";
 import { Transaction } from "../../entities/ITransaction";
@@ -83,7 +82,6 @@ export default function LabPage(props: Readonly<Props>) {
 
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
   const [nft, setNft] = useState<LabNFT>();
   const [originalMemes, setOriginalMemes] = useState<NFT[]>([]);
@@ -192,11 +190,6 @@ export default function LabPage(props: Readonly<Props>) {
           ).then((response: DBResponse) => {
             const nft: LabNFT = response.data[0];
             setNft(nft);
-            setBreadcrumbs([
-              { display: "Home", href: "/" },
-              { display: "Meme Lab", href: "/meme-lab" },
-              { display: `Card ${nftId} - ${nft.name}` },
-            ]);
 
             if (nft.meme_references.length > 0) {
               fetchUrl(
@@ -215,11 +208,6 @@ export default function LabPage(props: Readonly<Props>) {
           });
         } else {
           setNftMeta(undefined);
-          setBreadcrumbs([
-            { display: "Home", href: "/" },
-            { display: "Meme Lab", href: "/meme-lab" },
-            { display: `${nftId}` },
-          ]);
         }
       });
     }
@@ -1262,8 +1250,6 @@ export default function LabPage(props: Readonly<Props>) {
   }
 
   return (
-    <>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
@@ -1357,6 +1343,5 @@ export default function LabPage(props: Readonly<Props>) {
           </Col>
         </Row>
       </Container>
-    </>
   );
 }

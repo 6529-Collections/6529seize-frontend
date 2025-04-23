@@ -1,16 +1,9 @@
 import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
-
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
-import Breadcrumb, { Crumb } from "../../../components/breadcrumb/Breadcrumb";
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../components/auth/Auth";
+import { useContext, useEffect } from "react";
+import { AuthContext, useAuth } from "../../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const LabCollectionComponent = dynamic(
   () => import("../../../components/memelab/MemeLabCollection"),
@@ -22,21 +15,15 @@ const LabCollectionComponent = dynamic(
 export default function MemeLabIndex(props: any) {
   const { setTitle, title } = useContext(AuthContext);
   const pageProps = props.pageProps;
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const { connectedProfile } = useAuth();
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "Meme Lab", href: "/meme-lab" },
-    { display: "Collections", href: "/meme-lab?sort=collections" },
-    { display: pageProps.collection.replaceAll("-", " ") },
-  ]);
   const pagenameFull = `${pageProps.name} | 6529.io`;
 
   useEffect(() => {
     setTitle({
       title: pagenameFull,
     });
-  }, []);
+  }, [pagenameFull, setTitle]);
 
   return (
     <>
@@ -65,9 +52,13 @@ export default function MemeLabIndex(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
-        <LabCollectionComponent wallets={connectedWallets} />
+        <LabCollectionComponent
+          wallets={
+            connectedProfile?.consolidation.wallets.map(
+              (w) => w.wallet.address
+            ) ?? []
+          }
+        />
       </main>
     </>
   );

@@ -1,19 +1,10 @@
-import dynamic from "next/dynamic";
-import Breadcrumb, { Crumb } from "../../breadcrumb/Breadcrumb";
-import HeaderPlaceholder from "../../header/HeaderPlaceholder";
 import { Poppins } from "next/font/google";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
 import Head from "next/head";
 import { AuthContext } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-
-const Header = dynamic(() => import("../../header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -29,11 +20,6 @@ export default function DistributionPlanToolWrapper({
   const { setTitle, title } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
   const router = useRouter();
-  const [defaultBreadCrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "EMMA" },
-  ]);
-  const [breadcrumbs, setBreadCrumbs] = useState<Crumb[]>(defaultBreadCrumbs);
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
@@ -64,8 +50,6 @@ export default function DistributionPlanToolWrapper({
           content={`${process.env.BASE_ENDPOINT}/6529io.png`}
         />
       </Head>
-      <Header />
-      <Breadcrumb breadcrumbs={breadcrumbs} />
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
         <div
           id="allowlist-tool"

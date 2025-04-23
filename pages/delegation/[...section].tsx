@@ -1,9 +1,7 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import { useContext, useEffect, useState } from "react";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useRouter } from "next/router";
 import { DelegationCenterSection } from "../../components/delegation/DelegationCenterMenu";
 import {
@@ -14,10 +12,6 @@ import {
 } from "../../constants";
 import { AuthContext } from "../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const DelegationCenterMenu = dynamic(
   () => import("../../components/delegation/DelegationCenterMenu"),
@@ -27,10 +21,10 @@ const DelegationCenterMenu = dynamic(
 export const MAX_BULK_ACTIONS = 5;
 
 export interface DelegationCollection {
-  title: string;
-  display: string;
-  contract: string;
-  preview: string;
+  readonly title: string;
+  readonly display: string;
+  readonly contract: string;
+  readonly preview: string;
 }
 
 export const ANY_COLLECTION_PATH = "any-collection";
@@ -192,13 +186,8 @@ export default function DelegationsDocumentation(props: any) {
     pageProps.useCaseQuery
   );
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "Delegation", href: "/delegation/delegation-center" },
-  ]);
-
   function getQueryParams() {
-    let queryParams;
+    let queryParams: { [key: string]: string | number } = {};
     if (
       addressQuery &&
       [
@@ -229,66 +218,31 @@ export default function DelegationsDocumentation(props: any) {
       if (activeSection === DelegationCenterSection.HTML && pageProps.path) {
         router.push(
           {
-            pathname: `${pageProps.path.join("/")}`,
+            pathname: `/delegation/${pageProps.path.join("/")}`,
           },
           undefined,
           { shallow: true }
         );
-
-        const sectionTitle: Crumb[] = [];
-
-        pageProps.path.map((p: any, index: number) => {
-          const title = p
-            .replaceAll("-", " ")
-            .replace(/(^\w{1})|(\s+\w{1})/g, (letter: any) =>
-              letter.toUpperCase()
-            )
-            .replace("Faq", "FAQ")
-            .replace("Sub Delegation", "Sub-Delegation");
-          const crumb: any = { display: title };
-          if (index != pageProps.path.length - 1) {
-            crumb.href = `/delegation/${p}`;
-          }
-          sectionTitle.push(crumb);
-        });
-
-        setBreadcrumbs([
-          { display: "Home", href: "/" },
-          { display: "Delegation", href: "/delegation/delegation-center" },
-          ...sectionTitle,
-        ]);
       } else {
         const queryParams = getQueryParams();
         router.push(
           {
-            pathname: `${activeSection}`,
+            pathname: `/delegation/${activeSection}`,
             query: queryParams,
           },
           undefined,
           { shallow: true }
         );
-
-        const sectionTitle = activeSection
-          .replaceAll("-", " ")
-          .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase())
-          .replace("Faq", "FAQ")
-          .replace("Sub Delegation", "Sub-Delegation");
-
-        setBreadcrumbs([
-          { display: "Home", href: "/" },
-          { display: "Delegation", href: "/delegation/delegation-center" },
-          { display: sectionTitle },
-        ]);
       }
       window.scrollTo(0, 0);
     }
-  }, [activeSection, addressQuery, collectionQuery, useCaseQuery]);
+  }, [activeSection, addressQuery, collectionQuery, useCaseQuery, pageProps.path, router]);
 
   useEffect(() => {
     setTitle({
       title: "Delegation | 6529.io",
     });
-  }, []);
+  }, [setTitle]);
 
   return (
     <>
@@ -309,8 +263,6 @@ export default function DelegationsDocumentation(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <DelegationCenterMenu
           section={activeSection}
           path={pageProps.path}

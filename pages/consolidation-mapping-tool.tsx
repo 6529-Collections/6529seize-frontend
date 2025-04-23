@@ -1,17 +1,11 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import { useContext, useEffect, useState } from "react";
-import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import MappingToolPlaceholder from "../components/mapping-tools/MappingToolPlaceholder";
 import { AuthContext } from "../components/auth/Auth";
 
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const ConsolidationMappingTool = dynamic(
   () => import("../components/mapping-tools/ConsolidationMappingTool"),
@@ -26,11 +20,6 @@ export default function ConsolidationMappingToolPage() {
       title: "Consolidation Mapping Tool | 6529.io",
     });
   }, []);
-
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "Consolidation Mapping Tool" },
-  ]);
 
   const [html, setHtml] = useState("");
   const [htmlError, setHtmlError] = useState(false);
@@ -72,8 +61,6 @@ export default function ConsolidationMappingToolPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid>
           <Row>
             <Col>

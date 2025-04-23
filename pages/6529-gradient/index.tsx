@@ -1,16 +1,8 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-
-import { useContext, useEffect, useState } from "react";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
+import { useContext, useEffect} from "react";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
-import { AuthContext } from "../../components/auth/Auth";
-
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
+import { AuthContext, useAuth } from "../../components/auth/Auth";
 
 const GradientsComponent = dynamic(
   () => import("../../components/6529Gradient/6529Gradient"),
@@ -25,11 +17,7 @@ export default function GradientsPage() {
     });
   }, []);
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([
-    { display: "Home", href: "/" },
-    { display: "6529 Gradient" },
-  ]);
-  const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
+  const { connectedProfile } = useAuth();
 
   return (
     <>
@@ -50,9 +38,13 @@ export default function GradientsPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
-        <GradientsComponent wallets={connectedWallets} />
+        <GradientsComponent
+          wallets={
+            connectedProfile?.consolidation.wallets.map(
+              (w) => w.wallet.address
+            ) ?? []
+          }
+        />
       </main>
     </>
   );

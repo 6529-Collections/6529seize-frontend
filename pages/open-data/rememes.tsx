@@ -1,15 +1,9 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import Breadcrumb from "../../components/breadcrumb/Breadcrumb";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const CommunityDownloadsRememes = dynamic(
   () => import("../../components/communityDownloads/CommunityDownloadsRememes"),
@@ -20,11 +14,6 @@ const CommunityDownloadsRememes = dynamic(
 
 export default function RememesDownloads() {
   const { setTitle, title } = useContext(AuthContext);
-  const breadcrumbs = [
-    { display: "Home", href: "/" },
-    { display: "Open Data", href: "/open-data" },
-    { display: "Rememes" },
-  ];
 
   useEffect(() => {
     setTitle({
@@ -51,8 +40,6 @@ export default function RememesDownloads() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <CommunityDownloadsRememes />
       </main>
     </>

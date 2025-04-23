@@ -1,7 +1,6 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../components/auth/Auth";
 
@@ -12,10 +11,6 @@ const Royalties = dynamic(
   }
 );
 
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function MemeAccountingPage() {
   const { setTitle, title } = useContext(AuthContext);
@@ -44,7 +39,6 @@ export default function MemeAccountingPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
         <Royalties />
       </main>
     </>

@@ -1,9 +1,7 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../components/breadcrumb/Breadcrumb";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../components/auth/Auth";
 
@@ -12,10 +10,6 @@ const LatestActivity = dynamic(
   { ssr: false }
 );
 
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 export default function TheMemesPage() {
   const { setTitle, title } = useContext(AuthContext);
@@ -24,11 +18,6 @@ export default function TheMemesPage() {
       title: "NFT Activity | 6529.io",
     });
   }, []);
-
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "NFT Activity" },
-  ];
 
   return (
     <>
@@ -49,8 +38,6 @@ export default function TheMemesPage() {
       </Head>
 
       <main className={styles.main}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid className={styles.leaderboardContainer}>
           <Row>
             <Col>

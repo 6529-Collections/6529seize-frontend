@@ -1,8 +1,5 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
-import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { Container, Row, Col } from "react-bootstrap";
 import {
   RedeemedSubscriptionCounts,
@@ -20,10 +17,6 @@ import Link from "next/link";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 interface SubscriptionsProps {
   readonly szn: number;
@@ -37,10 +30,6 @@ export default function SubscriptionsReport({
   readonly pageProps: SubscriptionsProps;
 }) {
   const { setTitle, title } = useContext(AuthContext);
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "Subscriptions Report" },
-  ];
 
   useEffect(() => {
     setTitle({
@@ -67,8 +56,6 @@ export default function SubscriptionsReport({
       </Head>
 
       <main className={styles.main}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <SubscriptionsReportComponent
           szn={pageProps.szn}
           upcomingCounts={pageProps.upcoming}

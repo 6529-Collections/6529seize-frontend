@@ -1,7 +1,6 @@
 import styles from "../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import HeaderPlaceholder from "../../../../components/header/HeaderPlaceholder";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import { useShallowRedirect } from "./[[...view]]";
 import {
@@ -9,10 +8,6 @@ import {
   getServerSideCollection,
 } from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader";
 
-const Header = dynamic(() => import("../../../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const NextGenCollectionMintComponent = dynamic(
   () =>
@@ -34,7 +29,6 @@ export default function NextGenCollectionMintPage(props: any) {
       <NextGenCollectionHead collection={collection} name={pagenameFull} />
 
       <main className={styles.main}>
-        <Header />
         <NextGenCollectionMintComponent collection={collection} />
       </main>
     </>

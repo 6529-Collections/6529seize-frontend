@@ -1,6 +1,5 @@
 import styles from "../NextGen.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import Breadcrumb, { Crumb } from "../../../breadcrumb/Breadcrumb";
 import NextGenCollectionHeader from "./NextGenCollectionHeader";
 import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
@@ -57,11 +56,6 @@ export function printViewButton(
 }
 
 export default function NextGenCollectionComponent(props: Readonly<Props>) {
-  const crumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "NextGen", href: "/nextgen" },
-    { display: `${props.collection.name}` },
-  ];
 
   const [view, setView] = useState<ContentView>(props.view);
 
@@ -82,7 +76,6 @@ export default function NextGenCollectionComponent(props: Readonly<Props>) {
 
   return (
     <>
-      <Breadcrumb breadcrumbs={crumbs} />
       <NextGenNavigationHeader />
       {props.collection.mint_count > 0 && (
         <NextGenCollectionSlideshow collection={props.collection} />

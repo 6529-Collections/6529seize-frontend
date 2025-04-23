@@ -6,7 +6,6 @@ import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
 
-import Breadcrumb, { Crumb } from "../breadcrumb/Breadcrumb";
 import { Transaction } from "../../entities/ITransaction";
 import { useRouter } from "next/router";
 import { ConsolidatedTDH } from "../../entities/ITDH";
@@ -62,7 +61,6 @@ export default function MemePage() {
 
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
 
-  const [breadcrumbs, setBreadcrumbs] = useState<Crumb[]>([]);
 
   const [nft, setNft] = useState<NFT>();
   const [nftMeta, setNftMeta] = useState<MemesExtendedData>();
@@ -172,23 +170,9 @@ export default function MemePage() {
           ).then((response: DBResponse) => {
             const mynft = response.data[0];
             setNft(mynft);
-            setBreadcrumbs([
-              { display: "Home", href: "/" },
-              { display: "The Memes", href: "/the-memes" },
-              {
-                display: `SZN${nftMetas[0].season}`,
-                href: `/the-memes?szn=${nftMetas[0].season}&sort=age&sort_dir=ASC`,
-              },
-              { display: `Card ${nftId} - ${mynft.name}` },
-            ]);
           });
         } else {
           setNftMeta(undefined);
-          setBreadcrumbs([
-            { display: "Home", href: "/" },
-            { display: "The Memes", href: "/the-memes" },
-            { display: `${nftId}` },
-          ]);
         }
       });
     }
@@ -331,8 +315,6 @@ export default function MemePage() {
   }
 
   return (
-    <>
-      <Breadcrumb breadcrumbs={breadcrumbs} />
       <Container fluid className={styles.mainContainer}>
         <Row>
           <Col>
@@ -389,7 +371,6 @@ export default function MemePage() {
           </Col>
         </Row>
       </Container>
-    </>
   );
 }
 

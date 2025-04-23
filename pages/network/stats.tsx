@@ -2,15 +2,8 @@ import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
-import Breadcrumb, { Crumb } from "../../components/breadcrumb/Breadcrumb";
 import { useContext, useEffect } from "react";
-import HeaderPlaceholder from "../../components/header/HeaderPlaceholder";
 import { AuthContext } from "../../components/auth/Auth";
-
-const Header = dynamic(() => import("../../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const CommunityStatsComponent = dynamic(
   () => import("../../components/communityStats/CommunityStats"),
@@ -23,13 +16,7 @@ export default function CommunityStats() {
     setTitle({
       title: "Stats | Network",
     });
-  }, []);
-
-  const breadcrumbs: Crumb[] = [
-    { display: "Home", href: "/" },
-    { display: "Network", href: "/network" },
-    { display: "Stats" },
-  ];
+  }, [setTitle]);
 
   return (
     <>
@@ -50,8 +37,6 @@ export default function CommunityStats() {
       </Head>
 
       <main className={`${styles.main} ${styles.tdhMain}`}>
-        <Header />
-        <Breadcrumb breadcrumbs={breadcrumbs} />
         <Container fluid>
           <Row>
             <Col>
