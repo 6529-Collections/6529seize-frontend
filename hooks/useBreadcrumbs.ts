@@ -2,9 +2,10 @@ import { useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { Crumb } from "../components/breadcrumb/Breadcrumb"; // Adjust path if needed
-import { fetchUrl } from "../services/6529api"; // Adjust path if needed
+import { commonApiFetch } from "../services/api/common-api"; // Import commonApiFetch
 import { useWaveData } from "./useWaveData"; // Import useWaveData
 import { ApiWave } from "../generated/models/ApiWave"; // Import ApiWave if needed for type checks
+import { MEMES_CONTRACT } from "../constants"; // Import MEMES_CONTRACT
 
 // Helper function to format path segments
 const formatCrumbDisplay = (segment: string): string => {
@@ -23,10 +24,14 @@ const fetchGradientName = async (
 ): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
-    const response = await fetchUrl(
-      `${process.env.API_ENDPOINT}/api/nfts/gradients?id=${id}`
-    );
-    const nftData = response?.data?.[0]; // Use safe parsing
+    // Use commonApiFetch
+    const response = await commonApiFetch<{
+      data?: [{ name: string }]; // Assume data array structure
+    }>({
+      endpoint: "nfts/gradients",
+      params: { id },
+    });
+    const nftData = response?.data?.[0];
     return nftData ? { name: nftData.name } : null;
   } catch (error) {
     console.error("Error fetching gradient name:", error);
@@ -56,17 +61,38 @@ const fetchProfileHandle = async (
 const fetchWaveName = async (id: string): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
-    // Adjust endpoint if needed based on useWaveData.ts or actual API
-    const response = await fetchUrl(
-      `${process.env.API_ENDPOINT}/api/waves?id=${id}`
-    );
-    // Assuming response structure { data: [{ name: '...' }] }
+    // Use commonApiFetch
+    const response = await commonApiFetch<{
+      data?: [{ name: string }]; // Assume data array structure
+    }>({
+      endpoint: "waves",
+      params: { id },
+    });
     const waveData = response?.data?.[0];
     return waveData ? { name: waveData.name } : null;
   } catch (error) {
     // Fallback display
     console.error("Error fetching wave name:", error);
     return { name: `Wave ${id}` };
+  }
+};
+
+// NEW: Fetcher for Meme Name
+const fetchMemeName = async (id: string): Promise<{ name: string } | null> => {
+  if (!id || typeof id !== "string") return null;
+  try {
+    // Use commonApiFetch
+    const response = await commonApiFetch<{
+      data?: [{ name: string }]; // Assume data array structure
+    }>({
+      endpoint: "nfts",
+      params: { contract: MEMES_CONTRACT, id },
+    });
+    const nftData = response?.data?.[0];
+    return nftData?.name ? { name: nftData.name } : null;
+  } catch (error) {
+    console.error("Error fetching meme name:", error);
+    return { name: `Meme ${id}` }; // Fallback display
   }
 };
 
@@ -201,11 +227,16 @@ const buildProfileCrumbs = (
 };
 
 const buildMemeCrumbs = (
-  config: Extract<DynamicRouteConfig, { type: "meme" }>
+  config: Extract<DynamicRouteConfig, { type: "meme" }>,
+  isLoading: boolean,
+  data: { name: string } | null | undefined
 ): Crumb[] => {
   const crumbs: Crumb[] = [{ display: "The Memes", href: "/the-memes" }];
   if (config.id) {
-    crumbs.push({ display: `Meme ${config.id}` });
+    const display = isLoading
+      ? `Loading...`
+      : data?.name ?? `Meme ${config.id}`;
+    crumbs.push({ display });
   }
   return crumbs;
 };
@@ -384,6 +415,29 @@ export const useBreadcrumbs = (): Crumb[] => {
     refetchOnWindowFocus: false,
   });
 
+  // RE-ADD: Query for Meme Name
+  const { data: memeData, isLoading: isLoadingMeme } = useQuery({
+    queryKey: [
+      "breadcrumb",
+      "meme",
+      (() => {
+        if (dynamicRouteConfig.type === "meme") {
+          return dynamicRouteConfig.id;
+        }
+        return "invalid";
+      })(),
+    ],
+    queryFn: () => {
+      if (dynamicRouteConfig.type === "meme" && dynamicRouteConfig.id) {
+        return fetchMemeName(dynamicRouteConfig.id);
+      }
+      return Promise.resolve(null);
+    },
+    enabled: dynamicRouteConfig.type === "meme" && !!dynamicRouteConfig.id, // Ensure id is truthy
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   // Use useWaveData hook conditionally
   const waveIdForHook = (() => {
     if (dynamicRouteConfig.type === "wave" && dynamicRouteConfig.id) {
@@ -416,7 +470,11 @@ export const useBreadcrumbs = (): Crumb[] => {
         );
         break;
       case "meme":
-        dynamicCrumbs = buildMemeCrumbs(dynamicRouteConfig);
+        dynamicCrumbs = buildMemeCrumbs(
+          dynamicRouteConfig,
+          isLoadingMeme,
+          memeData
+        );
         break;
       case "wave":
         dynamicCrumbs = buildWaveCrumbs(dynamicRouteConfig, waveDataFromHook);
@@ -436,6 +494,8 @@ export const useBreadcrumbs = (): Crumb[] => {
     profileData,
     isLoadingProfile,
     waveDataFromHook,
+    memeData,       // Ensure dependency is present
+    isLoadingMeme,  // Ensure dependency is present
   ]);
 
   return finalCrumbs;
