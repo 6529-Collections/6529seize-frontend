@@ -34,6 +34,18 @@ interface LayoutSpaces {
   measurementsComplete: boolean;
 }
 
+// Helper function to calculate height style
+const calculateHeightStyle = (
+  spaces: LayoutSpaces,
+  capacitorSpace: number // Accept specific space value
+): React.CSSProperties => {
+  const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
+  return {
+    height: heightCalc,
+    maxHeight: heightCalc,
+  };
+};
+
 // Context type definition
 // Define valid ref types for type safety
 export type LayoutRefType =
@@ -323,14 +335,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 20 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -348,14 +354,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -373,14 +373,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -398,14 +392,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -423,14 +411,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -448,14 +430,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -473,14 +449,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -498,14 +468,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -523,14 +487,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,
@@ -548,14 +506,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-
     const capacitorSpace = isAndroid ? 56 : isIos ? 80 : isCapacitor ? 80 : 0;
-    const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
-
-    return {
-      height: heightCalc,
-      maxHeight: heightCalc,
-    };
+    return calculateHeightStyle(spaces, capacitorSpace);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,

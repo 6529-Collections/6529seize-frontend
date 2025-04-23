@@ -52,7 +52,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       if (isCapacitor) {
         console.log("Initializing push notifications");
-        await initializePushNotifications(profile);
+        /* await initializePushNotifications(profile); */
       }
     } catch (error) {
       console.error("Error initializing notifications", error);
