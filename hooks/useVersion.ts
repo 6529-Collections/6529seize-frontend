@@ -13,7 +13,6 @@ export function useIsStale(interval = 30_000) {
         const { version } = await fetch("/api/version", {
           cache: "no-store",
         }).then((r) => r.json());
-        console.log('old', CURRENT, 'new', version)
         setStale(version !== CURRENT);
       } catch {
         /* ignore network errors */
