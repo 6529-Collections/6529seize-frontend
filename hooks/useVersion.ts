@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const CURRENT = process.env.VERSION!; // baked into the bundle
 
-export function useIsStale(interval = 30_000) {
+export function useIsStale(interval = 120_000) {
   const [stale, setStale] = useState(false);
 
   useEffect(() => {
@@ -13,7 +13,6 @@ export function useIsStale(interval = 30_000) {
         const { version } = await fetch("/api/version", {
           cache: "no-store",
         }).then((r) => r.json());
-        console.log('old', CURRENT, 'new', version)
         setStale(version !== CURRENT);
       } catch {
         /* ignore network errors */
