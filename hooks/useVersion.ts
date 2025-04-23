@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const CURRENT = process.env.VERSION!; // baked into the bundle
 
-export function useIsStale(interval = 30_000) {
+export function useIsStale(interval = 120_000) {
   const [stale, setStale] = useState(false);
 
   useEffect(() => {
