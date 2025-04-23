@@ -94,6 +94,15 @@ export default function Header(props: Readonly<Props>) {
   }, []);
 
   useEffect(() => {
+    setShowBurgerMenuCollections(false);
+    setBurgerMenuOpen(false);
+    setShowBurgerMenuAbout(false);
+    setShowBurgerMenuCommunity(false);
+    setShowBurgerMenuTools(false);
+    setShowBurgerMenuBrain(false);
+  }, [router.route])
+
+  useEffect(() => {
     if (props.onSetWallets) {
       const isConsolidation = consolidations.length > 1;
       if (isConsolidation) {
