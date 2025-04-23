@@ -65,6 +65,7 @@ const fetchWaveName = async (id: string): Promise<{ name: string } | null> => {
     return waveData ? { name: waveData.name } : null;
   } catch (error) {
     // Fallback display
+    console.error("Error fetching wave name:", error);
     return { name: `Wave ${id}` };
   }
 };

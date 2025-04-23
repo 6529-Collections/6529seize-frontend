@@ -124,12 +124,7 @@ export default function Home({
           <>
             {numberWithCommas(manifoldClaim.total)} /{" "}
             {numberWithCommas(manifoldClaim.totalMax)}
-            {manifoldClaim.isFetching && (
-              <>
-                {" "}
-                <DotLoader />
-              </>
-            )}
+            {manifoldClaim.isFetching && <>{' '}<DotLoader /></>}
           </>
         );
       }
