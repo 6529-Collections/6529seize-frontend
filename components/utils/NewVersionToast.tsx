@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRefresh, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 
 const NewVersionToast = (): JSX.Element | null => {
   // This component currently only renders the design.
@@ -21,7 +21,7 @@ const NewVersionToast = (): JSX.Element | null => {
           </button>
         </div>
       </div>
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
