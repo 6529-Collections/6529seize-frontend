@@ -72,21 +72,42 @@ export const setAuthJwt = (
   }
 };
 
-export const getAuthJwt = () => {
+ export const getAuthJwt = () => {
+  if (true) {
+    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJjODI0OGVhLWE2NmUtNDgwZi05MGZjLWY4NmVmNDViNGQ1YiIsInN1YiI6IjB4OWI4Nzc1ZTdhMWU2YmYwNzQ1NmJiODEwZmIwN2VmODIzNzViYTEzMiIsImlhdCI6MTc0NTIxMzEzMCwiZXhwIjoxNzQ3ODQxNDE4fQ.XuZ_CRF1Lgiby4y-zWjSHQSc878yLJqLj59kLLmbiOA";
+  }
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
 
 export const getRefreshToken = () => {
-  return safeLocalStorage.getItem(WALLET_REFRESH_TOKEN_STORAGE_KEY) ?? null;
+  if (true) {
+    return "77ce023da5e8e3f57fa5012b36c0635ec1b0e4a83e6d414150a215fb70afcdbb8d4cb0b224cbb87580ddd4cc5aeec1c74fc5fd731b970f9706b1f9fcdcb22b7d";
+  }
+  return Cookies.get(WALLET_REFRESH_TOKEN_COOKIE) ?? null;
 };
 
 export const getWalletAddress = () => {
-  return safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY) ?? null;
-};
+  if (true) {
+    return "0x9B8775e7A1e6BF07456bB810fb07ef82375ba132";
+  }
+  return Cookies.get(WALLET_ADDRESS_COOKIE) ?? null;
+}; 
 
-export const getWalletRole = () => {
-  return safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY) ?? null;
-};
+// export const getAuthJwt = () => {
+//   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
+// };
+
+// export const getRefreshToken = () => {
+//   return safeLocalStorage.getItem(WALLET_REFRESH_TOKEN_STORAGE_KEY) ?? null;
+// };
+
+// export const getWalletAddress = () => {
+//   return safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY) ?? null;
+// };
+
+// export const getWalletRole = () => {
+//   return safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY) ?? null;
+// };
 
 export const removeAuthJwt = () => {
   Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
