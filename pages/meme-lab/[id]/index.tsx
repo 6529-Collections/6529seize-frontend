@@ -29,7 +29,7 @@ export default function MemeLabPage(props: any) {
     <>
       <SharedHead props={pageProps} contract={MEMELAB_CONTRACT} />
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        {/* <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} /> */}
         <LabPageComponent wallets={connectedWallets} />
       </main>
     </>

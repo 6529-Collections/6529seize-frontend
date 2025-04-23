@@ -45,7 +45,7 @@ export default function MemeLab() {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        {/* <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} /> */}
         <MemeLabComponent wallets={connectedWallets} />
       </main>
     </>

@@ -57,7 +57,7 @@ export default function MemeLabIndex(props: any) {
       </Head>
 
       <main className={styles.main}>
-        <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} />
+        {/* <Header onSetWallets={(wallets) => setConnectedWallets(wallets)} /> */}
         <LabCollectionComponent wallets={connectedWallets} />
       </main>
     </>

@@ -1,11 +1,4 @@
-import {
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { ReactNode, useContext, useEffect, useMemo } from "react";
 import Head from "next/head";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
@@ -20,7 +13,7 @@ import { useHeaderContext } from "../../../../contexts/HeaderContext";
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
-  const { setTitle, title, showWaves, connectedProfile, fetchingProfile } =
+  const { title, showWaves, connectedProfile, fetchingProfile } =
     useContext(AuthContext);
   const { registerRef, spaces } = useLayout();
   const { isAuthenticated } = useSeizeConnectContext();

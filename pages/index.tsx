@@ -6,7 +6,6 @@ import { useContext, useEffect, useState } from "react";
 import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
 import { NFTWithMemesExtendedData } from "../entities/INFT";
-
 import dynamic from "next/dynamic";
 import {
   capitalizeEveryWord,
@@ -16,7 +15,6 @@ import {
   printMintDate,
 } from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
-import HeaderPlaceholder from "../components/header/HeaderPlaceholder";
 import { ProfileActivityLog } from "../entities/IProfile";
 import { CountlessPage } from "../helpers/Types";
 import {
@@ -64,11 +62,6 @@ const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   handleOrWallet: null,
   groupId: null,
 };
-
-const Header = dynamic(() => import("../components/header/Header"), {
-  ssr: false,
-  loading: () => <HeaderPlaceholder />,
-});
 
 const NFTImage = dynamic(() => import("../components/nft-image/NFTImage"), {
   ssr: false,
