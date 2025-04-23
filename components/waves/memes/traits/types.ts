@@ -1,7 +1,7 @@
 import { TraitsData } from "../submission/types/TraitsData";
 
 // Component Props Types
-export interface BaseTraitProps {
+interface BaseTraitProps {
   readonly label: string;
   readonly field: keyof TraitsData;
   readonly className?: string;

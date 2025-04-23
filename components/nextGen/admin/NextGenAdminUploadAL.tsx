@@ -24,7 +24,7 @@ interface Props {
 
 const MARKLE_ZERO_PATTERN = /^0x0+$/;
 
-export enum Type {
+enum Type {
   ALLOWLIST = "allowlist",
   NO_ALLOWLIST = "no_allowlist",
   EXTERNAL_BURN = "external_burn",

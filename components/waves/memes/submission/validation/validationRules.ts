@@ -13,7 +13,7 @@ import {
  * @param context The validation context
  * @returns Validation result
  */
-export function validateTextField(
+function validateTextField(
   context: FieldValidationContext
 ): FieldValidationResult {
   const { value } = context;
@@ -44,7 +44,7 @@ export function validateTextField(
  * @param context The validation context
  * @returns Validation result
  */
-export function validateNumberField(
+function validateNumberField(
   context: FieldValidationContext
 ): FieldValidationResult {
   const { value, fieldDefinition } = context;
@@ -100,7 +100,7 @@ export function validateNumberField(
  * @param context The validation context
  * @returns Validation result
  */
-export function validateBooleanField(
+function validateBooleanField(
   context: FieldValidationContext
 ): FieldValidationResult {
   const { value } = context;
@@ -124,7 +124,7 @@ export function validateBooleanField(
  * @param context The validation context
  * @returns Validation result
  */
-export function validateDropdownField(
+function validateDropdownField(
   context: FieldValidationContext
 ): FieldValidationResult {
   const { value, fieldDefinition } = context;

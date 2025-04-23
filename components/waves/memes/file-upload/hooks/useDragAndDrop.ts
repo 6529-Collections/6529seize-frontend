@@ -36,7 +36,7 @@ interface DragAndDropHandlers {
  * @param props Hook props
  * @returns Object with ref and event handlers
  */
-export const useDragAndDrop = ({
+const useDragAndDrop = ({
   enabled,
   onFileDrop,
   setVisualState

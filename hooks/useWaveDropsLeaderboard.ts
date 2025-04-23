@@ -34,7 +34,7 @@ interface UseWaveDropsLeaderboardProps {
   readonly pausePolling?: boolean;
 }
 
-export const SORT_DIRECTION_MAP: Record<
+const SORT_DIRECTION_MAP: Record<
   WaveDropsLeaderboardSort,
   string | undefined
 > = {

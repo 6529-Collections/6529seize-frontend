@@ -2,7 +2,7 @@ import { Action, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HYDRATE } from "next-redux-wrapper";
 import type { AppState } from "./store";
 
-export interface GroupState {
+interface GroupState {
   activeGroupId: string | null;
 }
 
@@ -37,4 +37,3 @@ export const groupSlice = createSlice({
 export const { setActiveGroupId } = groupSlice.actions;
 export const selectActiveGroupId = (state: AppState) =>
   state.group.activeGroupId;
-export default groupSlice.reducer;

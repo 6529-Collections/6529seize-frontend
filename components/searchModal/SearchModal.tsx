@@ -14,7 +14,7 @@ interface Props {
   clearSearchWallets(): any;
 }
 
-export default function SearchModal(props: Readonly<Props>) {
+function SearchModal(props: Readonly<Props>) {
   const [invalidWalletAdded, setInvalidWalletAdded] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 

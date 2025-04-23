@@ -19,7 +19,7 @@ export enum SubmissionStatus {
 /**
  * Type definition for the return value of useWave
  */
-export interface WaveInfo {
+interface WaveInfo {
   voting: {
     startTime: number;
     endTime: number;

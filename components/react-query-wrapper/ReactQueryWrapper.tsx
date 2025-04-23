@@ -92,14 +92,14 @@ export enum QueryKey {
 }
 
 type QueryType<T, U, V, W> = [T, U, V, W];
-export type ProfileQuery = QueryType<
+type ProfileQuery = QueryType<
   IProfileAndConsolidations,
   string,
   IProfileAndConsolidations,
   [QueryKey.PROFILE, string]
 >;
 
-export interface InitProfileActivityLogsParamsAndData {
+interface InitProfileActivityLogsParamsAndData {
   readonly data: Page<ProfileActivityLogRatingEdit>;
   readonly page: number;
   readonly pageSize: number;
@@ -108,17 +108,17 @@ export interface InitProfileActivityLogsParamsAndData {
   readonly includeIncoming: boolean;
 }
 
-export interface InitProfileRatersParamsAndData {
+interface InitProfileRatersParamsAndData {
   readonly data: Page<RatingWithProfileInfoAndLevel>;
   readonly params: ProfileRatersParams;
 }
 
-export interface InitProfileActivityLogsParams {
+interface InitProfileActivityLogsParams {
   readonly params: ActivityLogParams;
   readonly data: CountlessPage<ProfileActivityLog>;
 }
 
-export interface InitProfileRepPageParams {
+interface InitProfileRepPageParams {
   readonly profile: IProfileAndConsolidations;
   readonly repRates: UserPageRepPropsRepRates;
   readonly repLogs: InitProfileActivityLogsParams;
@@ -127,7 +127,7 @@ export interface InitProfileRepPageParams {
   readonly handleOrWallet: string;
 }
 
-export interface InitProfileIdentityPageParams {
+interface InitProfileIdentityPageParams {
   readonly profile: IProfileAndConsolidations;
   readonly activityLogs: InitProfileActivityLogsParams;
   readonly cicGivenToUsers: InitProfileRatersParamsAndData;

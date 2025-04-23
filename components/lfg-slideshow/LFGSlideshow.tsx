@@ -180,7 +180,6 @@ const LFGSlideshow: React.FC<{
   );
 };
 
-export default LFGSlideshow;
 
 export const LFGButton: React.FC<{
   contract: string;

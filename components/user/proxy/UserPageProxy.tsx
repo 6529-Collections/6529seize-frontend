@@ -15,7 +15,7 @@ export enum ProxyMode {
   CREATE = "CREATE",
 }
 
-export enum ProxyAction {
+enum ProxyAction {
   ALLOCATE_REP = "ALLOCATE_REP",
   ALLOCATE_CATEGORY_REP = "ALLOCATE_CATEGORY_REP",
   ALLOCATE_CIC = "ALLOCATE_CIC",

@@ -192,7 +192,7 @@ export function useCollectionAdditionalData(
   return { data, error, isLoading };
 }
 
-export function useCollectionAdditionalHook(
+function useCollectionAdditionalHook(
   collection: number,
   setData: (data: AdditionalData) => void,
   watch: boolean = false
@@ -242,7 +242,7 @@ export function useCollectionInfo(
   return { data, error, isLoading };
 }
 
-export function useCollectionInfoHook(
+function useCollectionInfoHook(
   collection: number,
   setData: (data: Info) => void,
   watch: boolean = false
@@ -353,7 +353,7 @@ export function getStatusFromDates(startTime: number, endTime: number) {
   return Status.UNAVAILABLE;
 }
 
-export function extractURI(s: string) {
+function extractURI(s: string) {
   const regex = /"animation_url":"([^"]+)"/;
   const match = regex.exec(s);
   if (match && match.length >= 2) {
@@ -372,7 +372,7 @@ export function extractURI(s: string) {
   }
 }
 
-export function extractField(field: string, s: string) {
+function extractField(field: string, s: string) {
   const regex = new RegExp(`"${field}":"([^"]+)"`);
   const match = regex.exec(s);
   if (match && match.length >= 2) {
@@ -382,7 +382,7 @@ export function extractField(field: string, s: string) {
   }
 }
 
-export function extractAttributes(s: string) {
+function extractAttributes(s: string) {
   const regex = /"attributes":\[(.*?)\]/;
   const match = regex.exec(s);
   if (match) {
@@ -391,7 +391,7 @@ export function extractAttributes(s: string) {
   return null;
 }
 
-export function extractPhases(d: any[]) {
+function extractPhases(d: any[]) {
   const al_start = parseInt(d[0]);
   const al_end = parseInt(d[1]);
   const public_start = parseInt(d[3]);
@@ -412,7 +412,7 @@ export function extractPhases(d: any[]) {
   return phases;
 }
 
-export function useTokensIndex(
+function useTokensIndex(
   type: "min" | "max",
   collection: number | string,
   callback: (data: any) => void

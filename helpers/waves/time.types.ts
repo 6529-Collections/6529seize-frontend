@@ -5,7 +5,7 @@
 /**
  * Represents the phase type of the Wave
  */
-export enum WaveLeaderboardTimeType {
+enum WaveLeaderboardTimeType {
   DROPPING = "DROPPING",
   VOTING = "VOTING",
 }
@@ -13,7 +13,7 @@ export enum WaveLeaderboardTimeType {
 /**
  * Represents the current state of a Wave phase
  */
-export enum WaveLeaderboardTimeState {
+enum WaveLeaderboardTimeState {
   UPCOMING = "UPCOMING",
   IN_PROGRESS = "IN_PROGRESS",
   COMPLETED = "COMPLETED",

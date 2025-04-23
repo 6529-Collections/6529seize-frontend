@@ -5,7 +5,7 @@ import { DropInteractionParams } from "../../waves/drops/Drop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 
-export interface NotificationItemsProps {
+interface NotificationItemsProps {
   readonly items: TypedNotification[];
   readonly activeDrop: ActiveDropState | null;
   readonly onReply: (param: DropInteractionParams) => void;

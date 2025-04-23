@@ -34,4 +34,3 @@ export const UnifiedWavesListLoader: React.FC<UnifiedWavesListLoaderProps> = ({
   );
 };
 
-export default UnifiedWavesListLoader;

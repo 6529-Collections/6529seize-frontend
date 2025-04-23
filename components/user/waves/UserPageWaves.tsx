@@ -14,7 +14,7 @@ import { useDebounce } from "react-use";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
-export interface SearchWavesParams {
+interface SearchWavesParams {
   readonly author?: string;
   readonly name?: string;
   readonly limit: number;

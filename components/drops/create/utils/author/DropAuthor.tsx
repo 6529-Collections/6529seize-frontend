@@ -7,7 +7,7 @@ import UserCICAndLevel, {
 import { DropPartSize } from "../../../view/part/DropPart";
 import { ProfileMinWithoutSubs } from "../../../../../helpers/ProfileTypes";
 
-export interface DropAuthorProps {
+interface DropAuthorProps {
   readonly profile: ProfileMinWithoutSubs;
   readonly timestamp: number;
   readonly size?: DropPartSize;

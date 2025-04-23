@@ -34,6 +34,6 @@ export enum WaveDropsSearchStrategy {
   FIND_BOTH = "FIND_BOTH",
 }
 
-export interface DropWithStableOrderKey extends ExtendedDrop {
+interface DropWithStableOrderKey extends ExtendedDrop {
   order: number;
 }

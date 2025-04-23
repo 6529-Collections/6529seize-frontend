@@ -178,4 +178,3 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   );
 };
 
-export default MemesLeaderboardDrop;

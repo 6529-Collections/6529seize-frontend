@@ -4,7 +4,7 @@ interface MemesLeaderboardDropDescriptionProps {
   readonly description: string;
 }
 
-export const MemesLeaderboardDropDescription: React.FC<MemesLeaderboardDropDescriptionProps> = ({
+const MemesLeaderboardDropDescription: React.FC<MemesLeaderboardDropDescriptionProps> = ({
   description,
 }) => {
   return (

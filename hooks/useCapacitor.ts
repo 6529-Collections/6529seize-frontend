@@ -3,7 +3,7 @@ import { Capacitor, PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";
 import { App } from "@capacitor/app";
 
-export enum CapacitorOrientationType {
+enum CapacitorOrientationType {
   PORTRAIT,
   LANDSCAPE,
 }

@@ -7,7 +7,7 @@
 /**
  * Supported file types for uploads
  */
-export const ACCEPTED_FORMATS: readonly string[] = [
+const ACCEPTED_FORMATS: readonly string[] = [
   'image/png',
   'image/jpeg', 
   'image/jpg',

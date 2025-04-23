@@ -23,7 +23,7 @@ import { Suspense } from "react";
 
 const ImageComponent = React.lazy(() => import("./ImageComponent"));
 
-export interface ImagePayload {
+interface ImagePayload {
   key?: NodeKey;
   src: string;
   altText?: string;
@@ -38,7 +38,7 @@ function $convertImageElement(domNode: Node): null | DOMConversionOutput {
   return { node };
 }
 
-export type SerializedImageNode = Spread<
+type SerializedImageNode = Spread<
   {
     src: string;
     altText?: string;

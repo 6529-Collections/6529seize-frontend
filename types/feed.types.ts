@@ -18,7 +18,7 @@ export type IFeedItemDropCreated = {
   readonly type: ApiFeedItemType.DropCreated;
 };
 
-export type IFeedItemDropRepliedItem = {
+type IFeedItemDropRepliedItem = {
   readonly drop: ApiDrop;
   readonly reply: ApiDrop;
 };
@@ -29,7 +29,7 @@ export type IFeedItemDropReplied = {
   readonly type: ApiFeedItemType.DropReplied;
 };
 
-export type IFeedItemDropVotedItem = {
+type IFeedItemDropVotedItem = {
   readonly drop: ApiDrop;
   readonly vote: ApiDropVote;
 };

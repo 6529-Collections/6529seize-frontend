@@ -11,7 +11,7 @@ import {
 } from "lexical";
 import { EmojiNode } from "../../nodes/EmojiNode";
 
-export const EMOJI_TEST_REGEX = /:(\w+)/;
+const EMOJI_TEST_REGEX = /:(\w+)/;
 export const EMOJI_MATCH_REGEX = /:(\w+):/g;
 
 function transformEmojiTextToNode(editor: LexicalEditor) {

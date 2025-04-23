@@ -24,7 +24,7 @@ const getBorderClasses = (drop: ExtendedDrop) => {
   }
 };
 
-export const MemesLeaderboardDropCard: React.FC<MemesLeaderboardDropCardProps> = ({
+const MemesLeaderboardDropCard: React.FC<MemesLeaderboardDropCardProps> = ({
   drop,
   children,
 }) => {

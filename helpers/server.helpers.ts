@@ -21,7 +21,7 @@ import { SortDirection } from "../entities/ISort";
 import { ApiProfileProxy } from "../generated/models/ApiProfileProxy";
 import { ApiWave } from "../generated/models/ApiWave";
 
-export interface CommonUserServerSideProps {
+interface CommonUserServerSideProps {
   profile: IProfileAndConsolidations;
   title: string;
   consolidatedTDH: ConsolidatedTDHMetrics | null;
@@ -40,7 +40,7 @@ export const getUserProfile = async ({
   });
 };
 
-export const getProxyById = async ({
+const getProxyById = async ({
   proxyId,
   headers,
 }: {
@@ -112,7 +112,7 @@ export const getUserProfileActivityLogs = async <T = ProfileActivityLog>({
   }
 };
 
-export const getUserProfileIdentityStatements = async ({
+const getUserProfileIdentityStatements = async ({
   user,
   headers,
 }: {
@@ -129,7 +129,7 @@ export const getUserProfileIdentityStatements = async ({
   }
 };
 
-export const getGradients = async (
+const getGradients = async (
   headers: Record<string, string>
 ): Promise<NFT[]> => {
   const gradients = await commonApiFetch<{ data: NFT[] }>({
@@ -139,7 +139,7 @@ export const getGradients = async (
   return gradients.data;
 };
 
-export const getMemesLite = async (
+const getMemesLite = async (
   headers: Record<string, string>
 ): Promise<NFTLite[]> => {
   const memes = await commonApiFetch<{ data: NFTLite[] }>({
@@ -149,7 +149,7 @@ export const getMemesLite = async (
   return memes.data;
 };
 
-export const getSeasons = async (
+const getSeasons = async (
   headers: Record<string, string>
 ): Promise<Season[]> => {
   const seasons = await commonApiFetch<Season[]>({
@@ -159,7 +159,7 @@ export const getSeasons = async (
   return seasons;
 };
 
-export const getProfileRatings = async ({
+const getProfileRatings = async ({
   user,
   headers,
   signedWallet,
@@ -226,7 +226,7 @@ export const getInitialRatersParams = ({
   handleOrWallet,
 });
 
-export const getProfileRatingsByRater = async ({
+const getProfileRatingsByRater = async ({
   params,
   headers,
 }: {
@@ -258,7 +258,7 @@ export const getProfileRatingsByRater = async ({
   }
 };
 
-export const getWave = async ({
+const getWave = async ({
   waveId,
   headers,
 }: {
@@ -271,7 +271,7 @@ export const getWave = async ({
   });
 };
 
-export const getWavesOverview = async ({
+const getWavesOverview = async ({
   headers,
   limit,
   offset,
@@ -311,7 +311,7 @@ export const getCommonHeaders = (req: any): Record<string, string> => {
   };
 };
 
-export const getSignedWalletOrNull = (req: any): string | null => {
+const getSignedWalletOrNull = (req: any): string | null => {
   const walletAuthCookie = req?.req?.cookies["wallet-auth"] ?? null;
   if (!walletAuthCookie) {
     return null;

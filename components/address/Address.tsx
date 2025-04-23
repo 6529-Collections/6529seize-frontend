@@ -35,23 +35,23 @@ interface Props {
   setLinkQueryAddress?: boolean;
 }
 
-export const MEMES_SETS_ICON = "";
+const MEMES_SETS_ICON = "";
 
-export const UNIQUE_MEMES_ICON = "";
+const UNIQUE_MEMES_ICON = "";
 
-export const SZN_1_ICON = "";
+const SZN_1_ICON = "";
 
-export const SZN_2_ICON = "";
+const SZN_2_ICON = "";
 
-export const SZN_3_ICON = "";
+const SZN_3_ICON = "";
 
-export const SZN_4_ICON = "";
+const SZN_4_ICON = "";
 
-export const SZN_5_ICON = "";
+const SZN_5_ICON = "";
 
-export const SZN_6_ICON = "";
+const SZN_6_ICON = "";
 
-export const GRADIENT_ICON = "";
+const GRADIENT_ICON = "";
 
 export default function Address(props: Readonly<Props>) {
   const [consolidationExpanded, setConsolidationExpanded] = useState(

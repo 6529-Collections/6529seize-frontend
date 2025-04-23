@@ -9,12 +9,12 @@ import {
   FALLBACK_END_TIME,
 } from "../helpers/waves/time.utils";
 
-export type PhaseState = "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
+type PhaseState = "UPCOMING" | "IN_PROGRESS" | "COMPLETED";
 
 /**
  * Timer results interface
  */
-export interface WaveTimersResult {
+interface WaveTimersResult {
   // Participation time information
   participation: {
     timeLeft: TimeLeft;

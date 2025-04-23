@@ -21,7 +21,7 @@ interface Props {
 
 const SIDEBAR_COLLAPSED_COOKIE = "brain-right-sidebar-collapsed";
 
-export const BrainDesktop: React.FC<Props> = ({ children }) => {
+const BrainDesktop: React.FC<Props> = ({ children }) => {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const cookie = Cookies.get(SIDEBAR_COLLAPSED_COOKIE);

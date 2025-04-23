@@ -1,6 +1,6 @@
 import React from "react";
 
-export interface WavePictureProps {
+interface WavePictureProps {
   readonly name: string;
   readonly picture: string | null;
   readonly contributors: {
