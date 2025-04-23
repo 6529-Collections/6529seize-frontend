@@ -53,9 +53,9 @@ export default function AboutMemes() {
             papers and podcasts can&apos;t.
           </p>
           <p>
-            The Memes are large edition, CC0 (public domain) NFTs that spread
-            far and wide, are remixed, ReMemed, and reinterpreted by the world
-            at large.
+          The Memes are large edition, CCO (public domain) NFTs that are
+            actively encouraged to be spread far and wide, to be remixed, to be
+            rememed and to be reinterpreted by the world at large.
           </p>
           <p>
             We believe that permissionless NFTs on decentralized public
@@ -67,11 +67,6 @@ export default function AboutMemes() {
             are recorded in centralized corporate databased or user-owned public
             blockchains is the most consequential technology decision in our
             society right now.
-          </p>
-          <p>
-            The Memes are large edition, CCO (public domain) NFTs that are
-            actively encouraged to be spread far and wide, to be remixed, to be
-            ReMemed and to be reinterpreted by the world at large.
           </p>
           <br />
           <p>
