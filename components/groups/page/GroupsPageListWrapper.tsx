@@ -40,14 +40,14 @@ export default function GroupsPageListWrapper({
   const group = searchParams?.get(GROUP_NAME_SEARCH_PARAM);
 
   const [filters, setFilters] = useState<GroupsRequestParams>({
-    group_name: group || null,
-    author_identity: identity || null,
+    group_name: group ?? null,
+    author_identity: identity ?? null,
   });
 
   useEffect(() => {
     setFilters({
-      group_name: group || null,
-      author_identity: identity || null,
+      group_name: group ?? null,
+      author_identity: identity ?? null,
     });
   }, [group, identity]);
 
