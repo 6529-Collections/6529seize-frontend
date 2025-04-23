@@ -134,7 +134,7 @@ export function createEmptyWaveMessages(
  * @throws Re-throws abort errors
  * @returns null
  */
-export function handleWaveMessagesError(error: unknown, waveId: string): null {
+function handleWaveMessagesError(error: unknown, waveId: string): null {
   // Check if this is an abort error
   if (error instanceof DOMException && error.name === "AbortError") {
     throw error; // Re-throw abort errors to be handled by the caller
@@ -207,7 +207,7 @@ export function mergeDrops(
 }
 
 // Helper function to get the highest serial number from an array of drops
-export function getHighestSerialNo(
+function getHighestSerialNo(
   drops: ApiDrop[] | ExtendedDrop[]
 ): number | null {
   if (!drops || drops.length === 0) {

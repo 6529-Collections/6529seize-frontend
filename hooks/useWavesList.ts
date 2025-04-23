@@ -15,7 +15,7 @@ import { ApiWave } from "../generated/models/ApiWave";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 
 // Enhanced wave interface with isPinned field and newDropsCount
-export interface EnhancedWave extends ApiWave {
+interface EnhancedWave extends ApiWave {
   isPinned: boolean;
 }
 
@@ -50,7 +50,7 @@ const useIndividualWaveData = (
  * Hook for managing and fetching waves list including pinned waves
  * @returns Wave list data and loading states
  */
-export const useWavesList = () => {
+const useWavesList = () => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   const [following] = useShowFollowingWaves();

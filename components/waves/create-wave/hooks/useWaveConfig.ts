@@ -14,7 +14,7 @@ import { Period } from "../types/period";
 import { getCreateWaveValidationErrors, CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
-export interface EndDateConfig {
+interface EndDateConfig {
   time: number | null;
   period: Period | null;
 }

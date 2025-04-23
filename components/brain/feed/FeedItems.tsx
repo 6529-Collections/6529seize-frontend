@@ -8,7 +8,7 @@ import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 
-export interface FeedItemsProps {
+interface FeedItemsProps {
   readonly items: TypedFeedItem[];
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;

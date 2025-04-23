@@ -1,4 +1,4 @@
-export interface NewDelegationParams {
+interface NewDelegationParams {
   collection_address: string;
   delegation_address: string;
   expiry_date: Date;

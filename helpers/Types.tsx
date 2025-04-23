@@ -18,7 +18,7 @@ export interface Page<T> {
 
 export type CountlessPage<T> = Omit<Page<T>, "count">;
 
-export type NonNullableRequired<T> = {
+type NonNullableRequired<T> = {
   [P in keyof T]-?: NonNullable<T[P]>;
 };
 
@@ -307,11 +307,11 @@ export const CONTACT_STATEMENT_TYPES = [
 
 export type CONTACT_STATEMENT_TYPE = (typeof CONTACT_STATEMENT_TYPES)[number];
 
-export const SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES = [
+const SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES = [
   STATEMENT_TYPE.LINK,
 ] as const;
 
-export type SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPE =
+type SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPE =
   (typeof SOCIAL_MEDIA_VERIFICATION_POSTS_STATEMENT_TYPES)[number];
 
 export enum Period {

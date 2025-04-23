@@ -19,7 +19,7 @@ import {
   TextNode,
 } from "lexical";
 
-export type SerializedHashtagNode = Spread<
+type SerializedHashtagNode = Spread<
   {
     hashtagName: string;
   },

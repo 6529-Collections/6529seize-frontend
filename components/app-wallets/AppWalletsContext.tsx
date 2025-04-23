@@ -215,7 +215,7 @@ export const useAppWallets = () => {
   return context;
 };
 
-export const getAllWallets = async () => {
+const getAllWallets = async () => {
   let wallets: AppWallet[] = [];
   try {
     const keysResult = await SecureStoragePlugin.keys();

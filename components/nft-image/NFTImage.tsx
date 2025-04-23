@@ -160,7 +160,7 @@ export default function NFTImage(props: Readonly<Props>) {
   );
 }
 
-export function NFTImageBalance(props: Readonly<Props>) {
+function NFTImageBalance(props: Readonly<Props>) {
   return (
     <>
       {props.balance > 0 && (

@@ -2,9 +2,9 @@ import React from "react";
 import { TimeLeft } from "../../../helpers/waves/time.utils";
 
 // Using the existing TimeLeft type from time.utils.ts
-export type TimeRemaining = TimeLeft;
+type TimeRemaining = TimeLeft;
 
-export interface CountdownDisplayProps {
+interface CountdownDisplayProps {
   headerText: string;
   headerClassName?: string;
   timeRemaining: TimeRemaining;

@@ -5,7 +5,7 @@ export interface DBResponse {
   data: any[];
 }
 
-export interface LeaderboardDBResponse {
+interface LeaderboardDBResponse {
   count: number;
   page: number;
   next: any;

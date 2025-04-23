@@ -62,7 +62,7 @@ enum Sort {
   total_boosted_tdh = "total_boosted_tdh",
 }
 
-export interface NftTDH {
+interface NftTDH {
   id: number;
   contract: string;
   handle: string;

@@ -20,7 +20,7 @@ export interface MinimalWaveNewDropsCount {
  * @param refetchWaves - Function to refetch waves data when needed
  * @returns Object containing newDropsCounts and reset function
  */
-export function useNewDropCounter(
+function useNewDropCounter(
   activeWaveId: string | null,
   waves: ApiWave[],
   refetchWaves: () => void

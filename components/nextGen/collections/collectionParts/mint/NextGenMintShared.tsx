@@ -5,7 +5,7 @@ import { Form, Row, Col } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 
-export function NextGenMintAddressOption(props: Readonly<{ address: string }>) {
+function NextGenMintAddressOption(props: Readonly<{ address: string }>) {
   const ens = useEnsName({
     address: props.address as `0x${string}`,
     chainId: 1,

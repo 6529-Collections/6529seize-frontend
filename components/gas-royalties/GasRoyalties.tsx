@@ -19,7 +19,7 @@ export enum GasRoyaltiesCollectionFocus {
   MEMELAB = "meme-lab",
 }
 
-export interface HeaderProps {
+interface HeaderProps {
   title: string;
   description?: string;
   fetching: boolean;
@@ -39,7 +39,7 @@ export interface HeaderProps {
   setBlocks: (fromBlock: number, toBlock: number) => void;
 }
 
-export function getUrlParams(
+function getUrlParams(
   apiPath: string,
   isPrimary: boolean,
   isCustomBlocks: boolean,

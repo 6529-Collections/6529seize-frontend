@@ -18,7 +18,7 @@ import {
 } from "../../pages/delegation/[...section]";
 import { useOrignalDelegatorEnsResolution } from "./delegation_shared";
 
-export function DelegationAddressInput(
+function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>
 ) {
   const [newDelegationInput, setNewDelegationInput] = useState("");
@@ -134,7 +134,7 @@ export function DelegationAddressDisabledInput(
   );
 }
 
-export function DelegationAddressDisplay(props: Readonly<{ address: string }>) {
+function DelegationAddressDisplay(props: Readonly<{ address: string }>) {
   const ens = useEnsName({
     address: props.address as `0x${string}`,
     chainId: 1,
@@ -244,7 +244,7 @@ export function DelegationFormDelegateAddressFormGroup(
   );
 }
 
-export function DelegationButtons(
+function DelegationButtons(
   props: Readonly<{
     showCancel: boolean;
     onSubmit: () => void;

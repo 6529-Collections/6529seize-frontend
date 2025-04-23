@@ -45,7 +45,7 @@ export default function UserPageStatsCollected({
   );
 }
 
-export function UserPageStatsCollectedTotals({
+function UserPageStatsCollectedTotals({
   ownerBalance,
 }: {
   readonly ownerBalance: OwnerBalance | undefined;
@@ -195,7 +195,7 @@ export function UserPageStatsCollectedTotals({
   );
 }
 
-export function UserPageStatsCollectedMemes({
+function UserPageStatsCollectedMemes({
   balanceMemes,
   seasons,
 }: {

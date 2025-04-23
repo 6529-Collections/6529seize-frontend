@@ -34,7 +34,7 @@ interface DropOutcomes {
   haveOutcomes: boolean;
 }
 
-export interface DropOutcomesInput {
+interface DropOutcomesInput {
   readonly drop: ApiDrop;
   readonly wave: ApiWave;
 }

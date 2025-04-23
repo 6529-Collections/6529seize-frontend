@@ -4,13 +4,13 @@ import DropListItemContentNft from "./nft-tag/DropListItemContentNft";
 import DropListItemContentMention from "./DropListItemContentMention";
 import { DropContentPartType } from "../../part/DropPartMarkdown";
 
-export interface DropListItemContentMentionProps {
+interface DropListItemContentMentionProps {
   readonly type: DropContentPartType.MENTION;
   readonly value: MentionedUser;
   readonly match: string;
 }
 
-export interface DropListItemContentHashtagProps {
+interface DropListItemContentHashtagProps {
   readonly type: DropContentPartType.HASHTAG;
   readonly value: ReferencedNft;
   readonly match: string;

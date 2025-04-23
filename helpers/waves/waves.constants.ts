@@ -149,7 +149,7 @@ export const CREATE_WAVE_START_DATE_LABELS: Record<ApiWaveType, string> = {
   [ApiWaveType.Approve]: "Drops Submission Opens",
 };
 
-export const CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS: Record<
+const CREATE_WAVE_DROPS_REQUIRED_METADATA_TYPES_LABELS: Record<
   ApiWaveMetadataType,
   string
 > = {

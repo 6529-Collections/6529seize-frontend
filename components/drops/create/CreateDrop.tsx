@@ -55,7 +55,7 @@ interface CreateDropProps {
   readonly onSuccessfulDrop?: () => void;
 }
 
-export default function CreateDrop({
+function CreateDrop({
   profile,
   quotedDrop,
   wave,

@@ -9,7 +9,7 @@ interface MyStreamWaveTabsLeaderboardProps {
   readonly onViewChange: (view: BrainView) => void;
 }
 
-export const MyStreamWaveTabsLeaderboard: React.FC<
+const MyStreamWaveTabsLeaderboard: React.FC<
   MyStreamWaveTabsLeaderboardProps
 > = ({ wave, activeView, onViewChange }) => {
   const {

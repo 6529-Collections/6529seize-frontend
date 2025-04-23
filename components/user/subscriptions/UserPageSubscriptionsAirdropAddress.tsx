@@ -4,7 +4,7 @@ import Tippy from "@tippyjs/react";
 import { MEMES_CONTRACT } from "../../../constants";
 import { AIRDROPS_USE_CASE } from "../../../pages/delegation/[...section]";
 
-export interface AirdropAddress {
+interface AirdropAddress {
   address: string;
   ens: string;
 }

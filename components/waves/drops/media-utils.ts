@@ -5,7 +5,7 @@
 /**
  * Determines if a URL is pointing to a video based on extension or source
  */
-export const isVideoUrl = (url: string): boolean => {
+const isVideoUrl = (url: string): boolean => {
   // Check file extension
   const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.wmv', '.flv', '.mkv'];
   const lowercaseUrl = url.toLowerCase();
@@ -64,7 +64,7 @@ export interface ProcessedContent {
 /**
  * Extracts media from markdown text and returns segmented content
  */
-export const extractMediaFromMarkdown = (text: string): ProcessedContent => {
+const extractMediaFromMarkdown = (text: string): ProcessedContent => {
   const mediaPattern = /!\[([^\]]*)\]\(([^\)]+)\)/g;
   const segments: ContentSegment[] = [];
   
@@ -109,7 +109,7 @@ export const extractMediaFromMarkdown = (text: string): ProcessedContent => {
 /**
  * Removes @ square brackets from text (e.g., @[username] -> @username)
  */
-export const removeSquareBrackets = (text: string): string => {
+const removeSquareBrackets = (text: string): string => {
   return text.replace(/@\[([^\]]+)\]/g, "@$1");
 };
 

@@ -1,6 +1,6 @@
 import { IAttribute } from "../../entities/INFT";
 
-export interface ManifoldImageDetails {
+interface ManifoldImageDetails {
   bytes: number;
   format: string;
   sha256: string;
@@ -8,7 +8,7 @@ export interface ManifoldImageDetails {
   height: number;
 }
 
-export interface ManifoldPublicData {
+interface ManifoldPublicData {
   asset: {
     created_by: string;
     description: string;
@@ -40,13 +40,13 @@ export interface ManifoldPublicData {
   extensionAddress1155: ManifoldExtensionAddress;
 }
 
-export interface ManifoldCreator {
+interface ManifoldCreator {
   id: number;
   name: string;
   address: string;
 }
 
-export interface ManifoldContract {
+interface ManifoldContract {
   name: string;
   symbol: string;
   contractAddress: string;
@@ -54,18 +54,18 @@ export interface ManifoldContract {
   spec: string;
 }
 
-export interface ManifoldMintPrice {
+interface ManifoldMintPrice {
   value: string;
   decimals: number;
   currency: string;
   erc20: string;
 }
 
-export interface ManifoldInstanceAllowlist {
+interface ManifoldInstanceAllowlist {
   merkleTreeId: number;
 }
 
-export interface ManifoldExtensionAddress {
+interface ManifoldExtensionAddress {
   value: string;
   version: number;
 }

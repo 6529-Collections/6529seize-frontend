@@ -8,7 +8,7 @@ export enum WaveVotingState {
 }
 
 // Define a type for the updateAvailableTabs parameters
-export type WaveTabParams = {
+type WaveTabParams = {
   isChatWave: boolean;
   isMemesWave: boolean;
   votingState: WaveVotingState;

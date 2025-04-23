@@ -2,7 +2,7 @@ import { AcceptActionRequestActionEnum } from "../generated/models/AcceptActionR
 import { ApiProfileProxyActionType } from "../generated/models/ApiProfileProxyActionType";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../helpers/Types";
 
-export interface IProfileWallet {
+interface IProfileWallet {
   readonly address: string;
   readonly ens?: string;
 }
@@ -12,7 +12,7 @@ export interface IProfileConsolidation {
   readonly tdh: number;
 }
 
-export interface AggregatedCicRating {
+interface AggregatedCicRating {
   cic_rating: number;
   contributor_count: number;
 }
@@ -53,7 +53,7 @@ export const CLASSIFICATIONS: Record<
   [PROFILE_CLASSIFICATION.PARODY]: { title: "Parody" },
 };
 
-export interface IProfile {
+interface IProfile {
   readonly external_id: string;
   readonly normalised_handle: string;
   readonly handle: string;
@@ -152,7 +152,7 @@ export const PROFILE_ACTIVITY_TYPE_TO_TEXT: Record<
   [ProfileActivityLogType.PROXY_DROP_RATING_EDIT]: "Proxy Drop Rating",
 };
 
-export interface ProfileActivityLogBase {
+interface ProfileActivityLogBase {
   readonly id: string;
   readonly profile_id: string;
   readonly target_id: string | null;
@@ -164,7 +164,6 @@ export interface ProfileActivityLogBase {
 }
 
 export enum ProfileActivityLogRatingEditContentChangeReason {
-  USER_EDIT = "USER_EDIT",
   LOST_TDH = "LOST_TDH",
 }
 
@@ -220,7 +219,7 @@ export interface ProfileActivityLogPfpEdit extends ProfileActivityLogBase {
   };
 }
 
-export enum ProfileActivityLogSocialsEditContentAction {
+enum ProfileActivityLogSocialsEditContentAction {
   ADD = "ADD",
   DELETE = "DELETE",
 }
@@ -337,7 +336,7 @@ export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
   readonly contents: {};
 }
 
-export interface ProfileActivityLogProxyDropRatingEdit
+interface ProfileActivityLogProxyDropRatingEdit
   extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_DROP_RATING_EDIT;
   readonly contents: {};
@@ -371,7 +370,7 @@ export enum RateMatter {
   DROP_REP = "DROP_REP",
 }
 
-export interface ProfilesMatterRating {
+interface ProfilesMatterRating {
   readonly rater_handle: string;
   readonly matter: RateMatter;
   readonly matter_category: string;
@@ -409,7 +408,7 @@ export interface ApiProfileRepRatesState {
   readonly rating_stats: RatingStats[];
 }
 
-export interface RatingWithProfileInfo {
+interface RatingWithProfileInfo {
   handle: string;
   tdh: number;
   rating: number;
@@ -473,7 +472,7 @@ export interface CollectedCard {
   readonly szn: number | null;
 }
 
-export interface WalletDelegation {
+interface WalletDelegation {
   readonly created_at: Date;
   readonly block: number;
   readonly from_address: string;
@@ -509,7 +508,7 @@ export interface ProfileMinimal {
   readonly level: number;
 }
 
-export interface ProfileAvailableDropRateResponse {
+interface ProfileAvailableDropRateResponse {
   readonly available_credit_for_rating: number;
 }
 

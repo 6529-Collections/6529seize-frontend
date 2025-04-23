@@ -8,7 +8,7 @@ import { areEqualAddresses } from "../../helpers/Helpers";
 import { useAuth } from "../auth/Auth";
 import { useAppWallets } from "./AppWalletsContext";
 
-export const SEED_MIN_PASS_LENGTH = 6;
+const SEED_MIN_PASS_LENGTH = 6;
 
 const showAppWalletError = (
   timeoutRef: MutableRefObject<NodeJS.Timeout | null>,

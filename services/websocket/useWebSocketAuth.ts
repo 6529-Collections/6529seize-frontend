@@ -16,7 +16,7 @@ import { getAuthJwt, WALLET_AUTH_COOKIE } from "../auth/auth.utils";
  *   - status: Current WebSocket connection status
  *   - disconnect: Function to manually disconnect
  */
-export function useWebSocketAuth() {
+function useWebSocketAuth() {
   const { connect, disconnect, status } = useWebSocket();
   const [authToken, setAuthToken] = useState<string | null>(getAuthJwt());
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -1,11 +1,11 @@
 import { ApiProfileProxyActionType } from "../generated/models/ApiProfileProxyActionType";
 
-export interface CreateProxyActionBase<T extends ApiProfileProxyActionType> {
+interface CreateProxyActionBase<T extends ApiProfileProxyActionType> {
   readonly action_type: T;
   readonly end_time: number | null;
 }
 
-export interface CreateProxyAllocateCreditBase {
+interface CreateProxyAllocateCreditBase {
   readonly credit_amount: number;
 }
 
@@ -37,7 +37,7 @@ export type CreateProxyAction =
   | CreateProxyCreateDropToWaveAction
   | CreateProxyRateWaveDropAction;
 
-export interface CreateNewProfileProxy {
+interface CreateNewProfileProxy {
   readonly target_id: string;
 }
 

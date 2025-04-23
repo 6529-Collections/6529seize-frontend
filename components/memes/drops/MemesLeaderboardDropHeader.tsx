@@ -4,7 +4,7 @@ interface MemesLeaderboardDropHeaderProps {
   readonly title: string;
 }
 
-export const MemesLeaderboardDropHeader: React.FC<
+const MemesLeaderboardDropHeader: React.FC<
   MemesLeaderboardDropHeaderProps
 > = ({ title }) => {
   return (

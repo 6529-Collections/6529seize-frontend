@@ -16,7 +16,7 @@ export interface CommonSelectItem<T, U = unknown> {
   readonly childrenProps?: U;
 }
 
-export interface CommonSelectDefaultProps<T, U> {
+interface CommonSelectDefaultProps<T, U> {
   readonly items: CommonSelectItem<T, U>[];
   readonly activeItem: T;
   readonly filterLabel: string;
@@ -32,7 +32,7 @@ export interface CommonSelectDefaultProps<T, U> {
   ) => React.ReactElement<ChildComponentProps>;
 }
 
-export interface CommonSelectsWithSortProps<T, U>
+interface CommonSelectsWithSortProps<T, U>
   extends CommonSelectDefaultProps<T, U> {
   readonly sortDirection: SortDirection;
 }

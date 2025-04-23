@@ -1,4 +1,4 @@
-export const isAvailable = typeof window !== "undefined";
+const isAvailable = typeof window !== "undefined";
 
 export const safeLocalStorage = {
   getItem: (key: string) => (isAvailable ? localStorage.getItem(key) : null),

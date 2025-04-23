@@ -6,7 +6,7 @@ import DistributionPlanToolPlansNoPlans from "./DistributionPlanToolPlansNoPlans
 import DistributionPlanToolPlansTable from "./DistributionPlanToolPlansTable";
 import { assertUnreachable } from "../../../helpers/AllowlistToolHelpers";
 
-export enum State {
+enum State {
   LOADING = "LOADING",
   NO_PLANS = "NO_PLANS",
   HAS_PLANS = "HAS_PLANS",

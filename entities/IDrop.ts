@@ -25,22 +25,22 @@ export interface DropMetadata {
   readonly data_value: string;
 }
 
-export interface DropMedia {
+interface DropMedia {
   readonly url: string;
   readonly mime_type: string;
 }
 
-export interface DropRater {
+interface DropRater {
   readonly profile: ProfileMinimal;
   readonly rating: number;
 }
 
-export interface DropRatingCategory {
+interface DropRatingCategory {
   readonly category: string;
   readonly rating: number;
 }
 
-export interface QuotedDrop {
+interface QuotedDrop {
   readonly drop_id: string;
   readonly drop_part_id: number;
 }
@@ -50,25 +50,25 @@ export interface DropRateChangeRequest {
   readonly category: string;
 }
 
-export type DropActivityLogBase =
+type DropActivityLogBase =
   | ProfileActivityLogDropComment
   | ProfileActivityLogDropRatingEdit;
 
-export interface DropActivityLogDiscussion
+interface DropActivityLogDiscussion
   extends ProfileActivityLogDropComment {
   readonly author: ProfileMinWithoutSubs | null;
 }
 
-export interface DropActivityLogRepEdit
+interface DropActivityLogRepEdit
   extends ProfileActivityLogDropRatingEdit {
   readonly author: ProfileMinWithoutSubs | null;
 }
 
-export interface DropActivityLogDropCreated
+interface DropActivityLogDropCreated
   extends ProfileActivityLogDropCreated {
   readonly author: ProfileMinWithoutSubs | null;
 }
-export type DropActivityLog =
+type DropActivityLog =
   | DropActivityLogDiscussion
   | DropActivityLogRepEdit
   | DropActivityLogDropCreated;
@@ -88,4 +88,4 @@ export interface CreateDropConfig
   readonly parts: Array<CreateDropPart>;
 }
 
-export type DropPartDiscussionRequest = FullPageRequest<"created_at">;
+type DropPartDiscussionRequest = FullPageRequest<"created_at">;

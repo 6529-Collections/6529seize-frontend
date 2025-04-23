@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { CreateWaveStep } from "../../../../types/waves.types";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
 
-export enum CreateWaveNextStepType {
+enum CreateWaveNextStepType {
   NEXT = "NEXT",
   SAVE = "SAVE",
 }

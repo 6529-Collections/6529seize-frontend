@@ -17,7 +17,7 @@ declare enum NftTokenType {
   UNKNOWN = "UNKNOWN",
 }
 
-export interface OpenSeaCollectionMetadata {
+interface OpenSeaCollectionMetadata {
   /** The floor price of the collection. */
   floorPrice?: number;
   /** The name of the collection on OpenSea. */

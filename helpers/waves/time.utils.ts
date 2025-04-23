@@ -45,7 +45,7 @@ export const calculateTimeLeft = (targetTime: number): TimeLeft => {
  * @param timeLeft - TimeLeft object
  * @returns boolean - true if all values are zero
  */
-export const isTimeZero = (timeLeft: TimeLeft): boolean => {
+const isTimeZero = (timeLeft: TimeLeft): boolean => {
   return (
     timeLeft.days === 0 &&
     timeLeft.hours === 0 &&

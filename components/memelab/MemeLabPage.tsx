@@ -55,7 +55,7 @@ interface MemeTab {
   title: string;
 }
 
-export enum MEME_FOCUS {
+enum MEME_FOCUS {
   LIVE = "live",
   YOUR_CARDS = "your-cards",
   THE_ART = "the-art",

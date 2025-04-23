@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
-export interface ComponentConfigMetaPropsTag {
+interface ComponentConfigMetaPropsTag {
   readonly id: string;
   readonly name: string;
 }
 
-export interface ComponentConfigMetaProps {
+interface ComponentConfigMetaProps {
   readonly tags: ComponentConfigMetaPropsTag[];
   readonly walletsCount: number | null;
   readonly isLoading: boolean;

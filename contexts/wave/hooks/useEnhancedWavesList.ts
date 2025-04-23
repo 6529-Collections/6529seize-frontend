@@ -27,7 +27,7 @@ export interface MinimalWave {
  * @param activeWaveId The currently active wave ID
  * @returns Object containing waves data, loading states, pagination, and pinning functions
  */
-export function useEnhancedWavesList(activeWaveId: string | null) {
+function useEnhancedWavesList(activeWaveId: string | null) {
   // Get waves data from the optimized hook
   const wavesData = useWavesList();
 

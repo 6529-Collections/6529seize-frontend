@@ -9,7 +9,7 @@ import { commonApiPost } from "../../../../services/api/common-api";
  * @param handle User handle for the group name
  * @returns Promise with the group ID or null
  */
-export const createOnlyMeGroup = async ({
+const createOnlyMeGroup = async ({
   primaryWallet,
   handle,
   onError,

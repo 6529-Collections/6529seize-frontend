@@ -2,7 +2,7 @@ export type AllowlistToolResponse<T> =
   | T
   | { statusCode: number; message: string | string[]; error: string };
 
-export interface AllowlistDescriptionActiveRun {
+interface AllowlistDescriptionActiveRun {
   readonly createdAt: number;
   readonly updatedAt?: number;
   readonly status?: AllowlistRunStatus;
@@ -46,7 +46,7 @@ export interface AllowlistCustomTokenPool {
   readonly tokensCount: number;
 }
 
-export interface AllowlistWalletPool {
+interface AllowlistWalletPool {
   readonly id: string;
   readonly allowlistId: string;
   readonly name: string;
@@ -54,7 +54,7 @@ export interface AllowlistWalletPool {
   readonly walletsCount: number;
 }
 
-export interface AllowlistPhase {
+interface AllowlistPhase {
   readonly id: string;
   readonly allowlistId: string;
   readonly name: string;
@@ -66,7 +66,7 @@ export interface AllowlistPhase {
   readonly winnersSpotsCount: number;
 }
 
-export interface AllowlistPhaseComponent {
+interface AllowlistPhaseComponent {
   readonly id: string;
   readonly allowlistId: string;
   readonly phaseId: string;
@@ -79,7 +79,7 @@ export interface AllowlistPhaseComponent {
   readonly winnersSpotsCount: number;
 }
 
-export interface AllowlistPhaseComponentItem {
+interface AllowlistPhaseComponentItem {
   readonly id: string;
   readonly allowlistId: string;
   readonly phaseId: string;
@@ -93,7 +93,7 @@ export interface AllowlistPhaseComponentItem {
   readonly tokensCount: number;
 }
 
-export interface AllowlistPhaseComponentWithItems
+interface AllowlistPhaseComponentWithItems
   extends AllowlistPhaseComponent {
   readonly items: AllowlistPhaseComponentItem[];
 }
@@ -161,7 +161,7 @@ export type Mutable<T, K extends keyof T> = Omit<T, K> & {
   -readonly [P in K]: T[P];
 };
 
-export interface AllowlistOperationDescription {
+interface AllowlistOperationDescription {
   readonly code: AllowlistOperationCode;
   readonly title: string;
   readonly description: string;
@@ -170,11 +170,10 @@ export interface AllowlistOperationDescription {
 export enum AllowlistRunStatus {
   PENDING = "PENDING",
   CLAIMED = "CLAIMED",
-  COMPLETED = "COMPLETED",
   FAILED = "FAILED",
 }
 
-export enum AllowlistToolEntity {
+enum AllowlistToolEntity {
   TRANSFER_POOLS = "TRANSFER_POOLS",
   TRANSFER_POOL = "TRANSFER_POOL",
   TOKEN_POOLS = "TOKEN_POOLS",
@@ -198,7 +197,7 @@ export interface AllowlistResult {
   readonly amount: number;
 }
 
-export interface AllowlistToolOperationsGrouped {
+interface AllowlistToolOperationsGrouped {
   transferPools: {
     operations: AllowlistOperation[];
     pools: Record<string, AllowlistOperation[]>;

@@ -22,7 +22,7 @@ import { assertUnreachable } from "../AllowlistToolHelpers";
  * @param timeWeighted The time-weighted voting configuration
  * @returns The time lock in milliseconds, constrained within acceptable range
  */
-export const getTimeWeightedLockMs = (
+const getTimeWeightedLockMs = (
   timeWeighted: TimeWeightedVotingSettings
 ): number => {
   // Constants
@@ -324,7 +324,7 @@ export const calculateLastDecisionTime = (
  * @returns The calculated end date in milliseconds
  * @throws Error if isRolling is true and no end date is provided
  */
-export const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
+const calculateEndDate = (dates: CreateWaveDatesConfig): number => {
   // If subsequentDecisions is empty, end date is firstDecisionTime
   if (dates.subsequentDecisions.length === 0) {
     return dates.firstDecisionTime;
