@@ -1,4 +1,3 @@
-
 import "../styles/seize-bootstrap.scss";
 import "../styles/globals.scss";
 import "tippy.js/dist/tippy.css";
@@ -131,6 +130,7 @@ import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
 import { SeizeSettingsProvider } from "../contexts/SeizeSettingsContext";
 import { EmojiProvider } from "../contexts/EmojiContext";
 import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider";
+import { useIsStale } from "../hooks/useVersion";
 
 library.add(
   faArrowUp,
@@ -277,6 +277,16 @@ type AppPropsWithLayout = AppProps & {
 };
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
+  const stale = useIsStale();
+
+  useEffect(() => {
+    if (stale) {
+      console.log("stale");
+    } else {
+      console.log("not stale");
+    }
+  }, [stale]);
+
   const { store, props } = wrapper.useWrappedStore(rest);
 
   const getLayout = Component.getLayout ?? ((page) => page);
