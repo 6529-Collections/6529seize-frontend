@@ -21,7 +21,7 @@ export default function UserPageStatsActivityDistributions({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const page = searchParams.get(WALLET_DISTRIBUTION_PAGE_PARAM);
+  const page = searchParams?.get(WALLET_DISTRIBUTION_PAGE_PARAM);
 
   const [pageFilter, setPageFilter] = useState(
     page && !isNaN(+page) ? +page : 1
@@ -37,7 +37,7 @@ export default function UserPageStatsActivityDistributions({
       value: string;
     }[]
   ): string => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
     for (const { name, value } of config) {
       params.set(name, value);
     }

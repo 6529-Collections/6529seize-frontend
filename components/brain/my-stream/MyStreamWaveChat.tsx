@@ -31,7 +31,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
 
   // Handle URL parameters
   useEffect(() => {
-    const dropParam = searchParams.get("serialNo");
+    const dropParam = searchParams?.get("serialNo");
     if (dropParam) {
       setInitialDrop(parseInt(dropParam));
       const newUrl = new URL(window.location.href);

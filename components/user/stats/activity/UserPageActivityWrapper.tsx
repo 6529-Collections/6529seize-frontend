@@ -34,7 +34,7 @@ export default function UserPageActivityWrapper({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const activity = searchParams.get(SEARCH_PARAM_ACTIVITY);
+  const activity = searchParams?.get(SEARCH_PARAM_ACTIVITY);
 
   const enumToPath = (type: USER_PAGE_ACTIVITY_TAB): string => {
     const found = ENUM_AND_PATH.find((e) => e.type === type);
@@ -56,7 +56,7 @@ export default function UserPageActivityWrapper({
 
   const createQueryString = useCallback(
     (name: string, value: USER_PAGE_ACTIVITY_TAB) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       params.set(name, enumToPath(value));
       params.delete(WALLET_ACTIVITY_FILTER_PARAM);
       params.delete(WALLET_ACTIVITY_PAGE_PARAM);
