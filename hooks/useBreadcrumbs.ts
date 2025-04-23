@@ -29,6 +29,7 @@ const fetchGradientName = async (
     const nftData = response?.data?.[0]; // Use safe parsing
     return nftData ? { name: nftData.name } : null;
   } catch (error) {
+    console.error("Error fetching gradient name:", error);
     return { name: `Gradient ${id}` }; // Fallback
   }
 };
@@ -46,6 +47,7 @@ const fetchProfileHandle = async (
     await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate network delay
     return { handle: handle }; // Placeholder
   } catch (error) {
+    console.error("Error fetching profile handle:", error);
     return { handle: handle }; // Fallback
   }
 };
@@ -310,9 +312,9 @@ export const useBreadcrumbs = (): Crumb[] => {
   );
 
   // Use active item from queue if available, otherwise use current router state
-  const activePathname = activeItem?.pathname || pathname;
-  const activeAsPath = activeItem?.asPath || asPath;
-  const activeQuery = activeItem?.query || query;
+  const activePathname = activeItem?.pathname ?? pathname;
+  const activeAsPath = activeItem?.asPath ?? asPath;
+  const activeQuery = activeItem?.query ?? query;
 
   // Determine route type and fetch data conditionally
   const pathSegments = useMemo(

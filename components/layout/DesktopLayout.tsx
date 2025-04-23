@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect } from "react";
+import React, { ReactNode, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
@@ -13,7 +13,7 @@ const Header = dynamic(() => import("../header/Header"), {
 
 interface DesktopLayoutProps {
   readonly children: ReactNode;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Used by MainLayout
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Prop is passed down from MainLayout but not used directly here.
   readonly hideFooter?: boolean;
   readonly isSmall?: boolean;
 }

@@ -10,7 +10,7 @@ const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
 export const HeaderProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const headerRefInternal = useRef<HTMLDivElement | null>(null);
   // We need a state to trigger re-renders in consumers when the ref changes
-  const [refState, setRefState] = useState<HTMLDivElement | null>(null);
+  const [, setRefState] = useState<HTMLDivElement | null>(null);
 
   const setHeaderRef = useCallback((ref: HTMLDivElement | null) => {
     if (headerRefInternal.current !== ref) {
