@@ -193,7 +193,7 @@ export default function BlockPicker() {
     setTitle({
       title: "Meme Blocks | 6529.io",
     });
-  }, [setTitle]);
+  }, []);
 
   return (
     <>

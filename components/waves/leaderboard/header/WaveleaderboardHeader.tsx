@@ -32,7 +32,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         <div className="tw-flex tw-items-center tw-gap-x-2 lg:tw-gap-x-4">
           {isMemesWave && (
             <div className="tw-mb-4 tw-flex tw-items-center tw-gap-x-2">
-              <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-800 tw-border-solid tw-rounded-lg tw-overflow-hidden">
+              <div className="tw-flex tw-items-center tw-whitespace-nowrap tw-h-9 tw-px-1 tw-text-xs tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-hidden">
                 <Tippy
                   content="List view"
                   touch={["hold", 500]}

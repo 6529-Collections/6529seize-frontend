@@ -16,7 +16,7 @@ export default function CommunityStats() {
     setTitle({
       title: "Stats | Network",
     });
-  }, [setTitle]);
+  }, []);
 
   return (
     <>

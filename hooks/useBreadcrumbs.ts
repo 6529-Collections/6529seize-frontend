@@ -2,9 +2,11 @@ import { useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { Crumb } from "../components/breadcrumb/Breadcrumb"; // Adjust path if needed
-import { fetchUrl } from "../services/6529api"; // Adjust path if needed
+import { commonApiFetch } from "../services/api/common-api"; // Import commonApiFetch
 import { useWaveData } from "./useWaveData"; // Import useWaveData
 import { ApiWave } from "../generated/models/ApiWave"; // Import ApiWave if needed for type checks
+import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "../constants"; // Import MEMES_CONTRACT
+import { NextGenToken } from "../entities/INextgen";
 
 // Helper function to format path segments
 const formatCrumbDisplay = (segment: string): string => {
@@ -23,10 +25,14 @@ const fetchGradientName = async (
 ): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
-    const response = await fetchUrl(
-      `${process.env.API_ENDPOINT}/api/nfts/gradients?id=${id}`
-    );
-    const nftData = response?.data?.[0]; // Use safe parsing
+    // Use commonApiFetch
+    const response = await commonApiFetch<{
+      data?: [{ name: string }]; // Assume data array structure
+    }>({
+      endpoint: "nfts/gradients",
+      params: { id },
+    });
+    const nftData = response?.data?.[0];
     return nftData ? { name: nftData.name } : null;
   } catch (error) {
     console.error("Error fetching gradient name:", error);
@@ -56,11 +62,13 @@ const fetchProfileHandle = async (
 const fetchWaveName = async (id: string): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
-    // Adjust endpoint if needed based on useWaveData.ts or actual API
-    const response = await fetchUrl(
-      `${process.env.API_ENDPOINT}/api/waves?id=${id}`
-    );
-    // Assuming response structure { data: [{ name: '...' }] }
+    // Use commonApiFetch
+    const response = await commonApiFetch<{
+      data?: [{ name: string }]; // Assume data array structure
+    }>({
+      endpoint: "waves",
+      params: { id },
+    });
     const waveData = response?.data?.[0];
     return waveData ? { name: waveData.name } : null;
   } catch (error) {
@@ -70,8 +78,87 @@ const fetchWaveName = async (id: string): Promise<{ name: string } | null> => {
   }
 };
 
-// --- Add more fetchers for other dynamic route types ---
+// NEW: Fetcher for Meme Name
+const fetchMemeName = async (id: string): Promise<{ name: string } | null> => {
+  if (!id || typeof id !== "string") return null;
+  try {
+    // Use commonApiFetch
+    const response = await commonApiFetch<{
+      data?: [{ name: string }]; // Assume data array structure
+    }>({
+      endpoint: "nfts",
+      params: { contract: MEMES_CONTRACT, id },
+    });
+    const nftData = response?.data?.[0];
+    return nftData?.name ? { name: nftData.name } : null;
+  } catch (error) {
+    console.error("Error fetching meme name:", error);
+    return { name: `Meme ${id}` }; // Fallback display
+  }
+};
 
+// NEW: Fetcher for Nextgen Name
+const fetchNextgenName = async (
+  id: string
+): Promise<{ name: string } | null> => {
+  if (!id || typeof id !== "string") return null;
+  try {
+    // Use commonApiFetch
+    const response = await commonApiFetch<NextGenToken>({
+      endpoint: `nextgen/tokens/${id}`,
+    });
+    return response?.name ? { name: response.name } : null;
+  } catch (error) {
+    console.error("Error fetching nextgen name:", error);
+    return { name: `Nextgen ${id}` }; // Fallback display
+  }
+};
+
+const fetchRememeName = async (
+  contract: string,
+  id: string
+): Promise<{ name: string } | null> => {
+  if (!id || typeof id !== "string") return null;
+  try {
+    const response = await commonApiFetch<any>({
+      endpoint: `rememes`,
+      params: { contract, id },
+    });
+    if (response?.data?.length > 0) {
+      return { name: response.data[0].metadata?.name };
+    }
+    return { name: `Rememe ${id}` };
+  } catch (error) {
+    console.error("Error fetching meme name:", error);
+    return { name: `Rememe ${id}` }; // Fallback display
+  }
+};
+
+// NEW: Fetcher for Meme Lab Name
+const fetchMemeLabName = async (
+  id: string
+): Promise<{ name: string } | null> => {
+  if (!id || typeof id !== "string") return null;
+  try {
+    // Use commonApiFetch
+    const response = await commonApiFetch<any>({
+      endpoint: `nfts_memelab`,
+      params: {
+        contract: MEMELAB_CONTRACT,
+        id,
+      },
+    });
+    if (response?.data?.length > 0) {
+      return { name: response.data[0].name };
+    }
+    return { name: `Meme Lab ${id}` };
+  } catch (error) {
+    console.error("Error fetching meme lab name:", error);
+    return { name: `Meme Lab ${id}` }; // Fallback display
+  }
+};
+
+// --- Add more fetchers for other dynamic route types ---
 // Helper function to safely extract dynamic segments
 const getDynamicParam = (
   segments: string[],
@@ -110,6 +197,9 @@ type DynamicRouteConfig =
   | { type: "meme"; id: string }
   | { type: "collection"; contract: string; id?: string }
   | { type: "wave"; id: string }
+  | { type: "nextgen"; id: string }
+  | { type: "meme-lab"; id: string }
+  | { type: "rememe"; contract: string; id: string }
   | { type: "static" };
 
 // Helper function to determine dynamic route configuration
@@ -156,17 +246,25 @@ const determineRouteConfig = (
         activeQuery.contract
       );
       if (!contract) return { type: "static" };
-      const id = getDynamicParam(
-        pathSegments,
-        firstSegment,
-        2,
-        activeQuery.id
-      );
+      const id = getDynamicParam(pathSegments, firstSegment, 2, activeQuery.id);
       return { type: "collection", contract, id };
     }
     case "waves": {
       const id = getDynamicParam(pathSegments, firstSegment, 1, activeQuery.id);
       return id ? { type: "wave", id } : { type: "static" };
+    }
+    case "nextgen": {
+      const id = getDynamicParam(pathSegments, firstSegment, 2, activeQuery.id);
+      return id ? { type: "nextgen", id } : { type: "static" };
+    }
+    case "meme-lab": {
+      const id = getDynamicParam(pathSegments, firstSegment, 1, activeQuery.id);
+      return id ? { type: "meme-lab", id } : { type: "static" };
+    }
+    case "rememes": {
+      const contract = getDynamicParam(pathSegments, firstSegment, 1, activeQuery.contract);
+      const id = getDynamicParam(pathSegments, firstSegment, 2, activeQuery.id);
+      return contract && id ? { type: "rememe", contract, id } : { type: "static" };
     }
     // Add more cases as needed
     default:
@@ -201,11 +299,63 @@ const buildProfileCrumbs = (
 };
 
 const buildMemeCrumbs = (
-  config: Extract<DynamicRouteConfig, { type: "meme" }>
+  config: Extract<DynamicRouteConfig, { type: "meme" }>,
+  isLoading: boolean,
+  data: { name: string } | null | undefined
 ): Crumb[] => {
   const crumbs: Crumb[] = [{ display: "The Memes", href: "/the-memes" }];
   if (config.id) {
-    crumbs.push({ display: `Meme ${config.id}` });
+    const display = isLoading
+      ? `Loading...`
+      : data?.name ?? `Meme ${config.id}`;
+    crumbs.push({ display });
+  }
+  return crumbs;
+};
+
+const buildNextgenCrumbs = (
+  config: Extract<DynamicRouteConfig, { type: "nextgen" }>,
+  isLoading: boolean,
+  nextgenData: { name: string } | null | undefined
+): Crumb[] => {
+  const crumbs: Crumb[] = [{ display: "Nextgen", href: "/nextgen" }];
+  if (config.id) {
+    const display = isLoading
+      ? `Loading...`
+      : nextgenData?.name ?? `Nextgen ${config.id}`;
+    crumbs.push({ display });
+  }
+  return crumbs;
+};
+
+const buildRememeCrumbs = (
+  config: Extract<DynamicRouteConfig, { type: "rememe" }>,
+  isLoading: boolean,
+  data: { name: string } | null | undefined
+): Crumb[] => {
+  const crumbs: Crumb[] = [{ display: "Rememes", href: "/rememes" }];
+
+  if (config.contract && config.id) {
+    const display = isLoading
+      ? `Loading...`
+      : data?.name ?? `Rememe ${config.id}`;
+    crumbs.push({ display });
+  }
+  return crumbs;
+};
+const buildMemeLabCrumbs = (
+  config: Extract<DynamicRouteConfig, { type: "meme-lab" }>,
+  isLoading: boolean,
+  data: { name: string } | null | undefined
+): Crumb[] => {
+  const crumbs: Crumb[] = [{ display: "Meme Lab", href: "/meme-lab" }];
+  if (config.id) {
+    const display = isLoading
+      ? `Loading...`
+      : data?.name
+      ? `Card ${config.id} - ${data.name}`
+      : `Card ${config.id}`;
+    crumbs.push({ display });
   }
   return crumbs;
 };
@@ -228,9 +378,7 @@ const buildWaveCrumbs = (
 const buildCollectionCrumbs = (
   config: Extract<DynamicRouteConfig, { type: "collection" }>
 ): Crumb[] => {
-  const crumbs: Crumb[] = [
-    { display: "Collections", href: "/collections" },
-  ];
+  const crumbs: Crumb[] = [{ display: "Collections", href: "/collections" }];
   if (config.contract) {
     crumbs.push({
       display: `Collection ${config.contract}`,
@@ -384,6 +532,95 @@ export const useBreadcrumbs = (): Crumb[] => {
     refetchOnWindowFocus: false,
   });
 
+  // RE-ADD: Query for Meme Name
+  const { data: memeData, isLoading: isLoadingMeme } = useQuery({
+    queryKey: [
+      "breadcrumb",
+      "meme",
+      (() => {
+        if (dynamicRouteConfig.type === "meme") {
+          return dynamicRouteConfig.id;
+        }
+        return "invalid";
+      })(),
+    ],
+    queryFn: () => {
+      if (dynamicRouteConfig.type === "meme" && dynamicRouteConfig.id) {
+        return fetchMemeName(dynamicRouteConfig.id);
+      }
+      return Promise.resolve(null);
+    },
+    enabled: dynamicRouteConfig.type === "meme" && !!dynamicRouteConfig.id, // Ensure id is truthy
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: nextgenData, isLoading: isLoadingNextgen } = useQuery({
+    queryKey: [
+      "breadcrumb",
+      "nextgen",
+      (() => {
+        if (dynamicRouteConfig.type === "nextgen") {
+          return dynamicRouteConfig.id;
+        }
+        return "invalid";
+      })(),
+    ],
+    queryFn: () => {
+      if (dynamicRouteConfig.type === "nextgen" && dynamicRouteConfig.id) {
+        return fetchNextgenName(dynamicRouteConfig.id);
+      }
+      return Promise.resolve(null);
+    },
+    enabled: dynamicRouteConfig.type === "nextgen" && !!dynamicRouteConfig.id, // Ensure id is truthy
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: rememeData, isLoading: isLoadingRememe } = useQuery({
+    queryKey: [
+      "breadcrumb",
+      "rememe",
+      (() => {
+        if (dynamicRouteConfig.type === "rememe") {
+          return dynamicRouteConfig.id;
+        }
+        return "invalid";
+      })(),
+    ],
+    queryFn: () => {
+      if (dynamicRouteConfig.type === "rememe" && dynamicRouteConfig.id) {
+        return fetchRememeName(dynamicRouteConfig.contract, dynamicRouteConfig.id);
+      }
+      return Promise.resolve(null);
+    },
+    enabled: dynamicRouteConfig.type === "rememe" && !!dynamicRouteConfig.id, // Ensure id is truthy
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: memeLabData, isLoading: isLoadingMemeLab } = useQuery({
+    queryKey: [
+      "breadcrumb",
+      "meme-lab",
+      (() => {
+        if (dynamicRouteConfig.type === "meme-lab") {
+          return dynamicRouteConfig.id;
+        }
+        return "invalid";
+      })(),
+    ],
+    queryFn: () => {
+      if (dynamicRouteConfig.type === "meme-lab" && dynamicRouteConfig.id) {
+        return fetchMemeLabName(dynamicRouteConfig.id);
+      }
+      return Promise.resolve(null);
+    },
+    enabled: dynamicRouteConfig.type === "meme-lab" && !!dynamicRouteConfig.id, // Ensure id is truthy
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   // Use useWaveData hook conditionally
   const waveIdForHook = (() => {
     if (dynamicRouteConfig.type === "wave" && dynamicRouteConfig.id) {
@@ -416,13 +653,38 @@ export const useBreadcrumbs = (): Crumb[] => {
         );
         break;
       case "meme":
-        dynamicCrumbs = buildMemeCrumbs(dynamicRouteConfig);
+        dynamicCrumbs = buildMemeCrumbs(
+          dynamicRouteConfig,
+          isLoadingMeme,
+          memeData
+        );
         break;
       case "wave":
         dynamicCrumbs = buildWaveCrumbs(dynamicRouteConfig, waveDataFromHook);
         break;
       case "collection":
         dynamicCrumbs = buildCollectionCrumbs(dynamicRouteConfig);
+        break;
+      case "nextgen":
+        dynamicCrumbs = buildNextgenCrumbs(
+          dynamicRouteConfig,
+          isLoadingNextgen,
+          nextgenData
+        );
+        break;
+      case "rememe":
+        dynamicCrumbs = buildRememeCrumbs(
+          dynamicRouteConfig,
+          isLoadingRememe,
+          rememeData
+        );
+        break;
+      case "meme-lab":
+        dynamicCrumbs = buildMemeLabCrumbs(
+          dynamicRouteConfig,
+          isLoadingMemeLab,
+          memeLabData
+        );
         break;
       // No default needed as 'static' is handled above
     }
@@ -436,6 +698,8 @@ export const useBreadcrumbs = (): Crumb[] => {
     profileData,
     isLoadingProfile,
     waveDataFromHook,
+    memeData, // Ensure dependency is present
+    isLoadingMeme, // Ensure dependency is present
   ]);
 
   return finalCrumbs;

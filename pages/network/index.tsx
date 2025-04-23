@@ -23,7 +23,7 @@ export default function CommunityPage() {
     setTitle({
       title: "Network | 6529.io",
     });
-  }, [setTitle]);
+  }, []);
 
   const activeGroupId = useSelector(selectActiveGroupId);
   useQuery<ApiGroupFull>({

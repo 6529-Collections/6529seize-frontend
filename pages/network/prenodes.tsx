@@ -16,7 +16,7 @@ export default function PrenodesPage() {
     setTitle({
       title: "Prenodes | Network",
     });
-  }, [setTitle]);
+  }, []);
 
   return (
     <>

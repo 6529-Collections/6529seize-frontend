@@ -30,7 +30,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({ wave, dr
     
     // Use similar calculation to SingleWaveDropInfoContainer
     return {
-      height: `calc(100vh - ${spaces.headerSpace}px - var(--tab-height, 47px))`,
+      height: `calc(100vh - ${spaces.headerSpace}px - var(--tab-height, 64px))`,
     };
   }, [spaces.measurementsComplete, spaces.headerSpace]);
   
