@@ -7,17 +7,17 @@ const NewVersionToast = (): JSX.Element | null => {
   // Functionality (version checking, state) is not implemented.
 
   return (
-    <div className="tailwind-scope tw-fixed tw-bottom-4 tw-right-4 tw-z-[1000] tw-rounded-md tw-bg-blue-600 tw-p-4 tw-text-white tw-shadow-lg animate-fade-in">
+    <div className="tailwind-scope tw-fixed tw-bottom-4 tw-right-4 tw-z-[1000] tw-rounded-lg tw-bg-primary-500 tw-p-4 tw-text-white tw-shadow-md animate-fade-in">
       <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
-        <span>A new version is available!</span>
+        <span className="tw-text-sm">A new version is available!</span>
         <div className="tw-flex tw-items-center tw-space-x-2">
           <button
             onClick={() => console.log('Refresh clicked')} // Placeholder
-            className="tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300"
+            className="tw-flex tw-group tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-md tw-border tw-border-transparent tw-bg-white desktop-hover:hover:tw-bg-gray-100 tw-px-2.5 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-primary-600 tw-shadow-sm hover:tw-bg-gray-100 tw-transition-colors tw-duration-150"
             aria-label="Refresh page"
             title="Refresh page"
           >
-            <FontAwesomeIcon icon={faRefresh} className="tw-size-4  tw-flex-shrink-0" />
+            <FontAwesomeIcon icon={faRefresh} className="tw-size-4 tw-flex-shrink-0 tw-text-primary-500 desktop-hover:group-hover:tw-text-primary-600" />
           </button>
         </div>
       </div>
