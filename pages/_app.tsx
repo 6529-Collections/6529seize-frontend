@@ -132,6 +132,7 @@ import { EmojiProvider } from "../contexts/EmojiContext";
 import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider";
 import MainLayout from "../components/layout/MainLayout";
 import { HeaderProvider } from '../contexts/HeaderContext';
+import { useIsStale } from "../hooks/useVersion";
 
 library.add(
   faArrowUp,
@@ -278,6 +279,16 @@ type AppPropsWithLayout = AppProps & {
 };
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
+  const stale = useIsStale();
+
+  useEffect(() => {
+    if (stale) {
+      console.log("stale");
+    } else {
+      console.log("not stale");
+    }
+  }, [stale]);
+
   const { store, props } = wrapper.useWrappedStore(rest);
 
   const getLayout = Component.getLayout ?? ((page) => page);
