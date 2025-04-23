@@ -12,7 +12,6 @@ import {
 } from "../../constants";
 import { AuthContext } from "../../components/auth/Auth";
 
-
 const DelegationCenterMenu = dynamic(
   () => import("../../components/delegation/DelegationCenterMenu"),
   { ssr: false }
@@ -236,13 +235,20 @@ export default function DelegationsDocumentation(props: any) {
       }
       window.scrollTo(0, 0);
     }
-  }, [activeSection, addressQuery, collectionQuery, useCaseQuery, pageProps.path, router]);
+  }, [
+    activeSection,
+    addressQuery,
+    collectionQuery,
+    useCaseQuery,
+    pageProps.path,
+    router,
+  ]);
 
   useEffect(() => {
     setTitle({
       title: "Delegation | 6529.io",
     });
-  }, [setTitle]);
+  }, []);
 
   return (
     <>

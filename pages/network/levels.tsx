@@ -414,7 +414,7 @@ export default function Levels() {
     setTitle({
       title: "Levels | Network",
     });
-  }, [setTitle]);
+  }, []);
 
   return (
     <>
