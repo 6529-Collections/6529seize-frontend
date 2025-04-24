@@ -1,8 +1,6 @@
-import Link from "next/link";
-import { useRouter } from "next/router";
 import React, { useCallback, useRef } from "react";
+import { useRouter } from "next/router";
 import { BrainView } from "../BrainMobile";
-import { ApiWaveType } from "../../../generated/models/ApiWaveType";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboard";
 import { useLayout } from "../my-stream/layout/LayoutContext";
@@ -53,18 +51,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     };
   }, [router.events, onViewChange]);
 
-  const isLinkActive =
-    router.pathname === "/my-stream" && activeView === BrainView.DEFAULT;
-
-  const wavesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
-    activeView === BrainView.WAVES ? "tw-bg-iron-800" : "tw-bg-iron-950"
-  }`;
-
-  const wavesButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    activeView === BrainView.WAVES ? "tw-text-iron-300" : "tw-text-iron-400"
-  }`;
-
-  const aboutButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
+  const aboutButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
     activeView === BrainView.ABOUT ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
@@ -72,22 +59,14 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.ABOUT ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
-  const myStreamLinkClasses = `tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-md ${
-    isLinkActive ? "tw-bg-iron-800" : "tw-bg-iron-950"
-  }`;
-
-  const myStreamTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    isLinkActive ? "tw-text-iron-300" : "tw-text-iron-400"
-  }`;
-
-  const outcomeButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
+  const outcomeButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
     activeView === BrainView.OUTCOME ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
   const otucomeButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
     activeView === BrainView.OUTCOME ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
-  const myVotesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
+  const myVotesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
     activeView === BrainView.MY_VOTES ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
@@ -95,45 +74,26 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.MY_VOTES ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
-  const notificationsButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
-    activeView === BrainView.NOTIFICATIONS ? "tw-bg-iron-800" : "tw-bg-iron-950"
+  const chatButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
+    activeView === BrainView.DEFAULT ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
-  const notificationsButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    activeView === BrainView.NOTIFICATIONS
-      ? "tw-text-iron-300"
-      : "tw-text-iron-400"
+  const chatButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+    activeView === BrainView.DEFAULT ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
-  const getMyStreamHref = () => {
-    if (router.pathname === "/my-stream") return router.asPath;
-    return "/my-stream";
-  };
-
-  const onLinkClick = (path: string, toPath?: string) => {
-    if (router.pathname === path) {
-      onViewChange(BrainView.DEFAULT);
-    } else {
-      router.push(toPath ?? path);
-    }
-  };
-
-  const onMyStreamClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    onLinkClick("/my-stream", getMyStreamHref());
+  const onChatClick = () => {
+    onViewChange(BrainView.DEFAULT);
   };
 
   return (
     <div
       ref={setMobileTabsRef}
-      className="tw-pb-2 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-pt-2"
+      className="tw-pb-2 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-overflow-x-auto"
     >
-      <div className="tw-flex tw-justify-center tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-11 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
-        <button
-          onClick={() => onViewChange(BrainView.WAVES)}
-          className={wavesButtonClasses}
-        >
-          <span className={wavesButtonTextClasses}>Waves</span>
+      <div className="tw-flex tw-justify-start tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-h-9 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
+        <button onClick={onChatClick} className={chatButtonClasses}>
+          <span className={chatButtonTextClasses}>Chat</span>
         </button>
         {isWave() && (
           <button
@@ -143,13 +103,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <span className={aboutButtonTextClasses}>About</span>
           </button>
         )}
-        <Link
-          href={getMyStreamHref()}
-          onClick={onMyStreamClick}
-          className={myStreamLinkClasses}
-        >
-          <span className={myStreamTextClasses}>My Stream</span>
-        </Link>
         {isWave() && wave && isRankWave && (
           <>
             <MyStreamWaveTabsLeaderboard
@@ -157,7 +110,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               activeView={activeView}
               onViewChange={onViewChange}
             />
-              {isMemesWave && (
+            {isMemesWave && (
               <>
                 <button
                   onClick={() => onViewChange(BrainView.MY_VOTES)}
@@ -165,9 +118,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 >
                   <span className={myVotesButtonTextClasses}>My Votes</span>
                 </button>
-               
               </>
-            )} 
+            )}
             <button
               onClick={() => onViewChange(BrainView.OUTCOME)}
               className={outcomeButtonClasses}
@@ -177,7 +129,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             {isMemesWave && (
               <button
                 onClick={() => onViewChange(BrainView.FAQ)}
-                className={`tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-9 tw-rounded-lg ${
+                className={`tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
                   activeView === BrainView.FAQ
                     ? "tw-bg-iron-800"
                     : "tw-bg-iron-950"
@@ -196,13 +148,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             )}
           </>
         )}
-
-        <button
-          onClick={() => onViewChange(BrainView.NOTIFICATIONS)}
-          className={notificationsButtonClasses}
-        >
-          <span className={notificationsButtonTextClasses}>Notifications</span>
-        </button>
       </div>
     </div>
   );
