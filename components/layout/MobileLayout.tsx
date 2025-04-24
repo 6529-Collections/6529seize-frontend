@@ -52,6 +52,8 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
       </div>
       {activeSubView === "messages" ? (
         <div className="tw-text-white tw-text-center tw-p-4">Messages view placeholder</div>
+      ) : activeSubView === "waves" ? (
+        <div className="tw-text-white tw-text-center tw-p-4">Waves view placeholder</div>
       ) : (
         <main>{children}</main>
       )}

@@ -40,13 +40,14 @@ type ViewNavItem = {
   name: string;
   viewKey: ViewKey;
   Icon?: IconType;
+  image?: string;
 };
 
 type NavItem = RouteNavItem | ViewNavItem;
 
 const items: NavItem[] = [
   { kind: "route", name: "Home", href: "/", Icon: HomeIcon },
-  { kind: "view", name: "Waves", viewKey: "waves", Icon: WavesIconPlaceholder },
+  { kind: "view", name: "Waves", viewKey: "waves", image: "/waves-icon.png" },
   { kind: "view", name: "Messages", viewKey: "messages", Icon: ChatBubbleIcon },
   { kind: "route", name: "Stream", href: "/my-stream", image: "/6529.png" },
   { kind: "route", name: "Network", href: "/network", Icon: UserGroupIcon },
@@ -59,7 +60,7 @@ const items: NavItem[] = [
   {
     kind: "route",
     name: "Notifications",
-    href: "/notifications",
+    href: "/my-stream/notifications",
     Icon: BellIcon,
   },
 ];
@@ -83,7 +84,11 @@ const BottomNavigation: React.FC = () => {
                 router.push(item.href);
               } else {
                 // view
-                router.push({ pathname: "/my-stream", query: { tab: item.viewKey } }, undefined, { shallow: true });
+                router.push(
+                  { pathname: "/my-stream", query: { tab: item.viewKey } },
+                  undefined,
+                  { shallow: true }
+                );
                 setActiveSubView(item.viewKey);
               }
             };
@@ -91,7 +96,9 @@ const BottomNavigation: React.FC = () => {
             if (item.kind === "route") {
               isActive = router.pathname === item.href;
             } else {
-              isActive = activeSubView === item.viewKey && router.pathname === "/my-stream";
+              isActive =
+                activeSubView === item.viewKey &&
+                router.pathname === "/my-stream";
             }
 
             return (
@@ -115,7 +122,9 @@ const BottomNavigation: React.FC = () => {
                         alt={name}
                         width={24}
                         height={24}
-                        className={`tw-object-contain tw-size-8 tw-shadow-lg ${
+                        className={`tw-object-contain ${
+                          name === "Waves" ? "tw-size-6" : "tw-size-8"
+                        } tw-shadow-lg ${
                           isActive ? "tw-opacity-100" : "tw-opacity-50"
                         }`}
                       />
