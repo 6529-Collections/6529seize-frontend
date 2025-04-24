@@ -5,6 +5,7 @@ import MobileLayout from "./MobileLayout";
 import DesktopLayout from "./DesktopLayout";
 import ClientOnly from "../client-only/ClientOnly";
 import { ViewProvider } from "../navigation/ViewContext";
+import { MyStreamProvider } from "../../contexts/wave/MyStreamContext";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -20,11 +21,13 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <ViewProvider>
       <ClientOnly>
-        {isMobile ? (
-          <MobileLayout>{children}</MobileLayout>
-        ) : (
-          <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
-        )}
+        <MyStreamProvider>
+          {isMobile ? (
+            <MobileLayout>{children}</MobileLayout>
+          ) : (
+            <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
+          )}
+        </MyStreamProvider>
       </ClientOnly>
     </ViewProvider>
   );
