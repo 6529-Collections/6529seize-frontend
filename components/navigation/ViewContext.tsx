@@ -1,19 +1,18 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-
-export type SubView = 'waves' | 'messages'; // extend as needed
+import type { ViewKey } from "./navTypes";
 
 interface ViewContextType {
-  activeSubView: SubView | null;
-  setActiveSubView: (view: SubView | null) => void;
+  activeView: ViewKey | null;
+  setActiveView: (view: ViewKey | null) => void;
 }
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
 
 export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({ children }) => {
-  const [activeSubView, setActiveSubView] = useState<SubView | null>(null);
+  const [activeView, setActiveView] = useState<ViewKey | null>(null);
 
   return (
-    <ViewContext.Provider value={{ activeSubView, setActiveSubView }}>
+    <ViewContext.Provider value={{ activeView, setActiveView }}>
       {children}
     </ViewContext.Provider>
   );

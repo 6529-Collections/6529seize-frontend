@@ -3,7 +3,6 @@ import dynamic from "next/dynamic";
 import { useHeaderContext } from "../../contexts/HeaderContext";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
-import { useRouter } from "next/router";
 
 // Simple placeholder for the header while it loads client-side
 const HeaderPlaceholder = () => {
@@ -27,7 +26,7 @@ interface MobileLayoutProps {
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
   const { setHeaderRef } = useHeaderContext();
-  const { activeSubView } = useViewContext();
+  const { activeView } = useViewContext();
 
   // Use a callback ref to get the DOM node
   const headerWrapperRef = useCallback(
@@ -42,11 +41,11 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
       <div ref={headerWrapperRef}>
         <Header />
       </div>
-      {activeSubView === "messages" ? (
+      {activeView === "messages" ? (
         <div className="tw-text-white tw-text-center tw-p-4">
           Messages view placeholder
         </div>
-      ) : activeSubView === "waves" ? (
+      ) : activeView === "waves" ? (
         <div className="tw-text-white tw-text-center tw-p-4">
           Waves view placeholder
         </div>
