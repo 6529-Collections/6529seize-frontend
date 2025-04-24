@@ -3,14 +3,14 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 export type SubView = 'waves' | 'messages'; // extend as needed
 
 interface ViewContextType {
-  activeSubView: SubView;
-  setActiveSubView: (view: SubView) => void;
+  activeSubView: SubView | null;
+  setActiveSubView: (view: SubView | null) => void;
 }
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
 
 export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({ children }) => {
-  const [activeSubView, setActiveSubView] = useState<SubView>('waves');
+  const [activeSubView, setActiveSubView] = useState<SubView | null>(null);
 
   return (
     <ViewContext.Provider value={{ activeSubView, setActiveSubView }}>

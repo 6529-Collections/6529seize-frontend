@@ -27,8 +27,7 @@ interface MobileLayoutProps {
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
   const { setHeaderRef } = useHeaderContext();
-  const { activeSubView, setActiveSubView } = useViewContext();
-  const router = useRouter();
+  const { activeSubView } = useViewContext();
 
   // Use a callback ref to get the DOM node
   const headerWrapperRef = useCallback(
@@ -38,22 +37,19 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
     [setHeaderRef]
   );
 
-  React.useEffect(() => {
-    const tab = router.query.tab;
-    if (tab === "waves" || tab === "messages") {
-      setActiveSubView(tab as any);
-    }
-  }, [router.query.tab, setActiveSubView]);
-
   return (
     <div>
       <div ref={headerWrapperRef}>
         <Header />
       </div>
       {activeSubView === "messages" ? (
-        <div className="tw-text-white tw-text-center tw-p-4">Messages view placeholder</div>
+        <div className="tw-text-white tw-text-center tw-p-4">
+          Messages view placeholder
+        </div>
       ) : activeSubView === "waves" ? (
-        <div className="tw-text-white tw-text-center tw-p-4">Waves view placeholder</div>
+        <div className="tw-text-white tw-text-center tw-p-4">
+          Waves view placeholder
+        </div>
       ) : (
         <main>{children}</main>
       )}

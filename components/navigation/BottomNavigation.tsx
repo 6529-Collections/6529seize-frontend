@@ -82,13 +82,8 @@ const BottomNavigation: React.FC = () => {
             const handleClick = () => {
               if (item.kind === "route") {
                 router.push(item.href);
+                setActiveSubView(null);
               } else {
-                // view
-                router.push(
-                  { pathname: "/my-stream", query: { tab: item.viewKey } },
-                  undefined,
-                  { shallow: true }
-                );
                 setActiveSubView(item.viewKey);
               }
             };
@@ -96,9 +91,7 @@ const BottomNavigation: React.FC = () => {
             if (item.kind === "route") {
               isActive = router.pathname === item.href;
             } else {
-              isActive =
-                activeSubView === item.viewKey &&
-                router.pathname === "/my-stream";
+              isActive = activeSubView === item.viewKey;
             }
 
             return (
