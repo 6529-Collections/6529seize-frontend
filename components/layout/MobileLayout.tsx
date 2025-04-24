@@ -4,6 +4,7 @@ import { useHeaderContext } from "../../contexts/HeaderContext";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
 import { useRouter } from "next/router";
+import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
 
 // Simple placeholder for the header while it loads client-side
 const HeaderPlaceholder = () => {
@@ -47,9 +48,7 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
           Messages view placeholder
         </div>
       ) : activeSubView === "waves" ? (
-        <div className="tw-text-white tw-text-center tw-p-4">
-          Waves view placeholder
-        </div>
+        <BrainMobileWaves />
       ) : (
         <main>{children}</main>
       )}
