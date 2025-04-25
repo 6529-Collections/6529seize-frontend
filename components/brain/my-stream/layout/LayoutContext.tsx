@@ -27,6 +27,8 @@ interface LayoutSpaces {
   // Space used by mobile tabs
   mobileTabsSpace: number;
 
+  // Space used by mobile nav
+  mobileNavSpace: number;
   // Available space for content
   contentSpace: number;
 
@@ -39,7 +41,7 @@ const calculateHeightStyle = (
   spaces: LayoutSpaces,
   capacitorSpace: number // Accept specific space value
 ): React.CSSProperties => {
-  const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${capacitorSpace}px)`;
+  const heightCalc = `calc(100vh - ${spaces.headerSpace}px - ${spaces.pinnedSpace}px - ${spaces.tabsSpace}px - ${spaces.spacerSpace}px - ${spaces.mobileTabsSpace}px - ${spaces.mobileNavSpace}px - ${capacitorSpace}px)`;
   return {
     height: heightCalc,
     maxHeight: heightCalc,
@@ -53,7 +55,8 @@ export type LayoutRefType =
   | "pinned"
   | "tabs"
   | "spacer"
-  | "mobileTabs";
+  | "mobileTabs"
+  | "mobileNav";
 
 interface LayoutContextType {
   // Calculated spaces
@@ -106,6 +109,7 @@ const defaultSpaces: LayoutSpaces = {
   tabsSpace: 0,
   spacerSpace: 0,
   mobileTabsSpace: 0,
+  mobileNavSpace: 0,
   contentSpace: 0,
   measurementsComplete: false,
 };
@@ -141,6 +145,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     tabs: null,
     spacer: null,
     mobileTabs: null,
+    mobileNav: null,
   });
 
   // Keep track of the ResizeObserver instance
@@ -191,14 +196,14 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     let tabsHeight = 0;
     let spacerHeight = 0;
     let mobileTabsHeight = 0;
-
+    let mobileNavHeight = 0;
     // Get elements from refMap (source of truth)
     const headerElement = refMap.current.header;
     const pinnedElement = refMap.current.pinned;
     const tabsElement = refMap.current.tabs;
     const spacerElement = refMap.current.spacer;
     const mobileTabsElement = refMap.current.mobileTabs;
-
+    const mobileNavElement = refMap.current.mobileNav;
     // Measure header space if element exists
     if (headerElement) {
       try {
@@ -249,13 +254,24 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       }
     }
 
+    // Measure mobile nav element if it exists
+    if (mobileNavElement) {
+      try {
+        const rect = mobileNavElement.getBoundingClientRect();
+        mobileNavHeight = rect.height;
+      } catch (e) {
+        console.error("Error measuring mobile nav element:", e);
+      }
+    }
+
     // Calculate total occupied space
     const totalOccupiedSpace =
       headerHeight +
       pinnedHeight +
       tabsHeight +
       spacerHeight +
-      mobileTabsHeight;
+      mobileTabsHeight +
+      mobileNavHeight;
 
     // Ensure content space is at least 0 to prevent negative values
     const calculatedContentSpace = Math.max(
@@ -269,6 +285,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       tabsSpace: tabsHeight,
       spacerSpace: spacerHeight,
       mobileTabsSpace: mobileTabsHeight,
+      mobileNavSpace: mobileNavHeight,
       contentSpace: calculatedContentSpace,
       measurementsComplete: true,
     });
@@ -335,8 +352,8 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     if (!spaces.measurementsComplete) {
       return {};
     }
-    const capacitorSpace = isAndroid ? 56 : isIos ? 20 : isCapacitor ? 80 : 0;
-    return calculateHeightStyle(spaces, capacitorSpace);
+    // const capacitorSpace = isAndroid ? 56 : isIos ? 20 : isCapacitor ? 80 : 0;
+    return calculateHeightStyle(spaces, 0);
   }, [
     spaces.measurementsComplete,
     spaces.headerSpace,

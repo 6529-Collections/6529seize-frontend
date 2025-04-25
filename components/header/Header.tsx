@@ -120,6 +120,7 @@ export default function Header(props: Readonly<Props>) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/consolidations/${address}`
       ).then((response: DBResponse) => {
+        console.log("response", response);
         setConsolidations(Array.from(response.data));
       });
     } else {
@@ -508,7 +509,7 @@ export default function Header(props: Readonly<Props>) {
   return (
     <>
       {printBurgerMenu()}
-      {capacitor.isCapacitor && <CapacitorWidget />}
+      {/* {capacitor.isCapacitor && <CapacitorWidget />} */}
       <Container fluid className={`${containerClassName} ${props.extraClass}`}>
         <Row>
           <Col>
