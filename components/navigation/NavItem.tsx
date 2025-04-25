@@ -78,7 +78,7 @@ const NavItem = ({ item }: Props) => {
         {item.iconComponent ? (
           <item.iconComponent
             className={`${iconSizeClass} ${ 
-              "tw-text-white"
+              "tw-text-iron-100"
             }`}
           />
         ) : (
