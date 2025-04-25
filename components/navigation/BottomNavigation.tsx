@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import NavItem from "./NavItem";
 import type { NavItem as NavItemData } from "./navTypes";
 import HomeIcon from "../common/icons/HomeIcon";
@@ -8,6 +8,7 @@ import Squares2X2Icon from "../common/icons/Squares2X2Icon";
 import BellIcon from "../common/icons/BellIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import LogoIcon from "../common/icons/LogoIcon";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 
 export const items: NavItemData[] = [
   {
@@ -63,8 +64,23 @@ export const items: NavItemData[] = [
 ];
 
 const BottomNavigation: React.FC = () => {
+  const { registerRef } = useLayout();
+
+  const mobileNavRef = useRef<HTMLDivElement | null>(null);
+
+  const setMobileNavRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      console.log("BottomNavigation", node);
+      mobileNavRef.current = node;
+      registerRef("mobileNav", node);
+    },
+    [registerRef]
+  );
   return (
-    <nav className="tw-fixed tw-left-0 tw-w-full tw-overflow-x-hidden tw-bottom-0 tw-bg-black tw-border-t tw-border-iron-700 tw-shadow-inner tw-h-14 tw-z-50 md:tw-hidden">
+    <nav
+      ref={setMobileNavRef}
+      className="tw-fixed tw-left-0 tw-w-full tw-overflow-x-hidden tw-bottom-0 tw-bg-black tw-border-t tw-border-iron-700 tw-shadow-inner tw-h-14 tw-z-50 md:tw-hidden"
+    >
       <div className="tw-h-full tw-pb-[max(10px,env(safe-area-inset-bottom))]">
         <ul className="tw-flex tw-justify-between tw-items-end tw-h-full tw-overflow-x-hidden tw-px-2">
           {items.map((item) => (

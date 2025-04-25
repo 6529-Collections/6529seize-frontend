@@ -1,9 +1,9 @@
 import React, { ReactNode, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useHeaderContext } from "../../contexts/HeaderContext";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
+import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 
 // Simple placeholder for the header while it loads client-side
 const HeaderPlaceholder = () => {
@@ -26,15 +26,15 @@ interface MobileLayoutProps {
 }
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
-  const { setHeaderRef } = useHeaderContext();
+  const { registerRef } = useLayout();
   const { activeView } = useViewContext();
 
   // Use a callback ref to get the DOM node
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
-      setHeaderRef(node);
+      registerRef("header", node);
     },
-    [setHeaderRef]
+    [registerRef]
   );
 
   return (

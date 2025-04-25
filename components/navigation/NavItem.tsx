@@ -22,8 +22,9 @@ const NavItem = ({ item }: Props) => {
   let isActive = false;
   const handleClick = () => {
     if (item.kind === "route") {
-      router.push(item.href);
-      setActiveView(null);
+      router.push(item.href).then(() => {
+        setActiveView(null);
+      });
     } else {
       setActiveView(item.viewKey);
     }

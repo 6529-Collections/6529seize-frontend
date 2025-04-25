@@ -1,0 +1,55 @@
+
+6529.io Web App Task List
+
+This file is the source of truth for ongoing and upcoming work.
+Tasks are grouped by category.
+
+BUG FIXES & CORRECTNESS
+- Fix cic/vote-all — identify steps to restore proper cic/vote-all behavior
+- Find a good UX way to navigate back into my-stream when viewing a wave
+- Persist wave description on create after backend error
+- Consolidate duplicate calculateLastDecisionTime functions
+- Enforce server-side trait validation
+- Verify voting end time ≤ last decision time on rolling waves — enforce this check on both frontend and backend
+- Ensure “today” and “yesterday” labels in activity logs display correctly across drop times
+- Revamp tab title updating logic — unify title and new-message badge updates into a consistent mechanism
+- Prevent “just now” last-drop timestamps after re-login
+- Correct last message dates on mobile reconnect
+- Prevent replies appearing in leaderboard
+- Ensure default voting end time is calculated correctly
+
+UI/UX IMPROVEMENTS
+- Show submission thumbnail on incoming chat messages
+- Add visible character limit indicator on trait inputs — adjust current limits (they’re too big)
+- Show “follow” / “am I following” status in notification items
+- Deep-link tabs via URL query param (e.g. ?tab=)
+- Update page title to reflect active wave name
+- Add loader when switching leaderboard sort/tabs
+- Display new-drop count badge on chat tab when in other tabs
+- Show “0” total votes even when there are individual voters
+- Surface description in single-drop view
+- Add skeleton loaders to pages missing loading states
+- Retry button on image load failure
+- Synchronize tab titles with selected tab
+
+PERFORMANCE & CACHING
+- Ensure message sends retry or queue to prevent loss
+- Cache and load top-X posts/leaderboards on app load
+- Add retry logic to fetchWaveMessages
+- Fix issue where a new wave message arrives but isn’t in the current list, so the UI doesn’t refresh or display it
+
+CLEANUP & MAJOR FEATURES
+- Add Terms & Conditions for non-meme waves
+- Resolve current “Create a storm” issues
+- Improve build performance
+- Show min/max vote counts in “My Votes”
+- Include top voters in single-drop winner view
+- Remove incorrect top-voter icons on winner drops
+- Align core vs web client feature parity
+- Build “My submissions” page
+- Speed up leaderboard tab switching
+- Add sort-by-voter count to leaderboard
+
+Notes:
+- When a task is in progress, prefix with “▶” and add status: in-progress, review, done.
+- Keep this file updated as tasks evolve.
