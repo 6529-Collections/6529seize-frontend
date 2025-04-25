@@ -22,6 +22,7 @@ import {
   isMintingToday,
   numberOfCardsForSeasonEnd,
 } from "../../../helpers/meme_calendar.helpers";
+import { Page } from "../../../helpers/Types";
 
 const HISTORY_PAGE_SIZE = 10;
 
@@ -43,13 +44,23 @@ export default function UserPageSubscriptions(
   const [fetchingAirdropAddress, setFetchingAirdropAddress] =
     useState<boolean>(true);
 
-  const [topUpHistory, setTopUpHistory] = useState<SubscriptionTopUp[]>([]);
+  const [topUpHistory, setTopUpHistory] = useState<Page<SubscriptionTopUp>>({
+    count: 0,
+    page: 1,
+    next: false,
+    data: [],
+  });
   const [fetchingTopUpHistory, setFetchingTopUpHistory] =
     useState<boolean>(true);
 
   const [redeemedHistory, setRedeemedHistory] = useState<
-    RedeemedSubscription[]
-  >([]);
+    Page<RedeemedSubscription>
+  >({
+    count: 0,
+    page: 1,
+    next: false,
+    data: [],
+  });
   const [fetchingRedeemedHistory, setFetchingRedeemedHistory] =
     useState<boolean>(true);
 
@@ -60,9 +71,14 @@ export default function UserPageSubscriptions(
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
     useState<boolean>(true);
 
-  const [subscriptionLogs, setSubscriptionLogs] = useState<SubscriptionLog[]>(
-    []
-  );
+  const [subscriptionLogs, setSubscriptionLogs] = useState<
+    Page<SubscriptionLog>
+  >({
+    count: 0,
+    page: 1,
+    next: false,
+    data: [],
+  });
   const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
     useState<boolean>(true);
 
@@ -140,7 +156,7 @@ export default function UserPageSubscriptions(
       });
   }
 
-  function fetchTopUpHistory() {
+  function fetchTopUpHistory(page: number) {
     if (!profileKey) {
       return;
     }
@@ -151,17 +167,17 @@ export default function UserPageSubscriptions(
       next: boolean;
       data: SubscriptionTopUp[];
     }>({
-      endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
+      endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
     })
       .then((data) => {
-        setTopUpHistory(data.data);
+        setTopUpHistory(data);
       })
       .finally(() => {
         setFetchingTopUpHistory(false);
       });
   }
 
-  function fetchRedeemHistory() {
+  function fetchRedeemHistory(page: number) {
     if (!profileKey) {
       return;
     }
@@ -172,10 +188,10 @@ export default function UserPageSubscriptions(
       next: boolean;
       data: RedeemedSubscription[];
     }>({
-      endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
+      endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
     })
       .then((data) => {
-        setRedeemedHistory(data.data);
+        setRedeemedHistory(data);
       })
       .finally(() => {
         setFetchingRedeemedHistory(false);
@@ -202,7 +218,7 @@ export default function UserPageSubscriptions(
       });
   }
 
-  function fetchLogs() {
+  function fetchLogs(page: number) {
     if (!profileKey) {
       return;
     }
@@ -213,10 +229,10 @@ export default function UserPageSubscriptions(
       next: boolean;
       data: SubscriptionLog[];
     }>({
-      endpoint: `subscriptions/consolidation/logs/${profileKey}?page=1&page_size=${HISTORY_PAGE_SIZE}`,
+      endpoint: `subscriptions/consolidation/logs/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
     })
       .then((data) => {
-        setSubscriptionLogs(data.data);
+        setSubscriptionLogs(data);
       })
       .finally(() => {
         setFetchingSubscriptionLogs(false);
@@ -229,10 +245,10 @@ export default function UserPageSubscriptions(
     }
     fetchDetails();
     fetchAirdropAddress();
-    fetchTopUpHistory();
+    fetchTopUpHistory(1);
     fetchMemeSubscriptions();
-    fetchRedeemHistory();
-    fetchLogs();
+    fetchRedeemHistory(1);
+    fetchLogs(1);
   };
 
   useEffect(() => {
@@ -254,8 +270,7 @@ export default function UserPageSubscriptions(
                 <span>
                   <a
                     href="/about/subscriptions"
-                    className="font-smaller font-color-silver decoration-hover-underline"
-                  >
+                    className="font-smaller font-color-silver decoration-hover-underline">
                     Learn More
                   </a>
                 </span>
@@ -306,6 +321,15 @@ export default function UserPageSubscriptions(
             topups={topUpHistory}
             redeemed={redeemedHistory}
             logs={subscriptionLogs}
+            setRedeemedPage={(page: number) => {
+              fetchRedeemHistory(page);
+            }}
+            setTopUpPage={(page: number) => {
+              fetchTopUpHistory(page);
+            }}
+            setLogsPage={(page: number) => {
+              fetchLogs(page);
+            }}
           />
         </Col>
       </Row>
