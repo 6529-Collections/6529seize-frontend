@@ -81,10 +81,10 @@ const BottomNavigation: React.FC = () => {
   return (
     <nav
       ref={setMobileNavRef}
-      className="tw-fixed tw-left-0 tw-w-full tw-overflow-x-hidden tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-h-16 tw-z-50 tw-pb-[env(safe-area-inset-bottom)] tw-pl-[env(safe-area-inset-left)] tw-pr-[env(safe-area-inset-right)]"
+      className="tw-fixed tw-left-0 tw-w-full tw-overflow-x-hidden tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-h-16 tw-z-50"
     >
       <div className="tw-h-full">
-        <ul className="tw-flex tw-justify-between tw-items-end tw-h-full tw-overflow-x-hidden tw-px-2">
+        <ul className="tw-flex tw-justify-between tw-items-end tw-h-full tw-overflow-x-hidden tw-pl-[env(safe-area-inset-left)] tw-pr-[env(safe-area-inset-right)]">
           {items.map((item) => (
             <li
               key={item.name}

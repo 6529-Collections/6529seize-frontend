@@ -9,9 +9,8 @@ enum CapacitorOrientationType {
 }
 
 const useCapacitor = () => {
-  // Temporary override to disable Capacitor features while we migrate away
-  const isCapacitor = false;
-  const platform = "web";
+  const isCapacitor = Capacitor.isNativePlatform();
+  const platform = Capacitor.getPlatform();
 
   const isIos = platform === "ios";
   const isAndroid = platform === "android";
