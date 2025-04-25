@@ -65,8 +65,7 @@ export default function NextGenNavigationHeader(
             }
             window.location.href = href;
           }
-        }}
-      >
+        }}>
         {viewHeader}
       </button>
     );
@@ -81,8 +80,7 @@ export default function NextGenNavigationHeader(
         style={{
           height: isMobile ? "auto" : "90px",
           paddingTop: isMobile ? "20px" : "0",
-        }}
-      >
+        }}>
         <div className="d-flex align-items-center gap-3">
           <Image
             priority
@@ -106,21 +104,12 @@ export default function NextGenNavigationHeader(
           />
           <LFGButton contract={"nextgen"} />
         </div>
-        {/* Mobile only collections dropdown */}
-        <div className="d-md-none pt-3 pb-3 w-100">
-          <Row>
-            <Col>
-              <CollectionsDropdown activePage="nextgen" />
-            </Col>
-          </Row>
-        </div>
         <div
           className={`d-flex align-items-center ${
             isMobile
               ? "justify-content-center pt-3 pb-3"
               : "justify-content-end"
-          }`}
-        >
+          }`}>
           <span className="d-flex gap-4">
             {printView(undefined)}
             {printView(NextGenView.COLLECTIONS)}
@@ -129,6 +118,15 @@ export default function NextGenNavigationHeader(
           </span>
         </div>
       </Container>
+      
+      <Container className="d-xl-none pb-3 px-5 pl-md-4 pr-md-0">
+        <Row className="justify-content-xs-start justify-content-sm-center justify-content-md-start">
+          <Col xs={12} sm="auto" className="px-0">
+            <CollectionsDropdown activePage="nextgen" />
+          </Col>
+        </Row>
+      </Container>
+      
       <hr className={styles.navigationHeaderHr} />
     </>
   );

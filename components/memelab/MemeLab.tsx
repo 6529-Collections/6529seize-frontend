@@ -670,10 +670,14 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                 </Col>
               </Row>
               
-              {/* Mobile only elements */}
-              <Row className="d-md-none">
+              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
+              <Row className="d-xl-none">
                 <Col xs={12} className="mb-3">
-                  <CollectionsDropdown activePage="memelab" />
+                  <Row>
+                    <Col xs={12} sm="auto">
+                      <CollectionsDropdown activePage="memelab" />
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
               <Row className="pt-2">

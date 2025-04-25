@@ -10,11 +10,42 @@ import UsersIcon from "../common/icons/UsersIcon";
 import LogoIcon from "../common/icons/LogoIcon";
 
 export const items: NavItemData[] = [
-  { kind: "route", name: "Home", href: "/", icon: "home", iconComponent: HomeIcon },
-  { kind: "view", name: "Waves", viewKey: "waves", icon: "waves", iconComponent: WavesIcon },
-  { kind: "view", name: "Messages", viewKey: "messages", icon: "messages", iconComponent: ChatBubbleIcon },
-  { kind: "route", name: "Stream", href: "/my-stream", icon: "stream", iconComponent: LogoIcon, iconSizeClass: "tw-size-8" },
-  { kind: "route", name: "Network", href: "/network", icon: "network", iconComponent: UsersIcon },
+  {
+    kind: "route",
+    name: "Home",
+    href: "/",
+    icon: "home",
+    iconComponent: HomeIcon,
+  },
+  {
+    kind: "view",
+    name: "Waves",
+    viewKey: "waves",
+    icon: "waves",
+    iconComponent: WavesIcon,
+  },
+  {
+    kind: "view",
+    name: "Messages",
+    viewKey: "messages",
+    icon: "messages",
+    iconComponent: ChatBubbleIcon,
+  },
+  {
+    kind: "route",
+    name: "Stream",
+    href: "/my-stream",
+    icon: "stream",
+    iconComponent: LogoIcon,
+    iconSizeClass: "tw-size-8",
+  },
+  {
+    kind: "route",
+    name: "Network",
+    href: "/network",
+    icon: "network",
+    iconComponent: UsersIcon,
+  },
   {
     kind: "route",
     name: "Collections",
@@ -34,10 +65,13 @@ export const items: NavItemData[] = [
 const BottomNavigation: React.FC = () => {
   return (
     <nav className="tw-fixed tw-left-0 tw-w-full tw-overflow-x-hidden tw-bottom-0 tw-bg-black tw-border-t tw-border-iron-700 tw-shadow-inner tw-h-14 tw-z-50 md:tw-hidden">
-      <div className="tw-h-full tw-pb-[env(safe-area-inset-bottom)]">
-        <ul className="tw-flex tw-justify-between tw-items-end tw-h-full tw-overflow-x-hidden tw-px-2 min-[500px]:tw-px-8 sm:tw-px-16">
+      <div className="tw-h-full tw-pb-[max(10px,env(safe-area-inset-bottom))]">
+        <ul className="tw-flex tw-justify-between tw-items-end tw-h-full tw-overflow-x-hidden tw-px-2">
           {items.map((item) => (
-            <li key={item.name} className="tw-flex tw-justify-center tw-items-end tw-h-full">
+            <li
+              key={item.name}
+              className="tw-flex tw-justify-center tw-items-end tw-h-full"
+            >
               <NavItem item={item} />
             </li>
           ))}

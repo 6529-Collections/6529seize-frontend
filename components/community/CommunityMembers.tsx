@@ -234,7 +234,7 @@ export default function CommunityMembers() {
   return (
     <div>
       <div className="tw-flex tw-items-center tw-justify-between">
-        <h1 className="tw-block tw-float-none">Network</h1>
+        <h1 className="tw-block tw-float-none tw-text-3xl md:tw-text-5xl">Network</h1>
         <div className="tw-inline-flex tw-space-x-3 tw-items-center">
           <button
             type="button"

@@ -164,9 +164,9 @@ export default function GradientsComponent(props: Readonly<Props>) {
                 </Col>
               </Row>
               
-              {/* Mobile only elements */}
-              <Row className="d-md-none">
-                <Col xs={12} className="mb-3">
+              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
+              <Row className="d-xl-none">
+                <Col xs={12} sm="auto" className="mb-3">
                   <CollectionsDropdown activePage="gradient" />
                 </Col>
               </Row>

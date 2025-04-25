@@ -428,7 +428,7 @@ export default function TheMemesComponent() {
                     </h1>
                     <LFGButton contract={MEMES_CONTRACT} />
                   </span>
-                  <div className="d-none d-md-block">
+                  <div className="d-none d-sm-block">
                     <SeasonsDropdown
                       seasons={seasons.map((s) => s.id)}
                       selectedSeason={selectedSeason}
@@ -438,17 +438,23 @@ export default function TheMemesComponent() {
                 </Col>
               </Row>
               
-              {/* Mobile only elements */}
-              <Row className="d-md-none">
+              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
+              <Row className="d-xl-none">
                 <Col xs={12} className="mb-3">
-                  <CollectionsDropdown activePage="memes" />
+                  <Row>
+                    <Col xs={12} sm="auto">
+                      <CollectionsDropdown activePage="memes" />
+                    </Col>
+                  </Row>
                 </Col>
-                <Col xs={12} className="mb-3 text-start">
-                  <SeasonsDropdown
-                    seasons={seasons.map((s) => s.id)}
-                    selectedSeason={selectedSeason}
-                    setSelectedSeason={setSelectedSeason}
-                  />
+                <Col xs={12} className="mb-3 d-flex d-sm-none">
+                  <div className="text-start">
+                    <SeasonsDropdown
+                      seasons={seasons.map((s) => s.id)}
+                      selectedSeason={selectedSeason}
+                      setSelectedSeason={setSelectedSeason}
+                    />
+                  </div>
                 </Col>
               </Row>
               <Row className="pt-2">
