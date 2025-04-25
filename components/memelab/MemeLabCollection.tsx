@@ -20,6 +20,7 @@ import {
   sortChanged,
 } from "./MemeLab";
 import { MemeLabSort } from "../../enums";
+import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
 
 interface Props {
   wallets: string[];
@@ -181,11 +182,27 @@ export default function LabCollection(props: Readonly<Props>) {
         <Row>
           <Col>
             <Container className="pt-4 pb-4">
-              <Row>
+              {/* Desktop header */}
+              <Row className="d-none d-md-flex">
                 <Col>
                   <h1>
                     <span className="font-lightest">Meme</span> Lab Collections
                   </h1>
+                </Col>
+              </Row>
+              
+              {/* Mobile header with collections dropdown */}
+              <Row className="d-flex d-md-none">
+                <Col
+                  xs={12}
+                  className="d-flex align-items-center justify-content-between mb-3"
+                >
+                  <h1 className="mb-0">
+                    <span className="font-lightest">Meme</span> Lab
+                  </h1>
+                </Col>
+                <Col xs={12} className="mb-3">
+                  <CollectionsDropdown activePage="memelab" />
                 </Col>
               </Row>
               <Row className="pt-3">

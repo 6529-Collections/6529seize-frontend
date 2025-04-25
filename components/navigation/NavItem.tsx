@@ -1,7 +1,9 @@
+import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useViewContext } from "./ViewContext";
 import type { NavItem as NavItemData } from "./navTypes";
+import { motion } from "framer-motion";
 
 interface Props {
   readonly item: NavItemData;
@@ -12,8 +14,10 @@ const NavItem = ({ item }: Props) => {
   const { activeView, setActiveView } = useViewContext();
 
   const { name } = item;
-  const Icon = "Icon" in item ? item.Icon : undefined;
-  const image = "image" in item ? item.image : undefined;
+  const { icon } = item;
+
+  // Determine icon size, make Stream icon slightly bigger
+  const iconSizeClass = item.iconSizeClass ?? "tw-size-6";
 
   let isActive = false;
   const handleClick = () => {
@@ -26,7 +30,7 @@ const NavItem = ({ item }: Props) => {
   };
 
   if (item.kind === "route") {
-    isActive = router.pathname === item.href;
+    isActive = router.pathname === item.href && activeView === null;
   } else {
     isActive = activeView === item.viewKey;
   }
@@ -37,23 +41,30 @@ const NavItem = ({ item }: Props) => {
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
       onClick={handleClick}
-      className="tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-size-12"
+      className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-12 tw-h-full"
     >
-      {image ? (
-        <div className="tw-flex tw-items-center tw-justify-center -tw-translate-y-2">
+      {isActive && (
+        <motion.div
+          layoutId="nav-indicator"
+          className="tw-absolute tw-top-0 tw-left-0 tw-w-full tw-h-0.5 tw-bg-white tw-rounded-full"
+        />
+      )}
+      <div className="tw-flex tw-items-center tw-justify-center">
+        {item.iconComponent ? (
+          <item.iconComponent className={`${iconSizeClass} ${isActive ? 'tw-text-white' : 'tw-text-iron-400'}`} />
+        ) : (
           <Image
-            src={image}
+            src={icon}
             alt={name}
             width={24}
             height={24}
-            className={`tw-object-contain ${name === "Waves" ? "tw-size-6" : "tw-size-8"} tw-shadow-lg ${isActive ? "tw-opacity-100" : "tw-opacity-50"}`}
+            unoptimized
+            className={iconSizeClass}
           />
-        </div>
-      ) : Icon ? (
-        <Icon className={`tw-size-6 ${isActive ? "tw-text-white" : "tw-text-iron-400"}`} />
-      ) : null}
+        )}
+      </div>
     </button>
   );
 };
 
-export default NavItem; 
+export default NavItem;

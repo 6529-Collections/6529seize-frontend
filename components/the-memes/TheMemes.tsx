@@ -22,6 +22,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { AuthContext } from "../auth/Auth";
 import { MemeLabSort, MemesSort } from "../../enums";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
+import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
 
 interface Meme {
   meme: number;
@@ -38,7 +39,8 @@ export function printVolumeTypeDropdown(
       className={`${styles.volumeDropdown} ${
         isVolumeSort ? styles.volumeDropdownEnabled : ""
       }`}
-      drop={"down-centered"}>
+      drop={"down-centered"}
+    >
       <Dropdown.Toggle>Volume</Dropdown.Toggle>
       <Dropdown.Menu>
         {Object.values(VolumeType).map((vol) => (
@@ -49,7 +51,8 @@ export function printVolumeTypeDropdown(
               if (!isVolumeSort) {
                 setVolumeSort();
               }
-            }}>
+            }}
+          >
             {vol}
           </Dropdown.Item>
         ))}
@@ -313,10 +316,12 @@ export default function TheMemesComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <a
           href={`/the-memes/${nft.id}`}
-          className="decoration-none scale-hover">
+          className="decoration-none scale-hover"
+        >
           <Container fluid>
             <Row className={connectedProfile ? styles.nftImagePadding : ""}>
               <NFTImage
@@ -414,7 +419,8 @@ export default function TheMemesComponent() {
         <Col>
           <Container className="pt-4">
             <>
-              <Row>
+              {/* Desktop header */}
+              <Row className="d-none d-md-flex">
                 <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2">
                   <span className="d-flex align-items-center gap-3">
                     <h1 className="no-wrap">
@@ -422,6 +428,29 @@ export default function TheMemesComponent() {
                     </h1>
                     <LFGButton contract={MEMES_CONTRACT} />
                   </span>
+                  <SeasonsDropdown
+                    seasons={seasons.map((s) => s.id)}
+                    selectedSeason={selectedSeason}
+                    setSelectedSeason={setSelectedSeason}
+                  />
+                </Col>
+              </Row>
+
+              {/* Mobile header with collections dropdown */}
+              <Row className="d-flex d-md-none">
+                <Col
+                  xs={12}
+                  className="d-flex align-items-center justify-content-between mb-3"
+                >
+                  <h1 className="mb-0">
+                    <span className="font-lightest">The</span> Memes
+                  </h1>
+                  <LFGButton contract={MEMES_CONTRACT} />
+                </Col>
+                <Col xs={12} className="mb-3">
+                  <CollectionsDropdown activePage="memes" />
+                </Col>
+                <Col xs={12} className="mb-3">
                   <SeasonsDropdown
                     seasons={seasons.map((s) => s.id)}
                     selectedSeason={selectedSeason}
@@ -503,7 +532,8 @@ export function SortButton(
       onClick={() => props.select()}
       className={`btn-link ${styles.sort} ${
         props.currentSort != props.sort ? styles.disabled : ""
-      }`}>
+      }`}
+    >
       {name}
     </button>
   );
