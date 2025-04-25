@@ -133,6 +133,8 @@ import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider
 import MainLayout from "../components/layout/MainLayout";
 import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
+import useDeviceInfo from "../hooks/useDeviceInfo";
+import useIsMobileScreen from "../hooks/isMobileScreen";
 
 library.add(
   faArrowUp,
@@ -285,9 +287,13 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const capacitor = useCapacitor();
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const router = useRouter();
-  const hideFooter = ["/waves", "/my-stream", "/open-mobile"].some((path) =>
-    router.pathname.startsWith(path)
-  );
+  const { isMobileDevice } = useDeviceInfo();
+  const isMobileScreen = useIsMobileScreen();
+  const hideFooter =
+    (isMobileDevice && isMobileScreen) ||
+    ["/waves", "/my-stream", "/open-mobile"].some((path) =>
+      router.pathname.startsWith(path)
+    );
 
   useEffect(() => {
     const createConnectorForWallet = (

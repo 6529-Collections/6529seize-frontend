@@ -4,18 +4,9 @@ import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
+import useDeviceInfo from "../../hooks/useDeviceInfo";
+import HeaderPlaceholder from "../header/HeaderPlaceholder";
 
-// Simple placeholder for the header while it loads client-side
-const HeaderPlaceholder = () => {
-  // Style to roughly match header height
-  return (
-    <div style={{ height: "56px" /* Adjust height as needed for mobile */ }}>
-      Loading Header...
-    </div>
-  );
-};
-
-// Dynamically import Header, disable SSR, and use the placeholder
 const Header = dynamic(() => import("../header/Header"), {
   ssr: false,
   loading: () => <HeaderPlaceholder />,
@@ -28,6 +19,7 @@ interface MobileLayoutProps {
 const MobileLayout = ({ children }: MobileLayoutProps) => {
   const { registerRef } = useLayout();
   const { activeView } = useViewContext();
+  const { isMobileDevice } = useDeviceInfo();
 
   // Use a callback ref to get the DOM node
   const headerWrapperRef = useCallback(
@@ -51,7 +43,7 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
       ) : (
         <main>{children}</main>
       )}
-      <BottomNavigation />
+      {isMobileDevice && <BottomNavigation />}
     </div>
   );
 };

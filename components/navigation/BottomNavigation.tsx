@@ -24,6 +24,7 @@ export const items: NavItemData[] = [
     viewKey: "waves",
     icon: "waves",
     iconComponent: WavesIcon,
+    iconSizeClass: "tw-size-6",
   },
   {
     kind: "view",
@@ -31,6 +32,7 @@ export const items: NavItemData[] = [
     viewKey: "messages",
     icon: "messages",
     iconComponent: ChatBubbleIcon,
+    disabled: true,
   },
   {
     kind: "route",
@@ -38,7 +40,7 @@ export const items: NavItemData[] = [
     href: "/my-stream",
     icon: "stream",
     iconComponent: LogoIcon,
-    iconSizeClass: "tw-size-8",
+    iconSizeClass: "tw-size-9",
   },
   {
     kind: "route",
@@ -79,14 +81,16 @@ const BottomNavigation: React.FC = () => {
   return (
     <nav
       ref={setMobileNavRef}
-      className="tw-fixed tw-left-0 tw-w-full tw-overflow-x-hidden tw-bottom-0 tw-bg-black tw-border-t tw-border-iron-700 tw-shadow-inner tw-h-14 tw-z-50 md:tw-hidden"
+      className="tw-fixed tw-left-0 tw-w-full tw-overflow-x-hidden tw-bottom-0 tw-bg-black tw-border-t tw-border-solid tw-border-x-0 tw-border-b-0 tw-border-iron-900 tw-shadow-inner tw-h-16 tw-z-50 tw-pb-[env(safe-area-inset-bottom)] tw-pl-[env(safe-area-inset-left)] tw-pr-[env(safe-area-inset-right)]"
     >
-      <div className="tw-h-full tw-pb-[max(10px,env(safe-area-inset-bottom))]">
+      <div className="tw-h-full">
         <ul className="tw-flex tw-justify-between tw-items-end tw-h-full tw-overflow-x-hidden tw-px-2">
           {items.map((item) => (
             <li
               key={item.name}
-              className="tw-flex tw-justify-center tw-items-end tw-h-full"
+              className={`tw-flex tw-justify-center ${
+                item.name === "Stream" ? "-tw-translate-y-1" : ""
+              } tw-h-full`}
             >
               <NavItem item={item} />
             </li>

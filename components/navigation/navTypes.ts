@@ -9,6 +9,7 @@ export type RouteNavItem = {
   icon: string;
   iconComponent?: React.ComponentType<{ className?: string }>;
   iconSizeClass?: string;
+  disabled?: boolean;
 };
 
 export type ViewNavItem = {
@@ -18,6 +19,7 @@ export type ViewNavItem = {
   icon: string;
   iconComponent?: React.ComponentType<{ className?: string }>;
   iconSizeClass?: string;
+  disabled?: boolean;
 };
 
 export type NavItem = RouteNavItem | ViewNavItem; 

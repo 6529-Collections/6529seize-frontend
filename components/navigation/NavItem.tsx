@@ -16,7 +16,28 @@ const NavItem = ({ item }: Props) => {
   const { name } = item;
   const { icon } = item;
 
-  // Determine icon size, make Stream icon slightly bigger
+  const isStream = name === "Stream";
+
+  if (item.disabled) {
+    return (
+      <button
+        type="button"
+        aria-label={name}
+        aria-disabled="true"
+        disabled
+        className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-14 tw-h-full tw-opacity-40 tw-pointer-events-none"
+      >
+        <div className="tw-flex tw-items-center tw-justify-center">
+          {item.iconComponent ? (
+            <item.iconComponent className={`${item.iconSizeClass ?? "tw-size-6"} tw-text-iron-400`} />
+          ) : (
+            <Image src={icon} alt={name} width={24} height={24} unoptimized className={item.iconSizeClass ?? "tw-size-6"} />
+          )}
+        </div>
+      </button>
+    );
+  }
+
   const iconSizeClass = item.iconSizeClass ?? "tw-size-6";
 
   let isActive = false;
@@ -42,17 +63,24 @@ const NavItem = ({ item }: Props) => {
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
       onClick={handleClick}
-      className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-12 tw-h-full"
+      className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors 
+      tw-w-14 tw-h-full"
     >
       {isActive && (
         <motion.div
           layoutId="nav-indicator"
-          className="tw-absolute tw-top-0 tw-left-0 tw-w-full tw-h-0.5 tw-bg-white tw-rounded-full"
+          className={`tw-absolute tw-top-0 tw-left-0 tw-w-full tw-h-0.5 tw-bg-white tw-rounded-full ${
+            isStream ? "tw-top-1" : ""
+          }`}
         />
       )}
       <div className="tw-flex tw-items-center tw-justify-center">
         {item.iconComponent ? (
-          <item.iconComponent className={`${iconSizeClass} ${isActive ? 'tw-text-white' : 'tw-text-iron-400'}`} />
+          <item.iconComponent
+            className={`${iconSizeClass} ${
+              isActive ? "tw-text-white" : "tw-text-iron-500"
+            }`}
+          />
         ) : (
           <Image
             src={icon}

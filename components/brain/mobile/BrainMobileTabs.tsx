@@ -51,7 +51,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     };
   }, [router.events, onViewChange]);
 
-  const aboutButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
+  const aboutButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-h-7 tw-gap-1 tw-flex-1  tw-rounded-md ${
     activeView === BrainView.ABOUT ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
@@ -59,14 +59,14 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.ABOUT ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
-  const outcomeButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
+  const outcomeButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-h-7 tw-gap-1 tw-flex-1  tw-rounded-md ${
     activeView === BrainView.OUTCOME ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
   const otucomeButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
     activeView === BrainView.OUTCOME ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
-  const myVotesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
+  const myVotesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-h-7 tw-gap-1 tw-flex-1  tw-rounded-md ${
     activeView === BrainView.MY_VOTES ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
@@ -74,7 +74,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.MY_VOTES ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
-  const chatButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
+  const chatButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-h-7 tw-gap-1 tw-flex-1  tw-rounded-md ${
     activeView === BrainView.DEFAULT ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
@@ -129,7 +129,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             {isMemesWave && (
               <button
                 onClick={() => onViewChange(BrainView.FAQ)}
-                className={`tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1 tw-gap-1 tw-flex-1  tw-rounded-md ${
+                className={`tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-h-7 tw-gap-1 tw-flex-1 tw-rounded-md ${
                   activeView === BrainView.FAQ
                     ? "tw-bg-iron-800"
                     : "tw-bg-iron-950"
