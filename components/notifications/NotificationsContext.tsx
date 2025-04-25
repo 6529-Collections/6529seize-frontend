@@ -126,9 +126,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const removeAllDeliveredNotifications = async () => {
-    if (isCapacitor) {
-      await PushNotifications.removeAllDeliveredNotifications();
-    }
+    // TODO: Comment it back in later
+    // if (isCapacitor) {
+    //   await PushNotifications.removeAllDeliveredNotifications();
+    // }
   };
 
   const value = useMemo(
