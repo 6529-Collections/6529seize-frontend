@@ -73,7 +73,6 @@ export const setAuthJwt = (
 };
 
 export const getAuthJwt = () => {
-  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFiZjEwY2Y0LTcyOTktNGZhZi04ODI0LTE2NDg0MTU1NTgzNSIsInN1YiI6IjB4MjNhODY3YzliMzljOTQwZTk0NjdmNWIzYjQzZmEwZTVhMmJkMWU2ZSIsInJvbGUiOiIwZjgzMmZlOS04N2I0LTExZWUtOWQ4Mi0wMjlhMGU0YjYxNTkiLCJpYXQiOjE3NDU1NjkyNDYsImV4cCI6MTc0ODE5NzUzNH0.PU1Q-FFZgZ9wezJVgWl8-Lgn5HcunQIrwTAtqzW_hLI"
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
 
@@ -82,7 +81,6 @@ export const getRefreshToken = () => {
 };
 
 export const getWalletAddress = () => {
-  return '0x23a867C9b39c940E9467f5b3B43FA0e5a2bD1e6E'
   return safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY) ?? null;
 };
 

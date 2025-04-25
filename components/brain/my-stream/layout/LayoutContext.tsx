@@ -400,7 +400,9 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
         ? CAPACITOR_PADDING[key].capacitor
         : 0;
       acc[key] = calculateHeightStyle(spaces, padding);
-
+      if (key === "singleDrop") {
+        console.log(acc[key]);
+      }
       return acc;
     }, {} as Record<View, React.CSSProperties>);
   }, [spaces, isAndroid, isIos, isCapacitor]);
