@@ -18,17 +18,41 @@
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     border-radius: 4px;
     position: relative;
+    color: white !important;
+    
+    &:hover, &:focus, &:active {
+      color: rgba(255, 255, 255, 0.9) !important;
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      
+      &::after {
+        color: rgba(255, 255, 255, 0.9) !important;
+      }
+    }
     
     &::after {
       position: absolute;
       right: 1rem;
       top: 50%;
       transform: translateY(-50%);
+      color: white !important;
+      margin-top: 0 !important; /* Reset bootstrap's default margin */
     }
   }
   
   div {
     width: 100%;
+  }
+  
+  /* Ensure active dropdown item is styled correctly */
+  :global(.dropdown-item.active) {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+  }
+  
+  /* Style dropdown items on hover */
+  :global(.dropdown-item:hover) {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
   }
 }
 

@@ -1,9 +1,10 @@
 import styles from "./NextGen.module.scss";
 
 import { useState, useEffect } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
 import { LFGButton } from "../../lfg-slideshow/LFGSlideshow";
+import CollectionsDropdown from "../../collections-dropdown/CollectionsDropdown";
 
 export enum NextGenView {
   COLLECTIONS = "Collections",
@@ -64,7 +65,8 @@ export default function NextGenNavigationHeader(
             }
             window.location.href = href;
           }
-        }}>
+        }}
+      >
         {viewHeader}
       </button>
     );
@@ -79,7 +81,8 @@ export default function NextGenNavigationHeader(
         style={{
           height: isMobile ? "auto" : "90px",
           paddingTop: isMobile ? "20px" : "0",
-        }}>
+        }}
+      >
         <div className="d-flex align-items-center gap-3">
           <Image
             priority
@@ -103,12 +106,21 @@ export default function NextGenNavigationHeader(
           />
           <LFGButton contract={"nextgen"} />
         </div>
+        {/* Mobile only collections dropdown */}
+        <div className="d-md-none pt-3 pb-3 w-100">
+          <Row>
+            <Col>
+              <CollectionsDropdown activePage="nextgen" />
+            </Col>
+          </Row>
+        </div>
         <div
           className={`d-flex align-items-center ${
             isMobile
               ? "justify-content-center pt-3 pb-3"
               : "justify-content-end"
-          }`}>
+          }`}
+        >
           <span className="d-flex gap-4">
             {printView(undefined)}
             {printView(NextGenView.COLLECTIONS)}

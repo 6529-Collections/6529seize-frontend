@@ -24,7 +24,6 @@ import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import { AuthContext } from "../auth/Auth";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import useCapacitor from "../../hooks/useCapacitor";
-import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -301,27 +300,11 @@ export default function GradientPage() {
         <Row>
           <Col>
             <Container className="pt-4 pb-4">
-              {/* Desktop header */}
-              <Row className="d-none d-md-flex">
+              <Row>
                 <Col>
                   <h1>
                     <span className="font-lightest">6529</span> Gradient
                   </h1>
-                </Col>
-              </Row>
-              
-              {/* Mobile header with collections dropdown */}
-              <Row className="d-flex d-md-none">
-                <Col
-                  xs={12}
-                  className="d-flex align-items-center justify-content-between mb-3"
-                >
-                  <h1 className="mb-0">
-                    <span className="font-lightest">6529</span> Gradient
-                  </h1>
-                </Col>
-                <Col xs={12} className="mb-3">
-                  <CollectionsDropdown activePage="gradient" />
                 </Col>
               </Row>
               <Row className="pt-2">

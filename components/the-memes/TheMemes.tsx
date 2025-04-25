@@ -419,38 +419,31 @@ export default function TheMemesComponent() {
         <Col>
           <Container className="pt-4">
             <>
-              {/* Desktop header */}
-              <Row className="d-none d-md-flex">
-                <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+              {/* Page header - visible on all devices */}
+              <Row>
+                <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                   <span className="d-flex align-items-center gap-3">
-                    <h1 className="no-wrap">
+                    <h1 className="no-wrap mb-0">
                       <span className="font-lightest">The</span> Memes
                     </h1>
                     <LFGButton contract={MEMES_CONTRACT} />
                   </span>
-                  <SeasonsDropdown
-                    seasons={seasons.map((s) => s.id)}
-                    selectedSeason={selectedSeason}
-                    setSelectedSeason={setSelectedSeason}
-                  />
+                  <div className="d-none d-md-block">
+                    <SeasonsDropdown
+                      seasons={seasons.map((s) => s.id)}
+                      selectedSeason={selectedSeason}
+                      setSelectedSeason={setSelectedSeason}
+                    />
+                  </div>
                 </Col>
               </Row>
-
-              {/* Mobile header with collections dropdown */}
-              <Row className="d-flex d-md-none">
-                <Col
-                  xs={12}
-                  className="d-flex align-items-center justify-content-between mb-3"
-                >
-                  <h1 className="mb-0">
-                    <span className="font-lightest">The</span> Memes
-                  </h1>
-                  <LFGButton contract={MEMES_CONTRACT} />
-                </Col>
+              
+              {/* Mobile only elements */}
+              <Row className="d-md-none">
                 <Col xs={12} className="mb-3">
                   <CollectionsDropdown activePage="memes" />
                 </Col>
-                <Col xs={12} className="mb-3">
+                <Col xs={12} className="mb-3 text-start">
                   <SeasonsDropdown
                     seasons={seasons.map((s) => s.id)}
                     selectedSeason={selectedSeason}

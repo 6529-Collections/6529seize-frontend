@@ -204,17 +204,26 @@ export default function Rememes() {
       <Row>
         <Col>
           <Container className="pt-4">
-            {/* Desktop header */}
-            <Row className="d-none d-md-flex justify-content-between">
-              <Col
-                className={`d-flex flex-wrap align-items-center gap-2 justify-content-between`}>
-                <span className="d-flex align-items-center gap-3 pt-3 pb-2">
+            {/* Page header - visible on all devices */}
+            <Row className="mb-3">
+              <Col className={`d-flex flex-wrap align-items-center gap-2 justify-content-between`}>
+                <span className="d-flex align-items-center gap-3">
                   <span className="d-flex align-items-center gap-2">
                     <Image
                       loading={"eager"}
                       width="0"
                       height="0"
                       style={{ width: "250px", height: "auto" }}
+                      className="d-none d-md-block"
+                      src="/re-memes.png"
+                      alt="re-memes"
+                    />
+                    <Image
+                      loading={"eager"}
+                      width="0"
+                      height="0"
+                      style={{ width: "150px", height: "auto" }}
+                      className="d-md-none"
                       src="/re-memes.png"
                       alt="re-memes"
                     />
@@ -226,7 +235,7 @@ export default function Rememes() {
                   </span>
                   <LFGButton contract={"rememes"} />
                 </span>
-                <span className="pt-2 pb-2">
+                <span className="d-none d-md-block">
                   <Button
                     className="seize-btn btn-white d-flex align-items-center gap-2"
                     onClick={() => {
@@ -236,33 +245,14 @@ export default function Rememes() {
                     <FontAwesomeIcon
                       icon="plus-circle"
                       className={styles.buttonIcon}
-                      onClick={() => {
-                        window.location.href = "/rememes/add";
-                      }}
                     />
                   </Button>
                 </span>
               </Col>
             </Row>
             
-            {/* Mobile header with collections dropdown */}
-            <Row className="d-flex d-md-none">
-              <Col
-                xs={12}
-                className="d-flex align-items-center justify-content-between mb-3"
-              >
-                <span className="d-flex align-items-center gap-2">
-                  <Image
-                    loading={"eager"}
-                    width="0"
-                    height="0"
-                    style={{ width: "150px", height: "auto" }}
-                    src="/re-memes.png"
-                    alt="re-memes"
-                  />
-                </span>
-                <LFGButton contract={"rememes"} />
-              </Col>
+            {/* Mobile only elements */}
+            <Row className="d-md-none">
               <Col xs={12} className="mb-3">
                 <CollectionsDropdown activePage="rememes" />
               </Col>

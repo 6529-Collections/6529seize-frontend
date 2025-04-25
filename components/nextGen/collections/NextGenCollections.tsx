@@ -6,7 +6,6 @@ import { DBResponse } from "../../../entities/IDBResponse";
 import { fetchUrl } from "../../../services/6529api";
 import { NextGenCollection } from "../../../entities/INextgen";
 import Pagination from "../../pagination/Pagination";
-import CollectionsDropdown from "../../collections-dropdown/CollectionsDropdown";
 
 const PAGE_SIZE = 25;
 
@@ -56,37 +55,12 @@ export default function NextGenCollections() {
 
   return (
     <Container className="no-padding pt-4 pb-4">
-      {/* Desktop header */}
-      <Row className="pb-3 d-none d-md-flex">
+      <Row className="pb-3">
         <Col className="d-flex justify-content-between">
           <h1>Collections</h1>
           <Dropdown className={styles.filterDropdown} drop={"down-centered"}>
             <Dropdown.Toggle>Status: {selectedStatus}</Dropdown.Toggle>
             <Dropdown.Menu>
-              {Object.values(StatusFilter).map((filter) => (
-                <Dropdown.Item
-                  key={`filter-${filter}`}
-                  onClick={() => setSelectedStatus(filter)}>
-                  {filter}
-                </Dropdown.Item>
-              ))}
-            </Dropdown.Menu>
-          </Dropdown>
-        </Col>
-      </Row>
-
-      {/* Mobile header with collections dropdown */}
-      <Row className="d-flex d-md-none">
-        <Col xs={12} className="d-flex align-items-center justify-content-between mb-3">
-          <h1 className="mb-0">Collections</h1>
-        </Col>
-        <Col xs={12} className="mb-3">
-          <CollectionsDropdown activePage="nextgen" />
-        </Col>
-        <Col xs={12} className="mb-3">
-          <Dropdown className={`${styles.filterDropdown} w-100`}>
-            <Dropdown.Toggle className="w-100">Status: {selectedStatus}</Dropdown.Toggle>
-            <Dropdown.Menu className="w-100">
               {Object.values(StatusFilter).map((filter) => (
                 <Dropdown.Item
                   key={`filter-${filter}`}
