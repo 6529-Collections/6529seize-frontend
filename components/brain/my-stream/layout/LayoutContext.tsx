@@ -47,10 +47,10 @@ type View =
   | "myStreamFeed"
   | "mobileWaves"
   | "mobileAbout"
-  | "singleDrop";
 
 // Helper function to calculate height style
 const calculateHeightStyle = (
+  view: View,
   spaces: LayoutSpaces,
   capacitorSpace: number // Accept specific space value
 ): React.CSSProperties => {
@@ -91,7 +91,6 @@ const CAPACITOR_PADDING: Record<
   myStreamFeed: getPadding({}),
   mobileWaves: getPadding({}),
   mobileAbout: getPadding({}),
-  singleDrop: getPadding({}),
 };
 
 // Context type definition
@@ -143,9 +142,6 @@ interface LayoutContextType {
 
   // Style for mobile about view
   mobileAboutViewStyle: React.CSSProperties;
-
-  // Style for single drop view
-  singleDropViewStyle: React.CSSProperties;
 }
 
 // Default context values
@@ -175,7 +171,6 @@ const LayoutContext = createContext<LayoutContextType>({
   myStreamFeedStyle: {}, // Empty style object as default
   mobileWavesViewStyle: {}, // Empty style object as default
   mobileAboutViewStyle: {}, // Empty style object as default
-  singleDropViewStyle: {}, // Empty style object as default
 });
 
 // Provider component
@@ -399,10 +394,7 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
         : isCapacitor
         ? CAPACITOR_PADDING[key].capacitor
         : 0;
-      acc[key] = calculateHeightStyle(spaces, padding);
-      if (key === "singleDrop") {
-        console.log(acc[key]);
-      }
+      acc[key] = calculateHeightStyle(key, spaces, padding);
       return acc;
     }, {} as Record<View, React.CSSProperties>);
   }, [spaces, isAndroid, isIos, isCapacitor]);
@@ -423,7 +415,6 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       myStreamFeedStyle: viewStyles.myStreamFeed,
       mobileWavesViewStyle: viewStyles.mobileWaves,
       mobileAboutViewStyle: viewStyles.mobileAbout,
-      singleDropViewStyle: viewStyles.singleDrop,
     }),
     [spaces, registerRef, contentContainerStyle, viewStyles]
   );

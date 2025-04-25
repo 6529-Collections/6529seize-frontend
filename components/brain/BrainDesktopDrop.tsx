@@ -1,6 +1,7 @@
 import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { SingleWaveDrop } from "../waves/drop/SingleWaveDrop";
 
+
 interface Props {
   readonly drop: ExtendedDrop;
   readonly onClose: () => void;
