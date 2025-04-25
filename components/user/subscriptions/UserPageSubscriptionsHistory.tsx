@@ -15,12 +15,17 @@ import {
 } from "../../../helpers/Helpers";
 import { mainnet } from "wagmi/chains";
 import { MEMES_CONTRACT } from "../../../constants";
+import { Page } from "../../../helpers/Types";
+import Pagination from "../../pagination/Pagination";
 
 export default function UserPageSubscriptionsHistory(
   props: Readonly<{
-    topups: SubscriptionTopUp[];
-    redeemed: RedeemedSubscription[];
-    logs: SubscriptionLog[];
+    topups: Page<SubscriptionTopUp>;
+    redeemed: Page<RedeemedSubscription>;
+    logs: Page<SubscriptionLog>;
+    setRedeemedPage: (page: number) => void;
+    setTopUpPage: (page: number) => void;
+    setLogsPage: (page: number) => void;
   }>
 ) {
   return (
@@ -32,17 +37,20 @@ export default function UserPageSubscriptionsHistory(
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
-          <RedeemedSubscriptionsAccordion history={props.redeemed} />
+          <RedeemedSubscriptionsAccordion
+            history={props.redeemed}
+            setPage={props.setRedeemedPage}
+          />
         </Col>
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
-          <LogAccordion logs={props.logs} />
+          <LogAccordion logs={props.logs} setPage={props.setLogsPage} />
         </Col>
       </Row>
       <Row className="pt-2 pb-2">
         <Col>
-          <TopUpAccordion history={props.topups} />
+          <TopUpAccordion history={props.topups} setPage={props.setTopUpPage} />
         </Col>
       </Row>
     </Container>
@@ -50,7 +58,10 @@ export default function UserPageSubscriptionsHistory(
 }
 
 function RedeemedSubscriptionsAccordion(
-  props: Readonly<{ history: RedeemedSubscription[] }>
+  props: Readonly<{
+    history: Page<RedeemedSubscription>;
+    setPage: (page: number) => void;
+  }>
 ) {
   return (
     <Accordion>
@@ -60,13 +71,61 @@ function RedeemedSubscriptionsAccordion(
         </Accordion.Button>
         <Accordion.Body className={styles.topUpHistoryAccordionBody}>
           <div className="d-flex flex-column gap-2">
-            {props.history.length > 0 ? (
-              props.history.map((redeem) => (
+            {props.history.data.length > 0 ? (
+              props.history.data.map((redeem) => (
                 <RedeemedEntry key={redeem.transaction} redeem={redeem} />
               ))
             ) : (
               <div className="font-color-silver">
                 No Redeemed Subscriptions found
+              </div>
+            )}
+          </div>
+          {props.history.count > 0 && props.history.count / 10 > 1 && (
+            <div className="text-center mt-3">
+              <Pagination
+                page={props.history.page}
+                pageSize={10}
+                totalResults={props.history.count}
+                setPage={props.setPage}
+              />
+            </div>
+          )}
+        </Accordion.Body>
+      </Accordion.Item>
+    </Accordion>
+  );
+}
+
+function LogAccordion(
+  props: Readonly<{
+    logs: Page<SubscriptionLog>;
+    setPage: (page: number) => void;
+  }>
+) {
+  return (
+    <Accordion>
+      <Accordion.Item defaultChecked={true} eventKey={"0"}>
+        <Accordion.Button className={styles.topUpHistoryAccordionButton}>
+          <b>Log History</b>
+        </Accordion.Button>
+        <Accordion.Body className={styles.topUpHistoryAccordionBody}>
+          <div className="d-flex flex-column gap-2">
+            {props.logs.data.length > 0 ? (
+              props.logs.data.map((log) => (
+                <LogEntry key={`subscription-log-${log.id}`} log={log} />
+              ))
+            ) : (
+              <div className="font-color-silver">No logs found</div>
+            )}
+            {props.logs.count > 0 && props.logs.count / 10 > 1 && (
+              <div className="text-center mt-3">
+                <Pagination
+                  page={props.logs.page}
+                  pageSize={10}
+                  totalResults={props.logs.count}
+                  setPage={props.setPage}
+                />
               </div>
             )}
           </div>
@@ -76,30 +135,12 @@ function RedeemedSubscriptionsAccordion(
   );
 }
 
-function LogAccordion(props: Readonly<{ logs: SubscriptionLog[] }>) {
-  return (
-    <Accordion>
-      <Accordion.Item defaultChecked={true} eventKey={"0"}>
-        <Accordion.Button className={styles.topUpHistoryAccordionButton}>
-          <b>Log History</b>
-        </Accordion.Button>
-        <Accordion.Body className={styles.topUpHistoryAccordionBody}>
-          <div className="d-flex flex-column gap-2">
-            {props.logs.length > 0 ? (
-              props.logs.map((log) => (
-                <LogEntry key={`subscription-log-${log.id}`} log={log} />
-              ))
-            ) : (
-              <div className="font-color-silver">No logs found</div>
-            )}
-          </div>
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
-  );
-}
-
-function TopUpAccordion(props: Readonly<{ history: SubscriptionTopUp[] }>) {
+function TopUpAccordion(
+  props: Readonly<{
+    history: Page<SubscriptionTopUp>;
+    setPage: (page: number) => void;
+  }>
+) {
   return (
     <Accordion>
       <Accordion.Item defaultChecked={true} eventKey={"0"}>
@@ -108,14 +149,24 @@ function TopUpAccordion(props: Readonly<{ history: SubscriptionTopUp[] }>) {
         </Accordion.Button>
         <Accordion.Body className={styles.topUpHistoryAccordionBody}>
           <div className="d-flex flex-column gap-2">
-            {props.history.length > 0 ? (
-              props.history.map((topUp) => (
+            {props.history.data.length > 0 ? (
+              props.history.data.map((topUp) => (
                 <TopUpEntry key={topUp.hash} topUp={topUp} />
               ))
             ) : (
               <div className="font-color-silver">No Top Ups found</div>
             )}
           </div>
+          {props.history.count > 0 && props.history.count / 10 > 1 && (
+            <div className="text-center mt-3">
+              <Pagination
+                page={props.history.page}
+                pageSize={10}
+                totalResults={props.history.count}
+                setPage={props.setPage}
+              />
+            </div>
+          )}
         </Accordion.Body>
       </Accordion.Item>
     </Accordion>
