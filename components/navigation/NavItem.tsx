@@ -25,7 +25,7 @@ const NavItem = ({ item }: Props) => {
         aria-label={name}
         aria-disabled="true"
         disabled
-        className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-14 tw-h-full tw-opacity-40 tw-pointer-events-none"
+        className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors tw-w-14 tw-h-16 tw-opacity-40 tw-pointer-events-none"
       >
         <div className="tw-flex tw-items-center tw-justify-center">
           {item.iconComponent ? (
@@ -64,7 +64,7 @@ const NavItem = ({ item }: Props) => {
       aria-current={isActive ? "page" : undefined}
       onClick={handleClick}
       className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors 
-      tw-w-14 tw-h-full"
+      tw-w-14 tw-h-16"
     >
       {isActive && (
         <motion.div
@@ -77,8 +77,8 @@ const NavItem = ({ item }: Props) => {
       <div className="tw-flex tw-items-center tw-justify-center">
         {item.iconComponent ? (
           <item.iconComponent
-            className={`${iconSizeClass} ${
-              isActive ? "tw-text-white" : "tw-text-iron-500"
+            className={`${iconSizeClass} ${ 
+              "tw-text-white"
             }`}
           />
         ) : (
