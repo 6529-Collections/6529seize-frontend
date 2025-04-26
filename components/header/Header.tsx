@@ -120,6 +120,10 @@ export default function Header(props: Readonly<Props>) {
       fetchUrl(
         `${process.env.API_ENDPOINT}/api/consolidations/${address}`
       ).then((response: DBResponse) => {
+        if (!response.data) {
+          setConsolidations([]);
+          return;
+        }
         setConsolidations(Array.from(response.data));
       });
     } else {

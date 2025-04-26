@@ -1,6 +1,6 @@
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
-import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -612,20 +612,50 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (!wave.participation.signature_required) {
       return requestBody;
     }
-    const { success, signature } = await signDrop({
-      drop: requestBody,
-      termsOfService: wave.participation.terms,
-    });
-
-    if (!success || !signature) {
-      return null;
+    
+    // Use direct signature if there are no terms to display
+    if (!wave.participation.terms) {
+      const { success, signature } = await signDrop({
+        drop: requestBody,
+        termsOfService: null,
+      });
+      
+      if (!success || !signature) {
+        return null;
+      }
+      
+      return {
+        ...requestBody,
+        signature,
+      };
     }
-
-    const updatedDropRequest = {
-      ...requestBody,
-      signature,
-    };
-    return updatedDropRequest;
+    
+    // For terms that need to be displayed, use the terms flow
+    return new Promise<ApiCreateDropRequest | null>((resolve) => {
+      // Define callback for when signing completes
+      const handleSigningComplete = (result: { success: boolean; signature?: string }) => {
+        if (!result.success || !result.signature) {
+          resolve(null);
+          return;
+        }
+        
+        const updatedDropRequest = {
+          ...requestBody,
+          signature: result.signature,
+        };
+        resolve(updatedDropRequest);
+      };
+      
+      // Show the terms modal through a global event
+      const event = new CustomEvent('showTermsModal', { 
+        detail: {
+          drop: requestBody,
+          termsOfService: wave.participation.terms,
+          onComplete: handleSigningComplete
+        }
+      });
+      document.dispatchEvent(event);
+    });
   };
   const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
@@ -958,6 +988,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         removeFile={removeFile}
         disabled={submitting}
       />
+      
+      {/* Terms of Service Flow - Modal will render when needed */}
+      <React.Suspense fallback={null}>
+        {(() => {
+          const TermsFlow = React.lazy(() => import('../terms/TermsSignatureFlow'));
+          return <TermsFlow />;
+        })()}
+      </React.Suspense>
     </div>
   );
 };
