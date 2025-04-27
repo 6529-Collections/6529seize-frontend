@@ -13,7 +13,7 @@ interface MockSignatureResponse {
  */
 export async function setupWalletMock(page: Page, response: MockSignatureResponse = { success: true, signature: "0x1234567890abcdef" }) {
   // Mock the wagmi hooks response
-  await page.addInitScript(() => {
+  await page.addInitScript(`() => {
     // Store the original window.ethereum
     const originalEthereum = window.ethereum;
     
@@ -77,7 +77,7 @@ export async function setupWalletMock(page: Page, response: MockSignatureRespons
       }
       return originalDefineProperty.call(this, obj, prop, descriptor);
     };
-  });
+  }`);
 }
 
 /**

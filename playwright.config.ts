@@ -5,7 +5,8 @@ dotenv.config(); // Loads variables from .env
 dotenv.config({ path: ".env.test" }); // Overrides or adds variables from .env
 
 const config = defineConfig({
-  testDir: './e2e', 
+  testDir: './',
+  testMatch: /.*\.spec\.ts/,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
