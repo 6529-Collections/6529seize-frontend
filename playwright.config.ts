@@ -4,8 +4,6 @@ import * as dotenv from "dotenv";
 dotenv.config(); // Loads variables from .env
 dotenv.config({ path: ".env.test" }); // Overrides or adds variables from .env
 
-console.log("Loaded process.env.TEST_BASE_URL", process.env.TEST_BASE_URL);
-
 const config = defineConfig({
   testDir: './e2e', 
   fullyParallel: true,
@@ -14,7 +12,7 @@ const config = defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000', 
+    baseURL: 'http://localhost:3001', 
     trace: 'on-first-retry',
   },
   projects: [
@@ -34,8 +32,9 @@ const config = defineConfig({
   ],
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3001',
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
   },
 });
 

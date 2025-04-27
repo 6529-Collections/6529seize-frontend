@@ -11,9 +11,11 @@
     "postbuild": "next-sitemap",
     "start": "next start -p 3001",
     "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:watch": "nodemon --watch tests --watch src --ext ts,tsx,js,jsx --exec \"npx playwright test\"",
     "knip": "knip --fix --allow-remove-files"
   },
   "dependencies": {
