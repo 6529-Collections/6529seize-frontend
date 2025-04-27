@@ -1,14 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-test('homepage has a heading', async ({ page }) => {
+test('homepage has expected title', async ({ page }) => {
   await page.goto('/');
 
-  // Wait for the page to be more fully loaded
-  await page.waitForLoadState('domcontentloaded');
-
-  // Check if a visible h1 element exists on the page
-  // This is often more reliable than title for default pages
-  await expect(page.locator('h1')).toBeVisible();
+  // Expect a title "to contain" a substring.
+  // Replace with the actual expected title when the app is built
+  await expect(page).toHaveTitle(/6529/);
 });
 
 // Add more tests here as the application develops
