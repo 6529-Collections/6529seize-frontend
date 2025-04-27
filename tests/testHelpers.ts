@@ -3,7 +3,9 @@ import { test as baseTest, expect, Page } from "@playwright/test";
 // Extend the base test to include a global beforeEach hook
 export const test = baseTest.extend({
   page: async ({ page }, use, testInfo) => {
-    await page.waitForTimeout(testInfo.project.metadata.testDelay);
+    // Use testDelay from metadata or default to 0 if undefined
+    const delay = testInfo.project.metadata?.testDelay ?? 0;
+    await page.waitForTimeout(delay);
     await use(page);
   },
 });

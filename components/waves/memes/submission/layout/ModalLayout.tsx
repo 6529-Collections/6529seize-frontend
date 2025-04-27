@@ -18,8 +18,8 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0 tw-h-full tw-flex tw-flex-col md:tw-block">
-      <motion.div className="tw-self-end md:tw-self-auto tw-w-full tw-z-50">
+    <div className="tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+      <motion.div className="tw-w-full tw-z-50">
         <div className="tw-w-full tw-bg-iron-950 tw-rounded-t-xl md:tw-rounded-xl tw-px-2 sm:tw-px-4 tw-pt-8 md:tw-px-8 md:tw-pt-8 tw-relative tw-border tw-border-iron-800/30 tw-backdrop-blur tw-border-b-0 md:tw-border-b">
           {/* Ambient background effect */}
           <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-overflow-hidden">
