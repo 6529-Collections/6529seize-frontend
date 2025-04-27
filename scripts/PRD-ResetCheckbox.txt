@@ -1,0 +1,29 @@
+<context>
+# Overview
+This document describes a required change to the `TermsOfServiceModal` component behavior. Currently, if a user checks the "I have read and agree" checkbox, closes the modal, and reopens it within the same session, the checkbox remains checked. This needs to be changed to ensure the user explicitly acknowledges the terms *every time* the modal is presented.
+
+# Core Features
+- **Checkbox State Reset:** Ensure the "I have read and agree to the terms of service" checkbox within `components/terms/TermsOfServiceModal.tsx` is always in an unchecked state when the modal initially becomes visible.
+
+# User Experience
+- **User Flow:** User triggers modal -> Modal opens -> Checkbox is *unchecked* -> User reads terms -> User *must* check the box -> User clicks "Agree" -> Modal closes. If the user closes the modal and reopens it, the checkbox must again start as unchecked.
+- **UI/UX Considerations:** No visual changes, only functional behavior change of the checkbox's initial state upon opening.
+</context>
+<PRD>
+# Technical Architecture
+- **Component:** `components/terms/TermsOfServiceModal.tsx`
+- **Requirement:** Modify the component's state logic to reset the `hasAcknowledged` state to `false` whenever the `isOpen` prop transitions from `false` to `true`.
+
+# Development Roadmap
+- **Phase 1:** Implement the state reset logic within `TermsOfServiceModal.tsx`.
+
+# Logical Dependency Chain
+1. Modify `TermsOfServiceModal.tsx` to reset state on open.
+
+# Risks and Mitigations
+- **Risk:** Incorrectly implementing the effect dependency array might cause unnecessary resets or fail to reset.
+  - **Mitigation:** Ensure the `useEffect` hook correctly depends on `isOpen` and includes logic to only reset when opening.
+
+# Appendix
+- **Component:** [`components/terms/TermsOfServiceModal.tsx`](mdc:components/terms/TermsOfServiceModal.tsx)
+</PRD> 
