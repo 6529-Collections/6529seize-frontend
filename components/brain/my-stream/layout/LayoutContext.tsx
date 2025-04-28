@@ -359,57 +359,48 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("leaderboard", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("leaderboard", spaces, 0);
+  }, [spaces]);
 
   const winnersViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("winners", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("winners", spaces, 0);
+  }, [spaces]);
 
   const myVotesViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("myVotes", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("myVotes", spaces, 0);
+  }, [spaces]);
 
   const outcomeViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("outcome", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("outcome", spaces, 0);
+  }, [spaces]);
 
   const faqViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("faq", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("faq", spaces, 0);
+  }, [spaces]);
 
   const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("notifications", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("notifications", spaces, 0);
+  }, [spaces]);
 
   const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("myStreamFeed", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("myStreamFeed", spaces, 0);
+  }, [spaces]);
 
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("mobileWaves", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("mobileWaves", spaces, 0);
+  }, [spaces]);
 
   const mobileAboutViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
-    return calculateHeightStyle("mobileAbout", spaces, capSpace);
-  }, [spaces, isAndroid, isIos, isCapacitor]);
+    return calculateHeightStyle("mobileAbout", spaces, 0);
+  }, [spaces]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo<LayoutContextType>(
