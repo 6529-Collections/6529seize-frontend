@@ -15,7 +15,7 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const router = useRouter();
   const { isMobileDevice, hasTouchScreen } = useDeviceInfo();
-  const isMobile = isMobileDevice || hasTouchScreen;
+  const isMobile = isMobileDevice ?? hasTouchScreen;
 
   // Pages that should use the small header
   const isSmall = router.pathname.startsWith("/my-stream");
