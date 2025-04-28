@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import HeaderPlaceholder from "../../../components/header/HeaderPlaceholder";
 import dynamic from "next/dynamic";
 
@@ -9,13 +9,13 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 
 const IndexPage = () => (
   <>
-    <Header extraClass="header-wp" />
     <div>
-  <title>Redirecting...</title>
-  <meta httpEquiv="refresh" content="0;url=/" />
-  <p>You are being redirected to <a href="/">/</a></p>
-</div>
-
+      <title>Redirecting...</title>
+      <meta httpEquiv="refresh" content="0;url=/" />
+      <p>
+        You are being redirected to <a href="/">/</a>
+      </p>
+    </div>
   </>
 );
 
