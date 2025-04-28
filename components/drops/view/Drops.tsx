@@ -29,7 +29,7 @@ export default function Drops() {
       QueryKey.PROFILE_DROPS,
       {
         handleOrWallet,
-        context_profile: connectedProfile?.profile?.handle ?? null,
+        context_profile: connectedProfile?.handle ?? null,
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
@@ -41,8 +41,8 @@ export default function Drops() {
       if (pageParam) {
         params.serial_no_less_than = `${pageParam}`;
       }
-      if (connectedProfile?.profile?.handle) {
-        params.context_profile = connectedProfile.profile.handle;
+      if (connectedProfile?.handle) {
+        params.context_profile = connectedProfile.handle;
       }
       return await commonApiFetch<ApiDrop[]>({
         endpoint: `/drops`,

@@ -67,10 +67,10 @@ export default function GroupCard({
   const onActionCancel = () => onGroupStateChange(GroupCardState.IDLE);
 
   useEffect(() => {
-    if (!connectedProfile?.profile?.handle) {
+    if (!connectedProfile?.handle) {
       onGroupStateChange(GroupCardState.IDLE);
     }
-  }, [connectedProfile?.profile?.handle]);
+  }, [connectedProfile?.handle]);
 
   const onEditClick = (group: ApiGroupFull) => {
     router.push(`/network/groups?edit=${group.id}`);
@@ -123,7 +123,7 @@ export default function GroupCard({
       </div>
       <div
         className={` ${
-          connectedProfile?.profile?.handle
+          connectedProfile?.handle
             ? "tw-min-h-[134px]"
             : "tw-h-[123.5px]"
         } -tw-mt-1 tw-bg-iron-900 tw-flex tw-flex-col tw-rounded-b-2xl tw-relative tw-border-[1.5px] tw-border-solid tw-border-t-0 tw-border-iron-700 group-hover:tw-border-iron-600 tw-transition tw-duration-500 tw-ease-out`}>

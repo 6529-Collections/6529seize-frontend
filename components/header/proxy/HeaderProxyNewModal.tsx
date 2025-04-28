@@ -2,13 +2,14 @@ import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 
 export default function HeaderProxyNewModal({
   connectedProfile,
   proxyGrantor,
   onClose,
 }: {
-  readonly connectedProfile: IProfileAndConsolidations;
+  readonly connectedProfile: ApiIdentity;
   readonly proxyGrantor: ApiProfileMin;
   readonly onClose: (setAsDontShowAgain: boolean) => void;
 }) {
@@ -154,9 +155,9 @@ export default function HeaderProxyNewModal({
                 <div>
                   <div className="tw-relative tw-inline-flex tw-rounded-lg tw-shadow-sm">
                     <div className="tw-relative tw-px-3.5 tw-h-11 tw-inline-flex tw-items-center tw-gap-x-3 tw-text-base tw-font-semibold tw-ring-1 tw-ring-white/10 tw-border-0 tw-rounded-s-lg tw-bg-iron-800 tw-text-white">
-                      {connectedProfile.profile?.pfp_url ? (
+                      {connectedProfile.pfp ? (
                         <img
-                          src={connectedProfile.profile.pfp_url}
+                          src={connectedProfile.pfp}
                           alt="Profile Picture"
                           className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700"
                         />
@@ -164,7 +165,7 @@ export default function HeaderProxyNewModal({
                         <div className="tw-flex-shrink-0 tw-h-7 tw-w-7 tw-flex-none tw-rounded-lg tw-bg-iron-700 group-hover:tw-bg-iron-600 tw-transition tw-duration-300 tw-ease-out"></div>
                       )}
                       <div className="tw-flex tw-gap-x-2 tw-items-center">
-                        <span>{connectedProfile.profile?.handle}</span>
+                        <span>{connectedProfile.handle}</span>
                       </div>
                     </div>
                     <div className="tw-relative tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-h-11  tw-ring-2 tw-ring-offset-4 tw-ring-offset-iron-700 tw-ring-primary-400 tw-border-0 tw-text-iron-50 tw-shadow-sm">

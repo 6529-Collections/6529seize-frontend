@@ -33,7 +33,7 @@ export default function CreateGroupWalletsEmma({
       );
       return data ?? [];
     },
-    enabled: !!connectedProfile?.profile?.handle && !!selected,
+    enabled: !!connectedProfile?.handle && !!selected,
   });
 
   useEffect(

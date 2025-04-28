@@ -61,7 +61,7 @@ export default function DropListItemRateGiveSubmit({
     onSuccess: (response: ApiDrop) => {
       onDropRateChange({
         drop: response,
-        giverHandle: connectedProfile?.profile?.handle ?? null,
+        giverHandle: connectedProfile?.handle ?? null,
       });
       onSuccessfulRateChange();
     },

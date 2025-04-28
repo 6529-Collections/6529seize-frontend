@@ -85,10 +85,10 @@ export default function GroupCreateWallets({
     const all = Array.from(new Set([...uploaded, ...emma, ...selected]));
     if (
       iAmIncluded &&
-      connectedProfile?.profile?.primary_wallet &&
+      connectedProfile?.primary_wallet &&
       type === GroupCreateWalletsType.INCLUDE
     ) {
-      all.push(connectedProfile.profile.primary_wallet);
+      all.push(connectedProfile.primary_wallet);
     }
     setWallets(all.length ? Array.from(new Set(all)) : null);
   }, [uploadedWallets, emmaWallets, selectedWallets]);

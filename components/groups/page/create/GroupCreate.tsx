@@ -146,13 +146,13 @@ export default function GroupCreate({
 
   const onSetIAmIncluded = (newState: boolean) => {
     const primaryWallet =
-      connectedProfile?.profile?.primary_wallet?.toLowerCase();
+      connectedProfile?.primary_wallet?.toLowerCase();
     if (!primaryWallet) {
       return;
     }
     const consolidatedAddresses =
-      connectedProfile?.consolidation.wallets.map((w) =>
-        w.wallet.address.toLowerCase()
+      connectedProfile?.wallets?.map((w) =>
+        w.wallet.toLowerCase()
       ) ?? [];
     const currentAddresses = groupConfig.group.identity_addresses ?? [];
     const newAddresses = currentAddresses.filter(

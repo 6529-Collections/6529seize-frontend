@@ -56,7 +56,7 @@ export default function GroupCardHeader({
           <span className="tw-text-sm tw-text-iron-500 tw-font-normal">
             {timeAgo}
           </span>
-          {!!connectedProfile?.profile?.handle &&
+          {!!connectedProfile?.handle &&
             !activeProfileProxy &&
             onEditClick &&
             group && (

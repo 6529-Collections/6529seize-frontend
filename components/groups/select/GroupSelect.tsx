@@ -76,7 +76,7 @@ export default function GroupSelect() {
   const onShowMyGroups = () => {
     const handle =
       activeProfileProxy?.created_by.handle ??
-      connectedProfile?.profile?.handle ??
+      connectedProfile?.handle ??
       null;
     if (!handle) return;
     onUserSelect(handle);
@@ -92,7 +92,7 @@ export default function GroupSelect() {
           Search Groups
         </p>
         <div className="tw-space-y-3">
-          {!!connectedProfile?.profile?.handle && (
+          {!!connectedProfile?.handle && (
             <button
               onClick={onShowMyGroups}
               type="button"

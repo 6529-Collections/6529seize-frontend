@@ -14,10 +14,7 @@ import {
 import { commonApiFetch, commonApiPost } from "../../services/api/common-api";
 import { jwtDecode } from "jwt-decode";
 import { UserRejectedRequestError } from "viem";
-import {
-  IProfileAndConsolidations,
-  ProfileConnectedStatus,
-} from "../../entities/IProfile";
+import { ProfileConnectedStatus } from "../../entities/IProfile";
 import { useQuery } from "@tanstack/react-query";
 import {
   QueryKey,
@@ -35,6 +32,7 @@ import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { ApiRedeemRefreshTokenRequest } from "../../generated/models/ApiRedeemRefreshTokenRequest";
 import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemRefreshTokenResponse";
 import { areEqualAddresses } from "../../helpers/Helpers";
+import { ApiIdentity } from "../../generated/models/ApiIdentity";
 
 export enum TitleType {
   PAGE = "PAGE",
@@ -44,7 +42,7 @@ export enum TitleType {
 }
 
 type AuthContextType = {
-  readonly connectedProfile: IProfileAndConsolidations | null;
+  readonly connectedProfile: ApiIdentity | null;
   readonly fetchingProfile: boolean;
   readonly connectionStatus: ProfileConnectedStatus;
   readonly receivedProfileProxies: ApiProfileProxy[];
@@ -101,15 +99,14 @@ export default function Auth({
   const signMessage = useSignMessage();
   const [showSignModal, setShowSignModal] = useState(false);
 
-  const [connectedProfile, setConnectedProfile] =
-    useState<IProfileAndConsolidations>();
+  const [connectedProfile, setConnectedProfile] = useState<ApiIdentity>();
   const [fetchingProfile, setFetchingProfile] = useState(false);
 
   useEffect(() => {
     if (address) {
       setFetchingProfile(true);
-      commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${address}`,
+      commonApiFetch<ApiIdentity>({
+        endpoint: `identities/${address}`,
       })
         .then((profile) => {
           setConnectedProfile(profile);
@@ -125,13 +122,13 @@ export default function Auth({
   const { data: profileProxies } = useQuery<ApiProfileProxy[]>({
     queryKey: [
       QueryKey.PROFILE_PROFILE_PROXIES,
-      { handleOrWallet: connectedProfile?.input_identity },
+      { handleOrWallet: connectedProfile?.query },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileProxy[]>({
-        endpoint: `profiles/${connectedProfile?.input_identity}/proxies/`,
+        endpoint: `profiles/${connectedProfile?.query}/proxies/`,
       }),
-    enabled: !!connectedProfile?.input_identity,
+    enabled: !!connectedProfile?.query,
   });
 
   const [receivedProfileProxies, setReceivedProfileProxies] = useState<
@@ -140,7 +137,7 @@ export default function Auth({
     groupProfileProxies({
       profileProxies: profileProxies ?? [],
       onlyActive: true,
-      profileId: connectedProfile?.profile?.external_id ?? null,
+      profileId: connectedProfile?.id ?? null,
     }).received
   );
 
@@ -151,7 +148,7 @@ export default function Auth({
     const receivedProxies = groupProfileProxies({
       profileProxies: profileProxies ?? [],
       onlyActive: true,
-      profileId: connectedProfile?.profile?.external_id ?? null,
+      profileId: connectedProfile?.id ?? null,
     }).received;
     setReceivedProfileProxies(receivedProxies);
     const role = getRole({ jwt: getAuthJwt() });
@@ -482,7 +479,7 @@ export default function Auth({
   };
 
   const getShowWaves = (): boolean => {
-    if (!connectedProfile?.profile?.handle) {
+    if (!connectedProfile?.handle) {
       return false;
     }
 
@@ -557,7 +554,8 @@ export default function Auth({
         setActiveProfileProxy: onActiveProfileProxy,
         setTitle,
         title: pageTitle,
-      }}>
+      }}
+    >
       {children}
       <ToastContainer />
       <Modal
@@ -565,7 +563,8 @@ export default function Auth({
         onHide={() => setShowSignModal(false)}
         backdrop="static"
         keyboard={false}
-        centered>
+        centered
+      >
         <Modal.Header className={styles.signModalHeader}>
           <Modal.Title>Sign Authentication Request</Modal.Title>
         </Modal.Header>
@@ -591,13 +590,15 @@ export default function Auth({
             onClick={() => {
               setShowSignModal(false);
               seizeDisconnectAndLogout();
-            }}>
+            }}
+          >
             Cancel
           </Button>
           <Button
             variant="primary"
             onClick={() => requestAuth()}
-            disabled={signMessage.isPending}>
+            disabled={signMessage.isPending}
+          >
             {signMessage.isPending ? (
               <>
                 Confirm in your wallet <DotLoader />

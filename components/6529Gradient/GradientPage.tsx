@@ -56,8 +56,8 @@ export default function GradientPage() {
 
   useEffect(() => {
     setIsOwner(
-      connectedProfile?.consolidation.wallets?.some((w) =>
-        areEqualAddresses(w.wallet.address, nft?.owner)
+      connectedProfile?.wallets?.some((w) =>
+        areEqualAddresses(w.wallet, nft?.owner)
       ) ?? false
     );
   }, [nft, connectedProfile]);
@@ -115,7 +115,8 @@ export default function GradientPage() {
             sm={{ span: 12 }}
             md={{ span: 6 }}
             lg={{ span: 6 }}
-            className="pt-2 position-relative">
+            className="pt-2 position-relative"
+          >
             {nft && (
               <NFTImage
                 id={fullscreenElementId}
@@ -134,7 +135,8 @@ export default function GradientPage() {
               sm={{ span: 12 }}
               md={{ span: 6 }}
               lg={{ span: 6 }}
-              className="pt-2">
+              className="pt-2"
+            >
               <Container>
                 <Row>
                   <Col>
@@ -215,7 +217,8 @@ export default function GradientPage() {
                       <a
                         href={`https://opensea.io/assets/ethereum/${GRADIENT_CONTRACT}/${nft.id}`}
                         target="_blank"
-                        rel="noreferrer">
+                        rel="noreferrer"
+                      >
                         <Image
                           className={styles.marketplace}
                           src="/opensea.png"
@@ -239,7 +242,8 @@ export default function GradientPage() {
                       <a
                         href={`https://x2y2.io/eth/${GRADIENT_CONTRACT}/${nft.id}`}
                         target="_blank"
-                        rel="noreferrer">
+                        rel="noreferrer"
+                      >
                         <Image
                           className={styles.marketplace}
                           src="/x2y2.png"
@@ -326,7 +330,8 @@ export default function GradientPage() {
                                   parseInt(nftId) === 0
                                     ? styles.nftPreviousdisabled
                                     : ""
-                                }`}>
+                                }`}
+                              >
                                 <FontAwesomeIcon icon="chevron-circle-left" />
                               </a>
                             </h2>
@@ -338,7 +343,8 @@ export default function GradientPage() {
                                   parseInt(nftId) === 100
                                     ? styles.nftPreviousdisabled
                                     : ""
-                                }`}>
+                                }`}
+                              >
                                 <FontAwesomeIcon icon="chevron-circle-right" />
                               </a>
                             </h2>

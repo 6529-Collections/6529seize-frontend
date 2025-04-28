@@ -20,8 +20,8 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
   const { connectedProfile, activeProfileProxy } = useAuth();
 
   const isConnectedIdentity = useMemo(() => {
-    return !!connectedProfile?.profile?.handle && !activeProfileProxy;
-  }, [connectedProfile?.profile?.handle, activeProfileProxy]);
+    return !!connectedProfile?.handle && !activeProfileProxy;
+  }, [connectedProfile?.handle, activeProfileProxy]);
 
   // Split waves into pinned and regular waves (no separate active section)
   const { pinnedWaves, regularWaves } = useMemo(() => {

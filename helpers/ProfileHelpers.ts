@@ -3,12 +3,12 @@ import {
   ProfileConnectedStatus,
 } from "../entities/IProfile";
 import { ProfileMinWithoutSubs } from "./ProfileTypes";
-
+import { ApiIdentity } from "../generated/models/ApiIdentity";
 export const getProfileConnectedStatus = ({
   profile,
   isProxy,
 }: {
-  readonly profile: IProfileAndConsolidations | null;
+  readonly profile: ApiIdentity | null;
   readonly isProxy: boolean;
 }): ProfileConnectedStatus => {
   if (!profile) {
@@ -17,7 +17,7 @@ export const getProfileConnectedStatus = ({
   if (isProxy) {
     return ProfileConnectedStatus.PROXY;
   }
-  if (!profile.profile?.handle) {
+  if (!profile.handle) {
     return ProfileConnectedStatus.NO_PROFILE;
   }
   return ProfileConnectedStatus.HAVE_PROFILE;
