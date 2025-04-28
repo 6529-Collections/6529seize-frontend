@@ -5,13 +5,13 @@ import React, {
   ReactNode,
   useEffect,
   useMemo,
+  useCallback,
 } from "react";
-import type { ViewKey, NavItem } from "./navTypes";
+import type { ViewKey, NavItem, RouteNavItem } from "./navTypes";
 import { useRouter } from "next/router";
 
 interface ViewContextType {
   activeView: ViewKey | null;
-  setActiveView: (view: ViewKey | null) => void;
   handleNavClick: (item: NavItem) => void;
 }
 
@@ -23,90 +23,73 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const router = useRouter();
   const [activeView, setActiveView] = useState<ViewKey | null>(null);
   const [lastVisitedWave, setLastVisitedWave] = useState<string | null>(null);
+  const [lastVisitedPath, setLastVisitedPath] = useState<string | null>(null);
 
   useEffect(() => {
-    setActiveView(null);
-    if (router.pathname.startsWith("/my-stream")) {
-      const waveId = (() => {
-        const queryMatch = router.asPath.match(/[?&]wave=([^&]+)/);
-        if (queryMatch) return queryMatch[1];
-        const pathMatch = router.asPath.match(/\/wave\/([^/?]+)/);
-        if (pathMatch) return pathMatch[1];
-        return null;
-      })();
-
-      if (waveId) {
-        setLastVisitedWave(waveId);
+    if (
+      router.pathname.startsWith("/my-stream") &&
+      !router.pathname.includes("notifications")
+    ) {
+      const { query } = router;
+      if (query.wave) {
+        setLastVisitedWave(query.wave as string);
       } else {
         setLastVisitedWave(null);
       }
     }
-  }, [router.asPath]);
+    setLastVisitedPath(router.pathname);
+    setActiveView(null);
+  }, [router.asPath, router.pathname]);
 
-  const handleNavClick = (item: NavItem) => {
-    if (item.kind === "route") {
-      const extractWaveId = (path: string): string | null => {
-        const queryMatch = path.match(/[?&]wave=([^&]+)/);
-        if (queryMatch) return queryMatch[1];
-        const pathMatch = path.match(/\/wave\/([^/?]+)/);
-        if (pathMatch) return pathMatch[1];
-        return null;
-      };
-
-      const isStreamIcon = item.href === "/my-stream";
-
-      if (isStreamIcon) {
-        if (activeView !== null) {
-          setActiveView(null);
-          return;
-        }
-
-        const currentWaveId = extractWaveId(router.asPath);
-
-        if (currentWaveId) {
-          router.push("/my-stream").then(() => setActiveView(null));
-          return;
-        }
-
-        if (lastVisitedWave) {
-          const currentPathBase = router.asPath.split("?")[0].replace(/\/$/, "");
-          if (currentPathBase === "/my-stream") {
-            router.push(`/my-stream?wave=${lastVisitedWave}`).then(() => setActiveView(null));
-          } else {
-            router.push(`/my-stream?wave=${lastVisitedWave}`).then(() => setActiveView(null));
-          }
-          return;
-        }
-
-        const currentPathBase = router.asPath.split("?")[0].replace(/\/$/, "");
-        if (currentPathBase !== "/my-stream") {
-          router.push("/my-stream").then(() => setActiveView(null));
-        } else {
-          setActiveView(null);
-        }
-        return;
+  const getHref = useCallback(
+    (item: RouteNavItem) => {
+      if (
+        item.name === "Stream" &&
+        lastVisitedPath?.startsWith("/my-stream") &&
+        !lastVisitedPath.includes("notifications") &&
+        lastVisitedWave && !activeView
+      ) {
+        return item.href;
       }
-
-      const currentPathBase = router.asPath.split("?")[0].replace(/\/$/, "");
-      const targetPathBase = item.href.split("?")[0].replace(/\/$/, "");
-
-      if (currentPathBase !== targetPathBase) {
-        router.push(item.href).then(() => setActiveView(null));
+      if (item.name === "Stream" && lastVisitedWave) {
+        return `/my-stream?wave=${lastVisitedWave}`;
       } else {
-        setActiveView(null);
+        return item.href;
       }
-    } else {
-      setActiveView(item.viewKey);
-    }
-  };
+    },
+    [lastVisitedWave, lastVisitedPath, activeView]
+  );
+
+  const handleRouteClick = useCallback(
+    (item: RouteNavItem) => {
+      const href = getHref(item);
+      router.push(href, undefined, { shallow: true }).then(() => {
+        setActiveView(null);
+      });
+    },
+    [getHref, lastVisitedWave, lastVisitedPath, activeView]
+  );
+
+  const handleNavClick = useCallback(
+    (item: NavItem) => {
+      if (item.kind === "route") {
+        handleRouteClick(item);
+      } else {
+        setActiveView(item.viewKey);
+      }
+    },
+    [handleRouteClick, setActiveView]
+  );
 
   const providerValue = useMemo(
-    () => ({ activeView, setActiveView, handleNavClick }),
-    [activeView, lastVisitedWave]
+    () => ({ activeView, handleNavClick }),
+    [activeView, lastVisitedWave, lastVisitedPath]
   );
 
   return (
-    <ViewContext.Provider value={providerValue}>{children}</ViewContext.Provider>
+    <ViewContext.Provider value={providerValue}>
+      {children}
+    </ViewContext.Provider>
   );
 };
 
