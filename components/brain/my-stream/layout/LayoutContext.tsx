@@ -352,7 +352,14 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   // Per-view styles with inline padding logic
   const waveViewStyle = useMemo<React.CSSProperties>(() => {
     if (!spaces.measurementsComplete) return {};
-    const capSpace = isAndroid ? 85 : isIos ? 20 : isCapacitor ? 20 : 0;
+
+    let capSpace = 0;
+    if (isAndroid) {
+      capSpace = 85;
+    } else if (isIos || isCapacitor) {
+      capSpace = 20;
+    }
+
     const adjustedSpaces = { ...spaces, mobileNavSpace: 0 };
     return calculateHeightStyle("wave", adjustedSpaces, capSpace);
   }, [spaces, isAndroid, isIos, isCapacitor]);

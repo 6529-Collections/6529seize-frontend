@@ -4,6 +4,7 @@ import React, {
   useState,
   ReactNode,
   useEffect,
+  useMemo,
 } from "react";
 import type { ViewKey } from "./navTypes";
 import { useRouter } from "next/router";
@@ -25,10 +26,13 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     setActiveView(null);
   }, [router.asPath]);
 
+  const providerValue = useMemo(
+    () => ({ activeView, setActiveView }),
+    [activeView]
+  );
+
   return (
-    <ViewContext.Provider value={{ activeView, setActiveView }}>
-      {children}
-    </ViewContext.Provider>
+    <ViewContext.Provider value={providerValue}>{children}</ViewContext.Provider>
   );
 };
 

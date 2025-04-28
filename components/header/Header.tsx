@@ -519,7 +519,6 @@ export default function Header(props: Readonly<Props>) {
   return (
     <>
       {printBurgerMenu()}
-      {/* {capacitor.isCapacitor && <CapacitorWidget />} */}
       <Container fluid className={`${containerClassName} ${props.extraClass}`}>
         <Row>
           <Col>
