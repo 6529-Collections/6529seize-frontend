@@ -990,12 +990,12 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       />
       
       {/* Terms of Service Flow - Modal will render when needed */}
-      <React.Suspense fallback={null}>
+      {/* <React.Suspense fallback={null}>
         {(() => {
           const TermsFlow = React.lazy(() => import('../terms/TermsSignatureFlow'));
           return <TermsFlow />;
         })()}
-      </React.Suspense>
+      </React.Suspense> */}
     </div>
   );
 };

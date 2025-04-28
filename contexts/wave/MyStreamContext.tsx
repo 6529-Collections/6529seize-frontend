@@ -108,6 +108,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   useEffect(() => {
     if (activeWaveId) {
+
       waveDataManager.registerWave(activeWaveId, true);
     }
   }, [activeWaveId]);
