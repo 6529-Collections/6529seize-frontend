@@ -3,9 +3,7 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { BrainView } from "../BrainMobile";
 import { useWaveTimers } from "../../../hooks/useWaveTimers";
 
-interface RegisterTabRef {
-  (view: BrainView, el: HTMLButtonElement | null): void;
-}
+type RegisterTabRef = (view: BrainView, el: HTMLButtonElement | null) => void;
 
 interface MyStreamWaveTabsLeaderboardProps {
   readonly wave: ApiWave;
