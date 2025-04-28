@@ -652,7 +652,7 @@ export default function ReactQueryWrapper({
       });
     }
 
-    if (profileProxy && profileProxy.created_by?.handle && profileProxy.granted_to?.handle) {
+    if (profileProxy?.created_by?.handle && profileProxy.granted_to?.handle) {
       invalidateQueries({
         key: QueryKey.PROFILE,
         values: [

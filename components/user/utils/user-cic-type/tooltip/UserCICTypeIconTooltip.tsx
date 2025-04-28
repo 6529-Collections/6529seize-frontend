@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { CICType, RateMatter, RatingWithProfileInfoAndLevel } from "../../../../../entities/IProfile";
+import {
+  CICType,
+  RateMatter,
+  RatingWithProfileInfoAndLevel,
+} from "../../../../../entities/IProfile";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
 import {
@@ -10,8 +14,7 @@ import {
 import { CIC_META } from "../../user-cic-status/UserCICStatus";
 import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import { keepPreviousData } from "@tanstack/react-query";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../helpers/Types";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 import { SortDirection } from "../../../../../entities/ISort";
@@ -36,9 +39,7 @@ export default function UserCICTypeIconTooltip({
     setCicType(cicToType(profile.cic));
   }, [profile]);
 
-  const {
-    data: ratings,
-  } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
+  const { data: ratings } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
     queryKey: [
       QueryKey.PROFILE_RATERS,
       {
