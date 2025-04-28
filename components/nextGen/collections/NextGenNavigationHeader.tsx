@@ -1,9 +1,10 @@
 import styles from "./NextGen.module.scss";
 
 import { useState, useEffect } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
 import { LFGButton } from "../../lfg-slideshow/LFGSlideshow";
+import CollectionsDropdown from "../../collections-dropdown/CollectionsDropdown";
 
 export enum NextGenView {
   COLLECTIONS = "Collections",
@@ -117,6 +118,15 @@ export default function NextGenNavigationHeader(
           </span>
         </div>
       </Container>
+      
+      <Container className="d-xl-none pb-3 px-5 pl-md-4 pr-md-0">
+        <Row className="justify-content-xs-start justify-content-sm-center justify-content-md-start">
+          <Col xs={12} sm="auto" className="px-0">
+            <CollectionsDropdown activePage="nextgen" />
+          </Col>
+        </Row>
+      </Container>
+      
       <hr className={styles.navigationHeaderHr} />
     </>
   );

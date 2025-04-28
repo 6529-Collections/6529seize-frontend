@@ -1,0 +1,76 @@
+@import "../../styles/variables.scss";
+
+.collectionsDropdown {
+  width: 100%;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  
+  a {
+    line-height: 30px;
+  }
+  
+  button {
+    text-align: left;
+    font-size: 1rem !important;
+    padding: 0.5rem 1rem;
+    min-width: 180px; /* Standard min-width for dropdown */
+    background-color: rgba(255, 255, 255, 0.05) !important; /* Added subtle background */
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    border-radius: 4px;
+    position: relative;
+    color: white !important;
+    
+    &:hover, &:focus, &:active {
+      color: rgba(255, 255, 255, 0.9) !important;
+      background-color: rgba(255, 255, 255, 0.15) !important; /* Slightly increased brightness on hover */
+      
+      &::after {
+        color: rgba(255, 255, 255, 0.9) !important;
+      }
+    }
+    
+    &::after {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white !important;
+      margin-top: 0 !important; /* Reset bootstrap's default margin */
+      font-size: 1.2em; /* Make the arrow bigger */
+      margin-left: 10px; /* Add space between text and arrow */
+    }
+  }
+  
+  div {
+    width: 100%;
+  }
+  
+  /* Ensure active dropdown item is styled correctly */
+  :global(.dropdown-item.active) {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+  }
+  
+  /* Style dropdown items on hover */
+  :global(.dropdown-item:hover) {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .collectionsDropdown {
+    button {
+      min-width: 200px; /* Slightly wider on larger screens */
+    }
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .collectionsDropdown {
+    button {
+      width: 100%;
+    }
+  }
+}

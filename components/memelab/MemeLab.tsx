@@ -20,6 +20,7 @@ import { MEMELAB_CONTRACT } from "../../constants";
 import { printVolumeTypeDropdown, SortButton } from "../the-memes/TheMemes";
 import { MemeLabSort } from "../../enums";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
+import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
 
 interface Props {
   wallets: string[];
@@ -658,12 +659,26 @@ export default function MemeLabComponent(props: Readonly<Props>) {
         <Col>
           <Container className="pt-4">
             <>
+              {/* Page header - visible on all devices */}
               <Row>
-                <Col className="d-flex align-items-center gap-3">
-                  <h1>
-                    <span className="font-lightest">Meme</span> Lab
-                  </h1>
-                  <LFGButton contract={MEMELAB_CONTRACT} />
+                <Col className="d-flex align-items-center justify-content-between mb-3">
+                  <span className="d-flex align-items-center gap-3">
+                    <h1 className="mb-0">
+                      <span className="font-lightest">Meme</span> Lab
+                    </h1>
+                    <LFGButton contract={MEMELAB_CONTRACT} />
+                  </span>
+                </Col>
+              </Row>
+              
+              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
+              <Row className="d-xl-none">
+                <Col xs={12} className="mb-3">
+                  <Row>
+                    <Col xs={12} sm="auto">
+                      <CollectionsDropdown activePage="memelab" />
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
               <Row className="pt-2">

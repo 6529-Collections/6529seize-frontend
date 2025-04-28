@@ -29,7 +29,7 @@ export default function FeedWrapper({
   onDropContentClick,
 }: FeedWrapperProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { feedViewStyle } = useLayout();
+  const { myStreamFeedStyle } = useLayout();
 
   const handleScrollUpNearTop = () => {
     onBottomIntersection(true);
@@ -38,7 +38,7 @@ export default function FeedWrapper({
   return (
     <div 
       className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl"
-      style={feedViewStyle}
+      style={myStreamFeedStyle}
     >
       <FeedScrollContainer
         ref={scrollRef}

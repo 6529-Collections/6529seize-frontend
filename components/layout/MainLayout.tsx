@@ -4,6 +4,9 @@ import useIsMobileScreen from "../../hooks/isMobileScreen";
 import MobileLayout from "./MobileLayout";
 import DesktopLayout from "./DesktopLayout";
 import ClientOnly from "../client-only/ClientOnly";
+import { ViewProvider } from "../navigation/ViewContext";
+import { MyStreamProvider } from "../../contexts/wave/MyStreamContext";
+import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -17,13 +20,19 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const isSmall = router.pathname.startsWith("/my-stream");
 
   return (
-    <ClientOnly>
-      {isMobile ? (
-        <MobileLayout>{children}</MobileLayout>
-      ) : (
-        <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
-      )}
-    </ClientOnly>
+    <ViewProvider>
+      <LayoutProvider>
+        <ClientOnly>
+          <MyStreamProvider>
+            {isMobile ? (
+              <MobileLayout>{children}</MobileLayout>
+            ) : (
+              <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
+            )}
+          </MyStreamProvider>
+        </ClientOnly>
+      </LayoutProvider>
+    </ViewProvider>
   );
 };
 

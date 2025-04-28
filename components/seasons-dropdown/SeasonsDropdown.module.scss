@@ -1,7 +1,7 @@
 @import "../../styles/variables.scss";
 
 .seasonDropdown {
-  text-align: center;
+  text-align: left;
   background-color: transparent;
   border: none;
   padding-right: 25px;
@@ -13,10 +13,17 @@
     font-weight: bolder !important;
     cursor: copy;
     padding: 0;
+    text-align: left;
     background-color: transparent !important;
     border-color: transparent !important;
+    position: relative;
     &::after {
-      margin-top: 0.8rem;
+      position: absolute;
+      margin-top: 0;
+      top: 50%;
+      margin-left: 0.5rem;
+      transform: translateY(-50%);
+      font-size: 1.2em; /* Make the arrow bigger */
     }
   }
   div {
@@ -26,10 +33,27 @@
 
 @media only screen and (max-width: 800px) {
   .seasonDropdown {
+    width: auto; /* Changed from 100% to auto to prevent full width */
+    display: inline-block; /* Keeps it to the size of its content */
+    
     button {
+      text-align: left;
+      width: auto; /* Changed from 100% to auto */
+      position: relative;
+      padding-right: 1.75rem; /* Make space for the arrow */
+      
       &::after {
-        margin-top: 0.5rem;
+        position: absolute;
+        right: 0; /* Position at the right edge of button */
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2em; /* Make the arrow bigger */
       }
+    }
+    
+    div {
+      width: auto;
+      min-width: 120px; /* Ensure dropdown menu has reasonable width */
     }
   }
 }

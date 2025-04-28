@@ -22,6 +22,7 @@ import { commonApiFetch } from "../../services/api/common-api";
 import { AuthContext } from "../auth/Auth";
 import { MemeLabSort, MemesSort } from "../../enums";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
+import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
 
 interface Meme {
   meme: number;
@@ -418,19 +419,42 @@ export default function TheMemesComponent() {
         <Col>
           <Container className="pt-4">
             <>
+              {/* Page header - visible on all devices */}
               <Row>
-                <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                   <span className="d-flex align-items-center gap-3">
-                    <h1 className="no-wrap">
+                    <h1 className="no-wrap mb-0">
                       <span className="font-lightest">The</span> Memes
                     </h1>
                     <LFGButton contract={MEMES_CONTRACT} />
                   </span>
-                  <SeasonsDropdown
-                    seasons={seasons.map((s) => s.id)}
-                    selectedSeason={selectedSeason}
-                    setSelectedSeason={setSelectedSeason}
-                  />
+                  <div className="d-none d-sm-block">
+                    <SeasonsDropdown
+                      seasons={seasons.map((s) => s.id)}
+                      selectedSeason={selectedSeason}
+                      setSelectedSeason={setSelectedSeason}
+                    />
+                  </div>
+                </Col>
+              </Row>
+              
+              {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
+              <Row className="d-xl-none">
+                <Col xs={12} className="mb-3">
+                  <Row>
+                    <Col xs={12} sm="auto">
+                      <CollectionsDropdown activePage="memes" />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col xs={12} className="mb-3 d-flex d-sm-none">
+                  <div className="text-start">
+                    <SeasonsDropdown
+                      seasons={seasons.map((s) => s.id)}
+                      selectedSeason={selectedSeason}
+                      setSelectedSeason={setSelectedSeason}
+                    />
+                  </div>
                 </Col>
               </Row>
               <Row className="pt-2">
