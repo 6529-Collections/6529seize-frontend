@@ -1,5 +1,7 @@
 import { useContext } from "react";
 import { AuthContext } from "../../../auth/Auth";
+import { MAX_DROP_UPLOAD_FILES } from "../../../../helpers/Helpers";
+
 
 export default function CreateDropActionsRow({
   canAddPart,
@@ -43,7 +45,7 @@ export default function CreateDropActionsRow({
               onChange={(e: any) => {
                 if (e.target.files) {
                   const files: File[] = Array.from(e.target.files);
-                  if (files.length > 4) {
+                  if (files.length > MAX_DROP_UPLOAD_FILES) {
                     setToast({
                       message: "You can only upload up to 4 files at a time",
                       type: "error",

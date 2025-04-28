@@ -1,11 +1,11 @@
 # Task ID: 5
-# Title: Implement initial ModalLayout integration
+# Title: Document the constant and update code comments
 # Status: done
-# Dependencies: 4
-# Priority: high
-# Description: Replace the inner structure of TermsOfServiceModal with ModalLayout, passing the required props while maintaining the outer container structure.
+# Dependencies: 1, 2, 3
+# Priority: low
+# Description: Add appropriate documentation for the new constant and update any relevant code comments in the modified files.
 # Details:
-Modify the TermsOfServiceModal to use ModalLayout while preserving the outer container structure: 1) Keep the FocusTrap as the outermost wrapper, 2) Maintain the outer overlay/centering div structure, 3) Place ModalLayout inside this structure, 4) Pass title="Terms of Service" to ModalLayout, 5) Pass onCancel={onClose} to ModalLayout, 6) Pass the previously identified content elements as children to ModalLayout. The basic structure should be: `<FocusTrap><div className="overlay"><div className="container"><ModalLayout title="Terms of Service" onCancel={onClose}>{contentElements}</ModalLayout></div></div></FocusTrap>`.
+Add a descriptive comment above the MAX_DROP_UPLOAD_FILES constant explaining its purpose and usage. Update any comments in CreateDropActionsRow.tsx and CreateDropContent.tsx that reference the file limit to mention the constant instead of the hardcoded value. If there's a project documentation file or wiki, consider adding a note about this constant for future developers. Ensure code comments accurately reflect the changes made and provide context for why the constant exists.
 
 # Test Strategy:
-Render the component and verify it displays without errors. Check that the title appears correctly and the close button is visible. Verify that the modal maintains proper positioning and overlay effects from the outer container structure.
+Review the documentation and comments for clarity, accuracy, and completeness. Ensure they provide sufficient context for future developers to understand the purpose and usage of the constant.

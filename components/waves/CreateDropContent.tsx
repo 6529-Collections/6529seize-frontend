@@ -58,6 +58,8 @@ import throttle from "lodash/throttle";
 import { useWebSocket } from "../../services/websocket";
 import { WsMessageType } from "../../helpers/Types";
 import { ApiIdentity } from "../../generated/models/ObjectSerializer";
+import { MAX_DROP_UPLOAD_FILES } from '../../helpers/Helpers';
+
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(() => import('../terms/TermsSignatureFlow'), {
@@ -791,14 +793,14 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     let updatedFiles = [...files, ...newFiles];
     let removedCount = 0;
 
-    if (updatedFiles.length > 4) {
-      removedCount = updatedFiles.length - 4;
-      updatedFiles = updatedFiles.slice(-4);
+    if (updatedFiles.length > MAX_DROP_UPLOAD_FILES) {
+      removedCount = updatedFiles.length - MAX_DROP_UPLOAD_FILES;
+      updatedFiles = updatedFiles.slice(-MAX_DROP_UPLOAD_FILES);
 
       setToast({
         message: `File limit exceeded. The ${removedCount} oldest file${
           removedCount > 1 ? "s were" : " was"
-        } removed to maintain the 4-file limit. New files have been added.`,
+        } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
         type: "warning",
       });
     }
