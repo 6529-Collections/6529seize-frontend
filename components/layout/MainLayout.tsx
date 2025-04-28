@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
 import { useRouter } from "next/router";
-import useIsMobileScreen from "../../hooks/isMobileScreen";
+import useDeviceInfo from "../../hooks/useDeviceInfo";
 import MobileLayout from "./MobileLayout";
 import DesktopLayout from "./DesktopLayout";
 import ClientOnly from "../client-only/ClientOnly";
@@ -13,11 +13,13 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
-  const isMobile = useIsMobileScreen();
   const router = useRouter();
+  const { isMobileDevice, hasTouchScreen } = useDeviceInfo();
+  const isMobile = isMobileDevice ?? hasTouchScreen;
 
   // Pages that should use the small header
   const isSmall = router.pathname.startsWith("/my-stream");
+  
 
   return (
     <ViewProvider>

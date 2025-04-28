@@ -11,7 +11,7 @@ interface Props {
 
 const NavItem = ({ item }: Props) => {
   const router = useRouter();
-  const { activeView, setActiveView } = useViewContext();
+  const { activeView, handleNavClick } = useViewContext();
 
   const { name } = item;
   const { icon } = item;
@@ -41,15 +41,7 @@ const NavItem = ({ item }: Props) => {
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
   let isActive = false;
-  const handleClick = () => {
-    if (item.kind === "route") {
-      router.push(item.href).then(() => {
-        setActiveView(null);
-      });
-    } else {
-      setActiveView(item.viewKey);
-    }
-  };
+  const handleClick = () => handleNavClick(item);
 
   if (item.kind === "route") {
     isActive = router.pathname === item.href && activeView === null;

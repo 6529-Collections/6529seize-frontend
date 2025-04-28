@@ -6,12 +6,10 @@ import { useState, useEffect } from "react";
  * 
  * @returns Object containing device information:
  * - isMobileDevice: Whether the device is a mobile device (based on user agent)
- * - isMobileScreen: Whether the screen is mobile-sized (≤ 750px width)
  * - hasTouchScreen: Whether the device has a touch screen
  */
 export default function useDeviceInfo() {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [isMobileScreen, setIsMobileScreen] = useState(false);
   const [hasTouchScreen, setHasTouchScreen] = useState(false);
 
   // Check for mobile device
@@ -27,21 +25,8 @@ export default function useDeviceInfo() {
     setHasTouchScreen(window.matchMedia("(pointer: coarse)").matches);
   }, []);
 
-  // Check for mobile screen size
-  useEffect(() => {
-    function checkMobile() {
-      const screenSize = window.innerWidth;
-      setIsMobileScreen(screenSize <= 750);
-    }
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
   return {
     isMobileDevice,
-    isMobileScreen,
     hasTouchScreen
   };
 }
