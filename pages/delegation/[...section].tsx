@@ -1,6 +1,6 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { DelegationCenterSection } from "../../components/delegation/DelegationCenterMenu";
@@ -185,20 +185,20 @@ export default function DelegationsDocumentation(props: any) {
     pageProps.useCaseQuery
   );
 
-  function getQueryParams() {
+  function getQueryParams(s: DelegationCenterSection) {
     let queryParams: { [key: string]: string | number } = {};
     if (
       addressQuery &&
       [
         DelegationCenterSection.CHECKER,
         DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
-      ].includes(activeSection)
+      ].includes(s)
     ) {
       queryParams = { address: addressQuery };
     } else {
       setAddressQuery("");
     }
-    if (activeSection === DelegationCenterSection.REGISTER_DELEGATION) {
+    if (s === DelegationCenterSection.REGISTER_DELEGATION) {
       if (collectionQuery) {
         queryParams = { ...queryParams, collection: collectionQuery };
       }
@@ -212,9 +212,9 @@ export default function DelegationsDocumentation(props: any) {
     return queryParams;
   }
 
-  useEffect(() => {
-    if (activeSection) {
-      if (activeSection === DelegationCenterSection.HTML && pageProps.path) {
+  const updatePath = (s: DelegationCenterSection) => {
+    if (s) {
+      if (s === DelegationCenterSection.HTML && pageProps.path) {
         router.push(
           {
             pathname: `/delegation/${pageProps.path.join("/")}`,
@@ -223,26 +223,23 @@ export default function DelegationsDocumentation(props: any) {
           { shallow: true }
         );
       } else {
-        const queryParams = getQueryParams();
+        const queryParams = getQueryParams(s);
         router.push(
           {
-            pathname: `/delegation/${activeSection}`,
+            pathname: `/delegation/${s}`,
             query: queryParams,
           },
           undefined,
           { shallow: true }
         );
       }
-      window.scrollTo(0, 0);
     }
-  }, [
-    activeSection,
-    addressQuery,
-    collectionQuery,
-    useCaseQuery,
-    pageProps.path,
-    router,
-  ]);
+    window.scrollTo(0, 0);
+  };
+
+  useEffect(() => {
+    updatePath(activeSection);
+  }, [addressQuery, collectionQuery, useCaseQuery, pageProps.path]);
 
   useEffect(() => {
     setTitle({
@@ -272,7 +269,10 @@ export default function DelegationsDocumentation(props: any) {
         <DelegationCenterMenu
           section={activeSection}
           path={pageProps.path}
-          setActiveSection={setActiveSection}
+          setActiveSection={(s) => {
+            setActiveSection(s);
+            updatePath(s);
+          }}
           address_query={addressQuery}
           setAddressQuery={setAddressQuery}
           collection_query={collectionQuery}
