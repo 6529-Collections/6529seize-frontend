@@ -9,7 +9,6 @@ const Header = dynamic(() => import("../../../components/header/Header"), {
 
 const IndexPage = () => (
   <>
-    <Header extraClass="header-wp" />
     <div>
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />

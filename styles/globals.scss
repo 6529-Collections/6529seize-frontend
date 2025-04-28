@@ -551,44 +551,6 @@ pre code {
   }
 }
 
-.header-wp {
-  @media (max-width: 1000px) {
-    .container {
-      max-width: 850px !important;
-    }
-  }
-
-  @media (max-width: 1100px) {
-    .container {
-      max-width: 950px !important;
-    }
-  }
-
-  @media (min-width: 1200px) {
-    .container {
-      max-width: 1050px !important;
-    }
-  }
-
-  @media (min-width: 1300px) {
-    .container {
-      max-width: 1150px !important;
-    }
-  }
-
-  @media (min-width: 1400px) {
-    .container {
-      max-width: 1250px !important;
-    }
-  }
-
-  @media (min-width: 1500px) {
-    .container {
-      max-width: 1280px !important;
-    }
-  }
-}
-
 /* X card */
 @media (max-width: 390px) {
   a.tw-no-underline .react-tweet-theme.tweet-container_root__0rJLq,
