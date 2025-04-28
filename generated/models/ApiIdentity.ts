@@ -10,19 +10,28 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileClassification } from '../models/ApiProfileClassification';
+import { ApiWallet } from '../models/ApiWallet';
 import { HttpFile } from '../http/http';
 
 export class ApiIdentity {
-    'id': string;
-    'handle': string;
-    'normalised_handle': string;
+    'id': string | null;
+    'handle': string | null;
+    'normalised_handle': string | null;
     'pfp': string | null;
     'cic': number;
     'rep': number;
     'level': number;
     'tdh': number;
+    'consolidation_key': string;
     'display': string;
     'primary_wallet': string;
+    'banner1': string | null;
+    'banner2': string | null;
+    'classification': ApiProfileClassification;
+    'sub_classification': string | null;
+    'query'?: string | null;
+    'wallets'?: Array<ApiWallet>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -76,6 +85,12 @@ export class ApiIdentity {
             "format": "int65"
         },
         {
+            "name": "consolidation_key",
+            "baseName": "consolidation_key",
+            "type": "string",
+            "format": ""
+        },
+        {
             "name": "display",
             "baseName": "display",
             "type": "string",
@@ -86,6 +101,42 @@ export class ApiIdentity {
             "baseName": "primary_wallet",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "banner1",
+            "baseName": "banner1",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "banner2",
+            "baseName": "banner2",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "classification",
+            "baseName": "classification",
+            "type": "ApiProfileClassification",
+            "format": ""
+        },
+        {
+            "name": "sub_classification",
+            "baseName": "sub_classification",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "query",
+            "baseName": "query",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wallets",
+            "baseName": "wallets",
+            "type": "Array<ApiWallet>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
@@ -95,4 +146,6 @@ export class ApiIdentity {
     public constructor() {
     }
 }
+
+
 

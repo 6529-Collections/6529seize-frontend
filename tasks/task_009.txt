@@ -1,0 +1,31 @@
+# Task ID: 9
+# Title: Test focus trap functionality
+# Status: done
+# Dependencies: 8
+# Priority: medium
+# Description: Verify that the focus trap still works correctly with the new modal structure.
+# Details:
+Initial code review has confirmed that the `<FocusTrap active={isOpen}>` component is still present in `TermsOfServiceModal.tsx` and correctly wraps the entire modal presentation structure, including the outer overlay `div` and the `<ModalLayout>` component. Now we need to complete the manual testing to verify actual behavior: 1) Open the modal and verify focus is trapped within it, 2) Tab through all focusable elements to ensure they receive focus in the correct order, 3) Verify that focus doesn't escape the modal. Adjust the FocusTrap implementation if needed based on testing results.
+
+# Test Strategy:
+Manually test keyboard navigation within the modal, ensuring focus remains trapped and all interactive elements are accessible via keyboard. Test both forward tabbing (Tab key) and backward tabbing (Shift+Tab) to verify focus cycles correctly within the modal without escaping.
+
+# Subtasks:
+## 9.1. Code structure verification [completed]
+### Dependencies: None
+### Description: Verified that `<FocusTrap active={isOpen}>` component is present in `TermsOfServiceModal.tsx` and correctly wraps the entire modal structure including `ModalLayout`.
+### Details:
+
+
+## 9.2. Manual keyboard navigation testing [done]
+### Dependencies: None
+### Description: Test tabbing through all interactive elements in the modal to verify focus is properly trapped and all elements are accessible.
+### Details:
+
+
+## 9.3. Edge case testing [done]
+### Dependencies: None
+### Description: Test focus behavior when modal opens/closes, and verify initial focus placement is appropriate.
+### Details:
+
+

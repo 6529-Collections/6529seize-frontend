@@ -29,7 +29,7 @@ export enum WaveDropsLeaderboardSort {
 
 interface UseWaveDropsLeaderboardProps {
   readonly waveId: string;
-  readonly connectedProfileHandle: string | undefined;
+  readonly connectedProfileHandle: string | null;
   readonly sort?: WaveDropsLeaderboardSort;
   readonly pausePolling?: boolean;
 }

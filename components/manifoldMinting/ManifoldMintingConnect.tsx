@@ -116,7 +116,8 @@ export default function ManifoldMintingConnect(
               style={{
                 width: "fit-content",
               }}
-              onClick={() => reset()}>
+              onClick={() => reset()}
+            >
               <span className="font-smaller font-lighter pt-1">clear</span>
             </button>
           </span>
@@ -126,11 +127,9 @@ export default function ManifoldMintingConnect(
   }
 
   function printConnected() {
-    const type = cicToType(connectedProfile?.cic?.cic_rating ?? 0);
+    const type = cicToType(connectedProfile?.cic ?? 0);
     const profileHandle =
-      connectedProfile?.profile?.handle ??
-      connectedProfile?.consolidation.consolidation_display ??
-      account.address;
+      connectedProfile?.handle ?? connectedProfile?.display ?? account.address;
     const showAddress = !areEqualAddresses(profileHandle, account.address);
     return (
       <div className="d-flex flex-column pt-1 pb-1">
@@ -176,13 +175,15 @@ export default function ManifoldMintingConnect(
           <button
             className={`btn ${mintForFren ? "btn-dark" : "btn-light"}`}
             style={{ width: "50%" }}
-            onClick={() => setMintForFren(false)}>
+            onClick={() => setMintForFren(false)}
+          >
             Mint for me
           </button>
           <button
             className={`btn ${mintForFren ? "btn-light" : "btn-dark"}`}
             style={{ width: "50%" }}
-            onClick={() => setMintForFren(true)}>
+            onClick={() => setMintForFren(true)}
+          >
             Mint for fren
           </button>
         </Col>

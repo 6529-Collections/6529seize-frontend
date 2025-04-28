@@ -1,11 +1,9 @@
-import {
-  CicStatement,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { CicStatement } from "../../../../entities/IProfile";
 import { useEffect, useState } from "react";
 import PencilIcon from "../../../utils/icons/PencilIcon";
 import UserPageHeaderAboutStatement from "./UserPageHeaderAboutStatement";
 import UserPageHeaderAboutEdit from "./UserPageHeaderAboutEdit";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 
 enum AboutStatementView {
   STATEMENT = "STATEMENT",
@@ -17,7 +15,7 @@ export default function UserPageHeaderAbout({
   statement,
   canEdit,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly statement: CicStatement | null;
   readonly canEdit: boolean;
 }) {

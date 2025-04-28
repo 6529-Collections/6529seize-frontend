@@ -1,5 +1,5 @@
 import { NextGenCollection } from "../../../../../../entities/INextgen";
-import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
 import { Transaction } from "../../../../../../entities/ITransaction";
 import { MemeLite } from "../../../../settings/UserSettingsImgSelectMeme";
 import UserPageStatsActivityWalletTableRow from "./row/UserPageStatsActivityWalletTableRow";
@@ -11,7 +11,7 @@ export default function UserPageStatsActivityWalletTable({
   nextgenCollections,
 }: {
   readonly transactions: Transaction[];
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly memes: MemeLite[];
   readonly nextgenCollections: NextGenCollection[];
 }) {

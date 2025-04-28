@@ -5,7 +5,7 @@ import { commonApiFetch } from "../services/api/common-api";
 import useCapacitor from "./useCapacitor";
 import { QueryKey } from "../components/react-query-wrapper/ReactQueryWrapper";
 import { getDefaultQueryRetry } from "../components/react-query-wrapper/utils/query-utils";
-export function useUnreadNotifications(handle: string | undefined) {
+export function useUnreadNotifications(handle: string | null) {
   const { isCapacitor } = useCapacitor();
 
   const { data: notifications } = useQuery<ApiNotificationsResponse>({

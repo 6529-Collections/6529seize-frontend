@@ -1,4 +1,4 @@
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
 
@@ -13,22 +13,22 @@ import UserPageStatsBoostBreakdown from "./UserPageStatsBoostBreakdown";
 import { ConsolidatedTDH, TDH } from "../../../entities/ITDH";
 
 export function getStatsPath(
-  profile: IProfileAndConsolidations,
+  profile: ApiIdentity,
   activeAddress: string | null
 ) {
   if (activeAddress) {
     return `wallet/${activeAddress}`;
   }
-  if (profile.consolidation.consolidation_key) {
-    return `consolidation/${profile.consolidation.consolidation_key}`;
+  if (profile.consolidation_key) {
+    return `consolidation/${profile.consolidation_key}`;
   }
-  return `wallet/${profile.consolidation.wallets[0].wallet.address}`;
+  return `wallet/${profile.wallets?.[0].wallet}`;
 }
 
 export default function UserPageStats({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const [activeAddress, setActiveAddress] = useState<string | null>(null);
 
@@ -86,7 +86,7 @@ export default function UserPageStats({
         />
         <div>
           <UserAddressesSelectDropdown
-            addresses={profile.consolidation.wallets}
+            wallets={profile.wallets ?? []}
             onActiveAddress={setActiveAddress}
           />
         </div>

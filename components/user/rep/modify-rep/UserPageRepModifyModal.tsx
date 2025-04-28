@@ -2,7 +2,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import {
   ApiProfileRepRatesState,
-  IProfileAndConsolidations,
   RatingStats,
 } from "../../../../entities/IProfile";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -21,7 +20,7 @@ import {
 } from "../../../react-query-wrapper/ReactQueryWrapper";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 interface ApiAddRepRatingToProfileRequest {
   readonly amount: number;
   readonly category: string;
@@ -33,7 +32,7 @@ export default function UserPageRepModifyModal({
   category,
 }: {
   readonly onClose: () => void;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly category: string;
 }) {
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
@@ -45,12 +44,12 @@ export default function UserPageRepModifyModal({
       QueryKey.PROFILE_REP_RATINGS,
       {
         rater: activeProfileProxy?.created_by.handle,
-        handleOrWallet: profile.profile?.handle,
+        handleOrWallet: profile?.handle,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile.input_identity}/rep/ratings/received`,
+        endpoint: `profiles/${profile?.query}/rep/ratings/received`,
         params: activeProfileProxy?.created_by.handle
           ? { rater: activeProfileProxy.created_by.handle }
           : {},
@@ -62,18 +61,18 @@ export default function UserPageRepModifyModal({
     queryKey: [
       QueryKey.PROFILE_REP_RATINGS,
       {
-        rater: connectedProfile?.profile?.handle,
-        handleOrWallet: profile.profile?.handle,
+        rater: connectedProfile?.handle,
+        handleOrWallet: profile?.handle,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile.input_identity}/rep/ratings/received`,
-        params: connectedProfile?.profile?.handle
-          ? { rater: connectedProfile?.profile?.handle }
+        endpoint: `profiles/${profile?.query}/rep/ratings/received`,
+        params: connectedProfile?.handle
+          ? { rater: connectedProfile?.handle }
           : {},
       }),
-    enabled: !!connectedProfile?.profile?.handle,
+    enabled: !!connectedProfile?.handle,
   });
 
   const getProxyAvailableCredit = (): number | null => {
@@ -316,7 +315,7 @@ export default function UserPageRepModifyModal({
       category: string;
     }) =>
       await commonApiPost<ApiAddRepRatingToProfileRequest, void>({
-        endpoint: `profiles/${profile.input_identity}/rep/rating`,
+        endpoint: `profiles/${profile?.query}/rep/rating`,
         body: {
           amount,
           category,
@@ -381,7 +380,9 @@ export default function UserPageRepModifyModal({
             className="sm:tw-max-w-md tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
           >
             <UserPageRepModifyModalHeader
-              handleOrWallet={profile.input_identity}
+              handleOrWallet={
+                profile.query ?? profile.handle ?? profile.display
+              }
               onClose={onClose}
             />
             {repState && (

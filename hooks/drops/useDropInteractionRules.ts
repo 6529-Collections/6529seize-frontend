@@ -33,7 +33,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
     if (!connectedProfile) {
       return DropVoteState.NOT_LOGGED_IN;
     }
-    if (!connectedProfile.profile?.handle) {
+    if (!connectedProfile.handle) {
       return DropVoteState.NO_PROFILE;
     }
     if (activeProfileProxy) {
@@ -89,7 +89,7 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
 
   // Base rules that apply to all interactions
   const baseRules =
-    !!connectedProfile?.profile?.handle && // must have profile
+    !!connectedProfile?.handle && // must have profile
     !activeProfileProxy && // must not be using proxy
     !drop.id.startsWith("temp-"); // must not be temporary drop
 
@@ -109,8 +109,8 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   const canVote = voteState === DropVoteState.CAN_VOTE;
 
   const isAuthor =
-    !!connectedProfile?.profile?.handle &&
-    connectedProfile.profile.handle === drop.author.handle;
+    !!connectedProfile?.handle &&
+    connectedProfile.handle === drop.author.handle;
 
   const isAdmin = drop.wave.authenticated_user_admin;
   const adminDropDeletionEnabled = drop.wave.admin_drop_deletion_enabled;

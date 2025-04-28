@@ -1,6 +1,6 @@
 import styles from "./UserPageStats.module.scss";
 import { numberWithCommas } from "../../../helpers/Helpers";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import { Accordion, Container, Row, Col, Table } from "react-bootstrap";
 import {
   AggregatedActivity,
@@ -25,7 +25,7 @@ export default function UserPageStatsActivityOverview({
   profile,
   activeAddress,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
   const [activity, setActivity] = useState<AggregatedActivity | undefined>();

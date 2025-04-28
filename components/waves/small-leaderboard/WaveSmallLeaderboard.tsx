@@ -19,7 +19,7 @@ export const WaveSmallLeaderboard: React.FC<WaveSmallLeaderboardProps> = ({
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.profile?.handle,
+      connectedProfileHandle: connectedProfile?.handle ?? null,
     });
 
   const memoizedDrops = useMemo(() => drops, [drops]);

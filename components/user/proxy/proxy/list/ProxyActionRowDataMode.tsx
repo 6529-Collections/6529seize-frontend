@@ -1,4 +1,4 @@
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import {
   PROFILE_PROXY_ACTION_HAVE_CREDIT,
   PROFILE_PROXY_ACTION_LABELS,
@@ -23,7 +23,7 @@ export default function ProxyActionRowDataMode({
 }: {
   readonly action: ApiProfileProxyAction;
   readonly profileProxy: ApiProfileProxy;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly isSelf: boolean;
   readonly setViewMode: (mode: PROXY_ACTION_ROW_VIEW_MODE) => void;
 }) {

@@ -15,6 +15,9 @@
 - **Components**: Use function components with explicit return types
 - **File Structure**: Component files with matching .module.scss in same directory
 - **Error Handling**: Use try/catch blocks and provide user feedback with toast messages
+- **Function Parameters**: Prefer object inputs for functions with multiple parameters
+- **Null vs Undefined**: Prefer null over undefined for absence of values
+- **Interfaces**: Always use readonly for interface properties
 
 ## State Management
 - Use React hooks for local state

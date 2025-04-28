@@ -74,7 +74,10 @@ export default function ProxyCreate({
   };
 
   const onActionCreated = () => {
-    if (!newProfileProxy) {
+    if (
+      !newProfileProxy?.granted_to?.handle ||
+      !newProfileProxy?.created_by?.handle
+    ) {
       return;
     }
     setProfileProxy(newProfileProxy);

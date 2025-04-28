@@ -23,7 +23,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.profile?.handle,
+      connectedProfileHandle: connectedProfile?.handle ?? null,
       sort,
     });
   

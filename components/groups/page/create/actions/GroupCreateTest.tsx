@@ -93,7 +93,7 @@ export default function GroupCreateTest({
     const response = await createNewFilterMutation.mutateAsync({
       name: groupConfig.name.length
         ? groupConfig.name
-        : `${connectedProfile?.profile?.handle} Test Run`,
+        : `${connectedProfile?.handle} Test Run`,
       group: groupConfig.group,
     });
     if (response) {

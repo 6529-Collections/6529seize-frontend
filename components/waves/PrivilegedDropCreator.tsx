@@ -32,7 +32,7 @@ export default function PrivilegedDropCreator({
 }: PrivilegedDropCreatorProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
-    isLoggedIn: !!connectedProfile?.profile?.handle,
+    isLoggedIn: !!connectedProfile?.handle,
     isProxy: !!activeProfileProxy,
     canChat: wave.chat.authenticated_user_eligible,
     canDrop: wave.participation.authenticated_user_eligible,

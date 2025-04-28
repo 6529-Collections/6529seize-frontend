@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Distribution } from "../../../../../entities/IDistribution";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import {
   areEqualAddresses,
   capitalizeEveryWord,
@@ -37,7 +37,7 @@ export default function UserPageStatsActivityDistributionsTable({
   loading,
 }: {
   readonly items: Distribution[];
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly loading: boolean;
 }) {
   const getAvailablePhases = (): string[] => {
@@ -98,9 +98,9 @@ export default function UserPageStatsActivityDistributionsTable({
         tokenId: item.card_id,
         name: item.card_name,
         wallet:
-          profile.consolidation.wallets.find(
-            (w) => w.wallet.address.toLowerCase() === item.wallet.toLowerCase()
-          )?.wallet.ens ??
+          profile.wallets?.find(
+            (w) => w.wallet.toLowerCase() === item.wallet.toLowerCase()
+          )?.display ??
           item.wallet_display ??
           item.wallet,
         phases: phases.map((phase) => getItemPhaseAmount({ phase, item })),
@@ -117,46 +117,54 @@ export default function UserPageStatsActivityDistributionsTable({
         <tr>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-px-4 sm:tw-px-6 lg:tw-pr-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+          >
             Collection
           </th>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+          >
             Token
           </th>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3  tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3  tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+          >
             Name
           </th>
 
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+          >
             Wallet
           </th>
           {availablePhases.map((phase) => (
             <th
               key={getRandomObjectId()}
               scope="col"
-              className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+              className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+            >
               {capitalizeEveryWord(phase.replaceAll("_", " "))}
             </th>
           ))}
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+          >
             Minted
           </th>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+          >
             Total
           </th>
           <th
             scope="col"
-            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
+            className="tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-group tw-py-3 tw-text-right tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
+          >
             <div className={loading ? "tw-opacity-100" : "tw-opacity-0"}>
               <CircleLoader />
             </div>

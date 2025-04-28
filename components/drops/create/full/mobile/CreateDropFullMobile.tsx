@@ -11,7 +11,7 @@ import CreateDropContent, {
   CreateDropContentHandles,
 } from "../../utils/CreateDropContent";
 import CreateDropFullMobileMetadata from "./CreateDropFullMobileMetadata";
-import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../../types";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
 import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";

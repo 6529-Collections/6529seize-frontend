@@ -1,18 +1,14 @@
-import {
-  IProfileAndConsolidations,
-  RatingStats,
-} from "../../../../../entities/IProfile";
+import { RatingStats } from "../../../../../entities/IProfile";
 import UserPageRepRepsTableItem from "./UserPageRepRepsTableItem";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 
 export default function UserPageRepRepsTableBody({
   reps,
   profile,
-  giverAvailableRep,
   canEditRep,
 }: {
   readonly reps: RatingStats[];
-  readonly profile: IProfileAndConsolidations;
-  readonly giverAvailableRep: number;
+  readonly profile: ApiIdentity;
   readonly canEditRep: boolean;
 }) {
   return (
@@ -22,7 +18,6 @@ export default function UserPageRepRepsTableBody({
           key={rep.category}
           rep={rep}
           profile={profile}
-          giverAvailableRep={giverAvailableRep}
           canEditRep={canEditRep}
         />
       ))}

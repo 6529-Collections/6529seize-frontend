@@ -26,7 +26,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.profile?.handle,
+      connectedProfileHandle: connectedProfile?.handle ?? null,
       sort: WaveDropsLeaderboardSort.MY_REALTIME_VOTE,
       pausePolling,
     });

@@ -38,7 +38,8 @@ export function printVolumeTypeDropdown(
       className={`${styles.volumeDropdown} ${
         isVolumeSort ? styles.volumeDropdownEnabled : ""
       }`}
-      drop={"down-centered"}>
+      drop={"down-centered"}
+    >
       <Dropdown.Toggle>Volume</Dropdown.Toggle>
       <Dropdown.Menu>
         {Object.values(VolumeType).map((vol) => (
@@ -49,7 +50,8 @@ export function printVolumeTypeDropdown(
               if (!isVolumeSort) {
                 setVolumeSort();
               }
-            }}>
+            }}
+          >
             {vol}
           </Dropdown.Item>
         ))}
@@ -261,7 +263,7 @@ export default function TheMemesComponent() {
     if (connectedConsolidationKey && newTokenIds.length > 0) {
       fetchAllPages(
         `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${
-          connectedProfile?.consolidation.consolidation_key
+          connectedProfile?.consolidation_key
         }?contract=${MEMES_CONTRACT}&token_id=${newTokenIds.join(",")}`
       ).then((owners: NftOwner[]) => {
         setNftBalances([...nftBalances, ...owners]);
@@ -276,8 +278,8 @@ export default function TheMemesComponent() {
     setNftBalances([]);
     setNftBalancesTokenIds(new Set());
     setConnectedConsolidationKey(
-      connectedProfile?.consolidation?.consolidation_key ??
-        connectedProfile?.consolidation.wallets?.[0]?.wallet.address ??
+      connectedProfile?.consolidation_key ??
+        connectedProfile?.wallets?.[0]?.wallet ??
         ""
     );
   }, [connectedProfile]);
@@ -313,10 +315,12 @@ export default function TheMemesComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <a
           href={`/the-memes/${nft.id}`}
-          className="decoration-none scale-hover">
+          className="decoration-none scale-hover"
+        >
           <Container fluid>
             <Row className={connectedProfile ? styles.nftImagePadding : ""}>
               <NFTImage
@@ -503,7 +507,8 @@ export function SortButton(
       onClick={() => props.select()}
       className={`btn-link ${styles.sort} ${
         props.currentSort != props.sort ? styles.disabled : ""
-      }`}>
+      }`}
+    >
       {name}
     </button>
   );

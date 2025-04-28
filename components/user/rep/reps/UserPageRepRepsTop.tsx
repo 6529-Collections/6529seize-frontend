@@ -1,8 +1,6 @@
-import {
-  IProfileAndConsolidations,
-  RatingStats,
-} from "../../../../entities/IProfile";
+import { RatingStats } from "../../../../entities/IProfile";
 import UserPageRepsItem from "./UserPageRepsItem";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 
 export default function UserPageRepRepsTop({
   reps,
@@ -10,7 +8,7 @@ export default function UserPageRepRepsTop({
   canEditRep,
 }: {
   readonly reps: RatingStats[];
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly canEditRep: boolean;
 }) {
   return (

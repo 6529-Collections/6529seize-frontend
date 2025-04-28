@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import {
   CICType,
-  IProfileAndConsolidations,
+  RateMatter,
+  RatingWithProfileInfoAndLevel,
 } from "../../../../../entities/IProfile";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
@@ -12,18 +13,22 @@ import {
 } from "../../../../../helpers/Helpers";
 import { CIC_META } from "../../user-cic-status/UserCICStatus";
 import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { Page } from "../../../../../helpers/Types";
+import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
+import { SortDirection } from "../../../../../entities/ISort";
+import { ProfileRatersParamsOrderBy } from "../../raters-table/wrapper/ProfileRatersTableWrapper";
+import { commonApiFetch } from "../../../../../services/api/common-api";
 export default function UserCICTypeIconTooltip({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const { address } = useSeizeConnectContext();
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
 
-  const [cicType, setCicType] = useState<CICType>(
-    cicToType(profile.cic.cic_rating)
-  );
+  const [cicType, setCicType] = useState<CICType>(cicToType(profile.cic));
 
   useEffect(
     () => setIsMyProfile(amIUser({ profile, address })),
@@ -31,8 +36,38 @@ export default function UserCICTypeIconTooltip({
   );
 
   useEffect(() => {
-    setCicType(cicToType(profile.cic.cic_rating));
+    setCicType(cicToType(profile.cic));
   }, [profile]);
+
+  const { data: ratings } = useQuery<Page<RatingWithProfileInfoAndLevel>>({
+    queryKey: [
+      QueryKey.PROFILE_RATERS,
+      {
+        handleOrWallet: profile.handle,
+        matter: RateMatter.NIC,
+        page: 1,
+        pageSize: 1,
+        order: SortDirection.DESC,
+        orderBy: ProfileRatersParamsOrderBy.RATING,
+        given: false,
+      },
+    ],
+    queryFn: async () =>
+      await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
+        endpoint: `profiles/${profile.handle}/cic/ratings/by-rater`,
+        params: {
+          page: `${1}`,
+          page_size: `${1}`,
+          order: SortDirection.DESC.toLowerCase(),
+          order_by: ProfileRatersParamsOrderBy.RATING.toLowerCase(),
+          given: "false",
+        },
+      }),
+    enabled: !!profile.handle,
+    placeholderData: keepPreviousData,
+  });
+
+  useEffect(() => console.log(ratings), [ratings]);
 
   return (
     <div className="tw-p-3">
@@ -41,7 +76,7 @@ export default function UserCICTypeIconTooltip({
         <span className="tw-block tw-text-iron-200 tw-font-semibold">
           <span>Rating:</span>
           <span className="tw-ml-1 tw-text-iron-200 tw-font-bold">
-            {formatNumberWithCommas(profile.cic.cic_rating)}
+            {formatNumberWithCommas(profile.cic)}
           </span>
         </span>
         <span className="tw-block tw-text-iron-200 tw-font-semibold">
@@ -50,10 +85,11 @@ export default function UserCICTypeIconTooltip({
             {CIC_META[cicType].title}
           </span>
         </span>
+
         <span className="tw-block tw-text-iron-200 tw-font-semibold">
           <span>Raters:</span>
           <span className="tw-ml-1 tw-font-bold tw-text-iron-200">
-            {formatNumberWithCommas(profile.cic.contributor_count)}
+            {formatNumberWithCommas(ratings?.count ?? 0)}
           </span>
         </span>
       </div>

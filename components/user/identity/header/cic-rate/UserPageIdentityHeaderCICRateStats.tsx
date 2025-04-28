@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../auth/Auth";
 import Link from "next/link";
 import { formatNumberWithCommas } from "../../../../../helpers/Helpers";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "../../../../../generated/models/ApiProfileProxyActionType";
 
 export default function UserPageIdentityHeaderCICRateStats({
@@ -12,7 +12,7 @@ export default function UserPageIdentityHeaderCICRateStats({
   heroAvailableCredit,
 }: {
   readonly isTooltip: boolean;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly minMaxValues: {
     readonly min: number;
     readonly max: number;
@@ -77,13 +77,13 @@ export default function UserPageIdentityHeaderCICRateStats({
       {activeProfileProxy ? (
         <>
           <span className="tw-block tw-text-iron-300 tw-font-normal">
-            <span>Your max NIC Rating to {profile.profile?.handle}:</span>
+            <span>Your max NIC Rating to {profile.handle}:</span>
             <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
               {formatNumberWithCommas(minMaxValues.max)}
             </span>
           </span>
           <span className="tw-block tw-text-iron-300 tw-font-normal">
-            <span>Your min NIC Rating to {profile.profile?.handle}:</span>
+            <span>Your min NIC Rating to {profile.handle}:</span>
             <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
               {formatNumberWithCommas(minMaxValues.min)}
             </span>
@@ -91,7 +91,7 @@ export default function UserPageIdentityHeaderCICRateStats({
         </>
       ) : (
         <span className="tw-block tw-text-iron-300 tw-font-normal tw-break-all">
-          <span>Your max/min NIC Rating to {profile.profile?.handle}:</span>
+          <span>Your max/min NIC Rating to {profile.handle}:</span>
           <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
             +/- {formatNumberWithCommas(minMaxValues.max)}
           </span>

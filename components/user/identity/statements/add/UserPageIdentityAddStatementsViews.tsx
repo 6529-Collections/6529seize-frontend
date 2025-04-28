@@ -2,7 +2,7 @@ import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import UserPageIdentityAddStatementsSelect from "./UserPageIdentityAddStatementsSelect";
 import UserPageIdentityAddStatementsContact from "./contact/UserPageIdentityAddStatementsContact";
 import UserPageIdentityAddStatementsSocialMediaAccount from "./social-media/UserPageIdentityAddStatementsSocialMediaAccount";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import UserPageIdentityAddStatementsSocialMediaPosts from "./social-media-verification-posts/UserPageIdentityAddStatementsSocialMediaPosts";
 import { STATEMENT_ADD_VIEW } from "./UserPageIdentityAddStatements";
 import UserPageIdentityAddStatementsNFTAccounts from "./nft-accounts/UserPageIdentityAddStatementsNFTAccounts";
@@ -13,7 +13,7 @@ export default function UserPageIdentityAddStatementsViews({
   setActiveView,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly activeView: STATEMENT_ADD_VIEW;
   readonly setActiveView: (view: STATEMENT_ADD_VIEW) => void;
   readonly onClose: () => void;

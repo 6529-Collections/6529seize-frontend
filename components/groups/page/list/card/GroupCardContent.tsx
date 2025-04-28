@@ -28,7 +28,7 @@ export default function GroupCardContent({
           className="tw-mb-0 tw-text-xl tw-text-iron-50 tw-font-semibold tw-whitespace-nowrap tw-overflow-hidden tw-text-overflow-ellipsis tw-truncate">
           {group?.name ?? titlePlaceholder ?? ""}
         </p>
-        {!!connectedProfile?.profile?.handle && setState && (
+        {!!connectedProfile?.handle && setState && (
           <div className="tw-flex tw-items-center tw-gap-x-3">
             <button
               onClick={(e) => {

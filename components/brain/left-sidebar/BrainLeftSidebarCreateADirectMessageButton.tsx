@@ -12,8 +12,8 @@ const BrainLeftSidebarCreateADirectMessageButton: React.FC<
   const { connectedProfile, activeProfileProxy } = useAuth();
 
   const isConnectedIdentity = useMemo(() => {
-    return !!connectedProfile?.profile?.handle && !activeProfileProxy;
-  }, [connectedProfile?.profile?.handle, activeProfileProxy]);
+    return !!connectedProfile?.handle && !activeProfileProxy;
+  }, [connectedProfile?.handle, activeProfileProxy]);
 
 
   const label = useMemo(() => {

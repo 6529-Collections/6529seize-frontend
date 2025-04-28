@@ -1,6 +1,6 @@
 import { ReactElement, useContext } from "react";
 import { NextPageWithLayout } from "../_app";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -11,7 +11,7 @@ import UserPageStats from "../../components/user/stats/UserPageStats";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 
 export interface UserPageStatsProps {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageStatsProps }> = ({

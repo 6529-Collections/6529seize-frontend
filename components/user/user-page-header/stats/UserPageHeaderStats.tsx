@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { useRouter } from "next/router";
 import UserPageFollowers from "../followers/UserPageFollowers";
@@ -7,7 +7,7 @@ import UserPageFollowers from "../followers/UserPageFollowers";
 export default function UserPageHeaderStats({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const router = useRouter();
   const user = router.query.user as string;
@@ -19,7 +19,7 @@ export default function UserPageHeaderStats({
           className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1"
         >
           <span className="tw-text-base tw-font-medium tw-text-iron-50">
-            {formatNumberWithCommas(profile.consolidation.tdh)}
+            {formatNumberWithCommas(profile.tdh)}
           </span>
           <span className="tw-block tw-text-base tw-font-medium tw-text-iron-400">
             TDH

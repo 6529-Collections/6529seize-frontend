@@ -94,7 +94,7 @@ export function useWaveIsTyping(
       const data = msg.data;
       if (!data || data.wave_id !== waveId) return;
       if (data.profile?.handle === myHandle) return; // ignore myself
-
+      if (!data.profile?.handle) return;
       // Use local clock for freshness (avoids clock‑skew issues)
       typersRef.current.set(data.profile.handle, {
         profile: data.profile,

@@ -51,7 +51,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       removeSelected(response.id);
       onDropRateChange({
         drop: response,
-        giverHandle: connectedProfile?.profile?.handle ?? null,
+        giverHandle: connectedProfile?.handle ?? null,
       });
     },
     onError: (error) => {

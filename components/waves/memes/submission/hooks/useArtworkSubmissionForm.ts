@@ -6,13 +6,16 @@ import { useAuth } from "../../../../auth/Auth";
 /**
  * Action types for the form reducer - drastically simplified
  */
-type FormAction = 
-  | { type: 'SET_STEP'; payload: SubmissionStep }
-  | { type: 'SET_AGREEMENTS'; payload: boolean }
-  | { type: 'SET_ARTWORK_UPLOADED'; payload: boolean }
-  | { type: 'SET_ARTWORK_URL'; payload: string }
-  | { type: 'SET_TRAIT_FIELD'; payload: { field: keyof TraitsData; value: any } }
-  | { type: 'SET_MULTIPLE_TRAITS'; payload: Partial<TraitsData> };
+type FormAction =
+  | { type: "SET_STEP"; payload: SubmissionStep }
+  | { type: "SET_AGREEMENTS"; payload: boolean }
+  | { type: "SET_ARTWORK_UPLOADED"; payload: boolean }
+  | { type: "SET_ARTWORK_URL"; payload: string }
+  | {
+      type: "SET_TRAIT_FIELD";
+      payload: { field: keyof TraitsData; value: any };
+    }
+  | { type: "SET_MULTIPLE_TRAITS"; payload: Partial<TraitsData> };
 
 /**
  * State interface for the form reducer
@@ -30,40 +33,40 @@ interface FormState {
  */
 function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
-    case 'SET_STEP':
+    case "SET_STEP":
       return { ...state, currentStep: action.payload };
-    
-    case 'SET_AGREEMENTS':
+
+    case "SET_AGREEMENTS":
       return { ...state, agreements: action.payload };
-    
-    case 'SET_ARTWORK_UPLOADED':
+
+    case "SET_ARTWORK_UPLOADED":
       return { ...state, artworkUploaded: action.payload };
-    
-    case 'SET_ARTWORK_URL':
+
+    case "SET_ARTWORK_URL":
       return { ...state, artworkUrl: action.payload };
-    
-    case 'SET_TRAIT_FIELD': {
+
+    case "SET_TRAIT_FIELD": {
       // Simple direct update - no special handling
       return {
         ...state,
         traits: {
           ...state.traits,
-          [action.payload.field]: action.payload.value
-        }
+          [action.payload.field]: action.payload.value,
+        },
       };
     }
-    
-    case 'SET_MULTIPLE_TRAITS': {
+
+    case "SET_MULTIPLE_TRAITS": {
       // Simple merge - no special handling
       return {
         ...state,
         traits: {
           ...state.traits,
-          ...action.payload
-        }
+          ...action.payload,
+        },
       };
     }
-    
+
     default:
       return state;
   }
@@ -75,7 +78,7 @@ function formReducer(state: FormState, action: FormAction): FormState {
  */
 export function useArtworkSubmissionForm() {
   const { connectedProfile } = useAuth();
-  
+
   // Import the pre-computed initial values
   const { initialTraits } = require("../../traits/schema");
 
@@ -85,56 +88,57 @@ export function useArtworkSubmissionForm() {
     agreements: false,
     artworkUploaded: false,
     artworkUrl: "",
-    traits: initialTraits
+    traits: initialTraits,
   };
 
   // Use reducer for state management
   const [state, dispatch] = useReducer(formReducer, initialState);
-  
+
   // Extract values for convenience
-  const { currentStep, agreements, artworkUploaded, artworkUrl, traits } = state;
+  const { currentStep, agreements, artworkUploaded, artworkUrl, traits } =
+    state;
 
   // Extremely simple and direct update function
-  const updateTraitField = useCallback(<K extends keyof TraitsData>(
-    field: K,
-    value: TraitsData[K]
-  ) => {
-    dispatch({ 
-      type: 'SET_TRAIT_FIELD', 
-      payload: { field, value }
-    });
-  }, []);
+  const updateTraitField = useCallback(
+    <K extends keyof TraitsData>(field: K, value: TraitsData[K]) => {
+      dispatch({
+        type: "SET_TRAIT_FIELD",
+        payload: { field, value },
+      });
+    },
+    []
+  );
 
   // Multiple traits update function
   const setTraits = useCallback((traitsUpdate: Partial<TraitsData>) => {
-    dispatch({ type: 'SET_MULTIPLE_TRAITS', payload: traitsUpdate });
+    dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
   }, []);
 
   // Handle file selection
   const handleFileSelect = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onloadend = () => {
-      dispatch({ type: 'SET_ARTWORK_URL', payload: reader.result as string });
-      dispatch({ type: 'SET_ARTWORK_UPLOADED', payload: true });
+      dispatch({ type: "SET_ARTWORK_URL", payload: reader.result as string });
+      dispatch({ type: "SET_ARTWORK_UPLOADED", payload: true });
     };
     reader.readAsDataURL(file);
   }, []);
 
   // Handle continuing from terms
   const handleContinueFromTerms = useCallback(() => {
-    dispatch({ type: 'SET_STEP', payload: SubmissionStep.ARTWORK });
+    dispatch({ type: "SET_STEP", payload: SubmissionStep.ARTWORK });
   }, []);
 
   // Initialize traits with profile info
   useEffect(() => {
-    const userProfile = connectedProfile?.profile?.handle ?? "";
+    const userProfile = connectedProfile?.handle ?? "";
     if (userProfile) {
-      dispatch({ 
-        type: 'SET_MULTIPLE_TRAITS', 
+      dispatch({
+        type: "SET_MULTIPLE_TRAITS",
         payload: {
           artist: userProfile,
-          seizeArtistProfile: userProfile
-        }
+          seizeArtistProfile: userProfile,
+        },
       });
     }
   }, [connectedProfile]);
@@ -146,9 +150,9 @@ export function useArtworkSubmissionForm() {
       traits: {
         ...traits,
         // Ensure these fields have values
-        title: traits.title || "Artwork Title",
-        description: traits.description || "Artwork for The Memes collection."
-      }
+        title: traits.title ?? "Artwork Title",
+        description: traits.description ?? "Artwork for The Memes collection.",
+      },
     };
   }, [artworkUrl, traits]);
 
@@ -159,13 +163,15 @@ export function useArtworkSubmissionForm() {
 
     // Agreement step
     agreements,
-    setAgreements: (value: boolean) => dispatch({ type: 'SET_AGREEMENTS', payload: value }),
+    setAgreements: (value: boolean) =>
+      dispatch({ type: "SET_AGREEMENTS", payload: value }),
     handleContinueFromTerms,
 
     // Artwork step
     artworkUploaded,
     artworkUrl,
-    setArtworkUploaded: (value: boolean) => dispatch({ type: 'SET_ARTWORK_UPLOADED', payload: value }),
+    setArtworkUploaded: (value: boolean) =>
+      dispatch({ type: "SET_ARTWORK_UPLOADED", payload: value }),
     handleFileSelect,
 
     // Traits
@@ -174,6 +180,6 @@ export function useArtworkSubmissionForm() {
     updateTraitField,
 
     // Submission
-    getSubmissionData
+    getSubmissionData,
   };
 }

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { ApiIncomingIdentitySubscriptionsPage } from "../../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { commonApiFetch } from "../../../../services/api/common-api";
@@ -12,31 +12,31 @@ import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
 export default function UserPageFollowers({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const { data: followers, isFetching } =
     useQuery<ApiIncomingIdentitySubscriptionsPage>({
       queryKey: [
         QueryKey.IDENTITY_FOLLOWERS,
         {
-          profile_id: profile.profile?.external_id,
+          profile_id: profile.id,
           page_size: 1,
           target_type: "IDENTITY",
         },
       ],
       queryFn: async () =>
         await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
-          endpoint: `identity-subscriptions/incoming/IDENTITY/${profile.profile?.external_id}`,
+          endpoint: `identity-subscriptions/incoming/IDENTITY/${profile.id}`,
           params: {
             page_size: "1",
           },
         }),
-      enabled: !!profile.profile?.external_id,
+      enabled: !!profile.id,
     });
 
   return (
     <Link
-      href={`/${profile.profile?.handle}/followers`}
+      href={`/${profile.handle}/followers`}
       className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1 hover:tw-underline tw-transition tw-duration-300 tw-ease-out"
     >
       {isFetching ? (

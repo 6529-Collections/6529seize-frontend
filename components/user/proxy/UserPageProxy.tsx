@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import ProxyList from "./list/ProxyList";
 import ProxyCreate from "./create/ProxyCreate";
 import CommonChangeAnimation from "../../utils/animation/CommonChangeAnimation";
@@ -10,6 +10,7 @@ import { AuthContext } from "../../auth/Auth";
 import { groupProfileProxies } from "../../../helpers/profile-proxy.helpers";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { useIdentity } from "../../../hooks/useIdentity";
 export enum ProxyMode {
   LIST = "LIST",
   CREATE = "CREATE",
@@ -24,21 +25,16 @@ enum ProxyAction {
 export default function UserPageProxy({
   profile: initialProfile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
   const [mode, setMode] = useState<ProxyMode>(ProxyMode.LIST);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
-  const { data: profile } = useQuery({
-    queryKey: [QueryKey.PROFILE, user],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user}`,
-      }),
-    enabled: !!user,
-    initialData: initialProfile,
+  const { profile } = useIdentity({
+    handleOrWallet: user,
+    initialProfile: initialProfile,
   });
 
   useEffect(
@@ -47,9 +43,9 @@ export default function UserPageProxy({
   );
 
   const getIsSelf = () =>
-    !!connectedProfile?.profile?.external_id &&
-    !!profile.profile?.external_id &&
-    connectedProfile.profile.external_id === profile.profile.external_id &&
+    !!connectedProfile?.id &&
+    !!profile?.id &&
+    connectedProfile.id === profile.id &&
     !activeProfileProxy;
 
   const [isSelf, setIsSelf] = useState(getIsSelf());
@@ -61,13 +57,13 @@ export default function UserPageProxy({
   const { data: profileProxies, isFetching } = useQuery<ApiProfileProxy[]>({
     queryKey: [
       QueryKey.PROFILE_PROFILE_PROXIES,
-      { handleOrWallet: profile.profile?.handle },
+      { handleOrWallet: profile?.handle },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileProxy[]>({
-        endpoint: `profiles/${profile.input_identity}/proxies/`,
+        endpoint: `profiles/${profile?.query}/proxies/`,
       }),
-    enabled: !!profile.profile?.handle,
+    enabled: !!profile?.handle,
     placeholderData: keepPreviousData,
   });
 
@@ -78,7 +74,7 @@ export default function UserPageProxy({
     groupProfileProxies({
       profileProxies: profileProxies ?? [],
       onlyActive: !isSelf,
-      profileId: profile.profile?.external_id ?? null,
+      profileId: profile?.id ?? null,
     })
   );
 
@@ -87,7 +83,7 @@ export default function UserPageProxy({
       groupProfileProxies({
         profileProxies: profileProxies ?? [],
         onlyActive: !isSelf,
-        profileId: profile.profile?.external_id ?? null,
+        profileId: profile?.id ?? null,
       })
     );
   }, [profileProxies, isSelf, profile]);
@@ -99,7 +95,7 @@ export default function UserPageProxy({
         loading={isFetching}
         receivedProfileProxies={profileProxiesFiltered.received}
         grantedProfileProxies={profileProxiesFiltered.granted}
-        profile={profile}
+        profile={profile ?? initialProfile}
         onModeChange={setMode}
       />
     ),

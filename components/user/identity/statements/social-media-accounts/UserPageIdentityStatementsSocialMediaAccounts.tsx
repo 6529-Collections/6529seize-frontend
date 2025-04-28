@@ -1,8 +1,6 @@
-import {
-  CicStatement,
-  IProfileAndConsolidations,
-} from "../../../../../entities/IProfile";
+import { CicStatement } from "../../../../../entities/IProfile";
 import UserPageIdentityStatementsStatementsList from "../utils/UserPageIdentityStatementsStatementsList";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 
 export default function UserPageIdentityStatementsSocialMediaAccounts({
   statements,
@@ -10,7 +8,7 @@ export default function UserPageIdentityStatementsSocialMediaAccounts({
   loading,
 }: {
   readonly statements: CicStatement[];
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly loading: boolean;
 }) {
   return (

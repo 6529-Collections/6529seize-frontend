@@ -1,19 +1,18 @@
 import { useRouter } from "next/router";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
-import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageIdentity from "./UserPageIdentity";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { useIdentity } from "../../../hooks/useIdentity";
+
 export default function UserPageIdentityWrapper({
   profile: initialProfile,
   initialCICReceivedParams,
   initialCICGivenParams,
   initialActivityLogParams,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly initialCICReceivedParams: ProfileRatersParams;
   readonly initialCICGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
@@ -21,20 +20,15 @@ export default function UserPageIdentityWrapper({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
-  const { data: profile } = useQuery({
-    queryKey: [QueryKey.PROFILE, user],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user}`,
-      }),
-    enabled: !!user,
-    initialData: initialProfile,
+  const { profile } = useIdentity({
+    handleOrWallet: user,
+    initialProfile: initialProfile,
   });
 
   return (
-    <UserPageSetUpProfileWrapper profile={profile}>
+    <UserPageSetUpProfileWrapper profile={profile ?? initialProfile}>
       <UserPageIdentity
-        profile={profile}
+        profile={profile ?? initialProfile}
         initialCICReceivedParams={initialCICReceivedParams}
         initialCICGivenParams={initialCICGivenParams}
         initialActivityLogParams={initialActivityLogParams}

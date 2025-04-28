@@ -2,7 +2,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import {
   ApiCreateOrUpdateProfileCicStatement,
   CicStatement,
-  IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../../auth/Auth";
@@ -12,13 +11,13 @@ import { STATEMENT_GROUP, STATEMENT_TYPE } from "../../../../helpers/Types";
 import { useKeyPressEvent } from "react-use";
 import UserPageHeaderAboutEditError from "./UserPageHeaderAboutEditError";
 import { AnimatePresence } from "framer-motion";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageHeaderAboutEdit({
   profile,
   statement,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly statement: CicStatement | null;
   readonly onClose: () => void;
 }) {
@@ -81,7 +80,7 @@ export default function UserPageHeaderAboutEdit({
         ApiCreateOrUpdateProfileCicStatement,
         CicStatement
       >({
-        endpoint: `profiles/${profile.input_identity}/cic/statements`,
+        endpoint: `profiles/${profile.query}/cic/statements`,
         body: {
           statement_group: STATEMENT_GROUP.GENERAL,
           statement_type: STATEMENT_TYPE.BIO,

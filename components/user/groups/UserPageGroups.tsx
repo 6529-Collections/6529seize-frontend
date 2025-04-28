@@ -1,23 +1,22 @@
 import { useContext, useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import GroupsList from "../../groups/page/list/GroupsList";
 import { AuthContext } from "../../auth/Auth";
 import { GroupsRequestParams } from "../../../entities/IGroup";
 import { useRouter } from "next/router";
-
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function UserPageGroups({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity | null;
 }) {
   const router = useRouter();
   const { connectedProfile, activeProfileProxy, requestAuth } =
     useContext(AuthContext);
   const getShowCreateNewGroupButton = () => {
     return (
-      !!connectedProfile?.profile?.handle &&
+      !!connectedProfile?.handle &&
       !activeProfileProxy &&
-      connectedProfile.profile.handle === profile.profile?.handle
+      connectedProfile.handle === profile?.handle
     );
   };
   const [showCreateNewGroupButton, setShowCreateNewGroupButton] = useState(
@@ -30,13 +29,13 @@ export default function UserPageGroups({
 
   const [filters, setFilters] = useState<GroupsRequestParams>({
     group_name: null,
-    author_identity: profile.profile?.handle ?? null,
+    author_identity: profile?.handle ?? null,
   });
 
   useEffect(() => {
     setFilters({
       group_name: null,
-      author_identity: profile.profile?.handle ?? null,
+      author_identity: profile?.handle ?? null,
     });
   }, [profile]);
 

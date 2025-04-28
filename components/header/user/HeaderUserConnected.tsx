@@ -1,21 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { commonApiFetch } from "../../../services/api/common-api";
 import HeaderUserConnecting from "./HeaderUserConnecting";
 import HeaderUserContext from "./HeaderUserContext";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { useIdentity } from "../../../hooks/useIdentity";
+
 export default function HeaderUserConnected({
   connectedAddress,
 }: {
   readonly connectedAddress: string;
 }) {
-  const { isLoading, data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, connectedAddress.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${connectedAddress}`,
-      }),
+  const { isLoading, profile } = useIdentity({
+    handleOrWallet: connectedAddress,
+    initialProfile: null,
   });
+
   return (
     <div>
       {isLoading || !profile ? (

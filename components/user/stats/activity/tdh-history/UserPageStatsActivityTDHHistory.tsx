@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { TDHHistory } from "../../../../../entities/ITDH";
 import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../../../services/api/common-api";
@@ -12,11 +12,11 @@ const PAGE_SIZE = 30;
 export default function UserPageStatsActivityTDHHistory({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const router = useRouter();
   const mainAddress =
-    profile.profile?.primary_wallet?.toLowerCase() ??
+    profile.primary_wallet?.toLowerCase() ??
     (router.query.user as string).toLowerCase();
 
   const { isFetching, data: tdhHistory } = useQuery<TDHHistory[]>({

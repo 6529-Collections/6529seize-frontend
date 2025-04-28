@@ -6,8 +6,7 @@ import Image from "next/image";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextgen_contracts";
 import DotLoader from "../../dotLoader/DotLoader";
 import { NextGenCollection } from "../../../entities/INextgen";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { commonApiFetch } from "../../../services/api/common-api";
+
 import Address from "../../address/Address";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,6 +15,7 @@ import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
 import Tippy from "@tippyjs/react";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import { useIdentity } from "../../../hooks/useIdentity";
 
 interface Props {
   collection: NextGenCollection;
@@ -33,8 +33,6 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const [tokenNotFound, setTokenNotFound] = useState<boolean>(false);
   const [tokenMetadataUrl, setTokenMetadataUrl] = useState<string>("");
   const [tokenImage, setTokenImage] = useState<string>("");
-
-  const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
 
   const normalisedTokenId = props.token_id - props.collection.id * 10000000000;
   const tokenName = `${props.collection.name} #${normalisedTokenId}`;
@@ -96,17 +94,10 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
     }
   }, [ownerENSRead.data]);
 
-  useEffect(() => {
-    if (owner) {
-      commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${owner}`,
-      }).then((profile) => {
-        if (profile.profile?.handle) {
-          setOwnerProfileHandle(profile.profile.handle);
-        }
-      });
-    }
-  }, [owner]);
+  const { profile } = useIdentity({
+    handleOrWallet: owner,
+    initialProfile: null,
+  });
 
   function printToken() {
     return (
@@ -159,7 +150,8 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 <a
                   href={`/nextgen/collection/${formatNameForUrl(
                     props.collection.name
-                  )}`}>
+                  )}`}
+                >
                   {props.collection.name}
                 </a>
               </span>
@@ -174,7 +166,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 <span className="d-flex">
                   <Address
                     wallets={[owner as `0x${string}`]}
-                    display={ownerProfileHandle ?? ownerENS}
+                    display={profile?.handle ?? ownerENS}
                   />
                   {areEqualAddresses(owner, account.address) && (
                     <span>(you)</span>
@@ -189,7 +181,8 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                     <a href={tokenMetadataUrl} target="_blank" rel="noreferrer">
                       <FontAwesomeIcon
                         className={styles.copyIcon}
-                        icon="external-link-square"></FontAwesomeIcon>
+                        icon="external-link-square"
+                      ></FontAwesomeIcon>
                     </a>
                   </span>
                 </span>
@@ -202,7 +195,8 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       <a
                         href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
                         target="_blank"
-                        rel="noreferrer">
+                        rel="noreferrer"
+                      >
                         <Image
                           className={styles.marketplace}
                           src="/opensea.png"

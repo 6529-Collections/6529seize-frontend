@@ -1,30 +1,31 @@
 import { useEffect, useState } from "react";
 import { areEqualAddresses, numberWithCommas } from "../../../helpers/Helpers";
-import { IProfileConsolidation } from "../../../entities/IProfile";
+import { ApiWallet } from "../../../generated/models/ApiWallet";
+
 
 export default function UserSettingsPrimaryWalletItem({
   wallet,
   selected,
   onSelect,
 }: {
-  readonly wallet: IProfileConsolidation;
+  readonly wallet: ApiWallet;
   readonly selected: string;
   readonly onSelect: (wallet: string) => void;
 }) {
   const [isActive, setIsActive] = useState(
-    areEqualAddresses(wallet.wallet.address, selected)
+    areEqualAddresses(wallet.wallet, selected)
   );
 
   useEffect(() => {
-    setIsActive(areEqualAddresses(wallet.wallet.address, selected));
-  }, [selected, wallet.wallet.address]);
+    setIsActive(areEqualAddresses(wallet.wallet, selected));
+  }, [selected, wallet.wallet]);
   return (
     <li
-      onClick={() => onSelect(wallet.wallet.address)}
+      onClick={() => onSelect(wallet.wallet)}
       className="tw-group tw-text-white tw-justify-between tw-w-full tw-flex tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-p-2 hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
     >
       <span className="tw-inline-block tw-text-sm tw-font-medium tw-text-white">
-        {`${wallet.wallet.ens ?? wallet.wallet.address} - ${
+        {`${wallet.display ?? wallet.wallet} - ${
           wallet.tdh > 0 ? numberWithCommas(wallet.tdh) : 0
         }TDH`}
       </span>

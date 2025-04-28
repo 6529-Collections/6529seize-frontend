@@ -9,7 +9,7 @@ import {
 } from "../constants";
 import { BaseNFT, VolumeType } from "../entities/INFT";
 import { DateIntervalsSelection } from "../enums";
-import { CICType, IProfileAndConsolidations } from "../entities/IProfile";
+import { CICType } from "../entities/IProfile";
 import { NextRouter } from "next/router";
 import {
   USER_PAGE_TAB_META,
@@ -20,6 +20,7 @@ import {
   NEXTGEN_CORE,
 } from "../components/nextGen/nextgen_contracts";
 import { Period } from "./Types";
+import { ApiIdentity } from "../generated/models/ApiIdentity";
 
 export function formatAddress(address: string) {
   if (
@@ -52,29 +53,6 @@ export function isNextgenContract(contract: string) {
 
 export function isMemeLabContract(contract: string) {
   return contract.toUpperCase() === MEMELAB_CONTRACT.toUpperCase();
-}
-
-const fetchMeta = async (uri: string) => {
-  try {
-    new URL(uri);
-    const response = await fetch(uri);
-    return await response.json();
-  } catch {
-    return null;
-  }
-};
-
-const fetchBlockTimestamp = async (provider: any, block: number) => {
-  const blockEvent = await provider.getBlock(block);
-  return blockEvent.timestamp * 1000;
-};
-
-function getDaysDiff(t1: number, t2: number, floor = true) {
-  const diff = t1 - t2;
-  if (floor) {
-    return Math.floor(diff / (1000 * 3600 * 24));
-  }
-  return Math.ceil(diff / (1000 * 3600 * 24));
 }
 
 export function fromGWEI(from: number) {
@@ -185,16 +163,6 @@ export const fullScreenSupported = (): boolean => {
   return check;
 };
 
-const isInFullScreen = (): boolean => {
-  const doc: any = document;
-  return !!(
-    doc.fullscreenElement ||
-    doc.mozFullScreenElement ||
-    doc.webkitFullscreenElement ||
-    doc.msFullscreenElement
-  );
-};
-
 export const enterArtFullScreen = async (elementId: string): Promise<void> => {
   const element: any = document.getElementById(elementId);
 
@@ -219,41 +187,6 @@ export const enterArtFullScreen = async (elementId: string): Promise<void> => {
     console.warn("Fullscreen API is not supported by this browser.");
   }
 };
-
-function nextTdh() {
-  const now = new Date();
-  const utcMidnight = new Date(now).setUTCHours(24, 0, 0, 0);
-
-  let diffMS = utcMidnight / 1000 - now.getTime() / 1000;
-  let diffHr = Math.floor(diffMS / 3600);
-  diffMS = diffMS - diffHr * 3600;
-  let diffMi = Math.floor(diffMS / 60);
-  diffMS = diffMS - diffMi * 60;
-  let diffS = Math.floor(diffMS);
-  let result = diffHr < 10 ? "0" + diffHr : diffHr;
-  result += ":" + (diffMi < 10 ? "0" + diffMi : diffMi);
-  result += ":" + (diffS < 10 ? "0" + diffS : diffS);
-  return result.toString();
-}
-
-function splitArtists(artists: string) {
-  const a = artists
-    .split(" / ")
-    .join(",")
-    .split(", ")
-    .join(",")
-    .split(" and ")
-    .join(",");
-  return a;
-}
-
-function removeProtocol(link: string) {
-  if (!link) {
-    return link;
-  }
-
-  return link.replace(/(^\w+:|^)\/\//, "");
-}
 
 export function addProtocol(link: string) {
   if (!link || link.startsWith("http")) {
@@ -302,17 +235,6 @@ export function getAddressEtherscanLink(chain_id: number, address: string) {
       return `https://goerli.etherscan.io/address/${address}`;
     default:
       return `https://etherscan.io/address/${address}`;
-  }
-}
-
-async function getContentTypeFromURL(url: string) {
-  try {
-    const response = await fetch(url, { method: "HEAD" });
-    const contentType = response.headers.get("Content-Type");
-    return contentType;
-  } catch (error) {
-    console.error("Error retrieving content type:", error);
-    return null;
   }
 }
 
@@ -387,25 +309,6 @@ export function getRandomColor() {
   return `#${r}${g}${b}`;
 }
 
-const scrollToDiv = (divRef: any, block: "start" | "end") => {
-  if (divRef.current) {
-    divRef.current.scrollIntoView({ behavior: "smooth", block });
-  }
-};
-
-const isDivInViewport = (divRef: any) => {
-  if (divRef.current) {
-    const rect = divRef.current.getBoundingClientRect();
-    return (
-      rect.top >= 0 &&
-      rect.left >= 0 &&
-      rect.bottom <= window.innerHeight &&
-      rect.right <= window.innerWidth
-    );
-  }
-  return false;
-};
-
 export function capitalizeEveryWord(input: string): string {
   return input
     .toLocaleLowerCase()
@@ -437,25 +340,6 @@ export function createArray(startNum: number, endNum: number) {
 
   return result;
 }
-const formatNumber = (num: number): string => {
-  // For numbers less than 1000, return the number as is
-  if (num < 1000) {
-    return num.toString();
-  }
-
-  // For numbers between 1000 and 100,000, format with commas
-  if (num < 100000) {
-    return num.toLocaleString();
-  }
-
-  // For numbers 100,000 and above, format as 'K' for thousands
-  if (num < 1000000) {
-    return parseFloat((num / 1000).toFixed(1)).toString() + "K";
-  }
-
-  // For numbers 1 million and above, format as 'M' for millions
-  return parseFloat((num / 1000000).toFixed(2)).toString() + "M";
-};
 
 export function displayDecimal(value: number, places: number): string {
   if (0 >= value) {
@@ -601,24 +485,22 @@ export const amIUser = ({
   address,
   connectedHandle,
 }: {
-  profile: IProfileAndConsolidations;
+  profile: ApiIdentity;
   address: string | undefined;
   connectedHandle?: string;
 }): boolean => {
-  if (connectedHandle && profile.profile?.handle) {
-    if (
-      connectedHandle.toLowerCase() === profile.profile.handle.toLowerCase()
-    ) {
+  if (connectedHandle && profile?.handle) {
+    if (connectedHandle.toLowerCase() === profile.handle.toLowerCase()) {
       return true;
     }
   }
 
-  if (!address || !profile.consolidation?.wallets) {
+  if (!address || !profile?.wallets) {
     return false;
   }
 
-  return profile.consolidation.wallets.some(
-    (wallet) => wallet.wallet.address.toLowerCase() === address.toLowerCase()
+  return profile.wallets.some(
+    (wallet) => wallet.wallet.toLowerCase() === address.toLowerCase()
   );
 };
 
@@ -722,13 +604,6 @@ export const getTimeUntil = (milliseconds: number): string => {
   }
 };
 
-const truncateMiddle = (value: string): string => {
-  if (value.length > 50) {
-    return `${value.substring(0, 10)}...${value.substring(value.length - 30)}`;
-  }
-  return value;
-};
-
 export const getStringAsNumberOrZero = (value: string): number => {
   const parsedValue = parseInt(value);
   return isNaN(parsedValue) ? 0 : parsedValue;
@@ -770,21 +645,6 @@ export function getRoyaltyImage(royaltiesPercentage: number) {
     ? "pepe-xglasses.png"
     : "pepe-smile.png";
 }
-
-const convertStringOrNullToNumberOrNull = (
-  value: string | null
-): number | null => {
-  if (value === null) {
-    return null;
-  }
-  if (value === "") {
-    return null;
-  }
-  if (isNaN(parseFloat(value))) {
-    return null;
-  }
-  return parseFloat(value);
-};
 
 export const formatTimestampToMonthYear = (timestamp: number): string => {
   const date = new Date(timestamp);
@@ -853,12 +713,6 @@ export const getRandomColorWithSeed = (seedString: string) => {
     .padStart(2, "0");
 
   return `#${r}${g}${b}`;
-};
-
-const waitForMilliseconds = async (
-  milliseconds: number
-): Promise<void> => {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 };
 
 export function parseNftDescriptionToHtml(description: string) {

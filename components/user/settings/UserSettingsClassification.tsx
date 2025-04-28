@@ -1,18 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  CLASSIFICATIONS,
-  PROFILE_CLASSIFICATION,
-} from "../../../entities/IProfile";
 import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserSettingsClassificationItem from "./UserSettingsClassificationItem";
+import { ApiProfileClassification } from "../../../generated/models/ApiProfileClassification";
+import { CLASSIFICATIONS } from "../../../entities/IProfile";
 
 export default function UserSettingsClassification({
   selected,
   onSelect,
 }: {
-  readonly selected: PROFILE_CLASSIFICATION;
-  readonly onSelect: (selected: PROFILE_CLASSIFICATION) => void;
+  readonly selected: ApiProfileClassification;
+  readonly onSelect: (selected: ApiProfileClassification) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [iconScope, animateIcon] = useAnimate();
@@ -33,12 +31,12 @@ export default function UserSettingsClassification({
     setTitle(CLASSIFICATIONS[selected].title);
   }, [selected]);
 
-  const onClassification = (value: PROFILE_CLASSIFICATION) => {
+  const onClassification = (value: ApiProfileClassification) => {
     onSelect(value);
     setIsOpen(false);
   };
 
-  const classifications = Object.values(PROFILE_CLASSIFICATION);
+  const classifications = Object.values(ApiProfileClassification);
 
   return (
     <div className="tw-max-w-full tw-relative" ref={listRef}>

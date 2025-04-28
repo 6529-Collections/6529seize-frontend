@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { ApiIncomingIdentitySubscriptionsPage } from "../../../generated/models/ApiIncomingIdentitySubscriptionsPage";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ type Query = {
 export default function UserPageFollowers({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const query: Query = {
     page_size: `${REQUEST_SIZE}`,
@@ -35,7 +35,7 @@ export default function UserPageFollowers({
       {
         ...query,
         target_type: "IDENTITY",
-        profile_id: profile.profile?.external_id,
+        profile_id: profile.id,
       },
     ],
     queryFn: async ({ pageParam }: { pageParam: number | null }) => {
@@ -46,11 +46,11 @@ export default function UserPageFollowers({
         params.page = `${pageParam}`;
       }
       return await commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
-        endpoint: `/identity-subscriptions/incoming/IDENTITY/${profile.profile?.external_id}`,
+        endpoint: `/identity-subscriptions/incoming/IDENTITY/${profile.id}`,
         params,
       });
     },
-    enabled: !!profile.profile?.external_id,
+    enabled: !!profile.id,
     initialPageParam: null,
     getNextPageParam: (lastPage) => (lastPage.next ? lastPage.page + 1 : null),
   });

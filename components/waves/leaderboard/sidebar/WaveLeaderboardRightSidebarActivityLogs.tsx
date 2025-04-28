@@ -19,7 +19,7 @@ export const WaveLeaderboardRightSidebarActivityLogs: React.FC<
   const { logs, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveActivityLogs({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.profile?.handle,
+      connectedProfileHandle: connectedProfile?.handle ?? undefined,
       reverse: false,
       dropId: null,
       logTypes: ["DROP_VOTE_EDIT"],

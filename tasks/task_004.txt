@@ -1,0 +1,17 @@
+# Task ID: 4
+# Title: Extract content elements from current modal
+# Status: done
+# Dependencies: 3
+# Priority: high
+# Description: Identify and isolate the content elements that need to be preserved and passed as children to ModalLayout.
+# Details:
+Within the TermsOfServiceModal component, identify the following specific JSX elements to be preserved:
+
+1. **Scrollable Terms Div:** The `div` starting at approximately line 77 (`className="tw-max-h-[400px]..."`) responsible for displaying the terms content.
+2. **Custom Checkbox Button:** The `<button>` element starting at approximately line 90 (`className="tw-flex tw-pt-4..."`) that implements the custom checkbox.
+3. **Footer Buttons Div:** The `div` starting at approximately line 148 (`className="tw-flex tw-justify-end..."`) containing the 'Cancel' and 'Agree & Continue' buttons.
+
+These three distinct element blocks will be identified for extraction but not modified in this task. They will later be grouped (likely using a React Fragment `<>...</>`) and placed directly as the `children` prop when implementing the `<ModalLayout>` component in the next step.
+
+# Test Strategy:
+Verify all content elements are correctly identified and isolated without breaking their functionality or state connections. Confirm the three specific elements (scrollable terms div, custom checkbox button, and footer buttons div) are properly documented for extraction in the next task.

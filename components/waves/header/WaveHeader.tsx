@@ -101,7 +101,7 @@ export default function WaveHeader({
           <div className="tw-mt-10 tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-justify-end tw-gap-x-3 tw-pb-1">
             <div className="tw-min-w-0 tw-flex-1">
               <div className="tw-flex tw-flex-col tw-items-end">
-                {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
+                {!!connectedProfile?.handle && !activeProfileProxy && (
                   <div className="tw-inline-flex tw-space-x-2 tw-items-center">
                     <WaveNotificationSettings wave={wave} />
                     <WaveHeaderFollow wave={wave} />
@@ -115,9 +115,9 @@ export default function WaveHeader({
         <div className="tw-px-4 tw-pb-4 tw-mt-2 tw-min-w-0 tw-flex-1">
           <div className="tw-flex tw-justify-between">
             <WaveHeaderName wave={wave} />
-            {!!connectedProfile?.profile?.handle && !activeProfileProxy && (
+            {!!connectedProfile?.handle && !activeProfileProxy && (
               <div>
-                {connectedProfile.profile.handle === wave.author.handle && (
+                {connectedProfile.handle === wave.author.handle && (
                   <WaveHeaderOptions wave={wave} />
                 )}
               </div>
@@ -148,7 +148,7 @@ export default function WaveHeader({
                     </span>
                   </div>
                 )}
-              </div>
+              </div>  
               <WaveHeaderPinned wave={wave} side={pinnedSide} />
             </div>
           </div>

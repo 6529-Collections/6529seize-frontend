@@ -1,7 +1,4 @@
-import {
-  IProfileAndConsolidations,
-  RateMatter,
-} from "../../../../entities/IProfile";
+import { RateMatter } from "../../../../entities/IProfile";
 import { useContext, useEffect, useState } from "react";
 import { amIUser } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
@@ -9,6 +6,8 @@ import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfi
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+
 
 const SUB_TITLE: Record<RateMatter, string> = {
   [RateMatter.NIC]: "NIC rate",
@@ -30,7 +29,7 @@ export default function UserPageRateWrapper({
   type,
   children,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly type: RateMatter;
   readonly children: React.ReactNode;
 }) {
@@ -64,7 +63,7 @@ export default function UserPageRateWrapper({
     if (!activeProfileProxy && amIUser({ profile, address })) {
       return RaterContext.MY_PROFILE;
     }
-    if (!connectedProfile.profile?.handle) {
+    if (!connectedProfile.handle) {
       return RaterContext.DONT_HAVE_PROFILE;
     }
     if (!!activeProfileProxy && !getIsProxyAndHaveAllowance()) {
@@ -72,7 +71,7 @@ export default function UserPageRateWrapper({
     }
     if (
       !!activeProfileProxy &&
-      activeProfileProxy.created_by.handle === profile.profile?.handle
+      activeProfileProxy.created_by.handle === profile.handle
     ) {
       return RaterContext.PROXY_GRANTOR_PROFILE;
     }
@@ -83,11 +82,11 @@ export default function UserPageRateWrapper({
   const getRaterContextMessage = (context: RaterContext): string | null => {
     switch (context) {
       case RaterContext.NOT_CONNECTED:
-        return `Please connect to ${SUB_TITLE[type]} ${profile.input_identity}`;
+        return `Please connect to ${SUB_TITLE[type]} ${profile.query}`;
       case RaterContext.DONT_HAVE_PROFILE:
-        return `Please make profile to ${SUB_TITLE[type]} ${profile.input_identity}`;
+        return `Please make profile to ${SUB_TITLE[type]} ${profile.query}`;
       case RaterContext.PROXY_NO_ALLOWANCE:
-        return `You are acting as proxy and don't have allowance to ${SUB_TITLE[type]} ${profile.input_identity}`;
+        return `You are acting as proxy and don't have allowance to ${SUB_TITLE[type]} ${profile.query}`;
       case RaterContext.PROXY_GRANTOR_PROFILE:
         return `You are acting as proxy and can't ${SUB_TITLE[type]} proxy grantor profile`;
       case RaterContext.MY_PROFILE:

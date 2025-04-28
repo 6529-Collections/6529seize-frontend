@@ -14,7 +14,7 @@ export const BrainLeftSidebarViewChange: React.FC<
   const [activeTab, setActiveTab] = useState(router.pathname);
 
   const { haveUnreadNotifications } = useUnreadNotifications(
-    connectedProfile?.profile?.handle
+    connectedProfile?.handle ?? null
   );
 
   useEffect(() => {

@@ -15,7 +15,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: drop.wave.id,
-      connectedProfileHandle: connectedProfile?.profile?.handle,
+      connectedProfileHandle: connectedProfile?.handle ?? undefined,
       reverse: false,
       dropId: drop.id,
       sortDirection: "DESC",

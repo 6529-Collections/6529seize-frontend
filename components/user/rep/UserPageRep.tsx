@@ -1,6 +1,5 @@
 import {
   ApiProfileRepRatesState,
-  IProfileAndConsolidations,
   RateMatter,
 } from "../../../entities/IProfile";
 import UserPageRepNewRep from "./new-rep/UserPageRepNewRep";
@@ -18,14 +17,14 @@ import UserPageRepActivityLog from "./UserPageRepActivityLog";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function UserPageRep({
   profile,
   initialRepReceivedParams,
   initialRepGivenParams,
   initialActivityLogParams,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly initialRepReceivedParams: ProfileRatersParams;
   readonly initialRepGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
@@ -37,8 +36,7 @@ export default function UserPageRep({
 
   const [rater, setRater] = useState<string | undefined>(undefined);
   useEffect(
-    () =>
-      setRater(connectedProfile?.profile?.handle.toLowerCase() ?? undefined),
+    () => setRater(connectedProfile?.handle?.toLowerCase()),
     [connectedProfile]
   );
 
