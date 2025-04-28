@@ -102,7 +102,7 @@ function useNewDropCounter(
         }
 
         if (
-          connectedProfile?.profile?.handle?.toLowerCase() ===
+          connectedProfile?.handle?.toLowerCase() ===
           message.author.handle?.toLowerCase()
         )
           return setNewDropsCounts((prev) => {

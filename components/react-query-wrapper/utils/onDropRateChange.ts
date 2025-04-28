@@ -90,7 +90,7 @@ export const changeDropInCache = async (
     [
       QueryKey.PROFILE_DROPS,
       {
-        handleOrWallet: drop.author.handle.toLowerCase(),
+        handleOrWallet: drop.author.handle?.toLowerCase(),
         context_profile: giverHandle,
       },
     ],

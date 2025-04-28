@@ -20,14 +20,14 @@ export default function GroupCardEditActions({
 
   const [isMyFilter, setIsMyFilter] = useState(
     connectedProfile?.handle?.toLowerCase() ===
-      group.created_by?.handle.toLowerCase()
+      group.created_by?.handle?.toLowerCase()
   );
 
   useEffect(
     () =>
       setIsMyFilter(
         connectedProfile?.handle?.toLowerCase() ===
-          group.created_by?.handle.toLowerCase()
+          group.created_by?.handle?.toLowerCase()
       ),
     [connectedProfile]
   );

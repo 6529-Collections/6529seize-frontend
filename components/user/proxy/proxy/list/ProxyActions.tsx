@@ -1,4 +1,4 @@
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import { Time } from "../../../../../helpers/time";
 import ProxyActionRow from "./ProxyActionRow";
@@ -9,7 +9,7 @@ export default function ProxyActions({
   isSelf,
 }: {
   readonly profileProxy: ApiProfileProxy;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly isSelf: boolean;
 }) {
   const actions = profileProxy.actions.toSorted((a, d) => {

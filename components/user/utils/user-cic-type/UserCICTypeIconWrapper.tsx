@@ -1,4 +1,4 @@
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import Tippy from "@tippyjs/react";
 import UserCICTypeIconTooltip from "./tooltip/UserCICTypeIconTooltip";
 import UserCICTypeIcon from "./UserCICTypeIcon";
@@ -6,7 +6,7 @@ import UserCICTypeIcon from "./UserCICTypeIcon";
 export default function UserCICTypeIconWrapper({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   return (
     <Tippy
@@ -15,7 +15,7 @@ export default function UserCICTypeIconWrapper({
       content={<UserCICTypeIconTooltip profile={profile} />}
     >
       <div>
-        <UserCICTypeIcon cic={profile.cic.cic_rating} />
+        <UserCICTypeIcon cic={profile.cic} />
       </div>
     </Tippy>
   );

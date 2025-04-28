@@ -1,0 +1,25 @@
+# Task ID: 3
+# Title: Import ModalLayout into TermsOfServiceModal
+# Status: done
+# Dependencies: 2
+# Priority: high
+# Description: Add the import statement for ModalLayout and ensure it's properly accessible from TermsOfServiceModal.
+# Details:
+Added the import statement at the top of TermsOfServiceModal.tsx: `import ModalLayout from '../waves/memes/submission/layout/ModalLayout';`. The relative path was verified based on the current file structure and works correctly without any TypeScript errors.
+
+# Test Strategy:
+Confirmed the import statement resolves correctly without any path errors or TypeScript warnings.
+
+# Subtasks:
+## 3.1. undefined [completed]
+### Dependencies: None
+### Description: Added import statement to components/terms/TermsOfServiceModal.tsx
+### Details:
+
+
+## 3.2. undefined [completed]
+### Dependencies: None
+### Description: Verified relative path based on current file structure
+### Details:
+
+

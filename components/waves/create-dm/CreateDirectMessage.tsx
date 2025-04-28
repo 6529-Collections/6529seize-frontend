@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 
-import {
-  CommunityMemberMinimal,
-  IProfileAndConsolidations,
-} from "../../../entities/IProfile";
+import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import GroupCreateIdentitiesSelect from "../../groups/page/create/config/identities/select/GroupCreateIdentitiesSelect";
 import { areEqualAddresses } from "../../../helpers/Helpers";
 import { useAuth } from "../../auth/Auth";
@@ -15,12 +12,12 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../../distribution-plan-tool/common/CircleLoader";
 import CreateWaveFlow from "../create-wave/CreateWaveFlow";
-
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function CreateDirectMessage({
   profile,
   onBack,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onBack: () => void;
 }) {
   const [isCreating, setIsCreating] = useState(false);
@@ -36,7 +33,7 @@ export default function CreateDirectMessage({
     if (
       areEqualAddresses(
         identity.primary_wallet ?? identity.wallet,
-        profile.profile?.primary_wallet!
+        profile?.primary_wallet
       )
     ) {
       setToast({
@@ -49,7 +46,7 @@ export default function CreateDirectMessage({
   };
 
   const onRemove = (id: string) => {
-    if (areEqualAddresses(id, profile.profile?.primary_wallet)) {
+    if (areEqualAddresses(id, profile?.primary_wallet)) {
       setToast({
         message: "You cannot remove yourself from the DM",
         type: "error",
@@ -103,7 +100,8 @@ export default function CreateDirectMessage({
     tw-bg-primary-500 tw-text-white tw-border-primary-500 
     hover:tw-bg-primary-600 hover:tw-border-primary-600
     focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-600
-    disabled:tw-bg-gray-300 disabled:tw-text-gray-500 disabled:tw-border-gray-300 disabled:hover:tw-bg-gray-300 disabled:tw-cursor-not-allowed">
+    disabled:tw-bg-gray-300 disabled:tw-text-gray-500 disabled:tw-border-gray-300 disabled:hover:tw-bg-gray-300 disabled:tw-cursor-not-allowed"
+        >
           {isCreating ? (
             <CircleLoader size={CircleLoaderSize.MEDIUM} />
           ) : (

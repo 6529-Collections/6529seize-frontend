@@ -3,16 +3,13 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ApiProfileRepRatesState,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { ApiProfileRepRatesState } from "../../../../entities/IProfile";
 import UserPageRepNewRepSearchHeader from "./UserPageRepNewRepSearchHeader";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import CircleLoader from "../../../distribution-plan-tool/common/CircleLoader";
 import UserPageRepNewRepError from "./UserPageRepNewRepError";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 const SEARCH_LENGTH = {
   MIN: 3,
   MAX: 100,
@@ -32,7 +29,7 @@ export default function UserPageRepNewRepSearch({
 }: {
   readonly repRates: ApiProfileRepRatesState | null;
   readonly onRepSearch: (repSearch: string) => void;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const [repSearch, setRepSearch] = useState<string>("");
 

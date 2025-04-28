@@ -1,5 +1,4 @@
 import { UserPageStatsActivityWalletFilterType } from "../UserPageStatsActivityWallet";
-import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
 import { Transaction } from "../../../../../../entities/ITransaction";
 import UserPageStatsActivityWalletTable from "./UserPageStatsActivityWalletTable";
 import CommonTablePagination from "../../../../../utils/table/paginator/CommonTablePagination";
@@ -8,7 +7,7 @@ import UserPageStatsActivityWalletFilter from "../filter/UserPageStatsActivityWa
 import CommonCardSkeleton from "../../../../../utils/animation/CommonCardSkeleton";
 import CircleLoader from "../../../../../distribution-plan-tool/common/CircleLoader";
 import { NextGenCollection } from "../../../../../../entities/INextgen";
-
+import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
 export default function UserPageStatsActivityWalletTableWrapper({
   filter,
   profile,
@@ -23,7 +22,7 @@ export default function UserPageStatsActivityWalletTableWrapper({
   onActiveFilter,
 }: {
   readonly filter: UserPageStatsActivityWalletFilterType;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly transactions: Transaction[];
   readonly memes: MemeLite[];
   readonly nextgenCollections: NextGenCollection[];

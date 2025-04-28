@@ -3,11 +3,7 @@ import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
 
 import { useRouter } from "next/router";
 import { useMutation } from "@tanstack/react-query";
-import {
-  ApiCreateOrUpdateProfileRequest,
-  IProfileAndConsolidations,
-  PROFILE_CLASSIFICATION,
-} from "../../../../entities/IProfile";
+import { ApiCreateOrUpdateProfileRequest } from "../../../../entities/IProfile";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiPost } from "../../../../services/api/common-api";
@@ -15,43 +11,42 @@ import UserSettingsUsername from "../../settings/UserSettingsUsername";
 import UserSettingsClassification from "../../settings/UserSettingsClassification";
 import UserSettingsPrimaryWallet from "../../settings/UserSettingsPrimaryWallet";
 import UserSettingsSave from "../../settings/UserSettingsSave";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { ApiProfileClassification } from "../../../../generated/models/ApiProfileClassification";
 export default function UserPageSetUpProfile({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
 
-  const [userName, setUserName] = useState<string>(
-    profile.profile?.handle ?? ""
-  );
+  const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
-  const [classification, setClassification] = useState<PROFILE_CLASSIFICATION>(
-    profile.profile?.classification ?? PROFILE_CLASSIFICATION.PSEUDONYM
+  const [classification, setClassification] = useState<ApiProfileClassification>(
+    profile.classification ?? ApiProfileClassification.Pseudonym
   );
 
   const getHighestTdhWalletOrNone = () => {
-    const tdhWallets = profile.consolidation.wallets.toSorted(
-      (a, b) => (b.tdh ?? 0) - (a.tdh ?? 0)
-    );
-    return tdhWallets.length > 0 ? tdhWallets[0].wallet.address : "";
+    const tdhWallets =
+      profile.wallets?.toSorted((a, b) => (b.tdh ?? 0) - (a.tdh ?? 0)) ?? [];
+    return tdhWallets.length > 0 ? tdhWallets[0].wallet : "";
   };
 
   const [primaryWallet, setPrimaryWallet] = useState<string>(
-    profile.profile?.primary_wallet ?? getHighestTdhWalletOrNone()
+    profile.primary_wallet ?? getHighestTdhWalletOrNone()
   );
 
-  const haveConsolidations = profile.consolidation.wallets.length > 1;
+  const haveConsolidations =
+    profile.wallets?.length && profile.wallets.length > 1;
 
   const [haveChanges, setHaveChanges] = useState<boolean>(false);
   useEffect(() => {
     setHaveChanges(
-      userName?.toLowerCase() !== profile.profile?.handle.toLowerCase() ||
-        primaryWallet !== profile.profile?.primary_wallet ||
-        classification !== profile.profile?.classification
+      userName?.toLowerCase() !== profile.handle?.toLowerCase() ||
+        primaryWallet !== profile.primary_wallet ||
+        classification !== profile.classification
     );
   }, [profile, userName, primaryWallet, classification]);
 
@@ -62,7 +57,7 @@ export default function UserPageSetUpProfile({
       setMutating(true);
       return await commonApiPost<
         ApiCreateOrUpdateProfileRequest,
-        IProfileAndConsolidations
+        ApiIdentity
       >({
         endpoint: `profiles`,
         body,
@@ -76,7 +71,7 @@ export default function UserPageSetUpProfile({
 
       const newPath = router.pathname.replace(
         "[user]",
-        updatedProfile.profile?.handle!?.toLowerCase()
+        updatedProfile?.handle!?.toLowerCase()
       );
       await router.replace(newPath);
       onProfileEdit({
@@ -110,8 +105,8 @@ export default function UserPageSetUpProfile({
       classification,
     };
 
-    if (profile.profile?.pfp_url) {
-      body.pfp_url = profile.profile?.pfp_url;
+    if (profile?.pfp) {
+      body.pfp_url = profile.pfp;
     }
 
     await updateUser.mutateAsync(body);
@@ -127,7 +122,7 @@ export default function UserPageSetUpProfile({
         <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
           <UserSettingsUsername
             userName={userName}
-            originalUsername={profile.profile?.handle ?? ""}
+            originalUsername={profile.handle ?? ""}
             setUserName={setUserName}
             setIsAvailable={setUserNameAvailable}
             setIsLoading={setCheckingUsername}
@@ -140,7 +135,7 @@ export default function UserPageSetUpProfile({
 
           {haveConsolidations && (
             <UserSettingsPrimaryWallet
-              consolidations={profile.consolidation.wallets}
+              wallets={profile.wallets ?? []}
               selected={primaryWallet}
               onSelect={setPrimaryWallet}
             />

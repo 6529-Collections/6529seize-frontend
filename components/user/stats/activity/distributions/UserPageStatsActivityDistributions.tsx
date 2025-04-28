@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Page } from "../../../../../helpers/Types";
 import { Distribution } from "../../../../../entities/IDistribution";
@@ -14,7 +14,7 @@ export default function UserPageStatsActivityDistributions({
   profile,
   activeAddress,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
   const PAGE_SIZE = 10;
@@ -64,9 +64,7 @@ export default function UserPageStatsActivityDistributions({
   const getWalletsParam = () =>
     [
       activeAddress?.toLowerCase() ??
-        profile.consolidation.wallets.map((w) =>
-          w.wallet.address.toLowerCase()
-        ),
+        profile.wallets?.map((w) => w.wallet.toLowerCase()),
     ].join(",");
 
   const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());

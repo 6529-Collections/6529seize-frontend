@@ -62,6 +62,9 @@ export default function ProfileProxyEndTimeEdit({
       });
     },
     onSuccess: () => {
+      if (!profileProxy.granted_to?.handle || !profileProxy.created_by?.handle) {
+        return;
+      }
       onProfileProxyModify({
         profileProxyId: profileProxy.id,
         grantedToHandle: profileProxy.granted_to.handle,

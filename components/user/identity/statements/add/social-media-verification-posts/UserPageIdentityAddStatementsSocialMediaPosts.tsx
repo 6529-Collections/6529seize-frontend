@@ -1,4 +1,4 @@
-import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
 import {
   STATEMENT_GROUP,
   STATEMENT_TYPE,
@@ -10,7 +10,7 @@ export default function UserPageIdentityAddStatementsSocialMediaPosts({
   profile,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onClose: () => void;
 }) {
   return (

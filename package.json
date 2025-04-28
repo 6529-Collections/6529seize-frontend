@@ -12,11 +12,12 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "knip": "knip --fix --allow-remove-files"
+    "test:watch": "nodemon --watch tests --watch src --ext ts,tsx,js,jsx --exec \"npx playwright test\"",
+    "knip": "knip --fix --allow-remove-files",
+    "type-check": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@capacitor/app": "^6.0.1",

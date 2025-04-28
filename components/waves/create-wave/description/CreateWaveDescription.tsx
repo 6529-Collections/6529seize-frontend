@@ -1,12 +1,12 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { CreateDropConfig } from "../../../../entities/IDrop";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
-import { CreateDropType } from "../../../drops/create/CreateDrop";
+
 import DropEditor, {
   DropEditorHandles,
 } from "../../../drops/create/DropEditor";
 import { profileAndConsolidationsToProfileMin } from "../../../../helpers/ProfileHelpers";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import { CreateDropType } from "../../../drops/create/types";
 export interface CreateWaveDescriptionHandles {
   requestDrop: () => CreateDropConfig | null;
 }
@@ -18,7 +18,7 @@ interface CreateWaveDescriptionWaveProps {
 }
 
 interface CreateWaveDescriptionProps {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly wave: CreateWaveDescriptionWaveProps;
   readonly showDropError: boolean;
   readonly onHaveDropToSubmitChange: (canSubmit: boolean) => void;

@@ -25,14 +25,14 @@ const WaveDropQuoteWithDropId: React.FC<WaveDropQuoteWithDropIdProps> = ({
       QueryKey.DROP,
       {
         drop_id: dropId,
-        context_profile: connectedProfile?.profile?.handle,
+        context_profile: connectedProfile?.handle,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiDrop>({
         endpoint: `drops/${dropId}`,
-        params: connectedProfile?.profile?.handle
-          ? { context_profile: connectedProfile.profile.handle }
+        params: connectedProfile?.handle
+          ? { context_profile: connectedProfile.handle }
           : {},
       }),
     placeholderData: keepPreviousData,

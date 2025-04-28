@@ -1,21 +1,18 @@
 import { useContext, useRef, useState } from "react";
-import {
-  CicStatement,
-  IProfileAndConsolidations,
-} from "../../../../../entities/IProfile";
+import { CicStatement } from "../../../../../entities/IProfile";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../../../auth/Auth";
 import { commonApiDelete } from "../../../../../services/api/common-api";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
-
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 export default function UserPageIdentityDeleteStatementModal({
   statement,
   profile,
   onClose,
 }: {
   readonly statement: CicStatement;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -30,7 +27,7 @@ export default function UserPageIdentityDeleteStatementModal({
     mutationFn: async () => {
       setLoading(true);
       return await commonApiDelete({
-        endpoint: `profiles/${profile.input_identity}/cic/statements/${statement.id}`,
+        endpoint: `profiles/${profile.query}/cic/statements/${statement.id}`,
       });
     },
     onError: (error) => {

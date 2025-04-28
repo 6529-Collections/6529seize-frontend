@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import ProxyActions from "../proxy/list/ProxyActions";
 import { AuthContext } from "../../../auth/Auth";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import ProxyCreateAction from "../proxy/create-action/ProxyCreateAction";
 import CommonChangeAnimation from "../../../utils/animation/CommonChangeAnimation";
 import { PROFILE_PROXY_AVAILABLE_ACTIONS } from "../../../../entities/IProxy";
@@ -20,11 +20,11 @@ export default function ProxyListItem({
 }: {
   readonly isSelf: boolean;
   readonly profileProxy: ApiProfileProxy;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const { connectedProfile } = useContext(AuthContext);
   const getIsGrantor = () =>
-    connectedProfile?.profile?.external_id === profileProxy?.created_by?.id;
+    connectedProfile?.id === profileProxy?.created_by?.id;
 
   const [isGrantor, setIsGrantor] = useState(getIsGrantor());
 

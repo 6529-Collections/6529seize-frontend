@@ -1,0 +1,11 @@
+# Task ID: 1
+# Title: Analyze current TermsOfServiceModal structure
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Review the existing TermsOfServiceModal.tsx component to understand its structure, state management, and functionality before making changes.
+# Details:
+Open the file at components/terms/TermsOfServiceModal.tsx and analyze: 1) The component's props and return structure, 2) State management (particularly hasAcknowledged), 3) Event handlers (onClose, checkbox interaction), 4) The layout hierarchy (FocusTrap, overlay div, container div, header, content, footer), 5) Styling classes used. Document the key elements that need to be preserved versus those that will be replaced by ModalLayout.
+
+# Test Strategy:
+Create a checklist of all functionality and visual elements in the current implementation to verify against after refactoring.

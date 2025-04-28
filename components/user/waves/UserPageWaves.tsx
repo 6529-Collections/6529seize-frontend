@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { AuthContext } from "../../auth/Auth";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../../services/api/common-api";
@@ -13,7 +12,7 @@ import UserPageWavesSearch from "./UserPageWavesSearch";
 import { useDebounce } from "react-use";
 import { useRouter } from "next/router";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 interface SearchWavesParams {
   readonly author?: string;
   readonly name?: string;
@@ -25,18 +24,18 @@ interface SearchWavesParams {
 export default function UserPageWaves({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
-  const haveProfile = !!profile.profile?.handle;
+  const haveProfile = !!profile.handle;
   const { connectedProfile, activeProfileProxy, requestAuth } =
     useContext(AuthContext);
   const router = useRouter();
 
   const getShowCreateNewWaveButton = () => {
     return (
-      !!connectedProfile?.profile?.handle &&
+      !!connectedProfile?.handle &&
       !activeProfileProxy &&
-      connectedProfile.profile.handle === profile.profile?.handle
+      connectedProfile.handle === profile.handle
     );
   };
   const [showCreateNewWaveButton, setShowCreateNewWaveButton] = useState(
@@ -48,7 +47,7 @@ export default function UserPageWaves({
   }, [connectedProfile, profile, activeProfileProxy]);
 
   const getUsePublicWaves = () =>
-    !connectedProfile?.profile?.handle || !!activeProfileProxy;
+    !connectedProfile?.handle || !!activeProfileProxy;
   const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
   useEffect(
     () => setUsePublicWaves(getUsePublicWaves()),
@@ -57,7 +56,7 @@ export default function UserPageWaves({
 
   const getParams = (): SearchWavesParams => {
     return {
-      author: profile.profile?.handle ?? undefined,
+      author: profile.handle ?? undefined,
       name: undefined,
       limit: 20,
     };

@@ -1,9 +1,5 @@
 import { ReactElement } from "react";
-import {
-  ApiProfileRepRatesState,
-  IProfileAndConsolidations,
-  RateMatter,
-} from "../../entities/IProfile";
+import { ApiProfileRepRatesState, RateMatter } from "../../entities/IProfile";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
@@ -17,14 +13,14 @@ import { ActivityLogParams } from "../../components/profile-activity/ProfileActi
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
 import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
-
+import { ApiIdentity } from "../../generated/models/ApiIdentity";
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
   readonly rater: string | null;
 }
 
 export interface UserPageRepProps {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly handleOrWallet: string;
 }
 

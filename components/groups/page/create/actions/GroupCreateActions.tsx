@@ -156,7 +156,7 @@ export default function GroupCreateActions({
           visible: true,
           old_version_id:
             originalGroup &&
-            originalGroup.created_by?.handle.toLowerCase() ===
+            originalGroup.created_by?.handle?.toLowerCase() ===
               connectedProfile?.handle?.toLowerCase()
               ? originalGroup.id
               : null,

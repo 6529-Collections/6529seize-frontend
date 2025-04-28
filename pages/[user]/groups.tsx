@@ -1,23 +1,22 @@
 import { ReactElement } from "react";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
-import { getCommonHeaders, getUserProfile, userPageNeedsRedirect } from "../../helpers/server.helpers";
+import {
+  getCommonHeaders,
+  getUserProfile,
+  userPageNeedsRedirect,
+} from "../../helpers/server.helpers";
 import UserPageGroupsWrapper from "../../components/user/groups/UserPageGroupsWrapper";
 
 export interface UserPageGroupsProps {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageGroupsProps }> = ({
   pageProps,
 }) => {
-
-  return (
-    <UserPageGroupsWrapper
-      profile={pageProps.profile}
-    />
-  );
+  return <UserPageGroupsWrapper profile={pageProps.profile} />;
 };
 
 Page.getLayout = function getLayout(

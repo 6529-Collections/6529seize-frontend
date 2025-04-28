@@ -4,7 +4,6 @@ import {
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
-  IProfileAndConsolidations,
 } from "../../../entities/IProfile";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { Page } from "../../../helpers/Types";
@@ -21,6 +20,7 @@ import {
   convertAddressToLowerCase,
 } from "./filters/user-page-collected-filters.helpers";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { ApiIdentity } from "../../../generated/models/ObjectSerializer";
 
 export interface ProfileCollectedFilters {
   readonly handleOrWallet: string;
@@ -66,7 +66,7 @@ const SZN_TO_SEARCH_PARAMS: Record<MEMES_SEASON, string> = {
 export default function UserPageCollected({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const defaultSortBy = CollectionSort.TOKEN_ID;
   const defaultSortDirection = SortDirection.DESC;
@@ -165,7 +165,7 @@ export default function UserPageCollected({
     const convertedAddress = convertAddressToLowerCase(address);
     const convertedCollection = convertCollection(collection ?? null);
     return {
-      handleOrWallet: convertedAddress ?? profile.profile?.handle ?? user,
+      handleOrWallet: convertedAddress ?? profile.handle ?? user,
       accountForConsolidations: !convertedAddress,
       collection: convertedCollection,
       seized: convertSeized({

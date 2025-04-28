@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-import {
-  IProfileAndConsolidations,
-  RatingStats,
-} from "../../../../../entities/IProfile";
+import { RatingStats } from "../../../../../entities/IProfile";
 import UserPageRepRepsTableBody from "./UserPageRepRepsTableBody";
 import UserPageRepRepsTableHeader from "./UserPageRepRepsTableHeader";
 import { SortDirection } from "../../../../../entities/ISort";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CommonTableWrapper from "../../../../utils/table/CommonTableWrapper";
-
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 export enum RepsTableSort {
   REP = "REP",
   RATERS = "RATERS",
@@ -18,12 +15,10 @@ export enum RepsTableSort {
 export default function UserPageRepRepsTable({
   reps,
   profile,
-  giverAvailableRep,
   canEditRep,
 }: {
   readonly reps: RatingStats[];
-  readonly profile: IProfileAndConsolidations;
-  readonly giverAvailableRep: number;
+  readonly profile: ApiIdentity;
   readonly canEditRep: boolean;
 }) {
   const [sortType, setSortType] = useState<RepsTableSort>(RepsTableSort.REP);
@@ -115,13 +110,11 @@ export default function UserPageRepRepsTable({
         onSortTypeClick={onSortTypeClick}
       />
 
-        <UserPageRepRepsTableBody
-          reps={sortedReps}
-          profile={profile}
-          giverAvailableRep={giverAvailableRep}
-          canEditRep={canEditRep}
-        />
-
+      <UserPageRepRepsTableBody
+        reps={sortedReps}
+        profile={profile}
+        canEditRep={canEditRep}
+      />
     </CommonTableWrapper>
   );
 }

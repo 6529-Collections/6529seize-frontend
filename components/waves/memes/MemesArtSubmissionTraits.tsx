@@ -25,7 +25,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   const { connectedProfile } = useAuth();
 
   // Get the user profile from connected account
-  const userProfile = connectedProfile?.profile?.handle;
+  const userProfile = connectedProfile?.handle;
 
   // Direct field update handlers - much simpler now
   const updateText = useCallback(

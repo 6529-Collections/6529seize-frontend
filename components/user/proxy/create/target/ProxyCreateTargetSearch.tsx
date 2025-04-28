@@ -60,7 +60,7 @@ export default function ProxyCreateTargetSearch({
       return [];
     }
     return profiles.filter(
-      (profile) => profile.handle !== connectedProfile.profile?.handle
+      (profile) => profile.handle !== connectedProfile.handle
     );
   };
 

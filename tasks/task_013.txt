@@ -1,0 +1,52 @@
+# Task ID: 13
+# Title: Verify End-to-End Drop Submission Flow with Terms Acceptance
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Test the complete drop submission process for waves that require terms acceptance, ensuring all user interactions with the terms modal function correctly.
+# Details:
+This task involves comprehensive testing of the drop submission flow when terms acceptance is required. The developer should verify that:
+
+1. When submitting a drop to a wave with terms requirements, the terms acceptance modal appears correctly
+2. The modal properly displays the terms content
+3. The user cannot proceed without acknowledging the terms
+4. The submission process completes successfully after terms are accepted and signed
+5. The UI handles all edge cases gracefully, including:
+   - User canceling from the modal
+   - User rejecting the signature request
+   - Any network or processing errors during the flow
+
+The developer should pay special attention to the user experience, ensuring that error states are clearly communicated and that the flow feels intuitive. Check that the terms hash is correctly included in the signature payload as verified in Task #12.
+
+# Test Strategy:
+Execute the following test cases manually:
+
+1. **Happy Path Test**:
+   - Select a wave that requires terms acceptance
+   - Initiate a drop submission
+   - Verify the terms modal appears with correct content
+   - Acknowledge the terms
+   - Complete the signature process
+   - Confirm the submission completes successfully
+   - Verify appropriate success messages are displayed
+
+2. **Cancellation Test**:
+   - Initiate a drop submission to a terms-required wave
+   - When the terms modal appears, click the cancel/close button
+   - Verify the modal closes and the submission is properly canceled
+   - Confirm the UI returns to an appropriate state
+
+3. **Rejection Test**:
+   - Initiate a drop submission to a terms-required wave
+   - Acknowledge the terms in the modal
+   - When prompted for signature, reject the signature request
+   - Verify the submission is properly canceled
+   - Confirm appropriate error/information messages are displayed
+
+4. **Technical Verification**:
+   - Open browser developer tools
+   - Monitor the console during all test scenarios
+   - Verify no unexpected errors appear
+   - Check network requests to confirm proper API interactions
+
+Document any issues found with screenshots and detailed reproduction steps.

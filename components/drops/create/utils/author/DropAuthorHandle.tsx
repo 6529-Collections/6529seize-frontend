@@ -13,7 +13,7 @@ export default function DropAuthorHandle({
 }) {
   const router = useRouter();
   const handleOrWallet = (router.query.user as string)?.toLowerCase();
-  const amIAuthor = handle.toLowerCase() === handleOrWallet;
+  const amIAuthor = handle?.toLowerCase() === handleOrWallet;
 
   const getTextClasses = (): string => {
     switch (size) {

@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import {
   ApiProfileRepRatesState,
-  IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import { AuthContext } from "../../../auth/Auth";
@@ -11,12 +10,13 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import Link from "next/link";
 import CommonInfoBox from "../../../utils/CommonInfoBox";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageRepNewRepSearchHeader({
   repRates,
   profile,
 }: {
   readonly repRates: ApiProfileRepRatesState | null;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const { activeProfileProxy } = useContext(AuthContext);
 
@@ -25,12 +25,12 @@ export default function UserPageRepNewRepSearchHeader({
       QueryKey.PROFILE_REP_RATINGS,
       {
         rater: activeProfileProxy?.created_by.handle,
-        handleOrWallet: profile.profile?.handle,
+        handleOrWallet: profile?.handle,
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profile.input_identity}/rep/ratings/received`,
+        endpoint: `profiles/${profile?.query}/rep/ratings/received`,
         params: activeProfileProxy?.created_by.handle
           ? { rater: activeProfileProxy.created_by.handle }
           : {},
@@ -127,7 +127,7 @@ export default function UserPageRepNewRepSearchHeader({
         </>
       )}
       <span className="tw-text-base tw-block tw-text-iron-300 tw-font-normal">
-        <span>Your Rep assigned to {profile.input_identity}:</span>
+        <span>Your Rep assigned to {profile.query ?? profile.handle ?? profile.display}:</span>
         <span className="tw-ml-1 tw-font-semibold tw-text-iron-50">
           {repRates ? formatNumberWithCommas(activeRepRates.rated) : ""}
         </span>

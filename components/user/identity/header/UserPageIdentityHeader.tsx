@@ -1,15 +1,13 @@
-import {
-  IProfileAndConsolidations,
-  RateMatter,
-} from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import UserPageIdentityHeaderCIC from "./UserPageIdentityHeaderCIC";
 import UserPageRateWrapper from "../../utils/rate/UserPageRateWrapper";
 import UserPageIdentityHeaderCICRate from "./cic-rate/UserPageIdentityHeaderCICRate";
+import { RateMatter } from "../../../../entities/IProfile";
 
 export default function UserPageIdentityHeader({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   return (
     <div>

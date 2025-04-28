@@ -17,7 +17,7 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({ drop }) 
   const { logs, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveActivityLogs({
       waveId: drop.wave.id,
-      connectedProfileHandle: connectedProfile?.profile?.handle,
+      connectedProfileHandle: connectedProfile?.handle ?? undefined,
       reverse: false,
       dropId: drop.id,
       logTypes: ["DROP_VOTE_EDIT"],

@@ -18,10 +18,6 @@ export interface Page<T> {
 
 export type CountlessPage<T> = Omit<Page<T>, "count">;
 
-type NonNullableRequired<T> = {
-  [P in keyof T]-?: NonNullable<T[P]>;
-};
-
 export type NonNullableNotRequired<T> = {
   [P in keyof T]?: NonNullable<T[P]>;
 };

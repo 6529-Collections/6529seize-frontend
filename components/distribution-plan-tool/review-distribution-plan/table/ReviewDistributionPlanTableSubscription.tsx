@@ -16,7 +16,7 @@ import {
   commonApiPost,
 } from "../../../../services/api/common-api";
 import CircleLoader from "../../common/CircleLoader";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 
 interface WalletResult {
   wallet: string;
@@ -50,7 +50,8 @@ export function SubscriptionLinks(
           onClick={() => setShowConfirm(true)}
           disabled={downloading}
           type="button"
-          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300">
+          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
+        >
           {downloading ? (
             <span className="d-flex gap-2 align-items-center">
               <CircleLoader />
@@ -161,7 +162,8 @@ export function SubscriptionConfirm(
         <Button
           disabled={!tokenId || isNaN(parseInt(tokenId))}
           variant="primary"
-          onClick={() => props.onConfirm(contract, tokenId)}>
+          onClick={() => props.onConfirm(contract, tokenId)}
+        >
           Looks good
         </Button>
       </Modal.Footer>
@@ -192,13 +194,9 @@ const resetSubscriptions = async (
   });
 };
 
-export const isSubscriptionsAdmin = (
-  connectedProfile: IProfileAndConsolidations | null
-) => {
+export const isSubscriptionsAdmin = (connectedProfile: ApiIdentity | null) => {
   const connectedWallets =
-    connectedProfile?.consolidation.wallets.map(
-      (wallet) => wallet.wallet.address
-    ) ?? [];
+    connectedProfile?.wallets?.map((wallet) => wallet.wallet) ?? [];
   return connectedWallets.some((w) =>
     SUBSCRIPTIONS_ADMIN_WALLETS.some((a) => areEqualAddresses(a, w))
   );

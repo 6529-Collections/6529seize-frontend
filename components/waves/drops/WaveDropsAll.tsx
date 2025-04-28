@@ -94,7 +94,7 @@ export default function WaveDropsAll({
 
   const typingMessage = useWaveIsTyping(
     waveId,
-    connectedProfile?.profile?.handle ?? null
+    connectedProfile?.handle ?? null
   );
 
   // Effect to update the ref whenever waveMessages changes

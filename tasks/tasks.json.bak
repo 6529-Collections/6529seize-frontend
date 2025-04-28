@@ -1,0 +1,313 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Enhance TermsOfServiceModal with Accessibility Features",
+      "description": "Update the existing TermsOfServiceModal component to improve accessibility with focus management, keyboard interactions, and ARIA attributes.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high",
+      "details": "Modify components/terms/TermsOfServiceModal.tsx to: 1) Add role='dialog' and aria-modal='true' to the main container, 2) Add aria-labelledby pointing to the modal title, 3) Implement focus trapping within the modal (consider using focus-trap-react or a custom hook), 4) Add ESC key listener to close the modal, 5) Ensure focus returns to the triggering element when closed, 6) Verify the scrolling behavior for long content works properly with keyboard navigation.",
+      "testStrategy": "Test with screen readers (NVDA, VoiceOver), keyboard-only navigation, and verify focus management works across different browsers. Ensure the modal can be closed with ESC key and that focus returns to the original element.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Add ARIA attributes and roles to TermsOfServiceModal",
+          "description": "Update the TermsOfServiceModal component with proper ARIA attributes and roles to improve screen reader accessibility",
+          "dependencies": [],
+          "details": "1. Add role='dialog' and aria-modal='true' to the main modal container\n2. Add a unique ID to the modal title element\n3. Add aria-labelledby attribute to the modal container, pointing to the title ID\n4. Add appropriate aria-describedby if there's descriptive content\n5. Ensure close buttons have aria-label='Close' for screen readers\n6. Test with screen readers (NVDA or VoiceOver) to verify announcements\n7. Document changes in code comments",
+          "status": "done",
+          "parentTaskId": 1
+        },
+        {
+          "id": 2,
+          "title": "Implement keyboard navigation and focus management",
+          "description": "Add keyboard interaction support and focus trapping to ensure the modal is fully navigable without a mouse",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Install focus-trap-react library (or create a custom useFocusTrap hook)\n2. Implement focus trapping within the modal when it opens\n3. Add an ESC key event listener to close the modal\n4. Store the triggering element reference when opening the modal\n5. Return focus to the triggering element when the modal closes\n6. Test keyboard navigation through all interactive elements\n7. Ensure tab order is logical and includes all interactive elements\n8. Verify that focus cannot escape the modal while open",
+          "status": "done",
+          "parentTaskId": 1
+        },
+        {
+          "id": 3,
+          "title": "Optimize scrolling behavior for keyboard accessibility",
+          "description": "Ensure the modal's scrolling content is properly accessible via keyboard and works correctly with focus management",
+          "dependencies": [
+            2
+          ],
+          "details": "1. Review current scrolling implementation in the modal\n2. Ensure scrollable content has tabindex='0' to make it focusable\n3. Add appropriate keyboard handlers for scrolling (arrow keys)\n4. Test focus visibility when tabbing through scrollable content\n5. Ensure focus indicators remain visible when elements are scrolled\n6. Test with various content lengths to verify scrolling behavior\n7. Verify that focus trapping works correctly with scrollable content\n8. Add automated tests for keyboard navigation and scrolling functionality",
+          "status": "done",
+          "parentTaskId": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Create Terms Acknowledgment UI Components",
+      "description": "Implement the checkbox and related UI elements for explicit terms acknowledgment within the modal.",
+      "status": "done",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "details": "Add to TermsOfServiceModal: 1) Create a checkbox component that is unchecked by default, 2) Add accompanying text 'I have read and agree to the terms of service', 3) Style the checkbox and label according to existing design patterns, 4) Implement state management for the checkbox, 5) Ensure the checkbox is accessible with proper labeling and keyboard interaction, 6) Add validation to prevent proceeding without checking the box.",
+      "testStrategy": "Verify the checkbox works with mouse and keyboard, test that the 'Agree & Continue' button is properly disabled until the checkbox is checked, and ensure screen readers announce the checkbox state correctly.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create and style the acknowledgment checkbox component",
+          "description": "Implement the checkbox UI element with proper styling and accessibility attributes",
+          "dependencies": [],
+          "details": "1) Create a new checkbox component within the TermsOfServiceModal component\n2) Style the checkbox according to existing design patterns in the application\n3) Ensure proper accessibility by adding aria-label and role attributes\n4) Make the checkbox keyboard navigable (can be focused and toggled with keyboard)\n5) Add the accompanying text 'I have read and agree to the terms of service' as a label\n6) Ensure the label is properly associated with the checkbox using htmlFor/id\n7) Test the component renders correctly and is accessible via keyboard and screen readers",
+          "status": "done",
+          "parentTaskId": 2
+        },
+        {
+          "id": 2,
+          "title": "Implement state management for the acknowledgment checkbox",
+          "description": "Add state management to track whether the checkbox is checked or unchecked",
+          "dependencies": [
+            1
+          ],
+          "details": "1) Create a state variable (e.g., isAcknowledged) initialized to false\n2) Connect the checkbox component to this state variable\n3) Implement an onChange handler to update the state when the checkbox is clicked\n4) Ensure the checkbox visual state reflects the current state value\n5) Add appropriate event handlers for keyboard interactions\n6) Test that clicking the checkbox toggles the state correctly\n7) Verify that the state persists correctly within the component lifecycle",
+          "status": "done",
+          "parentTaskId": 2
+        },
+        {
+          "id": 3,
+          "title": "Add validation to prevent proceeding without acknowledgment",
+          "description": "Implement validation logic to ensure users cannot proceed without checking the acknowledgment box",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1) Modify the modal's primary action button (e.g., 'Continue' or 'Accept') to be disabled when isAcknowledged is false\n2) Add visual indication that the checkbox is required (e.g., asterisk or helper text)\n3) Implement error messaging that appears if the user attempts to proceed without checking the box\n4) Add a focus mechanism to highlight the checkbox if validation fails\n5) Ensure the validation state is properly communicated to screen readers\n6) Test the validation by attempting to proceed without checking the box\n7) Verify that the user can proceed only after acknowledging the terms",
+          "status": "done",
+          "parentTaskId": 2
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Develop useTermsSignatureFlow Custom Hook",
+      "description": "Create a custom hook to manage the terms display, acknowledgment, and signature process flow.",
+      "status": "done",
+      "dependencies": [
+        1,
+        2
+      ],
+      "priority": "high",
+      "details": "Implement a new hook that: 1) Manages modal visibility state, 2) Tracks terms acknowledgment state, 3) Handles the sequence from terms display to acknowledgment to signature request, 4) Provides methods for opening/closing the modal, 5) Stores the terms version being acknowledged, 6) Captures timestamp of acknowledgment, 7) Provides a clean API for the drop submission process to use.",
+      "testStrategy": "Write unit tests for the hook using React Testing Library, testing each state transition and ensuring the flow works as expected. Test edge cases like cancellation and rejection scenarios.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Create basic hook structure with state management",
+          "description": "Implement the foundation of the useTermsSignatureFlow hook with state variables and basic functions for modal visibility and terms acknowledgment.",
+          "dependencies": [],
+          "details": "1. Create a new file named useTermsSignatureFlow.js in the hooks directory.\n2. Set up the hook with the following state variables:\n   - isModalVisible (boolean)\n   - isTermsAcknowledged (boolean)\n   - termsVersion (string)\n   - acknowledgmentTimestamp (Date or null)\n   - currentStep (enum: 'terms', 'signature', 'completed')\n3. Implement basic functions:\n   - openModal(): Sets isModalVisible to true and resets states\n   - closeModal(): Sets isModalVisible to false\n   - acknowledgeTerms(version): Sets isTermsAcknowledged to true, stores version and timestamp\n4. Add proper TypeScript types/interfaces if applicable\n5. Test the hook's basic functionality with a simple test component that uses the state variables and functions.",
+          "status": "done",
+          "parentTaskId": 3
+        },
+        {
+          "id": 2,
+          "title": "Implement flow control and transition logic",
+          "description": "Add logic to manage the sequence flow from terms display to acknowledgment to signature request, with proper state transitions.",
+          "dependencies": [
+            1
+          ],
+          "details": "1. Enhance the hook with flow control functions:\n   - goToNextStep(): Advances the flow based on currentStep value\n   - resetFlow(): Resets the flow to initial state\n   - isFlowCompleted(): Returns whether the entire flow is completed\n2. Implement the step transition logic:\n   - From 'terms' to 'signature' when terms are acknowledged\n   - From 'signature' to 'completed' when signature is captured\n3. Add validation to ensure steps cannot be skipped (e.g., can't go to signature without acknowledging terms)\n4. Create helper methods to determine the current state of the flow (isTermsStep, isSignatureStep, etc.)\n5. Test the transition logic by simulating a complete flow from start to finish, ensuring each state change works correctly.",
+          "status": "done",
+          "parentTaskId": 3
+        },
+        {
+          "id": 3,
+          "title": "Finalize API and integrate with submission process",
+          "description": "Complete the hook by adding signature capture functionality and creating a clean, documented API for the drop submission process.",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "1. Add signature-related functionality:\n   - captureSignature(signatureData): Stores signature data and advances flow\n   - getSignatureData(): Returns the captured signature\n2. Create a comprehensive return object with all necessary values and functions:\n   - State values: isModalVisible, isTermsAcknowledged, currentStep, etc.\n   - Control functions: openModal, closeModal, acknowledgeTerms, etc.\n   - Flow functions: goToNextStep, resetFlow, isFlowCompleted, etc.\n   - Signature functions: captureSignature, getSignatureData\n3. Add proper JSDoc comments to document the hook's API\n4. Implement error handling for edge cases\n5. Create a comprehensive example of how the hook integrates with the drop submission process\n6. Test the complete flow in an integration test that simulates the entire terms and signature process.",
+          "status": "done",
+          "parentTaskId": 3
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Update Drop Signature Logic",
+      "description": "Modify the existing useDropSignature hook to incorporate the terms display step before requesting signature.",
+      "status": "done",
+      "dependencies": [
+        3
+      ],
+      "priority": "high",
+      "details": "Update useDropSignature.ts to: 1) Check if the wave requires terms acceptance, 2) If terms are required, trigger the terms modal flow before signature, 3) Only proceed with signature request after terms acknowledgment, 4) Ensure the terms content is properly included in the signature hash, 5) Add context to the signature request explaining what is being signed, 6) Handle rejection and cancellation gracefully.",
+      "testStrategy": "Test the signature flow with and without terms requirements. Verify the signature hash includes terms data correctly. Test cancellation at different stages of the flow."
+    },
+    {
+      "id": 5,
+      "title": "Integrate Terms Flow with Drop Submission",
+      "description": "Update the prepareAndSubmitDrop function to incorporate the terms display and acknowledgment flow.",
+      "status": "done",
+      "dependencies": [
+        3,
+        4
+      ],
+      "priority": "high",
+      "details": "Modify CreateDropContent.tsx to: 1) Use the useTermsSignatureFlow hook, 2) Update prepareAndSubmitDrop to check if terms are required for the wave, 3) If required, show terms modal before proceeding to signature, 4) Pass the acknowledgment data to the signature process, 5) Handle user cancellation of terms or signature, 6) Provide appropriate feedback during the process.",
+      "testStrategy": "Test the full drop submission flow with waves that have terms requirements. Verify the flow works correctly from start to finish, including cancellation scenarios. Test with different terms lengths."
+    },
+    {
+      "id": 6,
+      "title": "Implement Responsive Design for Terms Modal",
+      "description": "Ensure the terms modal is fully responsive and provides a good user experience on all device sizes.",
+      "status": "done",
+      "dependencies": [
+        1,
+        2
+      ],
+      "priority": "medium",
+      "details": "1) Review and enhance the existing responsive styles in TermsOfServiceModal.tsx, 2) Optimize the modal size and layout for mobile devices, 3) Ensure the scrollable terms area works well on touch devices, 4) Test and adjust font sizes and spacing for readability on small screens, 5) Verify that buttons and the checkbox are easily tappable on mobile, 6) Implement any necessary media queries for specific breakpoints.",
+      "testStrategy": "Test on various device sizes (phone, tablet, desktop) and orientations. Use browser dev tools to simulate different screen sizes and verify the layout adjusts appropriately. Test actual touch interaction on mobile devices."
+    },
+    {
+      "id": 7,
+      "title": "Update DropHasher for Terms Inclusion",
+      "description": "Modify the DropHasher to ensure terms acknowledgment is properly included in the signature hash.",
+      "status": "done",
+      "dependencies": [
+        4
+      ],
+      "priority": "high",
+      "details": "Update DropHasher.ts to: 1) Include terms version in the hash calculation, 2) Add acknowledgment timestamp to the hash data, 3) Ensure the hash algorithm properly incorporates these new fields, 4) Maintain backward compatibility with drops that don't have terms, 5) Document the updated hash structure for future reference.",
+      "testStrategy": "Create unit tests for the hash function with various input combinations. Verify that the same inputs produce the same hash consistently. Test with and without terms data to ensure backward compatibility."
+    },
+    {
+      "id": 8,
+      "title": "Implement Error Handling and Edge Cases",
+      "description": "Add comprehensive error handling and support for edge cases in the terms and signature flow.",
+      "status": "done",
+      "dependencies": [
+        3,
+        4,
+        5
+      ],
+      "priority": "medium",
+      "details": "1) Handle network errors during signature requests, 2) Manage state for interrupted flows (e.g., user closes wallet), 3) Add appropriate error messages for various failure scenarios, 4) Implement retry mechanisms where appropriate, 5) Handle edge cases like terms changing during the submission process, 6) Ensure proper cleanup of resources and state when the flow is interrupted.",
+      "testStrategy": "Test various error scenarios by mocking API failures. Verify that the UI provides appropriate feedback and recovery options. Test interruption scenarios like closing the browser mid-flow."
+    },
+    {
+      "id": 9,
+      "title": "Create Signature Context Improvements",
+      "description": "Enhance the signature request UX by adding clear context about what is being signed.",
+      "status": "done",
+      "dependencies": [
+        4,
+        5
+      ],
+      "priority": "medium",
+      "details": "1) Update the signature request messaging to clearly explain that the user is signing agreement to terms, 2) Add a brief summary of what the signature represents, 3) Consider adding a reference to the terms version being signed, 4) Ensure the messaging is consistent with the terms displayed in the modal, 5) Keep the messaging concise but informative to reduce confusion.",
+      "testStrategy": "Conduct user testing to verify that the signature context is clear and understandable. Test with different wallet providers to ensure the messaging displays correctly in various wallet interfaces."
+    },
+    {
+      "id": 10,
+      "title": "Perform Integration Testing and Documentation",
+      "description": "Conduct comprehensive testing of the entire flow and document the implementation for future reference.",
+      "status": "done",
+      "dependencies": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "priority": "medium",
+      "details": "1) Test the complete flow from drop creation to submission with terms, 2) Verify all components work together correctly, 3) Test on multiple browsers and devices, 4) Document the implementation details, including component structure, state management, and flow logic, 5) Create usage examples for the new hooks and components, 6) Update any existing documentation that references the drop submission process.",
+      "testStrategy": "Perform end-to-end testing of the complete flow. Create test cases covering all possible paths through the flow. Document test results and any issues found. Have multiple team members test the implementation on different devices and browsers."
+    },
+    {
+      "id": 11,
+      "title": "Verify Regression: Basic Drop Submission Without Terms Requirements",
+      "description": "Ensure that the core drop submission functionality for waves without terms requirements remains unaffected by the new terms acceptance implementation.",
+      "details": "This task focuses on regression testing to verify that our recent implementation of the terms acceptance flow does not interfere with the standard drop submission process for waves that don't require terms acceptance. The developer should:\n\n1. Set up a test environment with the latest code from the feature branch\n2. Identify or create a wave configuration that does not have terms requirements enabled\n3. Attempt to submit a drop to this wave following the standard submission flow\n4. Monitor the application's behavior throughout the submission process\n5. Compare this behavior with the same flow on the 'main' branch to ensure consistency\n6. Check that no Terms modal appears at any point during the submission\n7. Verify all submission-related API calls are made correctly\n8. Confirm the drop is successfully submitted and appears in the expected state\n9. Document any unexpected behavior or differences compared to the main branch",
+      "testStrategy": "1. **Setup**:\n   - Deploy the feature branch to a test environment\n   - Have a parallel environment with the 'main' branch for comparison\n   - Prepare test data including a wave without terms requirements and valid drop content\n\n2. **Test Cases**:\n   - TC1: Navigate to the drop submission page and initiate a submission to a wave without terms requirements\n   - TC2: Complete all standard submission form fields and proceed through each step of the submission flow\n   - TC3: Monitor UI for any unexpected Terms modal appearances\n   - TC4: Verify submission completes successfully\n   - TC5: Compare submission time and steps with the same process on the main branch\n\n3. **Validation**:\n   - Check browser network tab to verify API calls match those made in the main branch\n   - Verify no terms-related API calls are made during submission\n   - Confirm drop status shows as successfully submitted\n   - Verify drop appears correctly in the drops list/dashboard after submission\n   - Use browser console to check for any unexpected errors or warnings\n\n4. **Documentation**:\n   - Record test results with screenshots\n   - Document the exact steps followed and system behavior\n   - Note any performance differences between feature and main branches",
+      "status": "done",
+      "dependencies": [],
+      "priority": "medium"
+    },
+    {
+      "id": 12,
+      "title": "Verify Signature Payload Contains Terms Hash and Clear User Context",
+      "description": "Ensure that the cryptographic signature payload includes the terms hash when required and that the signature request presents clear context to users about terms agreement.",
+      "details": "This task involves verifying that when a user submits to a terms-required wave, the signature payload correctly includes the terms hash in the data being signed. The implementation should:\n\n1. Ensure the terms hash is properly included in the signature payload for any wave that requires terms acceptance\n2. Verify that the signature request shown to users in their wallet contains clear contextual information indicating they are agreeing to terms\n3. Check that the context message is human-readable and explicitly mentions terms agreement\n4. Confirm that waves without terms requirements don't unnecessarily include terms-related data in the signature payload\n5. Validate that the terms hash in the payload matches the actual hash of the terms document being agreed to\n\nThe signature context should be implemented in a way that helps users understand what they're agreeing to before signing, reducing confusion and potential user errors.",
+      "testStrategy": "1. Set up a test environment with at least one wave that requires terms acceptance\n2. Use browser developer tools to monitor network requests when submitting to the terms-required wave\n3. Capture and inspect the signature payload sent to the wallet\n4. Verify the payload contains a properly formatted terms hash field\n5. Trigger the signature request and capture screenshots of the wallet signature prompt\n6. Confirm the signature prompt includes clear language about agreeing to terms\n7. Test with multiple wallets (MetaMask, WalletConnect, etc.) to ensure consistent behavior\n8. Compare the terms hash in the payload with the expected hash of the terms document\n9. Perform a control test with a non-terms wave to verify terms hash is not included when not required\n10. Document any discrepancies between expected and actual behavior with screenshots and payload examples",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high"
+    },
+    {
+      "id": 13,
+      "title": "Verify End-to-End Drop Submission Flow with Terms Acceptance",
+      "description": "Test the complete drop submission process for waves that require terms acceptance, ensuring all user interactions with the terms modal function correctly.",
+      "details": "This task involves comprehensive testing of the drop submission flow when terms acceptance is required. The developer should verify that:\n\n1. When submitting a drop to a wave with terms requirements, the terms acceptance modal appears correctly\n2. The modal properly displays the terms content\n3. The user cannot proceed without acknowledging the terms\n4. The submission process completes successfully after terms are accepted and signed\n5. The UI handles all edge cases gracefully, including:\n   - User canceling from the modal\n   - User rejecting the signature request\n   - Any network or processing errors during the flow\n\nThe developer should pay special attention to the user experience, ensuring that error states are clearly communicated and that the flow feels intuitive. Check that the terms hash is correctly included in the signature payload as verified in Task #12.",
+      "testStrategy": "Execute the following test cases manually:\n\n1. **Happy Path Test**:\n   - Select a wave that requires terms acceptance\n   - Initiate a drop submission\n   - Verify the terms modal appears with correct content\n   - Acknowledge the terms\n   - Complete the signature process\n   - Confirm the submission completes successfully\n   - Verify appropriate success messages are displayed\n\n2. **Cancellation Test**:\n   - Initiate a drop submission to a terms-required wave\n   - When the terms modal appears, click the cancel/close button\n   - Verify the modal closes and the submission is properly canceled\n   - Confirm the UI returns to an appropriate state\n\n3. **Rejection Test**:\n   - Initiate a drop submission to a terms-required wave\n   - Acknowledge the terms in the modal\n   - When prompted for signature, reject the signature request\n   - Verify the submission is properly canceled\n   - Confirm appropriate error/information messages are displayed\n\n4. **Technical Verification**:\n   - Open browser developer tools\n   - Monitor the console during all test scenarios\n   - Verify no unexpected errors appear\n   - Check network requests to confirm proper API interactions\n\nDocument any issues found with screenshots and detailed reproduction steps.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high"
+    },
+    {
+      "id": 14,
+      "title": "Unit Test useTermsSignatureFlow Hook Logic",
+      "description": "Create comprehensive unit tests for the useTermsSignatureFlow hook to verify its internal logic, state transitions, and callback handling.",
+      "details": "Implement unit tests for the useTermsSignatureFlow hook that validate its behavior across different scenarios. The tests should:\n\n1. Verify initial state values (modal closed, acknowledged false)\n2. Test the openModal function and confirm it correctly updates state\n3. Test the closeModal function and verify it resets state appropriately\n4. Verify the setAcknowledged function properly updates the acknowledged state\n5. Test the handleAccept function to ensure it calls the onAccept callback with correct parameters\n6. Verify the handleClose function properly invokes the onClose callback\n7. Test that the hook correctly handles different props configurations (required vs optional terms)\n8. Verify proper cleanup on unmount to prevent memory leaks\n\nUse React Testing Library and Jest for implementing these tests. Mock any external dependencies or context providers that the hook might rely on. If the hook uses any API calls, these should be mocked to isolate the hook's logic.",
+      "testStrategy": "1. Setup testing environment with React Testing Library and necessary mocks\n2. Create a test wrapper component that uses the hook and exposes its return values\n3. Test initial state values match expected defaults\n4. Trigger each function returned by the hook and verify state changes:\n   - Call openModal and verify isOpen becomes true\n   - Call setAcknowledged(true) and verify acknowledged becomes true\n   - Call handleAccept and verify onAccept callback is called with expected arguments\n   - Call closeModal and verify isOpen becomes false and acknowledged resets\n5. Test edge cases:\n   - Calling handleAccept when acknowledged is false\n   - Multiple rapid state changes\n   - Passing null or undefined callbacks\n6. If direct unit testing proves difficult due to hook implementation details, create an integration test with a minimal component that uses the hook, then use component interactions to trigger the hook's functions and observe state changes via rendered UI or debug output.\n7. Document any limitations in the testing approach and suggest manual verification steps for aspects that couldn't be automatically tested.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high"
+    },
+    {
+      "id": 15,
+      "title": "Accessibility and Functionality Testing for TermsOfServiceModal Component",
+      "description": "Perform comprehensive testing of the TermsOfServiceModal component to ensure it meets accessibility standards, has proper UI behavior, and functions correctly across devices and interaction methods.",
+      "details": "This task involves thorough verification of the TermsOfServiceModal component with a focus on accessibility compliance and user experience. The developer should:\n\n1. Verify the modal implements a proper focus trap that keeps keyboard focus within the modal when open\n2. Confirm that the ESC key properly closes the modal\n3. Ensure focus returns to the triggering element when the modal closes\n4. Validate that all interactive elements within the modal are keyboard accessible\n5. Check that the checkbox state correctly controls the enabled/disabled state of the Agree button\n6. Verify the modal has proper ARIA attributes including:\n   - role=\"dialog\"\n   - aria-modal=\"true\"\n   - aria-labelledby pointing to the modal title\n   - aria-describedby if there's descriptive content\n7. Test the responsive layout across multiple screen sizes (mobile, tablet, desktop)\n8. Verify content within the modal is scrollable via keyboard (arrow keys) when content exceeds the viewport\n9. Ensure all text meets color contrast requirements (WCAG AA compliance)\n10. Check that the modal renders correctly and maintains functionality across supported browsers",
+      "testStrategy": "Testing should follow this structured approach:\n\n1. **Keyboard Navigation Testing**:\n   - Open the modal and verify Tab and Shift+Tab cycle through all interactive elements without escaping the modal\n   - Press ESC key and verify the modal closes\n   - After closing, verify focus returns to the element that triggered the modal\n   - Test that arrow keys can scroll content when focused on scrollable areas\n\n2. **Screen Reader Testing**:\n   - Use VoiceOver (macOS/iOS) and NVDA (Windows) to navigate the modal\n   - Verify the modal is announced as a dialog\n   - Confirm the modal title is properly announced\n   - Check that the modal content is properly conveyed\n   - Verify checkbox state changes are announced\n\n3. **Functional Testing**:\n   - Verify the checkbox toggles correctly\n   - Confirm the Agree button is disabled until checkbox is checked\n   - Test that clicking Agree performs the expected action\n   - Verify clicking Cancel/Close dismisses the modal\n\n4. **Responsive Testing**:\n   - Test on at least 3 viewport sizes: 375px (mobile), 768px (tablet), 1440px (desktop)\n   - Verify content remains readable and controls are usable at all sizes\n   - Check that scrolling works properly on small screens\n\n5. **Cross-browser Testing**:\n   - Verify functionality in Chrome, Firefox, Safari, and Edge\n\nDocument all findings with screenshots and specific recommendations for any issues discovered.",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high"
+    },
+    {
+      "id": 16,
+      "title": "Reset Terms Modal Checkbox State on Modal Open",
+      "description": "Modify the TermsOfServiceModal component to ensure the 'hasAcknowledged' checkbox state is reset to false whenever the modal is opened.",
+      "details": "In the TermsOfServiceModal.tsx file, update the component to reset the 'hasAcknowledged' state to false whenever the 'isOpen' prop transitions from false to true. This will require implementing a useEffect hook that watches for changes to the 'isOpen' prop and resets the state accordingly. The current implementation likely maintains the checkbox state between modal openings, which creates a confusing user experience. The checkbox should always start unchecked when the modal is freshly opened, requiring users to explicitly acknowledge the terms each time. Be careful to only reset when the modal is opening (transitioning from closed to open), not when it's closing. This may require tracking the previous value of 'isOpen' using a ref or another state variable.",
+      "testStrategy": "Testing should verify that the checkbox state is properly reset when the modal is reopened:\n\n1. Manual testing:\n   - Open the Terms of Service modal\n   - Check the acknowledgment checkbox\n   - Close the modal\n   - Reopen the modal\n   - Verify the checkbox is unchecked\n\n2. Unit testing:\n   - Write a test that renders the TermsOfServiceModal component\n   - Simulate opening the modal (set isOpen to true)\n   - Simulate checking the checkbox\n   - Verify the hasAcknowledged state is true\n   - Simulate closing the modal (set isOpen to false)\n   - Simulate reopening the modal (set isOpen to true again)\n   - Verify the hasAcknowledged state has been reset to false\n\n3. Integration testing:\n   - Test the component within the actual application flow\n   - Verify the reset behavior works in conjunction with other components that might control the modal's visibility",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high"
+    },
+    {
+      "id": 17,
+      "title": "Set up Frontend Testing Framework with Jest, RTL, Playwright and Code Coverage",
+      "description": "Implement a comprehensive frontend testing framework that includes Jest for unit testing, React Testing Library for component testing, Playwright for end-to-end testing, and configure code coverage reporting.",
+      "details": "This task involves setting up a complete testing infrastructure for the frontend application:\n\n1. Install required dependencies:\n   - Jest and its related packages (@types/jest, ts-jest if using TypeScript)\n   - React Testing Library (@testing-library/react, @testing-library/user-event, @testing-library/jest-dom)\n   - Playwright (@playwright/test)\n   - Coverage tools (istanbul, nyc, or Jest's built-in coverage)\n\n2. Configure Jest:\n   - Create jest.config.js with appropriate presets and configuration\n   - Set up test environment (jsdom)\n   - Configure module mocking and transformations\n   - Set up test paths and patterns\n\n3. Set up React Testing Library:\n   - Create test-utils.js/ts for common testing utilities\n   - Configure custom renders with providers if needed\n   - Set up global jest-dom extensions\n\n4. Configure Playwright:\n   - Create playwright.config.js/ts\n   - Set up browser configurations (Chromium, Firefox, WebKit)\n   - Configure screenshot and video recording options\n   - Set up test directories and patterns\n\n5. Implement code coverage:\n   - Configure Jest coverage collection\n   - Set coverage thresholds (e.g., 80% line coverage)\n   - Set up coverage reporting formats (lcov, json, text)\n   - Configure coverage exclusions for irrelevant files\n\n6. Create CI integration:\n   - Add npm scripts for running different test types\n   - Configure test commands for CI pipeline\n   - Set up coverage reporting in CI\n\n7. Create documentation:\n   - Document how to run tests locally\n   - Explain testing conventions and patterns to follow",
+      "testStrategy": "To verify this task has been correctly implemented:\n\n1. Verify installation and configuration:\n   - Check that all required packages are correctly installed in package.json\n   - Confirm configuration files exist and contain correct settings (jest.config.js, playwright.config.js)\n\n2. Test the Jest and React Testing Library setup:\n   - Create a simple component test using RTL\n   - Run the test and verify it passes\n   - Check that test utilities are working correctly\n\n3. Test Playwright setup:\n   - Create a simple E2E test that opens the application\n   - Run the test against multiple browsers\n   - Verify screenshots or videos are captured correctly\n\n4. Validate code coverage:\n   - Run tests with coverage enabled\n   - Verify coverage reports are generated in the expected format\n   - Check that coverage thresholds are applied\n\n5. Verify CI integration:\n   - Run the test scripts defined in package.json\n   - Ensure all test types (unit, component, E2E) can be run separately\n   - Verify coverage reports are generated during CI runs\n\n6. Documentation check:\n   - Review documentation for completeness\n   - Have another team member follow the documentation to run tests\n   - Ensure all testing patterns and conventions are clearly explained",
+      "status": "pending",
+      "dependencies": [],
+      "priority": "high"
+    }
+  ],
+  "metadata": {
+    "projectName": "Terms of Service Display Implementation",
+    "totalTasks": 10,
+    "sourceFile": "scripts/PRD.txt",
+    "generatedAt": "2023-11-14"
+  }
+}

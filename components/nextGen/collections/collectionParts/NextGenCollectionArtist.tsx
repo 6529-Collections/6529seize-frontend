@@ -1,14 +1,12 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { NextGenCollection } from "../../../../entities/INextgen";
 import { useEffect, useState } from "react";
-import {
-  CicStatement,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { CicStatement } from "../../../../entities/IProfile";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { STATEMENT_TYPE } from "../../../../helpers/Types";
 import Image from "next/image";
 import { formatNameForUrl } from "../../nextgen_helpers";
+import { useIdentity } from "../../../../hooks/useIdentity";
 
 interface Props {
   collection: NextGenCollection;
@@ -16,18 +14,12 @@ interface Props {
 }
 
 export default function NextGenCollectionArtist(props: Readonly<Props>) {
-  const [profileHandle, setProfileHandle] = useState<string>("");
-  const [pfp, setPfp] = useState<string>("");
   const [bio, setBio] = useState<string>("");
 
-  useEffect(() => {
-    commonApiFetch<IProfileAndConsolidations>({
-      endpoint: `profiles/${props.collection.artist_address}`,
-    }).then((profile) => {
-      setProfileHandle(profile.profile?.handle ?? "");
-      setPfp(profile.profile?.pfp_url ?? "");
-    });
-  }, []);
+  const { profile } = useIdentity({
+    handleOrWallet: props.collection.artist_address,
+    initialProfile: null,
+  });
 
   useEffect(() => {
     commonApiFetch<CicStatement[]>({
@@ -46,8 +38,9 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
         <Col
           sm={12}
           md={3}
-          className="pt-4 d-flex align-items-center justify-content-center">
-          {pfp && (
+          className="pt-4 d-flex align-items-center justify-content-center"
+        >
+          {profile?.pfp && (
             <Image
               priority
               loading="eager"
@@ -57,7 +50,7 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                 height: "auto",
                 width: "100%",
               }}
-              src={pfp}
+              src={profile.pfp}
               alt={props.collection.artist}
               className="cursor-pointer"
             />
@@ -70,17 +63,10 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                 <h3 className="font-color mb-0">{props.collection.artist}</h3>
               </Col>
             </Row>
-            {profileHandle && (
+            {profile?.handle && (
               <Row className="pt-3">
                 <Col>
-                  <a
-                    href={
-                      profileHandle
-                        ? `/${profileHandle}`
-                        : `/${props.collection.artist_address}`
-                    }>
-                    @{profileHandle}
-                  </a>
+                  <a href={`/${profile?.handle}`}>@{profile?.handle}</a>
                 </Col>
               </Row>
             )}
@@ -93,9 +79,8 @@ export default function NextGenCollectionArtist(props: Readonly<Props>) {
                       {index > 0 && ", "}
                       <a
                         key={`link-collection-${c.id}`}
-                        href={`/nextgen/collection/${formatNameForUrl(
-                          c.name
-                        )}`}>
+                        href={`/nextgen/collection/${formatNameForUrl(c.name)}`}
+                      >
                         {c.name}
                       </a>
                     </>

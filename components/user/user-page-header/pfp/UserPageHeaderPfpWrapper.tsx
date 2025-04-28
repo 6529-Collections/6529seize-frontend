@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import PencilIcon from "../../../utils/icons/PencilIcon";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
@@ -10,7 +10,7 @@ export default function UserPageHeaderPfpWrapper({
   canEdit,
   children,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly canEdit: boolean;
   readonly children: React.ReactNode;
 }) {

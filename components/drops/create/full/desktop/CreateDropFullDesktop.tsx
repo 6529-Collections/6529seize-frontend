@@ -11,7 +11,7 @@ import {
 import CreateDropFullDesktopMetadata from "./CreateDropFullDesktopMetadata";
 import CreateDropDesktopFooter from "../../utils/CreateDropDesktopFooter";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { CreateDropType, CreateDropViewType } from "../../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../../types";
 import { assertUnreachable } from "../../../../../helpers/AllowlistToolHelpers";
 import CreateDropSelectedFileIcon from "../../utils/file/CreateDropSelectedFileIcon";
 import CreateDropSelectedFilePreview from "../../utils/file/CreateDropSelectedFilePreview";

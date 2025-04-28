@@ -35,7 +35,7 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
-import { CreateDropType, CreateDropViewType } from "../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../types";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import ClearEditorPlugin, {

@@ -806,7 +806,9 @@ paths:
     get:
       tags:
         - Identities
-      summary: Get identity by it's key. Key can be id, wallet, handle, ENS name, etc...
+      summary: >-
+        Get identity by it"s key. Key can be id, wallet, handle, ENS name,
+        etc...
       operationId: getIdentityByKey
       parameters:
         - name: identity_key
@@ -4429,6 +4431,9 @@ components:
         - level
         - tdh
         - display
+        - consolidation_key
+        - classification
+        - sub_classification
         - primary_wallet
         - banner1
         - banner2
@@ -4457,6 +4462,8 @@ components:
         tdh:
           type: integer
           format: int65
+        consolidation_key:
+          type: string
         display:
           type: string
         primary_wallet:
@@ -4465,6 +4472,11 @@ components:
           type: string
           nullable: true
         banner2:
+          type: string
+          nullable: true
+        classification:
+          $ref: "#/components/schemas/ApiProfileClassification"
+        sub_classification:
           type: string
           nullable: true
         query:
@@ -5042,6 +5054,16 @@ components:
         next:
           type: string
           nullable: true
+    ApiProfileClassification:
+      type: string
+      enum:
+        - GOVERNMENT_NAME
+        - PSEUDONYM
+        - ORGANIZATION
+        - AI
+        - BOT
+        - PARODY
+        - COLLECTION
     ApiProfileMin:
       type: object
       required:
@@ -5062,6 +5084,7 @@ components:
           format: uuid
         handle:
           type: string
+          nullable: true
         pfp:
           type: string
           nullable: true

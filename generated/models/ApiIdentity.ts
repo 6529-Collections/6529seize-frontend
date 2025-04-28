@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiWallet } from '../models/ApiWallet';
 import { HttpFile } from '../http/http';
 
@@ -22,10 +23,13 @@ export class ApiIdentity {
     'rep': number;
     'level': number;
     'tdh': number;
+    'consolidation_key': string;
     'display': string;
     'primary_wallet': string;
     'banner1': string | null;
     'banner2': string | null;
+    'classification': ApiProfileClassification;
+    'sub_classification': string | null;
     'query'?: string | null;
     'wallets'?: Array<ApiWallet>;
 
@@ -81,6 +85,12 @@ export class ApiIdentity {
             "format": "int65"
         },
         {
+            "name": "consolidation_key",
+            "baseName": "consolidation_key",
+            "type": "string",
+            "format": ""
+        },
+        {
             "name": "display",
             "baseName": "display",
             "type": "string",
@@ -105,6 +115,18 @@ export class ApiIdentity {
             "format": ""
         },
         {
+            "name": "classification",
+            "baseName": "classification",
+            "type": "ApiProfileClassification",
+            "format": ""
+        },
+        {
+            "name": "sub_classification",
+            "baseName": "sub_classification",
+            "type": "string",
+            "format": ""
+        },
+        {
             "name": "query",
             "baseName": "query",
             "type": "string",
@@ -124,4 +146,6 @@ export class ApiIdentity {
     public constructor() {
     }
 }
+
+
 

@@ -100,6 +100,7 @@ export * from '../models/ApiOwnerBalanceMemes';
 export * from '../models/ApiOwnerBalancePage';
 export * from '../models/ApiPageBase';
 export * from '../models/ApiPageWithNextUriBase';
+export * from '../models/ApiProfileClassification';
 export * from '../models/ApiProfileMin';
 export * from '../models/ApiProfileProxy';
 export * from '../models/ApiProfileProxyAction';
@@ -242,7 +243,7 @@ import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
 import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum    } from '../models/ApiGroupOwnsNft';
 import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter } from '../models/ApiGroupTdhFilter';
-import { ApiIdentity } from '../models/ApiIdentity';
+import { ApiIdentity                  } from '../models/ApiIdentity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
@@ -266,6 +267,7 @@ import { ApiOwnerBalanceMemes } from '../models/ApiOwnerBalanceMemes';
 import { ApiOwnerBalancePage } from '../models/ApiOwnerBalancePage';
 import { ApiPageBase } from '../models/ApiPageBase';
 import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
+import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiProfileProxy } from '../models/ApiProfileProxy';
 import { ApiProfileProxyAction             } from '../models/ApiProfileProxyAction';
@@ -355,6 +357,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiIdentitySubscriptionTargetType",
     "ApiNftTokenTypeEnum",
     "ApiNotificationCause",
+    "ApiProfileClassification",
     "ApiProfileProxyActionType",
     "ApiRateMatter",
     "ApiWaveCreditScope",

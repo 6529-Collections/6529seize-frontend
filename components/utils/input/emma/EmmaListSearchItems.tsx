@@ -21,7 +21,7 @@ export default function EmmaListSearchItems({
   const { data, isFetching } = useQuery<AllowlistDescription[]>({
     queryKey: [
       QueryKey.EMMA_IDENTITY_ALLOWLISTS,
-      { identity: connectedProfile?.profile?.handle },
+      { identity: connectedProfile?.handle },
     ],
     queryFn: async () => {
       const { success } = await requestAuth();
@@ -33,7 +33,7 @@ export default function EmmaListSearchItems({
       );
       return response.data ?? [];
     },
-    enabled: !!connectedProfile?.profile?.handle && open,
+    enabled: !!connectedProfile?.handle && open,
   });
 
   const [items, setItems] = useState<AllowlistDescription[]>([]);

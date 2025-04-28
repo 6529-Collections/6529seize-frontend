@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
@@ -10,7 +10,7 @@ import {
 import UserPageWavesWrapper from "../../components/user/waves/UserPageWavesWrapper";
 
 export interface UserPageWavesProps {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageWavesProps }> = ({

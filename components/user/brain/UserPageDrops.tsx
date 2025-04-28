@@ -1,12 +1,11 @@
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import Drops from "../../drops/view/Drops";
-
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function UserPageDrops({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity | null;
 }) {
-  const haveProfile = !!profile.profile?.handle;
+  const haveProfile = !!profile?.handle;
   return (
     <div className="tailwind-scope">
       <div className="tw-max-w-[672px] mx-auto">{haveProfile && <Drops />}</div>

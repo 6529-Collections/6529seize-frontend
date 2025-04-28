@@ -1,8 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  CicStatement,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { CicStatement } from "../../../../entities/IProfile";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityAddStatementsHeader from "./header/UserPageIdentityAddStatementsHeader";
 import { useRouter } from "next/router";
@@ -15,10 +12,11 @@ import UserPageIdentityStatementsSocialMediaVerificationPosts from "./social-med
 import UserPageIdentityStatementsNFTAccounts from "./nft-accounts/UserPageIdentityStatementsNFTAccounts";
 import Tippy from "@tippyjs/react";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageIdentityStatements({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();

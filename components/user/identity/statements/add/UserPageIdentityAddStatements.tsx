@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserPageIdentityAddStatementsViews from "./UserPageIdentityAddStatementsViews";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 
 export enum STATEMENT_ADD_VIEW {
   SELECT = "SELECT",
@@ -15,7 +15,7 @@ export default function UserPageIdentityAddStatements({
   profile,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);

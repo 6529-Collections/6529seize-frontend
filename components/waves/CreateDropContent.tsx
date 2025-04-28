@@ -25,7 +25,6 @@ import CreateDropMetadata from "./CreateDropMetadata";
 import { ApiWave } from "../../generated/models/ApiWave";
 import { ApiWaveMetadataType } from "../../generated/models/ApiWaveMetadataType";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
@@ -57,6 +56,7 @@ import { ProcessIncomingDropType } from "../../contexts/wave/hooks/useWaveRealti
 import throttle from "lodash/throttle";
 import { useWebSocket } from "../../services/websocket";
 import { WsMessageType } from "../../helpers/Types";
+import { ApiIdentity } from "../../generated/models/ObjectSerializer";
 
 export type CreateDropMetadataType =
   | {
@@ -246,7 +246,7 @@ const generateParts = async (
 
 const getOptimisticDrop = (
   dropRequest: ApiCreateDropRequest,
-  connectedProfile: IProfileAndConsolidations | null,
+  connectedProfile: ApiIdentity | null,
   wave: {
     id: string;
     name: string;
@@ -264,7 +264,7 @@ const getOptimisticDrop = (
   activeDrop: ActiveDropState | null,
   dropType: ApiDropType
 ): ApiDrop | null => {
-  if (!connectedProfile?.profile) {
+  if (!connectedProfile?.id || !connectedProfile.handle) {
     return null;
   }
 
@@ -308,14 +308,14 @@ const getOptimisticDrop = (
       forbid_negative_votes: wave.voting.forbid_negative_votes,
     },
     author: {
-      id: connectedProfile.profile.external_id,
-      handle: connectedProfile.profile.handle,
-      pfp: connectedProfile.profile.pfp_url ?? null,
-      banner1_color: connectedProfile.profile.banner_1 ?? null,
-      banner2_color: connectedProfile.profile.banner_2 ?? null,
-      cic: connectedProfile.cic.cic_rating,
+      id: connectedProfile.id,
+      handle: connectedProfile.handle,
+      pfp: connectedProfile.pfp ?? null,
+      banner1_color: connectedProfile.banner1 ?? null,
+      banner2_color: connectedProfile.banner2 ?? null,
+      cic: connectedProfile.cic,
       rep: connectedProfile.rep,
-      tdh: connectedProfile.consolidation.tdh,
+      tdh: connectedProfile.tdh,
       level: connectedProfile.level,
       subscribed_actions: [],
       archived: false,

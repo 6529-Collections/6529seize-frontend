@@ -1,4 +1,4 @@
-import { CreateDropType } from "../../CreateDrop";
+import { CreateDropType } from "../../types";
 import MobileWrapperDialog from "../../../../mobile-wrapper-dialog/MobileWrapperDialog";
 
 export default function CreateDropFullMobileWrapper({

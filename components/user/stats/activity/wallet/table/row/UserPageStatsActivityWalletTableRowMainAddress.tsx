@@ -1,4 +1,4 @@
-import { IProfileAndConsolidations } from "../../../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../../../generated/models/ApiIdentity";
 import { Transaction } from "../../../../../../../entities/ITransaction";
 import { assertUnreachable } from "../../../../../../../helpers/AllowlistToolHelpers";
 import { formatAddress } from "../../../../../../../helpers/Helpers";
@@ -11,24 +11,20 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
 }: {
   readonly transaction: Transaction;
   readonly type: TransactionType;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
-  const wallet = profile.consolidation.wallets.find((w) => {
+  const wallet = profile.wallets?.find((w) => {
     switch (type) {
       case TransactionType.RECEIVED_AIRDROP:
       case TransactionType.SEIZED:
       case TransactionType.PURCHASE:
       case TransactionType.TRANSFER_IN:
-        return (
-          w.wallet.address.toLowerCase() ===
-          transaction.to_address.toLowerCase()
-        );
+        return w.wallet.toLowerCase() === transaction.to_address.toLowerCase();
       case TransactionType.SALE:
       case TransactionType.BURNED:
       case TransactionType.TRANSFER_OUT:
         return (
-          w.wallet.address.toLowerCase() ===
-          transaction.from_address.toLowerCase()
+          w.wallet.toLowerCase() === transaction.from_address.toLowerCase()
         );
       case TransactionType.RECEIVED_BURN:
       case TransactionType.AIRDROPPED:
@@ -51,7 +47,7 @@ export default function UserPageStatsActivityWalletTableRowMainAddress({
     if (!wallet) {
       return "unknown";
     }
-    return wallet.wallet.ens ?? formatAddress(wallet.wallet.address);
+    return wallet.display ?? formatAddress(wallet.wallet);
   };
 
   const walletDisplay = getWalletDisplay();

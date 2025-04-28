@@ -1,0 +1,43 @@
+# Task ID: 11
+# Title: Verify Regression: Basic Drop Submission Without Terms Requirements
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Ensure that the core drop submission functionality for waves without terms requirements remains unaffected by the new terms acceptance implementation.
+# Details:
+This task focuses on regression testing to verify that our recent implementation of the terms acceptance flow does not interfere with the standard drop submission process for waves that don't require terms acceptance. The developer should:
+
+1. Set up a test environment with the latest code from the feature branch
+2. Identify or create a wave configuration that does not have terms requirements enabled
+3. Attempt to submit a drop to this wave following the standard submission flow
+4. Monitor the application's behavior throughout the submission process
+5. Compare this behavior with the same flow on the 'main' branch to ensure consistency
+6. Check that no Terms modal appears at any point during the submission
+7. Verify all submission-related API calls are made correctly
+8. Confirm the drop is successfully submitted and appears in the expected state
+9. Document any unexpected behavior or differences compared to the main branch
+
+# Test Strategy:
+1. **Setup**:
+   - Deploy the feature branch to a test environment
+   - Have a parallel environment with the 'main' branch for comparison
+   - Prepare test data including a wave without terms requirements and valid drop content
+
+2. **Test Cases**:
+   - TC1: Navigate to the drop submission page and initiate a submission to a wave without terms requirements
+   - TC2: Complete all standard submission form fields and proceed through each step of the submission flow
+   - TC3: Monitor UI for any unexpected Terms modal appearances
+   - TC4: Verify submission completes successfully
+   - TC5: Compare submission time and steps with the same process on the main branch
+
+3. **Validation**:
+   - Check browser network tab to verify API calls match those made in the main branch
+   - Verify no terms-related API calls are made during submission
+   - Confirm drop status shows as successfully submitted
+   - Verify drop appears correctly in the drops list/dashboard after submission
+   - Use browser console to check for any unexpected errors or warnings
+
+4. **Documentation**:
+   - Record test results with screenshots
+   - Document the exact steps followed and system behavior
+   - Note any performance differences between feature and main branches

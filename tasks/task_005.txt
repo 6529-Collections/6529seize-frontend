@@ -1,0 +1,11 @@
+# Task ID: 5
+# Title: Implement initial ModalLayout integration
+# Status: done
+# Dependencies: 4
+# Priority: high
+# Description: Replace the inner structure of TermsOfServiceModal with ModalLayout, passing the required props while maintaining the outer container structure.
+# Details:
+Modify the TermsOfServiceModal to use ModalLayout while preserving the outer container structure: 1) Keep the FocusTrap as the outermost wrapper, 2) Maintain the outer overlay/centering div structure, 3) Place ModalLayout inside this structure, 4) Pass title="Terms of Service" to ModalLayout, 5) Pass onCancel={onClose} to ModalLayout, 6) Pass the previously identified content elements as children to ModalLayout. The basic structure should be: `<FocusTrap><div className="overlay"><div className="container"><ModalLayout title="Terms of Service" onCancel={onClose}>{contentElements}</ModalLayout></div></div></FocusTrap>`.
+
+# Test Strategy:
+Render the component and verify it displays without errors. Check that the title appears correctly and the close button is visible. Verify that the modal maintains proper positioning and overlay effects from the outer container structure.

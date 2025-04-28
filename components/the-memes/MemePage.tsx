@@ -52,15 +52,12 @@ export default function MemePage() {
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
   useEffect(() => {
-    setConnectedWallets(
-      connectedProfile?.consolidation.wallets.map((w) => w.wallet.address) ?? []
-    );
+    setConnectedWallets(connectedProfile?.wallets?.map((w) => w.wallet) ?? []);
   }, [connectedProfile]);
 
   const [nftId, setNftId] = useState<string>();
 
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
-
 
   const [nft, setNft] = useState<NFT>();
   const [nftMeta, setNftMeta] = useState<MemesExtendedData>();
@@ -215,7 +212,7 @@ export default function MemePage() {
   useEffect(() => {
     if (connectedWallets.length > 0 && nftId) {
       commonApiFetch<ConsolidatedTDH>({
-        endpoint: `tdh/consolidation/${connectedProfile?.consolidation.consolidation_key}`,
+        endpoint: `tdh/consolidation/${connectedProfile?.consolidation_key}`,
       }).then((response) => {
         setMyOwner(response);
         setMyTDH(response.memes.find((m) => m.id === parseInt(nftId)));
@@ -248,7 +245,8 @@ export default function MemePage() {
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
                     lg={{ span: 6 }}
-                    className={`${styles.nftImageWrapper} pt-2 pb-5`}>
+                    className={`${styles.nftImageWrapper} pt-2 pb-5`}
+                  >
                     <NFTImage
                       nft={nft}
                       animation={true}
@@ -315,62 +313,63 @@ export default function MemePage() {
   }
 
   return (
-      <Container fluid className={styles.mainContainer}>
-        <Row>
-          <Col>
-            <Container className="pt-4 pb-4">
-              <Row>
-                <Col>
-                  <h1>
-                    <span className="font-lightest">The</span> Memes
-                  </h1>
-                </Col>
-              </Row>
-              {nftMeta && nft && (
-                <>
-                  <Row className="pt-3 pb-3">
-                    <Col className="d-flex gap-2 align-items-center">
-                      {nftId && (
-                        <>
-                          <MemeNavigationBtn nft={nftMeta} icon="previous" />
-                          <MemeNavigationBtn nft={nftMeta} icon="next" />
-                        </>
-                      )}
-                    </Col>
-                  </Row>
-                  <Row className="pt-2">
-                    <Col>
-                      <h2 className="float-left">
-                        <a
-                          href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
-                          SZN{nftMeta.season}
-                        </a>
-                      </h2>
-                      <h2 className="float-left">
-                        &nbsp;| Card {nft.id} -&nbsp;
-                      </h2>
-                      <h2 className="float-left">{nft.name}</h2>
-                    </Col>
-                  </Row>
-                  <Row className="pt-3 pb-3">
-                    <Col>
-                      {MEME_TABS.map((tab) => (
-                        <TabButton
-                          key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                          tab={tab}
-                          activeTab={activeTab}
-                          setActiveTab={setActiveTab}
-                        />
-                      ))}
-                    </Col>
-                  </Row>
-                  {printContent()}
-                </>
-              )}
-            </Container>
-          </Col>
-        </Row>
-      </Container>
+    <Container fluid className={styles.mainContainer}>
+      <Row>
+        <Col>
+          <Container className="pt-4 pb-4">
+            <Row>
+              <Col>
+                <h1>
+                  <span className="font-lightest">The</span> Memes
+                </h1>
+              </Col>
+            </Row>
+            {nftMeta && nft && (
+              <>
+                <Row className="pt-3 pb-3">
+                  <Col className="d-flex gap-2 align-items-center">
+                    {nftId && (
+                      <>
+                        <MemeNavigationBtn nft={nftMeta} icon="previous" />
+                        <MemeNavigationBtn nft={nftMeta} icon="next" />
+                      </>
+                    )}
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col>
+                    <h2 className="float-left">
+                      <a
+                        href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
+                      >
+                        SZN{nftMeta.season}
+                      </a>
+                    </h2>
+                    <h2 className="float-left">
+                      &nbsp;| Card {nft.id} -&nbsp;
+                    </h2>
+                    <h2 className="float-left">{nft.name}</h2>
+                  </Col>
+                </Row>
+                <Row className="pt-3 pb-3">
+                  <Col>
+                    {MEME_TABS.map((tab) => (
+                      <TabButton
+                        key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
+                        tab={tab}
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                      />
+                    ))}
+                  </Col>
+                </Row>
+                {printContent()}
+              </>
+            )}
+          </Container>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
@@ -426,7 +425,8 @@ function TabButton(
       }`}
       onClick={() => {
         props.setActiveTab(props.tab.focus);
-      }}>
+      }}
+    >
       {props.tab.title}
     </button>
   );

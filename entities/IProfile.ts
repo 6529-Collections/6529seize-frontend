@@ -1,4 +1,5 @@
 import { AcceptActionRequestActionEnum } from "../generated/models/AcceptActionRequest";
+import { ApiProfileClassification } from "../generated/models/ApiProfileClassification";
 import { ApiProfileProxyActionType } from "../generated/models/ApiProfileProxyActionType";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "../helpers/Types";
 
@@ -12,62 +13,18 @@ export interface IProfileConsolidation {
   readonly tdh: number;
 }
 
-interface AggregatedCicRating {
-  cic_rating: number;
-  contributor_count: number;
-}
-
-export interface IProfileAndConsolidations {
-  readonly profile: IProfile | null;
-  readonly consolidation: {
-    readonly wallets: IProfileConsolidation[];
-    readonly tdh: number;
-    readonly consolidation_key: string | null;
-    readonly consolidation_display: string | null;
-  };
-  readonly level: number;
-  readonly cic: AggregatedCicRating;
-  readonly rep: number;
-  readonly balance: number;
-  readonly input_identity: string;
-}
-
-export enum PROFILE_CLASSIFICATION {
-  GOVERNMENT_NAME = "GOVERNMENT_NAME",
-  PSEUDONYM = "PSEUDONYM",
-  ORGANIZATION = "ORGANIZATION",
-  AI = "AI",
-  BOT = "BOT",
-  PARODY = "PARODY",
-}
-
 export const CLASSIFICATIONS: Record<
-  PROFILE_CLASSIFICATION,
+  ApiProfileClassification,
   { title: string }
 > = {
-  [PROFILE_CLASSIFICATION.GOVERNMENT_NAME]: { title: "Government Name" },
-  [PROFILE_CLASSIFICATION.PSEUDONYM]: { title: "Pseudonym" },
-  [PROFILE_CLASSIFICATION.ORGANIZATION]: { title: "Organization" },
-  [PROFILE_CLASSIFICATION.AI]: { title: "AI" },
-  [PROFILE_CLASSIFICATION.BOT]: { title: "Bot" },
-  [PROFILE_CLASSIFICATION.PARODY]: { title: "Parody" },
+  [ApiProfileClassification.GovernmentName]: { title: "Government Name" },
+  [ApiProfileClassification.Pseudonym]: { title: "Pseudonym" },
+  [ApiProfileClassification.Organization]: { title: "Organization" },
+  [ApiProfileClassification.Ai]: { title: "AI" },
+  [ApiProfileClassification.Bot]: { title: "Bot" },
+  [ApiProfileClassification.Parody]: { title: "Parody" },
+  [ApiProfileClassification.Collection]: { title: "Collection" },
 };
-
-interface IProfile {
-  readonly external_id: string;
-  readonly normalised_handle: string;
-  readonly handle: string;
-  readonly primary_wallet: string;
-  readonly created_at: Date;
-  readonly created_by_wallet: string;
-  readonly classification: PROFILE_CLASSIFICATION | null;
-  readonly updated_at?: Date | undefined;
-  readonly updated_by_wallet?: string | undefined;
-  readonly pfp_url?: string | undefined;
-  readonly banner_1?: string | undefined;
-  readonly banner_2?: string | undefined;
-  readonly website?: string | undefined;
-}
 
 export enum CICType {
   INACCURATE = "INACCURATE",
@@ -190,8 +147,8 @@ export interface ProfileActivityLogClassificationEdit
   extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.CLASSIFICATION_EDIT;
   readonly contents: {
-    new_value: PROFILE_CLASSIFICATION;
-    old_value: PROFILE_CLASSIFICATION;
+    new_value: ApiProfileClassification;
+    old_value: ApiProfileClassification;
   };
 }
 
@@ -336,8 +293,7 @@ export interface ProfileActivityLogDropCreated extends ProfileActivityLogBase {
   readonly contents: {};
 }
 
-interface ProfileActivityLogProxyDropRatingEdit
-  extends ProfileActivityLogBase {
+interface ProfileActivityLogProxyDropRatingEdit extends ProfileActivityLogBase {
   readonly type: ProfileActivityLogType.PROXY_DROP_RATING_EDIT;
   readonly contents: {};
 }
@@ -422,7 +378,7 @@ export type RatingWithProfileInfoAndLevel = RatingWithProfileInfo & {
 
 export interface ApiCreateOrUpdateProfileRequest {
   readonly handle: string;
-  readonly classification: PROFILE_CLASSIFICATION;
+  readonly classification: ApiProfileClassification;
   pfp_url?: string;
   banner_1?: string;
   banner_2?: string;

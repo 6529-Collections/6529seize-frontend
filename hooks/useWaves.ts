@@ -32,7 +32,7 @@ export function useWaves({
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
   const getUsePublicWaves = () =>
-    !connectedProfile?.profile?.handle || !!activeProfileProxy;
+    !connectedProfile?.handle || !!activeProfileProxy;
   const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
   useEffect(
     () => setUsePublicWaves(getUsePublicWaves()),

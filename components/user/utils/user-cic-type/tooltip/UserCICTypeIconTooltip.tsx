@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  CICType,
-  IProfileAndConsolidations,
-} from "../../../../../entities/IProfile";
+import { CICType } from "../../../../../entities/IProfile";
 import UserCICTypeIconTooltipHeaders from "./UserCICTypeIconTooltipHeaders";
 import UserCICTypeIconTooltipRate from "./UserCICTypeIconTooltipRate";
 import {
@@ -12,18 +9,16 @@ import {
 } from "../../../../../helpers/Helpers";
 import { CIC_META } from "../../user-cic-status/UserCICStatus";
 import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
-
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 export default function UserCICTypeIconTooltip({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const { address } = useSeizeConnectContext();
   const [isMyProfile, setIsMyProfile] = useState<boolean>(true);
 
-  const [cicType, setCicType] = useState<CICType>(
-    cicToType(profile.cic.cic_rating)
-  );
+  const [cicType, setCicType] = useState<CICType>(cicToType(profile.cic));
 
   useEffect(
     () => setIsMyProfile(amIUser({ profile, address })),
@@ -31,7 +26,7 @@ export default function UserCICTypeIconTooltip({
   );
 
   useEffect(() => {
-    setCicType(cicToType(profile.cic.cic_rating));
+    setCicType(cicToType(profile.cic));
   }, [profile]);
 
   return (
@@ -41,7 +36,7 @@ export default function UserCICTypeIconTooltip({
         <span className="tw-block tw-text-iron-200 tw-font-semibold">
           <span>Rating:</span>
           <span className="tw-ml-1 tw-text-iron-200 tw-font-bold">
-            {formatNumberWithCommas(profile.cic.cic_rating)}
+            {formatNumberWithCommas(profile.cic)}
           </span>
         </span>
         <span className="tw-block tw-text-iron-200 tw-font-semibold">
@@ -50,12 +45,13 @@ export default function UserCICTypeIconTooltip({
             {CIC_META[cicType].title}
           </span>
         </span>
-        <span className="tw-block tw-text-iron-200 tw-font-semibold">
+        {/* TODO: add this back in */}
+        {/* <span className="tw-block tw-text-iron-200 tw-font-semibold">
           <span>Raters:</span>
           <span className="tw-ml-1 tw-font-bold tw-text-iron-200">
             {formatNumberWithCommas(profile.cic.contributor_count)}
           </span>
-        </span>
+        </span> */}
       </div>
       {cicType === CICType.INACCURATE && (
         <div className="mt-2">

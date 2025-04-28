@@ -1,7 +1,4 @@
-import {
-  IProfileAndConsolidations,
-  ProfileConnectedStatus,
-} from "../entities/IProfile";
+import { ProfileConnectedStatus } from "../entities/IProfile";
 import { ProfileMinWithoutSubs } from "./ProfileTypes";
 import { ApiIdentity } from "../generated/models/ApiIdentity";
 export const getProfileConnectedStatus = ({
@@ -26,22 +23,19 @@ export const getProfileConnectedStatus = ({
 export const profileAndConsolidationsToProfileMin = ({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }): ProfileMinWithoutSubs | null =>
-  profile.profile
+  profile?.id && profile?.handle
     ? {
-        id: profile.profile.external_id,
-        handle: profile.profile.handle,
-        pfp: profile.profile.pfp_url ?? null,
-        banner1_color: profile.profile.banner_1 ?? null,
-        banner2_color: profile.profile.banner_2 ?? null,
-        cic: profile.cic.cic_rating,
+        id: profile.id,
+        handle: profile.handle,
+        pfp: profile.pfp ?? null,
+        banner1_color: profile.banner1 ?? null,
+        banner2_color: profile.banner2 ?? null,
+        cic: profile.cic,
         rep: profile.rep,
-        tdh: profile.consolidation.tdh,
+        tdh: profile.tdh,
         level: profile.level,
         archived: false,
       }
     : null;
-
-
-    

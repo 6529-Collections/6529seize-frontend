@@ -1,8 +1,5 @@
 import { FormEvent, useContext, useEffect, useRef, useState } from "react";
-import {
-  ApiCreateOrUpdateProfileRequest,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { ApiCreateOrUpdateProfileRequest } from "../../../../entities/IProfile";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserSettingsImgSelectMeme, {
   MemeLite,
@@ -25,12 +22,12 @@ import {
   ImageScale,
 } from "../../../../helpers/image.helpers";
 import { useIpfsService } from "../../../ipfs/IPFSContext";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageHeaderEditPfp({
   profile,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -58,9 +55,7 @@ export default function UserPageHeaderEditPfp({
   });
 
   const [imageToShow, setImageToShow] = useState<string | null>(
-    profile.profile?.pfp_url
-      ? getScaledImageUri(profile.profile.pfp_url, ImageScale.W_200_H_200)
-      : null
+    profile.pfp ? getScaledImageUri(profile.pfp, ImageScale.W_200_H_200) : null
   );
 
   const [selectedMeme, setSelectedMeme] = useState<MemeLite | null>(null);
@@ -90,34 +85,37 @@ export default function UserPageHeaderEditPfp({
     mutationFn: async (body: FormData) => {
       setSaving(true);
       const pfp = body.get("pfp");
+      if (!profile.handle) {
+        throw new Error("Profile handle is required");
+      }
       if (pfp) {
-        if (!profile.profile?.classification) {
+        if (!profile.classification) {
           return;
         }
         const cid = await ipfsService.addFile(pfp as File);
         const ipfs = `ipfs://${cid}`;
         const ipfsBody: ApiCreateOrUpdateProfileRequest = {
-          handle: profile.profile?.handle,
-          classification: profile.profile?.classification,
+          handle: profile.handle,
+          classification: profile.classification,
           pfp_url: ipfs,
         };
-        if (profile.profile?.banner_1) {
-          ipfsBody.banner_1 = profile.profile?.banner_1;
+        if (profile?.banner1) {
+          ipfsBody.banner_1 = profile?.banner1;
         }
-        if (profile.profile?.banner_2) {
-          ipfsBody.banner_2 = profile.profile?.banner_2;
+        if (profile?.banner2) {
+          ipfsBody.banner_2 = profile?.banner2;
         }
         const response = await commonApiPost<
           ApiCreateOrUpdateProfileRequest,
-          IProfileAndConsolidations
+          ApiIdentity
         >({
           endpoint: `profiles`,
           body: ipfsBody,
         });
-        return response.profile?.pfp_url;
+        return response?.pfp;
       } else {
         const response = await commonApiPostForm<{ pfp_url: string }>({
-          endpoint: `profiles/${profile.input_identity}/pfp`,
+          endpoint: `profiles/${profile.query}/pfp`,
           body: body,
         });
         return response.pfp_url;
@@ -127,7 +125,7 @@ export default function UserPageHeaderEditPfp({
       onProfileEdit({
         profile: {
           ...profile,
-          profile: profile.profile ? { ...profile.profile, pfp_url } : null,
+          pfp: pfp_url ?? null,
         },
         previousProfile: null,
       });
@@ -186,7 +184,8 @@ export default function UserPageHeaderEditPfp({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div
             ref={modalRef}
-            className={`sm:tw-max-w-3xl md:tw-max-w-2xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}>
+            className={`sm:tw-max-w-3xl md:tw-max-w-2xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}
+          >
             <form onSubmit={onSubmit}>
               <UserSettingsImgSelectMeme
                 memes={memes ?? []}

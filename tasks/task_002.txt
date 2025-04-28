@@ -1,0 +1,37 @@
+# Task ID: 2
+# Title: Analyze ModalLayout component interface
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Examine the ModalLayout component to understand its props, children handling, and styling to ensure proper integration.
+# Details:
+The analysis of components/waves/memes/submission/layout/ModalLayout.tsx has been completed with the following findings:
+
+1) **Required Props**:
+   - `title: string` - Used for the H3 header
+   - `onCancel: () => void` - Attached to the top-right close button
+   - `children: React.ReactNode` - Rendered as the main content below the header
+
+2) **Children Handling**:
+   - Children are rendered directly within a `div` after the header section
+   - The component provides overall container padding that children will inherit
+
+3) **Styling & Structure**:
+   - Provides the main modal frame (`tw-bg-iron-950`, borders, padding, backdrop-blur)
+   - Includes an ambient background effect
+   - Implements a standard header with the title
+   - Implements a standard close button linked to `onCancel`
+   - Uses `framer-motion` components
+
+4) **Integration Considerations**:
+   - `ModalLayout` will replace the need for manual implementation of overlay, container, header, and close button in `TermsOfServiceModal`
+   - Styling of the children content might need minor adjustments (padding/margin) to fit within `ModalLayout`'s structure
+
+# Test Strategy:
+The mapping plan for integrating TermsOfServiceModal with ModalLayout is as follows:
+
+1. Pass hardcoded string "Terms of Service" to `title` prop
+2. Pass the existing `onClose` function from `TermsOfServiceModal` to the `onCancel` prop
+3. Pass the block containing { scrollable terms div + custom checkbox button + footer buttons div } as the `children` prop
+
+This mapping will ensure proper integration while maintaining the existing functionality of the Terms of Service modal.

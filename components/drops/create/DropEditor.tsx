@@ -15,7 +15,7 @@ import {
   MentionedUser,
   ReferencedNft,
 } from "../../../entities/IDrop";
-import { CreateDropType, CreateDropViewType } from "./CreateDrop";
+import { CreateDropType, CreateDropViewType } from "./types";
 import CreateDropStormView from "./utils/storm/CreateDropStormView";
 import { ProfileMinWithoutSubs } from "../../../helpers/ProfileTypes";
 

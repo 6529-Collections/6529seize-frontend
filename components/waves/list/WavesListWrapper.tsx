@@ -40,7 +40,7 @@ export default function WavesListWrapper({
   const isShowAll = showAllType === overviewType;
 
   const getUsePublicWaves = () =>
-    !connectedProfile?.profile?.handle || !!activeProfileProxy;
+    !connectedProfile?.handle || !!activeProfileProxy;
   const [usePublicWaves, setUsePublicWaves] = useState(getUsePublicWaves());
 
   useEffect(

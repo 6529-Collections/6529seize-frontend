@@ -1,9 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import {
-  ApiCreateOrUpdateProfileRequest,
-  IProfileAndConsolidations,
-  PROFILE_CLASSIFICATION,
-} from "../../../../../entities/IProfile";
+import { ApiCreateOrUpdateProfileRequest } from "../../../../../entities/IProfile";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AuthContext } from "../../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../../react-query-wrapper/ReactQueryWrapper";
@@ -11,12 +7,13 @@ import UserSettingsSave from "../../../settings/UserSettingsSave";
 import UserSettingsClassification from "../../../settings/UserSettingsClassification";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../services/api/common-api";
-
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
+import { ApiProfileClassification } from "../../../../../generated/models/ApiProfileClassification";
 export default function UserPageHeaderEditClassification({
   profile,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -26,14 +23,15 @@ export default function UserPageHeaderEditClassification({
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
 
-  const [classification, setClassification] = useState<PROFILE_CLASSIFICATION>(
-    profile.profile?.classification ?? PROFILE_CLASSIFICATION.PSEUDONYM
-  );
+  const [classification, setClassification] =
+    useState<ApiProfileClassification>(
+      profile.classification ?? ApiProfileClassification.Pseudonym
+    );
 
   const [haveChanges, setHaveChanges] = useState<boolean>(false);
 
   useEffect(() => {
-    setHaveChanges(classification !== profile.profile?.classification);
+    setHaveChanges(classification !== profile.classification);
   }, [classification]);
 
   const [mutating, setMutating] = useState<boolean>(false);
@@ -41,10 +39,7 @@ export default function UserPageHeaderEditClassification({
   const updateUser = useMutation({
     mutationFn: async (body: ApiCreateOrUpdateProfileRequest) => {
       setMutating(true);
-      return await commonApiPost<
-        ApiCreateOrUpdateProfileRequest,
-        IProfileAndConsolidations
-      >({
+      return await commonApiPost<ApiCreateOrUpdateProfileRequest, ApiIdentity>({
         endpoint: `profiles`,
         body,
       });
@@ -70,7 +65,7 @@ export default function UserPageHeaderEditClassification({
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!profile.profile) {
+    if (!profile.handle) {
       return;
     }
 
@@ -84,20 +79,20 @@ export default function UserPageHeaderEditClassification({
     }
 
     const body: ApiCreateOrUpdateProfileRequest = {
-      handle: profile.profile.handle,
+      handle: profile.handle,
       classification,
     };
 
-    if (profile.profile?.banner_1) {
-      body.banner_1 = profile.profile.banner_1;
+    if (profile.banner1) {
+      body.banner_1 = profile.banner1;
     }
 
-    if (profile.profile?.banner_2) {
-      body.banner_2 = profile.profile.banner_2;
+    if (profile.banner2) {
+      body.banner_2 = profile.banner2;
     }
 
-    if (profile.profile?.pfp_url) {
-      body.pfp_url = profile.profile?.pfp_url;
+    if (profile.pfp) {
+      body.pfp_url = profile.pfp;
     }
 
     await updateUser.mutateAsync(body);
@@ -110,10 +105,12 @@ export default function UserPageHeaderEditClassification({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div
             ref={modalRef}
-            className={`tw-max-w-full md:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}>
+            className={`tw-max-w-full md:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}
+          >
             <form
               onSubmit={onSubmit}
-              className="tw-flex tw-flex-col tw-gap-y-6">
+              className="tw-flex tw-flex-col tw-gap-y-6"
+            >
               <UserSettingsClassification
                 selected={classification}
                 onSelect={setClassification}

@@ -13,10 +13,6 @@ import {
   printMintDate,
 } from "../../../../helpers/Helpers";
 import { useState, useEffect } from "react";
-import {
-  CICType,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
 import Image from "next/image";
@@ -34,6 +30,7 @@ import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import { ETHEREUM_ICON_TEXT } from "../../../../constants";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
+import { useIdentity } from "../../../../hooks/useIdentity";
 
 interface Props {
   collection: NextGenCollection;
@@ -43,29 +40,11 @@ interface Props {
 export default function NextgenTokenAbout(props: Readonly<Props>) {
   const capacitor = useCapacitor();
   const account = useSeizeConnectContext();
-  const [ownerDisplay, setOwnerDisplay] = useState<string | null>();
-  const [ownerProfileHandle, setOwnerProfileHandle] = useState<string>();
-  const [level, setLevel] = useState(-1);
-  const [cicType, setCicType] = useState<CICType>();
-  const [ownerTdh, setOwnerTdh] = useState<number>(0);
   const [tdh, setTdh] = useState<number>(0);
-
-  useEffect(() => {
-    commonApiFetch<IProfileAndConsolidations>({
-      endpoint: `profiles/${props.token.owner}`,
-    }).then((profile) => {
-      setOwnerProfileHandle(profile.profile?.handle);
-      setCicType(cicToType(profile.cic.cic_rating));
-      setOwnerTdh(profile.consolidation.tdh);
-      setLevel(profile.level);
-      if (
-        profile.consolidation?.consolidation_display?.includes(".eth") ||
-        profile.consolidation?.consolidation_display?.includes("-")
-      ) {
-        setOwnerDisplay(profile.consolidation?.consolidation_display);
-      }
-    });
-  }, [props.token.owner]);
+  const { profile } = useIdentity({
+    handleOrWallet: props.token.owner,
+    initialProfile: null,
+  });
 
   useEffect(() => {
     commonApiFetch<DBResponse>({
@@ -131,22 +110,26 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                 />
               </Tippy>
             )}
-            {cicType && level > -1 ? (
+            {profile?.level && profile?.cic ? (
               <a
-                href={`/${ownerProfileHandle ?? props.token.owner}`}
-                className="d-flex gap-2 decoration-hover-underline align-items-center">
-                <UserCICAndLevel level={level} cicType={cicType} />
+                href={`/${profile?.handle ?? props.token.owner}`}
+                className="d-flex gap-2 decoration-hover-underline align-items-center"
+              >
+                <UserCICAndLevel
+                  level={profile.level}
+                  cicType={cicToType(profile.cic)}
+                />
                 <span className="decoration-underline">
-                  {ownerProfileHandle ??
-                    ownerDisplay ??
+                  {profile?.handle ??
+                    profile?.display ??
                     formatAddress(props.token.owner)}
                 </span>
               </a>
             ) : (
-              <a href={`/${ownerDisplay ?? props.token.owner}`}>
+              <a href={`/${profile?.handle ?? props.token.owner}`}>
                 <span>
-                  {ownerProfileHandle ??
-                    ownerDisplay ??
+                  {profile?.handle ??
+                    profile?.display ??
                     formatAddress(props.token.owner)}
                 </span>
               </a>
@@ -161,7 +144,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         <Col className="pb-3 d-flex gap-2">
           <span className="font-color-h">Collector TDH:</span>
           <span className="d-flex gap-1 align-items-center">
-            {numberWithCommas(Math.round(ownerTdh * 100) / 100)}
+            {numberWithCommas(Math.round((profile?.tdh ?? 0) * 100) / 100)}
           </span>
         </Col>
       </Row>
@@ -191,12 +174,14 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   }
                   theme={"light"}
                   placement="right"
-                  delay={250}>
+                  delay={250}
+                >
                   <a
                     href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
                     target="_blank"
                     rel="noreferrer"
-                    className="d-flex gap-2 align-items-center decoration-none">
+                    className="d-flex gap-2 align-items-center decoration-none"
+                  >
                     <Image
                       className={styles.marketplace}
                       src="/opensea.png"
@@ -247,12 +232,14 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   }
                   theme={"light"}
                   placement="right"
-                  delay={250}>
+                  delay={250}
+                >
                   <a
                     href={getBlurLink(props.token.id)}
                     target="_blank"
                     rel="noreferrer"
-                    className="d-flex gap-2 align-items-center decoration-none">
+                    className="d-flex gap-2 align-items-center decoration-none"
+                  >
                     <Image
                       className={styles.marketplace}
                       src="/blur.png"
@@ -296,12 +283,14 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   }
                   theme={"light"}
                   placement="right"
-                  delay={250}>
+                  delay={250}
+                >
                   <a
                     href={getMagicEdenLink(props.token.id)}
                     target="_blank"
                     rel="noreferrer"
-                    className="d-flex gap-2 align-items-center decoration-none">
+                    className="d-flex gap-2 align-items-center decoration-none"
+                  >
                     <Image
                       className={styles.marketplace}
                       src="/magiceden.svg"
@@ -347,7 +336,8 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             <a
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
-              )}`}>
+              )}`}
+            >
               {props.collection.name}
             </a>
           </span>

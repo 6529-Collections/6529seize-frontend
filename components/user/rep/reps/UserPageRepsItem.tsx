@@ -1,22 +1,19 @@
 import { useEffect, useState } from "react";
-import {
-  IProfileAndConsolidations,
-  RatingStats,
-} from "../../../../entities/IProfile";
+import { RatingStats } from "../../../../entities/IProfile";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageRepsItem({
   rep,
   profile,
   canEditRep,
 }: {
   readonly rep: RatingStats;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly canEditRep: boolean;
 }) {
   const router = useRouter();

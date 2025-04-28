@@ -15,7 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiProfileMin {
     'id': string;
-    'handle': string;
+    'handle': string | null;
     'pfp': string | null;
     'banner1_color': string | null;
     'banner2_color': string | null;

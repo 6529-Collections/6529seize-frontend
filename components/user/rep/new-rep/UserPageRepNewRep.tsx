@@ -4,19 +4,18 @@ import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpac
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import {
   ApiProfileRepRatesState,
-  IProfileAndConsolidations,
   RatingStats,
 } from "../../../../entities/IProfile";
 import UserPageRepNewRepSearch from "./UserPageRepNewRepSearch";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 
 export default function UserPageRepNewRep({
   profile,
   repRates,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly repRates: ApiProfileRepRatesState | null;
-  }) {
-  
+}) {
   const [isAddNewRepModalOpen, setIsAddNewRepModalOpen] =
     useState<boolean>(false);
 

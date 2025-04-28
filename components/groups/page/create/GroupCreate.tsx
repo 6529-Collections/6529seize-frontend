@@ -125,9 +125,7 @@ export default function GroupCreate({
     if (!connectedProfile) {
       return [];
     }
-    return connectedProfile.consolidation.wallets.map((w) =>
-      w.wallet.address.toLowerCase()
-    );
+    return connectedProfile.wallets?.map((w) => w.wallet.toLowerCase()) ?? [];
   };
 
   useEffect(() => {

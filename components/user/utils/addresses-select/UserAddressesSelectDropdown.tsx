@@ -1,38 +1,37 @@
 import { useRouter } from "next/router";
-import { IProfileConsolidation } from "../../../../entities/IProfile";
 import { CommonSelectItem } from "../../../utils/select/CommonSelect";
 import CommonDropdown from "../../../utils/select/dropdown/CommonDropdown";
 import { RefObject, useEffect, useState } from "react";
 import { formatAddress } from "../../../../helpers/Helpers";
 import UserAddressesSelectDropdownItem from "./UserAddressesSelectDropdownItem";
+import { ApiWallet } from "../../../../generated/models/ApiWallet";
 
 type SelectedType = string | null;
 
 export default function UserAddressesSelectDropdown({
-  addresses,
+  wallets,
   containerRef,
   onActiveAddress,
 }: {
-  readonly addresses: IProfileConsolidation[];
+  readonly wallets: ApiWallet[];
   readonly containerRef?: RefObject<HTMLDivElement>;
   readonly onActiveAddress: (address: SelectedType) => void;
 }) {
   const router = useRouter();
-  const items: CommonSelectItem<SelectedType, IProfileConsolidation | null>[] =
-    [
-      {
-        label: "All Addresses",
-        value: null,
-        key: "all",
-        childrenProps: null,
-      },
-      ...addresses.map((address) => ({
-        label: address.wallet.ens ?? formatAddress(address.wallet.address),
-        value: address.wallet.address.toLowerCase(),
-        key: address.wallet.address.toLowerCase(),
-        childrenProps: address,
-      })),
-    ];
+  const items: CommonSelectItem<SelectedType, ApiWallet | null>[] = [
+    {
+      label: "All Addresses",
+      value: null,
+      key: "all",
+      childrenProps: null,
+    },
+    ...wallets.map((wallet) => ({
+      label: wallet.display ?? formatAddress(wallet.wallet),
+      value: wallet.wallet.toLowerCase(),
+      key: wallet.wallet.toLowerCase(),
+      childrenProps: wallet,
+    })),
+  ];
 
   const getAddressFromQuery = (): string | null => {
     if (!router.query.address) {
@@ -107,7 +106,7 @@ export default function UserAddressesSelectDropdown({
       setSelected={onAddressChange}
       renderItemChildren={(item) =>
         item.childrenProps ? (
-          <UserAddressesSelectDropdownItem item={item.childrenProps} />
+          <UserAddressesSelectDropdownItem wallet={item.childrenProps} />
         ) : (
           <></> // return an empty fragment when item.childrenProps is not available
         )

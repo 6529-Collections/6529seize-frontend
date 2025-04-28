@@ -7,13 +7,13 @@ import {
   STATEMENT_TYPE,
 } from "../../../../../../helpers/Types";
 import UserPageIdentityAddStatementsForm from "../../utils/UserPageIdentityAddStatementsForm";
-import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
 
 export default function UserPageIdentityAddStatementsContact({
   profile,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onClose: () => void;
 }) {
   const [contactType, setContactType] = useState<CONTACT_STATEMENT_TYPE>(

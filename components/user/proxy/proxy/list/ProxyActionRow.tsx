@@ -1,6 +1,6 @@
 import { ApiProfileProxyAction } from "../../../../../generated/models/ApiProfileProxyAction";
 import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { useState } from "react";
 import ProxyActionRowDataMode from "./ProxyActionRowDataMode";
 import CommonChangeAnimation from "../../../../utils/animation/CommonChangeAnimation";
@@ -21,7 +21,7 @@ export default function ProxyActionRow({
 }: {
   readonly action: ApiProfileProxyAction;
   readonly profileProxy: ApiProfileProxy;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly isSelf: boolean;
 }) {
   const [viewMode, setViewMode] = useState(PROXY_ACTION_ROW_VIEW_MODE.DATA);

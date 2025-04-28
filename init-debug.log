@@ -1,0 +1,17 @@
+[INFO] Initializing project in /Users/simo/6529seize-frontend
+[INFO] Created directory: /Users/simo/6529seize-frontend/tasks
+[INFO] Setting up MCP configuration for Cursor integration...
+[INFO] MCP configuration file already exists, checking for existing task-master-mcp...
+[INFO] Found existing task-master-mcp configuration in mcp.json, leaving untouched
+[INFO] Created file: /Users/simo/6529seize-frontend/.env.example
+[INFO] /Users/simo/6529seize-frontend/.gitignore already exists, merging content...
+[INFO] No new content to add to /Users/simo/6529seize-frontend/.gitignore
+[WARN] /Users/simo/6529seize-frontend/.cursor/rules/dev_workflow.mdc already exists. Skipping file creation to avoid overwriting existing content.
+[WARN] /Users/simo/6529seize-frontend/.cursor/rules/taskmaster.mdc already exists. Skipping file creation to avoid overwriting existing content.
+[WARN] /Users/simo/6529seize-frontend/.cursor/rules/cursor_rules.mdc already exists. Skipping file creation to avoid overwriting existing content.
+[WARN] /Users/simo/6529seize-frontend/.cursor/rules/self_improve.mdc already exists. Skipping file creation to avoid overwriting existing content.
+[INFO] /Users/simo/6529seize-frontend/.windsurfrules already exists, appending content instead of overwriting...
+[SUCCESS] Updated /Users/simo/6529seize-frontend/.windsurfrules with additional rules
+[WARN] /Users/simo/6529seize-frontend/scripts/example_prd.txt already exists. Skipping file creation to avoid overwriting existing content.
+[INFO] /Users/simo/6529seize-frontend/README-task-master.md already exists
+[SUCCESS] Created /Users/simo/6529seize-frontend/README-task-master.md (preserved original README-task-master.md)
