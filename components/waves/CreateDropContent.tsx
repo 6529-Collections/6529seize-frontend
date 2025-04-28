@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic';
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
 import React, { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -57,6 +58,11 @@ import throttle from "lodash/throttle";
 import { useWebSocket } from "../../services/websocket";
 import { WsMessageType } from "../../helpers/Types";
 import { ApiIdentity } from "../../generated/models/ObjectSerializer";
+
+// Use next/dynamic for lazy loading with SSR support
+const TermsSignatureFlow = dynamic(() => import('../terms/TermsSignatureFlow'), {
+  suspense: true, // Enable suspense for fallback UI
+});
 
 export type CreateDropMetadataType =
   | {
@@ -990,11 +996,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
       />
       
       {/* Terms of Service Flow - Modal will render when needed */}
-      <React.Suspense fallback={null}>
-        {(() => {
-          const TermsFlow = React.lazy(() => import('../terms/TermsSignatureFlow'));
-          return <TermsFlow />;
-        })()}
+      <React.Suspense fallback={<div>Loading Terms...</div>}>
+        <TermsSignatureFlow />
       </React.Suspense>
     </div>
   );

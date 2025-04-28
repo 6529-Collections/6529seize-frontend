@@ -187,15 +187,15 @@ export default function GroupCardVoteAll({
       }
       const members = membersPage.data;
       try {
-        // await bulkRateMutation.mutateAsync({
-        //   matter,
-        //   category,
-        //   amount_to_add:
-        //     creditDirection === CreditDirection.ADD
-        //       ? amountToAdd
-        //       : -amountToAdd,
-        //   target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
-        // });
+        await bulkRateMutation.mutateAsync({
+          matter,
+          category,
+          amount_to_add:
+            creditDirection === CreditDirection.ADD
+              ? amountToAdd
+              : -amountToAdd,
+          target_wallet_addresses: members.map((m) => m.wallet.toLowerCase()),
+        });
         setDoneMembersCount((prev) => prev + members.length);
       } catch {
         setDoingRates(false);
