@@ -1,11 +1,11 @@
 # Task ID: 1
-# Title: Analyze current TermsOfServiceModal structure
+# Title: Create or modify constants file for MAX_DROP_UPLOAD_FILES
 # Status: done
 # Dependencies: None
 # Priority: high
-# Description: Review the existing TermsOfServiceModal.tsx component to understand its structure, state management, and functionality before making changes.
+# Description: Create a new constants file or modify an existing one to define the MAX_DROP_UPLOAD_FILES constant with a value of 4.
 # Details:
-Open the file at components/terms/TermsOfServiceModal.tsx and analyze: 1) The component's props and return structure, 2) State management (particularly hasAcknowledged), 3) Event handlers (onClose, checkbox interaction), 4) The layout hierarchy (FocusTrap, overlay div, container div, header, content, footer), 5) Styling classes used. Document the key elements that need to be preserved versus those that will be replaced by ModalLayout.
+Create a new file at src/lib/constants/uploads.ts if it doesn't exist. If the directory structure doesn't exist, create it. If a similar constants file already exists that would be appropriate for this constant, use that instead. Define the constant as: export const MAX_DROP_UPLOAD_FILES = 4; with an appropriate comment explaining its purpose. Ensure the constant is properly exported so it can be imported by other files.
 
 # Test Strategy:
-Create a checklist of all functionality and visual elements in the current implementation to verify against after refactoring.
+Verify the constant file exists, contains the MAX_DROP_UPLOAD_FILES constant with value 4, and can be imported from other files in the project.
