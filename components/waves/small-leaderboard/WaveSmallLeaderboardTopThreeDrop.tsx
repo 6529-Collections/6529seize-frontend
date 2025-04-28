@@ -116,7 +116,7 @@ export const WaveSmallLeaderboardTopThreeDrop: React.FC<
                       <img
                         className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-object-contain tw-p-[1px]"
                         src={drop.author.pfp}
-                        alt={drop.author.handle}
+                        alt={drop.author.handle ?? ""}
                       />
                     ) : (
                       <div className="tw-size-6 tw-flex-shrink-0 tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700" />

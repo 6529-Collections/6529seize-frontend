@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import ProxyListItem from "./ProxyListItem";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
 
 export enum ProfileProxyListType {
@@ -29,7 +29,7 @@ export default function ProxyList({
   readonly receivedProfileProxies: ApiProfileProxy[];
   readonly grantedProfileProxies: ApiProfileProxy[];
   readonly isSelf: boolean;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly loading: boolean;
 }) {
   const [proxyType, setProxyType] = useState<ProfileProxyListType>(

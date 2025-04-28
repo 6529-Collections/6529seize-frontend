@@ -1,4 +1,4 @@
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -52,7 +52,7 @@ export default function UserPageStatsActivityWallet({
   profile,
   activeAddress,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
   const FILTER_TO_PARAM: Record<UserPageStatsActivityWalletFilterType, string> =
@@ -146,9 +146,7 @@ export default function UserPageStatsActivityWallet({
   const getWalletsParam = () =>
     [
       activeAddress?.toLowerCase() ??
-        profile.consolidation.wallets.map((w) =>
-          w.wallet.address.toLowerCase()
-        ),
+        profile.wallets?.map((w) => w.wallet.toLowerCase()),
     ].join(",");
 
   const [walletsParam, setWalletsParam] = useState<string>(getWalletsParam());

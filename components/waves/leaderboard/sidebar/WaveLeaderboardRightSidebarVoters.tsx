@@ -16,7 +16,7 @@ export const WaveLeaderboardRightSidebarVoters: React.FC<
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
       waveId: wave.id,
-      connectedProfileHandle: connectedProfile?.profile?.handle,
+      connectedProfileHandle: connectedProfile?.handle ?? undefined,
       reverse: false,
       dropId: null,
       sortDirection: "DESC",

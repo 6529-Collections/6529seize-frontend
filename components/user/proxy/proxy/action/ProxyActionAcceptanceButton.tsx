@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import { ApiProfileProxyAction } from "../../../../../generated/models/ApiProfileProxyAction";
 import { AuthContext } from "../../../../auth/Auth";
@@ -39,28 +39,28 @@ export default function ProxyActionAcceptanceButton({
   profileProxy,
 }: {
   readonly action: ApiProfileProxyAction;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly profileProxy: ApiProfileProxy;
 }) {
   const { setToast, connectedProfile, requestAuth } = useContext(AuthContext);
   const { onProfileProxyModify } = useContext(ReactQueryWrapperContext);
   const getPossibleActions = (): AcceptActionRequestActionEnum[] => {
-    if (!connectedProfile?.profile?.external_id) {
+    if (!connectedProfile?.id) {
       return [];
     }
 
-    if (connectedProfile.profile.external_id !== profile.profile?.external_id) {
+    if (connectedProfile.id !== profile.id) {
       return [];
     }
 
-    if (connectedProfile.profile.external_id === profileProxy.created_by.id) {
+    if (connectedProfile.id === profileProxy.created_by.id) {
       if (action.revoked_at) {
         return [AcceptActionRequestActionEnum.Restore];
       }
       return [AcceptActionRequestActionEnum.Revoke];
     }
 
-    if (connectedProfile.profile.external_id === profileProxy.granted_to.id) {
+    if (connectedProfile.id === profileProxy.granted_to.id) {
       if (!action.accepted_at && !action.rejected_at) {
         return [
           AcceptActionRequestActionEnum.Accept,
@@ -82,19 +82,19 @@ export default function ProxyActionAcceptanceButton({
 
   const onAcceptanceModalClose = (setAsDontShowAgain: boolean) => {
     setShowAcceptanceModal(false);
-    if (setAsDontShowAgain && connectedProfile?.profile?.external_id) {
+    if (setAsDontShowAgain && connectedProfile?.id) {
       setSeenProfileProxyActionAcceptanceModal({
-        profileId: connectedProfile.profile.external_id,
+        profileId: connectedProfile.id,
       });
     }
   };
 
   const onSuccessFullProxyAcceptance = () => {
-    if (!connectedProfile?.profile?.external_id) {
+    if (!connectedProfile?.id) {
       return;
     }
     const haveSeenModal = haveSeenProfileProxyActionAcceptanceModal({
-      profileId: connectedProfile.profile.external_id,
+      profileId: connectedProfile.id,
     });
     if (haveSeenModal) {
       return;
@@ -110,6 +110,9 @@ export default function ProxyActionAcceptanceButton({
       });
     },
     onSuccess: (_, variables) => {
+      if (!profileProxy.granted_to?.handle || !profileProxy.created_by?.handle) {
+        return;
+      }
       onProfileProxyModify({
         profileProxyId: profileProxy.id,
         grantedToHandle: profileProxy.granted_to.handle,

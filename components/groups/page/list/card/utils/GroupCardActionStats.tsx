@@ -33,17 +33,17 @@ export default function GroupCardActionStats({
   const [creditPerMember, setCreditPerMember] = useState<number>(0);
 
   useEffect(() => {
-    if (!connectedProfile?.profile?.handle) {
+    if (!connectedProfile?.handle) {
       setRater(null);
       setRaterRepresentative(null);
       return;
     }
     if (activeProfileProxy) {
       setRater(activeProfileProxy.created_by.handle);
-      setRaterRepresentative(connectedProfile.profile.handle);
+      setRaterRepresentative(connectedProfile.handle);
       return;
     }
-    setRater(connectedProfile.profile.handle);
+    setRater(connectedProfile.handle);
     setRaterRepresentative(null);
   }, [connectedProfile, activeProfileProxy]);
 

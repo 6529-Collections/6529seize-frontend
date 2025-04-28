@@ -1,5 +1,5 @@
-import { IProfileConsolidation } from "../../../../../entities/IProfile";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
+import { ApiWallet } from "../../../../../generated/models/ApiWallet";
 
 export default function UserPageIdentityStatementsConsolidatedAddressesItemPrimary({
   isPrimary,
@@ -9,7 +9,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
   isAssigningPrimary,
 }: {
   readonly isPrimary: boolean;
-  readonly address: IProfileConsolidation;
+  readonly address: ApiWallet;
   readonly canEdit: boolean;
   readonly assignPrimary: () => void;
   readonly isAssigningPrimary: boolean;
@@ -27,7 +27,8 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItemPrima
       <button
         disabled={isAssigningPrimary}
         onClick={assignPrimary}
-        className="tw-bg-transparent tw-whitespace-nowrap tw-border-none tw-ml-1 tw-text-xs tw-font-bold tw-text-iron-500 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out">
+        className="tw-bg-transparent tw-whitespace-nowrap tw-border-none tw-ml-1 tw-text-xs tw-font-bold tw-text-iron-500 hover:tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+      >
         {isAssigningPrimary ? <CircleLoader /> : <>Set Primary</>}
       </button>
     );

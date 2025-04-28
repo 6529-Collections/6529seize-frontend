@@ -14,17 +14,24 @@ export const useWaveData = ({
   refetchInterval = Infinity,
   onWaveNotFound = () => {},
 }: UseWaveDataProps) => {
-  return useQuery<ApiWave>({
+   return useQuery<ApiWave>({
     queryKey: [QueryKey.WAVE, { wave_id: waveId }],
-    queryFn: async () =>
-      await commonApiFetch<ApiWave>({
+    queryFn: async () => {
+      if (!waveId) {
+        return Promise.reject(new Error("Attempted fetch with null waveId")); // Prevent API call
+      }
+      return await commonApiFetch<ApiWave>({
         endpoint: `waves/${waveId}`,
-      }),
+      });
+    },
 
     staleTime: 60000,
     enabled: !!waveId,
     refetchInterval,
     retry: (failureCount, error) => {
+      if ((error as any)?.message === "Attempted fetch with null waveId") {
+        return false; // Don't retry our artificial error
+      }
       if ((error as any) === `Wave ${waveId} not found`) {
         onWaveNotFound();
         return false;

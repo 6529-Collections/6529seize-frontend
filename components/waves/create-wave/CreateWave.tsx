@@ -12,7 +12,6 @@ import CreateWaveActions from "./utils/CreateWaveActions";
 import CreateWaveDescription, {
   CreateWaveDescriptionHandles,
 } from "./description/CreateWaveDescription";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { getCreateNewWaveBody } from "../../../helpers/waves/create-wave.helpers";
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
@@ -25,12 +24,12 @@ import { useWaveConfig } from "./hooks/useWaveConfig";
 import useCapacitor from "../../../hooks/useCapacitor";
 import CreateWaveFlow from "./CreateWaveFlow";
 import { multiPartUpload } from "./services/multiPartUpload";
-
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function CreateWave({
   profile,
   onBack,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onBack: () => void;
 }) {
   const router = useRouter();
@@ -115,8 +114,8 @@ export default function CreateWave({
 
     const adminGroupId = await getAdminGroupId({
       adminGroupId: config.groups.admin,
-      primaryWallet: connectedProfile?.profile?.primary_wallet,
-      handle: connectedProfile?.profile?.handle,
+      primaryWallet: connectedProfile?.primary_wallet,
+      handle: connectedProfile?.handle ?? undefined,
       onError: (error) => {
         setToast({
           message:

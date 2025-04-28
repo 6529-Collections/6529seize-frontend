@@ -6,7 +6,9 @@ import { cicToType } from "../../helpers/Helpers";
 import Link from "next/link";
 import CreateDropStormPart from "./CreateDropStormPart";
 import { AnimatePresence, motion } from "framer-motion";
-import UserCICAndLevel, { UserCICAndLevelSize } from "../user/utils/UserCICAndLevel";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "../user/utils/UserCICAndLevel";
 
 interface CreateDropStormPartsProps {
   parts: CreateDropPart[];
@@ -22,17 +24,17 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
   onRemovePart,
 }) => {
   const { connectedProfile } = React.useContext(AuthContext);
-  const cicType = cicToType(connectedProfile?.cic.cic_rating ?? 0);
+  const cicType = cicToType(connectedProfile?.cic ?? 0);
 
   return (
     <div className="tw-space-y-4 tw-pb-3">
       <div className="tw-bg-transparent tw-relative tw-group tw-w-full tw-flex tw-flex-col tw-py-2 tw-transition-colors tw-duration-300">
         <div className="tw-flex tw-gap-x-3">
           <div className="tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
-            {connectedProfile?.profile?.pfp_url ? (
+            {connectedProfile?.pfp ? (
               <img
-                src={connectedProfile.profile.pfp_url}
-                alt={connectedProfile.profile.handle || "user"}
+                src={connectedProfile.pfp}
+                alt={connectedProfile.handle ?? "user"}
                 className="tw-h-full tw-w-full tw-object-cover tw-rounded-lg"
               />
             ) : (
@@ -49,10 +51,10 @@ const CreateDropStormParts: React.FC<CreateDropStormPartsProps> = ({
                 />
                 <p className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
                   <Link
-                    href={`/${connectedProfile?.profile?.handle}`}
+                    href={`/${connectedProfile?.handle}`}
                     className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
                   >
-                    {connectedProfile?.profile?.handle || "user"}
+                    {connectedProfile?.handle ?? "user"}
                   </Link>
                 </p>
               </div>

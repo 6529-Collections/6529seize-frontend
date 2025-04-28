@@ -2,14 +2,15 @@ import { AnimatePresence, motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import UserSettingsPrimaryWalletItem from "./UserSettingsPrimaryWalletItem";
-import { IProfileConsolidation } from "../../../entities/IProfile";
+import { ApiWallet } from "../../../generated/models/ApiWallet";
+
 
 export default function UserSettingsPrimaryWallet({
-  consolidations,
+  wallets,
   selected,
   onSelect,
 }: {
-  readonly consolidations: IProfileConsolidation[];
+  readonly wallets: ApiWallet[];
   readonly selected: string;
   readonly onSelect: (wallet: string) => void;
 }) {
@@ -29,12 +30,9 @@ export default function UserSettingsPrimaryWallet({
 
   const [title, setTitle] = useState<string>("Select wallet");
   useEffect(() => {
-    const selectedWallet = consolidations.find(
-      (w) => w.wallet.address === selected
-    );
+    const selectedWallet = wallets.find((w) => w.wallet === selected);
 
-    const displayName =
-      selectedWallet?.wallet.ens ?? selectedWallet?.wallet.address;
+    const displayName = selectedWallet?.display ?? selectedWallet?.wallet;
     setTitle(displayName ?? "Select wallet");
   }, [selected]);
 
@@ -87,9 +85,9 @@ export default function UserSettingsPrimaryWallet({
             <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-max-w-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-py-1 tw-flow-root tw-max-h-[calc(240px+_-5vh)] tw-overflow-x-hidden tw-overflow-y-auto">
                 <ul className="tw-flex tw-flex-col tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">
-                  {consolidations.map((wallet) => (
+                  {wallets.map((wallet) => (
                     <UserSettingsPrimaryWalletItem
-                      key={wallet.wallet.address}
+                      key={wallet.wallet}
                       wallet={wallet}
                       selected={selected}
                       onSelect={selectWallet}

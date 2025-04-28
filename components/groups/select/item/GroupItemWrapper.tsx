@@ -15,11 +15,11 @@ export default function GroupItemWrapper({
   readonly onActiveGroupId?: (groupId: string | null) => void;
 }) {
   const banner1 =
-    group.created_by.banner1_color ??
-    getRandomColorWithSeed(group.created_by.handle);
+    group.created_by?.banner1_color ??
+    getRandomColorWithSeed(group.created_by?.handle ?? "");
   const banner2 =
-    group.created_by.banner2_color ??
-    getRandomColorWithSeed(group.created_by.handle);
+    group.created_by?.banner2_color ??
+    getRandomColorWithSeed(group.created_by?.handle ?? "");
 
   const onFilterClick = () => {
     if (isActive || !onActiveGroupId) return;

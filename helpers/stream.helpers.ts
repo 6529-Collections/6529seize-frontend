@@ -34,7 +34,7 @@ const getHandleFromJwt = async (
   const wallet = getWalletFromJwt(headers);
   if (!wallet) return null;
   const profile = await getUserProfile({ user: wallet, headers });
-  return profile.profile?.handle ?? null;
+  return profile.handle ?? null;
 };
 
 const prefetchAuthenticatedWavesOverview = async ({

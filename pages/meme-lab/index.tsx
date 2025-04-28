@@ -40,11 +40,7 @@ export default function MemeLab() {
 
       <main className={styles.main}>
         <MemeLabComponent
-          wallets={
-            connectedProfile?.consolidation.wallets.map(
-              (w) => w.wallet.address
-            ) ?? []
-          }
+          wallets={connectedProfile?.wallets?.map((w) => w.wallet) ?? []}
         />
       </main>
     </>

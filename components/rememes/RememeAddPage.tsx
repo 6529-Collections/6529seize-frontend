@@ -113,13 +113,12 @@ export default function RememeAddPage() {
   useEffect(() => {
     async function fetchTdh() {
       commonApiFetch<ConsolidatedTDH>({
-        endpoint: `tdh/consolidation/${connectedProfile?.consolidation.consolidation_key}`,
+        endpoint: `tdh/consolidation/${connectedProfile?.consolidation_key}`,
       }).then((response) => {
         setUserTDH(response);
       });
     }
-
-    if (connectedProfile?.consolidation) {
+    if (connectedProfile?.consolidation_key) {
       fetchTdh();
     } else {
       setCheckList([]);

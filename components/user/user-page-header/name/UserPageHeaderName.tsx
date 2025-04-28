@@ -1,27 +1,25 @@
-import {
-  CLASSIFICATIONS,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { CLASSIFICATIONS } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import UserCICTypeIconWrapper from "../../utils/user-cic-type/UserCICTypeIconWrapper";
-import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 import UserPageClassificationWrapper from "./classification/UserPageClassificationWrapper";
+import UserPageHeaderNameWrapper from "./UserPageHeaderNameWrapper";
 
 export default function UserPageHeaderName({
   profile,
   canEdit,
   mainAddress,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly canEdit: boolean;
   readonly mainAddress: string;
 }) {
   const getDisplayName = (): string => {
-    if (profile.profile?.handle) {
-      return profile.profile.handle;
+    if (profile?.handle) {
+      return profile.handle;
     }
 
-    if (profile.consolidation.consolidation_display) {
-      return profile.consolidation.consolidation_display;
+    if (profile.display) {
+      return profile.display;
     }
 
     if (mainAddress.endsWith(".eth")) {
@@ -40,16 +38,17 @@ export default function UserPageHeaderName({
             {displayName}
           </p>
         </UserPageHeaderNameWrapper>
-        {profile.profile?.handle && (
+        {profile?.handle && (
           <div className="tw-ml-2 tw-flex tw-items-center tw-justify-center tw-self-center tw-h-6 tw-w-6">
             <UserCICTypeIconWrapper profile={profile} />
           </div>
         )}
       </div>
-      {profile.profile?.classification && (
+
+      {profile?.classification && (
         <UserPageClassificationWrapper profile={profile} canEdit={canEdit}>
           <div className="tw-block tw-text-iron-400 hover:tw-text-iron-300 tw-font-medium tw-text-sm tw-leading-3 tw-transition tw-duration-300 tw-ease-out">
-            {CLASSIFICATIONS[profile.profile.classification].title}
+            {CLASSIFICATIONS[profile.classification].title}
           </div>
         </UserPageClassificationWrapper>
       )}

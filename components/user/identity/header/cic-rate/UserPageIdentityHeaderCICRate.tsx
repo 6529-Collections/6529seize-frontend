@@ -1,8 +1,5 @@
 import { FormEvent, useContext, useEffect, useState } from "react";
-import {
-  ApiProfileRaterCicState,
-  IProfileAndConsolidations,
-} from "../../../../../entities/IProfile";
+import { ApiProfileRaterCicState } from "../../../../../entities/IProfile";
 import { getStringAsNumberOrZero } from "../../../../../helpers/Helpers";
 import { AuthContext } from "../../../../auth/Auth";
 import {
@@ -20,6 +17,7 @@ import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader
 import { ApiProfileProxyActionType } from "../../../../../generated/models/ApiProfileProxyActionType";
 import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
 import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 
 const useBreakpoint = createBreakpoint({ MD: 768, S: 0 });
 
@@ -27,7 +25,7 @@ export default function UserPageIdentityHeaderCICRate({
   profile,
   isTooltip,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly isTooltip: boolean;
 }) {
   const { address } = useSeizeConnectContext();
@@ -40,13 +38,13 @@ export default function UserPageIdentityHeaderCICRate({
     queryKey: [
       QueryKey.PROFILE_RATER_CIC_STATE,
       {
-        handle: profile.profile?.handle.toLowerCase(),
+        handle: profile?.handle?.toLowerCase(),
         rater: activeProfileProxy?.created_by.handle ?? address?.toLowerCase(),
       },
     ],
     queryFn: async () =>
       await commonApiFetch<ApiProfileRaterCicState>({
-        endpoint: `profiles/${profile.input_identity}/cic/rating/${
+        endpoint: `profiles/${profile.query}/cic/rating/${
           activeProfileProxy?.created_by.handle ?? address?.toLowerCase()
         }`,
       }),
@@ -60,7 +58,7 @@ export default function UserPageIdentityHeaderCICRate({
     mutationFn: async (amount: number) => {
       setMutating(true);
       return await commonApiPost({
-        endpoint: `profiles/${profile.input_identity}/cic/rating`,
+        endpoint: `profiles/${profile.query}/cic/rating`,
         body: {
           amount,
         },
@@ -278,7 +276,8 @@ export default function UserPageIdentityHeaderCICRate({
         isTooltip
           ? ""
           : "tw-bg-iron-900 tw-px-4 tw-py-6 lg:tw-p-8 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800"
-      } `}>
+      } `}
+    >
       <UserPageIdentityHeaderCICRateStats
         isTooltip={isTooltip}
         profile={profile}
@@ -289,17 +288,20 @@ export default function UserPageIdentityHeaderCICRate({
       />
       <form
         onSubmit={onSubmit}
-        className={`${isTooltip ? "tw-mt-4" : "tw-mt-6"}`}>
+        className={`${isTooltip ? "tw-mt-4" : "tw-mt-6"}`}
+      >
         <div
           className={`${
             isTooltip ? "" : "tw-flex-wrap"
-          } tw-flex tw-items-end tw-gap-3`}>
+          } tw-flex tw-items-end tw-gap-3`}
+        >
           <div className="tw-w-full sm:tw-w-auto">
             <label
               className={`${
                 isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
-              } tw-block tw-text-sm tw-font-normal tw-text-iron-400 tw-break-all`}>
-              Your total NIC Rating of {profile.input_identity}:
+              } tw-block tw-text-sm tw-font-normal tw-text-iron-400 tw-break-all`}
+            >
+              Your total NIC Rating of {profile.query}:
             </label>
             <div className="tw-w-full tw-relative tw-flex tw-mt-1.5">
               <span className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-950 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3">
@@ -307,7 +309,8 @@ export default function UserPageIdentityHeaderCICRate({
                   className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
                   viewBox="0 0 24 24"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg">
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path
                     d="M12 5V19M5 12H19"
                     stroke="currentColor"
@@ -320,7 +323,8 @@ export default function UserPageIdentityHeaderCICRate({
                   className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
                   viewBox="0 0 24 24"
                   fill="none"
-                  xmlns="http://www.w3.org/2000/svg">
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path
                     d="M5 12H19"
                     stroke="currentColor"
@@ -354,7 +358,8 @@ export default function UserPageIdentityHeaderCICRate({
                     ? "hover:tw-bg-primary-600 hover:tw-border-primary-600"
                     : "tw-cursor-not-allowed tw-opacity-50"
                 } tw-w-full sm:tw-w-auto  tw-bg-primary-500 tw-px-4 tw-py-3 tw-text-sm tw-font-semibold tw-text-white 
-              tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}>
+              tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg  tw-transition tw-duration-300 tw-ease-out`}
+              >
                 {mutating ? (
                   <div className="tw-w-8">
                     <CircleLoader />

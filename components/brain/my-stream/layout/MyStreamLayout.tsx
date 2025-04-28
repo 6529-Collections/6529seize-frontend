@@ -39,7 +39,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
       );
     }
 
-    if (!connectedProfile?.profile?.handle && !fetchingProfile) {
+    if (!connectedProfile?.handle && !fetchingProfile) {
       return (
         <>
           <h1 className="tw-text-xl tw-font-bold">

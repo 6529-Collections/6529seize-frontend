@@ -11,7 +11,7 @@ import {
 } from "../../../../entities/IDrop";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
 import CreateDropSelectedFileIcon from "../utils/file/CreateDropSelectedFileIcon";
-import { CreateDropType, CreateDropViewType } from "../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../types";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 import CreateDropSelectedFilePreview from "../utils/file/CreateDropSelectedFilePreview";
 import { forwardRef, useImperativeHandle, useRef } from "react";

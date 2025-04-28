@@ -1,16 +1,10 @@
-import {
-  CicStatement,
-  IProfileAndConsolidations,
-} from "../../../entities/IProfile";
+import { CicStatement } from "../../../entities/IProfile";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import UserPageHeaderName from "./name/UserPageHeaderName";
 import UserLevel from "../utils/level/UserLevel";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import { useContext, useEffect, useState } from "react";
-import {
-  amIUser,
-  formatTimestampToMonthYear,
-  getRandomColor,
-} from "../../../helpers/Helpers";
+import { amIUser, getRandomColor } from "../../../helpers/Helpers";
 import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderAbout from "./about/UserPageHeaderAbout";
 import { useQuery } from "@tanstack/react-query";
@@ -23,6 +17,7 @@ import UserFollowBtn from "../utils/UserFollowBtn";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { createDirectMessageWave } from "../../../helpers/waves/waves.helpers";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import UserPageHeaderProfileEnabledAt from "./UserPageHeaderProfileEnabledAt";
 
 const DEFAULT_BANNER_1 = getRandomColor();
 const DEFAULT_BANNER_2 = getRandomColor();
@@ -42,7 +37,7 @@ export default function UserPageHeader({
   profile,
   mainAddress,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly mainAddress: string;
 }) {
   const router = useRouter();
@@ -56,9 +51,8 @@ export default function UserPageHeader({
 
   // Initialize with a check to prevent button flash
   const initialIsMyProfile =
-    connectedProfile?.profile?.handle && profile.profile?.handle
-      ? connectedProfile.profile.handle.toLowerCase() ===
-        profile.profile.handle.toLowerCase()
+    connectedProfile?.handle && profile.handle
+      ? connectedProfile.handle.toLowerCase() === profile.handle.toLowerCase()
       : false;
 
   const [isMyProfile, setIsMyProfile] = useState<boolean>(initialIsMyProfile);
@@ -68,13 +62,13 @@ export default function UserPageHeader({
       amIUser({
         profile,
         address,
-        connectedHandle: connectedProfile?.profile?.handle,
+        connectedHandle: connectedProfile?.handle ?? undefined,
       })
     );
-  }, [profile, address, connectedProfile?.profile?.handle]);
+  }, [profile, address, connectedProfile?.handle]);
 
   const getCanEdit = (): boolean => {
-    return !!(profile.profile?.handle && isMyProfile && !activeProfileProxy);
+    return !!(profile.handle && isMyProfile && !activeProfileProxy);
   };
 
   const [canEdit, setCanEdit] = useState<boolean>(getCanEdit());
@@ -157,34 +151,25 @@ export default function UserPageHeader({
               <div className="-tw-mt-16 sm:-tw-mt-24 tw-w-min">
                 <UserPageHeaderPfpWrapper profile={profile} canEdit={canEdit}>
                   <UserPageHeaderPfp
-                    canEdit={canEdit}
                     profile={profile}
-                    defaultBanner1={
-                      profile.profile?.banner_1 ?? DEFAULT_BANNER_1
-                    }
-                    defaultBanner2={
-                      profile.profile?.banner_2 ?? DEFAULT_BANNER_2
-                    }
+                    defaultBanner1={profile.banner1 ?? DEFAULT_BANNER_1}
+                    defaultBanner2={profile.banner2 ?? DEFAULT_BANNER_2}
                   />
                 </UserPageHeaderPfpWrapper>
               </div>
               <div className="tw-mt-4">
-                {!isMyProfile &&
-                  profile.profile?.handle &&
-                  connectedProfile?.profile?.handle && (
-                    <UserFollowBtn
-                      handle={profile.profile.handle}
-                      onDirectMessage={
-                        profile.profile?.primary_wallet
-                          ? () =>
-                              handleCreateDirectMessage(
-                                profile.profile?.primary_wallet
-                              )
-                          : undefined
-                      }
-                      directMessageLoading={directMessageLoading}
-                    />
-                  )}
+                {!isMyProfile && profile.handle && connectedProfile?.handle && (
+                  <UserFollowBtn
+                    handle={profile.handle}
+                    onDirectMessage={
+                      profile.primary_wallet
+                        ? () =>
+                            handleCreateDirectMessage(profile.primary_wallet)
+                        : undefined
+                    }
+                    directMessageLoading={directMessageLoading}
+                  />
+                )}
               </div>
             </div>
 
@@ -205,18 +190,7 @@ export default function UserPageHeader({
               />
             )}
             <UserPageHeaderStats profile={profile} />
-            {profile.profile?.created_at && (
-              <div className="tw-mt-2">
-                <p
-                  className="tw-mb-0 tw-text-iron-400 tw-text-sm tw-font-normal"
-                  suppressHydrationWarning>
-                  Profile Enabled:{" "}
-                  {formatTimestampToMonthYear(
-                    new Date(profile.profile.created_at).getTime()
-                  )}
-                </p>
-              </div>
-            )}
+            <UserPageHeaderProfileEnabledAt handleOrWallet={profile.handle} />
           </div>
         </div>
       </section>

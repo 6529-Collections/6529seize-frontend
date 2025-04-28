@@ -4,7 +4,7 @@ import PrimaryButtonLink from "../../utils/button/PrimaryButtonLink";
 
 export default function GroupHeaderSelect() {
   const { connectedProfile } = useContext(AuthContext);
-  const getHaveProfile = (): boolean => !!connectedProfile?.profile?.handle;
+  const getHaveProfile = (): boolean => !!connectedProfile?.handle;
   const [haveProfile, setHaveProfile] = useState(getHaveProfile());
   useEffect(() => setHaveProfile(getHaveProfile()), [connectedProfile]);
 

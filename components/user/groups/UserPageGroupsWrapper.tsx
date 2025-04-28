@@ -1,30 +1,24 @@
 import { useRouter } from "next/router";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
-import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../services/api/common-api";
+
 import UserPageGroups from "./UserPageGroups";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { useIdentity } from "../../../hooks/useIdentity";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 export default function UserPageGroupsWrapper({
   profile: initialProfile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
-  const { data: profile } = useQuery({
-    queryKey: [QueryKey.PROFILE, user],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user}`,
-      }),
-    enabled: !!user,
-    initialData: initialProfile,
+  const { profile } = useIdentity({
+    handleOrWallet: user,
+    initialProfile: initialProfile,
   });
 
   return (
-    <UserPageSetUpProfileWrapper profile={profile}>
+    <UserPageSetUpProfileWrapper profile={profile ?? initialProfile}>
       <UserPageGroups profile={profile} />
     </UserPageSetUpProfileWrapper>
   );

@@ -21,9 +21,7 @@ export default function ProfileProxyCredit({
     if (!connectedProfile) {
       return false;
     }
-    return (
-      connectedProfile?.profile?.external_id === profileProxy.created_by.id
-    );
+    return connectedProfile?.id === profileProxy.created_by.id;
   };
 
   const [isOwner, setIsOwner] = useState(getIsOwner());

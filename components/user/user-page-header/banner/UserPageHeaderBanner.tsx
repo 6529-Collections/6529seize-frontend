@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import PencilIcon from "../../../utils/icons/PencilIcon";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
@@ -11,7 +11,7 @@ export default function UserPageHeaderBanner({
   defaultBanner2,
   canEdit,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly defaultBanner1: string;
   readonly defaultBanner2: string;
   readonly canEdit: boolean;
@@ -23,8 +23,8 @@ export default function UserPageHeaderBanner({
       className="tw-h-24 sm:tw-h-36 tw-group tw-relative tw-overflow-hidden"
       style={{
         background: `linear-gradient(45deg, ${
-          profile.profile?.banner_1 ?? defaultBanner1
-        } 0%, ${profile.profile?.banner_2 ?? defaultBanner2} 100%)`,
+          profile?.banner1 ?? defaultBanner1
+        } 0%, ${profile?.banner2 ?? defaultBanner2} 100%)`,
       }}
     >
       {canEdit && (

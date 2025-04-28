@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
 import UserCICTypeIconWrapper from "../../utils/user-cic-type/UserCICTypeIconWrapper";
 import UserCICStatus from "../../utils/user-cic-status/UserCICStatus";
@@ -7,16 +7,12 @@ import UserCICStatus from "../../utils/user-cic-status/UserCICStatus";
 export default function UserPageIdentityHeaderCIC({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
-  const [cicRating, setCicRating] = useState<number>(profile.cic.cic_rating);
-  const [cicRaters, setCicRaters] = useState<number>(
-    profile.cic.contributor_count
-  );
+  const [cicRating, setCicRating] = useState<number>(profile.cic);
 
   useEffect(() => {
-    setCicRating(profile.cic.cic_rating);
-    setCicRaters(profile.cic.contributor_count);
+    setCicRating(profile.cic);
   }, [profile]);
 
   return (
@@ -35,12 +31,6 @@ export default function UserPageIdentityHeaderCIC({
       <div className="tw-flex tw-items-center tw-text-base tw-font-semibold tw-space-x-1">
         <span className="tw-text-iron-300 tw-font-medium">Status:</span>
         <UserCICStatus cic={cicRating} />
-      </div>
-      <div className="tw-flex tw-items-center tw-text-base tw-font-medium tw-text-iron-300 tw-space-x-1">
-        <span>Raters:</span>
-        <span className="tw-text-iron-50 tw-font-semibold">
-          {formatNumberWithCommas(cicRaters)}
-        </span>
       </div>
     </div>
   );

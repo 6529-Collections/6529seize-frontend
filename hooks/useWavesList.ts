@@ -63,8 +63,8 @@ const useWavesList = () => {
 
   // Track connected identity state - memoize to prevent re-renders
   const isConnectedIdentity = useMemo(() => {
-    return !!connectedProfile?.profile?.handle && !activeProfileProxy;
-  }, [connectedProfile?.profile?.handle, activeProfileProxy]);
+    return !!connectedProfile?.handle && !activeProfileProxy;
+  }, [connectedProfile?.handle, activeProfileProxy]);
 
   // Fetch main waves list
   const {

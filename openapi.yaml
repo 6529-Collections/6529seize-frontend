@@ -550,6 +550,72 @@ paths:
                 $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
         "400":
           description: Invalid request
+  /wave-media/multipart-upload:
+    post:
+      tags:
+        - Drops
+      summary: Get upload ID and key for multipart upload
+      description: Requires the user to be authenticated
+      operationId: createMultipartWaveMediaUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateMediaUploadUrlRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiStartMultipartMediaUploadResponse"
+        "400":
+          description: Invalid request
+  /wave-media/multipart-upload/part:
+    post:
+      tags:
+        - Drops
+      summary: Upload a part of multipart upload
+      description: Requires the user to be authenticated
+      operationId: uploadPartOfWaveMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadResponse"
+        "400":
+          description: Invalid request
+  /wave-media/multipart-upload/completion:
+    post:
+      tags:
+        - Drops
+      summary: Complete the multipart upload
+      description: Requires the user to be authenticated
+      operationId: completeWaveMultipartUpload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCompleteMultipartUploadRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
+        "400":
+          description: Invalid request
   /feed:
     get:
       tags:
@@ -736,6 +802,27 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ApiIdentity"
+  /identities/{identity_key}:
+    get:
+      tags:
+        - Identities
+      summary: >-
+        Get identity by it"s key. Key can be id, wallet, handle, ENS name,
+        etc...
+      operationId: getIdentityByKey
+      parameters:
+        - name: identity_key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentity"
   /identities/by-wallet/{wallet}:
     get:
       tags:
@@ -2154,72 +2241,6 @@ paths:
                 $ref: "#/components/schemas/ApiCreateMediaUrlResponse"
         "400":
           description: Invalid request
-  /wave-media/multipart-upload:
-    post:
-      tags:
-        - Drops
-      summary: Get upload ID and key for multipart upload
-      description: Requires the user to be authenticated
-      operationId: createMultipartWaveMediaUrl
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ApiCreateMediaUploadUrlRequest"
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiStartMultipartMediaUploadResponse"
-        "400":
-          description: Invalid request
-  /wave-media/multipart-upload/part:
-    post:
-      tags:
-        - Drops
-      summary: Upload a part of multipart upload
-      description: Requires the user to be authenticated
-      operationId: uploadPartOfWaveMultipartUpload
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadRequest"
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiUploadPartOfMultipartUploadResponse"
-        "400":
-          description: Invalid request
-  /wave-media/multipart-upload/completion:
-    post:
-      tags:
-        - Drops
-      summary: Complete the multipart upload
-      description: Requires the user to be authenticated
-      operationId: completeWaveMultipartUpload
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ApiCompleteMultipartUploadRequest"
-      responses:
-        "201":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiCompleteMultipartUploadResponse"
-        "400":
-          description: Invalid request
   /waves-overview:
     get:
       tags:
@@ -3280,6 +3301,36 @@ components:
         rep_rating_for_category_by_user:
           type: number
           format: int64
+    ApiCompleteMultipartUploadRequest:
+      required:
+        - upload_id
+        - key
+        - parts
+      properties:
+        upload_id:
+          type: string
+        key:
+          type: string
+        parts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompleteMultipartUploadRequestPart"
+    ApiCompleteMultipartUploadRequestPart:
+      required:
+        - etag
+        - part_no
+      properties:
+        etag:
+          type: string
+        part_no:
+          type: integer
+          format: int64
+    ApiCompleteMultipartUploadResponse:
+      required:
+        - media_url
+      properties:
+        media_url:
+          type: string
     ApiCreateDropPart:
       type: object
       required:
@@ -3391,64 +3442,6 @@ components:
         media_url:
           type: string
           example: https://example.com/final/image.png
-    ApiStartMultipartMediaUploadResponse:
-      required:
-        - upload_id
-        - key
-      properties:
-        upload_id:
-          type: string
-        key:
-          type: string
-    ApiUploadPartOfMultipartUploadRequest:
-      required:
-        - upload_id
-        - key
-        - part_no
-      properties:
-        upload_id:
-          type: string
-        key:
-          type: string
-        part_no:
-          type: integer
-          format: int64
-    ApiUploadPartOfMultipartUploadResponse:
-      required:
-        - upload_url
-      properties:
-        upload_url:
-          type: string
-    ApiCompleteMultipartUploadRequestPart:
-      required:
-        - etag
-        - part_no
-      properties:
-        etag:
-          type: string
-        part_no:
-          type: integer
-          format: int64
-    ApiCompleteMultipartUploadRequest:
-      required:
-        - upload_id
-        - key
-        - parts
-      properties:
-        upload_id:
-          type: string
-        key:
-          type: string
-        parts:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiCompleteMultipartUploadRequestPart"
-    ApiCompleteMultipartUploadResponse:
-      required:
-        - media_url
-      properties:
-        media_url:
-          type: string
     ApiCreateNewProfileProxy:
       type: object
       required:
@@ -4438,14 +4431,22 @@ components:
         - level
         - tdh
         - display
+        - consolidation_key
+        - classification
+        - sub_classification
         - primary_wallet
+        - banner1
+        - banner2
       properties:
         id:
           type: string
+          nullable: true
         handle:
           type: string
+          nullable: true
         normalised_handle:
           type: string
+          nullable: true
         pfp:
           type: string
           nullable: true
@@ -4461,10 +4462,30 @@ components:
         tdh:
           type: integer
           format: int65
+        consolidation_key:
+          type: string
         display:
           type: string
         primary_wallet:
           type: string
+        banner1:
+          type: string
+          nullable: true
+        banner2:
+          type: string
+          nullable: true
+        classification:
+          $ref: "#/components/schemas/ApiProfileClassification"
+        sub_classification:
+          type: string
+          nullable: true
+        query:
+          type: string
+          nullable: true
+        wallets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWallet"
     ApiIdentityAndSubscriptionActions:
       type: object
       required:
@@ -5033,6 +5054,16 @@ components:
         next:
           type: string
           nullable: true
+    ApiProfileClassification:
+      type: string
+      enum:
+        - GOVERNMENT_NAME
+        - PSEUDONYM
+        - ORGANIZATION
+        - AI
+        - BOT
+        - PARODY
+        - COLLECTION
     ApiProfileMin:
       type: object
       required:
@@ -5053,6 +5084,7 @@ components:
           format: uuid
         handle:
           type: string
+          nullable: true
         pfp:
           type: string
           nullable: true
@@ -5338,6 +5370,15 @@ components:
         memes_wave_id:
           type: string
           nullable: true
+    ApiStartMultipartMediaUploadResponse:
+      required:
+        - upload_id
+        - key
+      properties:
+        upload_id:
+          type: string
+        key:
+          type: string
     ApiTargetAndSubscriptionActions:
       type: object
       required:
@@ -5514,6 +5555,25 @@ components:
           format: int64
         url:
           type: string
+    ApiUploadPartOfMultipartUploadRequest:
+      required:
+        - upload_id
+        - key
+        - part_no
+      properties:
+        upload_id:
+          type: string
+        key:
+          type: string
+        part_no:
+          type: integer
+          format: int64
+    ApiUploadPartOfMultipartUploadResponse:
+      required:
+        - upload_url
+      properties:
+        upload_url:
+          type: string
     ApiUploadsPage:
       type: object
       required:
@@ -5525,6 +5585,20 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiUploadItem"
+    ApiWallet:
+      type: object
+      required:
+        - wallet
+        - display
+        - tdh
+      properties:
+        wallet:
+          type: string
+        display:
+          type: string
+        tdh:
+          type: integer
+          format: int64
     ApiWave:
       type: object
       required:

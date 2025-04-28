@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
-import {
-  CLASSIFICATIONS,
-  PROFILE_CLASSIFICATION,
-} from "../../../entities/IProfile";
-
+import { CLASSIFICATIONS } from "../../../entities/IProfile";
+import { ApiProfileClassification } from "../../../generated/models/ApiProfileClassification";
 export default function UserSettingsClassificationItem({
   classification,
   selected,
   onClassification,
 }: {
-  readonly selected: PROFILE_CLASSIFICATION | null;
-  readonly classification: PROFILE_CLASSIFICATION;
-  readonly onClassification: (classification: PROFILE_CLASSIFICATION) => void;
+  readonly selected: ApiProfileClassification | null;
+  readonly classification: ApiProfileClassification;
+  readonly onClassification: (classification: ApiProfileClassification) => void;
 }) {
   const [isActive, setIsActive] = useState<boolean>(
     classification === selected

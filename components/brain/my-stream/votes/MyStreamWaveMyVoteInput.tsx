@@ -56,7 +56,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     onSuccess: (response: ApiDrop) => {
       onDropRateChange({
         drop: response,
-        giverHandle: connectedProfile?.profile?.handle ?? null,
+        giverHandle: connectedProfile?.handle ?? null,
       });
 
       // Show success toast

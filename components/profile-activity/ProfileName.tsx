@@ -1,11 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
-import { commonApiFetch } from "../../services/api/common-api";
+import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { useEffect, useState } from "react";
 import { createPossessionStr } from "../../helpers/Helpers";
 import { assertUnreachable } from "../../helpers/AllowlistToolHelpers";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
+import { useIdentity } from "../../hooks/useIdentity";
 export enum ProfileNameType {
   POSSESSION = "POSSESSION",
   DEFAULT = "DEFAULT",
@@ -19,21 +17,17 @@ export default function ProfileName({
   const router = useRouter();
   const handleOrWallet = (router.query.user as string).toLowerCase();
 
-  const { data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, handleOrWallet],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${handleOrWallet}`,
-      }),
-    enabled: !!handleOrWallet,
+  const { profile } = useIdentity({
+    handleOrWallet: handleOrWallet,
+    initialProfile: null,
   });
 
-  const createName = (profile: IProfileAndConsolidations | null): string => {
+  const createName = (profile: ApiIdentity | null): string => {
     switch (type) {
       case ProfileNameType.POSSESSION:
-        return createPossessionStr(profile?.profile?.handle ?? null);
+        return createPossessionStr(profile?.handle ?? null);
       case ProfileNameType.DEFAULT:
-        return profile?.profile?.handle ?? "";
+        return profile?.handle ?? "";
       default:
         assertUnreachable(type);
         return "";

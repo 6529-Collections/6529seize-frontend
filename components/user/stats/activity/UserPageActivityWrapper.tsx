@@ -5,7 +5,9 @@ import { useRouter } from "next/router";
 import UserPageStatsActivityWallet from "./wallet/UserPageStatsActivityWallet";
 import UserPageStatsActivityDistributions from "./distributions/UserPageStatsActivityDistributions";
 import UserPageStatsActivityTDHHistory from "./tdh-history/UserPageStatsActivityTDHHistory";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+
+
 
 export enum USER_PAGE_ACTIVITY_TAB {
   WALLET_ACTIVITY = "WALLET_ACTIVITY",
@@ -28,7 +30,7 @@ export default function UserPageActivityWrapper({
   profile,
   activeAddress,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly activeAddress: string | null;
 }) {
   const router = useRouter();

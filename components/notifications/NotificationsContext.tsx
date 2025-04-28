@@ -7,12 +7,12 @@ import { Device, DeviceInfo } from "@capacitor/device";
 import { NextRouter, useRouter } from "next/router";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAuth } from "../auth/Auth";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
 import {
   commonApiPost,
   commonApiPostWithoutBodyAndResponse,
 } from "../../services/api/common-api";
 import { getStableDeviceId } from "./stable-device-id";
+import { ApiIdentity } from "../../generated/models/ApiIdentity";
 
 type NotificationsContextType = {
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
@@ -46,9 +46,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     initializeNotifications(connectedProfile ?? undefined);
   }, [connectedProfile]);
 
-  const initializeNotifications = async (
-    profile?: IProfileAndConsolidations
-  ) => {
+  const initializeNotifications = async (profile?: ApiIdentity) => {
     try {
       if (isCapacitor) {
         console.log("Initializing push notifications");
@@ -59,9 +57,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const initializePushNotifications = async (
-    profile?: IProfileAndConsolidations
-  ) => {
+  const initializePushNotifications = async (profile?: ApiIdentity) => {
     await PushNotifications.removeAllListeners();
 
     const stableDeviceId = await getStableDeviceId();
@@ -150,7 +146,7 @@ const registerPushNotification = async (
   deviceId: string,
   deviceInfo: DeviceInfo,
   token: string,
-  profile?: IProfileAndConsolidations
+  profile?: ApiIdentity
 ) => {
   try {
     const response = await commonApiPost({
@@ -159,7 +155,7 @@ const registerPushNotification = async (
         device_id: deviceId,
         token,
         platform: deviceInfo.platform,
-        profile_id: profile?.profile?.external_id,
+        profile_id: profile?.id,
       },
     });
     console.log("Push registration success", response);
@@ -171,7 +167,7 @@ const registerPushNotification = async (
 const handlePushNotificationAction = async (
   router: NextRouter,
   notification: PushNotificationSchema,
-  profile?: IProfileAndConsolidations
+  profile?: ApiIdentity
 ) => {
   console.log("Push notification action performed", notification);
   const notificationData = notification.data;
@@ -180,7 +176,7 @@ const handlePushNotificationAction = async (
   if (
     profile &&
     notificationProfileId &&
-    notificationProfileId !== profile.profile?.external_id
+    notificationProfileId !== profile.id
   ) {
     console.log("Notification profile id does not match connected profile");
     return;

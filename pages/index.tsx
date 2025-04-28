@@ -103,9 +103,9 @@ export default function Home({
   const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
 
   useEffect(() => {
-    if (connectedProfile?.consolidation.consolidation_key && pageProps.nft) {
+    if (connectedProfile?.consolidation_key && pageProps.nft) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation.consolidation_key}?contract=${pageProps.nft.contract}&token_id=${pageProps.nft.id}`
+        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${pageProps.nft.contract}&token_id=${pageProps.nft.id}`
       ).then((response: DBResponse) => {
         const balanceObject: NftOwner = response.data[0];
         setNftBalance(balanceObject?.balance ?? 0);
@@ -124,7 +124,12 @@ export default function Home({
           <>
             {numberWithCommas(manifoldClaim.total)} /{" "}
             {numberWithCommas(manifoldClaim.totalMax)}
-            {manifoldClaim.isFetching && <>{' '}<DotLoader /></>}
+            {manifoldClaim.isFetching && (
+              <>
+                {" "}
+                <DotLoader />
+              </>
+            )}
           </>
         );
       }

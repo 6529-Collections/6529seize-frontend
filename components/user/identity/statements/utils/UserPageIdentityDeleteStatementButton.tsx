@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
-import {
-  CicStatement,
-  IProfileAndConsolidations,
-} from "../../../../../entities/IProfile";
+import { CicStatement } from "../../../../../entities/IProfile";
 import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
 import UserPageIdentityDeleteStatementModal from "./UserPageIdentityDeleteStatementModal";
 import Tippy from "@tippyjs/react";
 import { useRouter } from "next/router";
-
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 export default function UserPageIdentityDeleteStatementButton({
   statement,
   profile,
 }: {
   readonly statement: CicStatement;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const router = useRouter();
   const [isDeleteStatementOpen, setIsDeleteStatementOpen] =

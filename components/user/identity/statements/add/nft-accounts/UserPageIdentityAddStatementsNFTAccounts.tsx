@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IProfileAndConsolidations } from "../../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../../generated/models/ApiIdentity";
 import UserPageIdentityAddStatementsNFTAccountHeader from "./UserPageIdentityAddStatementsNFTAccountHeader";
 import {
   NFT_ACCOUNTS_STATEMENT_TYPE,
@@ -14,7 +14,7 @@ export default function UserPageIdentityAddStatementsNFTAccounts({
   profile,
 }: {
   readonly onClose: () => void;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const [nftAccountType, setNFTAccountType] =
     useState<NFT_ACCOUNTS_STATEMENT_TYPE>(STATEMENT_TYPE.SUPER_RARE);

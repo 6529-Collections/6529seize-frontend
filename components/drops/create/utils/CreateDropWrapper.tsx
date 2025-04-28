@@ -19,7 +19,7 @@ import {
 } from "../../../../entities/IDrop";
 import { createBreakpoint } from "react-use";
 import { $convertToMarkdownString, TRANSFORMERS } from "@lexical/markdown";
-import { CreateDropType, CreateDropViewType } from "../CreateDrop";
+import { CreateDropType, CreateDropViewType } from "../types";
 import { MENTION_TRANSFORMER } from "../lexical/transformers/MentionTransformer";
 import { HASHTAG_TRANSFORMER } from "../lexical/transformers/HastagTransformer";
 import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeight";

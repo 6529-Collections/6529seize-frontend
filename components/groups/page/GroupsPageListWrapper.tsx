@@ -15,7 +15,7 @@ export default function GroupsPageListWrapper({
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const getShowCreateNewGroupButton = () => {
-    return !!connectedProfile?.profile?.handle && !activeProfileProxy;
+    return !!connectedProfile?.handle && !activeProfileProxy;
   };
 
   const [showCreateNewGroupButton, setShowCreateNewGroupButton] = useState(
@@ -23,7 +23,7 @@ export default function GroupsPageListWrapper({
   );
 
   const getShowMyGroupsButton = () =>
-    !!connectedProfile?.profile?.handle || !!activeProfileProxy;
+    !!connectedProfile?.handle || !!activeProfileProxy;
 
   const [showMyGroupsButton, setShowMyGroupsButton] = useState(
     getShowMyGroupsButton()
@@ -99,14 +99,14 @@ export default function GroupsPageListWrapper({
   };
 
   const onMyGroups = () => {
-    if (!connectedProfile?.profile?.handle) {
+    if (!connectedProfile?.handle) {
       return;
     }
     if (activeProfileProxy?.created_by.handle) {
       setAuthorIdentity(activeProfileProxy.created_by.handle);
       return;
     }
-    setAuthorIdentity(connectedProfile.profile.handle);
+    setAuthorIdentity(connectedProfile.handle);
   };
 
   return (

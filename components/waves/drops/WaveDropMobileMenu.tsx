@@ -72,13 +72,12 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   };
 
   const getIsAuthor = () =>
-    connectedProfile?.profile?.handle === drop.author.handle &&
-    !activeProfileProxy;
+    connectedProfile?.handle === drop.author.handle && !activeProfileProxy;
   const [isAuthor, setIsAuthor] = useState(getIsAuthor());
   useEffect(() => setIsAuthor(getIsAuthor()), [connectedProfile]);
 
   const getShowOptions = () => {
-    if (!connectedProfile?.profile?.handle) {
+    if (!connectedProfile?.handle) {
       return false;
     }
     if (activeProfileProxy) {
@@ -89,7 +88,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
       return false;
     }
 
-    return connectedProfile.profile.handle === drop.author.handle;
+    return connectedProfile.handle === drop.author.handle;
   };
 
   const [showOptions, setShowOptions] = useState(getShowOptions());

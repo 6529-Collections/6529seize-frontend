@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
-import {
-  CicStatement,
-  IProfileAndConsolidations,
-} from "../../../../../entities/IProfile";
+import { CicStatement } from "../../../../../entities/IProfile";
 import CopyIcon from "../../../../utils/icons/CopyIcon";
 import SocialStatementIcon from "../../../utils/icons/SocialStatementIcon";
 import UserPageIdentityDeleteStatementButton from "./UserPageIdentityDeleteStatementButton";
 import { useCopyToClipboard } from "react-use";
 import Tippy from "@tippyjs/react";
 import OutsideLinkIcon from "../../../../utils/icons/OutsideLinkIcon";
-
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { useRouter } from "next/router";
 import { STATEMENT_META } from "../../../../../helpers/Types";
 
@@ -19,7 +16,7 @@ export default function UserPageIdentityStatementsStatement({
   canEdit,
 }: {
   readonly statement: CicStatement;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly canEdit: boolean;
 }) {
   const router = useRouter();

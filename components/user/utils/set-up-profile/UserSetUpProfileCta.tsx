@@ -8,7 +8,7 @@ export default function UserSetUpProfileCta() {
   const { address } = useSeizeConnectContext();
 
   const getShouldShow = (): boolean =>
-    !!(connectedProfile && !connectedProfile.profile && address);
+    !!(connectedProfile && !connectedProfile.handle && address);
 
   const [show, setShow] = useState<boolean>(getShouldShow());
   useEffect(() => setShow(getShouldShow()), [connectedProfile]);

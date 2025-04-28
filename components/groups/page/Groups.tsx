@@ -38,13 +38,13 @@ export default function Groups() {
   };
 
   useEffect(() => {
-    if (edit && !!connectedProfile?.profile?.handle && !activeProfileProxy) {
+    if (edit && !!connectedProfile?.handle && !activeProfileProxy) {
       onViewModeChange(GroupsViewMode.CREATE);
     }
   }, [edit]);
 
   useEffect(() => {
-    if (!connectedProfile?.profile?.handle || activeProfileProxy) {
+    if (!connectedProfile?.handle || activeProfileProxy) {
       onViewModeChange(GroupsViewMode.VIEW);
     }
   }, [connectedProfile, activeProfileProxy]);

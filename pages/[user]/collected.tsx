@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { NextPageWithLayout } from "../_app";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
+
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -8,9 +8,9 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageCollected from "../../components/user/collected/UserPageCollected";
-
+import { ApiIdentity } from "../../generated/models/ApiIdentity";
 interface UserPageProps {
-  profile: IProfileAndConsolidations;
+  profile: ApiIdentity;
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({

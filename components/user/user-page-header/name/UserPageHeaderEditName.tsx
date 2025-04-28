@@ -1,8 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import {
-  ApiCreateOrUpdateProfileRequest,
-  IProfileAndConsolidations,
-} from "../../../../entities/IProfile";
+import { ApiCreateOrUpdateProfileRequest } from "../../../../entities/IProfile";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AuthContext } from "../../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
@@ -11,12 +8,12 @@ import UserSettingsSave from "../../settings/UserSettingsSave";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../services/api/common-api";
 import { useRouter } from "next/router";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageHeaderEditName({
   profile,
   onClose,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onClose: () => void;
 }) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -27,14 +24,12 @@ export default function UserPageHeaderEditName({
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
 
-  const [userName, setUserName] = useState<string>(
-    profile.profile?.handle ?? ""
-  );
+  const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
   const [haveChanges, setHaveChanges] = useState<boolean>(false);
 
   useEffect(() => {
-    setHaveChanges(userName !== profile.profile?.handle);
+    setHaveChanges(userName !== profile.handle);
   }, [userName]);
 
   const [mutating, setMutating] = useState<boolean>(false);
@@ -42,10 +37,7 @@ export default function UserPageHeaderEditName({
   const updateUser = useMutation({
     mutationFn: async (body: ApiCreateOrUpdateProfileRequest) => {
       setMutating(true);
-      return await commonApiPost<
-        ApiCreateOrUpdateProfileRequest,
-        IProfileAndConsolidations
-      >({
+      return await commonApiPost<ApiCreateOrUpdateProfileRequest, ApiIdentity>({
         endpoint: `profiles`,
         body,
       });
@@ -57,7 +49,7 @@ export default function UserPageHeaderEditName({
       });
       const newPath = router.pathname.replace(
         "[user]",
-        updatedProfile.profile?.handle!?.toLowerCase()
+        updatedProfile.handle!?.toLowerCase()
       );
       await router.replace(newPath);
       onProfileEdit({ profile: updatedProfile, previousProfile: profile });
@@ -77,7 +69,7 @@ export default function UserPageHeaderEditName({
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!profile.profile?.primary_wallet || !profile.profile?.classification) {
+    if (!profile.primary_wallet || !profile.classification) {
       return;
     }
 
@@ -92,20 +84,20 @@ export default function UserPageHeaderEditName({
 
     const body: ApiCreateOrUpdateProfileRequest = {
       handle: userName,
-      classification: profile.profile?.classification,
-      pfp_url: profile.profile?.pfp_url,
+      classification: profile.classification,
+      pfp_url: profile.pfp ?? undefined,
     };
 
-    if (profile.profile?.banner_1) {
-      body.banner_1 = profile.profile?.banner_1;
+    if (profile.banner1) {
+      body.banner_1 = profile.banner1;
     }
 
-    if (profile.profile?.banner_2) {
-      body.banner_2 = profile.profile?.banner_2;
+    if (profile.banner2) {
+      body.banner_2 = profile.banner2;
     }
 
-    if (profile.profile?.pfp_url) {
-      body.pfp_url = profile.profile?.pfp_url;
+    if (profile.pfp) {
+      body.pfp_url = profile.pfp;
     }
 
     await updateUser.mutateAsync(body);
@@ -121,11 +113,12 @@ export default function UserPageHeaderEditName({
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
           <div
             ref={modalRef}
-            className={`tw-max-w-full md:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}>
+            className={`tw-max-w-full md:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6 lg:tw-p-8`}
+          >
             <form onSubmit={onSubmit} className="tw-flex tw-flex-col">
               <UserSettingsUsername
                 userName={userName}
-                originalUsername={profile.profile?.handle ?? ""}
+                originalUsername={profile.handle ?? ""}
                 setUserName={setUserName}
                 setIsAvailable={setAvailable}
                 setIsLoading={setCheckingUsername}

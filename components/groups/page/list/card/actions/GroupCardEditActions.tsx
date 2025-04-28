@@ -19,15 +19,15 @@ export default function GroupCardEditActions({
   useKeyPressEvent("Escape", () => setIsOptionsOpen(false));
 
   const [isMyFilter, setIsMyFilter] = useState(
-    connectedProfile?.profile?.handle.toLowerCase() ===
-      group.created_by?.handle.toLowerCase()
+    connectedProfile?.handle?.toLowerCase() ===
+      group.created_by?.handle?.toLowerCase()
   );
 
   useEffect(
     () =>
       setIsMyFilter(
-        connectedProfile?.profile?.handle.toLowerCase() ===
-          group.created_by?.handle.toLowerCase()
+        connectedProfile?.handle?.toLowerCase() ===
+          group.created_by?.handle?.toLowerCase()
       ),
     [connectedProfile]
   );

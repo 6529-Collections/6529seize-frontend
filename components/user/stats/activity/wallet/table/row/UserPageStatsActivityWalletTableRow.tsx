@@ -16,7 +16,7 @@ import {
   NULL_ADDRESS,
   NULL_DEAD_ADDRESS,
 } from "../../../../../../../constants";
-import { IProfileAndConsolidations } from "../../../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../../../generated/models/ApiIdentity";
 import UserPageStatsActivityWalletTableRowMainAddress from "./UserPageStatsActivityWalletTableRowMainAddress";
 import { MemeLite } from "../../../../../settings/UserSettingsImgSelectMeme";
 import UserPageStatsActivityWalletTableRowSecondAddress from "./UserPageStatsActivityWalletTableRowSecondAddress";
@@ -66,7 +66,7 @@ export default function UserPageStatsActivityWalletTableRow({
   nextgenCollections,
 }: {
   readonly transaction: Transaction;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly memes: MemeLite[];
   readonly nextgenCollections: NextGenCollection[];
 }) {
@@ -97,13 +97,13 @@ export default function UserPageStatsActivityWalletTableRow({
   const showRoyalties = getShowRoyalties();
 
   const [consolidatedAddresses, setConsolidatedAddresses] = useState<string[]>(
-    profile.consolidation.wallets.map((w) => w.wallet.address.toLowerCase())
+    profile.wallets?.map((w) => w.wallet.toLowerCase()) ?? []
   );
 
   useEffect(
     () =>
       setConsolidatedAddresses(
-        profile.consolidation.wallets.map((w) => w.wallet.address.toLowerCase())
+        profile.wallets?.map((w) => w.wallet.toLowerCase()) ?? []
       ),
     [profile]
   );
@@ -120,9 +120,9 @@ export default function UserPageStatsActivityWalletTableRow({
     );
 
   const getAirDropType = (): TransactionType =>
-    profile.consolidation.wallets.some((w) =>
+    profile.wallets?.some((w) =>
       includingAddresses({
-        address: w.wallet.address,
+        address: w.wallet,
         addresses: NULL_AND_DEAD_ADDRESSES,
       })
     )
@@ -130,9 +130,9 @@ export default function UserPageStatsActivityWalletTableRow({
       : TransactionType.RECEIVED_AIRDROP;
 
   const getMintingType = (): TransactionType =>
-    profile.consolidation.wallets.some((w) =>
+    profile.wallets?.some((w) =>
       includingAddresses({
-        address: w.wallet.address,
+        address: w.wallet,
         addresses: MINTING_ADDRESSES,
       })
     )
@@ -140,9 +140,9 @@ export default function UserPageStatsActivityWalletTableRow({
       : TransactionType.SEIZED;
 
   const getBurnType = (): TransactionType =>
-    profile.consolidation.wallets.some((w) =>
+    profile.wallets?.some((w) =>
       includingAddresses({
-        address: w.wallet.address,
+        address: w.wallet,
         addresses: NULL_AND_DEAD_ADDRESSES,
       })
     )

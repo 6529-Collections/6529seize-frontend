@@ -22,7 +22,7 @@ export default function WaveGroupScope({
         <img
           className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800/80 tw-shadow-sm"
           src={getScaledImageUri(group.author.pfp, ImageScale.W_AUTO_H_50)}
-          alt={group.author.handle}
+          alt={group.author.handle ?? ""}
         />
       ) : (
         <div className="tw-h-5 tw-w-5 tw-rounded-md tw-bg-iron-800/80" />

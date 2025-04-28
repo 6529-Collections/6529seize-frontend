@@ -1,4 +1,4 @@
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import UserPageIdentityStatements from "./statements/UserPageIdentityStatements";
 import UserPageIdentityHeader from "./header/UserPageIdentityHeader";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
@@ -13,7 +13,7 @@ export default function UserPageIdentity({
   initialCICGivenParams,
   initialActivityLogParams,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly initialCICReceivedParams: ProfileRatersParams;
   readonly initialCICGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;

@@ -1,6 +1,6 @@
 import { ReactElement, useContext } from "react";
 import { NextPageWithLayout } from "../../_app";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import UserPageLayout from "../../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -11,7 +11,7 @@ import { ReactQueryWrapperContext } from "../../../components/react-query-wrappe
 import UserPageProxy from "../../../components/user/proxy/UserPageProxy";
 
 export interface UserPageProxyProps {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProxyProps }> = ({

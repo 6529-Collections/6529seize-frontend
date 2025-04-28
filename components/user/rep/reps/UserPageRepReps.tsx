@@ -1,14 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import {
   ApiProfileRepRatesState,
-  IProfileAndConsolidations,
   RatingStats,
 } from "../../../../entities/IProfile";
 import UserPageRepRepsTop from "./UserPageRepRepsTop";
 import UserPageRepRepsTable from "./table/UserPageRepRepsTable";
 import { AuthContext } from "../../../auth/Auth";
 import { ApiProfileProxyActionType } from "../../../../generated/models/ApiProfileProxyActionType";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 const TOP_REPS_COUNT = 5;
 
 export default function UserPageRepReps({
@@ -16,7 +15,7 @@ export default function UserPageRepReps({
   profile,
 }: {
   readonly repRates: ApiProfileRepRatesState | null;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
 
@@ -48,21 +47,21 @@ export default function UserPageRepReps({
     myProfile,
     targetProfile,
   }: {
-    myProfile: IProfileAndConsolidations | null;
-    targetProfile: IProfileAndConsolidations;
+    myProfile: ApiIdentity | null;
+    targetProfile: ApiIdentity;
   }) => {
-    if (!myProfile?.profile?.handle) {
+    if (!myProfile?.handle) {
       return false;
     }
     if (activeProfileProxy) {
-      if (profile.profile?.handle === activeProfileProxy.created_by.handle) {
+      if (profile.handle === activeProfileProxy.created_by.handle) {
         return false;
       }
       return activeProfileProxy.actions.some(
         (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
       );
     }
-    if (myProfile.profile.handle === targetProfile.profile?.handle) {
+    if (myProfile.handle === targetProfile.handle) {
       return false;
     }
     return true;
@@ -106,7 +105,6 @@ export default function UserPageRepReps({
           <UserPageRepRepsTable
             reps={reps}
             profile={profile}
-            giverAvailableRep={repRates?.rep_rates_left_for_rater ?? 0}
             canEditRep={canEditRep}
           />
         </>

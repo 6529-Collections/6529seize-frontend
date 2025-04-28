@@ -18,7 +18,7 @@ interface UseNotificationsQueryProps {
    * Only fetch notifications if we have a valid identity.
    * Used in "enabled" to avoid sending queries prematurely.
    */
-  identity?: string;
+  identity?: string | null;
 
   /**
    * Example usage where you only fetch if no active profile proxy is set.

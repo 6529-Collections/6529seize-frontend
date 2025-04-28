@@ -84,7 +84,7 @@ export default function Notifications() {
     fetchNextPage,
     refetch,
   } = useNotificationsQuery({
-    identity: connectedProfile?.profile?.handle,
+    identity: connectedProfile?.handle,
     activeProfileProxy: !!activeProfileProxy,
     limit: "30",
     reverse: true,

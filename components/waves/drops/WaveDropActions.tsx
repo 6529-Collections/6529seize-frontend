@@ -34,15 +34,14 @@ export default function WaveDropActions({
 
   // Check if we should hide the clap icon
   // Hide only for memes participation drops
-  const shouldHideClap = 
-    drop.drop_type === ApiDropType.Participatory && 
-    isMemesWave(drop.wave?.id); // Only hide for memes participation drops
+  const shouldHideClap =
+    drop.drop_type === ApiDropType.Participatory && isMemesWave(drop.wave?.id); // Only hide for memes participation drops
 
   return (
     <div className="tw-absolute tw-z-20 tw-right-2 tw-top-0 group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out">
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-h-8 tw-flex tw-items-center tw-shadow tw-bg-iron-950 tw-ring-1 tw-ring-iron-800 tw-ring-inset tw-rounded-lg">
-          {connectedProfile?.profile?.handle !== drop.author.handle &&
+          {connectedProfile?.handle !== drop.author.handle &&
             !activePartIndex && <WaveDropFollowAuthor drop={drop} />}
           <WaveDropActionsReply
             onReply={onReply}
@@ -62,4 +61,4 @@ export default function WaveDropActions({
       </div>
     </div>
   );
-} 
+}

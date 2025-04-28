@@ -1,12 +1,12 @@
 import { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import HeaderUserProxyDropdown from "./HeaderUserProxyDropdown";
 
 export default function HeaderUserProxy({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

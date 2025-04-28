@@ -1,6 +1,6 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
-import { useContext, useEffect} from "react";
+import { useContext, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { AuthContext, useAuth } from "../../components/auth/Auth";
 
@@ -39,11 +39,7 @@ export default function GradientsPage() {
 
       <main className={styles.main}>
         <GradientsComponent
-          wallets={
-            connectedProfile?.consolidation.wallets.map(
-              (w) => w.wallet.address
-            ) ?? []
-          }
+          wallets={connectedProfile?.wallets?.map((w) => w.wallet) ?? []}
         />
       </main>
     </>

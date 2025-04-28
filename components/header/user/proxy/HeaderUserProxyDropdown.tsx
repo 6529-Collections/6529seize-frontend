@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
@@ -19,7 +19,7 @@ export default function HeaderUserProxyDropdown({
   onClose,
 }: {
   readonly isOpen: boolean;
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly onClose: () => void;
 }) {
   const {
@@ -41,14 +41,14 @@ export default function HeaderUserProxyDropdown({
   };
 
   const getLabel = (): string => {
-    if (profile.profile?.handle) {
-      return profile.profile.handle;
+    if (profile.handle) {
+      return profile.handle;
     }
-    const wallet = profile?.consolidation.wallets.find(
-      (w) => w.wallet.address.toLowerCase() === address?.toLocaleLowerCase()
+    const wallet = profile?.wallets?.find(
+      (w) => w.wallet.toLowerCase() === address?.toLocaleLowerCase()
     );
-    if (wallet?.wallet?.ens) {
-      return wallet.wallet.ens;
+    if (wallet?.display) {
+      return wallet.display;
     }
     if (address) {
       return address.slice(0, 6);
@@ -84,9 +84,9 @@ export default function HeaderUserProxyDropdown({
                             : "tw-bg-iron-700"
                         } tw-group tw-py-2.5 tw-w-full tw-h-full tw-border-none tw-text-left tw-flex tw-items-center tw-gap-x-3 tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-3 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
                         onClick={() => onActivateProfileProxy(null)}>
-                        {profile.profile?.pfp_url ? (
+                        {profile.pfp ? (
                           <img
-                            src={profile.profile?.pfp_url}
+                            src={profile.pfp}
                             alt="Profile Picture"
                             className="tw-flex-shrink-0 tw-h-6 tw-w-6 tw-flex-none tw-rounded-lg tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
                           />

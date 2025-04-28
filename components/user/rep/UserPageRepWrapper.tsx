@@ -1,20 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { ActivityLogParams } from "../../profile-activity/ProfileActivityLogs";
 import { ProfileRatersParams } from "../utils/raters-table/wrapper/ProfileRatersTableWrapper";
 import { useRouter } from "next/router";
-import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageRep from "./UserPageRep";
 import UserPageSetUpProfileWrapper from "../utils/set-up-profile/UserPageSetUpProfileWrapper";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
-
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { useIdentity } from "../../../hooks/useIdentity";
 export default function UserPageRepWrapper({
   profile: initialProfile,
   initialRepReceivedParams,
   initialRepGivenParams,
   initialActivityLogParams,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly initialRepReceivedParams: ProfileRatersParams;
   readonly initialRepGivenParams: ProfileRatersParams;
   readonly initialActivityLogParams: ActivityLogParams;
@@ -22,20 +19,15 @@ export default function UserPageRepWrapper({
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
 
-  const { data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, user.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user.toLowerCase()}`,
-      }),
-    enabled: !!user,
-    initialData: initialProfile,
+  const { profile } = useIdentity({
+    handleOrWallet: user,
+    initialProfile,
   });
 
   return (
-    <UserPageSetUpProfileWrapper profile={profile}>
+    <UserPageSetUpProfileWrapper profile={profile ?? initialProfile}>
       <UserPageRep
-        profile={profile}
+        profile={profile ?? initialProfile}
         initialRepReceivedParams={initialRepReceivedParams}
         initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}

@@ -1,0 +1,21 @@
+# Task ID: 7
+# Title: Adjust content styling for ModalLayout
+# Status: done
+# Dependencies: 6
+# Priority: medium
+# Description: Modify the styling of the ModalLayout component to fix vertical alignment issues when used within a flex centering container.
+# Details:
+The ModalLayout component has styling conflicts that prevent proper vertical centering when used within a flex container. Make the following changes to fix this issue:
+
+1) In `components/waves/memes/submission/layout/ModalLayout.tsx` (around line 20), remove conflicting alignment and height classes from the outermost `div`: `tw-h-full`, `tw-flex`, `tw-flex-col`, `md:tw-block`.
+2) Remove conflicting self-alignment classes from the inner `motion.div` (around line 21): `tw-self-end`, `md:tw-self-auto`.
+3) After making these changes, verify that the modal content is properly centered when displayed.
+4) Ensure the terms content and checkbox are properly spaced.
+5) Verify the footer buttons are correctly positioned.
+
+These changes will allow the parent component's (e.g., `TermsOfServiceModal` overlay div) centering styles to take effect properly while maintaining visual consistency with the original design.
+
+# Test Strategy:
+1) Visually inspect the modal at different screen sizes to ensure content is properly displayed and spacing is appropriate.
+2) Specifically test the vertical centering of the modal when displayed in the overlay.
+3) Verify that removing the specified classes doesn't introduce any other layout issues.

@@ -100,6 +100,7 @@ export * from '../models/ApiOwnerBalanceMemes';
 export * from '../models/ApiOwnerBalancePage';
 export * from '../models/ApiPageBase';
 export * from '../models/ApiPageWithNextUriBase';
+export * from '../models/ApiProfileClassification';
 export * from '../models/ApiProfileMin';
 export * from '../models/ApiProfileProxy';
 export * from '../models/ApiProfileProxyAction';
@@ -127,6 +128,7 @@ export * from '../models/ApiUploadItem';
 export * from '../models/ApiUploadPartOfMultipartUploadRequest';
 export * from '../models/ApiUploadPartOfMultipartUploadResponse';
 export * from '../models/ApiUploadsPage';
+export * from '../models/ApiWallet';
 export * from '../models/ApiWave';
 export * from '../models/ApiWaveChatConfig';
 export * from '../models/ApiWaveConfig';
@@ -241,7 +243,7 @@ import { ApiGroupLevelFilter } from '../models/ApiGroupLevelFilter';
 import { ApiGroupOwnsNft, ApiGroupOwnsNftNameEnum    } from '../models/ApiGroupOwnsNft';
 import { ApiGroupRepFilter      } from '../models/ApiGroupRepFilter';
 import { ApiGroupTdhFilter } from '../models/ApiGroupTdhFilter';
-import { ApiIdentity } from '../models/ApiIdentity';
+import { ApiIdentity                  } from '../models/ApiIdentity';
 import { ApiIdentityAndSubscriptionActions } from '../models/ApiIdentityAndSubscriptionActions';
 import { ApiIdentitySubscriptionActions } from '../models/ApiIdentitySubscriptionActions';
 import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
@@ -265,6 +267,7 @@ import { ApiOwnerBalanceMemes } from '../models/ApiOwnerBalanceMemes';
 import { ApiOwnerBalancePage } from '../models/ApiOwnerBalancePage';
 import { ApiPageBase } from '../models/ApiPageBase';
 import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
+import { ApiProfileClassification } from '../models/ApiProfileClassification';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiProfileProxy } from '../models/ApiProfileProxy';
 import { ApiProfileProxyAction             } from '../models/ApiProfileProxyAction';
@@ -292,6 +295,7 @@ import { ApiUploadItem } from '../models/ApiUploadItem';
 import { ApiUploadPartOfMultipartUploadRequest } from '../models/ApiUploadPartOfMultipartUploadRequest';
 import { ApiUploadPartOfMultipartUploadResponse } from '../models/ApiUploadPartOfMultipartUploadResponse';
 import { ApiUploadsPage } from '../models/ApiUploadsPage';
+import { ApiWallet } from '../models/ApiWallet';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
 import { ApiWaveConfig          } from '../models/ApiWaveConfig';
@@ -353,6 +357,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiIdentitySubscriptionTargetType",
     "ApiNftTokenTypeEnum",
     "ApiNotificationCause",
+    "ApiProfileClassification",
     "ApiProfileProxyActionType",
     "ApiRateMatter",
     "ApiWaveCreditScope",
@@ -487,6 +492,7 @@ let typeMap: {[index: string]: any} = {
     "ApiUploadPartOfMultipartUploadRequest": ApiUploadPartOfMultipartUploadRequest,
     "ApiUploadPartOfMultipartUploadResponse": ApiUploadPartOfMultipartUploadResponse,
     "ApiUploadsPage": ApiUploadsPage,
+    "ApiWallet": ApiWallet,
     "ApiWave": ApiWave,
     "ApiWaveChatConfig": ApiWaveChatConfig,
     "ApiWaveConfig": ApiWaveConfig,

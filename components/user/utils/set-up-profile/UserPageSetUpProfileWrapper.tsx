@@ -1,13 +1,14 @@
 import { ReactNode, useEffect, useState } from "react";
-import { IProfileAndConsolidations } from "../../../../entities/IProfile";
+
 import UserPageSetUpProfile from "./UserPageSetUpProfile";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 
 export default function UserPageSetUpProfileWrapper({
   profile,
   children,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly children: ReactNode;
 }) {
   const { address } = useSeizeConnectContext();
@@ -15,9 +16,9 @@ export default function UserPageSetUpProfileWrapper({
   const getShowSetUpProfile = () => {
     if (!address) return false;
     if (!profile) return false;
-    if (!!profile.profile?.handle) return false;
-    return !!profile.consolidation.wallets.find((w) =>
-      [w.wallet.address.toLowerCase(), w.wallet.ens?.toLowerCase()].includes(
+    if (profile.handle) return false;
+    return !!profile.wallets?.find((w) =>
+      [w.wallet.toLowerCase(), w.display?.toLowerCase()].includes(
         address.toLowerCase()
       )
     );

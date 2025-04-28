@@ -3,7 +3,6 @@ import {
   CollectedCollectionType,
   CollectionSeized,
   CollectionSort,
-  IProfileAndConsolidations,
 } from "../../../../entities/IProfile";
 import { MEMES_SEASON } from "../../../../enums";
 import { ProfileCollectedFilters } from "../UserPageCollected";
@@ -13,7 +12,7 @@ import UserPageCollectedFiltersSeized from "./UserPageCollectedFiltersSeized";
 import UserPageCollectedFiltersSzn from "./UserPageCollectedFiltersSzn";
 import UserAddressesSelectDropdown from "../../utils/addresses-select/UserAddressesSelectDropdown";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
-
+import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 export default function UserPageCollectedFilters({
   profile,
   filters,
@@ -24,7 +23,7 @@ export default function UserPageCollectedFilters({
   setSzn,
   scrollHorizontally,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
   readonly filters: ProfileCollectedFilters;
   readonly containerRef: RefObject<HTMLDivElement>;
   readonly setCollection: (collection: CollectedCollectionType | null) => void;
@@ -189,7 +188,7 @@ export default function UserPageCollectedFilters({
         </div>
         <div ref={mostRightFilterRef}>
           <UserAddressesSelectDropdown
-            addresses={profile.consolidation.wallets}
+            wallets={profile.wallets ?? []}
             containerRef={containerRef}
             onActiveAddress={() => undefined}
           />

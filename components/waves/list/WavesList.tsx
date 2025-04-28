@@ -25,7 +25,7 @@ export default function WavesList({
     const types = showAllType
       ? Object.values(ApiWavesOverviewType).filter((t) => t === showAllType)
       : Object.values(ApiWavesOverviewType);
-    if (!connectedProfile?.profile?.handle || !!activeProfileProxy) {
+    if (!connectedProfile?.handle || !!activeProfileProxy) {
       return types.filter(
         (t) => t !== ApiWavesOverviewType.AuthorYouHaveRepped
       );

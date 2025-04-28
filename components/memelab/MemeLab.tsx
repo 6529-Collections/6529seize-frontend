@@ -483,12 +483,12 @@ export default function MemeLabComponent(props: Readonly<Props>) {
   }, []);
 
   useEffect(() => {
-    const connected =
-      connectedProfile?.consolidation?.consolidation_key ??
-      connectedProfile?.consolidation.wallets?.[0]?.wallet.address;
-    if (connected) {
+    const consolidationKey =
+      connectedProfile?.consolidation_key ??
+      connectedProfile?.wallets?.[0]?.wallet;
+    if (consolidationKey) {
       fetchAllPages(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connected}?contract=${MEMELAB_CONTRACT}`
+        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${consolidationKey}?contract=${MEMELAB_CONTRACT}`
       ).then((owners: NftOwner[]) => {
         setNftBalances(owners);
         setBalancesLoaded(true);
@@ -538,13 +538,13 @@ export default function MemeLabComponent(props: Readonly<Props>) {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}>
+        lg={{ span: 3 }}
+      >
         <a href={`/meme-lab/${nft.id}`} className="decoration-none scale-hover">
           <Container fluid>
             <Row
-              className={
-                props.wallets.length > 0 ? styles.nftImagePadding : ""
-              }>
+              className={props.wallets.length > 0 ? styles.nftImagePadding : ""}
+            >
               <NFTImage
                 nft={nft}
                 animation={false}
@@ -607,7 +607,8 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                 className={styles.collectionLink}
                 href={`/meme-lab/collection/${encodeURIComponent(
                   collection.replace(" ", "-")
-                )}`}>
+                )}`}
+              >
                 view
               </a>
             </h4>

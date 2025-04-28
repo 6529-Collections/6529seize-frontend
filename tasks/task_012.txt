@@ -1,0 +1,28 @@
+# Task ID: 12
+# Title: Verify Signature Payload Contains Terms Hash and Clear User Context
+# Status: done
+# Dependencies: None
+# Priority: high
+# Description: Ensure that the cryptographic signature payload includes the terms hash when required and that the signature request presents clear context to users about terms agreement.
+# Details:
+This task involves verifying that when a user submits to a terms-required wave, the signature payload correctly includes the terms hash in the data being signed. The implementation should:
+
+1. Ensure the terms hash is properly included in the signature payload for any wave that requires terms acceptance
+2. Verify that the signature request shown to users in their wallet contains clear contextual information indicating they are agreeing to terms
+3. Check that the context message is human-readable and explicitly mentions terms agreement
+4. Confirm that waves without terms requirements don't unnecessarily include terms-related data in the signature payload
+5. Validate that the terms hash in the payload matches the actual hash of the terms document being agreed to
+
+The signature context should be implemented in a way that helps users understand what they're agreeing to before signing, reducing confusion and potential user errors.
+
+# Test Strategy:
+1. Set up a test environment with at least one wave that requires terms acceptance
+2. Use browser developer tools to monitor network requests when submitting to the terms-required wave
+3. Capture and inspect the signature payload sent to the wallet
+4. Verify the payload contains a properly formatted terms hash field
+5. Trigger the signature request and capture screenshots of the wallet signature prompt
+6. Confirm the signature prompt includes clear language about agreeing to terms
+7. Test with multiple wallets (MetaMask, WalletConnect, etc.) to ensure consistent behavior
+8. Compare the terms hash in the payload with the expected hash of the terms document
+9. Perform a control test with a non-terms wave to verify terms hash is not included when not required
+10. Document any discrepancies between expected and actual behavior with screenshots and payload examples

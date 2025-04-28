@@ -2,13 +2,13 @@ import { useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../../utils/animation/CommonAnimationOpacity";
-import { IProfileAndConsolidations } from "../../../../../entities/IProfile";
+import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import PrimaryButton from "../../../../utils/button/PrimaryButton";
 
 export default function UserPageIdentityStatementsAddButton({
   profile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const [isAddStatementsOpen, setIsAddStatementsOpen] =
     useState<boolean>(false);

@@ -1,6 +1,7 @@
+import dynamic from 'next/dynamic';
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
-import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -25,7 +26,6 @@ import CreateDropMetadata from "./CreateDropMetadata";
 import { ApiWave } from "../../generated/models/ApiWave";
 import { ApiWaveMetadataType } from "../../generated/models/ApiWaveMetadataType";
 import CreateDropContentRequirements from "./CreateDropContentRequirements";
-import { IProfileAndConsolidations } from "../../entities/IProfile";
 import { CreateDropContentFiles } from "./CreateDropContentFiles";
 import CreateDropActions from "./CreateDropActions";
 import { createBreakpoint } from "react-use";
@@ -57,6 +57,12 @@ import { ProcessIncomingDropType } from "../../contexts/wave/hooks/useWaveRealti
 import throttle from "lodash/throttle";
 import { useWebSocket } from "../../services/websocket";
 import { WsMessageType } from "../../helpers/Types";
+import { ApiIdentity } from "../../generated/models/ObjectSerializer";
+
+// Use next/dynamic for lazy loading with SSR support
+const TermsSignatureFlow = dynamic(() => import('../terms/TermsSignatureFlow'), {
+  suspense: true, // Enable suspense for fallback UI
+});
 
 export type CreateDropMetadataType =
   | {
@@ -246,7 +252,7 @@ const generateParts = async (
 
 const getOptimisticDrop = (
   dropRequest: ApiCreateDropRequest,
-  connectedProfile: IProfileAndConsolidations | null,
+  connectedProfile: ApiIdentity | null,
   wave: {
     id: string;
     name: string;
@@ -264,7 +270,7 @@ const getOptimisticDrop = (
   activeDrop: ActiveDropState | null,
   dropType: ApiDropType
 ): ApiDrop | null => {
-  if (!connectedProfile?.profile) {
+  if (!connectedProfile?.id || !connectedProfile.handle) {
     return null;
   }
 
@@ -308,14 +314,14 @@ const getOptimisticDrop = (
       forbid_negative_votes: wave.voting.forbid_negative_votes,
     },
     author: {
-      id: connectedProfile.profile.external_id,
-      handle: connectedProfile.profile.handle,
-      pfp: connectedProfile.profile.pfp_url ?? null,
-      banner1_color: connectedProfile.profile.banner_1 ?? null,
-      banner2_color: connectedProfile.profile.banner_2 ?? null,
-      cic: connectedProfile.cic.cic_rating,
+      id: connectedProfile.id,
+      handle: connectedProfile.handle,
+      pfp: connectedProfile.pfp ?? null,
+      banner1_color: connectedProfile.banner1 ?? null,
+      banner2_color: connectedProfile.banner2 ?? null,
+      cic: connectedProfile.cic,
       rep: connectedProfile.rep,
-      tdh: connectedProfile.consolidation.tdh,
+      tdh: connectedProfile.tdh,
       level: connectedProfile.level,
       subscribed_actions: [],
       archived: false,
@@ -612,20 +618,50 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (!wave.participation.signature_required) {
       return requestBody;
     }
-    const { success, signature } = await signDrop({
-      drop: requestBody,
-      termsOfService: wave.participation.terms,
-    });
-
-    if (!success || !signature) {
-      return null;
+    
+    // Use direct signature if there are no terms to display
+    if (!wave.participation.terms) {
+      const { success, signature } = await signDrop({
+        drop: requestBody,
+        termsOfService: null,
+      });
+      
+      if (!success || !signature) {
+        return null;
+      }
+      
+      return {
+        ...requestBody,
+        signature,
+      };
     }
-
-    const updatedDropRequest = {
-      ...requestBody,
-      signature,
-    };
-    return updatedDropRequest;
+    
+    // For terms that need to be displayed, use the terms flow
+    return new Promise<ApiCreateDropRequest | null>((resolve) => {
+      // Define callback for when signing completes
+      const handleSigningComplete = (result: { success: boolean; signature?: string }) => {
+        if (!result.success || !result.signature) {
+          resolve(null);
+          return;
+        }
+        
+        const updatedDropRequest = {
+          ...requestBody,
+          signature: result.signature,
+        };
+        resolve(updatedDropRequest);
+      };
+      
+      // Show the terms modal through a global event
+      const event = new CustomEvent('showTermsModal', { 
+        detail: {
+          drop: requestBody,
+          termsOfService: wave.participation.terms,
+          onComplete: handleSigningComplete
+        }
+      });
+      document.dispatchEvent(event);
+    });
   };
   const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {
     if (submitting) {
@@ -958,6 +994,11 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         removeFile={removeFile}
         disabled={submitting}
       />
+      
+      {/* Terms of Service Flow - Modal will render when needed */}
+      <React.Suspense fallback={<div>Loading Terms...</div>}>
+        <TermsSignatureFlow />
+      </React.Suspense>
     </div>
   );
 };

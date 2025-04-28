@@ -1,16 +1,14 @@
 import { useRouter } from "next/router";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../auth/Auth";
-import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "../../../services/api/common-api";
 import UserPageWaves from "./UserPageWaves";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
-import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
+import { useIdentity } from "../../../hooks/useIdentity";
 export default function UserPageWavesWrapper({
   profile: initialProfile,
 }: {
-  readonly profile: IProfileAndConsolidations;
+  readonly profile: ApiIdentity;
 }) {
   const router = useRouter();
   const user = (router.query.user as string).toLowerCase();
@@ -28,19 +26,14 @@ export default function UserPageWavesWrapper({
     }
   }, [connectedProfile, activeProfileProxy, address, showWaves]);
 
-  const { data: profile } = useQuery<IProfileAndConsolidations>({
-    queryKey: [QueryKey.PROFILE, user.toLowerCase()],
-    queryFn: async () =>
-      await commonApiFetch<IProfileAndConsolidations>({
-        endpoint: `profiles/${user.toLowerCase()}`,
-      }),
-    enabled: !!user,
-    initialData: initialProfile,
+  const { profile } = useIdentity({
+    handleOrWallet: user,
+    initialProfile: initialProfile,
   });
 
   if (!showWaves) {
     return null;
   }
 
-  return <UserPageWaves profile={profile} />;
+  return <UserPageWaves profile={profile ?? initialProfile} />;
 }

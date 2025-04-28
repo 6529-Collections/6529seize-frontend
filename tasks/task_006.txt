@@ -1,0 +1,11 @@
+# Task ID: 6
+# Title: Remove redundant layout elements
+# Status: done
+# Dependencies: 5
+# Priority: medium
+# Description: Remove the layout elements from TermsOfServiceModal that are now handled by ModalLayout.
+# Details:
+Remove the following elements from TermsOfServiceModal as they're now provided by ModalLayout: 1) The outermost div with tw-fixed, tw-inset-0, etc. classes, 2) The main modal container div with tw-bg-iron-800, tw-rounded-lg, etc. classes, 3) The header div containing the h3 title, 4) The explicit close button with faXmark icon. Ensure no functionality is lost in the process.
+
+# Test Strategy:
+Compare the rendered output before and after removal to ensure the modal still appears correctly with all necessary elements.

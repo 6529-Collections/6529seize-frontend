@@ -1,7 +1,7 @@
 import { Col, Container, Row } from "react-bootstrap";
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
-import { IProfileAndConsolidations } from "../../../entities/IProfile";
+import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
 import { useContext, useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
@@ -28,7 +28,7 @@ const HISTORY_PAGE_SIZE = 10;
 
 export default function UserPageSubscriptions(
   props: Readonly<{
-    profile: IProfileAndConsolidations;
+    profile: ApiIdentity;
   }>
 ) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -92,15 +92,11 @@ export default function UserPageSubscriptions(
     }
 
     const connectedKey =
-      connectedProfile?.consolidation?.consolidation_key ??
-      connectedProfile?.consolidation.wallets
-        .map((w) => w.wallet.address)
-        .join("-");
+      connectedProfile?.consolidation_key ??
+      connectedProfile?.wallets?.map((w) => w.wallet).join("-");
     const pKey =
-      props.profile.consolidation.consolidation_key ??
-      props.profile?.consolidation.wallets
-        .map((w) => w.wallet.address)
-        .join("-");
+      props.profile.consolidation_key ??
+      props.profile.wallets?.map((w) => w.wallet).join("-");
 
     setIsConnectedAccount(connectedKey === pKey);
     setProfileKey(pKey);
@@ -270,7 +266,8 @@ export default function UserPageSubscriptions(
                 <span>
                   <a
                     href="/about/subscriptions"
-                    className="font-smaller font-color-silver decoration-hover-underline">
+                    className="font-smaller font-color-silver decoration-hover-underline"
+                  >
                     Learn More
                   </a>
                 </span>

@@ -24,11 +24,7 @@ export default function MemeLabPage(props: any) {
       <SharedHead props={pageProps} contract={MEMELAB_CONTRACT} />
       <main className={styles.main}>
         <LabPageComponent
-          wallets={
-            connectedProfile?.consolidation.wallets.map(
-              (w) => w.wallet.address
-            ) ?? []
-          }
+          wallets={connectedProfile?.wallets?.map((w) => w.wallet) ?? []}
         />
       </main>
     </>
