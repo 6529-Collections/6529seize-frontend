@@ -13,6 +13,8 @@ import Drop, {
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
+import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
+import NotificationsFollowBtn from "../NotificationsFollowBtn";
 
 export default function NotificationIdentityMentioned({
   notification,
@@ -43,7 +45,7 @@ export default function NotificationIdentityMentioned({
   return (
     <div className="tw-w-full tw-flex tw-gap-x-3">
       <div className="tw-w-full tw-flex tw-flex-col tw-space-y-2">
-        <div className="tw-inline-flex tw-items-center">
+        <div className="tw-flex tw-flex-1 tw-justify-between tw-gap-x-3 tw-gap-y-1">
           <div className="sm:tw-hidden tw-mr-2 tw-size-6 md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
             <svg
               className="tw-flex-shrink-0 tw-size-4 md:tw-size-5 tw-text-iron-300"
@@ -89,6 +91,10 @@ export default function NotificationIdentityMentioned({
               </span>
             </span>
           </div>
+          <NotificationsFollowBtn
+          profile={notification.related_drops[0].author}
+          size={UserFollowBtnSize.SMALL}
+        />
         </div>
 
         <Drop

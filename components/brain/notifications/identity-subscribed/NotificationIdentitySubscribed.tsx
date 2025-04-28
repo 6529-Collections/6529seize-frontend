@@ -6,7 +6,7 @@ import {
 } from "../../../../helpers/image.helpers";
 import { getTimeAgoShort } from "../../../../helpers/Helpers";
 import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
-import NotificationIdentitySubscribedFollowBtn from "./NotificationIdentitySubscribedFollowBtn";
+import NotificationsFollowBtn from "../NotificationsFollowBtn";
 
 export default function NotificationIdentitySubscribed({
   notification,
@@ -46,7 +46,7 @@ export default function NotificationIdentitySubscribed({
           </span>
         </div>
 
-        <NotificationIdentitySubscribedFollowBtn
+        <NotificationsFollowBtn
           profile={notification.related_identity}
           size={UserFollowBtnSize.SMALL}
         />
