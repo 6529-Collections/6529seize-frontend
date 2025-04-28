@@ -3,15 +3,20 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { BrainView } from "../BrainMobile";
 import { useWaveTimers } from "../../../hooks/useWaveTimers";
 
+interface RegisterTabRef {
+  (view: BrainView, el: HTMLButtonElement | null): void;
+}
+
 interface MyStreamWaveTabsLeaderboardProps {
   readonly wave: ApiWave;
   readonly activeView: BrainView;
   readonly onViewChange: (view: BrainView) => void;
+  readonly registerTabRef?: RegisterTabRef;
 }
 
 const MyStreamWaveTabsLeaderboard: React.FC<
   MyStreamWaveTabsLeaderboardProps
-> = ({ wave, activeView, onViewChange }) => {
+> = ({ wave, activeView, onViewChange, registerTabRef }) => {
   const {
     voting: { isCompleted },
     decisions: { firstDecisionDone },
@@ -40,6 +45,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
       {/* Show Leaderboard tab always except when voting has ended */}
       {!isCompleted && (
         <button
+          ref={(el) => registerTabRef?.(BrainView.LEADERBOARD, el)}
           onClick={() => onViewChange(BrainView.LEADERBOARD)}
           className={leaderboardButtonClasses}
         >
@@ -50,6 +56,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
       {/* Show Winners tab if first decision has passed */}
       {firstDecisionDone && (
         <button
+          ref={(el) => registerTabRef?.(BrainView.WINNERS, el)}
           onClick={() => onViewChange(BrainView.WINNERS)}
           className={winnersButtonClasses}
         >

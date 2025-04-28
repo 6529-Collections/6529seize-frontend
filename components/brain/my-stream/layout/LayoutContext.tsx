@@ -61,38 +61,6 @@ const calculateHeightStyle = (
   };
 };
 
-const DEFAULT_ANDROID_PADDING = 56;
-const DEFAULT_IOS_PADDING = 80;
-const DEFAULT_CAPACITOR_PADDING = 80;
-
-const getPadding = ({
-  android = DEFAULT_ANDROID_PADDING,
-  ios = DEFAULT_IOS_PADDING,
-  capacitor = DEFAULT_CAPACITOR_PADDING,
-}: {
-  android?: number;
-  ios?: number;
-  capacitor?: number;
-}): { android: number; ios: number; capacitor: number } => {
-  return { android, ios, capacitor };
-};
-
-const CAPACITOR_PADDING: Record<
-  View,
-  { android: number; ios: number; capacitor: number }
-> = {
-  wave: getPadding({}),
-  leaderboard: getPadding({}),
-  winners: getPadding({}),
-  myVotes: getPadding({}),
-  outcome: getPadding({}),
-  faq: getPadding({}),
-  notifications: getPadding({}),
-  myStreamFeed: getPadding({}),
-  mobileWaves: getPadding({}),
-  mobileAbout: getPadding({}),
-};
-
 // Context type definition
 // Define valid ref types for type safety
 export type LayoutRefType =
@@ -381,22 +349,66 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     };
   }, [spaces.measurementsComplete, spaces.headerSpace, spaces.spacerSpace]);
 
-  const viewStyles = useMemo(() => {
-    if (!spaces.measurementsComplete) {
-      return {} as Record<View, React.CSSProperties>;
-    }
+  // Per-view styles with inline padding logic
+  const waveViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 85 : isIos ? 20 : isCapacitor ? 20 : 0;
+    const adjustedSpaces = { ...spaces, mobileNavSpace: 0 };
+    return calculateHeightStyle("wave", adjustedSpaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
 
-    return (Object.keys(CAPACITOR_PADDING) as View[]).reduce((acc, key) => {
-      const padding = isAndroid
-        ? CAPACITOR_PADDING[key].android
-        : isIos
-        ? CAPACITOR_PADDING[key].ios
-        : isCapacitor
-        ? CAPACITOR_PADDING[key].capacitor
-        : 0;
-      acc[key] = calculateHeightStyle(key, spaces, padding);
-      return acc;
-    }, {} as Record<View, React.CSSProperties>);
+  const leaderboardViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("leaderboard", spaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
+
+  const winnersViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("winners", spaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
+
+  const myVotesViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("myVotes", spaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
+
+  const outcomeViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("outcome", spaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
+
+  const faqViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("faq", spaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
+
+  const notificationsViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("notifications", spaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
+
+  const myStreamFeedStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("myStreamFeed", spaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
+
+  const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("mobileWaves", spaces, capSpace);
+  }, [spaces, isAndroid, isIos, isCapacitor]);
+
+  const mobileAboutViewStyle = useMemo<React.CSSProperties>(() => {
+    if (!spaces.measurementsComplete) return {};
+    const capSpace = isAndroid ? 0 : isIos ? 0 : isCapacitor? 0 : 0;
+    return calculateHeightStyle("mobileAbout", spaces, capSpace);
   }, [spaces, isAndroid, isIos, isCapacitor]);
 
   // Memoize the context value to prevent unnecessary re-renders
@@ -405,18 +417,32 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
       spaces,
       registerRef,
       contentContainerStyle,
-      waveViewStyle: viewStyles.wave,
-      leaderboardViewStyle: viewStyles.leaderboard,
-      winnersViewStyle: viewStyles.winners,
-      myVotesViewStyle: viewStyles.myVotes,
-      outcomeViewStyle: viewStyles.outcome,
-      faqViewStyle: viewStyles.faq,
-      notificationsViewStyle: viewStyles.notifications,
-      myStreamFeedStyle: viewStyles.myStreamFeed,
-      mobileWavesViewStyle: viewStyles.mobileWaves,
-      mobileAboutViewStyle: viewStyles.mobileAbout,
+      waveViewStyle,
+      leaderboardViewStyle,
+      winnersViewStyle,
+      myVotesViewStyle,
+      outcomeViewStyle,
+      faqViewStyle,
+      notificationsViewStyle,
+      myStreamFeedStyle,
+      mobileWavesViewStyle,
+      mobileAboutViewStyle,
     }),
-    [spaces, registerRef, contentContainerStyle, viewStyles]
+    [
+      spaces,
+      registerRef,
+      contentContainerStyle,
+      waveViewStyle,
+      leaderboardViewStyle,
+      winnersViewStyle,
+      myVotesViewStyle,
+      outcomeViewStyle,
+      faqViewStyle,
+      notificationsViewStyle,
+      myStreamFeedStyle,
+      mobileWavesViewStyle,
+      mobileAboutViewStyle,
+    ]
   );
 
   return (

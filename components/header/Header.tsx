@@ -15,7 +15,6 @@ import { useAuth } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
-import CapacitorWidget from "./capacitor/CapacitorWidget";
 import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderShare from "./share/HeaderShare";

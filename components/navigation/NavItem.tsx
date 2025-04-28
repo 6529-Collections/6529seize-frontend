@@ -29,16 +29,16 @@ const NavItem = ({ item }: Props) => {
       >
         <div className="tw-flex tw-items-center tw-justify-center">
           {item.iconComponent ? (
-            <item.iconComponent className={`${item.iconSizeClass ?? "tw-size-6"} tw-text-iron-400`} />
+            <item.iconComponent className={`${item.iconSizeClass ?? "tw-size-7"} tw-text-iron-500`} />
           ) : (
-            <Image src={icon} alt={name} width={24} height={24} unoptimized className={item.iconSizeClass ?? "tw-size-6"} />
+            <Image src={icon} alt={name} width={24} height={24} unoptimized className={item.iconSizeClass ?? "tw-size-7"} />
           )}
         </div>
       </button>
     );
   }
 
-  const iconSizeClass = item.iconSizeClass ?? "tw-size-6";
+  const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
   let isActive = false;
   const handleClick = () => {
@@ -77,8 +77,8 @@ const NavItem = ({ item }: Props) => {
       <div className="tw-flex tw-items-center tw-justify-center">
         {item.iconComponent ? (
           <item.iconComponent
-            className={`${iconSizeClass} ${ 
-              "tw-text-iron-100"
+            className={`${iconSizeClass} ${
+              isActive ? "tw-text-white" : "tw-text-iron-500"
             }`}
           />
         ) : (
