@@ -22,6 +22,8 @@ import {
 import { Period } from "./Types";
 import { ApiIdentity } from "../generated/models/ApiIdentity";
 
+export const MAX_DROP_UPLOAD_FILES = 8; 
+
 export function formatAddress(address: string) {
   if (
     !address ||
