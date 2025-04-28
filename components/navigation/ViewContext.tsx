@@ -12,7 +12,7 @@ import { useRouter } from "next/router";
 interface ViewContextType {
   activeView: ViewKey | null;
   setActiveView: (view: ViewKey | null) => void;
-  handleClick: (item: NavItem) => void;
+  handleNavClick: (item: NavItem) => void;
 }
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
@@ -43,7 +43,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     }
   }, [router.asPath]);
 
-  const handleClick = (item: NavItem) => {
+  const handleNavClick = (item: NavItem) => {
     if (item.kind === "route") {
       const extractWaveId = (path: string): string | null => {
         const queryMatch = path.match(/[?&]wave=([^&]+)/);
@@ -101,7 +101,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   };
 
   const providerValue = useMemo(
-    () => ({ activeView, setActiveView, handleClick }),
+    () => ({ activeView, setActiveView, handleNavClick }),
     [activeView, lastVisitedWave]
   );
 
