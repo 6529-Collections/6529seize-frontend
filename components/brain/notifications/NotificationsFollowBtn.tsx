@@ -1,30 +1,30 @@
 import { FC, useState, useContext, useEffect } from "react";
-import { ApiProfileMin } from "../../../../generated/models/ApiProfileMin";
-import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
+import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
+import { UserFollowBtnSize } from "../../user/utils/UserFollowBtn";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import CircleLoader, {
   CircleLoaderSize,
-} from "../../../distribution-plan-tool/common/CircleLoader";
+} from "../../distribution-plan-tool/common/CircleLoader";
 import {
   QueryKey,
   ReactQueryWrapperContext,
-} from "../../../react-query-wrapper/ReactQueryWrapper";
-import { AuthContext } from "../../../auth/Auth";
-import { ApiIdentitySubscriptionActions } from "../../../../generated/models/ApiIdentitySubscriptionActions";
+} from "../../react-query-wrapper/ReactQueryWrapper";
+import { AuthContext } from "../../auth/Auth";
+import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
 import {
   commonApiDeleWithBody,
   commonApiFetch,
   commonApiPost,
-} from "../../../../services/api/common-api";
-import { ApiIdentitySubscriptionTargetAction } from "../../../../generated/models/ApiIdentitySubscriptionTargetAction";
+} from "../../../services/api/common-api";
+import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
 
-interface NotificationIdentitySubscribedFollowBtnProps {
+interface NotificationsFollowBtnProps {
   readonly profile: ApiProfileMin;
   readonly size?: UserFollowBtnSize;
 }
 
-const NotificationIdentitySubscribedFollowBtn: FC<
-  NotificationIdentitySubscribedFollowBtnProps
+const NotificationsFollowBtn: FC<
+NotificationsFollowBtnProps
 > = ({ profile, size = UserFollowBtnSize.MEDIUM }) => {
   const BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
     [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-1.5 tw-text-xs",
@@ -179,4 +179,4 @@ const NotificationIdentitySubscribedFollowBtn: FC<
   );
 };
 
-export default NotificationIdentitySubscribedFollowBtn;
+export default NotificationsFollowBtn;

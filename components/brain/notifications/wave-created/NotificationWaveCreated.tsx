@@ -12,6 +12,8 @@ import { ApiWave } from "../../../../generated/models/ApiWave";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "../../../react-query-wrapper/ReactQueryWrapper";
+import NotificationsFollowBtn from "../NotificationsFollowBtn";
+import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
 
 export default function NotificationWaveCreated({
   notification,
@@ -49,13 +51,15 @@ export default function NotificationWaveCreated({
         <span className="tw-text-sm tw-font-normal tw-text-iron-50">
           <Link
             href={`/${notification.related_identity.handle}`}
-            className="tw-no-underline tw-font-semibold">
+            className="tw-no-underline tw-font-semibold"
+          >
             {notification.related_identity.handle}
           </Link>{" "}
           invited you to a wave:{" "}
           <Link
             href={`/my-stream?wave=${notification.additional_context.wave_id}`}
-            className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
+            className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300"
+          >
             {wave?.name}
           </Link>{" "}
           <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
@@ -64,13 +68,20 @@ export default function NotificationWaveCreated({
           </span>
         </span>
       </div>
-      {wave && (
-        <WaveHeaderFollow
-          wave={wave}
-          subscribeToAllDrops={true}
-          size={WaveFollowBtnSize.SMALL}
+      <div className="tw-flex tw-gap-x-2 tw-items-center">
+
+        {wave && (
+          <WaveHeaderFollow
+            wave={wave}
+            subscribeToAllDrops={true}
+            size={WaveFollowBtnSize.SMALL}
+          />
+        )}
+        <NotificationsFollowBtn
+          profile={notification.related_identity}
+          size={UserFollowBtnSize.SMALL}
         />
-      )}
+      </div>
     </div>
   );
 }
