@@ -5,6 +5,7 @@ import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
+import { useHeaderContext } from "../../contexts/HeaderContext";
 
 const Header = dynamic(() => import("../header/Header"), {
   ssr: false,
@@ -18,6 +19,7 @@ interface DesktopLayoutProps {
 
 const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
   const { registerRef } = useLayout();
+  const { setHeaderRef } = useHeaderContext();
 
   const breadcrumbs = useBreadcrumbs();
   const router = useRouter();
@@ -27,8 +29,9 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
       registerRef("header", node);
+      setHeaderRef(node);
     },
-    [registerRef]
+    [registerRef, setHeaderRef]
   );
 
   return (

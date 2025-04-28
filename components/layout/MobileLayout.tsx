@@ -9,6 +9,7 @@ import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
 import { useRouter } from "next/router";
+import { useHeaderContext } from "../../contexts/HeaderContext";
 
 const Header = dynamic(() => import("../header/Header"), {
   ssr: false,
@@ -21,6 +22,7 @@ interface MobileLayoutProps {
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
   const { registerRef } = useLayout();
+  const { setHeaderRef } = useHeaderContext();
   const { activeView } = useViewContext();
   const { isMobileDevice } = useDeviceInfo();
   const breadcrumbs = useBreadcrumbs();
@@ -33,8 +35,9 @@ const MobileLayout = ({ children }: MobileLayoutProps) => {
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
       registerRef("header", node);
+      setHeaderRef(node);
     },
-    [registerRef]
+    [registerRef, setHeaderRef]
   );
 
   return (
