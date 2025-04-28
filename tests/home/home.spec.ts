@@ -6,7 +6,7 @@ test.describe("Home Page", () => {
   });
 
   test("should display the Latest Drop section", async ({ page }) => {
-    await expect(page).toHaveTitle("6529.io");
+    await expect(page).toHaveTitle("6529");
 
     const heading = page.locator("h1", { hasText: "Latest Drop" });
     await expect(heading).toBeVisible();

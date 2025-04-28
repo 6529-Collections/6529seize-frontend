@@ -1,0 +1,209 @@
+# Terms of Service Display PRD
+
+## Overview
+This product update addresses a critical UX and legal gap in the current drop submission flow. Currently, when users submit content to waves that require terms acceptance, they cryptographically sign terms they haven't been shown. This update will implement a Terms of Service display modal that shows users the terms they're agreeing to before requesting their signature, ensuring informed consent and legal compliance.
+
+## Core Features
+
+### Terms of Service Modal
+- **What it does**: Displays the wave's terms of service in a modal before requesting a wallet signature
+- **Why it's important**: Ensures users have actually seen the terms they're signing, addressing both legal and UX concerns
+- **How it works**: When submitting a drop to a wave that requires terms signature, a modal appears showing the full terms content with an explicit acknowledgment checkbox
+
+### Terms Acknowledgment
+- **What it does**: Requires explicit user confirmation that they've read and agree to the terms
+- **Why it's important**: Provides clear evidence of informed consent
+- **How it works**: Users must check a consent checkbox before proceeding to the signature step
+
+### Signature Context
+- **What it does**: Improves the signature request UX by explaining what is being signed
+- **Why it's important**: Reduces user confusion and potential signature rejections
+- **How it works**: Adds context in the signing flow about what the signature represents (agreement to terms)
+
+## User Experience
+
+### User Personas
+- **Content Creators**: Users submitting content to waves with legal requirements
+- **Wave Creators**: Users who set up waves with terms requirements
+- **Community Managers**: Users who oversee compliance and user experience
+
+### Key User Flows
+1. **Terms Acceptance Flow**:
+   - User creates a drop in a wave with terms requirements
+   - Upon submission, a modal appears displaying the full terms
+   - User must check an "I agree" checkbox
+   - After checking, the signature request is sent to wallet
+   - User signs, and the drop is submitted with the signature
+
+2. **Wave Creation Flow** (existing):
+   - Wave creator sets terms in the wave creation interface
+   - When enabled, all participants will see these terms before submitting
+
+### UI/UX Considerations
+- Modal should be clearly designed with readable typography
+- Terms should be scrollable if lengthy, with clear indication of scrollability
+- Checkbox must be unchecked by default (no dark patterns)
+- Clear explanation of what signing means in user-friendly language
+- Mobile-responsive design for all screens
+
+## Technical Architecture
+
+### System Components
+- **TermsOfServiceModal**: React component that displays terms and handles acknowledgment
+- **useTermsSignatureFlow**: Custom hook to manage the terms display, acknowledgment, and signature process
+- **DropSubmissionManager**: Enhanced version of current submission logic to incorporate terms display
+
+### Data Models
+- **TermsAcknowledgment**:
+  ```typescript
+  interface TermsAcknowledgment {
+    hasAcknowledged: boolean;
+    acknowledgedAt: number | null;
+    termsVersion: string; // Hash of terms content for tracking changes
+  }
+  ```
+
+### APIs and Integrations
+- Leverages existing wallet signature APIs
+- Enhances current drop submission flow with terms confirmation step
+- No additional backend changes required (uses existing terms stored in wave configuration)
+
+### Infrastructure Requirements
+- Frontend-only implementation
+- No additional backend services needed
+
+## Development Roadmap
+
+### MVP Requirements
+1. **Terms Modal Component**:
+   - Create reusable modal component for displaying terms
+   - Implement scrollable terms content area
+   - Add acknowledgment checkbox
+   - Include "Agree & Continue" and "Cancel" buttons
+
+2. **Terms Signature Flow Integration**:
+   - Modify `useDropSignature` hook to incorporate terms display step
+   - Update drop submission logic to display terms before signature request
+   - Ensure terms are properly included in signature hash
+
+3. **Submission Process Update**:
+   - Update `prepareAndSubmitDrop` function to show terms when required
+   - Modify signature request to include context about what's being signed
+   - Handle cancellations and rejections gracefully
+
+### Future Enhancements
+1. **Terms Versioning**:
+   - Track when users have agreed to specific terms versions
+   - Notify users when terms have changed since last agreement
+
+2. **Terms Format Improvements**:
+   - Support for rich text/markdown in terms display
+   - Add section navigation for lengthy terms
+
+3. **Analytics**:
+   - Track terms view time and acceptance rate
+   - Identify potential friction points in the terms acceptance flow
+
+## Logical Dependency Chain
+
+1. **Foundation** (Build First):
+   - Terms display modal component
+   - Terms acknowledgment state management
+   - Integration with existing signature flow
+
+2. **Getting to Usable Frontend**:
+   - Implement the basic terms display in the drop submission flow
+   - Ensure mobile and desktop compatibility
+   - Test with various terms lengths
+
+3. **Feature Pacing**:
+   - Phase 1: Basic terms display and acknowledgment (MVP)
+   - Phase 2: Improved formatting and readability
+   - Phase 3: Versioning and analytics
+
+## Risks and Mitigations
+
+### Technical Challenges
+- **Risk**: Modal state management across the complex drop submission flow
+  - **Mitigation**: Use a centralized state management approach for the terms flow
+
+- **Risk**: Ensuring terms are properly included in signature hash
+  - **Mitigation**: Comprehensive testing of the signature payload
+
+- **Risk**: Mobile UX challenges with limited screen space
+  - **Mitigation**: Responsive design with careful attention to mobile experience
+
+### MVP Approach
+- **Risk**: Adding friction to the drop submission process
+  - **Mitigation**: Streamlined UX that makes terms review quick and painless while still effective
+
+- **Risk**: User confusion about what they're signing
+  - **Mitigation**: Clear explanatory text and confirmation UI
+
+### Resource Constraints
+- **Risk**: Potential scope creep beyond the basic legal requirement
+  - **Mitigation**: Clear MVP definition focused on the core legal/UX need
+
+## Appendix
+
+### Research Findings
+- Current flow has users signing terms they haven't seen
+- AgreementStep component in the Memes submission flow provides a good pattern to follow
+- Legal best practices require explicit display and acknowledgment of terms before signature
+
+### Technical Specifications
+- Integration points:
+  - CreateDropContent.tsx (prepareAndSubmitDrop function)
+  - useDropSignature.ts (signDrop function)
+  - DropHasher.ts (hash function)
+- Existing terms data location: wave.participation.terms
+
+# Overview
+This document outlines the requirements for enhancing the existing `TermsOfServiceModal.tsx` component to improve accessibility and usability based on identified shortcomings. The goal is to make the modal conformant with standard accessibility practices for dialogs.
+
+# Core Features
+The enhancement involves adding the following features to `components/terms/TermsOfServiceModal.tsx`:
+
+1.  **Focus Management:**
+    *   When the modal opens, focus should be programmatically moved to the first focusable element within the modal (e.g., the content container or the close button).
+    *   Focus should be trapped within the modal while it is open, preventing users from tabbing to elements outside the modal.
+    *   When the modal closes, focus should return to the element that originally triggered the modal's opening.
+
+2.  **Keyboard Interaction:**
+    *   Implement an event listener so that pressing the `Escape` key closes the modal.
+
+3.  **ARIA Attributes:**
+    *   Add `role="dialog"` to the main modal container.
+    *   Add `aria-modal="true"` to indicate it's a modal dialog.
+    *   Add `aria-labelledby` attribute pointing to the ID of the modal's title element (`h3`).
+    *   Consider adding `aria-describedby` pointing to the ID of the main terms content container if appropriate for screen reader announcement.
+
+4.  **Long Content Handling:**
+    *   Verify that the existing `max-h-[400px]` and `overflow-y-auto` styling on the content container provides a usable scroll experience for long terms. Ensure the container itself is focusable to allow keyboard scrolling. No changes to the fundamental scroll mechanism are required unless testing reveals significant usability issues.
+
+# User Experience
+- **User Flow:** User clicks a button -> Modal opens -> Focus moves inside modal -> User reads terms (scrolling if necessary) -> User checks acknowledgment -> User clicks "Agree" or "Cancel", or presses ESC -> Modal closes -> Focus returns to original button.
+- **UI/UX Considerations:** Changes are primarily functional and accessibility-focused, maintaining the existing visual style.
+
+# Technical Architecture
+- **Component:** `components/terms/TermsOfServiceModal.tsx`
+- **Libraries:** React, FontAwesome, TailwindCSS. Potential need for a small utility library for focus trapping (e.g., `focus-trap-react`) or custom implementation using hooks.
+- **Data Models:** No changes to data handling.
+
+# Development Roadmap
+- **Phase 1 (MVP):** Implement all core features listed above (Focus Management, Keyboard Interaction, ARIA Attributes, Long Content Verification).
+
+# Logical Dependency Chain
+1.  Implement ARIA attributes.
+2.  Implement ESC key closing.
+3.  Implement focus trapping and focus return logic.
+4.  Verify long content scrolling behavior.
+
+# Risks and Mitigations
+- **Risk:** Implementing focus trapping correctly across different browsers.
+    - **Mitigation:** Use a well-tested library like `focus-trap-react` or thoroughly test a custom hook implementation.
+- **Risk:** Ensuring focus returns precisely to the triggering element, especially if the trigger can be dynamic.
+    - **Mitigation:** Store a reference to the triggering element when the modal opens.
+
+# Appendix
+- **Existing Component:** [`components/terms/TermsOfServiceModal.tsx`](mdc:components/terms/TermsOfServiceModal.tsx)

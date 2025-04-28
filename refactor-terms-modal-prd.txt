@@ -1,0 +1,55 @@
+<context>
+# Overview
+This document outlines the requirements for refactoring the `TermsOfServiceModal.tsx` component to utilize the shared `ModalLayout.tsx` component. The goal is to promote code reuse, ensure consistent modal appearance across the application, and simplify the structure of `TermsOfServiceModal.tsx` by leveraging the layout provided by `ModalLayout.tsx`.
+
+# Core Features
+- Integrate `ModalLayout.tsx` into `TermsOfServiceModal.tsx`.
+- Pass necessary props (`title`, `onCancel`) from `TermsOfServiceModal` to `ModalLayout`.
+- Place the existing body and footer content of `TermsOfServiceModal` as children within `ModalLayout`.
+- Remove redundant layout elements (background, padding, close button, title H3) from `TermsOfServiceModal` that are now handled by `ModalLayout`.
+- Maintain all existing functionality of the Terms of Service modal (focus trap, state management, terms display, checkbox interaction, button actions).
+
+# User Experience
+The visual appearance and core functionality of the Terms of Service modal should remain largely the same from the user's perspective, but benefit from the consistent styling and structure provided by `ModalLayout`. Minor visual adjustments due to `ModalLayout`'s specific padding or background effects are acceptable.
+</context>
+<PRD>
+# Technical Architecture
+- **Component:** `components/terms/TermsOfServiceModal.tsx`
+- **Refactor:** Replace the outer layout structure (`FocusTrap` > `div` overlay > `div` container) with the `ModalLayout` component.
+- **Props Mapping:**
+    - `TermsOfServiceModal`'s hardcoded title ("Terms of Service") will be passed to `ModalLayout`'s `title` prop.
+    - `TermsOfServiceModal`'s `onClose` function will be passed to `ModalLayout`'s `onCancel` prop.
+- **Children:** The existing content within the `div` with class `tw-p-4` (terms display, checkbox) and the footer `div` (buttons) will become the `children` prop passed to `ModalLayout`.
+- **Removal:** The following elements/structures within `TermsOfServiceModal` will be removed as they are provided by `ModalLayout`:
+    - The outermost `div` with `tw-fixed`, `tw-inset-0`, etc.
+    - The main modal container `div` with `tw-bg-iron-800`, `tw-rounded-lg`, etc.
+    - The header `div` containing the `h3` title and the explicit close button (`<button>` with `faXmark`).
+- **Retention:** The `FocusTrap` component should likely wrap the *entire* `ModalLayout` usage. The internal state (`hasAcknowledged`) and `useEffect` hooks remain unchanged.
+
+# Development Roadmap
+- **Phase 1 (MVP):** Implement the core refactor:
+    - Wrap existing content with `ModalLayout`.
+    - Pass required props.
+    - Remove redundant layout elements from `TermsOfServiceModal`.
+    - Ensure `FocusTrap` is correctly positioned.
+    - Verify all existing functionality works.
+
+# Logical Dependency Chain
+1.  Import `ModalLayout`.
+2.  Wrap the main content return structure with `FocusTrap` then `ModalLayout`.
+3.  Pass `title="Terms of Service"` and `onCancel={onClose}` to `ModalLayout`.
+4.  Move the existing content (`div` with terms/checkbox and `div` with buttons) inside `ModalLayout` as children.
+5.  Remove the old outer `div` (overlay), container `div`, header `div`, and close button from `TermsOfServiceModal`.
+6.  Test functionality thoroughly.
+
+# Risks and Mitigations
+- **Risk:** `ModalLayout` might impose styling or structure that conflicts slightly with the desired `TermsOfServiceModal` internal layout.
+  - **Mitigation:** Adjust internal `TermsOfServiceModal` content styling (padding/margins) as needed to fit cleanly within `ModalLayout`. Test visually.
+- **Risk:** Focus trapping might behave differently.
+  - **Mitigation:** Test focus trapping carefully. Ensure the existing `FocusTrap` wraps `ModalLayout` correctly.
+- **Risk:** Close button functionality might differ slightly (e.g., exact positioning).
+  - **Mitigation:** Accept minor differences as long as a close button provided by `ModalLayout` exists and functions correctly using the passed `onCancel` handler.
+
+# Appendix
+- **Reference Component:** `components/waves/memes/submission/layout/ModalLayout.tsx`
+</PRD> 
