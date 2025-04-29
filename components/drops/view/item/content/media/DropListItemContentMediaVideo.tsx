@@ -49,7 +49,7 @@ function DropListItemContentMediaVideo({ src }: { readonly src: string }) {
   }, []);
 
   return (
-    <div ref={wrapperRef}>
+    <div ref={wrapperRef} className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
       {inView && (
         <video
           ref={videoRef}
@@ -58,7 +58,7 @@ function DropListItemContentMediaVideo({ src }: { readonly src: string }) {
           autoPlay={!capacitor.isCapacitor}
           muted
           loop
-          className="tw-w-full tw-rounded-xl tw-overflow-hidden tw-max-h-full tw-object-contain"
+          className="tw-w-full tw-h-full tw-rounded-xl tw-object-contain"
           onClick={handleVideoClick}
         >
           <source src={src} type="video/mp4" />
