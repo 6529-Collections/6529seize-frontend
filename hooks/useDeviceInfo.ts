@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 /**
  * Hook that provides comprehensive device and screen information.
- * Combines functionality of useIsMobileDevice, useIsMobileScreen, and useHasTouchScreen.
+ * Combines functionality of useIsMobileDevice and useHasTouchScreen.
  * 
  * @returns Object containing device information:
  * - isMobileDevice: Whether the device is a mobile device (based on user agent)

@@ -416,7 +416,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                               <AppWebSocketProvider>
                                 <HeaderProvider>
                                   <MainLayout>
-                                    {getLayout(<Component {...props} />)}
+                                    {getLayout(<Component {...props} key={router.asPath} />)}
                                   </MainLayout>
                                 </HeaderProvider>
                                 {appWalletPasswordModal.modal}
