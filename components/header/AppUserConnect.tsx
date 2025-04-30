@@ -34,7 +34,7 @@ export default function AppUserConnect({
           seizeDisconnectAndLogout(true);
           onNavigate();
         }}
-        className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-medium tw-text-zinc-300 active:tw-bg-zinc-700 active:tw-text-zinc-200 tw-rounded-lg tw-transition-colors tw-duration-200"
+        className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-zinc-300 active:tw-bg-zinc-700 active:tw-text-zinc-200 tw-rounded-lg tw-transition-colors tw-duration-200"
         aria-label="Switch Account"
       >
         <ArrowsRightLeftIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
@@ -45,7 +45,7 @@ export default function AppUserConnect({
           seizeDisconnectAndLogout();
           onNavigate();
         }}
-        className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-medium tw-text-zinc-300 active:tw-bg-zinc-700 active:tw-text-zinc-200 tw-rounded-lg tw-transition-colors tw-duration-200"
+        className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-zinc-300 active:tw-bg-zinc-700 active:tw-text-zinc-200 tw-rounded-lg tw-transition-colors tw-duration-200"
         aria-label="Disconnect & Logout"
       >
         <ArrowRightEndOnRectangleIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />

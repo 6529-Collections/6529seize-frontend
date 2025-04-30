@@ -48,7 +48,7 @@ export default function CommunityMembersTableRow({
             </div>
           </div>
           <div
-            className={`tw-truncate tw-max-w-[12rem] sm:tw-max-w-xs ${textColorClass}`}>
+            className={`tw-truncate tw-max-w-[8rem] sm:tw-max-w-xs ${textColorClass}`}>
             <Link
               href={path}
               className={`tw-no-underline group-hover:tw-underline group-hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out ${textColorClass}`}>
