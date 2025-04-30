@@ -72,24 +72,20 @@ export default function SidebarLayout({
 
   useEffect(() => {
     const handleSidebarTop = () => {
-      const headerHeight = headerRef.current?.clientHeight ?? 0;
+      const headerHeight = headerRef.current
+        ? headerRef.current.clientHeight
+        : 0;
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
       const newPosition =
         scrollTop <= headerHeight ? headerHeight - scrollTop : 0;
-      if (sidebarRef.current) {
-        sidebarRef.current.style.top = `${newPosition}px`;
-      }
-      if (openButtonRef.current) {
-        openButtonRef.current.style.top = `${newPosition}px`;
-      }
+      sidebarRef.current!.style.top = `${newPosition}px`;
+      openButtonRef.current!.style.top = `${newPosition}px`;
     };
 
     const handleSidebarBottom = () => {
       const footerRef = document.getElementById("footer");
       const footerVisibleHeight = elementIsVisibleInViewportPx(footerRef);
-      if (sidebarRef.current) {
-        sidebarRef.current.style.bottom = `${footerVisibleHeight}px`;
-      }
+      sidebarRef.current!.style.bottom = `${footerVisibleHeight}px`;
     };
 
     const handleScroll = () => {
@@ -117,15 +113,15 @@ export default function SidebarLayout({
           setOpen={setOpen}
         />
       </div>
-      <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-6 lg:tw-pb-20 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+      <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-16 lg:tw-pb-20 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <div className="tw-flex">
           <div
-            className={`tw-fixed tw-z-40 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden no-scrollbar tw-transform tw-transition tw-duration-300 tw-ease-out ${
+            className={`tw-fixed tw-z-40 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500  tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transform tw-transition tw-duration-300 tw-ease-out ${
               !open ? "-tw-translate-x-full" : ""
             }`}
             ref={sidebarRef}
           >
-            <div className="tw-bg-iron-950 tw-min-h-screen  tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
+            <div className="tw-bg-iron-950 tw-w-80 tw-border-r tw-border-solid tw-border-t-0 tw-border-l-0 tw-border-b-0 tw-border-iron-700">
               <GroupsSidebar />
             </div>
           </div>

@@ -36,7 +36,8 @@ export default function AppHeader(props: Readonly<Props>) {
         .replace(/^./, (c) => c.toUpperCase())
     : "Home";
 
-  const waveId = typeof router.query.wave === "string" ? router.query.wave : null;
+  const waveId =
+    typeof router.query.wave === "string" ? router.query.wave : null;
   const { wave } = useWaveById(waveId);
 
   const finalTitle = (() => {
@@ -65,7 +66,7 @@ export default function AppHeader(props: Readonly<Props>) {
             <img
               src={pfp}
               alt="pfp"
-              className="tw-h-full tw-w-full tw-object-contain"
+              className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
             />
           ) : (
             <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />

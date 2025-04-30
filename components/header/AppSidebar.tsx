@@ -134,7 +134,7 @@ export default function AppSidebar({
             leaveFrom="tw-translate-x-0"
             leaveTo="-tw-translate-x-full"
           >
-            <DialogPanel className="tw-pointer-events-auto tw-max-w-[364px] tw-w-full tw-h-full tw-bg-zinc-950 tw-shadow-xl tw-flex tw-flex-col tw-pt-[env(safe-area-inset-top,0px)] tw-pb-[env(safe-area-inset-bottom,0px)]">
+            <DialogPanel className="tw-pointer-events-auto tw-max-w-[22.75rem] tw-w-full tw-h-full tw-bg-zinc-950 tw-shadow-xl tw-flex tw-flex-col tw-pt-[env(safe-area-inset-top,0px)] tw-pb-[env(safe-area-inset-bottom,0px)]">
               <AppSidebarHeader onClose={handleClose} />
               <nav className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-zinc-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-zinc-800 hover:tw-scrollbar-thumb-zinc-300 tw-py-6">
                 <div className="tw-flex tw-flex-col tw-h-full">
