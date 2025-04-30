@@ -70,28 +70,38 @@ export default function AppSidebarMenuItems({
                       />
                     </DisclosureButton>
                     <DisclosurePanel className="tw-pt-2 tw-pl-10 tw-space-y-1">
-                      {(item.children ?? []).map((child, idx) => (
-                        <Fragment key={child.label ?? `idx-${idx}`}>
-                          {(child.section && idx !== 0) || child.dividerBefore ? (
-                            <div className="tw-mx-4 tw-my-3 tw-h-px tw-bg-zinc-800" />
-                          ) : null}
-                          {child.section ? (
-                            child.label ? (
+                      {(item.children ?? []).map((child, idx) => {
+                        let childElement: React.ReactNode = null;
+
+                        if (child.section) {
+                          if (child.label) {
+                            childElement = (
                               <span className="tw-block tw-text-xs tw-uppercase tw-tracking-wide tw-text-iron-500 tw-px-4 tw-py-2">
                                 {child.label}
                               </span>
-                            ) : null
-                          ) : (
+                            );
+                          }
+                        } else {
+                          childElement = (
                             <Link
                               href={child.path === "/profile" ? profilePath : child.path ?? "#"}
                               onClick={onNavigate}
-                              className="tw-no-underline tw-block tw-text-base tw-px-4 tw-py-2 tw-text-iron-300 tw-font-medium active:tw-bg-iron-800  tw-rounded-lg tw-transition-colors tw-duration-200"
+                              className="tw-no-underline tw-block tw-text-base tw-px-4 tw-py-2 tw-text-iron-300 tw-font-medium active:tw-bg-iron-800 tw-rounded-lg tw-transition-colors tw-duration-200"
                             >
                               {child.label}
                             </Link>
-                          )}
-                        </Fragment>
-                      ))}
+                          );
+                        }
+
+                        return (
+                          <Fragment key={child.label ?? `idx-${idx}`}>
+                            {(child.section && idx !== 0) || child.dividerBefore ? (
+                              <div className="tw-mx-4 tw-my-3 tw-h-px tw-bg-zinc-800" />
+                            ) : null}
+                            {childElement}
+                          </Fragment>
+                        );
+                      })}
                     </DisclosurePanel>
                   </>
                 )}

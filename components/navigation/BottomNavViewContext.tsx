@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
 export type ViewKey = 'waves' | 'messages'; // extend as needed
 
@@ -12,8 +12,13 @@ const BottomNavViewContext = createContext<BottomNavViewContextType | undefined>
 export const BottomNavViewProvider: React.FC<{ readonly children: ReactNode }> = ({ children }) => {
   const [activeView, setActiveView] = useState<ViewKey>('waves');
 
+  const contextValue = useMemo(() => ({
+    activeView,
+    setActiveView,
+  }), [activeView, setActiveView]);
+
   return (
-    <BottomNavViewContext.Provider value={{ activeView, setActiveView }}>
+    <BottomNavViewContext.Provider value={contextValue}>
       {children}
     </BottomNavViewContext.Provider>
   );

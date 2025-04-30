@@ -13,7 +13,6 @@ import {
 } from "@heroicons/react/24/outline";
 import AppUserConnect from "./AppUserConnect";
 import AppSidebarHeader from "./AppSidebarHeader";
-import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
 
 const MENU = [
@@ -79,7 +78,6 @@ export default function AppSidebar({
   readonly onClose: () => void;
 }) {
   const handleClose = useCallback(() => onClose(), [onClose]);
-  const { address } = useSeizeConnectContext();
 
   // Close on right-to-left swipe
   useEffect(() => {

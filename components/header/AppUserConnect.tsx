@@ -1,7 +1,6 @@
 import {
   ArrowsRightLeftIcon,
   ArrowRightEndOnRectangleIcon,
-  ArrowLeftStartOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
