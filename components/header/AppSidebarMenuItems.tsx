@@ -84,7 +84,11 @@ export default function AppSidebarMenuItems({
                         } else {
                           childElement = (
                             <Link
-                              href={child.path === "/profile" ? profilePath : child.path ?? "#"}
+                              href={
+                                child.path === "/profile"
+                                  ? profilePath
+                                  : child.path ?? "#"
+                              }
                               onClick={onNavigate}
                               className="tw-no-underline tw-block tw-text-base tw-px-4 tw-py-2 tw-text-iron-300 tw-font-medium active:tw-bg-iron-800 tw-rounded-lg tw-transition-colors tw-duration-200"
                             >
@@ -95,7 +99,8 @@ export default function AppSidebarMenuItems({
 
                         return (
                           <Fragment key={child.label ?? `idx-${idx}`}>
-                            {(child.section && idx !== 0) || child.dividerBefore ? (
+                            {(child.section && idx !== 0) ||
+                            child.dividerBefore ? (
                               <div className="tw-mx-4 tw-my-3 tw-h-px tw-bg-zinc-800" />
                             ) : null}
                             {childElement}
