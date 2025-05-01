@@ -18,6 +18,8 @@ import MyStreamWaveFAQ from "./my-stream/MyStreamWaveFAQ";
 import { useWave } from "../../hooks/useWave";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
+import BrainMobileWaves from "./mobile/BrainMobileWaves";
+import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -27,6 +29,7 @@ export enum BrainView {
   OUTCOME = "OUTCOME",
   MY_VOTES = "MY_VOTES",
   FAQ = "FAQ",
+  WAVES = "WAVES",
 }
 
 interface Props {
@@ -35,6 +38,14 @@ interface Props {
 
 const BrainMobile: React.FC<Props> = ({ children }) => {
   const router = useRouter();
+  const { isMobileDevice, hasTouchScreen } = useDeviceInfo();
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  const isMobile = hydrated ? isMobileDevice ?? hasTouchScreen : true;
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
@@ -98,7 +109,11 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
   // Handle tab visibility and reset on wave changes
   useEffect(() => {
     if (!hasWave) {
-      if (activeView !== BrainView.DEFAULT) setActiveView(BrainView.DEFAULT);
+      if (
+        activeView !== BrainView.DEFAULT &&
+        activeView !== BrainView.WAVES
+      )
+        setActiveView(BrainView.DEFAULT);
       return;
     }
 
@@ -148,6 +163,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       isRankWave && isMemesWave && !!wave ? (
         <MyStreamWaveFAQ wave={wave} />
       ) : null,
+    [BrainView.WAVES]: <BrainMobileWaves />,
   };
 
   return (
@@ -164,11 +180,14 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           />
         </div>
       )}
-      {hasWave && (
+      {(hasWave || !isMobile) && (
         <BrainMobileTabs
           activeView={activeView}
           onViewChange={setActiveView}
           wave={wave}
+          waveActive={hasWave}
+          showWavesTab={hydrated && !isMobile}
+          showStreamBack={hydrated && !isMobile}
         />
       )}
       <AnimatePresence mode="wait">

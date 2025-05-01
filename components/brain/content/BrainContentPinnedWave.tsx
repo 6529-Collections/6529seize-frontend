@@ -128,10 +128,10 @@ const BrainContentPinnedWave: React.FC<BrainContentPinnedWaveProps> = ({
               type="button"
               onClick={onRemoveClick}
               aria-label="Remove wave"
-              className="tw-relative -tw-mr-0.5 tw-border-0 tw-bg-transparent tw-p-0.5 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-100 desktop-hover:tw-opacity-0 desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-red tw-transition-all tw-duration-300"
+              className="tw-relative -tw-mr-0.5 tw-border-0 tw-bg-transparent tw-p-0.5 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-text-iron-400 tw-cursor-pointer tw-opacity-100  desktop-hover:hover:tw-text-red tw-transition-all tw-duration-300"
             >
               <svg
-                className="tw-size-3 tw-flex-shrink-0"
+                className="tw-size-4 tw-flex-shrink-0"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
