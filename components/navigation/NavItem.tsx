@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useViewContext } from "./ViewContext";
 import type { NavItem as NavItemData } from "./navTypes";
 import { motion } from "framer-motion";
+import { TitleType, useAuth } from "../auth/Auth";
+import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
+import { useNotificationsContext } from "../notifications/NotificationsContext";
 
 interface Props {
   readonly item: NavItemData;
@@ -17,6 +20,26 @@ const NavItem = ({ item }: Props) => {
   const { icon } = item;
 
   const isStream = name === "Stream";
+
+  // Add unread notifications logic
+  const { connectedProfile, setTitle } = useAuth();
+  const { notifications, haveUnreadNotifications } = useUnreadNotifications(
+    item.name === "Notifications" ? connectedProfile?.handle ?? null : null
+  );
+  const { removeAllDeliveredNotifications } = useNotificationsContext();
+
+  useEffect(() => {
+    if (item.name !== "Notifications") return;
+    setTitle({
+      title: haveUnreadNotifications
+        ? `(${notifications?.unread_count}) Notifications | 6529.io`
+        : null,
+      type: TitleType.NOTIFICATION,
+    });
+    if (!haveUnreadNotifications) {
+      removeAllDeliveredNotifications();
+    }
+  }, [haveUnreadNotifications, notifications?.unread_count]);
 
   if (item.disabled) {
     return (
@@ -41,7 +64,19 @@ const NavItem = ({ item }: Props) => {
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
   let isActive = false;
-  const handleClick = () => handleNavClick(item);
+  const handleClick = () => {
+    if (
+      item.name === "Notifications" &&
+      item.kind === "route" &&
+      router.pathname === "/my-stream/notifications"
+    ) {
+      router.push("/my-stream/notifications?reload=true", undefined, {
+        shallow: true,
+      });
+    } else {
+      handleNavClick(item);
+    }
+  };
 
   if (item.kind === "route") {
     isActive = router.pathname === item.href && activeView === null;
@@ -66,7 +101,7 @@ const NavItem = ({ item }: Props) => {
           }`}
         />
       )}
-      <div className="tw-flex tw-items-center tw-justify-center">
+      <div className="tw-relative tw-flex tw-items-center tw-justify-center">
         {item.iconComponent ? (
           <item.iconComponent
             className={`${iconSizeClass} ${
@@ -82,6 +117,9 @@ const NavItem = ({ item }: Props) => {
             unoptimized
             className={iconSizeClass}
           />
+        )}
+        {item.name === "Notifications" && haveUnreadNotifications && (
+          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-rounded-full tw-bg-red tw-h-2.5 tw-w-2.5"></div>
         )}
       </div>
     </button>
