@@ -45,7 +45,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     setHydrated(true);
   }, []);
 
-  const isMobile = hydrated ? isMobileDevice || hasTouchScreen : true;
+  const isMobile = hydrated ? isMobileDevice ?? hasTouchScreen : true;
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
