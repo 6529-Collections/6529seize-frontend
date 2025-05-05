@@ -10,7 +10,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import useCapacitor from "../../../hooks/useCapacitor";
-import { DeepLinkScope } from "../capacitor/CapacitorWidget";
 import {
   getRefreshToken,
   getWalletAddress,
@@ -22,6 +21,7 @@ import { useElectron } from "../../../hooks/useElectron";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import yaml from "js-yaml";
 import { ShareMobileApp } from "./HeaderShareMobileApps";
+import { DeepLinkScope } from "../../../hooks/useDeepLinkNavigation";
 
 const QRCode = require("qrcode");
 
