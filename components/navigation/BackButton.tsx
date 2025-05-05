@@ -24,7 +24,7 @@ export default function BackButton() {
       onClick={handleClick}
       className="tw-flex tw-items-center tw-justify-center tw-h-10 tw-w-10 tw-bg-transparent tw-border-none"
     >
-      <ArrowLeftIcon className="tw-size-6 tw-shrink-0 tw-text-iron-50" />
+      <ArrowLeftIcon className="tw-size-6 tw-flex-shrink-0 tw-text-iron-50" />
     </button>
   );
 } 

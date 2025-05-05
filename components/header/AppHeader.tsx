@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import { useViewContext } from "../navigation/ViewContext";
 import { useWaveById } from "../../hooks/useWaveById";
 import BackButton from "../navigation/BackButton";
+import Spinner from "../utils/Spinner";
 
 interface Props {
   readonly extraClass?: string;
@@ -39,12 +40,13 @@ export default function AppHeader(props: Readonly<Props>) {
 
   const waveId =
     typeof router.query.wave === "string" ? router.query.wave : null;
-  const { wave } = useWaveById(waveId);
+  const { wave, isLoading, isFetching } = useWaveById(waveId);
 
-  const finalTitle = (() => {
+  const finalTitle: React.ReactNode = (() => {
     if (activeView === "waves") return "Waves";
     if (activeView === "messages") return "Messages";
     if (waveId) {
+      if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
       return wave?.name ?? "Wave";
     }
     return pageTitle;
