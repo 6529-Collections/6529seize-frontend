@@ -17,12 +17,6 @@ const NavigationHistoryContext = createContext<NavigationHistoryContextValue | u
 
 const MAX_STACK = 50;
 
-// DEBUG LOGGER
-const DEBUG_NAV = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
-const dlog = (...args: unknown[]): void => {
-  if (DEBUG_NAV) console.log("[NavigationHistory]", ...args);
-};
-
 export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode }> = ({ children }) => {
   const router = useRouter();
   const [index, setIndex] = useState(0);
@@ -32,18 +26,15 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
   const canGoBack = index > 0;
 
   const pushStack = useCallback((entry: StackEntry) => {
-    dlog("pushStack", { entry, prevIndex: index });
     historyRef.current = [
       ...historyRef.current.slice(0, index + 1),
       entry,
     ].slice(-MAX_STACK);
     setIndex(Math.min(index + 1, MAX_STACK - 1));
-    dlog("stackSnapshot", historyRef.current.map((e, i) => ({ i, ...e })));
   }, [index]);
 
   useEffect(() => {
     const handleRouteChange = (url: string) => {
-      dlog("routeChangeComplete", url);
       const last = historyRef.current[index];
       if (last?.type === "route" && last.path === url) return;
       pushStack({ type: "route", path: url });
@@ -53,15 +44,12 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
   }, [index, pushStack, router.events]);
 
   const pushView = useCallback((view: ViewKey) => {
-    dlog("pushView", view);
     return pushStack({ type: "view", view });
   }, [pushStack]);
 
   const goBack = useCallback(() => {
-    dlog("goBack called", { canGoBack, index });
     if (!canGoBack) return;
     const target = historyRef.current[index - 1];
-    dlog("goBack target", target);
     setIndex(index - 1);
 
     if (target.type === "route") {

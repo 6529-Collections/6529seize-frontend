@@ -18,12 +18,6 @@ interface ViewContextType {
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
 
-// DEBUG LOGGER
-const DEBUG_NAV = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
-const dlog = (...args: unknown[]): void => {
-  if (DEBUG_NAV) console.log("[ViewContext]", ...args);
-};
-
 export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   children,
 }) => {
@@ -33,7 +27,6 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const [lastVisitedPath, setLastVisitedPath] = useState<string | null>(null);
 
   useEffect(() => {
-    dlog("route/asPath changed", { pathname: router.pathname, asPath: router.asPath });
     if (
       router.pathname.startsWith("/my-stream") &&
       !router.pathname.includes("notifications")
@@ -46,8 +39,25 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
       }
     }
     setLastVisitedPath(router.pathname);
-    setActiveView(null);
+
+    const viewParam = typeof router.query.view === "string" ? router.query.view : null;
+    if (viewParam === "waves" || viewParam === "messages") {
+      setActiveView(viewParam as ViewKey);
+    } else {
+      setActiveView(null);
+    }
   }, [router.asPath, router.pathname]);
+
+  // Strip wave param when user navigates to waves list so components relying on waveId do not treat current page as a single wave
+  useEffect(() => {
+    const viewParam = typeof router.query.view === "string" ? router.query.view : null;
+    const hasWave = "wave" in router.query;
+    if (viewParam === "waves" && hasWave) {
+      setLastVisitedWave(null);
+      const { wave, ...rest } = router.query;
+      router.replace({ pathname: router.pathname, query: rest }, undefined, { shallow: true });
+    }
+  }, [router.query.view, router.query.wave, router.pathname, router]);
 
   const getHref = useCallback(
     (item: RouteNavItem) => {
@@ -70,11 +80,9 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 
   const handleRouteClick = useCallback(
     (item: RouteNavItem) => {
-      dlog("handleRouteClick", { item, href: getHref(item) });
       const href = getHref(item);
       router.push(href, undefined, { shallow: true }).then(() => {
         setActiveView(null);
-        dlog("route navigation finished", { href });
       });
     },
     [getHref, lastVisitedWave, lastVisitedPath, activeView]
@@ -82,7 +90,6 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 
   const handleNavClick = useCallback(
     (item: NavItem) => {
-      dlog("handleNavClick", { item, activeViewBefore: activeView });
       if (item.kind === "route") {
         handleRouteClick(item);
       } else {
@@ -95,7 +102,6 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
           setActiveView(item.viewKey);
         }
       }
-      dlog("handleNavClick done", { activeViewAfter: item.kind === "view" ? item.viewKey : null });
     },
     [handleRouteClick, setActiveView, lastVisitedWave, router]
   );

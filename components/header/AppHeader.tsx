@@ -1,14 +1,14 @@
 import { useState } from "react";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
-import { Bars3Icon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import { useAuth } from "../auth/Auth";
 import { useIdentity } from "../../hooks/useIdentity";
 import { useRouter } from "next/router";
 import { useViewContext } from "../navigation/ViewContext";
 import { useWaveById } from "../../hooks/useWaveById";
-import { items as navItems } from "../navigation/BottomNavigation";
+import BackButton from "../navigation/BackButton";
 
 interface Props {
   readonly extraClass?: string;
@@ -23,7 +23,7 @@ export default function AppHeader(props: Readonly<Props>) {
     handleOrWallet: address ?? null,
     initialProfile: null,
   });
-  const { activeView, handleNavClick } = useViewContext();
+  const { activeView } = useViewContext();
 
   const pfp = (() => {
     if (activeProfileProxy) return activeProfileProxy.created_by.pfp;
@@ -42,37 +42,19 @@ export default function AppHeader(props: Readonly<Props>) {
   const { wave } = useWaveById(waveId);
 
   const finalTitle = (() => {
+    if (activeView === "waves") return "Waves";
+    if (activeView === "messages") return "Messages";
     if (waveId) {
       return wave?.name ?? "Wave";
     }
-    if (activeView === "waves") return "Waves";
-    if (activeView === "messages") return "Messages";
     return pageTitle;
   })();
-
-  const showBackButton = !!waveId;
 
   return (
     <div className="tw-w-full tw-bg-black tw-text-iron-50 tw-pt-[env(safe-area-inset-top,0px)]">
       <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-h-16">
-        {showBackButton ? (
-          <button
-            type="button"
-            aria-label="Back to waves"
-            onClick={async () => {
-              if (waveId) {
-                await router.replace("/my-stream", undefined, { shallow: true });
-                const wavesNav = navItems.find(
-                  (it) => it.kind === "view" && (it as any).viewKey === "waves"
-                );
-                if (wavesNav) handleNavClick(wavesNav as any);
-              }
-            }}
-            className="tw-flex tw-items-center tw-justify-center tw-h-10 tw-w-10 tw-bg-transparent tw-border-none"
-          >
-            <ArrowLeftIcon className="tw-size-6 tw-text-iron-50" />
-          </button>
-        ) : (
+        <BackButton />
+        {!waveId && (
           <button
             type="button"
             aria-label="Open menu"

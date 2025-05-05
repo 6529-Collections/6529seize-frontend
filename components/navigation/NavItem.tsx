@@ -12,12 +12,6 @@ interface Props {
   readonly item: NavItemData;
 }
 
-// DEBUG LOGGER
-const DEBUG_NAV = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
-const dlog = (...args: unknown[]): void => {
-  if (DEBUG_NAV) console.log("[NavItem]", ...args);
-};
-
 const NavItem = ({ item }: Props) => {
   const router = useRouter();
   const { activeView, handleNavClick } = useViewContext();
@@ -74,7 +68,6 @@ const NavItem = ({ item }: Props) => {
     router.pathname === "/my-stream" && typeof router.query.wave === "string";
 
   const handleClick = () => {
-    dlog("click", { name: item.name, kind: item.kind, pathname: router.pathname });
     if (
       item.name === "Notifications" &&
       item.kind === "route" &&
