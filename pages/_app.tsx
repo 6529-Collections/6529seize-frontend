@@ -287,9 +287,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const capacitor = useCapacitor();
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const router = useRouter();
-  const { isMobileDevice } = useDeviceInfo();
+  const { isApp } = useDeviceInfo();
   const hideFooter =
-    isMobileDevice ||
+    isApp ||
     ["/waves", "/my-stream", "/open-mobile"].some((path) =>
       router.pathname.startsWith(path)
     );
