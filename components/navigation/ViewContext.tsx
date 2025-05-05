@@ -12,10 +12,17 @@ import { useRouter } from "next/router";
 
 interface ViewContextType {
   activeView: ViewKey | null;
+  setActiveView: (v: ViewKey | null) => void;
   handleNavClick: (item: NavItem) => void;
 }
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
+
+// DEBUG LOGGER
+const DEBUG_NAV = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
+const dlog = (...args: unknown[]): void => {
+  if (DEBUG_NAV) console.log("[ViewContext]", ...args);
+};
 
 export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   children,
@@ -26,6 +33,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const [lastVisitedPath, setLastVisitedPath] = useState<string | null>(null);
 
   useEffect(() => {
+    dlog("route/asPath changed", { pathname: router.pathname, asPath: router.asPath });
     if (
       router.pathname.startsWith("/my-stream") &&
       !router.pathname.includes("notifications")
@@ -62,9 +70,11 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 
   const handleRouteClick = useCallback(
     (item: RouteNavItem) => {
+      dlog("handleRouteClick", { item, href: getHref(item) });
       const href = getHref(item);
       router.push(href, undefined, { shallow: true }).then(() => {
         setActiveView(null);
+        dlog("route navigation finished", { href });
       });
     },
     [getHref, lastVisitedWave, lastVisitedPath, activeView]
@@ -72,18 +82,27 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
 
   const handleNavClick = useCallback(
     (item: NavItem) => {
+      dlog("handleNavClick", { item, activeViewBefore: activeView });
       if (item.kind === "route") {
         handleRouteClick(item);
       } else {
-        setActiveView(item.viewKey);
+        if (item.viewKey === "waves" && lastVisitedWave) {
+          router.push(`/my-stream?wave=${lastVisitedWave}`, undefined, {
+            shallow: true,
+          });
+          setActiveView(null);
+        } else {
+          setActiveView(item.viewKey);
+        }
       }
+      dlog("handleNavClick done", { activeViewAfter: item.kind === "view" ? item.viewKey : null });
     },
-    [handleRouteClick, setActiveView]
+    [handleRouteClick, setActiveView, lastVisitedWave, router]
   );
 
   const providerValue = useMemo(
-    () => ({ activeView, handleNavClick }),
-    [activeView, lastVisitedWave, lastVisitedPath]
+    () => ({ activeView, setActiveView, handleNavClick }),
+    [activeView, setActiveView]
   );
 
   return (

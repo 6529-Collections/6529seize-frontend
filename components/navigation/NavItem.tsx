@@ -12,6 +12,12 @@ interface Props {
   readonly item: NavItemData;
 }
 
+// DEBUG LOGGER
+const DEBUG_NAV = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
+const dlog = (...args: unknown[]): void => {
+  if (DEBUG_NAV) console.log("[NavItem]", ...args);
+};
+
 const NavItem = ({ item }: Props) => {
   const router = useRouter();
   const { activeView, handleNavClick } = useViewContext();
@@ -64,7 +70,11 @@ const NavItem = ({ item }: Props) => {
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
   let isActive = false;
+  const isWaveSubRoute =
+    router.pathname === "/my-stream" && typeof router.query.wave === "string";
+
   const handleClick = () => {
+    dlog("click", { name: item.name, kind: item.kind, pathname: router.pathname });
     if (
       item.name === "Notifications" &&
       item.kind === "route" &&
@@ -79,9 +89,20 @@ const NavItem = ({ item }: Props) => {
   };
 
   if (item.kind === "route") {
-    isActive = router.pathname === item.href && activeView === null;
+    if (item.name === "Stream") {
+      isActive =
+        router.pathname === item.href &&
+        activeView === null &&
+        typeof router.query.wave !== "string";
+    } else {
+      isActive = router.pathname === item.href && activeView === null;
+    }
   } else {
-    isActive = activeView === item.viewKey;
+    if (item.viewKey === "waves") {
+      isActive = activeView === item.viewKey || isWaveSubRoute;
+    } else {
+      isActive = activeView === item.viewKey;
+    }
   }
 
   return (
