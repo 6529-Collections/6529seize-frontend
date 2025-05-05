@@ -12,15 +12,12 @@ import { useState, useEffect, useCallback } from "react";
 import { Share } from "@capacitor/share";
 import Hammer from "hammerjs";
 import useCapacitor from "../../../hooks/useCapacitor";
-import { App } from "@capacitor/app";
 import { useRouter } from "next/router";
-
-export enum DeepLinkScope {
-  NAVIGATE = "navigate",
-  SHARE_CONNECTION = "share-connection",
-}
+import { useDeepLinkNavigation } from "../../../hooks/useDeepLinkNavigation";
 
 export default function CapacitorWidget() {
+  useDeepLinkNavigation();
+
   const capacitor = useCapacitor();
   const { canGoBack, canGoForward, isLoading, goBack, goForward, refresh } =
     useNavigationHistory();
@@ -76,55 +73,6 @@ export default function CapacitorWidget() {
       hammer.off("swipeleft", goForward);
     };
   }, [canGoBack, canGoForward]);
-
-  const doNavigation = useCallback(
-    (pathname: string, queryParams: Record<string, string | number>) => {
-      const isSamePath = router.asPath.includes(pathname);
-      const navigationMethod = isSamePath ? "replace" : "push";
-
-      router[navigationMethod]({ pathname, query: queryParams }, undefined, {
-        shallow: false,
-      });
-    },
-    [router]
-  );
-
-  useEffect(() => {
-    const listener = App.addListener("appUrlOpen", (data) => {
-      const urlString = data.url;
-
-      const schemeEndIndex = urlString.indexOf("://") + 3;
-      const urlWithoutScheme = urlString.slice(schemeEndIndex);
-
-      const [scope, ...pathParts] = urlWithoutScheme.split("?")[0].split("/");
-
-      const queryString = urlWithoutScheme.includes("?")
-        ? urlWithoutScheme.split("?")[1]
-        : "";
-
-      const searchParams = new URLSearchParams(queryString);
-      const queryParams: Record<string, string | number> = Object.fromEntries(
-        searchParams.entries()
-      );
-      queryParams["_t"] = Date.now() / 1000;
-
-      switch (scope) {
-        case DeepLinkScope.NAVIGATE:
-          doNavigation(`/${pathParts.join("/")}`, queryParams);
-          break;
-        case DeepLinkScope.SHARE_CONNECTION:
-          doNavigation("/accept-connection-sharing", queryParams);
-          break;
-        default:
-          console.log("Unknown Deep Link Scope", scope);
-          break;
-      }
-    });
-
-    return () => {
-      listener.then((handle) => handle.remove());
-    };
-  }, [doNavigation]);
 
   if (capacitor.keyboardVisible) {
     return <></>;
