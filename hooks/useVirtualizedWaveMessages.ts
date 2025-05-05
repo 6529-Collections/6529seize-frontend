@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useMyStreamWaveMessages } from "../contexts/wave/MyStreamContext";
 
-import { ExtendedDrop } from "../helpers/waves/drop.helpers";
+import { Drop } from "../helpers/waves/drop.helpers";
 import { WaveMessages } from "../contexts/wave/hooks/types";
 import { useDropMessages } from "./useDropMessages";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
-  readonly drops: ExtendedDrop[];
+  readonly drops: Drop[];
   readonly allDropsCount: number; // Total number of available drops in cache
   readonly loadMoreLocally: () => void; // Function to load more from cache
   readonly hasMoreLocal: boolean; // Whether there are more items to load locally

@@ -5,7 +5,7 @@ import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropRatings from "./WaveDropRatings";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { Drop, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDropMetadata from "./WaveDropMetadata";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
@@ -20,7 +20,7 @@ enum GroupingThreshold {
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
-  otherDrop: ExtendedDrop | null
+  otherDrop: Drop | null
 ): boolean => {
   if (!otherDrop || currentDrop.parts.length > 1) {
     return false;
@@ -103,8 +103,8 @@ const getDropClasses = (
 
 interface WaveDropProps {
   readonly drop: ExtendedDrop;
-  readonly previousDrop: ExtendedDrop | null;
-  readonly nextDrop: ExtendedDrop | null;
+  readonly previousDrop: Drop | null;
+  readonly nextDrop: Drop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;

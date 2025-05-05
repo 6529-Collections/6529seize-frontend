@@ -10,6 +10,8 @@ export enum DropSize {
   FULL = "FULL",
 }
 
+export type Drop = ExtendedDrop | ExtendedLightDrop;
+
 export interface ExtendedDrop extends ApiDrop {
   type: DropSize.FULL;
   stableKey: string;
@@ -24,7 +26,7 @@ export interface ExtendedLightDrop extends ApiDrop {
 
 export const getStableDropKey = (
   drop: ApiDrop,
-  existingDrops: ExtendedDrop[] = []
+  existingDrops: Drop[] = []
 ): { key: string; hash: string } => {
   const closestMatch = findClosestMatch(drop, existingDrops);
   const stableCreatedAt = closestMatch
@@ -53,9 +55,9 @@ export const getStableDropKey = (
 
 const findClosestMatch = (
   newDrop: ApiDrop,
-  existingDrops: ExtendedDrop[],
+  existingDrops: Drop[],
   maxDiff?: number
-): ExtendedDrop | null => {
+): Drop | null => {
   const MAX_TIME_DIFFERENCE = maxDiff ?? 10000;
 
   return existingDrops.reduce((closest, current) => {
@@ -83,7 +85,7 @@ const findClosestMatch = (
       }
     }
     return closest;
-  }, null as ExtendedDrop | null);
+  }, null as Drop | null);
 };
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;

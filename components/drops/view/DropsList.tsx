@@ -1,10 +1,10 @@
 import { useMemo, RefObject, useCallback, memo } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import Drop, { DropLocation } from "../../waves/drops/Drop";
 import VirtualScrollWrapper from "../../waves/drops/VirtualScrollWrapper";
-
+import { Drop as DropType } from "../../../helpers/waves/drop.helpers";
 type DropActionHandler = ({
   drop,
   partId,
@@ -15,7 +15,7 @@ type DropActionHandler = ({
 
 interface DropsListProps {
   readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
-  readonly drops: ExtendedDrop[];
+  readonly drops: DropType[];
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
@@ -79,7 +79,7 @@ const DropsList = memo(function DropsList({
       parentContainerRef,
       dropViewDropId,
       onDropContentClick,
-      scrollContainerRef
+      scrollContainerRef,
     };
   }, [
     drops,
@@ -95,7 +95,7 @@ const DropsList = memo(function DropsList({
     parentContainerRef,
     dropViewDropId,
     onDropContentClick,
-    scrollContainerRef
+    scrollContainerRef,
   ]);
 
   const memoizedDrops = useMemo(
@@ -108,28 +108,38 @@ const DropsList = memo(function DropsList({
           <div
             key={drop.stableKey}
             id={`drop-${drop.serial_no}`}
-            ref={getItemData.serialNo === drop.serial_no ? getItemData.targetDropRef : null}
-            className={getItemData.serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""}
+            ref={
+              getItemData.serialNo === drop.serial_no
+                ? getItemData.targetDropRef
+                : null
+            }
+            className={
+              getItemData.serialNo === drop.serial_no ? "tw-scroll-mt-20" : ""
+            }
           >
             <VirtualScrollWrapper
               scrollContainerRef={getItemData.scrollContainerRef}
             >
-              <MemoizedDrop
-                dropViewDropId={getItemData.dropViewDropId}
-                onReplyClick={getItemData.handleReplyClick}
-                drop={drop}
-                previousDrop={previousDrop}
-                nextDrop={nextDrop}
-                showWaveInfo={getItemData.showWaveInfo}
-                activeDrop={getItemData.activeDrop}
-                onReply={getItemData.handleReply}
-                onQuote={getItemData.handleQuote}
-                location={DropLocation.WAVE}
-                showReplyAndQuote={getItemData.showReplyAndQuote}
-                onQuoteClick={getItemData.onQuoteClick}
-                parentContainerRef={getItemData.parentContainerRef}
-                onDropContentClick={getItemData.onDropContentClick}
-              />
+              {drop.type === DropSize.FULL ? (
+                <MemoizedDrop
+                  dropViewDropId={getItemData.dropViewDropId}
+                  onReplyClick={getItemData.handleReplyClick}
+                  drop={drop}
+                  previousDrop={previousDrop}
+                  nextDrop={nextDrop}
+                  showWaveInfo={getItemData.showWaveInfo}
+                  activeDrop={getItemData.activeDrop}
+                  onReply={getItemData.handleReply}
+                  onQuote={getItemData.handleQuote}
+                  location={DropLocation.WAVE}
+                  showReplyAndQuote={getItemData.showReplyAndQuote}
+                  onQuoteClick={getItemData.onQuoteClick}
+                  parentContainerRef={getItemData.parentContainerRef}
+                  onDropContentClick={getItemData.onDropContentClick}
+                />
+              ) : (
+                <div>Light Drop</div>
+              )}
             </VirtualScrollWrapper>
           </div>
         );
@@ -137,7 +147,7 @@ const DropsList = memo(function DropsList({
     [drops, getItemData] // Only depends on drops array and the memoized item data
   );
 
-  return ( memoizedDrops);
+  return memoizedDrops;
 });
 
 export default DropsList;

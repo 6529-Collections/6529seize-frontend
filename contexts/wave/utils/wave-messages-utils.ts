@@ -4,8 +4,8 @@ import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import {
   DropSize,
-  ExtendedDrop,
   getStableDropKey,
+  Drop,
 } from "../../../helpers/waves/drop.helpers";
 import { WaveMessagesUpdate } from "../hooks/types";
 
@@ -130,26 +130,6 @@ export function createEmptyWaveMessages(
 }
 
 /**
- * Handles an error when fetching wave messages
- * @param error The error that occurred
- * @param waveId ID of the wave that failed
- * @throws Re-throws abort errors
- * @returns null
- */
-function handleWaveMessagesError(error: unknown, waveId: string): null {
-  // Check if this is an abort error
-  if (error instanceof DOMException && error.name === "AbortError") {
-    throw error; // Re-throw abort errors to be handled by the caller
-  }
-
-  console.error(
-    `[WaveDataManager] Error fetching messages for ${waveId}:`,
-    error
-  );
-  return null;
-}
-
-/**
  * Merges two arrays of drops, removing duplicates based on id,
  * preferring newer versions of duplicates, and sorting by serial_no
  *
@@ -157,12 +137,9 @@ function handleWaveMessagesError(error: unknown, waveId: string): null {
  * @param newDrops New array of drops to merge in
  * @returns A new merged array with no duplicates, sorted by serial_no
  */
-export function mergeDrops(
-  currentDrops: ExtendedDrop[],
-  newDrops: ExtendedDrop[]
-): ExtendedDrop[] {
+export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
   // Create a map for fast lookup by id
-  const dropsMapStableKey = new Map<string, ExtendedDrop>();
+  const dropsMapStableKey = new Map<string, Drop>();
 
   const newDropsWithStableKey = newDrops.map((drop) => {
     const { key, hash } = getStableDropKey(drop, currentDrops);
@@ -186,7 +163,7 @@ export function mergeDrops(
   // Convert the map back to an array
   const mergedDrops = Array.from(dropsMapStableKey.values());
 
-  const dropsMapSerialNo = new Map<number, ExtendedDrop>();
+  const dropsMapSerialNo = new Map<number, Drop>();
 
   for (const drop of mergedDrops) {
     dropsMapSerialNo.set(drop.serial_no, drop);
@@ -209,9 +186,7 @@ export function mergeDrops(
 }
 
 // Helper function to get the highest serial number from an array of drops
-function getHighestSerialNo(
-  drops: ApiDrop[] | ExtendedDrop[]
-): number | null {
+function getHighestSerialNo(drops: ApiDrop[] | Drop[]): number | null {
   if (!drops || drops.length === 0) {
     return null;
   }
