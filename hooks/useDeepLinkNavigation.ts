@@ -14,6 +14,7 @@ export const useDeepLinkNavigation = () => {
 
   const doNavigation = useCallback(
     (pathname: string, query: Record<string, string | number>) => {
+      console.log("Deep Link Navigation", pathname, query);
       router.push({ pathname, query });
     },
     [router]
