@@ -8,11 +8,10 @@ import {
   faShare,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigationHistory } from "../../../hooks/useNavigationHistory";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Share } from "@capacitor/share";
 import Hammer from "hammerjs";
 import useCapacitor from "../../../hooks/useCapacitor";
-import { useRouter } from "next/router";
 import { useDeepLinkNavigation } from "../../../hooks/useDeepLinkNavigation";
 
 export default function CapacitorWidget() {
@@ -25,8 +24,6 @@ export default function CapacitorWidget() {
   const [enableScrollTop, setEnableScrollTop] = useState(false);
 
   const [isShareOpen, setIsShareOpen] = useState(false);
-
-  const router = useRouter();
 
   const toggleShare = async () => {
     await Share.share({
