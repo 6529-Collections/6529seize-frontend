@@ -1,4 +1,4 @@
-import { useState, useCallback, useLayoutEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import useCapacitor from "./useCapacitor";
 
 interface DeviceInfo {
@@ -48,7 +48,7 @@ export default function useDeviceInfo(): DeviceInfo {
 
   const [info, setInfo] = useState<DeviceInfo>(() => getInfo());
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const mq = window.matchMedia('(pointer: coarse)');
     const update = () => setInfo(getInfo());
 
