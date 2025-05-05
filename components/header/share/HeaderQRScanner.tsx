@@ -12,8 +12,10 @@ import { areEqualURLS } from "../../../helpers/Helpers";
 
 export default function HeaderQRScanner({
   onScanSuccess,
+  appSidebar = false,
 }: {
   readonly onScanSuccess: () => void;
+  readonly appSidebar?: boolean;
 }) {
   const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
   const baseEndpoint = process.env.BASE_ENDPOINT ?? "https://6529.io";
@@ -134,6 +136,18 @@ export default function HeaderQRScanner({
     }
   };
 
+  if (appSidebar) {
+    return (
+      <button
+        onClick={startScan}
+        className="tw-bg-transparent tw-border-none tw-w-full tw-flex tw-items-center tw-space-x-4 tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-zinc-300 active:tw-bg-zinc-700 active:tw-text-zinc-200 tw-rounded-lg tw-transition-colors tw-duration-200"
+        aria-label="Scan QR Code">
+        <HeaderQRScannerIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
+        <span>Scan QR Code</span>
+      </button>
+    );
+  }
+
   return (
     <div className="tailwind-scope tw-self-center">
       <button
@@ -149,7 +163,7 @@ export default function HeaderQRScanner({
   );
 }
 
-function HeaderQRScannerIcon() {
+function HeaderQRScannerIcon({ className }: { className?: string }) {
   return (
     <Image
       priority
@@ -158,7 +172,7 @@ function HeaderQRScannerIcon() {
       alt="QR Scanner"
       width={20}
       height={20}
-      className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+      className={className ?? "tw-h-5 tw-w-5 tw-flex-shrink-0"}
     />
   );
 }
