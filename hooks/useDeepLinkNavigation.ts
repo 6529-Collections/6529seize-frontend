@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { App } from "@capacitor/app";
 import { useCallback, useEffect } from "react";
+import useCapacitor from "./useCapacitor";
 
 export enum DeepLinkScope {
   NAVIGATE = "navigate",
@@ -8,6 +9,7 @@ export enum DeepLinkScope {
 }
 
 export const useDeepLinkNavigation = () => {
+  const { isCapacitor } = useCapacitor();
   const router = useRouter();
 
   const doNavigation = useCallback(
@@ -23,6 +25,8 @@ export const useDeepLinkNavigation = () => {
   );
 
   useEffect(() => {
+    if (!isCapacitor) return;
+
     const listener = App.addListener("appUrlOpen", (data) => {
       const urlString = data.url;
 
