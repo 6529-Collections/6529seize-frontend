@@ -1,7 +1,6 @@
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
-
 // Define the shape of the functions passed from the store
 export interface WaveDataStoreUpdater {
   readonly updateData: (value: WaveMessagesUpdate) => void;
@@ -32,8 +31,4 @@ export enum WaveDropsSearchStrategy {
   FIND_OLDER = "FIND_OLDER",
   FIND_NEWER = "FIND_NEWER",
   FIND_BOTH = "FIND_BOTH",
-}
-
-interface DropWithStableOrderKey extends ExtendedDrop {
-  order: number;
 }
