@@ -229,6 +229,71 @@ paths:
                 $ref: "#/components/schemas/ApiRedeemRefreshTokenResponse"
         "400":
           description: Invalid request
+  /community-members:
+    get:
+      tags:
+        - CommunityMembers
+      summary: Get community members.
+      operationId: getCommunityMembers
+      parameters:
+        - name: only_profile_owners
+          in: query
+          description: Return only profile owners?
+          required: false
+          schema:
+            type: boolean
+        - name: param
+          in: query
+          description: Search param
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiCommunityMemberMinimal"
+  /light-drops:
+    get:
+      tags:
+        - Drops
+      summary: Get light drops
+      operationId: getLightDrops
+      parameters:
+        - name: min_serial_no
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: max_serial_no
+          in: query
+          required: false
+          description: Latest message if null
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: wave_id
+          in: query
+          description: Drops in wave with given ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiLightDrop"
   /drops:
     get:
       tags:
@@ -1700,6 +1765,27 @@ paths:
                 $ref: "#/components/schemas/ApiRatingWithProfileInfoAndLevelPage"
         "404":
           description: Profile not found
+  /profiles:
+    post:
+      tags:
+        - Profiles
+      summary: Create or update a profile
+      operationId: createOrUpdateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateOrUpdateProfileRequest"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiIdentity"
+        "400":
+          description: Invalid request
   /profiles/{identity}/proxies:
     get:
       tags:
@@ -3301,6 +3387,49 @@ components:
         rep_rating_for_category_by_user:
           type: number
           format: int64
+    ApiCommunityMemberMinimal:
+      type: object
+      required:
+        - profile_id
+        - handle
+        - normalised_handle
+        - primary_wallet
+        - display
+        - tdh
+        - level
+        - cic_rating
+        - wallet
+        - pfp
+      properties:
+        profile_id:
+          type: string
+          nullable: true
+        handle:
+          type: string
+          nullable: true
+        normalised_handle:
+          type: string
+          nullable: true
+        primary_wallet:
+          type: string
+          nullable: true
+        display:
+          type: string
+          nullable: true
+        tdh:
+          type: number
+          format: int64
+        level:
+          type: number
+          format: int64
+        cic_rating:
+          type: number
+          format: int64
+        wallet:
+          type: string
+        pfp:
+          type: string
+          nullable: true
     ApiCompleteMultipartUploadRequest:
       required:
         - upload_id
@@ -3678,6 +3807,33 @@ components:
           $ref: "#/components/schemas/ApiIntRange"
         forbid_negative_votes:
           type: boolean
+    ApiCreateOrUpdateProfileRequest:
+      type: object
+      required:
+        - handle
+        - classification
+        - sub_classification
+        - pfp_url
+      properties:
+        handle:
+          type: string
+        banner_1:
+          type: string
+          nullable: true
+        banner_2:
+          type: string
+          nullable: true
+        website:
+          type: string
+          nullable: true
+        classification:
+          $ref: "#/components/schemas/ApiProfileClassification"
+        sub_classification:
+          type: string
+          nullable: true
+        pfp_url:
+          type: string
+          nullable: true
     ApiCreateWaveConfig:
       type: object
       required:
@@ -4547,6 +4703,44 @@ components:
           type: number
           format: int64
           nullable: true
+    ApiLightDrop:
+      type: object
+      required:
+        - id
+        - serial_no
+        - drop_type
+        - part_1_text
+        - part_1_media_url
+        - part_1_media_mime_type
+        - has_quote
+        - is_reply_drop
+        - title
+      properties:
+        id:
+          type: string
+        serial_no:
+          description: Sequence number of the drop in Seize
+          type: number
+          format: int64
+        drop_type:
+          $ref: "#/components/schemas/ApiDropType"
+        title:
+          type: string
+          maxLength: 250
+          nullable: true
+        part_1_text:
+          type: string
+          nullable: true
+        part_1_media_url:
+          type: string
+          nullable: true
+        part_1_media_mime_type:
+          type: string
+          nullable: true
+        has_quote:
+          type: boolean
+        is_reply_drop:
+          type: boolean
     ApiLoginRequest:
       type: object
       required:
@@ -5074,6 +5268,7 @@ components:
         - rep
         - tdh
         - level
+        - primary_address
         - banner1_color
         - banner2_color
         - subscribed_actions
@@ -5106,6 +5301,8 @@ components:
         level:
           type: number
           format: int64
+        primary_address:
+          type: string
         subscribed_actions:
           type: array
           items:
