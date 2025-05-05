@@ -134,6 +134,7 @@ import MainLayout from "../components/layout/MainLayout";
 import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
 import useDeviceInfo from "../hooks/useDeviceInfo";
+import useIsMobileScreen from "../hooks/isMobileScreen";
 
 library.add(
   faArrowUp,
@@ -414,7 +415,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                               <AppWebSocketProvider>
                                 <HeaderProvider>
                                   <MainLayout>
-                                    {getLayout(<Component {...props} key={router.asPath} />)}
+                                    {getLayout(
+                                      <Component
+                                        {...props}
+                                        key={router.asPath}
+                                      />
+                                    )}
                                   </MainLayout>
                                 </HeaderProvider>
                                 {appWalletPasswordModal.modal}
