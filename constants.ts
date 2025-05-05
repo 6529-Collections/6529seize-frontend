@@ -37,6 +37,7 @@ export const DELEGATION_ALL_ADDRESS =
   "0x8888888888888888888888888888888888888888";
 
 export const API_AUTH_COOKIE = "x-6529-auth";
+
 export const CONSENT_ESSENTIAL_COOKIE = "essential-cookies-consent";
 export const CONSENT_PERFORMANCE_COOKIE = "performance-cookies-consent";
 export const CONSENT_EULA_COOKIE = "eula-consent";
