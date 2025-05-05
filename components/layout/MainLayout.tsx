@@ -18,6 +18,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const isMobile = isMobileDevice ?? hasTouchScreen;
   // Pages that should use the small header
   const isSmall = router.pathname.startsWith("/my-stream");
+  const isAccess = router.pathname.startsWith("/access");
+
+  if (isAccess) {
+    return <>{children}</>;
+  }
 
   return (
     <ViewProvider>
