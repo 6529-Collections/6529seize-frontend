@@ -54,6 +54,15 @@ export async function fetchWaveMessages(
   }
 }
 
+
+export async function fetchAroundSerialNoWaveMessages(
+  waveId: string,
+  serialNo: number,
+  signal?: AbortSignal
+): Promise<ApiDrop[] | null> {
+  return null;
+}
+
 /**
  * Fetches light wave messages (drops) for a specific wave
  * @param waveId The ID of the wave to fetch messages for
@@ -67,8 +76,9 @@ export async function fetchLightWaveMessages(
   signal?: AbortSignal
 ): Promise<ApiLightDrop[] | null> {
   const params: Record<string, string> = {
-    min_serial_no: `${serialNo}`,
+    max_serial_no: `${serialNo}`,
     wave_id: waveId,
+    limit: "1000",
   };
 
   try {
@@ -183,6 +193,7 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
 
   const newDropsWithStableKey = newDrops.map((drop) => {
     const { key, hash } = getStableDropKey(drop, currentDrops);
+
     return {
       ...drop,
       stableHash: hash,
@@ -212,17 +223,14 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
   const finalDrops = Array.from(dropsMapSerialNo.values());
 
   finalDrops.sort((a, b) => {
+    if (a.type === DropSize.LIGHT || b.type === DropSize.LIGHT) {
+      return b.serial_no - a.serial_no;
+    }
+
     const aIsTemp = a.id?.startsWith("temp-") ?? false;
     const bIsTemp = b.id?.startsWith("temp-") ?? false;
 
     if (aIsTemp || !bIsTemp) {
-      if (a.type === DropSize.LIGHT) {
-        return 1;
-      }
-
-      if (b.type === DropSize.LIGHT) {
-        return -1;
-      }
       return (
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
@@ -230,6 +238,7 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
 
     return b.serial_no - a.serial_no;
   });
+
   return finalDrops;
 }
 

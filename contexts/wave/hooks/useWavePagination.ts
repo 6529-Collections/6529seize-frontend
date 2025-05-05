@@ -5,6 +5,7 @@ import { WaveDataStoreUpdater } from "./types";
 import {
   fetchLightWaveMessages,
   fetchWaveMessages,
+  fetchAroundSerialNoWaveMessages,
 } from "../utils/wave-messages-utils";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
 import { ApiLightDrop } from "../../../generated/models/ApiLightDrop";
@@ -13,6 +14,12 @@ import { ApiLightDrop } from "../../../generated/models/ApiLightDrop";
 interface PaginationState {
   isLoading: boolean;
   promise: Promise<(ApiDrop | ApiLightDrop)[] | null> | null;
+}
+
+// Tracks the state for fetching messages around a specific serial number
+interface AroundSerialNoState {
+  isFetching: boolean;
+  pendingSerialNo: number | null;
 }
 
 export function useWavePagination({
@@ -28,6 +35,8 @@ export function useWavePagination({
 
   // Track pagination loading state
   const paginationStates = useRef<Record<string, PaginationState>>({});
+  // Track state for fetching around a serial number
+  const aroundSerialNoStates = useRef<Record<string, AroundSerialNoState>>({});
 
   /**
    * Gets the oldest message's serial number for pagination
@@ -82,7 +91,7 @@ export function useWavePagination({
       updateData({
         key: waveId,
         isLoadingNextPage: false,
-        hasNextPage: newDrops.length > 0, // If we got drops, assume there might be more
+        hasNextPage: newDrops.length > 0,
         drops: newDrops.map((drop) => {
           if ("part_1_text" in drop) {
             return {
@@ -245,31 +254,104 @@ export function useWavePagination({
     [cancelAbort, getData, updateData]
   );
 
-  const fetchNextLightPage = useCallback(
-    async (waveId: string): Promise<ApiLightDrop[] | null> => {
-      // Get current state
-      const currentData = getData(waveId);
-      if (!currentData) {
-        return null;
+  /**
+   * Internal function to process the queue for fetching around a serial number.
+   */
+  const _processAroundSerialNoQueue = useCallback(
+    async (waveId: string): Promise<void> => {
+      const state = aroundSerialNoStates.current[waveId];
+      if (!state) {
+        return; // No state for this waveId
       }
 
-      // Get the oldest message serial number for pagination
-      const oldestSerialNo = getOldestMessageSerialNo(waveId);
-      if (!oldestSerialNo) {
-        return null;
+      // Guard 1: Already fetching
+      if (state.isFetching) {
+        return;
       }
 
-      // Setup abort controller
+      // Guard 2: No pending request
+      const serialToFetch = state.pendingSerialNo;
+      if (serialToFetch === null) {
+        return;
+      }
 
-      // Create promise for the request
-      const drops = await fetchLightWaveMessages(waveId, oldestSerialNo);
-      return drops;
+      // Mark as busy and clear pending request
+      state.isFetching = true;
+      state.pendingSerialNo = null;
+
+      // Unique key for abort controller, distinct from pagination
+      const abortKey = `${waveId}-around`;
+      const controller = createController(abortKey);
+
+      try {
+        console.log(
+          `[WavePagination] Fetching around serial no ${serialToFetch} for wave ${waveId}`
+        );
+        const result = await fetchAroundSerialNoWaveMessages(
+          waveId,
+          serialToFetch,
+          controller.signal
+        );
+        // Placeholder: Handle the result if needed in the future.
+        // Currently, fetchAroundSerialNoWaveMessages returns null.
+        if (result) {
+          console.log(
+            `[WavePagination] Successfully fetched around serial no ${serialToFetch}`,
+            result
+          );
+          // TODO: Decide how to integrate 'result' if it ever returns data.
+          // It likely shouldn't merge directly into the main 'drops' state
+          // unless specifically designed to do so.
+        } else {
+            console.log(
+            `[WavePagination] Fetched around serial no ${serialToFetch}, no new data.`
+          );
+        }
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          console.error(
+            `[WavePagination] Error fetching around serial no ${serialToFetch} for wave ${waveId}:`,
+            error
+          );
+        } else {
+          console.log(`[WavePagination] Fetch around ${serialToFetch} aborted.`);
+        }
+      } finally {
+        state.isFetching = false;
+        cleanupController(abortKey, controller);
+        // Trigger processing again in case a new request came in during the fetch
+        void _processAroundSerialNoQueue(waveId);
+      }
     },
-    [getData, getOldestMessageSerialNo]
+    [createController, cleanupController] // Dependencies: functions from useWaveAbortController
+  );
+
+  /**
+   * Requests fetching messages around a specific serial number.
+   * Ensures only the latest request is processed after the current fetch completes.
+   */
+  const fetchAroundSerialNo = useCallback(
+    (waveId: string, serialNo: number): void => {
+      // Initialize state if it doesn't exist
+      if (!aroundSerialNoStates.current[waveId]) {
+        aroundSerialNoStates.current[waveId] = {
+          isFetching: false,
+          pendingSerialNo: null,
+        };
+      }
+
+      // Store the latest requested serial number
+      aroundSerialNoStates.current[waveId].pendingSerialNo = serialNo;
+
+      // Trigger the processing queue
+      void _processAroundSerialNoQueue(waveId);
+    },
+    [_processAroundSerialNoQueue] // Dependency: the internal processing function
   );
 
   return {
     fetchNextPage,
     cancelPaginationFetch,
+    fetchAroundSerialNo, // Expose the new function
   };
 }

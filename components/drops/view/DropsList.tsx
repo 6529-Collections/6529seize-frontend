@@ -5,6 +5,7 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import Drop, { DropLocation } from "../../waves/drops/Drop";
 import VirtualScrollWrapper from "../../waves/drops/VirtualScrollWrapper";
 import { Drop as DropType } from "../../../helpers/waves/drop.helpers";
+import LightDrop from "../../waves/drops/LightDrop";
 type DropActionHandler = ({
   drop,
   partId,
@@ -31,7 +32,7 @@ interface DropsListProps {
 }
 
 const MemoizedDrop = memo(Drop);
-
+const MemoizedLightDrop = memo(LightDrop);
 const DropsList = memo(function DropsList({
   scrollContainerRef,
   drops,
@@ -138,7 +139,7 @@ const DropsList = memo(function DropsList({
                   onDropContentClick={getItemData.onDropContentClick}
                 />
               ) : (
-                <div>Light Drop</div>
+                <MemoizedLightDrop drop={drop} />
               )}
             </VirtualScrollWrapper>
           </div>

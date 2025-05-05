@@ -264,13 +264,14 @@ paths:
       summary: Get light drops
       operationId: getLightDrops
       parameters:
-        - name: min_serial_no
+        - name: limit
           in: query
           required: true
           schema:
             type: integer
             format: int64
             minimum: 1
+            maximum: 2000
         - name: max_serial_no
           in: query
           required: false

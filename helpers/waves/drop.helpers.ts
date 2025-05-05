@@ -30,35 +30,26 @@ export const getStableDropKey = (
   drop: Drop,
   existingDrops: Drop[] = []
 ): { key: string; hash: string } => {
-  // TODO: is this correct?
-  const closestMatch =
-    drop.type === DropSize.FULL
-      ? findClosestMatch(drop, existingDrops)
-      : null;
+  if (drop.type === DropSize.LIGHT) {
+    return { key: drop.id, hash: drop.id };
+  }
+  const closestMatch = findClosestMatch(drop, existingDrops);
   const stableCreatedAt = closestMatch
     ? "created_at" in closestMatch
       ? closestMatch.created_at
-      : // TODO: what should we do here?
-        Time.currentMillis()
-    : "created_at" in drop
-    ? drop.created_at
-    : Time.currentMillis();
+      : drop.serial_no
+    : drop.created_at;
 
-  // TODO: is this correct?
   const input = {
-    wave_id: "wave" in drop ? drop.wave.id : null,
-    reply_to_id: "reply_to" in drop ? drop.reply_to?.drop_id : null,
-    reply_to_part_id: "reply_to" in drop ? drop.reply_to?.drop_part_id : null,
-    author_handle: "author" in drop ? drop.author.handle : null,
-    title: "title" in drop ? drop.title : null,
-    parts_content:
-      "parts" in drop ? drop.parts.map((part) => part.content).join("") : null,
-    metadata:
-      "metadata" in drop
-        ? drop.metadata
-            .map((metadata) => metadata.data_key + metadata.data_value)
-            .join("")
-        : null,
+    wave_id: drop.wave.id,
+    reply_to_id: drop.reply_to?.drop_id ?? null,
+    reply_to_part_id: drop.reply_to?.drop_part_id ?? null,
+    author_handle: drop.author.handle,
+    title: drop.title,
+    parts_content: drop.parts.map((part) => part.content).join(""),
+    metadata: drop.metadata
+      .map((metadata) => metadata.data_key + metadata.data_value)
+      .join(""),
     stable_created_at: stableCreatedAt,
   };
 
