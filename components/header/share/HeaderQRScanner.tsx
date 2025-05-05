@@ -163,7 +163,7 @@ export default function HeaderQRScanner({
   );
 }
 
-function HeaderQRScannerIcon({ className }: { className?: string }) {
+function HeaderQRScannerIcon({ className }: { readonly className?: string }) {
   return (
     <Image
       priority

@@ -14,7 +14,6 @@ import {
 import AppUserConnect from "./AppUserConnect";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
-import HeaderQRScanner from "./share/HeaderQRScanner";
 
 const MENU = [
   { label: "Profile", path: "/profile", icon: UserIcon },
