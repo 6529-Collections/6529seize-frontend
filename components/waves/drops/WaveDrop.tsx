@@ -20,7 +20,7 @@ enum GroupingThreshold {
 
 const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
-  otherDrop: Drop | null
+  otherDrop: ExtendedDrop | null
 ): boolean => {
   if (!otherDrop || currentDrop.parts.length > 1) {
     return false;
@@ -103,8 +103,8 @@ const getDropClasses = (
 
 interface WaveDropProps {
   readonly drop: ExtendedDrop;
-  readonly previousDrop: Drop | null;
-  readonly nextDrop: Drop | null;
+  readonly previousDrop: ExtendedDrop | null;
+  readonly nextDrop: ExtendedDrop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;

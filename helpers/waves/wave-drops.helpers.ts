@@ -7,7 +7,13 @@ const createExtendedDrop = (
   wave: ApiWaveMin,
   prevDrops: ExtendedDrop[]
 ): ExtendedDrop => {
-  const { key, hash } = getStableDropKey({ ...drop, wave }, prevDrops);
+  const { key, hash } = getStableDropKey({
+    ...drop,
+    wave,
+    type: DropSize.FULL,
+    stableKey: "",
+    stableHash: "",
+  }, prevDrops);
   return {
     ...drop,
     type: DropSize.FULL,

@@ -8,6 +8,7 @@ import {
   Drop,
 } from "../../../helpers/waves/drop.helpers";
 import { WaveMessagesUpdate } from "../hooks/types";
+import { ApiLightDrop } from "../../../generated/models/ObjectSerializer";
 
 /**
  * Fetches wave messages (drops) for a specific wave
@@ -47,6 +48,45 @@ export async function fetchWaveMessages(
 
     console.error(
       `[WaveDataManager] Failed to fetch messages for ${waveId}:`,
+      error
+    );
+    return null;
+  }
+}
+
+/**
+ * Fetches light wave messages (drops) for a specific wave
+ * @param waveId The ID of the wave to fetch messages for
+ * @param serialNo The serial number to fetch messages before
+ * @param signal Optional AbortSignal for cancellation
+ * @returns Array of ApiLightDrop with wave data attached, or null if the request fails
+ */
+export async function fetchLightWaveMessages(
+  waveId: string,
+  serialNo: number,
+  signal?: AbortSignal
+): Promise<ApiLightDrop[] | null> {
+  const params: Record<string, string> = {
+    min_serial_no: `${serialNo}`,
+    wave_id: waveId,
+  };
+
+  try {
+    const data = await commonApiFetch<ApiLightDrop[]>({
+      endpoint: `/light-drops`,
+      params,
+      signal,
+    });
+
+    return data;
+  } catch (error) {
+    // Check if this is an abort error
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error; // Re-throw abort errors to be handled by the caller
+    }
+
+    console.error(
+      `[WaveDataManager] Failed to fetch light messages for ${waveId}:`,
       error
     );
     return null;
@@ -175,10 +215,18 @@ export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
     const aIsTemp = a.id?.startsWith("temp-") ?? false;
     const bIsTemp = b.id?.startsWith("temp-") ?? false;
 
-    if (aIsTemp || !bIsTemp)
+    if (aIsTemp || !bIsTemp) {
+      if (a.type === DropSize.LIGHT) {
+        return 1;
+      }
+
+      if (b.type === DropSize.LIGHT) {
+        return -1;
+      }
       return (
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
+    }
 
     return b.serial_no - a.serial_no;
   });

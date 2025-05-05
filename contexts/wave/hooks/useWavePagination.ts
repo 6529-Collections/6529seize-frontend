@@ -2,13 +2,17 @@ import { useCallback, useRef } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { useWaveAbortController } from "./useWaveAbortController";
 import { WaveDataStoreUpdater } from "./types";
-import { fetchWaveMessages } from "../utils/wave-messages-utils";
+import {
+  fetchLightWaveMessages,
+  fetchWaveMessages,
+} from "../utils/wave-messages-utils";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
+import { ApiLightDrop } from "../../../generated/models/ApiLightDrop";
 
 // Tracks which waves are currently loading next page
 interface PaginationState {
   isLoading: boolean;
-  promise: Promise<ApiDrop[] | null> | null;
+  promise: Promise<(ApiDrop | ApiLightDrop)[] | null> | null;
 }
 
 export function useWavePagination({
@@ -46,8 +50,7 @@ export function useWavePagination({
    * Updates store with new paginated data
    */
   const updateWithPaginatedData = useCallback(
-    (waveId: string, newDrops: ApiDrop[] | null) => {
-
+    (waveId: string, newDrops: (ApiDrop | ApiLightDrop)[] | null) => {
       // Clear the loading state
       if (paginationStates.current[waveId]) {
         paginationStates.current[waveId].isLoading = false;
@@ -80,12 +83,23 @@ export function useWavePagination({
         key: waveId,
         isLoadingNextPage: false,
         hasNextPage: newDrops.length > 0, // If we got drops, assume there might be more
-        drops: newDrops.map((drop) => ({
-          ...drop,
-          type: DropSize.FULL,
-          stableKey: drop.id,
-          stableHash: drop.id,
-        })),
+        drops: newDrops.map((drop) => {
+          if ("part_1_text" in drop) {
+            return {
+              ...drop,
+              type: DropSize.LIGHT,
+              stableKey: drop.id,
+              stableHash: drop.id,
+            };
+          }
+
+          return {
+            ...drop,
+            type: DropSize.FULL,
+            stableKey: drop.id,
+            stableHash: drop.id,
+          };
+        }),
       });
 
       return newDrops;
@@ -130,7 +144,10 @@ export function useWavePagination({
    * Fetches the next page of data for a wave
    */
   const fetchNextPage = useCallback(
-    async (waveId: string): Promise<ApiDrop[] | null> => {
+    async (
+      waveId: string,
+      type: DropSize
+    ): Promise<(ApiDrop | ApiLightDrop)[] | null> => {
       // Get current state
       const currentData = getData(waveId);
       if (!currentData) {
@@ -173,11 +190,12 @@ export function useWavePagination({
       const controller = createController(waveId);
 
       // Create promise for the request
-      const fetchPromise = fetchWaveMessages(
-        waveId,
-        oldestSerialNo,
-        controller.signal
-      )
+      const fetchPromise =
+        type === DropSize.FULL
+          ? fetchWaveMessages(waveId, oldestSerialNo, controller.signal)
+          : fetchLightWaveMessages(waveId, oldestSerialNo, controller.signal);
+
+      fetchPromise
         .then((drops) => updateWithPaginatedData(waveId, drops))
         .catch((error) => {
           handlePaginationError(waveId, error);
@@ -225,6 +243,29 @@ export function useWavePagination({
       }
     },
     [cancelAbort, getData, updateData]
+  );
+
+  const fetchNextLightPage = useCallback(
+    async (waveId: string): Promise<ApiLightDrop[] | null> => {
+      // Get current state
+      const currentData = getData(waveId);
+      if (!currentData) {
+        return null;
+      }
+
+      // Get the oldest message serial number for pagination
+      const oldestSerialNo = getOldestMessageSerialNo(waveId);
+      if (!oldestSerialNo) {
+        return null;
+      }
+
+      // Setup abort controller
+
+      // Create promise for the request
+      const drops = await fetchLightWaveMessages(waveId, oldestSerialNo);
+      return drops;
+    },
+    [getData, getOldestMessageSerialNo]
   );
 
   return {

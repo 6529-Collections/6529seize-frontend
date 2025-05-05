@@ -4,6 +4,8 @@ import { ApiDrop } from "../../generated/models/ApiDrop";
 import { getRandomObjectId } from "../AllowlistToolHelpers";
 import { TypedFeedItem } from "../../types/feed.types";
 import { ApiFeedItemType } from "../../generated/models/ApiFeedItemType";
+import { ApiLightDrop } from "../../generated/models/ApiLightDrop";
+import { Time } from "../time";
 
 export enum DropSize {
   LIGHT = "LIGHT",
@@ -18,31 +20,45 @@ export interface ExtendedDrop extends ApiDrop {
   stableHash: string;
 }
 
-export interface ExtendedLightDrop extends ApiDrop {
+export interface ExtendedLightDrop extends ApiLightDrop {
   type: DropSize.LIGHT;
   stableKey: string;
   stableHash: string;
 }
 
 export const getStableDropKey = (
-  drop: ApiDrop,
+  drop: Drop,
   existingDrops: Drop[] = []
 ): { key: string; hash: string } => {
-  const closestMatch = findClosestMatch(drop, existingDrops);
+  // TODO: is this correct?
+  const closestMatch =
+    drop.type === DropSize.FULL
+      ? findClosestMatch(drop, existingDrops)
+      : null;
   const stableCreatedAt = closestMatch
-    ? closestMatch.created_at
-    : drop.created_at;
+    ? "created_at" in closestMatch
+      ? closestMatch.created_at
+      : // TODO: what should we do here?
+        Time.currentMillis()
+    : "created_at" in drop
+    ? drop.created_at
+    : Time.currentMillis();
 
+  // TODO: is this correct?
   const input = {
-    wave_id: drop.wave.id,
-    reply_to_id: drop.reply_to?.drop_id ?? null,
-    reply_to_part_id: drop.reply_to?.drop_part_id ?? null,
-    author_handle: drop.author.handle,
-    title: drop.title,
-    parts_content: drop.parts.map((part) => part.content).join(""),
-    metadata: drop.metadata
-      .map((metadata) => metadata.data_key + metadata.data_value)
-      .join(""),
+    wave_id: "wave" in drop ? drop.wave.id : null,
+    reply_to_id: "reply_to" in drop ? drop.reply_to?.drop_id : null,
+    reply_to_part_id: "reply_to" in drop ? drop.reply_to?.drop_part_id : null,
+    author_handle: "author" in drop ? drop.author.handle : null,
+    title: "title" in drop ? drop.title : null,
+    parts_content:
+      "parts" in drop ? drop.parts.map((part) => part.content).join("") : null,
+    metadata:
+      "metadata" in drop
+        ? drop.metadata
+            .map((metadata) => metadata.data_key + metadata.data_value)
+            .join("")
+        : null,
     stable_created_at: stableCreatedAt,
   };
 
@@ -61,6 +77,10 @@ const findClosestMatch = (
   const MAX_TIME_DIFFERENCE = maxDiff ?? 10000;
 
   return existingDrops.reduce((closest, current) => {
+    // TODO: is this correct?
+    if (current.type === DropSize.LIGHT) {
+      return closest;
+    }
     if (
       current.author.handle === newDrop.author.handle &&
       current.parts.map((p) => p.content).join("") ===
@@ -70,6 +90,11 @@ const findClosestMatch = (
           new Date(newDrop.created_at).getTime()
       ) < MAX_TIME_DIFFERENCE
     ) {
+      // TODO: is this correct?
+      if (closest?.type === DropSize.LIGHT) {
+        return current;
+      }
+
       if (
         !closest ||
         Math.abs(
@@ -94,7 +119,12 @@ export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
  * Convert an ApiDrop to ExtendedDrop by adding stable keys
  */
 export const convertApiDropToExtendedDrop = (drop: ApiDrop): ExtendedDrop => {
-  const { key, hash } = getStableDropKey(drop);
+  const { key, hash } = getStableDropKey({
+    ...drop,
+    type: DropSize.FULL,
+    stableKey: "",
+    stableHash: "",
+  });
   return {
     ...drop,
     type: DropSize.FULL,
