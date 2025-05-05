@@ -56,18 +56,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [BrainView.WAVES]: null,
   });
 
-/*   React.useEffect(() => {
-    const handleRouteChange = () => {
-      onViewChange(BrainView.DEFAULT);
-    };
-
-    router.events.on("routeChangeComplete", handleRouteChange);
-
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-    };
-  }, [router.events, onViewChange]); */
-
   React.useEffect(() => {
     const activeTabEl = tabRefs.current[activeView];
     if (activeTabEl) {

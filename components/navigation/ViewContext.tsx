@@ -92,15 +92,16 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     (item: NavItem) => {
       if (item.kind === "route") {
         handleRouteClick(item);
+        return;
+      }
+
+      if (item.viewKey === "waves" && lastVisitedWave) {
+        router.push(`/my-stream?wave=${lastVisitedWave}`, undefined, {
+          shallow: true,
+        });
+        setActiveView(null);
       } else {
-        if (item.viewKey === "waves" && lastVisitedWave) {
-          router.push(`/my-stream?wave=${lastVisitedWave}`, undefined, {
-            shallow: true,
-          });
-          setActiveView(null);
-        } else {
-          setActiveView(item.viewKey);
-        }
+        setActiveView(item.viewKey);
       }
     },
     [handleRouteClick, setActiveView, lastVisitedWave, router]

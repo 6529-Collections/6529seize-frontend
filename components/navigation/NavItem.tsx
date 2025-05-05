@@ -76,9 +76,9 @@ const NavItem = ({ item }: Props) => {
       router.push("/my-stream/notifications?reload=true", undefined, {
         shallow: true,
       });
-    } else {
-      handleNavClick(item);
+      return;
     }
+    handleNavClick(item);
   };
 
   if (item.kind === "route") {

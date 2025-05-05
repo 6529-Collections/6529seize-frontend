@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Spinner() {
   return (
-    <div role="status">
+    <output>
       <svg
         aria-hidden="true"
         className="tw-size-4 tw-text-iron-600 tw-animate-spin tw-fill-white"
@@ -19,6 +19,6 @@ export default function Spinner() {
           fill="currentFill"
         />
       </svg>
-    </div>
+    </output>
   );
 }
