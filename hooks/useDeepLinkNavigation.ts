@@ -25,7 +25,12 @@ export const useDeepLinkNavigation = () => {
   );
 
   useEffect(() => {
-    if (!isCapacitor) return;
+    if (!isCapacitor) {
+      console.log("Not Capacitor - Deep Link Navigation not supported");
+      return;
+    } else {
+      console.log("In Capacitor - Deep Link Navigation supported");
+    }
 
     const listener = App.addListener("appUrlOpen", (data) => {
       const urlString = data.url;
