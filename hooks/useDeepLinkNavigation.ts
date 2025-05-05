@@ -13,24 +13,14 @@ export const useDeepLinkNavigation = () => {
   const router = useRouter();
 
   const doNavigation = useCallback(
-    (pathname: string, queryParams: Record<string, string | number>) => {
-      const isSamePath = router.asPath.includes(pathname);
-      const navigationMethod = isSamePath ? "replace" : "push";
-
-      router[navigationMethod]({ pathname, query: queryParams }, undefined, {
-        shallow: false,
-      });
+    (pathname: string, query: Record<string, string | number>) => {
+      router.push({ pathname, query });
     },
     [router]
   );
 
   useEffect(() => {
-    if (!isCapacitor) {
-      console.log("Not Capacitor - Deep Link Navigation not supported");
-      return;
-    } else {
-      console.log("In Capacitor - Deep Link Navigation supported");
-    }
+    if (!isCapacitor) return;
 
     const listener = App.addListener("appUrlOpen", (data) => {
       const urlString = data.url;
