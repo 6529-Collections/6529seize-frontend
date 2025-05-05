@@ -1,4 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useLayoutEffect } from 'react';
+
+interface DeviceInfo {
+  readonly isMobileDevice: boolean;
+  readonly hasTouchScreen: boolean;
+}
 
 /**
  * Hook that provides comprehensive device and screen information.
@@ -8,25 +13,56 @@ import { useState, useEffect } from "react";
  * - isMobileDevice: Whether the device is a mobile device (based on user agent)
  * - hasTouchScreen: Whether the device has a touch screen
  */
-export default function useDeviceInfo() {
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [hasTouchScreen, setHasTouchScreen] = useState(false);
+export default function useDeviceInfo(): DeviceInfo {
+  const getInfo = useCallback((): DeviceInfo => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined')
+      return { isMobileDevice: false, hasTouchScreen: false };
 
-  // Check for mobile device
-  useEffect(() => {
-    const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent;
-    const regex = /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i;
-    const mobile = regex.exec(userAgent) !== null;
-    setIsMobileDevice(mobile);
+    const nav = navigator as Navigator & {
+      msMaxTouchPoints?: number;
+      userAgentData?: { mobile?: boolean };
+    };
+
+    const hasTouchScreen =
+      (nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0) > 0 ||
+      'ontouchstart' in window ||
+      window.matchMedia('(pointer: coarse)').matches;
+
+    const ua = nav.userAgent;
+    const uaDataMobile = nav.userAgentData?.mobile;
+    const classicMobile = /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      ua,
+    );
+    const iPadDesktopUA = ua.includes('Macintosh') && hasTouchScreen;
+    const widthMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    const isMobileDevice =
+      uaDataMobile ?? (classicMobile || iPadDesktopUA || widthMobile);
+
+    return { isMobileDevice, hasTouchScreen };
   }, []);
 
-  // Check for touch screen
-  useEffect(() => {
-    setHasTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
+  const [info, setInfo] = useState<DeviceInfo>(() => getInfo());
 
-  return {
-    isMobileDevice,
-    hasTouchScreen
-  };
+  useLayoutEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse)');
+    const update = () => setInfo(getInfo());
+
+    mq.addEventListener('change', update);
+    window.addEventListener('resize', update);
+
+    const onceTouch = () => {
+      update();
+      window.removeEventListener('touchstart', onceTouch);
+    };
+    window.addEventListener('touchstart', onceTouch, { passive: true });
+
+    return () => {
+      mq.removeEventListener('change', update);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('touchstart', onceTouch);
+    };
+  }, [getInfo]);
+
+  return info;
 }

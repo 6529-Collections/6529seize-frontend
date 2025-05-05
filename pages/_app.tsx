@@ -134,7 +134,6 @@ import MainLayout from "../components/layout/MainLayout";
 import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
 import useDeviceInfo from "../hooks/useDeviceInfo";
-import useIsMobileScreen from "../hooks/isMobileScreen";
 
 library.add(
   faArrowUp,
@@ -288,9 +287,8 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const router = useRouter();
   const { isMobileDevice } = useDeviceInfo();
-  const isMobileScreen = useIsMobileScreen();
   const hideFooter =
-    (isMobileDevice && isMobileScreen) ||
+    isMobileDevice ||
     ["/waves", "/my-stream", "/open-mobile"].some((path) =>
       router.pathname.startsWith(path)
     );
