@@ -90,12 +90,10 @@ const NavItem = ({ item }: Props) => {
     } else {
       isActive = router.pathname === item.href && activeView === null;
     }
+  } else if (item.viewKey === "waves") {
+    isActive = activeView === item.viewKey || isWaveSubRoute;
   } else {
-    if (item.viewKey === "waves") {
-      isActive = activeView === item.viewKey || isWaveSubRoute;
-    } else {
-      isActive = activeView === item.viewKey;
-    }
+    isActive = activeView === item.viewKey;
   }
 
   return (
