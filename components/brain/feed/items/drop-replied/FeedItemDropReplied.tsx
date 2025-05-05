@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { IFeedItemDropReplied } from "../../../../../types/feed.types";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import Drop, { DropInteractionParams, DropLocation } from "../../../../waves/drops/Drop";
 
 export default function FeedItemDropReplied({
@@ -32,6 +32,7 @@ export default function FeedItemDropReplied({
   return (
     <Drop
       drop={{
+        type: DropSize.FULL,
         ...item.item.reply,
         stableKey: "",
         stableHash: "",

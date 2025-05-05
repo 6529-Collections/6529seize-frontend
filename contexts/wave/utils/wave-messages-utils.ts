@@ -3,6 +3,7 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import {
+  DropSize,
   ExtendedDrop,
   getStableDropKey,
 } from "../../../helpers/waves/drop.helpers";
@@ -88,6 +89,7 @@ export function formatWaveMessages(
     hasNextPage: hasNextPage,
     drops: drops.map((drop) => ({
       ...drop,
+      type: DropSize.FULL,
       stableKey: drop.id,
       stableHash: drop.id,
     })),

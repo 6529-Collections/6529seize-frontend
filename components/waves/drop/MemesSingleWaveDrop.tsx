@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { SingleWaveDropHeader } from "./SingleWaveDropHeader";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useDrop } from "../../../hooks/useDrop";
 import { useWaveData } from "../../../hooks/useWaveData";
 import { MemesSingleWaveDropInfoPanel } from "./MemesSingleWaveDropInfoPanel";
@@ -43,6 +43,7 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
         {!!drop && !!wave && (
           <MemesSingleWaveDropInfoPanel
             drop={{
+              type: DropSize.FULL,
               ...drop,
               stableHash: initialDrop.stableHash,
               stableKey: initialDrop.stableKey,

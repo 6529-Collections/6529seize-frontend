@@ -1,3 +1,4 @@
+import { ExtendedLightDrop } from "./../../../helpers/waves/drop.helpers";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
@@ -19,7 +20,7 @@ export type WaveMessages = {
   readonly isLoading: boolean;
   readonly isLoadingNextPage: boolean;
   readonly hasNextPage: boolean;
-  readonly drops: ExtendedDrop[];
+  readonly drops: (ExtendedDrop | ExtendedLightDrop)[];
   readonly latestFetchedSerialNo: number | null;
 };
 

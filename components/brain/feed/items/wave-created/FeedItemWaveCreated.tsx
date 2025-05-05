@@ -3,7 +3,7 @@ import { IFeedItemWaveCreated } from "../../../../../types/feed.types";
 
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
-import { ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
 import Drop, {
   DropInteractionParams,
   DropLocation,
@@ -63,6 +63,7 @@ export default function FeedItemWaveCreated({
 
         <Drop
           drop={{
+            type: DropSize.FULL,
             ...item.item.description_drop,
             stableKey: "",
             stableHash: "",

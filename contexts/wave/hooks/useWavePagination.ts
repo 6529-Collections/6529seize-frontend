@@ -3,6 +3,7 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { useWaveAbortController } from "./useWaveAbortController";
 import { WaveDataStoreUpdater } from "./types";
 import { fetchWaveMessages } from "../utils/wave-messages-utils";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
 
 // Tracks which waves are currently loading next page
 interface PaginationState {
@@ -81,6 +82,7 @@ export function useWavePagination({
         hasNextPage: newDrops.length > 0, // If we got drops, assume there might be more
         drops: newDrops.map((drop) => ({
           ...drop,
+          type: DropSize.FULL,
           stableKey: drop.id,
           stableHash: drop.id,
         })),

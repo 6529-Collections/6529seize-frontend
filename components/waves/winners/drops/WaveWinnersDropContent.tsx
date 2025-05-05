@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import WaveDropContent from "../../drops/WaveDropContent";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 import { useRouter } from "next/router";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveWinnersDropContentProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -25,6 +25,7 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
   return (
     <WaveDropContent
       drop={{
+        type: DropSize.FULL,
         ...winner.drop,
         stableKey: winner.drop.id,
         stableHash: winner.drop.id,

@@ -5,7 +5,19 @@ import { getRandomObjectId } from "../AllowlistToolHelpers";
 import { TypedFeedItem } from "../../types/feed.types";
 import { ApiFeedItemType } from "../../generated/models/ApiFeedItemType";
 
+export enum DropSize {
+  LIGHT = "LIGHT",
+  FULL = "FULL",
+}
+
 export interface ExtendedDrop extends ApiDrop {
+  type: DropSize.FULL;
+  stableKey: string;
+  stableHash: string;
+}
+
+export interface ExtendedLightDrop extends ApiDrop {
+  type: DropSize.LIGHT;
   stableKey: string;
   stableHash: string;
 }
@@ -75,8 +87,6 @@ const findClosestMatch = (
 };
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
-const getOptimisticDropSerialNo = (): number =>
-  Math.floor(Math.random() * 1000000);
 
 /**
  * Convert an ApiDrop to ExtendedDrop by adding stable keys
@@ -85,6 +95,7 @@ export const convertApiDropToExtendedDrop = (drop: ApiDrop): ExtendedDrop => {
   const { key, hash } = getStableDropKey(drop);
   return {
     ...drop,
+    type: DropSize.FULL,
     stableKey: key,
     stableHash: hash,
   };
