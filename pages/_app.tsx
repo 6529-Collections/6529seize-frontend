@@ -111,7 +111,7 @@ import { wagmiConfigWeb } from "../wagmiConfig/wagmiConfigWeb";
 import { wagmiConfigCapacitor } from "../wagmiConfig/wagmiConfigCapacitor";
 import useCapacitor from "../hooks/useCapacitor";
 import { NotificationsProvider } from "../components/notifications/NotificationsContext";
-import Footer from "../components/footer/Footer";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { SeizeConnectProvider } from "../components/auth/SeizeConnectContext";
 import { IpfsProvider, resolveIpfsUrl } from "../components/ipfs/IPFSContext";
@@ -133,8 +133,6 @@ import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider
 import MainLayout from "../components/layout/MainLayout";
 import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
-import useDeviceInfo from "../hooks/useDeviceInfo";
-import useIsMobileScreen from "../hooks/isMobileScreen";
 
 library.add(
   faArrowUp,
@@ -287,13 +285,10 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const capacitor = useCapacitor();
   const appWalletPasswordModal = useAppWalletPasswordModal();
   const router = useRouter();
-  const { isMobileDevice } = useDeviceInfo();
-  const isMobileScreen = useIsMobileScreen();
-  const hideFooter =
-    (isMobileDevice && isMobileScreen) ||
-    ["/waves", "/my-stream", "/open-mobile"].some((path) =>
-      router.pathname.startsWith(path)
-    );
+
+  const FooterDynamic = dynamic(() => import("../FooterWrapper"), {
+    ssr: false,
+  });
 
   useEffect(() => {
     const createConnectorForWallet = (
@@ -335,7 +330,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
             appWalletPasswordModal.requestPassword
           )
         )
-        .filter((connector): connector is Connector => connector !== null); // Type guard to filter out null values
+        .filter((connector): connector is Connector => connector !== null);
 
       const existingConnectors =
         wagmiConfig?.connectors.filter(
@@ -416,7 +411,9 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                               <AppWebSocketProvider>
                                 <HeaderProvider>
                                   <MainLayout>
-                                    {getLayout(<Component {...props} key={router.asPath} />)}
+                                    {getLayout(
+                                      <Component {...props} key={router.asPath} />
+                                    )}
                                   </MainLayout>
                                 </HeaderProvider>
                                 {appWalletPasswordModal.modal}
@@ -432,7 +429,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
               </EmojiProvider>
             </SeizeSettingsProvider>
           </ReactQueryWrapper>
-          {!hideFooter && <Footer />}
+          <FooterDynamic />
         </WagmiProvider>
       </Provider>
     </QueryClientProvider>

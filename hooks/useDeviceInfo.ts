@@ -1,4 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useEffect } from 'react';
+import useCapacitor from "./useCapacitor";
+
+interface DeviceInfo {
+  readonly isMobileDevice: boolean;
+  readonly hasTouchScreen: boolean;
+  readonly isApp: boolean;
+}
 
 /**
  * Hook that provides comprehensive device and screen information.
@@ -7,26 +14,59 @@ import { useState, useEffect } from "react";
  * @returns Object containing device information:
  * - isMobileDevice: Whether the device is a mobile device (based on user agent)
  * - hasTouchScreen: Whether the device has a touch screen
+ * - isApp: Whether the device is an app
  */
-export default function useDeviceInfo() {
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [hasTouchScreen, setHasTouchScreen] = useState(false);
+export default function useDeviceInfo(): DeviceInfo {
+  const { isCapacitor } = useCapacitor();
 
-  // Check for mobile device
+  const getInfo = useCallback((): DeviceInfo => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined')
+      return { isMobileDevice: false, hasTouchScreen: false, isApp: false };
+
+    const win = window as any;
+    const nav = navigator as Navigator & {
+      msMaxTouchPoints?: number;
+      userAgentData?: { mobile?: boolean };
+      standalone?: boolean;
+    };
+
+    const hasTouchScreen =
+      (nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0) > 0 ||
+      'ontouchstart' in win ||
+      win.matchMedia('(pointer: coarse)').matches;
+
+    const ua = nav.userAgent;
+    const uaDataMobile = nav.userAgentData?.mobile;
+    const classicMobile = /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    const iPadDesktopUA = ua.includes('Macintosh') && hasTouchScreen;
+    const widthMobile = win.matchMedia('(max-width: 768px)').matches;
+
+    const isMobileDevice = uaDataMobile ?? (classicMobile || (isCapacitor && (iPadDesktopUA || widthMobile)));
+
+    return { isMobileDevice, hasTouchScreen, isApp: isCapacitor };
+  }, [isCapacitor]);
+
+  const [info, setInfo] = useState<DeviceInfo>(() => getInfo());
+
   useEffect(() => {
-    const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent;
-    const regex = /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i;
-    const mobile = regex.exec(userAgent) !== null;
-    setIsMobileDevice(mobile);
-  }, []);
+    const mq = window.matchMedia('(pointer: coarse)');
+    const update = () => setInfo(getInfo());
 
-  // Check for touch screen
-  useEffect(() => {
-    setHasTouchScreen(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
+    mq.addEventListener('change', update);
+    window.addEventListener('resize', update);
 
-  return {
-    isMobileDevice,
-    hasTouchScreen
-  };
+    const onceTouch = () => {
+      update();
+      window.removeEventListener('touchstart', onceTouch);
+    };
+    window.addEventListener('touchstart', onceTouch, { passive: true });
+
+    return () => {
+      mq.removeEventListener('change', update);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('touchstart', onceTouch);
+    };
+  }, [getInfo]);
+
+  return info;
 }

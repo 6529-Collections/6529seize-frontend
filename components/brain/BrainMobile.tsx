@@ -38,14 +38,14 @@ interface Props {
 
 const BrainMobile: React.FC<Props> = ({ children }) => {
   const router = useRouter();
-  const { isMobileDevice, hasTouchScreen } = useDeviceInfo();
+  const { isMobileDevice, hasTouchScreen, isApp } = useDeviceInfo();
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
   }, []);
 
-  const isMobile = hydrated ? isMobileDevice ?? hasTouchScreen : true;
+  const isMobile = hydrated ? (isMobileDevice || (hasTouchScreen && isApp)) : true;
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],

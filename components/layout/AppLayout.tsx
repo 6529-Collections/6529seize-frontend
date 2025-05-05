@@ -7,6 +7,7 @@ import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "../../contexts/HeaderContext";
+import { useDeepLinkNavigation } from "../../hooks/useDeepLinkNavigation";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function AppLayout({ children }: Props) {
+  useDeepLinkNavigation();
   const { registerRef } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const { activeView } = useViewContext();
