@@ -76,7 +76,10 @@ export default function WaveDropsAll({
     (behavior: ScrollBehavior) => {
       // Check if the target ref exists and is associated with the targetSerial
       if (targetDropRef.current && scrollContainerRef.current) {
-        targetDropRef.current.scrollIntoView({ behavior: behavior, block: "center" });
+        targetDropRef.current.scrollIntoView({
+          behavior: behavior,
+          block: "center",
+        });
         return true;
       }
       return false;
@@ -161,72 +164,26 @@ export default function WaveDropsAll({
     }).catch((error) => console.error("Failed to mark feed as read:", error));
   }, [waveId]);
 
+  const revealDropAndScrollToIt = useCallback(async () => {
+    console.log(smallestSerialNo.current);
+    
+  }, []);
+
   const fetchAndScrollToDrop = useCallback(async () => {
     if (!serialNo) return;
     setIsScrolling(true); // Set scrolling true for the entire process
 
-    const checkAndFetchNext = async () => {
-      // Always get the latest state from the ref
-      const currentMessages = latestWaveMessagesRef.current;
-      const currentSmallestSerial = smallestSerialNo.current;
-
-      // Check if target is now loaded
-      if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
-        smoothScrollWithRetries()
-        setSerialNo(null);
-        setIsScrolling(false); // **** Stop scrolling only AFTER successful scroll ****
-        return; // Exit the loop
-      }
-
-      // Check if we should stop fetching (no more pages or already fetching)
-      if (
-        !currentMessages?.hasNextPage ||
-        currentMessages?.isLoading ||
-        currentMessages?.isLoadingNextPage
-      ) {
-        if (!currentMessages?.hasNextPage) {
-          setSerialNo(null); // Clear the target
-        } else {
-          // Don't set isScrolling false here, just wait and retry check
-          setTimeout(checkAndFetchNext, 1000); // Retry check later
-          return;
-        }
-        setIsScrolling(false); // **** Stop scrolling if no more pages or error ****
-        return; // Exit the loop
-      }
-
-      // --- If target not found and we can fetch more ---
-      await fetchNextPage(
-        {
-          waveId,
-          type: DropSize.LIGHT,
-          targetSerialNo: serialNo,
-        },
-        dropId
-      );
-
-      // ** Crucial:** After await, state *might* have updated.
-      // The ref is updated by useEffect, so the *next* call to checkAndFetchNext will see it.
-
-      // Scroll to top after fetch completes to show newly loaded older messages
-      scrollToVisualTop(); // <--- SCROLL TO TOP HERE
-
-      // Schedule the next check without altering isScrolling state
-      setTimeout(checkAndFetchNext, 1000);
-    };
-
-    // Start the first check
-    checkAndFetchNext();
-  }, [
-    waveId,
-    fetchNextPage,
-    smoothScrollWithRetries,
-    serialNo,
-    setSerialNo,
-    setIsScrolling,
-    scrollToVisualTop, // <-- Add scrollToVisualTop dependency
-    init,
-  ]);
+    // TODO: do it separate function what checks if the drop is found, if not, then fetch more
+    await fetchNextPage(
+      {
+        waveId,
+        type: DropSize.LIGHT,
+        targetSerialNo: serialNo,
+      },
+      dropId
+    );
+    revealDropAndScrollToIt();
+  }, [waveId, fetchNextPage, serialNo, setIsScrolling, revealDropAndScrollToIt]);
 
   // Effect to trigger the fetch loop when serialNo is set and we are initialized
   useEffect(() => {
@@ -248,15 +205,16 @@ export default function WaveDropsAll({
     return () => {
       // Cleanup logic if needed
     };
-  }, [init, serialNo, fetchAndScrollToDrop, smoothScrollWithRetries, setSerialNo]);
+  }, [init, serialNo]);
 
-  const handleTopIntersection = useCallback(() => {
+  const handleTopIntersection = useCallback(async () => {
     if (
       waveMessages?.hasNextPage &&
       !waveMessages?.isLoading &&
-      !waveMessages?.isLoadingNextPage
+      !waveMessages?.isLoadingNextPage &&
+      !isScrolling
     ) {
-      fetchNextPage(
+      await fetchNextPage(
         {
           waveId,
           type: DropSize.FULL,
@@ -269,6 +227,7 @@ export default function WaveDropsAll({
     waveMessages?.isLoading,
     waveMessages?.isLoadingNextPage,
     fetchNextPage,
+    isScrolling,
   ]);
 
   const onQuoteClick = useCallback(
