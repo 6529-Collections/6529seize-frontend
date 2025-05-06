@@ -245,8 +245,7 @@ export default function MemePage() {
                     sm={{ span: 12 }}
                     md={{ span: 6 }}
                     lg={{ span: 6 }}
-                    className={`${styles.nftImageWrapper} pt-2 pb-5`}
-                  >
+                    className={`${styles.nftImageWrapper} pt-2 pb-5`}>
                     <NFTImage
                       nft={nft}
                       animation={true}
@@ -340,8 +339,7 @@ export default function MemePage() {
                   <Col>
                     <h2 className="float-left">
                       <a
-                        href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}
-                      >
+                        href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
                         SZN{nftMeta.season}
                       </a>
                     </h2>
@@ -382,6 +380,7 @@ function MemeNavigationBtn(
   const isMobile = useIsMobileScreen();
 
   const width = isMobile ? 25 : 35;
+  const height = isMobile ? 25 : 35;
 
   const isDisabled =
     props.icon === "previous"
@@ -396,6 +395,7 @@ function MemeNavigationBtn(
           : "chevron-circle-right"
       }
       width={width}
+      height={height}
       color={isDisabled ? "#9a9a9a" : "#fff"}
       cursor={isDisabled ? "default" : "pointer"}
     />
@@ -425,8 +425,7 @@ function TabButton(
       }`}
       onClick={() => {
         props.setActiveTab(props.tab.focus);
-      }}
-    >
+      }}>
       {props.tab.title}
     </button>
   );
