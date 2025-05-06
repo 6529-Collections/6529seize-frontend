@@ -10,6 +10,7 @@ import { useViewContext } from "../navigation/ViewContext";
 import { useWaveById } from "../../hooks/useWaveById";
 import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
+import { capitalizeEveryWord, formatAddress } from "../../helpers/Helpers";
 
 interface Props {
   readonly extraClass?: string;
@@ -32,6 +33,7 @@ export default function AppHeader(props: Readonly<Props>) {
   })();
 
   const pathSegments = router.asPath.split("?")[0].split("/").filter(Boolean);
+  const basePath = pathSegments.length ? pathSegments[0] : "";
   const pageTitle = pathSegments.length
     ? pathSegments[pathSegments.length - 1]
         .replace(/[-_]/g, " ")
@@ -49,7 +51,40 @@ export default function AppHeader(props: Readonly<Props>) {
       if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
       return wave?.name ?? "Wave";
     }
-    return pageTitle;
+
+    if (basePath && !isNaN(Number(pageTitle))) {
+      switch (basePath) {
+        case "the-memes":
+          return `The Memes #${pageTitle}`;
+        case "6529-gradient":
+          return `6529 Gradient #${pageTitle}`;
+        case "meme-lab":
+          return `Meme Lab #${pageTitle}`;
+        case "nextgen":
+          return `NextGen #${pageTitle}`;
+      }
+    }
+
+    const slice = (str: string, length: number) => {
+      if (str.length <= length) return str;
+
+      const half = Math.floor(length / 2);
+      const firstPart = str.slice(0, half);
+      const lastPart = str.slice(-half);
+      return `${firstPart}...${lastPart}`;
+    };
+
+    if (basePath === "rememes") {
+      const contract = pathSegments[1];
+      const tokenId = pathSegments[2];
+      if (contract && tokenId) {
+        const formattedContract = formatAddress(contract);
+        const formattedTokenId = formatAddress(tokenId);
+        return `Rememes ${formattedContract} #${slice(formattedTokenId, 10)}`;
+      }
+    }
+
+    return slice(capitalizeEveryWord(pageTitle), 20);
   })();
 
   return (
@@ -65,8 +100,7 @@ export default function AppHeader(props: Readonly<Props>) {
               address && pfp
                 ? "tw-bg-iron-900 tw-border-white/20 tw-border-solid"
                 : "tw-bg-transparent tw-border-transparent"
-            }`}
-          >
+            }`}>
             {address && pfp ? (
               <img
                 src={pfp}
