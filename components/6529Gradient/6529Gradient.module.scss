@@ -85,16 +85,20 @@
 
 .nextPreviousNft {
   width: 35px;
+  height: 35px;
   svg {
     width: 35px;
+    height: 35px;
   }
 }
 
 @media only screen and (max-width: 800px) {
   .nextPreviousNft {
     width: 25px;
+    height: 25px;
     svg {
       width: 25px;
+      height: 25px;
     }
   }
 }
