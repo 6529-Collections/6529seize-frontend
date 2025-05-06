@@ -27,7 +27,7 @@ export default function NextGen(props: Readonly<Props>) {
           className={styles.nextgenBanner}
           style={{ background: `url(${props.collection.banner})` }}
         />
-        <Container>
+        <Container className="tw-z-10">
           <Row>
             <Col>
               <Container className="pt-5 pb-5 no-padding">
