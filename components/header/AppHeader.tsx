@@ -8,6 +8,8 @@ import { useIdentity } from "../../hooks/useIdentity";
 import { useRouter } from "next/router";
 import { useViewContext } from "../navigation/ViewContext";
 import { useWaveById } from "../../hooks/useWaveById";
+import BackButton from "../navigation/BackButton";
+import Spinner from "../utils/Spinner";
 
 interface Props {
   readonly extraClass?: string;
@@ -38,40 +40,44 @@ export default function AppHeader(props: Readonly<Props>) {
 
   const waveId =
     typeof router.query.wave === "string" ? router.query.wave : null;
-  const { wave } = useWaveById(waveId);
+  const { wave, isLoading, isFetching } = useWaveById(waveId);
 
-  const finalTitle = (() => {
-    if (waveId) {
-      return wave?.name ?? "Wave";
-    }
+  const finalTitle: React.ReactNode = (() => {
     if (activeView === "waves") return "Waves";
     if (activeView === "messages") return "Messages";
+    if (waveId) {
+      if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
+      return wave?.name ?? "Wave";
+    }
     return pageTitle;
   })();
 
   return (
     <div className="tw-w-full tw-bg-black tw-text-iron-50 tw-pt-[env(safe-area-inset-top,0px)]">
       <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-h-16">
-        <button
-          type="button"
-          aria-label="Open menu"
-          onClick={() => setMenuOpen(true)}
-          className={`tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-h-10 tw-w-10 tw-rounded-full tw-border tw-border-solid ${
-            address && pfp
-              ? "tw-bg-iron-900 tw-border-white/20 tw-border-solid"
-              : "tw-bg-transparent tw-border-transparent"
-          }`}
-        >
-          {address && pfp ? (
-            <img
-              src={pfp}
-              alt="pfp"
-              className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
-            />
-          ) : (
-            <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
-          )}
-        </button>
+        <BackButton />
+        {!waveId && (
+          <button
+            type="button"
+            aria-label="Open menu"
+            onClick={() => setMenuOpen(true)}
+            className={`tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-h-10 tw-w-10 tw-rounded-full tw-border tw-border-solid ${
+              address && pfp
+                ? "tw-bg-iron-900 tw-border-white/20 tw-border-solid"
+                : "tw-bg-transparent tw-border-transparent"
+            }`}
+          >
+            {address && pfp ? (
+              <img
+                src={pfp}
+                alt="pfp"
+                className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
+              />
+            ) : (
+              <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
+            )}
+          </button>
+        )}
         <div className="tw-flex-1 tw-text-center tw-font-semibold tw-text-sm">
           {finalTitle}
         </div>

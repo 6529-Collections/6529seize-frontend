@@ -57,18 +57,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   });
 
   React.useEffect(() => {
-    const handleRouteChange = () => {
-      onViewChange(BrainView.DEFAULT);
-    };
-
-    router.events.on("routeChangeComplete", handleRouteChange);
-
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-    };
-  }, [router.events, onViewChange]);
-
-  React.useEffect(() => {
     const activeTabEl = tabRefs.current[activeView];
     if (activeTabEl) {
       activeTabEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
@@ -76,7 +64,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   }, [activeView]);
 
   const aboutButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5 tw-gap-1 tw-flex-1  tw-rounded-md ${
-    activeView === BrainView.ABOUT ? "tw-bg-iron-800" : "tw-bg-iron-950"
+    activeView === BrainView.ABOUT ? "tw-bg-iron-800" : "tw-bg-iron-950"  
   }`;
 
   const aboutButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
@@ -130,8 +118,13 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <>
             <button
               onClick={() => {
-                router.push('/my-stream', undefined, { shallow: true });
-                onViewChange(BrainView.DEFAULT);
+                // Use browser's history back when possible
+                if (window.history.length > 1) {
+                  window.history.back();
+                } else {
+                  router.push('/my-stream', undefined, { shallow: true });
+                  onViewChange(BrainView.DEFAULT);
+                }
               }}
               className={backButtonClasses}
             >

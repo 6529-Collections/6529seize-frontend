@@ -9,10 +9,10 @@ interface MobileLayoutProps {
 }
 
 const MobileLayout = ({ children }: MobileLayoutProps) => {
-  const { isMobileDevice } = useDeviceInfo();
+  const { isApp } = useDeviceInfo();
   const isSmallScreen = useIsMobileScreen();
 
-  if (isMobileDevice) {
+  if (isApp) {
     return <AppLayout>{children}</AppLayout>;
   }
 

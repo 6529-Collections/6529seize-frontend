@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 
 interface ViewContextType {
   activeView: ViewKey | null;
+  setActiveView: (v: ViewKey | null) => void;
   handleNavClick: (item: NavItem) => void;
 }
 
@@ -38,8 +39,25 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
       }
     }
     setLastVisitedPath(router.pathname);
-    setActiveView(null);
+
+    const viewParam = typeof router.query.view === "string" ? router.query.view : null;
+    if (viewParam === "waves" || viewParam === "messages") {
+      setActiveView(viewParam as ViewKey);
+    } else {
+      setActiveView(null);
+    }
   }, [router.asPath, router.pathname]);
+
+  // Strip wave param when user navigates to waves list so components relying on waveId do not treat current page as a single wave
+  useEffect(() => {
+    const viewParam = typeof router.query.view === "string" ? router.query.view : null;
+    const hasWave = "wave" in router.query;
+    if (viewParam === "waves" && hasWave) {
+      setLastVisitedWave(null);
+      const { wave, ...rest } = router.query;
+      router.replace({ pathname: router.pathname, query: rest }, undefined, { shallow: true });
+    }
+  }, [router.query.view, router.query.wave, router.pathname, router]);
 
   const getHref = useCallback(
     (item: RouteNavItem) => {
@@ -74,16 +92,24 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
     (item: NavItem) => {
       if (item.kind === "route") {
         handleRouteClick(item);
+        return;
+      }
+
+      if (item.viewKey === "waves" && lastVisitedWave) {
+        router.push(`/my-stream?wave=${lastVisitedWave}`, undefined, {
+          shallow: true,
+        });
+        setActiveView(null);
       } else {
         setActiveView(item.viewKey);
       }
     },
-    [handleRouteClick, setActiveView]
+    [handleRouteClick, setActiveView, lastVisitedWave, router]
   );
 
   const providerValue = useMemo(
-    () => ({ activeView, handleNavClick }),
-    [activeView, lastVisitedWave, lastVisitedPath]
+    () => ({ activeView, setActiveView, handleNavClick }),
+    [activeView, setActiveView]
   );
 
   return (
