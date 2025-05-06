@@ -10,6 +10,7 @@ import { useViewContext } from "../navigation/ViewContext";
 import { useWaveById } from "../../hooks/useWaveById";
 import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
+import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryContext";
 
 interface Props {
   readonly extraClass?: string;
@@ -25,6 +26,7 @@ export default function AppHeader(props: Readonly<Props>) {
     initialProfile: null,
   });
   const { activeView } = useViewContext();
+  const { canGoBack } = useNavigationHistoryContext();
 
   const pfp = (() => {
     if (activeProfileProxy) return activeProfileProxy.created_by.pfp;
@@ -41,6 +43,9 @@ export default function AppHeader(props: Readonly<Props>) {
   const waveId =
     typeof router.query.wave === "string" ? router.query.wave : null;
   const { wave, isLoading, isFetching } = useWaveById(waveId);
+  const isProfileRoute = router.pathname.startsWith("/[user]");
+
+  const showBackButton = !!waveId || (isProfileRoute && canGoBack);
 
   const finalTitle: React.ReactNode = (() => {
     if (activeView === "waves") return "Waves";
@@ -55,8 +60,8 @@ export default function AppHeader(props: Readonly<Props>) {
   return (
     <div className="tw-w-full tw-bg-black tw-text-iron-50 tw-pt-[env(safe-area-inset-top,0px)]">
       <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-h-16">
-        <BackButton />
-        {!waveId && (
+        {showBackButton && <BackButton />}
+        {!showBackButton && (
           <button
             type="button"
             aria-label="Open menu"
