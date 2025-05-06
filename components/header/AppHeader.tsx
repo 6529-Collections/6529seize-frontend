@@ -105,7 +105,8 @@ export default function AppHeader(props: Readonly<Props>) {
               address && pfp
                 ? "tw-bg-iron-900 tw-border-white/20 tw-border-solid"
                 : "tw-bg-transparent tw-border-transparent"
-            }`}>
+            }`}
+          >
             {address && pfp ? (
               <img
                 src={pfp}

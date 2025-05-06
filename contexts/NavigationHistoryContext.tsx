@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useCallback, useState, ReactNode,
 import { useRouter } from "next/router";
 import type { ViewKey } from "../components/navigation/navTypes";
 import { useViewContext } from "../components/navigation/ViewContext";
+import { mainSegment, sameMainPath } from "../helpers/navigation.helpers";
 
 interface StackRoute { type: "route"; path: string }
 interface StackView { type: "view"; view: ViewKey }
@@ -17,21 +18,29 @@ interface NavigationHistoryContextValue {
 const Context = createContext<NavigationHistoryContextValue | undefined>(undefined);
 const MAX_STACK = 50;
 
-const canonical = (url: string): string => {
-  const pathname = url.split("?")[0];
-  const m = pathname.match(/^\/([^/]+)(?:\/.*)?$/);
-  return m ? `/${m[1]}` : pathname;
-};
-
 export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode }> = ({ children }) => {
   const router = useRouter();
   const { setActiveView } = useViewContext();
 
-  const historyRef = useRef<StackEntry[]>([{ type: "route", path: canonical(router.asPath) }]);
+  const historyRef = useRef<StackEntry[]>([{ type: "route", path: mainSegment(router.asPath) }]);
   const [index, setIndex] = useState(0);
   const skipNext = useRef(false);
 
-  const canGoBack = index > 0;
+  const canGoBack = useMemo(() => {
+    if (index === 0) return false;
+    const current = historyRef.current[index];
+    const currentPath = current.type === "route" ? current.path : null;
+
+    for (let i = index - 1; i >= 0; i--) {
+      const entry = historyRef.current[i];
+      if (entry.type === "view") return true;
+      if (entry.type === "route") {
+        if (!currentPath) return true;
+        if (!sameMainPath(entry.path, currentPath)) return true;
+      }
+    }
+    return false;
+  }, [index]);
 
   const pushStack = useCallback((entry: StackEntry) => {
     setIndex(prev => {
@@ -47,29 +56,60 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
         skipNext.current = false;
         return;
       }
-      const pathKey = canonical(url);
-      const last = historyRef.current[historyRef.current.length - 1];
-      const isDuplicate = last?.type === "route" && last.path === pathKey;
-      if (isDuplicate && historyRef.current.length > 1) return;
+      const pathKey = mainSegment(url);
+      // avoid pushing if previous route entry (ignoring trailing views) has same main segment
+      let i = historyRef.current.length - 1;
+      while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
+      const lastRoute = i >= 0 ? historyRef.current[i] : null;
+      const isDuplicate = lastRoute?.type === "route" && lastRoute.path === pathKey;
+      if (isDuplicate) return;
       pushStack({ type: "route", path: pathKey });
+      console.log('[NAV] push route', pathKey, historyRef.current);
     };
     router.events.on("routeChangeComplete", handleRouteChange);
     return () => router.events.off("routeChangeComplete", handleRouteChange);
   }, [router.events, pushStack]);
 
-  const pushView = useCallback((view: ViewKey) => pushStack({ type: "view", view }), [pushStack]);
+  const pushView = useCallback((view: ViewKey) => {
+    pushStack({ type: "view", view });
+    console.log('[NAV] push view', view, historyRef.current);
+  }, [pushStack]);
 
   const goBack = useCallback(() => {
     if (!canGoBack) return;
     setIndex(prev => {
-      const target = historyRef.current[prev - 1];
+      let targetIndex = prev - 1;
+      const current = historyRef.current[prev];
+
+      while (targetIndex >= 0) {
+        const entry = historyRef.current[targetIndex];
+        if (
+          entry.type === "route" &&
+          current.type === "route" &&
+          sameMainPath(entry.path, current.path)
+        ) {
+          targetIndex -= 1;
+          continue;
+        }
+        break;
+      }
+
+      if (targetIndex < 0) {
+        router.back();
+        return prev;
+      }
+
+      const target = historyRef.current[targetIndex];
       if (target.type === "route") {
         skipNext.current = true;
-        router.push(target.path, undefined, { shallow: true });
+        const samePage = router.pathname === target.path;
+        console.log('goBack→', target.path, { current: router.asPath, samePage });
+        router.push(target.path);
       } else {
         setActiveView(target.view);
       }
-      return prev - 1;
+      console.log('[NAV] goBack →', target, 'stack:', historyRef.current);
+      return targetIndex;
     });
   }, [canGoBack, router, setActiveView]);
 
