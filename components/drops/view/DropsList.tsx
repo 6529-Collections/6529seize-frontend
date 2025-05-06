@@ -120,6 +120,9 @@ const DropsList = memo(function DropsList({
           >
             <VirtualScrollWrapper
               scrollContainerRef={getItemData.scrollContainerRef}
+              dropSerialNo={drop.serial_no}
+              waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
+              type={drop.type}
             >
               {drop.type === DropSize.FULL ? (
                 <MemoizedDrop

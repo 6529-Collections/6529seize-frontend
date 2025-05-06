@@ -8,7 +8,10 @@ import {
   Drop,
 } from "../../../helpers/waves/drop.helpers";
 import { WaveMessagesUpdate } from "../hooks/types";
-import { ApiLightDrop } from "../../../generated/models/ObjectSerializer";
+import {
+  ApiDropSearchStrategy,
+  ApiLightDrop,
+} from "../../../generated/models/ObjectSerializer";
 
 /**
  * Fetches wave messages (drops) for a specific wave
@@ -54,13 +57,41 @@ export async function fetchWaveMessages(
   }
 }
 
-
 export async function fetchAroundSerialNoWaveMessages(
   waveId: string,
   serialNo: number,
   signal?: AbortSignal
 ): Promise<ApiDrop[] | null> {
-  return null;
+  const params: Record<string, string> = {
+    limit: WAVE_DROPS_PARAMS.limit.toString(),
+  };
+
+  params.search_strategy = ApiDropSearchStrategy.Both;
+  params.serial_no_limit = `${serialNo}`;
+
+  try {
+    const data = await commonApiFetch<ApiWaveDropsFeed>({
+      endpoint: `waves/${waveId}/drops`,
+      params,
+      signal,
+    });
+
+    return data.drops.map((drop) => ({
+      ...drop,
+      wave: data.wave,
+    }));
+  } catch (error) {
+    // Check if this is an abort error
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error; // Re-throw abort errors to be handled by the caller
+    }
+
+    console.error(
+      `[WaveDataManager] Failed to fetch messages for ${waveId}:`,
+      error
+    );
+    return null;
+  }
 }
 
 /**
@@ -72,23 +103,45 @@ export async function fetchAroundSerialNoWaveMessages(
  */
 export async function fetchLightWaveMessages(
   waveId: string,
-  serialNo: number,
+  oldestSerialNo: number,
+  targetSerialNo: number,
   signal?: AbortSignal
-): Promise<ApiLightDrop[] | null> {
+): Promise<(ApiLightDrop | ApiDrop)[] | null> {
   const params: Record<string, string> = {
-    max_serial_no: `${serialNo}`,
+    max_serial_no: `${oldestSerialNo}`,
     wave_id: waveId,
     limit: "1000",
   };
 
   try {
-    const data = await commonApiFetch<ApiLightDrop[]>({
-      endpoint: `/light-drops`,
-      params,
-      signal,
-    });
+    const results = await Promise.all([
+      commonApiFetch<ApiLightDrop[]>({
+        endpoint: `/light-drops`,
+        params,
+        signal,
+      }),
+      fetchAroundSerialNoWaveMessages(waveId, targetSerialNo, signal),
+    ]);
 
-    return data;
+    const combined: (ApiLightDrop | ApiDrop)[] = [];
+
+    for (const drop of results[0]) {
+      combined.push(drop);
+    }
+    if (results[1]) {
+      for (const drop of results[1]) {
+        const existingIndex = combined.findIndex(
+          (d) => d.serial_no === drop.serial_no
+        );
+        if (existingIndex !== -1) {
+          combined[existingIndex] = drop;
+        } else {
+          combined.push(drop);
+        }
+      }
+    }
+
+    return combined;
   } catch (error) {
     // Check if this is an abort error
     if (error instanceof DOMException && error.name === "AbortError") {

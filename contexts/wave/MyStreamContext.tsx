@@ -24,6 +24,7 @@ import { useWebsocketStatus } from "../../services/websocket/useWebSocketMessage
 import useCapacitor from "../../hooks/useCapacitor";
 import { DropSize } from "../../helpers/waves/drop.helpers";
 import { ApiLightDrop } from "../../generated/models/ApiLightDrop";
+import { NextPageProps } from "./hooks/useWavePagination";
 
 // Define nested structures for context data
 interface WavesContextData {
@@ -54,10 +55,8 @@ interface MyStreamContextType {
   readonly activeWave: ActiveWaveContextData;
   readonly waveMessagesStore: WaveMessagesStoreData;
   readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
-  readonly fetchNextPageForWave: (
-    waveId: string,
-    type: DropSize
-  ) => Promise<(ApiDrop | ApiLightDrop)[] | null>;
+  readonly fetchNextPageForWave: (props: NextPageProps) => Promise<(ApiDrop | ApiLightDrop)[] | null>;
+  readonly fetchAroundSerialNo: (waveId: string, serialNo: number) => void;
   readonly processIncomingDrop: (
     drop: ApiDrop,
     type: ProcessIncomingDropType
@@ -113,7 +112,6 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   useEffect(() => {
     if (activeWaveId) {
-
       waveDataManager.registerWave(activeWaveId, true);
     }
   }, [activeWaveId]);
@@ -148,6 +146,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       waveMessagesStore: waveMessagesStoreData,
       registerWave: waveDataManager.registerWave,
       fetchNextPageForWave: waveDataManager.fetchNextPage,
+      fetchAroundSerialNo: waveDataManager.fetchAroundSerialNo,
       processIncomingDrop,
       processDropRemoved,
     };
@@ -166,6 +165,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     waveMessagesStore.unsubscribe,
     waveDataManager.registerWave,
     waveDataManager.fetchNextPage,
+    waveDataManager.fetchAroundSerialNo,
     processIncomingDrop,
     processDropRemoved,
   ]);

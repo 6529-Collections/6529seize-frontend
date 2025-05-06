@@ -9,7 +9,7 @@ import CircleLoader, {
 } from "../../distribution-plan-tool/common/CircleLoader";
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDropsEmptyPlaceholder from "./WaveDropsEmptyPlaceholder";
 import WaveDropsScrollingOverlay from "./WaveDropsScrollingOverlay";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
@@ -179,7 +179,14 @@ export default function WaveDropsAll({
       }
 
       // --- If target not found and we can fetch more ---
-      await fetchNextPage(waveId, dropId);
+      await fetchNextPage(
+        {
+          waveId,
+          type: DropSize.LIGHT,
+          targetSerialNo: serialNo,
+        },
+        dropId
+      );
 
       // ** Crucial:** After await, state *might* have updated.
       // The ref is updated by useEffect, so the *next* call to checkAndFetchNext will see it.
@@ -232,7 +239,13 @@ export default function WaveDropsAll({
       !waveMessages?.isLoading &&
       !waveMessages?.isLoadingNextPage
     ) {
-      fetchNextPage(waveId, dropId);
+      fetchNextPage(
+        {
+          waveId,
+          type: DropSize.FULL,
+        },
+        dropId
+      );
     }
   }, [
     waveMessages?.hasNextPage,

@@ -16,6 +16,19 @@ interface PaginationState {
   promise: Promise<(ApiDrop | ApiLightDrop)[] | null> | null;
 }
 
+export type NextPageProps = NextPageFullProps | NextPageLightProps;
+
+interface NextPageFullProps {
+  readonly waveId: string;
+  readonly type: DropSize.FULL;
+}
+
+interface NextPageLightProps {
+  readonly waveId: string;
+  readonly type: DropSize.LIGHT;
+  readonly targetSerialNo: number;
+}
+
 // Tracks the state for fetching messages around a specific serial number
 interface AroundSerialNoState {
   isFetching: boolean;
@@ -96,6 +109,7 @@ export function useWavePagination({
           if ("part_1_text" in drop) {
             return {
               ...drop,
+              waveId,
               type: DropSize.LIGHT,
               stableKey: drop.id,
               stableHash: drop.id,
@@ -154,11 +168,10 @@ export function useWavePagination({
    */
   const fetchNextPage = useCallback(
     async (
-      waveId: string,
-      type: DropSize
+      props: NextPageProps
     ): Promise<(ApiDrop | ApiLightDrop)[] | null> => {
       // Get current state
-      const currentData = getData(waveId);
+      const currentData = getData(props.waveId);
       if (!currentData) {
         return null;
       }
@@ -169,11 +182,11 @@ export function useWavePagination({
       }
 
       // Check if already has a pagination loading state
-      const paginationState = paginationStates.current[waveId] ?? {
+      const paginationState = paginationStates.current[props.waveId] ?? {
         isLoading: false,
         promise: null,
       };
-      paginationStates.current[waveId] = paginationState;
+      paginationStates.current[props.waveId] = paginationState;
 
       // If already loading, return the existing promise
       if (paginationState.isLoading && paginationState.promise) {
@@ -181,7 +194,7 @@ export function useWavePagination({
       }
 
       // Get the oldest message serial number for pagination
-      const oldestSerialNo = getOldestMessageSerialNo(waveId);
+      const oldestSerialNo = getOldestMessageSerialNo(props.waveId);
       if (!oldestSerialNo) {
         return null;
       }
@@ -191,26 +204,31 @@ export function useWavePagination({
 
       // Update store to show loading state
       updateData({
-        key: waveId,
+        key: props.waveId,
         isLoadingNextPage: true,
       });
 
       // Setup abort controller
-      const controller = createController(waveId);
+      const controller = createController(props.waveId);
 
       // Create promise for the request
       const fetchPromise =
-        type === DropSize.FULL
-          ? fetchWaveMessages(waveId, oldestSerialNo, controller.signal)
-          : fetchLightWaveMessages(waveId, oldestSerialNo, controller.signal);
+        props.type === DropSize.FULL
+          ? fetchWaveMessages(props.waveId, oldestSerialNo, controller.signal)
+          : fetchLightWaveMessages(
+              props.waveId,
+              oldestSerialNo,
+              props.targetSerialNo,
+              controller.signal
+            );
 
       fetchPromise
-        .then((drops) => updateWithPaginatedData(waveId, drops))
+        .then((drops) => updateWithPaginatedData(props.waveId, drops))
         .catch((error) => {
-          handlePaginationError(waveId, error);
+          handlePaginationError(props.waveId, error);
           return null;
         })
-        .finally(() => cleanupController(waveId, controller));
+        .finally(() => cleanupController(props.waveId, controller));
 
       // Store the promise
       paginationState.promise = fetchPromise;
@@ -292,6 +310,7 @@ export function useWavePagination({
           serialToFetch,
           controller.signal
         );
+
         // Placeholder: Handle the result if needed in the future.
         // Currently, fetchAroundSerialNoWaveMessages returns null.
         if (result) {
@@ -302,8 +321,20 @@ export function useWavePagination({
           // TODO: Decide how to integrate 'result' if it ever returns data.
           // It likely shouldn't merge directly into the main 'drops' state
           // unless specifically designed to do so.
+
+          updateData({
+            key: waveId,
+            drops: result.map((drop) => {
+              return {
+                ...drop,
+                type: DropSize.FULL,
+                stableKey: drop.id,
+                stableHash: drop.id,
+              };
+            }),
+          });
         } else {
-            console.log(
+          console.log(
             `[WavePagination] Fetched around serial no ${serialToFetch}, no new data.`
           );
         }
@@ -314,7 +345,9 @@ export function useWavePagination({
             error
           );
         } else {
-          console.log(`[WavePagination] Fetch around ${serialToFetch} aborted.`);
+          console.log(
+            `[WavePagination] Fetch around ${serialToFetch} aborted.`
+          );
         }
       } finally {
         state.isFetching = false;

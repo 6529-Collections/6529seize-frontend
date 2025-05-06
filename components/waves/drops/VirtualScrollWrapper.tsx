@@ -5,6 +5,8 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
+import { Drop, DropSize } from "../../../helpers/waves/drop.helpers";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 
 /**
  * Props for VirtualScrollWrapper
@@ -18,6 +20,9 @@ interface VirtualScrollWrapperProps {
 
   readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
 
+  readonly dropSerialNo: number;
+  readonly waveId: string;
+  readonly type: DropSize;
 
   /**
    * The child components to be rendered or virtualized.
@@ -50,7 +55,11 @@ export default function VirtualScrollWrapper({
   delay = 1000,
   scrollContainerRef,
   children,
+  dropSerialNo,
+  waveId,
+  type,
 }: VirtualScrollWrapperProps) {
+  const { fetchAroundSerialNo } = useMyStream();
 
   /**
    * isInView: Tracks if the component is currently in the viewport.
@@ -113,6 +122,9 @@ export default function VirtualScrollWrapper({
         if (inView !== isInView) {
           setIsInView(inView);
         }
+        // if (inView && type === DropSize.LIGHT) {
+        //   fetchAroundSerialNo(waveId, dropSerialNo);
+        // }
       },
       {
         // For a reversed layout, we need a large margin at both top and bottom
@@ -148,7 +160,8 @@ export default function VirtualScrollWrapper({
    *    also render children so we can measure them.
    */
   const isServer = typeof window === "undefined";
-  const shouldRenderChildren = isServer || isInView || measuredHeight === null;
+  const shouldRenderChildren =
+    isServer || isInView || measuredHeight === null || type === DropSize.LIGHT;
 
   return (
     <div ref={containerRef}>
