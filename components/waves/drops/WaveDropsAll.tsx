@@ -107,11 +107,13 @@ export default function WaveDropsAll({
     [scrollToSerialNo] // Depends on the stable scrollToSerialNo
   );
 
+  const [revealingDrop, setRevealingDrop] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!serialNo) return;
+    if (!serialNo || revealingDrop) return;
+    setRevealingDrop(true);
     console.log(waveMessages?.allDropsCount);
-  }, [serialNo, waveMessages?.allDropsCount]);
+  }, [serialNo, waveMessages?.allDropsCount, revealingDrop]);
 
   const revealDropAndScrollToIt = useCallback(
     async (targetSerialNo: number) => {
@@ -125,6 +127,7 @@ export default function WaveDropsAll({
         },
         dropId
       );
+      console.log("fetching next page done");
       setTimeout(() => {
         setSerialNo(targetSerialNo);
       }, 100);
