@@ -74,16 +74,34 @@ export default function WaveDropsAll({
 
   const scrollToSerialNo = useCallback(
     (behavior: ScrollBehavior) => {
-      if (serialNo && targetDropRef.current && scrollContainerRef.current) {
-        targetDropRef.current.scrollIntoView({
-          behavior: behavior,
-          block: "center", // Tries to vertically center the element
-        });
+      // Check if the target ref exists and is associated with the targetSerial
+      if (targetDropRef.current && scrollContainerRef.current) {
+        targetDropRef.current.scrollIntoView({ behavior: behavior, block: "center" });
         return true;
       }
       return false;
     },
-    [serialNo] // Keep scrollContainerRef.current out of deps as ref.current changes don't trigger re-renders/re-creation of callback
+    [] // No state dependencies needed here
+  );
+
+  const smoothScrollWithRetries = useCallback(
+    () => {
+      // Attempt initial smooth scroll
+      const initialSuccess = scrollToSerialNo("smooth");
+      // If the element was found and initial scroll started...
+      if (initialSuccess) {
+        // Schedule follow-up scrolls with 'auto' behavior to quickly correct position after layout shifts
+        setTimeout(() => {
+          scrollToSerialNo("auto");
+          // Second follow-up scroll
+          setTimeout(() => {
+            scrollToSerialNo("auto");
+          }, 300); // Delay after the first follow-up
+        }, 300); // Initial delay after smooth scroll starts
+      }
+      return initialSuccess; // Return success of the first attempt
+    },
+    [scrollToSerialNo] // Depends on the stable scrollToSerialNo
   );
 
   // Ref to hold the latest waveMessages state to avoid stale closures
@@ -154,8 +172,7 @@ export default function WaveDropsAll({
 
       // Check if target is now loaded
       if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Short delay for render
-        scrollToSerialNo("smooth");
+        smoothScrollWithRetries()
         setSerialNo(null);
         setIsScrolling(false); // **** Stop scrolling only AFTER successful scroll ****
         return; // Exit the loop
@@ -203,7 +220,7 @@ export default function WaveDropsAll({
   }, [
     waveId,
     fetchNextPage,
-    scrollToSerialNo,
+    smoothScrollWithRetries,
     serialNo,
     setSerialNo,
     setIsScrolling,
@@ -218,7 +235,7 @@ export default function WaveDropsAll({
 
       // Check if already loaded before attempting scroll or fetch
       if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
-        const success = scrollToSerialNo("smooth");
+        const success = smoothScrollWithRetries();
         if (success) {
           setSerialNo(null);
         } else {
@@ -231,7 +248,7 @@ export default function WaveDropsAll({
     return () => {
       // Cleanup logic if needed
     };
-  }, [init, serialNo, fetchAndScrollToDrop, scrollToSerialNo, setSerialNo]);
+  }, [init, serialNo, fetchAndScrollToDrop, smoothScrollWithRetries, setSerialNo]);
 
   const handleTopIntersection = useCallback(() => {
     if (
