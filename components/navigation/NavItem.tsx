@@ -64,6 +64,9 @@ const NavItem = ({ item }: Props) => {
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
   let isActive = false;
+  const isWaveSubRoute =
+    router.pathname === "/my-stream" && typeof router.query.wave === "string";
+
   const handleClick = () => {
     if (
       item.name === "Notifications" &&
@@ -73,13 +76,22 @@ const NavItem = ({ item }: Props) => {
       router.push("/my-stream/notifications?reload=true", undefined, {
         shallow: true,
       });
-    } else {
-      handleNavClick(item);
+      return;
     }
+    handleNavClick(item);
   };
 
   if (item.kind === "route") {
-    isActive = router.pathname === item.href && activeView === null;
+    if (item.name === "Stream") {
+      isActive =
+        router.pathname === item.href &&
+        activeView === null &&
+        typeof router.query.wave !== "string";
+    } else {
+      isActive = router.pathname === item.href && activeView === null;
+    }
+  } else if (item.viewKey === "waves") {
+    isActive = activeView === item.viewKey || isWaveSubRoute;
   } else {
     isActive = activeView === item.viewKey;
   }

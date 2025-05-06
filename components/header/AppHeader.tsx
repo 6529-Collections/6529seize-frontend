@@ -8,6 +8,9 @@ import { useIdentity } from "../../hooks/useIdentity";
 import { useRouter } from "next/router";
 import { useViewContext } from "../navigation/ViewContext";
 import { useWaveById } from "../../hooks/useWaveById";
+import BackButton from "../navigation/BackButton";
+import Spinner from "../utils/Spinner";
+import { capitalizeEveryWord, formatAddress } from "../../helpers/Helpers";
 
 interface Props {
   readonly extraClass?: string;
@@ -30,6 +33,7 @@ export default function AppHeader(props: Readonly<Props>) {
   })();
 
   const pathSegments = router.asPath.split("?")[0].split("/").filter(Boolean);
+  const basePath = pathSegments.length ? pathSegments[0] : "";
   const pageTitle = pathSegments.length
     ? pathSegments[pathSegments.length - 1]
         .replace(/[-_]/g, " ")
@@ -38,40 +42,76 @@ export default function AppHeader(props: Readonly<Props>) {
 
   const waveId =
     typeof router.query.wave === "string" ? router.query.wave : null;
-  const { wave } = useWaveById(waveId);
+  const { wave, isLoading, isFetching } = useWaveById(waveId);
 
-  const finalTitle = (() => {
-    if (waveId) {
-      return wave?.name ?? "Wave";
-    }
+  const finalTitle: React.ReactNode = (() => {
     if (activeView === "waves") return "Waves";
     if (activeView === "messages") return "Messages";
-    return pageTitle;
+    if (waveId) {
+      if (isLoading || isFetching || wave?.id !== waveId) return <Spinner />;
+      return wave?.name ?? "Wave";
+    }
+
+    if (basePath && !isNaN(Number(pageTitle))) {
+      switch (basePath) {
+        case "the-memes":
+          return `The Memes #${pageTitle}`;
+        case "6529-gradient":
+          return `6529 Gradient #${pageTitle}`;
+        case "meme-lab":
+          return `Meme Lab #${pageTitle}`;
+        case "nextgen":
+          return `NextGen #${pageTitle}`;
+      }
+    }
+
+    const slice = (str: string, length: number) => {
+      if (str.length <= length) return str;
+
+      const half = Math.floor(length / 2);
+      const firstPart = str.slice(0, half);
+      const lastPart = str.slice(-half);
+      return `${firstPart}...${lastPart}`;
+    };
+
+    if (basePath === "rememes") {
+      const contract = pathSegments[1];
+      const tokenId = pathSegments[2];
+      if (contract && tokenId) {
+        const formattedContract = formatAddress(contract);
+        const formattedTokenId = formatAddress(tokenId);
+        return `Rememes ${formattedContract} #${slice(formattedTokenId, 10)}`;
+      }
+    }
+
+    return slice(capitalizeEveryWord(pageTitle), 20);
   })();
 
   return (
     <div className="tw-w-full tw-bg-black tw-text-iron-50 tw-pt-[env(safe-area-inset-top,0px)]">
       <div className="tw-flex tw-items-center tw-justify-between tw-px-4 tw-h-16">
-        <button
-          type="button"
-          aria-label="Open menu"
-          onClick={() => setMenuOpen(true)}
-          className={`tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-h-10 tw-w-10 tw-rounded-full tw-border tw-border-solid ${
-            address && pfp
-              ? "tw-bg-iron-900 tw-border-white/20 tw-border-solid"
-              : "tw-bg-transparent tw-border-transparent"
-          }`}
-        >
-          {address && pfp ? (
-            <img
-              src={pfp}
-              alt="pfp"
-              className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
-            />
-          ) : (
-            <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
-          )}
-        </button>
+        <BackButton />
+        {!waveId && (
+          <button
+            type="button"
+            aria-label="Open menu"
+            onClick={() => setMenuOpen(true)}
+            className={`tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-h-10 tw-w-10 tw-rounded-full tw-border tw-border-solid ${
+              address && pfp
+                ? "tw-bg-iron-900 tw-border-white/20 tw-border-solid"
+                : "tw-bg-transparent tw-border-transparent"
+            }`}>
+            {address && pfp ? (
+              <img
+                src={pfp}
+                alt="pfp"
+                className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
+              />
+            ) : (
+              <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
+            )}
+          </button>
+        )}
         <div className="tw-flex-1 tw-text-center tw-font-semibold tw-text-sm">
           {finalTitle}
         </div>

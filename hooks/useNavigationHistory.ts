@@ -11,6 +11,12 @@ interface NavigationHistory {
   refresh: () => void;
 }
 
+// DEBUG LOGGER
+const DEBUG_NAV = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
+const dlog = (...args: unknown[]): void => {
+  if (DEBUG_NAV) console.log("[useNavigationHistory]", ...args);
+};
+
 export const useNavigationHistory = (): NavigationHistory => {
   const router = useRouter();
   const navRouter = useNavRouter();
@@ -35,6 +41,7 @@ export const useNavigationHistory = (): NavigationHistory => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    dlog("pathname effect", { pathname: router.pathname, backIndex, forwardIndex, isGoingBack, isGoingForward });
     if (isGoingBack) {
       setIsGoingBack(false);
       sessionStorage.setItem("isGoingBack", "false");
@@ -76,7 +83,7 @@ export const useNavigationHistory = (): NavigationHistory => {
   }, []);
 
   const goBack = () => {
-    console.log("Going back", canGoBack, backIndex);
+    dlog("goBack", { canGoBack, backIndex });
     if (canGoBack) {
       setIsGoingBack(true);
       sessionStorage.setItem("isGoingBack", "true");
@@ -87,7 +94,7 @@ export const useNavigationHistory = (): NavigationHistory => {
   };
 
   const goForward = () => {
-    console.log("Going forward", canGoForward, forwardIndex);
+    dlog("goForward", { canGoForward, forwardIndex });
     if (canGoForward) {
       setIsGoingForward(true);
       sessionStorage.setItem("isGoingForward", "true");
