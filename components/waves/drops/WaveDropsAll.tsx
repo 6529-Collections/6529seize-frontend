@@ -107,10 +107,35 @@ export default function WaveDropsAll({
     [scrollToSerialNo] // Depends on the stable scrollToSerialNo
   );
 
-  // Ref to hold the latest waveMessages state to avoid stale closures
-  const latestWaveMessagesRef = useRef(waveMessages);
 
-  const smallestSerialNo = useRef<number | null>(null);
+  useEffect(() => {
+    if (!serialNo) return;
+    console.log(waveMessages?.allDropsCount);
+  }, [serialNo, waveMessages?.allDropsCount]);
+
+  const revealDropAndScrollToIt = useCallback(
+    async (targetSerialNo: number) => {
+      if (isScrolling) return;
+      setIsScrolling(true);
+      await fetchNextPage(
+        {
+          waveId,
+          type: DropSize.LIGHT,
+          targetSerialNo: targetSerialNo,
+        },
+        dropId
+      );
+      setTimeout(() => {
+        setSerialNo(targetSerialNo);
+      }, 100);
+    },
+    [setIsScrolling, fetchNextPage, waveId, dropId]
+  );
+
+  // Ref to hold the latest waveMessages state to avoid stale closures
+  // const latestWaveMessagesRef = useRef(waveMessages);
+
+  // const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
 
   const typingMessage = useWaveIsTyping(
@@ -118,44 +143,44 @@ export default function WaveDropsAll({
     connectedProfile?.handle ?? null
   );
 
-  // Effect to update the ref whenever waveMessages changes
-  useEffect(() => {
-    latestWaveMessagesRef.current = waveMessages;
-    // Recalculate smallestSerialNo based on the potentially updated data
-    if (waveMessages && waveMessages.drops.length > 0) {
-      const minSerialNo = Math.min(
-        ...waveMessages.drops.map((drop) => drop.serial_no)
-      );
-      smallestSerialNo.current = minSerialNo;
-    } else {
-      smallestSerialNo.current = null;
-    }
-  }, [waveMessages]);
+  // // Effect to update the ref whenever waveMessages changes
+  // useEffect(() => {
+  //   latestWaveMessagesRef.current = waveMessages;
+  //   // Recalculate smallestSerialNo based on the potentially updated data
+  //   if (waveMessages && waveMessages.drops.length > 0) {
+  //     const minSerialNo = Math.min(
+  //       ...waveMessages.drops.map((drop) => drop.serial_no)
+  //     );
+  //     smallestSerialNo.current = minSerialNo;
+  //   } else {
+  //     smallestSerialNo.current = null;
+  //   }
+  // }, [waveMessages]);
 
   // Effect for initial load and handling own temporary drops
-  useEffect(() => {
-    const currentMessages = latestWaveMessagesRef.current;
-    if (currentMessages && currentMessages.drops.length > 0) {
-      if (!init) setInit(true);
+  // useEffect(() => {
+  //   const currentMessages = latestWaveMessagesRef.current;
+  //   if (currentMessages && currentMessages.drops.length > 0) {
+  //     if (!init) setInit(true);
 
-      const lastDrop = currentMessages.drops[0];
-      if (lastDrop.id.startsWith("temp-")) {
-        if (isAtBottom && !userHasManuallyScrolled) {
-          setTimeout(() => {
-            scrollToVisualBottom();
-          }, 100);
-        } else if (!userHasManuallyScrolled) {
-          setSerialNo(lastDrop.serial_no);
-        }
-      }
-    }
-  }, [
-    waveMessages,
-    isAtBottom,
-    userHasManuallyScrolled,
-    scrollToVisualBottom,
-    init,
-  ]); // Keep dependencies, logic uses ref
+  //     const lastDrop = currentMessages.drops[0];
+  //     if (lastDrop.id.startsWith("temp-")) {
+  //       if (isAtBottom && !userHasManuallyScrolled) {
+  //         setTimeout(() => {
+  //           scrollToVisualBottom();
+  //         }, 100);
+  //       } else if (!userHasManuallyScrolled) {
+  //         setSerialNo(lastDrop.serial_no);
+  //       }
+  //     }
+  //   }
+  // }, [
+  //   waveMessages,
+  //   isAtBottom,
+  //   userHasManuallyScrolled,
+  //   scrollToVisualBottom,
+  //   init,
+  // ]); // Keep dependencies, logic uses ref
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -164,48 +189,48 @@ export default function WaveDropsAll({
     }).catch((error) => console.error("Failed to mark feed as read:", error));
   }, [waveId]);
 
-  const revealDropAndScrollToIt = useCallback(async () => {
-    console.log(smallestSerialNo.current);
-    
-  }, []);
+  // const revealDropAndScrollToIt = useCallback(async () => {
+  //   console.log(smallestSerialNo.current);
 
-  const fetchAndScrollToDrop = useCallback(async () => {
-    if (!serialNo) return;
-    setIsScrolling(true); // Set scrolling true for the entire process
+  // }, []);
 
-    // TODO: do it separate function what checks if the drop is found, if not, then fetch more
-    await fetchNextPage(
-      {
-        waveId,
-        type: DropSize.LIGHT,
-        targetSerialNo: serialNo,
-      },
-      dropId
-    );
-    revealDropAndScrollToIt();
-  }, [waveId, fetchNextPage, serialNo, setIsScrolling, revealDropAndScrollToIt]);
+  // const fetchAndScrollToDrop = useCallback(async () => {
+  //   if (!serialNo) return;
+  //   setIsScrolling(true); // Set scrolling true for the entire process
 
-  // Effect to trigger the fetch loop when serialNo is set and we are initialized
-  useEffect(() => {
-    if (init && serialNo) {
-      const currentSmallestSerial = smallestSerialNo.current;
+  //   // TODO: do it separate function what checks if the drop is found, if not, then fetch more
+  //   await fetchNextPage(
+  //     {
+  //       waveId,
+  //       type: DropSize.LIGHT,
+  //       targetSerialNo: serialNo,
+  //     },
+  //     dropId
+  //   );
+  //   revealDropAndScrollToIt();
+  // }, [waveId, fetchNextPage, serialNo, setIsScrolling, revealDropAndScrollToIt]);
 
-      // Check if already loaded before attempting scroll or fetch
-      if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
-        const success = smoothScrollWithRetries();
-        if (success) {
-          setSerialNo(null);
-        } else {
-          fetchAndScrollToDrop();
-        }
-      } else {
-        fetchAndScrollToDrop();
-      }
-    }
-    return () => {
-      // Cleanup logic if needed
-    };
-  }, [init, serialNo]);
+  // // Effect to trigger the fetch loop when serialNo is set and we are initialized
+  // useEffect(() => {
+  //   if (init && serialNo) {
+  //     const currentSmallestSerial = smallestSerialNo.current;
+
+  //     // Check if already loaded before attempting scroll or fetch
+  //     if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
+  //       const success = smoothScrollWithRetries();
+  //       if (success) {
+  //         setSerialNo(null);
+  //       } else {
+  //         fetchAndScrollToDrop();
+  //       }
+  //     } else {
+  //       fetchAndScrollToDrop();
+  //     }
+  //   }
+  //   return () => {
+  //     // Cleanup logic if needed
+  //   };
+  // }, [init, serialNo]);
 
   const handleTopIntersection = useCallback(async () => {
     if (
@@ -277,7 +302,7 @@ export default function WaveDropsAll({
         >
           <DropsList
             scrollContainerRef={scrollContainerRef}
-            onReplyClick={() => setSerialNo(101818)}
+            onReplyClick={() => revealDropAndScrollToIt(101818)}
             drops={waveMessages?.drops ?? []}
             showWaveInfo={false}
             onReply={onReply}
