@@ -22,11 +22,6 @@ export default function BackButton() {
   const waveId =
     typeof router.query.wave === "string" ? router.query.wave : null;
 
-  const isProfileRoute = router.pathname.startsWith("/[user]");
-  const showBackButton = !!waveId || (isProfileRoute && canGoBack);
-
-  if (!showBackButton) return null;
-
   const handleClick = () => {
     if (loading) return;
     setLoading(true);
