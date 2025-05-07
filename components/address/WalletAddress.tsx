@@ -98,12 +98,9 @@ export function WalletAddress(props: {
                 props.isUserPage ? styles.addressUserPage : ""
               }`}
             >
-              <span
-                className={styles.address}
-                dangerouslySetInnerHTML={{
-                  __html: getInnerHTML(),
-                }}
-              ></span>
+              <Link href={getLink()} className={styles.address}>
+                {resolveDisplay()}
+              </Link>
             </span>
           )}
           {walletEns ? (
