@@ -191,7 +191,7 @@ export default function ProfileActivityLogs({
   }, [logs?.page, isLoading]);
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"}  `}>
-      <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-8 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
+      <div className="tw-w-full tw-flex tw-flex-col min-[1200px]:tw-flex-row tw-gap-y-4 min-[1200px]:tw-gap-x-16 min-[1200px]:tw-justify-between min-[1200px]:tw-items-center">
         {children && <div>{children}</div>}
         {withFilters && (
           <div className="min-[1200px]:tw-flex min-[1200px]:tw-justify-end">
