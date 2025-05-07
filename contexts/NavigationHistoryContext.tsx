@@ -56,7 +56,14 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
         skipNext.current = false;
         return;
       }
-      const pathKey = mainSegment(url);
+      const isProfile   = router.pathname.startsWith("/[user]");
+      const isMyStream  = url.startsWith("/my-stream") && url.includes("wave=");
+
+      const pathKey = isProfile
+          ? mainSegment(url)          // existing logic
+          : isMyStream
+              ? url.split("&")[0]     // keep ?wave=123, drop other params
+              : url.split(/[?#]/)[0]; // existing logic for everything else
       // avoid pushing if previous route entry (ignoring trailing views) has same main segment
       let i = historyRef.current.length - 1;
       while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
@@ -64,7 +71,6 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
       const isDuplicate = lastRoute?.type === "route" && lastRoute.path === pathKey;
       if (isDuplicate) return;
       pushStack({ type: "route", path: pathKey });
-      console.log('[NAV] push route', pathKey, historyRef.current);
     };
     router.events.on("routeChangeComplete", handleRouteChange);
     return () => router.events.off("routeChangeComplete", handleRouteChange);
@@ -72,7 +78,6 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
 
   const pushView = useCallback((view: ViewKey) => {
     pushStack({ type: "view", view });
-    console.log('[NAV] push view', view, historyRef.current);
   }, [pushStack]);
 
   const goBack = useCallback(() => {
@@ -102,13 +107,10 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
       const target = historyRef.current[targetIndex];
       if (target.type === "route") {
         skipNext.current = true;
-        const samePage = router.pathname === target.path;
-        console.log('goBack→', target.path, { current: router.asPath, samePage });
         router.push(target.path);
       } else {
         setActiveView(target.view);
       }
-      console.log('[NAV] goBack →', target, 'stack:', historyRef.current);
       return targetIndex;
     });
   }, [canGoBack, router, setActiveView]);

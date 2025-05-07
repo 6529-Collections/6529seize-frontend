@@ -67,14 +67,6 @@ export function WalletAddress(props: {
     }, 1000);
   }
 
-  function getInnerHTML() {
-    if (props.disableLink) {
-      return resolveDisplay();
-    }
-
-    return `<a href="${getLink()}">${resolveDisplay()}</a>`;
-  }
-
   const [walletEns] = useState(
     props.display?.endsWith(".eth")
       ? props.display
@@ -85,11 +77,14 @@ export function WalletAddress(props: {
 
   return (
     <span>
-      {(props.hideCopy || !navigator.clipboard) && (
-        <Link href={getLink()} className={styles.address}>
-          {resolveDisplay()}
-        </Link>
-      )}
+      {(props.hideCopy || !navigator.clipboard) &&
+        (props.disableLink ? (
+          <span className={styles.address}>{resolveDisplay()}</span>
+        ) : (
+          <Link href={getLink()} className={styles.address}>
+            {resolveDisplay()}
+          </Link>
+        ))}
       {!props.hideCopy && navigator.clipboard && (
         <>
           {!props.isUserPage && (
@@ -98,9 +93,13 @@ export function WalletAddress(props: {
                 props.isUserPage ? styles.addressUserPage : ""
               }`}
             >
-              <Link href={getLink()} className={styles.address}>
-                {resolveDisplay()}
-              </Link>
+              {props.disableLink ? (
+                <span className={styles.address}>{resolveDisplay()}</span>
+              ) : (
+                <Link href={getLink()} className={styles.address}>
+                  {resolveDisplay()}
+                </Link>
+              )}
             </span>
           )}
           {walletEns ? (
