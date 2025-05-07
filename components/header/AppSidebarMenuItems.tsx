@@ -96,7 +96,6 @@ export default function AppSidebarMenuItems({
                             </Link>
                           );
                         }
-
                         return (
                           <Fragment key={child.label ?? `idx-${idx}`}>
                             {(child.section && idx !== 0) ||
