@@ -1,6 +1,5 @@
 import type { NextRouter } from "next/router";
-import type { NavItem as NavItemData } from "./navTypes";
-import type { ViewKey } from "./navTypes";
+import type { NavItem as NavItemData, ViewKey } from "./navTypes";
 
 export const isNavItemActive = (
   item: NavItemData,

@@ -59,11 +59,14 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
       const isProfile   = router.pathname.startsWith("/[user]");
       const isMyStream  = url.startsWith("/my-stream") && url.includes("wave=");
 
-      const pathKey = isProfile
-          ? mainSegment(url)          // existing logic
-          : isMyStream
-              ? url.split("&")[0]     // keep ?wave=123, drop other params
-              : url.split(/[?#]/)[0]; // existing logic for everything else
+      let pathKey: string;
+      if (isProfile) {
+        pathKey = mainSegment(url);
+      } else if (isMyStream) {
+        pathKey = url.split("&")[0];
+      } else {
+        pathKey = url.split(/[?#]/)[0];
+      }
       // avoid pushing if previous route entry (ignoring trailing views) has same main segment
       let i = historyRef.current.length - 1;
       while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
