@@ -59,6 +59,8 @@ export default function VirtualScrollWrapper({
   waveId,
   type,
 }: VirtualScrollWrapperProps) {
+  const { fetchAroundSerialNo } = useMyStream();
+
   /**
    * isInView: Tracks if the component is currently in the viewport.
    */
@@ -109,21 +111,21 @@ export default function VirtualScrollWrapper({
    */
   useEffect(() => {
     // Avoid running Intersection Observer on the server
-    if (typeof window === "undefined" || type === DropSize.LIGHT) return;
+    if (typeof window === "undefined") return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         const inView = entry.isIntersecting;
-        if (!inView && containerRef.current) {
+        if (!inView && containerRef.current && type !== DropSize.LIGHT) {
           // If leaving viewport, measure height in case content changed
           measureHeight();
         }
         if (inView !== isInView) {
           setIsInView(inView);
         }
-        // if (inView && type === DropSize.LIGHT) {
-        //   fetchAroundSerialNo(waveId, dropSerialNo);
-        // }
+        if (inView && type === DropSize.LIGHT) {
+          fetchAroundSerialNo(waveId, dropSerialNo);
+        }
       },
       {
         // For a reversed layout, we need a large margin at both top and bottom
