@@ -60,8 +60,17 @@ export function useVirtualizedWaveDrops(
     },
     [fetchNextPageForWave, fetchNextpageForDrop]
   );
+
+
+  const revealDrop = useCallback(async (serialNo: number) => {
+    if (virtualizedWaveMessages) {
+      return virtualizedWaveMessages.revealDrop(serialNo);
+    }
+  }, [virtualizedWaveMessages]);
+  
   return {
     waveMessages: virtualizedWaveMessages,
     fetchNextPage,
+    revealDrop,
   };
 }

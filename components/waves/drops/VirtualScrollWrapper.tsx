@@ -59,8 +59,6 @@ export default function VirtualScrollWrapper({
   waveId,
   type,
 }: VirtualScrollWrapperProps) {
-  const { fetchAroundSerialNo } = useMyStream();
-
   /**
    * isInView: Tracks if the component is currently in the viewport.
    */
@@ -95,6 +93,7 @@ export default function VirtualScrollWrapper({
    * async changes to settle.
    */
   useEffect(() => {
+    if (type === DropSize.LIGHT) return;
     const timer = setTimeout(() => {
       measureHeight();
     }, delay);
@@ -110,7 +109,7 @@ export default function VirtualScrollWrapper({
    */
   useEffect(() => {
     // Avoid running Intersection Observer on the server
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || type === DropSize.LIGHT) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {

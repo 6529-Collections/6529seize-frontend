@@ -55,15 +55,14 @@ export default function WaveDropsAll({
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
 
-  const { waveMessages, fetchNextPage } = useVirtualizedWaveDrops(
+  const { waveMessages, fetchNextPage, revealDrop } = useVirtualizedWaveDrops(
     waveId,
     dropId
   );
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
 
-  const { scrollContainerRef, scrollToVisualTop, scrollToVisualBottom } =
-    useScrollBehavior();
+  const { scrollContainerRef, scrollToVisualBottom } = useScrollBehavior();
 
   const [isAtBottom, setIsAtBottom] = useState(true);
 
@@ -80,6 +79,35 @@ export default function WaveDropsAll({
           behavior: behavior,
           block: "center",
         });
+
+        // Check twice after small delays if element is still in viewport
+        // This protects against layout shifts that might move the element
+        setTimeout(() => {
+          const rect = targetDropRef.current?.getBoundingClientRect();
+          const isInViewport =
+            rect && rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+          if (!isInViewport && targetDropRef.current) {
+            targetDropRef.current.scrollIntoView({
+              behavior: behavior,
+              block: "center",
+            });
+
+            // Second check after another small delay
+            setTimeout(() => {
+              const rect = targetDropRef.current?.getBoundingClientRect();
+              const isInViewport =
+                rect && rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+              if (!isInViewport && targetDropRef.current) {
+                targetDropRef.current.scrollIntoView({
+                  behavior: behavior,
+                  block: "center",
+                });
+              }
+            }, 300);
+          }
+        }, 150);
         return true;
       }
       return false;
@@ -89,56 +117,16 @@ export default function WaveDropsAll({
 
   const smoothScrollWithRetries = useCallback(
     () => {
-      // Attempt initial smooth scroll
       const initialSuccess = scrollToSerialNo("smooth");
-      // If the element was found and initial scroll started...
-      if (initialSuccess) {
-        // Schedule follow-up scrolls with 'auto' behavior to quickly correct position after layout shifts
-        setTimeout(() => {
-          scrollToSerialNo("auto");
-          // Second follow-up scroll
-          setTimeout(() => {
-            scrollToSerialNo("auto");
-          }, 300); // Delay after the first follow-up
-        }, 300); // Initial delay after smooth scroll starts
-      }
       return initialSuccess; // Return success of the first attempt
     },
     [scrollToSerialNo] // Depends on the stable scrollToSerialNo
   );
 
-  const [revealingDrop, setRevealingDrop] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!serialNo || revealingDrop) return;
-    setRevealingDrop(true);
-    console.log(waveMessages?.allDropsCount);
-  }, [serialNo, waveMessages?.allDropsCount, revealingDrop]);
-
-  const revealDropAndScrollToIt = useCallback(
-    async (targetSerialNo: number) => {
-      if (isScrolling) return;
-      setIsScrolling(true);
-      await fetchNextPage(
-        {
-          waveId,
-          type: DropSize.LIGHT,
-          targetSerialNo: targetSerialNo,
-        },
-        dropId
-      );
-      console.log("fetching next page done");
-      setTimeout(() => {
-        setSerialNo(targetSerialNo);
-      }, 100);
-    },
-    [setIsScrolling, fetchNextPage, waveId, dropId]
-  );
-
   // Ref to hold the latest waveMessages state to avoid stale closures
-  // const latestWaveMessagesRef = useRef(waveMessages);
+  const latestWaveMessagesRef = useRef(waveMessages);
 
-  // const smallestSerialNo = useRef<number | null>(null);
+  const smallestSerialNo = useRef<number | null>(null);
   const [init, setInit] = useState(false);
 
   const typingMessage = useWaveIsTyping(
@@ -147,43 +135,43 @@ export default function WaveDropsAll({
   );
 
   // // Effect to update the ref whenever waveMessages changes
-  // useEffect(() => {
-  //   latestWaveMessagesRef.current = waveMessages;
-  //   // Recalculate smallestSerialNo based on the potentially updated data
-  //   if (waveMessages && waveMessages.drops.length > 0) {
-  //     const minSerialNo = Math.min(
-  //       ...waveMessages.drops.map((drop) => drop.serial_no)
-  //     );
-  //     smallestSerialNo.current = minSerialNo;
-  //   } else {
-  //     smallestSerialNo.current = null;
-  //   }
-  // }, [waveMessages]);
+  useEffect(() => {
+    latestWaveMessagesRef.current = waveMessages;
+    // Recalculate smallestSerialNo based on the potentially updated data
+    if (waveMessages && waveMessages.drops.length > 0) {
+      const minSerialNo = Math.min(
+        ...waveMessages.drops.map((drop) => drop.serial_no)
+      );
+      smallestSerialNo.current = minSerialNo;
+    } else {
+      smallestSerialNo.current = null;
+    }
+  }, [waveMessages]);
 
   // Effect for initial load and handling own temporary drops
-  // useEffect(() => {
-  //   const currentMessages = latestWaveMessagesRef.current;
-  //   if (currentMessages && currentMessages.drops.length > 0) {
-  //     if (!init) setInit(true);
+  useEffect(() => {
+    const currentMessages = latestWaveMessagesRef.current;
+    if (currentMessages && currentMessages.drops.length > 0) {
+      if (!init) setInit(true);
 
-  //     const lastDrop = currentMessages.drops[0];
-  //     if (lastDrop.id.startsWith("temp-")) {
-  //       if (isAtBottom && !userHasManuallyScrolled) {
-  //         setTimeout(() => {
-  //           scrollToVisualBottom();
-  //         }, 100);
-  //       } else if (!userHasManuallyScrolled) {
-  //         setSerialNo(lastDrop.serial_no);
-  //       }
-  //     }
-  //   }
-  // }, [
-  //   waveMessages,
-  //   isAtBottom,
-  //   userHasManuallyScrolled,
-  //   scrollToVisualBottom,
-  //   init,
-  // ]); // Keep dependencies, logic uses ref
+      const lastDrop = currentMessages.drops[0];
+      if (lastDrop.id.startsWith("temp-")) {
+        if (isAtBottom && !userHasManuallyScrolled) {
+          setTimeout(() => {
+            scrollToVisualBottom();
+          }, 100);
+        } else if (!userHasManuallyScrolled) {
+          setSerialNo(lastDrop.serial_no);
+        }
+      }
+    }
+  }, [
+    waveMessages,
+    isAtBottom,
+    userHasManuallyScrolled,
+    scrollToVisualBottom,
+    init,
+  ]); // Keep dependencies, logic uses ref
 
   useEffect(() => {
     void removeWaveDeliveredNotifications(waveId);
@@ -192,55 +180,71 @@ export default function WaveDropsAll({
     }).catch((error) => console.error("Failed to mark feed as read:", error));
   }, [waveId]);
 
-  // const revealDropAndScrollToIt = useCallback(async () => {
-  //   console.log(smallestSerialNo.current);
+  const fetchAndScrollToDrop = useCallback(async () => {
+    if (!serialNo || isScrolling) return;
+    setIsScrolling(true); // Set scrolling true for the entire process
+    await fetchNextPage(
+      {
+        waveId,
+        type: DropSize.LIGHT,
+        targetSerialNo: serialNo,
+      },
+      dropId
+    );
+    setTimeout(() => {
+      revealDrop(serialNo);
+      setTimeout(() => {
+        const success = smoothScrollWithRetries();
+        setTimeout(() => {
+          if (success) {
+            setSerialNo(null);
+            setIsScrolling(false);
+          }
+        }, 500);
+      }, 0);
+    }, 1000);
+  }, [
+    waveId,
+    fetchNextPage,
+    serialNo,
+    setIsScrolling,
+    isScrolling,
+    revealDrop,
+  ]);
 
-  // }, []);
+  useEffect(() => {
+    if (init && serialNo && !isScrolling) {
+      const currentSmallestSerial = smallestSerialNo.current;
 
-  // const fetchAndScrollToDrop = useCallback(async () => {
-  //   if (!serialNo) return;
-  //   setIsScrolling(true); // Set scrolling true for the entire process
-
-  //   // TODO: do it separate function what checks if the drop is found, if not, then fetch more
-  //   await fetchNextPage(
-  //     {
-  //       waveId,
-  //       type: DropSize.LIGHT,
-  //       targetSerialNo: serialNo,
-  //     },
-  //     dropId
-  //   );
-  //   revealDropAndScrollToIt();
-  // }, [waveId, fetchNextPage, serialNo, setIsScrolling, revealDropAndScrollToIt]);
-
-  // // Effect to trigger the fetch loop when serialNo is set and we are initialized
-  // useEffect(() => {
-  //   if (init && serialNo) {
-  //     const currentSmallestSerial = smallestSerialNo.current;
-
-  //     // Check if already loaded before attempting scroll or fetch
-  //     if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
-  //       const success = smoothScrollWithRetries();
-  //       if (success) {
-  //         setSerialNo(null);
-  //       } else {
-  //         fetchAndScrollToDrop();
-  //       }
-  //     } else {
-  //       fetchAndScrollToDrop();
-  //     }
-  //   }
-  //   return () => {
-  //     // Cleanup logic if needed
-  //   };
-  // }, [init, serialNo]);
+      // Check if already loaded before attempting scroll or fetch
+      if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
+        const success = scrollToSerialNo("smooth");
+        if (success) {
+          setSerialNo(null);
+        } else {
+          fetchAndScrollToDrop();
+        }
+      } else {
+        fetchAndScrollToDrop();
+      }
+    }
+    return () => {
+      // Cleanup logic if needed
+    };
+  }, [
+    init,
+    serialNo,
+    fetchAndScrollToDrop,
+    scrollToSerialNo,
+    setSerialNo,
+    isScrolling,
+  ]);
 
   const handleTopIntersection = useCallback(async () => {
     if (
       waveMessages?.hasNextPage &&
       !waveMessages?.isLoading &&
-      !waveMessages?.isLoadingNextPage &&
-      !isScrolling
+      !waveMessages?.isLoadingNextPage
     ) {
       await fetchNextPage(
         {
@@ -255,7 +259,6 @@ export default function WaveDropsAll({
     waveMessages?.isLoading,
     waveMessages?.isLoadingNextPage,
     fetchNextPage,
-    isScrolling,
   ]);
 
   const onQuoteClick = useCallback(
@@ -305,7 +308,7 @@ export default function WaveDropsAll({
         >
           <DropsList
             scrollContainerRef={scrollContainerRef}
-            onReplyClick={() => revealDropAndScrollToIt(101818)}
+            onReplyClick={() => setSerialNo(67615)}
             drops={waveMessages?.drops ?? []}
             showWaveInfo={false}
             onReply={onReply}
