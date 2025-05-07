@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import Tippy from "@tippyjs/react";
+import Link from "next/link";
 
 export function WalletAddress(props: {
   wallet: string;
@@ -66,14 +67,6 @@ export function WalletAddress(props: {
     }, 1000);
   }
 
-  function getInnerHTML() {
-    if (props.disableLink) {
-      return resolveDisplay();
-    }
-
-    return `<a href="${getLink()}">${resolveDisplay()}</a>`;
-  }
-
   const [walletEns] = useState(
     props.display?.endsWith(".eth")
       ? props.display
@@ -84,25 +77,29 @@ export function WalletAddress(props: {
 
   return (
     <span>
-      {(props.hideCopy || !navigator.clipboard) && (
-        <span
-          className={styles.address}
-          dangerouslySetInnerHTML={{
-            __html: getInnerHTML(),
-          }}></span>
-      )}
+      {(props.hideCopy || !navigator.clipboard) &&
+        (props.disableLink ? (
+          <span className={styles.address}>{resolveDisplay()}</span>
+        ) : (
+          <Link href={getLink()} className={styles.address}>
+            {resolveDisplay()}
+          </Link>
+        ))}
       {!props.hideCopy && navigator.clipboard && (
         <>
           {!props.isUserPage && (
             <span
               className={`${styles.address} ${
                 props.isUserPage ? styles.addressUserPage : ""
-              }`}>
-              <span
-                className={styles.address}
-                dangerouslySetInnerHTML={{
-                  __html: getInnerHTML(),
-                }}></span>
+              }`}
+            >
+              {props.disableLink ? (
+                <span className={styles.address}>{resolveDisplay()}</span>
+              ) : (
+                <Link href={getLink()} className={styles.address}>
+                  {resolveDisplay()}
+                </Link>
+              )}
             </span>
           )}
           {walletEns ? (
@@ -111,15 +108,18 @@ export function WalletAddress(props: {
                 content={isCopied ? "Copied" : "Copy"}
                 placement={"right"}
                 theme={"light"}
-                hideOnClick={false}>
+                hideOnClick={false}
+              >
                 <Dropdown.Toggle
                   name={`copy-toggle`}
-                  aria-label={`copy-toggle`}>
+                  aria-label={`copy-toggle`}
+                >
                   {props.isUserPage && props.display && (
                     <span
                       className={`${styles.address} ${
                         props.isUserPage ? styles.addressUserPage : ""
-                      }`}>
+                      }`}
+                    >
                       {formatAddress(props.display)}
                     </span>
                   )}
@@ -137,24 +137,28 @@ export function WalletAddress(props: {
                     content={isCopied ? "Copied" : "Copy"}
                     placement={"right"}
                     theme={"light"}
-                    hideOnClick={false}>
+                    hideOnClick={false}
+                  >
                     <Dropdown.Item
                       aria-label={`copy-ens-btn`}
                       onClick={() => copy(props.displayEns ?? props.display)}
                       dangerouslySetInnerHTML={{
                         __html: resolveAddress(),
-                      }}></Dropdown.Item>
+                      }}
+                    ></Dropdown.Item>
                   </Tippy>
                 )}
                 <Tippy
                   content={isCopied ? "Copied" : "Copy"}
                   placement={"right"}
                   theme={"light"}
-                  hideOnClick={false}>
+                  hideOnClick={false}
+                >
                   <Dropdown.Item
                     className={styles.copyDropdownItem}
                     aria-label={`copy-address-btn`}
-                    onClick={() => copy(props.wallet)}>
+                    onClick={() => copy(props.wallet)}
+                  >
                     {formatAddress(props.wallet as string)}
                   </Dropdown.Item>
                 </Tippy>
@@ -166,11 +170,13 @@ export function WalletAddress(props: {
                 content={isCopied ? "Copied" : "Copy"}
                 placement={"right"}
                 theme={"light"}
-                hideOnClick={false}>
+                hideOnClick={false}
+              >
                 <Dropdown.Toggle
                   name={`copy-toggle`}
                   aria-label={`copy-toggle`}
-                  onClick={() => copy(props.wallet)}>
+                  onClick={() => copy(props.wallet)}
+                >
                   {props.isUserPage && (
                     <span
                       className={`${styles.address} ${
@@ -178,7 +184,8 @@ export function WalletAddress(props: {
                       }`}
                       dangerouslySetInnerHTML={{
                         __html: resolveAddress(),
-                      }}></span>
+                      }}
+                    ></span>
                   )}
                   <FontAwesomeIcon
                     icon="copy"
