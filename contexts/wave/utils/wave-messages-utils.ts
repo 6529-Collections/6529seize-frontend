@@ -405,9 +405,9 @@ export async function findLightDropBySerialNoWithPagination(
       limit: itemsPerRequest.toString(),
       max_serial_no: currentMaxSerialForNextCall.toString(),
     };
-
+    
     const currentBatch = await commonApiFetch<ApiLightDrop[]>({
-      endpoint: `/light-drops`,
+      endpoint: `light-drops`,
       params: paramsForCurrentRequest,
       signal,
     });

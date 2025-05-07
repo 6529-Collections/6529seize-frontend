@@ -22,6 +22,7 @@ interface MyStreamWaveChatProps {
 }
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,6 +87,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
   const onCancelReplyQuote = () => {
     setActiveDrop(null);
   };
+
+
 
   if (!searchParamsDone) {
     return null;
