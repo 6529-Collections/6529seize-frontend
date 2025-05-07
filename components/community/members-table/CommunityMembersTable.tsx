@@ -1,6 +1,7 @@
 import { CommunityMemberOverview } from "../../../entities/IProfile";
 import { SortDirection } from "../../../entities/ISort";
 import { CommunityMembersSortOption } from "../../../enums";
+import CommunityMembersMobileCard from "./CommunityMembersMobileCard";
 import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
 import CommunityMembersTableRow from "./CommunityMembersTableRow";
 
@@ -22,22 +23,36 @@ export default function CommunityMembersTable({
   readonly onSort: (sort: CommunityMembersSortOption) => void;
 }) {
   return (
-    <table className="tw-min-w-full">
-      <CommunityMembersTableHeader
-        activeSort={activeSort}
-        sortDirection={sortDirection}
-        isLoading={isLoading}
-        onSort={onSort}
-      />
-      <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700">
+    <>
+      <div className="tw-hidden sm:tw-block">
+        <table className="tw-min-w-full">
+          <CommunityMembersTableHeader
+            activeSort={activeSort}
+            sortDirection={sortDirection}
+            isLoading={isLoading}
+            onSort={onSort}
+          />
+          <tbody className="tw-divide-y tw-divide-solid tw-divide-iron-700">
+            {members.map((member, index) => (
+              <CommunityMembersTableRow
+                key={member.detail_view_key}
+                member={member}
+                rank={index + 1 + (page - 1) * pageSize}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="tw-flex tw-flex-col tw-gap-y-4 sm:tw-hidden">
         {members.map((member, index) => (
-          <CommunityMembersTableRow
+          <CommunityMembersMobileCard
             key={member.detail_view_key}
             member={member}
             rank={index + 1 + (page - 1) * pageSize}
           />
         ))}
-      </tbody>
-    </table>
+      </div>
+    </>
   );
 }

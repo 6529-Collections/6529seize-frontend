@@ -1,0 +1,108 @@
+import {
+  CommunityMemberOverview,
+  CIC_TO_TEXT,
+} from "../../../entities/IProfile";
+import {
+  formatNumberWithCommasOrDash,
+  cicToType,
+} from "../../../helpers/Helpers";
+import UserLevel from "../../user/utils/level/UserLevel";
+import Tippy from "@tippyjs/react";
+import UserCICTypeIcon from "../../user/utils/user-cic-type/UserCICTypeIcon";
+import { isEthereumAddress } from "../../../helpers/AllowlistToolHelpers";
+import { ImageScale, getScaledImageUri } from "../../../helpers/image.helpers";
+import CommonTimeAgo from "../../utils/CommonTimeAgo";
+import Link from "next/link";
+
+export default function CommunityMembersMobileCard({
+  member,
+  rank,
+}: {
+  readonly member: CommunityMemberOverview;
+  readonly rank: number;
+}) {
+  const isNotProfile = isEthereumAddress(member.detail_view_key);
+  const isProfile = !isNotProfile;
+  const textColorClass = isProfile ? "tw-text-iron-50" : "tw-text-iron-400";
+  const path = `/${member.detail_view_key}`;
+
+  return (
+    <Link
+      href={path}
+      className="tw-flex tw-flex-col tw-gap-y-1 tw-py-3 tw-pl-3 tw-pr-4 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-white/[0.15] tw-bg-transparent active:tw-bg-iron-700 tw-transition-colors tw-duration-200 tw-no-underline tw-overflow-hidden"
+    >
+      {/* Row 1 */}
+      <div className="tw-flex tw-items-center tw-gap-x-3">
+        {/* Left: rank + avatar */}
+        <div className="tw-flex tw-items-center tw-gap-x-2 tw-flex-shrink-0">
+          <span className="tw-text-iron-400 tw-text-xxs tw-w-6">#{rank}</span>
+          <div className="tw-flex-shrink-0 tw-h-10 tw-w-10 tw-rounded-md tw-overflow-hidden tw-ring-1 tw-ring-white/10 tw-bg-iron-900 tw-flex tw-items-center tw-justify-center">
+            {member.pfp && (
+              <img
+                src={getScaledImageUri(member.pfp, ImageScale.W_AUTO_H_50)}
+                alt={`${member.display} avatar`}
+                className="tw-h-full tw-w-full tw-object-contain tw-mx-auto"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Center: handle with level below for consistent placement */}
+        <div className="tw-flex tw-flex-col tw-gap-y-2">
+          <div className="tw-max-w-[10rem] tw-overflow-hidden tw-truncate">
+            <span
+              className={`tw-truncate tw-text-sm tw-font-semibold ${textColorClass}`}
+            >
+              {member.display}
+            </span>
+          </div>
+          <div>
+            <UserLevel level={member.level} size="xs" />
+          </div>
+        </div>
+
+        {/* Right: active time */}
+        {member.last_activity && (
+          <div className="tw-flex tw-items-center tw-gap-x-1 tw-self-start tw-ml-auto">
+            <span className="tw-text-iron-400 tw-text-xxs">Active</span>
+            <span className="tw-text-iron-400 tw-text-xxs">
+              <CommonTimeAgo timestamp={member.last_activity} short={true} />
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Row 2: stats */}
+      <div className="tw-ml-[5.25rem] tw-mt-2.5 tw-overflow-x-hidden">
+        <div className="tw-flex tw-items-center tw-gap-x-3 tw-whitespace-nowrap tw-overflow-x-auto">
+          <div className="tw-flex tw-items-baseline tw-gap-x-1">
+            <span className="tw-font-medium tw-text-iron-50 tw-text-xxs">
+              {formatNumberWithCommasOrDash(member.tdh)}
+            </span>
+            <span className="tw-text-iron-400 tw-text-xxs">TDH</span>
+          </div>
+          <div className="tw-flex tw-items-baseline tw-gap-x-1">
+            <span className="tw-font-medium tw-text-iron-50 tw-text-xxs">
+              {formatNumberWithCommasOrDash(member.rep)}
+            </span>
+            <span className="tw-text-iron-400 tw-text-xxs">REP</span>
+          </div>
+          <div className="tw-flex tw-items-baseline tw-gap-x-1">
+            <span className="tw-font-medium tw-text-iron-50 tw-text-xxs">
+              {formatNumberWithCommasOrDash(member.cic)}
+            </span>
+            <Tippy
+              placement="top"
+              interactive={false}
+              content={CIC_TO_TEXT[cicToType(member.cic)]}
+            >
+              <span className="tw-h-4 tw-w-4">
+                <UserCICTypeIcon cic={member.cic} />
+              </span>
+            </Tippy>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
