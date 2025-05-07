@@ -120,7 +120,7 @@ export async function fetchLightWaveMessages(
     ]);
 
     const combined: (ApiLightDrop | ApiDrop)[] = [];
-
+   
     for (const drop of results[0]) {
       combined.push(drop);
     }

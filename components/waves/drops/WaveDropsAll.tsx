@@ -308,7 +308,7 @@ export default function WaveDropsAll({
         >
           <DropsList
             scrollContainerRef={scrollContainerRef}
-            onReplyClick={() => setSerialNo(67615)}
+            onReplyClick={() => setSerialNo(100407)}
             drops={waveMessages?.drops ?? []}
             showWaveInfo={false}
             onReply={onReply}

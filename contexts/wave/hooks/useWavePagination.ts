@@ -292,6 +292,7 @@ export function useWavePagination({
       if (serialToFetch === null) {
         return;
       }
+      
 
       // Mark as busy and clear pending request
       state.isFetching = true;

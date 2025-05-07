@@ -131,7 +131,7 @@ export default function VirtualScrollWrapper({
         // For a reversed layout, we need a large margin at both top and bottom
         // This ensures elements are detected well before they enter/leave the viewport
         // Using a large value for both directions ensures smooth operation in both regular and reversed layouts
-        rootMargin: "1500px 0px 1500px 0px",
+        rootMargin: "300px 0px 300px 0px",
         threshold: 0.0,
         root: scrollContainerRef.current,
       }
