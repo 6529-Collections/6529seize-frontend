@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState, useEffect } from "react";
 import { AuthContext } from "../../auth/Auth";
 
 const ACCEPTED_FORMATS = [
@@ -13,7 +13,7 @@ const ACCEPTED_FORMATS_DISPLAY = ACCEPTED_FORMATS.map(
   (format) => `.${format.replace("image/", "")}`
 ).join(", ");
 
-const FILE_SIZE_LIMIT = 10485760;
+const FILE_SIZE_LIMIT = 2097152;
 
 export default function UserSettingsImgSelectFile({
   imageToShow,
@@ -24,18 +24,21 @@ export default function UserSettingsImgSelectFile({
 }) {
   const { setToast } = useContext(AuthContext);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [shake, setShake] = useState<boolean>(false);
   const onFileChange = (file: File) => {
+    setError(null);
     if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
+      setError(null);
       setToast({
         type: "error",
         message: "Invalid file type",
       });
     } else if (file.size > FILE_SIZE_LIMIT) {
-      setToast({
-        type: "error",
-        message: "File size must be less than 10MB",
-      });
+      setError("File size must be less than 2MB");
+      setShake(true);
     } else {
+      setError(null);
       setFile(file);
     }
   };
@@ -62,6 +65,13 @@ export default function UserSettingsImgSelectFile({
     }
   };
 
+  useEffect(() => {
+    if (shake) {
+      const timeout = setTimeout(() => setShake(false), 300);
+      return () => clearTimeout(timeout);
+    }
+  }, [shake]);
+
   return (
     <div
       onDrop={handleDrop}
@@ -77,7 +87,7 @@ export default function UserSettingsImgSelectFile({
             ? "tw-border-iron-600 tw-bg-iron-800"
             : "tw-bg-iron-900 tw-border-iron-700"
         }
-      tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out
+      tw-relative tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out ${shake ? 'tw-animate-shake' : ''}
       `}
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
@@ -120,6 +130,11 @@ export default function UserSettingsImgSelectFile({
                 JPEG, JPG, PNG, GIF, WEBP
               </p>
             </>
+          )}
+          {error && (
+            <p className="tw-absolute tw-bottom-2 tw-left-0 tw-w-full tw-text-center tw-text-xs tw-font-medium tw-text-red">
+              {error}
+            </p>
           )}
         </div>
         <input
