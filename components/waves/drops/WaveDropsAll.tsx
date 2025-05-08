@@ -20,6 +20,9 @@ import { faCircle } from "@fortawesome/free-solid-svg-icons";
 import { useWaveIsTyping } from "../../../hooks/useWaveIsTyping";
 import { useAuth } from "../../auth/Auth";
 
+// Add this utility function if not already present in a shared util file
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 interface WaveDropsAllProps {
   readonly waveId: string;
   readonly dropId: string | null;
@@ -55,10 +58,8 @@ export default function WaveDropsAll({
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
 
-  const { waveMessages, fetchNextPage, revealDrop } = useVirtualizedWaveDrops(
-    waveId,
-    dropId
-  );
+  const { waveMessages, fetchNextPage, waitAndRevealDrop } =
+    useVirtualizedWaveDrops(waveId, dropId);
 
   const [serialNo, setSerialNo] = useState<number | null>(initialDrop);
 
@@ -116,11 +117,22 @@ export default function WaveDropsAll({
   );
 
   const smoothScrollWithRetries = useCallback(
-    () => {
-      const initialSuccess = scrollToSerialNo("smooth");
-      return initialSuccess; // Return success of the first attempt
+    async (maxWaitTimeMs: number = 3000, pollIntervalMs: number = 100): Promise<boolean> => {
+      const startTime = Date.now();
+      while (Date.now() - startTime < maxWaitTimeMs) {
+        if (targetDropRef.current) {
+          // targetDropRef.current is available, attempt to scroll
+          return scrollToSerialNo("smooth");
+        }
+        await delay(pollIntervalMs);
+      }
+      // Timeout reached, targetDropRef.current was not found
+      console.warn(
+        `smoothScrollWithRetries: Timed out after ${maxWaitTimeMs}ms waiting for targetDropRef to be set.`
+      );
+      return false; // Return false if the ref was not found in time
     },
-    [scrollToSerialNo] // Depends on the stable scrollToSerialNo
+    [scrollToSerialNo] // scrollToSerialNo is stable
   );
 
   // Ref to hold the latest waveMessages state to avoid stale closures
@@ -191,25 +203,21 @@ export default function WaveDropsAll({
       },
       dropId
     );
+    await waitAndRevealDrop(serialNo);
+    const success = await smoothScrollWithRetries();
     setTimeout(() => {
-      revealDrop(serialNo);
-      setTimeout(() => {
-        const success = smoothScrollWithRetries();
-        setTimeout(() => {
-          if (success) {
-            setSerialNo(null);
-            setIsScrolling(false);
-          }
-        }, 500);
-      }, 0);
-    }, 1000);
+      if (success) {
+        setSerialNo(null);
+        setIsScrolling(false);
+      }
+    }, 500);
   }, [
     waveId,
     fetchNextPage,
     serialNo,
     setIsScrolling,
     isScrolling,
-    revealDrop,
+    waitAndRevealDrop,
   ]);
 
   useEffect(() => {

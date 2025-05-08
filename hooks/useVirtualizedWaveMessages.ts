@@ -11,8 +11,14 @@ interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   readonly loadMoreLocally: () => void; // Function to load more from cache
   readonly hasMoreLocal: boolean; // Whether there are more items to load locally
   readonly fetchNextPageForDrop: () => void;
-  readonly revealDrop: (serialNo: number) => void;
+  readonly waitAndRevealDrop: (
+    serialNo: number,
+    maxWaitTimeMs?: number,
+    pollIntervalMs?: number
+  ) => Promise<boolean>;
 }
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Hook that provides virtualized pagination for wave messages
@@ -116,11 +122,6 @@ export function useVirtualizedWaveMessages(
   const revealDrop = useCallback(
     (serialNo: number) => {
       if (fullWaveMessagesRef.current) {
-        console.log(
-          "revealDrop",
-          serialNo,
-          fullWaveMessagesRef.current.drops.length
-        );
         const index = fullWaveMessagesRef.current.drops.findIndex(
           (drop) => drop.serial_no === serialNo
         );
@@ -133,6 +134,33 @@ export function useVirtualizedWaveMessages(
       }
     },
     [fullWaveMessagesRef.current]
+  );
+
+  const waitAndRevealDrop = useCallback(
+    async (
+      serialNo: number,
+      maxWaitTimeMs: number = 3000,
+      pollIntervalMs: number = 100
+    ) => {
+      const startTime = Date.now();
+      while (Date.now() - startTime < maxWaitTimeMs) {
+        // Check if the specific drop is present in the *currently loaded full list*
+        if (
+          fullWaveMessagesRef?.current?.drops?.some(
+            (drop) => drop.serial_no === serialNo
+          )
+        ) {
+          revealDrop(serialNo); // Call the hook's revealDrop to update virtualLimit
+          return true;
+        }
+        await delay(pollIntervalMs);
+      }
+      console.warn(
+        `useVirtualizedWaveMessages: Timed out after ${maxWaitTimeMs}ms waiting for serialNo ${serialNo} in wave ${waveId}`
+      );
+      return false;
+    },
+    [revealDrop, fullWaveMessagesRef.current]
   );
 
   if (dropId && !fullWaveMessagesForDrop) {
@@ -181,6 +209,6 @@ export function useVirtualizedWaveMessages(
     loadMoreLocally,
     hasMoreLocal,
     fetchNextPageForDrop: fullWaveMessagesForDrop.fetchNextPage,
-    revealDrop,
+    waitAndRevealDrop,
   };
 }
