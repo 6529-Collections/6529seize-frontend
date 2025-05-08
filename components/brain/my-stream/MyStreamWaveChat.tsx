@@ -16,13 +16,11 @@ import { useLayout } from "./layout/LayoutContext";
 import MobileMemesArtSubmissionBtn from "../../waves/memes/submission/MobileMemesArtSubmissionBtn";
 import { useWave } from "../../../hooks/useWave";
 
-
 interface MyStreamWaveChatProps {
   readonly wave: ApiWave;
 }
 
 const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
-
   const router = useRouter();
   const searchParams = useSearchParams();
   const containerRef = useRef<HTMLDivElement>(null);

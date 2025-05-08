@@ -292,7 +292,6 @@ export function useWavePagination({
       if (serialToFetch === null) {
         return;
       }
-      
 
       // Mark as busy and clear pending request
       state.isFetching = true;
@@ -303,9 +302,6 @@ export function useWavePagination({
       const controller = createController(abortKey);
 
       try {
-        console.log(
-          `[WavePagination] Fetching around serial no ${serialToFetch} for wave ${waveId}`
-        );
         const result = await fetchAroundSerialNoWaveMessages(
           waveId,
           serialToFetch,
@@ -315,10 +311,6 @@ export function useWavePagination({
         // Placeholder: Handle the result if needed in the future.
         // Currently, fetchAroundSerialNoWaveMessages returns null.
         if (result) {
-          console.log(
-            `[WavePagination] Successfully fetched around serial no ${serialToFetch}`,
-            result
-          );
           // TODO: Decide how to integrate 'result' if it ever returns data.
           // It likely shouldn't merge directly into the main 'drops' state
           // unless specifically designed to do so.
