@@ -4,6 +4,7 @@ import { CommunityMembersSortOption } from "../../../enums";
 import CommunityMembersMobileCard from "./CommunityMembersMobileCard";
 import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
 import CommunityMembersTableRow from "./CommunityMembersTableRow";
+import CommunityMembersMobileFilterBar from "./CommunityMembersMobileFilterBar";
 
 export default function CommunityMembersTable({
   members,
@@ -44,14 +45,22 @@ export default function CommunityMembersTable({
         </table>
       </div>
 
-      <div className="tw-flex tw-flex-col tw-gap-y-4 sm:tw-hidden">
-        {members.map((member, index) => (
-          <CommunityMembersMobileCard
-            key={member.detail_view_key}
-            member={member}
-            rank={index + 1 + (page - 1) * pageSize}
-          />
-        ))}
+      <div className="sm:tw-hidden">
+        <CommunityMembersMobileFilterBar
+          activeSort={activeSort}
+          sortDirection={sortDirection}
+          isLoading={isLoading}
+          onSort={onSort}
+        />
+        <div className="tw-flex tw-flex-col tw-gap-y-4 tw-mt-2">
+          {members.map((member, index) => (
+            <CommunityMembersMobileCard
+              key={member.detail_view_key}
+              member={member}
+              rank={index + 1 + (page - 1) * pageSize}
+            />
+          ))}
+        </div>
       </div>
     </>
   );
