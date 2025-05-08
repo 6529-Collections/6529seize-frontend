@@ -1,4 +1,4 @@
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropSize, Drop as DropType, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import WaveDrop from "./WaveDrop";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
@@ -20,8 +20,8 @@ export enum DropLocation {
 
 interface DropProps {
   readonly drop: ExtendedDrop;
-  readonly previousDrop: ExtendedDrop | null;
-  readonly nextDrop: ExtendedDrop | null;
+  readonly previousDrop: DropType | null;
+  readonly nextDrop: DropType | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
@@ -87,8 +87,10 @@ export default function Drop({
     [ApiDropType.Chat]: (
       <WaveDrop
         drop={drop}
-        previousDrop={previousDrop}
-        nextDrop={nextDrop}
+        previousDrop={
+          previousDrop?.type === DropSize.FULL ? previousDrop : null
+        }
+        nextDrop={nextDrop?.type === DropSize.FULL ? nextDrop : null}
         showWaveInfo={showWaveInfo}
         activeDrop={activeDrop}
         location={location}

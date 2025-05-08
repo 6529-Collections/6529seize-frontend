@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/wave-drops.helpers";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { WaveSmallLeaderboardTopThreeDrop } from "./WaveSmallLeaderboardTopThreeDrop";
 import { WaveSmallLeaderboardDefaultDrop } from "./WaveSmallLeaderboardDefaultDrop";
 import { ApiWave } from "../../../generated/models/ApiWave";
@@ -10,7 +10,9 @@ interface DefaultWaveSmallLeaderboardDropProps {
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }
 
-export const DefaultWaveSmallLeaderboardDrop: React.FC<DefaultWaveSmallLeaderboardDropProps> = ({ drop, wave, onDropClick }) => {
+export const DefaultWaveSmallLeaderboardDrop: React.FC<
+  DefaultWaveSmallLeaderboardDropProps
+> = ({ drop, wave, onDropClick }) => {
   return (
     <div className="tw-cursor-pointer" onClick={() => onDropClick(drop)}>
       {drop.rank && drop.rank <= 3 ? (
@@ -28,4 +30,4 @@ export const DefaultWaveSmallLeaderboardDrop: React.FC<DefaultWaveSmallLeaderboa
       )}
     </div>
   );
-}; 
+};

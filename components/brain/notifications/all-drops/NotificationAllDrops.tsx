@@ -10,7 +10,7 @@ import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "../../../waves/drops/Drop";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { getNotificationVoteColor } from "../drop-voted/NotificationDropVoted";
@@ -135,6 +135,7 @@ export default function NotificationAllDrops({
 
         <Drop
           drop={{
+            type: DropSize.FULL,
             ...notification.related_drops[0],
             stableKey: "",
             stableHash: "",

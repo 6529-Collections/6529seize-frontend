@@ -5,6 +5,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 import { createPortal } from "react-dom";
 import { WaveHeaderPinnedSide } from "./WaveHeader";
 import Drop, { DropLocation } from "../drops/Drop";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
 
 interface WaveHeaderPinnedProps {
   readonly wave: ApiWave;
@@ -149,6 +150,7 @@ const WaveHeaderPinned: React.FC<WaveHeaderPinnedProps> = ({ wave, side }) => {
             >
               <Drop
                 drop={{
+                  type: DropSize.FULL,
                   ...wave.description_drop,
                   stableKey: wave.description_drop.id,
                   stableHash: wave.description_drop.id,

@@ -412,7 +412,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                                 <HeaderProvider>
                                   <MainLayout>
                                     {getLayout(
-                                      <Component {...props} key={router.asPath} />
+                                      <Component {...props} key={router.asPath.split('?')[0]} />
                                     )}
                                   </MainLayout>
                                 </HeaderProvider>

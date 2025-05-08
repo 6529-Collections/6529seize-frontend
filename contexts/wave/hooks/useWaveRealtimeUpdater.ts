@@ -3,7 +3,7 @@ import { useWebSocketMessage } from "../../../services/websocket/useWebSocketMes
 import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";
 import { WaveDataStoreUpdater } from "./types";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { commonApiFetch } from "../../../services/api/common-api";
 
 interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
@@ -67,6 +67,7 @@ export function useWaveRealtimeUpdater({
           if (currentData) {
             const newDrops: ExtendedDrop[] = fetchedDrops.map((drop) => ({
               ...drop,
+              type: DropSize.FULL,
               stableKey: drop.id, // Assuming ApiDrop has id
               stableHash: drop.id, // Assuming ApiDrop has id
             }));
@@ -135,8 +136,9 @@ export function useWaveRealtimeUpdater({
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
 
       if (
-        type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
-        !existingDrop
+        (type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
+          !existingDrop) ||
+        existingDrop?.type === DropSize.LIGHT
       ) {
         return;
       }
@@ -151,6 +153,7 @@ export function useWaveRealtimeUpdater({
             drops: [
               {
                 ...apiDrop,
+                type: DropSize.FULL,
                 stableHash: existingDrop.stableHash,
                 stableKey: existingDrop.stableKey,
               },
@@ -162,6 +165,7 @@ export function useWaveRealtimeUpdater({
 
       const optimisticDrop: ExtendedDrop = {
         ...drop,
+        type: DropSize.FULL,
         author: {
           ...drop.author,
           subscribed_actions: existingDrop

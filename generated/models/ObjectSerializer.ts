@@ -21,6 +21,7 @@ export * from '../models/ApiChangeProfileCicRating';
 export * from '../models/ApiChangeProfileCicRatingResponse';
 export * from '../models/ApiChangeProfileRepRating';
 export * from '../models/ApiChangeProfileRepRatingResponse';
+export * from '../models/ApiCommunityMemberMinimal';
 export * from '../models/ApiCompleteMultipartUploadRequest';
 export * from '../models/ApiCompleteMultipartUploadRequestPart';
 export * from '../models/ApiCompleteMultipartUploadResponse';
@@ -43,6 +44,7 @@ export * from '../models/ApiCreateNewWaveParticipationConfig';
 export * from '../models/ApiCreateNewWaveScope';
 export * from '../models/ApiCreateNewWaveVisibilityConfig';
 export * from '../models/ApiCreateNewWaveVotingConfig';
+export * from '../models/ApiCreateOrUpdateProfileRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
 export * from '../models/ApiDrop';
@@ -83,6 +85,7 @@ export * from '../models/ApiIdentitySubscriptionTargetAction';
 export * from '../models/ApiIdentitySubscriptionTargetType';
 export * from '../models/ApiIncomingIdentitySubscriptionsPage';
 export * from '../models/ApiIntRange';
+export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
 export * from '../models/ApiNft';
@@ -188,6 +191,7 @@ import { ApiChangeProfileCicRating } from '../models/ApiChangeProfileCicRating';
 import { ApiChangeProfileCicRatingResponse } from '../models/ApiChangeProfileCicRatingResponse';
 import { ApiChangeProfileRepRating } from '../models/ApiChangeProfileRepRating';
 import { ApiChangeProfileRepRatingResponse } from '../models/ApiChangeProfileRepRatingResponse';
+import { ApiCommunityMemberMinimal } from '../models/ApiCommunityMemberMinimal';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
 import { ApiCompleteMultipartUploadResponse } from '../models/ApiCompleteMultipartUploadResponse';
@@ -210,6 +214,7 @@ import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveP
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveVisibilityConfig } from '../models/ApiCreateNewWaveVisibilityConfig';
 import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWaveVotingConfig';
+import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
 import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
 import { ApiDrop                         } from '../models/ApiDrop';
@@ -250,6 +255,7 @@ import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscr
 import { ApiIdentitySubscriptionTargetType } from '../models/ApiIdentitySubscriptionTargetType';
 import { ApiIncomingIdentitySubscriptionsPage } from '../models/ApiIncomingIdentitySubscriptionsPage';
 import { ApiIntRange } from '../models/ApiIntRange';
+import { ApiLightDrop          } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
 import { ApiNft      , ApiNftTokenTypeEnum                               } from '../models/ApiNft';
@@ -396,6 +402,7 @@ let typeMap: {[index: string]: any} = {
     "ApiChangeProfileCicRatingResponse": ApiChangeProfileCicRatingResponse,
     "ApiChangeProfileRepRating": ApiChangeProfileRepRating,
     "ApiChangeProfileRepRatingResponse": ApiChangeProfileRepRatingResponse,
+    "ApiCommunityMemberMinimal": ApiCommunityMemberMinimal,
     "ApiCompleteMultipartUploadRequest": ApiCompleteMultipartUploadRequest,
     "ApiCompleteMultipartUploadRequestPart": ApiCompleteMultipartUploadRequestPart,
     "ApiCompleteMultipartUploadResponse": ApiCompleteMultipartUploadResponse,
@@ -418,6 +425,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWaveScope": ApiCreateNewWaveScope,
     "ApiCreateNewWaveVisibilityConfig": ApiCreateNewWaveVisibilityConfig,
     "ApiCreateNewWaveVotingConfig": ApiCreateNewWaveVotingConfig,
+    "ApiCreateOrUpdateProfileRequest": ApiCreateOrUpdateProfileRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
     "ApiDrop": ApiDrop,
@@ -451,6 +459,7 @@ let typeMap: {[index: string]: any} = {
     "ApiIdentitySubscriptionActions": ApiIdentitySubscriptionActions,
     "ApiIncomingIdentitySubscriptionsPage": ApiIncomingIdentitySubscriptionsPage,
     "ApiIntRange": ApiIntRange,
+    "ApiLightDrop": ApiLightDrop,
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
     "ApiNft": ApiNft,

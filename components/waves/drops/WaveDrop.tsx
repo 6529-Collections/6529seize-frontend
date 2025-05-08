@@ -259,7 +259,8 @@ const WaveDrop = ({
               maxWidth: !shouldGroupWithPreviousDrop
                 ? "calc(100% - 3.25rem)"
                 : "100%",
-            }}>
+            }}
+          >
             {!shouldGroupWithPreviousDrop && (
               <WaveDropHeader
                 drop={drop}

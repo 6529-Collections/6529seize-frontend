@@ -5,7 +5,7 @@ import { useAuth } from "../../../auth/Auth";
 import { useWaveActivityLogs } from "../../../../hooks/useWaveActivityLogs";
 import { WaveLeaderboardRightSidebarActivityLog } from "./WaveLeaderboardRightSidebarActivityLog";
 import { useIntersectionObserver } from "../../../../hooks/useIntersectionObserver";
-import { ExtendedDrop } from "../../../../helpers/waves/wave-drops.helpers";
+import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 
 interface WaveLeaderboardRightSidebarActivityLogsProps {
   readonly wave: ApiWave;

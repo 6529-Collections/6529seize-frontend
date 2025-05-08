@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { Drop, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../Drop";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
@@ -9,8 +9,8 @@ import { useSeizeSettings } from "../../../../contexts/SeizeSettingsContext";
 
 interface WinnerDropProps {
   readonly drop: ExtendedDrop;
-  readonly previousDrop: ExtendedDrop | null;
-  readonly nextDrop: ExtendedDrop | null;
+  readonly previousDrop: Drop | null;
+  readonly nextDrop: Drop | null;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;

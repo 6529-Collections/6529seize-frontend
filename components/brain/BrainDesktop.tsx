@@ -10,7 +10,7 @@ import BrainDesktopDrop from "./BrainDesktopDrop";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { commonApiFetch } from "../../services/api/common-api";
-import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useLayout } from "./my-stream/layout/LayoutContext";
 import Cookies from "js-cookie";
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
@@ -113,6 +113,7 @@ const BrainDesktop: React.FC<Props> = ({ children }) => {
                   style={{ transition: "none" }}>
                   <BrainDesktopDrop
                     drop={{
+                      type: DropSize.FULL,
                       ...drop,
                       stableKey: drop.id,
                       stableHash: drop.id,
