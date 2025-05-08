@@ -135,7 +135,6 @@ export function useWaveRealtimeUpdater({
 
       const existingDrop = currentData.drops.find((d) => d.id === drop.id);
 
-      // TODO: is this correct?
       if (
         (type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
           !existingDrop) ||

@@ -1,10 +1,9 @@
 import { useMemo, RefObject, useCallback, memo } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop, Drop as DropType } from "../../../helpers/waves/drop.helpers";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import Drop, { DropLocation } from "../../waves/drops/Drop";
 import VirtualScrollWrapper from "../../waves/drops/VirtualScrollWrapper";
-import { Drop as DropType } from "../../../helpers/waves/drop.helpers";
 import LightDrop from "../../waves/drops/LightDrop";
 type DropActionHandler = ({
   drop,

@@ -444,15 +444,14 @@ export async function findLightDropBySerialNoWithPagination(
     }
 
     // Prepare for next iteration or check if we should stop
-    // TODO: comment it back in, currently api is big broken
-    // if (
-    //   currentBatch.length < itemsPerRequest &&
-    //   smallestSerialInCurrentBatch > targetSerialNo
-    // ) {
-    //   // Last page fetched, it was smaller than limit, and the smallest item is still greater than target.
-    //   // This means target is not in the dataset in the range we are looking.
-    //   break; // Target not found, and no more data in the desired direction.
-    // }
+    if (
+      currentBatch.length < itemsPerRequest &&
+      smallestSerialInCurrentBatch > targetSerialNo
+    ) {
+      // Last page fetched, it was smaller than limit, and the smallest item is still greater than target.
+      // This means target is not in the dataset in the range we are looking.
+      break; // Target not found, and no more data in the desired direction.
+    }
     currentMaxSerialForNextCall = smallestSerialInCurrentBatch;
 
     // Safety break: if max_serial_no for next call is not less than targetSerialNo after fetching a full page

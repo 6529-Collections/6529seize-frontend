@@ -5,7 +5,7 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
-import { Drop, DropSize } from "../../../helpers/waves/drop.helpers";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
 import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 
 /**
@@ -161,8 +161,7 @@ export default function VirtualScrollWrapper({
    *    also render children so we can measure them.
    */
   const isServer = typeof window === "undefined";
-  const shouldRenderChildren =
-    isServer || isInView || measuredHeight === null;
+  const shouldRenderChildren = isServer || isInView || measuredHeight === null;
 
   return (
     <div ref={containerRef}>

@@ -5,7 +5,7 @@ import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropRatings from "./WaveDropRatings";
-import { Drop, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDropMetadata from "./WaveDropMetadata";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
@@ -259,7 +259,8 @@ const WaveDrop = ({
               maxWidth: !shouldGroupWithPreviousDrop
                 ? "calc(100% - 3.25rem)"
                 : "100%",
-            }}>
+            }}
+          >
             {!shouldGroupWithPreviousDrop && (
               <WaveDropHeader
                 drop={drop}

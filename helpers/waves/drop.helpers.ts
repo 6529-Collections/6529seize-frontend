@@ -5,7 +5,6 @@ import { getRandomObjectId } from "../AllowlistToolHelpers";
 import { TypedFeedItem } from "../../types/feed.types";
 import { ApiFeedItemType } from "../../generated/models/ApiFeedItemType";
 import { ApiLightDrop } from "../../generated/models/ApiLightDrop";
-import { Time } from "../time";
 
 export enum DropSize {
   LIGHT = "LIGHT",
@@ -69,7 +68,6 @@ const findClosestMatch = (
   const MAX_TIME_DIFFERENCE = maxDiff ?? 10000;
 
   return existingDrops.reduce((closest, current) => {
-    // TODO: is this correct?
     if (current.type === DropSize.LIGHT) {
       return closest;
     }
@@ -82,7 +80,6 @@ const findClosestMatch = (
           new Date(newDrop.created_at).getTime()
       ) < MAX_TIME_DIFFERENCE
     ) {
-      // TODO: is this correct?
       if (closest?.type === DropSize.LIGHT) {
         return current;
       }

@@ -22,7 +22,6 @@ import {
 import { WaveMessages } from "./hooks/types";
 import { useWebsocketStatus } from "../../services/websocket/useWebSocketMessage";
 import useCapacitor from "../../hooks/useCapacitor";
-import { DropSize } from "../../helpers/waves/drop.helpers";
 import { ApiLightDrop } from "../../generated/models/ApiLightDrop";
 import { NextPageProps } from "./hooks/useWavePagination";
 
@@ -55,7 +54,9 @@ interface MyStreamContextType {
   readonly activeWave: ActiveWaveContextData;
   readonly waveMessagesStore: WaveMessagesStoreData;
   readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
-  readonly fetchNextPageForWave: (props: NextPageProps) => Promise<(ApiDrop | ApiLightDrop)[] | null>;
+  readonly fetchNextPageForWave: (
+    props: NextPageProps
+  ) => Promise<(ApiDrop | ApiLightDrop)[] | null>;
   readonly fetchAroundSerialNo: (waveId: string, serialNo: number) => void;
   readonly processIncomingDrop: (
     drop: ApiDrop,

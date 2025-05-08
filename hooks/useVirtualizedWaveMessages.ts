@@ -99,13 +99,11 @@ export function useVirtualizedWaveMessages(
       ) {
         setVirtualLimit((prevLimit) => prevLimit + pageSize);
       }
-    } else {
-      if (
-        fullWaveMessagesRef.current &&
-        fullWaveMessagesRef.current.drops.length > virtualLimit
-      ) {
-        setVirtualLimit((prevLimit) => prevLimit + pageSize);
-      }
+    } else if (
+      fullWaveMessagesRef.current &&
+      fullWaveMessagesRef.current.drops.length > virtualLimit
+    ) {
+      setVirtualLimit((prevLimit) => prevLimit + pageSize);
     }
   }, [
     fullWaveMessagesRef.current,

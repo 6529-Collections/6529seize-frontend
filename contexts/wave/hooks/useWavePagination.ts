@@ -308,13 +308,7 @@ export function useWavePagination({
           controller.signal
         );
 
-        // Placeholder: Handle the result if needed in the future.
-        // Currently, fetchAroundSerialNoWaveMessages returns null.
         if (result) {
-          // TODO: Decide how to integrate 'result' if it ever returns data.
-          // It likely shouldn't merge directly into the main 'drops' state
-          // unless specifically designed to do so.
-
           updateData({
             key: waveId,
             drops: result.map((drop) => {
