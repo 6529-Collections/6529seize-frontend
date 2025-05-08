@@ -37,7 +37,7 @@ export default function UserPageHeaderPfpWrapper({
         {isEditPfpOpen && (
           <CommonAnimationOpacity
             key="modal"
-            elementClasses="tw-absolute tw-z-10"
+            elementClasses="tw-absolute tw-z-[1000]"
             elementRole="dialog"
             onClicked={(e) => e.stopPropagation()}
           >
