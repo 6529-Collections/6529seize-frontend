@@ -1,6 +1,9 @@
 import { SortDirection } from "../../../entities/ISort";
 import { CommunityMembersSortOption } from "../../../enums";
 import CommonTableSortIcon from "../../user/utils/icons/CommonTableSortIcon";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "../../distribution-plan-tool/common/CircleLoader";
 
 export default function CommunityMembersMobileFilterBar({
   activeSort,
@@ -37,22 +40,29 @@ export default function CommunityMembersMobileFilterBar({
             key={option}
             type="button"
             onClick={() => onSort(option)}
-            className={`tw-flex tw-items-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-full tw-px-3 tw-py-1 tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 tw-ease-out ${
+            className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-border-none tw-rounded-full tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 tw-ease-out ${
               isActive
-                ? "tw-bg-primary-400 tw-text-iron-900"
-                : "tw-bg-iron-800 tw-text-iron-200 hover:tw-bg-iron-700"
+                ? "tw-bg-iron-800 tw-text-primary-400"
+                : "tw-bg-iron-900 tw-text-iron-400 active:tw-bg-iron-700"
             }`}
           >
             <span>{TITLE[option]}</span>
-            {isActive && !isLoading && (
-              <CommonTableSortIcon
-                direction={sortDirection}
-                isActive={true}
-              />
-            )}
+            {isActive &&
+              (isLoading ? (
+                <span className="-tw-mt-0.5 tw-ml-1">
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
+                </span>
+              ) : (
+                <span className="-tw-mt-0.5 tw-ml-1">
+                  <CommonTableSortIcon
+                    direction={sortDirection}
+                    isActive={true}
+                  />
+                </span>
+              ))}
           </button>
         );
       })}
     </div>
   );
-} 
+}
