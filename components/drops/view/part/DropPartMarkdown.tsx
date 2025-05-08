@@ -294,7 +294,7 @@ function DropPartMarkdown({
 
   const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
     <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0">
+      <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
         <Tweet id={result.tweetId} />
       </div>
       <ChatItemHrefButtons href={result.href} />
