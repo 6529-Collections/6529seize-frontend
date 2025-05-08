@@ -69,6 +69,34 @@ export default function CommunityStats() {
     return Math.round(days);
   }
 
+  function formatTdh(x: number): string {
+    if (x >= 1_000_000_000) return `${x / 1_000_000_000}B`;
+    if (x >= 1_000_000) return `${x / 1_000_000}M`;
+    if (x >= 1_000) return `${x / 1_000}K`;
+    return `${x}`;
+  }
+
+  function getNextCheckpoints(
+    current: number,
+    count = 3,
+    step = 250_000_000
+  ): number[] {
+    const next = Math.ceil(current / step) * step;
+    return Array.from({ length: count }, (_, i) => next + i * step);
+  }
+
+  function printEstimatedDaysUntilCheckpoints() {
+    const checkpoints = getNextCheckpoints(latestHistory!.total_boosted_tdh);
+    return checkpoints.map((x) => (
+      <tr key={x}>
+        <td>Estimated days until {formatTdh(x)}</td>
+        <td className="text-right">
+          {numberWithCommas(getEstimatedDaysUntil(x))}
+        </td>
+      </tr>
+    ));
+  }
+
   useEffect(() => {
     let url = `${process.env.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
     fetchUrl(url).then((response: DBResponse) => {
@@ -304,30 +332,7 @@ export default function CommunityStats() {
                   </Col>
                   <Col sm={12} md={6} lg={{ span: 4, offset: 4 }}>
                     <Table>
-                      <tbody>
-                        <tr>
-                          <td>Estimated days until 750M</td>
-                          <td className="text-right">
-                            {numberWithCommas(getEstimatedDaysUntil(750000000))}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Estimated days until 1B</td>
-                          <td className="text-right">
-                            {numberWithCommas(
-                              getEstimatedDaysUntil(1000000000)
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Estimated days until 1.5B</td>
-                          <td className="text-right">
-                            {numberWithCommas(
-                              getEstimatedDaysUntil(1500000000)
-                            )}
-                          </td>
-                        </tr>
-                      </tbody>
+                      <tbody>{printEstimatedDaysUntilCheckpoints()}</tbody>
                     </Table>
                   </Col>
                 </Row>
