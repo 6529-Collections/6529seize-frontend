@@ -1,9 +1,7 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.scss";
-import Image from "next/image";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
-import { MEMES_CONTRACT } from "../constants";
 import { DBResponse } from "../entities/IDBResponse";
 import { NFTWithMemesExtendedData } from "../entities/INFT";
 import dynamic from "next/dynamic";

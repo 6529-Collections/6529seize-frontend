@@ -1,7 +1,6 @@
 import styles from "./6529Gradient.module.scss";
 
 import { useContext, useEffect, useState } from "react";
-import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { GRADIENT_CONTRACT } from "../../constants";

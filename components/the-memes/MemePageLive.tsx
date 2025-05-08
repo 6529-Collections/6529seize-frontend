@@ -1,6 +1,6 @@
 import styles from "./TheMemes.module.scss";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
-import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { NFT, MemesExtendedData, Rememe } from "../../entities/INFT";
 import {
   areEqualAddresses,
