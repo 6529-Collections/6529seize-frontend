@@ -191,19 +191,19 @@ export function sortChanged(
 
   if (sort === MemeLabSort.AGE) {
     if (sortDir === SortDirection.ASC) {
-      setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? -1 : 1)));
+      setNfts([...nfts].sort((a, b) => b.id - a.id));
     } else {
-      setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+      setNfts([...nfts].sort((a, b) => a.id - b.id));
     }
   }
   if (sort === MemeLabSort.EDITION_SIZE) {
-    setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+    setNfts([...nfts].sort((a, b) => a.id - b.id));
     if (sortDir === SortDirection.ASC) {
       setNfts(
         [...nfts].sort((a, b) => {
           if (a.supply > b.supply) return 1;
           if (a.supply < b.supply) return -1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     } else {
@@ -211,7 +211,7 @@ export function sortChanged(
         [...nfts].sort((a, b) => {
           if (a.supply > b.supply) return -1;
           if (a.supply < b.supply) return 1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     }
@@ -230,7 +230,7 @@ export function sortChanged(
             nftMetas.find((t2) => b.id === t2.id)!.hodlers
           )
             return -1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     } else {
@@ -246,7 +246,7 @@ export function sortChanged(
             nftMetas.find((t2) => b.id === t2.id)!.hodlers
           )
             return 1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     }
@@ -279,7 +279,7 @@ export function sortChanged(
             nftMetas.find((t2) => b.id === t2.id)!.percent_unique
           )
             return -1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     } else {
@@ -295,7 +295,7 @@ export function sortChanged(
             nftMetas.find((t2) => b.id === t2.id)!.percent_unique
           )
             return 1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     }
@@ -314,7 +314,7 @@ export function sortChanged(
             nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
           )
             return -1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     } else {
@@ -330,19 +330,19 @@ export function sortChanged(
             nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
           )
             return 1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     }
   }
   if (sort === MemeLabSort.FLOOR_PRICE) {
-    setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+    setNfts([...nfts].sort((a, b) => a.id - b.id));
     if (sortDir === SortDirection.ASC) {
       setNfts(
         [...nfts].sort((a, b) => {
           if (a.floor_price > b.floor_price) return 1;
           if (a.floor_price < b.floor_price) return -1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     } else {
@@ -350,19 +350,19 @@ export function sortChanged(
         [...nfts].sort((a, b) => {
           if (a.floor_price > b.floor_price) return -1;
           if (a.floor_price < b.floor_price) return 1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     }
   }
   if (sort === MemeLabSort.MARKET_CAP) {
-    setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+    setNfts([...nfts].sort((a, b) => a.id - b.id));
     if (sortDir === SortDirection.ASC) {
       setNfts(
         [...nfts].sort((a, b) => {
           if (a.market_cap > b.market_cap) return 1;
           if (a.market_cap < b.market_cap) return -1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     } else {
@@ -370,19 +370,19 @@ export function sortChanged(
         [...nfts].sort((a, b) => {
           if (a.market_cap > b.market_cap) return -1;
           if (a.market_cap < b.market_cap) return 1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     }
   }
   if (sort === MemeLabSort.HIGHEST_OFFER) {
-    setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+    setNfts([...nfts].sort((a, b) => a.id - b.id));
     if (sortDir === SortDirection.ASC) {
       setNfts(
         [...nfts].sort((a, b) => {
           if (a.highest_offer > b.highest_offer) return 1;
           if (a.highest_offer < b.highest_offer) return -1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     } else {
@@ -390,13 +390,13 @@ export function sortChanged(
         [...nfts].sort((a, b) => {
           if (a.highest_offer > b.highest_offer) return -1;
           if (a.highest_offer < b.highest_offer) return 1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     }
   }
   if (sort === MemeLabSort.VOLUME) {
-    setNfts([...nfts].sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1)));
+    setNfts([...nfts].sort((a, b) => a.id - b.id));
     if (sortDir === SortDirection.ASC) {
       setNfts(
         [...nfts].sort((a, b) => {
@@ -405,7 +405,7 @@ export function sortChanged(
 
           if (aVolume > bVolume) return 1;
           if (aVolume < bVolume) return -1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     } else {
@@ -415,7 +415,7 @@ export function sortChanged(
           const bVolume = getValuesForVolumeType(volumeType, b);
           if (aVolume > bVolume) return -1;
           if (aVolume < bVolume) return 1;
-          return a.mint_date > b.mint_date ? 1 : -1;
+          return a.id - b.id;
         })
       );
     }
@@ -538,13 +538,13 @@ export default function MemeLabComponent(props: Readonly<Props>) {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
+        lg={{ span: 3 }}>
         <a href={`/meme-lab/${nft.id}`} className="decoration-none scale-hover">
           <Container fluid>
             <Row
-              className={props.wallets.length > 0 ? styles.nftImagePadding : ""}
-            >
+              className={
+                props.wallets.length > 0 ? styles.nftImagePadding : ""
+              }>
               <NFTImage
                 nft={nft}
                 animation={false}
@@ -583,7 +583,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
             <h4>{artist}</h4>
           </Col>
           {[...artistNfts]
-            .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
+            .sort((a, b) => a.id - b.id)
             .map((nft: LabNFT) => printNft(nft))}
         </Row>
       );
@@ -607,14 +607,13 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                 className={styles.collectionLink}
                 href={`/meme-lab/collection/${encodeURIComponent(
                   collection.replace(" ", "-")
-                )}`}
-              >
+                )}`}>
                 view
               </a>
             </h4>
           </Col>
           {[...collectionNfts]
-            .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
+            .sort((a, b) => a.id - b.id)
             .map((nft: LabNFT) => printNft(nft))}
         </Row>
       );
@@ -670,7 +669,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                   </span>
                 </Col>
               </Row>
-              
+
               {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
               <Row className="d-xl-none">
                 <Col xs={12} className="mb-3">

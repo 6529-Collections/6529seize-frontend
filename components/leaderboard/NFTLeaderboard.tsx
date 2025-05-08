@@ -144,14 +144,6 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
 
   return (
     <Container className={`no-padding pt-3`} id="nft-leaderboard">
-      <Row>
-        <Col>
-          <h1>
-            <span className="font-lightest">Network</span>
-          </h1>
-          <h1>&nbsp;Card {props.nftId}</h1>
-        </Col>
-      </Row>
       <Row className="pt-2 pb-2">
         <Col className="d-flex justify-content-end align-items-center">
           <SearchWalletsDisplay

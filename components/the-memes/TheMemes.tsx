@@ -39,8 +39,7 @@ export function printVolumeTypeDropdown(
       className={`${styles.volumeDropdown} ${
         isVolumeSort ? styles.volumeDropdownEnabled : ""
       }`}
-      drop={"down-centered"}
-    >
+      drop={"down-centered"}>
       <Dropdown.Toggle>Volume</Dropdown.Toggle>
       <Dropdown.Menu>
         {Object.values(VolumeType).map((vol) => (
@@ -51,8 +50,7 @@ export function printVolumeTypeDropdown(
               if (!isVolumeSort) {
                 setVolumeSort();
               }
-            }}
-          >
+            }}>
             {vol}
           </Dropdown.Item>
         ))}
@@ -316,12 +314,10 @@ export default function TheMemesComponent() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
+        lg={{ span: 3 }}>
         <a
           href={`/the-memes/${nft.id}`}
-          className="decoration-none scale-hover"
-        >
+          className="decoration-none scale-hover">
           <Container fluid>
             <Row className={connectedProfile ? styles.nftImagePadding : ""}>
               <NFTImage
@@ -406,7 +402,7 @@ export default function TheMemesComponent() {
             </Col>
           </Col>
           {[...memeNfts]
-            .sort((a, b) => (a.mint_date > b.mint_date ? 1 : -1))
+            .sort((a, b) => a.id - b.id)
             .map((nft) => printNft(nft))}
         </Row>
       );
@@ -437,7 +433,7 @@ export default function TheMemesComponent() {
                   </div>
                 </Col>
               </Row>
-              
+
               {/* Mobile & tablet elements - visible until xl breakpoint (1200px) */}
               <Row className="d-xl-none">
                 <Col xs={12} className="mb-3">
@@ -531,8 +527,7 @@ export function SortButton(
       onClick={() => props.select()}
       className={`btn-link ${styles.sort} ${
         props.currentSort != props.sort ? styles.disabled : ""
-      }`}
-    >
+      }`}>
       {name}
     </button>
   );

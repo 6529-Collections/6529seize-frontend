@@ -66,14 +66,6 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
 
   return (
     <Container className={`no-padding`} id="nft-leaderboard">
-      <Row>
-        <Col>
-          <h1>
-            <span className="font-lightest">Network</span>
-          </h1>
-          <h1>&nbsp;Card {props.nftId}</h1>
-        </Col>
-      </Row>
       <Row className={styles.scrollContainer}>
         <Col>
           <Table bordered={false} className={styles.memeLabLeaderboardTable}>
