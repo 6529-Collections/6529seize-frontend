@@ -40,9 +40,9 @@ export default function CommunityMembersMobileFilterBar({
             key={option}
             type="button"
             onClick={() => onSort(option)}
-            className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-border-none tw-rounded-full tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 tw-ease-out ${
+            className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-border-none tw-rounded-full tw-px-3.5 tw-py-1.5 tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 tw-ease-out ${
               isActive
-                ? "tw-bg-iron-800 tw-text-primary-400"
+                ? "tw-bg-iron-700 tw-text-white"
                 : "tw-bg-iron-900 tw-text-iron-400 active:tw-bg-iron-700"
             }`}
           >
@@ -57,6 +57,7 @@ export default function CommunityMembersMobileFilterBar({
                   <CommonTableSortIcon
                     direction={sortDirection}
                     isActive={true}
+                    activeClassName="tw-text-white"
                   />
                 </span>
               ))}
