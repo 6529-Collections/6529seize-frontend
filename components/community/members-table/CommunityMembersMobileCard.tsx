@@ -1,11 +1,7 @@
 import {
   CommunityMemberOverview,
-  CIC_TO_TEXT,
 } from "../../../entities/IProfile";
-import {
-  formatNumberWithCommasOrDash,
-  cicToType,
-} from "../../../helpers/Helpers";
+import { formatNumberWithCommasOrDash } from "../../../helpers/Helpers";
 import UserLevel from "../../user/utils/level/UserLevel";
 import Tippy from "@tippyjs/react";
 import UserCICTypeIcon from "../../user/utils/user-cic-type/UserCICTypeIcon";
@@ -67,7 +63,7 @@ export default function CommunityMembersMobileCard({
             <Tippy
               placement="top"
               interactive={false}
-              content={CIC_TO_TEXT[cicToType(member.cic)]}
+              content={formatNumberWithCommasOrDash(member.cic)}
             >
               <span className="tw-h-4 tw-w-4 tw-flex-shrink-0">
                 <UserCICTypeIcon cic={member.cic} />
