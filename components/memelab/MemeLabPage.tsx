@@ -48,6 +48,7 @@ import NFTAttributes from "../nftAttributes/NFTAttributes";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import { printMemeReferences } from "../rememes/RememePage";
 import useCapacitor from "../../hooks/useCapacitor";
+import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -81,7 +82,6 @@ export default function LabPage(props: Readonly<Props>) {
   );
 
   const [activeTab, setActiveTab] = useState<MEME_FOCUS>();
-
 
   const [nft, setNft] = useState<LabNFT>();
   const [originalMemes, setOriginalMemes] = useState<NFT[]>([]);
@@ -548,42 +548,7 @@ export default function LabPage(props: Readonly<Props>) {
             {capacitor.platform !== "ios" && (
               <Row className="pt-4">
                 <Col>
-                  <a
-                    href={`https://opensea.io/assets/ethereum/${MEMELAB_CONTRACT}/${nft.id}`}
-                    target="_blank"
-                    rel="noreferrer">
-                    <Image
-                      className={styles.marketplace}
-                      src="/opensea.png"
-                      alt="opensea"
-                      width={40}
-                      height={40}
-                    />
-                  </a>
-                  {/* <a
-                      href={`https://looksrare.org/collections/${MEMELAB_CONTRACT}/${nft.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <Image
-                        className={styles.marketplace}
-                        src="/looksrare.png"
-                        alt="looksrare"
-                        width={40}
-                        height={40}
-                      />
-                    </a> */}
-                  <a
-                    href={`https://x2y2.io/eth/${MEMELAB_CONTRACT}/${nft.id}`}
-                    target="_blank"
-                    rel="noreferrer">
-                    <Image
-                      className={styles.marketplace}
-                      src="/x2y2.png"
-                      alt="x2y2"
-                      width={40}
-                      height={40}
-                    />
-                  </a>
+                  <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
                 </Col>
               </Row>
             )}
@@ -1250,17 +1215,17 @@ export default function LabPage(props: Readonly<Props>) {
   }
 
   return (
-      <Container fluid className={styles.mainContainer}>
-        <Row>
-          <Col>
-            <Container className="pt-4 pb-4">
-              <Row>
-                <Col>
-                  <h1>
-                    <span className="font-lightest">Meme</span> Lab
-                  </h1>
-                </Col>
-                {/* {nft && (
+    <Container fluid className={styles.mainContainer}>
+      <Row>
+        <Col>
+          <Container className="pt-4 pb-4">
+            <Row>
+              <Col>
+                <h1>
+                  <span className="font-lightest">Meme</span> Lab
+                </h1>
+              </Col>
+              {/* {nft && (
                   <Col className="d-flex align-items-center justify-content-end">
                     <TwitterShareButton
                       className="twitter-share-button"
@@ -1276,72 +1241,72 @@ export default function LabPage(props: Readonly<Props>) {
                     </TwitterShareButton>
                   </Col>
                 )} */}
-              </Row>
-              {nftMeta && nft && (
-                <>
-                  <Row className="pt-2">
-                    <Col>
-                      {nftId && (
-                        <>
-                          <h2 className="float-left">
-                            <a
-                              href={`/meme-lab/${
-                                parseInt(nftId) - 1
-                              }?focus=${activeTab}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 1
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon="chevron-circle-left" />
-                            </a>
-                          </h2>
-                          <h2 className="float-left">
-                            &nbsp;
-                            <a
-                              href={`/meme-lab/${
-                                parseInt(nftId) + 1
-                              }?focus=${activeTab}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === nftMeta.collection_size
-                                  ? styles.nftNextdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon="chevron-circle-right" />
-                            </a>
-                          </h2>
-                        </>
-                      )}
-                    </Col>
-                  </Row>
-                  <Row className="pt-2">
-                    <Col>
-                      <h2 className="float-left">Card {nft.id} -&nbsp;</h2>
-                      <h2 className="float-left">{nft.name}</h2>
-                    </Col>
-                  </Row>
-                  <Row className="pt-3 pb-3">
-                    <Col>
-                      {MEME_TABS.map((tab) => (
-                        <span
-                          key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
-                          className={`${styles.tabFocus} ${
-                            activeTab === tab.focus ? styles.tabFocusActive : ""
-                          }`}
-                          onClick={() => {
-                            setActiveTab(tab.focus);
-                          }}>
-                          {tab.title}
-                        </span>
-                      ))}
-                    </Col>
-                  </Row>
-                  {printContent()}
-                </>
-              )}
-            </Container>
-          </Col>
-        </Row>
-      </Container>
+            </Row>
+            {nftMeta && nft && (
+              <>
+                <Row className="pt-2">
+                  <Col>
+                    {nftId && (
+                      <>
+                        <h2 className="float-left">
+                          <a
+                            href={`/meme-lab/${
+                              parseInt(nftId) - 1
+                            }?focus=${activeTab}`}
+                            className={`${styles.nextPreviousNft} ${
+                              parseInt(nftId) === 1
+                                ? styles.nftPreviousdisabled
+                                : ""
+                            }`}>
+                            <FontAwesomeIcon icon="chevron-circle-left" />
+                          </a>
+                        </h2>
+                        <h2 className="float-left">
+                          &nbsp;
+                          <a
+                            href={`/meme-lab/${
+                              parseInt(nftId) + 1
+                            }?focus=${activeTab}`}
+                            className={`${styles.nextPreviousNft} ${
+                              parseInt(nftId) === nftMeta.collection_size
+                                ? styles.nftNextdisabled
+                                : ""
+                            }`}>
+                            <FontAwesomeIcon icon="chevron-circle-right" />
+                          </a>
+                        </h2>
+                      </>
+                    )}
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col>
+                    <h2 className="float-left">Card {nft.id} -&nbsp;</h2>
+                    <h2 className="float-left">{nft.name}</h2>
+                  </Col>
+                </Row>
+                <Row className="pt-3 pb-3">
+                  <Col>
+                    {MEME_TABS.map((tab) => (
+                      <span
+                        key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
+                        className={`${styles.tabFocus} ${
+                          activeTab === tab.focus ? styles.tabFocusActive : ""
+                        }`}
+                        onClick={() => {
+                          setActiveTab(tab.focus);
+                        }}>
+                        {tab.title}
+                      </span>
+                    ))}
+                  </Col>
+                </Row>
+                {printContent()}
+              </>
+            )}
+          </Container>
+        </Col>
+      </Row>
+    </Container>
   );
 }
