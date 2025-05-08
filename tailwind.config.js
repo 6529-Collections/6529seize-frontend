@@ -101,6 +101,11 @@ module.exports = {
           '100%': { 
             opacity: '1'
           }
+        },
+        'shake': {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '20%, 60%': { transform: 'translateX(-4px)' },
+          '40%, 80%': { transform: 'translateX(4px)' }
         }
       },
       animation: {
@@ -109,7 +114,8 @@ module.exports = {
         'gradient-shift': 'gradient-shift 8s ease infinite',
         'gradient-x': 'gradient-x 3s ease infinite',
         'spin-slow': 'spin 15s linear infinite',
-        'fadeIn': 'fadeIn 0.3s ease-out forwards'
+        'fadeIn': 'fadeIn 0.3s ease-out forwards',
+        'shake': 'shake 0.3s ease-in-out'
       },
       backgroundSize: {
         'gradient-pos': '200% 200%',

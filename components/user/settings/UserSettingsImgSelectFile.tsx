@@ -87,7 +87,7 @@ export default function UserSettingsImgSelectFile({
             ? "tw-border-iron-600 tw-bg-iron-800"
             : "tw-bg-iron-900 tw-border-iron-700"
         }
-      tw-relative tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out ${shake ? 'shake' : ''}
+      tw-relative tw-flex tw-flex-col tw-items-center tw-justify-center tw-w-full tw-h-64 tw-border-2 tw-border-dashed tw-rounded-lg tw-cursor-pointer  hover:tw-border-iron-600 hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out ${shake ? 'tw-animate-shake' : ''}
       `}
       >
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-pt-5 tw-pb-6">
@@ -151,16 +151,6 @@ export default function UserSettingsImgSelectFile({
           }}
         />
       </label>
-      <style jsx>{`
-        .shake {
-          animation: shake 0.3s;
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%, 60% { transform: translateX(-4px); }
-          40%, 80% { transform: translateX(4px); }
-        }
-      `}</style>
     </div>
   );
 }
