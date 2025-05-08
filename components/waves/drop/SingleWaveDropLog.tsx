@@ -6,6 +6,7 @@ import {
 } from "../../../helpers/Helpers";
 import Link from "next/link";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
+import { SystemAdjustmentPill } from "../../common/SystemAdjustmentPill";
 
 interface SingleWaveDropLogProps {
   readonly log: ApiWaveLog;
@@ -45,6 +46,7 @@ export const SingleWaveDropLog: React.FC<SingleWaveDropLogProps> = ({ log, credi
           <span className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap ${log.contents.newVote > 0 ? "tw-text-green" : "tw-text-red"}`}>
             {formatNumberWithCommas(log.contents.newVote)} {creditType}
           </span>
+          {log.contents?.reason === "CREDIT_OVERSPENT" && <SystemAdjustmentPill />}
         </div>
 
         <div className="tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap">

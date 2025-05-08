@@ -8,6 +8,7 @@ import { WaveLeaderboardRightSidebarActivityLogDrop } from "./WaveLeaderboardRig
 
 import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { SystemAdjustmentPill } from "../../../common/SystemAdjustmentPill";
 
 interface WaveLeaderboardRightSidebarActivityLogProps {
   readonly log: ApiWaveLog;
@@ -83,6 +84,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
             >
               {formatNumberWithCommas(log.contents.newVote)} {creditType}
             </span>
+            {log.contents?.reason === "CREDIT_OVERSPENT" && <SystemAdjustmentPill />}
           </div>
 
           <Link
