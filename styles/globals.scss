@@ -136,7 +136,7 @@ h5:not(.tailwind-scope h5) {
 }
 
 @media only screen and (max-width: 800px) {
-  h1:not(.tailwind-scope h1) {
+  h1 {
     font-size: 26px;
   }
 

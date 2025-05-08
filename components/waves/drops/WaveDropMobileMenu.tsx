@@ -9,7 +9,7 @@ import WaveDropMobileMenuFollow from "./WaveDropMobileMenuFollow";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
-
+import { DropSize } from "../../../helpers/waves/drop.helpers";
 interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
   readonly isOpen: boolean;
@@ -171,6 +171,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         {showOpenOption && (
           <WaveDropMobileMenuOpen
             drop={{
+              type: DropSize.FULL,
               ...drop,
               stableHash: drop.id,
               stableKey: drop.id,

@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { TitleType, useAuth } from "../auth/Auth";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
+import { isNavItemActive } from "./isNavItemActive";
 
 interface Props {
   readonly item: NavItemData;
@@ -63,9 +64,7 @@ const NavItem = ({ item }: Props) => {
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
-  let isActive = false;
-  const isWaveSubRoute =
-    router.pathname === "/my-stream" && typeof router.query.wave === "string";
+  const isActive = isNavItemActive(item, router, activeView);
 
   const handleClick = () => {
     if (
@@ -80,21 +79,6 @@ const NavItem = ({ item }: Props) => {
     }
     handleNavClick(item);
   };
-
-  if (item.kind === "route") {
-    if (item.name === "Stream") {
-      isActive =
-        router.pathname === item.href &&
-        activeView === null &&
-        typeof router.query.wave !== "string";
-    } else {
-      isActive = router.pathname === item.href && activeView === null;
-    }
-  } else if (item.viewKey === "waves") {
-    isActive = activeView === item.viewKey || isWaveSubRoute;
-  } else {
-    isActive = activeView === item.viewKey;
-  }
 
   return (
     <button

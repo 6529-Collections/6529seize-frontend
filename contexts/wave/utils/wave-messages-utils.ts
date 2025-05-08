@@ -3,10 +3,15 @@ import { commonApiFetch } from "../../../services/api/common-api";
 import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import {
-  ExtendedDrop,
+  DropSize,
   getStableDropKey,
+  Drop,
 } from "../../../helpers/waves/drop.helpers";
 import { WaveMessagesUpdate } from "../hooks/types";
+import {
+  ApiDropSearchStrategy,
+  ApiLightDrop,
+} from "../../../generated/models/ObjectSerializer";
 
 /**
  * Fetches wave messages (drops) for a specific wave
@@ -52,6 +57,101 @@ export async function fetchWaveMessages(
   }
 }
 
+export async function fetchAroundSerialNoWaveMessages(
+  waveId: string,
+  serialNo: number,
+  signal?: AbortSignal
+): Promise<ApiDrop[] | null> {
+  const params: Record<string, string> = {
+    limit: WAVE_DROPS_PARAMS.limit.toString(),
+  };
+
+  params.search_strategy = ApiDropSearchStrategy.Both;
+  params.serial_no_limit = `${serialNo}`;
+
+  try {
+    const data = await commonApiFetch<ApiWaveDropsFeed>({
+      endpoint: `waves/${waveId}/drops`,
+      params,
+      signal,
+    });
+
+    return data.drops.map((drop) => ({
+      ...drop,
+      wave: data.wave,
+    }));
+  } catch (error) {
+    // Check if this is an abort error
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error; // Re-throw abort errors to be handled by the caller
+    }
+
+    console.error(
+      `[WaveDataManager] Failed to fetch messages for ${waveId}:`,
+      error
+    );
+    return null;
+  }
+}
+
+/**
+ * Fetches light wave messages (drops) for a specific wave
+ * @param waveId The ID of the wave to fetch messages for
+ * @param serialNo The serial number to fetch messages before
+ * @param signal Optional AbortSignal for cancellation
+ * @returns Array of ApiLightDrop with wave data attached, or null if the request fails
+ */
+export async function fetchLightWaveMessages(
+  waveId: string,
+  oldestSerialNo: number,
+  targetSerialNo: number,
+  signal?: AbortSignal
+): Promise<(ApiLightDrop | ApiDrop)[] | null> {
+  const params: LightDropsApiParams = {
+    max_serial_no: oldestSerialNo,
+    wave_id: waveId,
+    limit: 2000,
+  };
+
+  try {
+    const results = await Promise.all([
+      findLightDropBySerialNoWithPagination(targetSerialNo, params, signal),
+      fetchAroundSerialNoWaveMessages(waveId, targetSerialNo, signal),
+    ]);
+
+    const combined: (ApiLightDrop | ApiDrop)[] = [];
+   
+    for (const drop of results[0]) {
+      combined.push(drop);
+    }
+    if (results[1]) {
+      for (const drop of results[1]) {
+        const existingIndex = combined.findIndex(
+          (d) => d.serial_no === drop.serial_no
+        );
+        if (existingIndex !== -1) {
+          combined[existingIndex] = drop;
+        } else {
+          combined.push(drop);
+        }
+      }
+    }
+
+    return combined;
+  } catch (error) {
+    // Check if this is an abort error
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error; // Re-throw abort errors to be handled by the caller
+    }
+
+    console.error(
+      `[WaveDataManager] Failed to fetch light messages for ${waveId}:`,
+      error
+    );
+    return null;
+  }
+}
+
 /**
  * Transforms API drops into the format needed for the WaveMessages store
  * @param waveId ID of the wave
@@ -88,6 +188,7 @@ export function formatWaveMessages(
     hasNextPage: hasNextPage,
     drops: drops.map((drop) => ({
       ...drop,
+      type: DropSize.FULL,
       stableKey: drop.id,
       stableHash: drop.id,
     })),
@@ -128,26 +229,6 @@ export function createEmptyWaveMessages(
 }
 
 /**
- * Handles an error when fetching wave messages
- * @param error The error that occurred
- * @param waveId ID of the wave that failed
- * @throws Re-throws abort errors
- * @returns null
- */
-function handleWaveMessagesError(error: unknown, waveId: string): null {
-  // Check if this is an abort error
-  if (error instanceof DOMException && error.name === "AbortError") {
-    throw error; // Re-throw abort errors to be handled by the caller
-  }
-
-  console.error(
-    `[WaveDataManager] Error fetching messages for ${waveId}:`,
-    error
-  );
-  return null;
-}
-
-/**
  * Merges two arrays of drops, removing duplicates based on id,
  * preferring newer versions of duplicates, and sorting by serial_no
  *
@@ -155,15 +236,13 @@ function handleWaveMessagesError(error: unknown, waveId: string): null {
  * @param newDrops New array of drops to merge in
  * @returns A new merged array with no duplicates, sorted by serial_no
  */
-export function mergeDrops(
-  currentDrops: ExtendedDrop[],
-  newDrops: ExtendedDrop[]
-): ExtendedDrop[] {
+export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
   // Create a map for fast lookup by id
-  const dropsMapStableKey = new Map<string, ExtendedDrop>();
+  const dropsMapStableKey = new Map<string, Drop>();
 
   const newDropsWithStableKey = newDrops.map((drop) => {
     const { key, hash } = getStableDropKey(drop, currentDrops);
+
     return {
       ...drop,
       stableHash: hash,
@@ -184,7 +263,7 @@ export function mergeDrops(
   // Convert the map back to an array
   const mergedDrops = Array.from(dropsMapStableKey.values());
 
-  const dropsMapSerialNo = new Map<number, ExtendedDrop>();
+  const dropsMapSerialNo = new Map<number, Drop>();
 
   for (const drop of mergedDrops) {
     dropsMapSerialNo.set(drop.serial_no, drop);
@@ -193,23 +272,27 @@ export function mergeDrops(
   const finalDrops = Array.from(dropsMapSerialNo.values());
 
   finalDrops.sort((a, b) => {
+    if (a.type === DropSize.LIGHT || b.type === DropSize.LIGHT) {
+      return b.serial_no - a.serial_no;
+    }
+
     const aIsTemp = a.id?.startsWith("temp-") ?? false;
     const bIsTemp = b.id?.startsWith("temp-") ?? false;
 
-    if (aIsTemp || !bIsTemp)
+    if (aIsTemp || !bIsTemp) {
       return (
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
+    }
 
     return b.serial_no - a.serial_no;
   });
+
   return finalDrops;
 }
 
 // Helper function to get the highest serial number from an array of drops
-function getHighestSerialNo(
-  drops: ApiDrop[] | ExtendedDrop[]
-): number | null {
+function getHighestSerialNo(drops: ApiDrop[] | Drop[]): number | null {
   if (!drops || drops.length === 0) {
     return null;
   }
@@ -271,10 +354,136 @@ export const maxOrNull = (
   a: number | null | undefined,
   b: number | null | undefined
 ): number | null => {
-  // this signature “x is number” tells TS that inside `filter` we only keep numbers
+  // this signature "x is number" tells TS that inside `filter` we only keep numbers
   const nums = [a, b].filter(
     (x): x is number => typeof x === "number" && Number.isFinite(x)
   );
 
   return nums.length > 0 ? Math.max(...nums) : null;
 };
+
+/**
+ * Parameters for the /light-drops API endpoint.
+ */
+interface LightDropsApiParams {
+  /** The ID of the wave to fetch messages for. Required by the API. */
+  wave_id: string;
+  /** The maximum number of items to return. API requires 1-2000. Defaults to 2000 if not specified by caller. */
+  limit?: number;
+  /** Fetch items with serial_no less than or equal to this value. For pagination. Required. */
+  max_serial_no: number;
+  // Add any other specific, known query parameters for /light-drops from openapi.yaml if they exist
+}
+
+export async function findLightDropBySerialNoWithPagination(
+  targetSerialNo: number,
+  apiParams: LightDropsApiParams, // wave_id and max_serial_no are mandatory here
+  signal?: AbortSignal
+): Promise<ApiLightDrop[]> {
+  // Return type changed to ApiLightDrop[]
+  let currentMaxSerialForNextCall: number = apiParams.max_serial_no;
+  let requestsMade = 0;
+  const MAX_REQUESTS = 5;
+
+  const allFetchedDropsMap = new Map<number, ApiLightDrop>(); // Used to store unique drops by serial_no
+  let targetFound = false;
+
+  if (!apiParams.wave_id) {
+    throw new Error("wave_id is required in apiParams");
+  }
+
+  const itemsPerRequest =
+    apiParams.limit && apiParams.limit > 0 && apiParams.limit <= 2000
+      ? apiParams.limit
+      : 2000;
+
+  while (requestsMade < MAX_REQUESTS && !targetFound) {
+    requestsMade++;
+
+    const paramsForCurrentRequest: Record<string, string> = {
+      wave_id: apiParams.wave_id,
+      limit: itemsPerRequest.toString(),
+      max_serial_no: currentMaxSerialForNextCall.toString(),
+    };
+    
+    const currentBatch = await commonApiFetch<ApiLightDrop[]>({
+      endpoint: `light-drops`,
+      params: paramsForCurrentRequest,
+      signal,
+    });
+
+    if (signal?.aborted) {
+      throw new Error("Request aborted by signal.");
+    }
+
+    if (!currentBatch || currentBatch.length === 0) {
+      if (!targetFound) {
+        // Only throw if target hasn't been found in a previous batch that was processed before an empty one
+        const message = `Target serial number ${targetSerialNo} not found. No (more) items match criteria with wave_id=${apiParams.wave_id} and max_serial_no=${currentMaxSerialForNextCall}.`;
+        throw new Error(message);
+      }
+      break; // Target was found, and now we got an empty batch, so we are done.
+    }
+
+    let smallestSerialInCurrentBatch = currentBatch[0].serial_no;
+    for (const drop of currentBatch) {
+      if (!allFetchedDropsMap.has(drop.serial_no)) {
+        allFetchedDropsMap.set(drop.serial_no, drop);
+      }
+      if (drop.serial_no === targetSerialNo) {
+        targetFound = true;
+      }
+      if (drop.serial_no < smallestSerialInCurrentBatch) {
+        smallestSerialInCurrentBatch = drop.serial_no;
+      }
+    }
+
+    if (targetFound) {
+      // If target is found, we have processed its batch. We can break and return relevant drops.
+      break;
+    }
+
+    // Prepare for next iteration or check if we should stop
+    if (
+      currentBatch.length < itemsPerRequest &&
+      smallestSerialInCurrentBatch > targetSerialNo
+    ) {
+      // Last page fetched, it was smaller than limit, and the smallest item is still greater than target.
+      // This means target is not in the dataset in the range we are looking.
+      break; // Target not found, and no more data in the desired direction.
+    }
+    currentMaxSerialForNextCall = smallestSerialInCurrentBatch;
+
+    // Safety break: if max_serial_no for next call is not less than targetSerialNo after fetching a full page
+    // and target not found, it implies we might be stuck or target is much lower.
+    // This is mostly covered by the previous condition, but acts as a safeguard.
+    if (
+      currentMaxSerialForNextCall >= targetSerialNo &&
+      currentBatch.length === itemsPerRequest &&
+      requestsMade < MAX_REQUESTS
+    ) {
+      // continue, we expect to find it in subsequent pages
+    } else if (currentMaxSerialForNextCall < targetSerialNo && !targetFound) {
+      // We've passed the target serial number range in pagination without finding it.
+      break;
+    }
+  }
+
+  if (!targetFound) {
+    throw new Error(
+      `Target serial number ${targetSerialNo} not found for wave_id=${
+        apiParams.wave_id
+      } after ${requestsMade} requests (checked up to ${
+        requestsMade * itemsPerRequest
+      } items).`
+    );
+  }
+
+  // Filter accumulated drops: all items with serial_no >= targetSerialNo
+  // and also <= initial apiParams.max_serial_no (the starting point of the fetch)
+  const finalDrops = Array.from(allFetchedDropsMap.values()).sort(
+    (a, b) => b.serial_no - a.serial_no
+  ); // Sort descending by serial_no
+
+  return finalDrops;
+}

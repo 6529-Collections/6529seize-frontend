@@ -4,19 +4,40 @@ import { ApiDrop } from "../../generated/models/ApiDrop";
 import { getRandomObjectId } from "../AllowlistToolHelpers";
 import { TypedFeedItem } from "../../types/feed.types";
 import { ApiFeedItemType } from "../../generated/models/ApiFeedItemType";
+import { ApiLightDrop } from "../../generated/models/ApiLightDrop";
+
+export enum DropSize {
+  LIGHT = "LIGHT",
+  FULL = "FULL",
+}
+
+export type Drop = ExtendedDrop | ExtendedLightDrop;
 
 export interface ExtendedDrop extends ApiDrop {
+  type: DropSize.FULL;
+  stableKey: string;
+  stableHash: string;
+}
+
+export interface ExtendedLightDrop extends ApiLightDrop {
+  type: DropSize.LIGHT;
+  waveId: string;
   stableKey: string;
   stableHash: string;
 }
 
 export const getStableDropKey = (
-  drop: ApiDrop,
-  existingDrops: ExtendedDrop[] = []
+  drop: Drop,
+  existingDrops: Drop[] = []
 ): { key: string; hash: string } => {
+  if (drop.type === DropSize.LIGHT) {
+    return { key: drop.id, hash: drop.id };
+  }
   const closestMatch = findClosestMatch(drop, existingDrops);
   const stableCreatedAt = closestMatch
-    ? closestMatch.created_at
+    ? "created_at" in closestMatch
+      ? closestMatch.created_at
+      : drop.serial_no
     : drop.created_at;
 
   const input = {
@@ -41,12 +62,15 @@ export const getStableDropKey = (
 
 const findClosestMatch = (
   newDrop: ApiDrop,
-  existingDrops: ExtendedDrop[],
+  existingDrops: Drop[],
   maxDiff?: number
-): ExtendedDrop | null => {
+): Drop | null => {
   const MAX_TIME_DIFFERENCE = maxDiff ?? 10000;
 
   return existingDrops.reduce((closest, current) => {
+    if (current.type === DropSize.LIGHT) {
+      return closest;
+    }
     if (
       current.author.handle === newDrop.author.handle &&
       current.parts.map((p) => p.content).join("") ===
@@ -56,6 +80,10 @@ const findClosestMatch = (
           new Date(newDrop.created_at).getTime()
       ) < MAX_TIME_DIFFERENCE
     ) {
+      if (closest?.type === DropSize.LIGHT) {
+        return current;
+      }
+
       if (
         !closest ||
         Math.abs(
@@ -71,20 +99,24 @@ const findClosestMatch = (
       }
     }
     return closest;
-  }, null as ExtendedDrop | null);
+  }, null as Drop | null);
 };
 
 export const getOptimisticDropId = (): string => `temp-${getRandomObjectId()}`;
-const getOptimisticDropSerialNo = (): number =>
-  Math.floor(Math.random() * 1000000);
 
 /**
  * Convert an ApiDrop to ExtendedDrop by adding stable keys
  */
 export const convertApiDropToExtendedDrop = (drop: ApiDrop): ExtendedDrop => {
-  const { key, hash } = getStableDropKey(drop);
+  const { key, hash } = getStableDropKey({
+    ...drop,
+    type: DropSize.FULL,
+    stableKey: "",
+    stableHash: "",
+  });
   return {
     ...drop,
+    type: DropSize.FULL,
     stableKey: key,
     stableHash: hash,
   };

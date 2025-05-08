@@ -3,7 +3,7 @@ import { SingleWaveDropHeader } from "./SingleWaveDropHeader";
 import { SingleWaveDropInfoPanel } from "./SingleWaveDropInfoPanel";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 import { SingleWaveDropTab } from "./SingleWaveDrop";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useDrop } from "../../../hooks/useDrop";
 import { useWaveData } from "../../../hooks/useWaveData";
 import { useRouter } from "next/router";
@@ -43,6 +43,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
         {!!drop && !!wave && (
           <SingleWaveDropInfoPanel
             drop={{
+              type: DropSize.FULL,
               ...drop,
               stableHash: initialDrop.stableHash,
               stableKey: initialDrop.stableKey,

@@ -4,7 +4,7 @@ import { AuthContext } from "../../auth/Auth";
 import { useWaveDropsLeaderboard } from "../../../hooks/useWaveDropsLeaderboard";
 import { WaveSmallLeaderboardDrop } from "./WaveSmallLeaderboardDrop";
 import { useIntersectionObserver } from "../../../hooks/useIntersectionObserver";
-import { ExtendedDrop } from "../../../helpers/waves/wave-drops.helpers";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 
 interface WaveSmallLeaderboardProps {
   readonly wave: ApiWave;
