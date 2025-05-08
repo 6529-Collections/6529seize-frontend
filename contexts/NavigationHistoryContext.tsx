@@ -2,10 +2,12 @@ import { createContext, useContext, useEffect, useCallback, useState, ReactNode,
 import { useRouter } from "next/router";
 import type { ViewKey } from "../components/navigation/navTypes";
 import { useViewContext } from "../components/navigation/ViewContext";
+import { mainSegment, sameMainPath } from "../helpers/navigation.helpers";
 
-type StackEntry =
-  | { type: "route"; path: string }
-  | { type: "view"; view: ViewKey };
+interface StackRoute { type: "route"; path: string }
+interface StackView { type: "view"; view: ViewKey }
+
+type StackEntry = StackRoute | StackView;
 
 interface NavigationHistoryContextValue {
   canGoBack: boolean;
@@ -13,59 +15,116 @@ interface NavigationHistoryContextValue {
   pushView: (view: ViewKey) => void;
 }
 
-const NavigationHistoryContext = createContext<NavigationHistoryContextValue | undefined>(undefined);
-
+const Context = createContext<NavigationHistoryContextValue | undefined>(undefined);
 const MAX_STACK = 50;
 
 export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode }> = ({ children }) => {
   const router = useRouter();
-  const [index, setIndex] = useState(0);
-  const historyRef = useRef<StackEntry[]>([{ type: "route", path: router.asPath }]);
   const { setActiveView } = useViewContext();
 
-  const canGoBack = index > 0;
+  const historyRef = useRef<StackEntry[]>([{ type: "route", path: mainSegment(router.asPath) }]);
+  const [index, setIndex] = useState(0);
+  const skipNext = useRef(false);
+
+  const canGoBack = useMemo(() => {
+    if (index === 0) return false;
+    const current = historyRef.current[index];
+    const currentPath = current.type === "route" ? current.path : null;
+
+    for (let i = index - 1; i >= 0; i--) {
+      const entry = historyRef.current[i];
+      if (entry.type === "view") return true;
+      if (entry.type === "route") {
+        if (!currentPath) return true;
+        if (!sameMainPath(entry.path, currentPath)) return true;
+      }
+    }
+    return false;
+  }, [index]);
 
   const pushStack = useCallback((entry: StackEntry) => {
-    historyRef.current = [
-      ...historyRef.current.slice(0, index + 1),
-      entry,
-    ].slice(-MAX_STACK);
-    setIndex(Math.min(index + 1, MAX_STACK - 1));
-  }, [index]);
+    setIndex(prev => {
+      const newHistory = [...historyRef.current.slice(0, prev + 1), entry].slice(-MAX_STACK);
+      historyRef.current = newHistory;
+      return Math.min(prev + 1, MAX_STACK - 1);
+    });
+  }, []);
 
   useEffect(() => {
     const handleRouteChange = (url: string) => {
-      const last = historyRef.current[index];
-      if (last?.type === "route" && last.path === url) return;
-      pushStack({ type: "route", path: url });
+      if (skipNext.current) {
+        skipNext.current = false;
+        return;
+      }
+      const isProfile   = router.pathname.startsWith("/[user]");
+      const isMyStream  = url.startsWith("/my-stream") && url.includes("wave=");
+
+      let pathKey: string;
+      if (isProfile) {
+        pathKey = mainSegment(url);
+      } else if (isMyStream) {
+        pathKey = url.split("&")[0];
+      } else {
+        pathKey = url.split(/[?#]/)[0];
+      }
+      // avoid pushing if previous route entry (ignoring trailing views) has same main segment
+      let i = historyRef.current.length - 1;
+      while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
+      const lastRoute = i >= 0 ? historyRef.current[i] : null;
+      const isDuplicate = lastRoute?.type === "route" && lastRoute.path === pathKey;
+      if (isDuplicate) return;
+      pushStack({ type: "route", path: pathKey });
     };
     router.events.on("routeChangeComplete", handleRouteChange);
     return () => router.events.off("routeChangeComplete", handleRouteChange);
-  }, [index, pushStack, router.events]);
+  }, [router.events, pushStack]);
 
   const pushView = useCallback((view: ViewKey) => {
-    return pushStack({ type: "view", view });
+    pushStack({ type: "view", view });
   }, [pushStack]);
 
   const goBack = useCallback(() => {
     if (!canGoBack) return;
-    const target = historyRef.current[index - 1];
-    setIndex(index - 1);
+    setIndex(prev => {
+      let targetIndex = prev - 1;
+      const current = historyRef.current[prev];
 
-    if (target.type === "route") {
-      router.push(target.path, undefined, { shallow: true });
-    } else {
-      setActiveView(target.view);
-    }
-  }, [canGoBack, index, router, setActiveView]);
+      while (targetIndex >= 0) {
+        const entry = historyRef.current[targetIndex];
+        if (
+          entry.type === "route" &&
+          current.type === "route" &&
+          sameMainPath(entry.path, current.path)
+        ) {
+          targetIndex -= 1;
+          continue;
+        }
+        break;
+      }
 
-  const contextValue = useMemo<NavigationHistoryContextValue>(() => ({ canGoBack, goBack, pushView }), [canGoBack, goBack, pushView]);
+      if (targetIndex < 0) {
+        router.back();
+        return prev;
+      }
 
-  return <NavigationHistoryContext.Provider value={contextValue}>{children}</NavigationHistoryContext.Provider>;
+      const target = historyRef.current[targetIndex];
+      if (target.type === "route") {
+        skipNext.current = true;
+        router.push(target.path);
+      } else {
+        setActiveView(target.view);
+      }
+      return targetIndex;
+    });
+  }, [canGoBack, router, setActiveView]);
+
+  const value = useMemo(() => ({ canGoBack, goBack, pushView }), [canGoBack, goBack, pushView]);
+
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
 export const useNavigationHistoryContext = (): NavigationHistoryContextValue => {
-  const ctx = useContext(NavigationHistoryContext);
+  const ctx = useContext(Context);
   if (!ctx) throw new Error("useNavigationHistoryContext must be used within NavigationHistoryProvider");
   return ctx;
 }; 

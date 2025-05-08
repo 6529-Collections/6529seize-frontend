@@ -11,6 +11,7 @@ import {
   WrenchIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import UsersIcon from "../common/icons/UsersIcon";
 import AppUserConnect from "./AppUserConnect";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
@@ -66,6 +67,21 @@ const MENU = [
       { label: "ENS", path: "/about/ens" },
       { label: "License", path: "/about/license" },
       { label: "Release Notes", path: "/about/release-notes" },
+    ],
+  },
+  {
+    label: "Network",
+    icon: UsersIcon,
+    children: [
+      { label: "Identities", path: "/network" },
+      { label: "Network Activity", path: "/network/activity" },
+      { label: "Groups", path: "/network/groups" },
+      { label: "NFT Activity", path: "/nft-activity" },
+      { label: "Prenodes Status", path: "/network/prenodes", dividerBefore: true },
+      { label: "Metrics", section: true },
+      { label: "Definitions", path: "/network/metrics" },
+      { label: "Network Stats", path: "/network/stats" },
+      { label: "Levels", path: "/network/levels" },
     ],
   },
 ];
