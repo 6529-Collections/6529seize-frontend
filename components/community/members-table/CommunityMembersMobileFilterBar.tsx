@@ -35,32 +35,31 @@ export default function CommunityMembersMobileFilterBar({
     <div className="tw-flex tw-gap-x-2 tw-overflow-x-auto tw-py-1 sm:tw-hidden">
       {OPTIONS.map((option) => {
         const isActive = option === activeSort;
+        const showLoader = isActive && isLoading;
+        const arrowDirection = isActive ? sortDirection : SortDirection.DESC;
         return (
           <button
             key={option}
             type="button"
             onClick={() => onSort(option)}
-            className={`tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-border-none tw-rounded-full tw-px-3.5 tw-py-1.5 tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 tw-ease-out ${
+            className={`group tw-flex tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-border-none tw-rounded-full tw-px-3.5 tw-py-1.5 tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 tw-ease-out ${
               isActive
                 ? "tw-bg-iron-700 tw-text-white"
                 : "tw-bg-iron-900 tw-text-iron-400 active:tw-bg-iron-700"
             }`}
           >
             <span>{TITLE[option]}</span>
-            {isActive &&
-              (isLoading ? (
-                <span className="-tw-mt-0.5 tw-ml-1">
-                  <CircleLoader size={CircleLoaderSize.SMALL} />
-                </span>
+            <span className="-tw-mt-0.5 tw-ml-1">
+              {showLoader ? (
+                <CircleLoader size={CircleLoaderSize.SMALL} />
               ) : (
-                <span className="-tw-mt-0.5 tw-ml-1">
-                  <CommonTableSortIcon
-                    direction={sortDirection}
-                    isActive={true}
-                    activeClassName="tw-text-white"
-                  />
-                </span>
-              ))}
+                <CommonTableSortIcon
+                  direction={arrowDirection}
+                  isActive={isActive}
+                  activeClassName="tw-text-white"
+                />
+              )}
+            </span>
           </button>
         );
       })}
