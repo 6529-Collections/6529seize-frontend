@@ -6,13 +6,16 @@ export const isNavItemActive = (
   router: NextRouter,
   activeView: ViewKey | null,
 ): boolean => {
-  // User profile pages should activate the Network icon
-  if (item.name === "Network" && router.pathname.startsWith("/[user]")) {
-    return true;
-  }
-
-  if (item.name === "Network") {
+  // User profile pages and Network routes are active only when no in-app view is selected
+  if (item.name === "Network" && activeView === null) {
     const path = router.pathname;
+
+    // Profile pages (/[user])
+    if (router.pathname.startsWith("/[user]")) {
+      return true;
+    }
+
+    // Network related routes
     if (path === "/network" || path.startsWith("/network/") || path === "/nft-activity") {
       return true;
     }

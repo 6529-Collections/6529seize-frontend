@@ -260,7 +260,7 @@ export default function CommunityMembers() {
       {members ? (
         <div>
           <div className="tailwind-scope tw-mt-4 lg:tw-mt-6 tw-flow-root">
-            <div className="tw-overflow-auto tw-bg-iron-950 tw-shadow tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg tw-divide-y tw-divide-solid tw-divide-iron-800">
+            <div className="sm:tw-overflow-auto tw-bg-iron-950 tw-shadow sm:tw-border sm:tw-border-solid sm:tw-border-iron-700 tw-rounded-lg sm:tw-divide-y sm:tw-divide-solid sm:tw-divide-iron-800">
               <CommunityMembersTable
                 members={members.data}
                 activeSort={params.sort}

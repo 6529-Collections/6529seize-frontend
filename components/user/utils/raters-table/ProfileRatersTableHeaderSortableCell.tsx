@@ -33,7 +33,9 @@ export default function ProfileRatersTableHeaderSortableCell({
     >
       <span
         className={`${
-          isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
+          isActive
+            ? "tw-text-primary-400"
+            : "group-hover:tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out"
         }`}
       >
         {title}
@@ -43,10 +45,12 @@ export default function ProfileRatersTableHeaderSortableCell({
           <CircleLoader size={CircleLoaderSize.SMALL} />
         </span>
       ) : (
-        <CommonTableSortIcon
-          direction={isActive ? sortDirection : SortDirection.DESC}
-          isActive={isActive}
-        />
+        <span className="-tw-mt-0.5 tw-ml-2">
+          <CommonTableSortIcon
+            direction={isActive ? sortDirection : SortDirection.DESC}
+            isActive={isActive}
+          />
+        </span>
       )}
     </th>
   );

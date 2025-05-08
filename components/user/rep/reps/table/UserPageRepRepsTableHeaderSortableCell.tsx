@@ -45,7 +45,9 @@ export default function UserPageRepRepsTableHeaderSortableCell({
       >
         {SORT_TYPE_TO_TEXT[type]}
       </span>
-      <CommonTableSortIcon direction={sor} isActive={isActive} />
+      <span className="-tw-mt-0.5 tw-ml-2">
+        <CommonTableSortIcon direction={sor} isActive={isActive} />
+      </span>
     </th>
   );
 }

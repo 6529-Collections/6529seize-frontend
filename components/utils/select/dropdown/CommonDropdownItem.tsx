@@ -51,11 +51,13 @@ export default function CommonDropdownItem<T, U = unknown>(
             {label}
           </span>
           {sortDirection && (
-            <CommonTableSortIcon
-              direction={isActive ? sortDirection : SortDirection.DESC}
-              isActive={isActive}
-              shouldRotate={isActive && shouldRotate}
-            />
+            <span className="-tw-mt-0.5 tw-ml-2">
+              <CommonTableSortIcon
+                direction={isActive ? sortDirection : SortDirection.DESC}
+                isActive={isActive}
+                shouldRotate={isActive && shouldRotate}
+              />
+            </span>
           )}
           {item.value === activeItem && (
             <svg
