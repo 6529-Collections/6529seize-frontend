@@ -1,7 +1,6 @@
 import styles from "./6529Gradient.module.scss";
 
 import { useContext, useEffect, useState } from "react";
-import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { GRADIENT_CONTRACT } from "../../constants";
@@ -24,6 +23,7 @@ import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import { AuthContext } from "../auth/Auth";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import useCapacitor from "../../hooks/useCapacitor";
+import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -115,8 +115,7 @@ export default function GradientPage() {
             sm={{ span: 12 }}
             md={{ span: 6 }}
             lg={{ span: 6 }}
-            className="pt-2 position-relative"
-          >
+            className="pt-2 position-relative">
             {nft && (
               <NFTImage
                 id={fullscreenElementId}
@@ -135,8 +134,7 @@ export default function GradientPage() {
               sm={{ span: 12 }}
               md={{ span: 6 }}
               lg={{ span: 6 }}
-              className="pt-2"
-            >
+              className="pt-2">
               <Container>
                 <Row>
                   <Col>
@@ -214,44 +212,10 @@ export default function GradientPage() {
                 {capacitor.platform !== "ios" && (
                   <Row className="pt-4">
                     <Col>
-                      <a
-                        href={`https://opensea.io/assets/ethereum/${GRADIENT_CONTRACT}/${nft.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <Image
-                          className={styles.marketplace}
-                          src="/opensea.png"
-                          alt="opensea"
-                          width={40}
-                          height={40}
-                        />
-                      </a>
-                      {/* <a
-                      href={`https://looksrare.org/collections/${GRADIENT_CONTRACT}/${nft.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <Image
-                        className={styles.marketplace}
-                        src="/looksrare.png"
-                        alt="looksrare"
-                        width={40}
-                        height={40}
+                      <NFTMarketplaceLinks
+                        contract={nft.contract}
+                        id={nft.id}
                       />
-                    </a> */}
-                      <a
-                        href={`https://x2y2.io/eth/${GRADIENT_CONTRACT}/${nft.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <Image
-                          className={styles.marketplace}
-                          src="/x2y2.png"
-                          alt="x2y2"
-                          width={40}
-                          height={40}
-                        />
-                      </a>
                     </Col>
                   </Row>
                 )}
@@ -300,68 +264,66 @@ export default function GradientPage() {
   }
 
   return (
-      <Container fluid className={styles.mainContainer}>
-        <Row>
-          <Col>
-            <Container className="pt-4 pb-4">
-              <Row>
-                <Col>
-                  <h1>
-                    <span className="font-lightest">6529</span> Gradient
-                  </h1>
-                </Col>
-              </Row>
-              <Row className="pt-2">
-                <Col>
-                  <h2 className={styles.subheading}>{nft?.name}</h2>
-                </Col>
-              </Row>
-              {nft && (
-                <>
-                  <Row className="pt-2">
-                    <Col className="d-flex align-items-center justify-content-between">
-                      {nftId && (
-                        <>
-                          <span>
-                            <h2 className="float-left">
-                              <a
-                                href={`/6529-gradient/${parseInt(nftId) - 1}`}
-                                className={`${styles.nextPreviousNft} ${
-                                  parseInt(nftId) === 0
-                                    ? styles.nftPreviousdisabled
-                                    : ""
-                                }`}
-                              >
-                                <FontAwesomeIcon icon="chevron-circle-left" />
-                              </a>
-                            </h2>
-                            <h2 className="float-left">
-                              &nbsp;
-                              <a
-                                href={`/6529-gradient/${parseInt(nftId) + 1}`}
-                                className={`${styles.nextPreviousNft} ${
-                                  parseInt(nftId) === 100
-                                    ? styles.nftPreviousdisabled
-                                    : ""
-                                }`}
-                              >
-                                <FontAwesomeIcon icon="chevron-circle-right" />
-                              </a>
-                            </h2>
-                          </span>
-                          {fullScreenSupported() && printFullScreen()}
-                        </>
-                      )}
-                    </Col>
-                  </Row>
-                  <Row className="pt-2">
-                    <Col>{printLive()}</Col>
-                  </Row>
-                </>
-              )}
-            </Container>
-          </Col>
-        </Row>
-      </Container>
+    <Container fluid className={styles.mainContainer}>
+      <Row>
+        <Col>
+          <Container className="pt-4 pb-4">
+            <Row>
+              <Col>
+                <h1>
+                  <span className="font-lightest">6529</span> Gradient
+                </h1>
+              </Col>
+            </Row>
+            <Row className="pt-2">
+              <Col>
+                <h2 className={styles.subheading}>{nft?.name}</h2>
+              </Col>
+            </Row>
+            {nft && (
+              <>
+                <Row className="pt-2">
+                  <Col className="d-flex align-items-center justify-content-between">
+                    {nftId && (
+                      <>
+                        <span>
+                          <h2 className="float-left">
+                            <a
+                              href={`/6529-gradient/${parseInt(nftId) - 1}`}
+                              className={`${styles.nextPreviousNft} ${
+                                parseInt(nftId) === 0
+                                  ? styles.nftPreviousdisabled
+                                  : ""
+                              }`}>
+                              <FontAwesomeIcon icon="chevron-circle-left" />
+                            </a>
+                          </h2>
+                          <h2 className="float-left">
+                            &nbsp;
+                            <a
+                              href={`/6529-gradient/${parseInt(nftId) + 1}`}
+                              className={`${styles.nextPreviousNft} ${
+                                parseInt(nftId) === 100
+                                  ? styles.nftPreviousdisabled
+                                  : ""
+                              }`}>
+                              <FontAwesomeIcon icon="chevron-circle-right" />
+                            </a>
+                          </h2>
+                        </span>
+                        {fullScreenSupported() && printFullScreen()}
+                      </>
+                    )}
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col>{printLive()}</Col>
+                </Row>
+              </>
+            )}
+          </Container>
+        </Col>
+      </Row>
+    </Container>
   );
 }

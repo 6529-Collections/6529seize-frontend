@@ -113,8 +113,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             {profile?.level && profile?.cic ? (
               <a
                 href={`/${profile?.handle ?? props.token.owner}`}
-                className="d-flex gap-2 decoration-hover-underline align-items-center"
-              >
+                className="d-flex gap-2 decoration-hover-underline align-items-center">
                 <UserCICAndLevel
                   level={profile.level}
                   cicType={cicToType(profile.cic)}
@@ -174,14 +173,12 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   }
                   theme={"light"}
                   placement="right"
-                  delay={250}
-                >
+                  delay={250}>
                   <a
                     href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token.id)}
                     target="_blank"
                     rel="noreferrer"
-                    className="d-flex gap-2 align-items-center decoration-none"
-                  >
+                    className="d-flex gap-2 align-items-center decoration-none">
                     <Image
                       className={styles.marketplace}
                       src="/opensea.png"
@@ -232,14 +229,12 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   }
                   theme={"light"}
                   placement="right"
-                  delay={250}
-                >
+                  delay={250}>
                   <a
                     href={getBlurLink(props.token.id)}
                     target="_blank"
                     rel="noreferrer"
-                    className="d-flex gap-2 align-items-center decoration-none"
-                  >
+                    className="d-flex gap-2 align-items-center decoration-none">
                     <Image
                       className={styles.marketplace}
                       src="/blur.png"
@@ -283,17 +278,15 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
                   }
                   theme={"light"}
                   placement="right"
-                  delay={250}
-                >
+                  delay={250}>
                   <a
                     href={getMagicEdenLink(props.token.id)}
                     target="_blank"
                     rel="noreferrer"
-                    className="d-flex gap-2 align-items-center decoration-none"
-                  >
+                    className="d-flex gap-2 align-items-center decoration-none">
                     <Image
                       className={styles.marketplace}
-                      src="/magiceden.svg"
+                      src="/magiceden.png"
                       alt="magiceden"
                       width={24}
                       height={24}
@@ -336,8 +329,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             <a
               href={`/nextgen/collection/${formatNameForUrl(
                 props.collection.name
-              )}`}
-            >
+              )}`}>
               {props.collection.name}
             </a>
           </span>
