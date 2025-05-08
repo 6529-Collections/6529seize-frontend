@@ -73,6 +73,9 @@ export const setAuthJwt = (
 };
 
 export const getAuthJwt = () => {
+  if (process.env.USE_DEV_AUTH === "true") {
+    return process.env.DEV_MODE_AUTH_JWT ?? null;
+  }
   return Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 };
 
@@ -81,6 +84,9 @@ export const getRefreshToken = () => {
 };
 
 export const getWalletAddress = () => {
+  if (process.env.USE_DEV_AUTH === "true") {
+    return process.env.DEV_MODE_WALLET_ADDRESS ?? null;
+  }
   return safeLocalStorage.getItem(WALLET_ADDRESS_STORAGE_KEY) ?? null;
 };
 
