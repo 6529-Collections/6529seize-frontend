@@ -128,7 +128,9 @@ export default function CommonDropdown<T, U = unknown>(
         >
           {label}
           {sortDirection && (
-            <CommonTableSortIcon direction={sortDirection} isActive={true} />
+            <span className="-tw-mt-0.5 tw-ml-2">
+              <CommonTableSortIcon direction={sortDirection} isActive={true} />
+            </span>
           )}
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center -tw-mr-1 tw-pr-3.5">
             <svg

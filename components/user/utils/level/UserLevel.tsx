@@ -19,12 +19,12 @@ export default function UserLevel({
 
   const getSizeClasses = () => {
     if (size === "sm") {
-      return "tw-text-sm";
+      return "tw-text-sm tw-font-semibold tw-ring-2 tw-py-1";
     }
     if (size === "xs") {
-      return "tw-text-xs";
+      return "tw-text-[0.6875rem] tw-ring-1 tw-font-semibold tw-py-[0.1875rem]";
     }
-    return "tw-text-base";
+    return "tw-text-base tw-font-semibold tw-ring-2 tw-py-1";
   };
 
   const classes = `${getColorClasses()} ${getSizeClasses()}`;
@@ -35,7 +35,8 @@ export default function UserLevel({
   return (
     <button
       onClick={openLevelsPage}
-      className={`tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset ${classes}`}>
+      className={`tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-ring-inset ${classes}`}
+    >
       Level {level}
     </button>
   );

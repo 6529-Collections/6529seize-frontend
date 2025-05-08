@@ -10,10 +10,12 @@ export default function CommonTableSortIcon({
   direction,
   isActive,
   shouldRotate,
+  activeClassName = "tw-text-primary-400",
 }: {
   readonly direction: SortDirection;
   readonly isActive: boolean;
   readonly shouldRotate?: boolean;
+  readonly activeClassName?: string;
 }) {
   const getClasses = ({
     active,
@@ -26,9 +28,9 @@ export default function CommonTableSortIcon({
   }): string => {
     let c = "";
     if (active) {
-      c += "tw-text-primary-400";
+      c += ` ${activeClassName}`;
     } else {
-      c += "tw-text-iron-400 group-hover:tw-text-iron-200";
+      c += " tw-text-iron-400 group-hover:tw-text-iron-200";
     }
     const targetDirection = rotate ? rotatedDirections[dir] : dir;
     if (targetDirection === SortDirection.ASC) {
@@ -59,7 +61,7 @@ export default function CommonTableSortIcon({
 
   return (
     <svg
-      className={`${classes} -tw-mt-0.5 tw-ml-2 tw-transition tw-duration-300 tw-ease-out tw-h-4 tw-w-4`}
+      className={`${classes} tw-transition tw-duration-300 tw-ease-out tw-h-4 tw-w-4 tw-flex-shrink-0`}
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"

@@ -1,7 +1,7 @@
 export default function UserCICUnknownIcon() {
   return (
     <svg
-      className="tw-w-full tw-h-full tw-align-top"
+      className="tw-w-full tw-h-full tw-align-top tw-flex-shrink-0"
       viewBox="0 0 183 183"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

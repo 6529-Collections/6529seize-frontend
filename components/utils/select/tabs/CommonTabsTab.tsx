@@ -41,7 +41,13 @@ export default function CommonTabsTab<T, U = unknown>(
   };
 
   return (
-    <div className={isActive ? "tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800" : "tw-p-[1px] tw-flex tw-rounded-lg"}>
+    <div
+      className={
+        isActive
+          ? "tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800"
+          : "tw-p-[1px] tw-flex tw-rounded-lg"
+      }
+    >
       <button
         type="button"
         onClick={onSelected}
@@ -51,11 +57,13 @@ export default function CommonTabsTab<T, U = unknown>(
       >
         {item.label}
         {sortDirection && (
-          <CommonTableSortIcon
-            direction={isActive ? sortDirection : SortDirection.DESC}
-            isActive={isActive}
-            shouldRotate={isActive && shouldRotate}
-          />
+          <span className="-tw-mt-0.5 tw-ml-2">
+            <CommonTableSortIcon
+              direction={isActive ? sortDirection : SortDirection.DESC}
+              isActive={isActive}
+              shouldRotate={isActive && shouldRotate}
+            />
+          </span>
         )}
       </button>
     </div>
