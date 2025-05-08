@@ -1,21 +1,22 @@
-import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiDropWithoutWave } from "../../generated/models/ApiDropWithoutWave";
 import { ApiWaveMin } from "../../generated/models/ApiWaveMin";
-import { getStableDropKey } from "./drop.helpers";
-
-export interface ExtendedDrop extends ApiDrop {
-  readonly stableKey: string;
-  readonly stableHash: string;
-}
+import { DropSize, ExtendedDrop, getStableDropKey } from "./drop.helpers";
 
 const createExtendedDrop = (
   drop: ApiDropWithoutWave,
   wave: ApiWaveMin,
   prevDrops: ExtendedDrop[]
 ): ExtendedDrop => {
-  const { key, hash } = getStableDropKey({ ...drop, wave }, prevDrops);
+  const { key, hash } = getStableDropKey({
+    ...drop,
+    wave,
+    type: DropSize.FULL,
+    stableKey: "",
+    stableHash: "",
+  }, prevDrops);
   return {
     ...drop,
+    type: DropSize.FULL,
     wave,
     stableKey: key,
     stableHash: hash,

@@ -5,7 +5,7 @@ import { useContext, useEffect, useState, useRef, useCallback } from "react";
 import { AuthContext } from "../../auth/Auth";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "./DropsList";
-import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
 
 const REQUEST_SIZE = 10;
@@ -61,6 +61,7 @@ export default function Drops() {
       setDrops(
         data?.pages.flat().map((drop) => ({
           ...drop,
+          type: DropSize.FULL,
           stableKey: drop.id,
           stableHash: drop.id,
         })) ?? []

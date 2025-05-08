@@ -1,4 +1,4 @@
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { INotificationDropQuoted } from "../../../../types/feed.types";
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import Drop, {
@@ -38,6 +38,7 @@ export default function NotificationDropQuoted({
   return (
     <Drop
       drop={{
+        type: DropSize.FULL,
         ...notification.related_drops[0],
         stableKey: "",
         stableHash: "",

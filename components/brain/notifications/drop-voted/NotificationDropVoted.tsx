@@ -13,7 +13,7 @@ import Drop, {
 import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
 
@@ -107,6 +107,7 @@ export default function NotificationDropVoted({
 
         <Drop
           drop={{
+            type: DropSize.FULL,
             ...notification.related_drops[0],
             stableKey: "",
             stableHash: "",

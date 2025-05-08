@@ -133,7 +133,8 @@ const MyStreamWrapper: React.FC = () => {
   return (
     <BrainContent
       activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}>
+      onCancelReplyQuote={onCancelReplyQuote}
+    >
       {component}
     </BrainContent>
   );

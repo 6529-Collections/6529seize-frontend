@@ -20,11 +20,12 @@ export function useWaveDataManager({
     });
 
   // Add pagination functionality
-  const { fetchNextPage, cancelPaginationFetch } = useWavePagination({
-    updateData,
-    getData,
-    removeDrop,
-  });
+  const { fetchNextPage, cancelPaginationFetch, fetchAroundSerialNo } =
+    useWavePagination({
+      updateData,
+      getData,
+      removeDrop,
+    });
 
   // Expose a clean, focused API
   return {
@@ -36,5 +37,6 @@ export function useWaveDataManager({
     // Pagination
     fetchNextPage,
     cancelPaginationFetch,
+    fetchAroundSerialNo,
   };
 }

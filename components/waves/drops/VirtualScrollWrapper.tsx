@@ -5,6 +5,8 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 
 /**
  * Props for VirtualScrollWrapper
@@ -18,6 +20,9 @@ interface VirtualScrollWrapperProps {
 
   readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
 
+  readonly dropSerialNo: number;
+  readonly waveId: string;
+  readonly type: DropSize;
 
   /**
    * The child components to be rendered or virtualized.
@@ -50,7 +55,11 @@ export default function VirtualScrollWrapper({
   delay = 1000,
   scrollContainerRef,
   children,
+  dropSerialNo,
+  waveId,
+  type,
 }: VirtualScrollWrapperProps) {
+  const { fetchAroundSerialNo } = useMyStream();
 
   /**
    * isInView: Tracks if the component is currently in the viewport.
@@ -86,6 +95,7 @@ export default function VirtualScrollWrapper({
    * async changes to settle.
    */
   useEffect(() => {
+    if (type === DropSize.LIGHT) return;
     const timer = setTimeout(() => {
       measureHeight();
     }, delay);
@@ -106,12 +116,15 @@ export default function VirtualScrollWrapper({
     const observer = new IntersectionObserver(
       ([entry]) => {
         const inView = entry.isIntersecting;
-        if (!inView && containerRef.current) {
+        if (!inView && containerRef.current && type !== DropSize.LIGHT) {
           // If leaving viewport, measure height in case content changed
           measureHeight();
         }
         if (inView !== isInView) {
           setIsInView(inView);
+        }
+        if (inView && type === DropSize.LIGHT) {
+          fetchAroundSerialNo(waveId, dropSerialNo);
         }
       },
       {

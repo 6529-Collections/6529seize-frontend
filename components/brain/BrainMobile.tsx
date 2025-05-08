@@ -6,7 +6,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { commonApiFetch } from "../../services/api/common-api";
 import BrainDesktopDrop from "./BrainDesktopDrop";
 import BrainMobileAbout from "./mobile/BrainMobileAbout";
-import { ExtendedDrop } from "../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../helpers/waves/drop.helpers";
 import { useWaveData } from "../../hooks/useWaveData";
 import MyStreamWaveLeaderboard from "./my-stream/MyStreamWaveLeaderboard";
 import MyStreamWaveOutcome from "./my-stream/MyStreamWaveOutcome";
@@ -172,6 +172,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         <div className="tw-absolute tw-inset-0 tw-z-1000">
           <BrainDesktopDrop
             drop={{
+              type: DropSize.FULL,
               ...drop,
               stableKey: drop.id,
               stableHash: drop.id,

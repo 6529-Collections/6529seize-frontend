@@ -10,31 +10,28 @@
  * Do not edit the class manually.
  */
 
-import { ApiIdentitySubscriptionTargetAction } from '../models/ApiIdentitySubscriptionTargetAction';
 import { HttpFile } from '../http/http';
 
-export class ApiProfileMin {
-    'id': string;
+export class ApiCommunityMemberMinimal {
+    'profile_id': string | null;
     'handle': string | null;
-    'pfp': string | null;
-    'banner1_color': string | null;
-    'banner2_color': string | null;
-    'cic': number;
-    'rep': number;
+    'normalised_handle': string | null;
+    'primary_wallet': string | null;
+    'display': string | null;
     'tdh': number;
     'level': number;
-    'primary_address': string;
-    'subscribed_actions': Array<ApiIdentitySubscriptionTargetAction>;
-    'archived': boolean;
+    'cic_rating': number;
+    'wallet': string;
+    'pfp': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "id",
-            "baseName": "id",
+            "name": "profile_id",
+            "baseName": "profile_id",
             "type": "string",
-            "format": "uuid"
+            "format": ""
         },
         {
             "name": "handle",
@@ -43,34 +40,22 @@ export class ApiProfileMin {
             "format": ""
         },
         {
-            "name": "pfp",
-            "baseName": "pfp",
+            "name": "normalised_handle",
+            "baseName": "normalised_handle",
             "type": "string",
             "format": ""
         },
         {
-            "name": "banner1_color",
-            "baseName": "banner1_color",
+            "name": "primary_wallet",
+            "baseName": "primary_wallet",
             "type": "string",
             "format": ""
         },
         {
-            "name": "banner2_color",
-            "baseName": "banner2_color",
+            "name": "display",
+            "baseName": "display",
             "type": "string",
             "format": ""
-        },
-        {
-            "name": "cic",
-            "baseName": "cic",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "rep",
-            "baseName": "rep",
-            "type": "number",
-            "format": "int64"
         },
         {
             "name": "tdh",
@@ -85,26 +70,26 @@ export class ApiProfileMin {
             "format": "int64"
         },
         {
-            "name": "primary_address",
-            "baseName": "primary_address",
+            "name": "cic_rating",
+            "baseName": "cic_rating",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "wallet",
+            "baseName": "wallet",
             "type": "string",
             "format": ""
         },
         {
-            "name": "subscribed_actions",
-            "baseName": "subscribed_actions",
-            "type": "Array<ApiIdentitySubscriptionTargetAction>",
-            "format": ""
-        },
-        {
-            "name": "archived",
-            "baseName": "archived",
-            "type": "boolean",
+            "name": "pfp",
+            "baseName": "pfp",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiProfileMin.attributeTypeMap;
+        return ApiCommunityMemberMinimal.attributeTypeMap;
     }
 
     public constructor() {
