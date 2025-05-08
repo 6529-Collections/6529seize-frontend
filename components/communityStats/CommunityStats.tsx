@@ -88,7 +88,7 @@ export default function CommunityStats() {
   function printEstimatedDaysUntilCheckpoints() {
     const checkpoints = getNextCheckpoints(latestHistory!.total_boosted_tdh);
     return checkpoints.map((x) => (
-      <tr>
+      <tr key={x}>
         <td>Estimated days until {formatTdh(x)}</td>
         <td className="text-right">
           {numberWithCommas(getEstimatedDaysUntil(x))}
