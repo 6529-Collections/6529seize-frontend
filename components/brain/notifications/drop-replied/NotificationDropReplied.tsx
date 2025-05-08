@@ -10,7 +10,7 @@ import Drop, {
   DropInteractionParams,
   DropLocation,
 } from "../../../waves/drops/Drop";
-import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
+import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
@@ -100,6 +100,7 @@ export default function NotificationDropReplied({
 
         <Drop
           drop={{
+            type: DropSize.FULL,
             ...notification.related_drops[1],
             stableKey: "",
             stableHash: "",

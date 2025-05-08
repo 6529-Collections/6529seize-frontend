@@ -1,5 +1,5 @@
 import React from "react";
-import { ExtendedDrop } from "../../../helpers/waves/wave-drops.helpers";
+import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import Link from "next/link";
 import { CICType } from "../../../entities/IProfile";
