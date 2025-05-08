@@ -23,6 +23,7 @@ import {
 } from "../../../../helpers/image.helpers";
 import { useIpfsService } from "../../../ipfs/IPFSContext";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
+import SecondaryButton from "../../../utils/button/SecondaryButton";
 export default function UserPageHeaderEditPfp({
   profile,
   onClose,
@@ -60,15 +61,18 @@ export default function UserPageHeaderEditPfp({
 
   const [selectedMeme, setSelectedMeme] = useState<MemeLite | null>(null);
   const [file, setFile] = useState<File | null>();
+  const [error, setError] = useState<string | null>(null);
 
   const setSelectedMemeAndRemoveFile = (meme: MemeLite) => {
     setSelectedMeme(meme);
     setFile(null);
+    setError(null);
   };
 
   const setFileAndRemoveMeme = (file: File) => {
     setFile(file);
     setSelectedMeme(null);
+    setError(null);
   };
 
   useEffect(() => {
@@ -160,10 +164,16 @@ export default function UserPageHeaderEditPfp({
     }
 
     if (!file && !selectedMeme) {
+      setError(null);
       setToast({
         message: "You must select an image",
         type: "error",
       });
+      return;
+    }
+
+    if (file && file.size > 2097152) {
+      setError("File size must be less than 2MB");
       return;
     }
 
@@ -178,7 +188,7 @@ export default function UserPageHeaderEditPfp({
   };
 
   return (
-    <div className="tw-relative tw-z-10">
+    <div className="tw-relative tw-z-50">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75"></div>
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-text-center sm:tw-items-center tw-p-2 lg:tw-p-0">
@@ -203,12 +213,24 @@ export default function UserPageHeaderEditPfp({
                 imageToShow={imageToShow}
                 setFile={setFileAndRemoveMeme}
               />
+              {error && (
+                <p className="tw-mt-3 tw-text-sm tw-text-red">{error}</p>
+              )}
               <div className="tw-pt-6">
-                <UserSettingsSave
-                  loading={saving}
-                  disabled={!file && !selectedMeme}
-                  title="Save PFP"
-                />
+                <div className="sm:tw-flex sm:tw-flex-row-reverse tw-gap-x-3">
+                  <UserSettingsSave
+                    loading={saving}
+                    disabled={!file && !selectedMeme}
+                    title="Save PFP"
+                  />
+                  <SecondaryButton
+                    disabled={saving}
+                    onClicked={onClose}
+                    className="tw-w-full sm:tw-w-auto tw-mt-3 sm:tw-mt-0"
+                  >
+                    Cancel
+                  </SecondaryButton>
+                </div>
               </div>
             </form>
           </div>
