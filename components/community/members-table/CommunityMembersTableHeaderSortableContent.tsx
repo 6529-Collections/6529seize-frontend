@@ -41,7 +41,8 @@ export default function CommunityMembersTableHeaderSortableContent({
       <span
         className={`${
           isActive ? "tw-text-primary-400" : "group-hover:tw-text-iron-200"
-        } tw-transition tw-duration-300 tw-ease-out`}>
+        } tw-transition tw-duration-300 tw-ease-out`}
+      >
         {TITLE[sort]}
       </span>
       {showLoader ? (
@@ -49,11 +50,13 @@ export default function CommunityMembersTableHeaderSortableContent({
           <CircleLoader size={CircleLoaderSize.SMALL} />
         </span>
       ) : (
-        <CommonTableSortIcon
-          direction={direction}
-          isActive={isActive}
-          shouldRotate={rotate}
-        />
+        <span className="-tw-mt-0.5 tw-ml-2">
+          <CommonTableSortIcon
+            direction={direction}
+            isActive={isActive}
+            shouldRotate={rotate}
+          />
+        </span>
       )}
     </>
   );
