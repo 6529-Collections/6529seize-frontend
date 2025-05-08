@@ -60,16 +60,26 @@ export function useVirtualizedWaveDrops(
     [fetchNextPageForWave, fetchNextpageForDrop]
   );
 
+  const waitAndRevealDrop = useCallback(
+    async (
+      serialNo: number,
+      maxWaitTimeMs?: number,
+      pollIntervalMs?: number
+    ) => {
+      if (virtualizedWaveMessages) {
+        return await virtualizedWaveMessages.waitAndRevealDrop(
+          serialNo,
+          maxWaitTimeMs,
+          pollIntervalMs
+        );
+      }
+    },
+    [virtualizedWaveMessages]
+  );
 
-  const revealDrop = useCallback(async (serialNo: number) => {
-    if (virtualizedWaveMessages) {
-      return virtualizedWaveMessages.revealDrop(serialNo);
-    }
-  }, [virtualizedWaveMessages]);
-  
   return {
     waveMessages: virtualizedWaveMessages,
     fetchNextPage,
-    revealDrop,
+    waitAndRevealDrop,
   };
 }
