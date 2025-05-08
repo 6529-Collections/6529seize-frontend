@@ -1,6 +1,6 @@
 import styles from "./TheMemes.module.scss";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
-import { MEMES_CONTRACT, OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
+import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";
 import { NFT, MemesExtendedData, Rememe } from "../../entities/INFT";
 import {
   areEqualAddresses,
@@ -21,6 +21,7 @@ import ArtistProfileHandle from "./ArtistProfileHandle";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import { printMemeReferences } from "../rememes/RememePage";
 import useCapacitor from "../../hooks/useCapacitor";
+import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -223,42 +224,10 @@ export function MemePageLiveRightMenu(props: {
           {capacitor.platform !== "ios" && (
             <Row className="pt-4">
               <Col>
-                <a
-                  href={`https://opensea.io/assets/ethereum/${MEMES_CONTRACT}/${props.nft.id}`}
-                  target="_blank"
-                  rel="noreferrer">
-                  <Image
-                    className={styles.marketplace}
-                    src="/opensea.png"
-                    alt="opensea"
-                    width={40}
-                    height={40}
-                  />
-                </a>
-                {/* <a
-                      href={`https://looksrare.org/collections/${MEMES_CONTRACT}/${props.nft.id}`}
-                      target="_blank"
-                      rel="noreferrer">
-                      <Image
-                        className={styles.marketplace}
-                        src="/looksrare.png"
-                        alt="looksrare"
-                        width={40}
-                        height={40}
-                      />
-                    </a> */}
-                <a
-                  href={`https://x2y2.io/eth/${MEMES_CONTRACT}/${props.nft.id}`}
-                  target="_blank"
-                  rel="noreferrer">
-                  <Image
-                    className={styles.marketplace}
-                    src="/x2y2.png"
-                    alt="x2y2"
-                    width={40}
-                    height={40}
-                  />
-                </a>
+                <NFTMarketplaceLinks
+                  contract={props.nft.contract}
+                  id={props.nft.id}
+                />
               </Col>
             </Row>
           )}

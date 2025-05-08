@@ -26,6 +26,7 @@ import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import DotLoader from "../dotLoader/DotLoader";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import useCapacitor from "../../hooks/useCapacitor";
+import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
 
 interface Props {
   contract: string;
@@ -301,30 +302,10 @@ export default function RememePage(props: Readonly<Props>) {
                 {capacitor.platform !== "ios" && (
                   <Row className="pt-5">
                     <Col>
-                      <a
-                        href={`https://opensea.io/assets/ethereum/${props.contract}/${props.id}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.marketplaceRememe}
-                          src="/opensea.png"
-                          alt="opensea"
-                          width={40}
-                          height={40}
-                        />
-                      </a>
-                      <a
-                        href={`https://x2y2.io/eth/${props.contract}/${props.id}`}
-                        target="_blank"
-                        rel="noreferrer">
-                        <Image
-                          className={styles.marketplaceRememe}
-                          src="/x2y2.png"
-                          alt="x2y2"
-                          width={40}
-                          height={40}
-                        />
-                      </a>
+                      <NFTMarketplaceLinks
+                        contract={rememe.contract}
+                        id={rememe.id}
+                      />
                     </Col>
                   </Row>
                 )}
