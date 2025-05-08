@@ -57,7 +57,7 @@ export default function TheMemesMint(props: any) {
           proxy={MEMES_MANIFOLD_PROXY_CONTRACT}
           abi={MEMES_MANIFOLD_PROXY_ABI}
           token_id={nft.id}
-          mint_date={Time.fromString(nft.mint_date.toString())}
+          mint_date={Time.fromString(nft.mint_date?.toString() ?? "")}
         />
       </main>
     </>
