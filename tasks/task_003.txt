@@ -1,11 +1,11 @@
 # Task ID: 3
-# Title: Implement Revised determineRouteConfig Function
+# Title: Create breadcrumbs.utils.ts Module
 # Status: done
-# Dependencies: 2
+# Dependencies: 1
 # Priority: high
-# Description: Refactor the determineRouteConfig function to use the configuration array to find matching route configurations.
+# Description: Extract utility functions from useBreadcrumbs.ts into a dedicated utils module
 # Details:
-Rewrite the determineRouteConfig function to iterate through the DYNAMIC_ROUTE_CONFIGS array. For each config, check if the pathPattern matches the current route's primary segment. If it matches, use the paramExtractor to extract parameters. Return the first config that both matches and successfully extracts parameters, along with those parameters. Maintain the function signature to ensure compatibility with existing code. Include fallback logic for routes that don't match any configuration.
+Create a new file at hooks/breadcrumbs.utils.ts. Move utility functions from useBreadcrumbs.ts including formatCrumbDisplay, getDynamicParam, and buildStaticCrumbs. Import the Crumb type from ../components/breadcrumb/Breadcrumb for use in buildStaticCrumbs. Import any other necessary types from breadcrumbs.types.ts. Export all utility functions with proper export statements. Update useBreadcrumbs.ts to import these utilities from the new file. Ensure all function signatures remain the same to maintain compatibility.
 
 # Test Strategy:
-Create unit tests with various route patterns to verify the function correctly identifies route configurations and extracts parameters. Test with both matching and non-matching routes.
+Verify the application builds without errors. Test breadcrumb generation for both static and dynamic routes to ensure the utility functions are working correctly. Check that breadcrumb formatting and display remains consistent with the previous implementation.

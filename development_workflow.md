@@ -10,8 +10,19 @@ This document outlines key practices and steps for successful development and re
 
 2.  **Structured Task Breakdown (e.g., using a PRD or Task Management System):**
     *   Break down larger objectives into smaller, manageable tasks.
-    *   For significant changes, consider creating a brief Product Requirements Document (PRD) outlining the scope, technical approach, and potential risks.
+    *   For significant changes, consider creating a brief Product Requirements Document (PRD) outlining the scope, technical approach, and potential risks. A well-defined "Development Roadmap" section in the PRD is particularly useful.
     *   Each task should have a clear, actionable description.
+
+3.  **Automated Task Generation with Taskmaster (MCP):**
+    *   Once a PRD is created (e.g., `your_feature_prd.txt`), use Taskmaster's MCP tools to generate an initial `tasks.json`.
+    *   **Tool:** `parse_prd`
+    *   **Key Parameters:**
+        *   `input`: Absolute path to your PRD file.
+        *   `force: true`: To overwrite any existing `tasks.json`, ensuring a clean slate.
+        *   `numTasks`: Specify the approximate number of top-level tasks to generate. Align this with major phases or sections in your PRD's "Development Roadmap".
+        *   `projectRoot`: The absolute path to your project's root directory.
+    *   **Example:** `mcp_task-master-ai_parse_prd(force = True, input = "/path/to/your_feature_prd.txt", numTasks = "5", projectRoot = "/path/to/project")`
+    *   **Benefit:** Automates the initial task creation process, ensuring consistency with the PRD and saving manual effort. A detailed PRD leads to more relevant and actionable tasks.
 
 ## II. Implementation & Refactoring Process
 
@@ -60,6 +71,49 @@ This document outlines key practices and steps for successful development and re
 *   After completing a significant task or refactor, reflect on the process.
 *   Identify what worked well and what could be improved.
 *   Update this workflow document with new learnings and effective practices.
+*   **Key Takeaway:** A detailed PRD with a clear roadmap not only aids manual planning but also significantly enhances the quality of automated task generation when using tools like Taskmaster.
+
+## V. Task Management with Taskmaster
+
+This section outlines the general workflow for using Taskmaster (via MCP tools) to manage development tasks after initial generation. Refer to `.cursor/rules/dev_workflow.mdc` and `taskmaster.mdc` for comprehensive tool details.
+
+1.  **View Current Tasks:**
+    *   Use `get_tasks` to see the current list of tasks, their status, and IDs.
+    *   Example: `mcp_task-master-ai_get_tasks(projectRoot = "/path/to/project", withSubtasks = True)`
+
+2.  **Determine Next Task:**
+    *   Use `next_task` to identify the next task to work on based on dependencies and priorities.
+    *   Example: `mcp_task-master-ai_next_task(projectRoot = "/path/to/project")`
+
+3.  **View Specific Task Details:**
+    *   Use `get_task` to understand the requirements of a specific task.
+    *   Example: `mcp_task-master-ai_get_task(id = "3", projectRoot = "/path/to/project")`
+
+4.  **Update Task Status:**
+    *   As work progresses, update task statuses using `set_task_status`.
+    *   Example (mark task as done): `mcp_task-master-ai_set_task_status(id = "3", status = "done", projectRoot = "/path/to/project")`
+    *   Example (mark task as in-progress): `mcp_task-master-ai_set_task_status(id = "3.1", status = "in-progress", projectRoot = "/path/to/project")`
+
+5.  **Expand Complex Tasks:**
+    *   If a task is too large, use `expand_task` to break it into subtasks. This can be informed by `analyze_project_complexity` and `complexity_report` if needed.
+    *   Example: `mcp_task-master-ai_expand_task(id = "5", num = "3", projectRoot = "/path/to/project")`
+
+6.  **Log Implementation Details/Progress (for Subtasks):**
+    *   Use `update_subtask` to append notes, findings, or detailed plans to a subtask's details section. This creates a valuable log of the implementation journey.
+    *   Example: `mcp_task-master-ai_update_subtask(id = "5.1", prompt = "Initial exploration complete. Identified files X and Y to be modified. Plan is to...", projectRoot = "/path/to/project")`
+
+7.  **Handle Implementation Drift:**
+    *   If the implementation plan changes, use `update_task` (for a single task) or `update` (for multiple future tasks) to reflect these changes.
+    *   Example: `mcp_task-master-ai_update_task(id = "4", prompt = "Revised approach: now using library Z instead of A.", projectRoot = "/path/to/project")`
+
+8.  **Add New Tasks/Subtasks:**
+    *   If new work is identified, use `add_task` or `add_subtask`.
+    *   Example: `mcp_task-master-ai_add_task(prompt = "Create a new utility function for...", projectRoot = "/path/to/project")`
+
+9.  **Maintain Dependency Integrity:**
+    *   Use `add_dependency`, `remove_dependency`, `validate_dependencies`, and `fix_dependencies` as needed.
+
+**Takeaway:** Integrating a task management system like Taskmaster via its MCP tools directly into the development workflow streamlines planning, execution, and tracking, especially when combined with detailed PRDs.
 
 ---
 

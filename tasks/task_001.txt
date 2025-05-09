@@ -1,11 +1,11 @@
 # Task ID: 1
-# Title: Define RouteDynamicConfig Interface and Types
+# Title: Create breadcrumbs.types.ts Module
 # Status: done
 # Dependencies: None
 # Priority: high
-# Description: Create the TypeScript interface for RouteDynamicConfig and any supporting types needed for the configuration-driven approach.
+# Description: Extract all TypeScript type definitions from useBreadcrumbs.ts into a dedicated types module
 # Details:
-Create the RouteDynamicConfig interface as specified in the PRD, including type parameters for data and params. Define the Crumb interface if it doesn't already exist in the codebase. Ensure all properties are properly typed (pathPattern as RegExp, paramExtractor function, fetcher function, queryKeyBuilder function, crumbBuilder function, and optional parentCrumbs array). Add appropriate JSDoc comments to explain the purpose of each property.
+Create a new file at hooks/breadcrumbs.types.ts. Move all type definitions from useBreadcrumbs.ts including DynamicRouteType, RouteDynamicConfig<TData, TParams>, SpecificDeterminedRouteInfo, DeterminedRouteInfo, and BreadcrumbQueueItem. Export all types with proper export statements. Consider whether to import and re-export the Crumb type from ../components/breadcrumb/Breadcrumb or leave it as a direct import in other files. Update useBreadcrumbs.ts to import these types from the new file. Ensure there are no TypeScript errors after the migration.
 
 # Test Strategy:
-Verify the interface compiles without errors. Create a simple mock implementation to ensure the type constraints work as expected.
+Verify the application builds without TypeScript errors. Confirm that useBreadcrumbs.ts correctly imports and uses the types from the new file. Manually test breadcrumb functionality in the application to ensure it still works as expected.

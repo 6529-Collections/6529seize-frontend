@@ -2,127 +2,72 @@
   "tasks": [
     {
       "id": 1,
-      "title": "Define RouteDynamicConfig Interface and Types",
-      "description": "Create the TypeScript interface for RouteDynamicConfig and any supporting types needed for the configuration-driven approach.",
+      "title": "Create breadcrumbs.types.ts Module",
+      "description": "Extract all TypeScript type definitions from useBreadcrumbs.ts into a dedicated types module",
       "status": "done",
       "dependencies": [],
       "priority": "high",
-      "details": "Create the RouteDynamicConfig interface as specified in the PRD, including type parameters for data and params. Define the Crumb interface if it doesn't already exist in the codebase. Ensure all properties are properly typed (pathPattern as RegExp, paramExtractor function, fetcher function, queryKeyBuilder function, crumbBuilder function, and optional parentCrumbs array). Add appropriate JSDoc comments to explain the purpose of each property.",
-      "testStrategy": "Verify the interface compiles without errors. Create a simple mock implementation to ensure the type constraints work as expected."
+      "details": "Create a new file at hooks/breadcrumbs.types.ts. Move all type definitions from useBreadcrumbs.ts including DynamicRouteType, RouteDynamicConfig<TData, TParams>, SpecificDeterminedRouteInfo, DeterminedRouteInfo, and BreadcrumbQueueItem. Export all types with proper export statements. Consider whether to import and re-export the Crumb type from ../components/breadcrumb/Breadcrumb or leave it as a direct import in other files. Update useBreadcrumbs.ts to import these types from the new file. Ensure there are no TypeScript errors after the migration.",
+      "testStrategy": "Verify the application builds without TypeScript errors. Confirm that useBreadcrumbs.ts correctly imports and uses the types from the new file. Manually test breadcrumb functionality in the application to ensure it still works as expected."
     },
     {
       "id": 2,
-      "title": "Create DYNAMIC_ROUTE_CONFIGS Array Structure",
-      "description": "Set up the array structure that will hold all route configurations, initially as an empty array with the correct typing.",
+      "title": "Create breadcrumbs.api.ts Module",
+      "description": "Extract all API fetching functions from useBreadcrumbs.ts into a dedicated API module",
       "status": "done",
       "dependencies": [
         1
       ],
       "priority": "high",
-      "details": "Create a constant array named DYNAMIC_ROUTE_CONFIGS with the type RouteDynamicConfig[]. This will be populated with route configurations in later tasks. Add appropriate exports and imports. Include a comment explaining the purpose of this array and how new route configurations should be added.",
-      "testStrategy": "Verify the array is properly typed and can be imported/exported without TypeScript errors."
+      "details": "Create a new file at hooks/breadcrumbs.api.ts. Move all API fetching functions from useBreadcrumbs.ts including fetchGradientName, fetchProfileHandle, fetchWaveName, fetchMemeName, fetchNextgenName, fetchRememeName, fetchMemeLabName, and fetchCollectionName. Ensure all necessary imports are included, particularly ../services/api/common-api for the commonApiFetch function, ../constants for contract addresses, and ../entities/INextgen for the NextGenToken type. Export all fetcher functions with proper export statements. Temporarily update useBreadcrumbs.ts to import these functions from the new file (they will later be imported by breadcrumbs.config.ts instead).",
+      "testStrategy": "Verify the application builds without errors. Test each breadcrumb type that uses API fetching to ensure data is still being retrieved correctly. Check the network tab in browser dev tools to confirm API calls are still being made as expected."
     },
     {
       "id": 3,
-      "title": "Implement Revised determineRouteConfig Function",
-      "description": "Refactor the determineRouteConfig function to use the configuration array to find matching route configurations.",
+      "title": "Create breadcrumbs.utils.ts Module",
+      "description": "Extract utility functions from useBreadcrumbs.ts into a dedicated utils module",
       "status": "done",
       "dependencies": [
-        2
+        1
       ],
       "priority": "high",
-      "details": "Rewrite the determineRouteConfig function to iterate through the DYNAMIC_ROUTE_CONFIGS array. For each config, check if the pathPattern matches the current route's primary segment. If it matches, use the paramExtractor to extract parameters. Return the first config that both matches and successfully extracts parameters, along with those parameters. Maintain the function signature to ensure compatibility with existing code. Include fallback logic for routes that don't match any configuration.",
-      "testStrategy": "Create unit tests with various route patterns to verify the function correctly identifies route configurations and extracts parameters. Test with both matching and non-matching routes."
+      "details": "Create a new file at hooks/breadcrumbs.utils.ts. Move utility functions from useBreadcrumbs.ts including formatCrumbDisplay, getDynamicParam, and buildStaticCrumbs. Import the Crumb type from ../components/breadcrumb/Breadcrumb for use in buildStaticCrumbs. Import any other necessary types from breadcrumbs.types.ts. Export all utility functions with proper export statements. Update useBreadcrumbs.ts to import these utilities from the new file. Ensure all function signatures remain the same to maintain compatibility.",
+      "testStrategy": "Verify the application builds without errors. Test breadcrumb generation for both static and dynamic routes to ensure the utility functions are working correctly. Check that breadcrumb formatting and display remains consistent with the previous implementation."
     },
     {
       "id": 4,
-      "title": "Implement Centralized useQuery Hook",
-      "description": "Replace multiple useQuery hooks with a single centralized hook that uses the active route configuration.",
+      "title": "Create breadcrumbs.config.ts Module",
+      "description": "Extract the DYNAMIC_ROUTE_CONFIGS array into a dedicated configuration module",
       "status": "done",
       "dependencies": [
+        1,
+        2,
         3
       ],
-      "priority": "high",
-      "details": "Create a centralized useQuery implementation that dynamically derives queryKey and queryFn from the active route configuration. Use the queryKeyBuilder and fetcher functions from the active configuration. Maintain consistent caching strategy (staleTime, refetchOnWindowFocus) with the existing implementation. Handle the case where no configuration is active. Ensure proper typing of query results based on the configuration's TData type parameter.",
-      "testStrategy": "Test with mock configurations to verify the query is correctly constructed and executed. Verify that caching behavior matches the original implementation."
+      "priority": "medium",
+      "details": "Create a new file at hooks/breadcrumbs.config.ts. Move the DYNAMIC_ROUTE_CONFIGS array from useBreadcrumbs.ts to this file. Import necessary types from breadcrumbs.types.ts (RouteDynamicConfig, DynamicRouteType). Import API fetcher functions from breadcrumbs.api.ts. Import utility functions from breadcrumbs.utils.ts, particularly getDynamicParam if used in the configuration. Export the DYNAMIC_ROUTE_CONFIGS array. Update useBreadcrumbs.ts to import the configuration from this new file. Ensure the configuration structure remains identical to maintain compatibility.",
+      "testStrategy": "Verify the application builds without errors. Test each dynamic route type to ensure breadcrumbs are still generated correctly. Verify that API-dependent breadcrumbs still fetch and display data correctly. Test edge cases like invalid routes or missing parameters."
     },
     {
       "id": 5,
-      "title": "Refactor finalCrumbs Calculation",
-      "description": "Update the finalCrumbs memoized calculation to use the crumbBuilder from the active configuration.",
+      "title": "Refine useBreadcrumbs.ts Hook",
+      "description": "Streamline the main hook file to focus on core logic by importing from the new modules",
       "status": "done",
       "dependencies": [
+        1,
+        2,
+        3,
         4
       ],
-      "priority": "high",
-      "details": "Modify the finalCrumbs useMemo hook to use the active configuration's crumbBuilder function when available. Pass the extracted parameters, query data, loading state, path segments, and query object to the crumbBuilder. Preserve the existing logic for static routes (buildStaticCrumbs) when no dynamic configuration matches. Ensure the memoization dependencies are correctly set to prevent unnecessary recalculations.",
-      "testStrategy": "Test with various route configurations to verify the correct crumbs are generated. Compare output with the original implementation to ensure consistency."
-    },
-    {
-      "id": 6,
-      "title": "Implement Initial Route Configurations",
-      "description": "Create RouteDynamicConfig objects for 2-3 key dynamic route types (gradient, profile, meme).",
-      "status": "done",
-      "dependencies": [
-        5
-      ],
       "priority": "medium",
-      "details": "Implement configuration objects for gradient, profile, and meme routes. For each configuration: 1) Define an appropriate pathPattern regex, 2) Implement paramExtractor to extract IDs or other parameters, 3) Reuse existing fetcher functions initially, 4) Create queryKeyBuilder functions that match existing query keys, 5) Implement crumbBuilder functions that replicate the current breadcrumb generation logic. Add these configurations to the DYNAMIC_ROUTE_CONFIGS array.",
-      "testStrategy": "Test each configuration individually with sample routes to verify correct parameter extraction, data fetching, and breadcrumb generation. Compare with original implementation output."
-    },
-    {
-      "id": 7,
-      "title": "Migrate Remaining Route Configurations",
-      "description": "Create RouteDynamicConfig objects for all remaining dynamic route types (nextgen, rememe, meme-lab, collection, wave).",
-      "status": "done",
-      "dependencies": [
-        6
-      ],
-      "priority": "medium",
-      "details": "Implement configuration objects for nextgen, rememe, meme-lab, collection, and wave routes following the same pattern as the initial configurations. Pay special attention to the wave route if it uses a separate useWaveData hook - either integrate it into the configuration or handle it as a special case. Ensure all existing route patterns are covered. Add these configurations to the DYNAMIC_ROUTE_CONFIGS array.",
-      "testStrategy": "Test each new configuration with sample routes. Verify that all route types produce the expected breadcrumbs. Pay special attention to complex routes with multiple dynamic segments."
-    },
-    {
-      "id": 8,
-      "title": "Consolidate Fetcher Functions",
-      "description": "Create a generic fetcher function to reduce boilerplate in individual fetchers if API patterns allow.",
-      "status": "done",
-      "dependencies": [
-        7
-      ],
-      "priority": "low",
-      "details": "Analyze the existing fetcher functions to identify common patterns. Implement a genericFetchName function as suggested in the PRD that can handle most entity name fetching operations. Update the route configurations to use this generic fetcher where appropriate. Maintain type safety throughout. Keep specialized fetchers for routes with unique requirements.",
-      "testStrategy": "Test the generic fetcher with various entity types to verify it correctly fetches and returns data. Compare results with the original fetcher functions to ensure consistency."
-    },
-    {
-      "id": 9,
-      "title": "Simplify activeItem State",
-      "description": "Evaluate and potentially simplify the activeItem state and its useEffect.",
-      "status": "done",
-      "dependencies": [
-        8
-      ],
-      "priority": "low",
-      "details": "Review the current implementation of activeItem state and its associated useEffect. Determine if it can be simplified or removed by directly using pathname, asPath, and query from useRouter() in useMemo dependencies. Implement the simplification if it doesn't negatively impact stability or cause unnecessary re-renders. If simplification isn't feasible, document the reasons why.",
-      "testStrategy": "Test the hook with various route changes to verify that breadcrumbs update correctly. Monitor for unnecessary re-renders or other performance issues."
-    },
-    {
-      "id": 10,
-      "title": "Add Documentation and Perform Final Testing",
-      "description": "Add comprehensive JSDoc comments and perform final testing of the refactored hook.",
-      "status": "done",
-      "dependencies": [
-        9
-      ],
-      "priority": "medium",
-      "details": "Add detailed JSDoc comments to all functions, interfaces, and complex logic. Include examples of how to add new route configurations in the future. Create a brief documentation section explaining the architecture of the refactored hook. Perform comprehensive testing of all route types, including edge cases. Verify that the refactored hook produces identical output to the original implementation for all routes.",
-      "testStrategy": "Review all code for documentation completeness. Test the hook with all supported route types and compare output with the original implementation. Verify performance characteristics to ensure no regressions."
+      "details": "Update hooks/useBreadcrumbs.ts to be more focused and maintainable. Remove all code that has been moved to the new modules. Add imports for all necessary types from breadcrumbs.types.ts. Import DYNAMIC_ROUTE_CONFIGS from breadcrumbs.config.ts. Import utility functions from breadcrumbs.utils.ts. Import any API fetchers that might be used directly in the hook from breadcrumbs.api.ts. Retain only the core hook logic: useBreadcrumbs hook function, determineRouteConfig helper, getQueryKey and fetchQueryData helpers for useQuery. Ensure the hook's public API remains unchanged to maintain backward compatibility. Clean up any redundant code or imports.",
+      "testStrategy": "Verify the application builds without errors. Conduct comprehensive testing of breadcrumb functionality across different route types. Test navigation between pages to ensure breadcrumbs update correctly. Verify that dynamic breadcrumbs still fetch and display data correctly. Compare the behavior before and after the refactor to ensure complete functional equivalence."
     }
   ],
   "metadata": {
     "projectName": "PRD Implementation",
-    "totalTasks": 10,
-    "sourceFile": "/Users/simo/6529seize-frontend/refactor_useBreadcrumbs_prd.txt",
+    "totalTasks": 5,
+    "sourceFile": "/Users/simo/6529seize-frontend/refactor_useBreadcrumbs_modularization_prd.txt",
     "generatedAt": "2023-11-14"
   }
 }

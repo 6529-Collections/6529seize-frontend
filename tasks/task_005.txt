@@ -1,11 +1,11 @@
 # Task ID: 5
-# Title: Refactor finalCrumbs Calculation
+# Title: Refine useBreadcrumbs.ts Hook
 # Status: done
-# Dependencies: 4
-# Priority: high
-# Description: Update the finalCrumbs memoized calculation to use the crumbBuilder from the active configuration.
+# Dependencies: 1, 2, 3, 4
+# Priority: medium
+# Description: Streamline the main hook file to focus on core logic by importing from the new modules
 # Details:
-Modify the finalCrumbs useMemo hook to use the active configuration's crumbBuilder function when available. Pass the extracted parameters, query data, loading state, path segments, and query object to the crumbBuilder. Preserve the existing logic for static routes (buildStaticCrumbs) when no dynamic configuration matches. Ensure the memoization dependencies are correctly set to prevent unnecessary recalculations.
+Update hooks/useBreadcrumbs.ts to be more focused and maintainable. Remove all code that has been moved to the new modules. Add imports for all necessary types from breadcrumbs.types.ts. Import DYNAMIC_ROUTE_CONFIGS from breadcrumbs.config.ts. Import utility functions from breadcrumbs.utils.ts. Import any API fetchers that might be used directly in the hook from breadcrumbs.api.ts. Retain only the core hook logic: useBreadcrumbs hook function, determineRouteConfig helper, getQueryKey and fetchQueryData helpers for useQuery. Ensure the hook's public API remains unchanged to maintain backward compatibility. Clean up any redundant code or imports.
 
 # Test Strategy:
-Test with various route configurations to verify the correct crumbs are generated. Compare output with the original implementation to ensure consistency.
+Verify the application builds without errors. Conduct comprehensive testing of breadcrumb functionality across different route types. Test navigation between pages to ensure breadcrumbs update correctly. Verify that dynamic breadcrumbs still fetch and display data correctly. Compare the behavior before and after the refactor to ensure complete functional equivalence.
