@@ -162,7 +162,7 @@ export default function HeaderSearchModalItem({
         isSelected ? "tw-bg-iron-800" : ""
       } tw-rounded-lg tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}>
       <Link
-        href={getPath() as string}
+        href={getPath()}
         onClick={onClose}
         className="tw-group tw-no-underline tw-select-none tw-rounded-md tw-space-x-3 tw-flex tw-items-center tw-w-full tw-text-left tw-text-sm tw-font-medium">
         {getMedia()}
