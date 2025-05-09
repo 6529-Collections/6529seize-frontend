@@ -43,8 +43,8 @@ export default function WalletCheckerComponent(
   }>
 ) {
   const [fetchedAddress, setFetchedAddress] = useState<string>("");
-  const [walletInput, setWalletInput] = useState(props.address_query);
-  const [walletAddress, setWalletAddress] = useState(props.address_query);
+  const [walletInput, setWalletInput] = useState(props.address_query ?? "");
+  const [walletAddress, setWalletAddress] = useState(props.address_query ?? "");
 
   const [checking, setChecking] = useState(!!props.address_query);
   const [addressError, setAddressError] = useState(false);
