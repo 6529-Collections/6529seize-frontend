@@ -16,6 +16,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import UserCICAndLevel from "../../../user/utils/UserCICAndLevel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 export function NextGenTokenImage(
   props: Readonly<{
@@ -108,7 +109,7 @@ export function NextGenTokenImage(
             theme={"light"}
             placement="right"
             delay={250}>
-            <FontAwesomeIcon height={18} icon="info-circle"></FontAwesomeIcon>
+            <FontAwesomeIcon height={18} icon={faInfoCircle}></FontAwesomeIcon>
           </Tippy>
         </button>
       );

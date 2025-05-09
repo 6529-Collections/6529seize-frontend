@@ -5,6 +5,7 @@ import { fetchAllPages } from "../../services/6529api";
 import { Consolidation } from "../../entities/IDelegation";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 
 const csvParser = require("csv-parser");
 
@@ -191,7 +192,7 @@ export default function ConsolidationMappingTool() {
             onDragOver={handleDrag}>
             <div>
               <FontAwesomeIcon
-                icon="file-upload"
+                icon={faFileUpload}
                 className={styles.uploadIcon}
               />
             </div>

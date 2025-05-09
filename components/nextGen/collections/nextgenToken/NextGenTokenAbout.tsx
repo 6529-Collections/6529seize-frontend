@@ -31,6 +31,7 @@ import { ETHEREUM_ICON_TEXT } from "../../../../constants";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../../hooks/useIdentity";
+import { faFire } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -105,7 +106,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
             {(props.token.burnt || isNullAddress(props.token.owner)) && (
               <Tippy content={"Burnt"} theme={"light"} delay={100}>
                 <FontAwesomeIcon
-                  icon="fire"
+                  icon={faFire}
                   style={{ height: "22px", color: "#c51d34" }}
                 />
               </Tippy>

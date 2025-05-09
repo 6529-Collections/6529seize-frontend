@@ -21,6 +21,11 @@ import {
 } from "../../../helpers/meme_calendar.helpers";
 import { useQuery } from "@tanstack/react-query";
 import { Time } from "../../../helpers/time";
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+  faInfoCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function UserPageSubscriptionsUpcoming(
   props: Readonly<{
@@ -102,16 +107,15 @@ function SubscriptionExpandButton(
   return (
     <button
       className="btn-link decoration-none"
-      onClick={() => props.setExpanded(!props.expanded)}
-    >
+      onClick={() => props.setExpanded(!props.expanded)}>
       {props.expanded ? (
         <>
-          Show Less <FontAwesomeIcon icon="circle-chevron-up" height={"20px"} />
+          Show Less <FontAwesomeIcon icon={faChevronCircleUp} height={"20px"} />
         </>
       ) : (
         <>
           Show More{" "}
-          <FontAwesomeIcon icon="circle-chevron-down" height={"20px"} />
+          <FontAwesomeIcon icon={faChevronCircleDown} height={"20px"} />
         </>
       )}
     </button>
@@ -213,11 +217,10 @@ function SubscriptionRow(
               <Tippy
                 placement="right"
                 theme="light"
-                content="No changes allowed on minting day"
-              >
+                content="No changes allowed on minting day">
                 <span>
                   - Minting Today{" "}
-                  <FontAwesomeIcon icon="info-circle" height={"20px"} />
+                  <FontAwesomeIcon icon={faInfoCircle} height={"20px"} />
                 </span>
               </Tippy>
             ) : (

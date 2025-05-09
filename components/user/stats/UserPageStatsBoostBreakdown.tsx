@@ -6,6 +6,7 @@ import {
 } from "../../../entities/ITDH";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import Tippy from "@tippyjs/react";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 export default function UserPageStatsBoostBreakdown({
   tdh,
@@ -230,7 +231,7 @@ function BoostBreakdownInfo({ info }: { readonly info: string[] }) {
       }
       interactive={true}>
       <FontAwesomeIcon
-        icon="info-circle"
+        icon={faInfoCircle}
         height={16}
         color="lightgrey"
         cursor={"pointer"}></FontAwesomeIcon>

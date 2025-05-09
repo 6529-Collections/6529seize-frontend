@@ -4711,8 +4711,7 @@ components:
         - serial_no
         - drop_type
         - part_1_text
-        - part_1_media_url
-        - part_1_media_mime_type
+        - part_1_medias
         - has_quote
         - is_reply_drop
         - title
@@ -4732,12 +4731,10 @@ components:
         part_1_text:
           type: string
           nullable: true
-        part_1_media_url:
-          type: string
-          nullable: true
-        part_1_media_mime_type:
-          type: string
-          nullable: true
+        part_1_medias:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropMedia"
         has_quote:
           type: boolean
         is_reply_drop:
@@ -4886,6 +4883,7 @@ components:
         mint_date:
           type: string
           format: date-time
+          nullable: true
         boosted_tdh:
           type: number
           format: int64

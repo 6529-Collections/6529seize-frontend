@@ -20,6 +20,7 @@ import DotLoader from "../dotLoader/DotLoader";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
 import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
+import { faPlusCircle, faRefresh } from "@fortawesome/free-solid-svg-icons";
 
 const PAGE_SIZE = 40;
 
@@ -131,12 +132,10 @@ export default function Rememes() {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
+        lg={{ span: 3 }}>
         <a
           href={`/rememes/${rememe.contract}/${rememe.id}`}
-          className="decoration-none scale-hover"
-        >
+          className="decoration-none scale-hover">
           <Container fluid>
             <Row>
               <RememeImage nft={rememe} animation={false} height={300} />
@@ -237,16 +236,19 @@ export default function Rememes() {
                   <LFGButton contract={"rememes"} />
                 </span>
               </Col>
-              <Col xs={12} sm={4} md={3} className="d-flex justify-content-sm-end align-items-center">
+              <Col
+                xs={12}
+                sm={4}
+                md={3}
+                className="d-flex justify-content-sm-end align-items-center">
                 <Button
                   className="seize-btn btn-white d-flex align-items-center justify-content-center gap-2 w-100 w-sm-auto"
                   onClick={() => {
                     window.location.href = "/rememes/add";
-                  }}
-                >
+                  }}>
                   Add ReMeme{" "}
                   <FontAwesomeIcon
-                    icon="plus-circle"
+                    icon={faPlusCircle}
                     className={styles.buttonIcon}
                   />
                 </Button>
@@ -261,13 +263,11 @@ export default function Rememes() {
             {rememesLoaded && (
               <Row className="pt-2">
                 <Col
-                  className={`pt-2 pb-2 d-flex align-items-center flex-wrap gap-2 justify-content-between`}
-                >
+                  className={`pt-2 pb-2 d-flex align-items-center flex-wrap gap-2 justify-content-between`}>
                   <span className="d-flex align-items-center gap-1">
                     <Dropdown
                       className={styles.memeRefDropdown}
-                      drop={"down-centered"}
-                    >
+                      drop={"down-centered"}>
                       <Dropdown.Toggle>Sort: {selectedSorting}</Dropdown.Toggle>
                       <Dropdown.Menu>
                         {sorting.map((s) => (
@@ -275,8 +275,7 @@ export default function Rememes() {
                             key={`sorting-${s}`}
                             onClick={() => {
                               setSelectedSorting(s);
-                            }}
-                          >
+                            }}>
                             {s}
                           </Dropdown.Item>
                         ))}
@@ -287,10 +286,9 @@ export default function Rememes() {
                         content="Refresh results"
                         placement="top"
                         theme="light"
-                        delay={250}
-                      >
+                        delay={250}>
                         <FontAwesomeIcon
-                          icon="refresh"
+                          icon={faRefresh}
                           className={styles.buttonIcon}
                           onClick={() => {
                             fetchResults(page);
@@ -302,8 +300,7 @@ export default function Rememes() {
                   <span className="d-flex flex-wrap align-items-center justify-content-between gap-2">
                     <Dropdown
                       className={styles.memeRefDropdown}
-                      drop={"down-centered"}
-                    >
+                      drop={"down-centered"}>
                       <Dropdown.Toggle>
                         Token Type: {selectedTokenType}
                       </Dropdown.Toggle>
@@ -313,8 +310,7 @@ export default function Rememes() {
                             key={`token-type-${t}`}
                             onClick={() => {
                               setSelectedTokenType(t);
-                            }}
-                          >
+                            }}>
                             {t}
                           </Dropdown.Item>
                         ))}
@@ -322,8 +318,7 @@ export default function Rememes() {
                     </Dropdown>
                     <Dropdown
                       className={styles.memeRefDropdown}
-                      drop={"down-centered"}
-                    >
+                      drop={"down-centered"}>
                       <Dropdown.Toggle>
                         Meme Reference:{" "}
                         {router.query.meme_id
@@ -343,8 +338,7 @@ export default function Rememes() {
                         <Dropdown.Item
                           onClick={() => {
                             setSelectedMeme(0);
-                          }}
-                        >
+                          }}>
                           All
                         </Dropdown.Item>
                         {memes.map((m) => (
@@ -352,8 +346,7 @@ export default function Rememes() {
                             key={`meme-${m.id}`}
                             onClick={() => {
                               setSelectedMeme(m.id);
-                            }}
-                          >
+                            }}>
                             #{m.id} - {m.name}
                           </Dropdown.Item>
                         ))}

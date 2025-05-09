@@ -12,6 +12,7 @@ import router from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import DatePickerModal from "../datePickerModal/DatePickerModal";
 import { ApiArtistNameItem } from "../../generated/models/ApiArtistNameItem";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 export enum GasRoyaltiesCollectionFocus {
   MEMES = "the-memes",
@@ -177,8 +178,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     props.setFocus(GasRoyaltiesCollectionFocus.MEMES);
                   }
                 }}
-                aria-label="The Memes"
-              >
+                aria-label="The Memes">
                 The Memes
               </span>
               <span
@@ -195,8 +195,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                     props.setFocus(GasRoyaltiesCollectionFocus.MEMELAB);
                   }
                 }}
-                aria-label="Meme Lab"
-              >
+                aria-label="Meme Lab">
                 Meme Lab
               </span>
             </span>
@@ -227,8 +226,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   <Dropdown.Item
                     onClick={() => {
                       props.setSelectedArtist("");
-                    }}
-                  >
+                    }}>
                     All
                   </Dropdown.Item>
                   {artists.map((a) => (
@@ -236,8 +234,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                       key={`artist-${a.name.replaceAll(" ", "-")}`}
                       onClick={() => {
                         props.setSelectedArtist(a.name);
-                      }}
-                    >
+                      }}>
                       {a.name}
                     </Dropdown.Item>
                   ))}
@@ -266,8 +263,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                           } else {
                             props.setDateSelection(dateSelection);
                           }
-                        }}
-                      >
+                        }}>
                         {dateSelection}
                       </Dropdown.Item>
                     )
@@ -275,8 +271,7 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   <Dropdown.Item
                     onClick={() => {
                       setShowBlockPicker(true);
-                    }}
-                  >
+                    }}>
                     Custom Blocks
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -326,16 +321,14 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
     <a
       href={`/${props.path}/${props.token_id}`}
       target="_blank"
-      rel="noreferrer"
-    >
+      rel="noreferrer">
       <span className="d-flex justify-content-center aling-items-center gap-3">
         <span>{props.token_id} -</span>
         <Tippy
           content={`${props.name}`}
           delay={0}
           placement={"auto"}
-          theme={"light"}
-        >
+          theme={"light"}>
           <Image
             loading={"lazy"}
             width={0}
@@ -351,8 +344,7 @@ export function GasRoyaltiesTokenImage(props: Readonly<TokenImageProps>) {
             <span>
               <FontAwesomeIcon
                 className={styles.infoIcon}
-                icon="info-circle"
-              ></FontAwesomeIcon>
+                icon={faInfoCircle}></FontAwesomeIcon>
             </span>
           </Tippy>
         )}

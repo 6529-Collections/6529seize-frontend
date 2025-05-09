@@ -2,7 +2,7 @@ export interface BaseNFT {
   id: number;
   contract: string;
   created_at: Date;
-  mint_date: Date;
+  mint_date?: Date;
   mint_price: number;
   supply: number;
   name: string;

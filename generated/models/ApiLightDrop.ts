@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropType } from '../models/ApiDropType';
 import { HttpFile } from '../http/http';
 
@@ -22,8 +23,7 @@ export class ApiLightDrop {
     'drop_type': ApiDropType;
     'title': string | null;
     'part_1_text': string | null;
-    'part_1_media_url': string | null;
-    'part_1_media_mime_type': string | null;
+    'part_1_medias': Array<ApiDropMedia>;
     'has_quote': boolean;
     'is_reply_drop': boolean;
 
@@ -61,15 +61,9 @@ export class ApiLightDrop {
             "format": ""
         },
         {
-            "name": "part_1_media_url",
-            "baseName": "part_1_media_url",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "part_1_media_mime_type",
-            "baseName": "part_1_media_mime_type",
-            "type": "string",
+            "name": "part_1_medias",
+            "baseName": "part_1_medias",
+            "type": "Array<ApiDropMedia>",
             "format": ""
         },
         {

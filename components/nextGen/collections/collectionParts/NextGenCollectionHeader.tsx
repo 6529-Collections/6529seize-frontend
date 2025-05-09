@@ -27,6 +27,7 @@ import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -63,9 +64,8 @@ export function NextGenBackToCollectionPageLink(
   return (
     <a
       href={link}
-      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2"
-    >
-      <FontAwesomeIcon icon="arrow-circle-left" className={styles.backIcon} />
+      className="pt-2 decoration-none d-flex align-items-center gap-2 pb-2">
+      <FontAwesomeIcon icon={faArrowCircleLeft} className={styles.backIcon} />
       {content}
     </a>
   );
@@ -116,11 +116,9 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           <a
             href={`/nextgen/collection/${formatNameForUrl(
               props.collection.name
-            )}/mint`}
-          >
+            )}/mint`}>
             <button
-              className={`pt-2 pb-2 seize-btn btn-block no-wrap ${styles.exploreBtn}`}
-            >
+              className={`pt-2 pb-2 seize-btn btn-block no-wrap ${styles.exploreBtn}`}>
               {getButtonLabel()}
             </button>
           </a>
@@ -182,8 +180,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles.nextgenTag
-          } ${getAllowlistClassName()}`}
-        >
+          } ${getAllowlistClassName()}`}>
           ALLOWLIST {alStatus}
         </span>
       )}
@@ -191,8 +188,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
         <span
           className={`d-flex align-items-center font-bolder font-smaller ${
             styles.nextgenTag
-          } ${getPublicStatusClassName()}`}
-        >
+          } ${getPublicStatusClassName()}`}>
           PUBLIC PHASE {publicStatus}
         </span>
       )}
@@ -244,8 +240,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
                   getOpenseaLink(NEXTGEN_CHAIN_ID)
                 }
                 target="_blank"
-                rel="noreferrer"
-              >
+                rel="noreferrer">
                 <Image
                   className={styles.marketplace}
                   src="/opensea.png"
@@ -285,8 +280,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           <Col
             className="pt-3 d-flex flex-column align-items-center"
             sm={12}
-            md={6}
-          >
+            md={6}>
             <NextGenCountdown collection={props.collection} />
           </Col>
         )}

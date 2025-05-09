@@ -17,6 +17,7 @@ import {
   SUPPORTED_COLLECTIONS,
 } from "../../pages/delegation/[...section]";
 import { useOrignalDelegatorEnsResolution } from "./delegation_shared";
+import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 
 function DelegationAddressInput(
   props: Readonly<{ setAddress: (address: string) => void }>
@@ -84,7 +85,7 @@ export function DelegationFormLabel(
       <Tippy content={props.tooltip} placement={"top"} theme={"light"}>
         <FontAwesomeIcon
           className={styles.infoIcon}
-          icon="info-circle"></FontAwesomeIcon>
+          icon={faInfoCircle}></FontAwesomeIcon>
       </Tippy>
     </Form.Label>
   );
@@ -483,7 +484,7 @@ export function DelegationCloseButton(
       theme={"light"}>
       <FontAwesomeIcon
         className={styles.closeNewDelegationForm}
-        icon="times-circle"
+        icon={faTimesCircle}
         onClick={() => props.onHide()}></FontAwesomeIcon>
     </Tippy>
   );

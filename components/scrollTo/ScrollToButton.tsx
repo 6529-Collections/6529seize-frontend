@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
 import styles from "./ScrollToButton.module.scss";
 import { Link } from "react-scroll";
+import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   to: string;
@@ -40,7 +41,7 @@ export default function ScrollToButton(props: Readonly<Props>) {
       offset={props.offset}
       style={{ display: showButton ? "flex" : "none" }}
       duration={250}>
-      <FontAwesomeIcon icon="chevron-up" className={styles.icon} />
+      <FontAwesomeIcon icon={faChevronUp} className={styles.icon} />
     </Link>
   );
 }

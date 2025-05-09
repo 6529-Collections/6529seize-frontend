@@ -6,6 +6,7 @@ import { Dropdown } from "react-bootstrap";
 import Image from "next/image";
 import { IProfileConsolidation } from "../../entities/IProfile";
 import { WalletAddress } from "./WalletAddress";
+import { faArrowsTurnRight } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   wallets: `0x${string}`[];
@@ -158,7 +159,7 @@ export default function Address(props: Readonly<Props>) {
                 props.isUserPage ? styles.consolidationDiv : ""
               }`}>
               <FontAwesomeIcon
-                icon="arrow-turn-right"
+                icon={faArrowsTurnRight}
                 name={`arrow-turn-right`}
                 aria-label={`arrow-turn-right`}
                 className={`${styles.arrowTurnRight}`}

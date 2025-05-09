@@ -19,6 +19,11 @@ import {
 } from "../../../pages/delegation/[...section]";
 import { fetchUrl } from "../../../services/6529api";
 import Address from "../../address/Address";
+import {
+  faCheck,
+  faPlusCircle,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   path?: string;
@@ -38,8 +43,8 @@ export default function WalletCheckerComponent(
   }>
 ) {
   const [fetchedAddress, setFetchedAddress] = useState<string>("");
-  const [walletInput, setWalletInput] = useState(props.address_query);
-  const [walletAddress, setWalletAddress] = useState(props.address_query);
+  const [walletInput, setWalletInput] = useState(props.address_query ?? "");
+  const [walletAddress, setWalletAddress] = useState(props.address_query ?? "");
 
   const [checking, setChecking] = useState(!!props.address_query);
   const [addressError, setAddressError] = useState(false);
@@ -508,7 +513,7 @@ export default function WalletCheckerComponent(
                         </span>
                       )}
                       <FontAwesomeIcon
-                        icon="check"
+                        icon={faCheck}
                         className={styles.activeDelegationIcon}
                       />
                     </div>
@@ -676,14 +681,14 @@ export default function WalletCheckerComponent(
                               )}
                               {consolidatedWallets.length - 1 > index && (
                                 <FontAwesomeIcon
-                                  icon="plus-circle"
+                                  icon={faPlusCircle}
                                   className={styles.consolidationPlusIcon}
                                 />
                               )}
                             </Fragment>
                           ))}
                           <FontAwesomeIcon
-                            icon="check"
+                            icon={faCheck}
                             className={styles.consolidationActiveIcon}
                           />
                         </div>
@@ -693,7 +698,7 @@ export default function WalletCheckerComponent(
                     <>
                       <div className="pt-2 pb-2 d-flex-align-items-center">
                         <FontAwesomeIcon
-                          icon="xmark"
+                          icon={faXmark}
                           className={styles.consolidationRecommendationIcon}
                         />
                         Incomplete Consolidation
