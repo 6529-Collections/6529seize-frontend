@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 const MEMES_SOLD_MANUALLY = [1, 2, 3, 4];
 
@@ -169,7 +170,7 @@ export default function RoyaltiesComponent() {
                             theme={"light"}>
                             <FontAwesomeIcon
                               className={styles.infoIcon}
-                              icon="info-circle"></FontAwesomeIcon>
+                              icon={faInfoCircle}></FontAwesomeIcon>
                           </Tippy>
                         )}
                       </div>
@@ -186,7 +187,7 @@ export default function RoyaltiesComponent() {
                           theme={"light"}>
                           <FontAwesomeIcon
                             className={styles.infoIcon}
-                            icon="info-circle"></FontAwesomeIcon>
+                            icon={faInfoCircle}></FontAwesomeIcon>
                         </Tippy>
                       </div>
                     </th>

@@ -1,6 +1,10 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SortDirection } from "../../entities/ISort";
 import styles from "./Leaderboard.module.scss";
+import {
+  faSquareCaretDown,
+  faSquareCaretUp,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function LeaderboardSort<LeaderboardSortType>(
   props: Readonly<{
@@ -18,7 +22,7 @@ export default function LeaderboardSort<LeaderboardSortType>(
   return (
     <span className="d-flex flex-column">
       <FontAwesomeIcon
-        icon="square-caret-up"
+        icon={faSquareCaretUp}
         onClick={() =>
           props.setSort({
             sort: props.sort_option,
@@ -33,7 +37,7 @@ export default function LeaderboardSort<LeaderboardSortType>(
         }`}
       />
       <FontAwesomeIcon
-        icon="square-caret-down"
+        icon={faSquareCaretDown}
         onClick={() =>
           props.setSort({
             sort: props.sort_option,

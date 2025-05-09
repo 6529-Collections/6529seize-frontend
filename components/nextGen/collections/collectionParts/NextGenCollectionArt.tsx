@@ -28,6 +28,11 @@ import {
 import { NextgenRarityToggle } from "../nextgenToken/NextGenTokenProperties";
 import Tippy from "@tippyjs/react";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
+import {
+  faArrowCircleRight,
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -247,7 +252,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All
                 <FontAwesomeIcon
-                  icon="arrow-circle-right"
+                  icon={faArrowCircleRight}
                   className={styles.viewAllIcon}
                 />
               </h5>
@@ -338,7 +343,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   paddingLeft: "15px",
                 }}>
                 <FontAwesomeIcon
-                  icon="chevron-circle-up"
+                  icon={faChevronCircleUp}
                   style={{
                     cursor: "pointer",
                     height: "22px",
@@ -347,7 +352,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   onClick={() => setSortDir(SortDirection.ASC)}
                 />
                 <FontAwesomeIcon
-                  icon="chevron-circle-down"
+                  icon={faChevronCircleDown}
                   style={{
                     cursor: "pointer",
                     height: "22px",

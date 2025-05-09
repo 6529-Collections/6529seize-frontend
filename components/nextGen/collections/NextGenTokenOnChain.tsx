@@ -16,6 +16,7 @@ import Tippy from "@tippyjs/react";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../hooks/useIdentity";
+import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -150,8 +151,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 <a
                   href={`/nextgen/collection/${formatNameForUrl(
                     props.collection.name
-                  )}`}
-                >
+                  )}`}>
                   {props.collection.name}
                 </a>
               </span>
@@ -181,8 +181,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                     <a href={tokenMetadataUrl} target="_blank" rel="noreferrer">
                       <FontAwesomeIcon
                         className={styles.copyIcon}
-                        icon="external-link-square"
-                      ></FontAwesomeIcon>
+                        icon={faExternalLinkSquare}></FontAwesomeIcon>
                     </a>
                   </span>
                 </span>
@@ -195,8 +194,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                       <a
                         href={getOpenseaLink(NEXTGEN_CHAIN_ID, props.token_id)}
                         target="_blank"
-                        rel="noreferrer"
-                      >
+                        rel="noreferrer">
                         <Image
                           className={styles.marketplace}
                           src="/opensea.png"

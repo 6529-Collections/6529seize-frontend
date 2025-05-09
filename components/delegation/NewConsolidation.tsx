@@ -20,6 +20,7 @@ import {
   DelegationFormDelegateAddressFormGroup,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   address: string;
@@ -168,7 +169,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
                   rel="noreferrer">
                   <FontAwesomeIcon
                     className={styles.infoIconLink}
-                    icon="info-circle"></FontAwesomeIcon>
+                    icon={faInfoCircle}></FontAwesomeIcon>
                 </a>
               </Form.Label>
             </Form.Group>

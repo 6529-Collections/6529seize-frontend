@@ -22,6 +22,7 @@ import { NftPageStats } from "../nftAttributes/NftStats";
 import { printMemeReferences } from "../rememes/RememePage";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
+import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -67,7 +68,7 @@ export function MemePageLiveRightMenu(props: {
                           <span className="d-flex align-items-center gap-2">
                             <span>Burnt</span>
                             <FontAwesomeIcon
-                              icon="fire"
+                              icon={faFire}
                               style={{ height: "22px", color: "#c51d34" }}
                             />
                           </span>
@@ -351,7 +352,7 @@ export function MemePageLiveSubMenu(props: {
                     theme="light"
                     delay={250}>
                     <FontAwesomeIcon
-                      icon="refresh"
+                      icon={faRefresh}
                       className={styles.buttonIcon}
                       onClick={() => {
                         if (props.nft) {

@@ -6,6 +6,7 @@ import Cookies from "js-cookie";
 import { Spinner } from "../dotLoader/DotLoader";
 import { Button, Modal } from "react-bootstrap";
 import { getAuthJwt } from "../../services/auth/auth.utils";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   preview: string;
@@ -39,7 +40,7 @@ export default function DownloadUrlWidget(props: Readonly<Props>) {
         startDownload();
       }}
       disabled={isInProgress}>
-      {isInProgress ? <Spinner /> : <FontAwesomeIcon icon="download" />}
+      {isInProgress ? <Spinner /> : <FontAwesomeIcon icon={faDownload} />}
       {isInProgress ? `Downloading` : props.preview}
     </button>
   );

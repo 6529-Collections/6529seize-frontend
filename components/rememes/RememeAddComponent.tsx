@@ -14,6 +14,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Tippy from "@tippyjs/react";
 import Image from "next/image";
 import { postData } from "../../services/6529api";
+import {
+  faCheckCircle,
+  faPlusCircle,
+  faTimesCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface AddRememe {
   contract: string;
@@ -228,7 +233,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
             ))}
             <Dropdown className={styles.addMemeReferencesDropdown}>
               <Dropdown.Toggle disabled={verifying || verified}>
-                <FontAwesomeIcon icon="plus-circle" />
+                <FontAwesomeIcon icon={faPlusCircle} />
               </Dropdown.Toggle>
               <Dropdown.Menu>
                 {props.memes
@@ -332,7 +337,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
               <Col xs={12}>
                 <span className="d-flex align-items-center justify-content-start gap-2">
                   <FontAwesomeIcon
-                    icon="times-circle"
+                    icon={faTimesCircle}
                     className={styles.unverifiedIcon}
                   />
                   Verification Failed - Fix errors and revalidate
@@ -372,7 +377,7 @@ export default function RememeAddComponent(props: Readonly<Props>) {
               <div className="d-flex align-items-center justify-content-start gap-2">
                 <span className="d-flex align-items-center justify-content-start gap-2">
                   <FontAwesomeIcon
-                    icon="check-circle"
+                    icon={faCheckCircle}
                     className={styles.verifiedIcon}
                   />
                   Verified

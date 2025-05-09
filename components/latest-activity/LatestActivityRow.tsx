@@ -27,6 +27,10 @@ import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextGen/collections/nextgenToken/NextGenTokenImage";
+import {
+  faExternalLinkSquare,
+  faGasPump,
+} from "@fortawesome/free-solid-svg-icons";
 
 function calculateRoyaltiesPercentage(value: number, royalties: number) {
   return Math.round((royalties / value) * 10000) / 10000;
@@ -103,7 +107,7 @@ export function printGas(
       hideOnClick={false}>
       <FontAwesomeIcon
         className={styles.gasIcon}
-        icon="gas-pump"></FontAwesomeIcon>
+        icon={faGasPump}></FontAwesomeIcon>
     </Tippy>
   );
 }
@@ -365,7 +369,7 @@ export default function LatestActivityRow(props: Readonly<Props>) {
           rel="noreferrer">
           <FontAwesomeIcon
             className={styles.gasIcon}
-            icon="external-link-square"></FontAwesomeIcon>
+            icon={faExternalLinkSquare}></FontAwesomeIcon>
         </a>
       </span>
     );

@@ -42,7 +42,7 @@ export class ApiNft {
     'total_volume_last_1_month': number;
     'total_volume': number;
     'created_at': Date;
-    'mint_date': Date;
+    'mint_date': Date | null;
     'boosted_tdh': number;
     'artist_seize_handle': string | null;
     'has_distribution': boolean;

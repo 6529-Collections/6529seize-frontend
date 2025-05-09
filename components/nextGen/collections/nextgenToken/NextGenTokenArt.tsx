@@ -16,6 +16,15 @@ import NextGenZoomableImage, {
   MIN_ZOOM_SCALE,
 } from "./NextGenZoomableImage";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import {
+  faDownload,
+  faExternalLink,
+  faMaximize,
+  faMinusSquare,
+  faPlayCircle,
+  faPlusSquare,
+  faRefresh,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -169,7 +178,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             <FontAwesomeIcon
               className={getModeStyle(Mode.LIVE)}
               onClick={() => setMode(Mode.LIVE)}
-              icon="play-circle"
+              icon={faPlayCircle}
             />
           </Tippy>
         </Col>
@@ -182,7 +191,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               <>
                 <FontAwesomeIcon
                   className={styles.modeIcon}
-                  icon="minus-square"
+                  icon={faMinusSquare}
                   onClick={handleScaleDown}
                   style={{
                     color: zoomScale === MIN_ZOOM_SCALE ? "#9a9a9a" : "white",
@@ -191,7 +200,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                 <span className="unselectable">Scale: {zoomScale}</span>
                 <FontAwesomeIcon
                   className={styles.modeIcon}
-                  icon="plus-square"
+                  icon={faPlusSquare}
                   onClick={handleScaleUp}
                   style={{
                     color: zoomScale === MAX_ZOOM_SCALE ? "#9a9a9a" : "white",
@@ -199,7 +208,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                 />
                 <FontAwesomeIcon
                   className={styles.modeIcon}
-                  icon="refresh"
+                  icon={faRefresh}
                   onClick={() => setZoomScale(MIN_ZOOM_SCALE)}
                   style={{
                     paddingLeft: "5px",
@@ -234,7 +243,10 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                 placement="bottom"
                 theme="light"
                 delay={100}>
-                <FontAwesomeIcon className={styles.modeIcon} icon="download" />
+                <FontAwesomeIcon
+                  className={styles.modeIcon}
+                  icon={faDownload}
+                />
               </Tippy>
             </Dropdown.Toggle>
             <Dropdown.Menu>
@@ -263,7 +275,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                 const href = getCurrentHref();
                 window.open(href, "_blank");
               }}
-              icon="external-link"
+              icon={faExternalLink}
             />
           </Tippy>
           <Tippy
@@ -274,7 +286,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             delay={100}>
             <FontAwesomeIcon
               className={styles.modeIcon}
-              icon="maximize"
+              icon={faMaximize}
               onClick={toggleFullScreen}
             />
           </Tippy>

@@ -22,6 +22,11 @@ import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
 import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
+import {
+  faChevronCircleLeft,
+  faChevronCircleRight,
+  faFire,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -118,7 +123,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     const prev = (
       <FontAwesomeIcon
         title="Previous Token"
-        icon="chevron-circle-left"
+        icon={faChevronCircleLeft}
         onClick={() => {
           if (!hasPreviousToken) {
             return;
@@ -151,7 +156,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
     const hasNextToken = props.tokenCount - 1 > props.token.normalised_id;
     const next = (
       <FontAwesomeIcon
-        icon="chevron-circle-right"
+        icon={faChevronCircleRight}
         onClick={() => {
           if (!hasNextToken) {
             return;
@@ -196,7 +201,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                           isNullAddress(props.token.owner)) && (
                           <Tippy content={"Burnt"} theme={"light"} delay={100}>
                             <FontAwesomeIcon
-                              icon="fire"
+                              icon={faFire}
                               style={{ height: "35px", color: "#c51d34" }}
                             />
                           </Tippy>

@@ -23,6 +23,10 @@ import { AuthContext } from "../auth/Auth";
 import { MemeLabSort, MemesSort } from "../../enums";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
 import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Meme {
   meme: number;
@@ -457,7 +461,7 @@ export default function TheMemesComponent() {
                 <Col>
                   Sort by&nbsp;&nbsp;
                   <FontAwesomeIcon
-                    icon="chevron-circle-up"
+                    icon={faChevronCircleUp}
                     onClick={() => setSortDir(SortDirection.ASC)}
                     width={16}
                     color={sortDir != SortDirection.ASC ? "#9a9a9a" : "#fff"}
@@ -465,7 +469,7 @@ export default function TheMemesComponent() {
                     className={styles.sortDirection}
                   />{" "}
                   <FontAwesomeIcon
-                    icon="chevron-circle-down"
+                    icon={faChevronCircleDown}
                     onClick={() => setSortDir(SortDirection.DESC)}
                     width={16}
                     color={sortDir != SortDirection.DESC ? "#9a9a9a" : "#fff"}

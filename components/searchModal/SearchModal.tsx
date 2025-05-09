@@ -4,6 +4,11 @@ import { useState } from "react";
 import { Modal, InputGroup, Form, Button } from "react-bootstrap";
 import Tippy from "@tippyjs/react";
 import { formatAddress } from "../../helpers/Helpers";
+import {
+  faSearch,
+  faSquareXmark,
+  faTimesCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   show: boolean;
@@ -71,7 +76,7 @@ function SearchModal(props: Readonly<Props>) {
                   props.removeSearchWallet(w);
                 }}
                 className={styles.removeWalletBtn}
-                icon="square-xmark"></FontAwesomeIcon>
+                icon={faSquareXmark}></FontAwesomeIcon>
             </Tippy>
             {"  "}
             {w}
@@ -138,7 +143,7 @@ export function SearchWalletsDisplay(
           <FontAwesomeIcon
             onClick={() => setSearchWallets([])}
             className={styles.clearSearchBtnIcon}
-            icon="times-circle"></FontAwesomeIcon>
+            icon={faTimesCircle}></FontAwesomeIcon>
         </Tippy>
       )}
       <button
@@ -152,7 +157,7 @@ export function SearchWalletsDisplay(
             height: "20px",
             color: "#000",
           }}
-          icon="search"></FontAwesomeIcon>
+          icon={faSearch}></FontAwesomeIcon>
       </button>
     </span>
   );
