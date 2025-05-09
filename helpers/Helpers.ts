@@ -286,7 +286,7 @@ export function parseEmojis(s: string) {
 }
 
 function isValidDate(date?: any): date is Date {
-  return date && date instanceof Date && !isNaN(date.getTime());
+  return date && !isNaN(new Date(date).getTime());
 }
 
 export function printMintDate(date?: Date) {
