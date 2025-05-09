@@ -172,14 +172,12 @@ export default function DelegationsDocumentation(props: any) {
   const { setTitle, title } = useContext(AuthContext);
   const pageProps = props.pageProps;
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<DelegationCenterSection>(
-    pageProps.section
-  );
+  const section = pageProps.section;
   const [addressQuery, setAddressQuery] = useState<string>(
-    pageProps.addressQuery
+    pageProps.addressQuery ?? ""
   );
   const [collectionQuery, setCollectionQuery] = useState<string>(
-    pageProps.collectionQuery
+    pageProps.collectionQuery ?? ""
   );
   const [useCaseQuery, setUseCaseQuery] = useState<number>(
     pageProps.useCaseQuery
@@ -215,37 +213,41 @@ export default function DelegationsDocumentation(props: any) {
   const updatePath = (s: DelegationCenterSection) => {
     if (s) {
       if (s === DelegationCenterSection.HTML && pageProps.path) {
-        router.push(
-          {
-            pathname: `/delegation/${pageProps.path.join("/")}`,
-          },
-          undefined,
-          { shallow: true }
-        );
+        router.push({
+          pathname: `/delegation/${pageProps.path.join("/")}`,
+        });
       } else {
         const queryParams = getQueryParams(s);
-        router.push(
-          {
-            pathname: `/delegation/${s}`,
-            query: queryParams,
-          },
-          undefined,
-          { shallow: true }
-        );
+        router.push({
+          pathname: `/delegation/${s}`,
+          query: queryParams,
+        });
       }
     }
     window.scrollTo(0, 0);
   };
 
-  useEffect(() => {
-    updatePath(activeSection);
-  }, [addressQuery, collectionQuery, useCaseQuery, pageProps.path]);
+  const updateQueryParams = (s: DelegationCenterSection) => {
+    const queryParams = getQueryParams(s);
+    router.push(
+      {
+        pathname: `/delegation/${s}`,
+        query: queryParams,
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
 
   useEffect(() => {
     setTitle({
       title: "Delegation | 6529.io",
     });
   }, []);
+
+  useEffect(() => {
+    updateQueryParams(section);
+  }, [addressQuery, collectionQuery, useCaseQuery]);
 
   return (
     <>
@@ -267,12 +269,9 @@ export default function DelegationsDocumentation(props: any) {
 
       <main className={styles.main}>
         <DelegationCenterMenu
-          section={activeSection}
+          section={section}
           path={pageProps.path}
-          setActiveSection={(s) => {
-            setActiveSection(s);
-            updatePath(s);
-          }}
+          setActiveSection={(s) => updatePath(s)}
           address_query={addressQuery}
           setAddressQuery={setAddressQuery}
           collection_query={collectionQuery}
