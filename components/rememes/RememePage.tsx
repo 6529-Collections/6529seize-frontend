@@ -58,7 +58,7 @@ export function printMemeReferences(
       {memesLoaded ? (
         <>
           {memes.length > 0 ? (
-            <Row className="pt-2 pb-2">
+            <>
               {memes.map((nft) => {
                 return (
                   <Col
@@ -106,7 +106,7 @@ export function printMemeReferences(
                   </Col>
                 );
               })}
-            </Row>
+            </>
           ) : (
             <Col>
               <NothingHereYetSummer />

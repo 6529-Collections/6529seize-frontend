@@ -279,22 +279,17 @@ export default function MemePage() {
                 </>
               )}
           </Row>
-          <Row>
-            <MemePageLiveSubMenu
-              show={activeTab === MEME_FOCUS.LIVE}
-              nft={nft}
+          <MemePageLiveSubMenu show={activeTab === MEME_FOCUS.LIVE} nft={nft} />
+          {userLoaded && (
+            <MemePageYourCardsSubMenu
+              show={activeTab === MEME_FOCUS.YOUR_CARDS}
+              transactions={transactions}
             />
-            {userLoaded && (
-              <MemePageYourCardsSubMenu
-                show={activeTab === MEME_FOCUS.YOUR_CARDS}
-                transactions={transactions}
-              />
-            )}
-            <MemePageCollectorsSubMenu
-              show={activeTab === MEME_FOCUS.COLLECTORS}
-              nft={nft}
-            />
-          </Row>
+          )}
+          <MemePageCollectorsSubMenu
+            show={activeTab === MEME_FOCUS.COLLECTORS}
+            nft={nft}
+          />
         </Container>
         <MemePageArt
           show={activeTab === MEME_FOCUS.THE_ART}
