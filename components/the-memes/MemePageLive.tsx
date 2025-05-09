@@ -23,6 +23,7 @@ import { printMemeReferences } from "../rememes/RememePage";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
 import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -200,16 +201,18 @@ export function MemePageLiveRightMenu(props: {
           </Row>
           <Row>
             <Col>
-              <a
+              <Link
                 href={
                   props.nft.has_distribution
                     ? `/the-memes/${props.nft.id}/distribution`
-                    : `https://github.com/6529-Collections/thememecards/tree/main/card${props.nft.id}`
+                    : props.nft.id > 3
+                    ? `https://github.com/6529-Collections/thememecards/tree/main/card${props.nft.id}`
+                    : `https://github.com/6529-Collections/thememecards/tree/main/card1-3`
                 }
                 target={props.nft.has_distribution ? "_self" : "_blank"}
                 rel="noreferrer">
                 Distribution Plan
-              </a>
+              </Link>
             </Col>
           </Row>
           {props.nftBalance > 0 && (
@@ -390,7 +393,7 @@ export function MemePageLiveSubMenu(props: {
                     sm={{ span: 4 }}
                     md={{ span: 3 }}
                     lg={{ span: 3 }}>
-                    <a
+                    <Link
                       href={`/rememes/${rememe.contract}/${rememe.id}`}
                       className="decoration-none scale-hover">
                       <Container fluid className="no-padding">
@@ -452,7 +455,7 @@ export function MemePageLiveSubMenu(props: {
                           </Col>
                         </Row>
                       </Container>
-                    </a>
+                    </Link>
                   </Col>
                 );
               })}

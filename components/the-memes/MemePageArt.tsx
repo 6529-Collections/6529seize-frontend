@@ -20,6 +20,7 @@ import {
 } from "../../helpers/nft.helpers";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 export function MemePageArt(props: {
   show: boolean;
@@ -133,13 +134,13 @@ export function MemePageArt(props: {
                     <Row>
                       <Col>
                         {props.nft.metadata.image_details.format}{" "}
-                        <a
+                        <Link
                           className={styles.arweaveLink}
                           href={props.nft.metadata.image}
                           target="_blank"
                           rel="noreferrer">
                           {props.nft.metadata.image}
-                        </a>
+                        </Link>
                         <Download
                           href={props.nft.metadata.image}
                           name={props.nft.name}
@@ -152,7 +153,7 @@ export function MemePageArt(props: {
                       <Row className="pt-3">
                         <Col>
                           {props.nft.metadata.animation_details.format}{" "}
-                          <a
+                          <Link
                             className={styles.arweaveLink}
                             href={
                               props.nft.metadata.animation
@@ -164,7 +165,7 @@ export function MemePageArt(props: {
                             {props.nft.metadata.animation
                               ? props.nft.metadata.animation
                               : props.nft.metadata.animation_url}
-                          </a>
+                          </Link>
                           <Download
                             href={
                               props.nft.metadata.animation
@@ -261,27 +262,19 @@ export function MemePageArt(props: {
                 </Row>
                 <Row>
                   <Col>
-                    <a
-                      onClick={() => {
-                        if (props.nft && props.nft.has_distribution) {
-                          router.push(
-                            `/the-memes/${props.nft.id}/distribution`
-                          );
-                        } else {
-                          let link;
-                          if (props.nft && props.nft.id > 3) {
-                            link = `https://github.com/6529-Collections/thememecards/tree/main/card${props.nft.id}`;
-                          } else {
-                            link = `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
-                          }
-                          window.open(link, "_blank");
-                        }
-                      }}
+                    <Link
+                      href={
+                        props.nft && props.nft.has_distribution
+                          ? `/the-memes/${props.nft.id}/distribution`
+                          : props.nft && props.nft.id > 3
+                          ? `https://github.com/6529-Collections/thememecards/tree/main/card${props.nft.id}`
+                          : `https://github.com/6529-Collections/thememecards/tree/main/card1-3`
+                      }
                       target={props.nft.has_distribution ? "_self" : "_blank"}
                       rel="noreferrer"
                       className={styles.distributionPlanLink}>
                       Distribution Plan
-                    </a>
+                    </Link>
                   </Col>
                 </Row>
                 <Row>

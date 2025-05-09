@@ -54,6 +54,7 @@ import {
   faExpandAlt,
   faFire,
 } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -375,12 +376,12 @@ export default function LabPage(props: Readonly<Props>) {
                     <tr>
                       <td>Collection</td>
                       <td>
-                        <a
+                        <Link
                           href={`/meme-lab/collection/${encodeURIComponent(
                             nftMeta.metadata_collection.replace(" ", "-")
                           )}`}>
                           {nftMeta.metadata_collection}
-                        </a>
+                        </Link>
                       </td>
                     </tr>
                     {nftMeta.website && (
@@ -389,12 +390,12 @@ export default function LabPage(props: Readonly<Props>) {
                         <td>
                           {nftMeta.website.split(" ").map((w) => (
                             <Fragment key={`meta-website-${w}`}>
-                              <a
+                              <Link
                                 href={addProtocol(w)}
                                 target="_blank"
                                 rel="noreferrer">
                                 {w}
-                              </a>
+                              </Link>
                               &nbsp;&nbsp;
                             </Fragment>
                           ))}
@@ -533,9 +534,9 @@ export default function LabPage(props: Readonly<Props>) {
             {nft.has_distribution ? (
               <Row className="pt-3 pb-3">
                 <Col>
-                  <a href={`/meme-lab/${nft.id}/distribution`}>
+                  <Link href={`/meme-lab/${nft.id}/distribution`}>
                     Distribution Plan
-                  </a>
+                  </Link>
                 </Col>
               </Row>
             ) : (
@@ -868,13 +869,13 @@ export default function LabPage(props: Readonly<Props>) {
                       <Row>
                         <Col>
                           {nft.metadata.image_details.format}{" "}
-                          <a
+                          <Link
                             className={styles.arweaveLink}
                             href={nft.metadata.image}
                             target="_blank"
                             rel="noreferrer">
                             {nft.metadata.image}
-                          </a>
+                          </Link>
                           <Download
                             href={nft.metadata.image}
                             name={nft.name}
@@ -887,7 +888,7 @@ export default function LabPage(props: Readonly<Props>) {
                         <Row className="pt-3">
                           <Col>
                             {nft.metadata.animation_details.format}{" "}
-                            <a
+                            <Link
                               className={styles.arweaveLink}
                               href={
                                 nft.metadata.animation
@@ -899,7 +900,7 @@ export default function LabPage(props: Readonly<Props>) {
                               {nft.metadata.animation
                                 ? nft.metadata.animation
                                 : nft.metadata.animation_url}
-                            </a>
+                            </Link>
                             <Download
                               href={
                                 nft.metadata.animation
@@ -1254,7 +1255,7 @@ export default function LabPage(props: Readonly<Props>) {
                     {nftId && (
                       <>
                         <h2 className="float-left">
-                          <a
+                          <Link
                             href={`/meme-lab/${
                               parseInt(nftId) - 1
                             }?focus=${activeTab}`}
@@ -1264,11 +1265,11 @@ export default function LabPage(props: Readonly<Props>) {
                                 : ""
                             }`}>
                             <FontAwesomeIcon icon={faChevronCircleLeft} />
-                          </a>
+                          </Link>
                         </h2>
                         <h2 className="float-left">
                           &nbsp;
-                          <a
+                          <Link
                             href={`/meme-lab/${
                               parseInt(nftId) + 1
                             }?focus=${activeTab}`}
@@ -1278,7 +1279,7 @@ export default function LabPage(props: Readonly<Props>) {
                                 : ""
                             }`}>
                             <FontAwesomeIcon icon={faChevronCircleRight} />
-                          </a>
+                          </Link>
                         </h2>
                       </>
                     )}
