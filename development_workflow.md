@@ -31,20 +31,32 @@ This document outlines key practices and steps for successful development and re
     *   Make small, testable changes.
     *   Regularly review progress and be prepared to adjust the plan.
 
-2.  **Focus on Type Safety (TypeScript):**
+2.  **Task-Driven Implementation (using Taskmaster):**
+    *   Before starting work on a specific task (or subtask) identified from Taskmaster (e.g., via `next_task` or `get_task`):
+        *   Set its status to `in-progress` using `set_task_status`.
+        *   Example: `mcp_task-master-ai_set_task_status(id = "TASK_ID", status = "in-progress", projectRoot = "/path/to/project")`
+    *   **Perform the actual coding and implementation work for this specific task.**
+    *   During implementation, especially for subtasks or complex tasks that involve exploration or multiple steps:
+        *   Log significant findings, plans, challenges, and progress by appending to the task/subtask details using `update_subtask`. This creates a valuable, timestamped implementation log.
+        *   Example: `mcp_task-master-ai_update_subtask(id = "SUBTASK_ID", prompt = "Update: Successfully implemented X, encountered issue Y, solution was Z.", projectRoot = "/path/to/project")`
+    *   Upon completion and verification of the work for the task/subtask:
+        *   Set its status to `done` using `set_task_status`.
+        *   Example: `mcp_task-master-ai_set_task_status(id = "TASK_ID", status = "done", projectRoot = "/path/to/project")`
+
+3.  **Focus on Type Safety (TypeScript):**
     *   Leverage TypeScript's features to ensure code robustness.
     *   Define clear interfaces and types for data structures and function signatures.
     *   Aim for strong typing and use features like string literal unions, `as const`, and discriminated unions where appropriate to improve type safety and developer experience.
 
-3.  **Configuration-Driven Architecture (Where Applicable):**
+4.  **Configuration-Driven Architecture (Where Applicable):**
     *   For components or systems that handle multiple variations of similar logic, consider a configuration-driven approach.
     *   Define clear configuration objects/arrays that declaratively describe behavior, rather than relying solely on imperative code (e.g., large switch statements).
 
-4.  **Isolate Changes:**
+5.  **Isolate Changes:**
     *   When refactoring, try to update one logical part of the system at a time.
     *   Ensure a section is stable before moving to refactor dependent parts. Temporary type casts (e.g., `as any`) can be acceptable for bridging to not-yet-refactored code, with a plan to address them.
 
-5.  **Continuous Feedback & Communication:**
+6.  **Continuous Feedback & Communication:**
     *   If working with others (including AI assistants), maintain clear communication.
     *   Provide timely feedback on proposed changes.
     *   Ask clarifying questions early to avoid misunderstandings.
@@ -86,13 +98,15 @@ This section outlines the general workflow for using Taskmaster (via MCP tools) 
     *   Example: `mcp_task-master-ai_next_task(projectRoot = "/path/to/project")`
 
 3.  **View Specific Task Details:**
-    *   Use `get_task` to understand the requirements of a specific task.
+    *   Use `get_task` to understand the requirements of a specific task before starting implementation.
     *   Example: `mcp_task-master-ai_get_task(id = "3", projectRoot = "/path/to/project")`
 
-4.  **Update Task Status:**
-    *   As work progresses, update task statuses using `set_task_status`.
-    *   Example (mark task as done): `mcp_task-master-ai_set_task_status(id = "3", status = "done", projectRoot = "/path/to/project")`
-    *   Example (mark task as in-progress): `mcp_task-master-ai_set_task_status(id = "3.1", status = "in-progress", projectRoot = "/path/to/project")`
+4.  **Update Task Status (Lifecycle Management):**
+    *   As work begins on a task or subtask, set its status to `in-progress`:
+        *   Example: `mcp_task-master-ai_set_task_status(id = "3.1", status = "in-progress", projectRoot = "/path/to/project")`
+    *   Once a task or subtask is completed and verified, mark it as `done`:
+        *   Example: `mcp_task-master-ai_set_task_status(id = "3", status = "done", projectRoot = "/path/to/project")`
+    *   Use other statuses like `deferred`, `cancelled`, or custom statuses as needed through `set_task_status`.
 
 5.  **Expand Complex Tasks:**
     *   If a task is too large, use `expand_task` to break it into subtasks. This can be informed by `analyze_project_complexity` and `complexity_report` if needed.

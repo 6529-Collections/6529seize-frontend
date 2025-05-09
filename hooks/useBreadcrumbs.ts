@@ -3,52 +3,11 @@ import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { Crumb } from "../components/breadcrumb/Breadcrumb"; // Adjust path if needed
 import { BreadcrumbQueueItem } from "./breadcrumbs.types";
-import { 
-  buildStaticCrumbs,
-  formatCrumbDisplay,
-  getDynamicParam
-} from "./breadcrumbs.utils";
-import { 
-  DYNAMIC_ROUTE_CONFIGS, 
-  DeterminedRouteInfo 
+import { buildStaticCrumbs } from "./breadcrumbs.utils";
+import {
+  DYNAMIC_ROUTE_CONFIGS,
+  DeterminedRouteInfo,
 } from "./breadcrumbs.config";
-
-/**
- * Represents a single breadcrumb item.
- * This type is imported from `../components/breadcrumb/Breadcrumb.tsx`.
- * The actual interface is:
- * export interface Crumb {
- *   display: string;
- *   href?: string;
- * }
- */
-
-/**
- * Defines the recognized types for dynamic routes within the breadcrumb system.
- */
-// Removed local: export type DynamicRouteType =
-// Add other specific dynamic route type strings here as they are defined
-
-/**
- * Holds the configurations for all recognized dynamic route types.
- * Each element in this array defines how a specific dynamic route pattern
- * should be handled for breadcrumb generation, including parameter extraction,
- * data fetching, and crumb construction.
- *
- * To add support for a new dynamic route, create a new object conforming to
- * the `RouteDynamicConfig` interface (ensuring its `type` property is unique
- * and added to `DynamicRouteType`) and add it to this array. The order matters
- * for route matching if patterns could overlap, though specific patterns are preferred.
- */
-
-/**
- * Configuration for a dynamic route type used in breadcrumb generation.
- * @template TData The expected type of data resolved by the fetcher. This is typically an object
- *                 containing fields needed for display (e.g., `{ name: string }`) or null.
- * @template TParams The expected type of parameters extracted from the route by `paramExtractor`.
- *                   This is typically an object mapping param names to string values (e.g., `{ id: string }`).
- */
-// Removed local: interface RouteDynamicConfig<TData = any, TParams = any> { ... }
 
 /**
  * Determines the appropriate route configuration (dynamic or static) based on the current path.
