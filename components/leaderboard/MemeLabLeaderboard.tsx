@@ -12,6 +12,10 @@ import {
   NftTDHRanked,
   setScrollPosition,
 } from "./NFTLeaderboard";
+import {
+  faSquareCaretUp,
+  faSquareCaretDown,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   contract: string;
@@ -81,7 +85,7 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
                     Balance&nbsp;
                     <span className="d-flex flex-column">
                       <FontAwesomeIcon
-                        icon="square-caret-up"
+                        icon={faSquareCaretUp}
                         onClick={() =>
                           setSort({
                             sort: Sort.card_balance,
@@ -96,7 +100,7 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
                         }`}
                       />
                       <FontAwesomeIcon
-                        icon="square-caret-down"
+                        icon={faSquareCaretDown}
                         onClick={() =>
                           setSort({
                             sort: Sort.card_balance,

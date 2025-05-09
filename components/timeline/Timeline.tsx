@@ -4,6 +4,7 @@ import styles from "./Timeline.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { numberWithCommasFromString } from "../../helpers/Helpers";
 import TimelineMediaComponent, { MediaType } from "./TimelineMedia";
+import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   nft: BaseNFT;
@@ -201,7 +202,7 @@ export default function Timeline(props: Readonly<Props>) {
                         className="d-flex align-items-center justify-content-center gap-2 decoration-none">
                         URI
                         <FontAwesomeIcon
-                          icon="external-link-square"
+                          icon={faExternalLinkSquare}
                           className={styles.linkIcon}
                         />
                       </a>
@@ -212,7 +213,7 @@ export default function Timeline(props: Readonly<Props>) {
                         className="d-flex align-items-center justify-content-center gap-2 decoration-none">
                         TXN
                         <FontAwesomeIcon
-                          icon="external-link-square"
+                          icon={faExternalLinkSquare}
                           className={styles.linkIcon}
                         />
                       </a>

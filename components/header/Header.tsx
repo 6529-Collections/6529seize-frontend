@@ -15,7 +15,11 @@ import { useAuth } from "../auth/Auth";
 import HeaderNotifications from "./notifications/HeaderNotifications";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
-import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBars,
+  faChevronRight,
+  faTimesCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import HeaderShare from "./share/HeaderShare";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
@@ -173,14 +177,13 @@ export default function Header(props: Readonly<Props>) {
       <div
         className={`inset-safe-area ${styles.burgerMenu} ${
           burgerMenuOpen ? styles.burgerMenuOpen : ""
-        }`}
-      >
+        }`}>
         <Container className="pt-2 pb-2">
           <Row>
             <Col className="d-flex justify-content-end">
               <FontAwesomeIcon
                 className={styles.burgerMenuClose}
-                icon="times-circle"
+                icon={faTimesCircle}
                 onClick={() => {
                   setBurgerMenuOpen(false);
                   setShowBurgerMenuCollections(false);
@@ -188,8 +191,7 @@ export default function Header(props: Readonly<Props>) {
                   setShowBurgerMenuCommunity(false);
                   setShowBurgerMenuTools(false);
                   setShowBurgerMenuBrain(false);
-                }}
-              ></FontAwesomeIcon>
+                }}></FontAwesomeIcon>
             </Col>
           </Row>
         </Container>
@@ -210,8 +212,7 @@ export default function Header(props: Readonly<Props>) {
           <Row className="pt-4 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader} gap-2`}
-              >
+                className={`d-flex justify-content-center ${styles.burgerMenuHeader} gap-2`}>
                 <HeaderUser />
                 <HeaderQRScanner
                   onScanSuccess={() => {
@@ -246,8 +247,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuBrain
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-                >
+                  }`}>
                   Brain
                 </h3>
               </Col>
@@ -285,8 +285,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuCollections
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Collections
               </h3>
             </Col>
@@ -324,8 +323,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuCommunity
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Network
               </h3>
             </Col>
@@ -369,8 +367,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuTools
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 Tools
               </h3>
             </Col>
@@ -435,8 +432,7 @@ export default function Header(props: Readonly<Props>) {
                     showBurgerMenuAbout
                       ? styles.burgerMenuCaretClose
                       : styles.burgerMenuCaretOpen
-                  }`}
-              >
+                  }`}>
                 About
               </h3>
             </Col>
@@ -531,8 +527,7 @@ export default function Header(props: Readonly<Props>) {
                   lg={{ span: 3 }}
                   xl={{ span: 2 }}
                   xxl={{ span: 3 }}
-                  className={`d-flex align-items-center justify-content-start`}
-                >
+                  className={`d-flex align-items-center justify-content-start`}>
                   <Link href="/">
                     <Image
                       loading="eager"
@@ -557,16 +552,13 @@ export default function Header(props: Readonly<Props>) {
                   lg={{ span: 9 }}
                   xl={{ span: 10 }}
                   xxl={{ span: 9 }}
-                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}
-                >
+                  className={`d-flex align-items-center justify-content-end ${styles.headerRight}`}>
                   <Container className="no-padding">
                     <Navbar expand="lg" variant="dark">
                       <Container
-                        className={`d-flex align-items-center justify-content-end no-padding`}
-                      >
+                        className={`d-flex align-items-center justify-content-end no-padding`}>
                         <div
-                          className={`${styles.dMdNone} d-flex align-items-center`}
-                        >
+                          className={`${styles.dMdNone} d-flex align-items-center`}>
                           <div className="tw-inline-flex tw-space-x-3 tw-mr-3">
                             <HeaderOpenMobile />
                             {showWaves && <HeaderNotifications />}
@@ -577,22 +569,19 @@ export default function Header(props: Readonly<Props>) {
                             aria-label="Menu"
                             title="Menu"
                             onClick={() => setBurgerMenuOpen(true)}
-                            className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out"
-                          >
+                            className="tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-h-10 tw-w-10 tw-border-0 tw-text-iron-300 hover:tw-text-iron-50 tw-shadow-sm hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 tw-transition tw-duration-300 tw-ease-out">
                             <FontAwesomeIcon icon={faBars} height={20} />
                           </button>
                         </div>
                         <Navbar
                           id="seize-navbar-nav"
-                          className={`justify-content-end d-none ${styles.dMdBlock}`}
-                        >
+                          className={`justify-content-end d-none ${styles.dMdBlock}`}>
                           <Nav className="justify-content-end ml-auto">
                             {showWaves && (
                               <NavDropdown
                                 title="Brain"
                                 align={"start"}
-                                className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                              >
+                                className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                                 <HeaderDesktopLink
                                   link={{
                                     name: "My Stream",
@@ -610,8 +599,7 @@ export default function Header(props: Readonly<Props>) {
                             <NavDropdown
                               title="Collections"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <HeaderDesktopLink
                                 link={{
                                   name: "The Memes",
@@ -646,8 +634,7 @@ export default function Header(props: Readonly<Props>) {
                             <NavDropdown
                               title="Network"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               <HeaderDesktopLink
                                 link={{
                                   name: "Identities",
@@ -681,8 +668,7 @@ export default function Header(props: Readonly<Props>) {
                               />
                               <NavDropdown.Divider />
                               <NavDropdown.Item
-                                className={styles.submenuContainer}
-                              >
+                                className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   Metrics
                                   <FontAwesomeIcon
@@ -716,8 +702,7 @@ export default function Header(props: Readonly<Props>) {
                             <NavDropdown
                               title="Tools"
                               align={"start"}
-                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}
-                            >
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
                               {appWalletsSupported && (
                                 <>
                                   <HeaderDesktopLink
@@ -730,8 +715,7 @@ export default function Header(props: Readonly<Props>) {
                                 </>
                               )}
                               <NavDropdown.Item
-                                className={styles.submenuContainer}
-                              >
+                                className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   NFT Delegation
                                   <FontAwesomeIcon
@@ -774,8 +758,7 @@ export default function Header(props: Readonly<Props>) {
                                 </div>
                               </NavDropdown.Item>
                               <NavDropdown.Item
-                                className={styles.submenuContainer}
-                              >
+                                className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   The Memes Tools
                                   <FontAwesomeIcon
@@ -836,11 +819,9 @@ export default function Header(props: Readonly<Props>) {
                                   ? "active"
                                   : ""
                               }`}
-                              align={"start"}
-                            >
+                              align={"start"}>
                               <NavDropdown.Item
-                                className={styles.submenuContainer}
-                              >
+                                className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   NFTs
                                   <FontAwesomeIcon
@@ -904,8 +885,7 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                               <NavDropdown.Item
-                                className={styles.submenuContainer}
-                              >
+                                className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   NFT Delegation
                                   <FontAwesomeIcon
@@ -930,8 +910,7 @@ export default function Header(props: Readonly<Props>) {
                                 </div>
                               </NavDropdown.Item>
                               <NavDropdown.Item
-                                className={styles.submenuContainer}
-                              >
+                                className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   6529 Capital
                                   <FontAwesomeIcon
@@ -962,8 +941,7 @@ export default function Header(props: Readonly<Props>) {
                                 </div>
                               </NavDropdown.Item>
                               <NavDropdown.Item
-                                className={styles.submenuContainer}
-                              >
+                                className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   Support
                                   <FontAwesomeIcon
@@ -994,8 +972,7 @@ export default function Header(props: Readonly<Props>) {
                                 </div>
                               </NavDropdown.Item>
                               <NavDropdown.Item
-                                className={styles.submenuContainer}
-                              >
+                                className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   Resources
                                   <FontAwesomeIcon

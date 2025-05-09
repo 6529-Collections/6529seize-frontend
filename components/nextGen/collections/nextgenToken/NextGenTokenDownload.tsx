@@ -6,6 +6,7 @@ import DotLoader, { Spinner } from "../../../dotLoader/DotLoader";
 import Tippy from "@tippyjs/react";
 import { useEffect, useState } from "react";
 import { numberWithCommas } from "../../../../helpers/Helpers";
+import { faDownload, faExternalLink } from "@fortawesome/free-solid-svg-icons";
 
 export enum Resolution {
   "Thumbnail" = "Thumbnail",
@@ -118,7 +119,7 @@ export default function NextGenTokenDownload(
               const h = getUrl(props.token, quality);
               window.open(h, "_blank");
             }}
-            icon="external-link"
+            icon={faExternalLink}
           />
         </Tippy>
         <NextGenTokenDownloadButton token={props.token} quality={quality} />
@@ -174,7 +175,7 @@ function NextGenTokenDownloadButton(
       delay={100}
       hideOnClick={true}>
       <FontAwesomeIcon
-        icon="download"
+        icon={faDownload}
         className={props.class}
         style={{ cursor: "pointer", height: "24px", width: "24px" }}
         onClick={() => {

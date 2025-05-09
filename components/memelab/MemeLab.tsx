@@ -21,6 +21,10 @@ import { printVolumeTypeDropdown, SortButton } from "../the-memes/TheMemes";
 import { MemeLabSort } from "../../enums";
 import { LFGButton } from "../lfg-slideshow/LFGSlideshow";
 import CollectionsDropdown from "../collections-dropdown/CollectionsDropdown";
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   wallets: string[];
@@ -684,14 +688,14 @@ export default function MemeLabComponent(props: Readonly<Props>) {
                 <Col>
                   Sort by&nbsp;&nbsp;
                   <FontAwesomeIcon
-                    icon="chevron-circle-up"
+                    icon={faChevronCircleUp}
                     onClick={() => setSortDir(SortDirection.ASC)}
                     className={`${styles.sortDirection} ${
                       sortDir != SortDirection.ASC ? styles.disabled : ""
                     }`}
                   />{" "}
                   <FontAwesomeIcon
-                    icon="chevron-circle-down"
+                    icon={faChevronCircleDown}
                     onClick={() => setSortDir(SortDirection.DESC)}
                     className={`${styles.sortDirection} ${
                       sortDir != SortDirection.DESC ? styles.disabled : ""

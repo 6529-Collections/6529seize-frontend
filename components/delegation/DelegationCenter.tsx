@@ -14,6 +14,7 @@ import {
 } from "../../constants";
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 interface Props {
   setSection(section: DelegationCenterSection): any;
 }
@@ -148,7 +149,10 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_DELEGATION)
                   }>
-                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    className={styles.buttonIcon}
+                  />
                   Delegation
                 </button>
               </Col>
@@ -193,7 +197,10 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_CONSOLIDATION)
                   }>
-                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    className={styles.buttonIcon}
+                  />
                   Consolidation
                 </button>
               </Col>
@@ -239,7 +246,10 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   onClick={() =>
                     setRedirect(DelegationCenterSection.REGISTER_SUB_DELEGATION)
                   }>
-                  <FontAwesomeIcon icon="plus" className={styles.buttonIcon} />
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    className={styles.buttonIcon}
+                  />
                   Delegation Manager
                 </button>
               </Col>

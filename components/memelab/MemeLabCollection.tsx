@@ -20,6 +20,10 @@ import {
   sortChanged,
 } from "./MemeLab";
 import { MemeLabSort } from "../../enums";
+import {
+  faChevronCircleDown,
+  faChevronCircleUp,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   wallets: string[];
@@ -135,14 +139,14 @@ export default function LabCollection(props: Readonly<Props>) {
         xs={{ span: 6 }}
         sm={{ span: 4 }}
         md={{ span: 3 }}
-        lg={{ span: 3 }}
-      >
+        lg={{ span: 3 }}>
         <Container fluid className="no-padding">
           <Row>
             <a
               href={`/meme-lab/${nft.id}`}
-              className={props.wallets.length > 0 ? styles.nftImagePadding : ""}
-            >
+              className={
+                props.wallets.length > 0 ? styles.nftImagePadding : ""
+              }>
               <NFTImage
                 nft={nft}
                 animation={false}
@@ -201,8 +205,7 @@ export default function LabCollection(props: Readonly<Props>) {
                         <a
                           href={addProtocol(w)}
                           target="_blank"
-                          rel="noreferrer"
-                        >
+                          rel="noreferrer">
                           {w}
                         </a>
                         &nbsp;&nbsp;
@@ -215,14 +218,14 @@ export default function LabCollection(props: Readonly<Props>) {
                 <Col>
                   Sort by&nbsp;&nbsp;
                   <FontAwesomeIcon
-                    icon="chevron-circle-up"
+                    icon={faChevronCircleUp}
                     onClick={() => setSortDir(SortDirection.ASC)}
                     className={`${styles.sortDirection} ${
                       sortDir != SortDirection.ASC ? styles.disabled : ""
                     }`}
                   />{" "}
                   <FontAwesomeIcon
-                    icon="chevron-circle-down"
+                    icon={faChevronCircleDown}
                     onClick={() => setSortDir(SortDirection.DESC)}
                     className={`${styles.sortDirection} ${
                       sortDir != SortDirection.DESC ? styles.disabled : ""

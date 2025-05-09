@@ -33,6 +33,10 @@ import {
   getNextGenIconUrl,
   getNextGenImageUrl,
 } from "../nextgenToken/NextGenTokenImage";
+import {
+  faArrowCircleRight,
+  faCheckCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 const TRAITS: Record<number, string[]> = {
   1: ["Palette", "Size", "Traced"],
@@ -219,7 +223,7 @@ export default function NextGenTraitSets(
               <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                 View All
                 <FontAwesomeIcon
-                  icon="arrow-circle-right"
+                  icon={faArrowCircleRight}
                   className={styles.viewAllIcon}
                 />
               </h5>
@@ -335,7 +339,7 @@ export default function NextGenTraitSets(
                 <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                   View All Trait Sets
                   <FontAwesomeIcon
-                    icon="arrow-circle-right"
+                    icon={faArrowCircleRight}
                     className={styles.viewAllIcon}
                   />
                 </h5>
@@ -453,7 +457,7 @@ function TraitSetAccordion(
                     }>
                     <FontAwesomeIcon
                       style={{ height: "1.5em", color: "#00aa00" }}
-                      icon="check-circle"></FontAwesomeIcon>
+                      icon={faCheckCircle}></FontAwesomeIcon>
                   </Tippy>
                 )}
               </Col>
@@ -471,7 +475,7 @@ function TraitSetAccordion(
                     <span className="d-flex align-items-center gap-3">
                       <FontAwesomeIcon
                         style={{ height: "1.5em", color: "#00aa00" }}
-                        icon="check-circle"></FontAwesomeIcon>
+                        icon={faCheckCircle}></FontAwesomeIcon>
                       <b>
                         <a
                           href={`/nextgen/collection/${formatNameForUrl(

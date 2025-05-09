@@ -12,6 +12,10 @@ import {
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";
 import { commonApiFetch } from "../../services/api/common-api";
+import {
+  faSquareCaretUp,
+  faSquareCaretDown,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   contract: string;
@@ -186,7 +190,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                     Balance&nbsp;
                     <span className="d-flex flex-column">
                       <FontAwesomeIcon
-                        icon="square-caret-up"
+                        icon={faSquareCaretUp}
                         onClick={() =>
                           setSort({
                             sort: Sort.balance,
@@ -201,7 +205,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                         }`}
                       />
                       <FontAwesomeIcon
-                        icon="square-caret-down"
+                        icon={faSquareCaretDown}
                         onClick={() =>
                           setSort({
                             sort: Sort.balance,
@@ -223,7 +227,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                     TDH&nbsp;
                     <span className="d-flex flex-column">
                       <FontAwesomeIcon
-                        icon="square-caret-up"
+                        icon={faSquareCaretUp}
                         onClick={() =>
                           setSort({
                             sort: Sort.boosted_tdh,
@@ -238,7 +242,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                         }`}
                       />
                       <FontAwesomeIcon
-                        icon="square-caret-down"
+                        icon={faSquareCaretDown}
                         onClick={() =>
                           setSort({
                             sort: Sort.boosted_tdh,
@@ -260,7 +264,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                     Unweighted TDH&nbsp;
                     <span className="d-flex flex-column">
                       <FontAwesomeIcon
-                        icon="square-caret-up"
+                        icon={faSquareCaretUp}
                         onClick={() =>
                           setSort({
                             sort: Sort.tdh__raw,
@@ -275,7 +279,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                         }`}
                       />
                       <FontAwesomeIcon
-                        icon="square-caret-down"
+                        icon={faSquareCaretDown}
                         onClick={() =>
                           setSort({
                             sort: Sort.tdh__raw,
@@ -298,7 +302,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                     Balance&nbsp;
                     <span className="d-flex flex-column">
                       <FontAwesomeIcon
-                        icon="square-caret-up"
+                        icon={faSquareCaretUp}
                         onClick={() =>
                           setSort({
                             sort: Sort.total_balance,
@@ -313,7 +317,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                         }`}
                       />
                       <FontAwesomeIcon
-                        icon="square-caret-down"
+                        icon={faSquareCaretDown}
                         onClick={() =>
                           setSort({
                             sort: Sort.total_balance,
@@ -335,7 +339,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                     TDH&nbsp;
                     <span className="d-flex flex-column">
                       <FontAwesomeIcon
-                        icon="square-caret-up"
+                        icon={faSquareCaretUp}
                         onClick={() =>
                           setSort({
                             sort: Sort.total_boosted_tdh,
@@ -350,7 +354,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                         }`}
                       />
                       <FontAwesomeIcon
-                        icon="square-caret-down"
+                        icon={faSquareCaretDown}
                         onClick={() =>
                           setSort({
                             sort: Sort.total_boosted_tdh,
@@ -372,7 +376,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                     Unweighted TDH&nbsp;
                     <span className="d-flex flex-column">
                       <FontAwesomeIcon
-                        icon="square-caret-up"
+                        icon={faSquareCaretUp}
                         onClick={() =>
                           setSort({
                             sort: Sort.total_tdh__raw,
@@ -387,7 +391,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                         }`}
                       />
                       <FontAwesomeIcon
-                        icon="square-caret-down"
+                        icon={faSquareCaretDown}
                         onClick={() =>
                           setSort({
                             sort: Sort.total_tdh__raw,

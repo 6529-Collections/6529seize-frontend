@@ -2,6 +2,7 @@ import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
 import styles from "./DatePickerModal.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
+import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   mode: "date" | "block";
@@ -82,7 +83,7 @@ export default function DatePickerModal(props: Readonly<Props>) {
         <Modal.Title>Select {props.mode}s</Modal.Title>
         <FontAwesomeIcon
           className={styles.modalClose}
-          icon="times-circle"
+          icon={faTimesCircle}
           onClick={() => props.onHide()}
         />
       </Modal.Header>

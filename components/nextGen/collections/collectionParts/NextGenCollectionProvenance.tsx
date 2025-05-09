@@ -22,6 +22,7 @@ import {
   printGas,
   printRoyalties,
 } from "../../../latest-activity/LatestActivityRow";
+import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -288,7 +289,7 @@ export function NextGenCollectionProvenanceRow(
                           height: "25px",
                           cursor: "pointer",
                         }}
-                        icon="external-link-square"></FontAwesomeIcon>
+                        icon={faExternalLinkSquare}></FontAwesomeIcon>
                     </a>
                   </span>
                 </span>

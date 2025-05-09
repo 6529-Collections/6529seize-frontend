@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useCallback, useEffect } from "react";
+import { Fragment, useCallback, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogPanel,
@@ -15,6 +15,7 @@ import UsersIcon from "../common/icons/UsersIcon";
 import AppUserConnect from "./AppUserConnect";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
+import { useAppWallets } from "../app-wallets/AppWalletsContext";
 
 const MENU = [
   { label: "Profile", path: "/profile", icon: UserIcon },
@@ -77,7 +78,11 @@ const MENU = [
       { label: "Network Activity", path: "/network/activity" },
       { label: "Groups", path: "/network/groups" },
       { label: "NFT Activity", path: "/nft-activity" },
-      { label: "Prenodes Status", path: "/network/prenodes", dividerBefore: true },
+      {
+        label: "Prenodes Status",
+        path: "/network/prenodes",
+        dividerBefore: true,
+      },
       { label: "Metrics", section: true },
       { label: "Definitions", path: "/network/metrics" },
       { label: "Network Stats", path: "/network/stats" },
@@ -93,7 +98,30 @@ export default function AppSidebar({
   readonly open: boolean;
   readonly onClose: () => void;
 }) {
+  const { appWalletsSupported } = useAppWallets();
   const handleClose = useCallback(() => onClose(), [onClose]);
+
+  const menu = useMemo(() => {
+    return MENU.map((item) => {
+      if (item.label === "Tools" && item.children) {
+        const updatedChildren = [...item.children];
+
+        if (appWalletsSupported) {
+          updatedChildren.unshift({
+            label: "App Wallets",
+            path: "/tools/app-wallets",
+          });
+        }
+
+        return {
+          ...item,
+          children: updatedChildren,
+        };
+      }
+
+      return item;
+    });
+  }, [appWalletsSupported]);
 
   // Close on right-to-left swipe
   useEffect(() => {
@@ -152,7 +180,7 @@ export default function AppSidebar({
               <nav className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-zinc-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-zinc-800 hover:tw-scrollbar-thumb-zinc-300 tw-py-6">
                 <div className="tw-flex tw-flex-col tw-h-full">
                   <div className="tw-flex-1 tw-px-2">
-                    <AppSidebarMenuItems menu={MENU} onNavigate={handleClose} />
+                    <AppSidebarMenuItems menu={menu} onNavigate={handleClose} />
                   </div>
                   <div className="tw-px-2 tw-mt-auto tw-border-t tw-border-zinc-800 tw-border-solid tw-pt-6 tw-border-b-0 tw-border-x-0">
                     <AppUserConnect onNavigate={handleClose} />

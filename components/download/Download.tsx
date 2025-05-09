@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import styles from "./Download.module.scss";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   href: string;
@@ -19,7 +20,7 @@ export default function Download(props: Readonly<Props>) {
   return (
     <span className={styles.download}>
       {!isInProgress ? (
-        <FontAwesomeIcon icon="download" onClick={startDownload} />
+        <FontAwesomeIcon icon={faDownload} onClick={startDownload} />
       ) : (
         <>
           Downloading {percentage} %{" "}
