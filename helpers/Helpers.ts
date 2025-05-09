@@ -285,8 +285,12 @@ export function parseEmojis(s: string) {
   });
 }
 
+function isValidDate(date?: any): date is Date {
+  return date && date instanceof Date && !isNaN(date.getTime());
+}
+
 export function printMintDate(date?: Date) {
-  if (!date) {
+  if (!isValidDate(date)) {
     return "-";
   }
   const mintDate = new Date(date);
