@@ -35,6 +35,15 @@ export function MemePageArt(props: {
     "the-art-fullscreen-img"
   );
 
+  const distributionPlanLink = (() => {
+    const id = props.nft?.id;
+    if (!id) return "";
+    if (props.nft?.has_distribution) return `/the-memes/${id}/distribution`;
+    if (id > 3)
+      return `https://github.com/6529-Collections/thememecards/tree/main/card${id}`;
+    return `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
+  })();
+
   useEffect(() => {
     if (router.isReady) {
       setIsFullScreenSupported(fullScreenSupported());
@@ -260,23 +269,19 @@ export function MemePageArt(props: {
                     <h3>Minting Approach</h3>
                   </Col>
                 </Row>
-                <Row>
-                  <Col>
-                    <Link
-                      href={
-                        props.nft && props.nft.has_distribution
-                          ? `/the-memes/${props.nft.id}/distribution`
-                          : props.nft && props.nft.id > 3
-                          ? `https://github.com/6529-Collections/thememecards/tree/main/card${props.nft.id}`
-                          : `https://github.com/6529-Collections/thememecards/tree/main/card1-3`
-                      }
-                      target={props.nft.has_distribution ? "_self" : "_blank"}
-                      rel="noreferrer"
-                      className={styles.distributionPlanLink}>
-                      Distribution Plan
-                    </Link>
-                  </Col>
-                </Row>
+                {distributionPlanLink && (
+                  <Row>
+                    <Col>
+                      <Link
+                        href={distributionPlanLink}
+                        target={props.nft.has_distribution ? "_self" : "_blank"}
+                        rel="noreferrer"
+                        className={styles.distributionPlanLink}>
+                        Distribution Plan
+                      </Link>
+                    </Col>
+                  </Row>
+                )}
                 <Row>
                   <Col>
                     Mint price:{" "}

@@ -34,6 +34,16 @@ export function MemePageLiveRightMenu(props: {
   nftBalance: number;
 }) {
   const capacitor = useCapacitor();
+
+  const distributionPlanLink = (() => {
+    const id = props.nft?.id;
+    if (!id) return "";
+    if (props.nft?.has_distribution) return `/the-memes/${id}/distribution`;
+    if (id > 3)
+      return `https://github.com/6529-Collections/thememecards/tree/main/card${id}`;
+    return `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
+  })();
+
   if (props.show && props.nft && props.nftMeta) {
     return (
       <Col
@@ -199,22 +209,18 @@ export function MemePageLiveRightMenu(props: {
               </Table>
             </Col>
           </Row>
-          <Row>
-            <Col>
-              <Link
-                href={
-                  props.nft.has_distribution
-                    ? `/the-memes/${props.nft.id}/distribution`
-                    : props.nft.id > 3
-                    ? `https://github.com/6529-Collections/thememecards/tree/main/card${props.nft.id}`
-                    : `https://github.com/6529-Collections/thememecards/tree/main/card1-3`
-                }
-                target={props.nft.has_distribution ? "_self" : "_blank"}
-                rel="noreferrer">
-                Distribution Plan
-              </Link>
-            </Col>
-          </Row>
+          {distributionPlanLink && (
+            <Row>
+              <Col>
+                <Link
+                  href={distributionPlanLink}
+                  target={props.nft.has_distribution ? "_self" : "_blank"}
+                  rel="noreferrer">
+                  Distribution Plan
+                </Link>
+              </Col>
+            </Row>
+          )}
           {props.nftBalance > 0 && (
             <Row className="pt-3">
               <Col>
