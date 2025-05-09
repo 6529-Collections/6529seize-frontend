@@ -52,6 +52,14 @@ import RevokeDelegationWithSubComponent from "./RevokeDelegationWithSub";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import { Spinner } from "../dotLoader/DotLoader";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import {
+  faCircleArrowLeft,
+  faEdit,
+  faInfoCircle,
+  faMinus,
+  faPlus,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   setSection(section: DelegationCenterSection): any;
@@ -1063,7 +1071,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   theme={"light"}>
                   <FontAwesomeIcon
                     className={styles.infoIcon}
-                    icon="info-circle"></FontAwesomeIcon>
+                    icon={faInfoCircle}></FontAwesomeIcon>
                 </Tippy>
               )}
             </span>
@@ -1144,7 +1152,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
               <span className="d-flex align-items-center gap-2">
                 <Tippy content={"Edit"} placement={"top"} theme={"light"}>
                   <FontAwesomeIcon
-                    icon="edit"
+                    icon={faEdit}
                     style={{ cursor: "pointer" }}
                     height={25}
                     onClick={() => {
@@ -1159,7 +1167,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 </Tippy>
                 <Tippy content={"Revoke"} placement={"top"} theme={"light"}>
                   <FontAwesomeIcon
-                    icon="xmark"
+                    icon={faXmark}
                     color="white"
                     fill="white"
                     style={{
@@ -1451,7 +1459,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               window.scrollTo(0, 0);
                             }}>
                             <FontAwesomeIcon
-                              icon="plus"
+                              icon={faPlus}
                               className={styles.buttonIcon}
                             />
                             Register Delegation
@@ -1467,7 +1475,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               window.scrollTo(0, 0);
                             }}>
                             <FontAwesomeIcon
-                              icon="plus"
+                              icon={faPlus}
                               className={styles.buttonIcon}
                             />
                             Register Delegation Manager
@@ -1483,7 +1491,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               window.scrollTo(0, 0);
                             }}>
                             <FontAwesomeIcon
-                              icon="plus"
+                              icon={faPlus}
                               className={styles.buttonIcon}
                             />
                             Register Consolidation
@@ -1503,7 +1511,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                                 window.scrollTo(0, 0);
                               }}>
                               <FontAwesomeIcon
-                                icon="plus"
+                                icon={faPlus}
                                 className={styles.buttonIcon}
                               />
                               Assign Primary Address
@@ -1520,7 +1528,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                               window.scrollTo(0, 0);
                             }}>
                             <FontAwesomeIcon
-                              icon="minus"
+                              icon={faMinus}
                               className={styles.buttonIcon}
                             />
                             Revoke
@@ -1552,7 +1560,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                 theme={"light"}>
                 <FontAwesomeIcon
                   className={styles.infoIcon}
-                  icon="info-circle"></FontAwesomeIcon>
+                  icon={faInfoCircle}></FontAwesomeIcon>
               </Tippy>
             </h4>
           </Col>
@@ -1763,7 +1771,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                     onClick={() =>
                       props.setSection(DelegationCenterSection.CENTER)
                     }>
-                    <FontAwesomeIcon icon="circle-arrow-left" />
+                    <FontAwesomeIcon icon={faCircleArrowLeft} />
                     <span className="font-smaller">
                       Back to Delegation Center
                     </span>
@@ -1789,7 +1797,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                             onClick={() =>
                               props.setSection(DelegationCenterSection.CENTER)
                             }>
-                            <FontAwesomeIcon icon="circle-arrow-left" />
+                            <FontAwesomeIcon icon={faCircleArrowLeft} />
                             Back to Delegation Center
                           </button>
                         </Col>

@@ -1,3 +1,4 @@
+import { faCaretLeft, faCaretRight } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Pagination.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
@@ -64,7 +65,7 @@ export default function Pagination(props: Readonly<Props>) {
       {props.totalResults > props.pageSize && (
         <span>
           <FontAwesomeIcon
-            icon="caret-left"
+            icon={faCaretLeft}
             onClick={pagePrevious}
             className={
               props.page > 1
@@ -87,7 +88,7 @@ export default function Pagination(props: Readonly<Props>) {
             {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
           </span>{" "}
           <FontAwesomeIcon
-            icon="caret-right"
+            icon={faCaretRight}
             onClick={pageNext}
             className={
               isLastPage() ? `${styles.iconDisabled}` : `${styles.iconEnabled}`

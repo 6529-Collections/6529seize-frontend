@@ -4,6 +4,7 @@ import Tippy from "@tippyjs/react";
 import { Form, Row, Col } from "react-bootstrap";
 import { useEnsName } from "wagmi";
 import { useSeizeConnectContext } from "../../../../auth/SeizeConnectContext";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 function NextGenMintAddressOption(props: Readonly<{ address: string }>) {
   const ens = useEnsName({
@@ -38,7 +39,7 @@ export function NextGenMintingFor(
           theme={"light"}>
           <FontAwesomeIcon
             className={styles.infoIcon}
-            icon="info-circle"></FontAwesomeIcon>
+            icon={faInfoCircle}></FontAwesomeIcon>
         </Tippy>
       </Form.Label>
       <Col sm={12}>

@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styles from "./DotLoader.module.scss";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 export default function DotLoader() {
   return (
@@ -18,7 +19,7 @@ export function Spinner(
 ) {
   return (
     <FontAwesomeIcon
-      icon="spinner"
+      icon={faSpinner}
       className={styles.spinner}
       style={
         props.dimension

@@ -24,6 +24,11 @@ import { AuthContext } from "../auth/Auth";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
+import {
+  faChevronCircleLeft,
+  faChevronCircleRight,
+  faExpandAlt,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -254,7 +259,7 @@ export default function GradientPage() {
   function printFullScreen() {
     return (
       <FontAwesomeIcon
-        icon="expand-alt"
+        icon={faExpandAlt}
         className={styles.fullScreen}
         onClick={() =>
           fullscreenElementId && enterArtFullScreen(fullscreenElementId)
@@ -295,7 +300,7 @@ export default function GradientPage() {
                                   ? styles.nftPreviousdisabled
                                   : ""
                               }`}>
-                              <FontAwesomeIcon icon="chevron-circle-left" />
+                              <FontAwesomeIcon icon={faChevronCircleLeft} />
                             </a>
                           </h2>
                           <h2 className="float-left">
@@ -307,7 +312,7 @@ export default function GradientPage() {
                                   ? styles.nftPreviousdisabled
                                   : ""
                               }`}>
-                              <FontAwesomeIcon icon="chevron-circle-right" />
+                              <FontAwesomeIcon icon={faChevronCircleRight} />
                             </a>
                           </h2>
                         </span>

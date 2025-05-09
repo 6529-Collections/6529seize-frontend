@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import { formatNameForUrl } from "../../nextgen_helpers";
 import useCapacitor from "../../../../hooks/useCapacitor";
+import { faArrowCircleRight } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -84,7 +85,7 @@ export default function NextGenCollectionSlideshow(props: Readonly<Props>) {
                   <h5 className="mb-0 font-color d-flex align-items-center gap-2">
                     View All
                     <FontAwesomeIcon
-                      icon="arrow-circle-right"
+                      icon={faArrowCircleRight}
                       className={styles.viewAllIcon}
                     />
                   </h5>

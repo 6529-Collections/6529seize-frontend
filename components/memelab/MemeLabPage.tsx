@@ -48,6 +48,12 @@ import { NftPageStats } from "../nftAttributes/NftStats";
 import { printMemeReferences } from "../rememes/RememePage";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
+import {
+  faChevronCircleLeft,
+  faChevronCircleRight,
+  faExpandAlt,
+  faFire,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -429,7 +435,7 @@ export default function LabPage(props: Readonly<Props>) {
                             <span className="d-flex align-items-center gap-2">
                               <span>Burnt</span>
                               <FontAwesomeIcon
-                                icon="fire"
+                                icon={faFire}
                                 style={{ height: "22px", color: "#c51d34" }}
                               />
                             </span>
@@ -783,7 +789,7 @@ export default function LabPage(props: Readonly<Props>) {
             <Row className="position-relative">
               {isFullScreenSupported && (
                 <FontAwesomeIcon
-                  icon="expand-alt"
+                  icon={faExpandAlt}
                   className={styles.fullScreen}
                   onClick={() =>
                     fullscreenElementId &&
@@ -1257,7 +1263,7 @@ export default function LabPage(props: Readonly<Props>) {
                                 ? styles.nftPreviousdisabled
                                 : ""
                             }`}>
-                            <FontAwesomeIcon icon="chevron-circle-left" />
+                            <FontAwesomeIcon icon={faChevronCircleLeft} />
                           </a>
                         </h2>
                         <h2 className="float-left">
@@ -1271,7 +1277,7 @@ export default function LabPage(props: Readonly<Props>) {
                                 ? styles.nftNextdisabled
                                 : ""
                             }`}>
-                            <FontAwesomeIcon icon="chevron-circle-right" />
+                            <FontAwesomeIcon icon={faChevronCircleRight} />
                           </a>
                         </h2>
                       </>

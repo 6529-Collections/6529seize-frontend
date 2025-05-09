@@ -22,7 +22,7 @@ import {
 import { Period } from "./Types";
 import { ApiIdentity } from "../generated/models/ApiIdentity";
 
-export const MAX_DROP_UPLOAD_FILES = 8; 
+export const MAX_DROP_UPLOAD_FILES = 8;
 
 export function formatAddress(address: string) {
   if (
@@ -285,7 +285,14 @@ export function parseEmojis(s: string) {
   });
 }
 
-export function printMintDate(date: Date) {
+function isValidDate(date?: any): date is Date {
+  return date && date instanceof Date && !isNaN(date.getTime());
+}
+
+export function printMintDate(date?: Date) {
+  if (!isValidDate(date)) {
+    return "-";
+  }
   const mintDate = new Date(date);
   return `
       ${mintDate.toLocaleString("default", {

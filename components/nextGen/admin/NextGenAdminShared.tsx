@@ -1,3 +1,4 @@
+import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import styles from "./NextGenAdmin.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Row, Col, Form } from "react-bootstrap";
@@ -13,7 +14,7 @@ export function NextGenAdminHeadingRow(
         </h3>
         <FontAwesomeIcon
           className={styles.closeIcon}
-          icon="times-circle"
+          icon={faTimesCircle}
           onClick={() => {
             props.close();
           }}></FontAwesomeIcon>

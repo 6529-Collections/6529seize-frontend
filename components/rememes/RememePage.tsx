@@ -27,6 +27,7 @@ import DotLoader from "../dotLoader/DotLoader";
 import ArtistProfileHandle from "../the-memes/ArtistProfileHandle";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
+import { faExternalLink, faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   contract: string;
@@ -270,7 +271,7 @@ export default function RememePage(props: Readonly<Props>) {
                         className={styles.userLink}
                         href={rememe.contract_opensea_data.externalUrl}>
                         <FontAwesomeIcon
-                          icon="globe"
+                          icon={faGlobe}
                           className={styles.globeIcon}
                         />
                         {rememe.contract_opensea_data.externalUrl}
@@ -373,7 +374,7 @@ export default function RememePage(props: Readonly<Props>) {
           rel="noreferrer"
           className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
           {s}
-          <FontAwesomeIcon icon="external-link" className={styles.linkIcon} />
+          <FontAwesomeIcon icon={faExternalLink} className={styles.linkIcon} />
         </a>
       );
     }
@@ -398,7 +399,7 @@ export default function RememePage(props: Readonly<Props>) {
                         className={`d-inline-flex align-items-center justify-content-start ${styles.userLink}`}>
                         {rememe.token_uri}
                         <FontAwesomeIcon
-                          icon="external-link"
+                          icon={faExternalLink}
                           className={styles.linkIcon}
                         />
                       </a>

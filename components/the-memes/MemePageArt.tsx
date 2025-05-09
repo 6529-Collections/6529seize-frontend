@@ -19,6 +19,7 @@ import {
   getDimensionsFromMetadata,
 } from "../../helpers/nft.helpers";
 import NFTAttributes from "../nftAttributes/NFTAttributes";
+import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
 
 export function MemePageArt(props: {
   show: boolean;
@@ -54,7 +55,7 @@ export function MemePageArt(props: {
           <Row className="position-relative">
             {isFullScreenSupported && (
               <FontAwesomeIcon
-                icon="expand-alt"
+                icon={faExpandAlt}
                 className={styles.fullScreen}
                 onClick={() =>
                   fullscreenElementId && enterArtFullScreen(fullscreenElementId)
@@ -67,8 +68,7 @@ export function MemePageArt(props: {
                 interval={null}
                 indicators={false}
                 wrap={false}
-                onSlide={carouselHandlerSlide}
-              >
+                onSlide={carouselHandlerSlide}>
                 <Carousel.Item className="text-center">
                   <div className="pt-4 pb-3">
                     {props.nft.metadata.animation_details.format}
@@ -137,8 +137,7 @@ export function MemePageArt(props: {
                           className={styles.arweaveLink}
                           href={props.nft.metadata.image}
                           target="_blank"
-                          rel="noreferrer"
-                        >
+                          rel="noreferrer">
                           {props.nft.metadata.image}
                         </a>
                         <Download
@@ -161,8 +160,7 @@ export function MemePageArt(props: {
                                 : props.nft.metadata.animation_url
                             }
                             target="_blank"
-                            rel="noreferrer"
-                          >
+                            rel="noreferrer">
                             {props.nft.metadata.animation
                               ? props.nft.metadata.animation
                               : props.nft.metadata.animation_url}
@@ -193,8 +191,7 @@ export function MemePageArt(props: {
               xs={{ span: 12 }}
               sm={{ span: 6 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}
-            >
+              lg={{ span: 6 }}>
               <Container>
                 <Row>
                   <Col>
@@ -255,8 +252,7 @@ export function MemePageArt(props: {
               xs={{ span: 12 }}
               sm={{ span: 6 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}
-            >
+              lg={{ span: 6 }}>
               <Container>
                 <Row>
                   <Col>
@@ -283,8 +279,7 @@ export function MemePageArt(props: {
                       }}
                       target={props.nft.has_distribution ? "_self" : "_blank"}
                       rel="noreferrer"
-                      className={styles.distributionPlanLink}
-                    >
+                      className={styles.distributionPlanLink}>
                       Distribution Plan
                     </a>
                   </Col>
@@ -316,8 +311,7 @@ export function MemePageArt(props: {
                   <Col
                     dangerouslySetInnerHTML={{
                       __html: parseNftDescriptionToHtml(props.nft.description),
-                    }}
-                  ></Col>
+                    }}></Col>
                 </Row>
               </Container>
             </Col>
@@ -355,8 +349,7 @@ export function MemePageArt(props: {
               xs={{ span: 12 }}
               sm={{ span: 6 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}
-            >
+              lg={{ span: 6 }}>
               <Container>
                 <Row>
                   <Col>
@@ -368,8 +361,7 @@ export function MemePageArt(props: {
                     xs={{ span: 12 }}
                     sm={{ span: 10 }}
                     md={{ span: 8 }}
-                    lg={{ span: 6 }}
-                  >
+                    lg={{ span: 6 }}>
                     <Table>
                       <tbody>
                         <tr>
@@ -412,8 +404,7 @@ export function MemePageArt(props: {
               xs={{ span: 12 }}
               sm={{ span: 6 }}
               md={{ span: 6 }}
-              lg={{ span: 6 }}
-            >
+              lg={{ span: 6 }}>
               <Container>
                 <Row>
                   <Col>
@@ -425,8 +416,7 @@ export function MemePageArt(props: {
                     xs={{ span: 12 }}
                     sm={{ span: 10 }}
                     md={{ span: 8 }}
-                    lg={{ span: 6 }}
-                  >
+                    lg={{ span: 6 }}>
                     <Table>
                       <tbody>
                         {props.nft.metadata.attributes

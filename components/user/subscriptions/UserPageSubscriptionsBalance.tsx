@@ -5,6 +5,7 @@ import { SubscriptionDetails } from "../../../entities/ISubscription";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_MINT_PRICE } from "../../../constants";
+import { faRefresh } from "@fortawesome/free-solid-svg-icons";
 
 export default function UserPageSubscriptionsBalance(
   props: Readonly<{
@@ -25,7 +26,7 @@ export default function UserPageSubscriptionsBalance(
                 <Spinner />
               ) : (
                 <FontAwesomeIcon
-                  icon="refresh"
+                  icon={faRefresh}
                   onClick={() => {
                     props.refresh();
                   }}
