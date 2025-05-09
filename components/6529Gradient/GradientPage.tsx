@@ -29,6 +29,7 @@ import {
   faChevronCircleRight,
   faExpandAlt,
 } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -280,11 +281,6 @@ export default function GradientPage() {
                 </h1>
               </Col>
             </Row>
-            <Row className="pt-2">
-              <Col>
-                <h2 className={styles.subheading}>{nft?.name}</h2>
-              </Col>
-            </Row>
             {nft && (
               <>
                 <Row className="pt-2">
@@ -293,7 +289,7 @@ export default function GradientPage() {
                       <>
                         <span>
                           <h2 className="float-left">
-                            <a
+                            <Link
                               href={`/6529-gradient/${parseInt(nftId) - 1}`}
                               className={`${styles.nextPreviousNft} ${
                                 parseInt(nftId) === 0
@@ -301,11 +297,11 @@ export default function GradientPage() {
                                   : ""
                               }`}>
                               <FontAwesomeIcon icon={faChevronCircleLeft} />
-                            </a>
+                            </Link>
                           </h2>
                           <h2 className="float-left">
                             &nbsp;
-                            <a
+                            <Link
                               href={`/6529-gradient/${parseInt(nftId) + 1}`}
                               className={`${styles.nextPreviousNft} ${
                                 parseInt(nftId) === 100
@@ -313,12 +309,17 @@ export default function GradientPage() {
                                   : ""
                               }`}>
                               <FontAwesomeIcon icon={faChevronCircleRight} />
-                            </a>
+                            </Link>
                           </h2>
                         </span>
                         {fullScreenSupported() && printFullScreen()}
                       </>
                     )}
+                  </Col>
+                </Row>
+                <Row className="pt-2">
+                  <Col>
+                    <h2 className={styles.subheading}>{nft?.name}</h2>
                   </Col>
                 </Row>
                 <Row className="pt-2">
