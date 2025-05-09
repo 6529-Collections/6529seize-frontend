@@ -1,7 +1,4 @@
-import {
-  DynamicRouteType,
-  RouteDynamicConfig,
-} from "./breadcrumbs.types";
+import { RouteDynamicConfig } from "./breadcrumbs.types";
 import {
   fetchGradientName,
   fetchProfileHandle,
@@ -119,9 +116,7 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
       data: { name: string } | null | undefined,
       isLoading: boolean
     ) => {
-      const crumbs: Crumb[] = [
-        { display: "Nextgen", href: "/nextgen" },
-      ];
+      const crumbs: Crumb[] = [{ display: "Nextgen", href: "/nextgen" }];
       const displayName = isLoading
         ? "Loading..."
         : data?.name ?? `Nextgen ${params.id}`;
@@ -271,4 +266,4 @@ export type SpecificDeterminedRouteInfo =
 
 export type DeterminedRouteInfo =
   | SpecificDeterminedRouteInfo
-  | { readonly type: "static" }; 
+  | { readonly type: "static" };

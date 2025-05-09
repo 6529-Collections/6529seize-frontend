@@ -136,7 +136,7 @@ export const useBreadcrumbs = (): Crumb[] => {
       // correlated types from DYNAMIC_ROUTE_CONFIGS, TypeScript can struggle to infer this specific
       // correlation for every config.queryKeyBuilder call directly within this generic helper.
       // Type safety is primarily enforced at the definition of each RouteDynamicConfig.
-      return info.config.queryKeyBuilder(info.params as any);
+      return info.config.queryKeyBuilder(info.params);
     }
     return ["breadcrumb", "static", activePathname, activeQuery];
   };
@@ -147,7 +147,7 @@ export const useBreadcrumbs = (): Crumb[] => {
     if ("config" in info && info.config) {
       // Similar to getQueryKey, 'as any' is used for params. The TParams generic in RouteDynamicConfig
       // and the specific params from paramExtractor ensure type safety within each config's fetcher.
-      return info.config.fetcher(info.params as any);
+      return info.config.fetcher(info.params);
     }
     return Promise.resolve(null);
   };
@@ -166,8 +166,8 @@ export const useBreadcrumbs = (): Crumb[] => {
       // Similar to getQueryKey/fetchQueryData, 'as any' casts help manage the complexity of
       // calling a method from a union of configs with a union of params.
       // Type safety is largely enforced at the definition of each RouteDynamicConfig.
-      const dynamicCrumbs = (determinedRouteInfo.config.crumbBuilder as any)(
-        determinedRouteInfo.params as any,
+      const dynamicCrumbs = (determinedRouteInfo.config.crumbBuilder)(
+        determinedRouteInfo.params,
         dynamicData,
         isLoadingDynamicData,
         pathSegments,
