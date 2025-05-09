@@ -1,11 +1,11 @@
 # Task ID: 6
-# Title: Remove redundant layout elements
+# Title: Implement Initial Route Configurations
 # Status: done
 # Dependencies: 5
 # Priority: medium
-# Description: Remove the layout elements from TermsOfServiceModal that are now handled by ModalLayout.
+# Description: Create RouteDynamicConfig objects for 2-3 key dynamic route types (gradient, profile, meme).
 # Details:
-Remove the following elements from TermsOfServiceModal as they're now provided by ModalLayout: 1) The outermost div with tw-fixed, tw-inset-0, etc. classes, 2) The main modal container div with tw-bg-iron-800, tw-rounded-lg, etc. classes, 3) The header div containing the h3 title, 4) The explicit close button with faXmark icon. Ensure no functionality is lost in the process.
+Implement configuration objects for gradient, profile, and meme routes. For each configuration: 1) Define an appropriate pathPattern regex, 2) Implement paramExtractor to extract IDs or other parameters, 3) Reuse existing fetcher functions initially, 4) Create queryKeyBuilder functions that match existing query keys, 5) Implement crumbBuilder functions that replicate the current breadcrumb generation logic. Add these configurations to the DYNAMIC_ROUTE_CONFIGS array.
 
 # Test Strategy:
-Compare the rendered output before and after removal to ensure the modal still appears correctly with all necessary elements.
+Test each configuration individually with sample routes to verify correct parameter extraction, data fetching, and breadcrumb generation. Compare with original implementation output.

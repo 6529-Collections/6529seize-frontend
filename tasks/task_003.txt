@@ -1,11 +1,11 @@
 # Task ID: 3
-# Title: Update CreateDropContent.tsx to use the constant
+# Title: Create breadcrumbs.utils.ts Module
 # Status: done
 # Dependencies: 1
 # Priority: high
-# Description: Modify the CreateDropContent.tsx file to import and use the MAX_DROP_UPLOAD_FILES constant instead of the hardcoded value 4.
+# Description: Extract utility functions from useBreadcrumbs.ts into a dedicated utils module
 # Details:
-In components/waves/CreateDropContent.tsx, add an import statement for the MAX_DROP_UPLOAD_FILES constant. Find the handleFileChange function that checks 'updatedFiles.length > 4' and replace the hardcoded 4 with MAX_DROP_UPLOAD_FILES. Also find any instances where the array is sliced using '-4' and replace with `-MAX_DROP_UPLOAD_FILES`. Ensure the functionality remains the same - the component should still limit uploads to 4 files and handle array slicing correctly.
+Create a new file at hooks/breadcrumbs.utils.ts. Move utility functions from useBreadcrumbs.ts including formatCrumbDisplay, getDynamicParam, and buildStaticCrumbs. Import the Crumb type from ../components/breadcrumb/Breadcrumb for use in buildStaticCrumbs. Import any other necessary types from breadcrumbs.types.ts. Export all utility functions with proper export statements. Update useBreadcrumbs.ts to import these utilities from the new file. Ensure all function signatures remain the same to maintain compatibility.
 
 # Test Strategy:
-Manually test the drag-and-drop file upload functionality to ensure it still limits uploads to 4 files, shows the correct error message when attempting to upload more than 4 files, and correctly handles array slicing.
+Verify the application builds without errors. Test breadcrumb generation for both static and dynamic routes to ensure the utility functions are working correctly. Check that breadcrumb formatting and display remains consistent with the previous implementation.

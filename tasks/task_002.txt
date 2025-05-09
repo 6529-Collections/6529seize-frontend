@@ -1,11 +1,11 @@
 # Task ID: 2
-# Title: Update CreateDropActionsRow.tsx to use the constant
+# Title: Create breadcrumbs.api.ts Module
 # Status: done
 # Dependencies: 1
 # Priority: high
-# Description: Modify the CreateDropActionsRow.tsx file to import and use the MAX_DROP_UPLOAD_FILES constant instead of the hardcoded value 4.
+# Description: Extract all API fetching functions from useBreadcrumbs.ts into a dedicated API module
 # Details:
-In components/drops/create/utils/CreateDropActionsRow.tsx, add an import statement for the MAX_DROP_UPLOAD_FILES constant. Find the onChange handler for the file input element that checks 'files.length > 4' and replace the hardcoded 4 with MAX_DROP_UPLOAD_FILES. Ensure the functionality remains the same - the component should still limit uploads to 4 files and display appropriate error messages when the limit is exceeded.
+Create a new file at hooks/breadcrumbs.api.ts. Move all API fetching functions from useBreadcrumbs.ts including fetchGradientName, fetchProfileHandle, fetchWaveName, fetchMemeName, fetchNextgenName, fetchRememeName, fetchMemeLabName, and fetchCollectionName. Ensure all necessary imports are included, particularly ../services/api/common-api for the commonApiFetch function, ../constants for contract addresses, and ../entities/INextgen for the NextGenToken type. Export all fetcher functions with proper export statements. Temporarily update useBreadcrumbs.ts to import these functions from the new file (they will later be imported by breadcrumbs.config.ts instead).
 
 # Test Strategy:
-Manually test the file upload functionality through the button to ensure it still limits uploads to 4 files and shows the correct error message when attempting to upload more than 4 files.
+Verify the application builds without errors. Test each breadcrumb type that uses API fetching to ensure data is still being retrieved correctly. Check the network tab in browser dev tools to confirm API calls are still being made as expected.
