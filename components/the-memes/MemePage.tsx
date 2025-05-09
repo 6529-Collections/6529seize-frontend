@@ -29,6 +29,11 @@ import { AuthContext } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
 import MemePageMintCountdown from "./MemePageMintCountdown";
+import {
+  faChevronCircleLeft,
+  faChevronCircleRight,
+} from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 interface MemeTab {
   focus: MEME_FOCUS;
@@ -333,10 +338,10 @@ export default function MemePage() {
                 <Row className="pt-2">
                   <Col>
                     <h2 className="float-left">
-                      <a
+                      <Link
                         href={`/the-memes?szn=${nftMeta.season}&sort=age&sort_dir=ASC`}>
                         SZN{nftMeta.season}
-                      </a>
+                      </Link>
                     </h2>
                     <h2 className="float-left">
                       &nbsp;| Card {nft.id} -&nbsp;
@@ -385,9 +390,7 @@ function MemeNavigationBtn(
   const icon = (
     <FontAwesomeIcon
       icon={
-        props.icon === "previous"
-          ? "chevron-circle-left"
-          : "chevron-circle-right"
+        props.icon === "previous" ? faChevronCircleLeft : faChevronCircleRight
       }
       width={width}
       height={height}
@@ -402,7 +405,7 @@ function MemeNavigationBtn(
     const href = `/the-memes/${
       props.icon === "previous" ? props.nft.id - 1 : props.nft.id + 1
     }`;
-    return <a href={href}>{icon}</a>;
+    return <Link href={href}>{icon}</Link>;
   }
 }
 

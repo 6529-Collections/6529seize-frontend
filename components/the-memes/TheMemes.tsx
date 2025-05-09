@@ -27,6 +27,7 @@ import {
   faChevronCircleDown,
   faChevronCircleUp,
 } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 interface Meme {
   meme: number;
@@ -319,7 +320,7 @@ export default function TheMemesComponent() {
         sm={{ span: 4 }}
         md={{ span: 3 }}
         lg={{ span: 3 }}>
-        <a
+        <Link
           href={`/the-memes/${nft.id}`}
           className="decoration-none scale-hover">
           <Container fluid>
@@ -378,7 +379,7 @@ export default function TheMemesComponent() {
               </Col>
             </Row>
           </Container>
-        </a>
+        </Link>
       </Col>
     );
   }
