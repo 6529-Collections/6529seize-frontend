@@ -1,11 +1,11 @@
 # Task ID: 2
-# Title: Update CreateDropActionsRow.tsx to use the constant
+# Title: Create DYNAMIC_ROUTE_CONFIGS Array Structure
 # Status: done
 # Dependencies: 1
 # Priority: high
-# Description: Modify the CreateDropActionsRow.tsx file to import and use the MAX_DROP_UPLOAD_FILES constant instead of the hardcoded value 4.
+# Description: Set up the array structure that will hold all route configurations, initially as an empty array with the correct typing.
 # Details:
-In components/drops/create/utils/CreateDropActionsRow.tsx, add an import statement for the MAX_DROP_UPLOAD_FILES constant. Find the onChange handler for the file input element that checks 'files.length > 4' and replace the hardcoded 4 with MAX_DROP_UPLOAD_FILES. Ensure the functionality remains the same - the component should still limit uploads to 4 files and display appropriate error messages when the limit is exceeded.
+Create a constant array named DYNAMIC_ROUTE_CONFIGS with the type RouteDynamicConfig[]. This will be populated with route configurations in later tasks. Add appropriate exports and imports. Include a comment explaining the purpose of this array and how new route configurations should be added.
 
 # Test Strategy:
-Manually test the file upload functionality through the button to ensure it still limits uploads to 4 files and shows the correct error message when attempting to upload more than 4 files.
+Verify the array is properly typed and can be imported/exported without TypeScript errors.

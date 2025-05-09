@@ -1,11 +1,11 @@
 # Task ID: 5
-# Title: Document the constant and update code comments
+# Title: Refactor finalCrumbs Calculation
 # Status: done
-# Dependencies: 1, 2, 3
-# Priority: low
-# Description: Add appropriate documentation for the new constant and update any relevant code comments in the modified files.
+# Dependencies: 4
+# Priority: high
+# Description: Update the finalCrumbs memoized calculation to use the crumbBuilder from the active configuration.
 # Details:
-Add a descriptive comment above the MAX_DROP_UPLOAD_FILES constant explaining its purpose and usage. Update any comments in CreateDropActionsRow.tsx and CreateDropContent.tsx that reference the file limit to mention the constant instead of the hardcoded value. If there's a project documentation file or wiki, consider adding a note about this constant for future developers. Ensure code comments accurately reflect the changes made and provide context for why the constant exists.
+Modify the finalCrumbs useMemo hook to use the active configuration's crumbBuilder function when available. Pass the extracted parameters, query data, loading state, path segments, and query object to the crumbBuilder. Preserve the existing logic for static routes (buildStaticCrumbs) when no dynamic configuration matches. Ensure the memoization dependencies are correctly set to prevent unnecessary recalculations.
 
 # Test Strategy:
-Review the documentation and comments for clarity, accuracy, and completeness. Ensure they provide sufficient context for future developers to understand the purpose and usage of the constant.
+Test with various route configurations to verify the correct crumbs are generated. Compare output with the original implementation to ensure consistency.

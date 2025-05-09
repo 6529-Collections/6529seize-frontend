@@ -1,11 +1,11 @@
 # Task ID: 3
-# Title: Update CreateDropContent.tsx to use the constant
+# Title: Implement Revised determineRouteConfig Function
 # Status: done
-# Dependencies: 1
+# Dependencies: 2
 # Priority: high
-# Description: Modify the CreateDropContent.tsx file to import and use the MAX_DROP_UPLOAD_FILES constant instead of the hardcoded value 4.
+# Description: Refactor the determineRouteConfig function to use the configuration array to find matching route configurations.
 # Details:
-In components/waves/CreateDropContent.tsx, add an import statement for the MAX_DROP_UPLOAD_FILES constant. Find the handleFileChange function that checks 'updatedFiles.length > 4' and replace the hardcoded 4 with MAX_DROP_UPLOAD_FILES. Also find any instances where the array is sliced using '-4' and replace with `-MAX_DROP_UPLOAD_FILES`. Ensure the functionality remains the same - the component should still limit uploads to 4 files and handle array slicing correctly.
+Rewrite the determineRouteConfig function to iterate through the DYNAMIC_ROUTE_CONFIGS array. For each config, check if the pathPattern matches the current route's primary segment. If it matches, use the paramExtractor to extract parameters. Return the first config that both matches and successfully extracts parameters, along with those parameters. Maintain the function signature to ensure compatibility with existing code. Include fallback logic for routes that don't match any configuration.
 
 # Test Strategy:
-Manually test the drag-and-drop file upload functionality to ensure it still limits uploads to 4 files, shows the correct error message when attempting to upload more than 4 files, and correctly handles array slicing.
+Create unit tests with various route patterns to verify the function correctly identifies route configurations and extracts parameters. Test with both matching and non-matching routes.

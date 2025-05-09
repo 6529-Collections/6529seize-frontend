@@ -2,70 +2,127 @@
   "tasks": [
     {
       "id": 1,
-      "title": "Create or modify constants file for MAX_DROP_UPLOAD_FILES",
-      "description": "Create a new constants file or modify an existing one to define the MAX_DROP_UPLOAD_FILES constant with a value of 4.",
+      "title": "Define RouteDynamicConfig Interface and Types",
+      "description": "Create the TypeScript interface for RouteDynamicConfig and any supporting types needed for the configuration-driven approach.",
       "status": "done",
       "dependencies": [],
       "priority": "high",
-      "details": "Create a new file at src/lib/constants/uploads.ts if it doesn't exist. If the directory structure doesn't exist, create it. If a similar constants file already exists that would be appropriate for this constant, use that instead. Define the constant as: export const MAX_DROP_UPLOAD_FILES = 4; with an appropriate comment explaining its purpose. Ensure the constant is properly exported so it can be imported by other files.",
-      "testStrategy": "Verify the constant file exists, contains the MAX_DROP_UPLOAD_FILES constant with value 4, and can be imported from other files in the project."
+      "details": "Create the RouteDynamicConfig interface as specified in the PRD, including type parameters for data and params. Define the Crumb interface if it doesn't already exist in the codebase. Ensure all properties are properly typed (pathPattern as RegExp, paramExtractor function, fetcher function, queryKeyBuilder function, crumbBuilder function, and optional parentCrumbs array). Add appropriate JSDoc comments to explain the purpose of each property.",
+      "testStrategy": "Verify the interface compiles without errors. Create a simple mock implementation to ensure the type constraints work as expected."
     },
     {
       "id": 2,
-      "title": "Update CreateDropActionsRow.tsx to use the constant",
-      "description": "Modify the CreateDropActionsRow.tsx file to import and use the MAX_DROP_UPLOAD_FILES constant instead of the hardcoded value 4.",
+      "title": "Create DYNAMIC_ROUTE_CONFIGS Array Structure",
+      "description": "Set up the array structure that will hold all route configurations, initially as an empty array with the correct typing.",
       "status": "done",
       "dependencies": [
         1
       ],
       "priority": "high",
-      "details": "In components/drops/create/utils/CreateDropActionsRow.tsx, add an import statement for the MAX_DROP_UPLOAD_FILES constant. Find the onChange handler for the file input element that checks 'files.length > 4' and replace the hardcoded 4 with MAX_DROP_UPLOAD_FILES. Ensure the functionality remains the same - the component should still limit uploads to 4 files and display appropriate error messages when the limit is exceeded.",
-      "testStrategy": "Manually test the file upload functionality through the button to ensure it still limits uploads to 4 files and shows the correct error message when attempting to upload more than 4 files."
+      "details": "Create a constant array named DYNAMIC_ROUTE_CONFIGS with the type RouteDynamicConfig[]. This will be populated with route configurations in later tasks. Add appropriate exports and imports. Include a comment explaining the purpose of this array and how new route configurations should be added.",
+      "testStrategy": "Verify the array is properly typed and can be imported/exported without TypeScript errors."
     },
     {
       "id": 3,
-      "title": "Update CreateDropContent.tsx to use the constant",
-      "description": "Modify the CreateDropContent.tsx file to import and use the MAX_DROP_UPLOAD_FILES constant instead of the hardcoded value 4.",
+      "title": "Implement Revised determineRouteConfig Function",
+      "description": "Refactor the determineRouteConfig function to use the configuration array to find matching route configurations.",
       "status": "done",
       "dependencies": [
-        1
+        2
       ],
       "priority": "high",
-      "details": "In components/waves/CreateDropContent.tsx, add an import statement for the MAX_DROP_UPLOAD_FILES constant. Find the handleFileChange function that checks 'updatedFiles.length > 4' and replace the hardcoded 4 with MAX_DROP_UPLOAD_FILES. Also find any instances where the array is sliced using '-4' and replace with `-MAX_DROP_UPLOAD_FILES`. Ensure the functionality remains the same - the component should still limit uploads to 4 files and handle array slicing correctly.",
-      "testStrategy": "Manually test the drag-and-drop file upload functionality to ensure it still limits uploads to 4 files, shows the correct error message when attempting to upload more than 4 files, and correctly handles array slicing."
+      "details": "Rewrite the determineRouteConfig function to iterate through the DYNAMIC_ROUTE_CONFIGS array. For each config, check if the pathPattern matches the current route's primary segment. If it matches, use the paramExtractor to extract parameters. Return the first config that both matches and successfully extracts parameters, along with those parameters. Maintain the function signature to ensure compatibility with existing code. Include fallback logic for routes that don't match any configuration.",
+      "testStrategy": "Create unit tests with various route patterns to verify the function correctly identifies route configurations and extracts parameters. Test with both matching and non-matching routes."
     },
     {
       "id": 4,
-      "title": "Perform integration testing of file upload functionality",
-      "description": "Test the complete file upload functionality to ensure both upload methods (button and drag-and-drop) correctly enforce the limit using the new constant.",
+      "title": "Implement Centralized useQuery Hook",
+      "description": "Replace multiple useQuery hooks with a single centralized hook that uses the active route configuration.",
       "status": "done",
       "dependencies": [
-        2,
         3
       ],
-      "priority": "medium",
-      "details": "Test both file upload methods (button in CreateDropActionsRow.tsx and drag-and-drop in CreateDropContent.tsx) to ensure they correctly enforce the 4-file limit. Verify that appropriate error messages are displayed when attempting to upload more than 4 files. Test edge cases such as uploading exactly 4 files, uploading 0 files, and attempting to upload more than 4 files in various sequences.",
-      "testStrategy": "Create a test plan covering all upload scenarios: uploading 1-4 files via button, uploading 1-4 files via drag-and-drop, attempting to upload 5+ files via both methods, uploading files in multiple batches that would exceed the limit. Verify correct behavior and error messages in each case."
+      "priority": "high",
+      "details": "Create a centralized useQuery implementation that dynamically derives queryKey and queryFn from the active route configuration. Use the queryKeyBuilder and fetcher functions from the active configuration. Maintain consistent caching strategy (staleTime, refetchOnWindowFocus) with the existing implementation. Handle the case where no configuration is active. Ensure proper typing of query results based on the configuration's TData type parameter.",
+      "testStrategy": "Test with mock configurations to verify the query is correctly constructed and executed. Verify that caching behavior matches the original implementation."
     },
     {
       "id": 5,
-      "title": "Document the constant and update code comments",
-      "description": "Add appropriate documentation for the new constant and update any relevant code comments in the modified files.",
+      "title": "Refactor finalCrumbs Calculation",
+      "description": "Update the finalCrumbs memoized calculation to use the crumbBuilder from the active configuration.",
       "status": "done",
       "dependencies": [
-        1,
-        2,
-        3
+        4
+      ],
+      "priority": "high",
+      "details": "Modify the finalCrumbs useMemo hook to use the active configuration's crumbBuilder function when available. Pass the extracted parameters, query data, loading state, path segments, and query object to the crumbBuilder. Preserve the existing logic for static routes (buildStaticCrumbs) when no dynamic configuration matches. Ensure the memoization dependencies are correctly set to prevent unnecessary recalculations.",
+      "testStrategy": "Test with various route configurations to verify the correct crumbs are generated. Compare output with the original implementation to ensure consistency."
+    },
+    {
+      "id": 6,
+      "title": "Implement Initial Route Configurations",
+      "description": "Create RouteDynamicConfig objects for 2-3 key dynamic route types (gradient, profile, meme).",
+      "status": "done",
+      "dependencies": [
+        5
+      ],
+      "priority": "medium",
+      "details": "Implement configuration objects for gradient, profile, and meme routes. For each configuration: 1) Define an appropriate pathPattern regex, 2) Implement paramExtractor to extract IDs or other parameters, 3) Reuse existing fetcher functions initially, 4) Create queryKeyBuilder functions that match existing query keys, 5) Implement crumbBuilder functions that replicate the current breadcrumb generation logic. Add these configurations to the DYNAMIC_ROUTE_CONFIGS array.",
+      "testStrategy": "Test each configuration individually with sample routes to verify correct parameter extraction, data fetching, and breadcrumb generation. Compare with original implementation output."
+    },
+    {
+      "id": 7,
+      "title": "Migrate Remaining Route Configurations",
+      "description": "Create RouteDynamicConfig objects for all remaining dynamic route types (nextgen, rememe, meme-lab, collection, wave).",
+      "status": "done",
+      "dependencies": [
+        6
+      ],
+      "priority": "medium",
+      "details": "Implement configuration objects for nextgen, rememe, meme-lab, collection, and wave routes following the same pattern as the initial configurations. Pay special attention to the wave route if it uses a separate useWaveData hook - either integrate it into the configuration or handle it as a special case. Ensure all existing route patterns are covered. Add these configurations to the DYNAMIC_ROUTE_CONFIGS array.",
+      "testStrategy": "Test each new configuration with sample routes. Verify that all route types produce the expected breadcrumbs. Pay special attention to complex routes with multiple dynamic segments."
+    },
+    {
+      "id": 8,
+      "title": "Consolidate Fetcher Functions",
+      "description": "Create a generic fetcher function to reduce boilerplate in individual fetchers if API patterns allow.",
+      "status": "done",
+      "dependencies": [
+        7
       ],
       "priority": "low",
-      "details": "Add a descriptive comment above the MAX_DROP_UPLOAD_FILES constant explaining its purpose and usage. Update any comments in CreateDropActionsRow.tsx and CreateDropContent.tsx that reference the file limit to mention the constant instead of the hardcoded value. If there's a project documentation file or wiki, consider adding a note about this constant for future developers. Ensure code comments accurately reflect the changes made and provide context for why the constant exists.",
-      "testStrategy": "Review the documentation and comments for clarity, accuracy, and completeness. Ensure they provide sufficient context for future developers to understand the purpose and usage of the constant."
+      "details": "Analyze the existing fetcher functions to identify common patterns. Implement a genericFetchName function as suggested in the PRD that can handle most entity name fetching operations. Update the route configurations to use this generic fetcher where appropriate. Maintain type safety throughout. Keep specialized fetchers for routes with unique requirements.",
+      "testStrategy": "Test the generic fetcher with various entity types to verify it correctly fetches and returns data. Compare results with the original fetcher functions to ensure consistency."
+    },
+    {
+      "id": 9,
+      "title": "Simplify activeItem State",
+      "description": "Evaluate and potentially simplify the activeItem state and its useEffect.",
+      "status": "done",
+      "dependencies": [
+        8
+      ],
+      "priority": "low",
+      "details": "Review the current implementation of activeItem state and its associated useEffect. Determine if it can be simplified or removed by directly using pathname, asPath, and query from useRouter() in useMemo dependencies. Implement the simplification if it doesn't negatively impact stability or cause unnecessary re-renders. If simplification isn't feasible, document the reasons why.",
+      "testStrategy": "Test the hook with various route changes to verify that breadcrumbs update correctly. Monitor for unnecessary re-renders or other performance issues."
+    },
+    {
+      "id": 10,
+      "title": "Add Documentation and Perform Final Testing",
+      "description": "Add comprehensive JSDoc comments and perform final testing of the refactored hook.",
+      "status": "done",
+      "dependencies": [
+        9
+      ],
+      "priority": "medium",
+      "details": "Add detailed JSDoc comments to all functions, interfaces, and complex logic. Include examples of how to add new route configurations in the future. Create a brief documentation section explaining the architecture of the refactored hook. Perform comprehensive testing of all route types, including edge cases. Verify that the refactored hook produces identical output to the original implementation for all routes.",
+      "testStrategy": "Review all code for documentation completeness. Test the hook with all supported route types and compare output with the original implementation. Verify performance characteristics to ensure no regressions."
     }
   ],
   "metadata": {
-    "projectName": "Centralize Drop Image Upload Limit",
-    "totalTasks": 5,
-    "sourceFile": "/Users/simo/6529seize-frontend/centralize_limit_prd.txt",
-    "generatedAt": "2023-11-09"
+    "projectName": "PRD Implementation",
+    "totalTasks": 10,
+    "sourceFile": "/Users/simo/6529seize-frontend/refactor_useBreadcrumbs_prd.txt",
+    "generatedAt": "2023-11-14"
   }
 }

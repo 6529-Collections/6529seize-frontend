@@ -1,11 +1,11 @@
 # Task ID: 4
-# Title: Perform integration testing of file upload functionality
+# Title: Implement Centralized useQuery Hook
 # Status: done
-# Dependencies: 2, 3
-# Priority: medium
-# Description: Test the complete file upload functionality to ensure both upload methods (button and drag-and-drop) correctly enforce the limit using the new constant.
+# Dependencies: 3
+# Priority: high
+# Description: Replace multiple useQuery hooks with a single centralized hook that uses the active route configuration.
 # Details:
-Test both file upload methods (button in CreateDropActionsRow.tsx and drag-and-drop in CreateDropContent.tsx) to ensure they correctly enforce the 4-file limit. Verify that appropriate error messages are displayed when attempting to upload more than 4 files. Test edge cases such as uploading exactly 4 files, uploading 0 files, and attempting to upload more than 4 files in various sequences.
+Create a centralized useQuery implementation that dynamically derives queryKey and queryFn from the active route configuration. Use the queryKeyBuilder and fetcher functions from the active configuration. Maintain consistent caching strategy (staleTime, refetchOnWindowFocus) with the existing implementation. Handle the case where no configuration is active. Ensure proper typing of query results based on the configuration's TData type parameter.
 
 # Test Strategy:
-Create a test plan covering all upload scenarios: uploading 1-4 files via button, uploading 1-4 files via drag-and-drop, attempting to upload 5+ files via both methods, uploading files in multiple batches that would exceed the limit. Verify correct behavior and error messages in each case.
+Test with mock configurations to verify the query is correctly constructed and executed. Verify that caching behavior matches the original implementation.

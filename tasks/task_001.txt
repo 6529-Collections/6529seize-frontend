@@ -1,11 +1,11 @@
 # Task ID: 1
-# Title: Create or modify constants file for MAX_DROP_UPLOAD_FILES
+# Title: Define RouteDynamicConfig Interface and Types
 # Status: done
 # Dependencies: None
 # Priority: high
-# Description: Create a new constants file or modify an existing one to define the MAX_DROP_UPLOAD_FILES constant with a value of 4.
+# Description: Create the TypeScript interface for RouteDynamicConfig and any supporting types needed for the configuration-driven approach.
 # Details:
-Create a new file at src/lib/constants/uploads.ts if it doesn't exist. If the directory structure doesn't exist, create it. If a similar constants file already exists that would be appropriate for this constant, use that instead. Define the constant as: export const MAX_DROP_UPLOAD_FILES = 4; with an appropriate comment explaining its purpose. Ensure the constant is properly exported so it can be imported by other files.
+Create the RouteDynamicConfig interface as specified in the PRD, including type parameters for data and params. Define the Crumb interface if it doesn't already exist in the codebase. Ensure all properties are properly typed (pathPattern as RegExp, paramExtractor function, fetcher function, queryKeyBuilder function, crumbBuilder function, and optional parentCrumbs array). Add appropriate JSDoc comments to explain the purpose of each property.
 
 # Test Strategy:
-Verify the constant file exists, contains the MAX_DROP_UPLOAD_FILES constant with value 4, and can be imported from other files in the project.
+Verify the interface compiles without errors. Create a simple mock implementation to ensure the type constraints work as expected.
