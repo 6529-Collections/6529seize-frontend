@@ -1,11 +1,11 @@
 # Task ID: 5
-# Title: Document the constant and update code comments
+# Title: Refine useBreadcrumbs.ts Hook
 # Status: done
-# Dependencies: 1, 2, 3
-# Priority: low
-# Description: Add appropriate documentation for the new constant and update any relevant code comments in the modified files.
+# Dependencies: 1, 2, 3, 4
+# Priority: medium
+# Description: Streamline the main hook file to focus on core logic by importing from the new modules
 # Details:
-Add a descriptive comment above the MAX_DROP_UPLOAD_FILES constant explaining its purpose and usage. Update any comments in CreateDropActionsRow.tsx and CreateDropContent.tsx that reference the file limit to mention the constant instead of the hardcoded value. If there's a project documentation file or wiki, consider adding a note about this constant for future developers. Ensure code comments accurately reflect the changes made and provide context for why the constant exists.
+Update hooks/useBreadcrumbs.ts to be more focused and maintainable. Remove all code that has been moved to the new modules. Add imports for all necessary types from breadcrumbs.types.ts. Import DYNAMIC_ROUTE_CONFIGS from breadcrumbs.config.ts. Import utility functions from breadcrumbs.utils.ts. Import any API fetchers that might be used directly in the hook from breadcrumbs.api.ts. Retain only the core hook logic: useBreadcrumbs hook function, determineRouteConfig helper, getQueryKey and fetchQueryData helpers for useQuery. Ensure the hook's public API remains unchanged to maintain backward compatibility. Clean up any redundant code or imports.
 
 # Test Strategy:
-Review the documentation and comments for clarity, accuracy, and completeness. Ensure they provide sufficient context for future developers to understand the purpose and usage of the constant.
+Verify the application builds without errors. Conduct comprehensive testing of breadcrumb functionality across different route types. Test navigation between pages to ensure breadcrumbs update correctly. Verify that dynamic breadcrumbs still fetch and display data correctly. Compare the behavior before and after the refactor to ensure complete functional equivalence.

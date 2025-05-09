@@ -1,11 +1,11 @@
 # Task ID: 1
-# Title: Create or modify constants file for MAX_DROP_UPLOAD_FILES
+# Title: Create breadcrumbs.types.ts Module
 # Status: done
 # Dependencies: None
 # Priority: high
-# Description: Create a new constants file or modify an existing one to define the MAX_DROP_UPLOAD_FILES constant with a value of 4.
+# Description: Extract all TypeScript type definitions from useBreadcrumbs.ts into a dedicated types module
 # Details:
-Create a new file at src/lib/constants/uploads.ts if it doesn't exist. If the directory structure doesn't exist, create it. If a similar constants file already exists that would be appropriate for this constant, use that instead. Define the constant as: export const MAX_DROP_UPLOAD_FILES = 4; with an appropriate comment explaining its purpose. Ensure the constant is properly exported so it can be imported by other files.
+Create a new file at hooks/breadcrumbs.types.ts. Move all type definitions from useBreadcrumbs.ts including DynamicRouteType, RouteDynamicConfig<TData, TParams>, SpecificDeterminedRouteInfo, DeterminedRouteInfo, and BreadcrumbQueueItem. Export all types with proper export statements. Consider whether to import and re-export the Crumb type from ../components/breadcrumb/Breadcrumb or leave it as a direct import in other files. Update useBreadcrumbs.ts to import these types from the new file. Ensure there are no TypeScript errors after the migration.
 
 # Test Strategy:
-Verify the constant file exists, contains the MAX_DROP_UPLOAD_FILES constant with value 4, and can be imported from other files in the project.
+Verify the application builds without TypeScript errors. Confirm that useBreadcrumbs.ts correctly imports and uses the types from the new file. Manually test breadcrumb functionality in the application to ensure it still works as expected.

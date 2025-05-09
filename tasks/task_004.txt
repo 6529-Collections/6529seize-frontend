@@ -1,11 +1,11 @@
 # Task ID: 4
-# Title: Perform integration testing of file upload functionality
+# Title: Create breadcrumbs.config.ts Module
 # Status: done
-# Dependencies: 2, 3
+# Dependencies: 1, 2, 3
 # Priority: medium
-# Description: Test the complete file upload functionality to ensure both upload methods (button and drag-and-drop) correctly enforce the limit using the new constant.
+# Description: Extract the DYNAMIC_ROUTE_CONFIGS array into a dedicated configuration module
 # Details:
-Test both file upload methods (button in CreateDropActionsRow.tsx and drag-and-drop in CreateDropContent.tsx) to ensure they correctly enforce the 4-file limit. Verify that appropriate error messages are displayed when attempting to upload more than 4 files. Test edge cases such as uploading exactly 4 files, uploading 0 files, and attempting to upload more than 4 files in various sequences.
+Create a new file at hooks/breadcrumbs.config.ts. Move the DYNAMIC_ROUTE_CONFIGS array from useBreadcrumbs.ts to this file. Import necessary types from breadcrumbs.types.ts (RouteDynamicConfig, DynamicRouteType). Import API fetcher functions from breadcrumbs.api.ts. Import utility functions from breadcrumbs.utils.ts, particularly getDynamicParam if used in the configuration. Export the DYNAMIC_ROUTE_CONFIGS array. Update useBreadcrumbs.ts to import the configuration from this new file. Ensure the configuration structure remains identical to maintain compatibility.
 
 # Test Strategy:
-Create a test plan covering all upload scenarios: uploading 1-4 files via button, uploading 1-4 files via drag-and-drop, attempting to upload 5+ files via both methods, uploading files in multiple batches that would exceed the limit. Verify correct behavior and error messages in each case.
+Verify the application builds without errors. Test each dynamic route type to ensure breadcrumbs are still generated correctly. Verify that API-dependent breadcrumbs still fetch and display data correctly. Test edge cases like invalid routes or missing parameters.

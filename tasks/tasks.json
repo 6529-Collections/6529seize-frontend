@@ -2,70 +2,72 @@
   "tasks": [
     {
       "id": 1,
-      "title": "Create or modify constants file for MAX_DROP_UPLOAD_FILES",
-      "description": "Create a new constants file or modify an existing one to define the MAX_DROP_UPLOAD_FILES constant with a value of 4.",
+      "title": "Create breadcrumbs.types.ts Module",
+      "description": "Extract all TypeScript type definitions from useBreadcrumbs.ts into a dedicated types module",
       "status": "done",
       "dependencies": [],
       "priority": "high",
-      "details": "Create a new file at src/lib/constants/uploads.ts if it doesn't exist. If the directory structure doesn't exist, create it. If a similar constants file already exists that would be appropriate for this constant, use that instead. Define the constant as: export const MAX_DROP_UPLOAD_FILES = 4; with an appropriate comment explaining its purpose. Ensure the constant is properly exported so it can be imported by other files.",
-      "testStrategy": "Verify the constant file exists, contains the MAX_DROP_UPLOAD_FILES constant with value 4, and can be imported from other files in the project."
+      "details": "Create a new file at hooks/breadcrumbs.types.ts. Move all type definitions from useBreadcrumbs.ts including DynamicRouteType, RouteDynamicConfig<TData, TParams>, SpecificDeterminedRouteInfo, DeterminedRouteInfo, and BreadcrumbQueueItem. Export all types with proper export statements. Consider whether to import and re-export the Crumb type from ../components/breadcrumb/Breadcrumb or leave it as a direct import in other files. Update useBreadcrumbs.ts to import these types from the new file. Ensure there are no TypeScript errors after the migration.",
+      "testStrategy": "Verify the application builds without TypeScript errors. Confirm that useBreadcrumbs.ts correctly imports and uses the types from the new file. Manually test breadcrumb functionality in the application to ensure it still works as expected."
     },
     {
       "id": 2,
-      "title": "Update CreateDropActionsRow.tsx to use the constant",
-      "description": "Modify the CreateDropActionsRow.tsx file to import and use the MAX_DROP_UPLOAD_FILES constant instead of the hardcoded value 4.",
+      "title": "Create breadcrumbs.api.ts Module",
+      "description": "Extract all API fetching functions from useBreadcrumbs.ts into a dedicated API module",
       "status": "done",
       "dependencies": [
         1
       ],
       "priority": "high",
-      "details": "In components/drops/create/utils/CreateDropActionsRow.tsx, add an import statement for the MAX_DROP_UPLOAD_FILES constant. Find the onChange handler for the file input element that checks 'files.length > 4' and replace the hardcoded 4 with MAX_DROP_UPLOAD_FILES. Ensure the functionality remains the same - the component should still limit uploads to 4 files and display appropriate error messages when the limit is exceeded.",
-      "testStrategy": "Manually test the file upload functionality through the button to ensure it still limits uploads to 4 files and shows the correct error message when attempting to upload more than 4 files."
+      "details": "Create a new file at hooks/breadcrumbs.api.ts. Move all API fetching functions from useBreadcrumbs.ts including fetchGradientName, fetchProfileHandle, fetchWaveName, fetchMemeName, fetchNextgenName, fetchRememeName, fetchMemeLabName, and fetchCollectionName. Ensure all necessary imports are included, particularly ../services/api/common-api for the commonApiFetch function, ../constants for contract addresses, and ../entities/INextgen for the NextGenToken type. Export all fetcher functions with proper export statements. Temporarily update useBreadcrumbs.ts to import these functions from the new file (they will later be imported by breadcrumbs.config.ts instead).",
+      "testStrategy": "Verify the application builds without errors. Test each breadcrumb type that uses API fetching to ensure data is still being retrieved correctly. Check the network tab in browser dev tools to confirm API calls are still being made as expected."
     },
     {
       "id": 3,
-      "title": "Update CreateDropContent.tsx to use the constant",
-      "description": "Modify the CreateDropContent.tsx file to import and use the MAX_DROP_UPLOAD_FILES constant instead of the hardcoded value 4.",
+      "title": "Create breadcrumbs.utils.ts Module",
+      "description": "Extract utility functions from useBreadcrumbs.ts into a dedicated utils module",
       "status": "done",
       "dependencies": [
         1
       ],
       "priority": "high",
-      "details": "In components/waves/CreateDropContent.tsx, add an import statement for the MAX_DROP_UPLOAD_FILES constant. Find the handleFileChange function that checks 'updatedFiles.length > 4' and replace the hardcoded 4 with MAX_DROP_UPLOAD_FILES. Also find any instances where the array is sliced using '-4' and replace with `-MAX_DROP_UPLOAD_FILES`. Ensure the functionality remains the same - the component should still limit uploads to 4 files and handle array slicing correctly.",
-      "testStrategy": "Manually test the drag-and-drop file upload functionality to ensure it still limits uploads to 4 files, shows the correct error message when attempting to upload more than 4 files, and correctly handles array slicing."
+      "details": "Create a new file at hooks/breadcrumbs.utils.ts. Move utility functions from useBreadcrumbs.ts including formatCrumbDisplay, getDynamicParam, and buildStaticCrumbs. Import the Crumb type from ../components/breadcrumb/Breadcrumb for use in buildStaticCrumbs. Import any other necessary types from breadcrumbs.types.ts. Export all utility functions with proper export statements. Update useBreadcrumbs.ts to import these utilities from the new file. Ensure all function signatures remain the same to maintain compatibility.",
+      "testStrategy": "Verify the application builds without errors. Test breadcrumb generation for both static and dynamic routes to ensure the utility functions are working correctly. Check that breadcrumb formatting and display remains consistent with the previous implementation."
     },
     {
       "id": 4,
-      "title": "Perform integration testing of file upload functionality",
-      "description": "Test the complete file upload functionality to ensure both upload methods (button and drag-and-drop) correctly enforce the limit using the new constant.",
-      "status": "done",
-      "dependencies": [
-        2,
-        3
-      ],
-      "priority": "medium",
-      "details": "Test both file upload methods (button in CreateDropActionsRow.tsx and drag-and-drop in CreateDropContent.tsx) to ensure they correctly enforce the 4-file limit. Verify that appropriate error messages are displayed when attempting to upload more than 4 files. Test edge cases such as uploading exactly 4 files, uploading 0 files, and attempting to upload more than 4 files in various sequences.",
-      "testStrategy": "Create a test plan covering all upload scenarios: uploading 1-4 files via button, uploading 1-4 files via drag-and-drop, attempting to upload 5+ files via both methods, uploading files in multiple batches that would exceed the limit. Verify correct behavior and error messages in each case."
-    },
-    {
-      "id": 5,
-      "title": "Document the constant and update code comments",
-      "description": "Add appropriate documentation for the new constant and update any relevant code comments in the modified files.",
+      "title": "Create breadcrumbs.config.ts Module",
+      "description": "Extract the DYNAMIC_ROUTE_CONFIGS array into a dedicated configuration module",
       "status": "done",
       "dependencies": [
         1,
         2,
         3
       ],
-      "priority": "low",
-      "details": "Add a descriptive comment above the MAX_DROP_UPLOAD_FILES constant explaining its purpose and usage. Update any comments in CreateDropActionsRow.tsx and CreateDropContent.tsx that reference the file limit to mention the constant instead of the hardcoded value. If there's a project documentation file or wiki, consider adding a note about this constant for future developers. Ensure code comments accurately reflect the changes made and provide context for why the constant exists.",
-      "testStrategy": "Review the documentation and comments for clarity, accuracy, and completeness. Ensure they provide sufficient context for future developers to understand the purpose and usage of the constant."
+      "priority": "medium",
+      "details": "Create a new file at hooks/breadcrumbs.config.ts. Move the DYNAMIC_ROUTE_CONFIGS array from useBreadcrumbs.ts to this file. Import necessary types from breadcrumbs.types.ts (RouteDynamicConfig, DynamicRouteType). Import API fetcher functions from breadcrumbs.api.ts. Import utility functions from breadcrumbs.utils.ts, particularly getDynamicParam if used in the configuration. Export the DYNAMIC_ROUTE_CONFIGS array. Update useBreadcrumbs.ts to import the configuration from this new file. Ensure the configuration structure remains identical to maintain compatibility.",
+      "testStrategy": "Verify the application builds without errors. Test each dynamic route type to ensure breadcrumbs are still generated correctly. Verify that API-dependent breadcrumbs still fetch and display data correctly. Test edge cases like invalid routes or missing parameters."
+    },
+    {
+      "id": 5,
+      "title": "Refine useBreadcrumbs.ts Hook",
+      "description": "Streamline the main hook file to focus on core logic by importing from the new modules",
+      "status": "done",
+      "dependencies": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "priority": "medium",
+      "details": "Update hooks/useBreadcrumbs.ts to be more focused and maintainable. Remove all code that has been moved to the new modules. Add imports for all necessary types from breadcrumbs.types.ts. Import DYNAMIC_ROUTE_CONFIGS from breadcrumbs.config.ts. Import utility functions from breadcrumbs.utils.ts. Import any API fetchers that might be used directly in the hook from breadcrumbs.api.ts. Retain only the core hook logic: useBreadcrumbs hook function, determineRouteConfig helper, getQueryKey and fetchQueryData helpers for useQuery. Ensure the hook's public API remains unchanged to maintain backward compatibility. Clean up any redundant code or imports.",
+      "testStrategy": "Verify the application builds without errors. Conduct comprehensive testing of breadcrumb functionality across different route types. Test navigation between pages to ensure breadcrumbs update correctly. Verify that dynamic breadcrumbs still fetch and display data correctly. Compare the behavior before and after the refactor to ensure complete functional equivalence."
     }
   ],
   "metadata": {
-    "projectName": "Centralize Drop Image Upload Limit",
+    "projectName": "PRD Implementation",
     "totalTasks": 5,
-    "sourceFile": "/Users/simo/6529seize-frontend/centralize_limit_prd.txt",
-    "generatedAt": "2023-11-09"
+    "sourceFile": "/Users/simo/6529seize-frontend/refactor_useBreadcrumbs_modularization_prd.txt",
+    "generatedAt": "2023-11-14"
   }
 }
