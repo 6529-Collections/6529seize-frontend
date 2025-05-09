@@ -21,6 +21,7 @@ import {
   NEXTGEN_CHAIN_ID,
 } from "../../nextGen/nextgen_contracts";
 import HeaderSearchModalItemMedia from "./HeaderSearchModalItemMedia";
+import type { ApiWave } from "../../../generated/models/ApiWave";
 
 export interface NFTSearchResult {
   id: number;
@@ -33,7 +34,8 @@ export interface NFTSearchResult {
 
 export type HeaderSearchModalItemType =
   | CommunityMemberMinimal
-  | NFTSearchResult;
+  | NFTSearchResult
+  | ApiWave;
 
 export default function HeaderSearchModalItem({
   content,
@@ -52,17 +54,17 @@ export default function HeaderSearchModalItem({
   const ref = useRef<HTMLDivElement>(null);
   const isHovering = useHoverDirty(ref);
 
-  const isProfile = () => {
-    return content.hasOwnProperty("handle");
-  };
+  const supportsHover =
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(hover: hover)").matches;
 
-  const getProfile = () => {
-    return content as CommunityMemberMinimal;
-  };
+  const isProfile = () => content.hasOwnProperty("handle");
+  const isNft = () => content.hasOwnProperty("contract");
+  const getWave = () => content as ApiWave;
 
-  const getNft = () => {
-    return content as NFTSearchResult;
-  };
+  const getProfile = () => content as CommunityMemberMinimal;
+  const getNft = () => content as NFTSearchResult;
 
   const getNftCollectionMap = () => {
     return {
@@ -90,15 +92,26 @@ export default function HeaderSearchModalItem({
       const profile = getProfile();
       const cicType = cicToType(profile.cic_rating);
       return <UserCICAndLevel level={profile.level} cicType={cicType} />;
-    } else {
+    } else if (isNft()) {
       const nft = getNft();
       return <HeaderSearchModalItemMedia nft={nft} />;
+    } else {
+      const wave = getWave();
+      return (
+        <HeaderSearchModalItemMedia
+          src={wave.picture}
+          alt={wave.name}
+          roundedFull
+        />
+      );
     }
   };
 
   useEffect(() => {
-    onHover(isHovering);
-  }, [isHovering]);
+    if (supportsHover) {
+      onHover(isHovering);
+    }
+  }, [isHovering, supportsHover]);
 
   const getPath = () => {
     if (isProfile()) {
@@ -108,28 +121,37 @@ export default function HeaderSearchModalItem({
         router,
         defaultPath: UserPageTabType.IDENTITY,
       });
-    } else {
+    } else if (isNft()) {
       const nft = getNft();
       const collectionMap = getNftCollectionMap();
       return `${collectionMap[nft.contract].path}/${nft.id}`;
+    } else {
+      const wave = getWave();
+      const currentWaveId = router.query.wave as string | undefined;
+      return currentWaveId === wave.id ? "/my-stream" : `/my-stream?wave=${wave.id}`;
     }
   };
 
   const getPrimaryText = () => {
     if (isProfile()) {
       return getProfile().handle ?? "-";
-    } else {
+    } else if (isNft()) {
       return getNft().name;
+    } else {
+      return getWave().name;
     }
   };
 
   const getSecondaryText = () => {
     if (isProfile()) {
       return getProfile().display ?? "";
-    } else {
+    } else if (isNft()) {
       const nft = getNft();
       const collectionMap = getNftCollectionMap();
       return `${collectionMap[nft.contract].title} #${nft.id}`;
+    } else {
+      const wave = getWave();
+      return `Wave #${wave.serial_no}`;
     }
   };
 
@@ -138,7 +160,7 @@ export default function HeaderSearchModalItem({
       ref={ref}
       className={`${
         isSelected ? "tw-bg-iron-800" : ""
-      } tw-rounded-md tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}>
+      } tw-rounded-lg tw-px-2 tw-py-2 tw-my-1 tw-transition tw-duration-300 tw-ease-out tw-w-full`}>
       <Link
         href={getPath()}
         onClick={onClose}
@@ -146,7 +168,7 @@ export default function HeaderSearchModalItem({
         {getMedia()}
         <div className="tw-w-full">
           <div className="tw-inline-flex tw-justify-between tw-w-full">
-            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-100">
+            <span className="tw-text-sm tw-font-semibold tw-text-iron-100">
               <HeaderSearchModalItemHighlight
                 text={getPrimaryText()}
                 highlight={searchValue}
