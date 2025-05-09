@@ -38,7 +38,7 @@ const redirectConfig = {
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { isCapacitor } = useCapacitor();
+  const { isCapacitor, isIos } = useCapacitor();
   const { connectedProfile } = useAuth();
   const router = useRouter();
 
@@ -92,9 +92,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           action.notification,
           profile
         );
-        await PushNotifications.removeDeliveredNotifications({
-          notifications: [action.notification],
-        });
+
+        if (isIos) {
+          await PushNotifications.removeDeliveredNotifications({
+            notifications: [action.notification],
+          });
+        }
       }
     );
 
