@@ -9,6 +9,7 @@ import {
 } from "../utils/wave-messages-utils";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
 import { ApiLightDrop } from "../../../generated/models/ApiLightDrop";
+import { WAVE_DROPS_PARAMS } from "../../../components/react-query-wrapper/utils/query-utils";
 
 // Tracks which waves are currently loading next page
 interface PaginationState {
@@ -56,6 +57,55 @@ export function useWavePagination({
   );
   const aroundQueueLastFetchedMinSerialNoRef = useRef<number | null>(null);
   const aroundQueueLastFetchedMaxSerialNoRef = useRef<number | null>(null);
+
+  const determineSerialToFetch = useCallback(
+    (pendingSerialNo: number | null): number | null => {
+      if (pendingSerialNo === null) {
+        return null;
+      }
+
+      const lastSuccessfullyFetchedSerialNo =
+        aroundQueueLastSuccessfullyFetchedSerialNoRef.current;
+
+      if (lastSuccessfullyFetchedSerialNo === null) {
+        return pendingSerialNo;
+      }
+
+      if (pendingSerialNo === lastSuccessfullyFetchedSerialNo) {
+        return pendingSerialNo;
+      }
+
+      if (pendingSerialNo > lastSuccessfullyFetchedSerialNo) {
+        const lastFetchedMaxSerialNo =
+          aroundQueueLastFetchedMaxSerialNoRef.current;
+        if (lastFetchedMaxSerialNo === null) {
+          return pendingSerialNo;
+        }
+        if (
+          pendingSerialNo >
+          lastFetchedMaxSerialNo + WAVE_DROPS_PARAMS.limit
+        ) {
+          return pendingSerialNo;
+        }
+        return lastFetchedMaxSerialNo + (WAVE_DROPS_PARAMS.limit - 1);
+      } else {
+        // pendingSerialNo < lastSuccessfullyFetchedSerialNo
+        const lastFetchedMinSerialNo =
+          aroundQueueLastFetchedMinSerialNoRef.current;
+        if (lastFetchedMinSerialNo === null) {
+          return pendingSerialNo;
+        }
+        if (
+          pendingSerialNo <
+          lastFetchedMinSerialNo - WAVE_DROPS_PARAMS.limit
+        ) {
+          return pendingSerialNo;
+        }
+        return lastFetchedMinSerialNo - (WAVE_DROPS_PARAMS.limit - 1);
+      }
+    },
+    [] // No dependencies as it only uses refs
+  );
 
   /**
    * Gets the oldest message's serial number for pagination
@@ -294,7 +344,7 @@ export function useWavePagination({
       }
 
       // Guard 2: No pending request
-      const serialToFetch = state.pendingSerialNo;
+      const serialToFetch = determineSerialToFetch(state.pendingSerialNo);
       if (serialToFetch === null) {
         return;
       }
@@ -365,7 +415,7 @@ export function useWavePagination({
         void _processAroundSerialNoQueue(waveId);
       }
     },
-    [createController, cleanupController, updateData]
+    [createController, cleanupController, updateData, determineSerialToFetch]
   );
 
   /**

@@ -1,0 +1,45 @@
+# PRD: Helper Function for Determining `serialToFetch`
+
+**1. Introduction**
+This document outlines the requirements for creating a helper function within the `useWavePagination.ts` hook. This function, `determineSerialToFetch`, will encapsulate the logic for deciding the next serial number to fetch when using the "fetch around serial number" functionality.
+
+**2. Goals**
+- Create a new helper function `determineSerialToFetch` in `contexts/wave/hooks/useWavePagination.ts`.
+- This function will determine the optimal `serialToFetch` based on the current `pendingSerialNo` and the state of previously fetched ranges (`aroundQueueLastSuccessfullyFetchedSerialNoRef`, `aroundQueueLastFetchedMaxSerialNoRef`, `aroundQueueLastFetchedMinSerialNoRef`).
+- Improve readability and maintainability of the `_processAroundSerialNoQueue` function by extracting this complex logic.
+- Ensure the logic correctly handles fetching forward and backward from the last successful fetch, respecting a defined limit (WAVE_DROPS_PARAMS.limit).
+
+**3. Functional Requirements**
+The `determineSerialToFetch` function will:
+- Accept `pendingSerialNo: number | null` as an argument.
+- Access `aroundQueueLastSuccessfullyFetchedSerialNoRef.current`, `aroundQueueLastFetchedMaxSerialNoRef.current`, and `aroundQueueLastFetchedMinSerialNoRef.current`.
+- Use the `WAVE_DROPS_PARAMS.limit` constant.
+- Implement the following logic:
+    1. If `pendingSerialNo` is `null`, return `null`.
+    2. Let `lastSuccessfullyFetchedSerialNo = aroundQueueLastSuccessfullyFetchedSerialNoRef.current`.
+    3. If `lastSuccessfullyFetchedSerialNo` is `null`, return `pendingSerialNo`.
+    4. If `pendingSerialNo === lastSuccessfullyFetchedSerialNo`, return `pendingSerialNo`.
+    5. If `pendingSerialNo > lastSuccessfullyFetchedSerialNo`:
+        a. Let `lastFetchedMaxSerialNo = aroundQueueLastFetchedMaxSerialNoRef.current`.
+        b. If `lastFetchedMaxSerialNo` is `null`, return `pendingSerialNo`.
+        c. If `pendingSerialNo > lastFetchedMaxSerialNo + WAVE_DROPS_PARAMS.limit`, return `pendingSerialNo`.
+        d. Else, return `lastFetchedMaxSerialNo + WAVE_DROPS_PARAMS.limit`.
+    6. If `pendingSerialNo < lastSuccessfullyFetchedSerialNo`:
+        a. Let `lastFetchedMinSerialNo = aroundQueueLastFetchedMinSerialNoRef.current`.
+        b. If `lastFetchedMinSerialNo` is `null`, return `pendingSerialNo`.
+        c. If `pendingSerialNo < lastFetchedMinSerialNo - WAVE_DROPS_PARAMS.limit`, return `pendingSerialNo`.
+        d. Else, return `lastFetchedMinSerialNo - WAVE_DROPS_PARAMS.limit`.
+
+**4. Non-Functional Requirements**
+- The function should be placed within `contexts/wave/hooks/useWavePagination.ts`.
+- The function should be well-typed using TypeScript.
+- The existing `_processAroundSerialNoQueue` function should be updated to use this new helper function.
+
+**5. Out of Scope**
+- Changes to other parts of the `useWavePagination.ts` hook not directly related to `serialToFetch` determination.
+- Changes to the `WAVE_DROPS_PARAMS.limit` value.
+
+**6. Success Metrics**
+- The `determineSerialToFetch` function is implemented correctly as per the logic defined.
+- The `_processAroundSerialNoQueue` function uses the new helper and behaves as expected.
+- Code readability is improved. 
