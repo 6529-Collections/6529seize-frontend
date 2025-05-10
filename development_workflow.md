@@ -1,6 +1,6 @@
 # Development Workflow
 
-This document outlines key practices and steps for successful development and refactoring within this project. It's a living document, intended to be updated as new effective patterns emerge. **For all new feature development, this Taskmaster-centric workflow is the standard approach, ensuring clarity, consistency, and efficient collaboration, especially when working with AI assistants.**
+This document outlines key practices and steps for successful development and refactoring within this project. It's a living document, intended to be updated as new effective patterns emerge. **This Taskmaster-centric workflow is the strict standard approach for all development and refactoring tasks, irrespective of their size or complexity, ensuring clarity, consistency, and efficient collaboration, especially when working with AI assistants.**
 
 ## I. Planning & Preparation
 
@@ -10,19 +10,20 @@ This document outlines key practices and steps for successful development and re
 
 2.  **Structured Task Breakdown (e.g., using a PRD or Task Management System):**
     *   Break down larger objectives into smaller, manageable tasks.
-    *   **For significant new functionalities, creating a detailed Product Requirements Document (PRD) is the crucial first step.** This document should outline the scope, technical approach, potential risks, and a development roadmap. Refer to `scripts/example_prd.txt` for a recommended structure. A well-defined PRD, especially its "Development Roadmap" and "Logical Dependency Chain" sections, directly leads to more effective automated task generation.
-    *   Each task should have a clear, actionable description.
+    *   **All new development or refactoring work, regardless of scale, must begin with the creation of a Product Requirements Document (PRD).** Even for the smallest, most granular tasks (e.g., creating a single helper function), a minimal PRD is required. This PRD will then be processed by Taskmaster. Refer to `scripts/example_prd.txt` for a recommended structure.
+    *   The PRD, even a minimal one, should clearly define the task and its requirements to ensure it can be effectively processed by `parse_prd`.
+    *   Each task derived from the PRD should have a clear, actionable description.
 
 3.  **Automated Task Generation with Taskmaster (MCP):**
-    *   **Once a PRD for a new feature is finalized (as described above), use Taskmaster's MCP tools to generate an initial `tasks.json`.**
+    *   **Once the Product Requirements Document (PRD) is finalized, irrespective of the task's size, use Taskmaster's `parse_prd` MCP tool to generate the corresponding task(s) in `tasks.json`. This is the sole method for initiating tasks.**
     *   **Tool:** `parse_prd`
     *   **Key Parameters:**
-        *   `input`: Absolute path to your PRD file (e.g., `scripts/your_feature_prd.txt`).
-        *   `force: true`: To overwrite any existing `tasks.json`, ensuring a clean slate.
-        *   `numTasks`: Specify the approximate number of top-level tasks to generate. Align this with major phases or sections in your PRD's "Development Roadmap".
+        *   `input`: Absolute path to your PRD file (e.g., `scripts/your_feature_prd.txt` or `scripts/helper_function_xyz_prd.txt`).
+        *   `force: true`: To overwrite any existing `tasks.json` if starting fresh for a set of related tasks, or ensure it's `false` or omitted if appending/updating.
+        *   `numTasks`: Specify the approximate number of top-level tasks to generate. For a very small PRD defining a single granular task, this would typically be "1".
         *   `projectRoot`: The absolute path to your project's root directory.
-    *   **Example:** `mcp_task-master-ai_parse_prd(force = True, input = "/path/to/your_feature_prd.txt", numTasks = "5", projectRoot = "/path/to/project")`
-    *   **Benefit:** Automates the initial task creation process, ensuring consistency with the PRD and saving manual effort. A detailed PRD leads to more relevant and actionable tasks.
+    *   **Example (for a small, single task PRD):** `mcp_task-master-ai_parse_prd(force = True, input = "/path/to/your_small_task_prd.txt", numTasks = "1", projectRoot = "/path/to/project")`
+    *   **Benefit:** Ensures **all work without exception is initiated and tracked via a PRD processed by Taskmaster**, promoting maximum consistency and traceability.
 
 ## II. Implementation & Refactoring Process
 
@@ -32,7 +33,7 @@ This document outlines key practices and steps for successful development and re
     *   Regularly review progress and be prepared to adjust the plan.
 
 2.  **Task-Driven Implementation (using Taskmaster):**
-    *   **The following steps apply when working on tasks, typically those generated from a PRD via `parse_prd` and managed within Taskmaster.**
+    *   **The following steps apply strictly when working on any task managed within Taskmaster. All coding work must correspond to an existing task in `tasks.json`.**
     *   Before starting work on a specific task (or subtask) identified from Taskmaster (e.g., via `next_task` or `get_task`):
         *   Set its status to `in-progress` using `set_task_status`.
         *   Example: `mcp_task-master-ai_set_task_status(id = "TASK_ID", status = "in-progress", projectRoot = "/path/to/project")`
