@@ -51,7 +51,9 @@ export function useWavePagination({
   // Track state for fetching around a serial number
   const aroundSerialNoStates = useRef<Record<string, AroundSerialNoState>>({});
 
-  const aroundQueueLastSuccessfullyFetchedSerialNoRef = useRef<number | null>(null);
+  const aroundQueueLastSuccessfullyFetchedSerialNoRef = useRef<number | null>(
+    null
+  );
   const aroundQueueLastFetchedMinSerialNoRef = useRef<number | null>(null);
   const aroundQueueLastFetchedMaxSerialNoRef = useRef<number | null>(null);
 
@@ -328,7 +330,7 @@ export function useWavePagination({
           });
 
           if (result.length > 0) {
-            const serials = result.map(drop => drop.serial_no);
+            const serials = result.map((drop) => drop.serial_no);
             aroundQueueLastFetchedMinSerialNoRef.current = Math.min(...serials);
             aroundQueueLastFetchedMaxSerialNoRef.current = Math.max(...serials);
           } else {
