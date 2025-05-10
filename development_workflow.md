@@ -1,6 +1,6 @@
 # Development Workflow
 
-This document outlines key practices and steps for successful development and refactoring within this project. It's a living document, intended to be updated as new effective patterns emerge.
+This document outlines key practices and steps for successful development and refactoring within this project. It's a living document, intended to be updated as new effective patterns emerge. **For all new feature development, this Taskmaster-centric workflow is the standard approach, ensuring clarity, consistency, and efficient collaboration, especially when working with AI assistants.**
 
 ## I. Planning & Preparation
 
@@ -10,14 +10,14 @@ This document outlines key practices and steps for successful development and re
 
 2.  **Structured Task Breakdown (e.g., using a PRD or Task Management System):**
     *   Break down larger objectives into smaller, manageable tasks.
-    *   For significant changes, consider creating a brief Product Requirements Document (PRD) outlining the scope, technical approach, and potential risks. A well-defined "Development Roadmap" section in the PRD is particularly useful.
+    *   **For significant new functionalities, creating a detailed Product Requirements Document (PRD) is the crucial first step.** This document should outline the scope, technical approach, potential risks, and a development roadmap. Refer to `scripts/example_prd.txt` for a recommended structure. A well-defined PRD, especially its "Development Roadmap" and "Logical Dependency Chain" sections, directly leads to more effective automated task generation.
     *   Each task should have a clear, actionable description.
 
 3.  **Automated Task Generation with Taskmaster (MCP):**
-    *   Once a PRD is created (e.g., `your_feature_prd.txt`), use Taskmaster's MCP tools to generate an initial `tasks.json`.
+    *   **Once a PRD for a new feature is finalized (as described above), use Taskmaster's MCP tools to generate an initial `tasks.json`.**
     *   **Tool:** `parse_prd`
     *   **Key Parameters:**
-        *   `input`: Absolute path to your PRD file.
+        *   `input`: Absolute path to your PRD file (e.g., `scripts/your_feature_prd.txt`).
         *   `force: true`: To overwrite any existing `tasks.json`, ensuring a clean slate.
         *   `numTasks`: Specify the approximate number of top-level tasks to generate. Align this with major phases or sections in your PRD's "Development Roadmap".
         *   `projectRoot`: The absolute path to your project's root directory.
@@ -32,6 +32,7 @@ This document outlines key practices and steps for successful development and re
     *   Regularly review progress and be prepared to adjust the plan.
 
 2.  **Task-Driven Implementation (using Taskmaster):**
+    *   **The following steps apply when working on tasks, typically those generated from a PRD via `parse_prd` and managed within Taskmaster.**
     *   Before starting work on a specific task (or subtask) identified from Taskmaster (e.g., via `next_task` or `get_task`):
         *   Set its status to `in-progress` using `set_task_status`.
         *   Example: `mcp_task-master-ai_set_task_status(id = "TASK_ID", status = "in-progress", projectRoot = "/path/to/project")`
@@ -87,7 +88,7 @@ This document outlines key practices and steps for successful development and re
 
 ## V. Task Management with Taskmaster
 
-This section outlines the general workflow for using Taskmaster (via MCP tools) to manage development tasks after initial generation. Refer to `.cursor/rules/dev_workflow.mdc` and `taskmaster.mdc` for comprehensive tool details.
+This section outlines the general workflow for using Taskmaster (via MCP tools) to manage development tasks after initial generation. **These tools are integral to the lifecycle of tasks, particularly those originating from the PRD-driven planning phase, guiding work from initial breakdown through to completion.** Refer to `.cursor/rules/dev_workflow.mdc` and `taskmaster.mdc` for comprehensive tool details.
 
 1.  **View Current Tasks:**
     *   Use `get_tasks` to see the current list of tasks, their status, and IDs.
