@@ -51,6 +51,10 @@ export function useWavePagination({
   // Track state for fetching around a serial number
   const aroundSerialNoStates = useRef<Record<string, AroundSerialNoState>>({});
 
+  const aroundQueueLastSuccessfullyFetchedSerialNoRef = useRef<number | null>(null);
+  const aroundQueueLastFetchedMinSerialNoRef = useRef<number | null>(null);
+  const aroundQueueLastFetchedMaxSerialNoRef = useRef<number | null>(null);
+
   /**
    * Gets the oldest message's serial number for pagination
    */
@@ -308,6 +312,8 @@ export function useWavePagination({
           controller.signal
         );
 
+        aroundQueueLastSuccessfullyFetchedSerialNoRef.current = serialToFetch;
+
         if (result) {
           updateData({
             key: waveId,
@@ -320,9 +326,23 @@ export function useWavePagination({
               };
             }),
           });
+
+          if (result.length > 0) {
+            const serials = result.map(drop => drop.serial_no);
+            aroundQueueLastFetchedMinSerialNoRef.current = Math.min(...serials);
+            aroundQueueLastFetchedMaxSerialNoRef.current = Math.max(...serials);
+          } else {
+            aroundQueueLastFetchedMinSerialNoRef.current = null;
+            aroundQueueLastFetchedMaxSerialNoRef.current = null;
+            console.log(
+              `[WavePagination] Fetched around serial no ${serialToFetch}, received an empty list of drops.`
+            );
+          }
         } else {
+          aroundQueueLastFetchedMinSerialNoRef.current = null;
+          aroundQueueLastFetchedMaxSerialNoRef.current = null;
           console.log(
-            `[WavePagination] Fetched around serial no ${serialToFetch}, no new data.`
+            `[WavePagination] Fetched around serial no ${serialToFetch}, no new data (null result).`
           );
         }
       } catch (error) {
@@ -343,7 +363,7 @@ export function useWavePagination({
         void _processAroundSerialNoQueue(waveId);
       }
     },
-    [createController, cleanupController] // Dependencies: functions from useWaveAbortController
+    [createController, cleanupController, updateData]
   );
 
   /**

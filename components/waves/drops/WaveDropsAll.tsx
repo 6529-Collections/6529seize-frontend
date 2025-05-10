@@ -223,7 +223,6 @@ export default function WaveDropsAll({
   useEffect(() => {
     if (init && serialNo && !isScrolling) {
       const currentSmallestSerial = smallestSerialNo.current;
-
       // Check if already loaded before attempting scroll or fetch
       if (currentSmallestSerial && currentSmallestSerial <= serialNo) {
         const success = scrollToSerialNo("smooth");
