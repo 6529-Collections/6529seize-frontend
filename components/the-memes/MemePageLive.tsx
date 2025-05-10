@@ -23,6 +23,7 @@ import { printMemeReferences } from "../rememes/RememePage";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
 import { faFire, faRefresh } from "@fortawesome/free-solid-svg-icons";
+import Link from "next/link";
 
 const REMEMES_PAGE_SIZE = 20;
 
@@ -33,6 +34,16 @@ export function MemePageLiveRightMenu(props: {
   nftBalance: number;
 }) {
   const capacitor = useCapacitor();
+
+  const distributionPlanLink = (() => {
+    const id = props.nft?.id;
+    if (!id) return "";
+    if (props.nft?.has_distribution) return `/the-memes/${id}/distribution`;
+    if (id > 3)
+      return `https://github.com/6529-Collections/thememecards/tree/main/card${id}`;
+    return `https://github.com/6529-Collections/thememecards/tree/main/card1-3`;
+  })();
+
   if (props.show && props.nft && props.nftMeta) {
     return (
       <Col
@@ -198,20 +209,18 @@ export function MemePageLiveRightMenu(props: {
               </Table>
             </Col>
           </Row>
-          <Row>
-            <Col>
-              <a
-                href={
-                  props.nft.has_distribution
-                    ? `/the-memes/${props.nft.id}/distribution`
-                    : `https://github.com/6529-Collections/thememecards/tree/main/card${props.nft.id}`
-                }
-                target={props.nft.has_distribution ? "_self" : "_blank"}
-                rel="noreferrer">
-                Distribution Plan
-              </a>
-            </Col>
-          </Row>
+          {distributionPlanLink && (
+            <Row>
+              <Col>
+                <Link
+                  href={distributionPlanLink}
+                  target={props.nft.has_distribution ? "_self" : "_blank"}
+                  rel="noreferrer">
+                  Distribution Plan
+                </Link>
+              </Col>
+            </Row>
+          )}
           {props.nftBalance > 0 && (
             <Row className="pt-3">
               <Col>
@@ -390,7 +399,7 @@ export function MemePageLiveSubMenu(props: {
                     sm={{ span: 4 }}
                     md={{ span: 3 }}
                     lg={{ span: 3 }}>
-                    <a
+                    <Link
                       href={`/rememes/${rememe.contract}/${rememe.id}`}
                       className="decoration-none scale-hover">
                       <Container fluid className="no-padding">
@@ -452,7 +461,7 @@ export function MemePageLiveSubMenu(props: {
                           </Col>
                         </Row>
                       </Container>
-                    </a>
+                    </Link>
                   </Col>
                 );
               })}

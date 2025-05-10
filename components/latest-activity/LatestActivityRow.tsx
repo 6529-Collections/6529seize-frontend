@@ -28,8 +28,13 @@ import {
   getNextGenImageUrl,
 } from "../nextGen/collections/nextgenToken/NextGenTokenImage";
 import {
+  faCartPlus,
+  faExchange,
   faExternalLinkSquare,
+  faFire,
   faGasPump,
+  faParachuteBox,
+  faShoppingCart,
 } from "@fortawesome/free-solid-svg-icons";
 
 function calculateRoyaltiesPercentage(value: number, royalties: number) {
@@ -405,18 +410,18 @@ export default function LatestActivityRow(props: Readonly<Props>) {
 
   function getIcon() {
     if (isBurn()) {
-      return "fire";
+      return faFire;
     }
 
     if (props.tr.value > 0) {
-      return isMint() ? "cart-plus" : "shopping-cart";
+      return isMint() ? faCartPlus : faShoppingCart;
     }
 
     if (isAirdrop()) {
-      return "parachute-box";
+      return faParachuteBox;
     }
 
-    return "exchange";
+    return faExchange;
   }
 
   if (!props.tr.token_count) {
