@@ -5,6 +5,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
 
 // add the code bellow
 @layer utilities {
@@ -16,6 +21,16 @@
   .no-scrollbar {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
+  }
+
+  /* Prevent text selection on touch devices only */
+  .touch-select-none {
+    @media (hover: none) and (pointer: coarse) {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
   }
 }
 
