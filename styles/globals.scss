@@ -5,6 +5,11 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
 
 // add the code bellow
 @layer utilities {

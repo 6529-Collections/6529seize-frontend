@@ -92,9 +92,9 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
-        className={`tw-no-underline ${
+        className={`tw-no-underline tw-select-none ${
           isTemporaryDrop || !onDropContentClick
-            ? "tw-cursor-default"
+            ? "tw-cursor-pointer-none"
             : "tw-cursor-pointer"
         }`}
         role={isTemporaryDrop || !onDropContentClick ? undefined : "button"}
