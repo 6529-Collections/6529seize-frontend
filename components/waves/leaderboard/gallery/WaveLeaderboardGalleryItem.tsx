@@ -67,7 +67,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
 
   // Determine container class based on art-focused mode
   const containerClass = artFocused
-    ? "group tw-transition-all tw-duration-300 tw-ease-out"
+    ? "group tw-transition-all tw-duration-300 tw-ease-out active:tw-bg-iron-900 tw-transition tw-duration-200 tw-ease-out"
     : "";
 
   // Apply enhanced image effects for art-focused mode
