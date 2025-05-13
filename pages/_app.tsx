@@ -223,6 +223,14 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     };
   }, []);
 
+  const metadata = (Component as any).metadata || {
+    title: "6529.io",
+    description: "6529.io",
+    url: process.env.BASE_ENDPOINT!,
+    image: `${process.env.BASE_ENDPOINT}/6529io.png`,
+    twitterCard: "summary",
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
@@ -247,7 +255,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                             <EULAConsentProvider>
                               <AppWebSocketProvider>
                                 <HeaderProvider>
-                                  <MainLayout>
+                                  <MainLayout metadata={metadata}>
                                     {getLayout(
                                       <Component
                                         {...props}
