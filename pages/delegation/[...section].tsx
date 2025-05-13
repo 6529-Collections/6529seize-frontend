@@ -228,6 +228,9 @@ export default function DelegationsDocumentation(props: any) {
   };
 
   const updateQueryParams = (s: DelegationCenterSection) => {
+    if (s === DelegationCenterSection.HTML) {
+      return;
+    }
     const queryParams = getQueryParams(s);
     router.push(
       {
