@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getRandomObjectId } from "../../../../helpers/AllowlistToolHelpers";
 import { formatNameForUrl } from "../../nextgen_helpers";
 import useCapacitor from "../../../../hooks/useCapacitor";
-import { faArrowCircleRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowCircleRight, faPlayCircle, faPauseCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   collection: NextGenCollection;
@@ -148,7 +148,7 @@ function SwiperAutoplayButton() {
         onClick={() => {
           setPaused(!paused);
         }}
-        icon={paused ? "play-circle" : "pause-circle"}
+        icon={paused ? faPlayCircle : faPauseCircle}
       />
     </div>
   );

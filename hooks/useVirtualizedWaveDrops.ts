@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useVirtualizedWaveMessages } from "./useVirtualizedWaveMessages";
 import { useMyStream } from "../contexts/wave/MyStreamContext";
 import { NextPageProps } from "../contexts/wave/hooks/useWavePagination";
+import { DropSize } from "../helpers/waves/drop.helpers";
 
 /**
  * Hook that adapts the useVirtualizedWaveMessages hook to match the
@@ -29,7 +30,11 @@ export function useVirtualizedWaveDrops(
   // Create a wrapper for fetchNextPageForWave that first tries to get data locally
   const fetchNextPageForWave = useCallback(
     async (props: NextPageProps) => {
-      if (waveId === props.waveId && virtualizedWaveMessages) {
+      if (
+        waveId === props.waveId &&
+        virtualizedWaveMessages &&
+        props.type === DropSize.FULL
+      ) {
         // First try to load more from cache if available
         if (virtualizedWaveMessages.hasMoreLocal) {
           virtualizedWaveMessages.loadMoreLocally();

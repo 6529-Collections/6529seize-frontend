@@ -1,5 +1,8 @@
 import { WAVE_DROPS_PARAMS } from "../../../components/react-query-wrapper/utils/query-utils";
-import { commonApiFetch } from "../../../services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiFetchWithRetry,
+} from "../../../services/api/common-api";
 import { ApiWaveDropsFeed } from "../../../generated/models/ApiWaveDropsFeed";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import {
@@ -70,10 +73,16 @@ export async function fetchAroundSerialNoWaveMessages(
   params.serial_no_limit = `${serialNo}`;
 
   try {
-    const data = await commonApiFetch<ApiWaveDropsFeed>({
+    const data = await commonApiFetchWithRetry<ApiWaveDropsFeed>({
       endpoint: `waves/${waveId}/drops`,
       params,
       signal,
+      retryOptions: {
+        maxRetries: 3,
+        initialDelayMs: 1000,
+        backoffFactor: 2,
+        jitter: 0.1,
+      },
     });
 
     return data.drops.map((drop) => ({
@@ -120,7 +129,7 @@ export async function fetchLightWaveMessages(
     ]);
 
     const combined: (ApiLightDrop | ApiDrop)[] = [];
-   
+
     for (const drop of results[0]) {
       combined.push(drop);
     }
@@ -405,11 +414,17 @@ export async function findLightDropBySerialNoWithPagination(
       limit: itemsPerRequest.toString(),
       max_serial_no: currentMaxSerialForNextCall.toString(),
     };
-    
-    const currentBatch = await commonApiFetch<ApiLightDrop[]>({
+
+    const currentBatch = await commonApiFetchWithRetry<ApiLightDrop[]>({
       endpoint: `light-drops`,
       params: paramsForCurrentRequest,
       signal,
+      retryOptions: {
+        maxRetries: 3,
+        initialDelayMs: 1000,
+        backoffFactor: 2,
+        jitter: 0.1,
+      },
     });
 
     if (signal?.aborted) {
