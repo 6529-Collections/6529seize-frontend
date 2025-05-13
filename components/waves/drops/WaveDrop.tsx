@@ -13,6 +13,7 @@ import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "./Drop";
+import useIsMobileScreen from "../../../hooks/isMobileScreen";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -149,7 +150,7 @@ const WaveDrop = ({
   const shouldGroupWithNextDrop =
     !isDrop && shouldGroupWithDrop(drop, nextDrop);
 
-  const isMobile = useIsMobileDevice();
+  const isMobile = useIsMobileScreen();
 
   const getGroupingClass = () => {
     if (shouldGroupWithPreviousDrop) return "";
@@ -228,14 +229,12 @@ const WaveDrop = ({
     <div
       className={`${
         isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""
-      } tw-w-full`}
-    >
+      } tw-w-full`}>
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}
-      >
+        onTouchMove={handleTouchMove}>
         {drop.reply_to &&
           (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
             drop.author.handle !== previousDrop?.author.handle) &&
@@ -252,31 +251,35 @@ const WaveDrop = ({
             />
           )}
         <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0">
-          {!shouldGroupWithPreviousDrop && <WaveDropAuthorPfp drop={drop} />}
+          {!shouldGroupWithPreviousDrop && !isMobile && (
+            <WaveDropAuthorPfp drop={drop} />
+          )}
           <div
             className="tw-flex tw-flex-col tw-w-full tw-gap-y-1"
             style={{
-              maxWidth: !shouldGroupWithPreviousDrop
-                ? "calc(100% - 3.25rem)"
-                : "100%",
-            }}
-          >
+              maxWidth:
+                !shouldGroupWithPreviousDrop && !isMobile
+                  ? "calc(100% - 3.25rem)"
+                  : "100%",
+            }}>
             {!shouldGroupWithPreviousDrop && (
-              <WaveDropHeader
-                drop={drop}
-                showWaveInfo={showWaveInfo}
-                isStorm={isStorm}
-                currentPartIndex={activePartIndex}
-                partsCount={drop.parts.length}
-              />
+              <div className="tw-flex tw-gap-x-1">
+                {isMobile && <WaveDropAuthorPfp drop={drop} />}
+                <WaveDropHeader
+                  drop={drop}
+                  showWaveInfo={showWaveInfo}
+                  isStorm={isStorm}
+                  currentPartIndex={activePartIndex}
+                  partsCount={drop.parts.length}
+                />
+              </div>
             )}
             <div
               className={
                 shouldGroupWithPreviousDrop
                   ? "tw-ml-[3.25rem] tw-py-[0.15625rem]"
                   : ""
-              }
-            >
+              }>
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}
