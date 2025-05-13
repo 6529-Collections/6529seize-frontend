@@ -26,6 +26,22 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       ? parseInt(effectiveRank, 10)
       : effectiveRank;
 
+  // Helper to compute English ordinal suffix
+  const getOrdinalSuffix = (n: number) => {
+    const mod100 = n % 100;
+    if (mod100 >= 11 && mod100 <= 13) return "th";
+    switch (n % 10) {
+      case 1:
+        return "st";
+      case 2:
+        return "nd";
+      case 3:
+        return "rd";
+      default:
+        return "th";
+    }
+  };
+
   // Format separate date and time for responsive display
   const dateTime = decisionTime ? new Date(decisionTime) : null;
 
@@ -69,7 +85,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
     default:
       accentColor = "#848490"; // iron-600 from Tailwind config
       bgColor = "rgba(96,96,108,0.2)";
-      rankText = `${rankNumber}th`;
+      rankText = `${rankNumber}${getOrdinalSuffix(rankNumber)}`;
   }
 
   return (

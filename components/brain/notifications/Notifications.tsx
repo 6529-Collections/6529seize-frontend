@@ -3,7 +3,7 @@ import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
-import { useMutation } from "@tanstack/react-query";
+import NotificationsLoading from "./NotificationsLoading";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
@@ -15,6 +15,7 @@ import { useLayout } from "../my-stream/layout/LayoutContext";
 import NotificationsCauseFilter, {
   NotificationFilter,
 } from "./NotificationsCauseFilter";
+import { useMutation } from "@tanstack/react-query";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -64,9 +65,9 @@ export default function Notifications() {
       invalidateNotifications();
       await removeAllDeliveredNotifications();
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       setToast({
-        message: error as unknown as string,
+        message: String(error),
         type: "error",
       });
     },
@@ -83,6 +84,7 @@ export default function Notifications() {
     hasNextPage,
     fetchNextPage,
     refetch,
+    isInitialQueryDone,
   } = useNotificationsQuery({
     identity: connectedProfile?.handle,
     activeProfileProxy: !!activeProfileProxy,
@@ -115,6 +117,9 @@ export default function Notifications() {
     setActiveDrop(null);
   };
 
+  const showLoading = !isInitialQueryDone || (isFetching && items.length === 0);
+  const showNoItems = isInitialQueryDone && !isFetching && items.length === 0;
+
   return (
     <div 
       className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow"
@@ -125,16 +130,18 @@ export default function Notifications() {
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
         />
-        {!items.length && !isFetching ? (
+        {showLoading ? (
+          <NotificationsLoading />
+        ) : showNoItems ? (
           <MyStreamNoItems />
         ) : (
           <FeedScrollContainer
             ref={scrollRef}
             onScrollUpNearTop={handleScrollUpNearTop}
-            isFetchingNextPage={isFetching}>
+            isFetchingNextPage={isFetchingNextPage}
+          >
             <NotificationsWrapper
               items={items}
-              loading={isFetching}
               activeDrop={activeDrop}
               setActiveDrop={setActiveDrop}
             />

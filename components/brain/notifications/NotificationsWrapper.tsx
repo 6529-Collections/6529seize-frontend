@@ -1,9 +1,6 @@
 import React from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { TypedNotification } from "../../../types/feed.types";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
 import { ActiveDropAction, ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationItems from "./NotificationItems";
@@ -11,14 +8,12 @@ import { useRouter } from "next/router";
 
 interface NotificationsWrapperProps {
   readonly items: TypedNotification[];
-  readonly loading: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly setActiveDrop: (drop: ActiveDropState | null) => void;
 }
 
 export default function NotificationsWrapper({
   items,
-  loading,
   activeDrop,
   setActiveDrop,
 }: NotificationsWrapperProps) {
@@ -50,11 +45,6 @@ export default function NotificationsWrapper({
 
   return (
     <div className="tw-relative">
-      {loading && (
-        <div className="tw-w-full tw-text-center tw-mt-4 tw-mb-4">
-          <CircleLoader size={CircleLoaderSize.XXLARGE} />
-        </div>
-      )}
       <NotificationItems
         items={items}
         activeDrop={activeDrop}

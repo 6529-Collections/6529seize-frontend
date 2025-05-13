@@ -103,15 +103,16 @@ export function useNotificationsQuery({
    * Flatten all pages and (optionally) reverse them. Store in local state.
    */
   useEffect(() => {
-    let data: TypedNotification[] = [];
+    if (!query.data) {
+      return;
+    }
 
-    if (query.data?.pages) {
-      // Each page is a TypedNotificationsResponse, so accumulate their `notifications`
-      data = query.data.pages.flatMap((page) => page.notifications);
+    let data: TypedNotification[] = query.data.pages.flatMap(
+      (page) => page.notifications
+    );
 
-      if (reverse) {
-        data = data.reverse();
-      }
+    if (reverse) {
+      data = data.reverse();
     }
 
     setItems(data);
