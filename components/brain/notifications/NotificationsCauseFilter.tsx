@@ -132,7 +132,7 @@ function NotificationCauseFilterButton({
     `tw-border-none tw-bg-transparent tw-no-underline tw-flex tw-justify-center tw-items-center
      tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-8 tw-rounded-lg tw-transition-colors tw-duration-300
      tw-ease-in-out tw-relative z-10 ${
-       isActive ? "tw-text-iron-300" : "tw-text-iron-400 hover:tw-text-iron-300"
+       isActive ? "tw-text-iron-300" : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300"
      }`;
 
   return (

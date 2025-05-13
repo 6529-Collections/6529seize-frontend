@@ -3,7 +3,7 @@ import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
-import NotificationsLoading from "./NotificationsLoading";
+import { useMutation } from "@tanstack/react-query";
 import MyStreamNoItems from "../my-stream/layout/MyStreamNoItems";
 import { useRouter } from "next/router";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
@@ -15,7 +15,7 @@ import { useLayout } from "../my-stream/layout/LayoutContext";
 import NotificationsCauseFilter, {
   NotificationFilter,
 } from "./NotificationsCauseFilter";
-import { useMutation } from "@tanstack/react-query";
+import NotificationsLoading from "./NotificationsLoading";
 
 export default function Notifications() {
   const { connectedProfile, activeProfileProxy, setToast } =
@@ -65,9 +65,9 @@ export default function Notifications() {
       invalidateNotifications();
       await removeAllDeliveredNotifications();
     },
-    onError: (error: unknown) => {
+    onError: (error) => {
       setToast({
-        message: String(error),
+        message: error as unknown as string,
         type: "error",
       });
     },
@@ -84,7 +84,6 @@ export default function Notifications() {
     hasNextPage,
     fetchNextPage,
     refetch,
-    isInitialQueryDone,
   } = useNotificationsQuery({
     identity: connectedProfile?.handle,
     activeProfileProxy: !!activeProfileProxy,
@@ -117,24 +116,19 @@ export default function Notifications() {
     setActiveDrop(null);
   };
 
-  const showLoading = !isInitialQueryDone || (isFetching && items.length === 0);
-  const showNoItems = isInitialQueryDone && !isFetching && items.length === 0;
-
   return (
-    <div 
+    <div
       className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow"
       style={notificationsViewStyle}
     >
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
-      <NotificationsCauseFilter
+        <NotificationsCauseFilter
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
         />
-        {showLoading ? (
-          <NotificationsLoading />
-        ) : showNoItems ? (
-          <MyStreamNoItems />
-        ) : (
+        {isFetching && !isFetchingNextPage && <NotificationsLoading />}
+        {!isFetching && items.length === 0 && <MyStreamNoItems />}
+        {!isFetching && items.length > 0 && (
           <FeedScrollContainer
             ref={scrollRef}
             onScrollUpNearTop={handleScrollUpNearTop}
