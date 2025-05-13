@@ -1,13 +1,17 @@
 import React from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
+import useIsMobileScreen from "../../../hooks/isMobileScreen";
 
 interface WaveDropAuthorPfpProps {
   readonly drop: ApiDrop;
 }
 
 const WaveDropAuthorPfp: React.FC<WaveDropAuthorPfpProps> = ({ drop }) => {
+  const isMobile = useIsMobileScreen();
+  const size = isMobile ? "tw-h-6 tw-w-6" : "tw-h-10 tw-w-10";
   return (
-    <div className="tw-h-10 tw-w-10 tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg">
+    <div
+      className={`${size} tw-bg-iron-900 tw-relative tw-flex-shrink-0 tw-rounded-lg`}>
       {drop.author.pfp ? (
         <div className="tw-rounded-lg tw-h-full tw-w-full">
           <div className="tw-h-full tw-w-full tw-max-w-full tw-rounded-lg tw-overflow-hidden tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10">

@@ -62,6 +62,7 @@
     "js-yaml": "^4.1.0",
     "jwt-decode": "^4.0.0",
     "lexical": "^0.14.2",
+    "link-preview-js": "^3.0.14",
     "lodash": "^4.17.21",
     "luxon": "^3.6.1",
     "next": "^14.2.6",

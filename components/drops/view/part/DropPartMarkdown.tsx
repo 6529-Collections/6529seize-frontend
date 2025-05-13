@@ -1,5 +1,4 @@
 import {
-  AnchorHTMLAttributes,
   Children,
   ClassAttributes,
   HTMLAttributes,
@@ -17,24 +16,13 @@ import DropListItemContentPart, {
 } from "../item/content/DropListItemContentPart";
 import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
 import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
-import { Tweet } from "react-tweet";
-import Link from "next/link";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
-import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
-import WaveDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import {
-  parseSeizeQueryLink,
-  parseSeizeQuoteLink,
-  SeizeQuoteLinkInfo,
-} from "../../../../helpers/SeizeLinkParser";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 import { useEmoji } from "../../../../contexts/EmojiContext";
-import GroupCardChat from "../../../groups/page/list/card/GroupCardChat";
-import WaveItemChat from "../../../waves/list/WaveItemChat";
-import DropItemChat from "../../../waves/drops/DropItemChat";
-import ChatItemHrefButtons from "../../../waves/ChatItemHrefButtons";
+import { isSmartLink } from "./DropPartMarkdownLinkHandlers";
+import DropPartMarkdownLink from "./DropPartMarkdownLink";
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -48,11 +36,6 @@ export enum DropContentPartType {
   MENTION = "MENTION",
   HASHTAG = "HASHTAG",
 }
-
-type SmartLinkHandler<T> = {
-  parse: (href: string) => T | null;
-  render: (result: T, href: string) => JSX.Element | null;
-};
 
 function DropPartMarkdown({
   mentionedUsers,
@@ -216,176 +199,35 @@ function DropPartMarkdown({
     );
   };
 
-  const parseTwitterLink = (
-    href: string
-  ): { href: string; tweetId: string } | null => {
-    const twitterRegex =
-      /https:\/\/(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/;
-    const match = href.match(twitterRegex);
-    return match ? { href, tweetId: match[3] } : null;
-  };
+  // const aHrefRenderer = ({
+  //   node,
+  //   ...props
+  // }: ClassAttributes<HTMLAnchorElement> &
+  //   AnchorHTMLAttributes<HTMLAnchorElement> &
+  //   ExtraProps) => {
+  //   const { href } = props;
+  //   if (!href || !isValidLink(href)) {
+  //     return null;
+  //   }
 
-  const parseGifLink = (href: string): string | null => {
-    const gifRegex = /^https?:\/\/media\.tenor\.com\/[^\s]+\.gif$/i;
-    return gifRegex.test(href) ? href : null;
-  };
+  //   for (const { parse, render } of smartLinkHandlers) {
+  //     const result = parse(href);
+  //     if (result) {
+  //       return render(result, href, onQuoteClick);
+  //     }
+  //   }
 
-  const smartLinkHandlers: SmartLinkHandler<any>[] = [
-    {
-      parse: parseSeizeQuoteLink,
-      render: (result: SeizeQuoteLinkInfo, href: string) =>
-        renderSeizeQuote(result, onQuoteClick, href),
-    },
-    {
-      parse: (href: string) => parseSeizeQueryLink(href, "/network", ["group"]),
-      render: (result: { group: string }, href: string) => (
-        <GroupCardChat href={href} groupId={result.group} />
-      ),
-    },
-    {
-      parse: (href: string) =>
-        parseSeizeQueryLink(href, "/my-stream", ["wave"], true),
-      render: (result: { wave: string }, href: string) => (
-        <WaveItemChat href={href} waveId={result.wave} />
-      ),
-    },
-    {
-      parse: (href: string) =>
-        parseSeizeQueryLink(href, "/my-stream", ["wave", "drop"], true),
-      render: (result: { drop: string }, href: string) => (
-        <DropItemChat href={href} dropId={result.drop} />
-      ),
-    },
-    {
-      parse: parseTwitterLink,
-      render: (result: { href: string; tweetId: string }) =>
-        renderTweetEmbed(result),
-    },
-    {
-      parse: parseGifLink,
-      render: (url: string) => renderGifEmbed(url),
-    },
-  ];
+  //   return renderExternalOrInternalLink(href, props);
+  // };
 
-  const isSmartLink = (href: string): boolean => {
-    return smartLinkHandlers.some((handler) => !!handler.parse(href));
-  };
-
-  const aHrefRenderer = ({
-    node,
-    ...props
-  }: ClassAttributes<HTMLAnchorElement> &
-    AnchorHTMLAttributes<HTMLAnchorElement> &
-    ExtraProps) => {
-    const { href } = props;
-    if (!href || !isValidLink(href)) {
-      return null;
-    }
-
-    for (const { parse, render } of smartLinkHandlers) {
-      const result = parse(href);
-      if (result) {
-        return render(result, href);
-      }
-    }
-
-    return renderExternalOrInternalLink(href, props);
-  };
-
-  const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-      <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
-        <Tweet id={result.tweetId} />
-      </div>
-      <ChatItemHrefButtons href={result.href} />
-    </div>
-  );
-
-  const renderGifEmbed = (url: string) => (
-    <img
-      src={url}
-      alt={url}
-      className="tw-max-h-[25rem] tw-max-w-[100%] tw-h-auto"
-    />
-  );
-
-  const isValidLink = (href: string): boolean => {
-    try {
-      new URL(href);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
-  const renderExternalOrInternalLink = (
-    href: string,
-    props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
-  ) => {
-    const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
-    const isExternalLink = baseEndpoint && !href.startsWith(baseEndpoint);
-
-    if (isExternalLink) {
-      props.rel = "noopener noreferrer nofollow";
-      props.target = "_blank";
-    } else {
-      props.href = href.replace(baseEndpoint, "");
-    }
-
-    return (
-      <a
-        onClick={(e) => {
-          e.stopPropagation();
-          if (props.onClick) {
-            props.onClick(e);
-          }
-        }}
-        {...props}
-      />
-    );
-  };
-
-  const renderSeizeQuote = (
-    quoteLinkInfo: SeizeQuoteLinkInfo,
-    onQuoteClick: (drop: ApiDrop) => void,
-    href: string
-  ) => {
-    const { waveId, serialNo, dropId } = quoteLinkInfo;
-
-    if (serialNo) {
-      return (
-        <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-          <div className="tw-flex-1 tw-min-w-0">
-            <WaveDropQuoteWithSerialNo
-              serialNo={parseInt(serialNo)}
-              waveId={waveId}
-              onQuoteClick={onQuoteClick}
-            />
-          </div>
-          <ChatItemHrefButtons href={href} hideLink />
-        </div>
-      );
-    } else if (dropId) {
-      return (
-        <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
-          <div className="tw-flex-1 tw-min-w-0">
-            <WaveDropQuoteWithDropId
-              dropId={dropId}
-              partId={1}
-              maybeDrop={null}
-              onQuoteClick={onQuoteClick}
-            />
-          </div>
-          <ChatItemHrefButtons
-            href={href}
-            relativeHref={`/my-stream?wave=${waveId}&drop=${dropId}`}
-          />
-        </div>
-      );
-    }
-
-    return null;
-  };
+  // const isValidLink = (href: string): boolean => {
+  //   try {
+  //     new URL(href);
+  //     return true;
+  //   } catch {
+  //     return false;
+  //   }
+  // };
 
   const renderParagraph = (
     params: ClassAttributes<HTMLParagraphElement> &
@@ -522,7 +364,13 @@ function DropPartMarkdown({
             })}
           </code>
         ),
-        a: (params) => aHrefRenderer(params),
+        a: (params) => (
+          <DropPartMarkdownLink
+            href={params.href ?? ""}
+            onQuoteClick={onQuoteClick}
+            props={params}
+          />
+        ),
         img: (params) => <DropPartMarkdownImage src={params.src ?? ""} />,
         blockquote: (params) => (
           <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">

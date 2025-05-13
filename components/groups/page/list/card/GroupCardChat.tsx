@@ -4,7 +4,7 @@ import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import GroupCard from "./GroupCard";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
-import ChatItemHrefButtons from "../../../../waves/ChatItemHrefButtons";
+import { LinkText } from "../../../../drops/view/part/DropPartMarkdownLinkHandlers";
 
 export default function GroupCardChat({
   href,
@@ -24,7 +24,8 @@ export default function GroupCardChat({
   });
 
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+    <>
+      <LinkText href={href} relativeHref={`/network?group=${groupId}`} />
       <div className="tw-flex-1 tw-min-w-0">
         <GroupCard
           group={group}
@@ -32,10 +33,6 @@ export default function GroupCardChat({
           titlePlaceholder={groupId}
         />
       </div>
-      <ChatItemHrefButtons
-        href={href}
-        relativeHref={`/network?group=${groupId}`}
-      />
-    </div>
+    </>
   );
 }

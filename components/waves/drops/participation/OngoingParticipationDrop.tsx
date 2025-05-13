@@ -3,7 +3,6 @@ import { ActiveDropState } from "../../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "../Drop";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useCallback, useState } from "react";
-import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
@@ -12,6 +11,7 @@ import ParticipationDropHeader from "./ParticipationDropHeader";
 import ParticipationDropContent from "./ParticipationDropContent";
 import ParticipationDropMetadata from "./ParticipationDropMetadata";
 import ParticipationDropFooter from "./ParticipationDropFooter";
+import useIsMobileScreen from "../../../../hooks/isMobileScreen";
 
 interface OngoingParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -39,7 +39,7 @@ export default function OngoingParticipationDrop({
   parentContainerRef,
 }: OngoingParticipationDropProps) {
   const isActiveDrop = activeDrop?.drop.id === drop.id;
-  const isMobile = useIsMobileDevice();
+  const isMobile = useIsMobileScreen();
 
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -65,8 +65,7 @@ export default function OngoingParticipationDrop({
     <ParticipationDropContainer
       drop={drop}
       isActiveDrop={isActiveDrop}
-      location={location}
-    >
+      location={location}>
       {!isMobile && showReplyAndQuote && (
         <WaveDropActions
           drop={drop}
@@ -77,9 +76,12 @@ export default function OngoingParticipationDrop({
         />
       )}
       <div className="tw-flex tw-gap-x-3 tw-relative tw-z-10 tw-w-full tw-text-left tw-bg-transparent tw-border-0 tw-px-4 tw-pt-4">
-        <WaveDropAuthorPfp drop={drop} />
+        {!isMobile && <WaveDropAuthorPfp drop={drop} />}
         <div className="tw-flex tw-flex-col tw-w-full tw-gap-y-1.5">
-          <ParticipationDropHeader drop={drop} showWaveInfo={showWaveInfo} />
+          <div className="tw-flex tw-gap-x-3">
+            {isMobile && <WaveDropAuthorPfp drop={drop} />}
+            <ParticipationDropHeader drop={drop} showWaveInfo={showWaveInfo} />
+          </div>
           <ParticipationDropContent
             drop={drop}
             activePartIndex={activePartIndex}
@@ -97,7 +99,7 @@ export default function OngoingParticipationDrop({
         <ParticipationDropMetadata metadata={drop.metadata} />
         <ParticipationDropFooter drop={drop} />
       </div>
-      
+
       {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}

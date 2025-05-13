@@ -5,7 +5,7 @@ import { useDrop } from "../../../hooks/useDrop";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { SingleWaveDropPosition } from "../drop/SingleWaveDropPosition";
 import { SingleWaveDropVotes } from "../drop/SingleWaveDropVotes";
-import ChatItemHrefButtons from "../ChatItemHrefButtons";
+import { LinkText } from "../../drops/view/part/DropPartMarkdownLinkHandlers";
 
 export default function DropItemChat({
   href,
@@ -27,7 +27,8 @@ export default function DropItemChat({
   }
 
   return (
-    <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
+    <>
+      <LinkText href={href} relativeHref={relativeLink} />
       <div className="tw-flex-1 tw-min-w-0">
         <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4">
           <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3">
@@ -62,7 +63,6 @@ export default function DropItemChat({
           )}
         </div>
       </div>
-      <ChatItemHrefButtons href={href} relativeHref={relativeLink} />
-    </div>
+    </>
   );
 }
