@@ -56,7 +56,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === "Enter" || e.key === " ") {
       onDropClick(drop);
     }
   };
@@ -67,7 +67,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
 
   // Determine container class based on art-focused mode
   const containerClass = artFocused
-    ? "group tw-transition-all tw-duration-300 tw-ease-out"
+    ? "group tw-transition-all tw-duration-300 tw-ease-out active:tw-bg-iron-900 tw-transition tw-duration-200 tw-ease-out"
     : "";
 
   // Apply enhanced image effects for art-focused mode
@@ -76,42 +76,23 @@ export const WaveLeaderboardGalleryItem: React.FC<
     : "tw-aspect-square tw-bg-iron-800 tw-border tw-border-iron-800 tw-overflow-hidden tw-relative tw-cursor-pointer desktop-hover:hover:-tw-translate-y-0.5 desktop-hover:hover:tw-scale-[1.02] tw-transform tw-duration-300 tw-ease-out touch-none";
 
   return (
-    <div
-      className={containerClass}
-    >
-      <button 
-        className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-w-full tw-text-left tw-bg-transparent`} 
+    <div className={containerClass}>
+      <button
+        className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-w-full tw-text-left tw-bg-transparent`}
         onClick={handleImageClick}
         onKeyDown={handleKeyDown}
         type="button"
       >
-        <button
-          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-border-none tw-m-0 tw-p-0 tw-w-full tw-h-full tw-bg-transparent"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleImageClick();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              handleImageClick();
-            }
-          }}
-          type="button"
-        >
-          <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-            <MediaDisplay
-              media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
-              media_url={getScaledImageUri(
-                drop.parts[0].media[0].url,
-                ImageScale.AUTOx450
-              )}
-              disableMediaInteraction={true}
-            />
-          </div>
-        </button>
-
-        {/* No overlay for winners */}
+        <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
+          <MediaDisplay
+            media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
+            media_url={getScaledImageUri(
+              drop.parts[0].media[0].url,
+              ImageScale.AUTOx450
+            )}
+            disableMediaInteraction={true}
+          />
+        </div>
       </button>
       <div className="tw-flex tw-flex-col tw-mt-2 tw-gap-y-2">
         <div className="tw-flex tw-items-center tw-justify-between">
@@ -189,7 +170,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
             )}
           </div>
           {canShowVote && (
-            <button 
+            <button
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
               type="button"

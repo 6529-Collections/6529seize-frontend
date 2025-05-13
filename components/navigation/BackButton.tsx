@@ -21,16 +21,32 @@ export default function BackButton() {
 
   const waveId =
     typeof router.query.wave === "string" ? router.query.wave : null;
+  const dropId =
+    typeof router.query.drop === "string" ? router.query.drop : null;
 
   const handleClick = () => {
     if (loading) return;
     setLoading(true);
+    if (dropId) {
+      const newQuery = { ...router.query } as Record<string, any>;
+      delete newQuery.drop;
+      router.replace(
+        { pathname: router.pathname, query: newQuery },
+        undefined,
+        {
+          shallow: true,
+        }
+      );
+      return;
+    }
+
     if (waveId) {
       router.replace(`/my-stream?wave=${waveId}&view=waves`, undefined, {
         shallow: true,
       });
       return;
     }
+
     if (canGoBack) {
       goBack();
     }

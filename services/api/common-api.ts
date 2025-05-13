@@ -45,6 +45,119 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   return res.json();
 };
 
+export interface RetryOptions {
+  /** Maximum number of retry attempts. Default: 0 (no retries). */
+  readonly maxRetries?: number;
+  /** Initial delay in milliseconds before the first retry. Default: 1000ms. */
+  readonly initialDelayMs?: number;
+  /** Factor by which the delay increases for each subsequent retry. Default: 2. */
+  readonly backoffFactor?: number;
+  /**
+   * Adds randomness to the delay (jitter) to prevent thundering herd problem.
+   * Value is a percentage of the current delay (e.g., 0.1 for 10%). Default: 0.1.
+   */
+  readonly jitter?: number;
+}
+
+/**
+ * Fetches data from a specified API endpoint with support for retries and progressive backoff.
+ * This function wraps `commonApiFetch` to add retry capabilities.
+ *
+ * @template T The expected type of the data in the response body.
+ * @template U The type of the `params` object for URL query parameters.
+ * @param param The parameters for the fetch operation.
+ * @param param.endpoint The API endpoint path.
+ * @param param.headers Optional custom headers for the request.
+ * @param param.params Optional URL query parameters.
+ * @param param.signal Optional AbortSignal to cancel the request.
+ * @param param.retryOptions Optional configuration for retry behavior.
+ * @returns A Promise that resolves with the fetched data of type T.
+ * @throws An error if the request fails after all retry attempts or if aborted.
+ */
+export const commonApiFetchWithRetry = async <
+  T,
+  U = Record<string, string>
+>(param: {
+  readonly endpoint: string;
+  readonly headers?: Record<string, string>;
+  readonly params?: U;
+  readonly signal?: AbortSignal;
+  readonly retryOptions?: RetryOptions;
+}): Promise<T> => {
+  const { retryOptions, ...fetchParams } = param;
+  const maxRetries = retryOptions?.maxRetries ?? 0;
+  const initialDelayMs = retryOptions?.initialDelayMs ?? 1000;
+  const backoffFactor = retryOptions?.backoffFactor ?? 2;
+  const jitterFactor = retryOptions?.jitter ?? 0.1;
+
+  let attempts = 0;
+  let currentDelayMs = initialDelayMs;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    try {
+      if (fetchParams.signal?.aborted) {
+        // If the signal is already aborted, throw immediately.
+        // Use DOMException for consistency with fetch abort.
+        throw new DOMException("Request aborted", "AbortError");
+      }
+      return await commonApiFetch<T, U>(fetchParams);
+    } catch (error) {
+      attempts++;
+      if (attempts > maxRetries || fetchParams.signal?.aborted) {
+        // If max retries reached or aborted during an attempt/before delay, re-throw.
+        throw error;
+      }
+
+      // Log the retry attempt (optional, consider a more robust logging strategy for production)
+      console.warn(
+        `Attempt ${attempts}/${maxRetries} failed for endpoint '${fetchParams.endpoint}'. Retrying in ${currentDelayMs}ms. Error:`,
+        error
+      );
+
+      const delayWithJitter =
+        currentDelayMs * (1 + Math.random() * jitterFactor);
+
+      const delayPromise = new Promise((resolve) =>
+        setTimeout(resolve, delayWithJitter)
+      );
+
+      try {
+        if (fetchParams.signal) {
+          // Race the delay with the abort signal.
+          await Promise.race([
+            delayPromise,
+            new Promise((_, reject) => {
+              // Check if already aborted before adding listener
+              if (fetchParams.signal?.aborted) {
+                reject(new DOMException("Request aborted during delay", "AbortError"));
+                return;
+              }
+              let timeoutId: NodeJS.Timeout | undefined = undefined;
+              const abortListener = () => {
+                if (timeoutId) clearTimeout(timeoutId); // Clear the timeout if aborted
+                reject(new DOMException("Request aborted during delay", "AbortError"));
+              };
+              // Ensure the delayPromise resolves and cleans up listener if not aborted
+              timeoutId = setTimeout(() => {
+                fetchParams.signal?.removeEventListener("abort", abortListener);
+              }, delayWithJitter);
+              fetchParams.signal?.addEventListener("abort", abortListener, { once: true });
+            }),
+          ]);
+        } else {
+          await delayPromise;
+        }
+      } catch (abortError) {
+        // If Promise.race rejected due to abort, or if the signal was aborted before/during delay
+        throw abortError;
+      }
+
+      currentDelayMs *= backoffFactor;
+    }
+  }
+};
+
 export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
   endpoint: string;
   body: T;
