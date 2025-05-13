@@ -270,117 +270,115 @@ function DropPartMarkdown({
   };
 
   return (
-    <div>
-      <Markdown
-        rehypePlugins={[
-          [
-            rehypeExternalLinks,
-            {
-              target: "_blank",
-              rel: ["noopener", "noreferrer", "nofollow'"],
-              protocols: ["http", "https"],
-            },
-          ],
-          [rehypeSanitize],
-        ]}
-        remarkPlugins={[remarkGfm]}
-        className="tw-w-full tw-space-y-1"
-        components={{
-          h5: (params) => (
-            <h5 className="tw-text-iron-200 tw-break-words word-break">
-              {customRenderer({
-                content: params.children,
-                mentionedUsers,
-                referencedNfts,
-              })}
-            </h5>
-          ),
-          h4: (params) => (
-            <h4 className="tw-text-iron-200 tw-break-words word-break">
-              {customRenderer({
-                content: params.children,
-                mentionedUsers,
-                referencedNfts,
-              })}
-            </h4>
-          ),
-          h3: (params) => (
-            <h3 className="tw-text-iron-200 tw-break-words word-break">
-              {customRenderer({
-                content: params.children,
-                mentionedUsers,
-                referencedNfts,
-              })}
-            </h3>
-          ),
-          h2: (params) => (
-            <h2 className="tw-text-iron-200 tw-break-words word-break">
-              {customRenderer({
-                content: params.children,
-                mentionedUsers,
-                referencedNfts,
-              })}
-            </h2>
-          ),
-          h1: (params) => (
-            <h1 className="tw-text-iron-200 tw-break-words word-break">
-              {customRenderer({
-                content: params.children,
-                mentionedUsers,
-                referencedNfts,
-              })}
-            </h1>
-          ),
-          p: renderParagraph,
-          li: (params) => (
-            <li className="tw-text-md tw-text-iron-200 tw-break-words word-break">
-              {customRenderer({
-                content: params.children,
-                mentionedUsers,
-                referencedNfts,
-              })}
-            </li>
-          ),
-          code: (params) => (
-            <code
-              style={{ textOverflow: "unset" }}
-              className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words">
-              {customRenderer({
-                content: params.children,
-                mentionedUsers,
-                referencedNfts,
-              })}
-            </code>
-          ),
-          a: (params) => {
-            const { href, children } = params;
-            if (parseGifLink(href ?? "")) return <></>;
-            let target = "_self";
-            let rel = "";
-            if (isExternalLink(href ?? "")) {
-              target = "_blank";
-              rel = "noopener noreferrer";
-            }
-            return (
-              <Link href={href ?? ""} target={target} rel={rel}>
-                {children}
-              </Link>
-            );
+    <Markdown
+      rehypePlugins={[
+        [
+          rehypeExternalLinks,
+          {
+            target: "_blank",
+            rel: ["noopener", "noreferrer", "nofollow'"],
+            protocols: ["http", "https"],
           },
-          img: (params) => <DropPartMarkdownImage src={params.src ?? ""} />,
-          blockquote: (params) => (
-            <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
-              {customRenderer({
-                content: params.children,
-                mentionedUsers,
-                referencedNfts,
-              })}
-            </blockquote>
-          ),
-        }}>
-        {partContent}
-      </Markdown>
-    </div>
+        ],
+        [rehypeSanitize],
+      ]}
+      remarkPlugins={[remarkGfm]}
+      className="tw-w-full tw-space-y-1"
+      components={{
+        h5: (params) => (
+          <h5 className="tw-text-iron-200 tw-break-words word-break">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+            })}
+          </h5>
+        ),
+        h4: (params) => (
+          <h4 className="tw-text-iron-200 tw-break-words word-break">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+            })}
+          </h4>
+        ),
+        h3: (params) => (
+          <h3 className="tw-text-iron-200 tw-break-words word-break">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+            })}
+          </h3>
+        ),
+        h2: (params) => (
+          <h2 className="tw-text-iron-200 tw-break-words word-break">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+            })}
+          </h2>
+        ),
+        h1: (params) => (
+          <h1 className="tw-text-iron-200 tw-break-words word-break">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+            })}
+          </h1>
+        ),
+        p: renderParagraph,
+        li: (params) => (
+          <li className="tw-text-md tw-text-iron-200 tw-break-words word-break">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+            })}
+          </li>
+        ),
+        code: (params) => (
+          <code
+            style={{ textOverflow: "unset" }}
+            className="tw-text-iron-200 tw-whitespace-pre-wrap tw-break-words">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+            })}
+          </code>
+        ),
+        a: (params) => {
+          const { href, children } = params;
+          if (parseGifLink(href ?? "")) return <></>;
+          let target = "_self";
+          let rel = "";
+          if (isExternalLink(href ?? "")) {
+            target = "_blank";
+            rel = "noopener noreferrer";
+          }
+          return (
+            <Link href={href ?? ""} target={target} rel={rel}>
+              {children}
+            </Link>
+          );
+        },
+        img: (params) => <DropPartMarkdownImage src={params.src ?? ""} />,
+        blockquote: (params) => (
+          <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
+            {customRenderer({
+              content: params.children,
+              mentionedUsers,
+              referencedNfts,
+            })}
+          </blockquote>
+        ),
+      }}>
+      {partContent}
+    </Markdown>
   );
 }
 
