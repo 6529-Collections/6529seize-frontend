@@ -1,5 +1,6 @@
 import { useWaveById } from "../../../hooks/useWaveById";
 import { LinkText } from "../../drops/view/part/DropPartMarkdownLinkHandlers";
+// import ChatItemHrefButtons from "../ChatItemHrefButtons";
 import WaveItem from "./WaveItem";
 
 export default function WaveItemChat({
@@ -12,15 +13,12 @@ export default function WaveItemChat({
   const wave = useWaveById(waveId);
 
   return (
-    <>
-      <LinkText href={href} relativeHref={`/waves/${waveId}`} />
-      <div className="tw-flex-1 tw-min-w-0">
-        <WaveItem
-          wave={wave?.wave}
-          userPlaceholder={href}
-          titlePlaceholder={waveId}
-        />
-      </div>
-    </>
+    <div className="tw-flex-1 tw-min-w-0">
+      <WaveItem
+        wave={wave?.wave}
+        userPlaceholder={href}
+        titlePlaceholder={waveId}
+      />
+    </div>
   );
 }

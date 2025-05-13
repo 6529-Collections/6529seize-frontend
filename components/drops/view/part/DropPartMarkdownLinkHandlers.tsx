@@ -32,7 +32,7 @@ const parseTwitterLink = (
   return match ? { href, tweetId: match[3] } : null;
 };
 
-const parseGifLink = (href: string): string | null => {
+export const parseGifLink = (href: string): string | null => {
   const gifRegex = /^https?:\/\/media\.tenor\.com\/[^\s]+\.gif$/i;
   return gifRegex.test(href) ? href : null;
 };
@@ -63,12 +63,9 @@ const parseTwitchLink = (
 };
 
 const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
-  <>
-    <LinkText href={result.href} />
-    <div className="tw-flex tw-min-w-0 tw-justify-center" data-theme="dark">
-      <Tweet id={result.tweetId} />
-    </div>
-  </>
+  <div className="tw-flex tw-min-w-0 tw-justify-center" data-theme="dark">
+    <Tweet id={result.tweetId} />
+  </div>
 );
 
 const renderGifEmbed = (url: string) => (
@@ -88,31 +85,20 @@ const renderSeizeQuote = (
 
   if (serialNo) {
     return (
-      <>
-        <LinkText href={href} />
-        <WaveDropQuoteWithSerialNo
-          serialNo={parseInt(serialNo)}
-          waveId={waveId}
-          onQuoteClick={onQuoteClick}
-        />
-      </>
+      <WaveDropQuoteWithSerialNo
+        serialNo={parseInt(serialNo)}
+        waveId={waveId}
+        onQuoteClick={onQuoteClick}
+      />
     );
   } else if (dropId) {
     return (
-      <>
-        <LinkText
-          href={href}
-          relativeHref={`/my-stream?wave=${waveId}&drop=${dropId}`}
-        />
-        <div className="tw-flex-1 tw-min-w-0">
-          <WaveDropQuoteWithDropId
-            dropId={dropId}
-            partId={1}
-            maybeDrop={null}
-            onQuoteClick={onQuoteClick}
-          />
-        </div>
-      </>
+      <WaveDropQuoteWithDropId
+        dropId={dropId}
+        partId={1}
+        maybeDrop={null}
+        onQuoteClick={onQuoteClick}
+      />
     );
   }
 
@@ -144,18 +130,15 @@ const renderTwitchEmbed = (result: {
 };
 
 const renderIFrameEmbed = (result: { href: string; frameSrc: string }) => (
-  <>
-    <LinkText href={result.href} />
-    <div className="tw-w-full tw-aspect-video tw-relative tw-overflow-hidden tw-rounded-lg">
-      <iframe
-        className="tw-absolute tw-top-0 tw-left-0 tw-w-full tw-h-full"
-        src={result.frameSrc}
-        title="Embedded content"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-      />
-    </div>
-  </>
+  <div className="tw-w-full tw-aspect-video tw-relative tw-overflow-hidden tw-rounded-lg">
+    <iframe
+      className="tw-absolute tw-top-0 tw-left-0 tw-w-full tw-h-full"
+      src={result.frameSrc}
+      title="Embedded content"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowFullScreen
+    />
+  </div>
 );
 
 export const smartLinkHandlers: SmartLinkHandler<any>[] = [
@@ -205,10 +188,6 @@ export const smartLinkHandlers: SmartLinkHandler<any>[] = [
     render: renderTwitchEmbed,
   },
 ];
-
-export const isSmartLink = (href: string): boolean => {
-  return smartLinkHandlers.some((handler) => !!handler.parse(href));
-};
 
 export function LinkText({
   href,

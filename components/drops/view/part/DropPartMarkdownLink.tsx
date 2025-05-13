@@ -1,17 +1,21 @@
-import { ExtraProps } from "react-markdown/lib";
-
-import { AnchorHTMLAttributes, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { LinkText, smartLinkHandlers } from "./DropPartMarkdownLinkHandlers";
+import { smartLinkHandlers } from "./DropPartMarkdownLinkHandlers";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlayCircle, faXmarkCircle } from "@fortawesome/free-solid-svg-icons";
 import useIsMobileScreen from "../../../../hooks/isMobileScreen";
+import { isExternalLink } from "../../../../helpers/Helpers";
 
 const isValidLink = (href: string): boolean => {
   try {
-    new URL(href);
-    return true;
+    const url = new URL(href);
+    const lastSegment = url.pathname.split("/").pop()?.toLowerCase() || "";
+
+    // Reject if last segment has a file extension
+    const hasExtension = /\.[a-z0-9]+$/.test(lastSegment);
+
+    return !hasExtension;
   } catch {
     return false;
   }
@@ -20,13 +24,11 @@ const isValidLink = (href: string): boolean => {
 export default function DropPartMarkdownLink({
   href,
   onQuoteClick,
-  props,
 }: {
   href: string;
   onQuoteClick: (drop: ApiDrop) => void;
-  props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps;
 }) {
-  if (!href || !isValidLink(href)) {
+  if (!href) {
     return null;
   }
 
@@ -38,41 +40,28 @@ export default function DropPartMarkdownLink({
   }
 
   if (isValidLink(href)) {
-    return <DropPartMarkdownLinkPreview href={href} props={props} />;
+    return <DropPartMarkdownLinkPreview href={href} />;
   }
 
-  return <a {...props}>{href}</a>;
+  return <></>;
 }
 
-function DropPartMarkdownLinkPreview({
-  href,
-  props,
-}: {
-  href: string;
-  props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps;
-}) {
+function DropPartMarkdownLinkPreview({ href }: { href: string }) {
   const isMobile = useIsMobileScreen();
 
   const [preview, setPreview] = useState<any | null>(null);
-  const [error, setError] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
-    let active = true;
-    fetch(`/api/link-preview?url=${encodeURIComponent(href)}`)
+    fetch(`/api/link-preview?url=${encodeURIComponent(href)}`, {
+      redirect: "follow",
+    })
       .then((res) => (res.ok ? res.json() : Promise.reject(res)))
       .then((data) => {
-        if (active) setPreview(data);
+        setPreview(data);
       })
-      .catch(() => {
-        if (active) setError(true);
-      });
-    return () => {
-      active = false;
-    };
+      .catch(() => {});
   }, [href]);
-
-  if (error) return <a {...props}>{href}</a>;
 
   const image = preview?.images?.[0];
   const video = preview?.videos?.[0];
@@ -98,9 +87,15 @@ function DropPartMarkdownLinkPreview({
     return href;
   };
 
+  let target = "_self";
+  let rel = "";
+  if (isExternalLink(href ?? "")) {
+    target = "_blank";
+    rel = "noopener noreferrer";
+  }
+
   return (
-    <>
-      <LinkText href={href} />
+    <Link href={href} target={target} rel={rel} className="tw-no-underline">
       <div className="tw-mt-1 tw-border tw-rounded tw-p-3 tw-bg-iron-800 tw-text-sm tw-flex tw-flex-row tw-gap-4 tw-items-center tw-relative">
         <div className={`${imgSize} tw-flex-shrink-0`}>
           {image ? (
@@ -115,11 +110,9 @@ function DropPartMarkdownLinkPreview({
         </div>
         <div className="tw-flex-1 tw-min-w-0">
           <div className="tw-text-xs tw-text-iron-500">{getSiteName()}</div>
-          <Link href={href} target="_blank" rel="noopener noreferrer">
-            <div className="tw-font-medium tw-mb-1 tw-text-sm tw-whitespace-nowrap tw-overflow-hidden tw-text-ellipsis tw-w-full">
-              {getTitle()}
-            </div>
-          </Link>
+          <div className="tw-font-medium tw-mb-1 tw-text-sm tw-whitespace-nowrap tw-overflow-hidden tw-text-ellipsis tw-w-full">
+            {getTitle()}
+          </div>
           {preview?.description && (
             <div className="tw-text-xs tw-text-iron-500 tw-line-clamp-2">
               {preview.description}
@@ -148,6 +141,6 @@ function DropPartMarkdownLinkPreview({
           />
         </div>
       )}
-    </>
+    </Link>
   );
 }

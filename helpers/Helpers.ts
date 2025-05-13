@@ -766,3 +766,8 @@ export const wait = async (ms: number): Promise<void> => {
 export const removeBaseEndpoint = (link: string) => {
   return link.replace(process.env.BASE_ENDPOINT ?? "", "");
 };
+
+export function isExternalLink(href: string) {
+  const baseEndpoint = process.env.BASE_ENDPOINT ?? "";
+  return baseEndpoint && !href.startsWith(baseEndpoint);
+}

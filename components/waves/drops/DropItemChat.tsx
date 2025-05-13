@@ -5,7 +5,6 @@ import { useDrop } from "../../../hooks/useDrop";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { SingleWaveDropPosition } from "../drop/SingleWaveDropPosition";
 import { SingleWaveDropVotes } from "../drop/SingleWaveDropVotes";
-import { LinkText } from "../../drops/view/part/DropPartMarkdownLinkHandlers";
 
 export default function DropItemChat({
   href,
@@ -27,42 +26,37 @@ export default function DropItemChat({
   }
 
   return (
-    <>
-      <LinkText href={href} relativeHref={relativeLink} />
-      <div className="tw-flex-1 tw-min-w-0">
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4">
-          <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3">
-            <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
-              <Link className="tw-no-underline" href={relativeLink}>
-                {title}
-              </Link>
-            </h3>
-            {drop?.drop_type === ApiDropType.Participatory && (
-              <SingleWaveDropPosition rank={drop.rank} />
-            )}
-          </div>
-          {drop && (
-            <>
-              <span className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
-                <Link
-                  className="tw-no-underline"
-                  href={`/my-stream/wave/${drop.wave.id}`}>
-                  {drop.wave.name}
-                </Link>
-              </span>
-              <SingleWaveDropVotes drop={drop} />
-            </>
-          )}
-          {artworkMedia && (
-            <div className="tw-mt-4 tw-flex tw-justify-center">
-              <DropListItemContentMedia
-                media_mime_type={artworkMedia.mime_type}
-                media_url={artworkMedia.url}
-              />
-            </div>
-          )}
-        </div>
+    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4">
+      <div className="tw-flex tw-flex-row tw-items-center tw-gap-x-3">
+        <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
+          <Link className="tw-no-underline" href={relativeLink}>
+            {title}
+          </Link>
+        </h3>
+        {drop?.drop_type === ApiDropType.Participatory && (
+          <SingleWaveDropPosition rank={drop.rank} />
+        )}
       </div>
-    </>
+      {drop && (
+        <>
+          <span className="tw-mb-0 tw-text-[11px] tw-leading-0 -tw-mt-1 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
+            <Link
+              className="tw-no-underline"
+              href={`/my-stream/wave/${drop.wave.id}`}>
+              {drop.wave.name}
+            </Link>
+          </span>
+          <SingleWaveDropVotes drop={drop} />
+        </>
+      )}
+      {artworkMedia && (
+        <div className="tw-mt-4 tw-flex tw-justify-center">
+          <DropListItemContentMedia
+            media_mime_type={artworkMedia.mime_type}
+            media_url={artworkMedia.url}
+          />
+        </div>
+      )}
+    </div>
   );
 }

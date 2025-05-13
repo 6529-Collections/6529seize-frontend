@@ -64,6 +64,7 @@
     "lexical": "^0.14.2",
     "link-preview-js": "^3.0.14",
     "lodash": "^4.17.21",
+    "lru-cache": "^11.1.0",
     "luxon": "^3.6.1",
     "next": "^14.2.6",
     "next-redux-wrapper": "^8.1.0",
