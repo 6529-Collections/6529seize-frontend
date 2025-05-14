@@ -1,5 +1,7 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
+import { usePrefetchNotifications } from "../../../hooks/useNotificationsQuery";
+import { AuthContext } from "../../auth/Auth";
 
 export interface NotificationFilter {
   cause: ApiNotificationCause[];
@@ -40,6 +42,14 @@ export default function NotificationsCauseFilter({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
+
+  const { connectedProfile } = useContext(AuthContext);
+  const prefetchNotifications = usePrefetchNotifications();
+
+  const handleHover = (filter: NotificationFilter) => {
+    if (!connectedProfile) return;
+    prefetchNotifications({ identity: connectedProfile.handle, cause: filter.cause });
+  };
 
   useEffect(() => {
     const button = buttonRefs.current[activeFilterIndex];
@@ -109,6 +119,7 @@ export default function NotificationsCauseFilter({
             title={filter.title}
             isActive={isActive(filter)}
             onClick={() => handleChange(filter, index)}
+            onMouseEnter={() => handleHover(filter)}
             buttonRef={(el) => (buttonRefs.current[index] = el!)}
           />
         ))}
@@ -121,22 +132,29 @@ function NotificationCauseFilterButton({
   title,
   isActive,
   onClick,
+  onMouseEnter,
   buttonRef,
 }: {
   readonly title: string;
   readonly isActive: boolean;
   readonly onClick: () => void;
+  readonly onMouseEnter: () => void;
   readonly buttonRef: (el: HTMLButtonElement | null) => void;
 }) {
   const getLinkClasses = () =>
     `tw-border-none tw-bg-transparent tw-no-underline tw-flex tw-justify-center tw-items-center
      tw-px-3 tw-py-2 tw-gap-2 tw-flex-1 tw-h-8 tw-rounded-lg tw-transition-colors tw-duration-300
      tw-ease-in-out tw-relative z-10 ${
-       isActive ? "tw-text-iron-300" : "tw-text-iron-400 hover:tw-text-iron-300"
+       isActive ? "tw-text-iron-300" : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300"
      }`;
 
   return (
-    <button className={getLinkClasses()} onClick={onClick} ref={buttonRef}>
+    <button
+      className={getLinkClasses()}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      ref={buttonRef}
+    >
       <span className="tw-font-semibold tw-text-sm">{title}</span>
     </button>
   );

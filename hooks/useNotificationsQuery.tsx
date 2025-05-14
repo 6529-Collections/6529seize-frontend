@@ -37,6 +37,39 @@ interface UseNotificationsQueryProps {
   cause?: ApiNotificationCause[] | null;
 }
 
+type NotificationsQueryParams = {
+  limit: string;
+  cause: ApiNotificationCause[] | null;
+  pageParam?: number | null;
+};
+
+const getIdentityNotificationsQueryKey = (
+  identity: string | null | undefined,
+  limit: string,
+  cause: ApiNotificationCause[] | null
+) => [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }] as const;
+
+const fetchNotifications = async ({
+  limit,
+  cause,
+  pageParam,
+}: NotificationsQueryParams) => {
+  const params: Record<string, string> = { limit };
+
+  if (pageParam) {
+    params.id_less_than = String(pageParam);
+  }
+
+  if (cause?.length) {
+    params.cause = cause.join(",");
+  }
+
+  return await commonApiFetch<TypedNotificationsResponse>({
+    endpoint: "notifications",
+    params,
+  });
+};
+
 export function useNotificationsQuery({
   reverse = false,
   identity,
@@ -54,20 +87,9 @@ export function useNotificationsQuery({
    * This is similar to how `useMyStreamQuery` sets up prefetching.
    */
   queryClient.prefetchInfiniteQuery({
-    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }],
-    queryFn: async ({ pageParam }: { pageParam?: number | null }) => {
-      const params: Record<string, string> = { limit };
-      if (pageParam) {
-        params.id_less_than = String(pageParam);
-      }
-      if (cause?.length) {
-        params.cause = cause.join(",");
-      }
-      return await commonApiFetch<TypedNotificationsResponse>({
-        endpoint: "notifications",
-        params,
-      });
-    },
+    queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
+    queryFn: ({ pageParam }: { pageParam?: number | null }) =>
+      fetchNotifications({ limit, cause, pageParam }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
     pages: 3,
@@ -78,40 +100,34 @@ export function useNotificationsQuery({
    * Now the actual Infinite Query for notifications
    */
   const query = useInfiniteQuery({
-    queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }],
-    queryFn: async ({ pageParam }: { pageParam: number | null }) => {
-      const params: Record<string, string> = {
-        limit,
-      };
-      if (pageParam) {
-        params.id_less_than = `${pageParam}`;
-      }
-      if (cause) {
-        params.cause = cause.join(",");
-      }
-      return await commonApiFetch<TypedNotificationsResponse>({
-        endpoint: "notifications",
-        params,
-      });
-    },
+    queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
+    queryFn: ({ pageParam }: { pageParam: number | null }) =>
+      fetchNotifications({ limit, cause, pageParam }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
     enabled: !!identity && !activeProfileProxy,
+    staleTime: 60000
   });
+
+  useEffect(() => {
+    setItems([]);
+    setIsInitialQueryDone(false);
+  }, [identity, cause]);
 
   /**
    * Flatten all pages and (optionally) reverse them. Store in local state.
    */
   useEffect(() => {
-    let data: TypedNotification[] = [];
+    if (!query.data) {
+      return;
+    }
 
-    if (query.data?.pages) {
-      // Each page is a TypedNotificationsResponse, so accumulate their `notifications`
-      data = query.data.pages.flatMap((page) => page.notifications);
+    let data: TypedNotification[] = (
+      query.data.pages as TypedNotificationsResponse[]
+    ).flatMap((page) => page.notifications);
 
-      if (reverse) {
-        data = data.reverse();
-      }
+    if (reverse) {
+      data = data.reverse();
     }
 
     setItems(data);
@@ -123,5 +139,32 @@ export function useNotificationsQuery({
     ...query,
     items,
     isInitialQueryDone,
+  };
+}
+
+export function usePrefetchNotifications() {
+  const queryClient = useQueryClient();
+
+  return ({
+    identity,
+    cause = null,
+    limit = "30",
+  }: {
+    identity: string | null;
+    cause?: ApiNotificationCause[] | null;
+    limit?: string;
+  }) => {
+    if (!identity) {
+      return;
+    }
+    queryClient.prefetchInfiniteQuery({
+      queryKey: getIdentityNotificationsQueryKey(identity, limit, cause),
+      queryFn: ({ pageParam }: { pageParam?: number | null }) =>
+        fetchNotifications({ limit, cause, pageParam }),
+      initialPageParam: null,
+      getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
+      pages: 3,
+      staleTime: 60000,
+    });
   };
 }

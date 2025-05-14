@@ -30,7 +30,7 @@ export default function NotificationIdentitySubscribed({
         )}
       </div>
       <div className="tw-flex tw-flex-1 tw-justify-between tw-gap-x-3 tw-gap-y-1">
-        <div className="tw-flex tw-flex-col md:tw-flex-row md:tw-items-center tw-gap-x-1 tw-gap-y-1">
+        <span className="tw-inline tw-flex-wrap tw-items-center">
           <span className="tw-text-sm tw-font-normal tw-text-iron-400">
             <Link
               href={`/${notification.related_identity.handle}`}
@@ -39,12 +39,14 @@ export default function NotificationIdentitySubscribed({
               {notification.related_identity.handle}
             </Link>{" "}
             started following you
-          </span>
-          <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0 tw-hidden md:tw-block"></span>
-          <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
+          </span>{" "}
+          <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+            <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
+              &#8226;
+            </span>{" "}
             {getTimeAgoShort(notification.created_at)}
           </span>
-        </div>
+        </span>
 
         <NotificationsFollowBtn
           profile={notification.related_identity}

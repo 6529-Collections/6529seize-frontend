@@ -55,21 +55,22 @@ export default function NotificationWaveCreated({
           >
             {notification.related_identity.handle}
           </Link>{" "}
-          invited you to a wave:{" "}
+          <span className="tw-text-iron-400"> invited you to a wave:</span>{" "}
           <Link
             href={`/my-stream?wave=${notification.additional_context.wave_id}`}
             className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300"
           >
             {wave?.name}
           </Link>{" "}
-          <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
-            <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+          <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+            <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
+              &#8226;
+            </span>{" "}
             {getTimeAgoShort(notification.created_at)}
           </span>
         </span>
       </div>
       <div className="tw-flex tw-gap-x-2 tw-items-center">
-
         {wave && (
           <WaveHeaderFollow
             wave={wave}
