@@ -32,7 +32,7 @@ const MainLayout = ({ children, metadata }: MainLayoutProps) => {
 
   const { title, description, ogImage, twitterCard } = metadata;
 
-  const ogUrl = `${process.env.BASE_ENDPOINT}${router.pathname}`;
+  const ogUrl = `${process.env.BASE_ENDPOINT}${router.asPath}`;
 
   if (isAccess) {
     return <>{children}</>;
