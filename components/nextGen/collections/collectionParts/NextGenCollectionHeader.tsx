@@ -349,39 +349,19 @@ export function NextGenMintCounts(
 }
 
 export function NextGenCollectionHead(
-  props: Readonly<{ collection: NextGenCollection; name: string }>
+  props: Readonly<{ collection: NextGenCollection }>
 ) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: props.name,
+      title: props.collection.name,
     });
   }, []);
 
-  return (
-    <Head>
-      <title>{title}</title>
-      <link rel="icon" href="/favicon.ico" />
-      <meta name="description" content={props.name} />
-      <meta
-        property="og:url"
-        content={`${
-          process.env.BASE_ENDPOINT
-        }/nextgen/collection/${formatNameForUrl(props.collection.name)}`}
-      />
-      <meta property="og:title" content={props.name} />
-      <meta property="og:image" content={props.collection.image} />
-      <meta property="og:description" content="NEXTGEN | 6529.io" />
-      <meta name="twitter:card" content={props.name} />
-      <meta name="twitter:image:alt" content={props.name} />
-      <meta name="twitter:title" content={props.name} />
-      <meta name="twitter:description" content="NEXTGEN | 6529.io" />
-      <meta name="twitter:image" content={props.collection.image} />
-    </Head>
-  );
+  return <></>;
 }
 
-export async function getServerSideCollection(req: any) {
+export async function getServerSideCollection(req: any, path?: string) {
   const collectionId = req.query.collection;
   const headers = getCommonHeaders(req);
   const collection = await commonApiFetch<NextGenCollection>({
@@ -399,6 +379,12 @@ export async function getServerSideCollection(req: any) {
   return {
     props: {
       collection: collection,
+      metadata: {
+        title: `${path ? `${path} | ` : ""}${collection.name} | NextGen`,
+        ogImage: collection.image,
+        description: "NextGen",
+        twitterCard: "summary_large_image",
+      },
     },
   };
 }

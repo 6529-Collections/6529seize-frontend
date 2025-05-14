@@ -8,15 +8,12 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageSubscriptions from "../../components/user/subscriptions/UserPageSubscriptions";
+import { UserPageProps } from "../../helpers/Types";
 
-interface Props {
-  readonly profile: ApiIdentity;
-}
-
-const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
-  <UserPageSubscriptions profile={pageProps.profile} />
-);
-Page.getLayout = (page: ReactElement<{ pageProps: Props }>) => (
+const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
+  pageProps,
+}) => <UserPageSubscriptions profile={pageProps.profile} />;
+Page.getLayout = (page: ReactElement<{ pageProps: UserPageProps }>) => (
   <UserPageLayout profile={page.props.pageProps.profile}>{page}</UserPageLayout>
 );
 
@@ -26,7 +23,7 @@ export async function getServerSideProps(
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: Props;
+  props: UserPageProps;
 }> {
   try {
     const headers = getCommonHeaders(req);
@@ -45,6 +42,11 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        metadata: {
+          title: `${profile.handle} | Subscriptions`,
+          ogImage: profile.pfp ?? "",
+          twitterCard: "summary_large_image",
+        },
       },
     };
   } catch (e: any) {

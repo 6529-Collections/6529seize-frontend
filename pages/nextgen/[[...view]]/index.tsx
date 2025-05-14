@@ -42,82 +42,58 @@ export default function NextGen(props: any) {
 
   useEffect(() => {
     if (view) {
-      router.push(`/nextgen/${view.toLowerCase()}`, undefined, {
-        shallow: true,
-      });
+      router.push(`/nextgen/${view.toLowerCase()}`);
     } else {
-      router.push("/nextgen", undefined, { shallow: true });
+      router.push("/nextgen");
     }
   }, [view]);
 
-  const title = view ? view + " | NextGen | 6529.io" : "NextGen | 6529.io";
-  const path = view ? `/nextgen/${view.toLowerCase()}` : "/nextgen";
-
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="preload" href={collection.banner} as="image" />
-        <meta name="description" content={`${title} | 6529.io`} />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/${path}`}
-        />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/nextgen.png`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        {collection?.id ? (
-          <>
-            <NextGenNavigationHeader view={view} setView={setView} />
-            {!view && (
-              <NextGenComponent collection={collection} setView={setView} />
-            )}
-            {view && (
-              <Container fluid className={`${styles.main}`}>
-                <Row className="d-flex align-items-center">
-                  <Col>
-                    {view && (
-                      <Container className="pb-4">
-                        <Row>
-                          <Col>
-                            {view === NextGenView.COLLECTIONS && (
-                              <NextgenCollectionsComponent />
-                            )}
-                            {view === NextGenView.ARTISTS && (
-                              <NextgenArtistsComponent />
-                            )}
-                            {view === NextGenView.ABOUT && (
-                              <NextgenAboutComponent />
-                            )}
-                          </Col>
-                        </Row>
-                      </Container>
-                    )}
-                  </Col>
-                </Row>
-              </Container>
-            )}
-          </>
-        ) : (
-          <div className={`${styles.nextGenQuestion}`}>
-            <Image
-              width="0"
-              height="0"
-              style={{ height: "auto", width: "25vw" }}
-              src="/question.png"
-              alt="questionmark"
-            />
-          </div>
-        )}
-      </main>
-    </>
+    <main className={styles.main}>
+      {collection?.id ? (
+        <>
+          <NextGenNavigationHeader view={view} setView={setView} />
+          {!view && (
+            <NextGenComponent collection={collection} setView={setView} />
+          )}
+          {view && (
+            <Container fluid className={`${styles.main}`}>
+              <Row className="d-flex align-items-center">
+                <Col>
+                  {view && (
+                    <Container className="pb-4">
+                      <Row>
+                        <Col>
+                          {view === NextGenView.COLLECTIONS && (
+                            <NextgenCollectionsComponent />
+                          )}
+                          {view === NextGenView.ARTISTS && (
+                            <NextgenArtistsComponent />
+                          )}
+                          {view === NextGenView.ABOUT && (
+                            <NextgenAboutComponent />
+                          )}
+                        </Col>
+                      </Row>
+                    </Container>
+                  )}
+                </Col>
+              </Row>
+            </Container>
+          )}
+        </>
+      ) : (
+        <div className={`${styles.nextGenQuestion}`}>
+          <Image
+            width="0"
+            height="0"
+            style={{ height: "auto", width: "25vw" }}
+            src="/question.png"
+            alt="questionmark"
+          />
+        </div>
+      )}
+    </main>
   );
 }
 
@@ -139,6 +115,12 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     props: {
       collection: collection,
       view: nextgenView,
+      metadata: {
+        title: `${nextgenView ? `${nextgenView} | ` : ""}NextGen`,
+        ogImage: collection.image,
+        description: "NextGen",
+        twitterCard: "summary_large_image",
+      },
     },
   };
 }

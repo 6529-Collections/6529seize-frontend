@@ -224,16 +224,23 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     };
   }, []);
 
+  const pageMetadata = rest.pageProps.metadata;
+  const componentMetadata = (Component as any).metadata;
   const isStaging = process.env.BASE_ENDPOINT?.includes("staging");
-  const metadata: PageSSRMetadata = rest.pageProps.metadata ??
-    (Component as any).metadata ?? {
-      description: "",
-      ogImage: `${process.env.BASE_ENDPOINT}/6529io.png`,
-      twitterCard: "summary",
-    };
-
-  metadata.title = metadata.title ?? (isStaging ? "6529 Staging" : "6529");
-
+  const metadata: PageSSRMetadata = {
+    title:
+      pageMetadata?.title ??
+      componentMetadata?.title ??
+      (isStaging ? "6529 Staging" : "6529"),
+    description:
+      pageMetadata?.description ?? componentMetadata?.description ?? "",
+    ogImage:
+      pageMetadata?.ogImage ??
+      componentMetadata?.ogImage ??
+      `${process.env.BASE_ENDPOINT}/6529io.png`,
+    twitterCard:
+      pageMetadata?.twitterCard ?? componentMetadata?.twitterCard ?? "summary",
+  };
   metadata.description = `${
     metadata.description ? `${metadata.description} | ` : ""
   }${isStaging ? "staging.6529.io" : "6529.io"}`;

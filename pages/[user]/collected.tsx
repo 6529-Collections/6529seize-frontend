@@ -8,10 +8,7 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageCollected from "../../components/user/collected/UserPageCollected";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
-interface UserPageProps {
-  profile: ApiIdentity;
-}
+import { UserPageProps } from "../../helpers/Types";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -56,6 +53,11 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        metadata: {
+          title: `${profile.handle} | Collected`,
+          ogImage: profile.pfp ?? "",
+          twitterCard: "summary_large_image",
+        },
       },
     };
   } catch (e: any) {

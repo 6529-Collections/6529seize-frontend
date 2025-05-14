@@ -2,7 +2,6 @@ import { Poppins } from "next/font/google";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import "react-toastify/dist/ReactToastify.css";
-import Head from "next/head";
 import { AuthContext } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
@@ -37,26 +36,16 @@ export default function DistributionPlanToolWrapper({
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="EMMA | 6529.io" />
-        <meta property="og:url" content={`${process.env.BASE_ENDPOINT}/emma`} />
-        <meta property="og:title" content="EMMA" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-      <div className={`tw-bg-neutral-900 ${poppins.className}`}>
-        <div
-          id="allowlist-tool"
-          className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative">
-          {children}
-        </div>
+    <div className={`tw-bg-neutral-900 ${poppins.className}`}>
+      <div
+        id="allowlist-tool"
+        className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative">
+        {children}
       </div>
-    </>
+    </div>
   );
 }
+
+DistributionPlanToolWrapper.metadata = {
+  title: "EMMA",
+};

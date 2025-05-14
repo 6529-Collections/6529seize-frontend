@@ -13,14 +13,14 @@ import { ActivityLogParams } from "../../components/profile-activity/ProfileActi
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
 import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
+import { UserPageProps } from "../../helpers/Types";
+
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
   readonly rater: string | null;
 }
 
-export interface UserPageRepProps {
-  readonly profile: ApiIdentity;
+export interface UserPageRepProps extends UserPageProps {
   readonly handleOrWallet: string;
 }
 
@@ -108,6 +108,11 @@ export async function getServerSideProps(
       props: {
         profile,
         handleOrWallet,
+        metadata: {
+          title: `${profile.handle} | Rep`,
+          ogImage: profile.pfp ?? "",
+          twitterCard: "summary_large_image",
+        },
       },
     };
   } catch (e: any) {

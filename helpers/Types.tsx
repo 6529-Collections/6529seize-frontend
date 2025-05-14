@@ -1,5 +1,6 @@
 import { SortDirection } from "../entities/ISort";
 import { ApiDrop } from "../generated/models/ApiDrop";
+import { ApiIdentity } from "../generated/models/ApiIdentity";
 import { ApiProfileMin } from "../generated/models/ApiProfileMin";
 
 export interface FullPageRequest<SORT_BY_OPTIONS> {
@@ -342,7 +343,12 @@ export interface WsDropUpdateMessage {
 
 export interface PageSSRMetadata {
   title: string;
-  description: string;
+  description?: string;
   ogImage: string;
   twitterCard: "summary" | "summary_large_image";
+}
+
+export interface UserPageProps {
+  profile: ApiIdentity;
+  metadata: PageSSRMetadata;
 }
