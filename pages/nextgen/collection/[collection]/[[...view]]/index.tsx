@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
@@ -23,11 +22,10 @@ const NextGenCollectionComponent = dynamic(
 );
 
 export default function NextGenCollectionPage(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const collection: NextGenCollection = props.pageProps.collection;
   const view: ContentView = props.pageProps.view;
   useShallowRedirect(collection.name);
-  const pagenameFull = `${collection.name}`;
 
   useEffect(() => {
     setTitle({

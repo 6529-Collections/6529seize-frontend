@@ -36,7 +36,7 @@ export default function CommunityActivityPage({
 }: {
   readonly pageProps: CommunityActivityPage;
 }) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
       title: "Activity | Network",

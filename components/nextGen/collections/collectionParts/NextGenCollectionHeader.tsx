@@ -22,7 +22,6 @@ import {
 } from "../../nextgen_helpers";
 import { isEmptyObject, numberWithCommas } from "../../../../helpers/Helpers";
 import { DistributionLink } from "../NextGen";
-import Head from "next/head";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";

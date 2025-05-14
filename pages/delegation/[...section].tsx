@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import { useContext, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
@@ -169,7 +168,7 @@ export const ALL_USE_CASES = [
 ];
 
 export default function DelegationsDocumentation(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const pageProps = props.pageProps;
   const router = useRouter();
   const section = pageProps.section;

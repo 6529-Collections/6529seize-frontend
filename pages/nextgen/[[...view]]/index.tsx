@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";

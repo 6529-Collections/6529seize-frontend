@@ -12,7 +12,6 @@ import { ActivityLogParams } from "../../components/profile-activity/ProfileActi
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
 import UserPageIdentityWrapper from "../../components/user/identity/UserPageIdentityWrapper";
 import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { UserPageProps } from "../../helpers/Types";
 
 export interface UserPageIdentityProps extends UserPageProps {

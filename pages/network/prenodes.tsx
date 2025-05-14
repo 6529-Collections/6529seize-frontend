@@ -10,7 +10,7 @@ const PrenodesStatus = dynamic(
 );
 
 export default function PrenodesPage() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
       title: "Prenodes | Network",

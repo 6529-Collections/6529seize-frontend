@@ -6,7 +6,6 @@ import { MEMES_MANIFOLD_PROXY_ABI } from "../../abis";
 import { NFTWithMemesExtendedData } from "../../entities/INFT";
 import { getCommonHeaders } from "../../helpers/server.helpers";
 import { commonApiFetch } from "../../services/api/common-api";
-import Head from "next/head";
 import { Time } from "../../helpers/time";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
@@ -19,15 +18,12 @@ const ManifoldMinting = dynamic(
 );
 
 export default function TheMemesMint(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const nft: NFTWithMemesExtendedData = props.pageProps.nft;
-
-  const pagename = `Mint The Memes #${nft.id}`;
-  const pagenameFull = `${pagename} | 6529.io`;
 
   useEffect(() => {
     setTitle({
-      title: pagenameFull,
+      title: "The Memes | Mint",
     });
   }, []);
 

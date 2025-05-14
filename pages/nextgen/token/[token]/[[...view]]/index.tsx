@@ -32,7 +32,7 @@ const NextGenTokenOnChainComponent = dynamic(
 );
 
 export default function NextGenCollectionToken(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const tokenId: number = props.pageProps.token_id;
   const token: NextGenToken | null = props.pageProps.token;
   const traits: NextGenTrait[] = props.pageProps.traits;
