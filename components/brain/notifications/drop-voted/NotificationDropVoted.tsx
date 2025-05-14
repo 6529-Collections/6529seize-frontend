@@ -3,7 +3,6 @@ import {
   ImageScale,
 } from "../../../../helpers/image.helpers";
 import { INotificationDropVoted } from "../../../../types/feed.types";
-import RateClapOutlineIcon from "../../../utils/icons/RateClapOutlineIcon";
 import { getTimeAgoShort, numberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import Drop, {
