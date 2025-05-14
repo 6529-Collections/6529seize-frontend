@@ -7,7 +7,7 @@ type Props = {
   readonly setOpen: (open: boolean) => void;
 };
 
-const GroupsSidebarToggleButton = forwardRef<HTMLButtonElement, Props>(
+const GroupsSidebarToggle = forwardRef<HTMLButtonElement, Props>(
   ({ open, setOpen }, ref) => {
     const activeGroupId = useSelector(selectActiveGroupId);
     const color =
@@ -17,7 +17,7 @@ const GroupsSidebarToggleButton = forwardRef<HTMLButtonElement, Props>(
     return (
       <button
         ref={ref}
-        className={`${color} tw-fixed tw-mt-2 tw-z-40 tw-bg-iron-950 tw-border tw-border-l-0 tw-border-solid tw-border-neutral-600 tw-p-2 tw-rounded-r-lg  focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
+        className={`${color} tw-fixed tw-top-0 tw-mt-2 tw-z-40 tw-bg-iron-950 tw-border tw-border-l-0 tw-border-solid tw-border-neutral-600 tw-p-2 tw-rounded-r-lg  focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
         onClick={() => setOpen(!open)}
       >
         {open ? (
@@ -56,6 +56,6 @@ const GroupsSidebarToggleButton = forwardRef<HTMLButtonElement, Props>(
   }
 );
 
-GroupsSidebarToggleButton.displayName = "GroupsSidebarToggleButton";
+GroupsSidebarToggle.displayName = "GroupsSidebarToggle";
 
-export default GroupsSidebarToggleButton;
+export default GroupsSidebarToggle; 
