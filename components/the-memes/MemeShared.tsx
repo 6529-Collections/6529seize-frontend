@@ -23,7 +23,7 @@ export async function getSharedServerSideProps(
   );
   let image = `${process.env.BASE_ENDPOINT}/6529io.png`;
   if (response?.data?.length > 0) {
-    description = `${name} | ${description}`;
+    description = name;
     name = `${response.data[0].name}`;
     if (response.data[0].thumbnail) {
       image = response.data[0].thumbnail;

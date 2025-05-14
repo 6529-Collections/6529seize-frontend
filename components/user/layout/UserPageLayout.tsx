@@ -17,9 +17,6 @@ import {
 import { AuthContext } from "../../auth/Auth";
 import { useIdentity } from "../../../hooks/useIdentity";
 
-const DEFAULT_IMAGE =
-  "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/6529io.png";
-
 export default function UserPageLayout({
   profile: initialProfile,
   children,
@@ -105,43 +102,25 @@ export default function UserPageLayout({
   }, [router.query.user]);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={title} />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/${handleOrWallet}`}
+    <main className="tw-min-h-[100dvh] tailwind-scope">
+      <div className="tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20">
+        <UserPageHeader
+          profile={profile ?? initialProfile}
+          mainAddress={mainAddress}
         />
-        <meta property="og:title" content={title} />
-        <meta property="og:image" content={profile?.pfp ?? DEFAULT_IMAGE} />
-        <meta
-          property="og:description"
-          content={descriptionArray.join(" \n ")}
-        />
-      </Head>
-
-      <main className="tw-min-h-[100dvh] tailwind-scope">
-        <div className="tw-bg-iron-950 tw-min-h-screen tw-pb-16 lg:tw-pb-20">
-          <UserPageHeader
-            profile={profile ?? initialProfile}
-            mainAddress={mainAddress}
-          />
-          <div className="tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-            <UserPageTabs />
-            <div className="tw-mt-6 lg:tw-mt-8">
-              {isLoadingTabData ? (
-                <div className="tw-text-base tw-font-normal tw-text-iron-200">
-                  Loading...
-                </div>
-              ) : (
-                children
-              )}
-            </div>
+        <div className="tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+          <UserPageTabs />
+          <div className="tw-mt-6 lg:tw-mt-8">
+            {isLoadingTabData ? (
+              <div className="tw-text-base tw-font-normal tw-text-iron-200">
+                Loading...
+              </div>
+            ) : (
+              children
+            )}
           </div>
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 }

@@ -13,8 +13,9 @@ import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelec
 import UserPageIdentityWrapper from "../../components/user/identity/UserPageIdentityWrapper";
 import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
-export interface UserPageIdentityProps {
-  readonly profile: ApiIdentity;
+import { UserPageProps } from "../../helpers/Types";
+
+export interface UserPageIdentityProps extends UserPageProps {
   readonly handleOrWallet: string;
 }
 
@@ -102,6 +103,11 @@ export async function getServerSideProps(
       props: {
         profile,
         handleOrWallet,
+        metadata: {
+          title: `${profile.handle} | Identity`,
+          ogImage: profile.pfp ?? "",
+          twitterCard: "summary_large_image",
+        },
       },
     };
   } catch (e: any) {

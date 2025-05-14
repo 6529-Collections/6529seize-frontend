@@ -17,11 +17,10 @@ const NextGenTraitSets = dynamic(
 
 export default function NextGenCollectionTraitSetsPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = `Trait Sets | ${collection.name}`;
 
   return (
     <>
-      <NextGenCollectionHead collection={collection} name={pagenameFull} />
+      <NextGenCollectionHead collection={collection} />
 
       <main className={styles.main}>
         <NextGenNavigationHeader />
@@ -32,5 +31,5 @@ export default function NextGenCollectionTraitSetsPage(props: any) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  return await getServerSideCollection(req);
+  return await getServerSideCollection(req, "Trait Sets");
 }

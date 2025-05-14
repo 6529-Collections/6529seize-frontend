@@ -1,6 +1,5 @@
 import { ReactElement, useContext } from "react";
 import { NextPageWithLayout } from "../_app";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -9,12 +8,9 @@ import {
 } from "../../helpers/server.helpers";
 import UserPageStats from "../../components/user/stats/UserPageStats";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { UserPageProps } from "../../helpers/Types";
 
-export interface UserPageStatsProps {
-  readonly profile: ApiIdentity;
-}
-
-const Page: NextPageWithLayout<{ pageProps: UserPageStatsProps }> = ({
+const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
   const { setProfile } = useContext(ReactQueryWrapperContext);
@@ -23,7 +19,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageStatsProps }> = ({
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageStatsProps }>
+  page: ReactElement<{ pageProps: UserPageProps }>
 ) {
   return (
     <UserPageLayout profile={page.props.pageProps.profile}>
@@ -39,7 +35,7 @@ export async function getServerSideProps(
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: UserPageStatsProps;
+  props: UserPageProps;
 }> {
   try {
     const headers = getCommonHeaders(req);
@@ -58,6 +54,11 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        metadata: {
+          title: `${profile.handle} | Stats`,
+          ogImage: profile.pfp ?? "",
+          twitterCard: "summary_large_image",
+        },
       },
     };
   } catch (e: any) {
