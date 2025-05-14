@@ -52,6 +52,7 @@ import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider
 import MainLayout from "../components/layout/MainLayout";
 import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
+import { PageSSRMetadata } from "../helpers/Types";
 
 export function getChains() {
   const chains: Chain[] = [mainnet];
@@ -115,11 +116,7 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout<NextPageContext>;
 };
 
-export default function App({
-  Component,
-  pageProps,
-  ...rest
-}: AppPropsWithLayout) {
+export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
 
   const getLayout = Component.getLayout ?? ((page) => page);
@@ -227,7 +224,7 @@ export default function App({
     };
   }, []);
 
-  const metadata = pageProps.metadata ||
+  const metadata: PageSSRMetadata = rest.pageProps.metadata ||
     (Component as any).metadata || {
       title: "6529.io",
       description: "6529.io",

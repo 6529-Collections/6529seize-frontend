@@ -9,17 +9,11 @@ import { NavigationHistoryProvider } from "../../contexts/NavigationHistoryConte
 import { MyStreamProvider } from "../../contexts/wave/MyStreamContext";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import Head from "next/head";
-
-export interface Metadata {
-  title: string;
-  description: string;
-  ogImage: string;
-  twitterCard: "summary" | "summary_large_image";
-}
+import { PageSSRMetadata } from "../../helpers/Types";
 
 interface MainLayoutProps {
   children: ReactNode;
-  metadata: Metadata;
+  metadata: PageSSRMetadata;
 }
 
 const MainLayout = ({ children, metadata }: MainLayoutProps) => {

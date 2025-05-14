@@ -45,7 +45,6 @@ import NFTMarketplaceLinks from "../components/nft-marketplace-links/NFTMarketpl
 
 export interface IndexPageProps {
   readonly nft: NFTWithMemesExtendedData;
-  readonly logsPage: CountlessPage<ProfileActivityLog>;
   readonly nextGenFeatured: NextGenCollection;
 }
 
@@ -81,13 +80,6 @@ export default function Home({
   readonly pageProps: IndexPageProps;
 }) {
   const capacitor = useCapacitor();
-  const { initLandingPage } = useContext(ReactQueryWrapperContext);
-  initLandingPage({
-    activityLogs: {
-      data: pageProps.logsPage,
-      params: INITIAL_ACTIVITY_LOGS_PARAMS,
-    },
-  });
 
   const { connectedProfile, setTitle, title } = useContext(AuthContext);
   useEffect(() => {
@@ -433,13 +425,6 @@ export async function getServerSideProps(
       endpoint: `memes_latest`,
       headers: headers,
     }).then(async (responseExtended) => responseExtended);
-    const logsPage = await getUserProfileActivityLogs({
-      headers,
-      params: convertActivityLogParams({
-        params: INITIAL_ACTIVITY_LOGS_PARAMS,
-        disableActiveGroup: true,
-      }),
-    });
     const nextGenFeatured = await commonApiFetch<NextGenCollection>({
       endpoint: `nextgen/featured`,
       headers: headers,
@@ -447,7 +432,6 @@ export async function getServerSideProps(
     return {
       props: {
         nft,
-        logsPage,
         nextGenFeatured,
       },
     };

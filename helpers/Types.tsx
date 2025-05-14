@@ -326,18 +326,23 @@ export enum WsMessageType {
   SUBSCRIBE_TO_WAVE = "SUBSCRIBE_TO_WAVE",
 }
 
-
-
 export interface WsTypingMessage {
   readonly type: WsMessageType.USER_IS_TYPING;
   readonly data: {
     wave_id: string;
     profile: ApiProfileMin;
-    timestamp: number; 
+    timestamp: number;
   };
 }
 
 export interface WsDropUpdateMessage {
   type: WsMessageType.DROP_UPDATE;
   data: ApiDrop;
+}
+
+export interface PageSSRMetadata {
+  title: string;
+  description: string;
+  ogImage: string;
+  twitterCard: "summary" | "summary_large_image";
 }
