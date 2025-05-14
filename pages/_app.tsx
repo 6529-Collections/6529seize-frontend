@@ -115,7 +115,11 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout<NextPageContext>;
 };
 
-export default function App({ Component, ...rest }: AppPropsWithLayout) {
+export default function App({
+  Component,
+  pageProps,
+  ...rest
+}: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
 
   const getLayout = Component.getLayout ?? ((page) => page);
@@ -223,13 +227,13 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     };
   }, []);
 
-  const metadata = (Component as any).metadata || {
-    title: "6529.io",
-    description: "6529.io",
-    url: process.env.BASE_ENDPOINT!,
-    image: `${process.env.BASE_ENDPOINT}/6529io.png`,
-    twitterCard: "summary",
-  };
+  const metadata = pageProps.metadata ||
+    (Component as any).metadata || {
+      title: "6529.io",
+      description: "6529.io",
+      ogImage: `${process.env.BASE_ENDPOINT}/6529io.png`,
+      twitterCard: "summary",
+    };
 
   return (
     <QueryClientProvider client={queryClient}>
