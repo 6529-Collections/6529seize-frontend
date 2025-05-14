@@ -32,7 +32,7 @@ export default function CommunityMembersMobileFilterBar({
   } as const;
 
   return (
-    <div className="tw-flex tw-gap-x-2 tw-overflow-x-auto tw-py-1 sm:tw-hidden">
+    <div className="tw-flex tw-gap-x-2 sm:tw-hidden tw-overflow-x-auto tw-py-1 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 ">
       {OPTIONS.map((option) => {
         const isActive = option === activeSort;
         const showLoader = isActive && isLoading;

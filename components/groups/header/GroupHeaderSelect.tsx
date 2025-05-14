@@ -15,7 +15,7 @@ export default function GroupHeaderSelect() {
 
   if (haveProfile) {
     return (
-      <PrimaryButtonLink href="groups" padding="tw-px-3 tw-py-2 tw-w-full">
+      <PrimaryButtonLink href="/network/groups" padding="tw-px-3 tw-py-2 tw-w-full">
         <svg
           className="tw-w-5 tw-h-5"
           viewBox="0 0 24 24"
