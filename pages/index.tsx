@@ -12,18 +12,9 @@ import {
   printMintDate,
 } from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
-import { ProfileActivityLog } from "../entities/IProfile";
-import { CountlessPage } from "../helpers/Types";
-import {
-  getCommonHeaders,
-  getUserProfileActivityLogs,
-} from "../helpers/server.helpers";
-import {
-  ActivityLogParams,
-  convertActivityLogParams,
-} from "../components/profile-activity/ProfileActivityLogs";
+import { getCommonHeaders } from "../helpers/server.helpers";
+import { ActivityLogParams } from "../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
-import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 import NextGenCollectionSlideshow from "../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
@@ -81,7 +72,7 @@ export default function Home({
 }) {
   const capacitor = useCapacitor();
 
-  const { connectedProfile, setTitle, title } = useContext(AuthContext);
+  const { connectedProfile, setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
       title: "6529",
@@ -406,8 +397,6 @@ export default function Home({
 }
 
 Home.metadata = {
-  title: "6529",
-  description: "6529.io",
   ogImage: `${process.env.BASE_ENDPOINT}/6529io-banner.png`,
   twitterCard: "summary_large_image",
 };

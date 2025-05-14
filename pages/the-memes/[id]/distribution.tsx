@@ -11,9 +11,7 @@ const DistributionComponent = dynamic(
   }
 );
 
-export default function MemeDistributionPage(props: any) {
-  const pageProps = props.pageProps;
-
+export default function MemeDistributionPage() {
   return (
     <main className={styles.main}>
       <DistributionComponent

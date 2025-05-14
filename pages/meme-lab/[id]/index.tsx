@@ -12,7 +12,7 @@ const LabPageComponent = dynamic(
   }
 );
 
-export default function MemeLabPage(props: any) {
+export default function MemeLabPage() {
   const { connectedProfile } = useAuth();
 
   return (

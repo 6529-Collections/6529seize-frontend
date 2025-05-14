@@ -4,7 +4,6 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        <meta name="description" content="6529.io" />
         <meta name="version" content={process.env.VERSION} />
         <link rel="icon" href="/favicon.ico" />
         <link rel="preconnect" href={process.env.API_ENDPOINT} />
