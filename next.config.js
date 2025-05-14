@@ -17,10 +17,10 @@ if (VERSION) {
   }
 }
 
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.NODE_ENV !== "development",
-  openAnalyzer: false,
-});
+// const withBundleAnalyzer = require("@next/bundle-analyzer")({
+//   enabled: process.env.NODE_ENV !== "development",
+//   openAnalyzer: false,
+// });
 
 const securityHeaders = [
   {
@@ -53,9 +53,12 @@ const nextConfig = {
     ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
     : "",
   reactStrictMode: false,
-  swcMinify: true,
   compress: true,
   productionBrowserSourceMaps: false,
+  experimental: {
+    webpackMemoryOptimizations: true,
+    webpackBuildWorker: true,
+  },
   images: {
     domains: ["6529.io", "arweave.net", "localhost"],
     unoptimized: true,
@@ -101,4 +104,5 @@ const nextConfig = {
   },
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+// module.exports = withBundleAnalyzer(nextConfig);
+module.exports = nextConfig;
