@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useContext, useEffect } from "react";
@@ -10,35 +9,23 @@ const AddRememeComponent = dynamic(
 );
 
 export default function ReMemes() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
 
   useEffect(() => {
     setTitle({
-      title: "Add ReMemes | 6529.io",
+      title: "Add ReMemes | Collections",
     });
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Add ReMemes | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/rememes/add`}
-        />
-        <meta property="og:title" content="ReMemes" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        <AddRememeComponent />
-      </main>
-    </>
+    <main className={styles.main}>
+      <AddRememeComponent />
+    </main>
   );
 }
+
+ReMemes.metadata = {
+  title: "ReMemes | Add",
+  description: "Collections",
+  ogImage: `${process.env.BASE_ENDPOINT}/re-memes-b.jpeg`,
+};

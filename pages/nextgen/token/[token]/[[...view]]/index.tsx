@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import {
@@ -13,7 +12,6 @@ import { ContentView } from "../../../../../components/nextGen/collections/colle
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { AuthContext } from "../../../../../components/auth/Auth";
 import { useContext, useEffect } from "react";
-
 
 const NextGenTokenComponent = dynamic(
   () =>
@@ -41,9 +39,8 @@ export default function NextGenCollectionToken(props: any) {
   const tokenCount: number = props.pageProps.tokenCount;
   const collection: NextGenCollection = props.pageProps.collection;
   const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
-  const pageImage = token?.image_url ?? collection.image;
-  const tokenView = props.pageProps.view;
 
+  const tokenView = props.pageProps.view;
 
   useEffect(() => {
     setTitle({
@@ -52,44 +49,23 @@ export default function NextGenCollectionToken(props: any) {
   }, [pagenameFull]);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={pagenameFull} />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/token/${tokenId}`}
+    <main className={styles.main}>
+      <NextGenNavigationHeader />
+      {token ? (
+        <NextGenTokenComponent
+          collection={collection}
+          token={token}
+          traits={traits}
+          tokenCount={tokenCount}
+          view={tokenView}
         />
-        <meta property="og:title" content={pagenameFull} />
-        <meta property="og:image" content={pageImage} />
-        <meta property="og:description" content="NEXTGEN | 6529.io" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image:alt" content={pagenameFull} />
-        <meta name="twitter:title" content={pagenameFull} />
-        <meta name="twitter:description" content="NEXTGEN | 6529.io" />
-        <meta name="twitter:image" content={pageImage} />
-      </Head>
-
-      <main className={styles.main}>
-        <NextGenNavigationHeader />
-        {token ? (
-          <NextGenTokenComponent
-            collection={collection}
-            token={token}
-            traits={traits}
-            tokenCount={tokenCount}
-            view={tokenView}
-          />
-        ) : (
-          <NextGenTokenOnChainComponent
-            collection={collection}
-            token_id={tokenId}
-          />
-        )}
-      </main>
-    </>
+      ) : (
+        <NextGenTokenOnChainComponent
+          collection={collection}
+          token_id={tokenId}
+        />
+      )}
+    </main>
   );
 }
 
@@ -158,6 +134,12 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       tokenCount: tokenCount,
       collection: collection,
       view: tokenView,
+      metadata: {
+        title: token?.name ?? `${collection.name} - #${tokenId}`,
+        ogImage: token?.image_url ?? collection.image,
+        description: "NextGen",
+        twitterCard: "summary_large_image",
+      },
     },
   };
 }

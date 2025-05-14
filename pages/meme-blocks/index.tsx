@@ -1,6 +1,5 @@
 import { Poppins } from "next/font/google";
 import { useContext, useEffect, useState } from "react";
-import Head from "next/head";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import PrimaryButton from "../../components/utils/button/PrimaryButton";
@@ -17,7 +16,6 @@ export interface PredictBlockNumbersResponseApiModel {
   readonly count: number;
   readonly blockNumbers: number[];
 }
-
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -57,7 +55,7 @@ const BlockPickerTimeWindowToMilliseconds = {
 };
 
 export default function BlockPicker() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const targetDate =
     new Date().getTime() +
     BlockPickerTimeWindowToMilliseconds[BlockPickerTimeWindow.ONE_HOUR];
@@ -191,27 +189,12 @@ export default function BlockPicker() {
 
   useEffect(() => {
     setTitle({
-      title: "Meme Blocks | 6529.io",
+      title: "Meme Blocks | Tools",
     });
   }, []);
 
   return (
     <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Meme Blocks | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/meme-blocks`}
-        />
-        <meta property="og:title" content="Meme Blocks" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
       <div className={`tw-bg-neutral-900 ${poppins.className}`}>
         <div className="tailwind-scope tw-overflow-y-auto tw-min-h-screen tw-relative tw-pt-8 tw-pb-12 tw-px-4 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <h1 className="tw-text-white pb-4">
@@ -265,3 +248,8 @@ export default function BlockPicker() {
     </>
   );
 }
+
+BlockPicker.metadata = {
+  title: "Meme Blocks",
+  description: "Tools",
+};

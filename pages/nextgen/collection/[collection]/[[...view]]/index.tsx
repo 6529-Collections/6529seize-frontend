@@ -36,31 +36,9 @@ export default function NextGenCollectionPage(props: any) {
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={pagenameFull} />
-        <meta
-          property="og:url"
-          content={`${
-            process.env.BASE_ENDPOINT
-          }/nextgen/collection/${formatNameForUrl(collection.name)}`}
-        />
-        <meta property="og:title" content={pagenameFull} />
-        <meta property="og:image" content={collection.image} />
-        <meta property="og:description" content="NEXTGEN | 6529.io" />
-        <meta name="twitter:card" content={pagenameFull} />
-        <meta name="twitter:image:alt" content={pagenameFull} />
-        <meta name="twitter:title" content={pagenameFull} />
-        <meta name="twitter:description" content="NEXTGEN | 6529.io" />
-        <meta name="twitter:image" content={collection.image} />
-      </Head>
-
-      <main className={styles.main}>
-        <NextGenCollectionComponent collection={collection} view={view} />
-      </main>
-    </>
+    <main className={styles.main}>
+      <NextGenCollectionComponent collection={collection} view={view} />
+    </main>
   );
 }
 
@@ -85,7 +63,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     endpoint: `nextgen/collections/${parsedCollectionId}`,
     headers: headers,
   }).catch(() => {
-    return {};
+    return null;
   });
 
   if (isEmptyObject(collection)) {
@@ -107,6 +85,15 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     props: {
       collection: collection,
       view: collectionView,
+      metadata: {
+        title: `${
+          collection?.name ?? `Collection #${parsedCollectionId}`
+        } | NextGen`,
+        ogImage:
+          collection?.image ?? `${process.env.BASE_ENDPOINT}/nextgen.png`,
+        description: "NextGen",
+        twitterCard: "summary_large_image",
+      },
     },
   };
 }

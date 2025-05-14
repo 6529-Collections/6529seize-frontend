@@ -58,7 +58,6 @@ export enum AboutSection {
   COPYRIGHT = "copyright",
 }
 
-
 interface Props {
   section: AboutSection;
   sectionTitle: string;
@@ -151,62 +150,42 @@ export default function About(props: any) {
 
   useEffect(() => {
     setTitle({
-      title: `About - ${sectionTitle} | 6529.io`,
+      title: `${sectionTitle} | About`,
     });
   }, [sectionTitle]);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content={`About - ${sectionTitle} | 6529.io`}
-        />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/about/${section}`}
-        />
-        <meta property="og:title" content={`About - ${sectionTitle}`} />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-      <main className={styles.main}>
-        <Container fluid>
-          <Row>
-            <Col>
-              <Container className="pt-4">
-                <Row>
-                  <Col className={menuStyles.aboutMenuLeft}>
-                    <AboutMenu
-                      currentSection={section}
-                      setSection={setNewSection}
-                    />
+    <main className={styles.main}>
+      <Container fluid>
+        <Row>
+          <Col>
+            <Container className="pt-4">
+              <Row>
+                <Col className={menuStyles.aboutMenuLeft}>
+                  <AboutMenu
+                    currentSection={section}
+                    setSection={setNewSection}
+                  />
+                </Col>
+                {section && (
+                  <Col className={menuStyles.aboutMenuRight}>
+                    {printSection()}
                   </Col>
-                  {section && (
-                    <Col className={menuStyles.aboutMenuRight}>
-                      {printSection()}
-                    </Col>
-                  )}
-                </Row>
-                <Row className="pt-4">
-                  <Col className={menuStyles.aboutMenuLeftFull}>
-                    <AboutMenu
-                      currentSection={section}
-                      setSection={setNewSection}
-                    />
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-        </Container>
-      </main>
-    </>
+                )}
+              </Row>
+              <Row className="pt-4">
+                <Col className={menuStyles.aboutMenuLeftFull}>
+                  <AboutMenu
+                    currentSection={section}
+                    setSection={setNewSection}
+                  />
+                </Col>
+              </Row>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+    </main>
   );
 }
 
@@ -261,6 +240,10 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         releaseNotesText,
         faqText,
         ensText,
+        metadata: {
+          title: sectionTitle,
+          description: "About",
+        },
       },
     };
   } else {

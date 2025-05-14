@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
@@ -19,32 +18,19 @@ export default function PrenodesPage() {
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/network/prenodes`}
-        />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        <Container fluid className={styles.leaderboardContainer}>
-          <Row>
-            <Col>
-              <PrenodesStatus />
-            </Col>
-          </Row>
-        </Container>
-      </main>
-    </>
+    <main className={styles.main}>
+      <Container fluid className={styles.leaderboardContainer}>
+        <Row>
+          <Col>
+            <PrenodesStatus />
+          </Col>
+        </Row>
+      </Container>
+    </main>
   );
 }
+
+PrenodesPage.metadata = {
+  title: "Prenodes",
+  description: "Network",
+};

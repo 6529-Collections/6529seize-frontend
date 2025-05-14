@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
@@ -38,43 +37,22 @@ export default function CommunityNerdPage(props: any) {
   };
 
   useEffect(() => {
-    const pageTitle = focus ? `Network | Nerd - ${focus}` : "Network | Nerd";
+    const pageTitle = `Network Nerd - ${focus}`;
     if (title !== pageTitle) {
       setTitle({ title: pageTitle });
     }
   }, [focus, title, setTitle]);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="6529.io Network Nerd Leaderboard" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/network/nerd`}
-        />
-        <meta property="og:title" content={title} />
-        <meta
-          property="og:description"
-          content="6529.io Network Nerd Leaderboard"
-        />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        <Container fluid>
-          <Row>
-            <Col>
-              <Leaderboard focus={focus} setFocus={handleSetFocus} />
-            </Col>
-          </Row>
-        </Container>
-      </main>
-    </>
+    <main className={styles.main}>
+      <Container fluid>
+        <Row>
+          <Col>
+            <Leaderboard focus={focus} setFocus={handleSetFocus} />
+          </Col>
+        </Row>
+      </Container>
+    </main>
   );
 }
 
@@ -88,6 +66,10 @@ export async function getServerSideProps(req: any) {
   return {
     props: {
       focus,
+      metadata: {
+        title: `Network Nerd - ${focus}`,
+        description: "Network",
+      },
     },
   };
 }

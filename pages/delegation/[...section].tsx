@@ -253,37 +253,19 @@ export default function DelegationsDocumentation(props: any) {
   }, [addressQuery, collectionQuery, useCaseQuery]);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Delegation | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/delegation/delegation-center`}
-        />
-        <meta property="og:title" content="Delegation" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        <DelegationCenterMenu
-          section={section}
-          path={pageProps.path}
-          setActiveSection={(s) => updatePath(s)}
-          address_query={addressQuery}
-          setAddressQuery={setAddressQuery}
-          collection_query={collectionQuery}
-          setCollectionQuery={setCollectionQuery}
-          use_case_query={useCaseQuery}
-          setUseCaseQuery={setUseCaseQuery}
-        />
-      </main>
-    </>
+    <main className={styles.main}>
+      <DelegationCenterMenu
+        section={section}
+        path={pageProps.path}
+        setActiveSection={(s) => updatePath(s)}
+        address_query={addressQuery}
+        setAddressQuery={setAddressQuery}
+        collection_query={collectionQuery}
+        setCollectionQuery={setCollectionQuery}
+        use_case_query={useCaseQuery}
+        setUseCaseQuery={setUseCaseQuery}
+      />
+    </main>
   );
 }
 
@@ -312,6 +294,13 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
         addressQuery: addressQuery ?? null,
         collectionQuery: collectionQuery ?? null,
         useCaseQuery: useCaseQueryInt,
+        metadata: {
+          title: section
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase()),
+          description: "NFT Delegation",
+          twitterCard: "summary_large_image",
+        },
       },
     };
   } else {
