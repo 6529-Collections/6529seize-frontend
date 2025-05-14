@@ -7,7 +7,7 @@ export default function CommonIntersectionElement({
   readonly onIntersection: (state: boolean) => void;
 }) {
   const elementRef = useRef<HTMLDivElement>(null);
-  const intersection = useIntersection(elementRef, {
+  const intersection = useIntersection(elementRef as React.RefObject<HTMLElement>, {
     root: null,
     rootMargin: "0px",
     threshold: 1,
