@@ -49,8 +49,6 @@ export default function BackButton() {
 
     if (canGoBack) {
       goBack();
-    } else {
-      router.back();
     }
   };
 

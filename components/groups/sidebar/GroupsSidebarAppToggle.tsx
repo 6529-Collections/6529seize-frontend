@@ -1,9 +1,7 @@
 import { FC } from "react";
 import { useSelector } from "react-redux";
 import { selectActiveGroupId } from "../../../store/groupSlice";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import FilterIcon from "../../icons/FilterIcon";
-
+import { FunnelIcon } from "@heroicons/react/24/outline";
 interface Props {
   readonly open: boolean;
   readonly setOpen: (open: boolean) => void;
@@ -23,7 +21,7 @@ const GroupsSidebarAppToggle: FC<Props> = ({ open, setOpen }) => {
       onClick={() => setOpen(!open)}
       aria-label="Toggle groups sidebar"
     >
-      <FilterIcon className="tw-w-6 tw-h-6" />
+      <FunnelIcon className="tw-w-6 tw-h-6 tw-flex-shrink-0" />
     </button>
   );
 };
