@@ -14,7 +14,6 @@ export interface Metadata {
   title: string;
   description: string;
   ogImage: string;
-  ogUrl: string;
   twitterCard: "summary" | "summary_large_image";
 }
 
@@ -31,7 +30,9 @@ const MainLayout = ({ children, metadata }: MainLayoutProps) => {
   const isSmall = router.pathname.startsWith("/my-stream");
   const isAccess = router.pathname.startsWith("/access");
 
-  const { title, description, ogImage, ogUrl, twitterCard } = metadata;
+  const { title, description, ogImage, twitterCard } = metadata;
+
+  const ogUrl = `${process.env.BASE_ENDPOINT}${router.pathname}`;
 
   if (isAccess) {
     return <>{children}</>;
