@@ -25,7 +25,7 @@ interface CommonSelectDefaultProps<T, U> {
   readonly disabled?: boolean;
   readonly theme?: "dark" | "light";
   readonly size?: "sm" | "md";
-  readonly containerRef?: RefObject<HTMLDivElement>; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
+  readonly containerRef?: RefObject<HTMLDivElement | null>; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
   readonly setSelected: (item: T) => void;
   readonly renderItemChildren?: (
     item: CommonSelectItem<T, U>

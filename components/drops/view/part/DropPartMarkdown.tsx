@@ -6,6 +6,7 @@ import {
   isValidElement,
   memo,
   ReactNode,
+  type JSX,
 } from "react";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";

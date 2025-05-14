@@ -11,7 +11,7 @@ export default function UserPageCollectedFiltersSzn({
   setSelected,
 }: {
   readonly selected: SelectedType;
-  readonly containerRef: RefObject<HTMLDivElement>;
+  readonly containerRef: RefObject<HTMLDivElement | null>;
   readonly setSelected: (selected: SelectedType) => void;
 }) {
   const labels: { [key in MEMES_SEASON]: string } = {
