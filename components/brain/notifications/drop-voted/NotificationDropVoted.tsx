@@ -77,7 +77,7 @@ export default function NotificationDropVoted({
                 className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50"
               >
                 {notification.related_identity.handle}
-              </Link>{" "}
+              </Link>
               <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
                 rated
                 <span
@@ -88,11 +88,9 @@ export default function NotificationDropVoted({
                   {notification.additional_context.vote > 0 && "+"}
                   {numberWithCommas(notification.additional_context.vote)}
                 </span>
-              </span>{" "}
+              </span>
               <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-                <span className="tw-font-bold tw-mx-0.5 tw-text-iron-400">
-                  &#8226;
-                </span>{" "}
+                <span className="tw-font-bold tw-mx-0.5 tw-text-iron-400">&#8226;</span>
                 {getTimeAgoShort(notification.created_at)}
               </span>
             </span>
