@@ -72,7 +72,7 @@ export default function Home({
 }) {
   const capacitor = useCapacitor();
 
-  const { connectedProfile, setTitle, title } = useContext(AuthContext);
+  const { connectedProfile, setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
       title: "6529",
