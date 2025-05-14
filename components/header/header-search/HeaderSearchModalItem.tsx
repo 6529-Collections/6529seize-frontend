@@ -52,7 +52,7 @@ export default function HeaderSearchModalItem({
 }) {
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
-  const isHovering = useHoverDirty(ref);
+  const isHovering = useHoverDirty(ref as React.RefObject<HTMLDivElement>);
 
   const supportsHover =
     typeof window !== "undefined" &&

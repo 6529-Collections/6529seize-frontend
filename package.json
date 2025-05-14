@@ -50,6 +50,7 @@
     "@web3modal/wagmi": "^5.1.11",
     "bootstrap": "^5.3.3",
     "capacitor-secure-storage-plugin": "^0.10.0",
+    "chart.js": "^4.4.9",
     "csv-parser": "^3.0.0",
     "emoji-mart": "^5.6.0",
     "ethereum-cryptography": "^2.2.0",
