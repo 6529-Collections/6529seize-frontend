@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .slideshowContainer {
   position: fixed;
@@ -31,7 +31,7 @@
   width: 28px;
 
   &:hover {
-    color: $off-white;
+    color: variables.$off-white;
   }
 }
 
@@ -57,7 +57,7 @@
 .lfgButton {
   background-color: #39ff14;
   border-color: #39ff14;
-  color: $very-dark-grey !important;
+  color: variables.$very-dark-grey !important;
 
   &:hover,
   &:focus,

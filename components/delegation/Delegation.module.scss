@@ -1,4 +1,5 @@
-@import "../../styles/variables.scss";
+@use 'sass:color';
+@use "../../styles/variables.scss";
 
 .Web3NetworkSwitch {
   display: none !important;
@@ -16,7 +17,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale($white, $lightness: -15);
+    background-color: color.scale($white, $lightness: -15%);
   }
 }
 
@@ -31,14 +32,14 @@
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale($white, $lightness: -10);
+    background-color: color.scale($white, $lightness: -10%);
   }
 }
 
 .viewManageBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale($white, $lightness: -20);
-  color: $lighter-grey-2;
+  background-color: color.scale($white, $lightness: -20%);
+  color: variables.$lighter-grey-2;
 }
 
 .collectionDelegationsAccordion {
@@ -62,10 +63,10 @@
 
 .collectionDelegationsAccordionItemDisabled {
   pointer-events: none !important;
-  background-color: color.scale($blue, $lightness: -10);
+  background-color: color.scale(variables.$blue, $lightness: -10%);
 
   button {
-    color: $font-color-h !important;
+    color: variables.$font-color-h !important;
   }
 }
 
@@ -79,49 +80,49 @@
 }
 
 .useCaseWalletLink {
-  color: $font-color-h;
+  color: variables.$font-color-h;
   font-size: smaller;
   text-decoration: underline;
 
   &:hover {
-    color: $dark-grey;
+    color: variables.$dark-grey;
   }
 }
 
 .useCaseWalletUpdate {
   border: none !important;
-  background-color: $blue;
+  background-color: variables.$blue;
   color: white;
   padding: 10px 15px;
   cursor: pointer;
 
   &:hover {
-    background-color: lighten($color: $blue, $amount: 5);
+    background-color: color.adjust(variables.$blue, $lightness: 5%);
   }
 }
 
 .useCaseWalletUpdateDisabled {
   pointer-events: none !important;
-  background-color: color.scale($blue, $lightness: -10);
-  color: $font-color-h;
+  background-color: color.scale(variables.$blue, $lightness: -10%);
+  color: variables.$font-color-h;
 }
 
 .useCaseWalletRevoke {
   border: none !important;
-  background-color: $raspberry;
+  background-color: variables.$raspberry;
   color: white;
   padding: 10px 15px;
   cursor: pointer;
 
   &:hover {
-    background-color: lighten($color: $raspberry, $amount: 5);
+    background-color: color.adjust(variables.$raspberry, $lightness: 5%);
   }
 }
 
 .useCaseWalletRevokeDisabled {
   pointer-events: none !important;
-  background-color: color.scale($raspberry, $lightness: -10);
-  color: $font-color-h;
+  background-color: color.scale(variables.$raspberry, $lightness: -10%);
+  color: variables.$font-color-h;
 }
 
 .addNewDelegationBtn {
@@ -132,21 +133,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: $blue;
+  background-color: variables.$blue;
   color: white;
   padding: 15px 10px;
   cursor: pointer;
   white-space: nowrap;
 
   &:hover {
-    background-color: lighten($color: $blue, $amount: 5);
+    background-color: color.adjust(variables.$blue, $lightness: 5%);
   }
 }
 
 .addNewDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale($blue, $lightness: -10);
-  color: $font-color-h;
+  background-color: color.scale(variables.$blue, $lightness: -10%);
+  color: variables.$font-color-h;
 }
 
 .revokeDelegationBtn {
@@ -155,21 +156,21 @@
   justify-content: center;
   margin-right: 15px;
   margin-top: 15px;
-  background-color: $raspberry;
+  background-color: variables.$raspberry;
   color: white;
   width: fit-content;
   padding: 12px 16px;
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale($raspberry, $lightness: -5);
+    background-color: color.scale(variables.$raspberry, $lightness: -5%);
   }
 }
 
 .revokeDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale($raspberry, $lightness: -10);
-  color: $font-color-h;
+  background-color: color.scale(variables.$raspberry, $lightness: -10%);
+  color: variables.$font-color-h;
 }
 
 .lockDelegationBtn {
@@ -179,44 +180,44 @@
   justify-content: center;
   margin-right: 15px;
   margin-top: 15px;
-  background-color: color.scale(#d7710d, $lightness: -10);
+  background-color: color.scale(#d7710d, $lightness: -10%);
   color: white;
   width: fit-content;
   padding: 12px 16px;
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale(#d7710d, $lightness: -15);
+    background-color: color.scale(#d7710d, $lightness: -15%);
   }
 }
 
 .lockDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale(#d7710d, $lightness: -20);
-  color: $font-color-h;
+  background-color: color.scale(#d7710d, $lightness: -20%);
+  color: variables.$font-color-h;
 }
 
 .formInput {
-  color: $dark-grey !important;
+  color: variables.$dark-grey !important;
   border-radius: 0 !important;
-  border-color: $lightest-grey;
+  border-color: variables.$lightest-grey;
   height: 100%;
 
   &:focus {
-    border-color: $blue !important;
+    border-color: variables.$blue !important;
   }
 }
 
 .formInputLockUseCase {
-  color: $dark-grey !important;
+  color: variables.$dark-grey !important;
   border-radius: 0 !important;
-  border-color: $lightest-grey;
+  border-color: variables.$lightest-grey;
   padding-top: 10px;
   padding-bottom: 10px;
   height: 50px;
 
   &:focus {
-    border-color: $blue !important;
+    border-color: variables.$blue !important;
   }
 }
 
@@ -245,7 +246,7 @@
 }
 
 .newDelegationSubmitBtn {
-  background-color: $green;
+  background-color: variables.$green;
   padding-left: 15px;
   padding-right: 25px;
   border: none;
@@ -256,14 +257,14 @@
   color: white;
 
   &:hover {
-    background-color: color.scale($green, $lightness: -5);
+    background-color: color.scale(variables.$green, $lightness: -5%);
   }
 }
 
 .newDelegationSubmitBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale($green, $lightness: -10);
-  color: $font-color-h;
+  background-color: color.scale(variables.$green, $lightness: -10%);
+  color: variables.$font-color-h;
 }
 
 .newDelegationCancelBtn {
@@ -278,20 +279,20 @@
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale($white, $lightness: -15);
+    background-color: color.scale($white, $lightness: -15%);
   }
 }
 
 .newDelegationError {
-  color: lighten($color: $raspberry, $amount: 12);
+  color: color.adjust(variables.$raspberry, $lightness: 12%);
 }
 
 .newDelegationSuccess {
-  color: lighten($color: $green, $amount: 12);
+  color: color.adjust(variables.$green, $lightness: 12%);
 }
 
 .lockUseCaseBtn {
-  background-color: lighten($color: $lightest-grey, $amount: 25);
+  background-color: color.adjust(variables.$lightest-grey, $lightness: 25%);
   padding-left: 15px;
   padding-right: 25px;
   border: none;
@@ -301,7 +302,7 @@
   height: 50px;
 
   &:hover {
-    background-color: lighten($color: $lightest-grey, $amount: 20);
+    background-color: color.adjust(variables.$lightest-grey, $lightness: 20%);
   }
 }
 
@@ -337,13 +338,13 @@
   }
 
   &:hover {
-    color: $font-color-h;
+    color: variables.$font-color-h;
   }
 }
 
 .leftBorder {
   height: 100%;
-  border-left: 1px solid $lighter-grey;
+  border-left: 1px solid variables.$lighter-grey;
 }
 
 @media only screen and (max-width: 767px) {
@@ -390,10 +391,10 @@
 }
 
 .etherscanLink {
-  color: $font-color-h;
+  color: variables.$font-color-h;
 
   &:hover {
-    color: $font-color;
+    color: variables.$font-color;
   }
 }
 
@@ -443,24 +444,24 @@
 }
 
 .delegationFetchingLabel {
-  color: $font-color-h;
+  color: variables.$font-color-h;
   margin-left: 15px;
 }
 
 .delegationActiveLabel {
-  color: lighten($color: $green, $amount: 10);
+  color: color.adjust(variables.$green, $lightness: 10%);
 }
 
 .delegationExpiredLabel {
-  color: lighten($color: $raspberry, $amount: 10);
+  color: color.adjust(variables.$raspberry, $lightness: 10%);
 }
 
 .consolidationActiveLabel {
-  color: lighten($color: $blue, $amount: 20);
+  color: color.adjust(variables.$blue, $lightness: 20%);
 }
 
 .consolidationNotAcceptedLabel {
-  color: lighten($color: $orange, $amount: 10);
+  color: color.adjust(variables.$orange, $lightness: 10%);
 }
 
 .documentationLink {
@@ -509,12 +510,12 @@
 
 .formInputDisabled {
   pointer-events: none !important;
-  color: $font-color-h !important;
+  color: variables.$font-color-h !important;
 }
 
 .delegationContractLinksHeader {
   font-weight: bold;
-  color: $font-color-h;
+  color: variables.$font-color-h;
   text-align: center;
 }
 
@@ -525,12 +526,12 @@
 .registerHeading {
   cursor: pointer;
   &:hover {
-    color: $font-color;
+    color: variables.$font-color;
   }
 }
 
 .registerHeadingActive {
-  color: $font-color;
+  color: variables.$font-color;
 }
 
 .infoIconLink {
@@ -568,7 +569,7 @@
 .menuLeftItem {
   cursor: pointer;
   &:hover {
-    color: $lightest-grey;
+    color: variables.$lightest-grey;
   }
 }
 
@@ -649,12 +650,12 @@
   }
 
   &:hover {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
     color: white;
   }
 }
 
 .delegationAccordionBlock {
   padding: 15px;
-  background-color: $very-dark-grey !important;
+  background-color: variables.$very-dark-grey !important;
 }

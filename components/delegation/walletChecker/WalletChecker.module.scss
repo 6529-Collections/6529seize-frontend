@@ -1,29 +1,30 @@
-@import "../../../styles/variables.scss";
+@use 'sass:color';
+@use "../../../styles/variables.scss";
 
 .formInput {
-  color: $dark-grey !important;
+  color: variables.$dark-grey !important;
   border-radius: 0 !important;
-  border-color: $lightest-grey;
+  border-color: variables.$lightest-grey;
 
   &:focus {
-    border-color: $blue !important;
+    border-color: variables.$blue !important;
   }
 }
 
 .checkBtn {
-  background-color: $blue;
+  background-color: variables.$blue;
   border: none;
   border-radius: 0;
   color: white;
   padding: 10px 15px;
 
   &:hover {
-    background-color: lighten($color: $blue, $amount: 5);
+    background-color: color.adjust($color: variables.$blue, $lightness: 5%);
   }
 
   &:active,
   &:disabled {
-    background-color: color.scale($blue, $lightness: -5) !important;
+    background-color: color.scale(variables.$blue, $lightness: -5%) !important;
   }
 }
 
@@ -35,18 +36,18 @@
   padding: 10px 15px;
 
   &:hover {
-    background-color: $dark-grey;
+    background-color: variables.$dark-grey;
   }
 
   &:active,
   &:disabled {
-    background-color: $dark-grey;
+    background-color: variables.$dark-grey;
   }
 }
 
 .error {
   font-size: 1em;
-  color: $raspberry;
+  color: variables.$raspberry;
 }
 
 .supportingAddress {

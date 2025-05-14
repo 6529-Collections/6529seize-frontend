@@ -1,13 +1,14 @@
-@import "./variables.scss";
+@use 'sass:color';
+@use "variables.scss";
 
 .main {
   min-height: 100vh;
   padding-bottom: 20px;
-  background-color: $bg-color-2;
+  background-color: variables.$bg-color-2;
 }
 
 .latestDropImage {
-  background-color: $dark-grey;
+  background-color: variables.$dark-grey;
   padding: 0;
   position: relative;
 
@@ -71,7 +72,7 @@
 .login {
   height: 100vh;
   text-align: center;
-  background-color: $very-dark-grey;
+  background-color: variables.$very-dark-grey;
   .loginImage {
     max-width: 100%;
     max-height: 100vh;
@@ -95,7 +96,7 @@
     padding-left: 10px;
     border: none;
     height: 40px;
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
     width: 80%;
     max-width: 400px;
   }
@@ -116,7 +117,7 @@
   h3,
   h4,
   h5 {
-    font-family: $main-font !important;
+    font-family: variables.$main-font !important;
     float: none;
   }
   ul li {
@@ -130,12 +131,12 @@
   text-decoration: underline;
 
   &:hover {
-    color: color.scale($font-color, $lightness: -$darken-percentage);
+    color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
   }
 }
 
 .nextGenQuestion {
-  height: calc(100vh - $header-height - 20px);
+  height: calc(100vh - variables.$header-height - 20px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -145,14 +146,14 @@
   text-decoration: none;
   span {
     white-space: nowrap;
-    font-size: $font-smaller;
+    font-size: variables.$font-smaller;
     font-weight: 700;
-    border-bottom: 3px solid $font-color;
+    border-bottom: 3px solid variables.$font-color;
 
     &:hover {
-      color: color.scale($font-color, $lightness: -$darken-percentage);
+      color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
       border-bottom: 3px solid
-        color.scale($font-color, $lightness: -$darken-percentage);
+        color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
     }
 
     @media only screen and (max-width: 800px) {

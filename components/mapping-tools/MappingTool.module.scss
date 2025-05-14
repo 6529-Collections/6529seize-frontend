@@ -1,17 +1,17 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .placeholder {
   height: 500px;
 }
 
 .formInput {
-  color: $dark-grey !important;
+  color: variables.$dark-grey !important;
   border-radius: 0 !important;
-  border-color: $lightest-grey;
+  border-color: variables.$lightest-grey;
   cursor: pointer;
 
   &:focus {
-    border-color: $blue !important;
+    border-color: variables.$blue !important;
   }
 }
 
@@ -22,7 +22,7 @@
 .submitBtn {
   width: 100%;
   border-radius: 0;
-  background-color: $green;
+  background-color: variables.$green;
   padding-left: 15px;
   padding-right: 25px;
   border: none;
@@ -33,18 +33,18 @@
   color: white;
 
   &:active {
-    background-color: $green !important;
+    background-color: variables.$green !important;
   }
 
   &:hover {
-    background-color: color.scale($green, $lightness: -5);
+    background-color: color.scale(variables.$green, $lightness: -5);
   }
 }
 
 .submitBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale($green, $lightness: -10);
-  color: $font-color-h;
+  background-color: color.scale(variables.$green, $lightness: -10);
+  color: variables.$font-color-h;
 }
 
 .loader {
@@ -55,7 +55,7 @@
 
 .toolArea {
   padding: 25px 30px;
-  background-color: $almost-very-dark-grey;
+  background-color: variables.$almost-very-dark-grey;
 }
 
 .uploadArea {
@@ -63,19 +63,19 @@
   flex-direction: column;
   justify-content: center;
   padding: 50px;
-  background-color: $very-dark-grey;
+  background-color: variables.$very-dark-grey;
   align-items: center;
   gap: 2rem;
-  border: 2px dashed $lighter-grey;
+  border: 2px dashed variables.$lighter-grey;
   cursor: pointer;
 
   &:hover {
-    border: 2px dashed $lightest-grey;
+    border: 2px dashed variables.$lightest-grey;
   }
 }
 
 .uploadAreaActive {
-  border: 2px dashed $lightest-grey;
+  border: 2px dashed variables.$lightest-grey;
 }
 
 .uploadIcon {

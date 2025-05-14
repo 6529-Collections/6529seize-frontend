@@ -1,7 +1,7 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .breadcrumb {
-  background-color: $lighter-grey;
+  background-color: variables.$lighter-grey;
   height: 30px;
   line-height: 30px;
   font-size: 12px;
@@ -10,7 +10,7 @@
 }
 
 .capacitorBreadcrumb {
-  background-color: $lighter-grey;
+  background-color: variables.$lighter-grey;
   height: 30px;
   line-height: 30px;
   font-size: 12px;

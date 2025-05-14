@@ -1,3 +1,5 @@
+@use "~bootstrap/scss/bootstrap.scss";
+
 @use "fonts.scss";
 
 //FONT FAMILIES
@@ -30,11 +32,11 @@ $bg-color-2: $very-dark-grey;
 
 $darken-percentage: 30%;
 
-$pink: #da2089;
-$green: #208359;
-$blue: #267c93;
-$orange: #ffa500;
+bootstrap.$pink: #da2089;
+bootstrap.$green: #208359;
+bootstrap.$blue: #267c93;
+bootstrap.$orange: #ffa500;
 $salmon: #1861ff;
-$yellow: #ffff00;
+bootstrap.$yellow: #ffff00;
 $raspberry: #c51d34;
 $silver: rgb(147, 147, 159);

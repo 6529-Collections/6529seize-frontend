@@ -1,5 +1,5 @@
-@import "~bootstrap/scss/bootstrap.scss";
-@import "./variables.scss";
+@use "~bootstrap/scss/bootstrap.scss";
+@use "variables.scss";
 
 @media (max-width: 1000px) {
   .container,
@@ -70,7 +70,7 @@
 .navbar-expand .navbar-nav .dropdown-menu,
 .dropdown .dropdown-menu,
 .dropdown-center .dropdown-menu {
-  background-color: $bg-color-1;
+  background-color: variables.$bg-color-1;
   border-top: 3px solid white;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
@@ -96,7 +96,7 @@
   padding-bottom: 8px;
   width: 98%;
   margin-left: 1%;
-  color: $font-color !important;
+  color: variables.$font-color !important;
 }
 
 .dropdown-toggle::after {
@@ -107,8 +107,8 @@
 .dropdown-item.active,
 .dropdown-item:active,
 .dropdown-item:hover {
-  background-color: $very-dark-grey !important;
-  color: $font-color !important;
+  background-color: variables.$very-dark-grey !important;
+  color: variables.$font-color !important;
 }
 
 .dropdown-item:focus {
@@ -116,7 +116,7 @@
 }
 
 .nav-link {
-  color: $font-color;
+  color: variables.$font-color;
   padding: 0 !important;
   font-weight: 600;
   font-size: 16px;
@@ -125,7 +125,7 @@
 .navbar-nav .show > .nav-link,
 .navbar-nav .nav-link.active {
   pointer-events: none !important;
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
 }
 
 table:not(.tailwind-scope table),
@@ -135,7 +135,7 @@ tfoot:not(.tailwind-scope tfoot),
 tr:not(.tailwind-scope tr),
 td:not(.tailwind-scope td),
 th:not(.tailwind-scope th) {
-  color: $font-color !important;
+  color: variables.$font-color !important;
   border: none;
 }
 
@@ -146,11 +146,11 @@ th:not(.tailwind-scope th) {
 
 .nav-link:hover,
 .nav-link:focus {
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
 }
 
 .dropdown-divider {
-  border-color: $very-dark-grey !important;
+  border-color: variables.$very-dark-grey !important;
 }
 
 .modal-content {
@@ -185,7 +185,7 @@ th:not(.tailwind-scope th) {
 }
 
 .accordion-button {
-  color: $font-color !important;
+  color: variables.$font-color !important;
 }
 
 .accordion-button::after {
@@ -214,12 +214,12 @@ th:not(.tailwind-scope th) {
 }
 
 .form-select:focus {
-  border-color: $dark-grey;
+  border-color: variables.$dark-grey;
 }
 
 .toast-header {
   color: black !important;
-  background-color: $off-white !important;
+  background-color: variables.$off-white !important;
   border-radius: 0 !important;
   font-size: larger;
   font-weight: bolder !important;

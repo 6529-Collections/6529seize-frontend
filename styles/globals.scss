@@ -395,7 +395,7 @@ h5:not(.tailwind-scope h5) {
   color: white !important;
 
   &:hover {
-    background-color: color.adjust($color: variables.$green, $lightness: 5);
+    background-color: color.adjust($color: variables.$green, $lightness: 5%);
   }
 }
 

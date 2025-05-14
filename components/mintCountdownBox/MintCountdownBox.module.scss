@@ -1,7 +1,7 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .countdownContainer {
-  background-color: $very-dark-grey;
+  background-color: variables.$very-dark-grey;
   padding: 15px 20px;
   width: 100%;
   color: white;

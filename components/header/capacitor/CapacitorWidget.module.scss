@@ -1,4 +1,4 @@
-@import "../../../styles/variables.scss";
+@use "../../../styles/variables.scss";
 
 .capacitorWidget {
   position: fixed;
@@ -120,6 +120,6 @@
   text-align: center;
 
   &:hover {
-    background-color: $dark-grey;
+    background-color: variables.$dark-grey;
   }
 }

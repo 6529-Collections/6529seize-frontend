@@ -1,26 +1,26 @@
-@import "../../../styles/variables.scss";
+@use "../../../styles/variables.scss";
 
 .tabLeft {
-  color: $font-color-h;
+  color: variables.$font-color-h;
   cursor: pointer;
 
   &:hover {
-    color: $font-color;
+    color: variables.$font-color;
     transform: scale(1.01);
   }
 }
 
 .tabLeftActive {
   transform: scale(1.01);
-  color: $font-color !important;
+  color: variables.$font-color !important;
 }
 
 .closeIcon {
   height: 30px;
-  color: $font-color;
+  color: variables.$font-color;
   cursor: pointer;
 
   &:hover {
-    color: $off-white;
+    color: variables.$off-white;
   }
 }
