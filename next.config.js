@@ -102,6 +102,12 @@ const nextConfig = {
     config.resolve.alias.encoding = false;
     return config;
   },
+  turbopack: {
+    resolveAlias: {
+      canvas: "./stubs/empty.js",
+      encoding: "./stubs/empty.js",
+    },
+  },
 };
 
 // module.exports = withBundleAnalyzer(nextConfig);
