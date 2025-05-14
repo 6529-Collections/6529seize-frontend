@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import { useContext, useEffect } from "react";
 import dynamic from "next/dynamic";
@@ -10,39 +9,27 @@ const MemeLabComponent = dynamic(
 );
 
 export default function MemeLab() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
 
   useEffect(() => {
     setTitle({
-      title: "Meme Lab | 6529.io",
+      title: "Meme Lab | Collections",
     });
   }, []);
 
   const { connectedProfile } = useAuth();
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Meme Lab | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/meme-lab`}
-        />
-        <meta property="og:title" content="Meme Lab" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/meme-lab.jpg`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        <MemeLabComponent
-          wallets={connectedProfile?.wallets?.map((w) => w.wallet) ?? []}
-        />
-      </main>
-    </>
+    <main className={styles.main}>
+      <MemeLabComponent
+        wallets={connectedProfile?.wallets?.map((w) => w.wallet) ?? []}
+      />
+    </main>
   );
 }
+
+MemeLab.metadata = {
+  title: "Meme Lab",
+  ogImage: `${process.env.BASE_ENDPOINT}/meme-lab.jpg`,
+  description: "Collections",
+};

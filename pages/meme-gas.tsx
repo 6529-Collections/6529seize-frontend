@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { AuthContext } from "../components/auth/Auth";
@@ -9,34 +8,21 @@ const Gas = dynamic(() => import("../components/gas-royalties/Gas"), {
 });
 
 export default function GasPage() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Meme Gas | 6529.io",
+      title: "Meme Gas | Tools",
     });
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Meme Gas | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/meme-gas`}
-        />
-        <meta property="og:title" content="Meme Gas" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        <Gas />
-      </main>
-    </>
+    <main className={styles.main}>
+      <Gas />
+    </main>
   );
 }
+
+GasPage.metadata = {
+  title: "Meme Gas",
+  description: "Tools",
+};

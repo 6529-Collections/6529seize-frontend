@@ -16,7 +16,7 @@ export default function DistributionPlanToolWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
   const router = useRouter();
   const [initialized, setInitialized] = useState(false);
@@ -31,7 +31,7 @@ export default function DistributionPlanToolWrapper({
 
   useEffect(() => {
     setTitle({
-      title: "EMMA | 6529.io",
+      title: "EMMA | Tools",
     });
   }, []);
 
@@ -48,4 +48,5 @@ export default function DistributionPlanToolWrapper({
 
 DistributionPlanToolWrapper.metadata = {
   title: "EMMA",
+  description: "Tools",
 };

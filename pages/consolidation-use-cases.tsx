@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
@@ -6,10 +5,10 @@ import Image from "next/image";
 import { AuthContext } from "../components/auth/Auth";
 
 export default function ConsolidationUseCases() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Consolidation Use Cases | 6529.io",
+      title: "Consolidation Use Cases | Tools",
     });
   }, []);
 
@@ -31,60 +30,48 @@ export default function ConsolidationUseCases() {
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Consolidation Use Cases | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/consolidation-use-cases`}
-        />
-        <meta property="og:title" content="Consolidation Use Cases" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-      <main className={`${styles.main} ${styles.tdhMain}`}>
-        <Container fluid>
-          <Row>
-            <Col>
-              <Container className="pt-4">
-                <Row>
-                  <Col>
-                    <h1>
-                      <span className="font-lightest">Consolidation</span> Use
-                      Cases
-                    </h1>
-                  </Col>
-                </Row>
-                <Row className="pt-3 pb-3">
-                  {error ? (
-                    <div>
-                      <Image
-                        width="0"
-                        height="0"
-                        style={{ height: "auto", width: "100px" }}
-                        src="/SummerGlasses.svg"
-                        alt="SummerGlasses"
-                      />
-                      <h2>Loading HTML Failed</h2>
-                    </div>
-                  ) : (
-                    <Col
-                      className={styles.htmlContainer}
-                      dangerouslySetInnerHTML={{
-                        __html: html,
-                      }}></Col>
-                  )}
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-        </Container>
-      </main>
-    </>
+    <main className={`${styles.main} ${styles.tdhMain}`}>
+      <Container fluid>
+        <Row>
+          <Col>
+            <Container className="pt-4">
+              <Row>
+                <Col>
+                  <h1>
+                    <span className="font-lightest">Consolidation</span> Use
+                    Cases
+                  </h1>
+                </Col>
+              </Row>
+              <Row className="pt-3 pb-3">
+                {error ? (
+                  <div>
+                    <Image
+                      width="0"
+                      height="0"
+                      style={{ height: "auto", width: "100px" }}
+                      src="/SummerGlasses.svg"
+                      alt="SummerGlasses"
+                    />
+                    <h2>Loading HTML Failed</h2>
+                  </div>
+                ) : (
+                  <Col
+                    className={styles.htmlContainer}
+                    dangerouslySetInnerHTML={{
+                      __html: html,
+                    }}></Col>
+                )}
+              </Row>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+    </main>
   );
 }
+
+ConsolidationUseCases.metadata = {
+  title: "Consolidation Use Cases",
+  description: "Tools",
+};

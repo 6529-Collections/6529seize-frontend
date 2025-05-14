@@ -32,35 +32,16 @@ export default function TheMemesMint(props: any) {
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={pagenameFull} />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/the-memes/mint`}
-        />
-        <meta property="og:title" content={pagename} />
-        <meta property="og:image" content={nft.image} />
-        <meta property="og:description" content="6529.io" />
-        <meta name="twitter:card" content={pagenameFull} />
-        <meta name="twitter:image:alt" content={pagename} />
-        <meta name="twitter:title" content={pagename} />
-        <meta name="twitter:description" content="6529.io" />
-        <meta name="twitter:image" content={pagename} />
-      </Head>
-      <main className={styles.main}>
-        <ManifoldMinting
-          title={`The Memes #${nft.id}`}
-          contract={MEMES_CONTRACT}
-          proxy={MEMES_MANIFOLD_PROXY_CONTRACT}
-          abi={MEMES_MANIFOLD_PROXY_ABI}
-          token_id={nft.id}
-          mint_date={Time.fromString(nft.mint_date?.toString() ?? "")}
-        />
-      </main>
-    </>
+    <main className={styles.main}>
+      <ManifoldMinting
+        title={`The Memes #${nft.id}`}
+        contract={MEMES_CONTRACT}
+        proxy={MEMES_MANIFOLD_PROXY_CONTRACT}
+        abi={MEMES_MANIFOLD_PROXY_ABI}
+        token_id={nft.id}
+        mint_date={Time.fromString(nft.mint_date?.toString() ?? "")}
+      />
+    </main>
   );
 }
 
@@ -74,6 +55,10 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   return {
     props: {
       nft,
+      metadata: {
+        title: `The Memes | Mint`,
+        ogImage: nft.image,
+      },
     },
   };
 }

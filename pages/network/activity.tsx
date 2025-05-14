@@ -1,4 +1,3 @@
-import Head from "next/head";
 import {
   getCommonHeaders,
   getUserProfileActivityLogs,
@@ -40,10 +39,9 @@ export default function CommunityActivityPage({
   const { setTitle, title } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Network Activity | 6529.io",
+      title: "Activity | Network",
     });
   }, []);
-
 
   const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
   initCommunityActivityPage({
@@ -54,33 +52,15 @@ export default function CommunityActivityPage({
   });
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/network/activity`}
-        />
-        <meta property="og:title" content="Profiles Activity" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-        <meta property="og:description" content="6529.io" />
-      </Head>
-
-      <SidebarLayout>
-        <ProfileActivityLogs
-          initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
-          withFilters={true}>
-          <h1 className="tw-block tw-float-none tw-whitespace-nowrap">
-            <span className="font-lightest">Network</span> Activity
-          </h1>
-        </ProfileActivityLogs>
-      </SidebarLayout>
-    </>
+    <SidebarLayout>
+      <ProfileActivityLogs
+        initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
+        withFilters={true}>
+        <h1 className="tw-block tw-float-none tw-whitespace-nowrap">
+          <span className="font-lightest">Network</span> Activity
+        </h1>
+      </ProfileActivityLogs>
+    </SidebarLayout>
   );
 }
 
@@ -115,3 +95,8 @@ export async function getServerSideProps(
     } as any;
   }
 }
+
+CommunityActivityPage.metadata = {
+  title: "Activity",
+  description: "Network",
+};
