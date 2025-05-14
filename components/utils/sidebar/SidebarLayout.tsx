@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
-import GroupsSidebarToggleButton from "../../groups/sidebar/GroupsSidebarToggleButton";
+import GroupsSidebarToggle from "../../groups/sidebar/GroupsSidebarToggle";
 import GroupsSidebar from "../../groups/sidebar/GroupsSidebar";
 import { createBreakpoint } from "react-use";
 import { useRouter } from "next/router";
@@ -9,6 +9,8 @@ import {
   setActiveGroupId,
 } from "../../../store/groupSlice";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
+import SidebarLayoutApp from "./SidebarLayoutApp";
 
 export default function SidebarLayout({
   children,
@@ -23,6 +25,7 @@ export default function SidebarLayout({
   const dispatch = useDispatch();
 
   const { headerRef } = useHeaderContext();
+  const { isApp } = useDeviceInfo();
   const openButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -71,6 +74,8 @@ export default function SidebarLayout({
   };
 
   useEffect(() => {
+    if (isApp) return; // Skip DOM manipulation in app mode
+
     const handleSidebarTop = () => {
       const headerHeight = headerRef.current
         ? headerRef.current.clientHeight
@@ -78,14 +83,16 @@ export default function SidebarLayout({
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
       const newPosition =
         scrollTop <= headerHeight ? headerHeight - scrollTop : 0;
-      sidebarRef.current!.style.top = `${newPosition}px`;
-      openButtonRef.current!.style.top = `${newPosition}px`;
+      if (sidebarRef.current) sidebarRef.current.style.top = `${newPosition}px`;
+      if (openButtonRef.current)
+        openButtonRef.current.style.top = `${newPosition}px`;
     };
 
     const handleSidebarBottom = () => {
       const footerRef = document.getElementById("footer");
       const footerVisibleHeight = elementIsVisibleInViewportPx(footerRef);
-      sidebarRef.current!.style.bottom = `${footerVisibleHeight}px`;
+      if (sidebarRef.current)
+        sidebarRef.current.style.bottom = `${footerVisibleHeight}px`;
     };
 
     const handleScroll = () => {
@@ -98,22 +105,26 @@ export default function SidebarLayout({
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [isApp]);
+
+  if (isApp) {
+    return <SidebarLayoutApp>{children}</SidebarLayoutApp>;
+  }
 
   return (
-    <main className="tailwind-scope tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">
+    <main className="tailwind-scope tw-bg-iron-950 tw-overflow-x-hidden">
       <div
         className={`tw-transition-all tw-duration-300 tw-ease-out ${
           !open ? "tw-ml-0" : "tw-ml-[320px]"
         }`}
       >
-        <GroupsSidebarToggleButton
+        <GroupsSidebarToggle
           ref={openButtonRef}
           open={open}
           setOpen={setOpen}
         />
       </div>
-      <div className="tailwind-scope tw-bg-iron-950 tw-min-h-screen tw-mt-6 lg:tw-mt-8 tw-pb-6 lg:tw-pb-8 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+      <div className="tailwind-scope tw-bg-iron-950 tw-min-h-dvh tw-mt-6 lg:tw-mt-8 tw-pb-6 lg:tw-pb-8 tw-px-4 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
         <div className="tw-flex">
           <div
             className={`tw-fixed tw-z-40 tw-inset-y-0 tw-h-full tw-left-0 tw-overflow-x-hidden tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500  tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-transform tw-transition tw-duration-300 tw-ease-out ${
