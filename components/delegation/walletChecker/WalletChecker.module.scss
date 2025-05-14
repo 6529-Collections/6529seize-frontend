@@ -23,7 +23,7 @@
 
   &:active,
   &:disabled {
-    background-color: darken($color: $blue, $amount: 5) !important;
+    background-color: color.scale($blue, $lightness: -5) !important;
   }
 }
 

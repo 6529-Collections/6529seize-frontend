@@ -60,7 +60,7 @@ $negative-color: rgba(192, 57, 43, 1);
   100% {
     transform: scale(1);
     opacity: 0;
-    box-shadow: 0 0 50px darken($positive-color, 20%), inset 0 0 10px $positive-color;
+    box-shadow: 0 0 50px color.scale($positive-color, $lightness: -20%), inset 0 0 10px $positive-color;
   }
 }
 
@@ -74,6 +74,6 @@ $negative-color: rgba(192, 57, 43, 1);
   100% {
     transform: scale(1);
     opacity: 0;
-    box-shadow: 0 0 50px darken($negative-color, 20%), inset 0 0 10px $negative-color;
+    box-shadow: 0 0 50px color.scale($negative-color, $lightness: -20%), inset 0 0 10px $negative-color;
   }
 }

@@ -16,7 +16,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: white, $amount: 15);
+    background-color: color.scale($white, $lightness: -15);
   }
 }
 
@@ -31,13 +31,13 @@
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: white, $amount: 10);
+    background-color: color.scale($white, $lightness: -10);
   }
 }
 
 .viewManageBtnDisabled {
   pointer-events: none !important;
-  background-color: darken($color: white, $amount: 20);
+  background-color: color.scale($white, $lightness: -20);
   color: $lighter-grey-2;
 }
 
@@ -62,7 +62,7 @@
 
 .collectionDelegationsAccordionItemDisabled {
   pointer-events: none !important;
-  background-color: darken($color: $blue, $amount: 10);
+  background-color: color.scale($blue, $lightness: -10);
 
   button {
     color: $font-color-h !important;
@@ -102,7 +102,7 @@
 
 .useCaseWalletUpdateDisabled {
   pointer-events: none !important;
-  background-color: darken($color: $blue, $amount: 10);
+  background-color: color.scale($blue, $lightness: -10);
   color: $font-color-h;
 }
 
@@ -120,7 +120,7 @@
 
 .useCaseWalletRevokeDisabled {
   pointer-events: none !important;
-  background-color: darken($color: $raspberry, $amount: 10);
+  background-color: color.scale($raspberry, $lightness: -10);
   color: $font-color-h;
 }
 
@@ -145,7 +145,7 @@
 
 .addNewDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: darken($color: $blue, $amount: 10);
+  background-color: color.scale($blue, $lightness: -10);
   color: $font-color-h;
 }
 
@@ -162,13 +162,13 @@
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: $raspberry, $amount: 5);
+    background-color: color.scale($raspberry, $lightness: -5);
   }
 }
 
 .revokeDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: darken($color: $raspberry, $amount: 10);
+  background-color: color.scale($raspberry, $lightness: -10);
   color: $font-color-h;
 }
 
@@ -179,20 +179,20 @@
   justify-content: center;
   margin-right: 15px;
   margin-top: 15px;
-  background-color: darken($color: #d7710d, $amount: 10);
+  background-color: color.scale(#d7710d, $lightness: -10);
   color: white;
   width: fit-content;
   padding: 12px 16px;
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: #d7710d, $amount: 15);
+    background-color: color.scale(#d7710d, $lightness: -15);
   }
 }
 
 .lockDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: darken($color: #d7710d, $amount: 20);
+  background-color: color.scale(#d7710d, $lightness: -20);
   color: $font-color-h;
 }
 
@@ -256,13 +256,13 @@
   color: white;
 
   &:hover {
-    background-color: darken($color: $green, $amount: 5);
+    background-color: color.scale($green, $lightness: -5);
   }
 }
 
 .newDelegationSubmitBtnDisabled {
   pointer-events: none !important;
-  background-color: darken($color: $green, $amount: 10);
+  background-color: color.scale($green, $lightness: -10);
   color: $font-color-h;
 }
 
@@ -278,7 +278,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: darken($color: white, $amount: 15);
+    background-color: color.scale($white, $lightness: -15);
   }
 }
 

@@ -11,7 +11,7 @@
     cursor: pointer;
 
     &:hover {
-      color: darken($color: $font-color, $amount: $darken-percentage);
+      color: color.scale($font-color, $lightness: -$darken-percentage);
     }
   }
 }

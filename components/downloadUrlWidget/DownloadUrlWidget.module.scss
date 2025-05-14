@@ -9,9 +9,9 @@
   gap: 0.5rem;
 
   &:hover {
-    color: darken($color: $font-color, $amount: $darken-percentage);
+    color: color.scale($font-color, $lightness: -$darken-percentage);
     svg {
-      color: darken($color: $font-color, $amount: $darken-percentage);
+      color: color.scale($font-color, $lightness: -$darken-percentage);
     }
   }
 

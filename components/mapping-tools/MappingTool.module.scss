@@ -37,13 +37,13 @@
   }
 
   &:hover {
-    background-color: darken($color: $green, $amount: 5);
+    background-color: color.scale($green, $lightness: -5);
   }
 }
 
 .submitBtnDisabled {
   pointer-events: none !important;
-  background-color: darken($color: $green, $amount: 10);
+  background-color: color.scale($green, $lightness: -10);
   color: $font-color-h;
 }
 

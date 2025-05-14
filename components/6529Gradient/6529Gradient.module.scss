@@ -21,7 +21,7 @@
 .nftNextdisabled,
 .nftPreviousdisabled {
   pointer-events: none !important;
-  color: darken($color: $font-color, $amount: $darken-percentage);
+  color: color.scale($font-color, $lightness: -$darken-percentage);
 }
 
 .subheading {

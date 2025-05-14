@@ -62,7 +62,7 @@
   &:hover,
   &:focus,
   &:active {
-    background-color: darken(#39ff14, 10%) !important;
-    border-color: darken(#39ff14, 10%) !important;
+    background-color: color.scale(#39ff14, $lightness: -10%) !important;
+    border-color: color.scale(#39ff14, $lightness: -10%) !important;
   }
 }

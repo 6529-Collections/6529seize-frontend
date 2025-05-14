@@ -130,7 +130,7 @@
   text-decoration: underline;
 
   &:hover {
-    color: darken($color: $font-color, $amount: $darken-percentage);
+    color: color.scale($font-color, $lightness: -$darken-percentage);
   }
 }
 
@@ -150,9 +150,9 @@
     border-bottom: 3px solid $font-color;
 
     &:hover {
-      color: darken($color: $font-color, $amount: $darken-percentage);
+      color: color.scale($font-color, $lightness: -$darken-percentage);
       border-bottom: 3px solid
-        darken($color: $font-color, $amount: $darken-percentage);
+        color.scale($font-color, $lightness: -$darken-percentage);
     }
 
     @media only screen and (max-width: 800px) {

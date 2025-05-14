@@ -207,7 +207,7 @@
 
 .addMemeReferenceDisplayBtnDisabled {
   pointer-events: none !important;
-  background-color: darken($color: white, $amount: 20);
+  background-color: color.scale(white, $lightness: -20);
   color: $lighter-grey-2;
 }
 

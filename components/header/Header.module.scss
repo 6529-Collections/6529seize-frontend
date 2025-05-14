@@ -264,7 +264,7 @@
   background-color: #ffff00;
 
   &:hover {
-    background-color: darken(#ffff00, 5%);
+    background-color: color.scale(#ffff00, $lightness: -5%);
   }
 }
 
