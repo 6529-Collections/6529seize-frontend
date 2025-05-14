@@ -12,18 +12,9 @@ import {
   printMintDate,
 } from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
-import { ProfileActivityLog } from "../entities/IProfile";
-import { CountlessPage } from "../helpers/Types";
-import {
-  getCommonHeaders,
-  getUserProfileActivityLogs,
-} from "../helpers/server.helpers";
-import {
-  ActivityLogParams,
-  convertActivityLogParams,
-} from "../components/profile-activity/ProfileActivityLogs";
+import { getCommonHeaders } from "../helpers/server.helpers";
+import { ActivityLogParams } from "../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
-import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 import NextGenCollectionSlideshow from "../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";

@@ -11,7 +11,7 @@ const MemePageComponent = dynamic(
   }
 );
 
-export default function MemePage(props: any) {
+export default function MemePage() {
   return (
     <main className={styles.main}>
       <MemePageComponent />

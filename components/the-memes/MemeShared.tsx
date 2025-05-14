@@ -1,4 +1,3 @@
-import Head from "next/head";
 import { MEMELAB_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
 import { areEqualAddresses } from "../../helpers/Helpers";

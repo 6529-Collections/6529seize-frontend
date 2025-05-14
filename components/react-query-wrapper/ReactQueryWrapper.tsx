@@ -16,7 +16,7 @@ import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileR
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
 import { wait } from "../../helpers/Helpers";
-import { IFeedItemDropCreated, TypedFeedItem } from "../../types/feed.types";
+import { TypedFeedItem } from "../../types/feed.types";
 import { ApiFeedItemType } from "../../generated/models/ApiFeedItemType";
 import { ApiWaveDropsFeed } from "../../generated/models/ApiWaveDropsFeed";
 import { addDropToDrops } from "./utils/addDropsToDrops";

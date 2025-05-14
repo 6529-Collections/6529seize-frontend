@@ -224,8 +224,8 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     };
   }, []);
 
-  const metadata: PageSSRMetadata = rest.pageProps.metadata ||
-    (Component as any).metadata || {
+  const metadata: PageSSRMetadata = rest.pageProps.metadata ??
+    (Component as any).metadata ?? {
       title: "6529.io",
       description: "6529.io",
       ogImage: `${process.env.BASE_ENDPOINT}/6529io.png`,
