@@ -397,8 +397,6 @@ export default function Home({
 }
 
 Home.metadata = {
-  title: "6529",
-  description: "6529.io",
   ogImage: `${process.env.BASE_ENDPOINT}/6529io-banner.png`,
   twitterCard: "summary_large_image",
 };

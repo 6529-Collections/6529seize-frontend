@@ -75,7 +75,7 @@ export function getChains() {
 
 const CONTRACT_CHAINS = getChains();
 
-const metadata = {
+const wagmiMetadata = {
   name: "6529.io",
   description: "6529.io",
   url: process.env.BASE_ENDPOINT!,
@@ -98,8 +98,8 @@ const queryClient = new QueryClient({
 
 const isCapacitor = Capacitor.isNativePlatform();
 const wagmiConfig = isCapacitor
-  ? wagmiConfigCapacitor(chains, metadata)
-  : wagmiConfigWeb(chains, metadata);
+  ? wagmiConfigCapacitor(chains, wagmiMetadata)
+  : wagmiConfigWeb(chains, wagmiMetadata);
 
 createWeb3Modal({
   wagmiConfig: wagmiConfig,
@@ -224,13 +224,19 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     };
   }, []);
 
+  const isStaging = process.env.BASE_ENDPOINT?.includes("staging");
   const metadata: PageSSRMetadata = rest.pageProps.metadata ??
     (Component as any).metadata ?? {
-      title: "6529.io",
-      description: "6529.io",
+      description: "",
       ogImage: `${process.env.BASE_ENDPOINT}/6529io.png`,
       twitterCard: "summary",
     };
+
+  metadata.title = metadata.title ?? (isStaging ? "6529 Staging" : "6529");
+
+  metadata.description = `${
+    metadata.description ? `${metadata.description} | ` : ""
+  }${isStaging ? "staging.6529.io" : "6529.io"}`;
 
   return (
     <QueryClientProvider client={queryClient}>

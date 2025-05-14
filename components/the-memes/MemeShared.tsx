@@ -10,7 +10,7 @@ export async function getSharedServerSideProps(
   const id = req.query.id;
   let urlPath = "nfts";
   let name = `The Memes #${id}`;
-  let description = "6529.io";
+  let description = "";
   if (areEqualAddresses(contract, MEMELAB_CONTRACT)) {
     urlPath = "nfts_memelab";
     name = `Meme Lab #${id}`;
