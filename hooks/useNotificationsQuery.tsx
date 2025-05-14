@@ -97,7 +97,13 @@ export function useNotificationsQuery({
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
     enabled: !!identity && !activeProfileProxy,
+    staleTime: 60000
   });
+
+  useEffect(() => {
+    setItems([]);
+    setIsInitialQueryDone(false);
+  }, [identity, cause]);
 
   /**
    * Flatten all pages and (optionally) reverse them. Store in local state.
@@ -124,5 +130,43 @@ export function useNotificationsQuery({
     ...query,
     items,
     isInitialQueryDone,
+  };
+}
+
+export function usePrefetchNotifications() {
+  const queryClient = useQueryClient();
+
+  return ({
+    identity,
+    cause = null,
+    limit = "30",
+  }: {
+    identity: string | null;
+    cause?: ApiNotificationCause[] | null;
+    limit?: string;
+  }) => {
+    if (!identity) {
+      return;
+    }
+    queryClient.prefetchInfiniteQuery({
+      queryKey: [QueryKey.IDENTITY_NOTIFICATIONS, { identity, limit, cause }],
+      queryFn: async ({ pageParam }: { pageParam?: number | null }) => {
+        const params: Record<string, string> = { limit };
+        if (pageParam) {
+          params.id_less_than = String(pageParam);
+        }
+        if (cause?.length) {
+          params.cause = cause.join(",");
+        }
+        return await commonApiFetch<TypedNotificationsResponse>({
+          endpoint: "notifications",
+          params,
+        });
+      },
+      initialPageParam: null,
+      getNextPageParam: (lastPage) => lastPage.notifications.at(-1)?.id ?? null,
+      pages: 3,
+      staleTime: 60000,
+    });
   };
 }

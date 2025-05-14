@@ -1,5 +1,7 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { ApiNotificationCause } from "../../../generated/models/ApiNotificationCause";
+import { usePrefetchNotifications } from "../../../hooks/useNotificationsQuery";
+import { AuthContext } from "../../auth/Auth";
 
 export interface NotificationFilter {
   cause: ApiNotificationCause[];
@@ -40,6 +42,14 @@ export default function NotificationsCauseFilter({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<HTMLButtonElement[]>([]);
+
+  const { connectedProfile } = useContext(AuthContext);
+  const prefetchNotifications = usePrefetchNotifications();
+
+  const handleHover = (filter: NotificationFilter) => {
+    if (!connectedProfile) return;
+    prefetchNotifications({ identity: connectedProfile.handle, cause: filter.cause });
+  };
 
   useEffect(() => {
     const button = buttonRefs.current[activeFilterIndex];
@@ -109,6 +119,7 @@ export default function NotificationsCauseFilter({
             title={filter.title}
             isActive={isActive(filter)}
             onClick={() => handleChange(filter, index)}
+            onMouseEnter={() => handleHover(filter)}
             buttonRef={(el) => (buttonRefs.current[index] = el!)}
           />
         ))}
@@ -121,11 +132,13 @@ function NotificationCauseFilterButton({
   title,
   isActive,
   onClick,
+  onMouseEnter,
   buttonRef,
 }: {
   readonly title: string;
   readonly isActive: boolean;
   readonly onClick: () => void;
+  readonly onMouseEnter: () => void;
   readonly buttonRef: (el: HTMLButtonElement | null) => void;
 }) {
   const getLinkClasses = () =>
@@ -136,7 +149,12 @@ function NotificationCauseFilterButton({
      }`;
 
   return (
-    <button className={getLinkClasses()} onClick={onClick} ref={buttonRef}>
+    <button
+      className={getLinkClasses()}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      ref={buttonRef}
+    >
       <span className="tw-font-semibold tw-text-sm">{title}</span>
     </button>
   );
