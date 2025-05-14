@@ -8,6 +8,7 @@ import {
 } from "../../helpers/server.helpers";
 import UserPageGroupsWrapper from "../../components/user/groups/UserPageGroupsWrapper";
 import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -51,11 +52,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-        metadata: {
-          title: `${profile.handle} | Groups`,
-          ogImage: profile.pfp ?? "",
-          twitterCard: "summary_large_image",
-        },
+        metadata: getMetadataForUserPage(profile, "Groups"),
       },
     };
   } catch (e: any) {

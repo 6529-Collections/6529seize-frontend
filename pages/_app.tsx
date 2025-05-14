@@ -229,17 +229,17 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const isStaging = process.env.BASE_ENDPOINT?.includes("staging");
   const metadata: PageSSRMetadata = {
     title:
-      pageMetadata?.title ??
       componentMetadata?.title ??
+      pageMetadata?.title ??
       (isStaging ? "6529 Staging" : "6529"),
     description:
-      pageMetadata?.description ?? componentMetadata?.description ?? "",
+      componentMetadata?.description ?? pageMetadata?.description ?? "",
     ogImage:
-      pageMetadata?.ogImage ??
       componentMetadata?.ogImage ??
+      pageMetadata?.ogImage ??
       `${process.env.BASE_ENDPOINT}/6529io.png`,
     twitterCard:
-      pageMetadata?.twitterCard ?? componentMetadata?.twitterCard ?? "summary",
+      componentMetadata?.twitterCard ?? pageMetadata?.twitterCard ?? "summary",
   };
   metadata.description = `${
     metadata.description ? `${metadata.description} | ` : ""

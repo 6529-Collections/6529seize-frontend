@@ -10,6 +10,7 @@ import { MyStreamProvider } from "../../contexts/wave/MyStreamContext";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import Head from "next/head";
 import { PageSSRMetadata } from "../../helpers/Types";
+import { useAuth } from "../auth/Auth";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -24,7 +25,8 @@ const MainLayout = ({ children, metadata }: MainLayoutProps) => {
   const isSmall = router.pathname.startsWith("/my-stream");
   const isAccess = router.pathname.startsWith("/access");
 
-  const { title, description, ogImage, twitterCard } = metadata;
+  const { title: pageTitle } = useAuth();
+  const { title: metadataTitle, description, ogImage, twitterCard } = metadata;
 
   const ogUrl = `${process.env.BASE_ENDPOINT}${router.asPath}`;
 
@@ -37,11 +39,11 @@ const MainLayout = ({ children, metadata }: MainLayoutProps) => {
       <NavigationHistoryProvider>
         <LayoutProvider>
           <Head>
-            <title>{title}</title>
+            <title>{pageTitle}</title>
             <link rel="icon" href="/favicon.ico" />
             <meta name="description" content={description} />
             <meta property="og:url" content={ogUrl} />
-            <meta property="og:title" content={title} />
+            <meta property="og:title" content={metadataTitle} />
             <meta property="og:description" content={description} />
             <meta property="og:image" content={ogImage} />
             <meta name="twitter:card" content={twitterCard} />

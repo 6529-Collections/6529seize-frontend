@@ -9,6 +9,7 @@ import {
 import UserPageStats from "../../components/user/stats/UserPageStats";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -54,11 +55,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-        metadata: {
-          title: `${profile.handle} | Stats`,
-          ogImage: profile.pfp ?? "",
-          twitterCard: "summary_large_image",
-        },
+        metadata: getMetadataForUserPage(profile, "Stats"),
       },
     };
   } catch (e: any) {

@@ -8,6 +8,7 @@ import {
 } from "../../helpers/server.helpers";
 import UserPageBrainWrapper from "../../components/user/brain/UserPageBrainWrapper";
 import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -45,11 +46,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-        metadata: {
-          title: `${profile.handle}`,
-          ogImage: profile.pfp ?? "",
-          twitterCard: "summary_large_image",
-        },
+        metadata: getMetadataForUserPage(profile),
       },
     };
   } catch (e: any) {

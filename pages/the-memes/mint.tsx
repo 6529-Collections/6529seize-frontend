@@ -23,7 +23,7 @@ export default function TheMemesMint(props: any) {
 
   useEffect(() => {
     setTitle({
-      title: "The Memes | Mint",
+      title: `Mint #${nft.id} | ${nft.name} | The Memes`,
     });
   }, []);
 
@@ -51,10 +51,12 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   return {
     props: {
       nft,
-      metadata: {
-        title: `The Memes | Mint`,
-        ogImage: nft.image,
-      },
     },
   };
 }
+
+TheMemesMint.metadata = {
+  title: "Mint | The Memes",
+  ogImage: `${process.env.BASE_ENDPOINT}/memes-preview.png`,
+  twitterCard: "summary_large_image",
+};

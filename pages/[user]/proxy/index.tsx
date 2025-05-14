@@ -9,6 +9,7 @@ import {
 import { ReactQueryWrapperContext } from "../../../components/react-query-wrapper/ReactQueryWrapper";
 import UserPageProxy from "../../../components/user/proxy/UserPageProxy";
 import { UserPageProps } from "../../../helpers/Types";
+import { getMetadataForUserPage } from "../../../helpers/Helpers";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -54,11 +55,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-        metadata: {
-          title: `${profile.handle} | Proxy`,
-          ogImage: profile.pfp ?? "",
-          twitterCard: "summary_large_image",
-        },
+        metadata: getMetadataForUserPage(profile, "Proxy"),
       },
     };
   } catch (e: any) {
