@@ -72,7 +72,7 @@ export default function NotificationIdentityMentioned({
                 mentioned you
               </span>{" "}
               <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-                <span className="tw-font-bold tw-mx-0.5 tw-text-iron-400">
+                <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
                   &#8226;
                 </span>{" "}
                 {getTimeAgoShort(notification.created_at)}
