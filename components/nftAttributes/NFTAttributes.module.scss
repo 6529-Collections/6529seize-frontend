@@ -1,7 +1,7 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .nftAttribute {
-  border: 1px solid $font-color;
+  border: 1px solid variables.$font-color;
   text-align: center;
   padding-top: 8px;
   padding-bottom: 8px;

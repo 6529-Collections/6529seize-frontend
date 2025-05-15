@@ -1,29 +1,30 @@
-@import "../../../styles/variables.scss";
+@use 'sass:color';
+@use "../../../styles/variables.scss" as variables;
 
 .formInput {
-  color: $dark-grey !important;
+  color: variables.$dark-grey !important;
   border-radius: 0 !important;
-  border-color: $lightest-grey;
+  border-color: variables.$lightest-grey;
 
   &:focus {
-    border-color: $blue !important;
+    border-color: variables.$project-blue !important;
   }
 }
 
 .checkBtn {
-  background-color: $blue;
+  background-color: variables.$project-blue;
   border: none;
   border-radius: 0;
   color: white;
   padding: 10px 15px;
 
   &:hover {
-    background-color: lighten($color: $blue, $amount: 5);
+    background-color: color.adjust($color: variables.$project-blue, $lightness: 5%);
   }
 
   &:active,
   &:disabled {
-    background-color: darken($color: $blue, $amount: 5) !important;
+    background-color: color.scale(variables.$project-blue, $lightness: -5%) !important;
   }
 }
 
@@ -35,18 +36,18 @@
   padding: 10px 15px;
 
   &:hover {
-    background-color: $dark-grey;
+    background-color: variables.$dark-grey;
   }
 
   &:active,
   &:disabled {
-    background-color: $dark-grey;
+    background-color: variables.$dark-grey;
   }
 }
 
 .error {
   font-size: 1em;
-  color: $raspberry;
+  color: variables.$raspberry;
 }
 
 .supportingAddress {
@@ -116,4 +117,27 @@
   background-color: green;
   padding: 5px;
   border-radius: 18px;
+}
+
+.walletCheckerContainer {
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.walletOk {
+  &:focus {
+    border-color: variables.$project-blue !important;
+  }
+}
+
+.walletInput {
+  all: unset;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid variables.$lighter-grey;
+  border-radius: 18px;
+}
+
+.infoOk {
+  color: greenyellow;
 }

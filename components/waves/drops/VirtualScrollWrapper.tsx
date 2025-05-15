@@ -18,7 +18,7 @@ interface VirtualScrollWrapperProps {
    */
   readonly delay?: number;
 
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 
   readonly dropSerialNo: number;
   readonly waveId: string;

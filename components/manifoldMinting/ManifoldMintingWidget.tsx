@@ -1,5 +1,5 @@
 import styles from "./ManifoldMinting.module.scss";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { Col, Container, Form, Row, Table } from "react-bootstrap";
 import { ManifoldMerkleProof } from "./manifold-types";
 import DotLoader from "../dotLoader/DotLoader";

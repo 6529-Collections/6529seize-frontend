@@ -1,9 +1,10 @@
-@import "../../styles/variables.scss";
+@use "sass:color";
+@use "../../styles/variables.scss";
 
 .modalInput {
   border-radius: 0;
-  border: 1px solid $very-dark-grey;
-  color: $very-dark-grey !important;
+  border: 1px solid variables.$very-dark-grey;
+  color: variables.$very-dark-grey !important;
 
   &:focus {
     border-color: black;
@@ -17,10 +18,10 @@
 
 .shakeWalletInput {
   input {
-    border-color: $raspberry !important;
+    border-color: variables.$raspberry !important;
   }
   button {
-    background-color: $raspberry !important;
+    background-color: variables.$raspberry !important;
   }
   /* Start the shake animation and make the animation last for 0.5 seconds */
   animation: shake 0.2s;
@@ -66,7 +67,7 @@
 }
 
 .modalButton {
-  background-color: $very-dark-grey;
+  background-color: variables.$very-dark-grey;
   border: none !important;
   border-radius: 0;
 
@@ -78,8 +79,8 @@
 
 .modalButtonClear {
   background-color: transparent;
-  border-color: $dark-grey;
-  color: $dark-grey !important;
+  border-color: variables.$dark-grey;
+  color: variables.$dark-grey !important;
   border-radius: 0;
 
   &:hover {
@@ -89,31 +90,31 @@
   }
 
   &:active {
-    background-color: $lightest-grey !important;
-    border-color: $lightest-grey !important;
+    background-color: variables.$lightest-grey !important;
+    border-color: variables.$lightest-grey !important;
   }
 
   &:disabled {
-    background-color: $lightest-grey !important;
-    border-color: $lightest-grey !important;
+    background-color: variables.$lightest-grey !important;
+    border-color: variables.$lightest-grey !important;
   }
 }
 
 .modalButtonDone {
   float: right;
-  border-color: $very-dark-grey;
-  background-color: $very-dark-grey;
-  color: $font-color;
+  border-color: variables.$very-dark-grey;
+  background-color: variables.$very-dark-grey;
+  color: variables.$font-color;
   border-radius: 0;
 
   &:hover {
-    background-color: $dark-grey;
-    border-color: $dark-grey;
+    background-color: variables.$dark-grey;
+    border-color: variables.$dark-grey;
   }
 }
 
 .noSearchWalletsText {
-  color: $font-color-h;
+  color: variables.$font-color-h;
 }
 
 .searchBtn {
@@ -126,22 +127,22 @@
   padding: 10px;
   cursor: pointer;
   &:hover {
-    background-color: $off-white !important;
+    background-color: variables.$off-white !important;
   }
 
   &:disabled {
-    background-color: $lightest-grey !important;
+    background-color: variables.$lightest-grey !important;
     cursor: not-allowed;
   }
 }
 
 .searchBtnActive {
-  background-color: lighten($color: $green, $amount: 10) !important;
+  background-color: color.adjust($color: variables.$project-green, $lightness: 10%) !important;
 
   &:hover,
   &:active,
   &:focus {
-    background-color: $green !important;
+    background-color: variables.$project-green !important;
   }
 }
 
@@ -165,11 +166,11 @@
   text-decoration: none;
 
   &:hover {
-    background-color: $lighter-grey;
+    background-color: variables.$lighter-grey;
   }
 
   &:disabled {
-    background-color: $lightest-grey !important;
+    background-color: variables.$lightest-grey !important;
     cursor: not-allowed;
   }
 }
@@ -181,7 +182,7 @@
   cursor: pointer;
 
   &:hover {
-    color: $lightest-grey;
+    color: variables.$lightest-grey;
   }
 
   &:focus {

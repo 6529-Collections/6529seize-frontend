@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, type JSX } from "react";
 import GroupCreate from "./create/GroupCreate";
 import { AuthContext } from "../../auth/Auth";
 import GroupsPageListWrapper from "./GroupsPageListWrapper";

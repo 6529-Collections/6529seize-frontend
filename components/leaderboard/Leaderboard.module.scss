@@ -1,4 +1,5 @@
-@import "../../styles/variables.scss";
+@use "sass:color";
+@use "../../styles/variables.scss" as variables;
 
 .scrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -18,7 +19,7 @@
   line-height: 48px;
   font-size: larger;
   font-weight: bold;
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
 }
 
 .pageHeader {
@@ -91,7 +92,7 @@
 
 .viewAllLink {
   font-size: 15px !important;
-  font-family: $main-font;
+  font-family: variables.$main-font;
   font-weight: lighter;
 }
 
@@ -120,7 +121,7 @@
 }
 
 .boolean {
-  height: $font-size;
+  height: variables.$font-size;
 }
 
 .caret {
@@ -130,7 +131,7 @@
 
 @media only screen and (max-width: 1200px) {
   .boolean {
-    height: $font-smaller !important;
+    height: variables.$font-smaller !important;
   }
 
   .caret {
@@ -140,12 +141,12 @@
 
 @media only screen and (max-width: 800px) {
   .boolean {
-    height: $font-smallest !important;
+    height: variables.$font-smallest !important;
   }
 }
 
 .disabled {
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
   &:hover {
     color: white;
   }
@@ -184,7 +185,7 @@
   }
 
   tr:nth-child(even) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 }
 
@@ -225,7 +226,7 @@
   }
 
   tbody tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 }
 
@@ -255,7 +256,7 @@
   }
 
   tr:nth-child(even) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 }
 
@@ -265,7 +266,7 @@
 }
 
 .borderBottom {
-  border-bottom: 0.5px solid $font-color !important;
+  border-bottom: 0.5px solid variables.$font-color !important;
   padding: 0rem !important;
   position: relative;
 }
@@ -293,8 +294,8 @@
 }
 
 .focusSwitchLabelActive {
-  background-color: $font-color;
-  color: $bg-color-2;
+  background-color: variables.$font-color;
+  color: variables.$bg-color-2;
 }
 
 .focusSwitch {
@@ -307,12 +308,12 @@
     cursor: pointer;
     line-height: 48px;
     margin-top: 15px;
-    background-color: $yellow;
-    border-color: $very-dark-grey !important;
+    background-color: variables.$project-yellow;
+    border-color: variables.$very-dark-grey !important;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%231e1e1e'/%3e%3c/svg%3e") !important;
   }
   input:checked {
-    background-color: $orange !important;
+    background-color: variables.$project-orange !important;
   }
 }
 
@@ -352,12 +353,12 @@
 }
 
 .focus {
-  color: $font-color;
+  color: variables.$font-color;
   cursor: pointer;
 }
 
 .disabled {
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
   text-decoration: none;
   &:hover {
     color: white;
@@ -384,7 +385,7 @@
     border-color: black !important;
   }
   input:checked {
-    background-color: $yellow !important;
+    background-color: variables.$project-yellow !important;
   }
 }
 
@@ -420,7 +421,7 @@
   padding: 10px;
   cursor: pointer;
   &:hover {
-    background-color: $off-white;
+    background-color: variables.$off-white;
   }
 }
 
@@ -432,10 +433,10 @@
 }
 
 .searchBtnActive {
-  background-color: lighten($color: $green, $amount: 10);
+  background-color: color.adjust($color: variables.$project-green, $lightness: 10%);
 
   &:hover {
-    background-color: $green;
+    background-color: variables.$project-green;
   }
 }
 
@@ -469,7 +470,7 @@
   outline: 0 !important;
 
   &:hover {
-    background-color: $lighter-grey;
+    background-color: variables.$lighter-grey;
   }
 }
 
@@ -480,7 +481,7 @@
   cursor: pointer;
 
   &:hover {
-    color: $lightest-grey;
+    color: variables.$lightest-grey;
   }
 }
 
@@ -502,11 +503,11 @@
 
 .interactionsHeader {
   text-align: center;
-  border-bottom: 1px solid $font-color !important;
+  border-bottom: 1px solid variables.$font-color !important;
 }
 
 .statsContainer {
-  background-color: $very-dark-grey;
+  background-color: variables.$very-dark-grey;
   padding: 15px 20px;
   width: fit-content;
   color: white;
@@ -519,4 +520,22 @@
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 0.5rem;
+}
+
+.tdBottomPlace {
+  font-size: 14px;
+  height: 40px;
+  border-bottom: 1px solid variables.$lightest-grey;
+  &.me {
+    background-color: variables.$project-yellow;
+    color: black;
+    border-bottom: 1px solid variables.$lightest-grey;
+  }
+}
+
+.highlightedRow {
+  td {
+    background-color: variables.$project-yellow;
+    color: black;
+  }
 }

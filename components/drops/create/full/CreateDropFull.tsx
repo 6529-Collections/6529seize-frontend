@@ -13,7 +13,7 @@ import {
   ReferencedNft,
 } from "../../../../entities/IDrop";
 import { CreateDropType, CreateDropViewType } from "../types";
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef, type JSX } from "react";
 import { ApiWaveParticipationRequirement } from "../../../../generated/models/ApiWaveParticipationRequirement";
 import { ApiWaveRequiredMetadata } from "../../../../generated/models/ApiWaveRequiredMetadata";
 import { ProfileMinWithoutSubs } from "../../../../helpers/ProfileTypes";

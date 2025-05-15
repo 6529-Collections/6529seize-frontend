@@ -6,6 +6,7 @@ import {
   isValidElement,
   memo,
   ReactNode,
+  type JSX,
 } from "react";
 import Markdown, { ExtraProps } from "react-markdown";
 import rehypeExternalLinks from "rehype-external-links";
@@ -425,8 +426,8 @@ function DropPartMarkdown({
 
     for (const node of flattened) {
       const isValid = isValidElement(node);
-      const src = isValid && node.props?.src;
-      const href = isValid && node.props?.href;
+      const src = isValid && (node.props as any)?.src;
+      const href = isValid && (node.props as any)?.href;
       if (src || (href && isSmartLink(href))) {
         flushTextChunk();
         elements.push(node);
@@ -523,7 +524,7 @@ function DropPartMarkdown({
           </code>
         ),
         a: (params) => aHrefRenderer(params),
-        img: (params) => <DropPartMarkdownImage src={params.src ?? ""} />,
+        img: (params) => (typeof params.src === "string" ? <DropPartMarkdownImage src={params.src} /> : null),
         blockquote: (params) => (
           <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
             {customRenderer({

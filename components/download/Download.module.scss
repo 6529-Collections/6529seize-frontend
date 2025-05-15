@@ -1,8 +1,9 @@
-@import "../../styles/variables.scss";
+@use 'sass:color';
+@use "../../styles/variables.scss";
 
 .download {
   margin-left: 5px;
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
   width: 20px;
 
   svg {
@@ -11,7 +12,7 @@
     cursor: pointer;
 
     &:hover {
-      color: darken($color: $font-color, $amount: $darken-percentage);
+      color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
     }
   }
 }

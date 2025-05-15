@@ -6,7 +6,7 @@ import {
   EditorConfig,
   NodeKey,
 } from "lexical";
-import { createElement } from "react";
+import { createElement, type JSX } from "react";
 import { useEmoji } from "../../../../../contexts/EmojiContext";
 
 type SerializedEmojiNode = Spread<{ emojiId: string }, SerializedLexicalNode>;

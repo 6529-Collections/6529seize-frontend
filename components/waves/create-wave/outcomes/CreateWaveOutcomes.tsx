@@ -12,6 +12,8 @@ import CommonAnimationHeight from "../../../utils/animation/CommonAnimationHeigh
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
 
+import type { JSX } from "react";
+
 export default function WavesOutcome({
   outcomes,
   outcomeType,

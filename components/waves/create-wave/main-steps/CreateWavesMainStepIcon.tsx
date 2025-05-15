@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import { CreateWaveStepStatus } from "../../../../types/waves.types";
 import { useDebounce } from "react-use";
 

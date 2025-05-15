@@ -3,6 +3,8 @@ import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types"
 import CreateWaveOutcomesRowRepApprove from "./CreateWaveOutcomesRowRepApprove";
 import CreateWaveOutcomesRowRepRank from "./CreateWaveOutcomesRowRepRank";
 
+import type { JSX } from "react";
+
 export default function CreateWaveOutcomesRowRep({
   waveType,
   outcome,

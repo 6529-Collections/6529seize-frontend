@@ -24,7 +24,7 @@ const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
     </div>
   </HydrationBoundary>
 );
-Page.getLayout = (page: ReactElement) => (
+Page.getLayout = (page: ReactElement<any>) => (
   <MyStreamLayout>{page}</MyStreamLayout>
 );
 
