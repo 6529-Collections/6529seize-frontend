@@ -3,7 +3,6 @@ import {
   ImageScale,
 } from "../../../../helpers/image.helpers";
 import { INotificationDropVoted } from "../../../../types/feed.types";
-import RateClapOutlineIcon from "../../../utils/icons/RateClapOutlineIcon";
 import { getTimeAgoShort, numberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import Drop, {
@@ -56,13 +55,8 @@ export default function NotificationDropVoted({
   return (
     <div className="tw-flex tw-gap-x-3 tw-w-full">
       <div className="tw-space-y-2 tw-w-full">
-        <div className="tw-flex tw-flex-1 tw-justify-between tw-gap-x-3 tw-gap-y-1">
-          <div className="sm:tw-hidden tw-mr-2 tw-size-6 md:tw-absolute md:-tw-left-12 tw-flex-shrink-0 md:tw-size-8 tw-rounded-full tw-bg-iron-800 tw-flex tw-items-center tw-justify-center">
-            <div className="tw-size-4 md:tw-size-[1.15rem] md:-tw-mt-2.5 tw-text-iron-300 tw-flex tw-items-center tw-justify-center">
-              <RateClapOutlineIcon />
-            </div>
-          </div>
-          <div className="tw-flex tw-gap-x-2 tw-items-center">
+        <div className="tw-flex tw-justify-between tw-gap-x-4 tw-gap-y-1">
+          <div className="tw-flex-1 tw-flex tw-gap-x-2 tw-items-center">
             <div className="tw-h-7 tw-w-7">
               {notification.related_identity.pfp ? (
                 <img
@@ -77,24 +71,28 @@ export default function NotificationDropVoted({
                 <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
               )}
             </div>
-            <span className="tw-text-sm tw-font-normal tw-text-iron-50">
+            <span className="tw-inline-flex tw-flex-wrap tw-gap-x-1 tw-items-center">
               <Link
                 href={`/${notification.related_identity.handle}`}
-                className="tw-no-underline tw-font-semibold"
+                className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50"
               >
                 {notification.related_identity.handle}
-              </Link>{" "}
-              rated
+              </Link>
+              <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+                rated
+              </span>
               <span
                 className={`${getNotificationVoteColor(
                   notification.additional_context.vote
-                )} tw-pl-1 tw-font-medium`}
+                )} tw-pl-1 tw-font-medium tw-text-sm`}
               >
                 {notification.additional_context.vote > 0 && "+"}
                 {numberWithCommas(notification.additional_context.vote)}
-              </span>{" "}
-              <span className="tw-text-sm tw-text-iron-500 tw-font-normal tw-whitespace-nowrap">
-                <span className="tw-font-bold tw-mx-0.5">&#8226;</span>{" "}
+              </span>
+              <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+                <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
+                  &#8226;
+                </span>
                 {getTimeAgoShort(notification.created_at)}
               </span>
             </span>
