@@ -5,11 +5,8 @@ import NextGenCollectionArt from "./NextGenCollectionArt";
 import NextGenCollectionDetails from "./NextGenCollectionDetails";
 import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 import { NextGenCollection } from "../../../../entities/INextgen";
-import { useEffect, useState } from "react";
 import NextGenCollectionArtist from "./NextGenCollectionArtist";
 import NextGenNavigationHeader from "../NextGenNavigationHeader";
-import router from "next/router";
-import { formatNameForUrl } from "../../nextgen_helpers";
 
 interface Props {
   collection: NextGenCollection;

@@ -33,7 +33,7 @@ export default function NextGenCollectionPage(props: any) {
     const viewFromUrl = getCollectionView(
       Array.isArray(router.query.view)
         ? router.query.view[0]
-        : router.query.view || ""
+        : router.query.view ?? ""
     );
     setView(viewFromUrl);
     const viewTitle =
@@ -70,11 +70,17 @@ function getCollectionView(view: string): ContentView {
     ([key]) => key.toLowerCase() === normalizedView
   );
 
-  return entries
-    ? ContentView[entries[0] as keyof typeof ContentView]
-    : view === "top-trait-sets"
-    ? ContentView.TOP_TRAIT_SETS
-    : ContentView.OVERVIEW;
+  let contentView;
+
+  if (entries) {
+    contentView = ContentView[entries[0] as keyof typeof ContentView];
+  } else if (view === "top-trait-sets") {
+    contentView = ContentView.TOP_TRAIT_SETS;
+  } else {
+    contentView = ContentView.OVERVIEW;
+  }
+
+  return contentView;
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
@@ -105,7 +111,9 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     collectionView = getCollectionView(view);
   }
 
-  let title = `${collection?.name ?? `Collection #${parsedCollectionId}`}`;
+  let title = collection?.name
+    ? collection.name
+    : `Collection #${parsedCollectionId}`;
   if (collectionView && collectionView !== ContentView.OVERVIEW) {
     title = `${title} | ${collectionView}`;
   }

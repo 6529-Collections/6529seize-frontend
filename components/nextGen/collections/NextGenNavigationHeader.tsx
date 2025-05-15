@@ -5,7 +5,6 @@ import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
 import { LFGButton } from "../../lfg-slideshow/LFGSlideshow";
 import CollectionsDropdown from "../../collections-dropdown/CollectionsDropdown";
-import { useAuth } from "../../auth/Auth";
 
 export enum NextGenView {
   COLLECTIONS = "Collections",

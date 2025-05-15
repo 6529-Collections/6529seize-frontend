@@ -34,9 +34,7 @@ import {
   faChevronCircleRight,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { getMemeTabTitle, MemeTab } from "./MemeShared";
-import { MEME_TABS } from "./MemeShared";
-import { MEME_FOCUS } from "./MemeShared";
+import { getMemeTabTitle, MemeTab, MEME_TABS, MEME_FOCUS } from "./MemeShared";
 
 const ACTIVITY_PAGE_SIZE = 25;
 

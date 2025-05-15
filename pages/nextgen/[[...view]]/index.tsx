@@ -46,7 +46,7 @@ export default function NextGen(props: any) {
     const viewFromUrl = getNextGenView(
       Array.isArray(router.query.view)
         ? router.query.view[0]
-        : router.query.view || ""
+        : router.query.view ?? ""
     );
     setView(viewFromUrl ?? undefined);
     setTitle({ title: "NextGen " + (viewFromUrl ?? "") });
@@ -125,7 +125,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       collection: collection,
       view: nextgenView,
       metadata: {
-        title: "NextGen " + (nextgenView ? nextgenView : ""),
+        title: "NextGen " + (nextgenView ?? ""),
         ogImage: `${process.env.BASE_ENDPOINT}/nextgen.png`,
         description: "NextGen",
         twitterCard: "summary_large_image",
