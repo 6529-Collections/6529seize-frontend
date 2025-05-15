@@ -10,7 +10,6 @@ import NextgenTokenRarity, {
   NextgenTokenTraits,
 } from "./NextGenTokenProperties";
 import NextGenTokenAbout from "./NextGenTokenAbout";
-import { useEffect, useState } from "react";
 import NextGenTokenArt from "./NextGenTokenArt";
 import {
   ContentView,
@@ -18,7 +17,6 @@ import {
 } from "../collectionParts/NextGenCollection";
 import { isNullAddress } from "../../../../helpers/Helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/router";
 import Tippy from "@tippyjs/react";
 import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 import { NextGenBackToCollectionPageLink } from "../collectionParts/NextGenCollectionHeader";
@@ -34,43 +32,27 @@ interface Props {
   traits: NextGenTrait[];
   tokenCount: number;
   view: ContentView;
+  setView: (view: ContentView) => void;
 }
 
 export default function NextGenTokenPage(props: Readonly<Props>) {
-  const router = useRouter();
-
-  const [view, setView] = useState<ContentView>(
-    props.view ?? ContentView.ABOUT
-  );
-
-  useEffect(() => {
-    const basePath = `/nextgen/token/${props.token.id}`;
-    if (view && view !== ContentView.ABOUT) {
-      router.push(
-        `${basePath}/${view.toLowerCase().replaceAll(/ /g, "-")}`,
-        undefined,
-        {
-          shallow: true,
-        }
-      );
-    } else {
-      router.push(basePath, undefined, { shallow: true });
-    }
-  }, [view]);
-
   function printDetails() {
     return (
       <Container className="pt-4">
         <Row>
           <Col className="d-flex gap-4">
-            {printViewButton(view, ContentView.ABOUT, setView)}
-            {printViewButton(view, ContentView.PROVENANCE, setView)}
-            {printViewButton(view, ContentView.DISPLAY_CENTER, setView)}
-            {printViewButton(view, ContentView.RARITY, setView)}
+            {printViewButton(props.view, ContentView.ABOUT, props.setView)}
+            {printViewButton(props.view, ContentView.PROVENANCE, props.setView)}
+            {printViewButton(
+              props.view,
+              ContentView.DISPLAY_CENTER,
+              props.setView
+            )}
+            {printViewButton(props.view, ContentView.RARITY, props.setView)}
           </Col>
         </Row>
         <Row>
-          {view === ContentView.ABOUT && (
+          {props.view === ContentView.ABOUT && (
             <>
               <Col sm={12} md={6} className="pt-4 pb-4">
                 <NextGenTokenAbout
@@ -90,7 +72,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               </Col>
             </>
           )}
-          {view === ContentView.PROVENANCE && (
+          {props.view === ContentView.PROVENANCE && (
             <Col className="pt-4 pb-4">
               <NextGenTokenProvenance
                 token_id={props.token.id}
@@ -98,12 +80,12 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
               />
             </Col>
           )}
-          {view === ContentView.DISPLAY_CENTER && (
+          {props.view === ContentView.DISPLAY_CENTER && (
             <Col className="pt-4 pb-4">
               <NextGenTokenRenderCenter token={props.token} />
             </Col>
           )}
-          {view === ContentView.RARITY && (
+          {props.view === ContentView.RARITY && (
             <Col className="pt-4 pb-4">
               <NextgenTokenRarity
                 collection={props.collection}

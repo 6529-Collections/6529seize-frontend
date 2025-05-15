@@ -11,7 +11,8 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { AuthContext } from "../../../../../components/auth/Auth";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 const NextGenTokenComponent = dynamic(
   () =>
@@ -32,21 +33,42 @@ const NextGenTokenOnChainComponent = dynamic(
 );
 
 export default function NextGenCollectionToken(props: any) {
+  const router = useRouter();
+
   const { setTitle } = useContext(AuthContext);
   const tokenId: number = props.pageProps.token_id;
   const token: NextGenToken | null = props.pageProps.token;
   const traits: NextGenTrait[] = props.pageProps.traits;
   const tokenCount: number = props.pageProps.tokenCount;
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
 
-  const tokenView = props.pageProps.view;
+  const [tokenView, setTokenView] = useState<ContentView>(props.pageProps.view);
 
   useEffect(() => {
+    const viewFromUrl = getContentView(
+      Array.isArray(router.query.view)
+        ? router.query.view[0]
+        : router.query.view ?? ""
+    );
+    setTokenView(viewFromUrl);
+    const viewFromUrlDisplay =
+      viewFromUrl !== ContentView.ABOUT ? viewFromUrl : "";
+    const baseTitle = token?.name ?? `${collection.name} - #${tokenId}`;
+    const title = viewFromUrlDisplay
+      ? `${baseTitle} | ${viewFromUrlDisplay}`
+      : baseTitle;
     setTitle({
-      title: pagenameFull,
+      title,
     });
-  }, [pagenameFull]);
+  }, [router.query.view]);
+
+  const updateView = (newView?: ContentView) => {
+    let newPath = `/nextgen/token/${tokenId}`;
+    if (newView && newView !== ContentView.ABOUT) {
+      newPath += `/${newView.toLowerCase().replaceAll(" ", "-")}`;
+    }
+    router.push(newPath, undefined, { shallow: true });
+  };
 
   return (
     <main className={styles.main}>
@@ -58,6 +80,7 @@ export default function NextGenCollectionToken(props: any) {
           traits={traits}
           tokenCount={tokenCount}
           view={tokenView}
+          setView={updateView}
         />
       ) : (
         <NextGenTokenOnChainComponent
@@ -103,18 +126,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     headers: headers,
   });
 
-  let view = req.query.view as string;
-  let tokenView: ContentView | null = null;
-  if (view) {
-    view = view[0].toLowerCase().replaceAll("-", " ");
-    if (view === ContentView.DISPLAY_CENTER.toLowerCase()) {
-      tokenView = ContentView.DISPLAY_CENTER;
-    } else if (view == ContentView.PROVENANCE.toLowerCase()) {
-      tokenView = ContentView.PROVENANCE;
-    } else if (view == ContentView.RARITY.toLowerCase()) {
-      tokenView = ContentView.RARITY;
-    }
-  }
+  const view = req.query.view?.[0] ?? "";
+  const tokenView: ContentView = getContentView(view);
 
   if (isEmptyObject(collection)) {
     return {
@@ -126,6 +139,10 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     } as any;
   }
 
+  const viewDisplay = tokenView !== ContentView.ABOUT ? tokenView : "";
+  const baseTitle = token?.name ?? `${collection.name} - #${tokenId}`;
+  const title = viewDisplay ? `${baseTitle} | ${viewDisplay}` : baseTitle;
+
   return {
     props: {
       token_id: tokenId,
@@ -135,7 +152,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       collection: collection,
       view: tokenView,
       metadata: {
-        title: token?.name ?? `${collection.name} - #${tokenId}`,
+        title,
         ogImage:
           token?.thumbnail_url ??
           token?.image_url ??
@@ -145,4 +162,15 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       },
     },
   };
+}
+
+function getContentView(view: string): ContentView {
+  view = view?.toLowerCase().replaceAll("-", " ") ?? "";
+
+  const entries = Object.entries([
+    ContentView.DISPLAY_CENTER,
+    ContentView.PROVENANCE,
+    ContentView.RARITY,
+  ]).find(([, value]) => value.toLowerCase() === view);
+  return entries ? (entries[1] as ContentView) : ContentView.ABOUT;
 }
