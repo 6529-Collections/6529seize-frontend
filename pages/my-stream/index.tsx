@@ -47,7 +47,9 @@ export async function getServerSideProps(
 
   let title = "My Stream";
   if (context.query.wave) {
-    title = `Wave ${context.query.wave} | My Stream`;
+    const waveId = context.query.wave;
+    const shortUuid = `${waveId.slice(0, 8)}...${waveId.slice(-4)}`;
+    title = `Wave ${shortUuid} | My Stream`;
   }
 
   return {
