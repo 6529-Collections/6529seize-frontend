@@ -1,5 +1,19 @@
-@use "~bootstrap/scss/bootstrap.scss";
-@use "variables.scss";
+@use "variables.scss" as variables;
+
+// Define Bootstrap variable overrides FIRST
+$pink: #da2089;
+$green: #208359;
+$blue: #267c93;
+$orange: #ffa500;
+$yellow: #ffff00;
+// Add any other Bootstrap variables you want to set globally BEFORE the import.
+
+// Import Bootstrap's full SCSS using @import.
+@import "~bootstrap/scss/bootstrap";
+
+// Your custom global overrides for Bootstrap components or new global utility classes
+// can go AFTER the main Bootstrap import and after @use "variables.scss".
+// The existing media queries for .container can stay.
 
 @media (max-width: 1000px) {
   .container,

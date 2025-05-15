@@ -47,12 +47,12 @@
 .mintBtn {
   border-radius: 0;
   border: none;
-  background-color: variables.$green !important;
+  background-color: variables.$project-green !important;
   padding: 10px 50px;
   width: 100%;
 
   &:hover {
-    background-color: color.adjust($color: variables.$green, $lightness: 10%) !important;
+    background-color: color.adjust($color: variables.$project-green, $lightness: 10%) !important;
   }
 }
 
@@ -99,7 +99,7 @@
   border-color: variables.$lightest-grey;
 
   &:focus {
-    border-color: variables.$blue !important;
+    border-color: variables.$project-blue !important;
   }
 }
 
@@ -228,8 +228,8 @@
 }
 
 .phaseTimeTagUpcoming {
-  border: 1px solid variables.$orange;
-  color: variables.$orange;
+  border: 1px solid variables.$project-orange;
+  color: variables.$project-orange;
 }
 
 .artistSignature {

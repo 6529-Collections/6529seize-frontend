@@ -1,5 +1,6 @@
 @use "sass:color";
 @use "variables.scss";
+@use "fonts.scss";
 @import "react-toggle/style.css";
 
 @tailwind base;
@@ -391,11 +392,11 @@ h5:not(.tailwind-scope h5) {
 }
 
 .btn-green {
-  background-color: variables.$green;
+  background-color: variables.$project-green;
   color: white !important;
 
   &:hover {
-    background-color: color.adjust($color: variables.$green, $lightness: 5%);
+    background-color: color.adjust($color: variables.$project-green, $lightness: 5%);
   }
 }
 

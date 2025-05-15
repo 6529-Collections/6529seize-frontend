@@ -18,7 +18,7 @@
   transition: transform 0.3s ease;
 
   &:hover {
-    background-color: variables.$green;
+    background-color: variables.$project-green;
     color: white;
     transform: scale(1.02);
   }

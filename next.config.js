@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 
 let VERSION = process.env.VERSION;
@@ -55,6 +57,9 @@ const nextConfig = {
   reactStrictMode: false,
   compress: true,
   productionBrowserSourceMaps: false,
+  sassOptions: {
+    quietDeps: true,
+  },
   experimental: {
     webpackMemoryOptimizations: true,
     webpackBuildWorker: true,
