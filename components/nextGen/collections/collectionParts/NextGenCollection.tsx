@@ -14,6 +14,7 @@ import { formatNameForUrl } from "../../nextgen_helpers";
 interface Props {
   collection: NextGenCollection;
   view: ContentView;
+  setView: (v: ContentView) => void;
 }
 
 export enum ContentView {
@@ -23,15 +24,6 @@ export enum ContentView {
   RARITY = "Rarity",
   OVERVIEW = "Overview",
   TOP_TRAIT_SETS = "Trait Sets",
-}
-
-function getContentViewKeyByValue(value: string): string {
-  for (const [key, val] of Object.entries(ContentView)) {
-    if (val === value) {
-      return key;
-    }
-  }
-  return ContentView.OVERVIEW;
 }
 
 export function printViewButton(
@@ -56,24 +48,6 @@ export function printViewButton(
 }
 
 export default function NextGenCollectionComponent(props: Readonly<Props>) {
-
-  const [view, setView] = useState<ContentView>(props.view);
-
-  useEffect(() => {
-    let path =
-      view === ContentView.OVERVIEW
-        ? "/"
-        : `/${getContentViewKeyByValue(view).toLowerCase()}`;
-    path = path.replaceAll(" ", "-").replaceAll("_", "-");
-    router.push(
-      `/nextgen/collection/${formatNameForUrl(props.collection.name)}${path}`,
-      undefined,
-      {
-        shallow: true,
-      }
-    );
-  }, [view]);
-
   return (
     <>
       <NextGenNavigationHeader />
@@ -88,17 +62,25 @@ export default function NextGenCollectionComponent(props: Readonly<Props>) {
           />
           <Row className="pt-5">
             <Col className="d-flex gap-4">
-              {printViewButton(view, ContentView.OVERVIEW, setView)}
-              {printViewButton(view, ContentView.ABOUT, setView)}
-              {printViewButton(view, ContentView.PROVENANCE, setView)}
-              {printViewButton(view, ContentView.TOP_TRAIT_SETS, setView)}
+              {printViewButton(props.view, ContentView.OVERVIEW, props.setView)}
+              {printViewButton(props.view, ContentView.ABOUT, props.setView)}
+              {printViewButton(
+                props.view,
+                ContentView.PROVENANCE,
+                props.setView
+              )}
+              {printViewButton(
+                props.view,
+                ContentView.TOP_TRAIT_SETS,
+                props.setView
+              )}
             </Col>
           </Row>
           <Row className="pt-3">
             <Col>
               <NextGenCollectionDetails
                 collection={props.collection}
-                view={view}
+                view={props.view}
               />
             </Col>
           </Row>

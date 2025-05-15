@@ -10,6 +10,7 @@ import NextGenNavigationHeader, {
   NextGenView,
 } from "../../../components/nextGen/collections/NextGenNavigationHeader";
 import Image from "next/image";
+import { useAuth } from "../../../components/auth/Auth";
 
 const NextGenComponent = dynamic(
   () => import("../../../components/nextGen/collections/NextGen"),
@@ -39,21 +40,30 @@ export default function NextGen(props: any) {
     props.pageProps.view
   );
 
+  const { setTitle } = useAuth();
+
   useEffect(() => {
-    if (view) {
-      router.push(`/nextgen/${view.toLowerCase()}`);
-    } else {
-      router.push("/nextgen");
-    }
-  }, [view]);
+    const viewFromUrl = getNextGenView(
+      Array.isArray(router.query.view)
+        ? router.query.view[0]
+        : router.query.view || ""
+    );
+    setView(viewFromUrl ?? undefined);
+    setTitle({ title: "NextGen " + (viewFromUrl ?? "") });
+  }, [router.query.view]);
+
+  const updateView = (newView?: NextGenView) => {
+    const newPath = newView ? `/nextgen/${newView.toLowerCase()}` : "/nextgen";
+    router.push(newPath, undefined, { shallow: true });
+  };
 
   return (
     <main className={styles.main}>
       {collection?.id ? (
         <>
-          <NextGenNavigationHeader view={view} setView={setView} />
+          <NextGenNavigationHeader view={view} setView={updateView} />
           {!view && (
-            <NextGenComponent collection={collection} setView={setView} />
+            <NextGenComponent collection={collection} setView={updateView} />
           )}
           {view && (
             <Container fluid className={`${styles.main}`}>
@@ -115,8 +125,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       collection: collection,
       view: nextgenView,
       metadata: {
-        title: `${nextgenView ? `${nextgenView} | ` : ""}NextGen`,
-        ogImage: collection.image,
+        title: "NextGen " + (nextgenView ? nextgenView : ""),
+        ogImage: `${process.env.BASE_ENDPOINT}/nextgen.png`,
         description: "NextGen",
         twitterCard: "summary_large_image",
       },

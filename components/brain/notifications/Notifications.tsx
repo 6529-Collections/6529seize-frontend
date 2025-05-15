@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { AuthContext } from "../../auth/Auth";
+import { AuthContext, useAuth } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
@@ -22,6 +22,7 @@ export default function Notifications() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { notificationsViewStyle } = useLayout();
+  const { setTitle } = useAuth();
 
   const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
     null
@@ -31,6 +32,10 @@ export default function Notifications() {
 
   const router = useRouter();
   const { reload } = router.query;
+
+  useEffect(() => {
+    setTitle({ title: "Notifications | My Stream | Brain" });
+  }, []);
 
   useEffect(() => {
     if (reload === "true") {
@@ -131,8 +136,7 @@ export default function Notifications() {
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
-              viewBox="0 0 24 24"
-            >
+              viewBox="0 0 24 24">
               <circle
                 className="tw-opacity-25"
                 cx="12"
@@ -148,7 +152,9 @@ export default function Notifications() {
               />
             </svg>
           </div>
-          <div className="tw-text-iron-400 tw-text-sm">Loading notifications...</div>
+          <div className="tw-text-iron-400 tw-text-sm">
+            Loading notifications...
+          </div>
         </div>
       </div>
     );
@@ -159,8 +165,7 @@ export default function Notifications() {
       <FeedScrollContainer
         ref={scrollRef}
         onScrollUpNearTop={handleScrollUpNearTop}
-        isFetchingNextPage={isFetching}
-      >
+        isFetchingNextPage={isFetching}>
         <NotificationsWrapper
           items={items}
           loading={isFetching && items.length > 0}
@@ -174,8 +179,7 @@ export default function Notifications() {
   return (
     <div
       className="tw-relative tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 scroll-shadow"
-      style={notificationsViewStyle}
-    >
+      style={notificationsViewStyle}>
       <div className="tw-flex-1 tw-h-full tw-relative tw-flex-col tw-flex tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
         <NotificationsCauseFilter
           activeFilter={activeFilter}

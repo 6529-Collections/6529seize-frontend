@@ -379,7 +379,7 @@ export async function getServerSideCollection(req: any, path?: string) {
     props: {
       collection: collection,
       metadata: {
-        title: `${path ? `${path} | ` : ""}${collection.name} | NextGen`,
+        title: path ? `${path} | ${collection.name}` : collection.name,
         ogImage: collection.image,
         description: "NextGen",
         twitterCard: "summary_large_image",

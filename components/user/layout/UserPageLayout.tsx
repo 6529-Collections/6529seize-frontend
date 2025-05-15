@@ -1,9 +1,5 @@
 import { ReactNode, useContext, useEffect, useState } from "react";
-import {
-  containsEmojis,
-  formatAddress,
-  formatNumberWithCommas,
-} from "../../../helpers/Helpers";
+import { containsEmojis, formatAddress } from "../../../helpers/Helpers";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import { useRouter } from "next/router";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";

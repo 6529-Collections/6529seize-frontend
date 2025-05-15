@@ -136,9 +136,12 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       view: tokenView,
       metadata: {
         title: token?.name ?? `${collection.name} - #${tokenId}`,
-        ogImage: token?.image_url ?? collection.image,
+        ogImage:
+          token?.thumbnail_url ??
+          token?.image_url ??
+          collection.banner ??
+          `${process.env.BASE_ENDPOINT}/nextgen.png`,
         description: "NextGen",
-        twitterCard: "summary_large_image",
       },
     },
   };

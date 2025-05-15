@@ -94,9 +94,9 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
       const crumbs: Crumb[] = [{ display: "The Memes", href: "/the-memes" }];
       const displayName = isLoading
         ? "Loading..."
-        : data?.name ?? params.id === "mint"
+        : params.id === "mint"
         ? "Mint"
-        : `Meme #${params.id}`;
+        : data?.name ?? `Meme #${params.id}`;
       crumbs.push({ display: displayName });
       return crumbs;
     },

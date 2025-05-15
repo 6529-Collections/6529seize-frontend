@@ -772,7 +772,7 @@ export const getMetadataForUserPage = (
   path?: string
 ): PageSSRMetadata => {
   return {
-    title: `${profile.handle}${path ? ` | ${path}` : ""}`,
+    title: profile.handle + (path ? ` | ${path}` : ""),
     ogImage: profile.pfp ?? "",
     description: `Level ${
       profile.level
