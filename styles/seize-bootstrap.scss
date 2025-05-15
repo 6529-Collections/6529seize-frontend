@@ -8,8 +8,14 @@ $orange: #ffa500;
 $yellow: #ffff00;
 // Add any other Bootstrap variables you want to set globally BEFORE the import.
 
-// Import Bootstrap's full SCSS using @import.
-@import "~bootstrap/scss/bootstrap";
+// Import Bootstrap's full SCSS using @use and configure its variables.
+@use "bootstrap/scss/bootstrap" with (
+  $pink: $pink,
+  $green: $green,
+  $blue: $blue,
+  $orange: $orange,
+  $yellow: $yellow
+);
 
 // Your custom global overrides for Bootstrap components or new global utility classes
 // can go AFTER the main Bootstrap import and after @use "variables.scss".
