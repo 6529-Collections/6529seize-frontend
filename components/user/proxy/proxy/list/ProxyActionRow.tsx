@@ -1,7 +1,7 @@
 import { ApiProfileProxyAction } from "../../../../../generated/models/ApiProfileProxyAction";
 import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import ProxyActionRowDataMode from "./ProxyActionRowDataMode";
 import CommonChangeAnimation from "../../../../utils/animation/CommonChangeAnimation";
 import ProfileProxyCreditEdit from "../action/utils/credit/ProfileProxyCreditEdit";

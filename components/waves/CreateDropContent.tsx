@@ -62,9 +62,7 @@ import { MAX_DROP_UPLOAD_FILES } from '../../helpers/Helpers';
 
 
 // Use next/dynamic for lazy loading with SSR support
-const TermsSignatureFlow = dynamic(() => import('../terms/TermsSignatureFlow'), {
-  suspense: true, // Enable suspense for fallback UI
-});
+const TermsSignatureFlow = dynamic(() => import('../terms/TermsSignatureFlow'));
 
 export type CreateDropMetadataType =
   | {

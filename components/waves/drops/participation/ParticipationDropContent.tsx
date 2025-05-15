@@ -11,7 +11,7 @@ interface ParticipationDropContentProps {
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly setLongPressTriggered: (triggered: boolean) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement>;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
 }
 
 export default function ParticipationDropContent({

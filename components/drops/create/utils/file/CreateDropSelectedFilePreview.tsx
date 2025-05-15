@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 enum FILE_TYPES {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",

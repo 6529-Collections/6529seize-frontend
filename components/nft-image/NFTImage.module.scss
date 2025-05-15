@@ -1,12 +1,12 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .nftAnimation {
-  background-color: $dark-grey;
+  background-color: variables.$dark-grey;
   padding: 0;
   position: relative;
 
   model-viewer {
-    background-color: $bg-color-1;
+    background-color: variables.$bg-color-1;
   }
 
   iframe,
@@ -24,12 +24,12 @@
 }
 
 .heightFull {
-  max-height: calc(90vh - $header-height) !important;
+  max-height: calc(90vh - variables.$header-height) !important;
 
   iframe,
   video,
   model-viewer {
-    height: calc(90vh - $header-height) !important;
+    height: calc(90vh - variables.$header-height) !important;
     max-width: 90vw;
   }
 }
@@ -69,15 +69,15 @@
 }
 
 .imageWrapper {
-  background-color: $dark-grey;
+  background-color: variables.$dark-grey;
   padding: 0;
   position: relative;
 }
 
 .balance {
-  font-family: $main-font;
-  font-size: $font-size;
-  color: $lightest-grey !important;
+  font-family: variables.$main-font;
+  font-size: variables.$font-size;
+  color: variables.$lightest-grey !important;
   margin-right: 10px;
   padding: 2px 5px;
   white-space: nowrap;
@@ -98,12 +98,12 @@
 
 @media only screen and (max-width: 1200px) {
   .balance {
-    font-size: $font-smaller !important;
+    font-size: variables.$font-smaller !important;
   }
 }
 
 @media only screen and (max-width: 1000px) {
   .balance {
-    font-size: $font-smallest !important;
+    font-size: variables.$font-smallest !important;
   }
 }

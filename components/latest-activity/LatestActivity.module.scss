@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .scrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -27,7 +27,7 @@
 
 .iconRed {
   width: 20px;
-  color: $raspberry;
+  color: variables.$raspberry;
 }
 
 .iconEnabled {
@@ -55,7 +55,7 @@
   }
 
   tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 }
 

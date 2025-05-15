@@ -1,10 +1,4 @@
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type JSX } from "react";
 import CreateDropCompact, {
   CreateDropCompactHandles,
 } from "../compact/CreateDropCompact";

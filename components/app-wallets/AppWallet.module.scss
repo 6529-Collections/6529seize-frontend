@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .phrase {
   font-size: larger;
@@ -7,7 +7,7 @@
 }
 
 .blurry {
-  color: $font-color-h;
+  color: variables.$font-color-h;
   filter: blur(8px);
 }
 
@@ -19,7 +19,7 @@
 
   &:hover {
     transform: scale(1.01);
-    border: 1px solid $dark-grey;
+    border: 1px solid variables.$dark-grey;
     cursor: pointer;
   }
 }
@@ -35,39 +35,39 @@
 }
 
 .importWalletWordInput {
-  color: $font-color;
+  color: variables.$font-color;
   background-color: transparent;
   border: none;
   width: 100%;
 }
 
 .textSuccess {
-  color: $green !important;
+  color: variables.$project-green !important;
 }
 
 .textDanger {
-  color: $raspberry !important;
+  color: variables.$raspberry !important;
 }
 
 .appWalletAvatar {
   border-radius: 50%;
-  border: 1px solid $off-white;
+  border: 1px solid variables.$off-white;
   padding: 2px;
 }
 
 .modalHeader {
-  background-color: $bg-color-2;
-  color: $font-color;
-  border: 1px solid $lighter-grey !important;
+  background-color: variables.$bg-color-2;
+  color: variables.$font-color;
+  border: 1px solid variables.$lighter-grey !important;
   border-radius: 0;
 }
 
 .modalContent {
-  background-color: $bg-color-2;
-  color: $font-color;
+  background-color: variables.$bg-color-2;
+  color: variables.$font-color;
   border-top: 0;
-  border-bottom: 1px solid $lighter-grey !important;
-  border-left: 1px solid $lighter-grey !important;
-  border-right: 1px solid $lighter-grey !important;
+  border-bottom: 1px solid variables.$lighter-grey !important;
+  border-left: 1px solid variables.$lighter-grey !important;
+  border-right: 1px solid variables.$lighter-grey !important;
   border-radius: 0;
 }

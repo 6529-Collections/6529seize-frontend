@@ -1,4 +1,5 @@
-@import "../../styles/variables.scss";
+@use 'sass:color';
+@use "../../styles/variables.scss";
 
 .downloadUrlWidget {
   background-color: transparent;
@@ -9,9 +10,9 @@
   gap: 0.5rem;
 
   &:hover {
-    color: darken($color: $font-color, $amount: $darken-percentage);
+    color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
     svg {
-      color: darken($color: $font-color, $amount: $darken-percentage);
+      color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
     }
   }
 

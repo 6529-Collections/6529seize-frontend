@@ -124,7 +124,7 @@ export default function Notifications() {
   const showLoader = (!isInitialQueryDone || isFetching) && items.length === 0;
   const showNoItems = isInitialQueryDone && !isFetching && items.length === 0;
 
-  let mainContent: JSX.Element;
+  let mainContent: React.ReactNode;
 
   if (showLoader) {
     mainContent = (

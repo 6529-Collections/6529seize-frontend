@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 
 let VERSION = process.env.VERSION;
@@ -16,11 +18,6 @@ if (VERSION) {
     VERSION = "6529seize";
   }
 }
-
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
-  enabled: process.env.NODE_ENV !== "development",
-  openAnalyzer: false,
-});
 
 const securityHeaders = [
   {
@@ -53,9 +50,15 @@ const nextConfig = {
     ? `https://dnclu2fna0b2b.cloudfront.net/web_build/${VERSION}`
     : "",
   reactStrictMode: false,
-  swcMinify: true,
   compress: true,
   productionBrowserSourceMaps: false,
+  sassOptions: {
+    quietDeps: true,
+  },
+  experimental: {
+    webpackMemoryOptimizations: true,
+    webpackBuildWorker: true,
+  },
   images: {
     domains: ["6529.io", "arweave.net", "localhost"],
     unoptimized: true,
@@ -99,6 +102,12 @@ const nextConfig = {
     config.resolve.alias.encoding = false;
     return config;
   },
+  turbopack: {
+    resolveAlias: {
+      canvas: "./stubs/empty.js",
+      encoding: "./stubs/empty.js",
+    },
+  },
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+module.exports = nextConfig;

@@ -14,8 +14,8 @@ interface CreateDropWaveWrapperProps {
 }
 
 function useResizeObserver(
-  containerRef: React.RefObject<HTMLDivElement>,
-  fixedBottomRef: React.RefObject<HTMLDivElement>
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  fixedBottomRef: React.RefObject<HTMLDivElement | null>
 ) {
   const handleResize = useCallback(() => {
     const container = containerRef.current;

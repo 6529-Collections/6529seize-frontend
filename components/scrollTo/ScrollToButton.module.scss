@@ -1,7 +1,7 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .btn {
-  background-color: $almost-very-dark-grey;
+  background-color: variables.$almost-very-dark-grey;
   position: fixed;
   bottom: 25px;
   right: 25px;
@@ -16,7 +16,7 @@
   justify-content: center;
 
   &:hover {
-    background-color: $dark-grey !important;
+    background-color: variables.$dark-grey !important;
   }
 }
 
