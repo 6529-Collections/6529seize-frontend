@@ -19,11 +19,6 @@ if (VERSION) {
   }
 }
 
-// const withBundleAnalyzer = require("@next/bundle-analyzer")({
-//   enabled: process.env.NODE_ENV !== "development",
-//   openAnalyzer: false,
-// });
-
 const securityHeaders = [
   {
     key: "Strict-Transport-Security",
@@ -115,5 +110,4 @@ const nextConfig = {
   },
 };
 
-// module.exports = withBundleAnalyzer(nextConfig);
 module.exports = nextConfig;
