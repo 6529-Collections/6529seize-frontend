@@ -19,7 +19,7 @@ import {
   NEXTGEN_CHAIN_ID,
   NEXTGEN_CORE,
 } from "../components/nextGen/nextgen_contracts";
-import { Period } from "./Types";
+import { PageSSRMetadata, Period } from "./Types";
 import { ApiIdentity } from "../generated/models/ApiIdentity";
 
 export const MAX_DROP_UPLOAD_FILES = 8;
@@ -765,4 +765,18 @@ export const wait = async (ms: number): Promise<void> => {
 
 export const removeBaseEndpoint = (link: string) => {
   return link.replace(process.env.BASE_ENDPOINT ?? "", "");
+};
+
+export const getMetadataForUserPage = (
+  profile: ApiIdentity,
+  path?: string
+): PageSSRMetadata => {
+  return {
+    title: profile.handle + (path ? ` | ${path}` : ""),
+    ogImage: profile.pfp ?? "",
+    description: `Level ${
+      profile.level
+    } / TDH: ${profile.tdh.toLocaleString()} / Rep: ${profile.rep.toLocaleString()}`,
+    twitterCard: "summary_large_image",
+  };
 };

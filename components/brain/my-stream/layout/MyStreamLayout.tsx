@@ -1,4 +1,4 @@
-import { ReactNode, useContext, useEffect, useMemo } from "react";
+import { ReactNode, useContext, useMemo } from "react";
 import Head from "next/head";
 import Brain from "../../Brain";
 import { AuthContext } from "../../../auth/Auth";
@@ -11,16 +11,10 @@ import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpPro
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
-  const { showWaves, connectedProfile, fetchingProfile, setTitle } =
+  const { showWaves, connectedProfile, fetchingProfile } =
     useContext(AuthContext);
   const { spaces } = useLayout();
   const { isAuthenticated } = useSeizeConnectContext();
-
-  useEffect(() => {
-    setTitle({
-      title: "My Stream | Brain",
-    });
-  }, []);
 
   const containerClassName =
     "tw-relative tw-flex tw-flex-col tw-flex-1 tailwind-scope";
@@ -105,8 +99,3 @@ export default function MyStreamLayout({
 }) {
   return <MyStreamLayoutContent>{children}</MyStreamLayoutContent>;
 }
-
-MyStreamLayout.metadata = {
-  title: "My Stream",
-  description: "Brain",
-};

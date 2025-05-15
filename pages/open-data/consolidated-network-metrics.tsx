@@ -12,7 +12,7 @@ const CommunityDownloadsTDH = dynamic(
 );
 
 export default function ConsolidatedCommunityMetricsDownloads() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
 
   useEffect(() => {
     setTitle({

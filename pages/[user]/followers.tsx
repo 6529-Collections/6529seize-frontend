@@ -8,6 +8,7 @@ import {
 } from "../../helpers/server.helpers";
 import UserPageFollowers from "../../components/user/followers/UserPageFollowers";
 import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -45,11 +46,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-        metadata: {
-          title: `${profile.handle} | Followers`,
-          ogImage: profile.pfp ?? "",
-          twitterCard: "summary_large_image",
-        },
+        metadata: getMetadataForUserPage(profile, "Followers"),
       },
     };
   } catch (e: any) {

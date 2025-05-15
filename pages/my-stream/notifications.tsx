@@ -13,8 +13,10 @@ import { getCommonHeaders } from "../../helpers/server.helpers";
 import { prefetchAuthenticatedNotifications } from "../../helpers/stream.helpers";
 import { Time } from "../../helpers/time";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { PageSSRMetadata } from "../../helpers/Types";
 interface Props {
   dehydratedState: DehydratedState;
+  metadata: Partial<PageSSRMetadata>;
 }
 
 const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
@@ -47,5 +49,10 @@ export async function getServerSideProps(
     await prefetchAuthenticatedNotifications({ queryClient, headers, context });
   }
 
-  return { props: { dehydratedState: dehydrate(queryClient) } };
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+      metadata: { title: "Notifications | My Stream", description: "Brain" },
+    },
+  };
 }

@@ -1,10 +1,5 @@
-import Head from "next/head";
 import { ReactNode, useContext, useEffect, useState } from "react";
-import {
-  containsEmojis,
-  formatAddress,
-  formatNumberWithCommas,
-} from "../../../helpers/Helpers";
+import { containsEmojis, formatAddress } from "../../../helpers/Helpers";
 import UserPageHeader from "../user-page-header/UserPageHeader";
 import { useRouter } from "next/router";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
@@ -24,7 +19,7 @@ export default function UserPageLayout({
   readonly profile: ApiIdentity;
   readonly children: ReactNode;
 }) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const queryClient = useQueryClient();
   const router = useRouter();
   const { setProfile } = useContext(ReactQueryWrapperContext);
@@ -61,18 +56,6 @@ export default function UserPageLayout({
       title: pagenameFull,
     });
   }, []);
-
-  const descriptionArray = [];
-
-  descriptionArray.push(
-    `Level: ${formatNumberWithCommas(profile?.level ?? 0)}`
-  );
-
-  descriptionArray.push(`NIC: ${formatNumberWithCommas(profile?.cic ?? 0)}`);
-  descriptionArray.push(`Rep: ${formatNumberWithCommas(profile?.rep ?? 0)}`);
-  descriptionArray.push(`TDH: ${formatNumberWithCommas(profile?.tdh ?? 0)}`);
-
-  descriptionArray.push("6529.io");
 
   const mainAddress = profile?.primary_wallet ?? handleOrWallet.toLowerCase();
   const [isLoadingTabData, setIsLoadingTabData] = useState(false);

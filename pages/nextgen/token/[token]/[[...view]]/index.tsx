@@ -32,7 +32,7 @@ const NextGenTokenOnChainComponent = dynamic(
 );
 
 export default function NextGenCollectionToken(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const tokenId: number = props.pageProps.token_id;
   const token: NextGenToken | null = props.pageProps.token;
   const traits: NextGenTrait[] = props.pageProps.traits;
@@ -136,9 +136,12 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       view: tokenView,
       metadata: {
         title: token?.name ?? `${collection.name} - #${tokenId}`,
-        ogImage: token?.image_url ?? collection.image,
+        ogImage:
+          token?.thumbnail_url ??
+          token?.image_url ??
+          collection.banner ??
+          `${process.env.BASE_ENDPOINT}/nextgen.png`,
         description: "NextGen",
-        twitterCard: "summary_large_image",
       },
     },
   };

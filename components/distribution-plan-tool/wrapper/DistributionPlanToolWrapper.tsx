@@ -45,8 +45,3 @@ export default function DistributionPlanToolWrapper({
     </div>
   );
 }
-
-DistributionPlanToolWrapper.metadata = {
-  title: "EMMA",
-  description: "Tools",
-};

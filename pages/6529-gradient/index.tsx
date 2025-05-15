@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../styles/Home.module.scss";
 import { useContext, useEffect } from "react";
 import dynamic from "next/dynamic";

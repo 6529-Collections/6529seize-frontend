@@ -86,7 +86,7 @@ const MyStreamWrapper: React.FC = () => {
 
   useEffect(() => {
     setTitle({
-      title: haveNewItems ? "New Stream Items Available | 6529.io" : null,
+      title: haveNewItems ? "New Stream Items Available | Brain" : null,
       type: TitleType.MY_STREAM,
     });
 
@@ -97,6 +97,13 @@ const MyStreamWrapper: React.FC = () => {
       });
     };
   }, [haveNewItems]);
+
+  useEffect(() => {
+    setTitle({
+      title: "My Stream | Brain",
+      type: TitleType.MY_STREAM,
+    });
+  }, []);
 
   useEffect(() => {
     const checkAndRefetch = () => {
@@ -133,8 +140,7 @@ const MyStreamWrapper: React.FC = () => {
   return (
     <BrainContent
       activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}
-    >
+      onCancelReplyQuote={onCancelReplyQuote}>
       {component}
     </BrainContent>
   );

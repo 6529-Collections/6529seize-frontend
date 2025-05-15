@@ -16,7 +16,6 @@ import AboutContactUs from "../../components/about/AboutContactUs";
 import AboutReleaseNotes from "../../components/about/AboutReleaseNotes";
 import AboutTermsOfService from "../../components/about/AboutTermsOfService";
 import AboutPrivacyPolicy from "../../components/about/AboutPrivacyPolicy";
-import Head from "next/head";
 import AboutDataDecentral from "../../components/about/AboutDataDecentral";
 import AboutGDRC1 from "../../components/about/AboutGDRC1";
 import AboutNFTDelegation from "../../components/about/AboutNFTDelegation";
@@ -68,7 +67,7 @@ interface Props {
 }
 
 export default function About(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   const pageProps: Props = props.pageProps;
   const router = useRouter();
 

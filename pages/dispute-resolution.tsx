@@ -5,7 +5,7 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "../components/auth/Auth";
 
 export default function DisputeResolution() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
       title: "Dispute Resolution | 6529.io",

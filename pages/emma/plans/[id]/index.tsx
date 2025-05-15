@@ -19,3 +19,8 @@ export default function DistributionPlanToolPlan() {
     </DistributionPlanToolWrapper>
   );
 }
+
+DistributionPlanToolPlan.metadata = {
+  title: "EMMA | Plans",
+  description: "Tools",
+};

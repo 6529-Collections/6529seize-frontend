@@ -92,9 +92,15 @@ export const DYNAMIC_ROUTE_CONFIGS: ReadonlyArray<RouteDynamicConfig> = [
       isLoading: boolean
     ) => {
       const crumbs: Crumb[] = [{ display: "The Memes", href: "/the-memes" }];
-      const displayName = isLoading
-        ? "Loading..."
-        : data?.name ?? `Meme ${params.id}`;
+      let displayName: string;
+
+      if (isLoading) {
+        displayName = "Loading...";
+      } else if (params.id === "mint") {
+        displayName = "Mint";
+      } else {
+        displayName = data?.name ?? `Meme #${params.id}`;
+      }
       crumbs.push({ display: displayName });
       return crumbs;
     },

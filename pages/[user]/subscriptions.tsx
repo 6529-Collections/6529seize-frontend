@@ -1,5 +1,4 @@
 import { ReactElement } from "react";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
@@ -9,6 +8,7 @@ import {
 } from "../../helpers/server.helpers";
 import UserPageSubscriptions from "../../components/user/subscriptions/UserPageSubscriptions";
 import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -42,11 +42,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
-        metadata: {
-          title: `${profile.handle} | Subscriptions`,
-          ogImage: profile.pfp ?? "",
-          twitterCard: "summary_large_image",
-        },
+        metadata: getMetadataForUserPage(profile, "Subscriptions"),
       },
     };
   } catch (e: any) {

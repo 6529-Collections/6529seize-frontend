@@ -34,7 +34,9 @@ export const fetchProfileHandle = async (
   }
 };
 
-export const fetchWaveName = async (id: string): Promise<{ name: string } | null> => {
+export const fetchWaveName = async (
+  id: string
+): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
     const response = await commonApiFetch<{ name: string }>({
@@ -47,8 +49,10 @@ export const fetchWaveName = async (id: string): Promise<{ name: string } | null
   }
 };
 
-export const fetchMemeName = async (id: string): Promise<{ name: string } | null> => {
-  if (!id || typeof id !== "string") return null;
+export const fetchMemeName = async (
+  id: string
+): Promise<{ name: string } | null> => {
+  if (!id || typeof id !== "string" || id === "mint") return null;
   try {
     const response = await commonApiFetch<{
       data?: [{ name: string }];
@@ -85,7 +89,8 @@ export const fetchRememeName = async (
 ): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
-    const response = await commonApiFetch<any>({ // Consider a more specific type if possible
+    const response = await commonApiFetch<any>({
+      // Consider a more specific type if possible
       endpoint: `rememes`,
       params: { contract, id },
     });
@@ -104,7 +109,8 @@ export const fetchMemeLabName = async (
 ): Promise<{ name: string } | null> => {
   if (!id || typeof id !== "string") return null;
   try {
-    const response = await commonApiFetch<any>({ // Consider a more specific type
+    const response = await commonApiFetch<any>({
+      // Consider a more specific type
       endpoint: `nfts_memelab`,
       params: {
         contract: MEMELAB_CONTRACT,
@@ -138,4 +144,4 @@ export const fetchCollectionName = async (
     console.error("Error fetching collection name:", error);
     return { name: `Collection ${id}` };
   }
-}; 
+};

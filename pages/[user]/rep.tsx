@@ -14,6 +14,7 @@ import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelec
 import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
 import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
 import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -108,11 +109,7 @@ export async function getServerSideProps(
       props: {
         profile,
         handleOrWallet,
-        metadata: {
-          title: `${profile.handle} | Rep`,
-          ogImage: profile.pfp ?? "",
-          twitterCard: "summary_large_image",
-        },
+        metadata: getMetadataForUserPage(profile, "Rep"),
       },
     };
   } catch (e: any) {
