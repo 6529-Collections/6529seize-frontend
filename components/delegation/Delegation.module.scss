@@ -1,5 +1,5 @@
 @use 'sass:color';
-@use "../../styles/variables.scss";
+@use "../../styles/variables.scss" as variables;
 
 .Web3NetworkSwitch {
   display: none !important;
@@ -17,7 +17,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale($white, $lightness: -15%);
+    background-color: color.scale(variables.$white, $lightness: -15%);
   }
 }
 
@@ -32,13 +32,13 @@
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale($white, $lightness: -10%);
+    background-color: color.scale(variables.$white, $lightness: -10%);
   }
 }
 
 .viewManageBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale($white, $lightness: -20%);
+  background-color: color.scale(variables.$white, $lightness: -20%);
   color: variables.$lighter-grey-2;
 }
 
@@ -63,7 +63,7 @@
 
 .collectionDelegationsAccordionItemDisabled {
   pointer-events: none !important;
-  background-color: color.scale(variables.$blue, $lightness: -10%);
+  background-color: color.scale(variables.$project-blue, $lightness: -10%);
 
   button {
     color: variables.$font-color-h !important;
@@ -91,19 +91,19 @@
 
 .useCaseWalletUpdate {
   border: none !important;
-  background-color: variables.$blue;
+  background-color: variables.$project-blue;
   color: white;
   padding: 10px 15px;
   cursor: pointer;
 
   &:hover {
-    background-color: color.adjust(variables.$blue, $lightness: 5%);
+    background-color: color.adjust(variables.$project-blue, $lightness: 5%);
   }
 }
 
 .useCaseWalletUpdateDisabled {
   pointer-events: none !important;
-  background-color: color.scale(variables.$blue, $lightness: -10%);
+  background-color: color.scale(variables.$project-blue, $lightness: -10%);
   color: variables.$font-color-h;
 }
 
@@ -133,20 +133,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: variables.$blue;
+  background-color: variables.$project-blue;
   color: white;
   padding: 15px 10px;
   cursor: pointer;
   white-space: nowrap;
 
   &:hover {
-    background-color: color.adjust(variables.$blue, $lightness: 5%);
+    background-color: color.adjust(variables.$project-blue, $lightness: 5%);
   }
 }
 
 .addNewDelegationBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale(variables.$blue, $lightness: -10%);
+  background-color: color.scale(variables.$project-blue, $lightness: -10%);
   color: variables.$font-color-h;
 }
 
@@ -204,7 +204,7 @@
   height: 100%;
 
   &:focus {
-    border-color: variables.$blue !important;
+    border-color: variables.$project-blue !important;
   }
 }
 
@@ -217,7 +217,7 @@
   height: 50px;
 
   &:focus {
-    border-color: variables.$blue !important;
+    border-color: variables.$project-blue !important;
   }
 }
 
@@ -246,7 +246,7 @@
 }
 
 .newDelegationSubmitBtn {
-  background-color: variables.$green;
+  background-color: variables.$project-green;
   padding-left: 15px;
   padding-right: 25px;
   border: none;
@@ -257,13 +257,13 @@
   color: white;
 
   &:hover {
-    background-color: color.scale(variables.$green, $lightness: -5%);
+    background-color: color.scale(variables.$project-green, $lightness: -5%);
   }
 }
 
 .newDelegationSubmitBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale(variables.$green, $lightness: -10%);
+  background-color: color.scale(variables.$project-green, $lightness: -10%);
   color: variables.$font-color-h;
 }
 
@@ -279,7 +279,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: color.scale($white, $lightness: -15%);
+    background-color: color.scale(variables.$white, $lightness: -15%);
   }
 }
 
@@ -288,7 +288,7 @@
 }
 
 .newDelegationSuccess {
-  color: color.adjust(variables.$green, $lightness: 12%);
+  color: color.adjust(variables.$project-green, $lightness: 12%);
 }
 
 .lockUseCaseBtn {
@@ -449,7 +449,7 @@
 }
 
 .delegationActiveLabel {
-  color: color.adjust(variables.$green, $lightness: 10%);
+  color: color.adjust(variables.$project-green, $lightness: 10%);
 }
 
 .delegationExpiredLabel {
@@ -457,11 +457,11 @@
 }
 
 .consolidationActiveLabel {
-  color: color.adjust(variables.$blue, $lightness: 20%);
+  color: color.adjust(variables.$project-blue, $lightness: 20%);
 }
 
 .consolidationNotAcceptedLabel {
-  color: color.adjust(variables.$orange, $lightness: 10%);
+  color: color.adjust(variables.$project-orange, $lightness: 10%);
 }
 
 .documentationLink {

@@ -1,5 +1,5 @@
 @use "sass:color";
-@use "../../styles/variables.scss";
+@use "../../styles/variables.scss" as variables;
 
 .distributionHeader {
   display: flex;
@@ -130,10 +130,14 @@
 }
 
 .searchBtnActive {
-  background-color: color.adjust($color: variables.$green, $lightness: 10%);
+  background-color: color.adjust($color: variables.$project-green, $lightness: 10%);
 
   &:hover {
-    background-color: variables.$green;
+    border: 1px solid variables.$project-green;
+    background-color: color.adjust(
+      $color: variables.$project-green,
+      $lightness: 10%
+    );
   }
 }
 

@@ -137,12 +137,12 @@
 }
 
 .searchBtnActive {
-  background-color: color.adjust($color: variables.$green, $lightness: 10%) !important;
+  background-color: color.adjust($color: variables.$project-green, $lightness: 10%) !important;
 
   &:hover,
   &:active,
   &:focus {
-    background-color: variables.$green !important;
+    background-color: variables.$project-green !important;
   }
 }
 

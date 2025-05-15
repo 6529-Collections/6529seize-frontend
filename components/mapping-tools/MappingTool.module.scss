@@ -1,4 +1,5 @@
-@use "../../styles/variables.scss";
+@use "sass:color";
+@use "../../styles/variables.scss" as variables;
 
 .placeholder {
   height: 500px;
@@ -11,7 +12,7 @@
   cursor: pointer;
 
   &:focus {
-    border-color: variables.$blue !important;
+    border-color: variables.$project-blue !important;
   }
 }
 
@@ -22,7 +23,7 @@
 .submitBtn {
   width: 100%;
   border-radius: 0;
-  background-color: variables.$green;
+  background-color: variables.$project-green;
   padding-left: 15px;
   padding-right: 25px;
   border: none;
@@ -33,17 +34,17 @@
   color: white;
 
   &:active {
-    background-color: variables.$green !important;
+    background-color: variables.$project-green !important;
   }
 
   &:hover {
-    background-color: color.scale(variables.$green, $lightness: -5);
+    background-color: color.scale(variables.$project-green, $lightness: -5%);
   }
 }
 
 .submitBtnDisabled {
   pointer-events: none !important;
-  background-color: color.scale(variables.$green, $lightness: -10);
+  background-color: color.scale(variables.$project-green, $lightness: -10%);
   color: variables.$font-color-h;
 }
 

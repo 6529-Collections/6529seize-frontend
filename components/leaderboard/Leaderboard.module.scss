@@ -1,5 +1,5 @@
 @use "sass:color";
-@use "../../styles/variables.scss";
+@use "../../styles/variables.scss" as variables;
 
 .scrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -308,12 +308,12 @@
     cursor: pointer;
     line-height: 48px;
     margin-top: 15px;
-    background-color: variables.$yellow;
+    background-color: variables.$project-yellow;
     border-color: variables.$very-dark-grey !important;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%231e1e1e'/%3e%3c/svg%3e") !important;
   }
   input:checked {
-    background-color: variables.$orange !important;
+    background-color: variables.$project-orange !important;
   }
 }
 
@@ -385,7 +385,7 @@
     border-color: black !important;
   }
   input:checked {
-    background-color: variables.$yellow !important;
+    background-color: variables.$project-yellow !important;
   }
 }
 
@@ -433,10 +433,10 @@
 }
 
 .searchBtnActive {
-  background-color: color.adjust($color: variables.$green, $lightness: 10%);
+  background-color: color.adjust($color: variables.$project-green, $lightness: 10%);
 
   &:hover {
-    background-color: variables.$green;
+    background-color: variables.$project-green;
   }
 }
 
@@ -520,4 +520,22 @@
   flex-direction: column;
   gap: 0.5rem;
   border-radius: 0.5rem;
+}
+
+.tdBottomPlace {
+  font-size: 14px;
+  height: 40px;
+  border-bottom: 1px solid variables.$lightest-grey;
+  &.me {
+    background-color: variables.$project-yellow;
+    color: black;
+    border-bottom: 1px solid variables.$lightest-grey;
+  }
+}
+
+.highlightedRow {
+  td {
+    background-color: variables.$project-yellow;
+    color: black;
+  }
 }
