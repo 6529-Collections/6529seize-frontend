@@ -111,9 +111,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     collectionView = getCollectionView(view);
   }
 
-  let title = collection?.name
-    ? collection.name
-    : `Collection #${parsedCollectionId}`;
+  let title = collection?.name ?? `Collection #${parsedCollectionId}`;
   if (collectionView && collectionView !== ContentView.OVERVIEW) {
     title = `${title} | ${collectionView}`;
   }
