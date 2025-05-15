@@ -167,10 +167,13 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
 function getContentView(view: string): ContentView {
   view = view?.toLowerCase().replaceAll("-", " ") ?? "";
 
-  const entries = Object.entries([
+  const allowedViews = [
     ContentView.DISPLAY_CENTER,
     ContentView.PROVENANCE,
     ContentView.RARITY,
-  ]).find(([, value]) => value.toLowerCase() === view);
-  return entries ? (entries[1] as ContentView) : ContentView.ABOUT;
+  ];
+
+  const matchedView = allowedViews.find((v) => v.toLowerCase() === view);
+
+  return matchedView ?? ContentView.ABOUT;
 }
