@@ -79,7 +79,7 @@ interface DefautWinnerDropProps {
   readonly onReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-  readonly parentContainerRef?: React.RefObject<HTMLElement>;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
 }
 
 const DefaultWinnerDrop = ({

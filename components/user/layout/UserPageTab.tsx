@@ -9,7 +9,7 @@ export default function UserPageTab({
   activeTab,
 }: {
   readonly tab: UserPageTabType;
-  readonly parentRef: React.RefObject<HTMLDivElement>;
+  readonly parentRef: React.RefObject<HTMLDivElement | null>;
   readonly activeTab: UserPageTabType;
 }) {
   const router = useRouter();

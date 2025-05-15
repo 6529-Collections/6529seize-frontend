@@ -8,7 +8,7 @@ import React, {
 
 interface DropContentWrapperProps {
   readonly children: React.ReactNode;
-  readonly parentContainerRef?: React.RefObject<HTMLElement>;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
 }
 
 const DropContentWrapper: React.FC<DropContentWrapperProps> = ({

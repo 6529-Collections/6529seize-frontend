@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .downloadsScrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -22,7 +22,7 @@
   }
 
   tbody tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 }
 
@@ -41,7 +41,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: $almost-very-dark-grey;
-    border: 1px solid $off-white;
+    background-color: variables.$almost-very-dark-grey;
+    border: 1px solid variables.$off-white;
   }
 }

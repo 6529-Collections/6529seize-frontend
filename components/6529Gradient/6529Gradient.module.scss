@@ -1,12 +1,13 @@
-@import "../../styles/variables.scss";
+@use 'sass:color';
+@use "../../styles/variables.scss";
 
 .sortDirection {
-  width: $font-size;
+  width: variables.$font-size;
   cursor: pointer;
 }
 
 .disabled {
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
   text-decoration: none;
   &:hover {
     color: white;
@@ -21,11 +22,11 @@
 .nftNextdisabled,
 .nftPreviousdisabled {
   pointer-events: none !important;
-  color: darken($color: $font-color, $amount: $darken-percentage);
+  color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
 }
 
 .subheading {
-  color: $font-color;
+  color: variables.$font-color;
 }
 
 .fullScreen {
@@ -54,7 +55,7 @@
   }
 
   tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 }
 

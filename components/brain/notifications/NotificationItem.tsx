@@ -12,6 +12,8 @@ import NotificationIdentitySubscribed from "./identity-subscribed/NotificationId
 import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
 import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 
+import type { JSX } from "react";
+
 export default function NotificationItem({
   notification,
   activeDrop,

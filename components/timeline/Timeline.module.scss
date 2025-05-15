@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .timeline {
   position: relative;
@@ -8,11 +8,11 @@
   h4,
   h5,
   p {
-    color: $very-dark-grey !important;
+    color: variables.$very-dark-grey !important;
   }
 
   a {
-    color: $very-dark-grey !important;
+    color: variables.$very-dark-grey !important;
 
     &:hover {
       opacity: 0.8;
@@ -45,7 +45,7 @@
   height: 25px;
   right: -13px;
   background-color: white;
-  border: 6px solid $salmon;
+  border: 6px solid variables.$salmon;
   top: 25px;
   border-radius: 50%;
   z-index: 1;
@@ -83,7 +83,7 @@
 }
 
 .content {
-  color: $very-dark-grey;
+  color: variables.$very-dark-grey;
   padding: 20px;
   background-color: white;
   position: relative;

@@ -14,7 +14,7 @@ export default function UserAddressesSelectDropdown({
   onActiveAddress,
 }: {
   readonly wallets: ApiWallet[];
-  readonly containerRef?: RefObject<HTMLDivElement>;
+  readonly containerRef?: RefObject<HTMLDivElement | null>;
   readonly onActiveAddress: (address: SelectedType) => void;
 }) {
   const router = useRouter();
@@ -108,7 +108,7 @@ export default function UserAddressesSelectDropdown({
         item.childrenProps ? (
           <UserAddressesSelectDropdownItem wallet={item.childrenProps} />
         ) : (
-          <></> // return an empty fragment when item.childrenProps is not available
+          (<></>) // return an empty fragment when item.childrenProps is not available
         )
       }
     />

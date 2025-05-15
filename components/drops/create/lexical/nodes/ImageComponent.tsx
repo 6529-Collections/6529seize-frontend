@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, type JSX } from "react";
 import CircleLoader, {
   CircleLoaderSize,
 } from "../../../../distribution-plan-tool/common/CircleLoader";

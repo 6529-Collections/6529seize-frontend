@@ -1,4 +1,4 @@
-import React from "react";
+import React, { type JSX } from "react";
 import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 
 interface ClosedButtonProps {

@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .address {
   font-weight: bold;
@@ -72,31 +72,31 @@
 }
 
 .addressTag {
-  font-family: $main-font;
-  font-size: $font-size;
+  font-family: variables.$main-font;
+  font-size: variables.$font-size;
   font-weight: bold;
-  color: $font-color !important;
+  color: variables.$font-color !important;
   margin-right: 10px;
   padding: 2px 5px;
   white-space: nowrap;
   box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
-  background-color: $dark-grey;
+  background-color: variables.$dark-grey;
 }
 
 .tag {
-  font-family: $main-font;
-  font-size: $font-size;
+  font-family: variables.$main-font;
+  font-size: variables.$font-size;
   font-weight: bold;
-  color: $font-color !important;
+  color: variables.$font-color !important;
   padding: 2px 5px;
   white-space: nowrap;
   box-shadow: 0 4px 4px rgb(0 0 0 / 25%);
-  background-color: $dark-grey;
+  background-color: variables.$dark-grey;
 }
 
 .boostTag {
-  background-color: $off-white;
-  color: $dark-grey !important;
+  background-color: variables.$off-white;
+  color: variables.$dark-grey !important;
 }
 
 .profileTag {
@@ -107,7 +107,7 @@
 @media only screen and (max-width: 1200px) {
   .tag,
   .addressTag {
-    font-size: $font-smaller !important;
+    font-size: variables.$font-smaller !important;
   }
   .copy {
     font-size: 12px;
@@ -118,7 +118,7 @@
 @media only screen and (max-width: 1000px) {
   .tag,
   .addressTag {
-    font-size: $font-smallest !important;
+    font-size: variables.$font-smallest !important;
   }
   .copy {
     font-size: 10px;
@@ -127,7 +127,7 @@
 }
 
 .userPageAddress {
-  font-size: $font-size !important;
+  font-size: variables.$font-size !important;
 }
 
 .tagIcon {
@@ -140,22 +140,22 @@
 }
 
 .memesSetTag {
-  background-color: $pink;
+  background-color: variables.$project-pink;
   line-height: 24px;
 }
 
 .memesTag {
-  background-color: $raspberry;
+  background-color: variables.$raspberry;
   line-height: 24px;
 }
 
 .memeSzn1Tag {
-  background-color: $green;
+  background-color: variables.$project-green;
   line-height: 24px;
 }
 
 .memeSzn2Tag {
-  background-color: $blue;
+  background-color: variables.$project-blue;
   line-height: 24px;
 }
 
@@ -180,7 +180,7 @@
 }
 
 .gradientTag {
-  background-color: $lighter-grey;
+  background-color: variables.$lighter-grey;
   line-height: 24px;
 }
 

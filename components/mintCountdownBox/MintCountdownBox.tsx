@@ -3,6 +3,8 @@ import DateCountdown from "../date-countdown/DateCountdown";
 import { Container, Row, Col } from "react-bootstrap";
 import Link from "next/link";
 
+import type { JSX } from "react";
+
 export interface MemePageMintBtn {
   label: JSX.Element | string;
   link: string;

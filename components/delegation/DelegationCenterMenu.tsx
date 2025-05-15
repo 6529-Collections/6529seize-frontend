@@ -475,7 +475,7 @@ function GithubLink() {
 
 export function DelegationToast(
   props: Readonly<{
-    toastRef: React.RefObject<HTMLDivElement>;
+    toastRef: React.RefObject<HTMLDivElement | null>;
     toast: { title: string; message?: string };
     showToast: boolean;
     setShowToast: (show: boolean) => void;

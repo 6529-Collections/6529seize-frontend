@@ -109,7 +109,7 @@ createWeb3Modal({
 });
 
 export type NextPageWithLayout<Props> = NextPage<Props> & {
-  getLayout?: (page: ReactElement) => ReactNode;
+  getLayout?: (page: ReactElement<any>) => ReactNode;
 };
 
 type AppPropsWithLayout = AppProps & {

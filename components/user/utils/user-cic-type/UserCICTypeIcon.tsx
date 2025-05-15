@@ -6,6 +6,8 @@ import UserCICInaccurateIcon from "./icons/UserCICInaccurateIcon";
 import UserCICProbablyAccurateIcon from "./icons/UserCICProbablyAccurateIcon";
 import UserCICHighlyAccurateIcon from "./icons/UserCICHighlyAccurateIcon";
 
+import type { JSX } from "react";
+
 export default function UserCICTypeIcon({ cic }: { readonly cic: number }) {
   const COMPONENTS: Record<CICType, JSX.Element> = {
     [CICType.INACCURATE]: <UserCICInaccurateIcon />,

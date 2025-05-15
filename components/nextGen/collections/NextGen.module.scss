@@ -1,4 +1,5 @@
-@import "../../../styles/variables.scss";
+@use "sass:color";
+@use "../../../styles/variables.scss";
 
 .navigationHeader {
   display: flex;
@@ -8,7 +9,7 @@
 .navigationHeaderHr {
   margin: 0;
   border-top-width: 2px;
-  color: $lighter-grey;
+  color: variables.$lighter-grey;
 }
 
 .nextgenBannerWrapper {
@@ -33,7 +34,7 @@
 
   &:hover {
     transform: scale(1.02);
-    border: 1px solid $dark-grey;
+    border: 1px solid variables.$dark-grey;
   }
 }
 
@@ -46,12 +47,12 @@
 .mintBtn {
   border-radius: 0;
   border: none;
-  background-color: $green !important;
+  background-color: variables.$project-green !important;
   padding: 10px 50px;
   width: 100%;
 
   &:hover {
-    background-color: lighten($color: $green, $amount: 10) !important;
+    background-color: color.adjust($color: variables.$project-green, $lightness: 10%) !important;
   }
 }
 
@@ -62,7 +63,7 @@
 
 .viewAllTokens {
   :hover {
-    color: $font-color-h;
+    color: variables.$font-color-h;
   }
   svg {
     height: 22px;
@@ -93,12 +94,12 @@
 }
 
 .formInput {
-  color: $dark-grey !important;
+  color: variables.$dark-grey !important;
   border-radius: 0 !important;
-  border-color: $lightest-grey;
+  border-color: variables.$lightest-grey;
 
   &:focus {
-    border-color: $blue !important;
+    border-color: variables.$project-blue !important;
   }
 }
 
@@ -120,7 +121,7 @@
   cursor: pointer;
 
   &:hover {
-    color: $lightest-grey;
+    color: variables.$lightest-grey;
   }
 }
 
@@ -139,11 +140,11 @@
 }
 
 .collectionHeaderCol {
-  background-color: $very-dark-grey;
+  background-color: variables.$very-dark-grey;
 }
 
 .mintSelect {
-  color: $dark-grey !important;
+  color: variables.$dark-grey !important;
 }
 
 .mintingForRadio {
@@ -173,12 +174,12 @@
 }
 
 .trafficLight {
-  height: $font-size;
-  width: $font-size;
+  height: variables.$font-size;
+  width: variables.$font-size;
   border-radius: 50%;
   display: inline-block;
   animation: flashing 1s infinite;
-  background-color: $lightest-grey;
+  background-color: variables.$lightest-grey;
 }
 
 .trafficLightGreen {
@@ -217,8 +218,8 @@
 }
 
 .phaseTimeTagComplete {
-  border: 1px solid $font-color-h;
-  color: $font-color-h;
+  border: 1px solid variables.$font-color-h;
+  color: variables.$font-color-h;
 }
 
 .phaseTimeTagActive {
@@ -227,8 +228,8 @@
 }
 
 .phaseTimeTagUpcoming {
-  border: 1px solid $orange;
-  color: $orange;
+  border: 1px solid variables.$project-orange;
+  color: variables.$project-orange;
 }
 
 .artistSignature {
@@ -238,7 +239,7 @@
 }
 
 .tokenContainer {
-  background-color: $nextgen-grey;
+  background-color: variables.$nextgen-grey;
 }
 
 .mintDetails {
@@ -283,7 +284,7 @@
   height: 18px;
   cursor: pointer;
   &:hover {
-    color: $lightest-grey;
+    color: variables.$lightest-grey;
   }
   &:focus {
     outline: none !important;
@@ -302,20 +303,20 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: $nextgen-grey;
+    background-color: variables.$nextgen-grey;
     border-radius: 10px;
-    border: 1px solid $off-white;
+    border: 1px solid variables.$off-white;
   }
 
   &::-webkit-scrollbar-track {
     width: 50%;
-    background: $off-white;
+    background: variables.$off-white;
     border-radius: 10px;
   }
 
   // Firefox
   @supports (scrollbar-color: auto) {
-    scrollbar-color: darkgrey $off-white;
+    scrollbar-color: darkgrey variables.$off-white;
     scrollbar-width: thin;
   }
 }
@@ -331,11 +332,11 @@
 }
 
 .slideshowContainer {
-  background-color: $nextgen-grey;
+  background-color: variables.$nextgen-grey;
 }
 
 .countdownContainer {
-  background-color: $very-dark-grey;
+  background-color: variables.$very-dark-grey;
   padding: 15px 20px;
   width: 100%;
   color: white;
@@ -363,7 +364,7 @@
   }
 
   tbody tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 
   & > :not(caption) > * > * {
@@ -374,14 +375,14 @@
 .collectionProvenanceAccordion {
   border-radius: 0 !important;
   button {
-    background-color: $almost-very-dark-grey !important;
+    background-color: variables.$almost-very-dark-grey !important;
   }
 }
 
 .collectionProvenanceAccordionOdd {
   border-radius: 0 !important;
   button {
-    background-color: $very-dark-grey !important;
+    background-color: variables.$very-dark-grey !important;
   }
 }
 
@@ -400,12 +401,12 @@
 
 .collectionProvenanceAccordionBody {
   color: white;
-  background-color: $almost-very-dark-grey !important;
+  background-color: variables.$almost-very-dark-grey !important;
 }
 
 .collectionProvenanceAccordionBodyOdd {
   color: white;
-  background-color: $very-dark-grey !important;
+  background-color: variables.$very-dark-grey !important;
 }
 
 .logsScrollContainer {
@@ -435,18 +436,18 @@
     padding-left: 0;
     padding-right: 0;
     font-weight: bold;
-    background-color: $very-dark-grey !important;
+    background-color: variables.$very-dark-grey !important;
   }
 }
 
 .traitsAccordionItem {
-  background-color: $very-dark-grey !important;
+  background-color: variables.$very-dark-grey !important;
 }
 
 .traitsAccordionBody {
   padding: 0px;
-  color: $font-color;
-  background-color: $very-dark-grey !important;
+  color: variables.$font-color;
+  background-color: variables.$very-dark-grey !important;
 }
 
 .listed {
@@ -460,7 +461,7 @@
     border: none !important;
 
     &:hover {
-      color: $font-color-h;
+      color: variables.$font-color-h;
     }
 
     @media only screen and (max-width: 800px) {
@@ -507,7 +508,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: $off-white;
+    background-color: variables.$off-white;
     color: black;
   }
 }
@@ -520,7 +521,7 @@
 
 .collectorSetAccordionBody {
   color: white;
-  background-color: $nextgen-grey;
+  background-color: variables.$nextgen-grey;
 }
 
 .collectorSetAccordionButtonUltimate {

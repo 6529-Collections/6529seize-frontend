@@ -43,18 +43,21 @@ const MyStreamWaveTabsLeaderboard: React.FC<
       {/* Show Leaderboard tab always except when voting has ended */}
       {!isCompleted && (
         <button
-          ref={(el) => registerTabRef?.(BrainView.LEADERBOARD, el)}
+          ref={el => {
+            registerTabRef?.(BrainView.LEADERBOARD, el);
+          }}
           onClick={() => onViewChange(BrainView.LEADERBOARD)}
           className={leaderboardButtonClasses}
         >
           <span className={leaderboardButtonTextClasses}>Leaderboard</span>
         </button>
       )}
-
       {/* Show Winners tab if first decision has passed */}
       {firstDecisionDone && (
         <button
-          ref={(el) => registerTabRef?.(BrainView.WINNERS, el)}
+          ref={el => {
+            registerTabRef?.(BrainView.WINNERS, el);
+          }}
           onClick={() => onViewChange(BrainView.WINNERS)}
           className={winnersButtonClasses}
         >

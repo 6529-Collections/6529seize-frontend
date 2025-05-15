@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, type JSX } from "react";
 import WavesList from "./list/WavesList";
 import { AuthContext } from "../auth/Auth";
 import dynamic from "next/dynamic";

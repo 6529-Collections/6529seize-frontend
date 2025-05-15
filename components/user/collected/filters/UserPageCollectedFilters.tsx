@@ -25,7 +25,7 @@ export default function UserPageCollectedFilters({
 }: {
   readonly profile: ApiIdentity;
   readonly filters: ProfileCollectedFilters;
-  readonly containerRef: RefObject<HTMLDivElement>;
+  readonly containerRef: RefObject<HTMLDivElement | null>;
   readonly setCollection: (collection: CollectedCollectionType | null) => void;
   readonly setSortBy: (sortBy: CollectionSort) => void;
   readonly setSeized: (seized: CollectionSeized | null) => void;
@@ -43,7 +43,7 @@ export default function UserPageCollectedFilters({
   const [isMostRightFilterVisible, setIsMostRightFilterVisible] =
     useState<boolean>(false);
 
-  const checkVisibility = (elementRef: RefObject<HTMLDivElement>): boolean => {
+  const checkVisibility = (elementRef: RefObject<HTMLDivElement | null>): boolean => {
     if (window.matchMedia("(pointer: coarse)").matches) return true;
     const element = elementRef.current;
     const container = containerRef.current;

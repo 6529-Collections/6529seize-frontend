@@ -6,6 +6,8 @@ import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import CreateWaveOutcomesCICRank from "./CreateWaveOutcomesCICRank";
 import CreateWaveOutcomesCICApprove from "./CreateWaveOutcomesCICApprove";
 
+import type { JSX } from "react";
+
 export default function CreateWaveOutcomesCIC({
   waveType,
   dates,

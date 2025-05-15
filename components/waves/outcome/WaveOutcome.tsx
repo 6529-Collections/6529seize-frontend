@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, type JSX } from "react";
 import { ApiWaveOutcome } from "../../../generated/models/ApiWaveOutcome";
 import { WaveRepOutcome } from "./WaveRepOutcome";
 import { WaveNICOutcome } from "./WaveNICOutcome";

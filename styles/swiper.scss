@@ -1,9 +1,5 @@
-@import "./variables.scss";
-@import "swiper/css";
-@import "swiper/css/navigation";
-@import "swiper/css/pagination";
-@import "swiper/css/scrollbar";
-@import "swiper/css/autoplay";
+@use "variables.scss";
+@use "../node_modules/swiper/swiper.scss";
 
 .swiper {
   position: relative;
@@ -15,13 +11,13 @@
     text-align: center;
 
     .swiper-pagination-bullet-active {
-      background: $off-white;
+      background: variables.$off-white;
     }
   }
 
   .swiper-button-prev,
   .swiper-button-next {
-    color: $off-white;
+    color: variables.$off-white;
     position: absolute;
     top: auto;
     bottom: -10px;

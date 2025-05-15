@@ -14,7 +14,7 @@ export default function DropVoteProgressing({
   current,
   projected,
   subtle = false,
-}: DropVoteProgressingProps): React.ReactElement | null {
+}: DropVoteProgressingProps): React.ReactElement<any> | null {
   if (typeof current !== "number" || typeof projected !== "number") {
     return null;
   }

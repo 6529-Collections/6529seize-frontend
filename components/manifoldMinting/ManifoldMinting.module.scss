@@ -1,7 +1,8 @@
-@import "../../styles/variables.scss";
+@use "sass:color";
+@use "../../styles/variables.scss" as variables;
 
 .claimed {
-  color: $green;
+  color: variables.$project-green;
 }
 
 .spotsTable {

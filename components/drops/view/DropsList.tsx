@@ -14,7 +14,7 @@ type DropActionHandler = ({
 }) => void;
 
 interface DropsListProps {
-  readonly scrollContainerRef: React.RefObject<HTMLDivElement>;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   readonly drops: DropType[];
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
@@ -25,9 +25,9 @@ interface DropsListProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: (drop: ExtendedDrop) => void;
   readonly serialNo: number | null;
-  readonly targetDropRef: RefObject<HTMLDivElement> | null;
+  readonly targetDropRef: RefObject<HTMLDivElement | null> | null;
   readonly dropViewDropId: string | null;
-  readonly parentContainerRef?: React.RefObject<HTMLElement>;
+  readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
 }
 
 const MemoizedDrop = memo(Drop);

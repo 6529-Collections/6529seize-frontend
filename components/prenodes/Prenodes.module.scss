@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .prenode {
   padding: 20px;
@@ -8,7 +8,7 @@
 
   &:hover {
     transform: scale(1.01);
-    border: 1px solid $dark-grey;
+    border: 1px solid variables.$dark-grey;
     cursor: pointer;
   }
 
@@ -34,5 +34,5 @@
 }
 
 .unknown {
-  color: $lighter-grey-2;
+  color: variables.$lighter-grey-2;
 }

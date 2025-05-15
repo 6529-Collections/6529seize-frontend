@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .banner {
   padding: 5px 20px;
@@ -7,18 +7,18 @@
   width: 100%;
   z-index: 999;
   background-color: rgb(195, 225, 252);
-  color: $very-dark-grey;
+  color: variables.$very-dark-grey;
 }
 
 .accept {
   border: none;
   padding: 5px 10px;
-  background-color: $bg-color-2;
+  background-color: variables.$bg-color-2;
 
   transition: transform 0.3s ease;
 
   &:hover {
-    background-color: $green;
+    background-color: variables.$project-green;
     color: white;
     transform: scale(1.02);
   }
@@ -28,10 +28,10 @@
 .reject {
   border: none;
   background-color: transparent;
-  color: $very-dark-grey;
+  color: variables.$very-dark-grey;
   text-decoration: none;
 
   &:hover {
-    color: $lighter-grey-2;
+    color: variables.$lighter-grey-2;
   }
 }

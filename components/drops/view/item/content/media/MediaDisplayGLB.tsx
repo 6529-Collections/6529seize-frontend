@@ -12,12 +12,14 @@ export default function MediaDisplayGLB({
 }) {
   return (
     <div className="tw-w-full tw-h-full">
+      {/* @ts-ignore */}
       <model-viewer
         src={src}
         ar
         auto-rotate
         camera-controls
         className="tw-w-full tw-h-full"
+        // @ts-ignore
       ></model-viewer>
     </div>
   );

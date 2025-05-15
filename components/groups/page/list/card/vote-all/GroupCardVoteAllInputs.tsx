@@ -6,6 +6,8 @@ import RepCategorySearch, {
 import { CreditDirection } from "../GroupCard";
 import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
 
+import type { JSX } from "react";
+
 export default function GroupCardVoteAllInputs({
   matter,
   group,

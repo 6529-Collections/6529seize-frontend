@@ -8,6 +8,8 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 
+import type { JSX } from "react";
+
 interface FeedItemProps {
   readonly item: TypedFeedItem;
   readonly showWaveInfo: boolean;

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, type JSX } from "react";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import ProxyList from "./list/ProxyList";
 import ProxyCreate from "./create/ProxyCreate";

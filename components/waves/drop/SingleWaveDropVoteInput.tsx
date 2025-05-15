@@ -45,8 +45,8 @@ export const SingleWaveDropVoteInput: React.FC<
 
   const [isPaused, setIsPaused] = useState(false);
 
-  const pressTimer = useRef<NodeJS.Timeout>();
-  const pressStartTime = useRef<number>();
+  const pressTimer = useRef<NodeJS.Timeout>(undefined);
+  const pressStartTime = useRef<number>(undefined);
   const isPressed = useRef<boolean>(false);
 
   const updateValue = (increment: boolean) => {

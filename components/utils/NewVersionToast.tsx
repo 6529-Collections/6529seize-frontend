@@ -1,4 +1,4 @@
-import React from "react";
+import React, { type JSX } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRefresh } from "@fortawesome/free-solid-svg-icons";
 import { useIsStale } from "../../hooks/useVersion";

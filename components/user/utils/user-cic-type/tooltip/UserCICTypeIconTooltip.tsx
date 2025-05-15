@@ -67,7 +67,7 @@ export default function UserCICTypeIconTooltip({
     placeholderData: keepPreviousData,
   });
 
-  useEffect(() => console.log(ratings), [ratings]);
+
 
   return (
     <div className="tw-p-3">

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import React from "react";
 
 interface UnifiedWavesListLoaderProps {
-  readonly loadMoreRef: React.RefObject<HTMLDivElement>;
+  readonly loadMoreRef: React.RefObject<HTMLDivElement | null>;
   readonly isFetchingNextPage: boolean;
   readonly hasNextPage: boolean;
 }

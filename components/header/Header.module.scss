@@ -1,15 +1,16 @@
-@import "../../styles/variables.scss";
+@use 'sass:color';
+@use "../../styles/variables.scss";
 
 .mainContainer {
   font-size: larger;
   z-index: 600;
   position: relative;
-  min-height: $header-height;
-  background-color: $bg-color-1;
+  min-height: variables.$header-height;
+  background-color: variables.$bg-color-1;
 }
 
 .capacitorMainContainer {
-  height: calc($header-height-capacitor + env(safe-area-inset-top));
+  height: calc(variables.$header-height-capacitor + env(safe-area-inset-top));
   z-index: 600;
   background-color: #000000;
   position: fixed;
@@ -22,17 +23,17 @@
 }
 
 .capacitorPlaceholder {
-  height: calc($header-height-capacitor + env(safe-area-inset-top));
+  height: calc(variables.$header-height-capacitor + env(safe-area-inset-top));
   opacity: 0;
 }
 
 .headerRow {
-  min-height: $header-height;
+  min-height: variables.$header-height;
   z-index: 10;
 }
 
 .capacitorHeaderRow {
-  min-height: $header-height-capacitor;
+  min-height: variables.$header-height-capacitor;
   z-index: 10;
 }
 
@@ -61,7 +62,7 @@
 
 .headerRight {
   font-weight: bold;
-  font-size: $font-size;
+  font-size: variables.$font-size;
 }
 
 .burgerMenuBtn {
@@ -76,7 +77,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: $bg-color-1;
+  background-color: variables.$bg-color-1;
   z-index: 1001;
   padding-top: 20px;
   padding-bottom: 20px;
@@ -179,15 +180,15 @@
 .headerPlaceholder {
   z-index: 10;
   position: relative;
-  min-height: $header-height;
-  background-color: $bg-color-1;
+  min-height: variables.$header-height;
+  background-color: variables.$bg-color-1;
 }
 
 .headerPlaceholderCapacitor {
   z-index: 10;
   position: relative;
-  min-height: $header-height-capacitor;
-  background-color: $bg-color-1;
+  min-height: variables.$header-height-capacitor;
+  background-color: variables.$bg-color-1;
 }
 
 .userDropdown {
@@ -220,7 +221,7 @@
   }
 
   &:hover {
-    background-color: $off-white;
+    background-color: variables.$off-white;
   }
 
   &::after {
@@ -242,7 +243,7 @@
   }
 
   &:hover {
-    background-color: $off-white;
+    background-color: variables.$off-white;
   }
 }
 
@@ -264,7 +265,7 @@
   background-color: #ffff00;
 
   &:hover {
-    background-color: darken(#ffff00, 5%);
+    background-color: color.scale(#ffff00, $lightness: -5%);
   }
 }
 
@@ -297,7 +298,7 @@
 }
 
 .viewModeIcon {
-  height: $font-size;
+  height: variables.$font-size;
   padding-right: 8px;
 }
 
@@ -310,7 +311,7 @@
 }
 
 .dropdownItemHeader {
-  color: $font-color-h !important;
+  color: variables.$font-color-h !important;
 }
 
 .new {
@@ -328,7 +329,7 @@
   z-index: 600;
   position: relative;
   min-height: 70px;
-  background-color: $bg-color-1;
+  background-color: variables.$bg-color-1;
 }
 
 .headerRowSmall {
@@ -353,7 +354,7 @@
 
 .nestedMenu {
   position: absolute;
-  border-top: 3px solid $font-color;
+  border-top: 3px solid variables.$font-color;
   left: 100%;
   top: 0;
   display: none;
@@ -368,5 +369,5 @@
 }
 
 .burgerMenuSubheader {
-  color: $font-color-h !important;
+  color: variables.$font-color-h !important;
 }

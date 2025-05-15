@@ -6,6 +6,8 @@ import { ApiWaveType } from "../../../../../generated/models/ApiWaveType";
 import CreateWaveOutcomesRepRank from "./CreateWaveOutcomesRepRank";
 import CreateWaveOutcomesRepApprove from "./CreateWaveOutcomesRepApprove";
 
+import type { JSX } from "react";
+
 export default function CreateWaveOutcomesRep({
   waveType,
   dates,

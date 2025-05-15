@@ -3,6 +3,8 @@ import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types"
 import CreateWaveOutcomesRowManualApprove from "./CreateWaveOutcomesRowManualApprove";
 import CreateWaveOutcomesRowManualRank from "./CreateWaveOutcomesRowManualRank";
 
+import type { JSX } from "react";
+
 export default function CreateWaveOutcomesRowManual({
   waveType,
   outcome,

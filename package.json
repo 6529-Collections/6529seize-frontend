@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev --turbopack -p 3001",
     "compile": "tsc",
     "generate": "rm -rf tmp_gen_outp && node ./node_modules/@openapitools/openapi-generator-cli/main generate -i openapi.yaml -g typescript -o tmp_gen_outp --additional-properties=modelPropertyNaming=snake_case && rm -rf generated && mkdir generated && mv tmp_gen_outp/models generated/models && rm -rf tmp_gen_outp && mkdir generated/http && echo 'export type HttpFile = any;' > generated/http/http.ts && rm generated/models/all.ts",
-    "prebuild": "npm run generate",
     "build": "NODE_OPTIONS='--max-old-space-size=7680' next build",
+    "prebuild": "npm run generate",
     "postbuild": "next-sitemap",
     "start": "next start -p 3001",
     "lint": "next lint",
@@ -20,13 +20,14 @@
     "type-check": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@capacitor/app": "^6.0.1",
-    "@capacitor/barcode-scanner": "^1.0.4",
-    "@capacitor/device": "^6.0.1",
-    "@capacitor/filesystem": "^6.0.2",
-    "@capacitor/keyboard": "^6.0.2",
-    "@capacitor/push-notifications": "^6.0.2",
-    "@capacitor/share": "^6.0.2",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/barcode-scanner": "^2.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/device": "^7.0.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/keyboard": "^7.0.0",
+    "@capacitor/push-notifications": "^7.0.0",
+    "@capacitor/share": "^7.0.0",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
@@ -48,7 +49,8 @@
     "@types/lodash": "^4.17.10",
     "@web3modal/wagmi": "^5.1.11",
     "bootstrap": "^5.3.3",
-    "capacitor-secure-storage-plugin": "^0.10.0",
+    "capacitor-secure-storage-plugin": "^0.11.0",
+    "chart.js": "^4.4.9",
     "csv-parser": "^3.0.0",
     "emoji-mart": "^5.6.0",
     "ethereum-cryptography": "^2.2.0",
@@ -64,15 +66,15 @@
     "lexical": "^0.14.2",
     "lodash": "^4.17.21",
     "luxon": "^3.6.1",
-    "next": "^14.2.6",
+    "next": "15.3.2",
     "next-redux-wrapper": "^8.1.0",
     "next-sitemap": "^4.2.3",
     "p-retry": "^6.2.1",
     "qrcode": "^1.5.4",
-    "react": "^18.3.1",
+    "react": "19.1.0",
     "react-bootstrap": "^2.10.3",
     "react-chartjs-2": "^5.2.0",
-    "react-dom": "^18.3.1",
+    "react-dom": "19.1.0",
     "react-markdown": "^9.0.1",
     "react-pdf": "^9.1.0",
     "react-redux": "^9.1.2",
@@ -95,7 +97,8 @@
     "wagmi": "^2.10.3"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^14.2.4",
+    "@capacitor/cli": "^7.0.0",
+    "@next/bundle-analyzer": "15.3.2",
     "@playwright/test": "^1.52.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -107,15 +110,15 @@
     "@types/luxon": "^3.6.0",
     "@types/node": "^20.17.30",
     "@types/qrcode": "^1.5.5",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "19.1.4",
+    "@types/react-dom": "19.1.5",
     "@types/react-scroll": "^1.8.10",
     "@types/react-toggle": "^4.0.5",
     "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.4.19",
     "dotenv": "^16.0.3",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.4",
+    "eslint-config-next": "15.3.2",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
@@ -135,12 +138,23 @@
     "react-native": {
       "react": "18.3.1"
     },
+    "@emoji-mart/react": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    },
     "viem": {
       "ws": "8.17.1"
+    },
+    "react-toggle": {
+      "react": "$react",
+      "react-dom": "$react-dom"
     },
     "axios": "1.8.2",
     "@nestjs/axios": "4.0.0",
     "@nestjs/core": "11.0.20",
-    "@nestjs/common": "11.0.20"
+    "@nestjs/common": "11.0.20",
+    "@types/react": "19.1.4",
+    "@types/react-dom": "19.1.5",
+    "@babel/parser": "7.21.9"
   }
 }

@@ -1,4 +1,4 @@
-@import "../../styles/variables.scss";
+@use "../../styles/variables.scss";
 
 .scrollContainer {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -44,7 +44,7 @@
   }
 
   tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 }
 
@@ -79,22 +79,22 @@
 
 .collectionFocus {
   &:hover {
-    color: $font-color;
+    color: variables.$font-color;
     cursor: pointer;
   }
 }
 
 .collectionFocusActive {
-  color: $font-color;
+  color: variables.$font-color;
   transform: scale(1.02);
 }
 
 .infoIcon {
-  color: $font-color-h;
+  color: variables.$font-color-h;
   height: 18px;
   cursor: pointer;
 
   &:hover {
-    color: $font-color;
+    color: variables.$font-color;
   }
 }

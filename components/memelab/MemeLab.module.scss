@@ -1,17 +1,18 @@
-@import "../../styles/variables.scss";
+@use "sass:color";
+@use "../../styles/variables.scss" as variables;
 
 .main {
   min-height: 100vh;
 }
 
 .mainContainer {
-  background-color: $bg-color-2;
-  min-height: calc(100vh - $header-height);
+  background-color: variables.$bg-color-2;
+  min-height: calc(100vh - variables.$header-height);
   padding-bottom: 20px;
 }
 
 .season {
-  color: $font-color;
+  color: variables.$font-color;
   cursor: pointer;
 }
 
@@ -45,18 +46,18 @@
 }
 
 .sort {
-  color: $font-color;
+  color: variables.$font-color;
   cursor: pointer;
   margin-right: 15px;
 }
 
 .sortDirection {
-  width: $font-size;
+  width: variables.$font-size;
   cursor: pointer;
 }
 
 .disabled {
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
   text-decoration: none;
   &:hover {
     color: white;
@@ -73,7 +74,7 @@
 }
 
 .memePageTab {
-  color: darken($color: $font-color, $amount: $darken-percentage);
+  color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
   margin-right: 15px;
   cursor: pointer;
   &:hover {
@@ -112,7 +113,7 @@
 .nftNextdisabled,
 .nftPreviousdisabled {
   pointer-events: none !important;
-  color: darken($color: $font-color, $amount: $darken-percentage);
+  color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
 }
 
 .transactionsTable {
@@ -128,7 +129,7 @@
   }
 
   tr:nth-child(odd) {
-    background-color: $almost-very-dark-grey;
+    background-color: variables.$almost-very-dark-grey;
   }
 }
 
@@ -160,7 +161,7 @@
 }
 
 .rankSubheading {
-  color: $font-color !important;
+  color: variables.$font-color !important;
 }
 
 .hodlersTable {
@@ -219,7 +220,7 @@
   white-space: nowrap;
   cursor: pointer;
   margin-right: 20px;
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
 
   &:hover {
     color: white;
@@ -244,7 +245,7 @@
     line-height: 30px;
   }
   button {
-    color: $lightest-grey !important;
+    color: variables.$lightest-grey !important;
     font-size: inherit;
     padding: 0;
     background-color: transparent !important;

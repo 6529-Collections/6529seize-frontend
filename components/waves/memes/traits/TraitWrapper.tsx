@@ -51,8 +51,8 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
               id: fieldId,
               "aria-invalid": hasError,
               "aria-describedby": errorId,
-              ...child.props,
-            });
+              ...(child.props || {}),
+            } as any);
           }
           return child;
         })}

@@ -7,6 +7,8 @@ import CreateWaveOutcomesRowCIC from "./cic/CreateWaveOutcomesRowCIC";
 import CreateWaveOutcomesRowManual from "./manual/CreateWaveOutcomesRowManual";
 import CreateWaveOutcomesRowRep from "./rep/CreateWaveOutcomesRowRep";
 
+import type { JSX } from "react";
+
 export default function CreateWaveOutcomesRow({
   waveType,
   outcome,

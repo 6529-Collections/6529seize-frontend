@@ -3,6 +3,8 @@ import { CreateWaveOutcomeConfig } from "../../../../../../../types/waves.types"
 import CreateWaveOutcomesRowCICApprove from "./CreateWaveOutcomesRowCICApprove";
 import CreateWaveOutcomesRowCICRank from "./CreateWaveOutcomesRowCICRank";
 
+import type { JSX } from "react";
+
 export default function CreateWaveOutcomesRowCIC({
   waveType,
   outcome,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import {
   CreateProxyAction,
   PROFILE_PROXY_ACTION_LABELS,

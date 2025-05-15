@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, type JSX } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveType } from "../../../generated/models/ObjectSerializer";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";

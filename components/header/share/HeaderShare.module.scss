@@ -1,11 +1,11 @@
-@import "../../../styles/variables.scss";
+@use "../../../styles/variables.scss";
 
 .disabledMenuBtn {
   pointer-events: none;
 }
 
 .modalBody {
-  background-color: $very-dark-grey;
+  background-color: variables.$very-dark-grey;
 }
 
 .url {
@@ -13,17 +13,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
   max-width: calc(100% - 20px);
 }
 
 .urlCopy {
   height: 16px;
   cursor: pointer;
-  color: $lightest-grey;
+  color: variables.$lightest-grey;
 
   &:hover {
-    color: $off-white;
+    color: variables.$off-white;
   }
 
   &.copied {
