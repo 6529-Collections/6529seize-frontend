@@ -283,10 +283,11 @@ export default function GradientPage() {
                   <Col className="d-flex align-items-center justify-content-between">
                     <NftNavigation
                       nftId={nft.id}
+                      path="/6529-gradient"
                       startIndex={0}
                       endIndex={100}
+                      fullscreenElementId={fullscreenElementId}
                     />
-                    {fullScreenSupported() && printFullScreen()}
                   </Col>
                 </Row>
                 <Row className="pt-2">

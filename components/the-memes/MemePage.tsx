@@ -281,9 +281,10 @@ export default function MemePage() {
             {nftMeta && nft && (
               <>
                 <Row className="pt-3 pb-3">
-                  <Col className="d-flex gap-2 align-items-center">
+                  <Col className="d-flex align-items-center justify-content-between">
                     <NftNavigation
                       nftId={nft.id}
+                      path="/the-memes"
                       startIndex={1}
                       endIndex={nftMeta.collection_size}
                     />

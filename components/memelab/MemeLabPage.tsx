@@ -1215,6 +1215,7 @@ export default function LabPage(props: Readonly<Props>) {
                   <Col>
                     <NftNavigation
                       nftId={nft.id}
+                      path="/meme-lab"
                       startIndex={1}
                       endIndex={nftMeta.collection_size}
                     />
