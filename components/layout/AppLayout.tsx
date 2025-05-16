@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
+import DirectMessagesView from "../dms/DirectMessagesView";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "../../contexts/HeaderContext";
@@ -41,9 +42,7 @@ export default function AppLayout({ children }: Props) {
         <TouchDeviceHeader />
       </div>
       {activeView === "messages" ? (
-        <div className="tw-text-white tw-text-center tw-p-4">
-          Messages view placeholder
-        </div>
+        <DirectMessagesView />
       ) : activeView === "waves" ? (
         <BrainMobileWaves />
       ) : (
