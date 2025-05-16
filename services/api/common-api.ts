@@ -1,12 +1,10 @@
-import Cookies from "js-cookie";
-import { API_AUTH_COOKIE } from "../../constants";
-import { getAuthJwt } from "../auth/auth.utils";
+import { getAuthJwt, getStagingAuth } from "../auth/auth.utils";
 
 const getHeaders = (
   headers?: Record<string, string>,
   contentType: boolean = true
 ) => {
-  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  const apiAuth = getStagingAuth();
   const walletAuth = getAuthJwt();
   return {
     ...(contentType ? { "Content-Type": "application/json" } : {}),

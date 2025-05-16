@@ -83,6 +83,7 @@ const nextConfig = {
     DEV_MODE_WALLET_ADDRESS: process.env.DEV_MODE_WALLET_ADDRESS,
     DEV_MODE_AUTH_JWT: process.env.DEV_MODE_AUTH_JWT,
     USE_DEV_AUTH: process.env.USE_DEV_AUTH,
+    STAGING_API_KEY: process.env.STAGING_API_KEY,
   },
   async generateBuildId() {
     return VERSION;
