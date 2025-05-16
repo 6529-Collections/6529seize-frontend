@@ -1,5 +1,4 @@
 import { ReactElement } from "react";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
@@ -8,19 +7,17 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageWavesWrapper from "../../components/user/waves/UserPageWavesWrapper";
+import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
-export interface UserPageWavesProps {
-  readonly profile: ApiIdentity;
-}
-
-const Page: NextPageWithLayout<{ pageProps: UserPageWavesProps }> = ({
+const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
   return <UserPageWavesWrapper profile={pageProps.profile} />;
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageWavesProps }>
+  page: ReactElement<{ pageProps: UserPageProps }>
 ) {
   return (
     <UserPageLayout profile={page.props.pageProps.profile}>
@@ -36,7 +33,7 @@ export async function getServerSideProps(
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: UserPageWavesProps;
+  props: UserPageProps;
 }> {
   try {
     const headers = getCommonHeaders(req);
@@ -55,6 +52,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        metadata: getMetadataForUserPage(profile, "Waves"),
       },
     };
   } catch (e: any) {

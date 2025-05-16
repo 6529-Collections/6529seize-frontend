@@ -78,4 +78,4 @@ export interface BreadcrumbQueueItem {
   asPath: string;
   query: Record<string, string | string[]>;
   timestamp: number;
-} 
+}

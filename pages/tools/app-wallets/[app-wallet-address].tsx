@@ -1,5 +1,4 @@
 import styles from "../../../styles/Home.module.scss";
-import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../../components/auth/Auth";
@@ -13,7 +12,7 @@ const AppWalletComponent = dynamic(
 );
 
 export default function AppWalletPage(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
 
   const pageProps = props.pageProps;
   const address = pageProps.address;
@@ -25,24 +24,9 @@ export default function AppWalletPage(props: any) {
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={title} />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/the-memes/${pageProps.id}`}
-        />
-        <meta property="og:title" content={pageProps.name} />
-        <meta property="og:image" content={pageProps.image} />
-        <meta property="og:description" content="6529.io" />
-      </Head>
-
-      <main className={styles.main}>
-        <AppWalletComponent address={address} />
-      </main>
-    </>
+    <main className={styles.main}>
+      <AppWalletComponent address={address} />
+    </main>
   );
 }
 
@@ -52,6 +36,9 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
   return {
     props: {
       address,
+      metadata: {
+        title: `${formatAddress(address)} | App Wallets`,
+      },
     },
   };
 }

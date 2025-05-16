@@ -7,7 +7,6 @@ import {
   getServerSideCollection,
 } from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader";
 
-
 const NextGenCollectionTokenListComponent = dynamic(
   () =>
     import(
@@ -18,12 +17,10 @@ const NextGenCollectionTokenListComponent = dynamic(
 
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = `Art | ${collection.name}`;
 
   return (
     <>
-      <NextGenCollectionHead collection={collection} name={pagenameFull} />
-
+      <NextGenCollectionHead collection={collection} />
       <main className={styles.main}>
         <NextGenCollectionTokenListComponent collection={collection} />
       </main>
@@ -32,5 +29,5 @@ export default function NextGenCollectionTokensPage(props: any) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  return await getServerSideCollection(req);
+  return await getServerSideCollection(req, "Art");
 }

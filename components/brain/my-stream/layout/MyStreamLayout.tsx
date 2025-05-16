@@ -11,7 +11,7 @@ import UserSetUpProfileCta from "../../../user/utils/set-up-profile/UserSetUpPro
 
 // Main layout content that uses the Layout context
 function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
-  const { title, showWaves, connectedProfile, fetchingProfile } =
+  const { showWaves, connectedProfile, fetchingProfile } =
     useContext(AuthContext);
   const { spaces } = useLayout();
   const { isAuthenticated } = useSeizeConnectContext();
@@ -64,8 +64,7 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   ) : (
     <div
       id="my-stream-connect"
-      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6"
-    >
+      className="tw-flex-1 tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-min-h-[80dvh] tw-p-6">
       <Image
         priority
         loading="eager"
@@ -84,19 +83,6 @@ function MyStreamLayoutContent({ children }: { readonly children: ReactNode }) {
   return (
     <>
       <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="My Stream | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/my-stream`}
-        />
-        <meta property="og:title" content="My Stream" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-        <meta property="og:description" content="6529.io" />
         <style>{`body { overflow: hidden !important; }`}</style>
       </Head>
       <div className="tailwind-scope tw-flex tw-flex-col tw-bg-black tw-overflow-hidden">

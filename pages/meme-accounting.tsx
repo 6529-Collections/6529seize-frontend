@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useContext, useEffect } from "react";
@@ -11,36 +10,22 @@ const Royalties = dynamic(
   }
 );
 
-
 export default function MemeAccountingPage() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Meme Accounting | 6529.io",
+      title: "Meme Accounting | Tools",
     });
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Meme Accounting | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/meme-accounting`}
-        />
-        <meta property="og:title" content="Meme Accounting" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        <Royalties />
-      </main>
-    </>
+    <main className={styles.main}>
+      <Royalties />
+    </main>
   );
 }
+
+MemeAccountingPage.metadata = {
+  title: "Meme Accounting",
+  description: "Tools",
+};

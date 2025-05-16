@@ -1,6 +1,5 @@
 import { ReactElement, useContext } from "react";
 import { NextPageWithLayout } from "../../_app";
-import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import UserPageLayout from "../../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -9,12 +8,10 @@ import {
 } from "../../../helpers/server.helpers";
 import { ReactQueryWrapperContext } from "../../../components/react-query-wrapper/ReactQueryWrapper";
 import UserPageProxy from "../../../components/user/proxy/UserPageProxy";
+import { UserPageProps } from "../../../helpers/Types";
+import { getMetadataForUserPage } from "../../../helpers/Helpers";
 
-export interface UserPageProxyProps {
-  readonly profile: ApiIdentity;
-}
-
-const Page: NextPageWithLayout<{ pageProps: UserPageProxyProps }> = ({
+const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
   const { setProfile } = useContext(ReactQueryWrapperContext);
@@ -23,7 +20,7 @@ const Page: NextPageWithLayout<{ pageProps: UserPageProxyProps }> = ({
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageProxyProps }>
+  page: ReactElement<{ pageProps: UserPageProps }>
 ) {
   return (
     <UserPageLayout profile={page.props.pageProps.profile}>
@@ -39,7 +36,7 @@ export async function getServerSideProps(
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: UserPageProxyProps;
+  props: UserPageProps;
 }> {
   try {
     const headers = getCommonHeaders(req);
@@ -58,6 +55,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        metadata: getMetadataForUserPage(profile, "Proxy"),
       },
     };
   } catch (e: any) {

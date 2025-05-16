@@ -16,7 +16,7 @@ import { ProfileRatersParams } from "../user/utils/raters-table/wrapper/ProfileR
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiProfileProxy } from "../../generated/models/ApiProfileProxy";
 import { wait } from "../../helpers/Helpers";
-import { IFeedItemDropCreated, TypedFeedItem } from "../../types/feed.types";
+import { TypedFeedItem } from "../../types/feed.types";
 import { ApiFeedItemType } from "../../generated/models/ApiFeedItemType";
 import { ApiWaveDropsFeed } from "../../generated/models/ApiWaveDropsFeed";
 import { addDropToDrops } from "./utils/addDropsToDrops";
@@ -161,11 +161,6 @@ type ReactQueryWrapperContextType = {
   onIdentityFollowChange: () => void;
   initProfileRepPage: (params: InitProfileRepPageParams) => void;
   initProfileIdentityPage: (params: InitProfileIdentityPageParams) => void;
-  initLandingPage: ({
-    activityLogs,
-  }: {
-    activityLogs: InitProfileActivityLogsParams;
-  }) => void;
   initCommunityActivityPage: ({
     activityLogs,
   }: {
@@ -207,7 +202,6 @@ export const ReactQueryWrapperContext =
     onIdentityFollowChange: () => {},
     initProfileRepPage: () => {},
     initProfileIdentityPage: () => {},
-    initLandingPage: () => {},
     initCommunityActivityPage: () => {},
     waitAndInvalidateDrops: () => {},
     addOptimisticDrop: () => {},
@@ -793,18 +787,6 @@ export default function ReactQueryWrapper({
     setProfileRaters(cicReceivedFromUsers);
   };
 
-  const initLandingPage = ({
-    activityLogs,
-  }: {
-    activityLogs: InitProfileActivityLogsParams;
-  }) => {
-    initProfileActivityLogs({
-      params: activityLogs.params,
-      data: activityLogs.data,
-      disableActiveGroup: true,
-    });
-  };
-
   const initCommunityActivityPage = ({
     activityLogs,
   }: {
@@ -815,34 +797,6 @@ export default function ReactQueryWrapper({
       data: activityLogs.data,
       disableActiveGroup: false,
     });
-  };
-
-  const addDropToFeedItems = ({ drop }: { readonly drop: ApiDrop }): void => {
-    queryClient.setQueryData(
-      [QueryKey.FEED_ITEMS],
-      (
-        oldData:
-          | {
-              pages: TypedFeedItem[][];
-            }
-          | undefined
-      ) => {
-        if (!oldData?.pages.length) {
-          return oldData;
-        }
-        const pages = JSON.parse(JSON.stringify(oldData.pages));
-        const feedItem: IFeedItemDropCreated = {
-          serial_no: Math.floor(Math.random() * (1000000 - 100000) + 100000),
-          item: drop,
-          type: ApiFeedItemType.DropCreated,
-        };
-        pages.at(0)?.unshift(feedItem);
-        return {
-          ...oldData,
-          pages,
-        };
-      }
-    );
   };
 
   const increaseFeedItemsDropRedropCount = ({
@@ -1276,7 +1230,6 @@ export default function ReactQueryWrapper({
       onProfileStatementRemove,
       initProfileRepPage,
       initProfileIdentityPage,
-      initLandingPage,
       initCommunityActivityPage,
       onGroupRemoved,
       onGroupChanged,
@@ -1306,7 +1259,6 @@ export default function ReactQueryWrapper({
       onProfileStatementRemove,
       initProfileRepPage,
       initProfileIdentityPage,
-      initLandingPage,
       initCommunityActivityPage,
       onGroupRemoved,
       onGroupChanged,

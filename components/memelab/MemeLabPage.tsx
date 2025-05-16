@@ -55,20 +55,12 @@ import {
   faFire,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-
-interface MemeTab {
-  focus: MEME_FOCUS;
-  title: string;
-}
-
-enum MEME_FOCUS {
-  LIVE = "live",
-  YOUR_CARDS = "your-cards",
-  THE_ART = "the-art",
-  HODLERS = "collectors",
-  ACTIVITY = "activity",
-  TIMELINE = "timeline",
-}
+import {
+  getMemeTabTitle,
+  MEME_FOCUS,
+  MEME_TABS,
+} from "../the-memes/MemeShared";
+import { useAuth } from "../auth/Auth";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
@@ -79,6 +71,7 @@ interface Props {
 export default function LabPage(props: Readonly<Props>) {
   const router = useRouter();
   const capacitor = useCapacitor();
+  const { setTitle } = useAuth();
 
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
 
@@ -110,39 +103,11 @@ export default function LabPage(props: Readonly<Props>) {
     TypeFilter.ALL
   );
 
-  const liveTab = {
-    focus: MEME_FOCUS.LIVE,
-    title: "Live",
-  };
-  const cardsTab = {
-    focus: MEME_FOCUS.YOUR_CARDS,
-    title: "Your Cards",
-  };
-  const artTab = {
-    focus: MEME_FOCUS.THE_ART,
-    title: "The Art",
-  };
-  const hodlersTab = {
-    focus: MEME_FOCUS.HODLERS,
-    title: "Collectors",
-  };
-  const activityTab = {
-    focus: MEME_FOCUS.ACTIVITY,
-    title: "Activity",
-  };
-  const timelineTab = {
-    focus: MEME_FOCUS.TIMELINE,
-    title: "Timeline",
-  };
-
-  const MEME_TABS: MemeTab[] = [
-    liveTab,
-    cardsTab,
-    artTab,
-    hodlersTab,
-    activityTab,
-    timelineTab,
-  ];
+  useEffect(() => {
+    setTitle({
+      title: getMemeTabTitle(`Meme Lab`, nftId, nft, activeTab),
+    });
+  }, [nft, nftId, activeTab]);
 
   useEffect(() => {
     if (router.isReady) {
@@ -295,7 +260,7 @@ export default function LabPage(props: Readonly<Props>) {
       return printTheArt();
     }
 
-    if (activeTab === MEME_FOCUS.HODLERS) {
+    if (activeTab === MEME_FOCUS.COLLECTORS) {
       return printHodlers();
     }
 

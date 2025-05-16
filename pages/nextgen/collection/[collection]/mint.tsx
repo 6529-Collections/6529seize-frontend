@@ -8,7 +8,6 @@ import {
   getServerSideCollection,
 } from "../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader";
 
-
 const NextGenCollectionMintComponent = dynamic(
   () =>
     import(
@@ -22,11 +21,10 @@ const NextGenCollectionMintComponent = dynamic(
 export default function NextGenCollectionMintPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   useShallowRedirect(collection.name, "/mint");
-  const pagenameFull = `Mint | ${collection.name}`;
 
   return (
     <>
-      <NextGenCollectionHead collection={collection} name={pagenameFull} />
+      <NextGenCollectionHead collection={collection} />
 
       <main className={styles.main}>
         <NextGenCollectionMintComponent collection={collection} />
@@ -36,5 +34,5 @@ export default function NextGenCollectionMintPage(props: any) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  return await getServerSideCollection(req);
+  return await getServerSideCollection(req, "Mint");
 }

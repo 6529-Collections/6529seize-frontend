@@ -1,5 +1,4 @@
 import { FullPageRequest } from "../../helpers/Types";
-import Head from "next/head";
 import SidebarLayout from "../../components/utils/sidebar/SidebarLayout";
 import CommunityMembers from "../../components/community/CommunityMembers";
 import { useSelector } from "react-redux";
@@ -18,10 +17,10 @@ export interface CommunityMembersQuery
 }
 
 export default function CommunityPage() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Network | 6529.io",
+      title: "Network",
     });
   }, []);
 
@@ -37,26 +36,14 @@ export default function CommunityPage() {
   });
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Network | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/network`}
-        />
-        <meta property="og:title" content="Network" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-
-      <SidebarLayout>
-        <CommunityMembers />
-      </SidebarLayout>
-    </>
+    <SidebarLayout>
+      <CommunityMembers />
+    </SidebarLayout>
   );
 }
+
+CommunityPage.metadata = {
+  title: "Network",
+  description: "Network",
+  twitterCard: "summary_large_image",
+};

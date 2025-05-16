@@ -13,9 +13,11 @@ import { prefetchWavesOverview } from "../../helpers/stream.helpers";
 import { GetServerSidePropsContext } from "next";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "../../helpers/time";
+import { PageSSRMetadata } from "../../helpers/Types";
 
 interface Props {
   dehydratedState: DehydratedState;
+  metadata: Partial<PageSSRMetadata>;
 }
 
 const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
@@ -42,5 +44,21 @@ export async function getServerSideProps(
     const waveId = (context.query.wave as string | undefined) ?? null;
     await prefetchWavesOverview({ queryClient, headers, waveId });
   }
-  return { props: { dehydratedState: dehydrate(queryClient) } };
+
+  let title = "My Stream";
+  if (context.query.wave) {
+    const waveId = context.query.wave;
+    const shortUuid = `${waveId.slice(0, 8)}...${waveId.slice(-4)}`;
+    title = `Wave ${shortUuid} | My Stream`;
+  }
+
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+      metadata: {
+        title,
+        description: "Brain",
+      },
+    },
+  };
 }

@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
@@ -13,10 +12,10 @@ const DelegationMappingTool = dynamic(
 );
 
 export default function DelegationMappingToolPage() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Delegation Mapping Tool | 6529.io",
+      title: "Delegation Mapping Tool | Tools",
     });
   }, []);
 
@@ -39,94 +38,81 @@ export default function DelegationMappingToolPage() {
   }, []);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Delegation Mapping Tool | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/delegation-mapping-tool`}
-        />
-        <meta property="og:title" content="Delegation Mapping Tool" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-
-      <main className={styles.main}>
-        <Container fluid>
-          <Row>
-            <Col>
-              <Container>
-                <Row className="pt-4">
-                  <Col
-                    xs={{ span: 12 }}
-                    sm={{ span: 12 }}
-                    md={{ span: 10, offset: 1 }}
-                    lg={{ span: 8, offset: 2 }}>
-                    <h1 className="text-center">
-                      <span className="font-lightest">Delegation</span> Mapping
-                      Tool
-                    </h1>
-                  </Col>
-                </Row>
-                <Row className="pt-2">
-                  <Col
-                    xs={{ span: 12 }}
-                    sm={{ span: 12 }}
-                    md={{ span: 10, offset: 1 }}
-                    lg={{ span: 8, offset: 2 }}>
-                    <h5>Overview</h5>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col
-                    xs={{ span: 12 }}
-                    sm={{ span: 12 }}
-                    md={{ span: 10, offset: 1 }}
-                    lg={{ span: 8, offset: 2 }}>
-                    The Delegation Mapping tool allows anyone to easily upload a
-                    CSV file with addresses to receive delegated addresses in
-                    return (from the NFTDelegation.com contract).{" "}
-                    <a href="#how-to-use">How to use this tool?</a>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col
-                    xs={{ span: 12 }}
-                    sm={{ span: 10, offset: 1 }}
-                    md={{ span: 8, offset: 2 }}
-                    lg={{ span: 6, offset: 3 }}>
-                    <Container className="pt-5 pb-5">
-                      <Row>
-                        <Col>
-                          <DelegationMappingTool />
-                        </Col>
-                      </Row>
-                    </Container>
-                  </Col>
-                </Row>
-              </Container>
-            </Col>
-          </Row>
-        </Container>
-        <Container id="how-to-use" className="pt-1 pb-5">
-          <Row>
-            <Col
-              className={styles.htmlContainer}
-              xs={{ span: 12 }}
-              sm={{ span: 10, offset: 1 }}
-              md={{ span: 8, offset: 2 }}
-              lg={{ span: 6, offset: 3 }}
-              dangerouslySetInnerHTML={{
-                __html: html,
-              }}></Col>
-          </Row>
-        </Container>
-      </main>
-    </>
+    <main className={styles.main}>
+      <Container fluid>
+        <Row>
+          <Col>
+            <Container>
+              <Row className="pt-4">
+                <Col
+                  xs={{ span: 12 }}
+                  sm={{ span: 12 }}
+                  md={{ span: 10, offset: 1 }}
+                  lg={{ span: 8, offset: 2 }}>
+                  <h1 className="text-center">
+                    <span className="font-lightest">Delegation</span> Mapping
+                    Tool
+                  </h1>
+                </Col>
+              </Row>
+              <Row className="pt-2">
+                <Col
+                  xs={{ span: 12 }}
+                  sm={{ span: 12 }}
+                  md={{ span: 10, offset: 1 }}
+                  lg={{ span: 8, offset: 2 }}>
+                  <h5>Overview</h5>
+                </Col>
+              </Row>
+              <Row>
+                <Col
+                  xs={{ span: 12 }}
+                  sm={{ span: 12 }}
+                  md={{ span: 10, offset: 1 }}
+                  lg={{ span: 8, offset: 2 }}>
+                  The Delegation Mapping tool allows anyone to easily upload a
+                  CSV file with addresses to receive delegated addresses in
+                  return (from the NFTDelegation.com contract).{" "}
+                  <a href="#how-to-use">How to use this tool?</a>
+                </Col>
+              </Row>
+              <Row>
+                <Col
+                  xs={{ span: 12 }}
+                  sm={{ span: 10, offset: 1 }}
+                  md={{ span: 8, offset: 2 }}
+                  lg={{ span: 6, offset: 3 }}>
+                  <Container className="pt-5 pb-5">
+                    <Row>
+                      <Col>
+                        <DelegationMappingTool />
+                      </Col>
+                    </Row>
+                  </Container>
+                </Col>
+              </Row>
+            </Container>
+          </Col>
+        </Row>
+      </Container>
+      <Container id="how-to-use" className="pt-1 pb-5">
+        <Row>
+          <Col
+            className={styles.htmlContainer}
+            xs={{ span: 12 }}
+            sm={{ span: 10, offset: 1 }}
+            md={{ span: 8, offset: 2 }}
+            lg={{ span: 6, offset: 3 }}
+            dangerouslySetInnerHTML={{
+              __html: html,
+            }}></Col>
+        </Row>
+      </Container>
+    </main>
   );
 }
+
+DelegationMappingToolPage.metadata = {
+  title: "Delegation Mapping Tool",
+  description: "Tools",
+};

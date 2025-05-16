@@ -19,11 +19,10 @@ const NextGenCollectionMintingPlanComponent = dynamic(
 export default function NextGenCollectionTokensPage(props: any) {
   const collection: NextGenCollection = props.pageProps.collection;
   useShallowRedirect(collection.name, "/distribution-plan");
-  const pagenameFull = `Distribution Plan | ${collection.name}`;
 
   return (
     <>
-      <NextGenCollectionHead collection={collection} name={pagenameFull} />
+      <NextGenCollectionHead collection={collection} />
 
       <main className={styles.main}>
         <NextGenNavigationHeader />
@@ -34,5 +33,5 @@ export default function NextGenCollectionTokensPage(props: any) {
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  return await getServerSideCollection(req);
+  return await getServerSideCollection(req, "Distribution Plan");
 }

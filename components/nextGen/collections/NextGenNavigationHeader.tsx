@@ -118,7 +118,7 @@ export default function NextGenNavigationHeader(
           </span>
         </div>
       </Container>
-      
+
       <Container className="d-xl-none pb-3 px-5 pl-md-4 pr-md-0">
         <Row className="justify-content-xs-start justify-content-sm-center justify-content-md-start">
           <Col xs={12} sm="auto" className="px-0">
@@ -126,7 +126,7 @@ export default function NextGenNavigationHeader(
           </Col>
         </Row>
       </Container>
-      
+
       <hr className={styles.navigationHeaderHr} />
     </>
   );

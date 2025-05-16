@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../styles/Home.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
@@ -13,18 +12,9 @@ import {
   printMintDate,
 } from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
-import { ProfileActivityLog } from "../entities/IProfile";
-import { CountlessPage } from "../helpers/Types";
-import {
-  getCommonHeaders,
-  getUserProfileActivityLogs,
-} from "../helpers/server.helpers";
-import {
-  ActivityLogParams,
-  convertActivityLogParams,
-} from "../components/profile-activity/ProfileActivityLogs";
+import { getCommonHeaders } from "../helpers/server.helpers";
+import { ActivityLogParams } from "../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
-import { ReactQueryWrapperContext } from "../components/react-query-wrapper/ReactQueryWrapper";
 import NextGenCollectionSlideshow from "../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
@@ -46,7 +36,6 @@ import NFTMarketplaceLinks from "../components/nft-marketplace-links/NFTMarketpl
 
 export interface IndexPageProps {
   readonly nft: NFTWithMemesExtendedData;
-  readonly logsPage: CountlessPage<ProfileActivityLog>;
   readonly nextGenFeatured: NextGenCollection;
 }
 
@@ -82,15 +71,8 @@ export default function Home({
   readonly pageProps: IndexPageProps;
 }) {
   const capacitor = useCapacitor();
-  const { initLandingPage } = useContext(ReactQueryWrapperContext);
-  initLandingPage({
-    activityLogs: {
-      data: pageProps.logsPage,
-      params: INITIAL_ACTIVITY_LOGS_PARAMS,
-    },
-  });
 
-  const { connectedProfile, setTitle, title } = useContext(AuthContext);
+  const { connectedProfile, setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
       title: "6529",
@@ -152,258 +134,240 @@ export default function Home({
   };
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="6529.io" />
-        <meta property="og:url" content={`${process.env.BASE_ENDPOINT}`} />
-        <meta property="og:title" content="6529" />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io-banner.png`}
-        />
-        <meta name="twitter:card" content="summary_large_image" />
-      </Head>
-
-      <main className={styles.main}>
-        <>
-          <Container className="pt-4">
-            <Row>
-              <Col>
-                <h1>
-                  <span className="font-lightest">Latest</span> Drop
-                </h1>
-              </Col>
-            </Row>
-            <Row>
-              <Col
-                className="pt-3 pb-3 d-flex align-items-center justify-content-center"
-                xs={{ span: 12 }}
-                sm={{ span: 12 }}
-                md={{ span: 6 }}
-                lg={{ span: 6 }}>
-                <Container className="no-padding">
-                  <Row>
-                    {pageProps.nft.animation ||
-                    pageProps.nft.metadata.animation ? (
-                      <span
-                        className={
-                          connectedProfile ? styles.nftImagePadding : ""
-                        }>
-                        <NFTImage
-                          nft={pageProps.nft}
-                          animation={true}
-                          height={650}
-                          balance={nftBalance}
-                          showUnseized={!!connectedProfile}
-                        />
-                      </span>
-                    ) : (
-                      <Link
-                        href={`/the-memes/${pageProps.nft.id}`}
-                        className={
-                          connectedProfile ? styles.nftImagePadding : ""
-                        }>
-                        <NFTImage
-                          nft={pageProps.nft}
-                          animation={true}
-                          height={650}
-                          balance={nftBalance}
-                          showUnseized={!!connectedProfile}
-                        />
-                      </Link>
-                    )}
-                  </Row>
-                </Container>
-              </Col>
-
-              <Col
-                className="pt-3 pb-3"
-                xs={{ span: 12 }}
-                sm={{ span: 12 }}
-                md={{ span: 6 }}
-                lg={{ span: 6 }}>
-                <Container>
-                  <Row>
-                    <Col>
-                      <u>
-                        <h3>
-                          <Link href={`/the-memes/${pageProps.nft.id}`}>
-                            Card {pageProps.nft.id} - {pageProps.nft.name}
-                          </Link>
-                        </h3>
-                      </u>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <Table bordered={false}>
-                        <tbody>
-                          <tr>
-                            <td>Edition Size</td>
-                            <td>
-                              <b>{renderManifoldClaimEditionSize()}</b>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Collection</td>
-                            <td>
-                              <b>{pageProps.nft.collection}</b>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Season</td>
-                            <td>
-                              <b>{pageProps.nft.season}</b>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Meme</td>
-                            <td>
-                              <b>{pageProps.nft.meme_name}</b>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Artist Name</td>
-                            <td>
-                              <b>{pageProps.nft.artist}</b>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Artist Profile</td>
-                            <td>
-                              <b>
-                                <ArtistProfileHandle nft={pageProps.nft} />
-                              </b>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Mint Date</td>
-                            <td>
-                              <b>{printMintDate(pageProps.nft.mint_date)}</b>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>File Type</td>
-                            <td>
-                              <b>
-                                {getFileTypeFromMetadata(
-                                  pageProps.nft.metadata
-                                )}
-                              </b>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>Dimensions</td>
-                            <td>
-                              <b>
-                                {getDimensionsFromMetadata(
-                                  pageProps.nft.metadata
-                                )}
-                              </b>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <MemePageMintCountdown
-                        nft_id={pageProps.nft.id}
-                        setClaim={setManifoldClaim}
-                        is_full_width={true}
+    <main className={styles.main}>
+      <>
+        <Container className="pt-4">
+          <Row>
+            <Col>
+              <h1>
+                <span className="font-lightest">Latest</span> Drop
+              </h1>
+            </Col>
+          </Row>
+          <Row>
+            <Col
+              className="pt-3 pb-3 d-flex align-items-center justify-content-center"
+              xs={{ span: 12 }}
+              sm={{ span: 12 }}
+              md={{ span: 6 }}
+              lg={{ span: 6 }}>
+              <Container className="no-padding">
+                <Row>
+                  {pageProps.nft.animation ||
+                  pageProps.nft.metadata.animation ? (
+                    <span
+                      className={
+                        connectedProfile ? styles.nftImagePadding : ""
+                      }>
+                      <NFTImage
+                        nft={pageProps.nft}
+                        animation={true}
+                        height={650}
+                        balance={nftBalance}
+                        showUnseized={!!connectedProfile}
                       />
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <h3>Minting Approach</h3>
-                    </Col>
-                  </Row>
-                  <Row className="pb-3">
-                    <Col>
-                      <Link
-                        href={`/the-memes/${pageProps.nft.id}/distribution`}>
-                        Distribution Plan
-                      </Link>
-                    </Col>
-                  </Row>
-                  <Table bordered={false}>
-                    <tbody>
-                      {manifoldClaim && (
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/the-memes/${pageProps.nft.id}`}
+                      className={
+                        connectedProfile ? styles.nftImagePadding : ""
+                      }>
+                      <NFTImage
+                        nft={pageProps.nft}
+                        animation={true}
+                        height={650}
+                        balance={nftBalance}
+                        showUnseized={!!connectedProfile}
+                      />
+                    </Link>
+                  )}
+                </Row>
+              </Container>
+            </Col>
+
+            <Col
+              className="pt-3 pb-3"
+              xs={{ span: 12 }}
+              sm={{ span: 12 }}
+              md={{ span: 6 }}
+              lg={{ span: 6 }}>
+              <Container>
+                <Row>
+                  <Col>
+                    <u>
+                      <h3>
+                        <Link href={`/the-memes/${pageProps.nft.id}`}>
+                          Card {pageProps.nft.id} - {pageProps.nft.name}
+                        </Link>
+                      </h3>
+                    </u>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col>
+                    <Table bordered={false}>
+                      <tbody>
                         <tr>
-                          <td>Status</td>
+                          <td>Edition Size</td>
+                          <td>
+                            <b>{renderManifoldClaimEditionSize()}</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Collection</td>
+                          <td>
+                            <b>{pageProps.nft.collection}</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Season</td>
+                          <td>
+                            <b>{pageProps.nft.season}</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Meme</td>
+                          <td>
+                            <b>{pageProps.nft.meme_name}</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Artist Name</td>
+                          <td>
+                            <b>{pageProps.nft.artist}</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Artist Profile</td>
                           <td>
                             <b>
-                              {manifoldClaim?.isFinalized
-                                ? manifoldClaim.remaining > 0
-                                  ? "Ended"
-                                  : "Sold Out"
-                                : capitalizeEveryWord(manifoldClaim?.status)}
+                              <ArtistProfileHandle nft={pageProps.nft} />
                             </b>
                           </td>
                         </tr>
-                      )}
-                      <tr>
-                        <td>Mint Price</td>
-                        <td>
-                          <b>{renderManifoldClaimCost()}</b>
-                        </td>
-                      </tr>
-                      <NftPageStats
-                        nft={pageProps.nft}
-                        hide_mint_price={true}
-                        hide_hodl_rate={true}
-                      />
-                    </tbody>
-                  </Table>
-                  {capacitor.platform !== "ios" && (
-                    <Row className="pt-3">
-                      <Col>
-                        <NFTMarketplaceLinks
-                          contract={pageProps.nft.contract}
-                          id={pageProps.nft.id}
-                        />
-                      </Col>
-                    </Row>
-                  )}
-                </Container>
-              </Col>
-            </Row>
-          </Container>
-          {pageProps.nextGenFeatured &&
-            !isEmptyObject(pageProps.nextGenFeatured) && (
-              <Container className="pt-3 pb-5">
-                <Row>
-                  <Col className="d-flex align-items-center gap-3">
-                    <h1>
-                      <span className="font-lightest">Discover</span> NextGen -{" "}
-                      {pageProps.nextGenFeatured.name}{" "}
-                    </h1>
-                    <Link
-                      href={`/nextgen/collection/${formatNameForUrl(
-                        pageProps.nextGenFeatured.name
-                      )}`}
-                      className={styles.viewAllLink}>
-                      <span>View Collection</span>
-                    </Link>
+                        <tr>
+                          <td>Mint Date</td>
+                          <td>
+                            <b>{printMintDate(pageProps.nft.mint_date)}</b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>File Type</td>
+                          <td>
+                            <b>
+                              {getFileTypeFromMetadata(pageProps.nft.metadata)}
+                            </b>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Dimensions</td>
+                          <td>
+                            <b>
+                              {getDimensionsFromMetadata(
+                                pageProps.nft.metadata
+                              )}
+                            </b>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </Table>
                   </Col>
                 </Row>
-                <Row className="pt-3">
+                <Row>
                   <Col>
-                    <NextGenCollectionSlideshow
-                      collection={pageProps.nextGenFeatured}
+                    <MemePageMintCountdown
+                      nft_id={pageProps.nft.id}
+                      setClaim={setManifoldClaim}
+                      is_full_width={true}
                     />
                   </Col>
                 </Row>
+                <Row>
+                  <Col>
+                    <h3>Minting Approach</h3>
+                  </Col>
+                </Row>
+                <Row className="pb-3">
+                  <Col>
+                    <Link href={`/the-memes/${pageProps.nft.id}/distribution`}>
+                      Distribution Plan
+                    </Link>
+                  </Col>
+                </Row>
+                <Table bordered={false}>
+                  <tbody>
+                    {manifoldClaim && (
+                      <tr>
+                        <td>Status</td>
+                        <td>
+                          <b>
+                            {manifoldClaim?.isFinalized
+                              ? manifoldClaim.remaining > 0
+                                ? "Ended"
+                                : "Sold Out"
+                              : capitalizeEveryWord(manifoldClaim?.status)}
+                          </b>
+                        </td>
+                      </tr>
+                    )}
+                    <tr>
+                      <td>Mint Price</td>
+                      <td>
+                        <b>{renderManifoldClaimCost()}</b>
+                      </td>
+                    </tr>
+                    <NftPageStats
+                      nft={pageProps.nft}
+                      hide_mint_price={true}
+                      hide_hodl_rate={true}
+                    />
+                  </tbody>
+                </Table>
+                {capacitor.platform !== "ios" && (
+                  <Row className="pt-3">
+                    <Col>
+                      <NFTMarketplaceLinks
+                        contract={pageProps.nft.contract}
+                        id={pageProps.nft.id}
+                      />
+                    </Col>
+                  </Row>
+                )}
               </Container>
-            )}
-          <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
-            <div className="tw-px-2">
-              {/* <ProfileActivityLogs
+            </Col>
+          </Row>
+        </Container>
+        {pageProps.nextGenFeatured &&
+          !isEmptyObject(pageProps.nextGenFeatured) && (
+            <Container className="pt-3 pb-5">
+              <Row>
+                <Col className="d-flex align-items-center gap-3">
+                  <h1>
+                    <span className="font-lightest">Discover</span> NextGen -{" "}
+                    {pageProps.nextGenFeatured.name}{" "}
+                  </h1>
+                  <Link
+                    href={`/nextgen/collection/${formatNameForUrl(
+                      pageProps.nextGenFeatured.name
+                    )}`}
+                    className={styles.viewAllLink}>
+                    <span>View Collection</span>
+                  </Link>
+                </Col>
+              </Row>
+              <Row className="pt-3">
+                <Col>
+                  <NextGenCollectionSlideshow
+                    collection={pageProps.nextGenFeatured}
+                  />
+                </Col>
+              </Row>
+            </Container>
+          )}
+        <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
+          <div className="tw-px-2">
+            {/* <ProfileActivityLogs
                   initialParams={INITIAL_ACTIVITY_LOGS_PARAMS}
                   withFilters={true}
                   disableActiveGroup={true}>
@@ -418,20 +382,24 @@ export default function Home({
                     </Link>
                   </span>
                 </ProfileActivityLogs> */}
-            </div>
           </div>
-          <Container>
-            <Row className="pt-3">
-              <Col xs={12} sm={12} md={12} lg={12}>
-                <LatestActivity page={1} pageSize={12} showMore={false} />
-              </Col>
-            </Row>
-          </Container>
-        </>
-      </main>
-    </>
+        </div>
+        <Container>
+          <Row className="pt-3">
+            <Col xs={12} sm={12} md={12} lg={12}>
+              <LatestActivity page={1} pageSize={12} showMore={false} />
+            </Col>
+          </Row>
+        </Container>
+      </>
+    </main>
   );
 }
+
+Home.metadata = {
+  ogImage: `${process.env.BASE_ENDPOINT}/6529io-banner.png`,
+  twitterCard: "summary_large_image",
+};
 
 export async function getServerSideProps(
   req: any,
@@ -446,13 +414,6 @@ export async function getServerSideProps(
       endpoint: `memes_latest`,
       headers: headers,
     }).then(async (responseExtended) => responseExtended);
-    const logsPage = await getUserProfileActivityLogs({
-      headers,
-      params: convertActivityLogParams({
-        params: INITIAL_ACTIVITY_LOGS_PARAMS,
-        disableActiveGroup: true,
-      }),
-    });
     const nextGenFeatured = await commonApiFetch<NextGenCollection>({
       endpoint: `nextgen/featured`,
       headers: headers,
@@ -460,7 +421,6 @@ export async function getServerSideProps(
     return {
       props: {
         nft,
-        logsPage,
         nextGenFeatured,
       },
     };
