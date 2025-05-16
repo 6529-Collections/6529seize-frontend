@@ -48,7 +48,7 @@ export async function getServerSideProps(
   }
 
   let title = "My Stream";
-  let image = null;
+  let image = "";
   let description = "Brain";
   if (context.query.wave) {
     const waveId = context.query.wave;
@@ -58,7 +58,7 @@ export async function getServerSideProps(
     }).catch(() => null);
     if (wave) {
       title = `${wave.name} | My Stream`;
-      image = wave.picture ?? undefined;
+      image = wave.picture ?? "";
       description = `by @${wave.author.handle} / Subscribers: ${wave.metrics.subscribers_count} / Drops: ${wave.metrics.drops_count} | ${description}`;
     } else {
       const shortUuid = `${waveId.slice(0, 8)}...${waveId.slice(-4)}`;
