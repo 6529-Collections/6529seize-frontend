@@ -74,7 +74,10 @@
 }
 
 .memePageTab {
-  color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
+  color: color.scale(
+    variables.$font-color,
+    $lightness: -(variables.$darken-percentage)
+  );
   margin-right: 15px;
   cursor: pointer;
   &:hover {
@@ -90,30 +93,6 @@
   .arweaveLink {
     font-size: 8px;
   }
-}
-
-.nextPreviousNft {
-  width: 35px;
-  height: 35px;
-  svg {
-    width: 35px;
-    height: 35px;
-  }
-}
-
-@media only screen and (max-width: 800px) {
-  .nextPreviousNft {
-    width: 25px;
-    svg {
-      width: 25px;
-    }
-  }
-}
-
-.nftNextdisabled,
-.nftPreviousdisabled {
-  pointer-events: none !important;
-  color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
 }
 
 .transactionsTable {

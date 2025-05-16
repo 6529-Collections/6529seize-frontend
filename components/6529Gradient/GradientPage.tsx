@@ -9,7 +9,6 @@ import { NFT } from "../../entities/INFT";
 import {
   areEqualAddresses,
   enterArtFullScreen,
-  fullScreenSupported,
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
@@ -24,12 +23,8 @@ import { AuthContext } from "../auth/Auth";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
-import {
-  faChevronCircleLeft,
-  faChevronCircleRight,
-  faExpandAlt,
-} from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
+import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
+import NftNavigation from "../nft-navigation/NftNavigation";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -285,36 +280,13 @@ export default function GradientPage() {
               <>
                 <Row className="pt-2">
                   <Col className="d-flex align-items-center justify-content-between">
-                    {nftId && (
-                      <>
-                        <span>
-                          <h2 className="float-left">
-                            <Link
-                              href={`/6529-gradient/${parseInt(nftId) - 1}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 0
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon={faChevronCircleLeft} />
-                            </Link>
-                          </h2>
-                          <h2 className="float-left">
-                            &nbsp;
-                            <Link
-                              href={`/6529-gradient/${parseInt(nftId) + 1}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 100
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon={faChevronCircleRight} />
-                            </Link>
-                          </h2>
-                        </span>
-                        {fullScreenSupported() && printFullScreen()}
-                      </>
-                    )}
+                    <NftNavigation
+                      nftId={nft.id}
+                      path="/6529-gradient"
+                      startIndex={0}
+                      endIndex={100}
+                      fullscreenElementId={fullscreenElementId}
+                    />
                   </Col>
                 </Row>
                 <Row className="pt-2">
