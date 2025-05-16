@@ -9,7 +9,6 @@ import { NFT } from "../../entities/INFT";
 import {
   areEqualAddresses,
   enterArtFullScreen,
-  fullScreenSupported,
   numberWithCommas,
   printMintDate,
 } from "../../helpers/Helpers";
