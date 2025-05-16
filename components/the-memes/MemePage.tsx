@@ -35,6 +35,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { getMemeTabTitle, MemeTab, MEME_TABS, MEME_FOCUS } from "./MemeShared";
+import NftNavigation from "../nft-navigation/NftNavigation";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
@@ -287,12 +288,11 @@ export default function MemePage() {
               <>
                 <Row className="pt-3 pb-3">
                   <Col className="d-flex gap-2 align-items-center">
-                    {nftId && (
-                      <>
-                        <MemeNavigationBtn nft={nftMeta} icon="previous" />
-                        <MemeNavigationBtn nft={nftMeta} icon="next" />
-                      </>
-                    )}
+                    <NftNavigation
+                      nftId={nft.id}
+                      startIndex={1}
+                      endIndex={nftMeta.collection_size}
+                    />
                   </Col>
                 </Row>
                 <Row className="pt-2">

@@ -27,20 +27,15 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       : effectiveRank;
 
   // Helper to compute English ordinal suffix
-  const getOrdinalSuffix = (n: number) => {
+  function getOrdinalSuffix(n: number): string {
+    const mod10 = n % 10;
     const mod100 = n % 100;
-    if (mod100 >= 11 && mod100 <= 13) return "th";
-    switch (n % 10) {
-      case 1:
-        return "st";
-      case 2:
-        return "nd";
-      case 3:
-        return "rd";
-      default:
-        return "th";
-    }
-  };
+
+    if (mod10 === 1 && mod100 !== 11) return "st";
+    if (mod10 === 2 && mod100 !== 12) return "nd";
+    if (mod10 === 3 && mod100 !== 13) return "rd";
+    return "th";
+  }
 
   // Format separate date and time for responsive display
   const dateTime = decisionTime ? new Date(decisionTime) : null;
@@ -95,8 +90,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
         backgroundColor: bgColor,
         color: accentColor,
         border: `1px solid ${accentColor}40`,
-      }}
-    >
+      }}>
       {/* Rank part */}
       <span className="tw-px-2 tw-py-0.5 tw-text-xs tw-flex tw-items-center">
         <FontAwesomeIcon icon={faTrophy} className="tw-mr-1.5 tw-size-2.5" />
@@ -110,14 +104,12 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
             style={{
               backgroundColor: `${accentColor}70`,
             }}
-            className="tw-size-[3px] tw-rounded-full"
-          ></div>
+            className="tw-size-[3px] tw-rounded-full"></div>
           <span
             className="tw-border-l tw-px-2 tw-py-0.5 tw-flex tw-items-center tw-text-xs"
             style={{
               borderColor: `${accentColor}40`,
-            }}
-          >
+            }}>
             <FontAwesomeIcon icon={faClock} className="tw-mr-1.5 tw-size-2.5" />
             {dateString}
             {timeString && (

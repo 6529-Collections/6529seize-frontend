@@ -30,6 +30,7 @@ import {
   faExpandAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import NftNavigation from "../nft-navigation/NftNavigation";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -285,36 +286,11 @@ export default function GradientPage() {
               <>
                 <Row className="pt-2">
                   <Col className="d-flex align-items-center justify-content-between">
-                    {nftId && (
-                      <>
-                        <span>
-                          <h2 className="float-left">
-                            <Link
-                              href={`/6529-gradient/${parseInt(nftId) - 1}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 0
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon={faChevronCircleLeft} />
-                            </Link>
-                          </h2>
-                          <h2 className="float-left">
-                            &nbsp;
-                            <Link
-                              href={`/6529-gradient/${parseInt(nftId) + 1}`}
-                              className={`${styles.nextPreviousNft} ${
-                                parseInt(nftId) === 100
-                                  ? styles.nftPreviousdisabled
-                                  : ""
-                              }`}>
-                              <FontAwesomeIcon icon={faChevronCircleRight} />
-                            </Link>
-                          </h2>
-                        </span>
-                        {fullScreenSupported() && printFullScreen()}
-                      </>
-                    )}
+                    <NftNavigation
+                      nftId={nft.id}
+                      startIndex={0}
+                      endIndex={100}
+                    />
                   </Col>
                 </Row>
                 <Row className="pt-2">
