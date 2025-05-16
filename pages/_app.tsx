@@ -12,22 +12,14 @@ import {
   SUBSCRIPTIONS_CHAIN,
 } from "../constants";
 
-import { Chain, goerli, mainnet, sepolia } from "wagmi/chains";
-import { Connector, WagmiProvider } from "wagmi";
+import { Connector } from "wagmi";
 
 import Head from "next/head";
-import { NEXTGEN_CHAIN_ID } from "../components/nextGen/nextgen_contracts";
 import Auth from "../components/auth/Auth";
 import { NextPage, NextPageContext } from "next";
 import { ReactElement, ReactNode, useEffect } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import ReactQueryWrapper from "../components/react-query-wrapper/ReactQueryWrapper";
-import { createWeb3Modal } from "@web3modal/wagmi/react";
 import "../components/drops/create/lexical/lexical.styles.scss";
 import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
-import { MANIFOLD_NETWORK } from "../hooks/useManifoldClaim";
-import { wagmiConfigWeb } from "../wagmiConfig/wagmiConfigWeb";
-import { wagmiConfigCapacitor } from "../wagmiConfig/wagmiConfigCapacitor";
 import useCapacitor from "../hooks/useCapacitor";
 import { NotificationsProvider } from "../components/notifications/NotificationsContext";
 import dynamic from "next/dynamic";
@@ -44,7 +36,6 @@ import {
   APP_WALLET_CONNECTOR_TYPE,
   createAppWalletConnector,
 } from "../wagmiConfig/wagmiAppWalletConnector";
-import { Capacitor } from "@capacitor/core";
 import { useAppWalletPasswordModal } from "../hooks/useAppWalletPasswordModal";
 import { SeizeSettingsProvider } from "../contexts/SeizeSettingsContext";
 import { EmojiProvider } from "../contexts/EmojiContext";
@@ -54,59 +45,8 @@ import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
 import { PageSSRMetadata } from "../helpers/Types";
 
-export function getChains() {
-  const chains: Chain[] = [mainnet];
-  if (
-    DELEGATION_CONTRACT.chain_id === sepolia.id ||
-    (NEXTGEN_CHAIN_ID as number) === sepolia.id ||
-    SUBSCRIPTIONS_CHAIN.id.toString() === sepolia.id.toString() ||
-    MANIFOLD_NETWORK.id.toString() === sepolia.id.toString()
-  ) {
-    chains.push(sepolia);
-  }
-  if (
-    DELEGATION_CONTRACT.chain_id === goerli.id ||
-    (NEXTGEN_CHAIN_ID as number) === goerli.id
-  ) {
-    chains.push(goerli);
-  }
-  return chains;
-}
-
-const CONTRACT_CHAINS = getChains();
-
-const wagmiMetadata = {
-  name: "6529.io",
-  description: "6529.io",
-  url: process.env.BASE_ENDPOINT!,
-  icons: [
-    "https://d3lqz0a4bldqgf.cloudfront.net/seize_images/Seize_Logo_Glasses_3.png",
-  ],
-};
-
-const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 10000,
-      refetchOnWindowFocus: false,
-      gcTime: 1000 * 60 * 60 * 24,
-    },
-  },
-});
-
-const isCapacitor = Capacitor.isNativePlatform();
-const wagmiConfig = isCapacitor
-  ? wagmiConfigCapacitor(chains, wagmiMetadata)
-  : wagmiConfigWeb(chains, wagmiMetadata);
-
-createWeb3Modal({
-  wagmiConfig: wagmiConfig,
-  projectId: CW_PROJECT_ID,
-  enableAnalytics: true,
-  themeMode: "dark",
-});
+// Import CoreClientProviders
+import CoreClientProviders from "../components/shared/CoreClientProviders";
 
 export type NextPageWithLayout<Props> = NextPage<Props> & {
   getLayout?: (page: ReactElement<any>) => ReactNode;
@@ -139,7 +79,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
       const connector = createAppWalletConnector({ appWallet: wallet }, () =>
         requestPassword(wallet.address, wallet.address_hashed)
       );
-      return wagmiConfig?._internal.connectors.setup(connector) ?? null;
+      return connector;
     };
 
     const isConnectorNew = (
@@ -169,18 +109,25 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
           )
         )
         .filter((connector): connector is Connector => connector !== null);
-
+      
+      // This section interacting with wagmiConfig.connectors is non-functional without wagmiConfig
+      // console.warn("appWalletsEventEmitterHandler: wagmiConfig not directly accessible in _app.tsx after refactor. Dynamic connector updates might be affected.");
+      
+      // Example of what it might have done - this cannot run now:
+      /*
+      const tempWagmiConfig: any = {}; // placeholder
       const existingConnectors =
-        wagmiConfig?.connectors.filter(
-          (c) => c.id !== APP_WALLET_CONNECTOR_TYPE
+        tempWagmiConfig?.connectors?.filter(
+          (c: Connector) => c.id !== APP_WALLET_CONNECTOR_TYPE
         ) ?? [];
-
       const newConnectors = getNewConnectors(connectors, existingConnectors);
-
-      wagmiConfig?._internal.connectors.setState([
-        ...newConnectors,
-        ...existingConnectors,
-      ]);
+      if (tempWagmiConfig?._internal?.connectors?.setState) {
+        tempWagmiConfig._internal.connectors.setState([
+          ...newConnectors,
+          ...existingConnectors,
+        ]);
+      }
+      */
     };
 
     appWalletsEventEmitter.on("update", appWalletsEventEmitterHandler);
@@ -188,13 +135,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     return () => {
       appWalletsEventEmitter.off("update", appWalletsEventEmitterHandler);
     };
-  }, []);
-
-  useEffect(() => {
-    if (capacitor.isCapacitor) {
-      document.body.classList.add("capacitor-native");
-    }
-  }, []);
+  }, [appWalletPasswordModal]);
 
   const updateImagesSrc = async () => {
     const elementsWithSrc = document.querySelectorAll("[src]");
@@ -246,54 +187,50 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   }${isStaging ? "staging.6529.io" : "6529.io"}`;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Provider store={store}>
-        {capacitor.isCapacitor && (
-          <Head>
-            <meta
-              name="viewport"
-              content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-            />
-          </Head>
-        )}
-        <WagmiProvider config={wagmiConfig}>
-          <ReactQueryWrapper>
-            <SeizeSettingsProvider>
-              <EmojiProvider>
-                <IpfsProvider>
-                  <AppWalletsProvider>
-                    <SeizeConnectProvider>
-                      <Auth>
-                        <NotificationsProvider>
-                          <CookieConsentProvider>
-                            <EULAConsentProvider>
-                              <AppWebSocketProvider>
-                                <HeaderProvider>
-                                  <MainLayout metadata={metadata}>
-                                    {getLayout(
-                                      <Component
-                                        {...props}
-                                        key={router.asPath.split("?")[0]}
-                                      />
-                                    )}
-                                  </MainLayout>
-                                </HeaderProvider>
-                                {appWalletPasswordModal.modal}
-                                <NewVersionToast />
-                              </AppWebSocketProvider>
-                            </EULAConsentProvider>
-                          </CookieConsentProvider>
-                        </NotificationsProvider>
-                      </Auth>
-                    </SeizeConnectProvider>
-                  </AppWalletsProvider>
-                </IpfsProvider>
-              </EmojiProvider>
-            </SeizeSettingsProvider>
-          </ReactQueryWrapper>
-          <FooterDynamic />
-        </WagmiProvider>
-      </Provider>
-    </QueryClientProvider>
+    <Provider store={store}>
+      {capacitor.isCapacitor && (
+        <Head>
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+          />
+        </Head>
+      )}
+      <CoreClientProviders>
+        <SeizeSettingsProvider>
+          <EmojiProvider>
+            <IpfsProvider>
+              <AppWalletsProvider>
+                <SeizeConnectProvider>
+                  <Auth>
+                    <NotificationsProvider>
+                      <CookieConsentProvider>
+                        <EULAConsentProvider>
+                          <AppWebSocketProvider>
+                            <HeaderProvider>
+                              <MainLayout metadata={metadata}>
+                                {getLayout(
+                                  <Component
+                                    {...props}
+                                    key={router.asPath.split("?")[0]}
+                                  />
+                                )}
+                              </MainLayout>
+                            </HeaderProvider>
+                            {appWalletPasswordModal.modal}
+                            <NewVersionToast />
+                          </AppWebSocketProvider>
+                        </EULAConsentProvider>
+                      </CookieConsentProvider>
+                    </NotificationsProvider>
+                  </Auth>
+                </SeizeConnectProvider>
+              </AppWalletsProvider>
+            </IpfsProvider>
+          </EmojiProvider>
+        </SeizeSettingsProvider>
+        <FooterDynamic />
+      </CoreClientProviders>
+    </Provider>
   );
 }

@@ -4,7 +4,7 @@ import { createWalletClient, fallback, http, WalletClient } from "viem";
 import type { Address, Hex } from "viem";
 import type { AppWallet } from "../components/app-wallets/AppWalletsContext";
 import { decryptData } from "../components/app-wallets/app-wallet-helpers";
-import { getChains } from "../pages/_app";
+import { getChains } from "../utils/wagmiHelpers";
 import { areEqualAddresses } from "../helpers/Helpers";
 
 export const APP_WALLET_CONNECTOR_TYPE = "app-wallet";

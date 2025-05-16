@@ -1,0 +1,49 @@
+# Product Requirements Document: Core Client Providers Migration
+
+## 1. Introduction
+
+This document outlines the requirements for refactoring the core client-side providers (`QueryClientProvider`, `WagmiProvider`, `ReactQueryWrapper`) from `pages/_app.tsx` into a single, reusable client component. This new component, tentatively named `CoreClientProviders.tsx`, will be used by both the existing `pages/_app.tsx` and the new `app/layout.tsx` to ensure consistency and facilitate an incremental migration to the Next.js App Router.
+
+## 2. Goals
+
+*   **Centralize Provider Logic:** Consolidate the setup and rendering logic for `QueryClientProvider`, `WagmiProvider`, and `ReactQueryWrapper` into one reusable component.
+*   **Facilitate Incremental Migration:** Enable both `pages/_app.tsx` and `app/layout.tsx` to use the same core provider setup.
+*   **Improve Code Reusability:** Reduce duplication of provider setup logic.
+*   **Maintain Functionality:** Ensure all existing functionalities dependent on these providers (data fetching with React Query, Web3 interactions with Wagmi) continue to work seamlessly in both the `pages` and `app` directory contexts.
+*   **Include Essential Effects:** The new component must also encapsulate related client-side effects currently in `pages/_app.tsx`, specifically the dynamic addition of the `capacitor-native` class to the `document.body` for Capacitor builds.
+
+## 3. Scope
+
+*   **Create `CoreClientProviders.tsx`:**
+    *   This will be a client component (`"use client";`).
+    *   It will handle the initialization of:
+        *   `QueryClient` instance for React Query.
+        *   `wagmiConfig` (including `getChains()`, `wagmiMetadata`, Capacitor detection for `wagmiConfigCapacitor` vs. `wagmiConfigWeb`).
+        *   `createWeb3Modal` initialization.
+    *   It will render `QueryClientProvider`, `WagmiProvider`, and `ReactQueryWrapper` in the correct nesting order, passing `children` through.
+    *   It will include the `useEffect` hook for adding the `capacitor-native` body class based on `useCapacitor()`.
+*   **Integrate `CoreClientProviders.tsx` into `app/layout.tsx`:**
+    *   `app/layout.tsx` will import and use `CoreClientProviders` to wrap its children.
+*   **Refactor `pages/_app.tsx` to use `CoreClientProviders.tsx`:**
+    *   Remove the individual setup and rendering of `QueryClientProvider`, `WagmiProvider`, `ReactQueryWrapper`, and their associated initialization logic from `pages/_app.tsx`.
+    *   Import and use `CoreClientProviders` in `pages/_app.tsx` to provide these contexts.
+*   **Path for `CoreClientProviders.tsx`**: `components/shared/CoreClientProviders.tsx` (or a similar appropriate shared location).
+
+## 4. Non-Goals
+
+*   **Achieving React state persistence for provider components across `pages` and `app` navigations.** While data persistence via library features (Wagmi's `localStorage`, React Query persister) is expected to work, the React state *within* `CoreClientProviders` itself is not guaranteed to persist across these distinct router navigations.
+*   **Migrating other providers** (e.g., Redux `Provider`, `SeizeSettingsProvider`, `NotificationsProvider`, etc.) in this phase. This task focuses solely on the specified core client providers.
+*   **Modifying the `Head` component logic for the Capacitor viewport in `pages/_app.tsx` or addressing its equivalent for `app/layout.tsx` in this PRD.** This can be a separate task.
+
+## 5. Success Criteria
+
+*   The `CoreClientProviders.tsx` component is created and contains all specified logic.
+*   `app/layout.tsx` successfully uses `CoreClientProviders.tsx`. Pages rendered via the `app` router (e.g., the test `/hello-world` page) have access to React Query and Wagmi contexts.
+*   `pages/_app.tsx` is refactored to use `CoreClientProviders.tsx`, and all existing pages under the `/pages` directory continue to function correctly with React Query and Wagmi.
+*   The `capacitor-native` body class is correctly applied when running in a Capacitor environment for pages rendered by both `app/layout.tsx` and `pages/_app.tsx`.
+*   No regressions in existing functionality related to these providers are observed.
+
+## 6. Technical Considerations
+
+*   Ensure all necessary imports (`getChains`, `wagmiMetadata`, `QueryClient`, `WagmiProvider`, `createWeb3Modal`, `wagmiConfigWeb`, `wagmiConfigCapacitor`, `useCapacitor`, `ReactQueryWrapper`, etc.) are correctly handled within `CoreClientProviders.tsx`.
+*   Place `createWeb3Modal` initialization inside a `useEffect` hook to ensure it runs client-side after `wagmiConfig` is available. 
