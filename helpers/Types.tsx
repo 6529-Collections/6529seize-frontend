@@ -344,7 +344,7 @@ export interface WsDropUpdateMessage {
 export interface PageSSRMetadata {
   title: string;
   description?: string;
-  ogImage: string | null;
+  ogImage: string;
   twitterCard: "summary" | "summary_large_image";
 }
 
