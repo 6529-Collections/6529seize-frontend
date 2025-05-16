@@ -79,6 +79,7 @@ const useWavesList = () => {
     type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity && following,
+    directMessage: false,
   });
 
   // Create a map of mainWaves by ID for easy lookup
