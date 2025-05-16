@@ -1,0 +1,59 @@
+# Product Requirements Document: Fix App Wallets Event Handler
+
+## 1. Introduction
+
+This document outlines the requirements for restoring the functionality of the `appWalletsEventEmitterHandler` which is responsible for dynamically adding custom "app wallets" (e.g., from Capacitor secure storage) to the Wagmi connection options. This functionality was impaired during the refactor of `wagmiConfig` into the `CoreClientProviders.tsx` component, as the handler in `pages/_app.tsx` lost direct access to the `wagmiConfig` instance needed to register new connectors. This also led to a persistent linter error in `pages/_app.tsx` regarding `Connector` types.
+
+## 2. Goals
+
+*   **Restore Dynamic App Wallet Registration:** Ensure that app wallets emitted by `appWalletsEventEmitter` are correctly registered with Wagmi and become available for connection in the UI.
+*   **Centralize Wagmi Interaction:** Move the logic for handling these dynamic wallet events into `CoreClientProviders.tsx`, which has direct access to the active `wagmiConfig` instance.
+*   **Resolve Linter Errors:** Eliminate the `Connector` type mismatch linter error in `pages/_app.tsx`.
+*   **Maintain Existing Architecture:** The solution should integrate cleanly with the established `CoreClientProviders.tsx` architecture.
+
+## 3. Scope
+
+*   **Modify `CoreClientProviders.tsx`:**
+    *   Import necessary dependencies:
+        *   `appWalletsEventEmitter` from `../components/app-wallets/AppWalletsContext`.
+        *   `useAppWalletPasswordModal` hook from `../../hooks/useAppWalletPasswordModal`.
+        *   `createAppWalletConnector` function and `APP_WALLET_CONNECTOR_TYPE` constant from `../../wagmiConfig/wagmiAppWalletConnector`.
+        *   `AppWallet` type from `../components/app-wallets/AppWalletsContext`.
+        *   `Connector` type from `wagmi`.
+    *   Call `useAppWalletPasswordModal()` within `CoreClientProviders` to get access to `requestPassword` function and the modal JSX. The modal JSX should be rendered appropriately within `CoreClientProviders`'s output, similar to how it was in `pages/_app.tsx`.
+    *   Move the `createConnectorForWallet` helper function (and its helpers `isConnectorNew`, `getNewConnectors` if still needed, though Wagmi's internal `setup` and `setState` might simplify this) from `pages/_app.tsx` into `CoreClientProviders.tsx` or a utility accessible by it.
+    *   Implement a `useEffect` hook within `CoreClientProviders` that:
+        *   Subscribes to the `appWalletsEventEmitter.on("update", handler)` event.
+        *   The handler function (now inside `CoreClientProviders`) will:
+            *   Use the `currentWagmiConfig` (available in `CoreClientProviders`).
+            *   Map emitted `AppWallet[]` to `Connector[]` using the `createConnectorForWallet` function (passing the `requestPassword` function from `useAppWalletPasswordModal`).
+            *   For each new connector, call `currentWagmiConfig._internal.connectors.setup(connector)`.
+            *   Update the Wagmi connector state using `currentWagmiConfig._internal.connectors.setState([...newConnectors, ...existingConnectors])`. The logic for `existingConnectors` and merging needs to be correctly replicated.
+        *   The `useEffect` must return a cleanup function to `appWalletsEventEmitter.off("update", handler)`.
+        *   The `useEffect` should have `currentWagmiConfig` and `appWalletPasswordModal.requestPassword` (or the modal hook itself) in its dependency array.
+*   **Refactor `pages/_app.tsx`:**
+    *   Remove the `appWalletsEventEmitterHandler` function, its associated helper functions (`createConnectorForWallet`, `isConnectorNew`, `getNewConnectors`), and the `useEffect` hook that subscribes to `appWalletsEventEmitter`.
+    *   Remove the `useAppWalletPasswordModal()` call if its return values (modal JSX) are now handled and rendered by `CoreClientProviders.tsx`. If parts are still used (e.g. if the modal was rendered outside the provider chain previously and should remain so), adjust accordingly. For now, assume `CoreClientProviders` will render it.
+    *   Remove any remaining unused imports related to this logic (e.g., `Connector` if no longer used directly, `APP_WALLET_CONNECTOR_TYPE`, `createAppWalletConnector`). This should resolve the linter error.
+*   **Render App Wallet Password Modal:** Ensure the modal JSX returned by `useAppWalletPasswordModal()` is rendered by `CoreClientProviders.tsx` in a way that it's accessible globally, similar to its placement in `pages/_app.tsx`.
+
+## 4. Non-Goals
+
+*   Changing the underlying mechanism of how app wallets are discovered or stored.
+*   Altering the UI or behavior of the app wallet password modal itself, beyond ensuring it's correctly invoked.
+*   Refactoring other parts of `pages/_app.tsx` not directly related to this event handler.
+
+## 5. Success Criteria
+
+*   When `appWalletsEventEmitter` emits an "update" event with new app wallets, these wallets are dynamically added to the list of available connectors in the Web3Modal / connection UI.
+*   Users can successfully connect to these dynamically added app wallets, including going through the password prompt.
+*   The linter error related to `Connector` types in `pages/_app.tsx` is resolved.
+*   No regression in existing wallet connection functionalities (e.g., standard WalletConnect, MetaMask).
+*   The app wallet password modal is displayed correctly when needed.
+
+## 6. Technical Considerations
+
+*   The `useAppWalletPasswordModal` hook needs to be called within `CoreClientProviders.tsx`. Its returned modal JSX needs to be incorporated into the render output of `CoreClientProviders.tsx`.
+*   The logic for managing existing connectors and adding new ones via `currentWagmiConfig._internal.connectors.setState` must correctly handle Wagmi's internal state expectations.
+*   Ensure proper dependency arrays for all `useEffect` hooks involved.
+*   The `Connector` instances created by `createAppWalletConnector` must be compatible with what `currentWagmiConfig._internal.connectors.setup()` and `setState()` expect. 

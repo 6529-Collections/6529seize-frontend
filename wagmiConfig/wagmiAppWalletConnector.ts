@@ -1,4 +1,4 @@
-import { createConnector } from "wagmi";
+import { createConnector, type Connector } from "wagmi";
 import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, fallback, http, WalletClient } from "viem";
 import type { Address, Hex } from "viem";
@@ -16,7 +16,7 @@ interface CreateAppWalletConnectorOptions {
 export function createAppWalletConnector(
   options: CreateAppWalletConnectorOptions,
   requestPasswordModal: () => Promise<string>
-) {
+): Connector {
   const chains = getChains();
 
   let walletClient: WalletClient | undefined;

@@ -3,42 +3,43 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ReactQueryWrapper from '../react-query-wrapper/ReactQueryWrapper';
-
-// Wagmi and Capacitor specific imports
-import { WagmiProvider, type Chain } from 'wagmi';
+import { WagmiProvider, type Connector } from 'wagmi';
+import type { Chain } from 'wagmi';
 import { Capacitor } from '@capacitor/core';
 import useCapacitor from '../../hooks/useCapacitor';
 import { getChains, wagmiMetadata } from '../../utils/wagmiHelpers';
 import { wagmiConfigWeb } from '../../wagmiConfig/wagmiConfigWeb';
 import { wagmiConfigCapacitor } from '../../wagmiConfig/wagmiConfigCapacitor';
-
-// Web3Modal and constants
 import { createWeb3Modal } from '@web3modal/wagmi/react';
-import { CW_PROJECT_ID } from '../../constants'; // Path relative to components/shared/
+import { CW_PROJECT_ID } from '../../constants';
+
+// Imports for App Wallets Event Handler (Subtask 1.1)
+import { appWalletsEventEmitter, type AppWallet } from '../app-wallets/AppWalletsContext';
+import { useAppWalletPasswordModal } from '../../hooks/useAppWalletPasswordModal';
+import { createAppWalletConnector, APP_WALLET_CONNECTOR_TYPE } from '../../wagmiConfig/wagmiAppWalletConnector';
 
 interface CoreClientProvidersProps {
   readonly children: ReactNode;
 }
 
-// Initialize QueryClient outside the component or with useState as done previously
 const queryClientInstance = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 10000,
       refetchOnWindowFocus: false,
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      gcTime: 1000 * 60 * 60 * 24,
     },
   },
 });
 
 export default function CoreClientProviders({ children }: CoreClientProvidersProps) {
-  // queryClient is already initialized using useState in the previous step for stability.
-  // For this edit, I will reuse the existing queryClient from useState.
-  const [queryClient] = useState(() => queryClientInstance); 
-
+  const [queryClient] = useState(() => queryClientInstance);
   const capacitorHook = useCapacitor();
   const [currentWagmiConfig, setCurrentWagmiConfig] = useState<ReturnType<typeof wagmiConfigWeb> | ReturnType<typeof wagmiConfigCapacitor> | null>(null);
   const [isWeb3ModalCreated, setIsWeb3ModalCreated] = useState(false);
+
+  // App Wallet Password Modal hook (Subtask 1.1)
+  const appWalletPasswordModal = useAppWalletPasswordModal();
 
   useEffect(() => {
     const chains = getChains() as [Chain, ...Chain[]];
@@ -46,7 +47,7 @@ export default function CoreClientProviders({ children }: CoreClientProvidersPro
       ? wagmiConfigCapacitor(chains, wagmiMetadata)
       : wagmiConfigWeb(chains, wagmiMetadata);
     setCurrentWagmiConfig(config);
-  }, [capacitorHook.isCapacitor]); // Re-run if capacitor status changes
+  }, [capacitorHook.isCapacitor]);
 
   useEffect(() => {
     if (currentWagmiConfig && !isWeb3ModalCreated) {
@@ -56,9 +57,80 @@ export default function CoreClientProviders({ children }: CoreClientProvidersPro
         enableAnalytics: true,
         themeMode: "dark",
       });
-      setIsWeb3ModalCreated(true); // Ensure it's only created once
+      setIsWeb3ModalCreated(true);
     }
   }, [currentWagmiConfig, isWeb3ModalCreated]);
+
+  // useEffect for appWalletsEventEmitter (Subtask 1.2)
+  useEffect(() => {
+    const createConnectorForAppWallet = (
+      wallet: AppWallet,
+      requestPasswordFn: (
+        address: string,
+        addressHashed: string
+      ) => Promise<string>
+    ): Connector | null => {
+      try {
+        return createAppWalletConnector({ appWallet: wallet }, () =>
+          requestPasswordFn(wallet.address, wallet.address_hashed)
+        ) as Connector;
+      } catch (error) {
+        console.error("Error creating app wallet connector:", error);
+        return null;
+      }
+    };
+
+    const appWalletsUpdateHandler = async (wallets: AppWallet[]) => {
+      if (!currentWagmiConfig) {
+        console.warn("Wagmi config not available for app wallet update.");
+        return;
+      }
+
+      const newAppWalletConnectors = wallets
+        .map((wallet) =>
+          createConnectorForAppWallet(
+            wallet,
+            appWalletPasswordModal.requestPassword
+          )
+        )
+        .filter((connector): connector is Connector => connector !== null);
+
+      const otherConnectors = currentWagmiConfig.connectors.filter(
+        (c) => c.type !== APP_WALLET_CONNECTOR_TYPE
+      );
+      
+      const allConnectors = [...otherConnectors, ...newAppWalletConnectors];
+      
+      // Ensure no duplicate connectors by ID (address for app wallets)
+      const uniqueConnectors = allConnectors.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, [] as Connector[]);
+
+
+      setCurrentWagmiConfig(prevConfig => {
+        if (!prevConfig) return null;
+        // Ensure the connectors array is new to trigger re-render if necessary
+        if (JSON.stringify(prevConfig.connectors.map(c => c.id).sort()) === JSON.stringify(uniqueConnectors.map(c => c.id).sort())) {
+          return prevConfig; // No actual change in connectors
+        }
+        return {
+          ...prevConfig,
+          connectors: uniqueConnectors as readonly Connector[],
+        };
+      });
+    };
+
+    appWalletsEventEmitter.on("update", appWalletsUpdateHandler);
+
+    return () => {
+      appWalletsEventEmitter.off("update", appWalletsUpdateHandler);
+    };
+  }, [currentWagmiConfig, appWalletPasswordModal.requestPassword]);
 
   useEffect(() => {
     if (capacitorHook.isCapacitor) {
@@ -66,16 +138,13 @@ export default function CoreClientProviders({ children }: CoreClientProvidersPro
     } else {
       document.body.classList.remove("capacitor-native");
     }
-    // Cleanup function to remove the class if the component unmounts
-    // or if capacitor status changes from true to false during component lifecycle.
     return () => {
       document.body.classList.remove("capacitor-native");
     };
   }, [capacitorHook.isCapacitor]);
 
-  // Updated condition: wait for both wagmiConfig and Web3Modal creation
   if (!currentWagmiConfig || !isWeb3ModalCreated) {
-    return null; 
+    return null;
   }
 
   return (
@@ -85,6 +154,8 @@ export default function CoreClientProviders({ children }: CoreClientProvidersPro
           {children}
         </ReactQueryWrapper>
       </QueryClientProvider>
+      {/* Render App Wallet Password Modal JSX (Subtask 1.1) */}
+      {appWalletPasswordModal.modal}
     </WagmiProvider>
   );
 } 
