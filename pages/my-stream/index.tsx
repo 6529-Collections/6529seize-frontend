@@ -14,6 +14,8 @@ import { GetServerSidePropsContext } from "next";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "../../helpers/time";
 import { PageSSRMetadata } from "../../helpers/Types";
+import { commonApiFetch } from "../../services/api/common-api";
+import { ApiWave } from "../../generated/models/ApiWave";
 
 interface Props {
   dehydratedState: DehydratedState;
@@ -46,10 +48,22 @@ export async function getServerSideProps(
   }
 
   let title = "My Stream";
+  let image = null;
+  let description = "Brain";
   if (context.query.wave) {
     const waveId = context.query.wave;
-    const shortUuid = `${waveId.slice(0, 8)}...${waveId.slice(-4)}`;
-    title = `Wave ${shortUuid} | My Stream`;
+    const wave = await commonApiFetch<ApiWave>({
+      endpoint: `waves/${waveId}`,
+      headers: headers,
+    }).catch(() => null);
+    if (wave) {
+      title = `${wave.name} | My Stream`;
+      image = wave.picture ?? undefined;
+      description = `by @${wave.author.handle} / Subscribers: ${wave.metrics.subscribers_count} / Drops: ${wave.metrics.drops_count} | ${description}`;
+    } else {
+      const shortUuid = `${waveId.slice(0, 8)}...${waveId.slice(-4)}`;
+      title = `Wave ${shortUuid} | My Stream`;
+    }
   }
 
   return {
@@ -57,7 +71,8 @@ export async function getServerSideProps(
       dehydratedState: dehydrate(queryClient),
       metadata: {
         title,
-        description: "Brain",
+        description,
+        ogImage: image,
       },
     },
   };
