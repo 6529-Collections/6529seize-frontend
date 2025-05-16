@@ -24,12 +24,7 @@ import { AuthContext } from "../auth/Auth";
 import { NftPageStats } from "../nftAttributes/NftStats";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
-import {
-  faChevronCircleLeft,
-  faChevronCircleRight,
-  faExpandAlt,
-} from "@fortawesome/free-solid-svg-icons";
-import Link from "next/link";
+import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
 import NftNavigation from "../nft-navigation/NftNavigation";
 
 interface NftWithOwner extends NFT {
@@ -291,6 +286,7 @@ export default function GradientPage() {
                       startIndex={0}
                       endIndex={100}
                     />
+                    {fullScreenSupported() && printFullScreen()}
                   </Col>
                 </Row>
                 <Row className="pt-2">

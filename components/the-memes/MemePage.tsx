@@ -1,7 +1,6 @@
 import styles from "./TheMemes.module.scss";
 
 import { useContext, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Container, Row, Col } from "react-bootstrap";
 import { MEMES_CONTRACT } from "../../constants";
 import { DBResponse } from "../../entities/IDBResponse";
@@ -27,12 +26,7 @@ import {
 } from "./MemePageYourCards";
 import { AuthContext, useAuth } from "../auth/Auth";
 import { commonApiFetch } from "../../services/api/common-api";
-import useIsMobileScreen from "../../hooks/isMobileScreen";
 import MemePageMintCountdown from "./MemePageMintCountdown";
-import {
-  faChevronCircleLeft,
-  faChevronCircleRight,
-} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { getMemeTabTitle, MemeTab, MEME_TABS, MEME_FOCUS } from "./MemeShared";
 import NftNavigation from "../nft-navigation/NftNavigation";
@@ -329,44 +323,6 @@ export default function MemePage() {
       </Row>
     </Container>
   );
-}
-
-function MemeNavigationBtn(
-  props: Readonly<{
-    nft: MemesExtendedData;
-    icon: "next" | "previous";
-  }>
-) {
-  const isMobile = useIsMobileScreen();
-
-  const width = isMobile ? 25 : 35;
-  const height = isMobile ? 25 : 35;
-
-  const isDisabled =
-    props.icon === "previous"
-      ? props.nft.id === 1
-      : props.nft.id === props.nft.collection_size;
-
-  const icon = (
-    <FontAwesomeIcon
-      icon={
-        props.icon === "previous" ? faChevronCircleLeft : faChevronCircleRight
-      }
-      width={width}
-      height={height}
-      color={isDisabled ? "#9a9a9a" : "#fff"}
-      cursor={isDisabled ? "default" : "pointer"}
-    />
-  );
-
-  if (isDisabled) {
-    return icon;
-  } else {
-    const href = `/the-memes/${
-      props.icon === "previous" ? props.nft.id - 1 : props.nft.id + 1
-    }`;
-    return <Link href={href}>{icon}</Link>;
-  }
 }
 
 function TabButton(

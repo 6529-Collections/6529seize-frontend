@@ -48,12 +48,7 @@ import { NftPageStats } from "../nftAttributes/NftStats";
 import { printMemeReferences } from "../rememes/RememePage";
 import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
-import {
-  faChevronCircleLeft,
-  faChevronCircleRight,
-  faExpandAlt,
-  faFire,
-} from "@fortawesome/free-solid-svg-icons";
+import { faExpandAlt, faFire } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import {
   getMemeTabTitle,
