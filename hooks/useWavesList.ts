@@ -4,6 +4,7 @@ import {
   useCallback,
   useRef,
   useEffect,
+  useState,
 } from "react";
 import { AuthContext } from "../components/auth/Auth";
 import { useWavesOverview } from "./useWavesOverview";
@@ -53,6 +54,8 @@ const useWavesList = () => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { pinnedIds, addId, removeId } = usePinnedWaves();
   const [following] = useShowFollowingWaves();
+  // Use state for allWaves instead of ref to ensure reactivity
+  const [allWaves, setAllWaves] = useState<EnhancedWave[]>([]);
 
   // Use ref to avoid too many re-renders for derived values
   const prevMainWavesRef = useRef<ApiWave[]>([]);
@@ -76,7 +79,6 @@ const useWavesList = () => {
     type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity && following,
-    directMessageType: "non_dms_only",
   });
 
   // Create a map of mainWaves by ID for easy lookup
@@ -252,6 +254,17 @@ const useWavesList = () => {
 
   // New drops counting logic has been removed and will be managed by context
 
+  // Update allWaves state when the combined waves change
+  useEffect(() => {
+    // Using a functional update and removing the allWaves dependency
+    // to break the infinite update cycle
+    setAllWaves((prevWaves) => {
+      return !areWavesEqual(combinedWaves, prevWaves)
+        ? combinedWaves
+        : prevWaves;
+    });
+  }, [combinedWaves]);
+
   // Determine if any pinned waves are still loading
   const isPinnedWavesLoading = missingPinnedIds.some(
     (_, index) => index < 10 && waveDataArray[index].isLoading
@@ -272,7 +285,7 @@ const useWavesList = () => {
   return useMemo(
     () => ({
       // Main data - now using state instead of ref, with enhanced type
-      waves: combinedWaves,
+      waves: allWaves,
 
       // Original waves pagination and loading
       isFetching,
@@ -298,7 +311,7 @@ const useWavesList = () => {
       refetchAllWaves,
     }),
     [
-      combinedWaves,
+      allWaves,
       isFetching,
       isFetchingNextPage,
       hasNextPage,
