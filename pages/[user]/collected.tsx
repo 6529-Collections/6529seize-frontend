@@ -8,10 +8,8 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageCollected from "../../components/user/collected/UserPageCollected";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
-interface UserPageProps {
-  profile: ApiIdentity;
-}
+import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -56,6 +54,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        metadata: getMetadataForUserPage(profile, "Collected"),
       },
     };
   } catch (e: any) {

@@ -52,6 +52,7 @@ import { AppWebSocketProvider } from "../services/websocket/AppWebSocketProvider
 import MainLayout from "../components/layout/MainLayout";
 import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
+import { PageSSRMetadata } from "../helpers/Types";
 
 export function getChains() {
   const chains: Chain[] = [mainnet];
@@ -74,7 +75,7 @@ export function getChains() {
 
 const CONTRACT_CHAINS = getChains();
 
-const metadata = {
+const wagmiMetadata = {
   name: "6529.io",
   description: "6529.io",
   url: process.env.BASE_ENDPOINT!,
@@ -97,8 +98,8 @@ const queryClient = new QueryClient({
 
 const isCapacitor = Capacitor.isNativePlatform();
 const wagmiConfig = isCapacitor
-  ? wagmiConfigCapacitor(chains, metadata)
-  : wagmiConfigWeb(chains, metadata);
+  ? wagmiConfigCapacitor(chains, wagmiMetadata)
+  : wagmiConfigWeb(chains, wagmiMetadata);
 
 createWeb3Modal({
   wagmiConfig: wagmiConfig,
@@ -223,6 +224,27 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     };
   }, []);
 
+  const pageMetadata = rest.pageProps.metadata;
+  const componentMetadata = (Component as any).metadata;
+  const isStaging = process.env.BASE_ENDPOINT?.includes("staging");
+  const metadata: PageSSRMetadata = {
+    title:
+      componentMetadata?.title ??
+      pageMetadata?.title ??
+      (isStaging ? "6529 Staging" : "6529"),
+    description:
+      componentMetadata?.description ?? pageMetadata?.description ?? "",
+    ogImage:
+      componentMetadata?.ogImage ??
+      pageMetadata?.ogImage ??
+      `${process.env.BASE_ENDPOINT}/6529io.png`,
+    twitterCard:
+      componentMetadata?.twitterCard ?? pageMetadata?.twitterCard ?? "summary",
+  };
+  metadata.description = `${
+    metadata.description ? `${metadata.description} | ` : ""
+  }${isStaging ? "staging.6529.io" : "6529.io"}`;
+
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
@@ -247,7 +269,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                             <EULAConsentProvider>
                               <AppWebSocketProvider>
                                 <HeaderProvider>
-                                  <MainLayout>
+                                  <MainLayout metadata={metadata}>
                                     {getLayout(
                                       <Component
                                         {...props}

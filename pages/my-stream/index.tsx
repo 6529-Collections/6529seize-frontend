@@ -13,9 +13,13 @@ import { prefetchWavesOverview } from "../../helpers/stream.helpers";
 import { GetServerSidePropsContext } from "next";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { Time } from "../../helpers/time";
+import { PageSSRMetadata } from "../../helpers/Types";
+import { commonApiFetch } from "../../services/api/common-api";
+import { ApiWave } from "../../generated/models/ApiWave";
 
 interface Props {
   dehydratedState: DehydratedState;
+  metadata: Partial<PageSSRMetadata>;
 }
 
 const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
@@ -42,5 +46,34 @@ export async function getServerSideProps(
     const waveId = (context.query.wave as string | undefined) ?? null;
     await prefetchWavesOverview({ queryClient, headers, waveId });
   }
-  return { props: { dehydratedState: dehydrate(queryClient) } };
+
+  let title = "My Stream";
+  let image = "";
+  let description = "Brain";
+  if (context.query.wave) {
+    const waveId = context.query.wave;
+    const wave = await commonApiFetch<ApiWave>({
+      endpoint: `waves/${waveId}`,
+      headers: headers,
+    }).catch(() => null);
+    if (wave) {
+      title = `${wave.name} | My Stream`;
+      image = wave.picture ?? "";
+      description = `by @${wave.author.handle} / Subscribers: ${wave.metrics.subscribers_count} / Drops: ${wave.metrics.drops_count} | ${description}`;
+    } else {
+      const shortUuid = `${waveId.slice(0, 8)}...${waveId.slice(-4)}`;
+      title = `Wave ${shortUuid} | My Stream`;
+    }
+  }
+
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+      metadata: {
+        title,
+        description,
+        ogImage: image,
+      },
+    },
+  };
 }

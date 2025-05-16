@@ -2,10 +2,7 @@ import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
 import { MEMELAB_CONTRACT } from "../../../constants";
-import {
-  SharedHead,
-  getSharedServerSideProps,
-} from "../../../components/the-memes/MemeShared";
+import { getSharedServerSideProps } from "../../../components/the-memes/MemeShared";
 
 const DistributionComponent = dynamic(
   () => import("../../../components/distribution/Distribution"),
@@ -14,27 +11,18 @@ const DistributionComponent = dynamic(
   }
 );
 
-export default function MemeLabDistributionPage(props: any) {
-  const pageProps = props.pageProps;
-
+export default function MemeLabDistributionPage() {
   return (
-    <>
-      <SharedHead
-        props={pageProps}
+    <main className={styles.main}>
+      <DistributionComponent
+        header="Meme Lab"
         contract={MEMELAB_CONTRACT}
-        isDistribution={true}
+        link="/meme-lab"
       />
-      <main className={styles.main}>
-        <DistributionComponent
-          header="Meme Lab"
-          contract={MEMELAB_CONTRACT}
-          link="/meme-lab"
-        />
-      </main>
-    </>
+    </main>
   );
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
-  return getSharedServerSideProps(req, MEMELAB_CONTRACT);
+  return getSharedServerSideProps(req, MEMELAB_CONTRACT, true);
 }

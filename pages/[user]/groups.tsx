@@ -1,5 +1,4 @@
 import { ReactElement } from "react";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
@@ -8,19 +7,17 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageGroupsWrapper from "../../components/user/groups/UserPageGroupsWrapper";
+import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
-export interface UserPageGroupsProps {
-  readonly profile: ApiIdentity;
-}
-
-const Page: NextPageWithLayout<{ pageProps: UserPageGroupsProps }> = ({
+const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
 }) => {
   return <UserPageGroupsWrapper profile={pageProps.profile} />;
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageGroupsProps }>
+  page: ReactElement<{ pageProps: UserPageProps }>
 ) {
   return (
     <UserPageLayout profile={page.props.pageProps.profile}>
@@ -36,7 +33,7 @@ export async function getServerSideProps(
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: UserPageGroupsProps;
+  props: UserPageProps;
 }> {
   try {
     const headers = getCommonHeaders(req);
@@ -55,6 +52,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        metadata: getMetadataForUserPage(profile, "Groups"),
       },
     };
   } catch (e: any) {

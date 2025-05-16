@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
@@ -6,7 +5,7 @@ import { NextGenCollection } from "../../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../../helpers/Helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { getCommonHeaders } from "../../../../../helpers/server.helpers";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
@@ -23,44 +22,45 @@ const NextGenCollectionComponent = dynamic(
 );
 
 export default function NextGenCollectionPage(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
+  const router = useRouter();
   const collection: NextGenCollection = props.pageProps.collection;
-  const view: ContentView = props.pageProps.view;
   useShallowRedirect(collection.name);
-  const pagenameFull = `${collection.name}`;
+
+  const [view, setView] = useState<ContentView>(props.pageProps.view);
 
   useEffect(() => {
-    setTitle({
-      title: `${collection.name} | NEXTGEN | 6529.io`,
-    });
-  }, []);
+    const viewFromUrl = getCollectionView(
+      Array.isArray(router.query.view)
+        ? router.query.view[0]
+        : router.query.view ?? ""
+    );
+    setView(viewFromUrl);
+    const viewTitle =
+      viewFromUrl !== ContentView.OVERVIEW ? ` | ${viewFromUrl}` : "";
+    setTitle({ title: `${collection.name}${viewTitle} | NextGen` });
+  }, [router.query.view]);
+
+  const updateView = (newView: ContentView) => {
+    let path =
+      newView === ContentView.OVERVIEW
+        ? "/"
+        : `/${getContentViewKeyByValue(newView).toLowerCase()}`;
+    path = path.replaceAll(" ", "-").replaceAll("_", "-");
+    const newPath = `/nextgen/collection/${formatNameForUrl(
+      collection.name
+    )}${path}`;
+    router.push(newPath, undefined, { shallow: true });
+  };
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={pagenameFull} />
-        <meta
-          property="og:url"
-          content={`${
-            process.env.BASE_ENDPOINT
-          }/nextgen/collection/${formatNameForUrl(collection.name)}`}
-        />
-        <meta property="og:title" content={pagenameFull} />
-        <meta property="og:image" content={collection.image} />
-        <meta property="og:description" content="NEXTGEN | 6529.io" />
-        <meta name="twitter:card" content={pagenameFull} />
-        <meta name="twitter:image:alt" content={pagenameFull} />
-        <meta name="twitter:title" content={pagenameFull} />
-        <meta name="twitter:description" content="NEXTGEN | 6529.io" />
-        <meta name="twitter:image" content={collection.image} />
-      </Head>
-
-      <main className={styles.main}>
-        <NextGenCollectionComponent collection={collection} view={view} />
-      </main>
-    </>
+    <main className={styles.main}>
+      <NextGenCollectionComponent
+        collection={collection}
+        view={view}
+        setView={updateView}
+      />
+    </main>
   );
 }
 
@@ -70,9 +70,17 @@ function getCollectionView(view: string): ContentView {
     ([key]) => key.toLowerCase() === normalizedView
   );
 
-  return entries
-    ? ContentView[entries[0] as keyof typeof ContentView]
-    : ContentView.OVERVIEW;
+  let contentView;
+
+  if (entries) {
+    contentView = ContentView[entries[0] as keyof typeof ContentView];
+  } else if (view === "top-trait-sets") {
+    contentView = ContentView.TOP_TRAIT_SETS;
+  } else {
+    contentView = ContentView.OVERVIEW;
+  }
+
+  return contentView;
 }
 
 export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
@@ -85,7 +93,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     endpoint: `nextgen/collections/${parsedCollectionId}`,
     headers: headers,
   }).catch(() => {
-    return {};
+    return null;
   });
 
   if (isEmptyObject(collection)) {
@@ -103,10 +111,24 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     collectionView = getCollectionView(view);
   }
 
+  let title = collection?.name ?? `Collection #${parsedCollectionId}`;
+  if (collectionView && collectionView !== ContentView.OVERVIEW) {
+    title = `${title} | ${collectionView}`;
+  }
+
   return {
     props: {
       collection: collection,
       view: collectionView,
+      metadata: {
+        title,
+        ogImage:
+          collection?.banner ??
+          collection?.image ??
+          `${process.env.BASE_ENDPOINT}/nextgen.png`,
+        description: "NextGen",
+        twitterCard: "summary_large_image",
+      },
     },
   };
 }
@@ -140,4 +162,16 @@ export function useShallowRedirect(name: string, currentPath?: string) {
       { shallow: true }
     );
   }, []);
+}
+
+function getContentViewKeyByValue(value: string): string {
+  for (const [key, val] of Object.entries(ContentView)) {
+    if (val === value) {
+      return key;
+    }
+  }
+  if (value === "trait-sets") {
+    return ContentView.TOP_TRAIT_SETS;
+  }
+  return ContentView.OVERVIEW;
 }

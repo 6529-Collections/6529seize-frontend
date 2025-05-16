@@ -1,5 +1,4 @@
 import { ReactElement } from "react";
-import { ApiIdentity } from "../../generated/models/ApiIdentity";
 import { NextPageWithLayout } from "../_app";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
@@ -8,17 +7,17 @@ import {
   userPageNeedsRedirect,
 } from "../../helpers/server.helpers";
 import UserPageFollowers from "../../components/user/followers/UserPageFollowers";
+import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
 
-interface Props {
-  readonly profile: ApiIdentity;
-}
-
-const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
+const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
+  pageProps,
+}) => (
   <div className="tailwind-scope">
     <UserPageFollowers profile={pageProps.profile} />
   </div>
 );
-Page.getLayout = (page: ReactElement<{ pageProps: Props }>) => (
+Page.getLayout = (page: ReactElement<{ pageProps: UserPageProps }>) => (
   <UserPageLayout profile={page.props.pageProps.profile}>{page}</UserPageLayout>
 );
 
@@ -28,7 +27,7 @@ export async function getServerSideProps(
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: Props;
+  props: UserPageProps;
 }> {
   try {
     const headers = getCommonHeaders(req);
@@ -47,6 +46,7 @@ export async function getServerSideProps(
     return {
       props: {
         profile,
+        metadata: getMetadataForUserPage(profile, "Followers"),
       },
     };
   } catch (e: any) {

@@ -1,4 +1,3 @@
-import Head from "next/head";
 import styles from "../../../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import {
@@ -12,8 +11,8 @@ import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
 import { AuthContext } from "../../../../../components/auth/Auth";
-import { useContext, useEffect } from "react";
-
+import { useContext, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 const NextGenTokenComponent = dynamic(
   () =>
@@ -34,62 +33,62 @@ const NextGenTokenOnChainComponent = dynamic(
 );
 
 export default function NextGenCollectionToken(props: any) {
-  const { setTitle, title } = useContext(AuthContext);
+  const router = useRouter();
+
+  const { setTitle } = useContext(AuthContext);
   const tokenId: number = props.pageProps.token_id;
   const token: NextGenToken | null = props.pageProps.token;
   const traits: NextGenTrait[] = props.pageProps.traits;
   const tokenCount: number = props.pageProps.tokenCount;
   const collection: NextGenCollection = props.pageProps.collection;
-  const pagenameFull = token?.name ?? `${collection.name} - #${tokenId}`;
-  const pageImage = token?.image_url ?? collection.image;
-  const tokenView = props.pageProps.view;
 
+  const [tokenView, setTokenView] = useState<ContentView>(props.pageProps.view);
 
   useEffect(() => {
+    const viewFromUrl = getContentView(
+      Array.isArray(router.query.view)
+        ? router.query.view[0]
+        : router.query.view ?? ""
+    );
+    setTokenView(viewFromUrl);
+    const viewFromUrlDisplay =
+      viewFromUrl !== ContentView.ABOUT ? viewFromUrl : "";
+    const baseTitle = token?.name ?? `${collection.name} - #${tokenId}`;
+    const title = viewFromUrlDisplay
+      ? `${baseTitle} | ${viewFromUrlDisplay}`
+      : baseTitle;
     setTitle({
-      title: pagenameFull,
+      title,
     });
-  }, [pagenameFull]);
+  }, [router.query.view]);
+
+  const updateView = (newView?: ContentView) => {
+    let newPath = `/nextgen/token/${tokenId}`;
+    if (newView && newView !== ContentView.ABOUT) {
+      newPath += `/${newView.toLowerCase().replaceAll(" ", "-")}`;
+    }
+    router.push(newPath, undefined, { shallow: true });
+  };
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content={pagenameFull} />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/nextgen/token/${tokenId}`}
+    <main className={styles.main}>
+      <NextGenNavigationHeader />
+      {token ? (
+        <NextGenTokenComponent
+          collection={collection}
+          token={token}
+          traits={traits}
+          tokenCount={tokenCount}
+          view={tokenView}
+          setView={updateView}
         />
-        <meta property="og:title" content={pagenameFull} />
-        <meta property="og:image" content={pageImage} />
-        <meta property="og:description" content="NEXTGEN | 6529.io" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image:alt" content={pagenameFull} />
-        <meta name="twitter:title" content={pagenameFull} />
-        <meta name="twitter:description" content="NEXTGEN | 6529.io" />
-        <meta name="twitter:image" content={pageImage} />
-      </Head>
-
-      <main className={styles.main}>
-        <NextGenNavigationHeader />
-        {token ? (
-          <NextGenTokenComponent
-            collection={collection}
-            token={token}
-            traits={traits}
-            tokenCount={tokenCount}
-            view={tokenView}
-          />
-        ) : (
-          <NextGenTokenOnChainComponent
-            collection={collection}
-            token_id={tokenId}
-          />
-        )}
-      </main>
-    </>
+      ) : (
+        <NextGenTokenOnChainComponent
+          collection={collection}
+          token_id={tokenId}
+        />
+      )}
+    </main>
   );
 }
 
@@ -127,18 +126,8 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     headers: headers,
   });
 
-  let view = req.query.view as string;
-  let tokenView: ContentView | null = null;
-  if (view) {
-    view = view[0].toLowerCase().replaceAll("-", " ");
-    if (view === ContentView.DISPLAY_CENTER.toLowerCase()) {
-      tokenView = ContentView.DISPLAY_CENTER;
-    } else if (view == ContentView.PROVENANCE.toLowerCase()) {
-      tokenView = ContentView.PROVENANCE;
-    } else if (view == ContentView.RARITY.toLowerCase()) {
-      tokenView = ContentView.RARITY;
-    }
-  }
+  const view = req.query.view?.[0] ?? "";
+  const tokenView: ContentView = getContentView(view);
 
   if (isEmptyObject(collection)) {
     return {
@@ -150,6 +139,10 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
     } as any;
   }
 
+  const viewDisplay = tokenView !== ContentView.ABOUT ? tokenView : "";
+  const baseTitle = token?.name ?? `${collection.name} - #${tokenId}`;
+  const title = viewDisplay ? `${baseTitle} | ${viewDisplay}` : baseTitle;
+
   return {
     props: {
       token_id: tokenId,
@@ -158,6 +151,29 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
       tokenCount: tokenCount,
       collection: collection,
       view: tokenView,
+      metadata: {
+        title,
+        ogImage:
+          token?.thumbnail_url ??
+          token?.image_url ??
+          collection.banner ??
+          `${process.env.BASE_ENDPOINT}/nextgen.png`,
+        description: "NextGen",
+      },
     },
   };
+}
+
+function getContentView(view: string): ContentView {
+  view = view?.toLowerCase().replaceAll("-", " ") ?? "";
+
+  const allowedViews = [
+    ContentView.DISPLAY_CENTER,
+    ContentView.PROVENANCE,
+    ContentView.RARITY,
+  ];
+
+  const matchedView = allowedViews.find((v) => v.toLowerCase() === view);
+
+  return matchedView ?? ContentView.ABOUT;
 }

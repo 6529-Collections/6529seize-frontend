@@ -1,10 +1,7 @@
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import {
-  SharedHead,
-  getSharedServerSideProps,
-} from "../../../components/the-memes/MemeShared";
+import { getSharedServerSideProps } from "../../../components/the-memes/MemeShared";
 import { MEMELAB_CONTRACT } from "../../../constants";
 import { useAuth } from "../../../components/auth/Auth";
 
@@ -15,19 +12,15 @@ const LabPageComponent = dynamic(
   }
 );
 
-export default function MemeLabPage(props: any) {
-  const pageProps = props.pageProps;
+export default function MemeLabPage() {
   const { connectedProfile } = useAuth();
 
   return (
-    <>
-      <SharedHead props={pageProps} contract={MEMELAB_CONTRACT} />
-      <main className={styles.main}>
-        <LabPageComponent
-          wallets={connectedProfile?.wallets?.map((w) => w.wallet) ?? []}
-        />
-      </main>
-    </>
+    <main className={styles.main}>
+      <LabPageComponent
+        wallets={connectedProfile?.wallets?.map((w) => w.wallet) ?? []}
+      />
+    </main>
   );
 }
 

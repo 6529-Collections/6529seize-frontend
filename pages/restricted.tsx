@@ -2,16 +2,15 @@ import { useEffect, useState, useContext } from "react";
 import styles from "../styles/Home.module.scss";
 
 import { useRouter } from "next/router";
-import Head from "next/head";
 import { LoginImage } from "./access";
 import { AuthContext } from "../components/auth/Auth";
 import { getStagingAuth } from "../services/auth/auth.utils";
 
 export default function Access() {
-  const { setTitle, title } = useContext(AuthContext);
+  const { setTitle } = useContext(AuthContext);
   useEffect(() => {
     setTitle({
-      title: "Restricted | 6529.io",
+      title: "Restricted",
     });
   }, []);
   const router = useRouter();
@@ -41,33 +40,20 @@ export default function Access() {
   }, [router.isReady]);
 
   return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="description" content="Restricted | 6529.io" />
-        <meta
-          property="og:url"
-          content={`${process.env.BASE_ENDPOINT}/restricted`}
+    <main className={styles.login}>
+      {image && <LoginImage image={image} alt="access" />}
+      <div className={styles.loginPrompt}>
+        <input
+          disabled={true}
+          type="text"
+          className="text-center"
+          value={message}
         />
-        <meta property="og:title" content={`Restricted`} />
-        <meta property="og:description" content="6529.io" />
-        <meta
-          property="og:image"
-          content={`${process.env.BASE_ENDPOINT}/6529io.png`}
-        />
-      </Head>
-      <main className={styles.login}>
-        {image && <LoginImage image={image} alt="access" />}
-        <div className={styles.loginPrompt}>
-          <input
-            disabled={true}
-            type="text"
-            className="text-center"
-            value={message}
-          />
-        </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 }
+
+Access.metadata = {
+  title: "Restricted",
+};

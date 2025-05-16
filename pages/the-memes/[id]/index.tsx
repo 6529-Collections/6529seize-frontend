@@ -1,11 +1,7 @@
 import styles from "../../../styles/Home.module.scss";
 
 import dynamic from "next/dynamic";
-import {
-  SharedHead,
-  SharedHeadProps,
-  getSharedServerSideProps,
-} from "../../../components/the-memes/MemeShared";
+import { getSharedServerSideProps } from "../../../components/the-memes/MemeShared";
 import { MEMES_CONTRACT } from "../../../constants";
 
 const MemePageComponent = dynamic(
@@ -15,16 +11,11 @@ const MemePageComponent = dynamic(
   }
 );
 
-export default function MemePage(props: any) {
-  const pageProps: SharedHeadProps = props.pageProps;
-
+export default function MemePage() {
   return (
-    <>
-      <SharedHead props={pageProps} contract={MEMES_CONTRACT} />
-      <main className={styles.main}>
-        <MemePageComponent />
-      </main>
-    </>
+    <main className={styles.main}>
+      <MemePageComponent />
+    </main>
   );
 }
 
