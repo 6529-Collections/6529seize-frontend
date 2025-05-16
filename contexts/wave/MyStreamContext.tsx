@@ -10,6 +10,7 @@ import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import useEnhancedWavesList, {
   MinimalWave,
 } from "./hooks/useEnhancedWavesList";
+import useDirectMessagesEnhancedList from "./hooks/useDirectMessagesEnhancedList";
 import useWaveMessagesStore, {
   Listener as WaveMessagesListener,
 } from "./hooks/useWaveMessagesStore";
@@ -36,6 +37,18 @@ interface WavesContextData {
   readonly removePinnedWave: (id: string) => void;
 }
 
+// Define new interface for DM data
+interface DirectMessagesContextData {
+  readonly list: MinimalWave[];
+  readonly isFetching: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly hasNextPage: boolean;
+  readonly fetchNextPage: () => void;
+  readonly addPinnedWave: (id: string) => void;
+  readonly removePinnedWave: (id: string) => void;
+  // Potentially other DM-specific functions like refetchDms, resetDmDropsCount if they diverge
+}
+
 interface ActiveWaveContextData {
   readonly id: string | null;
   readonly set: (waveId: string | null) => void;
@@ -51,6 +64,7 @@ interface WaveMessagesStoreData {
 // Define the type for our context using nested structures
 interface MyStreamContextType {
   readonly waves: WavesContextData;
+  readonly directMessages: DirectMessagesContextData;
   readonly activeWave: ActiveWaveContextData;
   readonly waveMessagesStore: WaveMessagesStoreData;
   readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
@@ -79,6 +93,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { isCapacitor } = useCapacitor();
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
   const wavesHookData = useEnhancedWavesList(activeWaveId);
+  const dmsHookData = useDirectMessagesEnhancedList(activeWaveId);
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
 
@@ -106,10 +121,12 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       waveDataManager.registerWave(activeWaveId, true);
     }
     wavesHookData.refetchAllWaves();
+    dmsHookData.refetchAllWaves();
     if (isCapacitor) {
       wavesHookData.resetAllWavesNewDropsCount();
+      dmsHookData.resetAllWavesNewDropsCount();
     }
-  }, [websocketStatus, activeWaveId, isCapacitor]);
+  }, [websocketStatus, activeWaveId, isCapacitor, wavesHookData, dmsHookData]);
 
   useEffect(() => {
     if (activeWaveId) {
@@ -134,6 +151,16 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       set: setActiveWave,
     };
 
+    const directMessages: DirectMessagesContextData = {
+      list: dmsHookData.waves,
+      isFetching: dmsHookData.isFetching,
+      isFetchingNextPage: dmsHookData.isFetchingNextPage,
+      hasNextPage: dmsHookData.hasNextPage,
+      fetchNextPage: dmsHookData.fetchNextPage,
+      addPinnedWave: dmsHookData.addPinnedWave,
+      removePinnedWave: dmsHookData.removePinnedWave,
+    };
+
     // Prepare the store data for the context (only read/subscribe parts)
     const waveMessagesStoreData: WaveMessagesStoreData = {
       getData: waveMessagesStore.getData,
@@ -144,6 +171,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     return {
       waves,
       activeWave,
+      directMessages,
       waveMessagesStore: waveMessagesStoreData,
       registerWave: waveDataManager.registerWave,
       fetchNextPageForWave: waveDataManager.fetchNextPage,
@@ -159,6 +187,13 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     wavesHookData.fetchNextPage,
     wavesHookData.addPinnedWave,
     wavesHookData.removePinnedWave,
+    dmsHookData.waves,
+    dmsHookData.isFetching,
+    dmsHookData.isFetchingNextPage,
+    dmsHookData.hasNextPage,
+    dmsHookData.fetchNextPage,
+    dmsHookData.addPinnedWave,
+    dmsHookData.removePinnedWave,
     activeWaveId,
     setActiveWave,
     waveMessagesStore.getData,
