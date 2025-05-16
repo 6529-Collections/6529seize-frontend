@@ -1,6 +1,7 @@
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { safeLocalStorage } from "../../helpers/safeLocalStorage";
+import { API_AUTH_COOKIE } from "../../constants";
 
 export const WALLET_AUTH_COOKIE = "wallet-auth";
 
@@ -70,6 +71,10 @@ export const setAuthJwt = (
   if (role) {
     safeLocalStorage.setItem(WALLET_ROLE_STORAGE_KEY, role);
   }
+};
+
+export const getStagingAuth = () => {
+  return Cookies.get(API_AUTH_COOKIE) ?? process.env.STAGING_API_KEY ?? null;
 };
 
 export const getAuthJwt = () => {

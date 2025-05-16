@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Image from "next/image";
 import { AuthContext } from "../components/auth/Auth";
+import { getStagingAuth } from "../services/auth/auth.utils";
 
 export default function Access() {
   const { setTitle, title } = useContext(AuthContext);
@@ -21,7 +22,7 @@ export default function Access() {
 
   useEffect(() => {
     if (!image && router.isReady) {
-      const apiAuth = Cookies.get(API_AUTH_COOKIE);
+      const apiAuth = getStagingAuth();
       fetch(`${process.env.API_ENDPOINT}/api/`, {
         headers: apiAuth ? { "x-6529-auth": apiAuth } : {},
       }).then((r: any) => {
