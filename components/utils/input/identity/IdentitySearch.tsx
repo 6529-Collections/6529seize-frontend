@@ -127,22 +127,27 @@ export default function IdentitySearch({
         ></path>
       </svg>
       {!!identity?.length && (
-        <svg
+        <button
+          type="button"
           onClick={() => onValueChange(null)}
+          aria-label="Clear identity"
           className={`${ICON_CLASSES[size]} tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out`}
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            d="M17 7L7 17M7 7L17 17"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M17 7L7 17M7 7L17 17"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       )}
       <label
         htmlFor={randomId}

@@ -63,21 +63,26 @@ export default function GroupsListSearch({
             ></path>
           </svg>
           {!!groupName?.length && (
-            <svg
+            <button
+              type="button"
               onClick={() => setGroupName(null)}
+              aria-label="Clear group name"
               className="tw-top-3 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                d="M17 7L7 17M7 7L17 17"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M17 7L7 17M7 7L17 17"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           )}
           <label
             htmlFor={randomId}

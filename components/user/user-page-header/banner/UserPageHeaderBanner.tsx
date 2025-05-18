@@ -31,6 +31,7 @@ export default function UserPageHeaderBanner({
         <div className="">
           <button
             onClick={() => setIsEditOpen(true)}
+            aria-label="Edit banner"
             className="tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-p-0"
           >
             <div className="edit-profile tw-absolute tw-inset-0 tw-bg-black/30">
