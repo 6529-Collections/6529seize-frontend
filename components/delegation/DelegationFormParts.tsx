@@ -485,7 +485,8 @@ export function DelegationCloseButton(
       <FontAwesomeIcon
         className={styles.closeNewDelegationForm}
         icon={faTimesCircle}
-        onClick={() => props.onHide()}></FontAwesomeIcon>
+        onClick={() => props.onHide()}
+        aria-label={`Cancel ${props.title}`}></FontAwesomeIcon>
     </Tippy>
   );
 }
