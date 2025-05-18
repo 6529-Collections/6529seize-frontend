@@ -153,6 +153,7 @@ export default function UserFollowBtn({
           delay={250}>
           <button
             onClick={onDirectMessage}
+            aria-label="Send direct message"
             className={`${BUTTON_CLASSES[size]} tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700 tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
             {directMessageLoading ? (
               <CircleLoader size={CircleLoaderSize.SMALL} />
@@ -166,6 +167,7 @@ export default function UserFollowBtn({
         onClick={onFollow}
         disabled={mutating || isFetching}
         type="button"
+        aria-label={following ? "Unfollow" : "Follow"}
         className={`${BUTTON_CLASSES[size]} ${
           following
             ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
