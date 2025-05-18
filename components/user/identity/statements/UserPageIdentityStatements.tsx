@@ -137,6 +137,8 @@ export default function UserPageIdentityStatements({
                     placement="top">
                     <div
                       tabIndex={0}
+                      role="button"
+                      aria-label="Statements help"
                       className="tw-rounded-full tw-h-10 tw-w-10 tw-inline-flex tw-items-center tw-justify-center focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400">
                       <svg
                         className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-text-iron-400"
