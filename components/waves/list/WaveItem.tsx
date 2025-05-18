@@ -51,11 +51,11 @@ export default function WaveItem({
           <div className="-tw-mt-5 tw-relative tw-flex-shrink-0">
             <div className="tw-h-16 tw-w-16">
               {wave?.picture ? (
-                <img
-                  className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900"
-                  src={getScaledImageUri(wave.picture, ImageScale.W_AUTO_H_50)}
-                  alt="#"
-                />
+                  <img
+                    className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900"
+                    src={getScaledImageUri(wave.picture, ImageScale.W_AUTO_H_50)}
+                    alt={wave?.name ? `Wave ${wave.name}` : "Wave picture"}
+                  />
               ) : (
                 <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900" />
               )}
@@ -85,7 +85,11 @@ export default function WaveItem({
                       wave.author.pfp,
                       ImageScale.W_AUTO_H_50
                     )}
-                    alt="#"
+                    alt={
+                      wave?.author.handle
+                        ? `${wave.author.handle} avatar`
+                        : "Author avatar"
+                    }
                   />
                 ) : (
                   <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
