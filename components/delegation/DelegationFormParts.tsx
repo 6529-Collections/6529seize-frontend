@@ -483,6 +483,7 @@ export function DelegationCloseButton(
       placement={"top"}
       theme={"light"}>
       <FontAwesomeIcon
+        aria-label={`Cancel ${props.title}`}
         className={styles.closeNewDelegationForm}
         icon={faTimesCircle}
         onClick={() => props.onHide()}></FontAwesomeIcon>
