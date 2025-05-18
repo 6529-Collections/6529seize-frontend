@@ -60,6 +60,7 @@ export default function Access() {
       {image && <LoginImage image={image} alt="access" />}
       <div className={styles.loginPrompt}>
         <input
+          aria-label="Team access code"
           disabled={inputDisabled}
           type="text"
           className={inputDisabled ? "text-center" : ""}
