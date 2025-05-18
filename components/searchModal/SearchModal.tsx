@@ -60,7 +60,11 @@ function SearchModal(props: Readonly<Props>) {
             className={`${styles.modalInput}`}
             placeholder="Search for address, ENS or username"
           />
-          <Button className={styles.modalButton} onClick={addSearchWallet}>
+          <Button
+            className={styles.modalButton}
+            onClick={addSearchWallet}
+            aria-label="Add search wallet"
+          >
             +
           </Button>
         </InputGroup>
