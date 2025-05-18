@@ -213,7 +213,9 @@ export default function UserPageSubscriptionsTopUp() {
                     type="submit"
                     disabled={
                       sendTransaction.isPending || waitSendTransaction.isLoading
-                    }>
+                    }
+                    aria-label="Send custom top up"
+                  >
                     Send
                   </Button>
                 </Col>
@@ -261,7 +263,9 @@ function CardCountTopup(
             <Button
               className={styles.sendBtn}
               type="submit"
-              disabled={props.disabled}>
+              disabled={props.disabled}
+              aria-label={`Send top up for ${props.display ?? `${props.count} Card${props.count > 1 ? 's' : ''}`}`}
+            >
               Send
             </Button>
           </Col>

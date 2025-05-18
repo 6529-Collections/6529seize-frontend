@@ -34,6 +34,9 @@ export default function UserPageSubscriptionsBalance(
                     height: "24px",
                     cursor: "pointer",
                   }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Refresh balance"
                 />
               )}
             </>

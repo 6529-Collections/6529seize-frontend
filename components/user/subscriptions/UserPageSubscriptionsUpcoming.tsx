@@ -237,6 +237,7 @@ function SubscriptionRow(
               checked={subscribed}
               icons={false}
               onChange={submit}
+              aria-label={`Toggle subscription for ${props.title} #${props.subscription.token_id}`}
             />
           </span>
         </Col>

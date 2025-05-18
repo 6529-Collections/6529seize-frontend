@@ -47,7 +47,8 @@ export default function UserPageSubscriptionsAirdropAddress(
           </span>
           {props.airdrop?.airdrop_address && props.show_edit && (
             <a
-              href={`/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`}>
+              href={`/delegation/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`}
+              aria-label="Change airdrop address">
               Change
             </a>
           )}
