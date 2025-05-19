@@ -26,7 +26,7 @@ export default function DragDropPaste(): null {
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
     let isMounted = true;
-    return editor.registerCommand(
+    const unregister = editor.registerCommand(
       DRAG_DROP_PASTE,
       (files) => {
         (async () => {
@@ -74,7 +74,9 @@ export default function DragDropPaste(): null {
       },
       COMMAND_PRIORITY_LOW
     );
+
     return () => {
+      unregister();
       isMounted = false;
     };
   }, [editor, setToast]);
