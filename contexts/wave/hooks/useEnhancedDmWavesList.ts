@@ -45,10 +45,10 @@ function useEnhancedDmWavesList(activeWaveId: string | null) {
           pfp: c.contributor_pfp,
         })),
         newDropsCount: newDropsData,
-        isPinned: wavesData.pinnedWaves.some((w) => w.id === wave.id),
+        isPinned: false,
       };
     },
-    [newDropsCounts, wavesData.pinnedWaves]
+    [newDropsCounts]
   );
 
   const mappedWaves = useMemo(
@@ -72,8 +72,8 @@ function useEnhancedDmWavesList(activeWaveId: string | null) {
     isFetchingNextPage: wavesData.isFetchingNextPage,
     hasNextPage: wavesData.hasNextPage,
     fetchNextPage: wavesData.fetchNextPage,
-    addPinnedWave: wavesData.addPinnedWave,
-    removePinnedWave: wavesData.removePinnedWave,
+    addPinnedWave: () => {},
+    removePinnedWave: () => {},
     refetchAllWaves: wavesData.refetchAllWaves,
     resetAllWavesNewDropsCount,
   };

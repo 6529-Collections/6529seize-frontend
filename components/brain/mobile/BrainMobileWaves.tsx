@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import BrainLeftSidebarSearchWave from "../left-sidebar/search-wave/BrainLeftSidebarSearchWave";
 import BrainLeftSidebarWaves from "../left-sidebar/waves/BrainLeftSidebarWaves";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 
@@ -12,7 +11,6 @@ const BrainMobileWaves: React.FC = () => {
 
   return (
     <div className={containerClassName} style={mobileWavesViewStyle} ref={scrollContainerRef}>
-      <BrainLeftSidebarSearchWave />
       <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
     </div>
   );
