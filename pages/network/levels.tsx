@@ -17,7 +17,7 @@ export default function Levels() {
       <div className="tw-pt-12 tw-pb-12">
         <div className="tw-px-6 min-[992px]:tw-px-3 min-[992px]:tw-max-w-[960px] max-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <h1>Levels</h1>
-          <div className="tw-my-6 tw-flex tw-flex-col tw-items-center tw-justify-center">
+          <div className="tw-my-6 tw-flex tw-flex-col">
             <ProgressChart />
             <ul className="tw-ml-4 tw-pl-0">
               <li className="tw-text-justify tw-mb-0 tw-mt-2 tw-font-normal tw-text-base tw-text-neutral-100">
