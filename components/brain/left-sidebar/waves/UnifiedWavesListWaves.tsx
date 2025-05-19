@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, forwardRef, useImperativeHandle } from "react";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
@@ -6,6 +6,7 @@ import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
 import CommonSwitch from "../../../utils/switch/CommonSwitch";
 import { useShowFollowingWaves } from "../../../../hooks/useShowFollowingWaves";
 import { useAuth } from "../../../auth/Auth";
+import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 
 interface UnifiedWavesListWavesProps {
   readonly waves: MinimalWave[];
@@ -13,15 +14,18 @@ interface UnifiedWavesListWavesProps {
   readonly hideToggle?: boolean;
   readonly hidePin?: boolean;
   readonly hideHeaders?: boolean;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
-const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
-  waves,
-  onHover,
-  hideToggle = false,
-  hidePin = false,
-  hideHeaders = false,
-}) => {
+export interface UnifiedWavesListWavesHandle {
+  containerRef: React.RefObject<HTMLDivElement>;
+  sentinelRef: React.RefObject<HTMLDivElement>;
+}
+
+const UnifiedWavesListWaves = forwardRef<
+  UnifiedWavesListWavesHandle,
+  UnifiedWavesListWavesProps
+>(({ waves, onHover, scrollContainerRef, hideToggle, hidePin, hideHeaders }, ref) => {
   const [following, setFollowing] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
 
@@ -51,6 +55,19 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
     };
   }, [waves]);
 
+  const virtual = useVirtualizedWaves(
+    regularWaves,
+    "unified-waves-regular",
+    scrollContainerRef,
+    62,
+    5
+  );
+
+  useImperativeHandle(ref, () => ({
+    containerRef: virtual.containerRef as React.RefObject<HTMLDivElement>,
+    sentinelRef: virtual.sentinelRef as React.RefObject<HTMLDivElement>,
+  }));
+
   if (!waves.length) {
     return null;
   }
@@ -79,20 +96,46 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
       )}
       {regularWaves.length > 0 && (
         <>
-          {!hideHeaders && (
+         {!hideHeaders && (
             <SectionHeader label="All Waves" rightContent={joinedToggle} />
           )}
-          <div className="tw-flex tw-flex-col">
-            {regularWaves.map((wave) => (
-              <div key={wave.id}>
-                <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={!hidePin} />
-              </div>
-            ))}
+          <div style={{ height: virtual.totalHeight, position: "relative" }}>
+            {virtual.virtualItems.map((v) => {
+              if (v.index === regularWaves.length) {
+                return (
+                  <div
+                    key="sentinel"
+                    ref={virtual.sentinelRef}
+                    style={{
+                      position: "absolute",
+                      top: v.start,
+                      height: v.size,
+                      width: "100%",
+                    }}
+                  />
+                );
+              }
+              const wave = regularWaves[v.index];
+              return (
+                <div
+                  key={wave.id}
+                  style={{
+                    position: "absolute",
+                    top: v.start,
+                    height: v.size,
+                    width: "100%",
+                  }}
+                >
+                  <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={!hidePin} />
+                </div>
+              );
+            })}
           </div>
         </>
       )}
     </div>
   );
-};
+});
 
+UnifiedWavesListWaves.displayName = "UnifiedWavesListWaves";
 export default UnifiedWavesListWaves;
