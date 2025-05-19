@@ -152,7 +152,10 @@ export default function WaveDropFollowAuthor({
   };
 
   return (
-    <Tippy content={<span className="tw-text-xs">{tooltipText[followState]}</span>} placement="top">
+    <Tippy
+      content={<span className="tw-text-xs">{tooltipText[followState]}</span>}
+      placement="top"
+    >
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -160,6 +163,11 @@ export default function WaveDropFollowAuthor({
         }}
         disabled={mutating}
         className={`${classes[followState]} tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300`}
+        aria-label={
+          followState === FOLLOW_STATE.FOLLOWING
+            ? `Unfollow ${drop.author.handle}`
+            : `Follow ${drop.author.handle}`
+        }
       >
         {mutating ? (
           <CircleLoader size={CircleLoaderSize.SMALL} />

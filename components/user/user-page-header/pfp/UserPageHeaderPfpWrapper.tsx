@@ -22,6 +22,7 @@ export default function UserPageHeaderPfpWrapper({
         onClick={() => setIsEditPfpOpen(true)}
         disabled={!canEdit}
         className="tw-group tw-bg-transparent tw-border-none tw-relative tw-p-1 tw-rounded-lg"
+        aria-label={canEdit ? "Edit profile picture" : "Profile picture"}
       >
         {children}
 

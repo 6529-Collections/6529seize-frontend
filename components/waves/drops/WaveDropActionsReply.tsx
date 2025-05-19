@@ -38,6 +38,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
           }`}
           onClick={canReply ? onReply : undefined}
           disabled={!canReply}
+          aria-label="Reply to drop"
         >
           <svg
             className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
