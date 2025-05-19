@@ -1,4 +1,9 @@
-import React, { useMemo, forwardRef, useImperativeHandle } from "react";
+import React, {
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+} from "react";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
@@ -54,8 +59,8 @@ const UnifiedWavesListWaves = forwardRef<
   const virtual = useVirtualizedWaves(regularWaves, "unified-waves-regular");
 
   useImperativeHandle(ref, () => ({
-    containerRef: virtual.containerRef,
-    sentinelRef: virtual.sentinelRef,
+    containerRef: virtual.containerRef as React.RefObject<HTMLDivElement>,
+    sentinelRef: virtual.sentinelRef as React.RefObject<HTMLDivElement>,
   }));
 
   if (!waves.length) {
@@ -63,11 +68,7 @@ const UnifiedWavesListWaves = forwardRef<
   }
 
   const joinedToggle = isConnectedIdentity ? (
-    <CommonSwitch
-      label="Joined"
-      isOn={following}
-      setIsOn={setFollowing}
-    />
+    <CommonSwitch label="Joined" isOn={following} setIsOn={setFollowing} />
   ) : null;
 
   return (
@@ -86,10 +87,7 @@ const UnifiedWavesListWaves = forwardRef<
       )}
       {regularWaves.length > 0 && (
         <>
-          <SectionHeader
-            label="All Waves"
-            rightContent={joinedToggle}
-          />
+          <SectionHeader label="All Waves" rightContent={joinedToggle} />
           <div
             ref={virtual.containerRef}
             style={{ overflowY: "auto" }}
@@ -134,4 +132,5 @@ const UnifiedWavesListWaves = forwardRef<
   );
 });
 
+UnifiedWavesListWaves.displayName = "UnifiedWavesListWaves";
 export default UnifiedWavesListWaves;

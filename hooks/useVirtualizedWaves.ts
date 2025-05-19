@@ -26,6 +26,7 @@ export function useVirtualizedWaves<T>(
     if (el) {
       el.scrollTop = getPosition(key);
       const onScroll = () => {
+        console.log("onScroll", el.scrollTop);
         setScrollOffset(el.scrollTop);
         setPosition(key, el.scrollTop);
       };
@@ -38,6 +39,7 @@ export function useVirtualizedWaves<T>(
   }, [getPosition, setPosition, key]);
 
   const viewportHeight = containerRef.current?.clientHeight ?? 0;
+
   const startIndex = Math.max(Math.floor(scrollOffset / rowHeight) - overscan, 0);
   const endIndex = Math.min(
     Math.ceil((scrollOffset + viewportHeight) / rowHeight) + overscan,
