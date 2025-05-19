@@ -109,7 +109,7 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
         />
 
         {sidebarTab === 'waves' && <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef}/>}
-        {sidebarTab === 'messages' && <DirectMessagesList />}
+        {sidebarTab === 'messages' && <DirectMessagesList scrollContainerRef={scrollContainerRef}/>}
       </div>
     </div>
   );

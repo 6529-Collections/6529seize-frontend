@@ -5,8 +5,17 @@ import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
 import BrainLeftSidebarCreateADirectMessageButton from "../left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
 import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 
-const DirectMessagesList: React.FC = () => {
+interface DirectMessagesListProps {
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+}
+
+const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
+  scrollContainerRef,
+}) => {
   const { directMessages, activeWave, registerWave } = useMyStream();
+  useEffect(() => {
+    console.log("directMessages", directMessages);
+  }, [directMessages]);
 
   const onNextPage = () => {
     if (
@@ -63,6 +72,7 @@ const DirectMessagesList: React.FC = () => {
           hideToggle
           hidePin
           hideHeaders
+          scrollContainerRef={scrollContainerRef}
         />
 
         <UnifiedWavesListLoader
