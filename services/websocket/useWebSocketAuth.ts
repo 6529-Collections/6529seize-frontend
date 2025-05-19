@@ -27,7 +27,6 @@ function useWebSocketAuth() {
     const checkAuthToken = () => {
       const currentToken = getAuthJwt();
       if (currentToken !== authToken) {
-        console.log("Auth token changed, updating WebSocket connection");
         setAuthToken(currentToken);
       }
     };
