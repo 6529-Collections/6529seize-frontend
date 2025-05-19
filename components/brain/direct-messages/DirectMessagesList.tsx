@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import UnifiedWavesListWaves from "../left-sidebar/waves/UnifiedWavesListWaves";
+import UnifiedWavesListWaves, { UnifiedWavesListWavesHandle } from "../left-sidebar/waves/UnifiedWavesListWaves";
 import { UnifiedWavesListLoader } from "../left-sidebar/waves/UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
 import BrainLeftSidebarCreateADirectMessageButton from "../left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
@@ -12,36 +12,30 @@ interface DirectMessagesListProps {
 const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   scrollContainerRef,
 }) => {
+
+  // Refs to the scroll container and sentinel
+  const listRef = useRef<UnifiedWavesListWavesHandle>(null);
+  const hasFetchedRef = useRef(false);
+
   const { directMessages, activeWave, registerWave } = useMyStream();
+
   useEffect(() => {
     console.log("directMessages", directMessages);
   }, [directMessages]);
 
-  const onNextPage = () => {
-    if (
-      directMessages.hasNextPage &&
-      !directMessages.isFetchingNextPage &&
-      !directMessages.isFetching
-    ) {
-      directMessages.fetchNextPage();
-    }
-  };
-
-  // infinite scroll observer (same logic as waves list)
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  const hasFetchedRef = useRef(false);
-
+    // Reset the fetch flag when dependencies change
   useEffect(() => {
     hasFetchedRef.current = false;
   }, [directMessages.hasNextPage, directMessages.isFetchingNextPage]);
 
-  useEffect(() => {
-    if (!directMessages.hasNextPage || directMessages.isFetchingNextPage)
-      return;
-    const node = loadMoreRef.current;
-    if (!node) return;
 
-    const handler: IntersectionObserverCallback = (entries) => {
+
+
+  useEffect(() => {
+    const node = listRef.current?.sentinelRef.current;
+    if (!node || !directMessages.hasNextPage || directMessages.isFetchingNextPage) return;
+
+    const cb = (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
       if (
         entry.isIntersecting &&
@@ -54,10 +48,18 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
       }
     };
 
-    const observer = new IntersectionObserver(handler, { rootMargin: "100px" });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [directMessages.hasNextPage, directMessages.isFetchingNextPage]);
+    const obs = new IntersectionObserver(cb, {
+      root: listRef.current?.containerRef.current,
+      rootMargin: "100px",
+    });
+
+    obs.observe(node);
+
+    return () => obs.disconnect();
+  }, [listRef.current?.sentinelRef.current, directMessages.hasNextPage, directMessages.isFetchingNextPage]);
+
+
+
 
   return (
     <div className="tw-mb-4">
@@ -67,6 +69,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
         </div>
 
         <UnifiedWavesListWaves
+          ref={listRef}
           waves={directMessages.list.map((w) => ({ ...w, isPinned: false }))}
           onHover={registerWave}
           hideToggle
@@ -76,9 +79,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
         />
 
         <UnifiedWavesListLoader
-          loadMoreRef={loadMoreRef}
           isFetchingNextPage={directMessages.isFetchingNextPage}
-          hasNextPage={!!directMessages.hasNextPage}
         />
 
         <UnifiedWavesListEmpty
