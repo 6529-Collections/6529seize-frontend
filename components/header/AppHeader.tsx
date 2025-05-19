@@ -47,7 +47,7 @@ export default function AppHeader(props: Readonly<Props>) {
   const { wave, isLoading, isFetching } = useWaveById(waveId);
   const isProfileRoute = router.pathname.startsWith("/[user]");
 
-  const showBackButton = !!waveId || (isProfileRoute && canGoBack);
+  const showBackButton = (!!waveId && activeView === null) || (isProfileRoute && canGoBack);
 
   const finalTitle: React.ReactNode = (() => {
     if (activeView === "waves") return "Waves";

@@ -8,6 +8,8 @@ import { TitleType, useAuth } from "../auth/Auth";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { isNavItemActive } from "./isNavItemActive";
+import { useWaveData } from "../../hooks/useWaveData";
+import { useWave } from "../../hooks/useWave";
 
 interface Props {
   readonly item: NavItemData;
@@ -21,6 +23,16 @@ const NavItem = ({ item }: Props) => {
   const { icon } = item;
 
   const isStream = name === "Stream";
+
+  // Determine if the current wave (if any) is a DM
+  const waveIdFromQuery =
+    typeof router.query.wave === "string" ? router.query.wave : null;
+  const { data: waveData } = useWaveData({
+    waveId: waveIdFromQuery,
+    // Minimal onWaveNotFound, actual handling of not found is likely elsewhere
+    onWaveNotFound: () => {},
+  });
+  const { isDm: isCurrentWaveDmValue } = useWave(waveData);
 
   // Add unread notifications logic
   const { connectedProfile, setTitle } = useAuth();
@@ -64,7 +76,7 @@ const NavItem = ({ item }: Props) => {
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
-  const isActive = isNavItemActive(item, router, activeView);
+  const isActive = isNavItemActive(item, router, activeView, isCurrentWaveDmValue);
 
   const handleClick = () => {
     if (
