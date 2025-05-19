@@ -106,6 +106,7 @@ const BrainContentPinnedWaves: React.FC = () => {
       {showLeftArrow && (
         <button
           ref={leftArrowRef}
+          aria-label="Scroll left"
           onClick={() => scrollHorizontally("left")}
           className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-top-0 sm:tw-top-0.5 tw-p-0 tw-size-8 sm:tw-size-7 tw-left-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-md tw-border-none"
         >
@@ -128,6 +129,7 @@ const BrainContentPinnedWaves: React.FC = () => {
       {showRightArrow && (
         <button
           ref={rightArrowRef}
+          aria-label="Scroll right"
           onClick={() => scrollHorizontally("right")}
           className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-right-0 tw-top-0 sm:tw-top-0.5 tw-p-0 tw-size-8 sm:tw-size-7 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-md tw-border-none"
         >
