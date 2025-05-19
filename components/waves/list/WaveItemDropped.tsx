@@ -17,7 +17,7 @@ export default function WaveItemDropped({ wave }: { readonly wave: ApiWave }) {
                   c.contributor_pfp,
                   ImageScale.W_AUTO_H_50
                 )}
-                alt="#"
+                alt={`${c.contributor_identity} avatar`}
               />
             </div>
           </Link>

@@ -31,6 +31,7 @@ export default function UserPageIdentityDeleteStatementButton({
         <button
           onClick={() => setIsDeleteStatementOpen(true)}
           type="button"
+          aria-label="Delete statement"
           className={`${
             isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
           } tw-bg-transparent tw-cursor-pointer tw-text-sm tw-font-semibold tw-text-white tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
