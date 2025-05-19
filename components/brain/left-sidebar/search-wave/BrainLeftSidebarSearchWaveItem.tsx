@@ -18,12 +18,18 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
   const prefetchWaveData = usePrefetchWaveData();
   const { registerWave } = useMyStream();
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
+  const isDm =
+    wave.wave.type === ApiWaveType.Chat &&
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (wave.chat as any)?.scope?.group?.is_direct_message === true;
+
   const getHref = (waveId: string) => {
+    const base = isDm ? `/my-stream?view=messages&wave=${waveId}` : `/my-stream?wave=${waveId}`;
     const currentWaveId = router.query.wave as string | undefined;
     if (currentWaveId === waveId) {
       return "/my-stream";
     }
-    return `/my-stream?wave=${waveId}`;
+    return base;
   };
   const isActive = wave.id === router.query.wave;
 

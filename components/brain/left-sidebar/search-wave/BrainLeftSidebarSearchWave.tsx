@@ -2,11 +2,11 @@ import React, { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import BrainLeftSidebarSearchWaveDropdown from "./BrainLeftSidebarSearchWaveDropdown";
 
-interface BrainLeftSidebarSearchWaveProps {}
+interface BrainLeftSidebarSearchWaveProps {
+  readonly listType: 'waves' | 'messages';
+}
 
-const BrainLeftSidebarSearchWave: React.FC<
-  BrainLeftSidebarSearchWaveProps
-> = () => {
+const BrainLeftSidebarSearchWave: React.FC<BrainLeftSidebarSearchWaveProps> = ({ listType }) => {
   const [isOpen, setIsOpen] = useState(false);
   const onFocusChange = (newV: boolean) => {
     if (newV) {
@@ -53,6 +53,7 @@ const BrainLeftSidebarSearchWave: React.FC<
         open={isOpen}
         searchCriteria={searchCriteria}
         onClose={() => setIsOpen(false)}
+        listType={listType}
       />
     </div>
   );

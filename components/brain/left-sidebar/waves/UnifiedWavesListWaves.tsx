@@ -10,11 +10,17 @@ import { useAuth } from "../../../auth/Auth";
 interface UnifiedWavesListWavesProps {
   readonly waves: MinimalWave[];
   readonly onHover: (waveId: string) => void;
+  readonly hideToggle?: boolean;
+  readonly hidePin?: boolean;
+  readonly hideHeaders?: boolean;
 }
 
 const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
   waves,
   onHover,
+  hideToggle = false,
+  hidePin = false,
+  hideHeaders = false,
 }) => {
   const [following, setFollowing] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -49,7 +55,7 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
     return null;
   }
 
-  const joinedToggle = isConnectedIdentity ? (
+  const joinedToggle = !hideToggle && isConnectedIdentity ? (
     <CommonSwitch
       label="Joined"
       isOn={following}
@@ -59,13 +65,13 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
 
   return (
     <div className="tw-flex tw-flex-col">
-      {pinnedWaves.length > 0 && (
+      {!hideHeaders && pinnedWaves.length > 0 && (
         <>
           <SectionHeader label="Pinned" icon={faThumbtack} />
           <div className="tw-flex tw-flex-col tw-mb-3">
             {pinnedWaves.map((wave) => (
               <div key={wave.id}>
-                <BrainLeftSidebarWave wave={wave} onHover={onHover} />
+                <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={!hidePin} />
               </div>
             ))}
           </div>
@@ -73,14 +79,13 @@ const UnifiedWavesListWaves: React.FC<UnifiedWavesListWavesProps> = ({
       )}
       {regularWaves.length > 0 && (
         <>
-          <SectionHeader 
-            label="All Waves" 
-            rightContent={joinedToggle}
-          />
+          {!hideHeaders && (
+            <SectionHeader label="All Waves" rightContent={joinedToggle} />
+          )}
           <div className="tw-flex tw-flex-col">
             {regularWaves.map((wave) => (
               <div key={wave.id}>
-                <BrainLeftSidebarWave wave={wave} onHover={onHover} />
+                <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={!hidePin} />
               </div>
             ))}
           </div>

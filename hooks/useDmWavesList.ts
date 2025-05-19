@@ -12,6 +12,7 @@ import { WAVE_FOLLOWING_WAVES_PARAMS } from "../components/react-query-wrapper/u
 import { usePinnedWaves } from "./usePinnedWaves";
 import { useWaveData } from "./useWaveData";
 import { ApiWave } from "../generated/models/ApiWave";
+import { ApiWaveType } from "../generated/models/ApiWaveType";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
 
 interface EnhancedWave extends ApiWave {
@@ -115,11 +116,18 @@ const useDmWavesList = () => {
 
   const allPinnedWaves = useMemo(() => {
     const res: EnhancedWave[] = [];
+    const waveIsDm = (w: ApiWave) =>
+      w.wave.type === ApiWaveType.Chat &&
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (w.chat as any)?.scope?.group?.is_direct_message === true;
+
     pinnedIds.forEach((id) => {
       const wave = mainWavesMap.get(id);
-      if (wave) res.push({ ...wave, isPinned: true });
+      if (wave && waveIsDm(wave)) res.push({ ...wave, isPinned: true });
     });
-    separatelyFetchedPinnedWaves.forEach((wave) => res.push({ ...wave, isPinned: true }));
+    separatelyFetchedPinnedWaves.forEach((wave) => {
+      if (waveIsDm(wave)) res.push({ ...wave, isPinned: true });
+    });
     if (!areWavesEqual(res, prevPinnedWavesRef.current)) prevPinnedWavesRef.current = res;
     return res;
   }, [pinnedIds, mainWavesMap, separatelyFetchedPinnedWaves]);
@@ -131,10 +139,17 @@ const useDmWavesList = () => {
 
     const pinnedSet = new Set(pinnedIds);
     const arr: EnhancedWave[] = [];
+    const waveIsDm = (w: ApiWave) =>
+      w.wave.type === ApiWaveType.Chat &&
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (w.chat as any)?.scope?.group?.is_direct_message === true;
+
     [...mainWaves, ...separatelyFetchedPinnedWaves].forEach((w) => {
       if (!map.has(w.id)) return;
       map.delete(w.id);
-      arr.push({ ...w, isPinned: pinnedSet.has(w.id) });
+      if (waveIsDm(w)) {
+        arr.push({ ...w, isPinned: pinnedSet.has(w.id) });
+      }
     });
     arr.sort((a, b) => b.metrics.latest_drop_timestamp - a.metrics.latest_drop_timestamp);
     return arr;
