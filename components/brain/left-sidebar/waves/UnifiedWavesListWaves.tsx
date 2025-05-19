@@ -1,9 +1,4 @@
-import React, {
-  useMemo,
-  forwardRef,
-  useImperativeHandle,
-  useEffect,
-} from "react";
+import React, { useMemo, forwardRef, useImperativeHandle } from "react";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
@@ -57,7 +52,13 @@ const UnifiedWavesListWaves = forwardRef<
     };
   }, [waves]);
 
-  const virtual = useVirtualizedWaves(regularWaves, "unified-waves-regular", 62, 5, scrollContainerRef);
+  const virtual = useVirtualizedWaves(
+    regularWaves,
+    "unified-waves-regular",
+    scrollContainerRef,
+    62,
+    5
+  );
 
   useImperativeHandle(ref, () => ({
     containerRef: virtual.containerRef as React.RefObject<HTMLDivElement>,

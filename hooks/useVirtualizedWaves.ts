@@ -12,9 +12,9 @@ export const SENTINEL_HEIGHT = 40;
 export function useVirtualizedWaves<T>(
   items: readonly T[],
   key: string,
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>,
   rowHeight = 72,
-  overscan = 5,
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>
+  overscan = 5
 ) {
   const { getPosition, setPosition } = useScrollPositionContext();
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -39,7 +39,10 @@ export function useVirtualizedWaves<T>(
 
   const viewportHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
-  const startIndex = Math.max(Math.floor(scrollOffset / rowHeight) - overscan, 0);
+  const startIndex = Math.max(
+    Math.floor(scrollOffset / rowHeight) - overscan,
+    0
+  );
   const endIndex = Math.min(
     Math.ceil((scrollOffset + viewportHeight) / rowHeight) + overscan,
     items.length
@@ -59,5 +62,10 @@ export function useVirtualizedWaves<T>(
 
   const totalHeight = items.length * rowHeight + SENTINEL_HEIGHT;
 
-  return { containerRef: scrollContainerRef, virtualItems, totalHeight, sentinelRef };
+  return {
+    containerRef: scrollContainerRef,
+    virtualItems,
+    totalHeight,
+    sentinelRef,
+  };
 }

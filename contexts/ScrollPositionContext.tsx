@@ -1,17 +1,17 @@
-import { createContext, useContext, useRef } from "react";
+import { createContext, useContext, useMemo, useRef } from "react";
 
 interface ScrollPositionContextValue {
   getPosition: (key: string) => number;
   setPosition: (key: string, value: number) => void;
 }
 
-const ScrollPositionContext = createContext<ScrollPositionContextValue | undefined>(
-  undefined
-);
+const ScrollPositionContext = createContext<
+  ScrollPositionContextValue | undefined
+>(undefined);
 
-export const ScrollPositionProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ScrollPositionProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const positionsRef = useRef<Record<string, number>>({});
 
   const getPosition = (key: string) => positionsRef.current[key] ?? 0;
@@ -19,8 +19,13 @@ export const ScrollPositionProvider: React.FC<{ children: React.ReactNode }> = (
     positionsRef.current[key] = value;
   };
 
+  const value = useMemo(
+    () => ({ getPosition, setPosition }),
+    [getPosition, setPosition]
+  );
+
   return (
-    <ScrollPositionContext.Provider value={{ getPosition, setPosition }}>
+    <ScrollPositionContext.Provider value={value}>
       {children}
     </ScrollPositionContext.Provider>
   );
