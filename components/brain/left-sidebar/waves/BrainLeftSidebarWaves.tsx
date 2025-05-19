@@ -2,7 +2,15 @@ import React from "react";
 import UnifiedWavesList from "./UnifiedWavesList";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 
-const BrainLeftSidebarWaves: React.FC = () => {
+interface BrainLeftSidebarWavesProps {
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+}
+
+const BrainLeftSidebarWaves: React.FC<BrainLeftSidebarWavesProps> = ({
+  scrollContainerRef,
+}) => {
+
+  
   const { waves, activeWave, registerWave } = useMyStream();
 
   const onNextPage = () => {
@@ -19,6 +27,7 @@ const BrainLeftSidebarWaves: React.FC = () => {
       hasNextPage={waves.hasNextPage}
       isFetchingNextPage={waves.isFetchingNextPage}
       onHover={registerWave}
+      scrollContainerRef={scrollContainerRef}
     />
   );
 };

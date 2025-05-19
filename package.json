@@ -132,29 +132,13 @@
     "typescript": "^5.8.3"
   },
   "overrides": {
-    "react-i18next": {
-      "i18next": "22.5.1"
-    },
-    "react-native": {
-      "react": "18.3.1"
-    },
     "@emoji-mart/react": {
       "react": "$react",
       "react-dom": "$react-dom"
     },
-    "viem": {
-      "ws": "8.17.1"
-    },
     "react-toggle": {
       "react": "$react",
       "react-dom": "$react-dom"
-    },
-    "axios": "1.8.2",
-    "@nestjs/axios": "4.0.0",
-    "@nestjs/core": "11.0.20",
-    "@nestjs/common": "11.0.20",
-    "@types/react": "19.1.4",
-    "@types/react-dom": "19.1.5",
-    "@babel/parser": "7.21.9"
+    }
   }
 }

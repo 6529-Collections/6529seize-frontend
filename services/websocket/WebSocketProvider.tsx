@@ -123,19 +123,9 @@ export function WebSocketProvider({
       MAX_RECONNECT_DELAY
     );
 
-    console.log(
-      `WebSocket scheduling reconnect attempt ${
-        reconnectAttemptsRef.current + 1
-      } in ${delay}ms`
-    );
-
     // Schedule reconnection
     reconnectTimerRef.current = setTimeout(() => {
       reconnectAttemptsRef.current += 1;
-      console.log(
-        `WebSocket reconnect attempt ${reconnectAttemptsRef.current}`
-      );
-
       // Attempt reconnection with the stored token
       connect(reconnectTokenRef.current);
     }, delay);
@@ -176,7 +166,6 @@ export function WebSocketProvider({
 
         // Set up event handlers
         ws.onopen = () => {
-          console.log("WebSocket connected");
           setStatus(WebSocketStatus.CONNECTED);
 
           // Reset reconnect attempts on successful connection
@@ -186,10 +175,6 @@ export function WebSocketProvider({
         ws.onmessage = handleMessage;
 
         ws.onclose = (event) => {
-          console.log(
-            `WebSocket disconnected: code=${event.code}, reason=${event.reason}`
-          );
-
           // Clean up WebSocket
           wsRef.current = null;
           setStatus(WebSocketStatus.DISCONNECTED);
@@ -197,7 +182,6 @@ export function WebSocketProvider({
           // Only attempt reconnect for unexpected closure (not code 1000)
           // and if this wasn't a manual disconnect
           if (event.code !== 1000 && !isManualDisconnectRef.current) {
-            console.log("WebSocket closed unexpectedly, scheduling reconnect");
             attemptReconnect();
           } else {
             // Reset reconnect attempts for intentional disconnects

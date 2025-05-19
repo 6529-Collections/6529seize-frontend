@@ -11,6 +11,7 @@ import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import Head from "next/head";
 import { PageSSRMetadata } from "../../helpers/Types";
 import { useAuth } from "../auth/Auth";
+import { ScrollPositionProvider } from "../../contexts/ScrollPositionContext";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -35,31 +36,33 @@ const MainLayout = ({ children, metadata }: MainLayoutProps) => {
   }
 
   return (
-    <ViewProvider>
-      <NavigationHistoryProvider>
-        <LayoutProvider>
-          <Head>
-            <title>{pageTitle}</title>
-            <link rel="icon" href="/favicon.ico" />
-            <meta name="description" content={description} />
-            <meta property="og:url" content={ogUrl} />
-            <meta property="og:title" content={metadataTitle} />
-            <meta property="og:description" content={description} />
-            <meta property="og:image" content={ogImage} />
-            <meta name="twitter:card" content={twitterCard} />
-          </Head>
-          <ClientOnly>
-            <MyStreamProvider>
-              {isMobile ? (
-                <MobileLayout>{children}</MobileLayout>
-              ) : (
-                <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
-              )}
-            </MyStreamProvider>
-          </ClientOnly>
-        </LayoutProvider>
-      </NavigationHistoryProvider>
-    </ViewProvider>
+    <ScrollPositionProvider>
+      <ViewProvider>
+        <NavigationHistoryProvider>
+          <LayoutProvider>
+            <Head>
+              <title>{pageTitle}</title>
+              <link rel="icon" href="/favicon.ico" />
+              <meta name="description" content={description} />
+              <meta property="og:url" content={ogUrl} />
+              <meta property="og:title" content={metadataTitle} />
+              <meta property="og:description" content={description} />
+              <meta property="og:image" content={ogImage} />
+              <meta name="twitter:card" content={twitterCard} />
+            </Head>
+            <ClientOnly>
+              <MyStreamProvider>
+                {isMobile ? (
+                  <MobileLayout>{children}</MobileLayout>
+                ) : (
+                  <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
+                )}
+              </MyStreamProvider>
+            </ClientOnly>
+          </LayoutProvider>
+        </NavigationHistoryProvider>
+      </ViewProvider>
+    </ScrollPositionProvider>
   );
 };
 

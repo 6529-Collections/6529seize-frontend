@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import { BrainLeftSidebarViewChange } from "./BrainLeftSidebarViewChange";
 import BrainLeftSidebarSearchWave from "./search-wave/BrainLeftSidebarSearchWave";
 import BrainLeftSidebarWaves from "./waves/BrainLeftSidebarWaves";
@@ -13,6 +13,9 @@ interface BrainLeftSidebarProps {
 const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   activeWaveId,
 }) => {
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   // Get content tab state from context
   const { activeContentTab, setActiveContentTab, availableTabs } =
     useContentTab();
@@ -49,6 +52,7 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
 
   return (
     <div
+      ref={scrollContainerRef}
       className="tw-flex-shrink-0 tw-flex tw-flex-col tw-overflow-y-auto lg:tw-w-80 tw-w-full tw-h-full tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-transition-colors tw-duration-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden"
       style={sidebarStyle}
     >
@@ -66,7 +70,7 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
           </div>
         )}
         <BrainLeftSidebarSearchWave />
-        <BrainLeftSidebarWaves />
+        <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
       </div>
     </div>
   );

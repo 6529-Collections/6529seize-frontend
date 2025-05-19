@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
-import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
+import UnifiedWavesListWaves, { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 
 interface UnifiedWavesListProps {
@@ -15,6 +15,7 @@ interface UnifiedWavesListProps {
   readonly hasNextPage: boolean | undefined;
   readonly isFetchingNextPage: boolean;
   readonly onHover: (waveId: string) => void;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
@@ -24,9 +25,11 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   hasNextPage,
   isFetchingNextPage,
   onHover,
+  scrollContainerRef,
 }) => {
-  // Ref for intersection observer
-  const loadMoreRef = useRef<HTMLDivElement>(null);
+  
+  // Refs to the scroll container and sentinel
+  const listRef = useRef<UnifiedWavesListWavesHandle>(null);
 
   // Track if we've triggered a fetch to avoid multiple triggers
   const hasFetchedRef = useRef(false);
@@ -38,15 +41,11 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
   // Set up intersection observer for infinite scrolling
   useEffect(() => {
-    const currentRef = loadMoreRef.current;
+    const node = listRef.current?.sentinelRef.current;
+    if (!node || !hasNextPage || isFetchingNextPage) return;
 
-    // Only observe if we have more pages to load and aren't already fetching
-    if (!hasNextPage || isFetchingNextPage) return;
-
-    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+    const cb = (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
-      // Only fetch if we're intersecting, have more pages, aren't already fetching,
-      // and haven't triggered a fetch in this cycle
       if (
         entry.isIntersecting &&
         hasNextPage &&
@@ -58,20 +57,15 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
       }
     };
 
-    const observer = new IntersectionObserver(handleIntersection, {
+    const obs = new IntersectionObserver(cb, {
+      root: listRef.current?.containerRef.current,
       rootMargin: "100px",
     });
 
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+    obs.observe(node);
 
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+    return () => obs.disconnect();
+  }, [listRef.current?.sentinelRef.current, hasNextPage, isFetchingNextPage]);
 
   return (
     <div className="tw-mb-4">
@@ -98,14 +92,10 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
         <div className="tw-w-full">
           {/* Unified Waves List */}
-          <UnifiedWavesListWaves waves={waves} onHover={onHover} />
+          <UnifiedWavesListWaves ref={listRef} waves={waves} onHover={onHover} scrollContainerRef={scrollContainerRef} />
 
           {/* Loading indicator and intersection trigger */}
-          <UnifiedWavesListLoader
-            loadMoreRef={loadMoreRef}
-            isFetchingNextPage={isFetchingNextPage}
-            hasNextPage={!!hasNextPage}
-          />
+          <UnifiedWavesListLoader isFetchingNextPage={isFetchingNextPage} />
 
           {/* Empty state */}
           <UnifiedWavesListEmpty
