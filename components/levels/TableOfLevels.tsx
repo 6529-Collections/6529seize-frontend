@@ -9,7 +9,12 @@ export default function TableOfLevels() {
   return (
     <div className="tw-w-full tw-flex tw-flex-col tw-items-center tw-justify-center">
       <div className="tw-w-full xl:tw-max-w-4xl tw-overflow-x-auto tw-ring-1 tw-ring-white/[0.15] tw-rounded-lg">
-        <table className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60">
+        <table
+          className="tw-min-w-full tw-divide-y tw-divide-neutral-700/60"
+          aria-labelledby="levels-caption">
+          <caption id="levels-caption" className="tw-sr-only">
+            Thresholds by Level
+          </caption>
           <thead className="tw-bg-neutral-700 tw-sticky tw-top-0 tw-z-10">
             <tr>
               <td className="tw-py-3 tw-pl-4 tw-pr-3 tw-text-left tw-text-xs tw-font-semibold tw-text-white uppercase sm:tw-pl-6">
