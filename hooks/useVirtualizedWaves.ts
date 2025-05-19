@@ -13,20 +13,19 @@ export function useVirtualizedWaves<T>(
   items: readonly T[],
   key: string,
   rowHeight = 72,
-  overscan = 5
+  overscan = 5,
+  scrollContainerRef: React.RefObject<HTMLDivElement | null>
 ) {
   const { getPosition, setPosition } = useScrollPositionContext();
-  const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [scrollOffset, setScrollOffset] = useState(0);
 
   // Restore scroll position on mount
   useEffect(() => {
-    const el = containerRef.current;
+    const el = scrollContainerRef.current;
     if (el) {
       el.scrollTop = getPosition(key);
       const onScroll = () => {
-        console.log("onScroll", el.scrollTop);
         setScrollOffset(el.scrollTop);
         setPosition(key, el.scrollTop);
       };
@@ -36,9 +35,9 @@ export function useVirtualizedWaves<T>(
         el.removeEventListener("scroll", onScroll);
       };
     }
-  }, [getPosition, setPosition, key]);
+  }, [getPosition, setPosition, key, scrollContainerRef]);
 
-  const viewportHeight = containerRef.current?.clientHeight ?? 0;
+  const viewportHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
   const startIndex = Math.max(Math.floor(scrollOffset / rowHeight) - overscan, 0);
   const endIndex = Math.min(
@@ -60,5 +59,5 @@ export function useVirtualizedWaves<T>(
 
   const totalHeight = items.length * rowHeight + SENTINEL_HEIGHT;
 
-  return { containerRef, virtualItems, totalHeight, sentinelRef };
+  return { containerRef: scrollContainerRef, virtualItems, totalHeight, sentinelRef };
 }

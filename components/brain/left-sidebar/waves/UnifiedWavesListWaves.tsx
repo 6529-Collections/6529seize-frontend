@@ -16,6 +16,7 @@ import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 interface UnifiedWavesListWavesProps {
   readonly waves: MinimalWave[];
   readonly onHover: (waveId: string) => void;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export interface UnifiedWavesListWavesHandle {
@@ -26,7 +27,7 @@ export interface UnifiedWavesListWavesHandle {
 const UnifiedWavesListWaves = forwardRef<
   UnifiedWavesListWavesHandle,
   UnifiedWavesListWavesProps
->(({ waves, onHover }, ref) => {
+>(({ waves, onHover, scrollContainerRef }, ref) => {
   const [following, setFollowing] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
 
@@ -56,7 +57,7 @@ const UnifiedWavesListWaves = forwardRef<
     };
   }, [waves]);
 
-  const virtual = useVirtualizedWaves(regularWaves, "unified-waves-regular");
+  const virtual = useVirtualizedWaves(regularWaves, "unified-waves-regular", 62, 5, scrollContainerRef);
 
   useImperativeHandle(ref, () => ({
     containerRef: virtual.containerRef as React.RefObject<HTMLDivElement>,
@@ -88,43 +89,37 @@ const UnifiedWavesListWaves = forwardRef<
       {regularWaves.length > 0 && (
         <>
           <SectionHeader label="All Waves" rightContent={joinedToggle} />
-          <div
-            ref={virtual.containerRef}
-            style={{ overflowY: "auto" }}
-            className="tw-flex tw-flex-col"
-          >
-            <div style={{ height: virtual.totalHeight, position: "relative" }}>
-              {virtual.virtualItems.map((v) => {
-                if (v.index === regularWaves.length) {
-                  return (
-                    <div
-                      key="sentinel"
-                      ref={virtual.sentinelRef}
-                      style={{
-                        position: "absolute",
-                        top: v.start,
-                        height: v.size,
-                        width: "100%",
-                      }}
-                    />
-                  );
-                }
-                const wave = regularWaves[v.index];
+          <div style={{ height: virtual.totalHeight, position: "relative" }}>
+            {virtual.virtualItems.map((v) => {
+              if (v.index === regularWaves.length) {
                 return (
                   <div
-                    key={wave.id}
+                    key="sentinel"
+                    ref={virtual.sentinelRef}
                     style={{
                       position: "absolute",
                       top: v.start,
                       height: v.size,
                       width: "100%",
                     }}
-                  >
-                    <BrainLeftSidebarWave wave={wave} onHover={onHover} />
-                  </div>
+                  />
                 );
-              })}
-            </div>
+              }
+              const wave = regularWaves[v.index];
+              return (
+                <div
+                  key={wave.id}
+                  style={{
+                    position: "absolute",
+                    top: v.start,
+                    height: v.size,
+                    width: "100%",
+                  }}
+                >
+                  <BrainLeftSidebarWave wave={wave} onHover={onHover} />
+                </div>
+              );
+            })}
           </div>
         </>
       )}

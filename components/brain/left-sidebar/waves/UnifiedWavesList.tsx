@@ -15,6 +15,7 @@ interface UnifiedWavesListProps {
   readonly hasNextPage: boolean | undefined;
   readonly isFetchingNextPage: boolean;
   readonly onHover: (waveId: string) => void;
+  readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
@@ -24,7 +25,9 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   hasNextPage,
   isFetchingNextPage,
   onHover,
+  scrollContainerRef,
 }) => {
+  
   // Refs to the scroll container and sentinel
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
 
@@ -89,7 +92,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
         <div className="tw-w-full">
           {/* Unified Waves List */}
-          <UnifiedWavesListWaves ref={listRef} waves={waves} onHover={onHover} />
+          <UnifiedWavesListWaves ref={listRef} waves={waves} onHover={onHover} scrollContainerRef={scrollContainerRef} />
 
           {/* Loading indicator and intersection trigger */}
           <UnifiedWavesListLoader isFetchingNextPage={isFetchingNextPage} />
