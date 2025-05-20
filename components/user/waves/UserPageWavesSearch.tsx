@@ -46,6 +46,9 @@ export default function UserPageWavesSearch({
               className="tw-top-3 tw-cursor-pointer tw-absolute tw-right-3 tw-h-5 tw-w-5 tw-text-iron-300"
               viewBox="0 0 24 24"
               fill="none"
+              role="button"
+              tabIndex={0}
+              aria-label="Clear wave name"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path

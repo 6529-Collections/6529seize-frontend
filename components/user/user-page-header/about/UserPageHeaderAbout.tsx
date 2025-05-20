@@ -49,7 +49,7 @@ export default function UserPageHeaderAbout({
             onClick={onEditClick}
             disabled={!canEdit}
             type="button"
-            aria-label="Add an About statement"
+            aria-label={statement ? "Edit About statement" : "Add About statement"}
             className="tw-flex tw-items-center tw-gap-x-2 tw-text-iron-500 hover:tw-text-iron-200 tw-text-left tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out"
           >
             <UserPageHeaderAboutStatement statement={statement} />
