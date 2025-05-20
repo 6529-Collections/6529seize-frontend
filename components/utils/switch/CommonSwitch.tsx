@@ -25,6 +25,7 @@ export default function CommonSwitch({
         className={`${backGroundColor} tw-p-0 tw-relative tw-flex tw-items-center tw-h-6 tw-w-11 tw-flex-shrink-0 tw-cursor-pointer tw-rounded-full tw-border-2 tw-border-transparent tw-transition-colors tw-duration-200 tw-ease-in-out focus:tw-outline-none`}
         role="switch"
         aria-checked="false"
+        aria-label={label}
       >
         <span
           aria-hidden="true"

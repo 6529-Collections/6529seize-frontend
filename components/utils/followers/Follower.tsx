@@ -20,7 +20,7 @@ export default function Follower({
               {follower.identity.pfp ? (
                 <img
                   src={follower.identity.pfp}
-                  alt=""
+                  alt={`${follower.identity.handle}'s profile`}
                   className="tw-bg-transparent tw-max-w-full tw-max-h-full tw-h-auto tw-w-auto tw-mx-auto tw-object-contain"
                 />
               ) : (

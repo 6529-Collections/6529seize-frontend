@@ -111,6 +111,7 @@ export default function CommonDropdown<T, U = unknown>(
           ref={buttonRef}
           type="button"
           aria-haspopup="true"
+          aria-label={`${filterLabel}: ${label}`}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
           className={`${
