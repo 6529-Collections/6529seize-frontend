@@ -85,7 +85,7 @@ describe('MyStreamProvider integration', () => {
       </MyStreamProvider>
     );
 
-    expect(registerWave).toHaveBeenCalledWith('wave', undefined);
+    expect(registerWave).toHaveBeenCalledWith('wave');
     expect(fetchNextPage).toHaveBeenCalledWith({ waveId: 'wave', type: DropSize.FULL });
     expect(addPinnedWave).toHaveBeenCalledWith('wave');
     expect(removePinnedWave).toHaveBeenCalledWith('wave');
