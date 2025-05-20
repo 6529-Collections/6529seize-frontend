@@ -1,4 +1,4 @@
-import React, { useMemo, forwardRef, useImperativeHandle } from "react";
+import React, { useMemo, forwardRef, useImperativeHandle, useRef } from "react";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import SectionHeader from "./SectionHeader";
@@ -24,6 +24,7 @@ const UnifiedWavesListWaves = forwardRef<
   UnifiedWavesListWavesProps
 >(({ waves, onHover, scrollContainerRef }, ref) => {
   const [following, setFollowing] = useShowFollowingWaves();
+  const listContainerRef = useRef<HTMLDivElement>(null);
   const { connectedProfile, activeProfileProxy } = useAuth();
 
   const isConnectedIdentity = useMemo(() => {
@@ -56,6 +57,7 @@ const UnifiedWavesListWaves = forwardRef<
     regularWaves,
     "unified-waves-regular",
     scrollContainerRef,
+    listContainerRef,
     62,
     5
   );
@@ -90,7 +92,10 @@ const UnifiedWavesListWaves = forwardRef<
       {regularWaves.length > 0 && (
         <>
           <SectionHeader label="All Waves" rightContent={joinedToggle} />
-          <div style={{ height: virtual.totalHeight, position: "relative" }}>
+          <div
+            ref={listContainerRef}
+            style={{ height: virtual.totalHeight, position: "relative" }}
+          >
             {virtual.virtualItems.map((v) => {
               if (v.index === regularWaves.length) {
                 return (
