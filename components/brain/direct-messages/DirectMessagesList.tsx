@@ -11,6 +11,7 @@ import HeaderUserConnect from "../../header/user/HeaderUserConnect";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import Image from "next/image";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
 
 interface DirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -21,6 +22,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
 }) => {
   const { isAuthenticated } = useSeizeConnectContext();
   const { connectedProfile, fetchingProfile } = useContext(AuthContext);
+  const { isApp } = useDeviceInfo();
 
   const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
 
@@ -119,9 +121,11 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   return (
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
-        <div className="tw-px-4 tw-mb-4 tw-w-full">
-          <BrainLeftSidebarCreateADirectMessageButton />
-        </div>
+        {!isApp && (
+          <div className="tw-px-4 tw-mb-4 tw-w-full">
+            <BrainLeftSidebarCreateADirectMessageButton />
+          </div>
+        )}
 
         <UnifiedWavesListWaves
           ref={listRef}

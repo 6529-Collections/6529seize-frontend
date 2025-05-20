@@ -12,6 +12,7 @@ import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
 import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryContext";
 import { capitalizeEveryWord, formatAddress } from "../../helpers/Helpers";
+import HeaderActionButtons from "./HeaderActionButtons";
 
 interface Props {
   readonly extraClass?: string;
@@ -47,7 +48,8 @@ export default function AppHeader(props: Readonly<Props>) {
   const { wave, isLoading, isFetching } = useWaveById(waveId);
   const isProfileRoute = router.pathname.startsWith("/[user]");
 
-  const showBackButton = (!!waveId && activeView === null) || (isProfileRoute && canGoBack);
+  const showBackButton =
+    (!!waveId && activeView === null) || (isProfileRoute && canGoBack);
 
   const finalTitle: React.ReactNode = (() => {
     if (activeView === "waves") return "Waves";
@@ -125,7 +127,10 @@ export default function AppHeader(props: Readonly<Props>) {
         <div className="tw-flex-1 tw-text-center tw-font-semibold tw-text-sm">
           {finalTitle}
         </div>
-        <HeaderSearchButton />
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <HeaderActionButtons />
+          <HeaderSearchButton />
+        </div>
       </div>
       <AppSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>

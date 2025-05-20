@@ -4,8 +4,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { UnifiedWavesListLoader } from "./UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "./UnifiedWavesListEmpty";
-import UnifiedWavesListWaves, { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
+import UnifiedWavesListWaves, {
+  UnifiedWavesListWavesHandle,
+} from "./UnifiedWavesListWaves";
 import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesList";
+import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 
 interface UnifiedWavesListProps {
   readonly waves: MinimalWave[];
@@ -26,7 +29,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   onHover,
   scrollContainerRef,
 }) => {
-  
+  const { isApp } = useDeviceInfo();
   // Refs to the scroll container and sentinel
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
 
@@ -69,22 +72,29 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   return (
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
-        <div className="tw-px-4 tw-mb-4 tw-w-full">
-          <Link
-            href="/waves?new=true"
-            className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300"
-          >
-            <FontAwesomeIcon
-              icon={faPlus}
-              className="tw-size-3.5 -tw-ml-1.5 tw-flex-shrink-0"
-            />
-            <span className="tw-text-xs tw-font-semibold">Create a Wave</span>
-          </Link>
-        </div>
+        {!isApp && (
+          <div className="tw-px-4 tw-mb-4 tw-w-full">
+            <Link
+              href="/waves?new=true"
+              className="tw-no-underline tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-700 tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-lg tw-py-2 tw-px-4 tw-text-xs tw-bg-iron-800 desktop-hover:hover:tw-text-primary-400 tw-font-semibold tw-transition-all tw-duration-300"
+            >
+              <FontAwesomeIcon
+                icon={faPlus}
+                className="tw-size-3.5 -tw-ml-1.5 tw-flex-shrink-0"
+              />
+              <span className="tw-text-xs tw-font-semibold">Wave</span>
+            </Link>
+          </div>
+        )}
 
         <div className="tw-w-full">
           {/* Unified Waves List */}
-          <UnifiedWavesListWaves ref={listRef} waves={waves} onHover={onHover} scrollContainerRef={scrollContainerRef} />
+          <UnifiedWavesListWaves
+            ref={listRef}
+            waves={waves}
+            onHover={onHover}
+            scrollContainerRef={scrollContainerRef}
+          />
 
           {/* Loading indicator and intersection trigger */}
           <UnifiedWavesListLoader isFetchingNextPage={isFetchingNextPage} />
