@@ -33,8 +33,14 @@ export default function UserPageStatsActivityTDHHistory({
         <div className="tw-mt-2 sm:tw-mt-4 tw-w-full tw-h-96">
           <CommonCardSkeleton />
         </div>
+      ) : tdhHistory && tdhHistory.length > 0 ? (
+        <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory} />
       ) : (
-        <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory ?? []} />
+        <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-x-auto">
+          <div className="tw-p-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
+            No TDH history found
+          </div>
+        </div>
       )}
     </div>
   );
