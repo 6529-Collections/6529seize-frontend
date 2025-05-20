@@ -11,7 +11,7 @@ jest.mock('../services/api/common-api', () => ({
 
 const { commonApiFetch } = require('../services/api/common-api');
 
-const flushPromises = () => new Promise(setImmediate);
+const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));
 
 describe('useWaveRealtimeUpdater', () => {
   afterEach(() => {
