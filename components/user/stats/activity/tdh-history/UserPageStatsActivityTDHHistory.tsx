@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { TDHHistory } from "../../../../../entities/ITDH";
 import { useQuery } from "@tanstack/react-query";
@@ -7,35 +6,19 @@ import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHis
 import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
-const PAGE_SIZE = 30;
-
 export default function UserPageStatsActivityTDHHistory({
   profile,
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const router = useRouter();
-  const mainAddress =
-    profile.primary_wallet?.toLowerCase() ??
-    (router.query.user as string).toLowerCase();
-
   const { isFetching, data: tdhHistory } = useQuery<TDHHistory[]>({
-    queryKey: [
-      QueryKey.WALLET_TDH_HISTORY,
-      {
-        wallet: mainAddress,
-        page_size: `${PAGE_SIZE}`,
-      },
-    ],
+    queryKey: [QueryKey.WALLET_TDH_HISTORY, profile.consolidation_key],
+    enabled: !!profile?.consolidation_key,
     queryFn: async () => {
-      const response = await commonApiFetch<{ data: TDHHistory[] }>({
-        endpoint: `tdh_history`,
-        params: {
-          wallet: mainAddress,
-          page_size: `${PAGE_SIZE}`,
-        },
+      const response = await commonApiFetch<TDHHistory[]>({
+        endpoint: `recent_tdh_history/${profile.consolidation_key}`,
       });
-      return response.data;
+      return response;
     },
   });
 
