@@ -150,6 +150,7 @@ export default function RepCategorySearch({
         {!!category?.length && (
           <svg
             onClick={() => onValueChange(null)}
+            aria-label="Clear category"
             className={`${ICON_CLASSES[size]} tw-cursor-pointer tw-absolute tw-right-3 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-400 hover:tw-text-error tw-transition tw-duration-300 tw-ease-out`}
             viewBox="0 0 24 24"
             fill="none"

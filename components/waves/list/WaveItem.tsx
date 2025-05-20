@@ -46,7 +46,8 @@ export default function WaveItem({
           className="tw-relative tw-w-full tw-h-8 tw-rounded-t-xl"
           style={{
             background: `linear-gradient(45deg, ${banner1} 0%, ${banner2} 100%)`,
-          }}></div>
+          }}
+        ></div>
         <div className="tw-flex tw-gap-x-2 tw-px-4">
           <div className="-tw-mt-5 tw-relative tw-flex-shrink-0">
             <div className="tw-h-16 tw-w-16">
@@ -54,7 +55,7 @@ export default function WaveItem({
                 <img
                   className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900"
                   src={getScaledImageUri(wave.picture, ImageScale.W_AUTO_H_50)}
-                  alt="#"
+                  alt={wave?.name ? `Wave ${wave.name}` : "Wave picture"}
                 />
               ) : (
                 <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-full tw-bg-iron-700 tw-border-[3px] tw-border-solid tw-border-iron-900" />
@@ -67,7 +68,8 @@ export default function WaveItem({
               href={
                 wave ? `/my-stream?wave=${wave?.id}` : userPlaceholder ?? ""
               }
-              className="tw-no-underline tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out">
+              className="tw-no-underline tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-white hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
+            >
               {wave?.name ?? titlePlaceholder}
             </Link>
           </div>
@@ -76,7 +78,8 @@ export default function WaveItem({
           <div>
             <Link
               href={wave ? `${wave?.author.handle}` : userPlaceholder ?? ""}
-              className="tw-group tw-no-underline tw-inline-flex tw-items-center tw-gap-x-2">
+              className="tw-group tw-no-underline tw-inline-flex tw-items-center tw-gap-x-2"
+            >
               <div className="tw-h-6 tw-w-6">
                 {wave?.author.pfp ? (
                   <img
@@ -85,7 +88,11 @@ export default function WaveItem({
                       wave.author.pfp,
                       ImageScale.W_AUTO_H_50
                     )}
-                    alt="#"
+                    alt={
+                      wave?.author.handle
+                        ? `${wave.author.handle} avatar`
+                        : "Author avatar"
+                    }
                   />
                 ) : (
                   <div className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700" />
@@ -96,7 +103,8 @@ export default function WaveItem({
               </span>
               {wave && (
                 <div
-                  className={`${getColorClasses()} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}>
+                  className={`${getColorClasses()} tw-border-none tw-inline-flex tw-items-center tw-rounded-xl tw-bg-transparent tw-px-2 tw-py-1 tw-font-semibold tw-ring-2 tw-ring-inset tw-text-[0.625rem] tw-leading-3`}
+                >
                   Level {wave.author.level}
                 </div>
               )}
@@ -111,7 +119,8 @@ export default function WaveItem({
                 aria-hidden="true"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor">
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -129,7 +138,8 @@ export default function WaveItem({
                   aria-hidden="true"
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
-                  stroke="currentColor">
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -151,7 +161,8 @@ export default function WaveItem({
                 href={
                   wave ? `/my-stream?wave=${wave?.id}` : userPlaceholder ?? ""
                 }
-                className="tw-no-underline tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm hover:tw-bg-iron-700 hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out">
+                className="tw-no-underline tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm hover:tw-bg-iron-700 hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+              >
                 <svg
                   className="tw-size-5 tw-flex-shrink-0"
                   xmlns="http://www.w3.org/2000/svg"
@@ -159,7 +170,8 @@ export default function WaveItem({
                   aria-hidden="true"
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
-                  stroke="currentColor">
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
