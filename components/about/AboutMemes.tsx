@@ -1,6 +1,7 @@
 import { Col, Container, Row, Table } from "react-bootstrap";
 import Image from "next/image";
 import { AboutSection } from "../../pages/about/[section]";
+import Link from "next/link";
 
 export default function AboutMemes() {
   return (
@@ -53,7 +54,7 @@ export default function AboutMemes() {
             papers and podcasts can&apos;t.
           </p>
           <p>
-          The Memes are large edition, CCO (public domain) NFTs that are
+            The Memes are large edition, CCO (public domain) NFTs that are
             actively encouraged to be spread far and wide, to be remixed, to be
             rememed and to be reinterpreted by the world at large.
           </p>
@@ -94,13 +95,10 @@ export default function AboutMemes() {
             </a>
           </p>
           <p>
-            The Memes Discord:{" "}
-            <a
-              href="https://discord.gg/join-om"
-              target="_blank"
-              rel="noreferrer">
-              discord.gg/join-om
-            </a>
+            The Memes chat on Brain:{" "}
+            <Link href="https://6529.io/my-stream?wave=0849642f-1770-4de2-9cbc-70aae59c17ff">
+              Memes-Chat
+            </Link>
           </p>
           <p>
             Minting Memes:{" "}
