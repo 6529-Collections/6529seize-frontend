@@ -17,7 +17,7 @@ interface Props {
 
 const NavItem = ({ item }: Props) => {
   const router = useRouter();
-  const { activeView, handleNavClick } = useViewContext();
+  const { activeView, handleNavClick, setActiveView } = useViewContext();
 
   const { name } = item;
   const { icon } = item;
@@ -89,6 +89,21 @@ const NavItem = ({ item }: Props) => {
       });
       return;
     }
+
+    // Special handling: When currently viewing a DM wave, clicking the
+    // "Waves" nav item should take the user back to the Waves list.
+    if (
+      item.kind === "view" &&
+      item.viewKey === "waves" &&
+      isCurrentWaveDmValue &&
+      router.pathname === "/my-stream" && // Ensure we are in the stream section
+      typeof router.query.wave === "string" // And currently on a specific wave (the DM)
+    ) {
+      router.push("/my-stream?view=waves", undefined, { shallow: true });
+      setActiveView("waves"); // Explicitly set the view
+      return;
+    }
+
     handleNavClick(item);
   };
 

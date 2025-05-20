@@ -1,9 +1,16 @@
-import React, { useRef, useEffect } from "react";
-import UnifiedWavesListWaves, { UnifiedWavesListWavesHandle } from "../left-sidebar/waves/UnifiedWavesListWaves";
+import React, { useRef, useEffect, useContext } from "react";
+import UnifiedWavesListWaves, {
+  UnifiedWavesListWavesHandle,
+} from "../left-sidebar/waves/UnifiedWavesListWaves";
 import { UnifiedWavesListLoader } from "../left-sidebar/waves/UnifiedWavesListLoader";
 import UnifiedWavesListEmpty from "../left-sidebar/waves/UnifiedWavesListEmpty";
 import BrainLeftSidebarCreateADirectMessageButton from "../left-sidebar/BrainLeftSidebarCreateADirectMessageButton";
 import { useMyStream } from "../../../contexts/wave/MyStreamContext";
+import { AuthContext } from "../../auth/Auth";
+import HeaderUserConnect from "../../header/user/HeaderUserConnect";
+import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
+import Image from "next/image";
+import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
 
 interface DirectMessagesListProps {
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
@@ -12,6 +19,51 @@ interface DirectMessagesListProps {
 const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   scrollContainerRef,
 }) => {
+  const { isAuthenticated } = useSeizeConnectContext();
+  const { connectedProfile, fetchingProfile } = useContext(AuthContext);
+
+  const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
+
+  if (shouldShowPlaceholder) {
+    const placeholderContent = !isAuthenticated ? (
+      <>
+        <h1 className="tw-text-xl tw-font-bold">
+          This content is only available to connected wallets.
+        </h1>
+        <p className="tw-text-base tw-text-gray-400">
+          Connect your wallet to continue.
+        </p>
+        <HeaderUserConnect />
+      </>
+    ) : (
+      <>
+        <h1 className="tw-text-xl tw-font-bold">
+          You need to set up a profile to continue.
+        </h1>
+        <UserSetUpProfileCta />
+      </>
+    );
+
+    return (
+      <div
+        id="my-stream-connect"
+        className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-h-full tw-p-6 tailwind-scope"
+      >
+        <Image
+          priority
+          loading="eager"
+          src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
+          alt="Brain"
+          width={304}
+          height={450}
+          className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+        />
+        <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+          {placeholderContent}
+        </div>
+      </div>
+    );
+  }
 
   // Refs to the scroll container and sentinel
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
@@ -23,17 +75,19 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     console.log("directMessages", directMessages);
   }, [directMessages]);
 
-    // Reset the fetch flag when dependencies change
+  // Reset the fetch flag when dependencies change
   useEffect(() => {
     hasFetchedRef.current = false;
   }, [directMessages.hasNextPage, directMessages.isFetchingNextPage]);
 
-
-
-
   useEffect(() => {
     const node = listRef.current?.sentinelRef.current;
-    if (!node || !directMessages.hasNextPage || directMessages.isFetchingNextPage) return;
+    if (
+      !node ||
+      !directMessages.hasNextPage ||
+      directMessages.isFetchingNextPage
+    )
+      return;
 
     const cb = (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
@@ -56,10 +110,11 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     obs.observe(node);
 
     return () => obs.disconnect();
-  }, [listRef.current?.sentinelRef.current, directMessages.hasNextPage, directMessages.isFetchingNextPage]);
-
-
-
+  }, [
+    listRef.current?.sentinelRef.current,
+    directMessages.hasNextPage,
+    directMessages.isFetchingNextPage,
+  ]);
 
   return (
     <div className="tw-mb-4">

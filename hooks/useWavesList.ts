@@ -193,7 +193,7 @@ const useWavesList = () => {
     // Then add separately fetched pinned waves
     separatelyFetchedPinnedWaves.forEach((wave) => {
       if (!waveIsDm(wave)) {
-        result.push({ ...wave, isPinned: true });
+      result.push({ ...wave, isPinned: true });
       }
     });
 
@@ -240,10 +240,10 @@ const useWavesList = () => {
       const isPinned = pinnedWavesSet.has(wave.id);
 
       if (!waveIsDm(wave)) {
-        allWavesArray.push({
-          ...wave,
-          isPinned,
-        });
+      allWavesArray.push({
+        ...wave,
+        isPinned,
+      });
       }
     });
 
