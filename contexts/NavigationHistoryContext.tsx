@@ -1,11 +1,26 @@
-import { createContext, useContext, useEffect, useCallback, useState, ReactNode, useRef, useMemo } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+  useState,
+  ReactNode,
+  useRef,
+  useMemo,
+} from "react";
 import { useRouter } from "next/router";
 import type { ViewKey } from "../components/navigation/navTypes";
 import { useViewContext } from "../components/navigation/ViewContext";
 import { mainSegment, sameMainPath } from "../helpers/navigation.helpers";
 
-interface StackRoute { type: "route"; path: string }
-interface StackView { type: "view"; view: ViewKey }
+interface StackRoute {
+  type: "route";
+  path: string;
+}
+interface StackView {
+  type: "view";
+  view: ViewKey;
+}
 
 type StackEntry = StackRoute | StackView;
 
@@ -15,14 +30,20 @@ interface NavigationHistoryContextValue {
   pushView: (view: ViewKey) => void;
 }
 
-const Context = createContext<NavigationHistoryContextValue | undefined>(undefined);
+const Context = createContext<NavigationHistoryContextValue | undefined>(
+  undefined
+);
 const MAX_STACK = 50;
 
-export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode }> = ({ children }) => {
+export const NavigationHistoryProvider: React.FC<{
+  readonly children: ReactNode;
+}> = ({ children }) => {
   const router = useRouter();
-  const { setActiveView } = useViewContext();
+  const { hardBack } = useViewContext();
 
-  const historyRef = useRef<StackEntry[]>([{ type: "route", path: mainSegment(router.asPath) }]);
+  const historyRef = useRef<StackEntry[]>([
+    { type: "route", path: mainSegment(router.asPath) },
+  ]);
   const [index, setIndex] = useState(0);
   const skipNext = useRef(false);
 
@@ -43,8 +64,11 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
   }, [index]);
 
   const pushStack = useCallback((entry: StackEntry) => {
-    setIndex(prev => {
-      const newHistory = [...historyRef.current.slice(0, prev + 1), entry].slice(-MAX_STACK);
+    setIndex((prev) => {
+      const newHistory = [
+        ...historyRef.current.slice(0, prev + 1),
+        entry,
+      ].slice(-MAX_STACK);
       historyRef.current = newHistory;
       return Math.min(prev + 1, MAX_STACK - 1);
     });
@@ -56,8 +80,8 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
         skipNext.current = false;
         return;
       }
-      const isProfile   = router.pathname.startsWith("/[user]");
-      const isMyStream  = url.startsWith("/my-stream") && url.includes("wave=");
+      const isProfile = router.pathname.startsWith("/[user]");
+      const isMyStream = url.startsWith("/my-stream") && url.includes("wave=");
 
       let pathKey: string;
       if (isProfile) {
@@ -71,7 +95,8 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
       let i = historyRef.current.length - 1;
       while (i >= 0 && historyRef.current[i].type === "view") i -= 1;
       const lastRoute = i >= 0 ? historyRef.current[i] : null;
-      const isDuplicate = lastRoute?.type === "route" && lastRoute.path === pathKey;
+      const isDuplicate =
+        lastRoute?.type === "route" && lastRoute.path === pathKey;
       if (isDuplicate) return;
       pushStack({ type: "route", path: pathKey });
     };
@@ -79,13 +104,16 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
     return () => router.events.off("routeChangeComplete", handleRouteChange);
   }, [router.events, pushStack]);
 
-  const pushView = useCallback((view: ViewKey) => {
-    pushStack({ type: "view", view });
-  }, [pushStack]);
+  const pushView = useCallback(
+    (view: ViewKey) => {
+      pushStack({ type: "view", view });
+    },
+    [pushStack]
+  );
 
   const goBack = useCallback(() => {
     if (!canGoBack) return;
-    setIndex(prev => {
+    setIndex((prev) => {
       let targetIndex = prev - 1;
       const current = historyRef.current[prev];
 
@@ -112,19 +140,26 @@ export const NavigationHistoryProvider: React.FC<{ readonly children: ReactNode 
         skipNext.current = true;
         router.push(target.path);
       } else {
-        setActiveView(target.view);
+        hardBack(target.view);
       }
       return targetIndex;
     });
-  }, [canGoBack, router, setActiveView]);
+  }, [canGoBack, router, hardBack]);
 
-  const value = useMemo(() => ({ canGoBack, goBack, pushView }), [canGoBack, goBack, pushView]);
+  const value = useMemo(
+    () => ({ canGoBack, goBack, pushView }),
+    [canGoBack, goBack, pushView]
+  );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
-export const useNavigationHistoryContext = (): NavigationHistoryContextValue => {
-  const ctx = useContext(Context);
-  if (!ctx) throw new Error("useNavigationHistoryContext must be used within NavigationHistoryProvider");
-  return ctx;
-}; 
+export const useNavigationHistoryContext =
+  (): NavigationHistoryContextValue => {
+    const ctx = useContext(Context);
+    if (!ctx)
+      throw new Error(
+        "useNavigationHistoryContext must be used within NavigationHistoryProvider"
+      );
+    return ctx;
+  };

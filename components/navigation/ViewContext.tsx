@@ -3,16 +3,18 @@ import React, {
   useContext,
   useState,
   ReactNode,
-  useEffect,
   useMemo,
   useCallback,
+  useEffect,
 } from "react";
-import type { ViewKey, NavItem, RouteNavItem } from "./navTypes";
+import type { ViewKey, NavItem } from "./navTypes";
 import { useRouter } from "next/router";
+import { commonApiFetch } from "../../services/api/common-api";
+import { ApiWave } from "../../generated/models/ApiWave";
 
 interface ViewContextType {
   activeView: ViewKey | null;
-  setActiveView: (v: ViewKey | null) => void;
+  hardBack: (v: ViewKey) => void;
   handleNavClick: (item: NavItem) => void;
 }
 
@@ -24,92 +26,78 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
   const router = useRouter();
   const [activeView, setActiveView] = useState<ViewKey | null>(null);
   const [lastVisitedWave, setLastVisitedWave] = useState<string | null>(null);
-  const [lastVisitedPath, setLastVisitedPath] = useState<string | null>(null);
+  const [lastVisitedDm, setLastVisitedDm] = useState<string | null>(null);
 
   useEffect(() => {
-    if (
-      router.pathname.startsWith("/my-stream") &&
-      !router.pathname.includes("notifications")
-    ) {
-      const { query } = router;
-      if (query.wave) {
-        setLastVisitedWave(query.wave as string);
-      } else {
-        setLastVisitedWave(null);
-      }
-    }
-    setLastVisitedPath(router.pathname);
+    const { wave, view } = router.query;
 
-    const viewParam = typeof router.query.view === "string" ? router.query.view : null;
-    if (viewParam === "waves" || viewParam === "messages") {
-      setActiveView(viewParam as ViewKey);
+    const getWave = async () => {
+      const res = await commonApiFetch<ApiWave>({
+        endpoint: `/waves/${wave}`,
+      });
+      if (!res) {
+        return;
+      }
+      if (res.chat.scope.group?.is_direct_message) {
+        setLastVisitedDm(res.id);
+      } else {
+        setLastVisitedWave(res.id);
+      }
+    };
+
+    if (wave) {
+      setActiveView(null);
+      getWave();
+    } else if (view) {
+      setActiveView(view as ViewKey);
     } else {
       setActiveView(null);
     }
-  }, [router.asPath, router.pathname]);
-
-  // Strip wave param when user navigates to waves list so components relying on waveId do not treat current page as a single wave
-  useEffect(() => {
-    const viewParam = typeof router.query.view === "string" ? router.query.view : null;
-    const hasWave = "wave" in router.query;
-    if (viewParam === "waves" && hasWave) {
-      setLastVisitedWave(null);
-      const { wave, ...rest } = router.query;
-      router.replace({ pathname: router.pathname, query: rest }, undefined, { shallow: true });
-    }
-  }, [router.query.view, router.query.wave, router.pathname, router]);
-
-  const getHref = useCallback(
-    (item: RouteNavItem) => {
-      if (
-        item.name === "Stream" &&
-        lastVisitedPath?.startsWith("/my-stream") &&
-        !lastVisitedPath.includes("notifications") &&
-        lastVisitedWave && !activeView
-      ) {
-        return item.href;
-      }
-      if (item.name === "Stream" && lastVisitedWave) {
-        return `/my-stream?wave=${lastVisitedWave}`;
-      } else {
-        return item.href;
-      }
-    },
-    [lastVisitedWave, lastVisitedPath, activeView]
-  );
-
-  const handleRouteClick = useCallback(
-    (item: RouteNavItem) => {
-      const href = getHref(item);
-      router.push(href, undefined, { shallow: true }).then(() => {
-        setActiveView(null);
-      });
-    },
-    [getHref, lastVisitedWave, lastVisitedPath, activeView]
-  );
+  }, [router.asPath]);
 
   const handleNavClick = useCallback(
-    (item: NavItem) => {
+    async (item: NavItem) => {
       if (item.kind === "route") {
-        handleRouteClick(item);
-        return;
-      }
-
-      if (item.viewKey === "waves" && lastVisitedWave) {
-        router.push(`/my-stream?wave=${lastVisitedWave}`, undefined, {
+        await router.push(item.href, undefined, { shallow: true });
+      } else if (item.viewKey === "waves" && lastVisitedWave) {
+        await router.push(`/my-stream?wave=${lastVisitedWave}`, undefined, {
           shallow: true,
         });
-        setActiveView(null);
-      } else {
-        setActiveView(item.viewKey);
+      } else if (item.viewKey === "waves") {
+        await router.push("/my-stream?view=waves", undefined, {
+          shallow: true,
+        });
+      } else if (item.viewKey === "messages" && lastVisitedDm) {
+        await router.push(`/my-stream?wave=${lastVisitedDm}`, undefined, {
+          shallow: true,
+        });
+      } else if (item.viewKey === "messages") {
+        await router.push("/my-stream?view=messages", undefined, {
+          shallow: true,
+        });
       }
     },
-    [handleRouteClick, setActiveView, lastVisitedWave, router]
+    [router, lastVisitedWave, lastVisitedDm]
+  );
+
+  const hardBack = useCallback(
+    (v: ViewKey) => {
+      if (v === "messages") {
+        setLastVisitedDm(null);
+        router.push("/my-stream?view=messages", undefined, {
+          shallow: true,
+        });
+      } else if (v === "waves") {
+        setLastVisitedWave(null);
+        router.push("/my-stream?view=waves", undefined, { shallow: true });
+      }
+    },
+    [router, setLastVisitedDm, setLastVisitedWave]
   );
 
   const providerValue = useMemo(
-    () => ({ activeView, setActiveView, handleNavClick }),
-    [activeView, setActiveView]
+    () => ({ activeView, handleNavClick, hardBack }),
+    [activeView, handleNavClick, hardBack]
   );
 
   return (

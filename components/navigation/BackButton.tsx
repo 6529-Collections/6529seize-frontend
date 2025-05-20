@@ -5,9 +5,12 @@ import { useState, useEffect } from "react";
 import Spinner from "../utils/Spinner";
 import { useWaveData } from "../../hooks/useWaveData";
 import { useWave } from "../../hooks/useWave";
+import { useViewContext } from "./ViewContext";
+
 
 export default function BackButton() {
   const { canGoBack, goBack } = useNavigationHistoryContext();
+  const { hardBack } = useViewContext();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -56,9 +59,7 @@ export default function BackButton() {
 
     if (waveId) {
       const targetView = isDm ? "messages" : "waves";
-      router.replace(`/my-stream?view=${targetView}`, undefined, {
-        shallow: true,
-      });
+      hardBack(targetView);
       return;
     }
 

@@ -17,7 +17,7 @@ interface Props {
 
 const NavItem = ({ item }: Props) => {
   const router = useRouter();
-  const { activeView, handleNavClick, setActiveView } = useViewContext();
+  const { activeView, handleNavClick } = useViewContext();
 
   const { name } = item;
   const { icon } = item;
@@ -65,9 +65,20 @@ const NavItem = ({ item }: Props) => {
       >
         <div className="tw-flex tw-items-center tw-justify-center">
           {item.iconComponent ? (
-            <item.iconComponent className={`${item.iconSizeClass ?? "tw-size-7"} tw-text-iron-500`} />
+            <item.iconComponent
+              className={`${
+                item.iconSizeClass ?? "tw-size-7"
+              } tw-text-iron-500`}
+            />
           ) : (
-            <Image src={icon} alt={name} width={24} height={24} unoptimized className={item.iconSizeClass ?? "tw-size-7"} />
+            <Image
+              src={icon}
+              alt={name}
+              width={24}
+              height={24}
+              unoptimized
+              className={item.iconSizeClass ?? "tw-size-7"}
+            />
           )}
         </div>
       </button>
@@ -76,43 +87,19 @@ const NavItem = ({ item }: Props) => {
 
   const iconSizeClass = item.iconSizeClass ?? "tw-size-7";
 
-  const isActive = isNavItemActive(item, router, activeView, isCurrentWaveDmValue);
-
-  const handleClick = () => {
-    if (
-      item.name === "Notifications" &&
-      item.kind === "route" &&
-      router.pathname === "/my-stream/notifications"
-    ) {
-      router.push("/my-stream/notifications?reload=true", undefined, {
-        shallow: true,
-      });
-      return;
-    }
-
-    // Special handling: When currently viewing a DM wave, clicking the
-    // "Waves" nav item should take the user back to the Waves list.
-    if (
-      item.kind === "view" &&
-      item.viewKey === "waves" &&
-      isCurrentWaveDmValue &&
-      router.pathname === "/my-stream" && // Ensure we are in the stream section
-      typeof router.query.wave === "string" // And currently on a specific wave (the DM)
-    ) {
-      router.push("/my-stream?view=waves", undefined, { shallow: true });
-      setActiveView("waves"); // Explicitly set the view
-      return;
-    }
-
-    handleNavClick(item);
-  };
+  const isActive = isNavItemActive(
+    item,
+    router,
+    activeView,
+    isCurrentWaveDmValue
+  );
 
   return (
     <button
       type="button"
       aria-label={name}
       aria-current={isActive ? "page" : undefined}
-      onClick={handleClick}
+      onClick={() => handleNavClick(item)}
       className="tw-relative tw-bg-transparent tw-border-0 tw-flex tw-flex-col tw-items-center tw-justify-center focus:tw-outline-none tw-transition-colors 
       tw-w-14 tw-h-16"
     >
