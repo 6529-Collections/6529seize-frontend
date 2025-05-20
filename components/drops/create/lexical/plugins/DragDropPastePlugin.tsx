@@ -25,7 +25,8 @@ export default function DragDropPaste(): null {
 
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
-    return editor.registerCommand(
+    let isMounted = true;
+    const unregister = editor.registerCommand(
       DRAG_DROP_PASTE,
       (files) => {
         (async () => {
@@ -46,14 +47,25 @@ export default function DragDropPaste(): null {
                 const imageNode = $createImageNode({ src: "loading" });
                 $insertNodes([imageNode]);
                 const key = imageNode.getKey();
-                uploadImage(file).then((url: string) => {
-                  editor.update(() => {
-                    const node = $getNodeByKey(key);
-                    if (node) {
-                      node.replace($createImageNode({ src: url }));
-                    }
+                uploadImage(file)
+                  .then((url: string) => {
+                    if (!isMounted) return;
+                    editor.update(() => {
+                      const node = $getNodeByKey(key);
+                      if (node) {
+                        node.replace($createImageNode({ src: url }));
+                      }
+                    });
+                  })
+                  .catch(() => {
+                    if (!isMounted) return;
+                    editor.update(() => {
+                      const node = $getNodeByKey(key);
+                      if (node) {
+                        node.remove();
+                      }
+                    });
                   });
-                });
               });
             }
           }
@@ -62,6 +74,11 @@ export default function DragDropPaste(): null {
       },
       COMMAND_PRIORITY_LOW
     );
-  }, [editor]);
+
+    return () => {
+      unregister();
+      isMounted = false;
+    };
+  }, [editor, setToast]);
   return null;
 }
