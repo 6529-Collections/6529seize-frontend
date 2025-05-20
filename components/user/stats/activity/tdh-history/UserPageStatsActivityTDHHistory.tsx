@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { TDHHistory } from "../../../../../entities/ITDH";
 import { useQuery } from "@tanstack/react-query";
@@ -7,37 +6,41 @@ import UserPageStatsActivityTDHHistoryCharts from "./UserPageStatsActivityTDHHis
 import CommonCardSkeleton from "../../../../utils/animation/CommonCardSkeleton";
 import { QueryKey } from "../../../../react-query-wrapper/ReactQueryWrapper";
 
-const PAGE_SIZE = 30;
-
 export default function UserPageStatsActivityTDHHistory({
   profile,
 }: {
   readonly profile: ApiIdentity;
 }) {
-  const router = useRouter();
-  const mainAddress =
-    profile.primary_wallet?.toLowerCase() ??
-    (router.query.user as string).toLowerCase();
-
   const { isFetching, data: tdhHistory } = useQuery<TDHHistory[]>({
-    queryKey: [
-      QueryKey.WALLET_TDH_HISTORY,
-      {
-        wallet: mainAddress,
-        page_size: `${PAGE_SIZE}`,
-      },
-    ],
+    queryKey: [QueryKey.WALLET_TDH_HISTORY, profile.consolidation_key],
+    enabled: !!profile?.consolidation_key,
     queryFn: async () => {
-      const response = await commonApiFetch<{ data: TDHHistory[] }>({
-        endpoint: `tdh_history`,
-        params: {
-          wallet: mainAddress,
-          page_size: `${PAGE_SIZE}`,
-        },
+      const response = await commonApiFetch<TDHHistory[]>({
+        endpoint: `recent_tdh_history/${profile.consolidation_key}`,
       });
-      return response.data;
+      return response;
     },
   });
+
+  let content;
+
+  if (isFetching) {
+    content = (
+      <div className="tw-mt-2 sm:tw-mt-4 tw-w-full tw-h-96">
+        <CommonCardSkeleton />
+      </div>
+    );
+  } else if (tdhHistory && tdhHistory.length > 0) {
+    content = <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory} />;
+  } else {
+    content = (
+      <div className="tw-mt-2 lg:tw-mt-4 tw-bg-iron-950 tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-overflow-x-auto">
+        <div className="tw-p-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
+          No TDH history found
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="tw-mt-4 md:tw-mt-5">
@@ -46,13 +49,7 @@ export default function UserPageStatsActivityTDHHistory({
           TDH History
         </h3>
       </div>
-      {isFetching ? (
-        <div className="tw-mt-2 sm:tw-mt-4 tw-w-full tw-h-96">
-          <CommonCardSkeleton />
-        </div>
-      ) : (
-        <UserPageStatsActivityTDHHistoryCharts tdhHistory={tdhHistory ?? []} />
-      )}
+      {content}
     </div>
   );
 }

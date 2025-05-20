@@ -51,7 +51,7 @@ export default function UserPageStatsActivityDistributionsTableWrapper({
         </div>
       ) : (
         <div className="tw-p-4 sm:tw-px-6 tw-text-sm tw-italic tw-text-iron-500">
-          No distributions
+          No distributions found
         </div>
       )}
     </div>
