@@ -90,11 +90,7 @@ export default function ProgressChart() {
   };
 
   return (
-    <div
-      className="tw-w-full tw-h-[180px] md:tw-h-[280px]"
-      tabIndex={0}
-      role="img"
-      aria-label="Thresholds by Level">
+    <div className="tw-w-full tw-h-[180px] md:tw-h-[280px]">
       <Line data={data} options={options} />
     </div>
   );
