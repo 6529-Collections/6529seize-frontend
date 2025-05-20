@@ -23,6 +23,10 @@ const config = {
     '^.+\.(css|sass|scss)$': '<rootDir>/__mocks__/styleMock.js', // You might need to create this mock file
     // Handle image imports
     '^.+\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$': `<rootDir>/__mocks__/fileMock.js`, // You might need to create this mock file
+    // Mock react-use to override useCss
+    'react-use': '<rootDir>/__mocks__/react-use.js',
+    // Mock nano-css and its sub-imports
+    '^nano-css(.*)$': '<rootDir>/__mocks__/nanoCssMock.js',
     // Handle next/font - If you use next/font, uncomment and ensure mock exists
     // '@next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
     // 'next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
@@ -43,14 +47,14 @@ const config = {
     // Use ts-jest for ts/tsx files
     '^.+\.(ts|tsx)$': ['ts-jest', {
       tsconfig: 'tsconfig.json', // Use default tsconfig.json, adjust if needed
-      babelConfig: false, // Don't use babel-jest if using ts-jest directly
+      babelConfig: false, // This is fine, ts-jest handles TS.
     }],
-    // Optional: If you need Babel for JS/JSX files (e.g., for specific Babel plugins)
-    // '^.+\.(js|jsx)$': ['babel-jest', { presets: ['next/babel'] }],
+    // Add babel-jest for JS/JSX/MJS files
+    '^.+\.(js|jsx|mjs)$': ['babel-jest', { presets: ['next/babel'] }],
   },
   // Don't transform node_modules except specific ESM packages if needed
   transformIgnorePatterns: [
-    '/node_modules/',
+    '/node_modules/(?!wagmi|viem)/', // Allow transforming wagmi and viem
     '^.+\.module\.(css|sass|scss)$',
   ],
   // Coverage Configuration (keep existing)
