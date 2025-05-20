@@ -81,7 +81,8 @@ export default function UserPageSubscriptionsTopUp() {
               sendTransaction.data
             )}
             target="_blank"
-            rel="noreferrer">
+            rel="noreferrer"
+          >
             view
           </a>
         </>
@@ -100,7 +101,8 @@ export default function UserPageSubscriptionsTopUp() {
             <Tippy
               content={
                 <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
-              }>
+              }
+            >
               <span>
                 {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
                 {formatAddress(SUBSCRIPTIONS_ADDRESS)}
@@ -178,7 +180,8 @@ export default function UserPageSubscriptionsTopUp() {
               } else {
                 submit(count * MEMES_MINT_PRICE);
               }
-            }}>
+            }}
+          >
             <Form.Group className="mb-3">
               <Row className="d-flex align-items-center">
                 <Col xs={9} sm={8} className="d-flex align-items-center gap-2">
@@ -211,9 +214,11 @@ export default function UserPageSubscriptionsTopUp() {
                   <Button
                     className={styles.sendBtn}
                     type="submit"
+                    aria-label="Send custom top up"
                     disabled={
                       sendTransaction.isPending || waitSendTransaction.isLoading
-                    }>
+                    }
+                  >
                     Send
                   </Button>
                 </Col>
@@ -249,7 +254,8 @@ function CardCountTopup(
       onSubmit={(e) => {
         e.preventDefault();
         props.submit(props.count * MEMES_MINT_PRICE);
-      }}>
+      }}
+    >
       <Form.Group>
         <Row className="d-flex align-items-center no-wrap">
           <Col xs={9} sm={8} className="d-flex">
@@ -261,7 +267,12 @@ function CardCountTopup(
             <Button
               className={styles.sendBtn}
               type="submit"
-              disabled={props.disabled}>
+              disabled={props.disabled}
+              aria-label={`Send top up for ${
+                props.display ??
+                `${props.count} Card${props.count > 1 ? "s" : ""}`
+              }`}
+            >
               Send
             </Button>
           </Col>

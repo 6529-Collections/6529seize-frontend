@@ -6,7 +6,7 @@ import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
   to: string;
-  threshhold: number;
+  threshold: number;
   offset: number;
 }
 
@@ -16,9 +16,9 @@ export default function ScrollToButton(props: Readonly<Props>) {
   useEffect(() => {
     const target = document.getElementById(props.to);
     function handleScroll() {
-      const threshhold = props.threshhold + (target ? target.offsetTop : 0);
+      const threshold = props.threshold + (target ? target.offsetTop : 0);
 
-      if (window.pageYOffset > threshhold) {
+      if (window.pageYOffset > threshold) {
         setShowButton(true);
       } else {
         setShowButton(false);

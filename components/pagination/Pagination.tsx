@@ -72,6 +72,9 @@ export default function Pagination(props: Readonly<Props>) {
                 ? `${styles.iconEnabled}`
                 : `${styles.iconDisabled}`
             }
+            role="button"
+            aria-label="Previous page"
+            tabIndex={0}
           />{" "}
           <input
             id="page-number"
@@ -80,11 +83,16 @@ export default function Pagination(props: Readonly<Props>) {
             onKeyDown={enterValue}
             onChange={setValue}
             value={inputPage}
+            aria-label="Page number"
           />
           {" of "}
           <span
             onClick={goToLast}
-            className={isLastPage() ? styles.goToLast : ""}>
+            className={isLastPage() ? styles.goToLast : ""}
+            role="button"
+            aria-label="Go to last page"
+            tabIndex={0}
+          >
             {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
           </span>{" "}
           <FontAwesomeIcon
@@ -93,6 +101,9 @@ export default function Pagination(props: Readonly<Props>) {
             className={
               isLastPage() ? `${styles.iconDisabled}` : `${styles.iconEnabled}`
             }
+            role="button"
+            aria-label="Next page"
+            tabIndex={0}
           />
         </span>
       )}

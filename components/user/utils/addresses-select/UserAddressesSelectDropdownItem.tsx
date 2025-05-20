@@ -27,8 +27,8 @@ export default function UserAddressesSelectDropdownItem({
       <button
         onClick={copyAddress}
         type="button"
-        title="Copy"
-        aria-label="Copy"
+        title="Copy address"
+        aria-label="Copy address"
         className="tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
       >
         <svg
@@ -49,8 +49,8 @@ export default function UserAddressesSelectDropdownItem({
       <button
         onClick={openOpensea}
         type="button"
-        title="Opensea"
-        aria-label="Opensea"
+        title="Open in OpenSea"
+        aria-label="Open in OpenSea"
         className="tw-group tw-p-0 tw-inline-flex tw-items-center tw-w-7 tw-h-7 tw-border-0 tw-outline-0 tw-bg-transparent focus:tw-outline-none tw-group tw-cursor-pointer"
       >
         <svg

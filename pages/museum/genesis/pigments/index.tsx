@@ -720,7 +720,7 @@ Pigments is an exploration of color and spatial distortion. Each instance is an 
                               className="fusion-text fusion-text-6"
                               style={{ color: "#000000" }}>
                               <p>
-                                A dark, moody atmosphere from the the ‘Tempesta'
+                                A dark, moody atmosphere from the ‘Tempesta'
                                 and ‘Cellophane' traits.
                               </p>
                             </div>

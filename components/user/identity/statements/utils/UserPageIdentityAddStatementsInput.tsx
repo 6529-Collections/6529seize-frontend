@@ -23,9 +23,13 @@ export default function UserPageIdentityAddStatementsContactInput({
     const newValue = event.target.value;
     onChange(newValue);
   };
+  const inputId = `statement-${activeType}`;
   return (
     <>
-      <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
+      <label
+        htmlFor={inputId}
+        className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
+      >
         {STATEMENT_META[activeType].title}
       </label>
       <div className="tw-relative tw-mt-1.5">
@@ -35,6 +39,7 @@ export default function UserPageIdentityAddStatementsContactInput({
           </div>
         </div>
         <input
+          id={inputId}
           ref={inputRef}
           type="text"
           required

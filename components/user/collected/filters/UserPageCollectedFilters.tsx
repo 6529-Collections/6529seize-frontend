@@ -43,7 +43,9 @@ export default function UserPageCollectedFilters({
   const [isMostRightFilterVisible, setIsMostRightFilterVisible] =
     useState<boolean>(false);
 
-  const checkVisibility = (elementRef: RefObject<HTMLDivElement | null>): boolean => {
+  const checkVisibility = (
+    elementRef: RefObject<HTMLDivElement | null>
+  ): boolean => {
     if (window.matchMedia("(pointer: coarse)").matches) return true;
     const element = elementRef.current;
     const container = containerRef.current;
@@ -113,6 +115,7 @@ export default function UserPageCollectedFilters({
         {!isMostLeftFilterVisible && (
           <button
             ref={leftArrowRef}
+            aria-label="Scroll filters left"
             className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-left-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
             onClick={() => scrollHorizontally("left")}
           >
@@ -136,6 +139,7 @@ export default function UserPageCollectedFilters({
         {!isMostRightFilterVisible && (
           <button
             ref={rightArrowRef}
+            aria-label="Scroll filters right"
             className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-right-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
             onClick={() => scrollHorizontally("right")}
           >

@@ -21,6 +21,7 @@ export default function UserPageClassificationWrapper({
       <button
         onClick={() => setIsEditOpen(true)}
         disabled={!canEdit}
+        aria-label="Edit classification"
         className={`${
           canEdit ? "hover:tw-text-neutral-400" : ""
         } tw-group tw-bg-transparent tw-border-none tw-m-0 tw-p-0 tw-relative tw-transition tw-duration-300 tw-ease-out`}>

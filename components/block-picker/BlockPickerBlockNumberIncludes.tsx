@@ -10,7 +10,7 @@ export default function BlockPickerBlockNumberIncludes({
   return (
     <div className="tw-w-full">
       <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
-        Block no includes 
+        Block number includes 
       </label>
       <div className="tw-mt-1 5">
         <input

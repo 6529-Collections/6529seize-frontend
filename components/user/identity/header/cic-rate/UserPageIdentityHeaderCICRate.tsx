@@ -297,6 +297,7 @@ export default function UserPageIdentityHeaderCICRate({
         >
           <div className="tw-w-full sm:tw-w-auto">
             <label
+              htmlFor="nic-rating-input"
               className={`${
                 isTooltip ? "tw-max-w-[12rem]" : "tw-w-full sm:tw-w-auto"
               } tw-block tw-text-sm tw-font-normal tw-text-iron-400 tw-break-all`}
@@ -336,6 +337,7 @@ export default function UserPageIdentityHeaderCICRate({
               </span>
               <input
                 type="text"
+                id="nic-rating-input"
                 value={adjustedRatingStr}
                 onChange={onValueChange}
                 onBlur={adjustStrValueToMinMax}

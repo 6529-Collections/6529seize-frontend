@@ -166,6 +166,7 @@ function DropListItemContentMediaImage({
                 className="tw-flex tw-flex-col tw-items-center"
                 onClick={(e) => e.stopPropagation()}
                 tabIndex={0}
+                aria-label="Full size drop media"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.stopPropagation();
