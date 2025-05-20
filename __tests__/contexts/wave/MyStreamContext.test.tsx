@@ -1,16 +1,23 @@
-import React from 'react';
-import { render, screen, act } from '@testing-library/react';
-import { DropSize } from '../../../helpers/waves/drop.helpers';
-import { MyStreamProvider, useMyStream, useMyStreamWaveMessages } from '../../../contexts/wave/MyStreamContext';
+import React from "react";
+import { render, screen, act } from "@testing-library/react";
+import { DropSize } from "../../../helpers/waves/drop.helpers";
+import {
+  MyStreamProvider,
+  useMyStream,
+  useMyStreamWaveMessages,
+} from "../../../contexts/wave/MyStreamContext";
 
-jest.mock('../../../contexts/wave/hooks/useActiveWaveManager', () => ({
-  useActiveWaveManager: () => ({ activeWaveId: null, setActiveWave: jest.fn() })
+jest.mock("../../../contexts/wave/hooks/useActiveWaveManager", () => ({
+  useActiveWaveManager: () => ({
+    activeWaveId: null,
+    setActiveWave: jest.fn(),
+  }),
 }));
 
 const addPinnedWave = jest.fn();
 const removePinnedWave = jest.fn();
 
-jest.mock('../../../contexts/wave/hooks/useEnhancedWavesList', () => ({
+jest.mock("../../../contexts/wave/hooks/useEnhancedWavesList", () => ({
   __esModule: true,
   default: () => ({
     waves: [],
@@ -21,60 +28,60 @@ jest.mock('../../../contexts/wave/hooks/useEnhancedWavesList', () => ({
     addPinnedWave,
     removePinnedWave,
     refetchAllWaves: jest.fn(),
-    resetAllWavesNewDropsCount: jest.fn()
-  })
+    resetAllWavesNewDropsCount: jest.fn(),
+  }),
 }));
 
 const registerWave = jest.fn();
 const fetchNextPage = jest.fn();
 const fetchAroundSerialNo = jest.fn();
 
-jest.mock('../../../contexts/wave/hooks/useWaveDataManager', () => ({
+jest.mock("../../../contexts/wave/hooks/useWaveDataManager", () => ({
   useWaveDataManager: () => ({
     registerWave,
     fetchNextPage,
     fetchAroundSerialNo,
-    syncNewestMessages: jest.fn()
-  })
+    syncNewestMessages: jest.fn(),
+  }),
 }));
 
 const subscribe = jest.fn();
 const unsubscribe = jest.fn();
 const getData = jest.fn();
 
-jest.mock('../../../contexts/wave/hooks/useWaveMessagesStore', () => ({
+jest.mock("../../../contexts/wave/hooks/useWaveMessagesStore", () => ({
   __esModule: true,
   default: () => ({
     updateData: jest.fn(),
     removeDrop: jest.fn(),
     subscribe,
     unsubscribe,
-    getData
-  })
+    getData,
+  }),
 }));
 
-jest.mock('../../../contexts/wave/hooks/useWaveRealtimeUpdater', () => ({
+jest.mock("../../../contexts/wave/hooks/useWaveRealtimeUpdater", () => ({
   useWaveRealtimeUpdater: () => ({
     processIncomingDrop: jest.fn(),
-    processDropRemoved: jest.fn()
-  })
+    processDropRemoved: jest.fn(),
+  }),
 }));
 
-jest.mock('../../../services/websocket/useWebSocketMessage', () => ({
-  useWebsocketStatus: () => 'connected'
+jest.mock("../../../services/websocket/useWebSocketMessage", () => ({
+  useWebsocketStatus: () => "connected",
 }));
 
-jest.mock('../../../hooks/useCapacitor', () => () => ({ isCapacitor: false }));
+jest.mock("../../../hooks/useCapacitor", () => () => ({ isCapacitor: false }));
 
-describe('MyStreamProvider integration', () => {
-  it('delegates wave actions to underlying hooks', () => {
+describe("MyStreamProvider integration", () => {
+  it("delegates wave actions to underlying hooks", () => {
     function TestComponent() {
       const { registerWave: reg, fetchNextPageForWave, waves } = useMyStream();
       React.useEffect(() => {
-        reg('wave');
-        fetchNextPageForWave({ waveId: 'wave', type: DropSize.FULL });
-        waves.addPinnedWave('wave');
-        waves.removePinnedWave('wave');
+        reg("wave");
+        fetchNextPageForWave({ waveId: "wave", type: DropSize.FULL });
+        waves.addPinnedWave("wave");
+        waves.removePinnedWave("wave");
       }, [reg, fetchNextPageForWave, waves]);
       return null;
     }
@@ -85,23 +92,26 @@ describe('MyStreamProvider integration', () => {
       </MyStreamProvider>
     );
 
-    expect(registerWave).toHaveBeenCalledWith('wave');
-    expect(fetchNextPage).toHaveBeenCalledWith({ waveId: 'wave', type: DropSize.FULL });
-    expect(addPinnedWave).toHaveBeenCalledWith('wave');
-    expect(removePinnedWave).toHaveBeenCalledWith('wave');
+    expect(registerWave).toHaveBeenCalledWith("wave");
+    expect(fetchNextPage).toHaveBeenCalledWith({
+      waveId: "wave",
+      type: DropSize.FULL,
+    });
+    expect(addPinnedWave).toHaveBeenCalledWith("wave");
+    expect(removePinnedWave).toHaveBeenCalledWith("wave");
   });
 
-  it('updates hook data via useMyStreamWaveMessages', () => {
+  it("updates hook data via useMyStreamWaveMessages", () => {
     const listeners: Record<string, (data: any) => void> = {};
     subscribe.mockImplementation((key, cb) => {
       listeners[key] = cb;
-      cb({ id: key, drops: ['a'] });
+      cb({ id: key, drops: ["a"] });
     });
-    getData.mockImplementation(() => ({ id: 'wave', drops: ['a'] }));
+    getData.mockImplementation(() => ({ id: "wave", drops: ["a"] }));
 
-    function Messages({ waveId }: { waveId: string }) {
+    function Messages({ waveId }: { readonly waveId: string }) {
       const data = useMyStreamWaveMessages(waveId);
-      return <div>{data ? data.drops.join(',') : 'none'}</div>;
+      return <div>{data ? data.drops.join(",") : "none"}</div>;
     }
 
     const { rerender } = render(
@@ -110,10 +120,10 @@ describe('MyStreamProvider integration', () => {
       </MyStreamProvider>
     );
 
-    expect(screen.getByText('a')).toBeInTheDocument();
+    expect(screen.getByText("a")).toBeInTheDocument();
 
-    act(() => listeners['wave']({ id: 'wave', drops: ['b'] }));
-    expect(screen.getByText('b')).toBeInTheDocument();
+    act(() => listeners["wave"]({ id: "wave", drops: ["b"] }));
+    expect(screen.getByText("b")).toBeInTheDocument();
 
     rerender(
       <MyStreamProvider>
