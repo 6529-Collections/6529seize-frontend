@@ -54,7 +54,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [BrainView.MY_VOTES]: null,
     [BrainView.FAQ]: null,
     [BrainView.WAVES]: null,
-    [BrainView.MESSAGES]: null,
   });
 
   React.useEffect(() => {
@@ -96,11 +95,11 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   }`;
 
   const wavesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5 tw-gap-1 tw-flex-1  tw-rounded-md ${
-    activeView === BrainView.WAVES || activeView === BrainView.MESSAGES ? "tw-bg-iron-800" : "tw-bg-iron-950"
+    activeView === BrainView.WAVES ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
   const wavesButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
-    activeView === BrainView.WAVES || activeView === BrainView.MESSAGES ? "tw-text-iron-300" : "tw-text-iron-400"
+    activeView === BrainView.WAVES ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
   const backButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5  tw-gap-1 tw-flex-1 tw-rounded-md tw-bg-iron-950`;
@@ -137,17 +136,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <button
             ref={(el) => {
               tabRefs.current[BrainView.WAVES] = el;
-              // Also reference the same button element for MESSAGES
-              tabRefs.current[BrainView.MESSAGES] = el;
             }}
-            onClick={() => {
-              // Keep the current sub-tab when clicking the main Waves tab
-              if (activeView === BrainView.MESSAGES) {
-                onViewChange(BrainView.MESSAGES);
-              } else {
-                onViewChange(BrainView.WAVES);
-              }
-            }}
+            onClick={() => onViewChange(BrainView.WAVES)}
             className={wavesButtonClasses}
           >
             <WavesIcon className="tw-size-4 tw-text-iron-400" />
