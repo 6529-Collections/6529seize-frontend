@@ -1,10 +1,11 @@
 import { DBResponse } from "../entities/IDBResponse";
 import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../constants";
+import { getStagingAuth } from "./auth/auth.utils";
 
 export async function fetchUrl(url: string): Promise<DBResponse | any> {
   let headers = {};
-  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  const apiAuth = getStagingAuth();
   if (apiAuth) {
     headers = { "x-6529-auth": apiAuth };
   }
@@ -34,7 +35,7 @@ export async function postData(url: string, body: any) {
   let headers: any = {
     "Content-Type": "application/json",
   };
-  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  const apiAuth = getStagingAuth();
   if (apiAuth) {
     headers = { "x-6529-auth": apiAuth, "Content-Type": "application/json" };
   }
@@ -52,7 +53,7 @@ export async function postData(url: string, body: any) {
 
 export async function postFormData(url: string, formData: FormData) {
   let headers: any = {};
-  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  const apiAuth = getStagingAuth();
   if (apiAuth) {
     headers = { "x-6529-auth": apiAuth };
   }

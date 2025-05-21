@@ -6,7 +6,6 @@ import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboar
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { useWave } from "../../../hooks/useWave";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
-import WavesIcon from "../../common/icons/WavesIcon";
 
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
@@ -54,17 +53,22 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [BrainView.MY_VOTES]: null,
     [BrainView.FAQ]: null,
     [BrainView.WAVES]: null,
+    [BrainView.MESSAGES]: null,
   });
 
   React.useEffect(() => {
     const activeTabEl = tabRefs.current[activeView];
     if (activeTabEl) {
-      activeTabEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      activeTabEl.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
     }
   }, [activeView]);
 
   const aboutButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5 tw-gap-1 tw-flex-1  tw-rounded-md ${
-    activeView === BrainView.ABOUT ? "tw-bg-iron-800" : "tw-bg-iron-950"  
+    activeView === BrainView.ABOUT ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
   const aboutButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
@@ -102,6 +106,14 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.WAVES ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
+  const messagesButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5 tw-gap-1 tw-flex-1 tw-rounded-md ${
+    activeView === BrainView.MESSAGES ? "tw-bg-iron-800" : "tw-bg-iron-950"
+  }`;
+
+  const messagesButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+    activeView === BrainView.MESSAGES ? "tw-text-iron-300" : "tw-text-iron-400"
+  }`;
+
   const backButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5  tw-gap-1 tw-flex-1 tw-rounded-md tw-bg-iron-950`;
 
   const onChatClick = () => {
@@ -118,18 +130,17 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           <>
             <button
               onClick={() => {
-                // Use browser's history back when possible
-                if (window.history.length > 1) {
-                  window.history.back();
-                } else {
-                  router.push('/my-stream', undefined, { shallow: true });
-                  onViewChange(BrainView.DEFAULT);
-                }
+                // Always go directly to My Stream view with default tab
+                // Clear any view parameters to ensure we get back to main stream
+                router.push("/my-stream", undefined, { shallow: true });
+                onViewChange(BrainView.DEFAULT);
               }}
               className={backButtonClasses}
             >
               <ArrowLeftIcon className="tw-size-4 tw-text-iron-400" />
-              <span className="tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap tw-text-iron-400">My Stream</span>
+              <span className="tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap tw-text-iron-400">
+                My Stream
+              </span>
             </button>
             {/* Divider */}
             <div className="tw-h-4 tw-w-px tw-bg-iron-700 tw-mx-1 tw-flex-shrink-0" />
@@ -143,10 +154,18 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             onClick={() => onViewChange(BrainView.WAVES)}
             className={wavesButtonClasses}
           >
-            <WavesIcon className="tw-size-4 tw-text-iron-400" />
             <span className={wavesButtonTextClasses}>Waves</span>
           </button>
         )}
+        <button
+          ref={(el) => {
+            tabRefs.current[BrainView.MESSAGES] = el;
+          }}
+          onClick={() => onViewChange(BrainView.MESSAGES)}
+          className={messagesButtonClasses}
+        >
+          <span className={messagesButtonTextClasses}>Messages</span>
+        </button>
         <button
           ref={(el) => {
             tabRefs.current[BrainView.DEFAULT] = el;
@@ -154,7 +173,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           onClick={onChatClick}
           className={chatButtonClasses}
         >
-          <span className={chatButtonTextClasses}>{waveActive ? "Chat" : "My Stream"}</span>
+          <span className={chatButtonTextClasses}>
+            {waveActive ? "Chat" : "My Stream"}
+          </span>
         </button>
         {waveActive && (
           <button

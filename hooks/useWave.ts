@@ -46,6 +46,7 @@ interface WaveInfo {
   isChatWave: boolean;
   isRankWave: boolean;
   isMemesWave: boolean;
+  isDm: boolean;
 }
 
 /**
@@ -251,5 +252,6 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     isChatWave: wave?.wave.type === "CHAT",
     isRankWave: wave?.wave.type === "RANK",
     isMemesWave: isMemesWave(wave?.id.toLowerCase()),
+    isDm: !!wave?.chat?.scope?.group?.is_direct_message,
   };
 }

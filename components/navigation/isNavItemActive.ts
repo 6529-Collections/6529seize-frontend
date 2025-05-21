@@ -5,6 +5,7 @@ export const isNavItemActive = (
   item: NavItemData,
   router: NextRouter,
   activeView: ViewKey | null,
+  isCurrentWaveDm: boolean
 ): boolean => {
   // User profile pages and Network routes are active only when no in-app view is selected
   if (item.name === "Network" && activeView === null) {
@@ -36,7 +37,15 @@ export const isNavItemActive = (
   }
 
   if (item.viewKey === "waves") {
-    return activeView === item.viewKey || isWaveSubRoute;
+    if (activeView === "waves") return true;
+    if (activeView === "messages") return false;
+    return isWaveSubRoute && !isCurrentWaveDm;
+  }
+
+  if (item.viewKey === "messages") {
+    if (activeView === "messages") return true;
+    if (activeView === "waves") return false;
+    return isWaveSubRoute && isCurrentWaveDm;
   }
 
   return activeView === item.viewKey;

@@ -19,6 +19,7 @@ import { useWave } from "../../hooks/useWave";
 import { ApiDrop } from "../../generated/models/ApiDrop";
 import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
+import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 export enum BrainView {
@@ -30,6 +31,7 @@ export enum BrainView {
   MY_VOTES = "MY_VOTES",
   FAQ = "FAQ",
   WAVES = "WAVES",
+  MESSAGES = "MESSAGES",
 }
 
 interface Props {
@@ -111,7 +113,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     if (!hasWave) {
       if (
         activeView !== BrainView.DEFAULT &&
-        activeView !== BrainView.WAVES
+        activeView !== BrainView.WAVES &&
+        activeView !== BrainView.MESSAGES
       )
         setActiveView(BrainView.DEFAULT);
       return;
@@ -164,6 +167,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
         <MyStreamWaveFAQ wave={wave} />
       ) : null,
     [BrainView.WAVES]: <BrainMobileWaves />,
+    [BrainView.MESSAGES]: <BrainMobileMessages />,
   };
 
   return (

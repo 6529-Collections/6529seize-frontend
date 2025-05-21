@@ -12,6 +12,7 @@ import BackButton from "../navigation/BackButton";
 import Spinner from "../utils/Spinner";
 import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryContext";
 import { capitalizeEveryWord, formatAddress } from "../../helpers/Helpers";
+import HeaderActionButtons from "./HeaderActionButtons";
 
 interface Props {
   readonly extraClass?: string;
@@ -47,7 +48,8 @@ export default function AppHeader(props: Readonly<Props>) {
   const { wave, isLoading, isFetching } = useWaveById(waveId);
   const isProfileRoute = router.pathname.startsWith("/[user]");
 
-  const showBackButton = !!waveId || (isProfileRoute && canGoBack);
+  const showBackButton =
+    (!!waveId && activeView === null) || (isProfileRoute && canGoBack);
 
   const finalTitle: React.ReactNode = (() => {
     if (activeView === "waves") return "Waves";
@@ -102,17 +104,21 @@ export default function AppHeader(props: Readonly<Props>) {
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
             className={`tw-flex tw-items-center tw-justify-center tw-overflow-hidden tw-h-10 tw-w-10 tw-rounded-full tw-border tw-border-solid ${
-              address && pfp
-                ? "tw-bg-iron-900 tw-border-white/20 tw-border-solid"
+              address
+                ? "tw-bg-iron-900 tw-border-white/20"
                 : "tw-bg-transparent tw-border-transparent"
             }`}
           >
-            {address && pfp ? (
-              <img
-                src={pfp}
-                alt="pfp"
-                className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
-              />
+            {address ? (
+              pfp ? (
+                <img
+                  src={pfp}
+                  alt="pfp"
+                  className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
+                />
+              ) : (
+                <div className="tw-h-10 tw-w-10 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-flex-shrink-0" />
+              )
             ) : (
               <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
             )}
@@ -121,7 +127,10 @@ export default function AppHeader(props: Readonly<Props>) {
         <div className="tw-flex-1 tw-text-center tw-font-semibold tw-text-sm">
           {finalTitle}
         </div>
-        <HeaderSearchButton />
+        <div className="tw-flex tw-items-center tw-gap-x-2">
+          <HeaderActionButtons />
+          <HeaderSearchButton />
+        </div>
       </div>
       <AppSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>

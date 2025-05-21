@@ -150,4 +150,8 @@ export interface WavesOverviewParams {
   offset: number;
   type: ApiWavesOverviewType;
   only_waves_followed_by_authenticated_user?: boolean;
+  /**
+   * Filter waves by direct message flag. true -> only DMs, false -> exclude DMs.
+   */
+  direct_message?: boolean;
 }

@@ -13,6 +13,7 @@ import { usePinnedWaves } from "./usePinnedWaves";
 import { useWaveData } from "./useWaveData";
 import { ApiWave } from "../generated/models/ApiWave";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
+import { ApiWaveType } from "../generated/models/ApiWaveType";
 
 // Enhanced wave interface with isPinned field and newDropsCount
 interface EnhancedWave extends ApiWave {
@@ -184,15 +185,16 @@ const useWavesList = () => {
     // First add pinned waves from mainWaves
     pinnedIds.forEach((id) => {
       const waveFromMain = mainWavesMap.get(id);
-      if (waveFromMain) {
-        // Add isPinned property
+      if (waveFromMain && !waveIsDm(waveFromMain)) {
         result.push({ ...waveFromMain, isPinned: true });
       }
     });
 
     // Then add separately fetched pinned waves
     separatelyFetchedPinnedWaves.forEach((wave) => {
+      if (!waveIsDm(wave)) {
       result.push({ ...wave, isPinned: true });
+      }
     });
 
     // Update the ref if content changed - still useful for comparison and memoization
@@ -237,10 +239,12 @@ const useWavesList = () => {
 
       const isPinned = pinnedWavesSet.has(wave.id);
 
+      if (!waveIsDm(wave)) {
       allWavesArray.push({
         ...wave,
         isPinned,
       });
+      }
     });
 
     // Sort all waves by latest_drop_timestamp (most recent first)
@@ -329,5 +333,10 @@ const useWavesList = () => {
     ]
   );
 };
+
+const waveIsDm = (w: ApiWave) =>
+  w.wave.type === ApiWaveType.Chat &&
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  (w.chat as any)?.scope?.group?.is_direct_message === true;
 
 export default useWavesList;

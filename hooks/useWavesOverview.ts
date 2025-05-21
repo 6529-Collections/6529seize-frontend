@@ -12,6 +12,10 @@ interface UseWavesOverviewProps {
   readonly type: ApiWavesOverviewType;
   readonly limit?: number;
   readonly following?: boolean;
+  /**
+   * If true, fetch only direct message waves. If false, exclude them. Undefined -> no filter.
+   */
+  readonly directMessage?: boolean;
   readonly refetchInterval?: number;
 }
 
@@ -19,12 +23,14 @@ export const useWavesOverview = ({
   type,
   limit = 20,
   following = false,
+  directMessage,
   refetchInterval = Infinity,
 }: UseWavesOverviewProps) => {
   const params: Omit<WavesOverviewParams, "offset"> = {
     limit,
     type,
     only_waves_followed_by_authenticated_user: following,
+    ...(directMessage !== undefined ? { direct_message: directMessage } : {}),
   };
 
   const [lastErrorTimestamp, setLastErrorTimestamp] = useState<number | null>(
@@ -40,6 +46,10 @@ export const useWavesOverview = ({
         type: params.type,
         only_waves_followed_by_authenticated_user: `${params.only_waves_followed_by_authenticated_user}`,
       };
+
+      if (params.direct_message !== undefined) {
+        queryParams.direct_message = `${params.direct_message}`;
+      }
 
       return await commonApiFetch<ApiWave[]>({
         endpoint: `waves-overview`,

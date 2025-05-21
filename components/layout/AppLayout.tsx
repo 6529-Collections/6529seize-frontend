@@ -8,6 +8,7 @@ import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "../../contexts/HeaderContext";
 import { useDeepLinkNavigation } from "../../hooks/useDeepLinkNavigation";
+import BrainMobileMessages from "../brain/mobile/BrainMobileMessages";
 
 const TouchDeviceHeader = dynamic(() => import("../header/AppHeader"), {
   ssr: false,
@@ -41,9 +42,7 @@ export default function AppLayout({ children }: Props) {
         <TouchDeviceHeader />
       </div>
       {activeView === "messages" ? (
-        <div className="tw-text-white tw-text-center tw-p-4">
-          Messages view placeholder
-        </div>
+        <BrainMobileMessages />
       ) : activeView === "waves" ? (
         <BrainMobileWaves />
       ) : (

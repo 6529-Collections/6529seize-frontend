@@ -32,7 +32,6 @@ export const items: NavItemData[] = [
     viewKey: "messages",
     icon: "messages",
     iconComponent: ChatBubbleIcon,
-    disabled: true,
   },
   {
     kind: "route",

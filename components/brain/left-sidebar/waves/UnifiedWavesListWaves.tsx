@@ -11,6 +11,9 @@ import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 interface UnifiedWavesListWavesProps {
   readonly waves: MinimalWave[];
   readonly onHover: (waveId: string) => void;
+  readonly hideToggle?: boolean;
+  readonly hidePin?: boolean;
+  readonly hideHeaders?: boolean;
   readonly scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -22,7 +25,7 @@ export interface UnifiedWavesListWavesHandle {
 const UnifiedWavesListWaves = forwardRef<
   UnifiedWavesListWavesHandle,
   UnifiedWavesListWavesProps
->(({ waves, onHover, scrollContainerRef }, ref) => {
+>(({ waves, onHover, scrollContainerRef, hideToggle, hidePin, hideHeaders }, ref) => {
   const [following, setFollowing] = useShowFollowingWaves();
   const listContainerRef = useRef<HTMLDivElement>(null);
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -71,19 +74,23 @@ const UnifiedWavesListWaves = forwardRef<
     return null;
   }
 
-  const joinedToggle = isConnectedIdentity ? (
-    <CommonSwitch label="Joined" isOn={following} setIsOn={setFollowing} />
+  const joinedToggle = !hideToggle && isConnectedIdentity ? (
+    <CommonSwitch
+      label="Joined"
+      isOn={following}
+      setIsOn={setFollowing}
+    />
   ) : null;
 
   return (
     <div className="tw-flex tw-flex-col">
-      {pinnedWaves.length > 0 && (
+      {!hideHeaders && pinnedWaves.length > 0 && (
         <>
           <SectionHeader label="Pinned" icon={faThumbtack} />
           <div className="tw-flex tw-flex-col tw-mb-3">
             {pinnedWaves.map((wave) => (
               <div key={wave.id}>
-                <BrainLeftSidebarWave wave={wave} onHover={onHover} />
+                <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={!hidePin} />
               </div>
             ))}
           </div>
@@ -91,7 +98,9 @@ const UnifiedWavesListWaves = forwardRef<
       )}
       {regularWaves.length > 0 && (
         <>
-          <SectionHeader label="All Waves" rightContent={joinedToggle} />
+         {!hideHeaders && (
+            <SectionHeader label="All Waves" rightContent={joinedToggle} />
+          )}
           <div
             ref={listContainerRef}
             style={{ height: virtual.totalHeight, position: "relative" }}
@@ -122,7 +131,7 @@ const UnifiedWavesListWaves = forwardRef<
                     width: "100%",
                   }}
                 >
-                  <BrainLeftSidebarWave wave={wave} onHover={onHover} />
+                  <BrainLeftSidebarWave wave={wave} onHover={onHover} showPin={!hidePin} />
                 </div>
               );
             })}
