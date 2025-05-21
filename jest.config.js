@@ -38,6 +38,7 @@ const config = {
   // Transformation - use ts-jest
   transform: {
     // Use ts-jest for ts/tsx files
+<<<<<<< HEAD
     "^.+.(ts|tsx)$": [
       "ts-jest",
       {
@@ -50,6 +51,20 @@ const config = {
   },
   // Don't transform node_modules except specific ESM packages if needed
   transformIgnorePatterns: ["/node_modules/", "^.+.module.(css|sass|scss)$"],
+=======
+    '^.+\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: 'tsconfig.json', // Use default tsconfig.json, adjust if needed
+      babelConfig: false, // This is fine, ts-jest handles TS.
+    }],
+    // Add babel-jest for JS/JSX/MJS files
+    '^.+\.(js|jsx|mjs)$': ['babel-jest', { presets: ['next/babel'] }],
+  },
+  // Don't transform node_modules except specific ESM packages if needed
+  transformIgnorePatterns: [
+    '/node_modules/(?!wagmi|viem)/', // Allow transforming wagmi and viem
+    '^.+\.module\.(css|sass|scss)$',
+  ],
+>>>>>>> codex/write-jest-tests-for-memepagemintcountdown
   // Coverage Configuration (keep existing)
   collectCoverage: true,
   collectCoverageFrom: [
