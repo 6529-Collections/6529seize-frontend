@@ -27,7 +27,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
   const hasFetchedRef = useRef(false);
-  const { directMessages, activeWave, registerWave } = useMyStream();
+  const { directMessages, registerWave } = useMyStream();
 
   useEffect(() => {
     console.log("directMessages", directMessages);

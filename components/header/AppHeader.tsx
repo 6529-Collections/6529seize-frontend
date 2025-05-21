@@ -109,18 +109,16 @@ export default function AppHeader(props: Readonly<Props>) {
                 : "tw-bg-transparent tw-border-transparent"
             }`}
           >
-            {address ? (
-              pfp ? (
-                <img
-                  src={pfp}
-                  alt="pfp"
-                  className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
-                />
-              ) : (
-                <div className="tw-h-10 tw-w-10 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-flex-shrink-0" />
-              )
-            ) : (
+            {!address ? (
               <Bars3Icon className="tw-size-6 tw-flex-shrink-0" />
+            ) : pfp ? (
+              <img
+                src={pfp}
+                alt="pfp"
+                className="tw-h-10 tw-w-10 tw-rounded-full tw-object-contain tw-flex-shrink-0"
+              />
+            ) : (
+              <div className="tw-h-10 tw-w-10 tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-flex-shrink-0" />
             )}
           </button>
         )}

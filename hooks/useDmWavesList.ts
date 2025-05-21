@@ -1,13 +1,9 @@
 import {
   useCallback,
-  useEffect,
   useMemo,
-  useState,
 } from "react";
 import { useWavesOverview } from "./useWavesOverview";
 import { WAVE_FOLLOWING_WAVES_PARAMS } from "../components/react-query-wrapper/utils/query-utils";
-import { ApiWave } from "../generated/models/ApiWave";
-import { ApiWaveType } from "../generated/models/ApiWaveType";
 
 const useDmWavesList = () => {
   const {

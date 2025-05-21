@@ -1,6 +1,5 @@
 import React from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
-import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import BrainLeftSidebarSearchWaveItem from "./BrainLeftSidebarSearchWaveItem";
 
 interface BrainLeftSidebarSearchWaveDropdownContentProps {

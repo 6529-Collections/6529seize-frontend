@@ -18,7 +18,7 @@ const UnifiedWavesListEmpty: React.FC<UnifiedWavesListEmptyProps> = ({
 
   return (
     <div className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500">
-      <p>{emptyMessage || "No waves to display"}</p>
+      <p>{emptyMessage ?? "No waves to display"}</p>
     </div>
   );
 };
