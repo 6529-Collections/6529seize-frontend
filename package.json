@@ -13,6 +13,7 @@
     "lint": "next lint",
     "test": "jest",
     "test:cov": "CI=1 jest --coverage --watchAll=false",
+    "test:cov:changed": "CI=1 jest --coverage --watchAll=false --changedSince=main",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:watch": "nodemon --watch tests --watch src --ext ts,tsx,js,jsx --exec \"npx playwright test\"",
