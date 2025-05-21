@@ -21,56 +21,12 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   scrollContainerRef,
 }) => {
   const { isAuthenticated } = useSeizeConnectContext();
-  const { connectedProfile, fetchingProfile } = useContext(AuthContext);
+  const { connectedProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
-
-  const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
-
-  if (shouldShowPlaceholder) {
-    const placeholderContent = !isAuthenticated ? (
-      <>
-        <h1 className="tw-text-xl tw-font-bold">
-          This content is only available to connected wallets.
-        </h1>
-        <p className="tw-text-base tw-text-gray-400">
-          Connect your wallet to continue.
-        </p>
-        <HeaderUserConnect />
-      </>
-    ) : (
-      <>
-        <h1 className="tw-text-xl tw-font-bold">
-          You need to set up a profile to continue.
-        </h1>
-        <UserSetUpProfileCta />
-      </>
-    );
-
-    return (
-      <div
-        id="my-stream-connect"
-        className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-h-full tw-p-6 tailwind-scope"
-      >
-        <Image
-          priority
-          loading="eager"
-          src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
-          alt="Brain"
-          width={304}
-          height={450}
-          className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
-        />
-        <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
-          {placeholderContent}
-        </div>
-      </div>
-    );
-  }
-
-  // Refs to the scroll container and sentinel
+  
+  // Moved all hooks to the top level, before any conditional logic
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
   const hasFetchedRef = useRef(false);
-
   const { directMessages, activeWave, registerWave } = useMyStream();
 
   useEffect(() => {
@@ -117,6 +73,49 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     directMessages.hasNextPage,
     directMessages.isFetchingNextPage,
   ]);
+
+  const shouldShowPlaceholder = !isAuthenticated || !connectedProfile?.handle;
+
+  if (shouldShowPlaceholder) {
+    const placeholderContent = !isAuthenticated ? (
+      <>
+        <h1 className="tw-text-xl tw-font-bold">
+          This content is only available to connected wallets.
+        </h1>
+        <p className="tw-text-base tw-text-gray-400">
+          Connect your wallet to continue.
+        </p>
+        <HeaderUserConnect />
+      </>
+    ) : (
+      <>
+        <h1 className="tw-text-xl tw-font-bold">
+          You need to set up a profile to continue.
+        </h1>
+        <UserSetUpProfileCta />
+      </>
+    );
+
+    return (
+      <div
+        id="my-stream-connect"
+        className="tw-flex tw-flex-col md:tw-flex-row tw-items-center tw-justify-center tw-gap-8 tw-h-full tw-p-6 tailwind-scope"
+      >
+        <Image
+          priority
+          loading="eager"
+          src="https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33FD426905F149f8376e227d0C9D3340AaD17aF1/279.WEBP"
+          alt="Brain"
+          width={304}
+          height={450}
+          className="tw-rounded-md tw-shadow-lg tw-max-w-[30vw] md:tw-max-w-[200px] tw-h-auto"
+        />
+        <div className="tw-flex tw-flex-col tw-items-center md:tw-items-start tw-text-center md:tw-text-left tw-gap-4">
+          {placeholderContent}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="tw-mb-4">
