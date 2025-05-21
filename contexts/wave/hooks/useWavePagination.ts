@@ -268,7 +268,7 @@ export function useWavePagination({
       const controller = createController(props.waveId);
 
       // Create promise for the request
-      const fetchPromise =
+      const rawPromise =
         props.type === DropSize.FULL
           ? fetchWaveMessages(props.waveId, oldestSerialNo, controller.signal)
           : fetchLightWaveMessages(
@@ -278,7 +278,7 @@ export function useWavePagination({
               controller.signal
             );
 
-      fetchPromise
+      const handledPromise = rawPromise
         .then((drops) => updateWithPaginatedData(props.waveId, drops))
         .catch((error) => {
           handlePaginationError(props.waveId, error);
@@ -286,10 +286,10 @@ export function useWavePagination({
         })
         .finally(() => cleanupController(props.waveId, controller));
 
-      // Store the promise
-      paginationState.promise = fetchPromise;
+      // Store the promise so concurrent callers can await the same one
+      paginationState.promise = handledPromise;
 
-      return fetchPromise;
+      return handledPromise;
     },
     [
       getData,
@@ -435,10 +435,15 @@ export function useWavePagination({
       // Store the latest requested serial number
       aroundSerialNoStates.current[waveId].pendingSerialNo = serialNo;
 
+      // If a request is already in flight, abort it so only the latest will be processed
+      if (aroundSerialNoStates.current[waveId].isFetching) {
+        cancelAbort(`${waveId}-around`);
+      }
+
       // Trigger the processing queue
       void _processAroundSerialNoQueue(waveId);
     },
-    [_processAroundSerialNoQueue] // Dependency: the internal processing function
+    [cancelAbort, _processAroundSerialNoQueue] // Dependency: the internal processing function
   );
 
   return {

@@ -13,6 +13,7 @@ export function useVirtualizedWaves<T>(
   items: readonly T[],
   key: string,
   scrollContainerRef: React.RefObject<HTMLDivElement | null>,
+  listContainerRef: React.RefObject<HTMLDivElement | null>,
   rowHeight = 72,
   overscan = 5
 ) {
@@ -38,9 +39,9 @@ export function useVirtualizedWaves<T>(
   }, [getPosition, setPosition, key, scrollContainerRef]);
 
   const viewportHeight = scrollContainerRef.current?.clientHeight ?? 0;
-
+  const listOffset = listContainerRef.current?.offsetTop ?? 0;
   const startIndex = Math.max(
-    Math.floor(scrollOffset / rowHeight) - overscan,
+    Math.floor((scrollOffset - listOffset) / rowHeight) - overscan,
     0
   );
   const endIndex = Math.min(
