@@ -6,6 +6,7 @@ import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboar
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { useWave } from "../../../hooks/useWave";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
 
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
@@ -26,6 +27,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 }) => {
   const router = useRouter();
   const { registerRef } = useLayout();
+  const { isApp } = useDeviceInfo();
 
   // Local ref for component-specific needs
   const mobileTabsRef = useRef<HTMLDivElement | null>(null);
@@ -157,15 +159,17 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <span className={wavesButtonTextClasses}>Waves</span>
           </button>
         )}
-        <button
-          ref={(el) => {
-            tabRefs.current[BrainView.MESSAGES] = el;
-          }}
-          onClick={() => onViewChange(BrainView.MESSAGES)}
-          className={messagesButtonClasses}
-        >
-          <span className={messagesButtonTextClasses}>Messages</span>
-        </button>
+        {!isApp && (
+          <button
+            ref={(el) => {
+              tabRefs.current[BrainView.MESSAGES] = el;
+            }}
+            onClick={() => onViewChange(BrainView.MESSAGES)}
+            className={messagesButtonClasses}
+          >
+            <span className={messagesButtonTextClasses}>Messages</span>
+          </button>
+        )}
         <button
           ref={(el) => {
             tabRefs.current[BrainView.DEFAULT] = el;
