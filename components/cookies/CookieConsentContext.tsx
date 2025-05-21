@@ -71,7 +71,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [country, setCountry] = useState("");
 
-  const getCookieConsent = async (isFirstLoad: boolean = true) => {
+  const getCookieConsent = async (isFirstLoad: boolean = false) => {
     try {
       const essentialCookies = getCookieConsentByName(CONSENT_ESSENTIAL_COOKIE);
       const performanceCookies = getCookieConsentByName(
@@ -101,7 +101,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       } else {
         Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 7 });
         Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 7 });
-        getCookieConsent(false);
+        getCookieConsent();
       }
     } catch (error) {
       console.error("Failed to fetch cookie consent status", error);
@@ -166,7 +166,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   );
 
   useEffect(() => {
-    getCookieConsent();
+    getCookieConsent(true);
   }, []);
 
   return (
