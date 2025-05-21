@@ -27,6 +27,7 @@ import { commonApiFetch } from "../../../../services/api/common-api";
 import { AuthContext } from "../../../auth/Auth";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
+import { useCookieConsent } from "../../../cookies/CookieConsentContext";
 
 interface Props {
   collection: NextGenCollection;
@@ -197,6 +198,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 
 export default function NextGenCollectionHeader(props: Readonly<Props>) {
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const [available, setAvailable] = useState<number>(0);
 
   function showMint() {
@@ -231,7 +233,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
               available={available}
             />
           }
-          {props.show_links && capacitor.platform !== "ios" && (
+          {props.show_links && (!capacitor.isIos || country === "US") && (
             <span className="pt-2 pb-2 d-flex align-items-center justify-content-end gap-4">
               <a
                 href={

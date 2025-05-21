@@ -69,7 +69,7 @@ export default function CreateDirectMessage({
           .map((i) => i.primary_wallet ?? i.wallet)
           .filter((i) => i !== null),
       });
-      router.push(`/waves/${wave.id}`);
+      router.push(`/my-stream?view=messages&wave=${wave.id}`, undefined, { shallow: true });
     } catch (error) {
       console.error(error);
       setToast({

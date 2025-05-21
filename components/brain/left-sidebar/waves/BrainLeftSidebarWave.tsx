@@ -11,11 +11,13 @@ import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
 interface BrainLeftSidebarWaveProps {
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
+  readonly showPin?: boolean;
 }
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   wave,
   onHover,
+  showPin = true,
 }) => {
   const router = useRouter();
   const prefetchWaveData = usePrefetchWaveData();
@@ -115,7 +117,9 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
           )}
         </div>
       </Link>
-      <BrainLeftSidebarWavePin waveId={wave.id} isPinned={!!wave.isPinned} />
+      {showPin && (
+        <BrainLeftSidebarWavePin waveId={wave.id} isPinned={!!wave.isPinned} />
+      )}
     </div>
   );
 };

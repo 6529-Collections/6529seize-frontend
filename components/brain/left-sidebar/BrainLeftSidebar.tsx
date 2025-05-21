@@ -1,10 +1,12 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { BrainLeftSidebarViewChange } from "./BrainLeftSidebarViewChange";
 import BrainLeftSidebarSearchWave from "./search-wave/BrainLeftSidebarSearchWave";
 import BrainLeftSidebarWaves from "./waves/BrainLeftSidebarWaves";
 import { TabToggle } from "../../common/TabToggle";
 import { useContentTab } from "../ContentTabContext";
 import { MyStreamWaveTab } from "../../../types/waves.types";
+import DirectMessagesList from "../direct-messages/DirectMessagesList";
+import { useRouter } from "next/router";
 
 interface BrainLeftSidebarProps {
   readonly activeWaveId: string | null;
@@ -13,12 +15,36 @@ interface BrainLeftSidebarProps {
 const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   activeWaveId,
 }) => {
-
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Get content tab state from context
   const { activeContentTab, setActiveContentTab, availableTabs } =
     useContentTab();
+
+  // Sidebar tab state: 'waves' or 'messages'
+  const [sidebarTab, setSidebarTab] = useState<"waves" | "messages">(() => {
+    if (typeof window === "undefined") return "waves";
+    return (
+      (localStorage.getItem("sidebarTab") as "waves" | "messages") || "waves"
+    );
+  });
+
+  const router = useRouter();
+  // keep tab in sync with url ?view=
+  useEffect(() => {
+    const viewParam =
+      typeof router.query.view === "string" ? router.query.view : null;
+    if (viewParam === "messages") {
+      setSidebarTab("messages");
+    } else {
+      // default to waves when param is 'waves' or absent
+      setSidebarTab("waves");
+    }
+  }, [router.query.view]);
+
+  useEffect(() => {
+    localStorage.setItem("sidebarTab", sidebarTab);
+  }, [sidebarTab]);
 
   // Instead of calculating height, we'll use flex properties to fill parent container
   const sidebarStyle = useMemo(() => {
@@ -69,8 +95,28 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
             />
           </div>
         )}
-        <BrainLeftSidebarSearchWave />
-        <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
+
+        {/* Search field shared */}
+        <BrainLeftSidebarSearchWave listType={sidebarTab} />
+
+        <div className="tw-flex tw-flex-col tw-gap-y-2">
+          {/* Tab switcher */}
+          <TabToggle
+            options={[
+              { key: "waves", label: "Waves" },
+              { key: "messages", label: "Messages" },
+            ]}
+            activeKey={sidebarTab}
+            onSelect={(k) => setSidebarTab(k as "waves" | "messages")}
+          />
+
+          {sidebarTab === "waves" && (
+            <BrainLeftSidebarWaves scrollContainerRef={scrollContainerRef} />
+          )}
+          {sidebarTab === "messages" && (
+            <DirectMessagesList scrollContainerRef={scrollContainerRef} />
+          )}
+        </div>
       </div>
     </div>
   );

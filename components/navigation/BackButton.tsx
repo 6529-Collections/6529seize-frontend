@@ -3,9 +3,14 @@ import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryCon
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Spinner from "../utils/Spinner";
+import { useWaveData } from "../../hooks/useWaveData";
+import { useWave } from "../../hooks/useWave";
+import { useViewContext } from "./ViewContext";
+
 
 export default function BackButton() {
   const { canGoBack, goBack } = useNavigationHistoryContext();
+  const { hardBack } = useViewContext();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -24,6 +29,18 @@ export default function BackButton() {
   const dropId =
     typeof router.query.drop === "string" ? router.query.drop : null;
 
+  // Fetch wave to determine if it is DM
+  const { data: wave } = useWaveData({
+    waveId: waveId,
+    onWaveNotFound: () => {
+      const newQuery = { ...router.query } as Record<string, any>;
+      delete newQuery.wave;
+      router.replace({ pathname: router.pathname, query: newQuery }, undefined, { shallow: true });
+    },
+  });
+
+  const { isDm } = useWave(wave);
+
   const handleClick = () => {
     if (loading) return;
     setLoading(true);
@@ -41,9 +58,8 @@ export default function BackButton() {
     }
 
     if (waveId) {
-      router.replace(`/my-stream?wave=${waveId}&view=waves`, undefined, {
-        shallow: true,
-      });
+      const targetView = isDm ? "messages" : "waves";
+      hardBack(targetView);
       return;
     }
 

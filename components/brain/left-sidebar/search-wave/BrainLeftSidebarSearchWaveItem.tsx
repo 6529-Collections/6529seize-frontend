@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { usePrefetchWaveData } from "../../../../hooks/usePrefetchWaveData";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
+import { useWave } from "../../../../hooks/useWave";
 import WavePicture from "../../../waves/WavePicture";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
 interface BrainLeftSidebarSearchWaveItemProps {
@@ -18,12 +19,15 @@ const BrainLeftSidebarSearchWaveItem: React.FC<
   const prefetchWaveData = usePrefetchWaveData();
   const { registerWave } = useMyStream();
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
+  const { isDm } = useWave(wave);
+
   const getHref = (waveId: string) => {
+    const base = isDm ? `/my-stream?view=messages&wave=${waveId}` : `/my-stream?wave=${waveId}`;
     const currentWaveId = router.query.wave as string | undefined;
     if (currentWaveId === waveId) {
       return "/my-stream";
     }
-    return `/my-stream?wave=${waveId}`;
+    return base;
   };
   const isActive = wave.id === router.query.wave;
 

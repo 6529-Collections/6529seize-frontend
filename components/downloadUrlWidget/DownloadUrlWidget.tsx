@@ -1,11 +1,9 @@
 import styles from "./DownloadUrlWidget.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
-import { API_AUTH_COOKIE } from "../../constants";
-import Cookies from "js-cookie";
 import { Spinner } from "../dotLoader/DotLoader";
 import { Button, Modal } from "react-bootstrap";
-import { getAuthJwt } from "../../services/auth/auth.utils";
+import { getAuthJwt, getStagingAuth } from "../../services/auth/auth.utils";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
 interface Props {
@@ -15,7 +13,7 @@ interface Props {
 }
 
 export default function DownloadUrlWidget(props: Readonly<Props>) {
-  const apiAuth = Cookies.get(API_AUTH_COOKIE);
+  const apiAuth = getStagingAuth();
   let headers: any = {};
   if (apiAuth) {
     headers["x-6529-auth"] = apiAuth;

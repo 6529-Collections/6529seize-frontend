@@ -4,11 +4,13 @@ import { MinimalWave } from "../../../../contexts/wave/hooks/useEnhancedWavesLis
 interface UnifiedWavesListEmptyProps {
   readonly sortedWaves: MinimalWave[];
   readonly isFetchingNextPage: boolean;
+  readonly emptyMessage?: string;
 }
 
 const UnifiedWavesListEmpty: React.FC<UnifiedWavesListEmptyProps> = ({
   sortedWaves,
   isFetchingNextPage,
+  emptyMessage,
 }) => {
   if (sortedWaves.length > 0 || isFetchingNextPage) {
     return null;
@@ -16,7 +18,7 @@ const UnifiedWavesListEmpty: React.FC<UnifiedWavesListEmptyProps> = ({
 
   return (
     <div className="tw-px-5 tw-py-8 tw-text-center tw-text-iron-500">
-      <p>No waves to display</p>
+      <p>{emptyMessage ?? "No waves to display"}</p>
     </div>
   );
 };

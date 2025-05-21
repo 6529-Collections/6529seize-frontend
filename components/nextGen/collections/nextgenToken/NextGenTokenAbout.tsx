@@ -32,6 +32,7 @@ import useCapacitor from "../../../../hooks/useCapacitor";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../../hooks/useIdentity";
 import { faFire } from "@fortawesome/free-solid-svg-icons";
+import { useCookieConsent } from "../../../cookies/CookieConsentContext";
 
 interface Props {
   collection: NextGenCollection;
@@ -40,6 +41,7 @@ interface Props {
 
 export default function NextgenTokenAbout(props: Readonly<Props>) {
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const account = useSeizeConnectContext();
   const [tdh, setTdh] = useState<number>(0);
   const { profile } = useIdentity({
@@ -148,7 +150,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
           </span>
         </Col>
       </Row>
-      {capacitor.platform !== "ios" && (
+      {(!capacitor.isIos || country === "US") && (
         <Row>
           <Col className="pb-3 d-flex flex-column">
             <span className="font-color-h">Listed:</span>

@@ -6,11 +6,12 @@ interface BrainLeftSidebarSearchWaveDropdownContentProps {
   readonly loading: boolean;
   readonly waves: ApiWave[];
   readonly onClose: () => void;
+  readonly listType: 'waves' | 'messages';
 }
 
 const BrainLeftSidebarSearchWaveDropdownContent: React.FC<
   BrainLeftSidebarSearchWaveDropdownContentProps
-> = ({ loading, waves, onClose }) => {
+> = ({ loading, waves, onClose, listType }) => {
   if (loading) {
     return (
       <li className="tw-py-2 tw-w-full tw-h-full tw-text-sm tw-font-normal tw-text-iron-300 tw-rounded-lg tw-relative tw-select-none tw-px-2 tw-flex tw-items-center tw-gap-x-2">

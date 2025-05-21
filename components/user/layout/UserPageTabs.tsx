@@ -3,6 +3,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 import { AuthContext } from "../../auth/Auth";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { useCookieConsent } from "../../cookies/CookieConsentContext";
 
 export enum UserPageTabType {
   BRAIN = "BRAIN",
@@ -77,6 +78,7 @@ export const USER_PAGE_TAB_META: Record<
 export default function UserPageTabs() {
   const router = useRouter();
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const { showWaves } = useContext(AuthContext);
   const pathnameToTab = (pathname: string): UserPageTabType => {
     const regex = /\/\[user\]\/([^/?]+)/;
@@ -102,7 +104,7 @@ export default function UserPageTabs() {
 
   const getTabsToShow = () => {
     let allTabs = Object.values(UserPageTabType);
-    if (capacitor.isIos) {
+    if (capacitor.isIos && country !== "US") {
       allTabs = allTabs.filter((tab) => tab !== UserPageTabType.SUBSCRIPTIONS);
     }
     if (showWaves) return allTabs;

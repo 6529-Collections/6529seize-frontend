@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { API_AUTH_COOKIE } from "./constants";
 
-
 const redirectMappings = [
   { url: "/6529-dubai/", target: "/" },
   { url: "/6529-puerto-rico/", target: "/" },
@@ -109,7 +108,9 @@ export async function middleware(req: NextRequest) {
   }
 
   if (pathname != "/access" && pathname != "/restricted") {
-    const apiAuth = req.cookies.get(API_AUTH_COOKIE);
+    const apiAuth = req.cookies.get(API_AUTH_COOKIE) ?? {
+      value: process.env.STAGING_API_KEY ?? "",
+    };
     const r = await fetch(`${process.env.API_ENDPOINT}/api/`, {
       headers: apiAuth ? { "x-6529-auth": apiAuth.value } : {},
     });

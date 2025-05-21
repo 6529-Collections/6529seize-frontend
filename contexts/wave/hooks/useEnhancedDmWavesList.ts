@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import useWavesList from "../../../hooks/useWavesList";
+import useDmWavesList from "../../../hooks/useDmWavesList";
 import useNewDropCounter, {
   MinimalWaveNewDropsCount,
 } from "./useNewDropCounter";
@@ -12,12 +12,14 @@ export interface MinimalWave {
   type: ApiWaveType;
   newDropsCount: MinimalWaveNewDropsCount;
   picture: string | null;
-  contributors: { pfp: string }[];
+  contributors: {
+    pfp: string;
+  }[];
   isPinned: boolean;
 }
 
-function useEnhancedWavesList(activeWaveId: string | null) {
-  const wavesData = useWavesList();
+function useEnhancedDmWavesList(activeWaveId: string | null) {
+  const wavesData = useDmWavesList();
 
   const { newDropsCounts, resetAllWavesNewDropsCount } = useNewDropCounter(
     activeWaveId,
@@ -25,9 +27,9 @@ function useEnhancedWavesList(activeWaveId: string | null) {
     wavesData.mainWavesRefetch
   );
 
-  const mapWave = useCallback(
+  const mapWaveToMinimalWave = useCallback(
     (wave: ApiWave): MinimalWave => {
-      const newDrops = {
+      const newDropsData = {
         count: newDropsCounts[wave.id]?.count ?? 0,
         latestDropTimestamp:
           newDropsCounts[wave.id]?.latestDropTimestamp ??
@@ -39,37 +41,42 @@ function useEnhancedWavesList(activeWaveId: string | null) {
         name: wave.name,
         type: wave.wave.type,
         picture: wave.picture,
-        contributors: wave.contributors_overview.map((c) => ({ pfp: c.contributor_pfp })),
-        newDropsCount: newDrops,
-        isPinned: wavesData.pinnedWaves.some((w) => w.id === wave.id),
+        contributors: wave.contributors_overview.map((c) => ({
+          pfp: c.contributor_pfp,
+        })),
+        newDropsCount: newDropsData,
+        isPinned: false,
       };
     },
-    [newDropsCounts, wavesData.pinnedWaves]
+    [newDropsCounts]
   );
 
-  const minimal = useMemo(() => wavesData.waves.map(mapWave), [wavesData.waves, mapWave]);
+  const mappedWaves = useMemo(
+    () => wavesData.waves.map(mapWaveToMinimalWave),
+    [wavesData.waves, mapWaveToMinimalWave]
+  );
 
-  const sorted = useMemo(
+  const sortedWaves = useMemo(
     () =>
-      [...minimal].sort(
+      [...mappedWaves].sort(
         (a, b) =>
           (b.newDropsCount.latestDropTimestamp ?? 0) -
           (a.newDropsCount.latestDropTimestamp ?? 0)
       ),
-    [minimal]
+    [mappedWaves]
   );
 
   return {
-    waves: sorted,
+    waves: sortedWaves,
     isFetching: wavesData.isFetching,
     isFetchingNextPage: wavesData.isFetchingNextPage,
     hasNextPage: wavesData.hasNextPage,
     fetchNextPage: wavesData.fetchNextPage,
-    addPinnedWave: wavesData.addPinnedWave,
-    removePinnedWave: wavesData.removePinnedWave,
+    addPinnedWave: () => {},
+    removePinnedWave: () => {},
     refetchAllWaves: wavesData.refetchAllWaves,
     resetAllWavesNewDropsCount,
   };
 }
 
-export default useEnhancedWavesList; 
+export default useEnhancedDmWavesList; 

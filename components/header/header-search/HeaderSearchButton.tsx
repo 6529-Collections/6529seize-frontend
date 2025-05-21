@@ -5,6 +5,7 @@ import CommonAnimationWrapper from "../../utils/animation/CommonAnimationWrapper
 import CommonAnimationOpacity from "../../utils/animation/CommonAnimationOpacity";
 import HeaderSearchModal from "./HeaderSearchModal";
 import { useKey } from "react-use";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function HeaderSearchButton() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -32,21 +33,9 @@ export default function HeaderSearchButton() {
             : "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
         )}
       >
-        <svg
+        <MagnifyingGlassIcon
           className={clsx("tw-flex-shrink-0", iconSizeClasses)}
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-          />
-        </svg>
+        />
       </button>
       <CommonAnimationWrapper mode="sync" initial={true}>
         {isOpen && (

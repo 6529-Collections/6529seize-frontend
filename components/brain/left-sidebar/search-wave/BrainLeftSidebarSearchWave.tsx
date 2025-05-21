@@ -2,11 +2,11 @@ import React, { useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import BrainLeftSidebarSearchWaveDropdown from "./BrainLeftSidebarSearchWaveDropdown";
 
-interface BrainLeftSidebarSearchWaveProps {}
+interface BrainLeftSidebarSearchWaveProps {
+  readonly listType: 'waves' | 'messages';
+}
 
-const BrainLeftSidebarSearchWave: React.FC<
-  BrainLeftSidebarSearchWaveProps
-> = () => {
+const BrainLeftSidebarSearchWave: React.FC<BrainLeftSidebarSearchWaveProps> = ({ listType }) => {
   const [isOpen, setIsOpen] = useState(false);
   const onFocusChange = (newV: boolean) => {
     if (newV) {
@@ -14,15 +14,20 @@ const BrainLeftSidebarSearchWave: React.FC<
     }
   };
 
-  const [searchCriteria, setSearchCriteria] = useState<string | null>(null);
+  const [searchCriteria, setSearchCriteria] = useState<string>("");
 
   const onSearchCriteriaChange = (newV: string | null) => {
-    setSearchCriteria(newV);
+    setSearchCriteria(newV ?? "");
   };
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   useClickAway(wrapperRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setSearchCriteria("");
+  };
 
   return (
     <div className="tw-relative" ref={wrapperRef}>
@@ -41,18 +46,26 @@ const BrainLeftSidebarSearchWave: React.FC<
       <input
         type="text"
         id="brain-left-sidebar-search-wave"
-        value={searchCriteria ?? ""}
+        value={searchCriteria}
         onChange={(e) => onSearchCriteriaChange(e.target.value)}
         onFocus={() => onFocusChange(true)}
         onBlur={() => onFocusChange(false)}
+        onKeyDown={e => {
+          if (e.key === "Enter" && searchCriteria.trim()) {
+            e.preventDefault();
+            setSearchCriteria("");
+            setIsOpen(false);
+          }
+        }}
         autoComplete="off"
         className="tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-py-2.5 tw-pl-11 tw-pr-3 tw-bg-iron-900 tw-text-iron-50 tw-font-normal tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-800 hover:tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out"
-        placeholder="Search a Wave"
+        placeholder="Search"
       />
       <BrainLeftSidebarSearchWaveDropdown
         open={isOpen}
         searchCriteria={searchCriteria}
-        onClose={() => setIsOpen(false)}
+        onClose={handleClose}
+        listType={listType}
       />
     </div>
   );
