@@ -1,17 +1,31 @@
 import { useRef } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+import useIsMobileScreen from "../../hooks/isMobileScreen";
+import Link from "next/link";
 
 interface Props {
   file: string;
+  name: string;
 }
 
-export default function PdfViewer({ file }: Readonly<Props>) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function PdfViewer({ file, name }: Readonly<Props>) {
+  const isMobile = useIsMobileScreen();
 
   const pdfUrlWithPage = `${file}`;
 
+  if (isMobile) {
+    return (
+      <h3>
+        Open{" "}
+        <Link href={pdfUrlWithPage} target="_blank">
+          {name}
+        </Link>
+      </h3>
+    );
+  }
+
   return (
-    <Container className="no-padding" ref={containerRef}>
+    <Container className="no-padding">
       <Row>
         <Col>
           <iframe
@@ -20,7 +34,7 @@ export default function PdfViewer({ file }: Readonly<Props>) {
             width="100%"
             height="600px"
             style={{ border: "none" }}
-            title={file}
+            title={name}
           />
         </Col>
       </Row>
