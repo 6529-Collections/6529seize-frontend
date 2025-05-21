@@ -77,7 +77,6 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "19.1.0",
     "react-markdown": "^9.0.1",
-    "react-pdf": "^9.1.0",
     "react-redux": "^9.1.2",
     "react-scroll": "^1.9.0",
     "react-toastify": "^10.0.5",
