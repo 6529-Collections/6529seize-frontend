@@ -13,12 +13,14 @@ import Spinner from "../utils/Spinner";
 import { useNavigationHistoryContext } from "../../contexts/NavigationHistoryContext";
 import { capitalizeEveryWord, formatAddress } from "../../helpers/Helpers";
 import HeaderActionButtons from "./HeaderActionButtons";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 interface Props {
   readonly extraClass?: string;
 }
 
 export default function AppHeader(props: Readonly<Props>) {
+  const { country } = useCookieConsent();
   const [menuOpen, setMenuOpen] = useState(false);
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
@@ -41,6 +43,8 @@ export default function AppHeader(props: Readonly<Props>) {
     ? pathSegments[pathSegments.length - 1]
         .replace(/[-_]/g, " ")
         .replace(/^./, (c) => c.toUpperCase())
+    : country
+    ? `Home - ${country}`
     : "Home";
 
   const waveId =
@@ -107,8 +111,7 @@ export default function AppHeader(props: Readonly<Props>) {
               address
                 ? "tw-bg-iron-900 tw-border-white/20"
                 : "tw-bg-transparent tw-border-transparent"
-            }`}
-          >
+            }`}>
             {address ? (
               pfp ? (
                 <img
