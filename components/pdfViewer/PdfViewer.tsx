@@ -1,72 +1,39 @@
-import styles from "./PdfViewer.module.scss";
-import { Document, Page, pdfjs } from "react-pdf";
-import { useEffect, useRef, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
-import Pagination from "../pagination/Pagination";
+import useIsMobileScreen from "../../hooks/isMobileScreen";
+import Link from "next/link";
 
 interface Props {
   file: string;
+  name: string;
 }
 
-export default function PdfViewer(props: Readonly<Props>) {
-  useEffect(() => {
-    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
-  }, []);
+export default function PdfViewer({ file, name }: Readonly<Props>) {
+  const isMobile = useIsMobileScreen();
 
-  const [numPages, setNumPages] = useState(0);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [renderedPageNumber, setRenderedPageNumber] = useState(1);
+  const pdfUrlWithPage = `${file}`;
 
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  function changePage(p: number) {
-    setPageNumber(p);
+  if (isMobile) {
+    return (
+      <h3>
+        Open{" "}
+        <Link href={pdfUrlWithPage} target="_blank">
+          {name}
+        </Link>
+      </h3>
+    );
   }
-
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-  }
-
-  const isLoading = renderedPageNumber !== pageNumber;
 
   return (
-    <Container className="no-padding" ref={containerRef}>
+    <Container className="no-padding">
       <Row>
         <Col>
-          <Document
-            file={props.file}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={(e) => {
-              console.log("Error loading PDF", e);
-            }}>
-            {isLoading && renderedPageNumber ? (
-              <Page
-                key={renderedPageNumber}
-                className={styles.prevPage}
-                pageNumber={renderedPageNumber}
-                width={containerRef.current?.offsetWidth}
-              />
-            ) : null}
-            <Page
-              key={pageNumber}
-              pageNumber={pageNumber}
-              onRenderSuccess={() => setRenderedPageNumber(pageNumber)}
-              width={containerRef.current?.offsetWidth}
-            />
-          </Document>
-        </Col>
-      </Row>
-      <Row className="pt-2">
-        <Col className="d-flex justify-content-center gap-2">
-          <Pagination
-            page={pageNumber}
-            pageSize={1}
-            totalResults={numPages}
-            setPage={function (newPage: number) {
-              changePage(newPage);
-            }}
+          <iframe
+            key={pdfUrlWithPage}
+            src={pdfUrlWithPage}
+            width="100%"
+            height="600px"
+            style={{ border: "none" }}
+            title={name}
           />
         </Col>
       </Row>

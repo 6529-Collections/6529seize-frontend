@@ -188,7 +188,10 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
       {props.collection.distribution_plan && (
         <Row className="pt-3">
           <Col>
-            <PdfViewer file={props.collection.distribution_plan} />
+            <PdfViewer
+              file={props.collection.distribution_plan}
+              name={`${props.collection.name} Distribution Plan`}
+            />
           </Col>
         </Row>
       )}
