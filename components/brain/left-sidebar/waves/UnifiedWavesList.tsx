@@ -82,7 +82,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
                 icon={faPlus}
                 className="tw-size-3.5 -tw-ml-1.5 tw-flex-shrink-0"
               />
-              <span className="tw-text-xs tw-font-semibold">Wave</span>
+              <span className="tw-text-xs tw-font-semibold">Create Wave</span>
             </Link>
           </div>
         )}

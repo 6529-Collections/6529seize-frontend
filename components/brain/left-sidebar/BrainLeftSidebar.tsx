@@ -108,7 +108,6 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
             ]}
             activeKey={sidebarTab}
             onSelect={(k) => setSidebarTab(k as "waves" | "messages")}
-            fullWidth
           />
 
           {sidebarTab === "waves" && (

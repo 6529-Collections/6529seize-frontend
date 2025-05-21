@@ -44,7 +44,7 @@ export default function HeaderViewActionButtons() {
         onClick={onCreateDm}
         className={baseButtonClasses}
       >
-        <FontAwesomeIcon icon={faPaperPlane} className="tw-h-4 tw-w-4" />
+        <FontAwesomeIcon icon={faPaperPlane} className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
       </button>
     );
   }

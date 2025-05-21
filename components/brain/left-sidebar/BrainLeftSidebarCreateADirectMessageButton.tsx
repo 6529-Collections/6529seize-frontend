@@ -18,7 +18,7 @@ const BrainLeftSidebarCreateADirectMessageButton: React.FC<
 
   const label = useMemo(() => {
     if (isConnectedIdentity) {
-      return "DM";
+      return "Create DM";
     }
     return "Direct Message";
   }, [isConnectedIdentity]);

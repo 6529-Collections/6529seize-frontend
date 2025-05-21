@@ -122,9 +122,9 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     <div className="tw-mb-4">
       <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-py-4">
         {!isApp && (
-          <div className="tw-px-4 tw-mb-4 tw-w-full">
-            <BrainLeftSidebarCreateADirectMessageButton />
-          </div>
+        <div className="tw-px-4 tw-mb-4">
+          <BrainLeftSidebarCreateADirectMessageButton />
+        </div>
         )}
 
         <UnifiedWavesListWaves
@@ -144,6 +144,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
         <UnifiedWavesListEmpty
           sortedWaves={directMessages.list}
           isFetchingNextPage={directMessages.isFetchingNextPage}
+          emptyMessage="No messages to display"
         />
       </div>
     </div>
