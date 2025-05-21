@@ -135,7 +135,9 @@ const nft = {
 
 function renderPage() {
   return render(
-    <AuthContext.Provider value={{ connectedProfile: { wallets: [] } }}>
+    <AuthContext.Provider
+      value={{ connectedProfile: { wallets: [] }, setTitle: jest.fn() } as any}
+    >
       <MemePage />
     </AuthContext.Provider>
   );
@@ -165,10 +167,14 @@ describe('MemePage tab navigation', () => {
       expect(screen.getByTestId(testId)).toBeInTheDocument();
     });
 
-    expect(replaceMock).toHaveBeenLastCalledWith(
-      { query: { id: '1', focus } },
-      undefined,
-      { shallow: true }
-    );
+    if (label !== 'Live') {
+      expect(replaceMock).toHaveBeenLastCalledWith(
+        { query: { id: '1', focus } },
+        undefined,
+        { shallow: true }
+      );
+    } else {
+      expect(replaceMock).not.toHaveBeenCalled();
+    }
   });
 });

@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { AuthContext } from "../../components/auth/Auth";
-import Waves from "../../components/waves/Waves";
-import { ProfileConnectedStatus } from "../../entities/IProfile";
+import { AuthContext } from "../../../components/auth/Auth";
+import Waves from "../../../components/waves/Waves";
+import { ProfileConnectedStatus } from "../../../entities/IProfile";
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
@@ -20,7 +20,7 @@ jest.mock("next/dynamic", () => (importFn: any) => {
   return () => null;
 });
 
-jest.mock("../../components/waves/list/WavesList", () => {
+jest.mock("../../../components/waves/list/WavesList", () => {
   return function MockWavesList(props: any) {
     return (
       <div>
@@ -70,9 +70,12 @@ it("shows CreateDM when ?new-dm is present", () => {
 
 it("switches view modes on button clicks", async () => {
   const user = userEvent.setup();
-  renderWaves(new Map());
+  const { unmount } = renderWaves(new Map());
   await user.click(screen.getByText("open-create-wave"));
   expect(screen.getByTestId("create-wave")).toBeInTheDocument();
+  unmount();
+
+  renderWaves(new Map());
   await user.click(screen.getByText("open-create-dm"));
   expect(screen.getByTestId("create-dm")).toBeInTheDocument();
 });
