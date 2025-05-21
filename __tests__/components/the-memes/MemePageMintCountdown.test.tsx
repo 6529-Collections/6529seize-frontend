@@ -6,12 +6,17 @@ import useManifoldClaim, {
   ManifoldPhase,
 } from "../../../hooks/useManifoldClaim";
 import useCapacitor from "../../../hooks/useCapacitor";
+import { CookieConsentProvider } from "../../../components/cookies/CookieConsentContext";
 
 jest.mock("../../../hooks/useManifoldClaim");
 jest.mock("../../../hooks/useCapacitor");
 
-const mockUseManifoldClaim = useManifoldClaim as jest.MockedFunction<typeof useManifoldClaim>;
-const mockUseCapacitor = useCapacitor as jest.MockedFunction<typeof useCapacitor>;
+const mockUseManifoldClaim = useManifoldClaim as jest.MockedFunction<
+  typeof useManifoldClaim
+>;
+const mockUseCapacitor = useCapacitor as jest.MockedFunction<
+  typeof useCapacitor
+>;
 
 const baseClaim: ManifoldClaim = {
   instanceId: 1,
@@ -46,7 +51,11 @@ describe("MemePageMintCountdown", () => {
       endDate: 200,
       status: ManifoldClaimStatus.UPCOMING,
     });
-    render(<MemePageMintCountdown nft_id={1} />);
+    render(
+      <CookieConsentProvider>
+        <MemePageMintCountdown nft_id={1} />
+      </CookieConsentProvider>
+    );
     expect(screen.getByText(/Public Phase Starts In/)).toBeInTheDocument();
     expect(screen.getByText("1 minute and 30 seconds")).toBeInTheDocument();
   });
@@ -59,7 +68,11 @@ describe("MemePageMintCountdown", () => {
       endDate: 200,
       status: ManifoldClaimStatus.ACTIVE,
     });
-    render(<MemePageMintCountdown nft_id={1} />);
+    render(
+      <CookieConsentProvider>
+        <MemePageMintCountdown nft_id={1} />
+      </CookieConsentProvider>
+    );
     expect(screen.getByText(/Public Phase Ends In/)).toBeInTheDocument();
     expect(screen.getByText("3 minutes and 20 seconds")).toBeInTheDocument();
   });
@@ -72,8 +85,14 @@ describe("MemePageMintCountdown", () => {
       endDate: 200,
       status: ManifoldClaimStatus.UPCOMING,
     });
-    render(<MemePageMintCountdown nft_id={1} />);
-    expect(screen.queryByRole("button", { name: /mint/i })).not.toBeInTheDocument();
+    render(
+      <CookieConsentProvider>
+        <MemePageMintCountdown nft_id={1} />
+      </CookieConsentProvider>
+    );
+    expect(
+      screen.queryByRole("button", { name: /mint/i })
+    ).not.toBeInTheDocument();
   });
 
   it("shows Mint button on other platforms", () => {
@@ -84,7 +103,11 @@ describe("MemePageMintCountdown", () => {
       endDate: 200,
       status: ManifoldClaimStatus.UPCOMING,
     });
-    render(<MemePageMintCountdown nft_id={1} />);
+    render(
+      <CookieConsentProvider>
+        <MemePageMintCountdown nft_id={1} />
+      </CookieConsentProvider>
+    );
     expect(screen.getByRole("button", { name: /mint/i })).toBeInTheDocument();
   });
 });
