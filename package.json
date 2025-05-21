@@ -12,7 +12,7 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "test": "jest",
-    "test:cov": "jest --coverage",
+    "test:cov": "CI=1 jest --coverage --watchAll=false",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:watch": "nodemon --watch tests --watch src --ext ts,tsx,js,jsx --exec \"npx playwright test\"",
