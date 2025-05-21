@@ -6,6 +6,7 @@ import {
   useMyStream,
   useMyStreamWaveMessages,
 } from "../../../contexts/wave/MyStreamContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 jest.mock("../../../contexts/wave/hooks/useActiveWaveManager", () => ({
   useActiveWaveManager: () => ({
@@ -69,6 +70,7 @@ jest.mock("../../../contexts/wave/hooks/useWaveRealtimeUpdater", () => ({
 
 jest.mock("../../../services/websocket/useWebSocketMessage", () => ({
   useWebsocketStatus: () => "connected",
+  useWebSocketMessage: jest.fn(),
 }));
 
 jest.mock("../../../hooks/useCapacitor", () => () => ({ isCapacitor: false }));
@@ -86,10 +88,13 @@ describe("MyStreamProvider integration", () => {
       return null;
     }
 
+    const queryClient = new QueryClient();
     render(
-      <MyStreamProvider>
-        <TestComponent />
-      </MyStreamProvider>
+      <QueryClientProvider client={queryClient}>
+        <MyStreamProvider>
+          <TestComponent />
+        </MyStreamProvider>
+      </QueryClientProvider>
     );
 
     expect(registerWave).toHaveBeenCalledWith("wave");
@@ -114,10 +119,13 @@ describe("MyStreamProvider integration", () => {
       return <div>{data ? data.drops.join(",") : "none"}</div>;
     }
 
+    const queryClient = new QueryClient();
     const { rerender } = render(
-      <MyStreamProvider>
-        <Messages waveId="wave" />
-      </MyStreamProvider>
+      <QueryClientProvider client={queryClient}>
+        <MyStreamProvider>
+          <Messages waveId="wave" />
+        </MyStreamProvider>
+      </QueryClientProvider>
     );
 
     expect(screen.getByText("a")).toBeInTheDocument();
@@ -126,9 +134,11 @@ describe("MyStreamProvider integration", () => {
     expect(screen.getByText("b")).toBeInTheDocument();
 
     rerender(
-      <MyStreamProvider>
-        <Messages waveId="other" />
-      </MyStreamProvider>
+      <QueryClientProvider client={queryClient}>
+        <MyStreamProvider>
+          <Messages waveId="other" />
+        </MyStreamProvider>
+      </QueryClientProvider>
     );
 
     expect(unsubscribe).toHaveBeenCalled();
