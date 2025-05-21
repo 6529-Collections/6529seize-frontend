@@ -1,23 +1,23 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import WavesList from "../../../components/waves/list/WavesList";
-import { AuthContext } from "../../../components/auth/Auth";
-import { ProfileConnectedStatus } from "../../../entities/IProfile";
-import { ApiWavesOverviewType } from "../../../generated/models/ApiWavesOverviewType";
+import WavesList from "../../../../components/waves/list/WavesList";
+import { AuthContext } from "../../../../components/auth/Auth";
+import { ProfileConnectedStatus } from "../../../../entities/IProfile";
+import { ApiWavesOverviewType } from "../../../../generated/models/ApiWavesOverviewType";
 import { useRouter } from "next/router";
 
 jest.mock("next/router", () => ({
   useRouter: jest.fn(),
 }));
 
-jest.mock("../../../components/waves/list/header/WavesListHeader", () => (props: any) => (
+jest.mock("../../../../components/waves/list/header/WavesListHeader", () => (props: any) => (
   <div>
     <button onClick={() => props.setIdentity("bob")} data-testid="set-id" />
     <button onClick={() => props.setIdentity(null)} data-testid="clear-id" />
   </div>
 ));
 
-jest.mock("../../../components/waves/list/WavesListWrapper", () => (props: any) => (
+jest.mock("../../../../components/waves/list/WavesListWrapper", () => (props: any) => (
   <div data-testid={`wrapper-${props.overviewType}`}>
     <span data-testid={`showall-${props.overviewType}`}>{String(props.showAllType)}</span>
     <button
@@ -31,7 +31,7 @@ jest.mock("../../../components/waves/list/WavesListWrapper", () => (props: any) 
   </div>
 ));
 
-jest.mock("../../../components/waves/list/WavesListSearchResults", () => (props: any) => (
+jest.mock("../../../../components/waves/list/WavesListSearchResults", () => (props: any) => (
   <div data-testid="search-results">{props.identity ?? ""}</div>
 ));
 

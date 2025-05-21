@@ -51,7 +51,7 @@ describe("MemePageActivity", () => {
     await waitFor(() => expect(fetchUrlMock).toHaveBeenCalledTimes(1));
 
     await userEvent.click(screen.getByRole("button", { name: /Filter/ }));
-    await userEvent.click(screen.getByRole("menuitem", { name: TypeFilter.SALES }));
+    await userEvent.click(screen.getByRole("button", { name: TypeFilter.SALES }));
 
     await waitFor(() => {
       expect(fetchUrlMock).toHaveBeenLastCalledWith(
@@ -61,9 +61,11 @@ describe("MemePageActivity", () => {
   });
 
   it("requests new page when pagination changes", async () => {
-    fetchUrlMock.mockResolvedValueOnce({ count: 20, data: [] });
+    fetchUrlMock.mockResolvedValueOnce({ count: 20, data: [{} as any] });
     render(<MemePageActivity show nft={nft} pageSize={10} />);
     await waitFor(() => expect(fetchUrlMock).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => expect(screen.getByTestId("activity-row")).toBeInTheDocument());
 
     const input = screen.getByRole("textbox");
     await userEvent.clear(input);

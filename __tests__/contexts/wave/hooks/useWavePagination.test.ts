@@ -1,13 +1,14 @@
 import { renderHook, act } from '@testing-library/react';
-import { useWavePagination } from '../../../contexts/wave/hooks/useWavePagination';
-import { DropSize } from '../../../helpers/waves/drop.helpers';
+import { useWavePagination } from '../../../../contexts/wave/hooks/useWavePagination';
+import { DropSize } from '../../../../helpers/waves/drop.helpers';
+import { WAVE_DROPS_PARAMS } from '../../../../components/react-query-wrapper/utils/query-utils';
 
 // Mock abort controller utilities
 const cancelFetch = jest.fn();
 const createController = jest.fn(() => ({ signal: {} } as AbortController));
 const cleanupController = jest.fn();
 
-jest.mock('../../../contexts/wave/hooks/useWaveAbortController', () => ({
+jest.mock('../../../../contexts/wave/hooks/useWaveAbortController', () => ({
   useWaveAbortController: () => ({
     cancelFetch,
     createController,
@@ -20,7 +21,7 @@ export const fetchWaveMessages = jest.fn();
 export const fetchLightWaveMessages = jest.fn();
 export const fetchAroundSerialNoWaveMessages = jest.fn();
 
-jest.mock('../../../contexts/wave/utils/wave-messages-utils', () => ({
+jest.mock('../../../../contexts/wave/utils/wave-messages-utils', () => ({
   fetchWaveMessages: (...args: unknown[]) => fetchWaveMessages(...args),
   fetchLightWaveMessages: (...args: unknown[]) => fetchLightWaveMessages(...args),
   fetchAroundSerialNoWaveMessages: (...args: unknown[]) =>
@@ -153,10 +154,17 @@ describe('useWavePagination', () => {
       // microtask queue flush
     });
 
-    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(1);
-    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledWith(
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(2);
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenNthCalledWith(
+      1,
       'wave1',
-      110,
+      100,
+      expect.any(Object)
+    );
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenNthCalledWith(
+      2,
+      'wave1',
+      110 + (WAVE_DROPS_PARAMS.limit - 1),
       expect.any(Object)
     );
   });

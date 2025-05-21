@@ -6,7 +6,10 @@ import { NFT, MemesExtendedData, Rememe } from "../entities/INFT";
 jest.mock("next/image", () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
 jest.mock("next/link", () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
 jest.mock("../components/nft-image/RememeImage", () => ({ __esModule: true, default: () => <div data-testid="rememe-image" /> }));
-jest.mock("../components/nftAttributes/NftStats", () => ({ __esModule: true, NftPageStats: () => <div data-testid="nft-stats" /> }));
+jest.mock("../components/nftAttributes/NftStats", () => ({
+  __esModule: true,
+  NftPageStats: () => <tr data-testid="nft-stats" />,
+}));
 
 const mockFetchUrl = jest.fn();
 jest.mock("../services/6529api", () => ({
@@ -137,7 +140,7 @@ describe("MemePageLiveSubMenu sorting", () => {
 
     mockFetchUrl.mockResolvedValueOnce({ data: secondData, count: 21 });
     await userEvent.click(screen.getByRole("button", { name: /sort/i }));
-    await userEvent.click(screen.getByRole("menuitem", { name: /Recently Added/i }));
+    await userEvent.click(screen.getByRole("button", { name: /Recently Added/i }));
 
     await waitFor(() =>
       expect(mockFetchUrl).toHaveBeenLastCalledWith(
@@ -158,13 +161,13 @@ describe("MemePageLiveSubMenu sorting", () => {
 
     const { container } = render(<MemePageLiveSubMenu show nft={nft} />);
 
-    await waitFor(() => expect(screen.getByText("Random1")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Random1/)).toBeInTheDocument());
 
-    const refreshIcon = container.querySelector('svg[data-icon="refresh"]') as Element;
+    const refreshIcon = container.querySelector('svg[data-icon="arrows-rotate"]') as Element;
     expect(refreshIcon).toBeInTheDocument();
     fireEvent.click(refreshIcon);
 
-    await waitFor(() => expect(screen.getByText("Random2")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Random2/)).toBeInTheDocument());
   });
 });
 
