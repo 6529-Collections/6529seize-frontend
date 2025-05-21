@@ -158,7 +158,7 @@ export default function DistributionPage(props: Readonly<Props>) {
   function printDistribution() {
     return (
       <>
-        <ScrollToButton threshhold={500} to="distribution-table" offset={0} />
+        <ScrollToButton threshold={500} to="distribution-table" offset={0} />
         <Container className="pt-5 pb-3" id={`distribution-table`}>
           <Row>
             <Col className={`d-flex justify-content-end align-items-center`}>

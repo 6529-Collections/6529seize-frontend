@@ -95,6 +95,7 @@ export default function ProxyCreateTargetSearch({
             </span>
             <button
               type="button"
+              aria-label="Remove selected profile"
               onClick={() => onTargetSelect(null)}
               className="tw-bg-transparent tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-border-0 focus:tw-outline-none hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
             >

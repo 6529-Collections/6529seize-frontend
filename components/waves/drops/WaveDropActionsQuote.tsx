@@ -38,6 +38,7 @@ const WaveDropActionsQuote: React.FC<WaveDropActionsQuoteProps> = ({
           }`}
           onClick={isQuoteAllowed ? onQuote : undefined}
           disabled={!isQuoteAllowed}
+          aria-label="Quote drop"
         >
           <svg
             className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
