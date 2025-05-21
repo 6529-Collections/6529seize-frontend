@@ -146,10 +146,6 @@ export default function useManifoldClaim(
       const data = readContract.data as any;
       const instanceId = Number(data[0]);
       const claimData = data[1];
-      //TODO: Remove this
-      claimData.startDate = 1747818243;
-      claimData.endDate = 1747828243;
-      claimData.total = 10;
       const status = getStatus(claimData.startDate, claimData.endDate);
       const publicMerkle = areEqualAddresses(NULL_MERKLE, claimData.merkleRoot);
       const phase =
