@@ -71,7 +71,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const [showCookieConsent, setShowCookieConsent] = useState(false);
   const [country, setCountry] = useState("");
 
-  const getCookieConsent = async () => {
+  const getCookieConsent = async (isFirstLoad: boolean = false) => {
     try {
       const essentialCookies = getCookieConsentByName(CONSENT_ESSENTIAL_COOKIE);
       const performanceCookies = getCookieConsentByName(
@@ -85,6 +85,11 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
       if (essentialCookies != undefined && performanceCookies != undefined) {
         setShowCookieConsent(false);
       }
+
+      if (!isFirstLoad) {
+        return;
+      }
+
       const response = await commonApiFetch<CookieConsentResponse>({
         endpoint: `policies/country-check`,
       });
@@ -161,7 +166,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   );
 
   useEffect(() => {
-    getCookieConsent();
+    getCookieConsent(true);
   }, []);
 
   return (
