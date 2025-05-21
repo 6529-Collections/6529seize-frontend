@@ -193,6 +193,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           waveActive={hasWave}
           showWavesTab={hydrated && !isMobile}
           showStreamBack={hydrated && !isMobile}
+          isApp={isApp}
         />
       )}
       <AnimatePresence mode="wait">

@@ -14,6 +14,7 @@ interface BrainMobileTabsProps {
   readonly waveActive: boolean;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;
+  readonly isApp?: boolean;
 }
 
 const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
@@ -23,6 +24,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   waveActive,
   showWavesTab,
   showStreamBack,
+  isApp,
 }) => {
   const router = useRouter();
   const { registerRef } = useLayout();
@@ -157,15 +159,17 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <span className={wavesButtonTextClasses}>Waves</span>
           </button>
         )}
-        <button
-          ref={(el) => {
-            tabRefs.current[BrainView.MESSAGES] = el;
-          }}
-          onClick={() => onViewChange(BrainView.MESSAGES)}
-          className={messagesButtonClasses}
-        >
-          <span className={messagesButtonTextClasses}>Messages</span>
-        </button>
+        {!isApp && (
+          <button
+            ref={(el) => {
+              tabRefs.current[BrainView.MESSAGES] = el;
+            }}
+            onClick={() => onViewChange(BrainView.MESSAGES)}
+            className={messagesButtonClasses}
+          >
+            <span className={messagesButtonTextClasses}>Messages</span>
+          </button>
+        )}
         <button
           ref={(el) => {
             tabRefs.current[BrainView.DEFAULT] = el;
