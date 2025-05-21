@@ -6,7 +6,6 @@ import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboar
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { useWave } from "../../../hooks/useWave";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
-import useDeviceInfo from "../../../hooks/useDeviceInfo";
 
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
@@ -15,6 +14,7 @@ interface BrainMobileTabsProps {
   readonly waveActive: boolean;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;
+  readonly isApp?: boolean;
 }
 
 const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
@@ -24,10 +24,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   waveActive,
   showWavesTab,
   showStreamBack,
+  isApp,
 }) => {
   const router = useRouter();
   const { registerRef } = useLayout();
-  const { isApp } = useDeviceInfo();
 
   // Local ref for component-specific needs
   const mobileTabsRef = useRef<HTMLDivElement | null>(null);
