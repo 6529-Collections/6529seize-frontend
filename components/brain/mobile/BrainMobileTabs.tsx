@@ -161,6 +161,28 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <div className="tw-h-4 tw-w-px tw-bg-iron-700 tw-mx-1 tw-flex-shrink-0" />
           </>
         )}
+        {showWavesTab && (
+          <button
+            ref={(el) => {
+              tabRefs.current[BrainView.WAVES] = el;
+            }}
+            onClick={() => onViewChange(BrainView.WAVES)}
+            className={wavesButtonClasses}
+          >
+            <span className={wavesButtonTextClasses}>Waves</span>
+          </button>
+        )}
+        {!isApp && (
+          <button
+            ref={(el) => {
+              tabRefs.current[BrainView.MESSAGES] = el;
+            }}
+            onClick={() => onViewChange(BrainView.MESSAGES)}
+            className={messagesButtonClasses}
+          >
+            <span className={messagesButtonTextClasses}>Messages</span>
+          </button>
+        )}
         <button
           ref={(el) => {
             tabRefs.current[BrainView.DEFAULT] = el;
@@ -172,42 +194,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             {waveActive ? "Chat" : "My Stream"}
           </span>
         </button>
-        {!waveActive && showWavesTab &&(
-          <button
-            ref={(el) => {
-              tabRefs.current[BrainView.WAVES] = el;
-            }}
-            onClick={() => onViewChange(BrainView.WAVES)}
-            className={wavesButtonClasses}
-          >
-            <span className={wavesButtonTextClasses}>Waves</span>
-          </button>
-        )}
-        {!waveActive && !isApp && (
-          <button
-            ref={(el) => {
-              tabRefs.current[BrainView.MESSAGES] = el;
-            }}
-            onClick={() => onViewChange(BrainView.MESSAGES)}
-            className={messagesButtonClasses}
-          >
-            <span className={messagesButtonTextClasses}>Messages</span>
-          </button>
-        )}
-        {!waveActive && !isApp &&(
-          <button
-            ref={(el) => {
-              tabRefs.current[BrainView.NOTIFICATIONS] = el;
-            }}
-            onClick={onNotificationsClick}
-            className={notificationsButtonClasses}
-          >
-            <span className={notificationsButtonTextClasses}>
-              Notifications
-            </span>
-          </button>
-        )}
-
         {waveActive && (
           <button
             ref={(el) => {
@@ -275,6 +261,19 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               </button>
             )}
           </>
+        )}
+        {!isApp && (
+          <button
+            ref={(el) => {
+              tabRefs.current[BrainView.NOTIFICATIONS] = el;
+            }}
+            onClick={onNotificationsClick}
+            className={notificationsButtonClasses}
+          >
+            <span className={notificationsButtonTextClasses}>
+              Notifications
+            </span>
+          </button>
         )}
       </div>
     </div>
