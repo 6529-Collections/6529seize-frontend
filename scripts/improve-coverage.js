@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, openSync, closeSync, readSync, statSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import libCoverage from 'istanbul-lib-coverage';
@@ -45,25 +45,65 @@ function main() {
 
   let initialCoverage = 0;
   let targetCoverage = 0;
+  let fd;
 
-  if (existsSync(progressPath)) {
-    const progress = readJSON(progressPath);
-    initialCoverage = progress.initialCoverage || 0;
-    targetCoverage = progress.targetCoverage || 0;
-    if (targetCoverage === 0 && initialCoverage === 0 && currentCoverage > 0) {
-        console.log('Progress file found with invalid state, re-initializing target...');
+  try {
+    try {
+      fd = openSync(progressPath, 'r+');
+      const stats = statSync(progressPath);
+      let fileContent = '';
+      if (stats.size > 0) {
+        const buffer = Buffer.alloc(stats.size);
+        readSync(fd, buffer, 0, buffer.length, null);
+        fileContent = buffer.toString('utf-8');
+      }
+      
+      if (fileContent) {
+        const progress = JSON.parse(fileContent);
+        initialCoverage = progress.initialCoverage || 0;
+        targetCoverage = progress.targetCoverage || 0;
+
+        if (targetCoverage === 0 && initialCoverage === 0 && currentCoverage > 0) {
+            console.log('Progress file content invalid or state indicates first real run, re-initializing target...');
+            initialCoverage = currentCoverage;
+            targetCoverage = currentCoverage + 1.0;
+        } else if (targetCoverage === 0 && initialCoverage > 0) {
+            console.log('Target coverage not set in progress file, re-initializing target...');
+            targetCoverage = initialCoverage + 1.0;
+        } else if (initialCoverage === 0 && currentCoverage > 0) {
+             console.log('Initial coverage was zero in progress file, re-initializing...');
+             initialCoverage = currentCoverage;
+             targetCoverage = currentCoverage + 1.0;
+        }
+      } else {
+          console.log('Progress file is empty or unreadable, initializing target...');
+          initialCoverage = currentCoverage;
+          targetCoverage = currentCoverage + 1.0;
+      }
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        console.log('Progress file not found, creating it...');
         initialCoverage = currentCoverage;
         targetCoverage = currentCoverage + 1.0;
-        writeFileSync(progressPath, JSON.stringify({ initialCoverage, targetCoverage }, null, 2));
-    } else if (targetCoverage === 0 && initialCoverage > 0) {
-        targetCoverage = initialCoverage + 1.0;
-        writeFileSync(progressPath, JSON.stringify({ initialCoverage, targetCoverage }, null, 2));
+      } else {
+        throw e;
+      }
     }
 
-  } else {
-    initialCoverage = currentCoverage;
-    targetCoverage = currentCoverage + 1.0;
-    writeFileSync(progressPath, JSON.stringify({ initialCoverage, targetCoverage }, null, 2));
+    const newProgressContent = JSON.stringify({ initialCoverage, targetCoverage }, null, 2);
+    if (fd !== undefined) {
+      writeFileSync(fd, newProgressContent);
+    } else {
+      writeFileSync(progressPath, newProgressContent);
+    }
+
+  } catch (error) {
+    console.error(`Error handling progress file ${progressPath}:`, error);
+    process.exit(1); 
+  } finally {
+    if (fd !== undefined) {
+      closeSync(fd);
+    }
   }
 
   console.log(`initial: ${initialCoverage.toFixed(2)}%`);
