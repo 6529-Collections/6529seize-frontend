@@ -85,12 +85,27 @@ function main() {
             progressPath,
             fsConstants.O_RDWR | fsConstants.O_NOFOLLOW
           );
-          const stats = fstatSync(fd);
-          if (stats.size > 0) {
-            const buffer = Buffer.alloc(stats.size);
-            readSync(fd, buffer, 0, buffer.length, null);
-            fileContent = buffer.toString("utf-8");
+          // If we are here, fd is valid for an existing, non-symlink file.
+          // Read its content by chunks to avoid fstatSync TOCTOU issues.
+          const chunks = [];
+          const CHUNK_SIZE = 4096;
+          let bytesRead;
+          // The 'null' position argument in readSync uses and advances the current file position.
+          // For a file opened with O_RDWR, the initial position is 0.
+          while (true) {
+            const tempBuffer = Buffer.alloc(CHUNK_SIZE);
+            bytesRead = readSync(fd, tempBuffer, 0, CHUNK_SIZE, null);
+            if (bytesRead === 0) {
+              break; // EOF
+            }
+            chunks.push(tempBuffer.slice(0, bytesRead));
           }
+          if (chunks.length > 0) {
+            fileContent = Buffer.concat(chunks).toString("utf-8");
+          } else {
+            fileContent = ""; // File was empty
+          }
+          // isNewFile remains false as it was initialized to false
         } catch (openExistingError) {
           console.error(
             `Error opening existing progress file ${progressPath} with O_NOFOLLOW:`,
