@@ -42,9 +42,16 @@ function checkCoverage(changedFiles) {
   }
 
   if (failures.length) {
-    console.error('\nCoverage below 80% for the following files:');
-    for (const f of failures) console.error('  ' + f);
-    console.error('\nAdd or update tests to reach at least 80% coverage.');
+    const red = '\x1b[31m';
+    const bold = '\x1b[1m';
+    const reset = '\x1b[0m';
+
+    console.error(`\n${red}${bold}ERROR: Code coverage check failed!${reset}`);
+    console.error(`${red}The following files have line coverage below 80%:${reset}`);
+    for (const f of failures) {
+      console.error(`${red}  - ${f}${reset}`);
+    }
+    console.error(`${red}\nPlease add or update tests to ensure all changed files reach at least 80% line coverage.${reset}`);
     process.exit(1);
   }
 }
