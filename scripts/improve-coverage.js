@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync, openSync, closeSync, readSync, statSync, fstatSync, ftruncateSync, writeSync } from 'fs';
+import { readFileSync, existsSync, openSync, closeSync, readSync, fstatSync, ftruncateSync, writeSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import libCoverage from 'istanbul-lib-coverage';
