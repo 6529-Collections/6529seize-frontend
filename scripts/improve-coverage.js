@@ -8,6 +8,7 @@ import {
   fstatSync,
   ftruncateSync,
   writeSync,
+  constants as fsConstants,
 } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -76,21 +77,26 @@ function main() {
       isNewFile = true;
     } catch (e) {
       if (e.code === "EEXIST") {
-        console.log("Progress file already exists. Opening it.");
+        console.log(
+          "Progress file already exists. Opening it securely (O_RDWR | O_NOFOLLOW)."
+        );
         try {
-          fd = openSync(progressPath, "r+");
+          fd = openSync(
+            progressPath,
+            fsConstants.O_RDWR | fsConstants.O_NOFOLLOW
+          );
           const stats = fstatSync(fd);
           if (stats.size > 0) {
             const buffer = Buffer.alloc(stats.size);
             readSync(fd, buffer, 0, buffer.length, null);
             fileContent = buffer.toString("utf-8");
           }
-        } catch (openError) {
+        } catch (openExistingError) {
           console.error(
-            `Error opening existing progress file ${progressPath}:`,
-            openError
+            `Error opening existing progress file ${progressPath} with O_NOFOLLOW:`,
+            openExistingError
           );
-          throw openError;
+          throw openExistingError;
         }
       } else {
         console.error(
