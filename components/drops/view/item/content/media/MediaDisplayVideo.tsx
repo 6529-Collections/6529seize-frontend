@@ -62,6 +62,7 @@ function MediaDisplayVideo({
           ref={videoRef}
           playsInline
           controls={showControls}
+          
           autoPlay
           muted
           loop

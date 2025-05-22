@@ -18,7 +18,8 @@ function runJest() {
 
 function getChangedFiles() {
   try {
-    const output = execSync('git diff --name-only main').toString().trim();
+    const mergeBase = execSync('git merge-base HEAD main').toString().trim();
+    const output = execSync(`git diff --name-only ${mergeBase}`).toString().trim();
     return output.split('\n').filter(Boolean);
   } catch {
     return [];
