@@ -29,17 +29,14 @@ Before completing any task, ensure the following commands succeed:
 
 ```bash
 npm run test
-npm run test:cov:changed
 npm run lint
 npm run build
 ```
 
-* `npm run test`: Run the full test suite.
-* `npm run test:cov:changed`: Verify that all changed files have at least 80% test coverage.
+* `npm run test`: Run the full test suite and verify that all changed files have at least 80% test coverage.
 * `npm run lint`: Ensure code adheres to linting rules.
 * `npm run build`: Confirm the project builds successfully.
-
-If `test:cov:changed` reports any file below 80% coverage, write additional tests to meet the threshold. Repeat this process until all checks pass.
+If `npm run test` reports any file below 80% coverage, write additional tests to meet the threshold. Repeat this process until all checks pass.
 
 ## Coding Conventions
 
