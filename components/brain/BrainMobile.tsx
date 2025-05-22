@@ -36,10 +36,6 @@ export enum BrainView {
   NOTIFICATIONS = "NOTIFICATIONS",
 }
 
-function MobileNotifications() {
-  return <BrainNotifications />;
-}
-
 interface Props {
   children: ReactNode;
 }
@@ -183,7 +179,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       ) : null,
     [BrainView.WAVES]: <BrainMobileWaves />,
     [BrainView.MESSAGES]: <BrainMobileMessages />,
-    [BrainView.NOTIFICATIONS]: <MobileNotifications />,
+    [BrainView.NOTIFICATIONS]: <BrainNotifications />,
   };
 
   return (
