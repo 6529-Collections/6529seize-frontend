@@ -48,47 +48,86 @@ function main() {
   let fd;
 
   try {
-    try {
-      fd = openSync(progressPath, 'r+');
-      const stats = fstatSync(fd);
-      let fileContent = '';
-      if (stats.size > 0) {
-        const buffer = Buffer.alloc(stats.size);
-        readSync(fd, buffer, 0, buffer.length, null);
-        fileContent = buffer.toString('utf-8');
-      }
-      
-      if (fileContent) {
-        const progress = JSON.parse(fileContent);
-        initialCoverage = progress.initialCoverage || 0;
-        targetCoverage = progress.targetCoverage || 0;
+    let fileContent = '';
+    let isNewFile = false;
 
-        if (targetCoverage === 0 && initialCoverage === 0 && currentCoverage > 0) {
-            console.log('Progress file content invalid or state indicates first real run, re-initializing target...');
-            initialCoverage = currentCoverage;
-            targetCoverage = currentCoverage + 1.0;
-        } else if (targetCoverage === 0 && initialCoverage > 0) {
-            console.log('Target coverage not set in progress file, re-initializing target...');
-            targetCoverage = initialCoverage + 1.0;
-        } else if (initialCoverage === 0 && currentCoverage > 0) {
-             console.log('Initial coverage was zero in progress file, re-initializing...');
-             initialCoverage = currentCoverage;
-             targetCoverage = currentCoverage + 1.0;
+    try {
+      fd = openSync(progressPath, 'wx+');
+      console.log('Progress file newly created.');
+      isNewFile = true;
+    } catch (e) {
+      if (e.code === 'EEXIST') {
+        console.log('Progress file already exists. Opening it.');
+        try {
+          fd = openSync(progressPath, 'r+');
+          const stats = fstatSync(fd);
+          if (stats.size > 0) {
+            const buffer = Buffer.alloc(stats.size);
+            readSync(fd, buffer, 0, buffer.length, null);
+            fileContent = buffer.toString('utf-8');
+          }
+        } catch (openError) {
+          console.error(`Error opening existing progress file ${progressPath}:`, openError);
+          throw openError;
         }
       } else {
-          console.log('Progress file is empty or unreadable, initializing target...');
-          initialCoverage = currentCoverage;
-          targetCoverage = currentCoverage + 1.0;
-      }
-    } catch (e) {
-      if (e.code === 'ENOENT') {
-        console.log('Progress file not found, attempting to create it exclusively...');
-        initialCoverage = currentCoverage;
-        targetCoverage = currentCoverage + 1.0;
-        fd = openSync(progressPath, 'wx');
-      } else {
+        console.error(`Error trying to create/open progress file ${progressPath} initially:`, e);
         throw e;
       }
+    }
+
+    if (isNewFile) {
+      console.log('Progress file is new. Initializing coverage targets from current values.');
+      initialCoverage = currentCoverage;
+      targetCoverage = currentCoverage + 1.0;
+    } else {
+      if (fileContent) {
+        try {
+          const parsedProgress = JSON.parse(fileContent);
+          initialCoverage = parsedProgress.initialCoverage || 0;
+          targetCoverage = parsedProgress.targetCoverage || 0;
+
+          if (targetCoverage === 0 && initialCoverage === 0 && currentCoverage > 0) {
+            console.log('Adjusting: Parsed initial/target are 0, but current > 0. Re-initializing from current.');
+            initialCoverage = currentCoverage;
+            targetCoverage = currentCoverage + 1.0;
+          } else if (targetCoverage === 0 && initialCoverage > 0) {
+            console.log('Adjusting: Parsed target is 0, initial > 0. Setting target based on initial.');
+            targetCoverage = initialCoverage + 1.0;
+          } else if (initialCoverage === 0 && currentCoverage > 0) {
+            console.log('Adjusting: Parsed initial is 0, current > 0. Re-initializing initial from current; adjusting target.');
+            initialCoverage = currentCoverage;
+            if (targetCoverage <= initialCoverage) {
+              targetCoverage = currentCoverage + 1.0;
+            }
+          }
+          
+          if (initialCoverage === 0 && targetCoverage === 0 && currentCoverage === 0) {
+            console.log('Adjusting: All coverage figures are zero. Setting target to 1.0% to initiate progress.');
+            targetCoverage = 1.0;
+          }
+
+        } catch (parseJsonError) {
+          console.warn(`Could not parse JSON from existing progress file. Re-initializing from current. Error: ${parseJsonError.message}`);
+          initialCoverage = currentCoverage;
+          targetCoverage = currentCoverage + 1.0;
+        }
+      } else {
+        console.log('Progress file existed but was empty. Initializing coverage targets from current values.');
+        initialCoverage = currentCoverage;
+        targetCoverage = currentCoverage + 1.0;
+      }
+    }
+    
+    if (targetCoverage <= initialCoverage && !(initialCoverage >= 100 && targetCoverage >= 100)) {
+        if (currentCoverage > initialCoverage) {
+            initialCoverage = currentCoverage;
+        }
+        targetCoverage = initialCoverage + 1.0;
+        console.log(`Safeguard: Adjusted target. Initial: ${initialCoverage.toFixed(2)}%, Target: ${targetCoverage.toFixed(2)}%`);
+    }
+    if (targetCoverage > 100) {
+        targetCoverage = 100;
     }
 
     if (fd === undefined) {
