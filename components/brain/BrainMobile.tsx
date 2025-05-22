@@ -21,6 +21,7 @@ import { ApiWaveType } from "../../generated/models/ApiWaveType";
 import BrainMobileWaves from "./mobile/BrainMobileWaves";
 import BrainMobileMessages from "./mobile/BrainMobileMessages";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
+import BrainNotifications from "./notifications/Notifications";
 
 export enum BrainView {
   DEFAULT = "DEFAULT",
@@ -32,6 +33,11 @@ export enum BrainView {
   FAQ = "FAQ",
   WAVES = "WAVES",
   MESSAGES = "MESSAGES",
+  NOTIFICATIONS = "NOTIFICATIONS",
+}
+
+function MobileNotifications() {
+  return <BrainNotifications />;
 }
 
 interface Props {
@@ -47,7 +53,9 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     setHydrated(true);
   }, []);
 
-  const isMobile = hydrated ? (isMobileDevice || (hasTouchScreen && isApp)) : true;
+  const isMobile = hydrated
+    ? isMobileDevice || (hasTouchScreen && isApp)
+    : true;
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
@@ -114,7 +122,8 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       if (
         activeView !== BrainView.DEFAULT &&
         activeView !== BrainView.WAVES &&
-        activeView !== BrainView.MESSAGES
+        activeView !== BrainView.MESSAGES &&
+        activeView !== BrainView.NOTIFICATIONS
       )
         setActiveView(BrainView.DEFAULT);
       return;
@@ -168,6 +177,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       ) : null,
     [BrainView.WAVES]: <BrainMobileWaves />,
     [BrainView.MESSAGES]: <BrainMobileMessages />,
+    [BrainView.NOTIFICATIONS]: <MobileNotifications />,
   };
 
   return (
@@ -185,14 +195,14 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
           />
         </div>
       )}
-      {(hasWave || !isMobile) && (
+      {(hasWave || !isApp) && (
         <BrainMobileTabs
           activeView={activeView}
           onViewChange={setActiveView}
           wave={wave}
           waveActive={hasWave}
-          showWavesTab={hydrated && !isMobile}
-          showStreamBack={hydrated && !isMobile}
+          showWavesTab={hydrated}
+          showStreamBack={hydrated}
           isApp={isApp}
         />
       )}
