@@ -75,7 +75,7 @@ const config = {
   ],
   coverageDirectory: "coverage",
   coverageProvider: "babel", // Explicitly set provider if needed, default is babel
-  coverageReporters: ["json", "lcov", "text", "clover"],
+  coverageReporters: ["json", "lcov", "text", "clover", "json-summary"],
 };
 
 module.exports = config; // Export the config object directly
