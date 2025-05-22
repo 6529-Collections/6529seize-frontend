@@ -33,11 +33,13 @@ npm run lint
 npm run type-check
 ```
 
-* `npm run test`: Run the full test suite and verify that all changed files have at least 80% test coverage.
+* `npm run test`: Executes all Jest tests and checks code coverage. The command will fail if:
+    - Any Jest test fails.
+    - Any file modified since diverging from the `main` branch (including uncommitted changes) has less than 80% line coverage.
 * `npm run lint`: Ensure code adheres to linting rules.
 * `npm run type-check`: Verify TypeScript type checking passes with `tsc --noEmit -p tsconfig.json`.
 
-If `npm run test` reports any file below 80% coverage, write additional tests to meet the threshold. Repeat this process until all checks pass.
+If `npm run test` fails due to low coverage on a modified file, write meaningful tests that verify the file's functionality and bring its coverage to at least 80%. If a Jest test fails, debug and fix the underlying code or the test itself, ensuring the code behaves as expected and tests accurately reflect its intended functionality. Repeat this process until `npm run test` passes.
 
 ## Coding Conventions
 
