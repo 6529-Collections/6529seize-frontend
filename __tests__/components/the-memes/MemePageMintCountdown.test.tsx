@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import MemePageMintCountdown from "../../../components/the-memes/MemePageMintCountdown";
 import useManifoldClaim, {
   ManifoldClaim,
@@ -10,6 +10,15 @@ import { CookieConsentProvider } from "../../../components/cookies/CookieConsent
 
 jest.mock("../../../hooks/useManifoldClaim");
 jest.mock("../../../hooks/useCapacitor");
+jest.mock("../../../services/api/common-api", () => ({
+  __esModule: true,
+  commonApiFetch: jest.fn((opts: { endpoint: string }) => {
+    if (opts.endpoint === "policies/country-check") {
+      return Promise.resolve({ is_eu: false, country: "US" });
+    }
+    return Promise.reject(new Error("Unknown endpoint"));
+  }),
+}));
 
 const mockUseManifoldClaim = useManifoldClaim as jest.MockedFunction<
   typeof useManifoldClaim
@@ -43,7 +52,7 @@ afterEach(() => {
 });
 
 describe("MemePageMintCountdown", () => {
-  it("shows start countdown when upcoming", () => {
+  it("shows start countdown when upcoming", async () => {
     mockUseCapacitor.mockReturnValue({ isIos: false } as any);
     mockUseManifoldClaim.mockReturnValue({
       ...baseClaim,
@@ -51,16 +60,18 @@ describe("MemePageMintCountdown", () => {
       endDate: 200,
       status: ManifoldClaimStatus.UPCOMING,
     });
-    render(
-      <CookieConsentProvider>
-        <MemePageMintCountdown nft_id={1} />
-      </CookieConsentProvider>
-    );
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageMintCountdown nft_id={1} />
+        </CookieConsentProvider>
+      );
+    });
     expect(screen.getByText(/Public Phase Starts In/)).toBeInTheDocument();
     expect(screen.getByText("1 minute and 30 seconds")).toBeInTheDocument();
   });
 
-  it("shows end countdown when active", () => {
+  it("shows end countdown when active", async () => {
     mockUseCapacitor.mockReturnValue({ isIos: false } as any);
     mockUseManifoldClaim.mockReturnValue({
       ...baseClaim,
@@ -68,16 +79,18 @@ describe("MemePageMintCountdown", () => {
       endDate: 200,
       status: ManifoldClaimStatus.ACTIVE,
     });
-    render(
-      <CookieConsentProvider>
-        <MemePageMintCountdown nft_id={1} />
-      </CookieConsentProvider>
-    );
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageMintCountdown nft_id={1} />
+        </CookieConsentProvider>
+      );
+    });
     expect(screen.getByText(/Public Phase Ends In/)).toBeInTheDocument();
     expect(screen.getByText("3 minutes and 20 seconds")).toBeInTheDocument();
   });
 
-  it("hides Mint button on iOS", () => {
+  it("hides Mint button on iOS", async () => {
     mockUseCapacitor.mockReturnValue({ isIos: true } as any);
     mockUseManifoldClaim.mockReturnValue({
       ...baseClaim,
@@ -85,17 +98,19 @@ describe("MemePageMintCountdown", () => {
       endDate: 200,
       status: ManifoldClaimStatus.UPCOMING,
     });
-    render(
-      <CookieConsentProvider>
-        <MemePageMintCountdown nft_id={1} />
-      </CookieConsentProvider>
-    );
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageMintCountdown nft_id={1} />
+        </CookieConsentProvider>
+      );
+    });
     expect(
       screen.queryByRole("button", { name: /mint/i })
     ).not.toBeInTheDocument();
   });
 
-  it("shows Mint button on other platforms", () => {
+  it("shows Mint button on other platforms", async () => {
     mockUseCapacitor.mockReturnValue({ isIos: false } as any);
     mockUseManifoldClaim.mockReturnValue({
       ...baseClaim,
@@ -103,11 +118,13 @@ describe("MemePageMintCountdown", () => {
       endDate: 200,
       status: ManifoldClaimStatus.UPCOMING,
     });
-    render(
-      <CookieConsentProvider>
-        <MemePageMintCountdown nft_id={1} />
-      </CookieConsentProvider>
-    );
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageMintCountdown nft_id={1} />
+        </CookieConsentProvider>
+      );
+    });
     expect(screen.getByRole("button", { name: /mint/i })).toBeInTheDocument();
   });
 });

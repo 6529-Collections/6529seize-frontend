@@ -34,6 +34,16 @@ jest.mock("../services/6529api", () => ({
   fetchUrl: (url: string) => mockFetchUrl(url),
 }));
 
+jest.mock("../services/api/common-api", () => ({
+  __esModule: true,
+  commonApiFetch: jest.fn((opts: { endpoint: string }) => {
+    if (opts.endpoint === "policies/country-check") {
+      return Promise.resolve({ is_eu: false, country: "US" });
+    }
+    return Promise.reject(new Error("Unknown endpoint"));
+  }),
+}));
+
 beforeEach(() => {
   jest.clearAllMocks();
   process.env.API_ENDPOINT = "http://api";
@@ -203,14 +213,16 @@ describe("MemePageLiveSubMenu sorting", () => {
 });
 
 describe("MemePageLiveRightMenu distribution link", () => {
-  it("shows distribution plan link", () => {
+  it("shows distribution plan link", async () => {
     const nft = createNft({ id: 5, has_distribution: true });
     const meta = createMeta();
-    render(
-      <CookieConsentProvider>
-        <MemePageLiveRightMenu show nft={nft} nftMeta={meta} nftBalance={0} />
-      </CookieConsentProvider>
-    );
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageLiveRightMenu show nft={nft} nftMeta={meta} nftBalance={0} />
+        </CookieConsentProvider>
+      );
+    });
     const link = screen.getByRole("link", { name: /distribution plan/i });
     expect(link).toHaveAttribute("href", `/the-memes/5/distribution`);
   });
