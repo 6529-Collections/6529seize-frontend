@@ -5,7 +5,6 @@ import {
   openSync,
   closeSync,
   readSync,
-  fstatSync,
   ftruncateSync,
   writeSync,
   constants as fsConstants,
@@ -66,58 +65,43 @@ function main() {
   let initialCoverage = 0;
   let targetCoverage = 0;
   let fd;
+  let fileContent = "";
+  let isNewFile = false;
 
   try {
-    let fileContent = "";
-    let isNewFile = false;
-
+    console.log(`Attempting to open existing file: ${progressPath}`);
     try {
-      fd = openSync(progressPath, "wx+");
-      console.log("Progress file newly created.");
-      isNewFile = true;
+      fd = openSync(progressPath, fsConstants.O_RDWR | fsConstants.O_NOFOLLOW);
+      console.log(`Successfully opened existing file: ${progressPath}`);
+      isNewFile = false;
+
+      const chunks = [];
+      const CHUNK_SIZE = 4096;
+      let bytesRead;
+      while (true) {
+        const tempBuffer = Buffer.alloc(CHUNK_SIZE);
+        bytesRead = readSync(fd, tempBuffer, 0, CHUNK_SIZE, null);
+        if (bytesRead === 0) break; // EOF
+        chunks.push(tempBuffer.slice(0, bytesRead));
+      }
+      if (chunks.length > 0) {
+        fileContent = Buffer.concat(chunks).toString("utf-8");
+      }
+
     } catch (e) {
-      if (e.code === "EEXIST") {
-        console.log(
-          "Progress file already exists. Opening it securely (O_RDWR | O_NOFOLLOW)."
-        );
+      if (e.code === 'ENOENT') {
+        console.log(`File not found (${progressPath}). Attempting to create it exclusively.`);
         try {
-          fd = openSync(
-            progressPath,
-            fsConstants.O_RDWR | fsConstants.O_NOFOLLOW
-          );
-          // If we are here, fd is valid for an existing, non-symlink file.
-          // Read its content by chunks to avoid fstatSync TOCTOU issues.
-          const chunks = [];
-          const CHUNK_SIZE = 4096;
-          let bytesRead;
-          // The 'null' position argument in readSync uses and advances the current file position.
-          // For a file opened with O_RDWR, the initial position is 0.
-          while (true) {
-            const tempBuffer = Buffer.alloc(CHUNK_SIZE);
-            bytesRead = readSync(fd, tempBuffer, 0, CHUNK_SIZE, null);
-            if (bytesRead === 0) {
-              break; // EOF
-            }
-            chunks.push(tempBuffer.slice(0, bytesRead));
-          }
-          if (chunks.length > 0) {
-            fileContent = Buffer.concat(chunks).toString("utf-8");
-          } else {
-            fileContent = ""; // File was empty
-          }
-          // isNewFile remains false as it was initialized to false
-        } catch (openExistingError) {
-          console.error(
-            `Error opening existing progress file ${progressPath} with O_NOFOLLOW:`,
-            openExistingError
-          );
-          throw openExistingError;
+          fd = openSync(progressPath, fsConstants.O_RDWR | fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_NOFOLLOW, 0o600);
+          console.log(`Successfully created new file exclusively: ${progressPath}`);
+          isNewFile = true;
+
+        } catch (createError) {
+          console.error(`Failed to create progress file exclusively (${progressPath}):`, createError);
+          throw createError;
         }
       } else {
-        console.error(
-          `Error trying to create/open progress file ${progressPath} initially:`,
-          e
-        );
+        console.error(`Error opening initial progress file (${progressPath}):`, e);
         throw e;
       }
     }
