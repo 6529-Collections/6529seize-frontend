@@ -16,28 +16,22 @@ const MetadataItem: React.FC<{
 }> = ({ label, value }) => {
   const isMobile = useIsMobileDevice();
 
-  // Skip empty values
-  if (
-    (typeof value === "string" && !value) ||
-    (typeof value === "number" && value === 0) ||
-    (typeof value === "boolean" && !value)
-  ) {
-    return null;
-  }
-
   // Format display value
-  const displayValue = typeof value === "boolean" ? "Yes" : String(value);
+  const displayValue =
+    typeof value === "boolean" ? (value ? "Yes" : "No") : String(value);
 
   return (
-    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1">
-      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5">{label}:</span>
+    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1.5">
+      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-uppercase tw-font-normal">
+        {label}:
+      </span>
       <Tippy
         disabled={isMobile}
         content={displayValue}
         placement="top"
         theme="dark"
       >
-        <span className="tw-text-iron-200 tw-text-xs tw-font-medium tw-truncate">
+        <span className="tw-text-iron-50 tw-text-xs tw-font-medium tw-truncate">
           {displayValue}
         </span>
       </Tippy>
@@ -284,11 +278,15 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
   const traits = useMemo(() => {
     const extractedTraits = extractTraitsFromMetadata(drop.metadata);
 
+    // Extract content from the first part if available
+    const description =
+      drop.parts && drop.parts.length > 0 ? drop.parts[0].content || "" : "";
+
     // Return full traits with fallback values for missing traits
     const finalTraits: TraitsData = {
-      // Required basic fields that may not have been set
-      title: "",
-      description: "",
+      // Use drop title and first part content if available
+      title: drop.title || extractedTraits.title || "",
+      description: description || extractedTraits.description || "",
 
       // Fields with fallbacks from extracted data or defaults
       artist: extractedTraits.artist ?? "",
@@ -333,25 +331,114 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
     return finalTraits;
   }, [drop]);
 
-  // Convert traits to array of items for display
+  // Convert traits to array of items for display with logical ordering
   const traitItems = useMemo(() => {
-    return Object.entries(traits)
-      .filter(([_, value]) => {
-        if (typeof value === "string") return !!value;
-        if (typeof value === "number") return value > 0;
-        if (typeof value === "boolean") return value === true;
-        return false;
-      })
-      .map(([key, value]) => {
-        // Format key for display (camelCase to Title Case)
-        const formattedKey = key
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase())
-          .replace(/Points /, "") // Remove "Points " prefix
-          .trim();
+    // Define priority order for key fields
+    const priorityKeys = [
+      // Basic identity fields
+      "artist",
+      "seizeArtistProfile",
+      "memeName",
+      "title",
+      "description",
 
-        return { label: formattedKey, value };
-      });
+      // Boolean trait flags (Yes/No values)
+      "punk6529",
+      "gradient",
+      "movement",
+      "dynamic",
+      "interactive",
+      "collab",
+      "om",
+      "threeD",
+      "pepe",
+      "gm",
+      "summer",
+      "tulip",
+
+      // Visual properties
+      "style",
+      "palette",
+      "jewel",
+
+      // Character attributes
+      "superpower",
+      "dharma",
+      "element",
+
+      // Equipment and appearance
+      "gear",
+      "clothing",
+      "weapon",
+
+      // Environment and context
+      "home",
+      "parent",
+      "sibling",
+
+      // Preferences
+      "food",
+      "drink",
+
+      // Special characteristics
+      "mystery",
+      "secrets",
+
+      // Boosts and bonuses
+      "bonus",
+      "boost",
+
+      // Points fields
+      "pointsPower",
+      "pointsWisdom",
+      "pointsLoki",
+      "pointsSpeed",
+    ];
+
+    // Create an ordered array based on priority list
+    const orderedItems: { label: string; value: any }[] = [];
+
+    // First add items in priority order
+    priorityKeys.forEach((key) => {
+      if (key in traits && traits[key as keyof TraitsData] !== undefined) {
+        // For strings, only include if not empty
+        const value = traits[key as keyof TraitsData];
+        if (
+          (typeof value === "string" && value) ||
+          (typeof value === "number" && value > 0) ||
+          typeof value === "boolean"
+        ) {
+          const formattedKey = key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())
+            .replace(/Points /, "") // Remove "Points " prefix
+            .trim();
+
+          orderedItems.push({ label: formattedKey, value });
+        }
+      }
+    });
+
+    // Add any remaining items not in the priority list
+    Object.entries(traits).forEach(([key, value]) => {
+      if (!priorityKeys.includes(key)) {
+        if (
+          (typeof value === "string" && value) ||
+          (typeof value === "number" && value > 0) ||
+          typeof value === "boolean"
+        ) {
+          const formattedKey = key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase())
+            .replace(/Points /, "") // Remove "Points " prefix
+            .trim();
+
+          orderedItems.push({ label: formattedKey, value });
+        }
+      }
+    });
+
+    return orderedItems;
   }, [traits]);
 
   // If there are no meaningful traits to display, don't render the component
