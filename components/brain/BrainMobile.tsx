@@ -53,9 +53,7 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
     setHydrated(true);
   }, []);
 
-  const isMobile = hydrated
-    ? isMobileDevice || (hasTouchScreen && isApp)
-    : true;
+
   const [activeView, setActiveView] = useState<BrainView>(BrainView.DEFAULT);
   const { data: drop } = useQuery<ApiDrop>({
     queryKey: [QueryKey.DROP, { drop_id: router.query.drop as string }],
@@ -145,6 +143,14 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
       isInWinnersAndFirstDecisionHasntPassed ||
       isInMyVotesAndIsNotMemeWave ||
       isInFAQAndIsNotMemeWave
+    ) {
+      setActiveView(BrainView.DEFAULT);
+    }
+
+    if (
+      activeView === BrainView.NOTIFICATIONS ||
+      activeView === BrainView.MESSAGES ||
+      activeView === BrainView.WAVES
     ) {
       setActiveView(BrainView.DEFAULT);
     }

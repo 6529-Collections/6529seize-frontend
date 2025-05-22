@@ -259,7 +259,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   FAQ
                 </span>
               </button>
-            )}
+                        )}
           </>
         )}
         {!isApp && (
@@ -275,7 +275,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             </span>
           </button>
         )}
-      </div>
+        </div>
     </div>
   );
 };
