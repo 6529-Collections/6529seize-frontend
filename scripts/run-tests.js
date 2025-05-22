@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function runJest() {
   try {
-    execSync('CI=1 jest --coverage --watchAll=false', { stdio: 'inherit' });
+    execSync('CI=1 jest --coverage --watchAll=false --silent --coverageReporters=json', { stdio: 'inherit' });
   } catch (err) {
     process.exit(err.status || 1);
   }
