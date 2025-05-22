@@ -22,7 +22,7 @@ export const SingleWaveDrop: React.FC<SingleWaveDropProps> = ({
   const { isMemesWave } = useSeizeSettings();
   const isMemes = isMemesWave(initialDrop.wave.id);
 
-  if (isMemes) {
+  if (!isMemes) {
     return <MemesSingleWaveDrop drop={initialDrop} onClose={onClose} />;
   }
 
