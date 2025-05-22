@@ -9,7 +9,9 @@ import { CookieConsentProvider } from "../components/cookies/CookieConsentContex
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
 }));
 jest.mock("next/link", () => ({
   __esModule: true,
