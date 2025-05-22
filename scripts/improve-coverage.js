@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { readFileSync, writeFileSync, existsSync, openSync, closeSync, readSync, statSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, openSync, closeSync, readSync, statSync, fstatSync, ftruncateSync, writeSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import libCoverage from 'istanbul-lib-coverage';
@@ -50,7 +50,7 @@ function main() {
   try {
     try {
       fd = openSync(progressPath, 'r+');
-      const stats = statSync(progressPath);
+      const stats = fstatSync(fd);
       let fileContent = '';
       if (stats.size > 0) {
         const buffer = Buffer.alloc(stats.size);
@@ -82,23 +82,32 @@ function main() {
       }
     } catch (e) {
       if (e.code === 'ENOENT') {
-        console.log('Progress file not found, creating it...');
+        console.log('Progress file not found, attempting to create it exclusively...');
         initialCoverage = currentCoverage;
         targetCoverage = currentCoverage + 1.0;
+        fd = openSync(progressPath, 'wx');
       } else {
         throw e;
       }
     }
 
-    const newProgressContent = JSON.stringify({ initialCoverage, targetCoverage }, null, 2);
-    if (fd !== undefined) {
-      writeFileSync(fd, newProgressContent);
-    } else {
-      writeFileSync(progressPath, newProgressContent);
+    if (fd === undefined) {
+        console.error("Critical error: File descriptor for progress file is undefined. This should not happen.");
+        process.exit(1);
     }
+
+    const newProgressContent = JSON.stringify({ initialCoverage, targetCoverage }, null, 2);
+    
+    ftruncateSync(fd, 0);
+    const bufferToWrite = Buffer.from(newProgressContent, 'utf-8');
+    writeSync(fd, bufferToWrite, 0, bufferToWrite.length, 0);
 
   } catch (error) {
     console.error(`Error handling progress file ${progressPath}:`, error);
+    if (fd !== undefined) {
+        try { closeSync(fd); } catch (closeErr) { console.error("Error closing fd in error handler:", closeErr); }
+        fd = undefined;
+    }
     process.exit(1); 
   } finally {
     if (fd !== undefined) {
