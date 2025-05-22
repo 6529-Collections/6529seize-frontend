@@ -56,6 +56,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [BrainView.FAQ]: null,
     [BrainView.WAVES]: null,
     [BrainView.MESSAGES]: null,
+    [BrainView.NOTIFICATIONS]: null,
   });
 
   React.useEffect(() => {
@@ -116,10 +117,24 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.MESSAGES ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
+  const notificationsButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5 tw-gap-1 tw-flex-1 tw-rounded-md ${
+    activeView === BrainView.NOTIFICATIONS ? "tw-bg-iron-800" : "tw-bg-iron-950"
+  }`;
+
+  const notificationsButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+    activeView === BrainView.NOTIFICATIONS
+      ? "tw-text-iron-300"
+      : "tw-text-iron-400"
+  }`;
+
   const backButtonClasses = `tw-border-none tw-no-underline tw-flex tw-justify-center tw-items-center tw-px-2 tw-py-1.5  tw-gap-1 tw-flex-1 tw-rounded-md tw-bg-iron-950`;
 
   const onChatClick = () => {
     onViewChange(BrainView.DEFAULT);
+  };
+
+  const onNotificationsClick = () => {
+    onViewChange(BrainView.NOTIFICATIONS);
   };
 
   return (
@@ -128,12 +143,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       className="tw-py-2 tw-px-2 sm:tw-px-4 md:tw-px-6 tw-overflow-x-auto"
     >
       <div className="tw-flex tw-justify-start tw-items-center tw-p-1 tw-gap-1 tw-w-full tw-overflow-x-auto tw-overflow-y-hidden tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-py-1 tw-bg-iron-950 tw-border tw-border-solid tw-border-iron-800 tw-rounded-lg">
-        {waveActive && showStreamBack && (
+        {waveActive && showStreamBack && !isApp && (
           <>
             <button
               onClick={() => {
-                // Always go directly to My Stream view with default tab
-                // Clear any view parameters to ensure we get back to main stream
                 router.push("/my-stream", undefined, { shallow: true });
                 onViewChange(BrainView.DEFAULT);
               }}
@@ -148,7 +161,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <div className="tw-h-4 tw-w-px tw-bg-iron-700 tw-mx-1 tw-flex-shrink-0" />
           </>
         )}
-        {showWavesTab && (
+        {!waveActive && showWavesTab && (
           <button
             ref={(el) => {
               tabRefs.current[BrainView.WAVES] = el;
@@ -159,7 +172,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <span className={wavesButtonTextClasses}>Waves</span>
           </button>
         )}
-        {!isApp && (
+        {!isApp && !waveActive && (
           <button
             ref={(el) => {
               tabRefs.current[BrainView.MESSAGES] = el;
@@ -248,6 +261,19 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               </button>
             )}
           </>
+        )}
+        {!isApp && !waveActive && (
+          <button
+            ref={(el) => {
+              tabRefs.current[BrainView.NOTIFICATIONS] = el;
+            }}
+            onClick={onNotificationsClick}
+            className={notificationsButtonClasses}
+          >
+            <span className={notificationsButtonTextClasses}>
+              Notifications
+            </span>
+          </button>
         )}
       </div>
     </div>
