@@ -46,7 +46,7 @@ interface Props {
 
 const BrainMobile: React.FC<Props> = ({ children }) => {
   const router = useRouter();
-  const { isMobileDevice, hasTouchScreen, isApp } = useDeviceInfo();
+  const { isApp } = useDeviceInfo();
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
