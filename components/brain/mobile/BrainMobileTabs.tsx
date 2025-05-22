@@ -161,7 +161,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <div className="tw-h-4 tw-w-px tw-bg-iron-700 tw-mx-1 tw-flex-shrink-0" />
           </>
         )}
-        {showWavesTab && (
+        {!waveActive && showWavesTab && (
           <button
             ref={(el) => {
               tabRefs.current[BrainView.WAVES] = el;
@@ -172,7 +172,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             <span className={wavesButtonTextClasses}>Waves</span>
           </button>
         )}
-        {!isApp && (
+        {!isApp && !waveActive && (
           <button
             ref={(el) => {
               tabRefs.current[BrainView.MESSAGES] = el;
@@ -259,10 +259,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   FAQ
                 </span>
               </button>
-                        )}
+            )}
           </>
         )}
-        {!isApp && (
+        {!isApp && !waveActive && (
           <button
             ref={(el) => {
               tabRefs.current[BrainView.NOTIFICATIONS] = el;
@@ -275,7 +275,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             </span>
           </button>
         )}
-        </div>
+      </div>
     </div>
   );
 };
