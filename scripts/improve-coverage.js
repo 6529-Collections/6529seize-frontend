@@ -16,7 +16,40 @@ import crypto from "crypto";
 
 const { createCoverageMap } = libCoverage;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const progressPath = path.resolve(__dirname, "../.coverage-progress.json");
+
+// Add parallel processing configuration - REQUIRED
+if (!process.env.PROCESS_ID || !process.env.TOTAL_PROCESSES) {
+  console.error("Error: Required environment variables not set.");
+  console.error("");
+  console.error("Please set up your environment first:");
+  console.error("  source scripts/setup-coverage-env.sh <process_id> <total_processes>");
+  console.error("");
+  console.error("Examples:");
+  console.error("  source scripts/setup-coverage-env.sh 0 1  # Single process");
+  console.error("  source scripts/setup-coverage-env.sh 0 8  # Process 0 of 8");
+  console.error("");
+  console.error("Then run: npm run improve-coverage");
+  process.exit(1);
+}
+
+const PROCESS_ID = parseInt(process.env.PROCESS_ID);
+const TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES);
+
+if (isNaN(PROCESS_ID) || PROCESS_ID < 0 || PROCESS_ID >= TOTAL_PROCESSES) {
+  console.error(`PROCESS_ID must be between 0 and ${TOTAL_PROCESSES - 1}`);
+  process.exit(1);
+}
+
+if (isNaN(TOTAL_PROCESSES) || TOTAL_PROCESSES < 1) {
+  console.error("TOTAL_PROCESSES must be a positive integer");
+  process.exit(1);
+}
+
+// Create unique progress file per process when running in parallel
+const progressFilename = TOTAL_PROCESSES > 1 
+  ? `.coverage-progress-p${PROCESS_ID}.json`
+  : '.coverage-progress.json';
+const progressPath = path.resolve(__dirname, "..", progressFilename);
 
 const COVERAGE_INCREMENT_PERCENT_ENV = parseFloat(
   process.env.COVERAGE_INCREMENT_PERCENT_ENV
@@ -32,15 +65,6 @@ const TIME_LIMIT_MINUTES_ENV = parseFloat(
 const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
   ? TIME_LIMIT_MINUTES_ENV
   : 20;
-
-// Add parallel processing configuration
-const PROCESS_ID = parseInt(process.env.PROCESS_ID || "0");
-const TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES || "1");
-
-if (isNaN(PROCESS_ID) || PROCESS_ID < 0 || PROCESS_ID >= TOTAL_PROCESSES) {
-  console.error(`PROCESS_ID must be between 0 and ${TOTAL_PROCESSES - 1}`);
-  process.exit(1);
-}
 
 function run(command) {
   execSync(command, { stdio: "inherit" });
@@ -80,17 +104,6 @@ function getLowCoverageFiles(coverageData, limit = 1) {
   const assignedFiles = allLowCoverageFiles.filter(entry => 
     isFileAssignedToProcess(entry.file, PROCESS_ID, TOTAL_PROCESSES)
   );
-
-  // Log distribution info when running in parallel
-  if (TOTAL_PROCESSES > 1) {
-    console.log(`\nProcess ${PROCESS_ID} of ${TOTAL_PROCESSES}: Handling ${assignedFiles.length} files`);
-    if (assignedFiles.length > 0 && limit >= 1) {
-      console.log(`Files assigned to this process (showing up to ${limit}):`);
-      assignedFiles.slice(0, Math.min(limit, 3)).forEach(f => 
-        console.log(`  - ${path.basename(f.file)} (${f.pct.toFixed(1)}% coverage)`)
-      );
-    }
-  }
 
   const selectedFiles = assignedFiles.slice(0, limit);
   return selectedFiles.map((e) => path.relative(process.cwd(), e.file));
@@ -304,10 +317,6 @@ function main() {
   // Check time constraint
   const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
   console.log(`elapsed time: ${elapsedMinutes.toFixed(1)} minutes`);
-
-  if (TOTAL_PROCESSES > 1) {
-    console.log(`process: ${PROCESS_ID} of ${TOTAL_PROCESSES} (using hash-based assignment)`);
-  }
 
   if (currentCoverage >= targetCoverage) {
     console.log(

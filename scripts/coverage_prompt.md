@@ -18,16 +18,18 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
 
 **Workflow:**
 
-1. **Execute Script:** Run `npm run improve-coverage`
-   - Default time limit: 20 minutes
-   - Custom time limit: `TIME_LIMIT_MINUTES=30 npm run improve-coverage`
+1. **Setup Environment:** Configure your process
+   - Run: `source scripts/setup-coverage-env.sh 0 8`
 
-2. **Parse Output:** Analyze the coverage report for:
+2. **Execute Script:** Run `npm run improve-coverage`
+   - The script will use the environment variables you set up
+
+3. **Parse Output:** Analyze the coverage report for:
    - Current coverage percentage vs. target
    - Time elapsed and remaining
    - Specific files needing coverage
 
-3. **Time-Aware Test Strategy:**
+4. **Time-Aware Test Strategy:**
    Given the time constraint, prioritize tests in this order:
    
    **First 5-7 minutes: High-Impact Tests**
@@ -46,7 +48,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - Quick refactor for clarity
    - Add essential edge cases if time permits
 
-4. **Strategic Test Planning:**
+5. **Strategic Test Planning:**
    When adding tests for `[FILENAME]`, follow this comprehensive approach:
 
    ### A. Scenario Analysis (Before Writing Tests)
@@ -102,7 +104,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - [ ] **Focused**: Tests one behavior
    - [ ] **Realistic**: Uses production-like data/scenarios
 
-5. **Implementation Guidelines:**
+6. **Implementation Guidelines:**
 
    ```typescript
    // Example structure for comprehensive testing
@@ -134,7 +136,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    });
    ```
 
-6. **Specific Testing Patterns by File Type:**
+7. **Specific Testing Patterns by File Type:**
 
    **For API Routes:**
    - Authentication/authorization scenarios
@@ -158,7 +160,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - Data transformation edge cases
    - Async operation handling
 
-7. **Real-World Scenario Examples:**
+8. **Real-World Scenario Examples:**
 
    ```typescript
    // Instead of just: "sorts items"
@@ -194,37 +196,6 @@ When the 20-minute limit is reached before the coverage target:
 - Focus on test quality over rushing to meet coverage
 - Consider it a successful iteration of incremental improvement
 
-**Parallel Execution for Scale:**
-The coverage improvement process supports parallel execution across multiple independent processes:
-
-1. **Hash-Based File Assignment:**
-   - Each file is deterministically assigned to a process using MD5 hash
-   - No communication needed between processes
-   - Prevents multiple processes from working on the same file
-   - Works even when processes start at different times
-
-2. **Running in Parallel:**
-   ```bash
-   # Run with 8 parallel processes
-   ./scripts/improve-coverage-parallel.sh 8
-   
-   # Or manually with environment variables
-   PROCESS_ID=0 TOTAL_PROCESSES=8 npm run improve-coverage &
-   PROCESS_ID=1 TOTAL_PROCESSES=8 npm run improve-coverage &
-   # ... up to PROCESS_ID=7
-   ```
-
-3. **How It Works:**
-   - Each process computes `hash(filename) % TOTAL_PROCESSES`
-   - If result equals PROCESS_ID, that process handles the file
-   - Ensures even distribution across all processes
-   - Adapts automatically as files are added/removed
-
-4. **Benefits:**
-   - Linear speedup with number of processes
-   - No coordination overhead
-   - Resilient to process failures
-   - Each process maintains its own progress file
 
 **Example Output Scenarios:**
 
@@ -246,25 +217,6 @@ The coverage improvement process supports parallel execution across multiple ind
    elapsed time: 12.3 minutes
    Time remaining: 7.7 minutes until automatic completion.
    Action: Add tests for src/utils/validation.js to improve coverage.
-   ```
-
-4. **Parallel Process Output:**
-   ```
-   process: 3 of 8 (using hash-based assignment)
-   
-   Process 3 of 8: Handling 4 files
-   Files assigned to this process (showing up to 1):
-     - validation.js (45.2% coverage)
-   
-   Action: Add tests for src/utils/validation.js to improve coverage.
-   ```
-
-5. **No Files Assigned (in parallel mode):**
-   ```
-   process: 5 of 8 (using hash-based assignment)
-   
-   Info: No files assigned to process 5. There are 12 low coverage files 
-   assigned to other processes. This process can rest while others work on coverage.
    ```
 
 **Anti-Patterns to Avoid:**
