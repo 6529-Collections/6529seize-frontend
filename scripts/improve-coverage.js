@@ -12,6 +12,7 @@ import {
 import path from "path";
 import { fileURLToPath } from "url";
 import libCoverage from "istanbul-lib-coverage";
+import crypto from "crypto";
 
 const { createCoverageMap } = libCoverage;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -32,6 +33,15 @@ const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
   ? TIME_LIMIT_MINUTES_ENV
   : 20;
 
+// Add parallel processing configuration
+const PROCESS_ID = parseInt(process.env.PROCESS_ID || "0");
+const TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES || "1");
+
+if (isNaN(PROCESS_ID) || PROCESS_ID < 0 || PROCESS_ID >= TOTAL_PROCESSES) {
+  console.error(`PROCESS_ID must be between 0 and ${TOTAL_PROCESSES - 1}`);
+  process.exit(1);
+}
+
 function run(command) {
   execSync(command, { stdio: "inherit" });
 }
@@ -44,17 +54,46 @@ function getTotalCoverage(summary) {
   return summary.total.lines.pct;
 }
 
+function getFileHash(filepath) {
+  // Create a deterministic hash for the file path
+  return crypto.createHash('md5').update(filepath).digest('hex');
+}
+
+function isFileAssignedToProcess(filepath, processId, totalProcesses) {
+  // Convert hex hash to number and use modulo to assign to a process
+  const hash = getFileHash(filepath);
+  const hashNum = parseInt(hash.substring(0, 8), 16);
+  return (hashNum % totalProcesses) === processId;
+}
+
 function getLowCoverageFiles(coverageData, limit = 1) {
   const map = createCoverageMap(coverageData);
-  const entries = Object.entries(map.data)
+  const allLowCoverageFiles = Object.entries(map.data)
     .map(([file, data]) => ({
       file,
       pct: map.fileCoverageFor(file).toSummary().lines.pct,
     }))
     .filter((e) => e.pct < 80)
-    .sort((a, b) => a.pct - b.pct)
-    .slice(0, limit);
-  return entries.map((e) => path.relative(process.cwd(), e.file));
+    .sort((a, b) => a.pct - b.pct);
+
+  // Filter files assigned to this process
+  const assignedFiles = allLowCoverageFiles.filter(entry => 
+    isFileAssignedToProcess(entry.file, PROCESS_ID, TOTAL_PROCESSES)
+  );
+
+  // Log distribution info when running in parallel
+  if (TOTAL_PROCESSES > 1) {
+    console.log(`\nProcess ${PROCESS_ID} of ${TOTAL_PROCESSES}: Handling ${assignedFiles.length} files`);
+    if (assignedFiles.length > 0 && limit >= 1) {
+      console.log(`Files assigned to this process (showing up to ${limit}):`);
+      assignedFiles.slice(0, Math.min(limit, 3)).forEach(f => 
+        console.log(`  - ${path.basename(f.file)} (${f.pct.toFixed(1)}% coverage)`)
+      );
+    }
+  }
+
+  const selectedFiles = assignedFiles.slice(0, limit);
+  return selectedFiles.map((e) => path.relative(process.cwd(), e.file));
 }
 
 function main() {
@@ -266,6 +305,10 @@ function main() {
   const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
   console.log(`elapsed time: ${elapsedMinutes.toFixed(1)} minutes`);
 
+  if (TOTAL_PROCESSES > 1) {
+    console.log(`process: ${PROCESS_ID} of ${TOTAL_PROCESSES} (using hash-based assignment)`);
+  }
+
   if (currentCoverage >= targetCoverage) {
     console.log(
       `\nSuccess: Current coverage of ${currentCoverage.toFixed(
@@ -295,13 +338,26 @@ function main() {
         `\nAction: Add tests for ${nextFiles[0]} to improve coverage. Then re-run 'npm run improve-coverage'.`
       );
     } else {
-      console.log(
-        `\nInfo: All individual files meet the 80% threshold. However, current coverage of ${currentCoverage.toFixed(
-          2
-        )}% has not yet reached the target of ${targetCoverage.toFixed(
-          2
-        )}%. Please add more tests to any module to increase the overall percentage. Then re-run 'npm run improve-coverage'.`
-      );
+      // Check if there are low coverage files, just not assigned to this process
+      const map = createCoverageMap(coverageData);
+      const totalLowCoverageFiles = Object.entries(map.data)
+        .filter(([file, data]) => map.fileCoverageFor(file).toSummary().lines.pct < 80)
+        .length;
+      
+      if (TOTAL_PROCESSES > 1 && totalLowCoverageFiles > 0) {
+        console.log(
+          `\nInfo: No files assigned to process ${PROCESS_ID}. There are ${totalLowCoverageFiles} low coverage files ` +
+          `assigned to other processes. This process can rest while others work on coverage.`
+        );
+      } else {
+        console.log(
+          `\nInfo: All individual files meet the 80% threshold. However, current coverage of ${currentCoverage.toFixed(
+            2
+          )}% has not yet reached the target of ${targetCoverage.toFixed(
+            2
+          )}%. Please add more tests to any module to increase the overall percentage. Then re-run 'npm run improve-coverage'.`
+        );
+      }
     }
   }
 }
