@@ -16,7 +16,13 @@ import libCoverage from "istanbul-lib-coverage";
 const { createCoverageMap } = libCoverage;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const progressPath = path.resolve(__dirname, "../.coverage-progress.json");
-const COVERAGE_INCREMENT_PERCENT = 1.0;
+
+const COVERAGE_INCREMENT_PERCENT_ENV = parseFloat(
+  process.env.COVERAGE_INCREMENT_PERCENT_ENV
+);
+const COVERAGE_INCREMENT_PERCENT = !isNaN(COVERAGE_INCREMENT_PERCENT_ENV)
+  ? COVERAGE_INCREMENT_PERCENT_ENV
+  : 0.2;
 
 function run(command) {
   execSync(command, { stdio: "inherit" });
@@ -88,21 +94,36 @@ function main() {
       if (chunks.length > 0) {
         fileContent = Buffer.concat(chunks).toString("utf-8");
       }
-
     } catch (e) {
-      if (e.code === 'ENOENT') {
-        console.log(`File not found (${progressPath}). Attempting to create it exclusively.`);
+      if (e.code === "ENOENT") {
+        console.log(
+          `File not found (${progressPath}). Attempting to create it exclusively.`
+        );
         try {
-          fd = openSync(progressPath, fsConstants.O_RDWR | fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_NOFOLLOW, 0o600);
-          console.log(`Successfully created new file exclusively: ${progressPath}`);
+          fd = openSync(
+            progressPath,
+            fsConstants.O_RDWR |
+              fsConstants.O_CREAT |
+              fsConstants.O_EXCL |
+              fsConstants.O_NOFOLLOW,
+            0o600
+          );
+          console.log(
+            `Successfully created new file exclusively: ${progressPath}`
+          );
           isNewFile = true;
-
         } catch (createError) {
-          console.error(`Failed to create progress file exclusively (${progressPath}):`, createError);
+          console.error(
+            `Failed to create progress file exclusively (${progressPath}):`,
+            createError
+          );
           throw createError;
         }
       } else {
-        console.error(`Error opening initial progress file (${progressPath}):`, e);
+        console.error(
+          `Error opening initial progress file (${progressPath}):`,
+          e
+        );
         throw e;
       }
     }
