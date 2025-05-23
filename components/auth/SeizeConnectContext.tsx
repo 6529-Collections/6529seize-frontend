@@ -36,6 +36,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const { disconnect } = useDisconnect();
   const { open: onConnect } = useWeb3Modal();
   const { open } = useWeb3ModalState();
+  console.log("web3modal open", open);
 
   const account = useAccount();
   const [connectedAddress, setConnectedAddress] = useState<string | undefined>(
@@ -55,6 +56,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [account.address, account.isConnected]);
 
   const seizeConnect = useCallback(() => {
+    console.log("seizeConnect", onConnect);
     onConnect({ view: "Connect" });
   }, [onConnect]);
 
