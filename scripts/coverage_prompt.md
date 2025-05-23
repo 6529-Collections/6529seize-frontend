@@ -19,7 +19,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
 **Workflow:**
 
 1. **Setup Environment:** Configure your process
-   - Run: `source scripts/setup-coverage-env.sh 0 8`
+   - Run: `source scripts/setup-coverage-env.sh X Y`
 
 2. **Execute Script:** Run `npm run improve-coverage`
    - The script will use the environment variables you set up
