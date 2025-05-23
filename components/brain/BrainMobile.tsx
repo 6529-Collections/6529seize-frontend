@@ -110,6 +110,13 @@ const BrainMobile: React.FC<Props> = ({ children }) => {
 
   const hasWave = Boolean(router.query.wave);
 
+  // Simple fix: sync notifications route to mobile view  
+  useEffect(() => {
+    if (router.pathname === '/my-stream/notifications') {
+      setActiveView(BrainView.NOTIFICATIONS);
+    }
+  }, [router.pathname]);
+
   // Handle tab visibility and reset on wave changes
   useEffect(() => {
     if (!hasWave) {

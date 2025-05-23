@@ -79,7 +79,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { isCapacitor } = useCapacitor();
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
   const wavesHookData = useEnhancedWavesList(activeWaveId);
-  const dmWavesHookData = useEnhancedDmWavesList(null);
+  const dmWavesHookData = useEnhancedDmWavesList(activeWaveId);
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
 
