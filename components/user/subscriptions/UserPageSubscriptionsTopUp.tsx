@@ -16,8 +16,13 @@ import {
   numberOfCardsForCalendarEnd,
   numberOfCardsForSeasonEnd,
 } from "../../../helpers/meme_calendar.helpers";
+import { useCookieConsent } from "../../cookies/CookieConsentContext";
+import useCapacitor from "../../../hooks/useCapacitor";
+import Link from "next/link";
 
 export default function UserPageSubscriptionsTopUp() {
+  const { isIos } = useCapacitor();
+  const { country } = useCookieConsent();
   const [memeCount, setMemeCount] = useState<string>("");
   const sendTransaction = useSendTransaction();
 
@@ -81,8 +86,7 @@ export default function UserPageSubscriptionsTopUp() {
               sendTransaction.data
             )}
             target="_blank"
-            rel="noreferrer"
-          >
+            rel="noreferrer">
             view
           </a>
         </>
@@ -91,26 +95,27 @@ export default function UserPageSubscriptionsTopUp() {
     return <>&nbsp;</>;
   }
 
-  return (
-    <Container className="no-padding">
-      <Row className="pb-2">
-        <Col className="d-flex align-items-end gap-2 no-wrap">
-          <h5 className="mb-0">Top Up</h5>
-          <span className="d-flex align-items-center gap-1 font-color-h font-smaller">
-            Sending to{" "}
-            <Tippy
-              content={
-                <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
-              }
-            >
-              <span>
-                {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
-                {formatAddress(SUBSCRIPTIONS_ADDRESS)}
-              </span>
-            </Tippy>
-          </span>
-        </Col>
-      </Row>
+  if (isIos && country !== "US") {
+    return <></>;
+  }
+
+  const iOsContent = (
+    <Row className="pt-2">
+      <Col>
+        <Link
+          href={window.location.href}
+          className="text-center pt-2 pb-2"
+          target="_blank">
+          <button className="btn btn-light" style={{ width: "100%" }}>
+            Top-up on 6529.io
+          </button>
+        </Link>
+      </Col>
+    </Row>
+  );
+
+  const topUpContent = (
+    <>
       <Row className="pt-2">
         <Col>
           <CardCountTopup
@@ -180,8 +185,7 @@ export default function UserPageSubscriptionsTopUp() {
               } else {
                 submit(count * MEMES_MINT_PRICE);
               }
-            }}
-          >
+            }}>
             <Form.Group className="mb-3">
               <Row className="d-flex align-items-center">
                 <Col xs={9} sm={8} className="d-flex align-items-center gap-2">
@@ -217,8 +221,7 @@ export default function UserPageSubscriptionsTopUp() {
                     aria-label="Send custom top up"
                     disabled={
                       sendTransaction.isPending || waitSendTransaction.isLoading
-                    }
-                  >
+                    }>
                     Send
                   </Button>
                 </Col>
@@ -237,6 +240,29 @@ export default function UserPageSubscriptionsTopUp() {
           </Col>
         </Row>
       )}
+    </>
+  );
+
+  return (
+    <Container className="no-padding">
+      <Row className="pb-2">
+        <Col className="d-flex align-items-end gap-2 no-wrap">
+          <h5 className="mb-0">Top Up</h5>
+          <span className="d-flex align-items-center gap-1 font-color-h font-smaller">
+            Sending to{" "}
+            <Tippy
+              content={
+                <span className="font-smaller">{SUBSCRIPTIONS_ADDRESS}</span>
+              }>
+              <span>
+                {SUBSCRIPTIONS_ADDRESS_ENS}{" "}
+                {formatAddress(SUBSCRIPTIONS_ADDRESS)}
+              </span>
+            </Tippy>
+          </span>
+        </Col>
+      </Row>
+      {isIos ? iOsContent : topUpContent}
     </Container>
   );
 }
@@ -254,8 +280,7 @@ function CardCountTopup(
       onSubmit={(e) => {
         e.preventDefault();
         props.submit(props.count * MEMES_MINT_PRICE);
-      }}
-    >
+      }}>
       <Form.Group>
         <Row className="d-flex align-items-center no-wrap">
           <Col xs={9} sm={8} className="d-flex">
@@ -271,8 +296,7 @@ function CardCountTopup(
               aria-label={`Send top up for ${
                 props.display ??
                 `${props.count} Card${props.count > 1 ? "s" : ""}`
-              }`}
-            >
+              }`}>
               Send
             </Button>
           </Col>

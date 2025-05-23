@@ -25,6 +25,7 @@ import HeaderShare from "./share/HeaderShare";
 import useIsMobileScreen from "../../hooks/isMobileScreen";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import HeaderOpenMobile from "./open-mobile/HeaderOpenMobile";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 interface Props {
   onLoad?: () => void;
@@ -41,6 +42,7 @@ export interface HeaderLink {
 
 export default function Header(props: Readonly<Props>) {
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const { appWalletsSupported } = useAppWallets();
   const { address, seizeConnectOpen } = useSeizeConnectContext();
 
@@ -400,7 +402,7 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileRow("Wallet Checker", "/delegation/wallet-checker")}
                 {printMobileHr()}
                 {printMobileSubheader("The Memes Tools")}
-                {capacitor.platform !== "ios" && (
+                {(!capacitor.isIos || country === "US") && (
                   <>
                     {printMobileRow(
                       "Memes Subscriptions",
@@ -441,7 +443,7 @@ export default function Header(props: Readonly<Props>) {
                 {printMobileHr()}
                 {printMobileSubheader("NFTs")}
                 {printMobileRow("The Memes", `/about/${AboutSection.MEMES}`)}
-                {capacitor.platform !== "ios" && (
+                {(!capacitor.isIos || country === "US") && (
                   <>
                     {printMobileRow(
                       "Subscriptions",
@@ -768,7 +770,7 @@ export default function Header(props: Readonly<Props>) {
                                   />
                                 </div>
                                 <div className={styles.nestedMenu}>
-                                  {capacitor.platform !== "ios" && (
+                                  {(!capacitor.isIos || country === "US") && (
                                     <HeaderDesktopLink
                                       link={{
                                         name: "Memes Subscriptions",
@@ -837,7 +839,7 @@ export default function Header(props: Readonly<Props>) {
                                       path: `/about/${AboutSection.MEMES}`,
                                     }}
                                   />
-                                  {capacitor.platform !== "ios" && (
+                                  {(!capacitor.isIos || country === "US") && (
                                     <HeaderDesktopLink
                                       link={{
                                         name: "Subscriptions",

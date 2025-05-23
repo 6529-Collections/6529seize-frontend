@@ -12,6 +12,9 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../user/utils/UserCICAndLevel";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
+import useCapacitor from "../../hooks/useCapacitor";
+import Link from "next/link";
 
 export default function ManifoldMintingConnect(
   props: Readonly<{
@@ -20,6 +23,8 @@ export default function ManifoldMintingConnect(
 ) {
   const account = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
+  const { isIos } = useCapacitor();
+  const { country } = useCookieConsent();
 
   const [mintForFren, setMintForFren] = useState<boolean>(false);
 
@@ -116,8 +121,7 @@ export default function ManifoldMintingConnect(
               style={{
                 width: "fit-content",
               }}
-              onClick={() => reset()}
-            >
+              onClick={() => reset()}>
               <span className="font-smaller font-lighter pt-1">clear</span>
             </button>
           </span>
@@ -157,6 +161,23 @@ export default function ManifoldMintingConnect(
     return <>{mintForFren && printMintFor()}</>;
   }
 
+  if (isIos) {
+    if (country === "US") {
+      return (
+        <Link
+          href={window.location.href}
+          className="text-center pt-2 pb-2"
+          target="_blank">
+          <button className="btn btn-light" style={{ width: "100%" }}>
+            Mint on 6529.io
+          </button>
+        </Link>
+      );
+    } else {
+      return <></>;
+    }
+  }
+
   if (!account.isConnected) {
     return (
       <div className="text-center pt-2 pb-2">
@@ -175,15 +196,13 @@ export default function ManifoldMintingConnect(
           <button
             className={`btn ${mintForFren ? "btn-dark" : "btn-light"}`}
             style={{ width: "50%" }}
-            onClick={() => setMintForFren(false)}
-          >
+            onClick={() => setMintForFren(false)}>
             Mint for me
           </button>
           <button
             className={`btn ${mintForFren ? "btn-light" : "btn-dark"}`}
             style={{ width: "50%" }}
-            onClick={() => setMintForFren(true)}
-          >
+            onClick={() => setMintForFren(true)}>
             Mint for fren
           </button>
         </Col>

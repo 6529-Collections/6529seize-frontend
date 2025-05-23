@@ -6,7 +6,7 @@ import { AuthContext } from "../../components/auth/Auth";
 const CommunityDownloadsSubscriptions = dynamic(
   () =>
     import(
-      "../../components/communityDownloads/CommunityDownloadsSubscriptions"
+      "../../components/community-downloads/CommunityDownloadsSubscriptions"
     ),
   {
     ssr: false,

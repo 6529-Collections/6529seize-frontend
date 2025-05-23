@@ -25,6 +25,7 @@ import useCapacitor from "../../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../nft-marketplace-links/NFTMarketplaceLinks";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
 import NftNavigation from "../nft-navigation/NftNavigation";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 interface NftWithOwner extends NFT {
   owner: string;
@@ -34,6 +35,7 @@ interface NftWithOwner extends NFT {
 export default function GradientPage() {
   const router = useRouter();
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const { connectedProfile } = useContext(AuthContext);
   const fullscreenElementId = "the-art-fullscreen-img";
 
@@ -210,7 +212,7 @@ export default function GradientPage() {
                     </Table>
                   </Col>
                 </Row>
-                {capacitor.platform !== "ios" && (
+                {(!capacitor.isIos || country === "US") && (
                   <Row className="pt-4">
                     <Col>
                       <NFTMarketplaceLinks

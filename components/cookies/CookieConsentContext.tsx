@@ -23,6 +23,7 @@ const GTM_ID = "G-71NLVV3KY3";
 
 type CookieConsentContextType = {
   showCookieConsent: boolean;
+  country: string;
   consent: () => void;
   reject: () => void;
 };
@@ -30,6 +31,7 @@ type CookieConsentContextType = {
 interface CookieConsentResponse {
   is_eu: boolean;
   is_consent: boolean;
+  country: string;
 }
 
 const CookieConsentContext = createContext<
@@ -67,8 +69,9 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 }) => {
   const { setToast } = useContext(AuthContext);
   const [showCookieConsent, setShowCookieConsent] = useState(false);
+  const [country, setCountry] = useState("");
 
-  const getCookieConsent = async () => {
+  const getCookieConsent = async (isFirstLoad: boolean = false) => {
     try {
       const essentialCookies = getCookieConsentByName(CONSENT_ESSENTIAL_COOKIE);
       const performanceCookies = getCookieConsentByName(
@@ -81,13 +84,20 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
       if (essentialCookies != undefined && performanceCookies != undefined) {
         setShowCookieConsent(false);
+      }
+
+      if (!isFirstLoad) {
         return;
       }
+
       const response = await commonApiFetch<CookieConsentResponse>({
         endpoint: `policies/country-check`,
       });
+      setCountry(response.country);
       if (response.is_eu) {
-        setShowCookieConsent(true);
+        setShowCookieConsent(
+          essentialCookies == undefined && performanceCookies == undefined
+        );
       } else {
         Cookies.set(CONSENT_ESSENTIAL_COOKIE, "true", { expires: 7 });
         Cookies.set(CONSENT_PERFORMANCE_COOKIE, "true", { expires: 7 });
@@ -151,12 +161,12 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   };
 
   const value = useMemo(
-    () => ({ consent, reject, showCookieConsent }),
-    [consent, reject]
+    () => ({ consent, reject, showCookieConsent, country }),
+    [consent, reject, showCookieConsent, country]
   );
 
   useEffect(() => {
-    getCookieConsent();
+    getCookieConsent(true);
   }, []);
 
   return (

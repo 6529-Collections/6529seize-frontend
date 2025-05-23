@@ -11,6 +11,7 @@ import MintCountdownBox, {
 } from "../mintCountdownBox/MintCountdownBox";
 import { useEffect } from "react";
 import useCapacitor from "../../hooks/useCapacitor";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 export default function MemePageMintCountdown(
   props: Readonly<{
@@ -28,6 +29,7 @@ export default function MemePageMintCountdown(
   );
 
   const { isIos } = useCapacitor();
+  const { country } = useCookieConsent();
 
   useEffect(() => {
     if (props.setClaim && manifoldClaim) {
@@ -56,7 +58,7 @@ export default function MemePageMintCountdown(
 
   const getButtons = () => {
     const buttons: MemePageMintBtn[] = [];
-    if (!isIos) {
+    if (!isIos || country === "US") {
       buttons.push({
         label: "Mint",
         link: `/the-memes/mint`,
