@@ -6,6 +6,7 @@ import type { NavItem as NavItemData } from "./navTypes";
 import { motion } from "framer-motion";
 import { TitleType, useAuth } from "../auth/Auth";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
+import { useUnreadIndicator } from "../../hooks/useUnreadIndicator";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
 import { isNavItemActive } from "./isNavItemActive";
 import { useWaveData } from "../../hooks/useWaveData";
@@ -39,6 +40,13 @@ const NavItem = ({ item }: Props) => {
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
     item.name === "Notifications" ? connectedProfile?.handle ?? null : null
   );
+
+  // Add unread messages logic
+  const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
+    type: "messages",
+    handle: item.name === "Messages" ? connectedProfile?.handle ?? null : null,
+  });
+
   const { removeAllDeliveredNotifications } = useNotificationsContext();
 
   useEffect(() => {
@@ -129,6 +137,9 @@ const NavItem = ({ item }: Props) => {
           />
         )}
         {item.name === "Notifications" && haveUnreadNotifications && (
+          <div className="tw-absolute -tw-right-1 -tw-top-1 tw-rounded-full tw-bg-red tw-h-2.5 tw-w-2.5"></div>
+        )}
+        {item.name === "Messages" && hasUnreadMessages && (
           <div className="tw-absolute -tw-right-1 -tw-top-1 tw-rounded-full tw-bg-red tw-h-2.5 tw-w-2.5"></div>
         )}
       </div>

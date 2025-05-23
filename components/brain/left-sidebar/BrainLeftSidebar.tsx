@@ -7,6 +7,8 @@ import { useContentTab } from "../ContentTabContext";
 import { MyStreamWaveTab } from "../../../types/waves.types";
 import DirectMessagesList from "../direct-messages/DirectMessagesList";
 import { useRouter } from "next/router";
+import { useUnreadIndicator } from "../../../hooks/useUnreadIndicator";
+import { useAuth } from "../../auth/Auth";
 
 interface BrainLeftSidebarProps {
   readonly activeWaveId: string | null;
@@ -16,6 +18,7 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   activeWaveId,
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { connectedProfile } = useAuth();
 
   // Get content tab state from context
   const { activeContentTab, setActiveContentTab, availableTabs } =
@@ -29,7 +32,14 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
     );
   });
 
+  // Get unread indicator for messages
+  const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
+    type: "messages",
+    handle: connectedProfile?.handle ?? null,
+  });
+
   const router = useRouter();
+  
   // keep tab in sync with url ?view=
   useEffect(() => {
     const viewParam =
@@ -76,6 +86,16 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
     }));
   }, [availableTabs, tabLabels]);
 
+  // Create tab options with indicators
+  const sidebarTabOptions = useMemo(() => [
+    { key: "waves", label: "Waves" },
+    { 
+      key: "messages", 
+      label: "Messages",
+      hasIndicator: hasUnreadMessages
+    },
+  ], [hasUnreadMessages]);
+
   return (
     <div
       ref={scrollContainerRef}
@@ -100,12 +120,9 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
         <BrainLeftSidebarSearchWave listType={sidebarTab} />
 
         <div className="tw-flex tw-flex-col tw-gap-y-2">
-          {/* Tab switcher */}
+          {/* Tab switcher with indicator support */}
           <TabToggle
-            options={[
-              { key: "waves", label: "Waves" },
-              { key: "messages", label: "Messages" },
-            ]}
+            options={sidebarTabOptions}
             activeKey={sidebarTab}
             onSelect={(k) => setSidebarTab(k as "waves" | "messages")}
           />

@@ -6,6 +6,9 @@ import MyStreamWaveTabsLeaderboard from "../my-stream/MyStreamWaveTabsLeaderboar
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { useWave } from "../../../hooks/useWave";
 import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useUnreadIndicator } from "../../../hooks/useUnreadIndicator";
+import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
+import { useAuth } from "../../auth/Auth";
 
 interface BrainMobileTabsProps {
   readonly activeView: BrainView;
@@ -28,6 +31,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 }) => {
   const router = useRouter();
   const { registerRef } = useLayout();
+  const { connectedProfile } = useAuth();
 
   // Local ref for component-specific needs
   const mobileTabsRef = useRef<HTMLDivElement | null>(null);
@@ -45,6 +49,17 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   );
 
   const { isMemesWave, isRankWave } = useWave(wave);
+
+  // Get unread indicator for messages
+  const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
+    type: "messages",
+    handle: connectedProfile?.handle ?? null,
+  });
+
+  // Get unread notifications using the dedicated hook
+  const { haveUnreadNotifications } = useUnreadNotifications(
+    connectedProfile?.handle ?? null
+  );
 
   const tabRefs = useRef<Record<BrainView, HTMLButtonElement | null>>({
     [BrainView.DEFAULT]: null,
@@ -113,7 +128,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.MESSAGES ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
-  const messagesButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+  const messagesButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap tw-relative ${
     activeView === BrainView.MESSAGES ? "tw-text-iron-300" : "tw-text-iron-400"
   }`;
 
@@ -121,7 +136,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     activeView === BrainView.NOTIFICATIONS ? "tw-bg-iron-800" : "tw-bg-iron-950"
   }`;
 
-  const notificationsButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap ${
+  const notificationsButtonTextClasses = `tw-font-semibold tw-text-xs sm:tw-text-sm tw-whitespace-nowrap tw-relative ${
     activeView === BrainView.NOTIFICATIONS
       ? "tw-text-iron-300"
       : "tw-text-iron-400"
@@ -180,7 +195,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
             onClick={() => onViewChange(BrainView.MESSAGES)}
             className={messagesButtonClasses}
           >
-            <span className={messagesButtonTextClasses}>Messages</span>
+            <span className={messagesButtonTextClasses}>
+              <span>Messages</span>
+              {hasUnreadMessages && (
+                <div className="tw-absolute tw-rounded-full -tw-right-3 tw-top-0 tw-bg-red tw-h-2 tw-w-2"></div>
+              )}
+            </span>
           </button>
         )}
         <button
@@ -272,6 +292,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           >
             <span className={notificationsButtonTextClasses}>
               Notifications
+              {haveUnreadNotifications && (
+                <div className="tw-absolute tw-rounded-full -tw-right-1 -tw-top-1 tw-bg-red tw-h-2 tw-w-2"></div>
+              )}
             </span>
           </button>
         )}
