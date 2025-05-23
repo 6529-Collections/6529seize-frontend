@@ -9,6 +9,8 @@ import DirectMessagesList from "../direct-messages/DirectMessagesList";
 import { useRouter } from "next/router";
 import { useUnreadIndicator } from "../../../hooks/useUnreadIndicator";
 import { useAuth } from "../../auth/Auth";
+import { useWaveData } from "../../../hooks/useWaveData";
+import { useWave } from "../../../hooks/useWave";
 
 interface BrainLeftSidebarProps {
   readonly activeWaveId: string | null;
@@ -19,6 +21,14 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { connectedProfile } = useAuth();
+  const router = useRouter();
+
+  // Get wave data to determine if it's a DM
+  const { data: currentWave } = useWaveData({
+    waveId: activeWaveId,
+    onWaveNotFound: () => {},
+  });
+  const { isDm } = useWave(currentWave);
 
   // Get content tab state from context
   const { activeContentTab, setActiveContentTab, availableTabs } =
@@ -32,14 +42,23 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
     );
   });
 
+  // Auto-switch tab based on active wave type
+  useEffect(() => {
+    if (activeWaveId && currentWave) {
+      if (isDm) {
+        setSidebarTab("messages");
+      } else {
+        setSidebarTab("waves");
+      }
+    }
+  }, [activeWaveId, isDm, currentWave]);
+
   // Get unread indicator for messages
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
   });
 
-  const router = useRouter();
-  
   // keep tab in sync with url ?view=
   useEffect(() => {
     const viewParam =
@@ -87,14 +106,17 @@ const BrainLeftSidebar: React.FC<BrainLeftSidebarProps> = ({
   }, [availableTabs, tabLabels]);
 
   // Create tab options with indicators
-  const sidebarTabOptions = useMemo(() => [
-    { key: "waves", label: "Waves" },
-    { 
-      key: "messages", 
-      label: "Messages",
-      hasIndicator: hasUnreadMessages
-    },
-  ], [hasUnreadMessages]);
+  const sidebarTabOptions = useMemo(
+    () => [
+      { key: "waves", label: "Waves" },
+      {
+        key: "messages",
+        label: "Messages",
+        hasIndicator: hasUnreadMessages,
+      },
+    ],
+    [hasUnreadMessages]
+  );
 
   return (
     <div
