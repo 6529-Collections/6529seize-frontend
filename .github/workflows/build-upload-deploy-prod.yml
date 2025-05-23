@@ -7,7 +7,7 @@ env:
   COMMIT_SHA: "${{ github.sha }}"
   AWS_REGION: "us-east-1"
   BEANSTALK_APP_NAME: "seize app"
-  BEANSTALK_ENV_NAME: "Seizeapp-env"
+  BEANSTALK_ENV_NAME: "seizeapp-env-node22"
   NODE_ENV: "production"
   API_ENDPOINT: "https://api.6529.io"
   WS_ENDPOINT: "wss://ws.6529.io"
@@ -30,7 +30,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "22"
 
       - name: Install dependencies
         run: npm install --also=dev

@@ -50,7 +50,12 @@ describe('useWavePagination', () => {
     const getData = jest.fn((key: string) => store[key]);
 
     const { result } = renderHook(() =>
-      useWavePagination({ updateData, getData })
+      useWavePagination({
+        // cast to any to satisfy WaveDataStoreUpdater
+        updateData: updateData as any,
+        getData: getData as any,
+        removeDrop: jest.fn(),
+      })
     );
 
     return { result, updateData, getData, store };
@@ -89,7 +94,7 @@ describe('useWavePagination', () => {
       isLoadingNextPage: true,
     });
     // Last call appends new drops and clears loading
-    const lastCall = updateData.mock.calls.at(-1)[0];
+    const lastCall = updateData.mock.calls.at(-1)![0];
     expect(lastCall.isLoadingNextPage).toBe(false);
     expect(lastCall.hasNextPage).toBe(true);
     expect(lastCall.drops).toHaveLength(2);

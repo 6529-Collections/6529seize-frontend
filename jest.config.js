@@ -58,21 +58,24 @@ const config = {
   // Coverage Configuration (keep existing)
   collectCoverage: true,
   collectCoverageFrom: [
-    "src/**/*.{js,jsx,ts,tsx}",
+    // Target actual source directories like app, components, contexts, etc.
+    "{app,components,contexts,entities,helpers,hooks,lib,pages,services,store,utils,wagmiConfig}/**/*.{ts,tsx}",
+    // Exclude all TypeScript definition files from coverage
+    "!**/*.d.ts",
+    // Exclude node_modules
     "!**/node_modules/**",
-    "!src/lib/testing/**",
-    "!src/**/*.d.ts",
+    // Keep other exclusions
     "!**/coverage/**",
     "!**/.next/**",
     "!jest.config.js",
     "!jest.setup.js",
     "!playwright.config.ts",
-    "!<rootDir>/tests/**/*.spec.{js,jsx,ts,tsx}",
-    "!<rootDir>/e2e/**/*.spec.{js,jsx,ts,tsx}",
+    "!<rootDir>/tests/**/*.spec.{js,jsx,ts,tsx}", // Exclude Playwright tests
+    "!<rootDir>/e2e/**/*.spec.{js,jsx,ts,tsx}",   // Exclude Playwright e2e tests
   ],
   coverageDirectory: "coverage",
-  coverageProvider: "v8", // Explicitly set provider if needed, default is babel
-  coverageReporters: ["json", "lcov", "text", "clover"],
+  coverageProvider: "babel", // Explicitly set provider if needed, default is babel
+  coverageReporters: ["json", "lcov", "text", "clover", "json-summary"],
 };
 
 module.exports = config; // Export the config object directly

@@ -12,15 +12,15 @@ const MetadataItem: React.FC<{ label: string; value: string }> = ({ label, value
   const isMobile = useIsMobileDevice();
   
   return (
-    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1">
-      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5">{label}:</span>
+    <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1.5">
+      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-uppercase tw-font-normal">{label}:</span>
       <Tippy
         disabled={isMobile}
         content={value}
         placement="top"
         theme="dark"
       >
-        <span className="tw-text-iron-200 tw-text-xs tw-font-medium tw-truncate">
+        <span className="tw-text-iron-50 tw-text-xs tw-font-medium tw-truncate">
           {value}
         </span>
       </Tippy>

@@ -54,7 +54,7 @@ export const BrainLeftSidebarViewChange: React.FC<
       >
         <span className="tw-font-semibold tw-text-sm">Notifications</span>
         {haveUnreadNotifications && (
-          <span className="tw-size-2 -tw-mt-2 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
+          <span className="tw-size-2 -tw-mt-3 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>
         )}
       </Link>
     </div>
