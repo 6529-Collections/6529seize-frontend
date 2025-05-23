@@ -24,6 +24,14 @@ const COVERAGE_INCREMENT_PERCENT = !isNaN(COVERAGE_INCREMENT_PERCENT_ENV)
   ? COVERAGE_INCREMENT_PERCENT_ENV
   : 0.2;
 
+// Add time limit configuration
+const TIME_LIMIT_MINUTES_ENV = parseFloat(
+  process.env.TIME_LIMIT_MINUTES
+);
+const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
+  ? TIME_LIMIT_MINUTES_ENV
+  : 20;
+
 function run(command) {
   execSync(command, { stdio: "inherit" });
 }
@@ -71,6 +79,7 @@ function main() {
 
   let initialCoverage = 0;
   let targetCoverage = 0;
+  let startTime = null;
   let fd;
   let fileContent = "";
   let isNewFile = false;
@@ -134,11 +143,13 @@ function main() {
       );
       initialCoverage = currentCoverage;
       targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
+      startTime = Date.now();
     } else if (fileContent) {
       try {
         const parsedProgress = JSON.parse(fileContent);
         initialCoverage = parsedProgress.initialCoverage || 0;
         targetCoverage = parsedProgress.targetCoverage || 0;
+        startTime = parsedProgress.startTime || Date.now();
 
         if (
           targetCoverage === 0 &&
@@ -208,6 +219,12 @@ function main() {
       targetCoverage = 100;
     }
 
+    // Ensure startTime is always set
+    if (!startTime) {
+      startTime = Date.now();
+      console.log("Warning: startTime was not set, initializing to current time.");
+    }
+
     if (fd === undefined) {
       console.error(
         "Critical error: File descriptor for progress file is undefined. This should not happen."
@@ -216,7 +233,7 @@ function main() {
     }
 
     const newProgressContent = JSON.stringify(
-      { initialCoverage, targetCoverage },
+      { initialCoverage, targetCoverage, startTime },
       null,
       2
     );
@@ -245,6 +262,10 @@ function main() {
   console.log(`target: ${targetCoverage.toFixed(2)}%`);
   console.log(`current: ${currentCoverage.toFixed(2)}%`);
 
+  // Check time constraint
+  const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
+  console.log(`elapsed time: ${elapsedMinutes.toFixed(1)} minutes`);
+
   if (currentCoverage >= targetCoverage) {
     console.log(
       `\nSuccess: Current coverage of ${currentCoverage.toFixed(
@@ -253,7 +274,21 @@ function main() {
         2
       )}%. Task completed.`
     );
+  } else if (elapsedMinutes >= TIME_LIMIT_MINUTES) {
+    console.log(
+      `\nSuccess: Time limit of ${TIME_LIMIT_MINUTES} minutes has been reached. Task completed due to time constraint.`
+    );
+    console.log(
+      `Final coverage: ${currentCoverage.toFixed(
+        2
+      )}% (target was ${targetCoverage.toFixed(2)}%)`
+    );
   } else {
+    const remainingMinutes = TIME_LIMIT_MINUTES - elapsedMinutes;
+    console.log(
+      `\nTime remaining: ${remainingMinutes.toFixed(1)} minutes until automatic completion.`
+    );
+    
     const nextFiles = getLowCoverageFiles(coverageData, 1);
     if (nextFiles.length > 0) {
       console.log(
