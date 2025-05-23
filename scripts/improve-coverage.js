@@ -16,6 +16,7 @@ import libCoverage from "istanbul-lib-coverage";
 const { createCoverageMap } = libCoverage;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const progressPath = path.resolve(__dirname, "../.coverage-progress.json");
+const COVERAGE_INCREMENT_PERCENT = 1.0;
 
 function run(command) {
   execSync(command, { stdio: "inherit" });
@@ -111,7 +112,7 @@ function main() {
         "Progress file is new. Initializing coverage targets from current values."
       );
       initialCoverage = currentCoverage;
-      targetCoverage = currentCoverage + 1.0;
+      targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
     } else if (fileContent) {
       try {
         const parsedProgress = JSON.parse(fileContent);
@@ -127,19 +128,19 @@ function main() {
             "Adjusting: Parsed initial/target are 0, but current > 0. Re-initializing from current."
           );
           initialCoverage = currentCoverage;
-          targetCoverage = currentCoverage + 1.0;
+          targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
         } else if (targetCoverage === 0 && initialCoverage > 0) {
           console.log(
             "Adjusting: Parsed target is 0, initial > 0. Setting target based on initial."
           );
-          targetCoverage = initialCoverage + 1.0;
+          targetCoverage = initialCoverage + COVERAGE_INCREMENT_PERCENT;
         } else if (initialCoverage === 0 && currentCoverage > 0) {
           console.log(
             "Adjusting: Parsed initial is 0, current > 0. Re-initializing initial from current; adjusting target."
           );
           initialCoverage = currentCoverage;
           if (targetCoverage <= initialCoverage) {
-            targetCoverage = currentCoverage + 1.0;
+            targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
           }
         }
 
@@ -151,21 +152,21 @@ function main() {
           console.log(
             "Adjusting: All coverage figures are zero. Setting target to 1.0% to initiate progress."
           );
-          targetCoverage = 1.0;
+          targetCoverage = COVERAGE_INCREMENT_PERCENT;
         }
       } catch (parseJsonError) {
         console.warn(
           `Could not parse JSON from existing progress file. Re-initializing from current. Error: ${parseJsonError.message}`
         );
         initialCoverage = currentCoverage;
-        targetCoverage = currentCoverage + 1.0;
+        targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
       }
     } else {
       console.log(
         "Progress file existed but was empty. Initializing coverage targets from current values."
       );
       initialCoverage = currentCoverage;
-      targetCoverage = currentCoverage + 1.0;
+      targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
     }
 
     if (
@@ -175,7 +176,7 @@ function main() {
       if (currentCoverage > initialCoverage) {
         initialCoverage = currentCoverage;
       }
-      targetCoverage = initialCoverage + 1.0;
+      targetCoverage = initialCoverage + COVERAGE_INCREMENT_PERCENT;
       console.log(
         `Safeguard: Adjusted target. Initial: ${initialCoverage.toFixed(
           2
