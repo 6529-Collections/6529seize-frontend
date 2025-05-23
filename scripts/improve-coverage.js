@@ -46,9 +46,7 @@ if (isNaN(TOTAL_PROCESSES) || TOTAL_PROCESSES < 1) {
 }
 
 // Create unique progress file per process when running in parallel
-const progressFilename = TOTAL_PROCESSES > 1 
-  ? `.coverage-progress-p${PROCESS_ID}.json`
-  : '.coverage-progress.json';
+const progressFilename = ".coverage-progress.json"
 const progressPath = path.resolve(__dirname, "..", progressFilename);
 
 const COVERAGE_INCREMENT_PERCENT_ENV = parseFloat(
