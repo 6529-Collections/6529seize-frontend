@@ -1,11 +1,11 @@
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { VIEW } from "../../components/communityDownloads/CommunityDownloadsTDH";
+import { VIEW } from "../../components/community-downloads/CommunityDownloadsTDH";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
 const CommunityDownloadsTDH = dynamic(
-  () => import("../../components/communityDownloads/CommunityDownloadsTDH"),
+  () => import("../../components/community-downloads/CommunityDownloadsTDH"),
   {
     ssr: false,
   }
