@@ -16,6 +16,11 @@ cat << PROMPT_END | claude -p
 
 **Task:** Review this pull request: $PR_URL
 
+## CRITICAL CONSTRAINTS
+1. **ONLY review files that are actually modified in this PR** - do NOT suggest improvements for files not touched by this PR
+2. **If providing improvement instructions, output MUST start with "Task:" on the first line** - NO headers, NO introductions, NO explanations before the first task
+3. **Apply reasonable standards** - we want good code quality and test coverage, not perfection. Don't nitpick minor issues unless they pose real risk
+
 ## Review Framework
 
 ### 1. Initial Analysis & Scope Assessment
@@ -23,6 +28,7 @@ cat << PROMPT_END | claude -p
 - What files were modified and what types of changes were made?
 - Is the scope appropriate for the described changes?
 - Are there any files changed that seem unrelated to the main objective?
+- **IMPORTANT: Only analyze files shown in the PR diff - do not suggest improvements for files not modified in this PR**
 
 **Red Flags:**
 - Changes to files not mentioned in PR description
@@ -68,6 +74,12 @@ cat << PROMPT_END | claude -p
 
 ### 4. Test Coverage & Quality Assessment
 
+**Test Philosophy:**
+- Goal is PRACTICAL test coverage, not perfection
+- Focus on good coverage of happy paths and common failure scenarios
+- Avoid nitpicking about obscure edge cases unless they represent real user risk
+- 80% coverage of important flows is better than 100% coverage with brittle tests
+
 **Test Completeness - verify tests cover:**
 - Happy path scenarios
 - Edge cases and boundary conditions
@@ -84,6 +96,13 @@ cat << PROMPT_END | claude -p
 - Performance under load
 - Permission/authorization checks
 - Data validation rules
+
+**Reasonable Coverage Guidelines:**
+- Core functionality MUST be tested
+- Common error paths SHOULD be tested
+- Obscure edge cases MAY be tested if high risk
+- Don't demand tests for trivial getters/setters
+- Focus on tests that provide real confidence in the code
 
 ### 5. Specific Review Patterns by Change Type
 
@@ -137,8 +156,17 @@ cat << PROMPT_END | claude -p
 Analyze the pull request thoroughly using all criteria above, then provide ONLY one of these two responses:
 
 ### Option A: Ready to merge
+(Just these three words, nothing else)
 
 ### Option B: Improvement Instructions
+**OUTPUT REQUIREMENTS:**
+- First line MUST start with "Task:" - NO text before it
+- ONLY suggest improvements for files actually modified in this PR
+- Do NOT suggest adding new files or modifying files outside the PR scope
+- Do NOT write "Based on my review..." or ANY introductory text
+- Do NOT write "Here are the improvements..." or ANY header text
+- Do NOT write "Option B:" or ANY section labels
+
 Format as direct instructions with NO introductory text, explanations, or context. Start immediately with the first task:
 
 Task: [Specific improvement needed]
@@ -177,5 +205,12 @@ try {
 - Each task MUST include a clear "Reason:" explaining the issue being addressed
 - Reasons should specify: the problem, the risk/impact, and why it matters
 - Be specific about consequences (e.g., "will crash", "exposes user data", "breaks on mobile")
+
+**FINAL REMINDERS:**
+- Review ONLY the files shown as modified in the PR diff
+- Do NOT suggest creating new test files unless tests were modified in this PR
+- Do NOT suggest improvements for components/files not touched by this PR
+- If you choose Option B, your VERY FIRST characters must be "Task:"
+- NO preamble, NO introduction, NO "Based on my analysis" - start with Task immediately
 
 PROMPT_END
