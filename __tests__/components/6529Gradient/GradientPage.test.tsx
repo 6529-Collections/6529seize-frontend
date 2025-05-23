@@ -3,6 +3,7 @@ import GradientPage from '../../../components/6529Gradient/GradientPage';
 import { useRouter } from 'next/router';
 import { fetchUrl } from '../../../services/6529api';
 import { AuthContext } from '../../../components/auth/Auth';
+import { mockGradientCollection } from '../../fixtures/gradientFixtures';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('../../../services/6529api', () => ({ fetchUrl: jest.fn() }));
@@ -40,12 +41,20 @@ const nft = {
   hodl_rate: 1,
 };
 
-(fetchUrl as jest.Mock).mockResolvedValueOnce({ data: [nft] });
-(fetchUrl as jest.Mock).mockResolvedValueOnce({ data: [] });
+const tx = { from_address: '0x0', to_address: '0x1', transaction: '0xabc', token_id: '1' };
 
-function renderPage() {
+beforeEach(() => {
+  jest.clearAllMocks();
+  const collection = mockGradientCollection(3);
+  collection[0].owner = '0x1';
+  (fetchUrl as jest.Mock)
+    .mockResolvedValueOnce({ data: collection })
+    .mockResolvedValueOnce({ data: [tx] });
+});
+
+function renderPage(wallet: string = '0x1') {
   return render(
-    <AuthContext.Provider value={{ connectedProfile: { wallets: [{ wallet: '0x1' }] } } as any}>
+    <AuthContext.Provider value={{ connectedProfile: { wallets: [{ wallet }] } } as any}>
       <GradientPage />
     </AuthContext.Provider>
   );
@@ -59,5 +68,27 @@ describe('GradientPage', () => {
       expect(screen.getByTestId('image')).toHaveAttribute('data-owned', 'true')
     );
     expect(screen.getByText('*')).toBeInTheDocument();
+  });
+
+  it('hides owner star for non-owner', async () => {
+    renderPage('0x2');
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(screen.getByTestId('image')).toHaveAttribute('data-owned', 'false')
+    );
+    expect(screen.queryByText('*')).not.toBeInTheDocument();
+  });
+
+  it('shows transaction history', async () => {
+    renderPage();
+    const row = await screen.findByTestId('activity-row');
+    expect(row).toBeInTheDocument();
+  });
+
+  it('renders navigation and rank', async () => {
+    renderPage();
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
+    expect(await screen.findByTestId('nav')).toBeInTheDocument();
+    expect(screen.getByText('1/3')).toBeInTheDocument();
   });
 });

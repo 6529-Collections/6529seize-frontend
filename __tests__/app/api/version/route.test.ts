@@ -29,4 +29,17 @@ describe('GET version route', () => {
     );
     expect(result).toBe(expected);
   });
+
+  it('returns default version when env variable is undefined', async () => {
+    delete process.env.VERSION;
+    const expected = { foo: 'bar' };
+    jsonMock.mockReturnValue(expected);
+
+    const result = await GET();
+    expect(jsonMock).toHaveBeenCalledWith(
+      { version: 'unknown' },
+      { headers: { 'Cache-Control': 'no-store, must-revalidate' } },
+    );
+    expect(result).toBe(expected);
+  });
 });

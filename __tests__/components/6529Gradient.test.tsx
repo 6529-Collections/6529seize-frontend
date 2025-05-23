@@ -56,4 +56,36 @@ describe('GradientsComponent', () => {
     expect(links[0]).toHaveAttribute('href', '/6529-gradient/2');
     expect(links[1]).toHaveAttribute('href', '/6529-gradient/1');
   });
+
+  it('sorts by TDH when selected', async () => {
+    render(<GradientsComponent wallets={['0x1']} />);
+
+    await waitFor(() => expect(fetchAllPages).toHaveBeenCalled());
+
+    await userEvent.click(screen.getByText('TDH'));
+
+    await waitFor(() => {
+      expect(routerReplace).toHaveBeenLastCalledWith(
+        { query: { sort: 'tdh', sort_dir: 'ASC' } },
+        undefined,
+        { shallow: true }
+      );
+    });
+
+    const links = screen.getAllByRole('link');
+    expect(links[0]).toHaveAttribute('href', '/6529-gradient/2');
+    expect(links[1]).toHaveAttribute('href', '/6529-gradient/1');
+  });
+
+  it('shows loader while fetching data', async () => {
+    (fetchAllPages as jest.Mock).mockReturnValue(new Promise(() => {}));
+    render(<GradientsComponent wallets={['0x1']} />);
+    expect(await screen.findByTestId('loader')).toBeInTheDocument();
+  });
+
+  it('renders collections dropdown', async () => {
+    render(<GradientsComponent wallets={['0x1']} />);
+    await screen.findByTestId('dropdown');
+    expect(screen.getByTestId('dropdown')).toBeInTheDocument();
+  });
 });
