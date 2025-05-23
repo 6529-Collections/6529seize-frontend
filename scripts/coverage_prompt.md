@@ -18,18 +18,15 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
 
 **Workflow:**
 
-1. **Setup Environment:** Configure your process
-   - Run: `source scripts/setup-coverage-env.sh X Y`
-
-2. **Execute Script:** Run `npm run improve-coverage`
+1. **Execute Script:** Run `npm run improve-coverage`
    - The script will use the environment variables you set up
 
-3. **Parse Output:** Analyze the coverage report for:
+2. **Parse Output:** Analyze the coverage report for:
    - Current coverage percentage vs. target
    - Time elapsed and remaining
    - Specific files needing coverage
 
-4. **Time-Aware Test Strategy:**
+3. **Time-Aware Test Strategy:**
    Given the time constraint, prioritize tests in this order:
    
    **First 5-7 minutes: High-Impact Tests**
@@ -48,7 +45,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - Quick refactor for clarity
    - Add essential edge cases if time permits
 
-5. **Strategic Test Planning:**
+4. **Strategic Test Planning:**
    When adding tests for `[FILENAME]`, follow this comprehensive approach:
 
    ### A. Scenario Analysis (Before Writing Tests)
@@ -104,7 +101,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - [ ] **Focused**: Tests one behavior
    - [ ] **Realistic**: Uses production-like data/scenarios
 
-6. **Implementation Guidelines:**
+5. **Implementation Guidelines:**
 
    ```typescript
    // Example structure for comprehensive testing
@@ -136,7 +133,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    });
    ```
 
-7. **Specific Testing Patterns by File Type:**
+6. **Specific Testing Patterns by File Type:**
 
    **For API Routes:**
    - Authentication/authorization scenarios
@@ -160,7 +157,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - Data transformation edge cases
    - Async operation handling
 
-8. **Real-World Scenario Examples:**
+7. **Real-World Scenario Examples:**
 
    ```typescript
    // Instead of just: "sorts items"
