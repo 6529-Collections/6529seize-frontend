@@ -70,7 +70,9 @@ describe('BrainContentInput', () => {
     expect(screen.getByTestId('creator').parentElement?.className).toContain(
       'tw-max-h-[calc(100vh-14.7rem)]'
     );
-    onWaveNotFound && onWaveNotFound();
+    if (onWaveNotFound) {
+      (onWaveNotFound as any)();
+    }
     expect(onCancel).toHaveBeenCalled();
   });
 });
