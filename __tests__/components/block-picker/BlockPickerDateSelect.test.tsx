@@ -214,7 +214,7 @@ describe('BlockPickerDateSelect', () => {
         />
       );
 
-      const timeInput = screen.getAllByDisplayValue('')[1]; // Second empty input is the time input
+      const timeInput = document.getElementById('block-picker-time');
       expect(timeInput).toHaveValue('');
     });
   });
@@ -295,7 +295,7 @@ describe('BlockPickerDateSelect', () => {
   });
 
   describe('edge cases', () => {
-    it('handles malformed date values gracefully', () => {
+    it('browser sanitizes invalid date values', () => {
       render(
         <BlockPickerDateSelect
           date="invalid-date"
@@ -305,11 +305,12 @@ describe('BlockPickerDateSelect', () => {
         />
       );
 
-      const dateInput = screen.getByDisplayValue('invalid-date');
-      expect(dateInput).toHaveValue('invalid-date');
+      const dateInput = document.getElementById('block-picker-date');
+      // HTML date inputs automatically clear invalid values
+      expect(dateInput).toHaveValue('');
     });
 
-    it('handles malformed time values gracefully', () => {
+    it('browser sanitizes invalid time values', () => {
       render(
         <BlockPickerDateSelect
           date="2024-01-15"
@@ -319,8 +320,9 @@ describe('BlockPickerDateSelect', () => {
         />
       );
 
-      const timeInput = screen.getByDisplayValue('invalid-time');
-      expect(timeInput).toHaveValue('invalid-time');
+      const timeInput = document.getElementById('block-picker-time');
+      // HTML time inputs automatically clear invalid values
+      expect(timeInput).toHaveValue('');
     });
 
     it('works without showPicker method available', () => {
