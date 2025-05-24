@@ -55,7 +55,7 @@ describe('BrainContentInput', () => {
 
   it('uses capacitor height and triggers onWaveNotFound', () => {
     const onCancel = jest.fn();
-    let onWaveNotFound: Function | null = null;
+    let onWaveNotFound: (() => void) | null = null;
     useCapacitorMock.mockReturnValue({ isCapacitor: true });
     useWaveDataMock.mockImplementation((args: any) => {
       onWaveNotFound = args.onWaveNotFound;
@@ -70,7 +70,7 @@ describe('BrainContentInput', () => {
     expect(screen.getByTestId('creator').parentElement?.className).toContain(
       'tw-max-h-[calc(100vh-14.7rem)]'
     );
-    onWaveNotFound && onWaveNotFound();
+    if (onWaveNotFound) (onWaveNotFound as any)();
     expect(onCancel).toHaveBeenCalled();
   });
 });
