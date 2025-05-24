@@ -10,8 +10,8 @@ describe('AboutLicense', () => {
 
   it('links to CC0 license', () => {
     render(<AboutLicense />);
-    const link = screen.getByRole('link', { name: /creativecommons.org/i });
-    expect(link).toHaveAttribute('href', expect.stringContaining('creativecommons.org'));
+    const link = screen.getByRole('link', { name: /^https:\/\/creativecommons\.org\/share-your-work\/public-domain\/cc0\/$/ });
+    expect(link).toHaveAttribute('href', 'https://creativecommons.org/share-your-work/public-domain/cc0/');
   });
 
   it('links to artist twitter', () => {
