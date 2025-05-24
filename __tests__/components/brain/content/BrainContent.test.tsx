@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import BrainContent from '../../../../components/brain/content/BrainContent';
+import { ActiveDropAction } from '../../../../types/dropInteractionTypes';
 
 let bpValue = 'S';
 const registerRef = jest.fn();
@@ -34,11 +35,18 @@ describe('BrainContent', () => {
 
   it('shows pinned waves on small breakpoint', () => {
     bpValue = 'S';
-    render(
-      <BrainContent activeDrop={{ id: 'd' }} onCancelReplyQuote={jest.fn()}>
-        child
-      </BrainContent>
-    );
+      render(
+        <BrainContent
+          activeDrop={{
+            action: ActiveDropAction.REPLY,
+            drop: { id: 'd', wave: { id: 'w' } } as any,
+            partId: 0,
+          }}
+          onCancelReplyQuote={jest.fn()}
+        >
+          child
+        </BrainContent>
+      );
     expect(screen.getByTestId('pinned')).toBeInTheDocument();
     expect(registerRef).toHaveBeenCalledWith('pinned', expect.any(HTMLElement));
   });
@@ -56,11 +64,19 @@ describe('BrainContent', () => {
   it('passes props to BrainContentInput', () => {
     bpValue = 'S';
     const onCancel = jest.fn();
-    render(
-      <BrainContent activeDrop={{ id: 'x' }} onCancelReplyQuote={onCancel}>
-        child
-      </BrainContent>
-    );
+      render(
+        <BrainContent
+          activeDrop={{
+            id: 'x',
+            action: ActiveDropAction.REPLY,
+            drop: { id: 'x', wave: { id: 'w' } } as any,
+            partId: 0,
+          } as any}
+          onCancelReplyQuote={onCancel}
+        >
+          child
+        </BrainContent>
+      );
     expect(screen.getByTestId('input')).toHaveTextContent('x');
     fireEvent.click(screen.getByText('cancel'));
     expect(onCancel).toHaveBeenCalled();
