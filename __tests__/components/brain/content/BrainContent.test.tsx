@@ -35,7 +35,7 @@ describe('BrainContent', () => {
   it('shows pinned waves on small breakpoint', () => {
     bpValue = 'S';
     render(
-      <BrainContent activeDrop={{ id: 'd' }} onCancelReplyQuote={jest.fn()}>
+      <BrainContent activeDrop={{ id: 'd' } as any} onCancelReplyQuote={jest.fn()}>
         child
       </BrainContent>
     );
@@ -57,7 +57,7 @@ describe('BrainContent', () => {
     bpValue = 'S';
     const onCancel = jest.fn();
     render(
-      <BrainContent activeDrop={{ id: 'x' }} onCancelReplyQuote={onCancel}>
+      <BrainContent activeDrop={{ id: 'x' } as any} onCancelReplyQuote={onCancel}>
         child
       </BrainContent>
     );
