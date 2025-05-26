@@ -38,7 +38,7 @@ const searchParamsMock = new Map<string, string | null>();
   get: (key: string) => searchParamsMock.get(key) ?? null
 });
 (useRouter as jest.Mock).mockReturnValue({ push, replace });
-(useSelector as jest.Mock).mockReturnValue('1');
+(useSelector as unknown as jest.Mock).mockReturnValue('1');
 
 function renderComponent() {
   return render(<CommunityMembers />);
@@ -53,7 +53,7 @@ describe('CommunityMembers', () => {
       get: (key: string) => searchParamsMock.get(key) ?? null
     });
     (useRouter as jest.Mock).mockReturnValue({ push, replace });
-    (useSelector as jest.Mock).mockReturnValue('1');
+    (useSelector as unknown as jest.Mock).mockReturnValue('1');
   });
 
   it('shows skeleton while no members', () => {
