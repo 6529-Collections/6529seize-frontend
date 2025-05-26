@@ -4,7 +4,10 @@ import userEvent from '@testing-library/user-event';
 import DistributionPlanNextStepBtn from '../../../../components/distribution-plan-tool/common/DistributionPlanNextStepBtn';
 import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
 
-function renderBtn(props: React.ComponentProps<typeof DistributionPlanNextStepBtn>, ctx?: Partial<React.ContextType<typeof DistributionPlanToolContext>>) {
+function renderBtn(
+  props: any,
+  ctx?: Partial<React.ContextType<typeof DistributionPlanToolContext>>,
+) {
   const runOperations = jest.fn();
   const contextValue = { runOperations, ...(ctx || {}) } as any;
   const onNextStep = jest.fn();
