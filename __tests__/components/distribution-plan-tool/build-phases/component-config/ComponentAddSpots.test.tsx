@@ -1,8 +1,8 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ComponentAddSpots from '../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/ComponentAddSpots';
-import { DistributionPlanToolContext } from '../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
 
 // Mock nested components to keep the test focused on behavior
 jest.mock(
@@ -61,16 +61,14 @@ describe('ComponentAddSpots', () => {
     expect(screen.getByTestId('show-next')).toHaveTextContent('hide');
   });
 
-  it('shows validation error when value is less than one', async () => {
+  it('disables next button when value is less than one', async () => {
     const setToasts = jest.fn();
     renderComponent({ setToasts });
     const input = screen.getByPlaceholderText('Max mint count per wallet');
     await userEvent.type(input, '0');
-    await userEvent.click(screen.getByTestId('next-btn'));
-    expect(setToasts).toHaveBeenCalledWith({
-      messages: ['Max mint count must be greater than 0.'],
-      type: 'error',
-    });
+    const nextBtn = screen.getByTestId('next-btn');
+    expect(nextBtn).toBeDisabled();
+    expect(setToasts).not.toHaveBeenCalled();
   });
 
   it('calls onSelectMaxMintCount with valid value', async () => {
