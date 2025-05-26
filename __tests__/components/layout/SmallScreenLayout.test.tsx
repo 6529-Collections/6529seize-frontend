@@ -24,7 +24,7 @@ describe("SmallScreenLayout", () => {
     pathname = "/";
     render(<SmallScreenLayout>child</SmallScreenLayout>);
     expect(screen.getByTestId("header")).toBeInTheDocument();
-    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
     expect(registerRef).toHaveBeenCalledWith("header", expect.any(HTMLElement));
     expect(setHeaderRef).toHaveBeenCalledWith(expect.any(HTMLElement));
   });

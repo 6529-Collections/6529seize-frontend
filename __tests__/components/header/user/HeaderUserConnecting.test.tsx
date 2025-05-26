@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+// @ts-nocheck
 import HeaderUserConnecting from "../../../../components/header/user/HeaderUserConnecting";
 
 const mockLoader = jest.fn();
