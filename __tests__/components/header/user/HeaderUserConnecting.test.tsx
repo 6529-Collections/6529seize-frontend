@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react";
 import HeaderUserConnecting from "../../../../components/header/user/HeaderUserConnecting";
 
-const mockLoader = jest.fn((props?: any) => <div data-testid="loader" {...props} />);
-const mockLoader = jest.fn((props: any) => <div data-testid="loader" />);
+const mockLoader = jest.fn();
+mockLoader.mockImplementation(() => <div data-testid="loader" />);
 
 jest.mock("../../../../components/distribution-plan-tool/common/CircleLoader", () => ({
   __esModule: true,
