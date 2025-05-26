@@ -50,7 +50,9 @@ describe('CreateSnapshotFormSearchCollectionDropdownItem', () => {
   it('renders collection info', () => {
     renderItem({ openseaVerified: true });
     expect(screen.getByText('Collection')).toBeInTheDocument();
-    expect(screen.getByRole('img')).toBeInTheDocument();
+    // The image uses an empty alt attribute which gives it a presentation role
+    // rather than "img". Query by that role to assert it renders correctly.
+    expect(screen.getByRole('presentation')).toBeInTheDocument();
     expect(screen.getAllByText('f2')).toHaveLength(1); // volume
   });
 
@@ -62,9 +64,15 @@ describe('CreateSnapshotFormSearchCollectionDropdownItem', () => {
 
   it('fetches token ids and passes them for sub collection', async () => {
     fetchMock.mockResolvedValueOnce({ success: true, data: { tokenIds: '1,2' } });
-    const { onCollection, collection } = renderItem({ id: '0xabc:sub' });
+    // Use a valid sub collection id that matches the component's regex
+    const subCollectionId = `0x${'a'.repeat(40)}:sub`;
+    const { onCollection, collection } = renderItem({ id: subCollectionId });
     await userEvent.click(screen.getByRole('row'));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith('/other/contract-token-ids-as-string/0xabc:sub'));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/other/contract-token-ids-as-string/${subCollectionId}`
+      )
+    );
     expect(onCollection).toHaveBeenCalledWith({ name: collection.name, address: collection.address, tokenIds: '1,2' });
   });
 });
