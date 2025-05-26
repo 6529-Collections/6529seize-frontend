@@ -36,8 +36,8 @@ const defaultGroup = {
   name: '',
   group: {
     tdh: { min: null, max: null },
-    rep: { min: null, max: null, user_identity: null, category: null },
-    cic: { min: null, max: null, user_identity: null },
+    rep: { min: null, max: null, user_identity: null, category: null, direction: null },
+    cic: { min: null, max: null, user_identity: null, direction: null },
     level: { min: null, max: null },
     owns_nfts: [],
     identity_addresses: [],
