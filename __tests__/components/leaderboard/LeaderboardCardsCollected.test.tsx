@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { render, screen } from '@testing-library/react';
 import LeaderboardCardsCollectedComponent from '../../../components/leaderboard/LeaderboardCardsCollected';
 import { SortDirection } from '../../../entities/ISort';

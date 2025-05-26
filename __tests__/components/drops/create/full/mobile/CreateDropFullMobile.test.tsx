@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import CreateDropFullMobile from '../../../../../../components/drops/create/full/mobile/CreateDropFullMobile';
