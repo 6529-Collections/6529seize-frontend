@@ -35,7 +35,6 @@ describe('CreateDropFullMobile', () => {
         showSubmit={props.showSubmit ?? false}
         type={props.type ?? CreateDropType.DROP}
         drop={null}
-        showDropError={false}
         missingMedia={[]}
         missingMetadata={[]}
         waveId={null}

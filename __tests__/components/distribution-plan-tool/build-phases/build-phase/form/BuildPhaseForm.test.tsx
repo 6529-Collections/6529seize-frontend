@@ -1,7 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import BuildPhaseForm from '../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseForm';
-import { DistributionPlanToolContext } from '../../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
+import {
+  DistributionPlanToolContext,
+  DistributionPlanToolStep,
+} from '../../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
 import { BuildPhasesPhase } from '../../../../../../components/distribution-plan-tool/build-phases/BuildPhases';
 
 // Mock sub components to keep test focused
@@ -33,7 +36,7 @@ jest.mock('../../../../../../components/allowlist-tool/common/modals/AllowlistTo
 jest.mock('@tippyjs/react', () => ({ children }: any) => <>{children}</>);
 
 const defaultContext = {
-  step: 0,
+  step: DistributionPlanToolStep.CREATE_PLAN,
   setStep: jest.fn(),
   fetching: false,
   distributionPlan: { id: 'id' } as any,
