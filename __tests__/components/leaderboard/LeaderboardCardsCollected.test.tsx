@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import LeaderboardCardsCollectedComponent from '../../../components/leaderboard/LeaderboardCardsCollected';
 import { SortDirection } from '../../../entities/ISort';
 import { LeaderboardCardsCollectedSort } from '../../../components/leaderboard/leaderboard_helpers';
+import { Content, Collector } from '../../../components/leaderboard/Leaderboard';
 
 jest.mock('../../../components/leaderboard/leaderboard_helpers', () => {
   const original = jest.requireActual('../../../components/leaderboard/leaderboard_helpers');
@@ -15,8 +16,8 @@ const useFetchLeaderboard = require('../../../components/leaderboard/leaderboard
 
 const baseProps = {
   block: 1,
-  content: 'all',
-  collector: 'all',
+  content: Content.ALL,
+  collector: Collector.ALL,
   selectedSeason: 1,
   searchWallets: [],
   seasons: [],
