@@ -13,7 +13,7 @@ const GroupHeaderSelect = require('../../../../components/groups/header/GroupHea
 describe('GroupHeaderSelect', () => {
   const renderWithProfile = (profile: any) =>
     render(
-      <AuthContext.Provider value={{ connectedProfile: profile }} as any>
+      <AuthContext.Provider value={{ connectedProfile: profile } as any}>
         <GroupHeaderSelect />
       </AuthContext.Provider>
     );
@@ -32,7 +32,7 @@ describe('GroupHeaderSelect', () => {
     const { rerender } = renderWithProfile(null);
     expect(screen.getByText('Please connect a wallet')).toBeInTheDocument();
     rerender(
-      <AuthContext.Provider value={{ connectedProfile: { handle: 'user' } }} as any>
+      <AuthContext.Provider value={{ connectedProfile: { handle: 'user' } } as any}>
         <GroupHeaderSelect />
       </AuthContext.Provider>
     );
