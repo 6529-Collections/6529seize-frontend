@@ -18,7 +18,7 @@ jest.mock("../../../contexts/HeaderContext", () => ({ useHeaderContext: () => ({
 jest.mock("../../../hooks/useDeepLinkNavigation", () => ({ useDeepLinkNavigation: jest.fn() }));
 jest.mock("next/router", () => ({ useRouter: () => useRouter() }));
 
-const AppLayout = require("../../components/layout/AppLayout").default;
+const AppLayout = require("../../../components/layout/AppLayout").default;
 
 describe("AppLayout", () => {
   beforeEach(() => {
