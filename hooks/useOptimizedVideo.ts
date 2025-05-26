@@ -14,6 +14,11 @@ export interface UseOptimizedVideoResult {
   readonly isHls: boolean;
 }
 
+/**
+ * Repeatedly polls for an "optimized" version of the video (HLS/MP4)
+ * until found or until retries are exhausted. Defaults to HLS first,
+ * then 720p, then 360p, else fallback to original.
+ */
 export function useOptimizedVideo(
   originalUrl: string,
   options: UseOptimizedVideoOptions = {}
@@ -28,38 +33,37 @@ export function useOptimizedVideo(
   const [isOptimized, setIsOptimized] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const [isHls, setIsHls] = useState(false);
+
   const retriesRef = useRef(0);
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
-    // Always start with the original URL
+    // reset local states
     setPlayableUrl(originalUrl);
     setIsOptimized(false);
     setIsHls(false);
-    
+    retriesRef.current = 0;
+
+    // do nothing if it's obviously not a video or doesn't match /drops/ pattern
     if (!originalUrl || !isVideoUrl(originalUrl)) {
       return;
     }
 
     const conversions = getVideoConversions(originalUrl);
     if (!conversions) {
-      // Can't generate conversions (not a drops URL or missing extension)
-      // Stay with original URL
-      console.log('Video optimization not available for:', originalUrl);
+      console.debug('Not a convertible /drops/ URL, or missing extension:', originalUrl);
       return;
     }
 
-    let mounted = true;
+    let isMounted = true;
 
-    const checkOptimizedVersions = async () => {
-      if (!mounted) {
-        return;
-      }
+    const checkOptimized = async () => {
+      if (!isMounted) return;
 
-      // Check if we've exhausted retries
+      // if we tried too many times, fallback and stop
       if (retriesRef.current >= maxRetries) {
-        console.log(`Max retries (${maxRetries}) reached for video optimization`);
-        setPlayableUrl(originalUrl); // Explicit fallback
+        console.debug(`Max retries (${maxRetries}) reached for:`, originalUrl);
+        setPlayableUrl(originalUrl);
         setIsChecking(false);
         return;
       }
@@ -67,64 +71,57 @@ export function useOptimizedVideo(
       setIsChecking(true);
 
       try {
-        // Try HLS first if preferred
+        // 1. HLS if preferred
         if (preferHls) {
-          const hlsAvailable = await checkVideoAvailability(conversions.HLS);
-          if (hlsAvailable && mounted) {
-            console.log('Using HLS version:', conversions.HLS);
+          const hlsOk = await checkVideoAvailability(conversions.HLS);
+          if (hlsOk && isMounted) {
             setPlayableUrl(conversions.HLS);
             setIsOptimized(true);
             setIsHls(true);
             setIsChecking(false);
-            return;
+            return; // done
           }
         }
 
-        // Try 720p MP4
-        const mp4720Available = await checkVideoAvailability(conversions.MP4_720P);
-        if (mp4720Available && mounted) {
-          console.log('Using 720p MP4 version:', conversions.MP4_720P);
+        // 2. 720p fallback
+        const mp4720Ok = await checkVideoAvailability(conversions.MP4_720P);
+        if (mp4720Ok && isMounted) {
           setPlayableUrl(conversions.MP4_720P);
           setIsOptimized(true);
           setIsHls(false);
           setIsChecking(false);
-          return;
+          return; // done
         }
 
-        // Try 360p MP4
-        const mp4360Available = await checkVideoAvailability(conversions.MP4_360P);
-        if (mp4360Available && mounted) {
-          console.log('Using 360p MP4 version:', conversions.MP4_360P);
+        // 3. 360p fallback
+        const mp4360Ok = await checkVideoAvailability(conversions.MP4_360P);
+        if (mp4360Ok && isMounted) {
           setPlayableUrl(conversions.MP4_360P);
           setIsOptimized(true);
           setIsHls(false);
           setIsChecking(false);
-          return;
+          return; // done
         }
 
-        // No optimized versions found yet
+        // none found, try again later
         retriesRef.current += 1;
-        
-        if (mounted && retriesRef.current < maxRetries) {
-          console.log(`No optimized versions found yet. Retry ${retriesRef.current}/${maxRetries} in ${pollInterval}ms`);
-          timeoutRef.current = setTimeout(checkOptimizedVersions, pollInterval);
-        }
-      } catch (error) {
-        console.error('Error checking video conversions:', error);
-        // On error, stay with current URL (likely original)
-        setIsChecking(false);
+        console.debug(`No optimized version yet, retry #${retriesRef.current}`, originalUrl);
+
+        timeoutRef.current = setTimeout(checkOptimized, pollInterval);
+      } catch (err) {
+        console.error('Error checking for video conversions:', err);
+        // fallback to original
       } finally {
-        if (mounted) {
+        if (isMounted) {
           setIsChecking(false);
         }
       }
     };
 
-    // Start checking for optimized versions
-    checkOptimizedVersions();
+    checkOptimized();
 
     return () => {
-      mounted = false;
+      isMounted = false;
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
