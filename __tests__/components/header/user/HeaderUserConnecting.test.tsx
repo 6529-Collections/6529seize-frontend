@@ -5,7 +5,7 @@ const mockLoader = jest.fn(() => <div data-testid="loader" />);
 
 jest.mock("../../../../components/distribution-plan-tool/common/CircleLoader", () => ({
   __esModule: true,
-  default: (props: any) => mockLoader(props),
+  default: (props: any) => (mockLoader as any)(props),
   CircleLoaderSize: { MEDIUM: "MEDIUM" }
 }));
 
