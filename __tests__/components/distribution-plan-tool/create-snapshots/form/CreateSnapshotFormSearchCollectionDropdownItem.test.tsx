@@ -50,7 +50,7 @@ describe('CreateSnapshotFormSearchCollectionDropdownItem', () => {
   it('renders collection info', () => {
     renderItem({ openseaVerified: true });
     expect(screen.getByText('Collection')).toBeInTheDocument();
-    expect(screen.getByRole('img')).toBeInTheDocument();
+    expect(screen.getByRole('presentation')).toBeInTheDocument();
     expect(screen.getAllByText('f2')).toHaveLength(1); // volume
   });
 
@@ -62,9 +62,12 @@ describe('CreateSnapshotFormSearchCollectionDropdownItem', () => {
 
   it('fetches token ids and passes them for sub collection', async () => {
     fetchMock.mockResolvedValueOnce({ success: true, data: { tokenIds: '1,2' } });
-    const { onCollection, collection } = renderItem({ id: '0xabc:sub' });
+    const subId = '0x1111111111111111111111111111111111111111:sub';
+    const { onCollection, collection } = renderItem({ id: subId, address: '0x1111111111111111111111111111111111111111' });
     await userEvent.click(screen.getByRole('row'));
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith('/other/contract-token-ids-as-string/0xabc:sub'));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(`/other/contract-token-ids-as-string/${subId}`)
+    );
     expect(onCollection).toHaveBeenCalledWith({ name: collection.name, address: collection.address, tokenIds: '1,2' });
   });
 });
