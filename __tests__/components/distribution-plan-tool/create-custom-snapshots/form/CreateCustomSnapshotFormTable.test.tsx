@@ -5,8 +5,8 @@ import CreateCustomSnapshotFormTable from '../../../../../components/distributio
 import { CustomTokenPoolParamsToken } from '../../../../../components/allowlist-tool/allowlist-tool.types';
 
 const tokens: CustomTokenPoolParamsToken[] = [
-  { owner: '0x1', amount: '1' },
-  { owner: '0x2', amount: '2' }
+  { owner: '0x1', amount: '1' } as any,
+  { owner: '0x2', amount: '2' } as any,
 ];
 
 describe('CreateCustomSnapshotFormTable', () => {
