@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import CreateCustomSnapshotTable from '../../../../../components/distribution-plan-tool/create-custom-snapshots/table/CreateCustomSnapshotTable';
 import { AllowlistCustomTokenPool } from '../../../../../components/allowlist-tool/allowlist-tool.types';
 
-const snapshots: AllowlistCustomTokenPool[] = [
+const snapshots: any[] = [
   { id: '1', name: 'snap1', walletsCount: 2, tokensCount: 5 },
   { id: '2', name: 'snap2', walletsCount: 3, tokensCount: 7 },
 ];

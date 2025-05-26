@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import CreateCustomSnapshotFormTable from '../../../../../components/distribution-plan-tool/create-custom-snapshots/form/CreateCustomSnapshotFormTable';
 import { CustomTokenPoolParamsToken } from '../../../../../components/allowlist-tool/allowlist-tool.types';
 
-const tokens: CustomTokenPoolParamsToken[] = [
+const tokens: any[] = [
   { owner: '0x1', amount: '1' },
   { owner: '0x2', amount: '2' }
 ];
