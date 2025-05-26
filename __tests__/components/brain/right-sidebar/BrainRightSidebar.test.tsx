@@ -4,10 +4,10 @@ import React from 'react';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn(), keepPreviousData: {} }));
 
-const WaveContent = jest.fn(() => <div data-testid="content" />);
+const WaveContentMock = jest.fn((props: any) => <div data-testid="content" />);
 jest.mock('../../../../components/brain/right-sidebar/WaveContent', () => ({
   __esModule: true,
-  WaveContent: (props: any) => WaveContent(props),
+  WaveContent: (props: any) => WaveContentMock(props),
 }));
 
 import BrainRightSidebar, { Mode, SidebarTab } from '../../../../components/brain/right-sidebar/BrainRightSidebar';
@@ -37,7 +37,7 @@ describe('BrainRightSidebar', () => {
         setActiveTab={setActiveTab}
       />
     );
-    expect(WaveContent).toHaveBeenCalledWith(
+    expect(WaveContentMock).toHaveBeenCalledWith(
       expect.objectContaining({
         wave,
         mode: Mode.CONTENT,
