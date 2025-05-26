@@ -4,8 +4,8 @@ import CreateCustomSnapshotTable from '../../../../../components/distribution-pl
 import { AllowlistCustomTokenPool } from '../../../../../components/allowlist-tool/allowlist-tool.types';
 
 const snapshots: AllowlistCustomTokenPool[] = [
-  { id: '1', name: 'snap1', walletsCount: 2, tokensCount: 5 },
-  { id: '2', name: 'snap2', walletsCount: 3, tokensCount: 7 },
+  { id: '1', allowlistId: 'a1', name: 'snap1', description: '', walletsCount: 2, tokensCount: 5 },
+  { id: '2', allowlistId: 'a1', name: 'snap2', description: '', walletsCount: 3, tokensCount: 7 },
 ];
 
 describe('CreateCustomSnapshotTable', () => {
