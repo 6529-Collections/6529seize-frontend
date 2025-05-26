@@ -3,7 +3,7 @@ import React from "react";
 
 const registerRef = jest.fn();
 const setHeaderRef = jest.fn();
-const useBreadcrumbs = jest.fn(() => [{ label: "Home", href: "/" }]);
+const useBreadcrumbs = jest.fn(() => [{ display: "Home", href: "/" }]);
 let pathname = "/";
 
 jest.mock("next/dynamic", () => () => () => <div data-testid="header" />);
@@ -32,6 +32,6 @@ describe("SmallScreenLayout", () => {
   it("shows breadcrumb when not on home page", () => {
     pathname = "/page";
     render(<SmallScreenLayout>child</SmallScreenLayout>);
-    expect(screen.getByRole("link")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Home" })).toBeInTheDocument();
   });
 });
