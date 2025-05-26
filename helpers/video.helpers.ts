@@ -66,6 +66,16 @@ export function isVideoUrl(url: string): boolean {
  * HEAD request to see if a URL returns 200 OK (exists) or 404 (not yet).
  */
 export async function checkVideoAvailability(url: string): Promise<boolean> {
+  // Special handling for localhost HLS files
+  // Safari can play these natively, but CORS blocks our HEAD requests
+  if (typeof window !== 'undefined' && 
+      window.location.hostname === 'localhost' && 
+      url.includes('/hls/') && 
+      url.endsWith('.m3u8')) {
+    console.debug('Assuming HLS file exists on localhost for Safari:', url);
+    return true;
+  }
+
   try {
     const response = await fetch(url, {
       method: 'HEAD',

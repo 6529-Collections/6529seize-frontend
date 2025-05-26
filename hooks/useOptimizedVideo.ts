@@ -74,6 +74,8 @@ export function useOptimizedVideo(
         // 1. HLS if preferred
         if (preferHls) {
           const hlsOk = await checkVideoAvailability(conversions.HLS);
+          console.debug('HLS check:', conversions.HLS, '->', hlsOk);
+          
           if (hlsOk && isMounted) {
             setPlayableUrl(conversions.HLS);
             setIsOptimized(true);
@@ -85,6 +87,8 @@ export function useOptimizedVideo(
 
         // 2. 720p fallback
         const mp4720Ok = await checkVideoAvailability(conversions.MP4_720P);
+        console.debug('720p check:', conversions.MP4_720P, '->', mp4720Ok);
+        
         if (mp4720Ok && isMounted) {
           setPlayableUrl(conversions.MP4_720P);
           setIsOptimized(true);
@@ -95,6 +99,8 @@ export function useOptimizedVideo(
 
         // 3. 360p fallback
         const mp4360Ok = await checkVideoAvailability(conversions.MP4_360P);
+        console.debug('360p check:', conversions.MP4_360P, '->', mp4360Ok);
+        
         if (mp4360Ok && isMounted) {
           setPlayableUrl(conversions.MP4_360P);
           setIsOptimized(true);

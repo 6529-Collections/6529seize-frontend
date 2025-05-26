@@ -37,20 +37,44 @@ function MediaDisplayVideo({
     setIsHlsSupported(checkHlsSupport());
   }, []);
 
+  const attemptPlay = useCallback(async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    try {
+      await video.play();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error("Playback failed:", error);
+      setIsPlaying(false);
+    }
+  }, []);
+
   useEffect(() => {
     const loadHlsJs = async () => {
-      if (!videoRef.current || !isHls) {
-        if (videoRef.current && !isHls) {
-          videoRef.current.src = playableUrl;
+      if (!videoRef.current) {
+        return;
+      }
+
+      // For non-HLS videos, set the source directly
+      if (!isHls) {
+        videoRef.current.src = playableUrl;
+        if (inView) {
+          attemptPlay();
         }
         return;
       }
 
+      // For HLS videos
       if (isHlsSupported) {
         videoRef.current.src = playableUrl;
+        if (inView) {
+          attemptPlay();
+        }
         return;
       }
 
+      // Use HLS.js for browsers that don't support HLS natively
       try {
         const Hls = (await import('hls.js')).default;
         
@@ -83,6 +107,13 @@ function MediaDisplayVideo({
                   break;
                 default:
                   console.error('HLS fatal error', data);
+                  // If HLS fails due to CSP or other issues, fall back to original
+                  if (videoRef.current) {
+                    console.warn('Falling back to original video due to HLS error');
+                    videoRef.current.src = src;
+                    hls.destroy();
+                    setHlsInstance(null);
+                  }
                   break;
               }
             }
@@ -91,11 +122,17 @@ function MediaDisplayVideo({
           setHlsInstance(hls);
         } else {
           videoRef.current.src = playableUrl;
+          if (inView) {
+            attemptPlay();
+          }
         }
       } catch (error) {
         console.error('Failed to load HLS.js:', error);
         if (videoRef.current) {
           videoRef.current.src = playableUrl;
+          if (inView) {
+            attemptPlay();
+          }
         }
       }
     };
@@ -108,21 +145,8 @@ function MediaDisplayVideo({
         setHlsInstance(null);
       }
     };
-  }, [playableUrl, isHls, isHlsSupported, inView]);
+  }, [playableUrl, isHls, isHlsSupported, inView, attemptPlay]);
 
-  const attemptPlay = useCallback(async () => {
-    const video = videoRef.current;
-    if (!video) return;
-    
-    try {
-      await video.play();
-      setIsPlaying(true);
-    } catch (error) {
-      console.error("Playback failed:", error);
-      setIsPlaying(false);
-    }
-  }, []);
-  
   const handleVideoClick = useCallback(
     (event: React.MouseEvent<HTMLVideoElement>) => {
       if (!videoRef.current) return;
@@ -189,7 +213,7 @@ function MediaDisplayVideo({
         webkit-playsinline="true"
         x5-playsinline="true"
         controls={showControls}
-        autoPlay={inView && !isHls}
+        autoPlay={inView}
         muted
         loop
         preload="auto"
