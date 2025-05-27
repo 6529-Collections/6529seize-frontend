@@ -11,7 +11,7 @@
     "postbuild": "next-sitemap",
     "start": "next start -p 3001",
     "lint": "next lint",
-    "test": "jest",
+    "test": "jest --silent --verbose=false --coverageReporters=none",
     "test:cov": "CI=1 jest --coverage --watchAll=false --verbose=false 2>&1 | grep -A 10 '^FAIL' || true",
     "test:cov:summary": "CI=1 jest --coverage --watchAll=false --silent --reporters=default --verbose=false 2>&1 | grep -E '(PASS|FAIL|failed|passed)' || true",
     "test:cov:verbose": "CI=1 jest --coverage --watchAll=false",

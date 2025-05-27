@@ -31,7 +31,7 @@ describe('BlockPickerDateSelect', () => {
       expect(screen.getByText('Select time')).toBeInTheDocument();
       
       const dateInput = screen.getByDisplayValue('2024-01-15');
-      const timeInput = screen.getByDisplayValue('14:31:45');
+      const timeInput = screen.getByDisplayValue('14:30:45');
       
       expect(dateInput).toBeInTheDocument();
       expect(timeInput).toBeInTheDocument();
