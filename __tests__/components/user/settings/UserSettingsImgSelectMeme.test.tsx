@@ -4,8 +4,8 @@ import UserSettingsImgSelectMeme, { MemeLite } from '../../../../components/user
 
 describe('UserSettingsImgSelectMeme', () => {
   const memes: MemeLite[] = [
-    { id: 1, name: 'First', animation: null, contract: '', icon: null, image: null, scaled: null, thumbnail: null, artist: null },
-    { id: 2, name: 'Second', animation: null, contract: '', icon: null, image: null, scaled: null, thumbnail: null, artist: null },
+    { id: 1, name: 'First', animation: null, contract: '', icon: null, image: null, scaled: null, thumbnail: null, artist: null } as unknown as MemeLite,
+    { id: 2, name: 'Second', animation: null, contract: '', icon: null, image: null, scaled: null, thumbnail: null, artist: null } as unknown as MemeLite,
   ];
 
   it('filters memes and selects one', async () => {
