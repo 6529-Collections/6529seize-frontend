@@ -340,10 +340,13 @@ function main() {
     
     const nextFiles = getLowCoverageFiles(coverageData, FILE_SUGGESTION_COUNT);
     if (nextFiles.length > 0) {
-      const list = nextFiles.join(', ');
       console.log(
-        `\nAction: Add tests for ${list} to improve coverage. After each set of tests, re-run 'npm run improve-coverage' to get new suggestions. Continue until the time limit is reached.`
+        `\nAction: Add tests for:`
       );
+      for (const file of nextFiles) {
+        console.log(`- ${file}`);
+      }
+      console.log(`to improve coverage. After each set of tests, re-run 'npm run improve-coverage' to get new suggestions. Continue until the time limit is reached.`)
     } else {
       // Check if there are low coverage files, just not assigned to this process
       const map = createCoverageMap(coverageData);
