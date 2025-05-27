@@ -21,7 +21,7 @@ const useMutationMock = jest.fn((options: any) => {
   return { mutateAsync: mutateAsyncMock };
 });
 
-const useQueryMock = jest.fn(() => ({ isFetching: false, data: undefined }));
+const useQueryMock = jest.fn((...args: any[]) => ({ isFetching: false, data: undefined }));
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: (opts: any) => useMutationMock(opts),
