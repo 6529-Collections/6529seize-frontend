@@ -88,12 +88,14 @@ describe("WaveDropActionsAddReaction", () => {
       />
     );
     const button = screen.getByRole("button", { name: /add reaction/i });
-
     fireEvent.click(button);
+
     const emojiButton = await screen.findByText(/select emoji/i);
     fireEvent.click(emojiButton);
 
-    expect(onAddReactionMock).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onAddReactionMock).toHaveBeenCalled();
+    });
   });
 
   it("opens and closes picker on mobile button click", async () => {
