@@ -1,7 +1,6 @@
 // MediaDisplayVideo.tsx
 
 import React, { useRef, useCallback, useEffect } from "react";
-import useDeviceInfo from "../../../../../../hooks/useDeviceInfo";
 import { useInView } from "../../../../../../hooks/useInView";
 import { useOptimizedVideo } from "../../../../../../hooks/useOptimizedVideo";
 
@@ -21,9 +20,6 @@ const MediaDisplayVideo: React.FC<Props> = ({
 
   // Intersection-observer for in-view detection
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
-
-  // Detect app environment (not gating autoplay here)
-  const { isApp } = useDeviceInfo();
 
   // Poll for HLS → MP4 → original
   const { playableUrl, isHls } = useOptimizedVideo(src, {
