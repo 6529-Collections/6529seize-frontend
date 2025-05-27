@@ -44,7 +44,7 @@ describe('GroupsList', () => {
     });
     render(
       <GroupsList
-        filters={{ group_name: null, author_identity: null }}
+        filters={{} as any}
         showIdentitySearch={true}
         showCreateNewGroupButton={false}
         showMyGroupsButton={false}
