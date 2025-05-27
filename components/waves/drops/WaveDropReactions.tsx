@@ -36,9 +36,9 @@ function WaveDropReaction({
   reaction,
   initialSelected,
 }: {
-  drop: ApiDrop;
-  reaction: ApiDropReaction;
-  initialSelected: boolean;
+  readonly drop: ApiDrop;
+  readonly reaction: ApiDropReaction;
+  readonly initialSelected: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { onDropReactionChange } = useContext(ReactQueryWrapperContext);
