@@ -7,6 +7,7 @@ Iteratively enhance the project's test suite with high-quality tests focused on 
 - The coverage improvement task has a **configurable time limit** (default 60 minutes via `TIME_LIMIT_MINUTES`).
 - The script will run until the time limit is nearly reached. When time is close to expiring, wrap up your current work and submit a pull request.
 - This allows for longer sessions while still preventing endless iteration.
+- Always re-run the script after each set of tests to obtain new file suggestions. Keep iterating until the script reports the time limit has been reached.
 
 **Testing Philosophy:**
 - Coverage percentage is a metric, not the goal
@@ -24,7 +25,9 @@ Iteratively enhance the project's test suite with high-quality tests focused on 
    - Time elapsed and remaining
    - Specific files needing coverage
 
-3. **Time-Aware Test Strategy:**
+3. **Iterate:** Add tests for the suggested files, then run `npm run improve-coverage` again to receive new recommendations. Repeat this cycle until the script announces the time limit has been reached.
+
+4. **Time-Aware Test Strategy:**
    Given the time constraint, prioritize tests in this order:
    
    **First 5-7 minutes: High-Impact Tests**
@@ -43,7 +46,7 @@ Iteratively enhance the project's test suite with high-quality tests focused on 
    - Quick refactor for clarity
    - Add essential edge cases if time permits
 
-4. **Strategic Test Planning:**
+5. **Strategic Test Planning:**
    When adding tests for `[FILENAME]`, follow this comprehensive approach:
 
    ### A. Scenario Analysis (Before Writing Tests)
@@ -99,7 +102,7 @@ Iteratively enhance the project's test suite with high-quality tests focused on 
    - [ ] **Focused**: Tests one behavior
    - [ ] **Realistic**: Uses production-like data/scenarios
 
-5. **Implementation Guidelines:**
+6. **Implementation Guidelines:**
 
    ```typescript
    // Example structure for comprehensive testing
@@ -131,7 +134,7 @@ Iteratively enhance the project's test suite with high-quality tests focused on 
    });
    ```
 
-6. **Specific Testing Patterns by File Type:**
+7. **Specific Testing Patterns by File Type:**
 
    **For API Routes:**
    - Authentication/authorization scenarios
@@ -155,7 +158,7 @@ Iteratively enhance the project's test suite with high-quality tests focused on 
    - Data transformation edge cases
    - Async operation handling
 
-7. **Real-World Scenario Examples:**
+8. **Real-World Scenario Examples:**
 
    ```typescript
    // Instead of just: "sorts items"
@@ -190,6 +193,7 @@ When the time limit is reached:
 - Progress is preserved for the next session
 - Focus on test quality over rushing to meet coverage
 - Consider it a successful iteration of incremental improvement
+- Do not finish the pull request early if time remains. Continue improving tests until this message appears.
 
 
 **Example Output Scenarios:**
