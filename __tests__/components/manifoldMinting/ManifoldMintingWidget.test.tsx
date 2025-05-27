@@ -18,7 +18,7 @@ jest.mock("../../../components/manifoldMinting/ManifoldMintingConnect", () => ()
 
 jest.mock("wagmi", () => ({
   useReadContract: jest.fn(() => ({ data: 0 })),
-  useReadContracts: jest.fn(() => ({ data: [] })),
+  useReadContracts: jest.fn(() => ({ data: undefined })),
   useWaitForTransactionReceipt: jest.fn(() => ({ isPending: false, isSuccess: false, error: null })),
   useWriteContract: jest.fn(() => ({ writeContract: jest.fn(), reset: jest.fn(), data: undefined, isPending: false, error: null })),
 }));
@@ -45,6 +45,7 @@ const baseProps = {
 };
 
 describe("ManifoldMintingWidget", () => {
+
   it("shows ENDED when claim ended", () => {
     render(<ManifoldMintingWidget {...baseProps} />);
     const button = screen.getByRole("button");
