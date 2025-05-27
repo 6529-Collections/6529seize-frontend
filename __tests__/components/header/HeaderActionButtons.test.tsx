@@ -1,42 +1,40 @@
-import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import HeaderActionButtons from '../../../components/header/HeaderActionButtons';
+import { useViewContext } from '../../../components/navigation/ViewContext';
+import { useRouter } from 'next/router';
 
-jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('../../../components/navigation/ViewContext', () => ({ useViewContext: jest.fn() }));
+jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 
-const { useRouter } = require('next/router');
-const { useViewContext } = require('../../../components/navigation/ViewContext');
+const { useViewContext: useCtx } = require('../../../components/navigation/ViewContext');
+const { useRouter: useRt } = require('next/router');
+
+afterEach(() => jest.clearAllMocks());
 
 describe('HeaderActionButtons', () => {
-  afterEach(() => jest.clearAllMocks());
-
-  it('navigates to create wave when activeView is waves', () => {
+  it('creates new wave when active view is waves', async () => {
+    (useCtx as jest.Mock).mockReturnValue({ activeView: 'waves' });
     const push = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({ push });
-    (useViewContext as jest.Mock).mockReturnValue({ activeView: 'waves' });
-
+    (useRt as jest.Mock).mockReturnValue({ push });
     render(<HeaderActionButtons />);
-    const btn = screen.getByRole('button', { name: 'Create Wave' });
-    fireEvent.click(btn);
+    await userEvent.click(screen.getByRole('button', { name: 'Create Wave' }));
     expect(push).toHaveBeenCalledWith('/waves?new=true', undefined, { shallow: true });
   });
 
-  it('navigates to create DM when activeView is messages', () => {
+  it('creates new dm when active view is messages', async () => {
+    (useCtx as jest.Mock).mockReturnValue({ activeView: 'messages' });
     const push = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({ push });
-    (useViewContext as jest.Mock).mockReturnValue({ activeView: 'messages' });
-
+    (useRt as jest.Mock).mockReturnValue({ push });
     render(<HeaderActionButtons />);
-    const btn = screen.getByRole('button', { name: 'Create DM' });
-    fireEvent.click(btn);
+    await userEvent.click(screen.getByRole('button', { name: 'Create DM' }));
     expect(push).toHaveBeenCalledWith('/waves?new-dm=true', undefined, { shallow: true });
   });
 
-  it('renders nothing when view is not messages or waves', () => {
-    (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
-    (useViewContext as jest.Mock).mockReturnValue({ activeView: 'other' });
-
+  it('renders nothing for other views', () => {
+    (useCtx as jest.Mock).mockReturnValue({ activeView: 'other' });
+    (useRt as jest.Mock).mockReturnValue({ push: jest.fn() });
     const { container } = render(<HeaderActionButtons />);
     expect(container.firstChild).toBeNull();
   });
