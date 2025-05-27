@@ -664,15 +664,27 @@ export const formatLargeNumber = (num: number): string => {
   const isNegative = num < 0;
   const absNum = Math.abs(num);
 
-  let formattedNum;
+  const format = (value: number, suffix: string) => {
+    if (value % 1 === 0) {
+      return `${value.toLocaleString()}${suffix}`;
+    } else {
+      return `${value.toLocaleString(undefined, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      })}${suffix}`;
+    }
+  };
+
+  let formattedNum = "";
+
   if (absNum < 1000) {
-    formattedNum = absNum.toString(); // less than 1000
+    formattedNum = absNum.toLocaleString();
   } else if (absNum < 10000) {
-    formattedNum = (absNum / 1000).toFixed(1) + "k"; // less than 1 million
+    formattedNum = format(absNum / 1000, "K");
   } else if (absNum < 1000000) {
-    formattedNum = (absNum / 1000).toFixed(0) + "k"; // less than 1 million
+    formattedNum = format(absNum / 1000, "K");
   } else {
-    formattedNum = (absNum / 1000000).toFixed(1) + "M"; // 1 million or more
+    formattedNum = format(absNum / 1000000, "M");
   }
 
   return isNegative ? "-" + formattedNum : formattedNum;

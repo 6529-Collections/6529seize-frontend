@@ -3,7 +3,7 @@ import { ApiWave } from "../../../generated/models/ApiWave";
 import { useMutation } from "@tanstack/react-query";
 import { ApiWaveSubscriptionActions } from "../../../generated/models/ApiWaveSubscriptionActions";
 import {
-  commonApiDeleWithBody,
+  commonApiDeleteWithBody,
   commonApiPost,
 } from "../../../services/api/common-api";
 import { AuthContext } from "../../auth/Auth";
@@ -85,7 +85,7 @@ export default function WaveHeaderFollow({
 
   const unFollowMutation = useMutation({
     mutationFn: async () => {
-      await commonApiDeleWithBody<
+      await commonApiDeleteWithBody<
         ApiWaveSubscriptionActions,
         ApiWaveSubscriptionActions
       >({

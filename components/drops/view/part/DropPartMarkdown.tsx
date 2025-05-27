@@ -63,7 +63,7 @@ function DropPartMarkdown({
   textSize,
 }: DropPartMarkdownProps) {
   const isMobile = useIsMobileScreen();
-  const { emojiMap } = useEmoji();
+  const { emojiMap, findNativeEmoji } = useEmoji();
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
@@ -205,6 +205,15 @@ function DropPartMarkdown({
       .find((e) => e.id === emojiId);
 
     if (!emoji) {
+      const nativeEmoji = findNativeEmoji(emojiId);
+      if (nativeEmoji) {
+        return (
+          <span
+            className={`${bigEmoji ? "emoji-text-node" : "tw-align-middle"}`}>
+            {nativeEmoji.skins[0].native}
+          </span>
+        );
+      }
       return <span>{`:${emojiId}:`}</span>;
     }
 
@@ -524,7 +533,10 @@ function DropPartMarkdown({
           </code>
         ),
         a: (params) => aHrefRenderer(params),
-        img: (params) => (typeof params.src === "string" ? <DropPartMarkdownImage src={params.src} /> : null),
+        img: (params) =>
+          typeof params.src === "string" ? (
+            <DropPartMarkdownImage src={params.src} />
+          ) : null,
         blockquote: (params) => (
           <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
             {customRenderer({

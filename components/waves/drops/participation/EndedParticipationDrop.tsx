@@ -72,22 +72,24 @@ export default function EndedParticipationDrop({
     onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
   }, [onQuote, drop, activePartIndex]);
 
+  const handleOnAddReaction = useCallback(() => {
+    setIsSlideUp(false);
+  }, []);
+
   return (
     <div
       className={`${
         location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-      } tw-w-full`}
-    >
+      } tw-w-full`}>
       <div
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group tw-transition-colors tw-duration-200 tw-ease-linear
           ${
             isActiveDrop
               ? "tw-bg-[#3CCB7F]/10"
               : location === DropLocation.WAVE
-                ? "tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-iron-800"
-                : "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800"
-          }`}
-      >
+              ? "tw-bg-iron-900/60 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+              : "tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+          }`}>
         {!isMobile && showReplyAndQuote && (
           <WaveDropActions
             drop={drop}
@@ -116,8 +118,7 @@ export default function EndedParticipationDrop({
                       handleNavigation(e, `/${drop.author.handle}`)
                     }
                     href={`/${drop.author.handle}`}
-                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out"
-                  >
+                    className="tw-no-underline tw-text-iron-200 hover:tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out">
                     {drop.author.handle}
                   </Link>
                 </p>
@@ -139,8 +140,7 @@ export default function EndedParticipationDrop({
                 onClick={(e) =>
                   handleNavigation(e, `/my-stream?wave=${drop.wave.id}`)
                 }
-                className="tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-              >
+                className="tw-text-[11px] tw-leading-0 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
                 {drop.wave.name}
               </Link>
             )}
@@ -172,6 +172,7 @@ export default function EndedParticipationDrop({
           setOpen={setIsSlideUp}
           onReply={handleOnReply}
           onQuote={handleOnQuote}
+          onAddReaction={handleOnAddReaction}
         />
       </div>
     </div>

@@ -18,6 +18,7 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
 export enum ProcessIncomingDropType {
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   DROP_INSERT = "DROP_INSERT",
+  DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
 }
 
 type ProcessIncomingDropFn = (
@@ -118,6 +119,7 @@ export function useWaveRealtimeUpdater({
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
+      console.log("Processing incoming drop", type, drop);
       if (!drop?.wave?.id) {
         return;
       }
@@ -138,12 +140,18 @@ export function useWaveRealtimeUpdater({
       if (
         (type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
           !existingDrop) ||
+        (type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
+          !existingDrop) ||
         existingDrop?.type === DropSize.LIGHT
       ) {
         return;
       }
 
-      if (type === ProcessIncomingDropType.DROP_RATING_UPDATE && existingDrop) {
+      if (
+        (type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
+          type === ProcessIncomingDropType.DROP_REACTION_UPDATE) &&
+        existingDrop
+      ) {
         const apiDrop = await commonApiFetch<ApiDrop>({
           endpoint: `drops/${drop.id}`,
         });

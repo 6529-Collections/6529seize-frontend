@@ -71,7 +71,6 @@ export default function DropMobileMenuHandler({
     setLongPressTriggered(false);
   };
 
-
   const handleOnReply = useCallback(() => {
     setIsSlideUp(false);
     onReply();
@@ -82,13 +81,16 @@ export default function DropMobileMenuHandler({
     onQuote();
   }, [onQuote]);
 
+  const handleOnAddReaction = useCallback(() => {
+    setIsSlideUp(false);
+  }, []);
+
   return (
     <div
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchEnd}
-    >
+      onTouchCancel={handleTouchEnd}>
       {children} {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}
@@ -98,6 +100,7 @@ export default function DropMobileMenuHandler({
         setOpen={setIsSlideUp}
         onReply={handleOnReply}
         onQuote={handleOnQuote}
+        onAddReaction={handleOnAddReaction}
       />
     </div>
   );

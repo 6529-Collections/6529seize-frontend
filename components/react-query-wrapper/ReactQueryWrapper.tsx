@@ -172,6 +172,10 @@ type ReactQueryWrapperContextType = {
     readonly drop: ApiDrop;
     readonly giverHandle: string | null;
   }) => void;
+  onDropReactionChange: (params: {
+    readonly drop: ApiDrop;
+    readonly giverHandle: string | null;
+  }) => void;
   readonly invalidateDrops: () => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
@@ -206,6 +210,7 @@ export const ReactQueryWrapperContext =
     waitAndInvalidateDrops: () => {},
     addOptimisticDrop: () => {},
     onDropRateChange: () => {},
+    onDropReactionChange: () => {},
     invalidateDrops: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
@@ -1093,6 +1098,14 @@ export default function ReactQueryWrapper({
     readonly giverHandle: string | null;
   }) => await changeDropInCache(queryClient, drop, giverHandle);
 
+  const onDropReactionChange = async ({
+    drop,
+    giverHandle,
+  }: {
+    readonly drop: ApiDrop;
+    readonly giverHandle: string | null;
+  }) => await changeDropInCache(queryClient, drop, giverHandle);
+
   const onIdentityBulkRate = () => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_LOGS],
@@ -1236,6 +1249,7 @@ export default function ReactQueryWrapper({
       waitAndInvalidateDrops,
       addOptimisticDrop,
       onDropRateChange,
+      onDropReactionChange,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
@@ -1265,6 +1279,7 @@ export default function ReactQueryWrapper({
       waitAndInvalidateDrops,
       addOptimisticDrop,
       onDropRateChange,
+      onDropReactionChange,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,

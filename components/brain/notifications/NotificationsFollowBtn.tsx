@@ -9,7 +9,7 @@ import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWr
 import { AuthContext } from "../../auth/Auth";
 import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
 import {
-  commonApiDeleWithBody,
+  commonApiDeleteWithBody,
   commonApiPost,
 } from "../../../services/api/common-api";
 import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
@@ -82,7 +82,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
 
   const unFollowMutation = useMutation({
     mutationFn: async () => {
-      await commonApiDeleWithBody<
+      await commonApiDeleteWithBody<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
@@ -132,8 +132,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
           following
             ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
             : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
-        } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
-      >
+        } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
         {mutating ? (
           <CircleLoader size={LOADER_SIZES[size]} />
         ) : following ? (
@@ -144,8 +143,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
             viewBox="0 0 17 15"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               fillRule="evenodd"
               clipRule="evenodd"
@@ -159,8 +157,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12 5V19M5 12H19"
               stroke="currentColor"

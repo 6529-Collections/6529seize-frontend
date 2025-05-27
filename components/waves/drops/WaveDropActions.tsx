@@ -20,6 +20,7 @@ interface WaveDropActionsProps {
 
 import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
+import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 
 export default function WaveDropActions({
   drop,
@@ -56,6 +57,7 @@ export default function WaveDropActions({
           <WaveDropActionsCopyLink drop={drop} />
           <WaveDropActionsOpen drop={drop} />
           {canDelete && <WaveDropActionsOptions drop={drop} />}
+          <WaveDropActionsAddReaction drop={drop} />
         </div>
         {showVoting && !shouldHideClap && <WaveDropActionsRate drop={drop} />}
       </div>

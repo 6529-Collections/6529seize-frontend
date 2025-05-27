@@ -128,12 +128,15 @@ const DefaultWinnerDrop = ({
     onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
   }, [onQuote, drop, activePartIndex]);
 
+  const handleOnAddReaction = useCallback(() => {
+    setIsSlideUp(false);
+  }, []);
+
   return (
     <div
       className={`tw-w-full ${
         location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-      }`}
-    >
+      }`}>
       <div
         className={`tw-relative tw-w-full tw-flex tw-flex-col tw-px-4 tw-py-3 tw-rounded-lg tw-overflow-hidden tw-group
           ${
@@ -148,8 +151,7 @@ const DefaultWinnerDrop = ({
           borderLeft: "1.5px solid transparent",
           ...getDropStyles(isActiveDrop, colors),
           transition: "box-shadow 0.2s ease, background-color 0.2s ease",
-        }}
-      >
+        }}>
         {drop.reply_to && drop.reply_to.drop_id !== dropViewDropId && (
           <WaveDropReply
             onReplyClick={onReplyClick}
@@ -184,8 +186,7 @@ const DefaultWinnerDrop = ({
                 <Link
                   href={`/my-stream?wave=${drop.wave.id}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline"
-                >
+                  className="tw-text-xs tw-leading-none tw-mt-0.5 tw-text-iron-500 hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out tw-no-underline">
                   {drop.wave.name}
                 </Link>
               )}
@@ -229,6 +230,7 @@ const DefaultWinnerDrop = ({
         setOpen={setIsSlideUp}
         onReply={handleOnReply}
         onQuote={handleOnQuote}
+        onAddReaction={handleOnAddReaction}
       />
     </div>
   );
