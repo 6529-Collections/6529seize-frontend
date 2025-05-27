@@ -3,6 +3,7 @@ import {
   Children,
   ClassAttributes,
   HTMLAttributes,
+  ImgHTMLAttributes,
   isValidElement,
   memo,
   ReactNode,
@@ -302,6 +303,16 @@ function DropPartMarkdown({
     return renderExternalOrInternalLink(href, props);
   };
 
+  const imgRenderer = ({
+    node,
+    ...props
+  }: ClassAttributes<HTMLImageElement> &
+    ImgHTMLAttributes<HTMLImageElement> &
+    ExtraProps) =>
+    typeof props.src === "string" ? (
+      <DropPartMarkdownImage src={props.src} />
+    ) : null;
+
   const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
     <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
       <div className="tw-flex-1 tw-min-w-0" data-theme="dark">
@@ -533,10 +544,7 @@ function DropPartMarkdown({
           </code>
         ),
         a: (params) => aHrefRenderer(params),
-        img: (params) =>
-          typeof params.src === "string" ? (
-            <DropPartMarkdownImage src={params.src} />
-          ) : null,
+        img: imgRenderer,
         blockquote: (params) => (
           <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
             {customRenderer({
