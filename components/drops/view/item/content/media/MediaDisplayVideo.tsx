@@ -18,7 +18,6 @@ const MediaDisplayVideo: React.FC<Props> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<any>(null);
 
-  // Intersection-observer for in-view detection
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   // Poll for HLS → MP4 → original
@@ -28,7 +27,6 @@ const MediaDisplayVideo: React.FC<Props> = ({
     preferHls: true,
   });
 
-  // Ensure inline playback attributes on mount
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
