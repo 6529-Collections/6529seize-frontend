@@ -13,10 +13,10 @@ jest.mock("lexical", () => {
   return {
     DecoratorNode,
     // Runtime stand-ins for type-only exports
-    SerializedLexicalNode: class {},
+    SerializedLexicalNode: {},
     Spread: (x: any) => x,
-    LexicalEditor: class {},
-    EditorConfig: class {},
+    LexicalEditor: {},
+    EditorConfig: {},
     NodeKey: undefined,
   };
 });
