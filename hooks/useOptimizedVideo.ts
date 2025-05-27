@@ -123,7 +123,7 @@ export function useOptimizedVideo(
 
         timeoutRef.current = window.setTimeout(checkOptimized, delay);
       } catch {
-        // If something fails, let it keep retrying or eventually fallback
+        
       } finally {
         if (isMounted) {
           setIsChecking(false);
