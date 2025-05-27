@@ -54,7 +54,7 @@ const COVERAGE_INCREMENT_PERCENT_ENV = parseFloat(
 );
 const COVERAGE_INCREMENT_PERCENT = !isNaN(COVERAGE_INCREMENT_PERCENT_ENV)
   ? COVERAGE_INCREMENT_PERCENT_ENV
-  : 0.2;
+  : 0;
 
 // Add time limit configuration
 const TIME_LIMIT_MINUTES_ENV = parseFloat(
@@ -62,7 +62,7 @@ const TIME_LIMIT_MINUTES_ENV = parseFloat(
 );
 const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
   ? TIME_LIMIT_MINUTES_ENV
-  : 20;
+  : 60;
 
 function run(command) {
   execSync(command, { stdio: "inherit" });
@@ -309,30 +309,17 @@ function main() {
   }
 
   console.log(`initial: ${initialCoverage.toFixed(2)}%`);
-  console.log(`target: ${targetCoverage.toFixed(2)}%`);
   console.log(`current: ${currentCoverage.toFixed(2)}%`);
 
   // Check time constraint
   const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
   console.log(`elapsed time: ${elapsedMinutes.toFixed(1)} minutes`);
 
-  if (currentCoverage >= targetCoverage) {
-    console.log(
-      `\nSuccess: Current coverage of ${currentCoverage.toFixed(
-        2
-      )}% has met or exceeded the target of ${targetCoverage.toFixed(
-        2
-      )}%. Task completed.`
-    );
-  } else if (elapsedMinutes >= TIME_LIMIT_MINUTES) {
+  if (elapsedMinutes >= TIME_LIMIT_MINUTES) {
     console.log(
       `\nSuccess: Time limit of ${TIME_LIMIT_MINUTES} minutes has been reached. Task completed due to time constraint.`
     );
-    console.log(
-      `Final coverage: ${currentCoverage.toFixed(
-        2
-      )}% (target was ${targetCoverage.toFixed(2)}%)`
-    );
+    console.log(`Final coverage: ${currentCoverage.toFixed(2)}%`);
   } else {
     const remainingMinutes = TIME_LIMIT_MINUTES - elapsedMinutes;
     console.log(
@@ -358,11 +345,7 @@ function main() {
         );
       } else {
         console.log(
-          `\nInfo: All individual files meet the 80% threshold. However, current coverage of ${currentCoverage.toFixed(
-            2
-          )}% has not yet reached the target of ${targetCoverage.toFixed(
-            2
-          )}%. Please add more tests to any module to increase the overall percentage. Then re-run 'npm run improve-coverage'.`
+          `\nInfo: All individual files meet the 80% threshold. Please add more tests to increase the overall percentage and re-run 'npm run improve-coverage'.`
         );
       }
     }
