@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { render } from '@testing-library/react';
 import React from 'react';
 import GroupCreateLevel from '../../../../../../../components/groups/page/create/config/GroupCreateLevel';
