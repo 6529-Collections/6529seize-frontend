@@ -25,7 +25,8 @@ const useQueryMock = jest.fn(() => ({ isFetching: false, data: undefined }));
 
 jest.mock('@tanstack/react-query', () => ({
   useMutation: (opts: any) => useMutationMock(opts),
-  useQuery: (...args: any[]) => useQueryMock(...args),
+  // Cast to any to avoid tuple spread type issues
+  useQuery: (...args: any[]) => (useQueryMock as any)(...args),
   keepPreviousData: {},
 }));
 
