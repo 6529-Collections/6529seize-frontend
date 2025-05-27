@@ -1,14 +1,12 @@
 ## Enhanced Test Coverage Prompt
 
 **Task:**
-Iteratively enhance the project's test suite to achieve both quantitative coverage targets (+0.2% above baseline) and qualitative testing excellence through comprehensive real-world scenarios, within a time-boxed constraint.
+Iteratively enhance the project's test suite with high-quality tests focused on real-world scenarios. Continue improving coverage until the time limit is nearly reached, then finalize your work and prepare a pull request.
 
 **Time Management:**
-- The coverage improvement task has a **20-minute time limit** (configurable via `TIME_LIMIT_MINUTES` environment variable)
-- The task will complete successfully when either:
-  - The coverage target is reached (+0.2% above baseline), OR
-  - The time limit is reached
-- This prevents endless iteration while encouraging focused, incremental improvements
+- The coverage improvement task has a **configurable time limit** (default 60 minutes via `TIME_LIMIT_MINUTES`).
+- The script will run until the time limit is nearly reached. When time is close to expiring, wrap up your current work and submit a pull request.
+- This allows for longer sessions while still preventing endless iteration.
 
 **Testing Philosophy:**
 - Coverage percentage is a metric, not the goal
@@ -22,7 +20,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - The script will use the environment variables you set up
 
 2. **Parse Output:** Analyze the coverage report for:
-   - Current coverage percentage vs. target
+   - Current coverage percentage
    - Time elapsed and remaining
    - Specific files needing coverage
 
@@ -179,7 +177,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
 - Ensure tests document expected behavior
 
 **Success Criteria:**
-- Coverage target is met (+0.2%) OR time limit is reached
+- Time limit is reached with meaningful tests added
 - No test is written solely for coverage
 - Each test adds value by preventing a potential bug
 - Test suite serves as living documentation
@@ -187,7 +185,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
 - New developers can understand system behavior from tests
 
 **Time-Based Completion:**
-When the 20-minute limit is reached before the coverage target:
+When the time limit is reached:
 - The task is marked as complete (successful exit)
 - Progress is preserved for the next session
 - Focus on test quality over rushing to meet coverage
@@ -196,20 +194,14 @@ When the 20-minute limit is reached before the coverage target:
 
 **Example Output Scenarios:**
 
-1. **Target Reached:**
+1. **Time Limit Reached:**
    ```
-   current: 75.20%
-   Success: Current coverage has met or exceeded the target. Task completed.
-   ```
-
-2. **Time Limit Reached:**
-   ```
-   elapsed time: 20.1 minutes
-   Success: Time limit of 20 minutes has been reached. Task completed due to time constraint.
-   Final coverage: 75.15% (target was 75.20%)
+   elapsed time: 60.0 minutes
+   Success: Time limit reached. Task completed due to time constraint.
+   Final coverage: 75.15%
    ```
 
-3. **In Progress:**
+2. **In Progress:**
    ```
    elapsed time: 12.3 minutes
    Time remaining: 7.7 minutes until automatic completion.
