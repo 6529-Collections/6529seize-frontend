@@ -34,7 +34,7 @@ describe('UserPageGroupsWrapper', () => {
 
   it('passes profile from hook when available', () => {
     useRouterMock.mockReturnValue({ query: { user: 'alice' } });
-    const profile = { handle: 'alice' };
+    const profile = { handle: 'alice' } as any;
     useIdentityMock.mockReturnValue({ profile });
     render(<UserPageGroupsWrapper profile={profile} />);
     expect(useIdentityMock).toHaveBeenCalledWith({ handleOrWallet: 'alice', initialProfile: profile });
@@ -44,7 +44,7 @@ describe('UserPageGroupsWrapper', () => {
 
   it('falls back to initial profile when hook returns null', () => {
     useRouterMock.mockReturnValue({ query: { user: 'bob' } });
-    const initialProfile = { handle: 'bob' };
+    const initialProfile = { handle: 'bob' } as any;
     useIdentityMock.mockReturnValue({ profile: null });
     render(<UserPageGroupsWrapper profile={initialProfile} />);
     expect(capturedWrapperProfile).toBe(initialProfile);
