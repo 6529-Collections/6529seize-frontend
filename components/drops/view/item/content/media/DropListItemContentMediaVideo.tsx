@@ -1,12 +1,12 @@
 // DropListItemContentMediaVideo.tsx
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import useDeviceInfo from "../../../../../../hooks/useDeviceInfo";
 import { useInView } from "../../../../../../hooks/useInView";
 import { useOptimizedVideo } from "../../../../../../hooks/useOptimizedVideo";
 
 interface Props {
-  src: string;
+  readonly src: string;
 }
 
 function DropListItemContentMediaVideo({ src }: Props) {
@@ -16,9 +16,10 @@ function DropListItemContentMediaVideo({ src }: Props) {
   // Intersection-observer hook for play/pause on scroll
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
 
-  // Detect native vs. Capacitor environment
+  // Detect app environment
   const { isApp } = useDeviceInfo();
 
+  // Optimized URL (HLS preferred)
   const { playableUrl, isHls } = useOptimizedVideo(src, {
     pollInterval: 10000,
     maxRetries: 8,
@@ -26,81 +27,84 @@ function DropListItemContentMediaVideo({ src }: Props) {
     exponentialBackoff: false,
   });
 
-  // Whenever the chosen URL or HLS flag changes, attach to <video>
+  // Setup HLS.js if needed
+  const setupHls = useCallback(
+    async (video: HTMLVideoElement) => {
+      try {
+        const mod = await import("hls.js");
+        const HlsConstructor = (mod.default ?? mod) as any;
+        if (!HlsConstructor.isSupported()) {
+          video.src = playableUrl;
+          video.load();
+          return;
+        }
+
+        const hls = new HlsConstructor();
+        hlsRef.current = hls;
+        hls.loadSource(playableUrl);
+        hls.attachMedia(video);
+        hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {
+          video.load();
+          if (inView) video.play().catch(() => {});
+        });
+        hls.on(HlsConstructor.Events.ERROR, (_: any, data: any) => {
+          if (data.fatal) {
+            hls.destroy();
+            video.src = src;
+            video.load();
+          }
+        });
+      } catch {
+        // On import failure, fallback
+        video.src = src;
+        video.load();
+      }
+    },
+    [playableUrl, src, inView]
+  );
+
+  // Attach correct source and auto-play/pause on view
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Clean up any existing Hls.js instance
+    // cleanup previous
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
+    video.pause();
+    video.src = "";
 
     if (isHls) {
-      // If the browser supports HLS natively (Safari/iOS)
       if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = playableUrl;
+        video.load();
       } else {
-        // Otherwise dynamically load hls.js
-        (async () => {
-          try {
-            const mod = await import("hls.js");
-            const HlsConstructor = mod.default ?? mod;
-            if (!HlsConstructor.isSupported()) {
-              // Fallback to direct .m3u8 if hls.js isn't supported
-              video.src = playableUrl;
-              return;
-            }
-
-            const hls = new HlsConstructor();
-            hlsRef.current = hls;
-
-            hls.loadSource(playableUrl);
-            hls.attachMedia(video);
-            hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {
-              video.load();
-              if (inView) video.play().catch(() => {});
-            });
-
-            hls.on(HlsConstructor.Events.ERROR, (_evt: any, data: any) => {
-              if (data.fatal) {
-                hls.destroy();
-                // Minimal fallback: go back to original if HLS fails at runtime
-                video.src = src;
-              }
-            });
-          } catch {
-            // If dynamic import fails, fallback to original
-            video.src = src;
-          }
-        })();
+        setupHls(video);
       }
     } else {
-      // Not HLS: use MP4 or original URL
       video.src = playableUrl;
       video.load();
     }
 
-    // Auto-play if in view and not in App
     if (inView && !isApp) {
       video.play().catch(() => {});
     }
 
-    // Cleanup on unmount or source change
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
+      video.pause();
     };
-  }, [playableUrl, isHls, inView, isApp, src]);
+  }, [playableUrl, isHls, inView, isApp, src, setupHls]);
 
-  // Pause & mute when out of view; play when back in view
+  // Pause & mute outside view; play when back in view
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
     if (!inView) {
       video.pause();
       video.muted = true;
@@ -108,6 +112,14 @@ function DropListItemContentMediaVideo({ src }: Props) {
       video.play().catch(() => {});
     }
   }, [inView, isApp]);
+
+  // Ensure vendor inline attributes for legacy Safari
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.setAttribute("webkit-playsinline", "true");
+    video.setAttribute("x5-playsinline", "true");
+  }, []);
 
   return (
     <div
@@ -118,8 +130,6 @@ function DropListItemContentMediaVideo({ src }: Props) {
         <video
           ref={videoRef}
           playsInline
-          webkit-playsinline="true"
-          x5-playsinline="true"
           controls
           autoPlay={!isApp}
           muted
