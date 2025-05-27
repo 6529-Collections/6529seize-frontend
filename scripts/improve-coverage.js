@@ -17,23 +17,29 @@ import crypto from "crypto";
 const { createCoverageMap } = libCoverage;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Add parallel processing configuration - REQUIRED
-if (!process.env.PROCESS_ID || !process.env.TOTAL_PROCESSES) {
-  console.error("Error: Required environment variables not set.");
+// Add parallel processing configuration - support both CLI args and env vars
+let PROCESS_ID, TOTAL_PROCESSES;
+
+// Check if arguments are provided via command line
+if (process.argv.length >= 4) {
+  PROCESS_ID = parseInt(process.argv[2]);
+  TOTAL_PROCESSES = parseInt(process.argv[3]);
+} else if (process.env.PROCESS_ID && process.env.TOTAL_PROCESSES) {
+  PROCESS_ID = parseInt(process.env.PROCESS_ID);
+  TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES);
+} else {
+  console.error("Error: Process configuration not provided.");
   console.error("");
-  console.error("Please set up your environment first:");
-  console.error("  source scripts/setup-coverage-env.sh <process_id> <total_processes>");
+  console.error("You can either:");
+  console.error("1. Pass arguments directly:");
+  console.error("   npm run improve-coverage 0 1  # Single process");
+  console.error("   npm run improve-coverage 0 8  # Process 0 of 8");
   console.error("");
-  console.error("Examples:");
-  console.error("  source scripts/setup-coverage-env.sh 0 1  # Single process");
-  console.error("  source scripts/setup-coverage-env.sh 0 8  # Process 0 of 8");
-  console.error("");
-  console.error("Then run: npm run improve-coverage");
+  console.error("2. Set up environment variables:");
+  console.error("   source scripts/setup-coverage-env.sh <process_id> <total_processes>");
+  console.error("   npm run improve-coverage");
   process.exit(1);
 }
-
-const PROCESS_ID = parseInt(process.env.PROCESS_ID);
-const TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES);
 
 if (isNaN(PROCESS_ID) || PROCESS_ID < 0 || PROCESS_ID >= TOTAL_PROCESSES) {
   console.error(`PROCESS_ID must be between 0 and ${TOTAL_PROCESSES - 1}`);

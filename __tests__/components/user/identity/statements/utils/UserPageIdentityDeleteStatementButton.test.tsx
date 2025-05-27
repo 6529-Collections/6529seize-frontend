@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import UserPageIdentityDeleteStatementButton from "../../../../../../components/user/identity/statements/utils/UserPageIdentityDeleteStatementButton";
@@ -44,7 +44,7 @@ describe("UserPageIdentityDeleteStatementButton", () => {
     await userEvent.click(screen.getByRole("button", { name: /delete statement/i }));
     expect(screen.getByTestId("modal")).toBeInTheDocument();
     await userEvent.click(screen.getByText("close"));
-    expect(screen.queryByTestId("modal")).toBeNull();
+    await waitFor(() => expect(screen.queryByTestId("modal")).toBeNull());
   });
 
   it("shows button when touchscreen", () => {
