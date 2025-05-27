@@ -1,23 +1,34 @@
-import { useState, useEffect, useRef } from 'react';
-import { getVideoConversions, checkVideoAvailability, isVideoUrl } from '../helpers/video.helpers';
+import { useState, useEffect, useRef } from "react";
+import {
+  isVideoUrl,
+  getVideoConversions,
+  checkVideoAvailability,
+} from "../helpers/video.helpers";
 
 export interface UseOptimizedVideoOptions {
+  /** ms between checks */
   readonly pollInterval?: number;
   readonly maxRetries?: number;
+  /** if true, tries HLS first */
   readonly preferHls?: boolean;
+  /** if true, each pollInterval can grow exponentially (reducing requests on slow encodes) */
+  readonly exponentialBackoff?: boolean;
 }
 
 export interface UseOptimizedVideoResult {
+  /** The best URL found (HLS or MP4). Falls back to original if none found. */
   readonly playableUrl: string;
+  /** True if the returned URL is a known optimized one (HLS or MP4_720/1080). */
   readonly isOptimized: boolean;
+  /** True while we are still checking for better renditions. */
   readonly isChecking: boolean;
+  /** True if the playableUrl is an HLS .m3u8. */
   readonly isHls: boolean;
 }
 
 /**
- * Repeatedly polls for an "optimized" version of the video (HLS/MP4)
- * until found or until retries are exhausted. Defaults to HLS first,
- * then 720p, then 360p, else fallback to original.
+ * Poll for HLS or MP4 renditions until found or maxRetries is reached.
+ * If nothing is ready, fall back to the original URL.
  */
 export function useOptimizedVideo(
   originalUrl: string,
@@ -25,8 +36,9 @@ export function useOptimizedVideo(
 ): UseOptimizedVideoResult {
   const {
     pollInterval = 15000,
-    maxRetries = 20,
-    preferHls = true
+    maxRetries = 8,
+    preferHls = true,
+    exponentialBackoff = false,
   } = options;
 
   const [playableUrl, setPlayableUrl] = useState(originalUrl);
@@ -35,24 +47,23 @@ export function useOptimizedVideo(
   const [isHls, setIsHls] = useState(false);
 
   const retriesRef = useRef(0);
-  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // reset local states
+    // Reset state whenever the originalUrl changes
     setPlayableUrl(originalUrl);
     setIsOptimized(false);
     setIsHls(false);
     retriesRef.current = 0;
 
-    // do nothing if it's obviously not a video or doesn't match /drops/ pattern
+    // Only proceed if recognized video URL (and presumably in /drops/)
     if (!originalUrl || !isVideoUrl(originalUrl)) {
       return;
     }
 
     const conversions = getVideoConversions(originalUrl);
     if (!conversions) {
-      console.debug('Not a convertible /drops/ URL, or missing extension:', originalUrl);
-      return;
+      return; // Not a recognized /drops/ path
     }
 
     let isMounted = true;
@@ -60,9 +71,8 @@ export function useOptimizedVideo(
     const checkOptimized = async () => {
       if (!isMounted) return;
 
-      // if we tried too many times, fallback and stop
+      // If we've retried too many times, settle on the original
       if (retriesRef.current >= maxRetries) {
-        console.debug(`Max retries (${maxRetries}) reached for:`, originalUrl);
         setPlayableUrl(originalUrl);
         setIsChecking(false);
         return;
@@ -71,52 +81,49 @@ export function useOptimizedVideo(
       setIsChecking(true);
 
       try {
-        // 1. HLS if preferred
+        // 1) Try HLS first if preferHls is true
         if (preferHls) {
           const hlsOk = await checkVideoAvailability(conversions.HLS);
-          console.debug('HLS check:', conversions.HLS, '->', hlsOk);
-          
           if (hlsOk && isMounted) {
             setPlayableUrl(conversions.HLS);
             setIsOptimized(true);
             setIsHls(true);
             setIsChecking(false);
-            return; // done
+            return;
           }
         }
 
-        // 2. 720p fallback
-        const mp4720Ok = await checkVideoAvailability(conversions.MP4_720P);
-        console.debug('720p check:', conversions.MP4_720P, '->', mp4720Ok);
-        
-        if (mp4720Ok && isMounted) {
+        // 2) Try 1080p MP4
+        const ok1080 = await checkVideoAvailability(conversions.MP4_1080P);
+        if (ok1080 && isMounted) {
+          setPlayableUrl(conversions.MP4_1080P);
+          setIsOptimized(true);
+          setIsHls(false);
+          setIsChecking(false);
+          return;
+        }
+
+        // 3) Try 720p MP4
+        const ok720 = await checkVideoAvailability(conversions.MP4_720P);
+        if (ok720 && isMounted) {
           setPlayableUrl(conversions.MP4_720P);
           setIsOptimized(true);
           setIsHls(false);
           setIsChecking(false);
-          return; // done
+          return;
         }
 
-        // 3. 360p fallback
-        const mp4360Ok = await checkVideoAvailability(conversions.MP4_360P);
-        console.debug('360p check:', conversions.MP4_360P, '->', mp4360Ok);
-        
-        if (mp4360Ok && isMounted) {
-          setPlayableUrl(conversions.MP4_360P);
-          setIsOptimized(true);
-          setIsHls(false);
-          setIsChecking(false);
-          return; // done
-        }
-
-        // none found, try again later
+        // If none are yet ready, increase retry count & schedule another check
         retriesRef.current += 1;
-        console.debug(`No optimized version yet, retry #${retriesRef.current}`, originalUrl);
 
-        timeoutRef.current = setTimeout(checkOptimized, pollInterval);
-      } catch (err) {
-        console.error('Error checking for video conversions:', err);
-        // fallback to original
+        // Optionally use exponential backoff
+        const delay = exponentialBackoff
+          ? pollInterval * Math.pow(2, retriesRef.current - 1)
+          : pollInterval;
+
+        timeoutRef.current = window.setTimeout(checkOptimized, delay);
+      } catch {
+        // If something fails, let it keep retrying or eventually fallback
       } finally {
         if (isMounted) {
           setIsChecking(false);
@@ -128,16 +135,16 @@ export function useOptimizedVideo(
 
     return () => {
       isMounted = false;
-      if (timeoutRef.current) {
+      if (timeoutRef.current !== null) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [originalUrl, pollInterval, maxRetries, preferHls]);
+  }, [originalUrl, pollInterval, maxRetries, preferHls, exponentialBackoff]);
 
   return {
     playableUrl,
     isOptimized,
     isChecking,
-    isHls
+    isHls,
   };
-} 
+}

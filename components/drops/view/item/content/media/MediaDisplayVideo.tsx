@@ -1,233 +1,140 @@
-import React, { useRef, useCallback, useEffect, useState } from "react";
+// MediaDisplayVideo.tsx
+
+import React, { useRef, useCallback, useEffect } from "react";
+import useDeviceInfo from "../../../../../../hooks/useDeviceInfo";
 import { useInView } from "../../../../../../hooks/useInView";
 import { useOptimizedVideo } from "../../../../../../hooks/useOptimizedVideo";
 
 interface Props {
-  readonly src: string;
-  readonly showControls?: boolean;
-  readonly disableClickHandler?: boolean;
-  readonly showDebug?: boolean;
+  src: string;
+  showControls?: boolean;
+  disableClickHandler?: boolean;
 }
 
-function MediaDisplayVideo({
+const MediaDisplayVideo: React.FC<Props> = ({
   src,
   showControls = false,
   disableClickHandler = false,
-  showDebug = false,
-}: Props) {
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<any>(null);
+
+  // Intersection‐observer for in‐view detection
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [hasInteraction, setHasInteraction] = useState(false);
-  const [hlsInstance, setHlsInstance] = useState<any>(null);
-  const [isHlsSupported, setIsHlsSupported] = useState(false);
-  
-  const { playableUrl, isOptimized, isHls } = useOptimizedVideo(src, {
-    pollInterval: 10000,
-    maxRetries: 20,
-    preferHls: true
+  const { isApp } = useDeviceInfo();
+
+  // Poll for HLS → MP4 → original
+  const { playableUrl, isHls } = useOptimizedVideo(src, {
+    pollInterval: 15_000,
+    maxRetries: 8,
+    preferHls: true,
   });
 
-  useEffect(() => {
-    const checkHlsSupport = () => {
-      const video = document.createElement('video');
-      return video.canPlayType('application/vnd.apple.mpegurl') !== '';
-    };
-    
-    setIsHlsSupported(checkHlsSupport());
-  }, []);
-
+  // Silent play() attempt helper
   const attemptPlay = useCallback(async () => {
-    const video = videoRef.current;
-    if (!video) return;
-    
+    const vid = videoRef.current;
+    if (!vid) return;
     try {
-      await video.play();
-      setIsPlaying(true);
-    } catch (error) {
-      console.error("Playback failed:", error);
-      setIsPlaying(false);
+      await vid.play();
+    } catch {
+      /* ignore */
     }
   }, []);
 
+  // Load HLS or MP4 and auto‐play / pause on scroll-in/out
   useEffect(() => {
-    const loadHlsJs = async () => {
-      if (!videoRef.current) {
-        return;
-      }
+    const vid = videoRef.current;
+    if (!vid) return;
 
-      // For non-HLS videos, set the source directly
-      if (!isHls) {
-        videoRef.current.src = playableUrl;
-        if (inView) {
-          attemptPlay();
-        }
-        return;
-      }
+    // Teardown existing HLS.js
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
 
-      // For HLS videos
-      if (isHlsSupported) {
-        videoRef.current.src = playableUrl;
-        if (inView) {
-          attemptPlay();
-        }
-        return;
-      }
+    // Reset
+    vid.pause();
+    vid.src = "";
 
-      // Use HLS.js for browsers that don't support HLS natively
-      try {
-        const Hls = (await import('hls.js')).default;
-        
-        if (Hls.isSupported()) {
-          const hls = new Hls({
-            enableWorker: true,
-            lowLatencyMode: false,
-            backBufferLength: 90
-          });
-          
-          hls.loadSource(playableUrl);
-          hls.attachMedia(videoRef.current);
-          
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            if (inView && videoRef.current) {
-              attemptPlay();
-            }
-          });
-          
-          hls.on(Hls.Events.ERROR, (event, data) => {
-            if (data.fatal) {
-              switch (data.type) {
-                case Hls.ErrorTypes.NETWORK_ERROR:
-                  console.error('HLS network error', data);
-                  hls.startLoad();
-                  break;
-                case Hls.ErrorTypes.MEDIA_ERROR:
-                  console.error('HLS media error', data);
-                  hls.recoverMediaError();
-                  break;
-                default:
-                  console.error('HLS fatal error', data);
-                  // If HLS fails due to CSP or other issues, fall back to original
-                  if (videoRef.current) {
-                    console.warn('Falling back to original video due to HLS error');
-                    videoRef.current.src = src;
-                    hls.destroy();
-                    setHlsInstance(null);
-                  }
-                  break;
+    // Attach source
+    if (isHls && !vid.canPlayType("application/vnd.apple.mpegurl")) {
+      (async () => {
+        try {
+          const mod = await import("hls.js");
+          const Hls = (mod.default ?? mod) as any;
+          if (!Hls.isSupported()) {
+            vid.src = playableUrl;
+            vid.load();
+          } else {
+            const hls = new Hls();
+            hlsRef.current = hls;
+            hls.loadSource(playableUrl);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              vid.load();
+              if (inView) attemptPlay();
+            });
+            hls.on(Hls.Events.ERROR, (_evt: any, data: any) => {
+              if (data.fatal) {
+                hls.destroy();
+                vid.src = src;
               }
-            }
-          });
-          
-          setHlsInstance(hls);
-        } else {
-          videoRef.current.src = playableUrl;
-          if (inView) {
-            attemptPlay();
+            });
           }
+        } catch {
+          vid.src = src;
         }
-      } catch (error) {
-        console.error('Failed to load HLS.js:', error);
-        if (videoRef.current) {
-          videoRef.current.src = playableUrl;
-          if (inView) {
-            attemptPlay();
-          }
-        }
-      }
-    };
-
-    loadHlsJs();
-
-    return () => {
-      if (hlsInstance) {
-        hlsInstance.destroy();
-        setHlsInstance(null);
-      }
-    };
-  }, [playableUrl, isHls, isHlsSupported, inView, attemptPlay]);
-
-  const handleVideoClick = useCallback(
-    (event: React.MouseEvent<HTMLVideoElement>) => {
-      if (!videoRef.current) return;
-      
-      event.stopPropagation();
-      event.preventDefault();
-      setHasInteraction(true);
-      
-      const video = videoRef.current;
-      
-      if (video.paused) {
-        if (video.muted) {
-          if (hasInteraction) {
-            video.muted = false;
-          }
-        }
-        attemptPlay();
-      } else {
-        video.pause();
-        setIsPlaying(false);
-      }
-    },
-    [hasInteraction, attemptPlay]
-  );
-
-  useEffect(() => {
-    if (inView) {
-      if (videoRef.current && !isPlaying && !isHls) {
-        attemptPlay();
-      }
-    } else if (videoRef.current) {
-      videoRef.current.pause();
-      setIsPlaying(false);
+      })();
+    } else {
+      vid.src = playableUrl;
     }
-  }, [inView, attemptPlay, isPlaying, isHls]);
-  
-  useEffect(() => {
-    const video = videoRef.current;
-    return () => {
-      if (video) {
-        video.pause();
-        video.src = "";
-        video.load();
-      }
-    };
-  }, []);
 
-  const handleError = useCallback(() => {
-    console.error("Video playback error for source:", playableUrl);
-    setIsPlaying(false);
-  }, [playableUrl]);
+    // Auto-play/pause purely based on inView
+    if (inView) {
+      attemptPlay();
+    } else {
+      vid.pause();
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      vid.pause();
+    };
+  }, [playableUrl, isHls, inView, attemptPlay, src]);
+
+  // Custom tap‐to‐toggle if native controls are off
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLVideoElement>) => {
+      if (disableClickHandler) return;
+      const vid = videoRef.current;
+      if (!vid) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (vid.paused) vid.play().catch(() => {});
+      else vid.pause();
+    },
+    [disableClickHandler]
+  );
 
   return (
     <div ref={wrapperRef} className="tw-w-full tw-h-full tw-relative">
-      {showDebug && (
-        <div className="tw-absolute tw-top-2 tw-left-2 tw-z-10 tw-bg-black/80 tw-text-white tw-text-xs tw-p-2 tw-rounded tw-max-w-xs">
-          <div>Status: {isOptimized ? 'Optimized' : 'Original'}</div>
-          {isOptimized && <div>Type: {isHls ? 'HLS' : 'MP4'}</div>}
-        </div>
-      )}
       <video
         ref={videoRef}
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
-        controls={showControls}
-        autoPlay={inView}
         muted
         loop
+        autoPlay={inView}
+        controls={showControls}
         preload="auto"
-        className="tw-w-full tw-rounded-xl tw-overflow-hidden tw-max-h-full tw-object-contain"
-        onClick={disableClickHandler ? undefined : handleVideoClick}
-        onError={handleError}
-      >
-        {!isHls && (
-          <source src={playableUrl} type="video/mp4" />
-        )}
-        Your browser does not support the video tag.
-      </video>
+        className="tw-w-full tw-h-full tw-rounded-xl tw-object-contain"
+        onClick={showControls ? undefined : handleClick}
+      />
     </div>
   );
-}
+};
 
-export default MediaDisplayVideo;
+export default React.memo(MediaDisplayVideo);
