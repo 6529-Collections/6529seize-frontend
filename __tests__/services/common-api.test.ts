@@ -46,12 +46,13 @@ describe('commonApiFetch', () => {
 });
 
 describe('commonApiPost', () => {
+  const originalEndpoint = process.env.API_ENDPOINT;
   beforeEach(() => {
     (global as any).fetch = jest.fn();
     process.env.API_ENDPOINT = 'http://example.com';
   });
   afterAll(() => {
-    delete process.env.API_ENDPOINT;
+    process.env.API_ENDPOINT = originalEndpoint;
   });
 
   it('posts data and returns json', async () => {
