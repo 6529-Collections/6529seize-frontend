@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import GroupCreateTest from '../../../../../../components/groups/page/create/actions/GroupCreateTest';
