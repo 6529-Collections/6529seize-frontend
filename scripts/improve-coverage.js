@@ -74,7 +74,7 @@ const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
 const FILE_SUGGESTION_COUNT_ENV = parseInt(process.env.FILE_SUGGESTION_COUNT);
 const FILE_SUGGESTION_COUNT = !isNaN(FILE_SUGGESTION_COUNT_ENV)
   ? FILE_SUGGESTION_COUNT_ENV
-  : 3;
+  : 10;
 
 function run(command) {
   execSync(command, { stdio: "inherit" });
@@ -147,10 +147,8 @@ function main() {
   let isNewFile = false;
 
   try {
-    console.log(`Attempting to open existing file: ${progressPath}`);
     try {
       fd = openSync(progressPath, fsConstants.O_RDWR | fsConstants.O_NOFOLLOW);
-      console.log(`Successfully opened existing file: ${progressPath}`);
       isNewFile = false;
 
       const chunks = [];
@@ -270,12 +268,6 @@ function main() {
       if (currentCoverage > initialCoverage) {
         initialCoverage = currentCoverage;
       }
-      targetCoverage = initialCoverage + COVERAGE_INCREMENT_PERCENT;
-      console.log(
-        `Safeguard: Adjusted target. Initial: ${initialCoverage.toFixed(
-          2
-        )}%, Target: ${targetCoverage.toFixed(2)}%`
-      );
     }
     if (targetCoverage > 100) {
       targetCoverage = 100;
@@ -320,12 +312,8 @@ function main() {
     }
   }
 
-  console.log(`initial: ${initialCoverage.toFixed(2)}%`);
-  console.log(`current: ${currentCoverage.toFixed(2)}%`);
-
   // Check time constraint
   const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
-  console.log(`elapsed time: ${elapsedMinutes.toFixed(1)} minutes`);
 
   if (elapsedMinutes >= TIME_LIMIT_MINUTES) {
     console.log(
@@ -333,10 +321,6 @@ function main() {
     );
     console.log(`Final coverage: ${currentCoverage.toFixed(2)}%`);
   } else {
-    const remainingMinutes = TIME_LIMIT_MINUTES - elapsedMinutes;
-    console.log(
-      `\nTime remaining: ${remainingMinutes.toFixed(1)} minutes until automatic completion.`
-    );
     
     const nextFiles = getLowCoverageFiles(coverageData, FILE_SUGGESTION_COUNT);
     if (nextFiles.length > 0) {
