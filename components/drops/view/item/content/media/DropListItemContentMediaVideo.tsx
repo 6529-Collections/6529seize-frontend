@@ -23,7 +23,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
   const { playableUrl, isHls } = useOptimizedVideo(src, {
     pollInterval: 10000,
     maxRetries: 8,
-    preferHls: true,
+    preferHls: false,
     exponentialBackoff: false,
   });
 
