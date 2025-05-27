@@ -64,6 +64,12 @@ const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
   ? TIME_LIMIT_MINUTES_ENV
   : 60;
 
+// Number of files to suggest each iteration
+const FILE_SUGGESTION_COUNT_ENV = parseInt(process.env.FILE_SUGGESTION_COUNT);
+const FILE_SUGGESTION_COUNT = !isNaN(FILE_SUGGESTION_COUNT_ENV)
+  ? FILE_SUGGESTION_COUNT_ENV
+  : 3;
+
 function run(command) {
   execSync(command, { stdio: "inherit" });
 }
@@ -326,10 +332,11 @@ function main() {
       `\nTime remaining: ${remainingMinutes.toFixed(1)} minutes until automatic completion.`
     );
     
-    const nextFiles = getLowCoverageFiles(coverageData, 1);
+    const nextFiles = getLowCoverageFiles(coverageData, FILE_SUGGESTION_COUNT);
     if (nextFiles.length > 0) {
+      const list = nextFiles.join(', ');
       console.log(
-        `\nAction: Add tests for ${nextFiles[0]} to improve coverage. Then re-run 'npm run improve-coverage'.`
+        `\nAction: Add tests for ${list} to improve coverage. After each set of tests, re-run 'npm run improve-coverage' to get new suggestions. Continue until the time limit is reached.`
       );
     } else {
       // Check if there are low coverage files, just not assigned to this process
@@ -345,7 +352,7 @@ function main() {
         );
       } else {
         console.log(
-          `\nInfo: All individual files meet the 80% threshold. Please add more tests to increase the overall percentage and re-run 'npm run improve-coverage'.`
+          `\nInfo: All individual files meet the 80% threshold. Continue adding meaningful tests across the project and re-run 'npm run improve-coverage' until the time limit message is displayed.`
         );
       }
     }
