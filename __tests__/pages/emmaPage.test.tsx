@@ -2,17 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import DistributionPlanTool from '../../pages/emma/index';
 
-jest.mock('next/dynamic', () => {
-  return (importer: any) => {
-    const Component = (props: any) => {
-      const mod = require('../../components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper');
-      const Actual = mod.default || mod;
-      return <Actual {...props} />;
-    };
-    return Component;
-  };
-});
-jest.mock('../../components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper', () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
+jest.mock('next/dynamic', () => () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
 jest.mock('../../components/distribution-plan-tool/connect/distributipn-plan-tool-connect', () => () => <div data-testid="connect" />);
 
 describe('EMMA page', () => {
