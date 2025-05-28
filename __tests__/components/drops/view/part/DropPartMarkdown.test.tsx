@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import DropPartMarkdown from '../../../../components/drops/view/part/DropPartMarkdown';
+import DropPartMarkdown from '../../../../../components/drops/view/part/DropPartMarkdown';
 
-jest.mock('../../../../hooks/isMobileScreen', () => () => false);
-jest.mock('../../../../contexts/EmojiContext', () => ({ useEmoji: () => ({ emojiMap: [] }) }));
+jest.mock('../../../../../hooks/isMobileScreen', () => () => false);
+jest.mock('../../../../../contexts/EmojiContext', () => ({ useEmoji: () => ({ emojiMap: [] }) }));
 jest.mock('react-tweet', () => ({ Tweet: ({ id }: any) => <div>tweet:{id}</div> }));
 
 describe('DropPartMarkdown', () => {
