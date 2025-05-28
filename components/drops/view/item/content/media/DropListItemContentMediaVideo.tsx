@@ -1,25 +1,18 @@
-// DropListItemContentMediaVideo.tsx
-
-import React, { useRef, useEffect, useCallback } from "react";
-import useDeviceInfo from "../../../../../../hooks/useDeviceInfo";
+import React, { useEffect } from "react";
 import { useInView } from "../../../../../../hooks/useInView";
+import useDeviceInfo from "../../../../../../hooks/useDeviceInfo";
 import { useOptimizedVideo } from "../../../../../../hooks/useOptimizedVideo";
+import { useHlsPlayer } from "../../../../../../hooks/useHlsPlayer";
 
 interface Props {
   readonly src: string;
 }
 
 function DropListItemContentMediaVideo({ src }: Props) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<any>(null);
-
-  // Intersection-observer hook for play/pause on scroll
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
-
-  // Detect app environment
   const { isApp } = useDeviceInfo();
 
-  // Optimized URL (HLS preferred)
+  // 1) Pick up the best URL (HLS or MP4)
   const { playableUrl, isHls } = useOptimizedVideo(src, {
     pollInterval: 10000,
     maxRetries: 8,
@@ -27,118 +20,57 @@ function DropListItemContentMediaVideo({ src }: Props) {
     exponentialBackoff: false,
   });
 
-  // Setup HLS.js if needed
-  const setupHls = useCallback(
-    async (video: HTMLVideoElement) => {
-      try {
-        const mod = await import("hls.js");
-        const HlsConstructor = (mod.default ?? mod) as any;
-        if (!HlsConstructor.isSupported()) {
-          video.src = playableUrl;
-          video.load();
-          return;
-        }
+  // 2) Setup HLS (or native) once and get back the videoRef + loading state
+  const { videoRef, isLoading } = useHlsPlayer({
+    src: playableUrl,
+    isHls,
+    fallbackSrc: src,
+    autoPlay: inView && !isApp,
+  });
 
-        const hls = new HlsConstructor();
-        hlsRef.current = hls;
-        hls.loadSource(playableUrl);
-        hls.attachMedia(video);
-        hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {
-          video.load();
-          if (inView) video.play().catch(() => {});
-        });
-        hls.on(HlsConstructor.Events.ERROR, (_: any, data: any) => {
-          if (data.fatal) {
-            hls.destroy();
-            video.src = src;
-            video.load();
-          }
-        });
-      } catch {
-        // On import failure, fallback
-        video.src = src;
-        video.load();
-      }
-    },
-    [playableUrl, src, inView]
-  );
-
-  // Attach correct source and auto-play/pause on view
+  // 3) Play/pause & mute based on scroll visibility
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const videoEl = videoRef.current;
+    if (!videoEl || isLoading) return;
 
-    // cleanup previous
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-      hlsRef.current = null;
-    }
-    video.pause();
-    video.src = "";
-
-    if (isHls) {
-      if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = playableUrl;
-        video.load();
-      } else {
-        setupHls(video);
-      }
+    if (inView) {
+      // ensure muted autoplay works
+      videoEl.muted = true;
+      if (!isApp) videoEl.play().catch(() => {});
     } else {
-      video.src = playableUrl;
-      video.load();
+      videoEl.pause();
+      videoEl.muted = true;
     }
+  }, [inView, isApp, isLoading, videoRef]);
 
-    if (inView && !isApp) {
-      video.play().catch(() => {});
-    }
-
-    return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-      video.pause();
-    };
-  }, [playableUrl, isHls, inView, isApp, src, setupHls]);
-
-  // Pause & mute outside view; play when back in view
+  // 4) Inline attributes for iOS / legacy WebKit
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (!inView) {
-      video.pause();
-      video.muted = true;
-    } else if (!isApp) {
-      video.play().catch(() => {});
-    }
-  }, [inView, isApp]);
-
-  // Ensure vendor inline attributes for legacy Safari
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.setAttribute("webkit-playsinline", "true");
-    video.setAttribute("x5-playsinline", "true");
-  }, []);
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+    videoEl.setAttribute("webkit-playsinline", "true");
+    videoEl.setAttribute("x5-playsinline", "true");
+  }, [videoRef]);
 
   return (
     <div
       ref={wrapperRef}
       className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
     >
-      {inView && (
-        <video
-          ref={videoRef}
-          playsInline
-          controls
-          autoPlay={!isApp}
-          muted
-          loop
-          className="tw-w-full tw-h-full tw-rounded-xl tw-object-contain"
-        >
-          Your browser does not support the video tag.
-        </video>
-      )}
+      <video
+        ref={videoRef}
+        playsInline
+        controls
+        autoPlay={false} /* we control play via the hook+effect */
+        muted 
+        loop
+        className={`
+          tw-w-full tw-h-full tw-rounded-xl tw-object-contain
+          tw-transition-opacity tw-duration-300
+          ${inView ? "tw-opacity-100" : "tw-opacity-0"}
+        `}
+      >
+        Your browser does not support the video tag.
+      </video>
     </div>
   );
 }

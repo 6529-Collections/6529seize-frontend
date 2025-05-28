@@ -1,8 +1,7 @@
-// MediaDisplayVideo.tsx
-
-import React, { useRef, useCallback, useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useInView } from "../../../../../../hooks/useInView";
 import { useOptimizedVideo } from "../../../../../../hooks/useOptimizedVideo";
+import { useHlsPlayer } from "../../../../../../hooks/useHlsPlayer";
 
 interface Props {
   readonly src: string;
@@ -15,108 +14,47 @@ const MediaDisplayVideo: React.FC<Props> = ({
   showControls = false,
   disableClickHandler = false,
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const hlsRef = useRef<any>(null);
-
+  // Intersection observer for scroll-based triggers
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
 
-  // Poll for HLS → MP4 → original
+  // Poll for HLS → MP4 → fallback original
   const { playableUrl, isHls } = useOptimizedVideo(src, {
-    pollInterval: 15_000,
+    pollInterval: 15000,
     maxRetries: 8,
     preferHls: true,
+    exponentialBackoff: false,
   });
 
+  // Use HLS hook to handle the video ref, loading states, etc.
+  const { videoRef, isLoading } = useHlsPlayer({
+    src: playableUrl,
+    isHls,
+    fallbackSrc: src, // if HLS fails, revert to original
+    autoPlay: inView, // only autoplay if in view
+  });
+
+  // Inline attributes for iOS / legacy WebKit
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
     vid.setAttribute("webkit-playsinline", "true");
     vid.setAttribute("x5-playsinline", "true");
-  }, []);
+  }, [videoRef]);
 
-  // Helper to attempt play without throwing
-  const attemptPlay = useCallback(async () => {
-    const vid = videoRef.current;
-    if (!vid) return;
-    try {
-      await vid.play();
-    } catch {
-      // ignore autoplay errors
-    }
-  }, []);
-
-  // Setup HLS via hls.js when needed
-  const setupHls = useCallback(
-    async (vid: HTMLVideoElement) => {
-      try {
-        const mod = await import("hls.js");
-        const HlsConstructor = mod.default ?? mod;
-        if (!HlsConstructor.isSupported()) {
-          vid.src = playableUrl;
-          vid.load();
-          return;
-        }
-        const hls = new HlsConstructor();
-        hlsRef.current = hls;
-        hls.loadSource(playableUrl);
-        hls.attachMedia(vid);
-        hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {
-          vid.load();
-          if (inView) attemptPlay();
-        });
-        hls.on(HlsConstructor.Events.ERROR, (_evt: any, data: any) => {
-          if (data.fatal) {
-            hls.destroy();
-            vid.src = src;
-            vid.load();
-          }
-        });
-      } catch {
-        vid.src = src;
-        vid.load();
-      }
-    },
-    [playableUrl, src, inView, attemptPlay]
-  );
-
-  // Main effect: attach source and handle play/pause on scroll
+  // Additional effect: if out of view, we can pause
   useEffect(() => {
     const vid = videoRef.current;
-    if (!vid) return;
+    if (!vid || isLoading) return;
 
-    // Cleanup previous HLS instance
-    if (hlsRef.current) {
-      hlsRef.current.destroy();
-      hlsRef.current = null;
-    }
-
-    // Reset video element
-    vid.pause();
-    vid.src = "";
-
-    if (isHls && !vid.canPlayType("application/vnd.apple.mpegurl")) {
-      setupHls(vid);
-    } else {
-      vid.src = playableUrl;
-      vid.load();
-    }
-
-    if (inView) {
-      attemptPlay();
-    } else {
+    if (!inView) {
       vid.pause();
+    } else {
+      // Attempt to play if we're in view
+      vid.play().catch(() => {});
     }
+  }, [inView, isLoading, videoRef]);
 
-    return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-      vid.pause();
-    };
-  }, [playableUrl, isHls, inView, setupHls, attemptPlay]);
-
-  // Custom tap-to-toggle when native controls are off
+  // Tap-to-toggle if no controls
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLVideoElement>) => {
       if (disableClickHandler) return;
@@ -124,23 +62,25 @@ const MediaDisplayVideo: React.FC<Props> = ({
       if (!vid) return;
       e.preventDefault();
       e.stopPropagation();
-      if (vid.paused) vid.play().catch(() => {});
-      else vid.pause();
+      if (vid.paused) {
+        vid.play().catch(() => {});
+      } else {
+        vid.pause();
+      }
     },
-    [disableClickHandler]
+    [disableClickHandler, videoRef]
   );
 
   return (
     <div ref={wrapperRef} className="tw-w-full tw-h-full tw-relative">
       <video
         ref={videoRef}
-        playsInline
+        className="tw-w-full tw-h-full tw-rounded-xl tw-object-contain"
         muted
         loop
-        autoPlay={inView}
         controls={showControls}
+        playsInline
         preload="auto"
-        className="tw-w-full tw-h-full tw-rounded-xl tw-object-contain"
         onClick={showControls ? undefined : handleClick}
       />
     </div>
