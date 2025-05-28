@@ -8,6 +8,7 @@ jest.mock('../../../../services/6529api', () => ({ fetchUrl: jest.fn() }));
 const MockArtist = jest.fn(() => <div data-testid="artist" />);
 jest.mock('../../../../components/nextGen/collections/collectionParts/NextGenCollectionArtist', () => ({
   __esModule: true,
+  // @ts-ignore
   default: (props: any) => MockArtist(props),
 }));
 

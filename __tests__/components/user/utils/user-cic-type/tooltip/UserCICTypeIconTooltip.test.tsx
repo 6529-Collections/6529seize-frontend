@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import UserCICTypeIconTooltip from '../../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltip';
-import { CICType } from '../../../../../entities/IProfile';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
+import { CICType } from '../../../../../../entities/IProfile';
+import { ApiIdentity } from '../../../../../../generated/models/ApiIdentity';
 
 jest.mock('../../../../../../components/user/utils/user-cic-type/UserCICTypeIcon', () => () => <div data-testid="icon" />);
 jest.mock('../../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltipHeaders', () => () => <div data-testid="headers" />);
