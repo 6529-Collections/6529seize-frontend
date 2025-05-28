@@ -20,7 +20,7 @@ describe('UserPageIdentityWrapper', () => {
 
   it('uses profile from hook when available', () => {
     routerMock.mockReturnValue({ query: { user: 'alice' } });
-    const profile = { handle: 'alice' };
+    const profile: any = { handle: 'alice' };
     useIdentityMock.mockReturnValue({ profile });
     render(
       <UserPageIdentityWrapper
@@ -37,7 +37,7 @@ describe('UserPageIdentityWrapper', () => {
 
   it('falls back to initial profile when hook returns null', () => {
     routerMock.mockReturnValue({ query: { user: 'bob' } });
-    const profile = { handle: 'bob' };
+    const profile: any = { handle: 'bob' };
     useIdentityMock.mockReturnValue({ profile: null });
     render(
       <UserPageIdentityWrapper
