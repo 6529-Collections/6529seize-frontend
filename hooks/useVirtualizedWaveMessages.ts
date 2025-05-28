@@ -96,12 +96,12 @@ export function useVirtualizedWaveMessages(
   return {
     id: waveId,
     hasNextPage: source!.hasNextPage,
-    isLoading: dropId ? dropWave!.isFetching : fullWave.isLoading,
+    isLoading: dropId ? dropWave.isFetching : fullWave.isLoading,
     isLoadingNextPage: dropId
-      ? dropWave!.isFetchingNextPage
+      ? dropWave.isFetchingNextPage
       : fullWave.isLoadingNextPage,
     latestFetchedSerialNo: dropId
-      ? dropWave!.drops.at(-1)?.serial_no ?? null
+      ? dropWave.drops.at(-1)?.serial_no ?? null
       : fullWave.latestFetchedSerialNo,
     drops: source!.drops.slice(0, virtualLimit),
     allDropsCount: source!.drops.length,
