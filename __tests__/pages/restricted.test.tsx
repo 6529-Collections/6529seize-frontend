@@ -11,7 +11,7 @@ jest.mock('../../pages/access', () => ({ LoginImage: (p: any) => <img {...p} /> 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('../../services/auth/auth.utils', () => ({ getStagingAuth: jest.fn() }));
 
-const TestProvider: React.FC = ({ children }) => (
+const TestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>{children}</AuthContext.Provider>
 );
 
