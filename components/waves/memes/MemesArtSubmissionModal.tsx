@@ -29,19 +29,19 @@ const MemesArtSubmissionModal: React.FC<
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-bg-iron-700/80 tw-backdrop-blur-sm"
+          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-bg-iron-700 tw-opacity-80 tw-backdrop-blur-sm tw-p-4 2xl:tw-p-6 tw-overflow-y-auto"
           onClick={(e) => {
             e.stopPropagation();
           }}
         >
           {/* This container uses flexbox to position the modal at bottom on mobile, center on larger screens */}
-          <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center md:tw-items-center">
+          <div className="tw-relative tw-flex tw-min-h-full tw-items-end tw-justify-center md:tw-items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="tw-w-full tw-max-w-4xl"
+              className="tw-w-full"
               ref={modalRef}
               onClick={(e) => {
                 // This is important - stop the click from closing the modal

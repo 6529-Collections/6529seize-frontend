@@ -71,16 +71,14 @@ const FilePreview: React.FC<FilePreviewProps> = ({
               <img
                 src={url}
                 alt="Artwork preview"
-                className="tw-max-w-full tw-max-h-full tw-object-contain tw-rounded-md tw-shadow-lg"
+                className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg tw-absolute"
               />
-            ) : url.startsWith("data:video/") ? (
+            ) : isVideo ? (
               <video
                 src={url}
-                className="tw-max-w-full tw-max-h-full tw-object-contain tw-rounded-md tw-shadow-lg"
+                className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg"
                 controls
                 onError={(e) => {
-                  // If we get a runtime error but our checks said it should work,
-                  // we might want to update the compatibility state here
                   console.error("Video playback error:", e);
                 }}
               />
@@ -88,7 +86,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
               <img
                 src={url}
                 alt="Artwork preview"
-                className="tw-max-w-full tw-max-h-full tw-object-contain tw-rounded-md tw-shadow-lg"
+                className="tw-max-w-full tw-max-h-full tw-object-contain tw-shadow-lg tw-absolute"
               />
             )}
           </>

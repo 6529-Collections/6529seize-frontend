@@ -12,14 +12,11 @@ import { useTraitsValidation } from "../validation";
  * All fields are required for submission
  */
 
-
 /**
  * Fields that are read-only and should be skipped in validation
  * These are pre-populated by the system
  */
-const READ_ONLY_FIELDS = [
-  "seizeArtistProfile",
-] as const;
+const READ_ONLY_FIELDS = ["seizeArtistProfile"] as const;
 
 /**
  * Get tooltip text for submit button based on current state
@@ -105,7 +102,8 @@ function checkFormCompleteness(
     }
     // Handle number fields - must be a defined number and not zero
     else if (typeof value === "number") {
-      if (value === null || value === undefined || isNaN(value) || value === 0) return false;
+      if (value === null || value === undefined || isNaN(value) || value === 0)
+        return false;
     }
     // Handle boolean fields - must be explicitly true or false
     else if (typeof value === "boolean") {
@@ -270,44 +268,47 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-relative">
-      {/* Form content wrapped in a container */}
-      <div className="tw-flex tw-flex-col tw-gap-y-6">
-        {/* File Selection Component */}
-        <MemesArtSubmissionFile
-          artworkUploaded={artworkUploaded}
-          artworkUrl={artworkUrl}
-          setArtworkUploaded={setArtworkUploaded}
-          handleFileSelect={handleFileSelect}
-        />
+    <div className="tw-flex tw-flex-col tw-relative tw-h-full">
+      {/* Form content wrapped in a container with proper height */}
+      <div className="tw-relative tw-grid tw-grid-cols-12 tw-gap-x-6 tw-h-[calc(100vh-200px)] tw-min-h-0">
+        <div className="tw-col-span-6 tw-sticky tw-top-0 tw-h-full">
+          {/* File Selection Component */}
+          <MemesArtSubmissionFile
+            artworkUploaded={artworkUploaded}
+            artworkUrl={artworkUrl}
+            setArtworkUploaded={setArtworkUploaded}
+            handleFileSelect={handleFileSelect}
+          />
+        </div>
 
-        {/* Artwork Title and Description */}
-        <ArtworkDetails
-          title={traits.title}
-          description={traits.description}
-          onTitleChange={handleTitleChange}
-          onDescriptionChange={handleDescriptionChange}
-          titleError={validation.errors.title}
-          descriptionError={validation.errors.description}
-          onTitleBlur={() => handleFieldBlur("title")}
-          onDescriptionBlur={() => handleFieldBlur("description")}
-        />
+        <div className="tw-col-span-6 tw-flex tw-flex-col tw-gap-y-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-scroll-smooth tw-overscroll-contain tw-h-full tw-pr-2">
+          {/* Artwork Title and Description */}
+          <ArtworkDetails
+            title={traits.title}
+            description={traits.description}
+            onTitleChange={handleTitleChange}
+            onDescriptionChange={handleDescriptionChange}
+            titleError={validation.errors.title}
+            descriptionError={validation.errors.description}
+            onTitleBlur={() => handleFieldBlur("title")}
+            onDescriptionBlur={() => handleFieldBlur("description")}
+          />
 
-
-        {/* Traits Component */}
-        <MemesArtSubmissionTraits
-          traits={traits}
-          setTraits={setTraits}
-          validationErrors={validation.errors}
-          onFieldBlur={handleFieldBlur}
-        />
+          {/* Traits Component */}
+          <MemesArtSubmissionTraits
+            traits={traits}
+            setTraits={setTraits}
+            validationErrors={validation.errors}
+            onFieldBlur={handleFieldBlur}
+          />
+        </div>
       </div>
 
       {/* Action Buttons - Fixed at bottom */}
       <div className="tw-sticky tw-bottom-0 tw-left-0 tw-w-full tw-bg-iron-950/80 tw-backdrop-blur-sm tw-py-4 tw-z-10">
         <div className="tw-container tw-mx-auto">
           {/* Submission Progress - Only shown when active */}
-          {submissionPhase !== 'idle' && (
+          {submissionPhase !== "idle" && (
             <div className="tw-mb-4">
               <SubmissionProgress
                 phase={submissionPhase}
@@ -317,14 +318,22 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
               />
             </div>
           )}
-          
+
           {/* Action buttons row */}
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
             {/* Cancel button - always visible, but disabled during upload/processing and hidden on success */}
-            {onCancel && submissionPhase !== 'success' ? (
+            {onCancel && submissionPhase !== "success" ? (
               <button
-                onClick={submissionPhase === 'uploading' || submissionPhase === 'processing' ? undefined : onCancel}
-                disabled={submissionPhase === 'uploading' || submissionPhase === 'processing'}
+                onClick={
+                  submissionPhase === "uploading" ||
+                  submissionPhase === "processing"
+                    ? undefined
+                    : onCancel
+                }
+                disabled={
+                  submissionPhase === "uploading" ||
+                  submissionPhase === "processing"
+                }
                 className="tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
                 type="button"
               >
@@ -334,7 +343,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
               /* Keep this invisible div when button is not shown to maintain layout */
               <div></div>
             )}
-            
+
             {/* Submit button */}
             <div
               className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}
