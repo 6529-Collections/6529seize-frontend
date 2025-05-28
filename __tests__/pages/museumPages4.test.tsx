@@ -1,56 +1,61 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import CapsuleHouse from '../../pages/museum/6529-fund-szn1/capsule-house';
-import IncompleteControl from '../../pages/museum/6529-fund-szn1/incomplete-control';
-import Madhouse from '../../pages/museum/6529-fund-szn1/madhouse';
-import NuclearNerds from '../../pages/museum/6529-fund-szn1/nuclear-nerds';
-import PhotoB from '../../pages/museum/6529-photo-b';
-import BharatKrymo2 from '../../pages/museum/bharat-krymo-museum-2';
-import GeneralAssembly from '../../pages/museum/general-assembly';
-import Phase from '../../pages/museum/genesis/phase';
+import EmmaIndex from '../../pages/emma/index';
+import Clonex from '../../pages/museum/6529-fund-szn1/clonex';
+import Grifters from '../../pages/museum/6529-fund-szn1/grifters';
+import Mfers from '../../pages/museum/6529-fund-szn1/mfers';
+import NonEither from '../../pages/museum/6529-fund-szn1/non-either';
+import PublicDomain from '../../pages/museum/6529-public-domain';
+import AcMuseum from '../../pages/museum/ac-museum';
+import Genesis from '../../pages/museum/genesis';
+import Entretiempos from '../../pages/museum/genesis/entretiempos';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
+jest.mock('../../components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper', () => ({ children }: any) => <div>{children}</div>);
 
-describe('additional museum pages render 4', () => {
-  it('renders Capsule House page', () => {
-    render(<CapsuleHouse />);
-    expect(screen.getAllByText(/CAPSULE HOUSE/i).length).toBeGreaterThan(0);
+describe('new static museum pages render', () => {
+  it('renders EMMA index page', () => {
+    render(<EmmaIndex />);
+    expect(screen.getByTestId("dynamic")).toBeInTheDocument();
   });
 
-  it('renders Incomplete Control page', () => {
-    render(<IncompleteControl />);
-    expect(screen.getAllByText(/INCOMPLETE CONTROL/i).length).toBeGreaterThan(0);
+  it('renders Clonex page', () => {
+    render(<Clonex />);
+    expect(screen.getAllByText(/CLONEX/i).length).toBeGreaterThan(0);
   });
 
-  it('renders Madhouse page', () => {
-    render(<Madhouse />);
-    expect(screen.getAllByText(/MADHOUSE/i).length).toBeGreaterThan(0);
+  it('renders Grifters page', () => {
+    render(<Grifters />);
+    expect(screen.getAllByText(/GRIFTERS/i).length).toBeGreaterThan(0);
   });
 
-  it('renders Nuclear Nerds page', () => {
-    render(<NuclearNerds />);
-    expect(
-      screen.getAllByText(/NUCLEAR NERDS OF THE ACCIDENTAL APOCALYPSE/i).length
-    ).toBeGreaterThan(0);
+  it('renders Mfers page', () => {
+    render(<Mfers />);
+    expect(screen.getAllByText(/MFERS/i).length).toBeGreaterThan(0);
   });
 
-  it('renders 6529 Photo B page', () => {
-    render(<PhotoB />);
-    expect(screen.getAllByText(/6529 PHOTO B/i).length).toBeGreaterThan(0);
+  it('renders Non-Either page', () => {
+    render(<NonEither />);
+    expect(screen.getAllByText(/NON EITHER/i).length).toBeGreaterThan(0);
   });
 
-  it('renders Bharat Krymo Museum 2 page', () => {
-    render(<BharatKrymo2 />);
-    expect(screen.getAllByText(/BHARAT KRYMO MUSEE D'ART 2/i).length).toBeGreaterThan(0);
+  it('renders Public Domain page', () => {
+    render(<PublicDomain />);
+    expect(screen.getAllByText(/PUBLIC DOMAIN/i).length).toBeGreaterThan(0);
   });
 
-  it('renders General Assembly page', () => {
-    render(<GeneralAssembly />);
-    expect(screen.getAllByText(/GENERAL ASSEMBLY/i).length).toBeGreaterThan(0);
+  it('renders AC Museum page', () => {
+    render(<AcMuseum />);
+    expect(screen.getAllByText(/AC COLLECTION/i).length).toBeGreaterThan(0);
   });
 
-  it('renders Phase page', () => {
-    render(<Phase />);
-    expect(screen.getAllByText(/PHASE/i).length).toBeGreaterThan(0);
+  it('renders Genesis page', () => {
+    render(<Genesis />);
+    expect(screen.getAllByText(/GENESIS/i).length).toBeGreaterThan(0);
+  });
+
+  it('renders Entretiempos page', () => {
+    render(<Entretiempos />);
+    expect(screen.getAllByText(/ENTRETIEMPOS/i).length).toBeGreaterThan(0);
   });
 });
