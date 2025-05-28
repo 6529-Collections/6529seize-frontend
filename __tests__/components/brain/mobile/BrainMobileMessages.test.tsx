@@ -34,6 +34,6 @@ describe('BrainMobileMessages', () => {
     // ref should point to the rendered div
     expect(scrollContainerRef.current).toBe(rootDiv);
     // style from useLayout should be applied
-    expect(rootDiv).toHaveStyle('height: 42px');
+    expect(rootDiv).toHaveAttribute('style', 'height: 42px;');
   });
 });

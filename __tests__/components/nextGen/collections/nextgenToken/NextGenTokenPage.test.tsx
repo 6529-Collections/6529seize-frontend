@@ -58,14 +58,14 @@ describe('NextGenTokenPage navigation', () => {
   it('disables previous button on first token', () => {
     renderComponent();
     const prev = screen.getByTestId('circle-chevron-left');
-    expect(prev).toHaveStyle('color: #9a9a9a');
+    expect(prev.getAttribute('style')).toContain('color: rgb(154, 154, 154)');
     expect(prev.parentElement?.getAttribute('data-testid')).not.toBe('tippy');
   });
 
   it('enables previous button when not first token', () => {
     renderComponent({ token: { ...baseProps.token, normalised_id: 1, id: 2 } });
     const prev = screen.getByTestId('circle-chevron-left');
-    expect(prev).toHaveStyle('color: #fff');
+    expect(prev.getAttribute('style')).toContain('color: rgb(255, 255, 255)');
     expect(prev.parentElement?.getAttribute('data-testid')).toBe('tippy');
   });
 

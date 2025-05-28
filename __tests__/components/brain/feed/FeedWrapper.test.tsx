@@ -49,7 +49,7 @@ describe('FeedWrapper', () => {
     const { container } = render(<FeedWrapper {...baseProps} />);
 
     // style from useLayout applied
-    expect(container.firstChild).toHaveStyle({ color: 'red' });
+    expect(container.firstChild).toHaveAttribute('style', 'color: red;');
 
     // FeedScrollContainer receives props
     expect(FeedScrollContainerMock).toHaveBeenCalledWith(

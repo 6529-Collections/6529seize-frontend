@@ -27,6 +27,6 @@ describe('DistributionPlanAddOperationBtn', () => {
     expect(spinner).toBeInTheDocument();
     // children container should be hidden via style
     const textDiv = screen.getByText('Add');
-    expect(textDiv).toHaveStyle('visibility: hidden');
+    expect(textDiv).toHaveAttribute('style', 'visibility: hidden;');
   });
 });

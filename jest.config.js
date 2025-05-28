@@ -25,6 +25,8 @@ const config = {
     "^.+.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$": `<rootDir>/__mocks__/fileMock.js`, // You might need to create this mock file
     // Mock nano-css which is used by react-use
     "^nano-css(.*)$": "<rootDir>/__mocks__/nanoCssMock.js",
+    // Mock dom-helpers/css for react-bootstrap
+    "^dom-helpers/css$": "<rootDir>/__mocks__/css-functions.js",
     // Handle next/font - If you use next/font, uncomment and ensure mock exists
     // '@next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
     // 'next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,

@@ -26,7 +26,7 @@ describe('MyStreamWaveFAQ', () => {
 
     expect(setActiveContentTab).toHaveBeenCalledWith(MyStreamWaveTab.FAQ);
     const rootDiv = container.firstChild as HTMLElement;
-    expect(rootDiv).toHaveStyle('height: 21px');
+    expect(rootDiv).toHaveAttribute('style', 'height: 21px;');
     expect(screen.getByText('The Memes - Main Stage FAQ')).toBeInTheDocument();
   });
 });
