@@ -1,10 +1,11 @@
 import React from 'react';
 import { render, fireEvent, screen, act } from '@testing-library/react';
 import GroupCardVoteAll from '../../../../../../../components/groups/page/list/card/vote-all/GroupCardVoteAll';
-import { AuthContext } from '../../../../../../components/auth/Auth';
-import { ReactQueryWrapperContext } from '../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+import { AuthContext } from '../../../../../../../components/auth/Auth';
+import { ReactQueryWrapperContext } from '../../../../../../../components/react-query-wrapper/ReactQueryWrapper';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { commonApiFetch, commonApiPost } from '../../../../../../../services/api/common-api';
+import { ApiRateMatter } from '../../../../../../../generated/models/ApiRateMatter';
 
 jest.mock('@tanstack/react-query');
 jest.mock('../../../../../../../services/api/common-api');
@@ -41,7 +42,7 @@ describe('GroupCardVoteAll', () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={reactQueryCtx}>
-          <GroupCardVoteAll matter="Cic" group={{ id: 'g1' } as any} onCancel={jest.fn()} />
+          <GroupCardVoteAll matter={ApiRateMatter.Cic} group={{ id: 'g1' } as any} onCancel={jest.fn()} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );

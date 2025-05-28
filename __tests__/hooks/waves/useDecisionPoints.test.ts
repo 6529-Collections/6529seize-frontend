@@ -1,9 +1,9 @@
-import { useDecisionPoints } from '../../hooks/waves/useDecisionPoints';
+import { useDecisionPoints } from '../../../hooks/waves/useDecisionPoints';
 
 const mockCalculate = require('../../../helpers/waves/time.utils').calculateLastDecisionTime;
 
 jest.mock('../../../helpers/waves/time.utils', () => ({
-  calculateLastDecisionTime: jest.fn(() => 20)
+  calculateLastDecisionTime: jest.fn(() => 21)
 }));
 
 describe('useDecisionPoints', () => {
@@ -23,6 +23,7 @@ describe('useDecisionPoints', () => {
     expect(result).toEqual([
       { id: 0, name: 'First Decision', timestamp: 10 },
       { id: 1, name: 'Decision 1', timestamp: 15 },
+      { id: 2, name: 'Decision 2', timestamp: 20 },
     ]);
   });
 });

@@ -17,7 +17,7 @@ describe('useVirtualizedWaves', () => {
     const scrollRef = { current: scrollContainer } as React.RefObject<HTMLDivElement>;
     const listRef = { current: listContainer } as React.RefObject<HTMLDivElement>;
 
-    const { result } = renderHook(
+    const { result, rerender } = renderHook(
       () => useVirtualizedWaves(items, 'k', scrollRef, listRef, 50, 0),
       { wrapper }
     );
@@ -28,11 +28,9 @@ describe('useVirtualizedWaves', () => {
       scrollContainer.scrollTop = 120;
       scrollContainer.dispatchEvent(new Event('scroll'));
     });
-    // subsequent call should read updated scroll offset
-    const { result: result2 } = renderHook(
-      () => useVirtualizedWaves(items, 'k', scrollRef, listRef, 50, 0),
-      { wrapper }
-    );
-    expect(result2.current.virtualItems[0].index).toBe(2); // start index advanced
+    
+    // Rerender the same hook to get updated state
+    rerender();
+    expect(result.current.virtualItems[0].index).toBe(2); // start index advanced
   });
 });

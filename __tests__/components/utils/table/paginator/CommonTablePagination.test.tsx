@@ -33,6 +33,7 @@ describe('CommonTablePagination', () => {
         loading
       />
     );
-    expect(screen.getByText('Next')).toBeDisabled();
+    const nextButton = screen.getByRole('button', { name: /next/i });
+    expect(nextButton).toBeDisabled();
   });
 });

@@ -39,7 +39,7 @@ it('validates required fields', async () => {
 it('submits artwork successfully', async () => {
   const { result } = renderHook(() => useArtworkSubmissionMutation(), { wrapper: createWrapper() });
   const res = await result.current.submitArtwork({ imageFile: file, traits: { title: 't', description: 'd' } as any, waveId: '1', termsOfService: null });
-  await waitFor(() => expect(require('../../../../../components/waves/create-wave/services/multiPartUpload').multiPartUpload).toHaveBeenCalled());
-  expect(require('../../../../../services/api/common-api').commonApiPost).toHaveBeenCalled();
+  await waitFor(() => expect(require('../../../../../../components/waves/create-wave/services/multiPartUpload').multiPartUpload).toHaveBeenCalled());
+  expect(require('../../../../../../services/api/common-api').commonApiPost).toHaveBeenCalled();
   expect(res).not.toBeNull();
 });

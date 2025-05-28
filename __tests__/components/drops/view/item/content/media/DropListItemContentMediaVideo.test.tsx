@@ -1,13 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import DropListItemContentMediaVideo from '../../../../../../components/drops/view/item/content/media/DropListItemContentMediaVideo';
+import '@testing-library/jest-dom';
+import DropListItemContentMediaVideo from '../../../../../../../components/drops/view/item/content/media/DropListItemContentMediaVideo';
 
-jest.mock('../../../../../../hooks/useDeviceInfo', () => () => ({ isApp: false }));
-jest.mock('../../../../../../hooks/useInView', () => ({ useInView: jest.fn() }));
-jest.mock('../../../../../../hooks/useOptimizedVideo', () => ({ useOptimizedVideo: jest.fn() }));
+jest.mock('../../../../../../../hooks/useDeviceInfo', () => () => ({ isApp: false }));
+jest.mock('../../../../../../../hooks/useInView', () => ({ useInView: jest.fn() }));
+jest.mock('../../../../../../../hooks/useOptimizedVideo', () => ({ useOptimizedVideo: jest.fn() }));
 
-const mockUseInView = require('../../../../../../hooks/useInView').useInView as jest.Mock;
-const mockUseOptimizedVideo = require('../../../../../../hooks/useOptimizedVideo').useOptimizedVideo as jest.Mock;
+const mockUseInView = require('../../../../../../../hooks/useInView').useInView as jest.Mock;
+const mockUseOptimizedVideo = require('../../../../../../../hooks/useOptimizedVideo').useOptimizedVideo as jest.Mock;
 
 describe('DropListItemContentMediaVideo', () => {
   beforeEach(() => {
@@ -18,6 +19,12 @@ describe('DropListItemContentMediaVideo', () => {
     const ref = { current: document.createElement('div') } as React.RefObject<HTMLDivElement>;
     mockUseInView.mockReturnValue([ref, true]);
     mockUseOptimizedVideo.mockReturnValue({ playableUrl: 'foo.mp4', isHls: false });
+
+    // Mock HTMLVideoElement.play to return a promise
+    Object.defineProperty(HTMLVideoElement.prototype, 'play', {
+      writable: true,
+      value: jest.fn().mockResolvedValue(undefined),
+    });
 
     render(<DropListItemContentMediaVideo src="foo.mp4" />);
     expect(screen.getByText('Your browser does not support the video tag.')).toBeInTheDocument();

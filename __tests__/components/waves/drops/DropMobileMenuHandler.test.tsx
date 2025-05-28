@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import React from 'react';
 import DropMobileMenuHandler from '../../../../components/waves/drops/DropMobileMenuHandler';
 import { DropSize } from '../../../../helpers/waves/drop.helpers';

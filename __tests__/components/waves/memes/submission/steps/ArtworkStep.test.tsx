@@ -89,6 +89,23 @@ describe('ArtworkStep', () => {
     const traits = createTraits();
     traits.title = 't';
     traits.description = 'd';
+    traits.style = 's';
+    traits.jewel = 'j';
+    traits.superpower = 'sp';
+    traits.dharma = 'dh';
+    traits.gear = 'g';
+    traits.clothing = 'c';
+    traits.element = 'e';
+    traits.mystery = 'm';
+    traits.secrets = 'se';
+    traits.weapon = 'w';
+    traits.home = 'h';
+    traits.parent = 'pa';
+    traits.sibling = 'si';
+    traits.food = 'f';
+    traits.drink = 'dr';
+    traits.bonus = 'b';
+    traits.boost = 'bo';
     render(
       <ArtworkStep
         traits={traits}

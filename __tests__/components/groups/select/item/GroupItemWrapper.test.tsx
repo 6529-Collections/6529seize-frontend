@@ -41,7 +41,9 @@ describe('GroupItemWrapper', () => {
         <span>child</span>
       </GroupItemWrapper>
     );
-    const div = screen.getByText('child').closest('div')!.previousSibling as HTMLElement;
-    expect(div).toHaveStyle(`background: linear-gradient(45deg, #111 0%, #222 100%)`);
+    const childElement = screen.getByText('child');
+    const containerDiv = childElement.closest('div[class*="tw-bg-iron-900"]');
+    const gradientDiv = containerDiv?.querySelector('div[class*="tw-h-7"]') as HTMLElement;
+    expect(gradientDiv).toHaveStyle(`background: linear-gradient(45deg, #111 0%, #222 100%)`);
   });
 });
