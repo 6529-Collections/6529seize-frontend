@@ -41,7 +41,7 @@ export default function DropListItemRateGiveSubmit({
   readonly onSuccessfulRateChange: () => void;
   readonly isMobile?: boolean;
 }) {
-  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
+  const { requestAuth, setToast } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);

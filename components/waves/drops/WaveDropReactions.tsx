@@ -1,5 +1,5 @@
 import styles from "./WaveDropReactions.module.scss";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { formatLargeNumber } from "../../../helpers/Helpers";
 import { useEmoji } from "../../../contexts/EmojiContext";
