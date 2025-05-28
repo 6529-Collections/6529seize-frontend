@@ -3957,6 +3957,8 @@ components:
         - subscribed_actions
         - rank
         - is_signed
+        - reactions
+        - context_profile_reaction
       properties:
         id:
           type: string
@@ -4041,6 +4043,14 @@ components:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
         is_signed:
           type: boolean
+        reactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropReaction"
+        context_profile_reaction:
+          anyOf:
+            - type: "null"
+            - type: string
     ApiDropAndDropVote:
       type: object
       required:
@@ -4158,6 +4168,18 @@ components:
         category:
           type: string
           maxLength: 100
+    ApiDropReaction:
+      type: object
+      required:
+        - reaction
+        - profiles
+      properties:
+        reaction:
+          type: string
+        profiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfilePreview"
     ApiDropReferencedNFT:
       type: object
       required:
@@ -4291,6 +4313,8 @@ components:
         - context_profile_context
         - rank
         - is_signed
+        - reactions
+        - context_profile_reaction
       properties:
         id:
           type: string
@@ -4373,6 +4397,14 @@ components:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
         is_signed:
           type: boolean
+        reactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropReaction"
+        context_profile_reaction:
+          anyOf:
+            - type: "null"
+            - type: string
     ApiFeedItem:
       type: object
       required:
@@ -5320,6 +5352,19 @@ components:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
         archived:
           type: boolean
+    ApiProfilePreview:
+      type: object
+      required:
+        - id
+        - handle
+        - pfp
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        pfp:
+          type: string
     ApiProfileProxy:
       type: object
       required:

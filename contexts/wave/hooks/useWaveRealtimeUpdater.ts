@@ -119,7 +119,6 @@ export function useWaveRealtimeUpdater({
   // WebSocket message handler
   const processIncomingDrop: ProcessIncomingDropFn = useCallback(
     async (drop: ApiDrop, type: ProcessIncomingDropType) => {
-      console.log("Processing incoming drop", type, drop);
       if (!drop?.wave?.id) {
         return;
       }
@@ -238,6 +237,16 @@ export function useWaveRealtimeUpdater({
       processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_RATING_UPDATE
+      );
+    }
+  );
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_REACTION_UPDATE,
+    (messageData) => {
+      processIncomingDrop(
+        messageData,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
       );
     }
   );

@@ -10,31 +10,37 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfilePreview } from '../models/ApiProfilePreview';
 import { HttpFile } from '../http/http';
 
-export class ApiDropReaction {
-    'reaction': string;
-    'profiles': Array<ApiProfilePreview>;
+export class ApiProfilePreview {
+    'id': string;
+    'handle': string;
+    'pfp': string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "reaction",
-            "baseName": "reaction",
+            "name": "id",
+            "baseName": "id",
             "type": "string",
             "format": ""
         },
         {
-            "name": "profiles",
-            "baseName": "profiles",
-            "type": "Array<ApiProfilePreview>",
+            "name": "handle",
+            "baseName": "handle",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "pfp",
+            "baseName": "pfp",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropReaction.attributeTypeMap;
+        return ApiProfilePreview.attributeTypeMap;
     }
 
     public constructor() {

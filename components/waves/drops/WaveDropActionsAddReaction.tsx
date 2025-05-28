@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import Tippy from "@tippyjs/react";
 import { createPortal } from "react-dom";
@@ -8,21 +8,19 @@ import { useEmoji } from "../../../contexts/EmojiContext";
 import MobileWrapperDialog from "../../mobile-wrapper-dialog/MobileWrapperDialog";
 import { commonApiPost } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 const WaveDropActionsAddReaction: React.FC<{
   drop: ApiDrop;
   isMobile?: boolean;
   readonly onAddReaction?: () => void;
 }> = ({ drop, isMobile = false, onAddReaction }) => {
-  const { onDropReactionChange } = useContext(ReactQueryWrapperContext);
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canReact = !isTemporaryDrop;
+  const canReact = !isTemporaryDrop && !drop.context_profile_reaction;
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null); // Ref for container
   const { emojiMap, categories, categoryIcons } = useEmoji();
-  const { setToast, connectedProfile } = useAuth();
+  const { setToast } = useAuth();
 
   const handleEmojiSelect = async (emoji: { native?: string; id?: string }) => {
     const emojiText = `:${emoji.id}:`;
@@ -32,12 +30,6 @@ const WaveDropActionsAddReaction: React.FC<{
         reaction: emojiText,
       },
     })
-      .then((response) => {
-        onDropReactionChange({
-          drop: response,
-          giverHandle: connectedProfile?.handle ?? null,
-        });
-      })
       .catch((error) => {
         let errorMessage = "Error adding reaction";
         if (typeof error === "string") {
@@ -117,14 +109,20 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const desktopContent = (
     <Tippy
-      content={<span className="tw-text-xs">Add Reaction</span>}
+      content={
+        <span className="tw-text-xs">
+          {drop.context_profile_reaction
+            ? "You have already reacted to this drop"
+            : "Add Reaction"}
+        </span>
+      }
       placement="top">
       <div>
         <button
           ref={buttonRef}
           className={`picker-button tw-text-iron-500 icon tw-px-2 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300 ${
             !canReact ? "tw-opacity-50 tw-cursor-default" : "tw-cursor-pointer"
-          }`}
+          } hover:tw-text-[#FFCC22]`}
           onClick={onReact}
           disabled={!canReact}
           aria-label="Add reaction to drop">

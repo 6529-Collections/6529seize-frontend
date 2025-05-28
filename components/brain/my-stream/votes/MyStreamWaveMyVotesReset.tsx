@@ -6,7 +6,6 @@ import { DropRateChangeRequest } from "../../../../entities/IDrop";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
 import { useMutation } from "@tanstack/react-query";
 import { AuthContext } from "../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../react-query-wrapper/ReactQueryWrapper";
 
 interface MyStreamWaveMyVotesResetProps {
   readonly haveDrops: boolean;
@@ -27,8 +26,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   removeSelected,
   setPausePolling,
 }) => {
-  const { setToast, connectedProfile } = useContext(AuthContext);
-  const { onDropRateChange } = useContext(ReactQueryWrapperContext);
+  const { setToast } = useContext(AuthContext);
   // State for reset progress
   const [isResetting, setIsResetting] = useState(false);
   const [resetProgress, setResetProgress] = useState(0);
@@ -49,10 +47,6 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       }),
     onSuccess: (response: ApiDrop) => {
       removeSelected(response.id);
-      onDropRateChange({
-        drop: response,
-        giverHandle: connectedProfile?.handle ?? null,
-      });
     },
     onError: (error) => {
       setToast({
@@ -93,15 +87,13 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
         <SecondaryButton
           onClicked={onToggleSelectAll}
           size="sm"
-          disabled={isResetting}
-        >
+          disabled={isResetting}>
           {allItemsSelected ? "Deselect All" : "Select All"}
         </SecondaryButton>
         <SecondaryButton
           onClicked={handleReset}
           size="sm"
-          disabled={!selectedCount || isResetting}
-        >
+          disabled={!selectedCount || isResetting}>
           {isResetting ? "Resetting..." : "Reset Votes"}
         </SecondaryButton>
       </div>

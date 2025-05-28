@@ -73,7 +73,7 @@ const CreateDropEmojiPicker: FC = () => {
       <div className="tw-absolute tw-py-2 tw-right-2 tw-top-0 tw-h-full tw-flex tw-items-start tw-justify-center tw-flex tw-items-center tw-justify-center">
         <button
           ref={buttonRef}
-          className="tw-p-[0.35rem] tw-border-none tw-rounded tw-bg-transparent hover:tw-bg-[rgb(40,40,40)] tw-opacity-50 hover:tw-opacity-100 tw-transition tw-duration-150 tw-flex tw-items-center tw-justify-center"
+          className="tw-p-[0.35rem] tw-border-none tw-rounded tw-bg-transparent hover:tw-bg-[rgb(40,40,40)] tw-opacity-50 hover:tw-opacity-100 tw-transition tw-duration-150 tw-flex tw-items-center tw-justify-center hover:tw-text-[#FFCC22]"
           onClick={() => setShowPicker(!showPicker)}>
           <svg
             className="tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300"

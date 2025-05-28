@@ -1,5 +1,5 @@
 import styles from "./WaveDropReactions.module.scss";
-import React, { useContext, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { formatLargeNumber } from "../../../helpers/Helpers";
 import { useEmoji } from "../../../contexts/EmojiContext";
@@ -10,7 +10,7 @@ import {
   commonApiPost,
 } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
+import clsx from "clsx";
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
@@ -24,186 +24,169 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
           key={reaction.reaction}
           drop={drop}
           reaction={reaction}
-          initialSelected={reaction.reaction === drop.context_profile_reaction}
         />
       ))}
     </>
   );
 };
 
-function WaveDropReaction({
+export function WaveDropReaction({
   drop,
   reaction,
-  initialSelected,
 }: {
   readonly drop: ApiDrop;
   readonly reaction: ApiDropReaction;
-  readonly initialSelected: boolean;
 }) {
   const { setToast, connectedProfile } = useAuth();
-  const { onDropReactionChange } = useContext(ReactQueryWrapperContext);
-  const [count, setCount] = useState(reaction.profiles.length);
-  const [selected, setSelected] = useState(initialSelected);
-  const [direction, setDirection] = useState<"up" | "down">("up");
-
   const { emojiMap, findNativeEmoji } = useEmoji();
-  const emojiId = reaction.reaction.replaceAll(":", "");
-  const emoji = emojiMap
-    .flatMap((cat) => cat.emojis)
-    .find((e) => e.id === emojiId);
 
-  let emojiNode;
-  let emojiNodeTooltip;
-  if (emoji) {
-    emojiNode = (
-      <img
-        src={emoji.skins[0].src}
-        alt={emojiId}
-        className="tw-max-w-4 tw-max-h-4 tw-block tw-object-contain tw-rounded-sm"
-      />
-    );
-    emojiNodeTooltip = (
-      <img
-        src={emoji.skins[0].src}
-        alt={emojiId}
-        className="tw-max-w-8 tw-max-h-8 tw-block tw-object-contain tw-rounded-sm"
-      />
-    );
-  } else {
-    const native = findNativeEmoji(emojiId);
-    if (native) {
-      emojiNode = (
-        <span className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-text-[1rem]">
-          {native.skins[0].native}
-        </span>
-      );
-      emojiNodeTooltip = (
-        <span className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-text-2xl">
-          {native.skins[0].native}
-        </span>
-      );
-    }
-  }
-
-  if (!emojiNode || !count) return null;
-
-  let borderStyle = "tw-border-iron-700";
-  let bgStyle = "tw-bg-iron-900/40";
-  let hoveredStyle = "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
-  if (selected) {
-    borderStyle = "tw-border-primary-500";
-    bgStyle = "tw-bg-primary-500/10";
-    hoveredStyle = "hover:tw-border-primary-500 hover:tw-bg-primary-500/10";
-  }
-
-  const handleClick = async () => {
-    if (selected) {
-      await commonApiDeleteWithBody<{ reaction: string }, ApiDrop>({
-        endpoint: `drops/${drop.id}/reaction`,
-        body: {
-          reaction: reaction.reaction,
-        },
-      })
-        .then(() => {
-          onDropReactionChange({
-            drop,
-            giverHandle: connectedProfile?.handle ?? null,
-          });
-          setDirection("up");
-          setCount(count - 1);
-          setSelected(false);
-        })
-        .catch((error) => {
-          let errorMessage = "Error removing reaction";
-          if (typeof error === "string") {
-            errorMessage = error;
-          }
-          setToast({
-            message: errorMessage,
-            type: "error",
-          });
-        });
-    } else {
-      await commonApiPost<{ reaction: string }, ApiDrop>({
-        endpoint: `drops/${drop.id}/reaction`,
-        body: {
-          reaction: reaction.reaction,
-        },
-      })
-        .then(() => {
-          onDropReactionChange({
-            drop,
-            giverHandle: connectedProfile?.handle ?? null,
-          });
-          setDirection("down");
-          setCount(count + 1);
-          setSelected(true);
-        })
-        .catch((error) => {
-          let errorMessage = "Error adding reaction";
-          if (typeof error === "string") {
-            errorMessage = error;
-          }
-          setToast({
-            message: errorMessage,
-            type: "error",
-          });
-        });
-    }
-  };
-
-  const handles = reaction.profiles.map((p) => p.handle);
-  const total = handles.length;
-
-  let tooltipText;
-  if (total <= 3) {
-    tooltipText = handles.join(", ");
-  } else {
-    const firstThree = handles.slice(0, 3).join(", ");
-    const remaining = total - 3;
-    tooltipText = `${firstThree} and ${remaining} more`;
-  }
-  const tooltipContent = (
-    <div className="tw-flex tw-items-center tw-gap-2">
-      {emojiNodeTooltip}
-      <span className="tw-whitespace-nowrap">by {tooltipText}</span>
-    </div>
+  // initial
+  const initialTotal = reaction.profiles.length;
+  const initialSelected = reaction.reaction === drop.context_profile_reaction;
+  const [total, setTotal] = useState(initialTotal);
+  const [selected, setSelected] = useState(initialSelected);
+  const [handles, setHandles] = useState(
+    reaction.profiles.map((p) => p.handle)
   );
 
+  // derive emoji ID
+  const emojiId = useMemo(
+    () => reaction.reaction.replaceAll(":", ""),
+    [reaction.reaction]
+  );
+
+  // small + tooltip emoji nodes
+  const { emojiNode, emojiNodeTooltip } = useMemo(() => {
+    const custom = emojiMap
+      .flatMap((cat) => cat.emojis)
+      .find((e) => e.id === emojiId);
+
+    if (custom) {
+      return {
+        emojiNode: (
+          <img
+            src={custom.skins[0].src}
+            alt={emojiId}
+            className="tw-max-w-4 tw-max-h-4 tw-object-contain"
+          />
+        ),
+        emojiNodeTooltip: (
+          <img
+            src={custom.skins[0].src}
+            alt={emojiId}
+            className="tw-max-w-8 tw-max-h-8 tw-object-contain tw-rounded-sm"
+          />
+        ),
+      };
+    }
+
+    const native = findNativeEmoji(emojiId);
+    if (native) {
+      return {
+        emojiNode: (
+          <span className="tw-text-[1rem] tw-flex tw-items-center tw-justify-center">
+            {native.skins[0].native}
+          </span>
+        ),
+        emojiNodeTooltip: (
+          <span className="tw-text-2xl tw-flex tw-items-center tw-justify-center">
+            {native.skins[0].native}
+          </span>
+        ),
+      };
+    }
+
+    return { emojiNode: null, emojiNodeTooltip: null };
+  }, [emojiId, emojiMap, findNativeEmoji]);
+
+  // click handler: wait for API, then update via stream
+  const handleClick = useCallback(async () => {
+    // optimistic update
+    setSelected((s) => !s);
+    setTotal((n) => n + (selected ? -1 : +1));
+    if (selected) {
+      setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
+    } else {
+      setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+    }
+
+    try {
+      const body = { reaction: reaction.reaction };
+      if (selected) {
+        await commonApiDeleteWithBody<{ reaction: string }, ApiDrop>({
+          endpoint: `drops/${drop.id}/reaction`,
+          body,
+        });
+      } else {
+        await commonApiPost<{ reaction: string }, ApiDrop>({
+          endpoint: `drops/${drop.id}/reaction`,
+          body,
+        });
+      }
+    } catch (error) {
+      let msg = selected ? "Error removing reaction" : "Error adding reaction";
+      if (typeof error === "string") msg = error;
+      setToast({ message: msg, type: "error" });
+      setSelected((s) => !s);
+      setTotal((n) => n + (selected ? +1 : -1));
+      if (!selected) {
+        setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
+      } else {
+        setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+      }
+    }
+  }, [selected, drop.id, reaction.reaction, setToast]);
+
+  // tooltip text
+  const tooltipText = useMemo(() => {
+    if (total <= 3) return handles.join(", ");
+    return `${handles.slice(0, 3).join(", ")} and ${total - 3} more`;
+  }, [handles, total]);
+
+  // styles
+  const borderStyle = selected ? "tw-border-primary-500" : "tw-border-iron-700";
+  const bgStyle = selected ? "tw-bg-primary-500/10" : "tw-bg-iron-900/40";
+  const hoverStyle = selected
+    ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
+    : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+
+  if (!emojiNode || total === 0) return null;
   return (
     <>
       <button
         onClick={handleClick}
-        data-tooltip-id={`reaction-${reaction.reaction}`}
-        className={`
-        tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1
-        tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm
-        tw-border tw-border-solid tw-text-iron-500
-        hover:tw-text-iron-100
-        ${borderStyle} ${bgStyle} ${hoveredStyle}
-      `}>
+        data-tooltip-id={`reaction-${emojiId}`}
+        className={clsx(
+          "tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-border tw-border-solid hover:tw-text-iron-100",
+          borderStyle,
+          bgStyle,
+          hoverStyle
+        )}>
         <div className="tw-flex tw-items-center tw-gap-x-1 tw-h-full">
           <div className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
             {emojiNode}
           </div>
           <span className="tw-text-xs tw-font-normal tw-min-w-[2ch]">
             <span
-              key={count}
+              key={total}
               className={
-                direction === "up"
-                  ? styles.reactionSlideUp
-                  : styles.reactionSlideDown
+                selected ? styles.reactionSlideUp : styles.reactionSlideDown
               }>
-              {formatLargeNumber(count)}
+              {formatLargeNumber(total)}
             </span>
           </span>
         </div>
       </button>
       <Tooltip
-        id={`reaction-${reaction.reaction}`}
+        id={`reaction-${emojiId}`}
+        delayShow={250}
         place="bottom"
-        className="tw-opacity-100 tw-z-50 tw-bg-black tw-text-white tw-rounded-lg tw-shadow-lg">
-        {tooltipContent}
+        opacity={1}
+        style={{ backgroundColor: "#37373E", color: "white", zIndex: 50 }}>
+        <div className="tw-flex tw-items-center tw-gap-2">
+          {emojiNodeTooltip}
+          <span className="tw-whitespace-nowrap">by {tooltipText}</span>
+        </div>
       </Tooltip>
     </>
   );

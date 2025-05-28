@@ -3,7 +3,6 @@ import { DropRateChangeRequest } from "../../../../../../entities/IDrop";
 import { useMutation } from "@tanstack/react-query";
 import { commonApiPost } from "../../../../../../services/api/common-api";
 import { AuthContext } from "../../../../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../../../../react-query-wrapper/ReactQueryWrapper";
 import dynamic from "next/dynamic";
 import { ApiDrop } from "../../../../../../generated/models/ApiDrop";
 import { useDropInteractionRules } from "../../../../../../hooks/drops/useDropInteractionRules";
@@ -18,7 +17,7 @@ export const VOTE_STATE_ERRORS: Record<DropVoteState, string | null> = {
   [DropVoteState.CAN_VOTE]: null,
   [DropVoteState.IS_WINNER]: null,
   [DropVoteState.VOTING_NOT_STARTED]: "Voting has not started yet",
-  [DropVoteState.VOTING_ENDED]: "Voting has ended"
+  [DropVoteState.VOTING_ENDED]: "Voting has ended",
 };
 
 const DropListItemRateGiveClap = dynamic(
@@ -43,7 +42,6 @@ export default function DropListItemRateGiveSubmit({
   readonly isMobile?: boolean;
 }) {
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { onDropRateChange } = useContext(ReactQueryWrapperContext);
   const [mutating, setMutating] = useState<boolean>(false);
   const [clickCount, setClickCount] = useState<number>(0);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -59,10 +57,6 @@ export default function DropListItemRateGiveSubmit({
         },
       }),
     onSuccess: (response: ApiDrop) => {
-      onDropRateChange({
-        drop: response,
-        giverHandle: connectedProfile?.handle ?? null,
-      });
       onSuccessfulRateChange();
     },
     onError: (error) => {
