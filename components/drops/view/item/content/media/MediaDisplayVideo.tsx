@@ -24,7 +24,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
   const { playableUrl, isHls } = useOptimizedVideo(src, {
     pollInterval: 15_000,
     maxRetries: 8,
-    preferHls: false,
+    preferHls: true,
   });
 
   useEffect(() => {
