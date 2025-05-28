@@ -5,6 +5,31 @@ import CasaBatllo from '../../pages/casabatllo';
 import Museum from '../../pages/museum';
 import ElementColumns from '../../pages/element_category/columns';
 import MemeLabDistribution from '../../pages/meme-lab/[id]/distribution';
+import AuthorNft6529 from '../../pages/author/nft6529';
+import BlogArtists from '../../pages/blog/a-tale-of-two-artists';
+import CapitalFund from '../../pages/capital/fund';
+import ElementSections from '../../pages/element_category/sections';
+import EmmaPlan from '../../pages/emma/plans/[id]';
+
+jest.mock('next/font/google', () => ({ Poppins: () => ({ className: 'poppins' }) }));
+jest.mock('../../components/auth/SeizeConnectContext', () => ({
+  useSeizeConnectContext: () => ({
+    address: '0x0',
+    seizeConnect: jest.fn(),
+    seizeDisconnect: jest.fn(),
+    seizeDisconnectAndLogout: jest.fn(),
+    seizeAcceptConnection: jest.fn(),
+    seizeConnectOpen: false,
+    isConnected: false,
+    isAuthenticated: false,
+  }),
+}));
+jest.mock('next/router', () => ({ useRouter: () => ({ push: jest.fn(), replace: jest.fn(), query: { id: '1' } }) }));
+jest.mock('react-use', () => ({ useInterval: jest.fn() }));
+
+jest.mock('../../components/distribution-plan-tool/distribution-plan-tool-sidebar/DistributionPlanToolSidebar', () => () => (
+  <div data-testid="sidebar" />
+));
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 
@@ -32,5 +57,30 @@ describe('static pages render', () => {
   it('meme lab distribution page loads', () => {
     render(<MemeLabDistribution />);
     expect(screen.getByTestId('dynamic')).toBeInTheDocument();
+  });
+
+  it('renders author page', () => {
+    const { container } = render(<AuthorNft6529 />);
+    expect(container).toBeInTheDocument();
+  });
+
+  it('renders blog page', () => {
+    render(<BlogArtists />);
+    expect(screen.getAllByText(/Tale of Two Artists/i)[0]).toBeInTheDocument();
+  });
+
+  it('renders capital fund page', () => {
+    render(<CapitalFund />);
+    expect(screen.getByText(/6529 FUND/i)).toBeInTheDocument();
+  });
+
+  it('sections page redirects', () => {
+    render(<ElementSections />);
+    expect(screen.getByText(/redirected/i)).toBeInTheDocument();
+  });
+
+  it('emma plan page renders', () => {
+    render(<EmmaPlan />);
+    expect(screen.getByTestId('sidebar')).toBeInTheDocument();
   });
 });
