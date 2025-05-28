@@ -65,7 +65,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
   return (
     <div
       className="tw-w-full tw-cursor-pointer tw-@container"
-      onClick={() => onDropClick(drop)}
+      onClick={() => !hasTouchScreen && onDropClick(drop)}
     >
       <div className="tw-w-full tw-group">
         <div

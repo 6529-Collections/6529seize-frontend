@@ -31,9 +31,12 @@ const MemeDropTrait: React.FC<MemeDropTraitProps> = ({ label, value }) => {
   if (label === FIELD_TO_LABEL_MAP.pointsLoki) {
     console.log(value, typeof value);
   }
+
   return (
     <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1.5">
-      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-uppercase tw-font-normal">{label}:</span>
+      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-uppercase tw-font-normal">
+        {label}:
+      </span>
       <Tippy
         disabled={isMobile}
         content={convertedValue}
