@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import NextGenArtists from '../../../../components/nextGen/collections/NextGenArtists';
