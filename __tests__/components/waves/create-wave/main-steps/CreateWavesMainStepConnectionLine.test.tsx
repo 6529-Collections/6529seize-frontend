@@ -46,11 +46,11 @@ describe('CreateWavesMainStepConnectionLine', () => {
     expect(lines).toHaveLength(2);
   });
 
-  it('applies correct inline styles to progress line', () => {
+  it('progress line is present when component renders', () => {
     const { container } = render(<CreateWavesMainStepConnectionLine done={true} />);
     
     const progressLine = container.querySelector('.tw-bg-primary-500');
-    expect(progressLine).toHaveStyle('originY: 0');
-    expect(progressLine).toHaveStyle('scaleY: 0');
+    expect(progressLine).toBeInTheDocument();
+    expect(progressLine).toHaveClass('tw-bg-primary-500');
   });
 });

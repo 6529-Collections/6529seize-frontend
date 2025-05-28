@@ -448,15 +448,18 @@ describe('CreateWave', () => {
 
     it('shows toast on submission error', async () => {
       const errorMessage = 'Failed to create wave';
-      mockAddWaveMutation.mutateAsync.mockRejectedValue(errorMessage);
 
-      // Mock the mutation to call onError
+      // Mock the mutation to call onError without rejecting the promise twice
       mockedUseAddWaveMutation.mockImplementation(({ onError, onSettled }) => {
         const mutation = {
           mutateAsync: jest.fn().mockImplementation(async () => {
-            onError(errorMessage);
-            onSettled();
-            return Promise.reject(errorMessage);
+            try {
+              onError(errorMessage);
+              onSettled();
+              throw new Error(errorMessage);
+            } catch (error) {
+              // Handle the error internally to prevent unhandled rejection
+            }
           }),
         };
         return mutation;

@@ -134,10 +134,39 @@ const nft = {
 });
 
 function renderPage() {
+  const mockAuthContext = {
+    connectedProfile: {
+      id: 'test-id',
+      handle: 'test-handle',
+      normalised_handle: 'test-handle',
+      pfp: null,
+      cic: 0,
+      rep: 0,
+      level: 1,
+      tdh: 0,
+      consolidation_key: 'test-key',
+      display: 'Test User',
+      primary_wallet: '0x123',
+      banner1: null,
+      banner2: null,
+      classification: 'PSEUDONYM' as any,
+      sub_classification: null,
+      wallets: []
+    },
+    fetchingProfile: false,
+    connectionStatus: 'CONNECTED' as any,
+    receivedProfileProxies: [],
+    activeProfileProxy: null,
+    showWaves: false,
+    requestAuth: jest.fn().mockResolvedValue({ success: true }),
+    setToast: jest.fn(),
+    setActiveProfileProxy: jest.fn(),
+    setTitle: jest.fn(),
+    title: 'Test Title'
+  };
+
   return render(
-    <AuthContext.Provider
-      value={{ connectedProfile: { wallets: [] }, setTitle: jest.fn() } as any}
-    >
+    <AuthContext.Provider value={mockAuthContext}>
       <MemePage />
     </AuthContext.Provider>
   );

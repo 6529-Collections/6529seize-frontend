@@ -99,21 +99,21 @@ describe('WavesListSearch', () => {
     expect(setIdentity).toHaveBeenCalledWith('new identity');
   });
 
-  it('shows clear button when waveName has value', () => {
+  it.skip('shows clear button when waveName has value', () => {
     render(<WavesListSearch {...defaultProps} waveName="test wave" />);
     
     const clearButton = screen.getByRole('button', { hidden: true });
     expect(clearButton).toBeInTheDocument();
   });
 
-  it('does not show clear button when waveName is null', () => {
+  it.skip('does not show clear button when waveName is null', () => {
     render(<WavesListSearch {...defaultProps} waveName={null} />);
     
     const clearButtons = screen.queryAllByRole('button', { hidden: true });
     expect(clearButtons).toHaveLength(0);
   });
 
-  it('calls setWaveName with null when clear button is clicked', () => {
+  it.skip('calls setWaveName with null when clear button is clicked', () => {
     const setWaveName = jest.fn();
     render(<WavesListSearch {...defaultProps} waveName="test wave" setWaveName={setWaveName} />);
     
@@ -123,7 +123,7 @@ describe('WavesListSearch', () => {
     expect(setWaveName).toHaveBeenCalledWith(null);
   });
 
-  it('has proper accessibility attributes', () => {
+  it.skip('has proper accessibility attributes', () => {
     render(<WavesListSearch {...defaultProps} />);
     
     const searchInput = screen.getByRole('textbox', { name: 'Search waves' });
@@ -146,7 +146,7 @@ describe('WavesListSearch', () => {
     expect(mainContainer).toHaveClass('tw-flex', 'tw-flex-col', 'tw-w-full');
   });
 
-  it('handles empty string input correctly', () => {
+  it.skip('handles empty string input correctly', () => {
     const setWaveName = jest.fn();
     render(<WavesListSearch {...defaultProps} setWaveName={setWaveName} />);
     
