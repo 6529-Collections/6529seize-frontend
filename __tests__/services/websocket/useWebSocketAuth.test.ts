@@ -66,9 +66,15 @@ describe('useWebSocketAuth', () => {
   });
 
   it('disconnects when auth token is removed', () => {
-    // Start with a token
+    // Start with a token and mock connected status
     mockGetAuthJwt.mockReturnValue('test-token');
-    const { result, rerender } = renderHook(() => useWebSocketAuth());
+    require('../../../services/websocket/useWebSocket').useWebSocket.mockReturnValue({
+      connect: mockConnect,
+      disconnect: mockDisconnect,
+      status: WebSocketStatus.CONNECTED,
+    });
+    
+    const { rerender } = renderHook(() => useWebSocketAuth());
     
     // Remove the token
     mockGetAuthJwt.mockReturnValue(null);

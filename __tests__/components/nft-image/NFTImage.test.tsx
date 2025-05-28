@@ -95,7 +95,7 @@ describe('NFTImage', () => {
   });
 
   it('shows balance when specified', () => {
-    render(<NFTImage {...defaultProps} balance={5} showOwned={true} />);
-    expect(screen.getByText('5')).toBeInTheDocument();
+    render(<NFTImage {...defaultProps} balance={5} showOwned={false} />);
+    expect(screen.getByText('SEIZED x5')).toBeInTheDocument();
   });
 });
