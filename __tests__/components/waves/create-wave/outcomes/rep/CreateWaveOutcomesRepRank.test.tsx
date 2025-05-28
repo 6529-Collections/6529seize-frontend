@@ -42,6 +42,17 @@ jest.mock('../../../../../../components/waves/create-wave/outcomes/winners/Creat
         >
           Update Winners
         </button>
+        <button
+          onClick={() => setWinnersConfig({
+            ...winnersConfig,
+            creditValueType: 'PERCENTAGE',
+            totalAmount: 100,
+            winners: [{ value: 60 }, { value: 30 }], // This adds up to 90, not 100
+          })}
+          data-testid="set-percentage-mode"
+        >
+          Set Percentage Mode
+        </button>
         {totalValueError && <span data-testid="total-value-error">Total value error</span>}
         {percentageError && <span data-testid="percentage-error">Percentage error</span>}
         <span data-testid="outcome-type">{outcomeType}</span>
@@ -173,9 +184,12 @@ describe('CreateWaveOutcomesRepRank', () => {
     const user = userEvent.setup();
     renderComponent();
     
-    // Set category but leave winners in invalid state
+    // Set category 
     const categoryInput = screen.getByTestId('category-input');
     await user.type(categoryInput, 'Test Category');
+    
+    // Set to percentage mode with invalid total (90% instead of 100%)
+    await user.click(screen.getByTestId('set-percentage-mode'));
     
     // Submit with invalid percentage
     await user.click(screen.getByTestId('primary-button'));

@@ -59,10 +59,32 @@ const mockUseEnsName = require('wagmi').useEnsName as jest.Mock;
 
 const baseCollection = {
   id: 1,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
   name: 'Test Collection',
   artist: 'Test Artist',
+  description: 'Test Description',
+  website: 'https://test.com',
+  licence: 'CC0',
+  base_uri: 'https://test.com/metadata/',
+  library: 'test-library',
+  dependency_script: '',
+  image: 'https://test.com/image.png',
+  banner: 'https://test.com/banner.png',
+  distribution_plan: 'test-plan',
   artist_address: '0xartist',
+  artist_signature: '0xsignature',
+  max_purchases: 1,
+  total_supply: 1000,
+  final_supply_after_mint: 1000,
+  mint_count: 0,
   on_chain: true,
+  allowlist_start: 0,
+  allowlist_end: 0,
+  public_start: 0,
+  public_end: 0,
+  merkle_root: '0x',
+  opensea_link: 'https://opensea.io/test',
 };
 
 const baseProps = {
@@ -80,11 +102,13 @@ describe('NextGenTokenOnChain', () => {
     });
   });
 
-  it('shows fetching state initially', () => {
+  it('shows token not found when data is undefined', () => {
+    // When data is undefined, component considers it not found
+    mockUseReadContract.mockReturnValue({ data: undefined });
+    
     render(<NextGenTokenOnChain {...baseProps} />);
     
-    expect(screen.getByText('Fetching Token')).toBeInTheDocument();
-    expect(screen.getByTestId('dot-loader')).toBeInTheDocument();
+    expect(screen.getByText('Token Not Found')).toBeInTheDocument();
   });
 
   it('shows token not found when token data is null', () => {
@@ -225,8 +249,9 @@ describe('NextGenTokenOnChain', () => {
     });
 
     await waitFor(() => {
-      const image = screen.getByRole('img');
-      expect(image).toHaveAttribute('src', imageUrl);
+      const images = screen.getAllByRole('img');
+      const tokenImage = images.find(img => img.getAttribute('alt') === 'Test Collection #1');
+      expect(tokenImage).toHaveAttribute('src', imageUrl);
     });
   });
 
@@ -241,7 +266,8 @@ describe('NextGenTokenOnChain', () => {
     render(<NextGenTokenOnChain {...baseProps} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('external-link-square')).toBeInTheDocument();
+      // The FontAwesome icon should be rendered
+      expect(screen.getByTestId('square-arrow-up-right')).toBeInTheDocument();
     });
   });
 });

@@ -12,14 +12,20 @@ import { ApiGroupFull } from '../../../../../generated/models/ApiGroupFull';
 // Mock dependencies
 jest.mock('../../../../../components/utils/radio/CommonBorderedRadioButton', () => {
   return function CommonBorderedRadioButton({ type, selected, disabled, label, onChange }: any) {
+    const handleClick = () => {
+      if (!disabled && onChange) {
+        onChange(type);
+      }
+    };
+    
     return (
-      <div data-testid={`radio-${type}`}>
+      <div data-testid={`radio-${type}`} onClick={handleClick}>
         <input
           type="radio"
           checked={selected === type}
           disabled={disabled}
-          onChange={() => onChange(type)}
           aria-label={label}
+          readOnly
         />
         <label>{label}</label>
       </div>
@@ -81,38 +87,43 @@ jest.mock('../../../../../components/waves/create-wave/utils/CreateWaveToggle', 
 });
 
 // Mock constants
-jest.mock('../../../../../helpers/waves/waves.constants', () => ({
-  CREATE_WAVE_NONE_GROUP_LABELS: {
-    [CreateWaveGroupConfigType.ADMIN]: 'No Admin Group',
-    [CreateWaveGroupConfigType.CAN_VIEW]: 'Public Wave',
-    [CreateWaveGroupConfigType.CAN_DROP]: 'Everyone Can Drop',
-    [CreateWaveGroupConfigType.CAN_VOTE]: 'Everyone Can Vote',
-    [CreateWaveGroupConfigType.CAN_CHAT]: 'Everyone Can Chat',
-  },
-  CREATE_WAVE_SELECT_GROUP_LABELS: {
-    [ApiWaveType.Approve]: {
-      [CreateWaveGroupConfigType.ADMIN]: 'Admin Group',
-      [CreateWaveGroupConfigType.CAN_VIEW]: 'Who Can View',
-      [CreateWaveGroupConfigType.CAN_DROP]: 'Who Can Drop',
-      [CreateWaveGroupConfigType.CAN_VOTE]: 'Who Can Vote',
-      [CreateWaveGroupConfigType.CAN_CHAT]: 'Who Can Chat',
+jest.mock('../../../../../helpers/waves/waves.constants', () => {
+  const { CreateWaveGroupConfigType } = jest.requireActual('../../../../../types/waves.types');
+  const { ApiWaveType } = jest.requireActual('../../../../../generated/models/ApiWaveType');
+  
+  return {
+    CREATE_WAVE_NONE_GROUP_LABELS: {
+      [CreateWaveGroupConfigType.ADMIN]: 'Only me',
+      [CreateWaveGroupConfigType.CAN_VIEW]: 'Anyone',
+      [CreateWaveGroupConfigType.CAN_DROP]: 'Anyone',
+      [CreateWaveGroupConfigType.CAN_VOTE]: 'Anyone',
+      [CreateWaveGroupConfigType.CAN_CHAT]: 'Anyone',
     },
-    [ApiWaveType.Rank]: {
-      [CreateWaveGroupConfigType.ADMIN]: 'Admin Group',
-      [CreateWaveGroupConfigType.CAN_VIEW]: 'Who Can View',
-      [CreateWaveGroupConfigType.CAN_DROP]: 'Who Can Drop',
-      [CreateWaveGroupConfigType.CAN_VOTE]: 'Who Can Vote',
-      [CreateWaveGroupConfigType.CAN_CHAT]: 'Who Can Chat',
+    CREATE_WAVE_SELECT_GROUP_LABELS: {
+      [ApiWaveType.Approve]: {
+        [CreateWaveGroupConfigType.ADMIN]: 'Admin',
+        [CreateWaveGroupConfigType.CAN_VIEW]: 'Who can view',
+        [CreateWaveGroupConfigType.CAN_DROP]: 'Who can drop',
+        [CreateWaveGroupConfigType.CAN_VOTE]: 'Who can vote',
+        [CreateWaveGroupConfigType.CAN_CHAT]: 'Who can chat',
+      },
+      [ApiWaveType.Rank]: {
+        [CreateWaveGroupConfigType.ADMIN]: 'Admin',
+        [CreateWaveGroupConfigType.CAN_VIEW]: 'Who can view',
+        [CreateWaveGroupConfigType.CAN_DROP]: 'Who can drop',
+        [CreateWaveGroupConfigType.CAN_VOTE]: 'Who can vote',
+        [CreateWaveGroupConfigType.CAN_CHAT]: 'Who can chat',
+      },
+      [ApiWaveType.Chat]: {
+        [CreateWaveGroupConfigType.ADMIN]: 'Admin',
+        [CreateWaveGroupConfigType.CAN_VIEW]: 'Who can view',
+        [CreateWaveGroupConfigType.CAN_DROP]: 'Who can drop',
+        [CreateWaveGroupConfigType.CAN_VOTE]: 'Who can rate',
+        [CreateWaveGroupConfigType.CAN_CHAT]: 'Who can chat',
+      },
     },
-    [ApiWaveType.Chat]: {
-      [CreateWaveGroupConfigType.ADMIN]: 'Admin Group',
-      [CreateWaveGroupConfigType.CAN_VIEW]: 'Who Can View',
-      [CreateWaveGroupConfigType.CAN_DROP]: 'Who Can Drop',
-      [CreateWaveGroupConfigType.CAN_VOTE]: 'Who Can Vote',
-      [CreateWaveGroupConfigType.CAN_CHAT]: 'Who Can Chat',
-    },
-  },
-}));
+  };
+});
 
 describe('CreateWaveGroup', () => {
   const mockOnGroupSelect = jest.fn();
@@ -156,7 +167,7 @@ describe('CreateWaveGroup', () => {
   it('renders with correct title for group type', () => {
     renderComponent();
     
-    expect(screen.getByText('Who Can Drop')).toBeInTheDocument();
+    expect(screen.getByText('Who can drop')).toBeInTheDocument();
   });
 
   it('renders radio button options', () => {
@@ -237,7 +248,7 @@ describe('CreateWaveGroup', () => {
       chatEnabled: false,
     });
     
-    const radioInput = screen.getByLabelText('Everyone Can Chat');
+    const radioInput = screen.getByLabelText('Anyone');
     expect(radioInput).toBeDisabled();
   });
 
@@ -295,11 +306,10 @@ describe('CreateWaveGroup', () => {
   });
 
   it('handles radio button selection change', async () => {
-    const user = userEvent.setup();
     renderComponent();
     
-    const noneRadio = screen.getByLabelText('Everyone Can Drop');
-    await user.click(noneRadio);
+    const noneRadioContainer = screen.getByTestId('radio-NONE');
+    fireEvent.click(noneRadioContainer);
     
     expect(mockOnGroupSelect).toHaveBeenCalledWith(null);
   });
@@ -333,7 +343,7 @@ describe('CreateWaveGroup', () => {
       groupType: CreateWaveGroupConfigType.CAN_VOTE,
     });
     
-    expect(screen.getByText('Who Can Vote')).toBeInTheDocument();
+    expect(screen.getByText('Who can vote')).toBeInTheDocument();
   });
 
   it('shows modal when group is selected but not found in cache', () => {
@@ -344,7 +354,10 @@ describe('CreateWaveGroup', () => {
     
     // This would happen when the group item switches to GROUP status without a selectedGroup
     const groupItem = screen.getByTestId('group-item');
-    fireEvent.click(groupItem.querySelector('button')!);
+    const button = groupItem.querySelector('button');
+    if (button) {
+      fireEvent.click(button);
+    }
     
     // Now modal should appear
     expect(screen.getByTestId('select-group-modal')).toBeInTheDocument();

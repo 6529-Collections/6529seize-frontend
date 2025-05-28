@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CreateWaveApprovalThreshold from '../../../../../components/waves/create-wave/approval/CreateWaveApprovalThreshold';
 
@@ -31,9 +31,10 @@ describe('CreateWaveApprovalThreshold', () => {
     render(<CreateWaveApprovalThreshold {...defaultProps} setThreshold={mockSetThreshold} />);
     
     const input = screen.getByLabelText('Threshold');
-    await userEvent.type(input, '75');
     
-    expect(mockSetThreshold).toHaveBeenCalledWith(7);
+    // Use fireEvent to avoid controlled input issues with userEvent
+    fireEvent.change(input, { target: { value: '75' } });
+    
     expect(mockSetThreshold).toHaveBeenCalledWith(75);
   });
 
@@ -71,7 +72,7 @@ describe('CreateWaveApprovalThreshold', () => {
     render(<CreateWaveApprovalThreshold {...defaultProps} error={true} />);
     
     expect(screen.getByText('Please set threshold')).toBeInTheDocument();
-    expect(screen.getByRole('img', { hidden: true })).toBeInTheDocument(); // SVG icon
+    expect(document.querySelector('svg')).toBeInTheDocument(); // SVG icon
   });
 
   it('does not show error message when error prop is false', () => {

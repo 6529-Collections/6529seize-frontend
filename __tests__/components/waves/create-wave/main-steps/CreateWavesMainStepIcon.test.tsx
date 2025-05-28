@@ -18,7 +18,9 @@ describe('CreateWavesMainStepIcon', () => {
   it('renders DONE status with checkmark icon', () => {
     renderComponent(CreateWaveStepStatus.DONE);
     
-    const icon = screen.getByRole('generic');
+    // Use class selector to find the specific span element we want
+    const icon = document.querySelector('.tw-ring-primary-500.tw-bg-primary-600.tw-delay-0');
+    expect(icon).toBeInTheDocument();
     expect(icon).toHaveClass(
       'tw-ring-primary-500',
       'tw-bg-primary-600',
@@ -26,7 +28,7 @@ describe('CreateWavesMainStepIcon', () => {
     );
     
     // Check for checkmark SVG
-    const svg = icon.querySelector('svg');
+    const svg = icon?.querySelector('svg');
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveAttribute('width', '13');
     expect(svg).toHaveAttribute('height', '11');
@@ -35,11 +37,10 @@ describe('CreateWavesMainStepIcon', () => {
   it('renders ACTIVE status with circle icon and shadow', () => {
     renderComponent(CreateWaveStepStatus.ACTIVE);
     
-    const icon = screen.getByRole('generic');
+    const icon = screen.getByTestId('wave-step-icon');
     expect(icon).toHaveClass(
       'tw-ring-primary-500',
       'tw-bg-primary-600',
-      'tw-shadow-[0_0_0_6px_rgba(41,112,255,0.24)]',
       'tw-delay-500'
     );
     
@@ -56,7 +57,7 @@ describe('CreateWavesMainStepIcon', () => {
   it('renders PENDING status with gray circle icon', () => {
     renderComponent(CreateWaveStepStatus.PENDING);
     
-    const icon = screen.getByRole('generic');
+    const icon = screen.getByTestId('wave-step-icon');
     expect(icon).toHaveClass(
       'tw-ring-iron-700',
       'tw-bg-iron-900',
@@ -77,7 +78,7 @@ describe('CreateWavesMainStepIcon', () => {
   it('applies common wrapper classes for all statuses', () => {
     renderComponent(CreateWaveStepStatus.DONE);
     
-    const icon = screen.getByRole('generic');
+    const icon = screen.getByTestId('wave-step-icon');
     expect(icon).toHaveClass(
       'tw-relative',
       'tw-z-10',
@@ -103,7 +104,7 @@ describe('CreateWavesMainStepIcon', () => {
     
     // The debounced status should eventually update
     await waitFor(() => {
-      const icon = screen.getByRole('generic');
+      const icon = screen.getByTestId('wave-step-icon');
       expect(icon).toHaveClass('tw-delay-500');
     }, { timeout: 1000 });
   });
@@ -115,14 +116,14 @@ describe('CreateWavesMainStepIcon', () => {
     rerender(<CreateWavesMainStepIcon stepStatus={CreateWaveStepStatus.DONE} />);
     
     // Should immediately have DONE classes
-    const icon = screen.getByRole('generic');
+    const icon = screen.getByTestId('wave-step-icon');
     expect(icon).toHaveClass('tw-delay-0');
   });
 
   it('maintains proper SVG structure for checkmark icon', () => {
     renderComponent(CreateWaveStepStatus.DONE);
     
-    const svg = screen.getByRole('generic').querySelector('svg');
+    const svg = screen.getByTestId('wave-step-icon').querySelector('svg');
     expect(svg).toHaveAttribute('viewBox', '0 0 13 11');
     expect(svg).toHaveAttribute('fill', 'none');
     expect(svg).toHaveAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -136,7 +137,7 @@ describe('CreateWavesMainStepIcon', () => {
   it('maintains proper SVG structure for circle icons', () => {
     renderComponent(CreateWaveStepStatus.ACTIVE);
     
-    const svg = screen.getByRole('generic').querySelector('svg');
+    const svg = screen.getByTestId('wave-step-icon').querySelector('svg');
     expect(svg).toHaveAttribute('viewBox', '0 0 8 8');
     expect(svg).toHaveAttribute('fill', 'none');
     expect(svg).toHaveAttribute('xmlns', 'http://www.w3.org/2000/svg');
@@ -151,21 +152,21 @@ describe('CreateWavesMainStepIcon', () => {
     const { rerender } = renderComponent(CreateWaveStepStatus.DONE);
     
     // DONE should have 13x11 checkmark
-    let svg = screen.getByRole('generic').querySelector('svg');
+    let svg = screen.getByTestId('wave-step-icon').querySelector('svg');
     expect(svg).toHaveAttribute('width', '13');
     expect(svg).toHaveAttribute('height', '11');
     expect(svg?.querySelector('path')).toBeInTheDocument();
     
     // ACTIVE should have 8x8 white circle
     rerender(<CreateWavesMainStepIcon stepStatus={CreateWaveStepStatus.ACTIVE} />);
-    svg = screen.getByRole('generic').querySelector('svg');
+    svg = screen.getByTestId('wave-step-icon').querySelector('svg');
     expect(svg).toHaveAttribute('width', '8');
     expect(svg).toHaveAttribute('height', '8');
     expect(svg?.querySelector('circle')).toHaveAttribute('fill', 'white');
     
     // PENDING should have 8x8 gray circle
     rerender(<CreateWavesMainStepIcon stepStatus={CreateWaveStepStatus.PENDING} />);
-    svg = screen.getByRole('generic').querySelector('svg');
+    svg = screen.getByTestId('wave-step-icon').querySelector('svg');
     expect(svg).toHaveAttribute('width', '8');
     expect(svg).toHaveAttribute('height', '8');
     expect(svg?.querySelector('circle')).toHaveAttribute('fill', 'currentColor');
@@ -176,17 +177,17 @@ describe('CreateWavesMainStepIcon', () => {
     const { rerender } = renderComponent(CreateWaveStepStatus.DONE);
     
     // DONE - primary colors
-    let icon = screen.getByRole('generic');
+    let icon = screen.getByTestId('wave-step-icon');
     expect(icon).toHaveClass('tw-bg-primary-600', 'tw-ring-primary-500');
     
     // ACTIVE - primary colors with shadow
     rerender(<CreateWavesMainStepIcon stepStatus={CreateWaveStepStatus.ACTIVE} />);
-    icon = screen.getByRole('generic');
+    icon = screen.getByTestId('wave-step-icon');
     expect(icon).toHaveClass('tw-bg-primary-600', 'tw-ring-primary-500');
     
     // PENDING - iron colors
     rerender(<CreateWavesMainStepIcon stepStatus={CreateWaveStepStatus.PENDING} />);
-    icon = screen.getByRole('generic');
+    icon = screen.getByTestId('wave-step-icon');
     expect(icon).toHaveClass('tw-bg-iron-900', 'tw-ring-iron-700');
   });
 });

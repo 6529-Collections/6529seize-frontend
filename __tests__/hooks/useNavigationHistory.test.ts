@@ -1,11 +1,16 @@
 import { renderHook, act } from '@testing-library/react';
-import { useRouter } from 'next/router';
-import { useRouter as useNavRouter } from 'next/navigation';
 import { useNavigationHistory } from '../../hooks/useNavigationHistory';
 
 // Mock Next.js routers
-jest.mock('next/router');
-jest.mock('next/navigation');
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}));
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+}));
+
+const { useRouter } = require('next/router');
+const { useRouter: useNavRouter } = require('next/navigation');
 
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
 const mockUseNavRouter = useNavRouter as jest.MockedFunction<typeof useNavRouter>;
@@ -18,8 +23,19 @@ const mockSessionStorage = {
   clear: jest.fn(),
 };
 
+// Mock window object
+Object.defineProperty(global, 'window', {
+  value: {
+    sessionStorage: mockSessionStorage,
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+  },
+  writable: true,
+});
+
 Object.defineProperty(window, 'sessionStorage', {
   value: mockSessionStorage,
+  writable: true,
 });
 
 // Mock window properties

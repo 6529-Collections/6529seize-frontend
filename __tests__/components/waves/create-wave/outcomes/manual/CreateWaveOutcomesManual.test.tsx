@@ -26,10 +26,12 @@ jest.mock('../../../../../../components/utils/button/PrimaryButton', () => {
 });
 
 const mockDates: CreateWaveDatesConfig = {
-  submissionStartDate: new Date('2024-01-01'),
-  submissionEndDate: new Date('2024-01-31'),
-  votingStartDate: new Date('2024-02-01'),
-  votingEndDate: new Date('2024-02-28'),
+  submissionStartDate: new Date('2024-01-01').getTime(),
+  votingStartDate: new Date('2024-02-01').getTime(),
+  endDate: new Date('2024-02-28').getTime(),
+  firstDecisionTime: new Date('2024-03-01').getTime(),
+  subsequentDecisions: [],
+  isRolling: false,
 };
 
 describe('CreateWaveOutcomesManual', () => {
@@ -136,7 +138,8 @@ describe('CreateWaveOutcomesManual', () => {
     await userEvent.type(actionInput, 'Test action');
     
     const positionsInput = screen.getByLabelText(/Winning Positions/i);
-    await userEvent.type(positionsInput, 'invalid');
+    // Use a value that passes the input filter but fails format validation
+    await userEvent.type(positionsInput, '1--3');
     
     const saveButton = screen.getByTestId('primary-button');
     await userEvent.click(saveButton);
