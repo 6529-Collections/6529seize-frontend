@@ -30,8 +30,31 @@ describe('useAddWaveMutation', () => {
     const onError = jest.fn();
     const onSettled = jest.fn();
     const { result } = renderHook(() => useAddWaveMutation({ onSuccess, onError, onSettled }));
-    await act(() => result.current.mutateAsync({ name: 'wave' }));
-    expect(commonApiPost).toHaveBeenCalledWith({ endpoint: 'waves', body: { name: 'wave' } });
+    await act(() => result.current.mutateAsync({ 
+      name: 'wave',
+      picture: null,
+      description_drop: {} as any,
+      voting: {} as any,
+      visibility: {} as any,
+      participation: {} as any,
+      chat: {} as any,
+      wave: {} as any,
+      outcomes: []
+    }));
+    expect(commonApiPost).toHaveBeenCalledWith({ 
+      endpoint: 'waves', 
+      body: {
+        name: 'wave',
+        picture: null,
+        description_drop: {},
+        voting: {},
+        visibility: {},
+        participation: {},
+        chat: {},
+        wave: {},
+        outcomes: []
+      }
+    });
     expect(onSuccess).toHaveBeenCalledWith({ id: 1 });
     expect(onSettled).toHaveBeenCalled();
     expect(onError).not.toHaveBeenCalled();
@@ -44,7 +67,17 @@ describe('useAddWaveMutation', () => {
     const onError = jest.fn();
     const onSettled = jest.fn();
     const { result } = renderHook(() => useAddWaveMutation({ onSuccess, onError, onSettled }));
-    await expect(result.current.mutateAsync({ name: 'x' })).rejects.toThrow('fail');
+    await expect(result.current.mutateAsync({ 
+      name: 'x',
+      picture: null,
+      description_drop: {} as any,
+      voting: {} as any,
+      visibility: {} as any,
+      participation: {} as any,
+      chat: {} as any,
+      wave: {} as any,
+      outcomes: []
+    })).rejects.toThrow('fail');
     expect(onError).toHaveBeenCalledWith(error);
     expect(onSettled).toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();

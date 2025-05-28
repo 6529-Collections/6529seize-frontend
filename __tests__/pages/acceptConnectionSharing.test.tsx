@@ -10,7 +10,7 @@ jest.mock('../../components/auth/SeizeConnectContext', () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
-const TestProvider: React.FC = ({ children }) => (
+const TestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider value={{ setTitle: jest.fn(), setToast: jest.fn() } as any}>
     {children}
   </AuthContext.Provider>

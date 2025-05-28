@@ -5,7 +5,7 @@ import { AuthContext } from '../../components/auth/Auth';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 
-const TestProvider: React.FC = ({ children }) => (
+const TestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>{children}</AuthContext.Provider>
 );
 
