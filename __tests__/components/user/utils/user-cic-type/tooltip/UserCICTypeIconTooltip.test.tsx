@@ -1,7 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import UserCICTypeIconTooltip from '../../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltip';
-import { CICType } from '../../../../../entities/IProfile';
-import { ApiIdentity } from '../../../../../generated/models/ApiIdentity';
 
 jest.mock('../../../../../../components/user/utils/user-cic-type/UserCICTypeIcon', () => () => <div data-testid="icon" />);
 jest.mock('../../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltipHeaders', () => () => <div data-testid="headers" />);
@@ -23,7 +21,7 @@ jest.mock('@tanstack/react-query', () => ({ useQuery: () => ({ data: { count: 2 
 
 const { amIUser } = jest.requireMock('../../../../../../helpers/Helpers');
 
-const profile: ApiIdentity = { handle: 'alice', cic: -30 } as any;
+const profile: any = { handle: 'alice', cic: -30 };
 
 describe('UserCICTypeIconTooltip', () => {
   it('shows rate section when not my profile', () => {
