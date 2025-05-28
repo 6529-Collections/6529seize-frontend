@@ -21,7 +21,7 @@ const WaveDropReactions: React.FC<WaveDropReactionsProps> = ({ drop }) => {
     <>
       {drop.reactions?.map((reaction) => (
         <WaveDropReaction
-          key={reaction.reaction}
+          key={`${reaction.reaction}-${reaction.profiles.length}`}
           drop={drop}
           reaction={reaction}
         />

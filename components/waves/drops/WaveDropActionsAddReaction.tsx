@@ -15,7 +15,7 @@ const WaveDropActionsAddReaction: React.FC<{
   readonly onAddReaction?: () => void;
 }> = ({ drop, isMobile = false, onAddReaction }) => {
   const isTemporaryDrop = drop.id.startsWith("temp-");
-  const canReact = !isTemporaryDrop && !drop.context_profile_reaction;
+  const canReact = !isTemporaryDrop;
   const [showPicker, setShowPicker] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const pickerContainerRef = useRef<HTMLDivElement | null>(null); // Ref for container
@@ -102,7 +102,7 @@ const WaveDropActionsAddReaction: React.FC<{
         </g>
       </svg>
       <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
-        Add Reaction
+        {drop.context_profile_reaction ? "Update Reaction" : "Add Reaction"}
       </span>
     </button>
   );
@@ -111,9 +111,7 @@ const WaveDropActionsAddReaction: React.FC<{
     <Tippy
       content={
         <span className="tw-text-xs">
-          {drop.context_profile_reaction
-            ? "You have already reacted to this drop"
-            : "Add Reaction"}
+          {drop.context_profile_reaction ? "Update Reaction" : "Add Reaction"}
         </span>
       }
       placement="top">
