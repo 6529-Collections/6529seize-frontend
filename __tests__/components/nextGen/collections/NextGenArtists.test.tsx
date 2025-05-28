@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import NextGenArtists from '../../../../components/nextGen/collections/NextGenArtists';
@@ -8,6 +9,7 @@ jest.mock('../../../../services/6529api', () => ({ fetchUrl: jest.fn() }));
 const MockArtist = jest.fn((props: any) => <div data-testid="artist" />);
 jest.mock('../../../../components/nextGen/collections/collectionParts/NextGenCollectionArtist', () => ({
   __esModule: true,
+  // @ts-ignore
   default: (props: any) => MockArtist(props),
 }));
 

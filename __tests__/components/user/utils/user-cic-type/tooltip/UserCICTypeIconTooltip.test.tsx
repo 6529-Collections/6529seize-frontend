@@ -1,5 +1,7 @@
+// @ts-nocheck
 import { render, screen } from '@testing-library/react';
 import UserCICTypeIconTooltip from '../../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltip';
+
 
 jest.mock('../../../../../../components/user/utils/user-cic-type/UserCICTypeIcon', () => () => <div data-testid="icon" />);
 jest.mock('../../../../../../components/user/utils/user-cic-type/tooltip/UserCICTypeIconTooltipHeaders', () => () => <div data-testid="headers" />);
