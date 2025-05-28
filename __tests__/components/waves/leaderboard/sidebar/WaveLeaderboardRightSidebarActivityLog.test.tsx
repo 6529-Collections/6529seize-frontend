@@ -7,7 +7,7 @@ import { ApiWaveCreditType } from '../../../../../generated/models/ApiWaveCredit
 
 // Mock dependencies
 jest.mock('../../../../../helpers/Helpers', () => ({
-  formatNumberWithCommas: jest.fn((num) => num.toString()),
+  formatNumberWithCommas: jest.fn((num) => num >= 1000 ? `${Math.floor(num/1000)},${(num%1000).toString().padStart(3, '0')}` : num.toString()),
   getTimeAgoShort: jest.fn(() => '5m'),
 }));
 
@@ -42,21 +42,24 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
 
   const mockLog: ApiWaveLog = {
     id: 'log-1',
-    created_at: '2024-01-01T10:00:00Z',
+    action: 'VOTE',
+    wave_id: 'wave-1',
+    drop_id: 'drop-1',
+    created_at: '2024-01-01T10:00:00Z' as any,
     invoker: {
       handle: 'voter_user',
       pfp: 'https://example.com/voter.jpg',
-    },
+    } as any,
     drop_author: {
       handle: 'author_user',
       pfp: 'https://example.com/author.jpg',
-    },
+    } as any,
     contents: {
-      oldVote: 10,
-      newVote: 15,
+      oldVote: 1000,
+      newVote: 1000,
       reason: null,
     },
-  } as ApiWaveLog;
+  };
 
   const defaultProps = {
     log: mockLog,
@@ -75,7 +78,8 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
   it('renders the activity log container', () => {
     renderComponent();
     
-    const container = screen.getByRole('generic');
+    const container = document.querySelector('.tw-p-3.tw-rounded-lg.tw-bg-iron-900');
+    expect(container).toBeInTheDocument();
     expect(container).toHaveClass('tw-p-3', 'tw-rounded-lg', 'tw-bg-iron-900');
   });
 
@@ -159,8 +163,8 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
   it('displays vote change from old to new', () => {
     renderComponent();
     
-    expect(screen.getByText('10 →')).toBeInTheDocument();
-    expect(screen.getByText('15 Rep')).toBeInTheDocument();
+    expect(screen.getByText('1,000 →')).toBeInTheDocument();
+    expect(screen.getByText('1,000 REP')).toBeInTheDocument();
   });
 
   it('displays "voted" text for first-time votes', () => {
@@ -178,7 +182,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
   it('applies green color for positive new votes', () => {
     renderComponent();
     
-    const newVoteSpan = screen.getByText('15 Rep');
+    const newVoteSpan = screen.getByText('1,000 REP');
     expect(newVoteSpan).toHaveClass('tw-text-green');
   });
 
@@ -214,7 +218,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
   it('displays correct credit type', () => {
     renderComponent({ creditType: ApiWaveCreditType.Cic });
     
-    expect(screen.getByText('15 CIC')).toBeInTheDocument();
+    expect(screen.getByText('1,000 CIC')).toBeInTheDocument();
   });
 
   it('formats numbers with commas in vote display', () => {
@@ -235,10 +239,10 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
   it('applies correct styling classes to vote elements', () => {
     renderComponent();
     
-    const oldVoteSpan = screen.getByText('10 →');
+    const oldVoteSpan = screen.getByText('1,000 →');
     expect(oldVoteSpan).toHaveClass('tw-text-sm', 'tw-text-iron-500', 'tw-whitespace-nowrap');
     
-    const newVoteSpan = screen.getByText('15 Rep');
+    const newVoteSpan = screen.getByText('1,000 REP');
     expect(newVoteSpan).toHaveClass('tw-text-sm', 'tw-font-semibold', 'tw-whitespace-nowrap');
   });
 

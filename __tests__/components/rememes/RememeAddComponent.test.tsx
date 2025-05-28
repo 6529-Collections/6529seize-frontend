@@ -91,8 +91,8 @@ describe('RememeAddComponent', () => {
     const user = userEvent.setup();
     renderComponent();
     
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     
     expect(screen.getByText('#1 - The Memes #1')).toBeInTheDocument();
     expect(screen.getByText('#2 - The Memes #2')).toBeInTheDocument();
@@ -103,8 +103,8 @@ describe('RememeAddComponent', () => {
     renderComponent();
     
     // Add a reference
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     expect(screen.getByText('Meme References (1)')).toBeInTheDocument();
@@ -138,8 +138,8 @@ describe('RememeAddComponent', () => {
     await user.type(tokenIdInput, '1,2,3');
     
     // Add a reference
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     const validateButton = screen.getByRole('button', { name: /validate/i });
@@ -151,6 +151,7 @@ describe('RememeAddComponent', () => {
     renderComponent();
     
     mockPostData.mockResolvedValue({
+      status: 200,
       response: {
         valid: true,
         contract: { name: 'Test Contract' },
@@ -163,8 +164,8 @@ describe('RememeAddComponent', () => {
     await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), '1');
     
     // Add reference
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     // Validate
@@ -187,6 +188,7 @@ describe('RememeAddComponent', () => {
     renderComponent();
     
     mockPostData.mockResolvedValue({
+      status: 200,
       response: {
         valid: true,
         contract: { name: 'Test Contract' },
@@ -203,8 +205,8 @@ describe('RememeAddComponent', () => {
     await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), '1,2,3');
     
     // Add reference
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     // Validate
@@ -225,6 +227,7 @@ describe('RememeAddComponent', () => {
     renderComponent();
     
     mockPostData.mockResolvedValue({
+      status: 200,
       response: {
         valid: true,
         contract: { name: 'Test Contract' },
@@ -241,8 +244,8 @@ describe('RememeAddComponent', () => {
     await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), '1-3');
     
     // Add reference
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     // Validate
@@ -263,6 +266,7 @@ describe('RememeAddComponent', () => {
     renderComponent();
     
     mockPostData.mockResolvedValue({
+      status: 200,
       response: {
         valid: true,
         contract: { name: 'Test Contract', contractDeployer: '0xdeployer' },
@@ -274,8 +278,8 @@ describe('RememeAddComponent', () => {
     await user.type(screen.getByPlaceholderText('0x...'), '0x1234567890123456789012345678901234567890');
     await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), '1');
     
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     await user.click(screen.getByRole('button', { name: /validate/i }));
@@ -294,6 +298,7 @@ describe('RememeAddComponent', () => {
     renderComponent();
     
     mockPostData.mockResolvedValue({
+      status: 400,
       response: {
         valid: false,
         error: 'Contract not found',
@@ -304,8 +309,8 @@ describe('RememeAddComponent', () => {
     await user.type(screen.getByPlaceholderText('0x...'), '0x1234567890123456789012345678901234567890');
     await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), '1');
     
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     await user.click(screen.getByRole('button', { name: /validate/i }));
@@ -320,12 +325,12 @@ describe('RememeAddComponent', () => {
     const user = userEvent.setup();
     renderComponent();
     
-    // Fill form with invalid token IDs
+    // Fill form with invalid token IDs (leave token IDs empty)
     await user.type(screen.getByPlaceholderText('0x...'), '0x1234567890123456789012345678901234567890');
-    await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), '');
+    // Token IDs field left empty to test invalid case
     
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     await user.click(screen.getByRole('button', { name: /validate/i }));
@@ -341,6 +346,7 @@ describe('RememeAddComponent', () => {
     renderComponent();
     
     mockPostData.mockResolvedValue({
+      status: 200,
       response: {
         valid: true,
         contract: { name: 'Test Contract' },
@@ -352,8 +358,8 @@ describe('RememeAddComponent', () => {
     await user.type(screen.getByPlaceholderText('0x...'), '0x1234567890123456789012345678901234567890');
     await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), '1');
     
-    const dropdownToggle = screen.getByRole('button');
-    await user.click(dropdownToggle);
+    const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
+    await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
     await user.click(screen.getByRole('button', { name: /validate/i }));

@@ -96,9 +96,9 @@ describe('CreateWaveOutcomesWinnersAddWinner', () => {
     expect(path).toBeInTheDocument();
     expect(path).toHaveAttribute('d', 'M12 5V19M5 12H19');
     expect(path).toHaveAttribute('stroke', 'currentColor');
-    expect(path).toHaveAttribute('strokeWidth', '2');
-    expect(path).toHaveAttribute('strokeLinecap', 'round');
-    expect(path).toHaveAttribute('strokeLinejoin', 'round');
+    expect(path).toHaveAttribute('stroke-width', '2');
+    expect(path).toHaveAttribute('stroke-linecap', 'round');
+    expect(path).toHaveAttribute('stroke-linejoin', 'round');
   });
 
   it('has accessible button structure', () => {

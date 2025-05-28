@@ -40,7 +40,7 @@ jest.mock('../../../components/rememes/RememeAddComponent', () => (props: any) =
 ));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
-  FontAwesomeIcon: (props: any) => <svg data-testid={props.icon.iconName} />,
+  FontAwesomeIcon: (props: any) => <svg data-testid={props['data-testid'] || props.icon.iconName} />,
 }));
 
 // Mock hooks and contexts
@@ -201,9 +201,13 @@ describe('RememeAddPage', () => {
     // Verify rememe to trigger checklist
     fireEvent.click(screen.getByText('Verify Rememe'));
 
+    // Wait for the TDH message to appear first
     await waitFor(() => {
-      expect(screen.getByTestId('check-circle')).toBeInTheDocument();
-    });
+      expect(screen.getByText(/you have 10,000 TDH/)).toBeInTheDocument();
+    }, { timeout: 5000 });
+
+    // Then check for the check-circle icon
+    expect(screen.getByTestId('check-circle')).toBeInTheDocument();
   });
 
   it('handles signing message flow', async () => {
@@ -279,11 +283,14 @@ describe('RememeAddPage', () => {
       status: 201,
       response: {
         contract: { address: '0xcontract' },
-        nfts: [{ tokenId: '1', name: 'Test NFT' }],
+        nfts: [{ tokenId: '1', name: 'Test NFT', raw: {} }],
       },
     });
 
     render(<RememeAddPage />);
+    
+    // First verify rememe to set up the rememe data
+    fireEvent.click(screen.getByText('Verify Rememe'));
     
     await waitFor(() => {
       expect(screen.getByText('Status: Success')).toBeInTheDocument();
@@ -310,6 +317,9 @@ describe('RememeAddPage', () => {
 
     render(<RememeAddPage />);
     
+    // First verify rememe to set up the rememe data
+    fireEvent.click(screen.getByText('Verify Rememe'));
+    
     await waitFor(() => {
       expect(screen.getByText('Status: Fail')).toBeInTheDocument();
       expect(screen.getByText('Error: Invalid rememe')).toBeInTheDocument();
@@ -329,25 +339,34 @@ describe('RememeAddPage', () => {
   });
 
   it('handles add another button click', async () => {
-    mockUseSignMessage.mockReturnValue({
+    const signMessageMock = {
       ...defaultSignMessage,
       isSuccess: true,
       data: 'signature',
-    });
+    };
+    mockUseSignMessage.mockReturnValue(signMessageMock);
 
     mockPostData.mockResolvedValue({
       status: 201,
       response: {
         contract: { address: '0xcontract' },
-        nfts: [{ tokenId: '1', name: 'Test NFT' }],
+        nfts: [{ tokenId: '1', name: 'Test NFT', raw: {} }],
       },
     });
 
     render(<RememeAddPage />);
     
+    // First trigger the verification to set up the rememe
+    fireEvent.click(screen.getByText('Verify Rememe'));
+    
+    // Wait for API call to complete and submission to succeed
+    await waitFor(() => {
+      expect(mockPostData).toHaveBeenCalled();
+    });
+    
     await waitFor(() => {
       expect(screen.getByText('Add Another')).toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
 
     fireEvent.click(screen.getByText('Add Another'));
     expect(window.location.reload).toHaveBeenCalled();

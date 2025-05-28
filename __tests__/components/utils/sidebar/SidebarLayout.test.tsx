@@ -6,7 +6,7 @@ import { useHeaderContext } from '../../../../contexts/HeaderContext';
 import useDeviceInfo from '../../../../hooks/useDeviceInfo';
 import { createBreakpoint } from 'react-use';
 import { configureStore } from '@reduxjs/toolkit';
-import groupSlice from '../../../../store/groupSlice';
+import { groupSlice } from '../../../../store/groupSlice';
 
 // Mock dependencies
 jest.mock('next/router', () => ({
@@ -47,12 +47,15 @@ describe('SidebarLayout', () => {
   let store: any;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    
     store = configureStore({
       reducer: {
-        group: groupSlice,
+        group: groupSlice.reducer,
       },
     });
 
+    // Set default router mock
     useRouterMock.mockReturnValue({
       push: mockPush,
       query: {},
@@ -147,7 +150,7 @@ describe('SidebarLayout', () => {
     const mockUseBreakpoint = jest.fn(() => 'XXL');
     createBreakpointMock.mockReturnValue(mockUseBreakpoint);
     
-    renderComponent();
+    const { rerender } = renderComponent();
     
     const toggleButton = screen.getByTestId('sidebar-toggle');
     fireEvent.click(toggleButton); // Open sidebar
@@ -158,7 +161,13 @@ describe('SidebarLayout', () => {
     fireEvent.resize(window);
     
     // Force re-render by triggering useEffect
-    renderComponent();
+    rerender(
+      <Provider store={store}>
+        <SidebarLayout>
+          <div data-testid="test-content">Test Content</div>
+        </SidebarLayout>
+      </Provider>
+    );
     expect(screen.getByTestId('sidebar-toggle')).toHaveTextContent('Open Sidebar');
   });
 
@@ -183,11 +192,33 @@ describe('SidebarLayout', () => {
   });
 
   it('initializes with group from router query', () => {
+    // Reset all mocks completely
+    jest.resetAllMocks();
+    
+    // Recreate mocks in correct order
     useRouterMock.mockReturnValue({
       push: mockPush,
       query: { group: 'test-group-id' },
       isReady: true,
     } as any);
+
+    useHeaderContextMock.mockReturnValue({
+      headerRef: mockHeaderRef,
+    } as any);
+
+    useDeviceInfoMock.mockReturnValue({
+      isApp: false,
+    });
+
+    const mockUseBreakpoint = jest.fn(() => 'XXL');
+    createBreakpointMock.mockReturnValue(mockUseBreakpoint);
+
+    // Create fresh store after setting up router mock
+    store = configureStore({
+      reducer: {
+        group: groupSlice.reducer,
+      },
+    });
 
     renderComponent();
     
