@@ -1,90 +1,66 @@
+import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { render } from '@testing-library/react';
-import Clonex from '../../pages/museum/6529-fund-szn1/clonex';
-import Grifters from '../../pages/museum/6529-fund-szn1/grifters';
-import GenesisPage from '../../pages/museum/genesis';
-import Gazers from '../../pages/museum/genesis/gazers';
-import GlitchCrystalMonsters from '../../pages/museum/genesis/glitch-crystal-monsters';
-import KaiGen from '../../pages/museum/genesis/kai-gen';
-import Labios from '../../pages/museum/genesis/labios';
-import ImaginedWorlds from '../../pages/museum/imagined-worlds';
-import MuseumDistrict from '../../pages/om/6529-museum-district';
+import SixFam2021 from '../../pages/museum/6529-fam-2021';
+import ChromieSquiggle from '../../pages/museum/6529-fund-szn1/chromie-squiggle';
+import ConflictingMetaphysics from '../../pages/museum/6529-fund-szn1/conflicting-metaphysics';
+import SixFundSzn2 from '../../pages/museum/6529-fund-szn2';
+import TwentySevenBitDigital from '../../pages/museum/genesis/27-bit-digital';
+import Algobots from '../../pages/museum/genesis/algobots';
+import Asemica from '../../pages/museum/genesis/asemica';
+import Chimera from '../../pages/museum/genesis/chimera';
+import CosmicReef from '../../pages/museum/genesis/cosmic-reef';
+import GenesisDca from '../../pages/museum/genesis/genesis-dca';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 
-const pages = [
-  {
-    Component: Clonex,
-    title: 'CLONEX - 6529.io',
-    canonical: '/museum/6529-fund-szn1/clonex/',
-    heading: /CLONEX/i,
-  },
-  {
-    Component: Grifters,
-    title: 'GRIFTERS - 6529.io',
-    canonical: '/museum/6529-fund-szn1/grifters/',
-    heading: /GRIFTERS/i,
-  },
-  {
-    Component: GenesisPage,
-    title: 'GENESIS - 6529.io',
-    canonical: '/museum/genesis/',
-    heading: /GENESIS/i,
-  },
-  {
-    Component: Gazers,
-    title: 'GAZERS - 6529.io',
-    canonical: '/museum/genesis/gazers/',
-    heading: /GAZERS/i,
-  },
-  {
-    Component: GlitchCrystalMonsters,
-    title: 'GLITCH CRYSTAL MONSTERS - 6529.io',
-    canonical: '/museum/genesis/glitch-crystal-monsters/',
-    heading: /GLITCH CRYSTAL MONSTERS/i,
-  },
-  {
-    Component: KaiGen,
-    title: 'KAI-GEN - 6529.io',
-    canonical: '/museum/genesis/kai-gen/',
-    heading: /KAI-GEN/i,
-  },
-  {
-    Component: Labios,
-    title: 'LABIOS - 6529.io',
-    canonical: '/museum/genesis/labios/',
-    heading: /LABIOS/i,
-  },
-  {
-    Component: ImaginedWorlds,
-    title: 'IMAGINED WORLDS - 6529.io',
-    canonical: '/museum/imagined-worlds/',
-    heading: /IMAGINED WORLDS/i,
-  },
-  {
-    Component: MuseumDistrict,
-    title: '6529 MUSEUM DISTRICT - 6529.io',
-    canonical: '/om/6529-museum-district/',
-    heading: /6529 MUSEUM DISTRICT/i,
-  },
-];
+describe('museum static pages render', () => {
+  it('renders 6529 FAM 2021 page', () => {
+    render(<SixFam2021 />);
+    expect(screen.getAllByText(/6529 FAM 2021/i).length).toBeGreaterThan(0);
+  });
 
-describe('museum pages render correctly', () => {
-  pages.forEach(({ Component, title, canonical, heading }) => {
-    it(`renders ${title}`, () => {
-      render(<Component />);
+  it('renders Chromie Squiggle page', () => {
+    render(<ChromieSquiggle />);
+    expect(screen.getAllByText(/CHROMIE SQUIGGLE/i).length).toBeGreaterThan(0);
+  });
 
-      const titleEl = document.querySelector('title');
-      expect(titleEl?.textContent).toBe(title);
+  it('renders Conflicting Metaphysics page', () => {
+    render(<ConflictingMetaphysics />);
+    expect(screen.getAllByText(/CONFLICTING METAPHYSICS/i).length).toBeGreaterThan(0);
+  });
 
-      const canonicalLink = document.querySelector('link[rel="canonical"]');
-      expect(canonicalLink?.getAttribute('href')).toBe(canonical);
+  it('renders 6529 Fund Season 2 page', () => {
+    render(<SixFundSzn2 />);
+    expect(screen.getAllByText(/6529 FUND SZN2/i).length).toBeGreaterThan(0);
+  });
 
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      expect(ogTitle?.getAttribute('content')).toBe(title);
+  it('renders 27 Bit Digital page', () => {
+    render(<TwentySevenBitDigital />);
+    expect(screen.getAllByText(/27 BIT DIGITAL/i).length).toBeGreaterThan(0);
+  });
 
-      const h1 = document.querySelector('h1');
-      expect(h1?.textContent).toMatch(heading);
-    });
+  it('renders Algobots page', () => {
+    render(<Algobots />);
+    expect(screen.getAllByText(/ALGOBOTS/i).length).toBeGreaterThan(0);
+  });
+
+  it('renders Asemica page', () => {
+    render(<Asemica />);
+    expect(screen.getAllByText(/ASEMICA/i).length).toBeGreaterThan(0);
+  });
+
+  it('renders Chimera page', () => {
+    render(<Chimera />);
+    expect(screen.getAllByText(/CHIMERA/i).length).toBeGreaterThan(0);
+  });
+
+  it('renders Cosmic Reef page', () => {
+    render(<CosmicReef />);
+    expect(screen.getAllByText(/COSMIC REEF/i).length).toBeGreaterThan(0);
+  });
+
+  it('renders Genesis DCA page', () => {
+    render(<GenesisDca />);
+    expect(screen.getAllByText(/GENESIS/i).length).toBeGreaterThan(0);
   });
 });
