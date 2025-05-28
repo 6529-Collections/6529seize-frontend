@@ -29,10 +29,6 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   const hasFetchedRef = useRef(false);
   const { directMessages, registerWave } = useMyStream();
 
-  useEffect(() => {
-    console.log("directMessages", directMessages);
-  }, [directMessages]);
-
   // Reset the fetch flag when dependencies change
   useEffect(() => {
     hasFetchedRef.current = false;

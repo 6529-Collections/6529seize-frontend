@@ -31,7 +31,7 @@ const MemesLeaderboardDropCard: React.FC<MemesLeaderboardDropCardProps> = ({
   const borderClasses = getBorderClasses(drop);
 
   return (
-    <div className="tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full">
+    <div className="touch-select-none tw-rounded-xl tw-transition tw-duration-300 tw-ease-out tw-w-full">
       <div className={`${borderClasses} tw-bg-iron-950`}>
         {children}
       </div>
