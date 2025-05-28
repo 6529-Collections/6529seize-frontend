@@ -6,7 +6,7 @@ import { fetchUrl } from '../../../../services/6529api';
 
 jest.mock('../../../../services/6529api', () => ({ fetchUrl: jest.fn() }));
 
-const MockArtist = jest.fn(() => <div data-testid="artist" />);
+const MockArtist = jest.fn((props: any) => <div data-testid="artist" />);
 jest.mock('../../../../components/nextGen/collections/collectionParts/NextGenCollectionArtist', () => ({
   __esModule: true,
   // @ts-ignore
