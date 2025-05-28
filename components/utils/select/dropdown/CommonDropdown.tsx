@@ -69,8 +69,12 @@ export default function CommonDropdown<T, U = unknown>(
 
   const getButtonPosition = () => {
     if (buttonRef.current) {
-      const { bottom, right } = buttonRef.current.getBoundingClientRect();
-      return { bottom, right };
+      try {
+        const { bottom, right } = buttonRef.current.getBoundingClientRect();
+        return { bottom, right };
+      } catch (error) {
+        return { bottom: 0, right: 0 };
+      }
     }
     return { bottom: 0, right: 0 };
   };
