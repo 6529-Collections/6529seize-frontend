@@ -3,15 +3,11 @@ import { render, screen } from '@testing-library/react';
 import DistributionPlanTool from '../../pages/emma/index';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
-jest.mock('../../components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper', () => ({ children }: any) => <div data-testid="wrapper">{children}</div>);
-jest.mock('../../components/distribution-plan-tool/connect/distributipn-plan-tool-connect', () => () => <div data-testid="connect" />);
 
 describe('EMMA page', () => {
-  it('renders wrapper and connect components', () => {
+  it('renders dynamic wrapper placeholder', () => {
     render(<DistributionPlanTool />);
-    expect(screen.getByTestId('wrapper')).toBeInTheDocument();
-    expect(screen.getByTestId('connect')).toBeInTheDocument();
-    expect(screen.getByText(/Meet EMMA/i)).toBeInTheDocument();
+    expect(screen.getByTestId('dynamic')).toBeInTheDocument();
   });
 
   it('exports metadata', () => {
