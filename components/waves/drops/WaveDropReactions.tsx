@@ -46,7 +46,7 @@ export function WaveDropReaction({
   const [total, setTotal] = useState(initialTotal);
   const [selected, setSelected] = useState(initialSelected);
   const [handles, setHandles] = useState(
-    reaction.profiles.map((p) => p.handle)
+    reaction.profiles.map((p) => p.handle ?? p.id)
   );
 
   // derive emoji ID
@@ -139,8 +139,14 @@ export function WaveDropReaction({
 
   // tooltip text
   const tooltipText = useMemo(() => {
-    if (total <= 3) return handles.join(", ");
-    return `${handles.slice(0, 3).join(", ")} and ${total - 3} more`;
+    const limit = 12;
+    const truncate = (handle: string) =>
+      handle.length > limit ? handle.slice(0, limit) + "…" : handle;
+
+    const truncatedHandles = handles.map(truncate);
+
+    if (total <= 3) return truncatedHandles.join(", ");
+    return `${truncatedHandles.slice(0, 3).join(", ")} and ${total - 3} more`;
   }, [handles, total]);
 
   // styles

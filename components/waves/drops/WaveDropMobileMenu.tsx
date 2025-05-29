@@ -40,13 +40,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
   showFollowOption = true,
 }) => {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const { isMemesWave } = useSeizeSettings();
   const isTemporaryDrop = drop.id.startsWith("temp-");
-
-  // Check if we should hide the clap icon
-  // Hide only for memes participation drops
-  const shouldHideClap =
-    drop.drop_type === ApiDropType.Participatory && isMemesWave(drop.wave?.id); // Only hide for memes participation drops
 
   const [copied, setCopied] = useState(false);
 
@@ -109,13 +103,11 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         className={`tw-grid tw-grid-cols-1 tw-gap-y-2 ${
           longPressTriggered && "tw-select-none"
         }`}>
-        {!shouldHideClap && (
-          <WaveDropActionsAddReaction
-            drop={drop}
-            isMobile={true}
-            onAddReaction={onAddReaction}
-          />
-        )}
+        <WaveDropActionsAddReaction
+          drop={drop}
+          isMobile={true}
+          onAddReaction={onAddReaction}
+        />
         {showReplyAndQuote && (
           <>
             <button
@@ -220,13 +212,7 @@ const WaveDropMobileMenu: FC<WaveDropMobileMenuProps> = ({
         {showFollowOption && !isAuthor && (
           <WaveDropMobileMenuFollow drop={drop} onFollowChange={closeMenu} />
         )}
-        {!shouldHideClap && (
-          <WaveDropActionsRate
-            drop={drop}
-            isMobile={true}
-            onRated={closeMenu}
-          />
-        )}
+        <WaveDropActionsRate drop={drop} isMobile={true} onRated={closeMenu} />
         {showOptions && (
           <WaveDropMobileMenuDelete drop={drop} onDropDeleted={closeMenu} />
         )}

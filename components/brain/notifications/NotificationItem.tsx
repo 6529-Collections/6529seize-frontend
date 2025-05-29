@@ -13,6 +13,7 @@ import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
 import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 
 import type { JSX } from "react";
+import NotificationDropReacted from "./drop-reacted/NotificationDropReacted";
 
 export default function NotificationItem({
   notification,
@@ -52,6 +53,16 @@ export default function NotificationItem({
       case ApiNotificationCause.DropVoted:
         return (
           <NotificationDropVoted
+            notification={notification}
+            activeDrop={activeDrop}
+            onReply={onReply}
+            onQuote={onQuote}
+            onDropContentClick={onDropContentClick}
+          />
+        );
+      case ApiNotificationCause.DropReacted:
+        return (
+          <NotificationDropReacted
             notification={notification}
             activeDrop={activeDrop}
             onReply={onReply}

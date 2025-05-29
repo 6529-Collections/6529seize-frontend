@@ -14,8 +14,8 @@ import { HttpFile } from '../http/http';
 
 export class ApiProfilePreview {
     'id': string;
-    'handle': string;
-    'pfp': string;
+    'handle': string | null;
+    'pfp': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 

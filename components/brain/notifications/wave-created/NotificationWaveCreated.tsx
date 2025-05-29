@@ -51,19 +51,17 @@ export default function NotificationWaveCreated({
         <span className="tw-text-sm tw-font-normal tw-text-iron-50">
           <Link
             href={`/${notification.related_identity.handle}`}
-            className="tw-no-underline tw-font-semibold"
-          >
+            className="tw-no-underline tw-font-semibold">
             {notification.related_identity.handle}
           </Link>{" "}
           <span className="tw-text-iron-400"> invited you to a wave:</span>{" "}
           <Link
             href={`/my-stream?wave=${notification.additional_context.wave_id}`}
-            className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300"
-          >
+            className="tw-text-md tw-font-medium tw-no-underline tw-text-primary-400 hover:tw-text-primary-300">
             {wave?.name}
           </Link>{" "}
           <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-            <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
+            <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
               &#8226;
             </span>{" "}
             {getTimeAgoShort(notification.created_at)}

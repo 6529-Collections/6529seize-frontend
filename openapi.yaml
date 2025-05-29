@@ -5057,6 +5057,7 @@ components:
         - DROP_QUOTED
         - DROP_REPLIED
         - DROP_VOTED
+        - DROP_REACTED
         - WAVE_CREATED
         - ALL_DROPS
     ApiNotificationsResponse:
@@ -5363,8 +5364,10 @@ components:
           type: string
         handle:
           type: string
+          nullable: true
         pfp:
           type: string
+          nullable: true
     ApiProfileProxy:
       type: object
       required:
