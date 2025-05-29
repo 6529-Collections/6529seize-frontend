@@ -1,5 +1,11 @@
 import styles from "./WaveDropReactions.module.scss";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { formatLargeNumber } from "../../../helpers/Helpers";
 import { useEmoji } from "../../../contexts/EmojiContext";
@@ -42,12 +48,23 @@ export function WaveDropReaction({
 
   // initial
   const initialTotal = reaction.profiles.length;
+  const initialTotalRef = useRef(initialTotal);
+
   const initialSelected = reaction.reaction === drop.context_profile_reaction;
   const [total, setTotal] = useState(initialTotal);
   const [selected, setSelected] = useState(initialSelected);
   const [handles, setHandles] = useState(
     reaction.profiles.map((p) => p.handle ?? p.id)
   );
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    if (total !== initialTotalRef.current) {
+      setAnimate(true);
+      const timeout = setTimeout(() => setAnimate(false), 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [total]);
 
   // derive emoji ID
   const emojiId = useMemo(
@@ -127,6 +144,8 @@ export function WaveDropReaction({
       let msg = selected ? "Error removing reaction" : "Error adding reaction";
       if (typeof error === "string") msg = error;
       setToast({ message: msg, type: "error" });
+
+      // optimistic revert
       setSelected((s) => !s);
       setTotal((n) => n + (selected ? +1 : -1));
       if (!selected) {
@@ -172,14 +191,16 @@ export function WaveDropReaction({
           <div className="tw-w-5 tw-h-5 tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center">
             {emojiNode}
           </div>
-          <span className="tw-text-xs tw-font-normal tw-min-w-[2ch]">
-            <span
-              key={total}
-              className={
-                selected ? styles.reactionSlideUp : styles.reactionSlideDown
-              }>
-              {formatLargeNumber(total)}
-            </span>
+          <span
+            className={clsx(
+              "tw-text-xs tw-font-normal tw-min-w-[2ch]",
+              animate
+                ? selected
+                  ? styles.reactionSlideUp
+                  : styles.reactionSlideDown
+                : ""
+            )}>
+            {formatLargeNumber(total)}
           </span>
         </div>
       </button>
