@@ -112,14 +112,14 @@ describe('UserPageWaves', () => {
 
   it.skip('renders waves search component', () => {
     renderComponent();
-    expect(screen.getByTestId('waves-search')).toBeInTheDocument();
+    expect(screen.getByTestId('waves-search')).toBeTruthy();
   });
 
   it.skip('displays waves in grid layout', () => {
     renderComponent();
-    expect(screen.getByTestId('wave-1')).toBeInTheDocument();
-    expect(screen.getByTestId('wave-2')).toBeInTheDocument();
-    expect(screen.getByTestId('wave-3')).toBeInTheDocument();
+    expect(screen.getByTestId('wave-1')).toBeTruthy();
+    expect(screen.getByTestId('wave-2')).toBeTruthy();
+    expect(screen.getByTestId('wave-3')).toBeTruthy();
   });
 
   it.skip('shows create wave button for connected user viewing own profile', () => {

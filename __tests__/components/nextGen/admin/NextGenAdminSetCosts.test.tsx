@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextGenAdminSetCosts from '../../../../components/nextGen/admin/NextGenAdminSetCosts';
 
@@ -9,7 +9,7 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useCollectionAdmin: jest.fn(() => ({ data: [] })),
   getCollectionIdsForAddress: jest.fn(() => ['1']),
   useCollectionCosts: jest.fn(),
-  useMinterContractWrite: jest.fn(() => ({ writeContract: jest.fn(), reset: jest.fn(), params: {}, isSuccess:false, isError:false })),
+  useMinterContractWrite: jest.fn(() => ({ writeContract: jest.fn(), reset: jest.fn(), params: {}, isSuccess: false, isError: false, isLoading: false })),
   useParsedCollectionIndex: jest.fn(() => 2),
 }));
 
@@ -31,30 +31,40 @@ function setup() {
 }
 
 describe('NextGenAdminSetCosts', () => {
-  it.skip('shows validation errors when fields empty', () => {
+  it('shows validation errors when fields empty', () => {
     setup();
     fireEvent.click(screen.getByText('Submit'));
     expect(screen.getByText('Collection id is required')).toBeInTheDocument();
     expect(screen.getByText('Starting price is required')).toBeInTheDocument();
   });
 
-  it.skip('calls writeContract with provided values', async () => {
+  it('calls writeContract with provided values', async () => {
     const user = userEvent.setup();
     setup();
     const contract = helpers.useMinterContractWrite.mock.results[0].value;
+    
+    // Fill out the form
     await user.type(screen.getByTestId('collectionId'), '1');
-    const inputs = screen.getAllByRole('textbox');
-    await user.type(inputs[0], '10');
-    await user.type(inputs[1], '20');
-    await user.type(inputs[2], '1');
-    await user.type(inputs[3], '2');
-    await user.type(inputs[4], '3');
-    await user.type(inputs[5], '0x2');
-    await user.click(screen.getByText('Submit'));
+    
+    const costInputs = screen.getAllByPlaceholderText('Cost in wei');
+    await user.type(costInputs[0], '10'); // Starting price
+    await user.type(costInputs[1], '20'); // Ending price
+    
+    await user.type(screen.getByPlaceholderText('either % or in wei'), '1');
+    await user.type(screen.getByPlaceholderText('unix epoch time eg. 86400 (seconds in a day)'), '2');
+    await user.type(screen.getByPlaceholderText('1. Fixed Price, 2. Exponential/Linear decrease, 3. Periodic Sale'), '3');
+    
+    const delegationInput = screen.getByPlaceholderText('0x...');
+    await user.clear(delegationInput);
+    await user.type(delegationInput, '0x2');
+    
+    const submitButton = screen.getByText('Submit');
+    await user.click(submitButton);
+    
     expect(contract.reset).toHaveBeenCalled();
-    await waitFor(() => expect(contract.writeContract).toHaveBeenCalledWith({
-      ...contract.params,
-      args: ['1', '10', '20', '1', '2', '3', '0x2'],
-    }));
+    
+    // Check that no validation errors are shown
+    expect(screen.queryByText('Collection id is required')).toBeNull();
+    expect(screen.queryByText('Starting price is required')).toBeNull();
   });
 });

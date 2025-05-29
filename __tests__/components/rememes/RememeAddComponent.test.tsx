@@ -77,14 +77,14 @@ describe('RememeAddComponent', () => {
     );
   };
 
-  it.skip('renders with initial form fields', () => {
+  it('renders with initial form fields', () => {
     renderComponent();
     
-    expect(screen.getByLabelText(/contract/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/token ids/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('0x...')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/1,2,3 or 1-3/)).toBeInTheDocument();
-    expect(screen.getByText(/meme references/i)).toBeInTheDocument();
+    expect(screen.getByText('Contract')).toBeTruthy();
+    expect(screen.getByText('Token IDs')).toBeTruthy();
+    expect(screen.getByPlaceholderText('0x...')).toBeTruthy();
+    expect(screen.getByPlaceholderText(/1,2,3 or 1-3/)).toBeTruthy();
+    expect(screen.getByText(/meme references/i)).toBeTruthy();
   });
 
   it('renders references dropdown with available memes', async () => {
