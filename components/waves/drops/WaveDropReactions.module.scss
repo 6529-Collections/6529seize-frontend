@@ -20,12 +20,14 @@
   }
 }
 
-.reactionSlideUp {
+.reaction {
   display: inline-block;
+}
+
+.reactionSlideUp {
   animation: reaction-slide-up 0.1s ease-out;
 }
 
 .reactionSlideDown {
-  display: inline-block;
   animation: reaction-slide-down 0.1s ease-out;
 }
