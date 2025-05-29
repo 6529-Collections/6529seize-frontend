@@ -35,12 +35,12 @@ it.skip("copies text when copy button clicked", async () => {
     const profile = {} as any;
     render(<UserPageIdentityStatementsStatement statement={statement} profile={profile} canEdit={false} />);
     await userEvent.click(screen.getByRole('button', { name: /copy/i }));
-    expect(screen.getByText('Copied!')).toBeInTheDocument();
+    expect(screen.getByText('Copied!')).toBeTruthy();
     await act(() => {
       jest.advanceTimersByTime(1000);
       jest.runOnlyPendingTimers();
     });
-    expect(screen.getByText('http://x.com')).toBeInTheDocument();
+    expect(screen.getByText('http://x.com')).toBeTruthy();
 }, 10000);
 
   it('shows external link when canOpen is true', () => {

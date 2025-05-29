@@ -94,8 +94,8 @@ describe('RememeAddComponent', () => {
     const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
     await user.click(dropdownToggle!);
     
-    expect(screen.getByText('#1 - The Memes #1')).toBeInTheDocument();
-    expect(screen.getByText('#2 - The Memes #2')).toBeInTheDocument();
+    expect(screen.getByText('#1 - The Memes #1')).toBeTruthy();
+    expect(screen.getByText('#2 - The Memes #2')).toBeTruthy();
   });
 
   it.skip('adds and removes meme references', async () => {
@@ -107,15 +107,17 @@ describe('RememeAddComponent', () => {
     await user.click(dropdownToggle!);
     await user.click(screen.getByText('#1 - The Memes #1'));
     
-    expect(screen.getByText('Meme References (1)')).toBeInTheDocument();
-    expect(screen.getByText('#1 - The Memes #1')).toBeInTheDocument();
+    expect(screen.getByText('Meme References (1)')).toBeTruthy();
+    expect(screen.getByText('#1 - The Memes #1')).toBeTruthy();
     
     // Remove the reference
     const removeButton = screen.getByText('x');
     await user.click(removeButton);
     
-    expect(screen.getByText('Meme References')).toBeInTheDocument();
-    expect(screen.queryByText('#1 - The Memes #1')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Meme References')).toBeTruthy();
+      expect(screen.queryByText('#1 - The Memes #1')).toBeNull();
+    });
   });
 
   it('disables validate button when required fields are empty', () => {
@@ -146,7 +148,7 @@ describe('RememeAddComponent', () => {
     expect(validateButton).toBeEnabled();
   });
 
-  it.skip('parses single token ID correctly', async () => {
+  it('parses single token ID correctly', async () => {
     const user = userEvent.setup();
     renderComponent();
     
@@ -183,7 +185,7 @@ describe('RememeAddComponent', () => {
     });
   });
 
-  it.skip('parses comma-separated token IDs correctly', async () => {
+  it('parses comma-separated token IDs correctly', async () => {
     const user = userEvent.setup();
     renderComponent();
     
@@ -222,7 +224,7 @@ describe('RememeAddComponent', () => {
     });
   });
 
-  it.skip('parses range token IDs correctly', async () => {
+  it('parses range token IDs correctly', async () => {
     const user = userEvent.setup();
     renderComponent();
     
@@ -285,15 +287,15 @@ describe('RememeAddComponent', () => {
     await user.click(screen.getByRole('button', { name: /validate/i }));
     
     await waitFor(() => {
-      expect(screen.getByText(/verified/i)).toBeInTheDocument();
-      expect(screen.getByText(/contract/i)).toBeInTheDocument();
-      expect(screen.getByText('Name: Test Contract')).toBeInTheDocument();
-      expect(screen.getByText(/tokens/i)).toBeInTheDocument();
-      expect(screen.getByText('#1 - Test NFT')).toBeInTheDocument();
+      expect(screen.getByText(/verified/i)).toBeTruthy();
+      expect(screen.getByText(/contract/i)).toBeTruthy();
+      expect(screen.getByText('Name: Test Contract')).toBeTruthy();
+      expect(screen.getByText(/tokens/i)).toBeTruthy();
+      expect(screen.getByText('#1 - Test NFT')).toBeTruthy();
     });
   });
 
-  it.skip('displays verification errors', async () => {
+  it('displays verification errors', async () => {
     const user = userEvent.setup();
     renderComponent();
     
@@ -316,8 +318,8 @@ describe('RememeAddComponent', () => {
     await user.click(screen.getByRole('button', { name: /validate/i }));
     
     await waitFor(() => {
-      expect(screen.getByText(/verification failed/i)).toBeInTheDocument();
-      expect(screen.getByText('- Contract not found')).toBeInTheDocument();
+      expect(screen.getByText(/verification failed/i)).toBeTruthy();
+      expect(screen.getByText('- Contract not found')).toBeTruthy();
     });
   });
 
@@ -336,12 +338,12 @@ describe('RememeAddComponent', () => {
     await user.click(screen.getByRole('button', { name: /validate/i }));
     
     await waitFor(() => {
-      expect(screen.getByText(/verification failed/i)).toBeInTheDocument();
-      expect(screen.getByText('- Invalid token ID(s)')).toBeInTheDocument();
+      expect(screen.getByText(/verification failed/i)).toBeTruthy();
+      expect(screen.getByText('- Invalid token ID(s)')).toBeTruthy();
     });
   });
 
-  it.skip('allows editing after verification', async () => {
+  it('allows editing after verification', async () => {
     const user = userEvent.setup();
     renderComponent();
     
@@ -365,13 +367,13 @@ describe('RememeAddComponent', () => {
     await user.click(screen.getByRole('button', { name: /validate/i }));
     
     await waitFor(() => {
-      expect(screen.getByText(/verified/i)).toBeInTheDocument();
+      expect(screen.getByText(/verified/i)).toBeTruthy();
     });
     
     // Click edit
     await user.click(screen.getByRole('button', { name: /edit/i }));
     
-    expect(screen.getByRole('button', { name: /validate/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /validate/i })).toBeTruthy();
     expect(mockVerifiedRememe).toHaveBeenCalledWith(undefined, []);
   });
 });
