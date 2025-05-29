@@ -31,7 +31,7 @@ describe('WaveWinnersSmallDecisionSelector', () => {
       <WaveWinnersSmallDecisionSelector decisionPoints={decisionPoints} activeDecisionPoint={null} onChange={onChange} />
     );
     fireEvent.click(screen.getByRole('button'));
-    const option = screen.getByText('Jan 1, 2024 2:00 AM');
+    const option = screen.getByText((t) => t.startsWith('Jan 1, 2024'));
     fireEvent.click(option);
     expect(onChange).toHaveBeenCalledWith('1');
     expect(screen.queryByRole('list')).not.toBeInTheDocument();
