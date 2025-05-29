@@ -14,6 +14,7 @@ import WaveDropMetadata from "../WaveDropMetadata";
 import WaveDropMobileMenu from "../WaveDropMobileMenu";
 import useIsMobileDevice from "../../../../hooks/isMobileDevice";
 import WinnerDropBadge from "./WinnerDropBadge";
+import WaveDropReactions from "../WaveDropReactions";
 
 const getRankColorsByRank = (
   rank: number | null
@@ -219,7 +220,10 @@ const DefaultWinnerDrop = ({
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}
-          <div>{!!drop.raters_count && <WaveDropRatings drop={drop} />}</div>
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+            {!!drop.raters_count && <WaveDropRatings drop={drop} />}
+            <WaveDropReactions drop={drop} />
+          </div>
         </div>
       </div>
       <WaveDropMobileMenu

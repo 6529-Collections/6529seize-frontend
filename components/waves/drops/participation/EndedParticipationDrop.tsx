@@ -15,6 +15,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "../../../user/utils/UserCICAndLevel";
 import { cicToType, getTimeAgoShort } from "../../../../helpers/Helpers";
+import WaveDropReactions from "../WaveDropReactions";
 
 interface EndedParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -159,10 +160,13 @@ export default function EndedParticipationDrop({
         </div>
 
         {drop.metadata.length > 0 && (
-          <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-ml-[3.25rem]">
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
             <WaveDropMetadata metadata={drop.metadata} />
           </div>
         )}
+        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+          <WaveDropReactions drop={drop} />
+        </div>
 
         <WaveDropMobileMenu
           drop={drop}
