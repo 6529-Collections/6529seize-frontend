@@ -6,7 +6,7 @@ import { useVirtualizedWaveDrops } from '../../../../hooks/useVirtualizedWaveDro
 jest.mock('../../../../hooks/useVirtualizedWaveDrops');
 jest.mock('../../../../components/waves/drops/WaveDropsReverseContainer', () => ({ __esModule: true, WaveDropsReverseContainer: (props: any) => <div data-testid="container">{props.children}</div> }));
 jest.mock('../../../../components/drops/view/DropsList', () => ({ __esModule: true, default: (props: any) => <div data-testid="drops" {...props} /> }));
-jest.mock('../../../../components/waves/drops/WaveDropsScrollBottomButton', () => ({ __esModule: true, default: () => <div data-testid="scroll-btn" /> }));
+jest.mock('../../../../components/waves/drops/WaveDropsScrollBottomButton', () => ({ __esModule: true, WaveDropsScrollBottomButton: () => <div data-testid="scroll-btn" /> }));
 jest.mock('../../../../components/waves/drops/WaveDropsEmptyPlaceholder', () => ({ __esModule: true, default: () => <div data-testid="empty" /> }));
 jest.mock('../../../../components/waves/drops/WaveDropsScrollingOverlay', () => ({ __esModule: true, default: () => <div data-testid="overlay" /> }));
 jest.mock('next/router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
@@ -46,7 +46,7 @@ function renderComp(overrides?: any) {
   );
 }
 
-describe.skip('WaveDropsAll', () => {
+describe('WaveDropsAll', () => {
   it('shows loader when loading and empty', () => {
     const { container } = renderComp({ messages: { isLoading: true, drops: [] } });
     expect(container.querySelector('svg')).toBeInTheDocument();

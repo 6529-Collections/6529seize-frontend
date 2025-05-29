@@ -9,14 +9,17 @@ jest.mock('../../../components/waves/CreateDropMetadata', () => ({ __esModule: t
 jest.mock('../../../components/waves/CreateDropActions', () => ({ __esModule: true, default: (props: any) => (
   <label aria-label="Upload a file"><input type="file" multiple onChange={e => props.handleFileChange(Array.from(e.target.files!))} /></label>
 )}));
-jest.mock('../../../components/waves/CreateDropDropModeToggle', () => ({ __esModule: true, default: () => <div /> }));
-jest.mock('../../../components/waves/CreateDropSubmit', () => ({ __esModule: true, default: () => <button>submit</button> }));
+jest.mock('../../../components/waves/CreateDropDropModeToggle', () => ({ __esModule: true, CreateDropDropModeToggle: () => <div /> }));
+jest.mock('../../../components/waves/CreateDropSubmit', () => ({ __esModule: true, CreateDropSubmit: () => <button>submit</button> }));
 jest.mock('../../../components/terms/TermsSignatureFlow', () => ({ __esModule: true, default: () => <div /> }));
 jest.mock('../../../hooks/useDropPriviledges', () => ({ __esModule: true, DropPrivileges: {} }));
 jest.mock('../../../hooks/drops/useDropSignature', () => ({ __esModule: true, useDropSignature: () => ({ signDrop: jest.fn() }) }));
 jest.mock('../../../hooks/useWave', () => ({ __esModule: true, useWave: () => ({ isMemesWave: false }) }));
 jest.mock('../../../contexts/wave/MyStreamContext', () => ({ __esModule: true, useMyStream: () => ({ processIncomingDrop: jest.fn() }) }));
 jest.mock('../../../services/websocket', () => ({ __esModule: true, useWebSocket: () => ({ send: jest.fn() }) }));
+jest.mock('../../../components/waves/CreateDropContentFiles', () => ({ __esModule: true, CreateDropContentFiles: () => <div /> }));
+jest.mock('../../../components/waves/CreateDropContentRequirements', () => ({ __esModule: true, default: () => <div /> }));
+jest.mock('../../../components/waves/CreateDropReplyingWrapper', () => ({ __esModule: true, default: () => <div /> }));
 
 const wave: any = {
   id: '1',
@@ -30,7 +33,7 @@ const wave: any = {
 };
 
 describe('CreateDropContent', () => {
-  it.skip('limits number of uploaded files', () => {
+  it('limits number of uploaded files', () => {
     const setToast = jest.fn();
     const { getByLabelText } = render(
       <AuthContext.Provider value={{ setToast } as any}>
