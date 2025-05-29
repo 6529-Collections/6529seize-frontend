@@ -174,6 +174,11 @@ export function WaveDropReaction({
   const hoverStyle = selected
     ? "hover:tw-border-primary-500 hover:tw-bg-primary-500/10"
     : "hover:tw-border-iron-500 hover:tw-bg-iron-900/40";
+  const animationStyle = animate
+    ? selected
+      ? styles.reactionSlideUp
+      : styles.reactionSlideDown
+    : "";
 
   if (!emojiNode || total === 0) return null;
   return (
@@ -194,11 +199,7 @@ export function WaveDropReaction({
           <span
             className={clsx(
               "tw-text-xs tw-font-normal tw-min-w-[2ch]",
-              animate
-                ? selected
-                  ? styles.reactionSlideUp
-                  : styles.reactionSlideDown
-                : ""
+              animationStyle
             )}>
             {formatLargeNumber(total)}
           </span>
