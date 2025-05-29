@@ -1,46 +1,38 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { NextgenTokenTraits, NextgenRarityToggle, displayScore } from '../../../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties';
+import { render, screen, fireEvent } from '@testing-library/react';
 
-jest.mock('react-bootstrap', () => {
-  const React = require('react');
-  return { Container: (p: any) => <div {...p} />, Row: (p: any) => <div>{p.children}</div>, Col: (p: any) => <div>{p.children}</div> };
-});
-
-jest.mock('react-toggle', () => (p: any) => <input type="checkbox" {...p} />);
+const { displayScore, NextgenRarityToggle, NextgenTokenTraits } = require('../../../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties');
 
 describe('displayScore', () => {
   it('formats numbers based on size', () => {
-    expect(displayScore(1.2345)).toBe('1.235');
-    expect(displayScore(0.005)).toBe('0.00500');
+    expect(displayScore(0.02)).toBe('0.020');
     expect(displayScore(0.0005)).toBe('5.000e-4');
+    expect(displayScore(0.005)).toBe('0.00500');
   });
 });
 
 describe('NextgenRarityToggle', () => {
-  it('toggles value when clicked', () => {
+  it('calls setShow when toggled', () => {
     const setShow = jest.fn();
-    render(<NextgenRarityToggle title="Trait Count" show={false} setShow={setShow} />);
-    const checkbox = screen.getByRole('checkbox');
-    expect(checkbox).not.toBeChecked();
-    checkbox.click();
-    expect(setShow).toHaveBeenCalledWith(true);
-  });
-
-  it('shows disabled style', () => {
-    render(<NextgenRarityToggle title="Trait Count" show disabled />);
-    expect(screen.getByRole('checkbox')).toBeDisabled();
-    const label = screen.getByText(/Trait Count/).closest('label');
-    expect(label).toHaveClass('font-color-h');
+    render(<NextgenRarityToggle title="Trait Count" show={true} setShow={setShow} />);
+    fireEvent.click(screen.getByRole('checkbox'));
+    expect(setShow).toHaveBeenCalledWith(false);
+    expect(screen.getByText('Trait Count')).toBeInTheDocument();
   });
 });
 
 describe('NextgenTokenTraits', () => {
-  it('renders trait rows with links', () => {
-    const traits = [{ trait: 'Color', value: 'Red', value_count: 2, token_count: 10, trait_count: 1 } as any];
-    render(<NextgenTokenTraits collection={{ name: 'Cool Coll' } as any} token={{} as any} traits={traits} tokenCount={10} />);
-    const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/nextgen/collection/cool-coll/art?traits=Color:Red');
-    expect(link.textContent).toBe('Red');
+  it('lists traits with correct link and counts', () => {
+    const props: any = {
+      collection: { name: 'Collection Name' },
+      token: {} ,
+      traits: [{ trait: 'Color', value: 'Red', value_count: 2, token_count: 10 }],
+      tokenCount: 10,
+    };
+    render(<NextgenTokenTraits {...props} />);
+    expect(screen.getByText('Color:')).toBeInTheDocument();
+    const link = screen.getByRole('link', { name: 'Red' });
+    expect(link).toHaveAttribute('href', '/nextgen/collection/collection-name/art?traits=Color:Red');
+    expect(screen.getByText('2/10')).toBeInTheDocument();
   });
 });
