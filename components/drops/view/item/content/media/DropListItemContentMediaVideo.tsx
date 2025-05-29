@@ -65,8 +65,6 @@ function DropListItemContentMediaVideo({ src }: Props) {
         loop
         className={`
           tw-w-full tw-h-full tw-rounded-xl tw-object-contain
-          tw-transition-opacity tw-duration-300
-          ${inView ? "tw-opacity-100" : "tw-opacity-0"}
         `}
       >
         Your browser does not support the video tag.
