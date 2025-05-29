@@ -8,7 +8,9 @@ const wrapper = (value: any) => ({ children }: any) => (
   <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 );
 
-describe.skip('useDropInteractionRules', () => {
+jest.mock('../../../helpers/time', () => ({ Time: { currentMillis: jest.fn(() => 2000) } }));
+
+describe('useDropInteractionRules', () => {
   const baseDrop: any = {
     id: 'd1',
     drop_type: ApiDropType.Participatory,
@@ -23,13 +25,13 @@ describe.skip('useDropInteractionRules', () => {
     },
   };
 
-  it.skip('requires login to vote', () => {
+  it('requires login to vote', () => {
     const { result } = renderHook(() => useDropInteractionRules(baseDrop), { wrapper: wrapper({ connectedProfile: null, activeProfileProxy: null }) });
     expect(result.current.canVote).toBe(false);
     expect(result.current.voteState).toBe('NOT_LOGGED_IN');
   });
 
-  it.skip('handles winner drops', () => {
+  it('handles winner drops', () => {
     const drop = { ...baseDrop, drop_type: ApiDropType.Winner, winning_context: { place: 1 } };
     const ctx = { connectedProfile: { handle: 'me' }, activeProfileProxy: null };
     const { result } = renderHook(() => useDropInteractionRules(drop), { wrapper: wrapper(ctx) });
@@ -38,7 +40,7 @@ describe.skip('useDropInteractionRules', () => {
     expect(result.current.canVote).toBe(false);
   });
 
-  it.skip('detects voting ended', () => {
+  it('detects voting ended', () => {
     const drop = { ...baseDrop, wave: { ...baseDrop.wave, voting_period_end: 1000 } };
     jest.spyOn(Date, 'now').mockReturnValue(2000);
     const ctx = { connectedProfile: { handle: 'me' }, activeProfileProxy: null };
