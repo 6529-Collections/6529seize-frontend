@@ -1,6 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { displayScore, NextgenRarityToggle } from "../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties";
+import {
+  displayScore,
+  NextgenRarityToggle,
+  NextgenTokenTraits,
+} from "../../../components/nextGen/collections/nextgenToken/NextGenTokenProperties";
 
 describe("displayScore", () => {
   it("formats numbers >= 0.01 with three decimals", () => {
@@ -36,3 +40,29 @@ describe("NextgenRarityToggle", () => {
     expect(label.parentElement).toHaveClass("font-color-h");
   });
 });
+
+describe("NextgenTokenTraits", () => {
+  it("renders trait rows with links and counts", () => {
+    const traits = [
+      { trait: "Background", value: "Red", value_count: 5, token_count: 10 },
+    ] as any;
+    const collection = { name: "Cool Art" } as any;
+    const token = {} as any;
+    render(
+      <NextgenTokenTraits
+        collection={collection}
+        token={token}
+        traits={traits}
+        tokenCount={10}
+      />
+    );
+    expect(screen.getByText("Background:")).toBeInTheDocument();
+    const link = screen.getByRole("link", { name: "Red" });
+    expect(link).toHaveAttribute(
+      "href",
+      `/nextgen/collection/cool-art/art?traits=Background:Red`
+    );
+    expect(screen.getByText("5/10")).toBeInTheDocument();
+  });
+});
+

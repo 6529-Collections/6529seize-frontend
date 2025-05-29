@@ -28,8 +28,8 @@ const config = {
     // Mock dom-helpers/css for react-bootstrap
     "^dom-helpers/css$": "<rootDir>/__mocks__/css-functions.js",
     // Handle next/font - If you use next/font, uncomment and ensure mock exists
-    // '@next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
-    // 'next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
+    '^@next/font/(.*)$': `<rootDir>/__mocks__/nextFontMock.js`,
+    '^next/font/(.*)$': `<rootDir>/__mocks__/nextFontMock.js`,
   },
   // Test Discovery
   testMatch: ["<rootDir>/**/*.test.ts", "<rootDir>/**/*.test.tsx"],
