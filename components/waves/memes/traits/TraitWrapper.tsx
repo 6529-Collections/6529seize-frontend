@@ -1,6 +1,7 @@
 import React from "react";
 import { TraitWrapperProps } from "./types";
 import ValidationError from "../submission/ui/ValidationError";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   label,
@@ -10,6 +11,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   className,
   error,
   id,
+  isFieldFilled = false,
 }) => {
   // Generate unique IDs for accessibility
   const fieldId = id || `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
@@ -28,9 +30,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
           >
             {label}
           </label>
-          <div className="tw-flex-1 tw-max-w-xs">
-            {children}
-          </div>
+          <div className="tw-flex-1 tw-max-w-xs">{children}</div>
         </div>
         <ValidationError error={error} id={errorId} />
       </div>
@@ -44,20 +44,23 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
         <label
           htmlFor={fieldId}
           className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all
-            ${readOnly 
-              ? "tw-text-iron-500" 
-              : hasError 
-                ? "tw-text-red-400" 
+            ${
+              readOnly
+                ? "tw-text-iron-500"
+                : hasError
+                ? "tw-text-red-400"
                 : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
             }`}
         >
           {label}
         </label>
-        
-        <div className={`tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200
-          ${hasError 
-            ? "tw-shadow-[0_0_0_1px_rgba(239,68,68,0.1)]" 
-            : readOnly
+
+        <div
+          className={`tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200
+          ${
+            hasError
+              ? "tw-shadow-[0_0_0_1px_rgba(239,68,68,0.1)]"
+              : readOnly
               ? ""
               : "group-focus-visible-within:tw-shadow-[0_0_0_1px_rgba(139,92,246,0.05)]"
           }`}
@@ -74,6 +77,13 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
             }
             return child;
           })}
+
+          {/* Checkmark icon for filled fields */}
+          {isFieldFilled && !hasError && (
+            <div className="tw-absolute tw-right-3 tw-top-1/2 tw-transform -tw-translate-y-1/2 tw-pointer-events-none">
+              <CheckCircleIcon className="tw-text-emerald-500 tw-w-5 tw-h-5 tw-flex-shrink-0" />
+            </div>
+          )}
         </div>
       </div>
 

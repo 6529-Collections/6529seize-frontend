@@ -11,7 +11,6 @@ interface BaseTraitProps {
 
 export interface TextTraitProps extends BaseTraitProps {
   readonly readOnly?: boolean;
-  readonly placeholder?: string;
   readonly traits: TraitsData;
   readonly updateText: (field: keyof TraitsData, value: string) => void;
 }
@@ -49,4 +48,5 @@ export interface TraitWrapperProps {
   readonly className?: string;
   readonly error?: string | null;
   readonly id?: string;
+  readonly isFieldFilled?: boolean;
 }

@@ -1,6 +1,7 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useMemo } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 interface ArtworkDetailsProps {
   readonly title: string;
@@ -73,6 +74,10 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
     }
   }, [onDescriptionChange, description, onDescriptionBlur]);
 
+  // Check if fields are filled
+  const isTitleFilled = useMemo(() => title.trim().length > 0, [title]);
+  const isDescriptionFilled = useMemo(() => description.trim().length > 0, [description]);
+
   return (
     <FormSection
       title="Artwork Details"
@@ -109,7 +114,6 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 maxLength={500}
                 defaultValue={title || ""}
                 onBlur={handleTitleBlur}
-                placeholder="Enter artwork title"
                 aria-invalid={!!titleError}
                 aria-describedby={titleError ? "title-error" : undefined}
                 data-field="title"
@@ -120,10 +124,16 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                       ? "tw-ring-red"
                       : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
                   }
-                  
-                  
+                  ${isTitleFilled && !titleError ? 'tw-pr-10' : ''}
                   `}
               />
+              
+              {/* Title checkmark */}
+              {isTitleFilled && !titleError && (
+                <div className="tw-absolute tw-right-3 tw-top-1/2 tw-transform -tw-translate-y-1/2 tw-pointer-events-none">
+                  <CheckCircleIcon className="tw-text-emerald-500 tw-w-5 tw-h-5 tw-flex-shrink-0" />
+                </div>
+              )}
             </div>
           </div>
 
@@ -158,7 +168,6 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 name="description"
                 defaultValue={description || ""}
                 onBlur={handleDescriptionBlur}
-                placeholder="Enter artwork description"
                 rows={4}
                 maxLength={500}
                 aria-invalid={!!descriptionError}
@@ -173,10 +182,16 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                       ? "tw-ring-red"
                       : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
                   }
-                  
-                  
+                  ${isDescriptionFilled && !descriptionError ? 'tw-pr-10' : ''}
                   `}
               />
+              
+              {/* Description checkmark */}
+              {isDescriptionFilled && !descriptionError && (
+                <div className="tw-absolute tw-right-3 tw-top-3 tw-pointer-events-none">
+                  <CheckCircleIcon className="tw-text-emerald-500 tw-w-5 tw-h-5 tw-flex-shrink-0" />
+                </div>
+              )}
             </div>
           </div>
 

@@ -39,9 +39,9 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         );
 
         noButton?.classList.remove(
-          "tw-bg-rose-600/30",
-          "tw-ring-rose-500/60",
-          "tw-text-rose-200"
+          "tw-bg-emerald-600/30",
+          "tw-ring-emerald-500/60",
+          "tw-text-emerald-200"
         );
         noButton?.classList.add(
           "tw-bg-iron-800/50",
@@ -61,9 +61,9 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         );
 
         noButton?.classList.add(
-          "tw-bg-rose-600/30",
-          "tw-ring-rose-500/60",
-          "tw-text-rose-200"
+          "tw-bg-emerald-600/30",
+          "tw-ring-emerald-500/60",
+          "tw-text-emerald-200"
         );
         noButton?.classList.remove(
           "tw-bg-iron-800/50",
@@ -96,6 +96,12 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
       }
     }, [field, updateBoolean, onBlur]);
 
+    // Check if field is filled (explicitly set to true or false)
+    const isFieldFilled = React.useMemo(() => {
+      const currentValue = traits[field] as boolean;
+      return currentValue === true || currentValue === false;
+    }, [traits, field]);
+
     return (
       <TraitWrapper
         label={label}
@@ -103,6 +109,7 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         className={className}
         error={error}
         id={`field-${field}`}
+        isFieldFilled={isFieldFilled}
       >
         <div
           ref={uiStateRef}
@@ -125,8 +132,8 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
             onClick={handleNoClick}
             className={`no-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
             ${
-              !traits[field]
-                ? "tw-bg-rose-600/30 tw-ring-rose-500/60 tw-text-rose-200"
+              traits[field] === false
+                ? "tw-bg-emerald-600/30 tw-ring-emerald-500/60 tw-text-emerald-200"
                 : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
             type="button"

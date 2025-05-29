@@ -13,7 +13,6 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   traits,
   updateText,
   readOnly = false,
-  placeholder,
   className,
   error,
   onBlur,
@@ -37,7 +36,9 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   
   // Handle input changes with debounce
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setDebouncedValue(e.target.value);
+    const value = e.target.value;
+    setDebouncedValue(value);
+    setCurrentInputValue(value); // Update for real-time checkmark
   }, []);
   
   // Handle blur (when user finishes typing)
@@ -59,7 +60,27 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
     }
   }, [traits, field]);
   
-  // Prepare input className
+  // Track current input value for real-time checkmark updates
+  const [currentInputValue, setCurrentInputValue] = React.useState<string>(
+    (traits[field] as string) || ''
+  );
+  
+  // Update currentInputValue when traits change from outside
+  React.useEffect(() => {
+    const traitValue = (traits[field] as string) || '';
+    setCurrentInputValue(traitValue);
+  }, [traits, field]);
+
+  // Check if field is filled (non-empty trimmed value)
+  const isFieldFilled = useMemo(() => {
+    const traitValue = (traits[field] as string) || '';
+    const inputValue = currentInputValue || '';
+    
+    // Return true if either the trait value or current input value has content
+    return traitValue.trim().length > 0 || inputValue.trim().length > 0;
+  }, [traits, field, currentInputValue]);
+
+  // Prepare input className - add padding for checkmark when field is filled
   const inputClassName = useMemo(() => `tw-form-input tw-font-normal tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1
     ${
       readOnly
@@ -68,12 +89,11 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
           ? "tw-bg-iron-900 tw-ring-red tw-cursor-text"
           : "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text"
     }
-    
-    
-    `, [readOnly, error]);
+    ${isFieldFilled && !error ? 'tw-pr-10' : ''}
+    `, [readOnly, error, isFieldFilled]);
   
   return (
-    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error}>
+    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error} isFieldFilled={isFieldFilled}>
       <input
         ref={inputRef}
         type="text"
@@ -81,7 +101,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
         onChange={handleChange}
         onBlur={handleBlur}
         maxLength={500}
-        placeholder={placeholder || `Enter ${label.toLowerCase()}`}
+        placeholder=""
         readOnly={readOnly}
         className={inputClassName}
       />

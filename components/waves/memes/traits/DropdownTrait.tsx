@@ -48,8 +48,14 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
       [onBlur, field]
     );
 
+    // Check if field is filled (option selected, not empty default)
+    const isFieldFilled = React.useMemo(() => {
+      const currentValue = (traits[field] as string) || '';
+      return currentValue.trim().length > 0;
+    }, [traits, field]);
+
     return (
-      <TraitWrapper label={label} className={className} error={error}>
+      <TraitWrapper label={label} className={className} error={error} isFieldFilled={isFieldFilled}>
         <select
           ref={selectRef}
           defaultValue={(traits[field] as string) || ""}
@@ -63,7 +69,8 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
               : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
           }
           tw-appearance-none
-          [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100`}
+          [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100
+          ${isFieldFilled && !error ? 'tw-pr-10' : ''}`}
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`,
             backgroundPosition: 'right 0.5rem center',
