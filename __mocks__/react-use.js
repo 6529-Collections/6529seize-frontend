@@ -1,4 +1,5 @@
 // __mocks__/react-use.js
+const React = require('react');
 module.exports = {
   useCss: jest.fn(() => ['mocked-classname-from-react-use-mock', jest.fn()]),
   useClickAway: jest.fn(),
