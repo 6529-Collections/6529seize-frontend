@@ -14,6 +14,17 @@ jest.mock('../../../../hooks/useScrollBehavior', () => ({ useScrollBehavior: () 
 jest.mock('../../../../hooks/useWaveIsTyping', () => ({ useWaveIsTyping: () => null }));
 jest.mock('../../../../components/notifications/NotificationsContext', () => ({ useNotificationsContext: () => ({ removeWaveDeliveredNotifications: jest.fn() }) }));
 jest.mock('../../../../components/auth/Auth', () => ({ useAuth: () => ({ connectedProfile: null }) }));
+jest.mock('../../../../services/api/common-api', () => ({
+  commonApiPostWithoutBodyAndResponse: jest.fn(() => Promise.resolve()),
+}));
+jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => ({ 
+  __esModule: true, 
+  default: () => <svg data-testid="circle-loader" />,
+  CircleLoaderSize: { XXLARGE: 'xxlarge' }
+}));
+jest.mock('@fortawesome/react-fontawesome', () => ({
+  FontAwesomeIcon: () => <div data-testid="icon" />
+}));
 
 const useVirtualizedWaveDropsMock = useVirtualizedWaveDrops as jest.Mock;
 

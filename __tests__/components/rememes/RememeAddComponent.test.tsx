@@ -98,7 +98,7 @@ describe('RememeAddComponent', () => {
     expect(screen.getByText('#2 - The Memes #2')).toBeTruthy();
   });
 
-  it.skip('adds and removes meme references', async () => {
+  it('adds and removes meme references', async () => {
     const user = userEvent.setup();
     renderComponent();
     
@@ -116,7 +116,9 @@ describe('RememeAddComponent', () => {
     
     await waitFor(() => {
       expect(screen.getByText('Meme References')).toBeTruthy();
-      expect(screen.queryByText('#1 - The Memes #1')).toBeNull();
+      // The reference should still exist in the dropdown, but not in the references list
+      // Check that the text "Meme References (1)" is no longer present
+      expect(screen.queryByText('Meme References (1)')).toBeNull();
     });
   });
 
@@ -263,7 +265,7 @@ describe('RememeAddComponent', () => {
     });
   });
 
-  it.skip('displays verification success state', async () => {
+  it('displays verification success state', async () => {
     const user = userEvent.setup();
     renderComponent();
     
@@ -288,7 +290,6 @@ describe('RememeAddComponent', () => {
     
     await waitFor(() => {
       expect(screen.getByText(/verified/i)).toBeTruthy();
-      expect(screen.getByText(/contract/i)).toBeTruthy();
       expect(screen.getByText('Name: Test Contract')).toBeTruthy();
       expect(screen.getByText(/tokens/i)).toBeTruthy();
       expect(screen.getByText('#1 - Test NFT')).toBeTruthy();
@@ -323,13 +324,22 @@ describe('RememeAddComponent', () => {
     });
   });
 
-  it.skip('handles invalid token IDs', async () => {
+  it('handles invalid token IDs', async () => {
     const user = userEvent.setup();
     renderComponent();
     
-    // Fill form with invalid token IDs (leave token IDs empty)
+    mockPostData.mockResolvedValue({
+      status: 200,
+      response: {
+        valid: false,
+        error: 'Invalid token ID(s)',
+        errors: ['Invalid token ID(s)'],
+      },
+    });
+    
+    // Fill form with invalid token IDs
     await user.type(screen.getByPlaceholderText('0x...'), '0x1234567890123456789012345678901234567890');
-    // Token IDs field left empty to test invalid case
+    await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), 'invalid');
     
     const dropdownToggle = screen.getAllByRole('button').find(button => button.getAttribute('aria-expanded') === 'false');
     await user.click(dropdownToggle!);

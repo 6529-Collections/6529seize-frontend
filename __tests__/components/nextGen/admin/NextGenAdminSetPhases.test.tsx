@@ -19,11 +19,15 @@ jest.mock('../../../../components/nextGen/nextgen_helpers', () => ({
   useParsedCollectionIndex: jest.fn(() => 1),
   useCollectionAdmin: jest.fn(() => ({ data: [] })),
   getCollectionIdsForAddress: jest.fn(() => ['1']),
-  useCollectionPhases: jest.fn(),
+  useCollectionPhases: jest.fn(() => {}),
   useMinterContractWrite: jest.fn(),
 }));
 
 jest.mock('../../../../components/auth/SeizeConnectContext', () => ({ useSeizeConnectContext: () => ({ address: '0x1' }) }));
+
+jest.mock('../../../../services/api/common-api', () => ({
+  commonApiFetch: jest.fn(() => Promise.resolve([])),
+}));
 
 const helpers = require('../../../../components/nextGen/nextgen_helpers');
 
@@ -46,15 +50,41 @@ describe('NextGenAdminSetPhases', () => {
     expect(screen.getByText('Collection id is required')).toBeInTheDocument();
   });
 
-  it.skip('calls writeContract with provided data', async () => {
+  it('calls writeContract with provided data', async () => {
     const user = userEvent.setup();
+    const mockWriteContract = jest.fn();
+    const mockReset = jest.fn();
+    
+    (helpers.useMinterContractWrite as jest.Mock).mockReturnValue({
+      writeContract: mockWriteContract,
+      reset: mockReset,
+      params: {},
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+    });
+
     render(<NextGenAdminSetPhases close={()=>{}} />);
-    const contract = (helpers.useMinterContractWrite as jest.Mock).mock.results[0].value;
+    
     await user.type(screen.getByTestId('collection'), '1');
-    const inputs = screen.getAllByRole('textbox');
-    await user.type(inputs[1], '10');
-    await user.type(inputs[2], '20');
+    
+    // Get all inputs with placeholder "Unix epoch time"
+    const timeInputs = screen.getAllByPlaceholderText('Unix epoch time');
+    
+    // First input should be public start time, second should be public end time
+    await user.type(timeInputs[0], '1000');
+    await user.type(timeInputs[1], '2000');
+    
     await user.click(screen.getByRole('button', { name: 'Submit' }));
+    
+    // Verify no validation errors are shown
     expect(screen.queryByText('Collection id is required')).not.toBeInTheDocument();
+    expect(screen.queryByText('Public minting time is required')).not.toBeInTheDocument();
+    expect(screen.queryByText('Public minting end time is required')).not.toBeInTheDocument();
+    
+    // Wait for the async effect to trigger contract write
+    await waitFor(() => {
+      expect(mockWriteContract).toHaveBeenCalled();
+    }, { timeout: 3000 });
   });
 });
