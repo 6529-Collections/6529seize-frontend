@@ -35,9 +35,9 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
         >
           <div className="tw-fixed tw-inset-2 md:tw-inset-4 tw-flex tw-items-center tw-justify-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="tw-w-full tw-h-full tw-flex tw-flex-col"
               ref={modalRef}
