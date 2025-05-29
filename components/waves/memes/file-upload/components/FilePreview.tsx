@@ -32,7 +32,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="tw-relative tw-w-full tw-h-full tw-bg-iron-950/50 tw-flex tw-items-center tw-justify-center"
+      className="tw-relative tw-w-full tw-h-full tw-bg-iron-900 tw-flex tw-items-center tw-justify-center"
     >
       {/* Container with checkerboard pattern for transparent media */}
       <div className="tw-absolute tw-inset-0 tw-opacity-5">
@@ -105,7 +105,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
       <div className="tw-absolute tw-top-0 tw-right-0 tw-z-20 tw-flex tw-gap-2">
         <button
           onClick={onRemove}
-          className=" tw-size-8 tw-flex tw-items-center tw-text-red tw-justify-center tw-rounded-lg tw-bg-red/5 tw-backdrop-blur hover:tw-bg-red/10 tw-transition-colors tw-duration-200 tw-border-0 tw-shadow-lg"
+          className="tw-size-9 tw-flex tw-items-center tw-text-red tw-justify-center tw-rounded-full tw-bg-red/20 tw-backdrop-blur hover:tw-bg-red/30 tw-transition-colors tw-duration-200 tw-border-0 tw-shadow-lg"
           aria-label="Remove uploaded file"
           tabIndex={0}
           data-testid="artwork-remove-button"

@@ -17,49 +17,68 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
 
   const hasError = !!error && !readOnly;
 
-  return (
-    <div
-      className={`tw-bg-iron-900/50 tw-rounded-xl tw-p-2 md:tw-p-4 tw-ring-1 tw-ring-inset 
-      ${isBoolean ? "tw-ring-iron-800/40" : "tw-ring-iron-800/5"} 
-      ${hasError ? "tw-ring-red" : ""} 
-      tw-transition-colors ${className || ""}`}
-    >
-      <div className="tw-flex sm:tw-items-center tw-gap-x-6 tw-gap-y-1.5 tw-flex-col sm:tw-flex-row">
-        <div className="tw-w-full sm:tw-w-1/3">
+  if (isBoolean) {
+    // Special layout for boolean fields
+    return (
+      <div className={`tw-group tw-relative ${className || ""}`}>
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
           <label
             htmlFor={fieldId}
-            className={`${
-              isBoolean
-                ? "tw-text-sm tw-text-iron-200 tw-font-medium"
-                : `tw-text-sm tw-font-medium ${
-                    readOnly
-                      ? "tw-text-iron-400"
-                      : hasError
-                      ? "tw-text-red"
-                      : "tw-text-iron-300"
-                  }`
-            }`}
+            className="tw-text-sm tw-font-medium tw-text-iron-300 tw-cursor-pointer tw-w-40 tw-flex-shrink-0"
           >
             {label}
           </label>
+          <div className="tw-flex-1 tw-max-w-xs">
+            {children}
+          </div>
         </div>
+        <ValidationError error={error} id={errorId} />
+      </div>
+    );
+  }
 
-        {/* Cloning children to pass additional props if needed */}
-        {React.Children.map(children, (child) => {
-          if (React.isValidElement(child)) {
-            return React.cloneElement(child, {
-              id: fieldId,
-              "aria-invalid": hasError,
-              "aria-describedby": errorId,
-              ...(child.props || {}),
-            } as any);
-          }
-          return child;
-        })}
+  return (
+    <div className={`tw-group tw-relative ${className || ""}`}>
+      {/* Modern floating label design */}
+      <div className="tw-relative">
+        <label
+          htmlFor={fieldId}
+          className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all
+            ${readOnly 
+              ? "tw-text-iron-500" 
+              : hasError 
+                ? "tw-text-red-400" 
+                : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
+            }`}
+        >
+          {label}
+        </label>
+        
+        <div className={`tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200
+          ${hasError 
+            ? "tw-shadow-[0_0_0_1px_rgba(239,68,68,0.1)]" 
+            : readOnly
+              ? ""
+              : "group-focus-visible-within:tw-shadow-[0_0_0_1px_rgba(139,92,246,0.05)]"
+          }`}
+        >
+          {/* Cloning children to pass additional props if needed */}
+          {React.Children.map(children, (child) => {
+            if (React.isValidElement(child)) {
+              return React.cloneElement(child, {
+                id: fieldId,
+                "aria-invalid": hasError,
+                "aria-describedby": errorId,
+                ...(child.props || {}),
+              } as any);
+            }
+            return child;
+          })}
+        </div>
       </div>
 
       {/* Error message */}
-      <ValidationError error={error} id={errorId} className="tw-ml-[33%]" />
+      <ValidationError error={error} id={errorId} />
     </div>
   );
 };

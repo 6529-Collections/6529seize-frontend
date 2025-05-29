@@ -146,12 +146,16 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
         readOnly={readOnly}
         min={min}
         max={max}
-        className={`tw-form-input tw-w-full sm:tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
+        className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1
+          [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
           ${
             readOnly
-              ? "tw-bg-iron-950 tw-ring-iron-950 tw-opacity-80 tw-cursor-not-allowed tw-text-iron-500"
-              : "tw-bg-iron-900/80 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400"
-          } tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500`}
+              ? "tw-bg-iron-800 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-500"
+              : error
+                ? "tw-bg-iron-900 tw-ring-red tw-cursor-text"
+                : "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text"
+          }
+          `}
       />
     </TraitWrapper>
   );

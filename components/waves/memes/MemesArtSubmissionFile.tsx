@@ -141,7 +141,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
       className={`
         tw-relative tw-w-full tw-h-full
         tw-bg-gradient-to-br tw-from-iron-900 tw-to-iron-950
-        tw-rounded-xl tw-overflow-hidden tw-group tw-flex tw-flex-col tw-items-center tw-justify-center
+        tw-rounded-xl tw-overflow-hidden tw-group
         ${visualState === "dragging" ? "tw-border-2 tw-border-primary-500/60" : ""}
         ${visualState === "invalid" ? "tw-border-2 tw-border-red/60" : ""}
         ${visualState === "idle" && !artworkUploaded

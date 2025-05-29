@@ -268,45 +268,49 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   };
 
   return (
-    <div className="tw-flex tw-flex-col tw-relative tw-h-full">
-      {/* Form content wrapped in a container with proper height */}
-      <div className="tw-relative tw-grid tw-grid-cols-12 tw-gap-x-6 tw-h-[calc(100vh-200px)] tw-min-h-0">
-        <div className="tw-col-span-6 tw-sticky tw-top-0 tw-h-full">
-          {/* File Selection Component */}
-          <MemesArtSubmissionFile
-            artworkUploaded={artworkUploaded}
-            artworkUrl={artworkUrl}
-            setArtworkUploaded={setArtworkUploaded}
-            handleFileSelect={handleFileSelect}
-          />
-        </div>
+    <div className="tw-flex tw-flex-col tw-h-full">
+      {/* Scrollable form content */}
+      <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-relative">
+        <div className="tw-relative tw-flex tw-gap-x-6 tw-gap-y-6 tw-flex-col lg:tw-flex-row tw-w-full">
+          <div className="tw-px-4 md:tw-px-8 lg:tw-pr-0 tw-w-full lg:tw-w-1/2">
+            {/* File Selection Component - Sticky within scrollable area */}
+            <div className="tw-sticky tw-top-0 tw-h-[calc(100vh-14rem)]">
+              <MemesArtSubmissionFile
+                artworkUploaded={artworkUploaded}
+                artworkUrl={artworkUrl}
+                setArtworkUploaded={setArtworkUploaded}
+                handleFileSelect={handleFileSelect}
+              />
+            </div>
+          </div>
 
-        <div className="tw-col-span-6 tw-flex tw-flex-col tw-gap-y-6 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-scroll-smooth tw-overscroll-contain tw-h-full tw-pr-2">
-          {/* Artwork Title and Description */}
-          <ArtworkDetails
-            title={traits.title}
-            description={traits.description}
-            onTitleChange={handleTitleChange}
-            onDescriptionChange={handleDescriptionChange}
-            titleError={validation.errors.title}
-            descriptionError={validation.errors.description}
-            onTitleBlur={() => handleFieldBlur("title")}
-            onDescriptionBlur={() => handleFieldBlur("description")}
-          />
+          <div className="tw-px-4 md:tw-px-8 lg:tw-pl-0 tw-full lg:tw-w-1/2 tw-flex tw-flex-col tw-gap-y-6 tw-pb-6">
+            {/* Artwork Title and Description */}
+            <ArtworkDetails
+              title={traits.title}
+              description={traits.description}
+              onTitleChange={handleTitleChange}
+              onDescriptionChange={handleDescriptionChange}
+              titleError={validation.errors.title}
+              descriptionError={validation.errors.description}
+              onTitleBlur={() => handleFieldBlur("title")}
+              onDescriptionBlur={() => handleFieldBlur("description")}
+            />
 
-          {/* Traits Component */}
-          <MemesArtSubmissionTraits
-            traits={traits}
-            setTraits={setTraits}
-            validationErrors={validation.errors}
-            onFieldBlur={handleFieldBlur}
-          />
+            {/* Traits Component */}
+            <MemesArtSubmissionTraits
+              traits={traits}
+              setTraits={setTraits}
+              validationErrors={validation.errors}
+              onFieldBlur={handleFieldBlur}
+            />
+          </div>
         </div>
       </div>
 
       {/* Action Buttons - Fixed at bottom */}
-      <div className="tw-sticky tw-bottom-0 tw-left-0 tw-w-full tw-bg-iron-950/80 tw-backdrop-blur-sm tw-py-4 tw-z-10">
-        <div className="tw-container tw-mx-auto">
+      <div className="tw-border-t tw-border-iron-800 tw-border-solid tw-border-b-0 tw-border-x-0 tw-bg-iron-950 tw-py-3">
+        <div className="tw-px-4 md:tw-px-8">
           {/* Submission Progress - Only shown when active */}
           {submissionPhase !== "idle" && (
             <div className="tw-mb-4">
@@ -334,7 +338,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
                   submissionPhase === "uploading" ||
                   submissionPhase === "processing"
                 }
-                className="tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
+                className="tw-border tw-border-solid tw-border-iron-800 tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 tw-rounded-lg tw-bg-iron-800 tw-px-3.5 tw-py-3 tw-text-sm tw-font-semibold tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-border-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out disabled:tw-opacity-50 disabled:tw-cursor-not-allowed"
                 type="button"
               >
                 Cancel
@@ -349,6 +353,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
               className={`tw-transition-all tw-duration-300 ${getButtonClass()}`}
             >
               <PrimaryButton
+                padding="tw-py-3 tw-px-3.5"
                 onClicked={handleSubmit}
                 loading={
                   isSubmitting &&
