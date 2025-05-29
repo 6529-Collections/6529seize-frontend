@@ -94,7 +94,7 @@ const MobileMemesArtSubmissionBtn: React.FC<
         </svg>
       </button>
       <MemesArtSubmissionModal
-        isOpen={!isOpen}
+        isOpen={isOpen}
         wave={wave}
         onClose={() => setIsOpen(false)}
       />

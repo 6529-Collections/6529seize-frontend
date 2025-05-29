@@ -135,7 +135,7 @@ const MemesArtSubmissionContainer: React.FC<
 
   return (
     <div className="tw-h-full tw-flex tw-flex-col">
-      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-relative tw-border tw-border-iron-800/30 tw-backdrop-blur tw-flex tw-flex-col tw-overflow-hidden">
+      <div className="tw-h-full tw-bg-iron-950 tw-rounded-xl tw-relative tw-border tw-border-iron-800 tw-backdrop-blur tw-flex tw-flex-col tw-overflow-hidden">
         <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-overflow-hidden">
           <div className="tw-absolute tw-w-1/2 tw-h-1/2 tw-bg-primary-500/[0.03] tw-blur-3xl -tw-top-1/4 -tw-right-1/4" />
           <div className="tw-absolute tw-w-2/3 tw-h-1/2 tw-bg-purple-500/[0.02] tw-blur-3xl tw-top-1/4 -tw-left-1/4" />

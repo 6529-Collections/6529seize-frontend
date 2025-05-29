@@ -30,7 +30,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-bg-iron-700/80 tw-backdrop-blur-sm tw-overflow-hidden"
+          className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000] tw-bg-gray-600/80 tw-backdrop-blur-sm tw-overflow-hidden"
           onClick={onClose}
         >
           <div className="tw-fixed tw-inset-2 md:tw-inset-4 tw-flex tw-items-center tw-justify-center">

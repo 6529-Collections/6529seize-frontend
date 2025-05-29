@@ -271,7 +271,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     <div className="tw-flex tw-flex-col tw-h-full">
       {/* Scrollable form content */}
       <div className="tw-flex-1 tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-relative">
-        <div className="tw-relative tw-flex tw-gap-x-6 tw-gap-y-6 tw-flex-col lg:tw-flex-row tw-w-full">
+        <div className="tw-relative tw-flex tw-gap-x-8 tw-gap-y-6 tw-flex-col lg:tw-flex-row tw-w-full">
           <div className="tw-px-4 md:tw-px-8 lg:tw-pr-0 tw-w-full lg:tw-w-1/2">
             {/* File Selection Component - Sticky within scrollable area */}
             <div className="tw-sticky tw-top-0 tw-h-[calc(100vh-14rem)]">

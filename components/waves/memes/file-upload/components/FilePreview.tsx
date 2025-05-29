@@ -102,7 +102,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
       </div>
 
       {/* Control buttons */}
-      <div className="tw-absolute tw-top-0 tw-right-0 tw-z-20 tw-flex tw-gap-2">
+      <div className="tw-absolute tw-top-0 tw-right-0 tw-z-30 tw-flex tw-gap-2">
         <button
           onClick={onRemove}
           className="tw-size-9 tw-flex tw-items-center tw-text-red tw-justify-center tw-rounded-full tw-bg-red/20 tw-backdrop-blur hover:tw-bg-red/30 tw-transition-colors tw-duration-200 tw-border-0 tw-shadow-lg"
