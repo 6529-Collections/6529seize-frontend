@@ -9,8 +9,6 @@ import { AuthContext } from "../../auth/Auth";
 import WaveDropFollowAuthor from "./WaveDropFollowAuthor";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
-import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 
 interface WaveDropActionsProps {
@@ -30,14 +28,6 @@ export default function WaveDropActions({
 }: WaveDropActionsProps) {
   const { connectedProfile } = useContext(AuthContext);
   const { canDelete } = useDropInteractionRules(drop);
-  const { isMemesWave } = useSeizeSettings();
-
-  // Check if we should hide the clap icon
-  // Hide only for chat drops and memes participation drops
-  const shouldHideClap =
-    drop.drop_type === ApiDropType.Chat ||
-    (drop.drop_type === ApiDropType.Participatory &&
-      isMemesWave(drop.wave?.id));
 
   return (
     <div className="tw-absolute tw-z-20 tw-right-2 tw-top-0 group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out">

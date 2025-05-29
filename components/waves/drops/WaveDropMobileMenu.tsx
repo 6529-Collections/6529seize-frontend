@@ -2,13 +2,11 @@ import { FC, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import CommonDropdownItemsMobileWrapper from "../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { AuthContext } from "../../auth/Auth";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
 import WaveDropMobileMenuFollow from "./WaveDropMobileMenuFollow";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
 import WaveDropActionsRate from "./WaveDropActionsRate";
-import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
 import { DropSize } from "../../../helpers/waves/drop.helpers";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 
