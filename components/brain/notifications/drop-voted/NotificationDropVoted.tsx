@@ -74,8 +74,7 @@ export default function NotificationDropVoted({
             <span className="tw-inline-flex tw-flex-wrap tw-gap-x-1 tw-items-center">
               <Link
                 href={`/${notification.related_identity.handle}`}
-                className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50"
-              >
+                className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
                 {notification.related_identity.handle}
               </Link>
               <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
@@ -84,13 +83,12 @@ export default function NotificationDropVoted({
               <span
                 className={`${getNotificationVoteColor(
                   notification.additional_context.vote
-                )} tw-pl-1 tw-font-medium tw-text-sm`}
-              >
+                )} tw-pl-1 tw-font-medium tw-text-sm`}>
                 {notification.additional_context.vote > 0 && "+"}
                 {numberWithCommas(notification.additional_context.vote)}
               </span>
               <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-                <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
+                <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
                   &#8226;
                 </span>
                 {getTimeAgoShort(notification.created_at)}

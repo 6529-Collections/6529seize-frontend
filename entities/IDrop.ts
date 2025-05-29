@@ -54,18 +54,15 @@ type DropActivityLogBase =
   | ProfileActivityLogDropComment
   | ProfileActivityLogDropRatingEdit;
 
-interface DropActivityLogDiscussion
-  extends ProfileActivityLogDropComment {
+interface DropActivityLogDiscussion extends ProfileActivityLogDropComment {
   readonly author: ProfileMinWithoutSubs | null;
 }
 
-interface DropActivityLogRepEdit
-  extends ProfileActivityLogDropRatingEdit {
+interface DropActivityLogRepEdit extends ProfileActivityLogDropRatingEdit {
   readonly author: ProfileMinWithoutSubs | null;
 }
 
-interface DropActivityLogDropCreated
-  extends ProfileActivityLogDropCreated {
+interface DropActivityLogDropCreated extends ProfileActivityLogDropCreated {
   readonly author: ProfileMinWithoutSubs | null;
 }
 type DropActivityLog =

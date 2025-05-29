@@ -69,14 +69,18 @@ export class EmojiNode extends DecoratorNode<JSX.Element> {
   }
 }
 
-const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
-  const { emojiMap } = useEmoji();
+export const EmojiComponent = ({ emojiId }: { emojiId: string }) => {
+  const { emojiMap, findNativeEmoji } = useEmoji();
 
   const emoji = emojiMap
     .flatMap((cat) => cat.emojis)
     .find((e) => e.id === emojiId);
 
   if (!emoji) {
+    const nativeEmoji = findNativeEmoji(emojiId);
+    if (nativeEmoji) {
+      return <span>{nativeEmoji.skins[0].native}</span>;
+    }
     return <span>{`:${emojiId}:`}</span>;
   }
 

@@ -13,6 +13,7 @@ import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams, DropLocation } from "./Drop";
+import WaveDropReactions from "./WaveDropReactions";
 
 enum GroupingThreshold {
   TIME_DIFFERENCE = 60000,
@@ -66,7 +67,7 @@ const getColorClasses = ({
   if (!isDrop) {
     const hoverClass =
       location === DropLocation.WAVE
-        ? "desktop-hover:hover:tw-bg-iron-900/50"
+        ? "desktop-hover:hover:tw-bg-iron-800/50"
         : "";
     const ringClasses =
       location !== DropLocation.WAVE
@@ -152,8 +153,8 @@ const WaveDrop = ({
   const isMobile = useIsMobileDevice();
 
   const getGroupingClass = () => {
-    if (shouldGroupWithPreviousDrop) return "";
-    if (shouldGroupWithNextDrop) return "tw-pt-4";
+    if (shouldGroupWithPreviousDrop) return "tw-pt-1";
+    if (shouldGroupWithNextDrop) return "tw-pt-4 tw-pb-1";
     return "tw-py-4";
   };
 
@@ -208,6 +209,10 @@ const WaveDrop = ({
     onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
   }, [onQuote, drop, activePartIndex]);
 
+  const handleOnAddReaction = useCallback(() => {
+    setIsSlideUp(false);
+  }, []);
+
   useEffect(() => {
     return () => {
       if (longPressTimeoutRef.current) {
@@ -228,14 +233,12 @@ const WaveDrop = ({
     <div
       className={`${
         isDrop && location === DropLocation.WAVE ? "tw-py-0.5 tw-px-4" : ""
-      } tw-w-full`}
-    >
+      } tw-w-full`}>
       <div
         className={dropClasses}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}
-      >
+        onTouchMove={handleTouchMove}>
         {drop.reply_to &&
           (drop.reply_to.drop_id !== previousDrop?.reply_to?.drop_id ||
             drop.author.handle !== previousDrop?.author.handle) &&
@@ -259,8 +262,7 @@ const WaveDrop = ({
               maxWidth: !shouldGroupWithPreviousDrop
                 ? "calc(100% - 3.25rem)"
                 : "100%",
-            }}
-          >
+            }}>
             {!shouldGroupWithPreviousDrop && (
               <WaveDropHeader
                 drop={drop}
@@ -275,8 +277,7 @@ const WaveDrop = ({
                 shouldGroupWithPreviousDrop
                   ? "tw-ml-[3.25rem] tw-py-[0.15625rem]"
                   : ""
-              }
-            >
+              }>
               <WaveDropContent
                 drop={drop}
                 activePartIndex={activePartIndex}
@@ -298,12 +299,12 @@ const WaveDrop = ({
             onQuote={handleOnQuote}
           />
         )}
-        <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-ml-[3.25rem]">
+        <div className="tw-mx-2 tw-flex tw-w-[calc(100%-3.25rem)] tw-ml-[3.25rem] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
           {drop.metadata.length > 0 && (
             <WaveDropMetadata metadata={drop.metadata} />
           )}
-
           {!!drop.raters_count && <WaveDropRatings drop={drop} />}
+          <WaveDropReactions drop={drop} />
         </div>
         <WaveDropMobileMenu
           drop={drop}
@@ -313,6 +314,7 @@ const WaveDrop = ({
           setOpen={setIsSlideUp}
           onReply={handleOnReply}
           onQuote={handleOnQuote}
+          onAddReaction={handleOnAddReaction}
         />
       </div>
     </div>

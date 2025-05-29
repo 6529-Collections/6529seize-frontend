@@ -1,0 +1,31 @@
+@keyframes reaction-slide-up {
+  from {
+    transform: translateY(50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes reaction-slide-down {
+  from {
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.reactionSlideUp {
+  display: inline-block;
+  animation: reaction-slide-up 0.1s ease-out;
+}
+
+.reactionSlideDown {
+  display: inline-block;
+  animation: reaction-slide-down 0.1s ease-out;
+}

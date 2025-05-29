@@ -3,6 +3,7 @@ import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDropContent from "../../drops/WaveDropContent";
 import WaveDropMetadata from "../../drops/WaveDropMetadata";
 import { useRouter } from "next/router";
+import WaveDropReactions from "../../drops/WaveDropReactions";
 
 interface WaveLeaderboardDropContentProps {
   readonly drop: ExtendedDrop;
@@ -38,6 +39,9 @@ export const WaveLeaderboardDropContent: React.FC<
           <WaveDropMetadata metadata={drop.metadata} />
         </div>
       )}
+      <div className="tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+        <WaveDropReactions drop={drop} />
+      </div>
     </div>
   );
 };

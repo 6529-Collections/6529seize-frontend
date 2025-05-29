@@ -24,7 +24,7 @@ const config = {
     // Handle image imports
     "^.+.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$": `<rootDir>/__mocks__/fileMock.js`, // You might need to create this mock file
     // Mock nano-css which is used by react-use
-    '^nano-css(.*)$': '<rootDir>/__mocks__/nanoCssMock.js',
+    "^nano-css(.*)$": "<rootDir>/__mocks__/nanoCssMock.js",
     // Handle next/font - If you use next/font, uncomment and ensure mock exists
     // '@next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
     // 'next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
@@ -40,20 +40,20 @@ const config = {
   // Transformation - use ts-jest
   transform: {
     // Use ts-jest for ts/tsx files
-    '^.+\\.(ts|tsx)$': [
-      'ts-jest',
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
       {
-        tsconfig: 'tsconfig.jest.json', // Use jest-specific tsconfig
+        tsconfig: "tsconfig.jest.json", // Use jest-specific tsconfig
         babelConfig: false,
       },
     ],
     // Add babel-jest for JS/JSX/MJS files
-    '^.+\\.(js|jsx|mjs)$': ['babel-jest', { presets: ['next/babel'] }],
+    "^.+\\.(js|jsx|mjs)$": ["babel-jest", { presets: ["next/babel"] }],
   },
   // Don't transform node_modules except specific ESM packages if needed
   transformIgnorePatterns: [
-    '/node_modules/(?!wagmi|viem)/', // Allow transforming wagmi and viem
-    '^.+\\.module\\.(css|sass|scss)$',
+    "/node_modules/(?!wagmi|viem)/", // Allow transforming wagmi and viem
+    "^.+\\.module\\.(css|sass|scss)$",
   ],
   // Coverage Configuration (keep existing)
   collectCoverage: true,
@@ -71,7 +71,7 @@ const config = {
     "!jest.setup.js",
     "!playwright.config.ts",
     "!<rootDir>/tests/**/*.spec.{js,jsx,ts,tsx}", // Exclude Playwright tests
-    "!<rootDir>/e2e/**/*.spec.{js,jsx,ts,tsx}",   // Exclude Playwright e2e tests
+    "!<rootDir>/e2e/**/*.spec.{js,jsx,ts,tsx}", // Exclude Playwright e2e tests
   ],
   coverageDirectory: "coverage",
   coverageProvider: "babel", // Explicitly set provider if needed, default is babel

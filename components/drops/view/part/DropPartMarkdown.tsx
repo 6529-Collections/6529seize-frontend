@@ -2,7 +2,9 @@ import {
   AnchorHTMLAttributes,
   Children,
   ClassAttributes,
+  Fragment,
   HTMLAttributes,
+  ImgHTMLAttributes,
   isValidElement,
   memo,
   ReactNode,
@@ -19,7 +21,6 @@ import DropListItemContentPart, {
 import { ApiDropMentionedUser } from "../../../../generated/models/ApiDropMentionedUser";
 import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropReferencedNFT";
 import { Tweet } from "react-tweet";
-import Link from "next/link";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
 import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
@@ -63,7 +64,7 @@ function DropPartMarkdown({
   textSize,
 }: DropPartMarkdownProps) {
   const isMobile = useIsMobileScreen();
-  const { emojiMap } = useEmoji();
+  const { emojiMap, findNativeEmoji } = useEmoji();
   const textSizeClass = (() => {
     switch (textSize) {
       case "sm":
@@ -113,6 +114,17 @@ function DropPartMarkdown({
       ),
     };
 
+    const emojiRegex = /(:\w+:)/g;
+    const isEmoji = (str: string): boolean => {
+      const emojiTextRegex =
+        /^(?:\ud83c[\udffb-\udfff]|\ud83d[\udc00-\ude4f\ude80-\udfff]|\ud83e[\udd00-\uddff]|\u00a9|\u00ae|\u200d|\u203c|\u2049|\u2122|\u2139|\u2194-\u21aa|\u231a-\u23fa|\u24c2|\u25aa-\u25fe|\u2600-\u27bf|\u2934-\u2b55|\u3030|\u303d|\u3297|\u3299|\ufe0f)$/;
+      return emojiTextRegex.test(str.trim());
+    };
+    const areAllPartsEmojis = content
+      .split(emojiRegex)
+      .filter((p) => !!p)
+      .every((part) => part.match(emojiRegex) || isEmoji(part));
+
     let currentContent = content;
 
     for (const token of Object.values(values)) {
@@ -130,24 +142,13 @@ function DropPartMarkdown({
           const randomId = getRandomObjectId();
           return <DropListItemContentPart key={randomId} part={partProps} />;
         } else {
-          const emojiRegex = /(:\w+:)/g;
           const parts = part.split(emojiRegex);
-
-          const isEmoji = (str: string): boolean => {
-            const emojiTextRegex =
-              /^(?:\ud83c[\udffb-\udfff]|\ud83d[\udc00-\ude4f\ude80-\udfff]|\ud83e[\udd00-\uddff]|\u00a9|\u00ae|\u200d|\u203c|\u2049|\u2122|\u2139|\u2194-\u21aa|\u231a-\u23fa|\u24c2|\u25aa-\u25fe|\u2600-\u27bf|\u2934-\u2b55|\u3030|\u303d|\u3297|\u3299|\ufe0f)$/;
-            return emojiTextRegex.test(str.trim());
-          };
-
-          const areAllPartsEmojis = parts
-            .filter((p) => !!p)
-            .every((part) => part.match(emojiRegex) || isEmoji(part));
 
           return parts.map((part) =>
             part.match(emojiRegex) ? (
-              <span key={getRandomObjectId()}>
+              <Fragment key={getRandomObjectId()}>
                 {renderEmoji(part, areAllPartsEmojis)}
-              </span>
+              </Fragment>
             ) : (
               <span
                 key={getRandomObjectId()}
@@ -205,6 +206,15 @@ function DropPartMarkdown({
       .find((e) => e.id === emojiId);
 
     if (!emoji) {
+      const nativeEmoji = findNativeEmoji(emojiId);
+      if (nativeEmoji) {
+        return (
+          <span
+            className={`${bigEmoji ? "emoji-text-node" : "tw-align-middle"}`}>
+            {nativeEmoji.skins[0].native}
+          </span>
+        );
+      }
       return <span>{`:${emojiId}:`}</span>;
     }
 
@@ -292,6 +302,16 @@ function DropPartMarkdown({
 
     return renderExternalOrInternalLink(href, props);
   };
+
+  const imgRenderer = ({
+    node,
+    ...props
+  }: ClassAttributes<HTMLImageElement> &
+    ImgHTMLAttributes<HTMLImageElement> &
+    ExtraProps) =>
+    typeof props.src === "string" ? (
+      <DropPartMarkdownImage src={props.src} />
+    ) : null;
 
   const renderTweetEmbed = (result: { href: string; tweetId: string }) => (
     <div className="tw-flex tw-items-stretch tw-w-full tw-gap-x-1">
@@ -400,7 +420,7 @@ function DropPartMarkdown({
     ) => (
       <p
         key={getRandomObjectId()}
-        className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
+        className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass} tw-flex tw-items-center`}>
         {customRenderer({
           content: params.children,
           mentionedUsers,
@@ -524,7 +544,7 @@ function DropPartMarkdown({
           </code>
         ),
         a: (params) => aHrefRenderer(params),
-        img: (params) => (typeof params.src === "string" ? <DropPartMarkdownImage src={params.src} /> : null),
+        img: imgRenderer,
         blockquote: (params) => (
           <blockquote className="tw-text-iron-200 tw-break-words word-break tw-pl-4 tw-border-l-4 tw-border-l-iron-500 tw-border-solid tw-border-t-0 tw-border-r-0 tw-border-b-0">
             {customRenderer({

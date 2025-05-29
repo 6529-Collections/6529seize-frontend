@@ -13,7 +13,6 @@ import { commonApiPost } from "../../../services/api/common-api";
 import { DropRateChangeRequest } from "../../../entities/IDrop";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AuthContext } from "../../auth/Auth";
-import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 
 type ThemeColors = {
   primary: string;
@@ -54,8 +53,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
   Props
 >(({ drop, newRating, onVoteSuccess }: Props, ref) => {
   const position = drop.rank;
-  const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
-  const { onDropRateChange } = useContext(ReactQueryWrapperContext);
+  const { requestAuth, setToast } = useContext(AuthContext);
   const [animationTimeline, setAnimationTimeline] = useState<any>(null);
   const [triangleBurst, setTriangleBurst] = useState<any>(null);
   const [circleBurst, setCircleBurst] = useState<any>(null);
@@ -84,12 +82,6 @@ const SingleWaveDropVoteSubmit = forwardRef<
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
       }),
-    onSuccess: (response: ApiDrop) => {
-      onDropRateChange({
-        drop: response,
-        giverHandle: connectedProfile?.handle ?? null,
-      });
-    },
     onError: (error) => {
       setToast({
         message: error as unknown as string,
@@ -257,8 +249,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           <span
             className={`${styles.buttonText} ${
               isTextExiting ? styles.exit : styles.enter
-            }`}
-          >
+            }`}>
             {showSuccess ? "Voted!" : "Vote!"}
           </span>
         )}
@@ -266,8 +257,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           <div
             className={`${styles.spinner} ${
               isSpinnerExiting ? styles.exit : styles.enter
-            }`}
-          >
+            }`}>
             <div className={styles.bounce1}></div>
             <div className={styles.bounce2}></div>
             <div className={styles.bounce3}></div>
@@ -287,8 +277,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
         onClick={(e) => {
           e.stopPropagation();
           handleClick();
-        }}
-      >
+        }}>
         {getButtonContent()}
       </button>
     </div>

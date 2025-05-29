@@ -34,14 +34,13 @@ export default function NotificationIdentitySubscribed({
           <span className="tw-text-sm tw-font-normal tw-text-iron-400">
             <Link
               href={`/${notification.related_identity.handle}`}
-              className="tw-no-underline tw-font-semibold"
-            >
+              className="tw-no-underline tw-font-semibold">
               {notification.related_identity.handle}
             </Link>{" "}
             started following you
           </span>{" "}
           <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-            <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
+            <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
               &#8226;
             </span>{" "}
             {getTimeAgoShort(notification.created_at)}
