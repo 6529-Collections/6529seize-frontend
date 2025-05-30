@@ -13,6 +13,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   traits,
   updateText,
   readOnly = false,
+  placeholder,
   className,
   error,
   onBlur,
@@ -107,7 +108,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
         onChange={handleChange}
         onBlur={handleBlur}
         maxLength={500}
-        placeholder=""
+        placeholder={placeholder ?? ""}
         readOnly={readOnly}
         className={inputClassName}
       />
@@ -117,6 +118,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   return prevProps.field === nextProps.field &&
          prevProps.label === nextProps.label &&
          prevProps.readOnly === nextProps.readOnly &&
+         prevProps.placeholder === nextProps.placeholder &&
          prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field] &&
          prevProps.error === nextProps.error;
 });
