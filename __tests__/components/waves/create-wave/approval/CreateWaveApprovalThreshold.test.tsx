@@ -98,23 +98,27 @@ describe('CreateWaveApprovalThreshold', () => {
     expect(mockSetThreshold).toHaveBeenCalledWith(null);
   });
 
-  it.skip('handles decimal input correctly', async () => {
+  it('handles decimal input correctly', async () => {
     const mockSetThreshold = jest.fn();
     render(<CreateWaveApprovalThreshold {...defaultProps} setThreshold={mockSetThreshold} />);
     
     const input = screen.getByLabelText('Threshold');
-    await userEvent.type(input, '12.5');
+    
+    // Use fireEvent to set the value all at once instead of typing character by character
+    fireEvent.change(input, { target: { value: '12.5' } });
     
     // parseInt converts '12.5' to 12
     expect(mockSetThreshold).toHaveBeenCalledWith(12);
   });
 
-  it.skip('handles negative input correctly', async () => {
+  it('handles negative input correctly', async () => {
     const mockSetThreshold = jest.fn();
     render(<CreateWaveApprovalThreshold {...defaultProps} setThreshold={mockSetThreshold} />);
     
     const input = screen.getByLabelText('Threshold');
-    await userEvent.type(input, '-5');
+    
+    // Use fireEvent to set the value all at once
+    fireEvent.change(input, { target: { value: '-5' } });
     
     // parseInt converts '-5' to -5
     expect(mockSetThreshold).toHaveBeenCalledWith(-5);

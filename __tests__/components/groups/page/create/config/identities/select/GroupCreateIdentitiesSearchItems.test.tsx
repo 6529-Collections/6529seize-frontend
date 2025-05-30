@@ -1,16 +1,38 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-const GroupCreateIdentitiesSearchItems = require('../../../../../../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems').default;
-import { QueryKey } from '../../../../../../../../components/react-query-wrapper/ReactQueryWrapper';
+
+// Mock framer-motion
+jest.mock('framer-motion', () => ({
+  AnimatePresence: ({ children }: any) => children,
+  motion: {
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  },
+}));
+
+// Mock API fetch
+jest.mock('../../../../../../../../services/api/common-api', () => ({
+  commonApiFetch: jest.fn(),
+}));
 
 const useQueryMock = jest.fn();
 jest.mock('@tanstack/react-query', () => ({ useQuery: (...args: any[]) => useQueryMock(...args) }));
 
 const ContentMock = jest.fn(() => <div data-testid="content" />);
-jest.mock('components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItemsContent', () => ({
+jest.mock('../../../../../../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItemsContent', () => ({
   __esModule: true,
   default: ContentMock,
 }));
+
+// Mock the QueryKey module
+jest.mock('../../../../../../../../components/react-query-wrapper/ReactQueryWrapper', () => ({
+  QueryKey: {
+    PROFILE_SEARCH: 'PROFILE_SEARCH',
+  },
+}));
+
+// Import after mocks
+import GroupCreateIdentitiesSearchItems from '../../../../../../../../components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems';
+import { QueryKey } from '../../../../../../../../components/react-query-wrapper/ReactQueryWrapper';
 
 const communityData = [{ wallet: '0x1', handle: 'alice', display: 'Alice' }];
 
@@ -19,7 +41,7 @@ beforeEach(() => {
   ContentMock.mockClear();
 });
 
-test.skip('queries and renders items when open and searchCriteria length >=3', () => {
+test('queries and renders items when open and searchCriteria length >=3', () => {
   useQueryMock.mockReturnValue({ data: communityData, isFetching: false });
   render(
     <GroupCreateIdentitiesSearchItems
@@ -34,9 +56,12 @@ test.skip('queries and renders items when open and searchCriteria length >=3', (
     queryFn: expect.any(Function),
     enabled: true,
   });
-  expect(ContentMock).toHaveBeenCalledWith(
-    expect.objectContaining({ items: communityData, loading: false })
-  );
+  expect(ContentMock).toHaveBeenCalledWith({
+    selectedWallets: [],
+    loading: false,
+    items: communityData,
+    onSelect: expect.any(Function),
+  }, undefined);
   expect(screen.getByTestId('content')).toBeInTheDocument();
 });
 
@@ -54,7 +79,7 @@ test('does not show list when open is false', () => {
   expect(screen.queryByTestId('content')).toBeNull();
 });
 
-test.skip('query disabled when searchCriteria too short', () => {
+test('query disabled when searchCriteria too short', () => {
   useQueryMock.mockReturnValue({ data: [], isFetching: false });
   render(
     <GroupCreateIdentitiesSearchItems
@@ -69,7 +94,10 @@ test.skip('query disabled when searchCriteria too short', () => {
     queryFn: expect.any(Function),
     enabled: false,
   });
-  expect(ContentMock).toHaveBeenCalledWith(
-    expect.objectContaining({ items: [], loading: false })
-  );
+  expect(ContentMock).toHaveBeenCalledWith({
+    selectedWallets: [],
+    loading: false,
+    items: [],
+    onSelect: expect.any(Function),
+  }, undefined);
 });
