@@ -99,12 +99,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
             </label>
 
             <div
-              className={`tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200
-              ${
-                titleError
-                  ? "tw-shadow-[0_0_0_1px_rgba(239,68,68,0.1)]"
-                  : "group-focus-visible-within:tw-shadow-[0_0_0_1px_rgba(139,92,246,0.05)]"
-              }`}
+              className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200"
             >
               <input
                 ref={titleRef}
@@ -155,12 +150,7 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
             </label>
 
             <div
-              className={`tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200
-              ${
-                descriptionError
-                  ? "tw-shadow-[0_0_0_1px_rgba(239,68,68,0.1)]"
-                  : "group-focus-visible-within:tw-shadow-[0_0_0_1px_rgba(139,92,246,0.05)]"
-              }`}
+              className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200"
             >
               <textarea
                 ref={descriptionRef}

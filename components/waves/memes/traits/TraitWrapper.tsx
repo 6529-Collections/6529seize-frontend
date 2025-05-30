@@ -32,7 +32,6 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
           </label>
           <div className="tw-flex-1 tw-max-w-xs">{children}</div>
         </div>
-        <ValidationError error={error} id={errorId} />
       </div>
     );
   }
@@ -55,16 +54,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
           {label}
         </label>
 
-        <div
-          className={`tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200
-          ${
-            hasError
-              ? "tw-shadow-[0_0_0_1px_rgba(239,68,68,0.1)]"
-              : readOnly
-              ? ""
-              : "group-focus-visible-within:tw-shadow-[0_0_0_1px_rgba(139,92,246,0.05)]"
-          }`}
-        >
+        <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
           {/* Cloning children to pass additional props if needed */}
           {React.Children.map(children, (child) => {
             if (React.isValidElement(child)) {

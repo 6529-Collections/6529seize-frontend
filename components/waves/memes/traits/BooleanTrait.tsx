@@ -28,9 +28,9 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
 
       if (valueRef.current) {
         yesButton?.classList.add(
-          "tw-bg-emerald-600/30",
-          "tw-ring-emerald-500/60",
-          "tw-text-emerald-200"
+          "tw-bg-primary-400/30",
+          "tw-ring-primary-400/60",
+          "tw-text-primary-200"
         );
         yesButton?.classList.remove(
           "tw-bg-iron-800/50",
@@ -39,9 +39,9 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         );
 
         noButton?.classList.remove(
-          "tw-bg-emerald-600/30",
-          "tw-ring-emerald-500/60",
-          "tw-text-emerald-200"
+          "tw-bg-primary-400/30",
+          "tw-ring-primary-400/60",
+          "tw-text-primary-200"
         );
         noButton?.classList.add(
           "tw-bg-iron-800/50",
@@ -50,9 +50,9 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         );
       } else {
         yesButton?.classList.remove(
-          "tw-bg-emerald-600/30",
-          "tw-ring-emerald-500/60",
-          "tw-text-emerald-200"
+          "tw-bg-primary-400/30",
+          "tw-ring-primary-400/60",
+          "tw-text-primary-200"
         );
         yesButton?.classList.add(
           "tw-bg-iron-800/50",
@@ -61,9 +61,9 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
         );
 
         noButton?.classList.add(
-          "tw-bg-emerald-600/30",
-          "tw-ring-emerald-500/60",
-          "tw-text-emerald-200"
+          "tw-bg-primary-400/30",
+          "tw-ring-primary-400/60",
+          "tw-text-primary-200"
         );
         noButton?.classList.remove(
           "tw-bg-iron-800/50",
@@ -121,7 +121,7 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
             className={`yes-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
             ${
               traits[field]
-                ? "tw-bg-emerald-600/30 tw-ring-emerald-500/60 tw-text-emerald-200"
+                ? "tw-bg-primary-400/30 tw-ring-primary-400/60 tw-text-primary-200"
                 : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
             type="button"
@@ -133,7 +133,7 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
             className={`no-button tw-flex-1 tw-px-3 tw-py-2 tw-rounded-lg tw-text-sm tw-transition-all tw-shadow-sm
             ${
               traits[field] === false
-                ? "tw-bg-emerald-600/30 tw-ring-emerald-500/60 tw-text-emerald-200"
+                ? "tw-bg-primary-400/30 tw-ring-primary-400/60 tw-text-primary-200"
                 : "tw-bg-iron-800/50 tw-ring-iron-700/50 tw-text-iron-400"
             } tw-border-0 tw-ring-1 tw-ring-inset hover:tw-brightness-125`}
             type="button"

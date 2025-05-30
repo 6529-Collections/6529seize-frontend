@@ -29,6 +29,7 @@ module.exports = {
         md: ["0.9375rem", "24px"],
       },
       colors: {
+        "primary-200": "#84ADFF",
         "primary-300": "#84ADFF",
         "primary-400": "#528BFF",
         "primary-500": "#406AFE",

@@ -193,10 +193,6 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   const handleFieldBlur = useCallback(
     (field: keyof TraitsData) => {
       validation.markFieldTouched(field);
-      // For development debugging
-      if (process.env.NODE_ENV === "development") {
-        console.debug(`Field touched: ${field}`);
-      }
     },
     [validation]
   );
