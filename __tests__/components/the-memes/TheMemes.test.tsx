@@ -1,41 +1,51 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { printVolumeTypeDropdown, SortButton } from '../../../components/the-memes/TheMemes';
-import { VolumeType, NFTWithMemesExtendedData } from '../../../entities/INFT';
-import { MemesSort, MemeLabSort } from '../../../enums';
-import { SortDirection } from '../../../entities/ISort';
+import { VolumeType, } from '../../../entities/INFT';
+import { MemeLabSort, MemesSort } from '../../../enums';
 
-// Mock styles modules used by SortButton/Dropdown for simplicity
+jest.mock('react-bootstrap', () => {
+  const React = require('react');
+  const Dropdown: any = (p: any) => <div data-testid="dropdown" {...p}/>;
+  Dropdown.Toggle = (p: any) => <button data-testid="toggle" {...p}>{p.children}</button>;
+  Dropdown.Menu = (p: any) => <div data-testid="menu" {...p}/>;
+  Dropdown.Item = (p: any) => <button data-testid={`item-${p.children}`} onClick={p.onClick}>{p.children}</button>;
+  return { Dropdown };
+});
+
 jest.mock('../../../components/the-memes/TheMemes.module.scss', () => ({
-  volumeDropdown: 'volumeDropdown',
-  volumeDropdownEnabled: 'volumeDropdownEnabled',
   sort: 'sort',
   disabled: 'disabled',
-  sortDirection: 'sortDirection'
+  volumeDropdown: 'volumeDropdown',
+  volumeDropdownEnabled: 'volumeDropdownEnabled'
 }));
 
 describe('TheMemes helpers', () => {
-  it('renders volume type dropdown and handles selection', async () => {
-    const setVolumeType = jest.fn();
-    const setVolumeSort = jest.fn();
-    render(printVolumeTypeDropdown(false, setVolumeType, setVolumeSort));
-
-    const dropdownButton = screen.getByRole('button');
-    await userEvent.click(dropdownButton);
-    const item = screen.getByText(VolumeType.DAYS_7);
-    await userEvent.click(item);
-    expect(setVolumeType).toHaveBeenCalledWith(VolumeType.DAYS_7);
-    expect(setVolumeSort).toHaveBeenCalled();
+  it('SortButton renders label and triggers select', () => {
+    const onSelect = jest.fn();
+    render(<SortButton currentSort={MemesSort.AGE} sort={MemesSort.EDITION_SIZE} select={onSelect} />);
+    const btn = screen.getByRole('button');
+    expect(btn.textContent).toBe('Edition Size');
+    fireEvent.click(btn);
+    expect(onSelect).toHaveBeenCalled();
+    expect(btn.className).toContain('disabled');
   });
 
-  it('sort button calls select and applies disabled style', async () => {
-    const select = jest.fn();
-    render(
-      <SortButton currentSort={MemesSort.AGE} sort={MemeLabSort.VOLUME} select={select} />
-    );
-    const btn = screen.getByRole('button');
-    await userEvent.click(btn);
-    expect(select).toHaveBeenCalled();
-    expect(btn.className).toContain('disabled');
+  it('printVolumeTypeDropdown handles click behaviour', () => {
+    const setType = jest.fn();
+    const setSort = jest.fn();
+    render(printVolumeTypeDropdown(false, setType, setSort));
+    fireEvent.click(screen.getByTestId(`item-${VolumeType.ALL_TIME}`));
+    expect(setType).toHaveBeenCalledWith(VolumeType.ALL_TIME);
+    expect(setSort).toHaveBeenCalled();
+  });
+
+  it('does not call setSort when already volume sort', () => {
+    const setType = jest.fn();
+    const setSort = jest.fn();
+    render(printVolumeTypeDropdown(true, setType, setSort));
+    fireEvent.click(screen.getByTestId(`item-${VolumeType.DAYS_7}`));
+    expect(setType).toHaveBeenCalledWith(VolumeType.DAYS_7);
+    expect(setSort).not.toHaveBeenCalled();
   });
 });
