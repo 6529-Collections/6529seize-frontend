@@ -13,12 +13,18 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   traits,
   updateText,
   readOnly = false,
+  placeholder,
   className,
   error,
   onBlur,
 }) => {
   // Use a ref to track the input element
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Track current input value for real-time checkmark updates
+  const [currentInputValue, setCurrentInputValue] = React.useState<string>(
+    (traits[field] as string) ?? ''
+  );
   
   // Debounced update function - stores the current input value for use in the debounced function
   const [debouncedValue, setDebouncedValue] = React.useState<string>('');
@@ -42,7 +48,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   }, []);
   
   // Handle blur (when user finishes typing)
-  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = useCallback(() => {
     if (inputRef.current && inputRef.current.value !== traits[field]) {
       updateText(field, inputRef.current.value);
     }
@@ -59,11 +65,6 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
       inputRef.current.value = value;
     }
   }, [traits, field]);
-  
-  // Track current input value for real-time checkmark updates
-  const [currentInputValue, setCurrentInputValue] = React.useState<string>(
-    (traits[field] as string) ?? ''
-  );
   
   // Update currentInputValue when traits change from outside
   React.useEffect(() => {
@@ -107,7 +108,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
         onChange={handleChange}
         onBlur={handleBlur}
         maxLength={500}
-        placeholder=""
+        placeholder={placeholder ?? ""}
         readOnly={readOnly}
         className={inputClassName}
       />
@@ -117,6 +118,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   return prevProps.field === nextProps.field &&
          prevProps.label === nextProps.label &&
          prevProps.readOnly === nextProps.readOnly &&
+         prevProps.placeholder === nextProps.placeholder &&
          prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field] &&
          prevProps.error === nextProps.error;
 });
