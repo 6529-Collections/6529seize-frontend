@@ -128,3 +128,26 @@ describe('useDropMessages', () => {
     jest.useRealTimers();
   });
 });
+it('ignores websocket messages when dropId is null', () => {
+  const refetch = jest.fn();
+  useInfiniteQueryMock.mockReturnValue({
+    data: { pages: [] },
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isFetching: false,
+    isFetchingNextPage: false,
+    refetch,
+  } as Partial<UseInfiniteQueryResult>);
+
+  let wsCallback: any;
+  const { useWebSocketMessage } = require('../../services/websocket/useWebSocketMessage');
+  (useWebSocketMessage as jest.Mock).mockImplementation((type, cb) => {
+    wsCallback = cb;
+    return { isConnected: true };
+  });
+
+  renderHook(() => useDropMessages('wave-1', null), { wrapper: createWrapper() });
+
+  wsCallback({ wave: { id: 'wave-1' } });
+  expect(refetch).not.toHaveBeenCalled();
+});

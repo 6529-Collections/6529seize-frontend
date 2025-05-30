@@ -38,3 +38,24 @@ describe('useWebsocketStatus', () => {
     expect(result.current).toBe(WebSocketStatus.CONNECTED);
   });
 });
+
+it('resubscribes when message type changes', () => {
+  const unsub1 = jest.fn();
+  const unsub2 = jest.fn();
+  const subscribe = jest
+    .fn()
+    .mockReturnValueOnce(unsub1)
+    .mockReturnValueOnce(unsub2);
+  useWebSocket.mockReturnValue({ subscribe, status: WebSocketStatus.CONNECTED });
+  const { result, rerender, unmount } = renderHook(
+    ({ type }) => useWebSocketMessage(type as any, jest.fn()),
+    { initialProps: { type: 'A' } }
+  );
+  expect(result.current.isConnected).toBe(true);
+  expect(subscribe).toHaveBeenCalledWith('A', expect.any(Function));
+  rerender({ type: 'B' });
+  expect(unsub1).toHaveBeenCalled();
+  expect(subscribe).toHaveBeenCalledWith('B', expect.any(Function));
+  unmount();
+  expect(unsub2).toHaveBeenCalled();
+});
