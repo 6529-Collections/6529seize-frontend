@@ -59,3 +59,54 @@ it('sets initial wave drops only when cache empty', () => {
   expect(client.getQueryData([QueryKey.DROPS, { waveId: 'w1', limit: 50, dropId: null }])).toEqual({ pages: [feed], pageParams: [undefined] });
 });
 
+it('sets initial waves overview page only once', () => {
+  const client = new QueryClient();
+  let ctx: any;
+  function Child() { ctx = useContext(ReactQueryWrapperContext); return null; }
+  render(
+    <QueryClientProvider client={client}>
+      <ReactQueryWrapper><Child /></ReactQueryWrapper>
+    </QueryClientProvider>
+  );
+  const waves = [{ id: 'w1' }] as any;
+  act(() => ctx.setWavesOverviewPage(waves));
+  const key = [QueryKey.WAVES_OVERVIEW, { limit: 20, type: "RECENTLY_DROPPED_TO", only_waves_followed_by_authenticated_user: true }];
+  expect(client.getQueryData(key)).toEqual({ pages: [waves], pageParams: [undefined] });
+  const other = [{ id: 'w2' }] as any;
+  act(() => ctx.setWavesOverviewPage(other));
+  expect(client.getQueryData(key)).toEqual({ pages: [waves], pageParams: [undefined] });
+});
+
+test('wave follow change toggles and invalidates', () => {
+  jest.useFakeTimers();
+  const toggle = require('../../../components/react-query-wrapper/utils/toggleWaveFollowing');
+  jest.spyOn(toggle, 'toggleWaveFollowing').mockResolvedValue(undefined);
+  const client = new QueryClient();
+  jest.spyOn(client, 'invalidateQueries');
+  let ctx: any;
+  function Child() { ctx = useContext(ReactQueryWrapperContext); return null; }
+  render(
+    <QueryClientProvider client={client}>
+      <ReactQueryWrapper><Child /></ReactQueryWrapper>
+    </QueryClientProvider>
+  );
+  act(() => ctx.onWaveFollowChange({ waveId: 'w1', following: true }));
+  expect(toggle.toggleWaveFollowing).toHaveBeenCalledWith({ waveId: 'w1', following: true, queryClient: client });
+  jest.runAllTimers();
+  expect(client.invalidateQueries).toHaveBeenCalledWith({ queryKey: [QueryKey.WAVES_OVERVIEW] });
+  jest.useRealTimers();
+});
+
+it('invalidateAll calls queryClient.invalidateQueries with no args', () => {
+  const client = new QueryClient();
+  jest.spyOn(client, 'invalidateQueries');
+  let ctx: any;
+  function Child() { ctx = useContext(ReactQueryWrapperContext); return null; }
+  render(
+    <QueryClientProvider client={client}>
+      <ReactQueryWrapper><Child /></ReactQueryWrapper>
+    </QueryClientProvider>
+  );
+  act(() => ctx.invalidateAll());
+  expect(client.invalidateQueries).toHaveBeenCalledWith();
+});

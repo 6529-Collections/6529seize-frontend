@@ -39,3 +39,18 @@ test("renders admin buttons", () => {
   expect(screen.getByText("Public Subscriptions")).toBeInTheDocument();
   expect(screen.getByText("Reset Subscriptions")).toBeInTheDocument();
 });
+
+test('shows confirm modals when buttons clicked', () => {
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  render(
+    <DistributionPlanToolContext.Provider value={distCtx}>
+      <AuthContext.Provider value={authCtx}>
+        <ReviewDistributionPlanTableSubscriptionFooter />
+      </AuthContext.Provider>
+    </DistributionPlanToolContext.Provider>
+  );
+  screen.getByText('Public Subscriptions').click();
+  expect(screen.getByTestId('Download Public Subscriptions')).toBeInTheDocument();
+  screen.getByText('Reset Subscriptions').click();
+  expect(screen.getByTestId('Reset Subscriptions')).toBeInTheDocument();
+});
