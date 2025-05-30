@@ -29,3 +29,12 @@ describe('useWebSocketMessage', () => {
     expect(subscribe).not.toHaveBeenCalled();
   });
 });
+
+describe('useWebsocketStatus', () => {
+  it('returns websocket status from context', () => {
+    useWebSocket.mockReturnValue({ subscribe: jest.fn(), status: WebSocketStatus.CONNECTED });
+    const { useWebsocketStatus } = require('../../../services/websocket/useWebSocketMessage');
+    const { result } = renderHook(() => useWebsocketStatus());
+    expect(result.current).toBe(WebSocketStatus.CONNECTED);
+  });
+});

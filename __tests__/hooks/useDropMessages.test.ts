@@ -1,6 +1,15 @@
 import { renderHook } from '@testing-library/react';
-import { useDropMessages } from '../../hooks/useDropMessages';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { UseInfiniteQueryResult } from '@tanstack/react-query';
+
+// Setup mock for useInfiniteQuery so tests can control its behaviour
+const useInfiniteQueryMock = jest.fn();
+jest.mock('@tanstack/react-query', () => {
+  const actual = jest.requireActual('@tanstack/react-query');
+  return { ...actual, useInfiniteQuery: (...args: any[]) => useInfiniteQueryMock(...args) };
+});
+
+const { useDropMessages } = require('../../hooks/useDropMessages');
 import React from 'react';
 
 // Mock all dependencies
@@ -30,6 +39,19 @@ const createWrapper = () => {
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 };
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  useInfiniteQueryMock.mockReset();
+  useInfiniteQueryMock.mockReturnValue({
+    data: { pages: [] },
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isFetching: false,
+    isFetchingNextPage: false,
+    refetch: jest.fn(),
+  } as Partial<UseInfiniteQueryResult>);
+});
+
 describe('useDropMessages', () => {
   it('should return expected hook properties', () => {
     const { result } = renderHook(
@@ -52,5 +74,57 @@ describe('useDropMessages', () => {
     );
 
     expect(Array.isArray(result.current.drops)).toBe(true);
+  });
+
+  it('manualFetch triggers next page when available', async () => {
+    const fetchNextPage = jest.fn();
+    useInfiniteQueryMock.mockReturnValue({
+      data: { pages: [] },
+      fetchNextPage,
+      hasNextPage: true,
+      isFetching: false,
+      isFetchingNextPage: false,
+      refetch: jest.fn(),
+    } as Partial<UseInfiniteQueryResult>);
+
+    const { useWebSocketMessage } = require('../../services/websocket/useWebSocketMessage');
+    (useWebSocketMessage as jest.Mock).mockReturnValue({ isConnected: true });
+
+    const { result } = renderHook(() => useDropMessages('wave-1', 'drop-1'), {
+      wrapper: createWrapper(),
+    });
+
+    await result.current.manualFetch();
+    expect(fetchNextPage).toHaveBeenCalled();
+  });
+
+  it('websocket callback debounces refetch', () => {
+    jest.useFakeTimers();
+    const refetch = jest.fn();
+    useInfiniteQueryMock.mockReturnValue({
+      data: { pages: [] },
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      refetch,
+    } as Partial<UseInfiniteQueryResult>);
+
+    let wsCallback: any;
+    const { useWebSocketMessage } = require('../../services/websocket/useWebSocketMessage');
+    (useWebSocketMessage as jest.Mock).mockImplementation((type, cb) => {
+      wsCallback = cb;
+      return { isConnected: true };
+    });
+
+    const { unmount } = renderHook(() => useDropMessages('wave-x', 'drop-y'), {
+      wrapper: createWrapper(),
+    });
+
+    wsCallback({ wave: { id: 'wave-x' } });
+    jest.advanceTimersByTime(1000);
+    expect(refetch).toHaveBeenCalled();
+    unmount();
+    jest.useRealTimers();
   });
 });
