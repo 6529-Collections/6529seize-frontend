@@ -152,8 +152,12 @@ describe('useNavigationHistory', () => {
       await new Promise(resolve => setTimeout(resolve, 0));
     });
 
+    // After pathname effect runs, backIndex should be incremented by 1 (2+1=3)
+    // and forwardIndex should be reset to 0, so:
+    // canGoBack should be true (3 > 0)
+    // canGoForward should be false (0 is not > 0)
     expect(result.current.canGoBack).toBe(true);
-    expect(result.current.canGoForward).toBe(true);
+    expect(result.current.canGoForward).toBe(false);
   });
 
   it('updates canGoBack when backIndex changes', () => {
