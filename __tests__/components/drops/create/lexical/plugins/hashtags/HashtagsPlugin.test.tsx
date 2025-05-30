@@ -36,13 +36,43 @@ jest.mock('../../../../../../../components/drops/create/lexical/nodes/HashtagNod
   $createHashtagNode: (text: string) => ({ select: jest.fn(), text }),
 }));
 
-jest.mock('../../../../../../../helpers/AllowlistToolHelpers', () => ({ isEthereumAddress: () => true }));
+jest.mock('../../../../../../../helpers/AllowlistToolHelpers', () => ({ 
+  isEthereumAddress: jest.fn(() => true),
+  __esModule: true
+}));
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import NewHashtagsPlugin, { HashtagsTypeaheadOption } from '../../../../../../../components/drops/create/lexical/plugins/hashtags/HashtagsPlugin';
+import { render, renderHook, waitFor } from '@testing-library/react';
+import NewHashtagsPlugin, {
+  HashtagsTypeaheadOption,
+  getPossibleQueryMatch,
+  useHashtagLookupService,
+} from '../../../../../../../components/drops/create/lexical/plugins/hashtags/HashtagsPlugin';
 
 test('renders without crashing', () => {
   render(<NewHashtagsPlugin onSelect={jest.fn()} />);
   expect(true).toBe(true);
+});
+
+test('getPossibleQueryMatch finds hashtag info', () => {
+  const match = getPossibleQueryMatch(' #hello');
+  expect(match).toEqual({
+    leadOffset: 1,
+    matchingString: 'hello',
+    replaceableString: '#hello',
+  });
+});
+
+test('HashtagsTypeaheadOption creates option correctly', () => {
+  const option = new HashtagsTypeaheadOption({
+    contract: '0x1234567890123456789012345678901234567890',
+    tokenId: '1',
+    name: 'Test NFT',
+    picture: 'test.jpg'
+  });
+
+  expect(option.contract).toBe('0x1234567890123456789012345678901234567890');
+  expect(option.tokenId).toBe('1');
+  expect(option.name).toBe('Test NFT');
+  expect(option.picture).toBe('test.jpg');
 });
