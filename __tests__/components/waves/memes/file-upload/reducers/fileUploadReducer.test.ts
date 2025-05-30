@@ -26,4 +26,21 @@ describe('fileUploaderReducer', () => {
     const state = fileUploaderReducer(modified, { type: 'RESET_STATE' } as any);
     expect(state).toEqual(initialFileUploaderState);
   });
+
+  it('increments attempts on start processing and handles error', () => {
+    const state1 = fileUploaderReducer(initialFileUploaderState, { type: 'START_PROCESSING', payload: sampleFile } as any);
+    expect(state1.processingAttempts).toBe(1);
+    const state2 = fileUploaderReducer(state1, { type: 'PROCESSING_ERROR', payload: 'bad' } as any);
+    expect(state2.visualState).toBe('invalid');
+    expect(state2.hasRecoveryOption).toBe(true);
+  });
+
+  it('handles timeout and compatibility check', () => {
+    const state = fileUploaderReducer(initialFileUploaderState, { type: 'START_COMPATIBILITY_CHECK', payload: sampleFile } as any);
+    expect(state.isCheckingCompatibility).toBe(true);
+    const timeout = fileUploaderReducer(state, { type: 'PROCESSING_TIMEOUT' } as any);
+    expect(timeout.error).toMatch('timed out');
+    const compat = fileUploaderReducer(state, { type: 'SET_COMPATIBILITY_RESULT', payload: { tested: true, canPlay: true } } as any);
+    expect(compat.videoCompatibility).toEqual({ tested: true, canPlay: true });
+  });
 });
