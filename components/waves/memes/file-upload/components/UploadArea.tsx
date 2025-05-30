@@ -22,7 +22,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
 }) => (
   <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-6">
     {/* Subtle animated dashed border around entire area */}
-    <div className="tw-absolute tw-inset-[10px] tw-border-2 tw-border-dashed tw-border-iron-700/40 group-hover:tw-border-primary-500/30 tw-rounded-lg tw-transition-all tw-duration-300" />
+    <div className="tw-absolute tw-inset-[10px] tw-border-2 tw-border-dashed tw-border-iron-700 group-hover:tw-border-primary-500/30 tw-rounded-lg tw-transition-all tw-duration-300" />
     <div className="tw-absolute tw-inset-[10px] tw-border tw-border-dashed tw-border-iron-600/20 group-hover:tw-border-iron-500/30 tw-rounded-lg tw-animate-pulse tw-transition-all tw-duration-300" />
 
     {/* Pattern background suggesting droppable area */}
