@@ -128,19 +128,25 @@ export const commonApiFetchWithRetry = async <
             new Promise((_, reject) => {
               // Check if already aborted before adding listener
               if (fetchParams.signal?.aborted) {
-                reject(new DOMException("Request aborted during delay", "AbortError"));
+                reject(
+                  new DOMException("Request aborted during delay", "AbortError")
+                );
                 return;
               }
               let timeoutId: NodeJS.Timeout | undefined = undefined;
               const abortListener = () => {
                 if (timeoutId) clearTimeout(timeoutId); // Clear the timeout if aborted
-                reject(new DOMException("Request aborted during delay", "AbortError"));
+                reject(
+                  new DOMException("Request aborted during delay", "AbortError")
+                );
               };
               // Ensure the delayPromise resolves and cleans up listener if not aborted
               timeoutId = setTimeout(() => {
                 fetchParams.signal?.removeEventListener("abort", abortListener);
               }, delayWithJitter);
-              fetchParams.signal?.addEventListener("abort", abortListener, { once: true });
+              fetchParams.signal?.addEventListener("abort", abortListener, {
+                once: true,
+              });
             }),
           ]);
         } else {
@@ -209,7 +215,7 @@ export const commonApiDelete = async (param: {
   });
 };
 
-export const commonApiDeleWithBody = async <
+export const commonApiDeleteWithBody = async <
   T,
   U,
   Z = Record<string, string>

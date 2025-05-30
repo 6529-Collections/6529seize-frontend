@@ -30,7 +30,6 @@ import { toggleWaveFollowing } from "./utils/toggleWaveFollowing";
 import { useQueryKeyListener } from "../../hooks/useQueryKeyListener";
 import Cookies from "js-cookie";
 import { Time } from "../../helpers/time";
-import { changeDropInCache } from "./utils/onDropRateChange";
 import { ApiIdentity } from "../../generated/models/ObjectSerializer";
 
 export enum QueryKey {
@@ -168,10 +167,6 @@ type ReactQueryWrapperContextType = {
   }) => void;
   waitAndInvalidateDrops: () => void;
   addOptimisticDrop: (params: { readonly drop: ApiDrop }) => void;
-  onDropRateChange: (params: {
-    readonly drop: ApiDrop;
-    readonly giverHandle: string | null;
-  }) => void;
   readonly invalidateDrops: () => void;
   onGroupRemoved: ({ groupId }: { readonly groupId: string }) => void;
   onGroupChanged: ({ groupId }: { readonly groupId: string }) => void;
@@ -205,7 +200,6 @@ export const ReactQueryWrapperContext =
     initCommunityActivityPage: () => {},
     waitAndInvalidateDrops: () => {},
     addOptimisticDrop: () => {},
-    onDropRateChange: () => {},
     invalidateDrops: () => {},
     onGroupRemoved: () => {},
     onGroupChanged: () => {},
@@ -1085,14 +1079,6 @@ export default function ReactQueryWrapper({
     invalidateDrops();
   };
 
-  const onDropRateChange = async ({
-    drop,
-    giverHandle,
-  }: {
-    readonly drop: ApiDrop;
-    readonly giverHandle: string | null;
-  }) => await changeDropInCache(queryClient, drop, giverHandle);
-
   const onIdentityBulkRate = () => {
     queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_LOGS],
@@ -1235,7 +1221,6 @@ export default function ReactQueryWrapper({
       onGroupChanged,
       waitAndInvalidateDrops,
       addOptimisticDrop,
-      onDropRateChange,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,
@@ -1264,7 +1249,6 @@ export default function ReactQueryWrapper({
       onGroupChanged,
       waitAndInvalidateDrops,
       addOptimisticDrop,
-      onDropRateChange,
       onIdentityBulkRate,
       onGroupCreate,
       onWaveCreated,

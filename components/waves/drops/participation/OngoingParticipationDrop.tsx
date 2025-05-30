@@ -61,12 +61,15 @@ export default function OngoingParticipationDrop({
     onQuote({ drop, partId: drop.parts[activePartIndex].part_id });
   }, [onQuote, drop, activePartIndex]);
 
+  const handleOnAddReaction = useCallback(() => {
+    setIsSlideUp(false);
+  }, []);
+
   return (
     <ParticipationDropContainer
       drop={drop}
       isActiveDrop={isActiveDrop}
-      location={location}
-    >
+      location={location}>
       {!isMobile && showReplyAndQuote && (
         <WaveDropActions
           drop={drop}
@@ -97,7 +100,7 @@ export default function OngoingParticipationDrop({
         <ParticipationDropMetadata metadata={drop.metadata} />
         <ParticipationDropFooter drop={drop} />
       </div>
-      
+
       {/* Mobile menu */}
       <WaveDropMobileMenu
         drop={drop}
@@ -107,6 +110,7 @@ export default function OngoingParticipationDrop({
         setOpen={setIsSlideUp}
         onReply={handleOnReply}
         onQuote={handleOnQuote}
+        onAddReaction={handleOnAddReaction}
       />
     </ParticipationDropContainer>
   );

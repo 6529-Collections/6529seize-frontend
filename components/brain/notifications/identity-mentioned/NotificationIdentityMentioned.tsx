@@ -64,15 +64,14 @@ export default function NotificationIdentityMentioned({
             <span className="tw-inline-flex tw-flex-wrap tw-gap-x-1 tw-items-center">
               <Link
                 href={`/${notification.related_drops[0].author.handle}`}
-                className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50"
-              >
+                className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
                 {notification.related_drops[0].author.handle}
               </Link>{" "}
               <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
                 mentioned you
               </span>{" "}
               <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-                <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
+                <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
                   &#8226;
                 </span>{" "}
                 {getTimeAgoShort(notification.created_at)}

@@ -18,6 +18,7 @@ export enum ApiNotificationCause {
     DropQuoted = 'DROP_QUOTED',
     DropReplied = 'DROP_REPLIED',
     DropVoted = 'DROP_VOTED',
+    DropReacted = 'DROP_REACTED',
     WaveCreated = 'WAVE_CREATED',
     AllDrops = 'ALL_DROPS'
 }

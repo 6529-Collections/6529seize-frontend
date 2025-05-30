@@ -5,7 +5,7 @@ import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
 import {
-  commonApiDeleWithBody,
+  commonApiDeleteWithBody,
   commonApiPost,
 } from "../../../services/api/common-api";
 import CircleLoader, {
@@ -37,8 +37,7 @@ export default function WaveDropFollowAuthor({
         viewBox="0 0 17 15"
         fill="none"
         aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+        xmlns="http://www.w3.org/2000/svg">
         <path
           fillRule="evenodd"
           clipRule="evenodd"
@@ -55,8 +54,7 @@ export default function WaveDropFollowAuthor({
         viewBox="0 0 17 15"
         fill="none"
         aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+        xmlns="http://www.w3.org/2000/svg">
         <path
           fillRule="evenodd"
           clipRule="evenodd"
@@ -111,7 +109,7 @@ export default function WaveDropFollowAuthor({
 
   const unFollowMutation = useMutation({
     mutationFn: async () => {
-      await commonApiDeleWithBody<
+      await commonApiDeleteWithBody<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
@@ -154,8 +152,7 @@ export default function WaveDropFollowAuthor({
   return (
     <Tippy
       content={<span className="tw-text-xs">{tooltipText[followState]}</span>}
-      placement="top"
-    >
+      placement="top">
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -167,8 +164,7 @@ export default function WaveDropFollowAuthor({
           followState === FOLLOW_STATE.FOLLOWING
             ? `Unfollow ${drop.author.handle}`
             : `Follow ${drop.author.handle}`
-        }
-      >
+        }>
         {mutating ? (
           <CircleLoader size={CircleLoaderSize.SMALL} />
         ) : (

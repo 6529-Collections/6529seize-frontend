@@ -2,6 +2,7 @@
 @use "variables.scss";
 @use "fonts.scss";
 @import "react-toggle/style.css";
+@import "react-tooltip/dist/react-tooltip.css";
 
 @tailwind base;
 @tailwind components;
@@ -81,7 +82,10 @@ a {
 }
 
 a:hover {
-  color: color.scale(variables.$font-color, $lightness: -(variables.$darken-percentage));
+  color: color.scale(
+    variables.$font-color,
+    $lightness: -(variables.$darken-percentage)
+  );
 }
 
 @media only screen and (max-width: 1200px) {
@@ -396,7 +400,10 @@ h5:not(.tailwind-scope h5) {
   color: white !important;
 
   &:hover {
-    background-color: color.adjust($color: variables.$project-green, $lightness: 5%);
+    background-color: color.adjust(
+      $color: variables.$project-green,
+      $lightness: 5%
+    );
   }
 }
 

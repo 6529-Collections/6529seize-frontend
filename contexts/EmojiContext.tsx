@@ -1,11 +1,26 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import data from "@emoji-mart/data";
 
 const S3_EMOJI_URL = `https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json?t=${Date.now()}`;
 
-interface Emoji {
+interface BaseEmoji {
   id: string;
   name: string;
   keywords: string;
+}
+
+interface NativeEmoji extends BaseEmoji {
+  skins: { native: string }[];
+}
+
+interface Emoji extends BaseEmoji {
   skins: { src: string }[];
 }
 
@@ -14,6 +29,7 @@ interface EmojiContextType {
   loading: boolean;
   categories: string[];
   categoryIcons: Record<string, { src: string }>;
+  findNativeEmoji: (emojiId: string) => NativeEmoji | null;
 }
 
 const EmojiContext = createContext<EmojiContextType | undefined>(undefined);
@@ -78,9 +94,20 @@ export const EmojiProvider = ({ children }: { children: React.ReactNode }) => {
     fetchEmojis();
   }, []);
 
+  const findNativeEmoji = useCallback((emojiId: string) => {
+    const emojiText = emojiId.replaceAll(":", "");
+    const emoji = Object.values((data as any).emojis).find(
+      (e: any) => e.id === emojiText
+    );
+    if (emoji) {
+      return emoji as NativeEmoji;
+    }
+    return null;
+  }, []);
+
   const value = useMemo(
-    () => ({ emojiMap, loading, categories, categoryIcons }),
-    [emojiMap, loading, categories, categoryIcons]
+    () => ({ emojiMap, loading, categories, categoryIcons, findNativeEmoji }),
+    [emojiMap, loading, categories, categoryIcons, findNativeEmoji]
   );
 
   return (
