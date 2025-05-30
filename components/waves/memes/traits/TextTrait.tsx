@@ -54,7 +54,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   
   // Synchronize the input value with props when traits change from outside
   React.useEffect(() => {
-    const value = (traits[field] as string) || '';
+    const value = (traits[field] as string) ?? '';
     if (inputRef.current && inputRef.current.value !== value) {
       inputRef.current.value = value;
     }
@@ -81,16 +81,22 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   }, [traits, field, currentInputValue]);
 
   // Prepare input className - add padding for checkmark when field is filled
-  const inputClassName = useMemo(() => `tw-form-input tw-font-normal tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1
-    ${
-      readOnly
-        ? "tw-bg-iron-700 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-300"
-        : error
-          ? "tw-bg-iron-900 tw-ring-red tw-cursor-text"
-          : "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text"
+  const inputClassName = useMemo(() => {
+    // Determine input state styling
+    let stateClassName: string;
+    if (readOnly) {
+      stateClassName = "tw-bg-iron-700 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-300";
+    } else if (error) {
+      stateClassName = "tw-bg-iron-900 tw-ring-red tw-cursor-text";
+    } else {
+      stateClassName = "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
     }
-    ${isFieldFilled && !error ? 'tw-pr-10' : ''}
-    `, [readOnly, error, isFieldFilled]);
+
+    // Determine padding for checkmark
+    const paddingClassName = isFieldFilled && !error ? 'tw-pr-10' : '';
+
+    return `tw-form-input tw-font-normal tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 ${stateClassName} ${paddingClassName}`;
+  }, [readOnly, error, isFieldFilled]);
   
   return (
     <TraitWrapper label={label} readOnly={readOnly} className={className} error={error} isFieldFilled={isFieldFilled}>

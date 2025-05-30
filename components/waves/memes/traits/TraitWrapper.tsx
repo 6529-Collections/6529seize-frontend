@@ -14,10 +14,18 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   isFieldFilled = false,
 }) => {
   // Generate unique IDs for accessibility
-  const fieldId = id || `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
+  const fieldId = id ?? `field-${label.toLowerCase().replace(/\s+/g, "-")}`;
   const errorId = error ? `${fieldId}-error` : undefined;
 
   const hasError = !!error && !readOnly;
+
+  // Determine label styling based on state
+  let labelClassName = "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400";
+  if (readOnly) {
+    labelClassName = "tw-text-iron-500";
+  } else if (hasError) {
+    labelClassName = "tw-text-red-400";
+  }
 
   if (isBoolean) {
     // Special layout for boolean fields
@@ -42,14 +50,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
       <div className="tw-relative">
         <label
           htmlFor={fieldId}
-          className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all
-            ${
-              readOnly
-                ? "tw-text-iron-500"
-                : hasError
-                ? "tw-text-red-400"
-                : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
-            }`}
+          className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all ${labelClassName}`}
         >
           {label}
         </label>

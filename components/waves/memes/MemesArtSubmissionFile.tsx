@@ -129,7 +129,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
     // Otherwise fallback to:
     // - existing objectUrl (if your useFileUploader logic set it)
     // - or the original "artworkUrl" prop from the server
-    setPreviewUrl(objectUrl || artworkUrl);
+    setPreviewUrl(objectUrl ?? artworkUrl);
   }, [currentFile, objectUrl, artworkUrl]);
 
   return (

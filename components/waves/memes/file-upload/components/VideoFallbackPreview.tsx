@@ -56,7 +56,7 @@ const VideoFallbackPreview: React.FC<VideoFallbackPreviewProps> = ({
 
       <div className="tw-text-center tw-text-iron-400 tw-text-sm tw-px-4 tw-mt-4">
         <p className="tw-mb-2">
-          {errorMessage || getBrowserSpecificMessage(file)}
+          {errorMessage ?? getBrowserSpecificMessage(file)}
         </p>
         <p className="tw-text-amber-400 tw-text-xs tw-mt-1">
           Your file will still be uploaded successfully.
