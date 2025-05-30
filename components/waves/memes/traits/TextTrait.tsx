@@ -62,19 +62,19 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
   
   // Track current input value for real-time checkmark updates
   const [currentInputValue, setCurrentInputValue] = React.useState<string>(
-    (traits[field] as string) || ''
+    (traits[field] as string) ?? ''
   );
   
   // Update currentInputValue when traits change from outside
   React.useEffect(() => {
-    const traitValue = (traits[field] as string) || '';
+    const traitValue = (traits[field] as string) ?? '';
     setCurrentInputValue(traitValue);
   }, [traits, field]);
 
   // Check if field is filled (non-empty trimmed value)
   const isFieldFilled = useMemo(() => {
-    const traitValue = (traits[field] as string) || '';
-    const inputValue = currentInputValue || '';
+    const traitValue = (traits[field] as string) ?? '';
+    const inputValue = currentInputValue ?? '';
     
     // Return true if either the trait value or current input value has content
     return traitValue.trim().length > 0 || inputValue.trim().length > 0;
@@ -103,7 +103,7 @@ export const TextTrait: React.FC<TextTraitProps> = React.memo(({
       <input
         ref={inputRef}
         type="text"
-        defaultValue={(traits[field] as string) || ''}
+        defaultValue={(traits[field] as string) ?? ''}
         onChange={handleChange}
         onBlur={handleBlur}
         maxLength={500}

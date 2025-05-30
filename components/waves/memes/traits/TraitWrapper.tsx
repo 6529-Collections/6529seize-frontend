@@ -30,7 +30,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   if (isBoolean) {
     // Special layout for boolean fields
     return (
-      <div className={`tw-group tw-relative ${className || ""}`}>
+      <div className={`tw-group tw-relative ${className ?? ""}`}>
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
           <label
             htmlFor={fieldId}
@@ -45,7 +45,7 @@ export const TraitWrapper: React.FC<TraitWrapperProps> = ({
   }
 
   return (
-    <div className={`tw-group tw-relative ${className || ""}`}>
+    <div className={`tw-group tw-relative ${className ?? ""}`}>
       {/* Modern floating label design */}
       <div className="tw-relative">
         <label
