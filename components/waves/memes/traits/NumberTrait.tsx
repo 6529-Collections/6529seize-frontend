@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import { useDebounce } from 'react-use';
 import { NumberTraitProps } from './types';
 import { TraitWrapper } from './TraitWrapper';
@@ -114,11 +114,13 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
   
   // Handle change for typing and increment/decrement buttons
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setDebouncedValue(e.target.value);
+    const value = e.target.value;
+    setDebouncedValue(value);
+    setCurrentInputValue(value); // Update for real-time checkmark
     
     // For increment/decrement buttons, also immediately update
-    if (e.target.value !== '') {
-      let newValue = Number(e.target.value);
+    if (value !== '') {
+      let newValue = Number(value);
       if (!isNaN(newValue) && isFinite(newValue)) {
         // Apply min/max constraints if provided
         if (min !== undefined && newValue < min) {
@@ -134,8 +136,41 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
     }
   }, [field, updateNumber, min, max]);
   
+  // Track current input value for real-time checkmark updates
+  const [currentInputValue, setCurrentInputValue] = React.useState<string>(
+    String((traits[field] as number) ?? 0)
+  );
+  
+  // Update currentInputValue when traits change from outside
+  React.useEffect(() => {
+    const traitValue = (traits[field] as number) ?? 0;
+    setCurrentInputValue(String(traitValue));
+  }, [traits, field]);
+  
+  // Check if field is filled (non-zero value)
+  const isFieldFilled = useMemo(() => {
+    const traitValue = (traits[field] as number) ?? 0;
+    const inputValue = parseFloat(currentInputValue) || 0;
+    
+    // Return true if either the trait value or current input value is > 0
+    return traitValue > 0 || inputValue > 0;
+  }, [traits, field, currentInputValue]);
+
+  // Determine input state styling
+  let stateClassName: string;
+  if (readOnly) {
+    stateClassName = "tw-bg-iron-800 tw-opacity-70 tw-cursor-not-allowed tw-text-iron-500";
+  } else if (error) {
+    stateClassName = "tw-bg-iron-900 tw-ring-red tw-cursor-text";
+  } else {
+    stateClassName = "tw-bg-iron-900 tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-cursor-text";
+  }
+
+  // Determine padding for checkmark
+  const paddingClassName = isFieldFilled && !error ? 'tw-pr-10' : '';
+  
   return (
-    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error}>
+    <TraitWrapper label={label} readOnly={readOnly} className={className} error={error} isFieldFilled={isFieldFilled}>
       <input
         ref={inputRef}
         type="number"
@@ -146,12 +181,12 @@ export const NumberTrait: React.FC<NumberTraitProps> = React.memo(({
         readOnly={readOnly}
         min={min}
         max={max}
-        className={`tw-form-input tw-w-full sm:tw-w-2/3 tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
-          ${
-            readOnly
-              ? "tw-bg-iron-950 tw-ring-iron-950 tw-opacity-80 tw-cursor-not-allowed tw-text-iron-500"
-              : "tw-bg-iron-900/80 tw-ring-iron-700/60 tw-cursor-text hover:tw-ring-primary-400 focus:tw-ring-primary-400"
-          } tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500`}
+        className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-ring-1 [&::-webkit-outer-spin-button]:tw-appearance-none [&::-webkit-inner-spin-button]:tw-appearance-none ${stateClassName} ${paddingClassName}`}
+        style={{
+          MozAppearance: 'textfield',
+          WebkitAppearance: 'none',
+        }}
+        onWheel={(e) => e.currentTarget.blur()}
       />
     </TraitWrapper>
   );

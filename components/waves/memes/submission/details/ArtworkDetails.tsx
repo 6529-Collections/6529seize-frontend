@@ -1,6 +1,7 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useMemo } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 
 interface ArtworkDetailsProps {
   readonly title: string;
@@ -73,21 +74,33 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
     }
   }, [onDescriptionChange, description, onDescriptionBlur]);
 
+  // Check if fields are filled
+  const isTitleFilled = useMemo(() => title.trim().length > 0, [title]);
+  const isDescriptionFilled = useMemo(() => description.trim().length > 0, [description]);
+
   return (
     <FormSection
       title="Artwork Details"
-      titleClassName="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-2 sm:tw-mb-4"
+      titleClassName="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4 sm:tw-mb-6"
     >
-      <div className="tw-grid tw-grid-cols-1 tw-gap-4">
-        <div className="tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors tw-ring-iron-800/5">
-          <div className="tw-flex sm:tw-items-center tw-gap-x-6 tw-flex-col sm:tw-flex-row tw-gap-y-1.5">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-6">
+        <div className="tw-group tw-relative">
+          <div className="tw-relative">
             <label
               htmlFor="field-title"
-              className="sm:tw-w-1/3 tw-text-sm tw-font-medium tw-text-iron-300"
+              className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all
+                ${
+                  titleError
+                    ? "tw-text-red"
+                    : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
+                }`}
             >
               Artwork Title
             </label>
-            <div className="tw-flex tw-flex-col sm:tw-w-2/3">
+
+            <div
+              className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200"
+            >
               <input
                 ref={titleRef}
                 id="field-title"
@@ -96,64 +109,83 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                 maxLength={500}
                 defaultValue={title || ""}
                 onBlur={handleTitleBlur}
-                placeholder="Enter artwork title"
                 aria-invalid={!!titleError}
                 aria-describedby={titleError ? "title-error" : undefined}
                 data-field="title"
-                className={`tw-form-input tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
-                tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500
-                ${
-                  titleError
-                    ? "tw-ring-red"
-                    : "tw-ring-iron-700/60 hover:tw-ring-primary-400 focus:tw-ring-primary-400"
-                }`}
+                className={`tw-form-input tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out
+                  tw-bg-iron-900 tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-cursor-text tw-ring-1
+                  ${
+                    titleError
+                      ? "tw-ring-red"
+                      : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
+                  }
+                  ${isTitleFilled && !titleError ? 'tw-pr-10' : ''}
+                  `}
               />
-              <ValidationError
-                error={titleError}
-                id="title-error"
-                className="tw-mt-1"
-              />
+              
+              {/* Title checkmark */}
+              {isTitleFilled && !titleError && (
+                <div className="tw-absolute tw-right-3 tw-top-1/2 tw-transform -tw-translate-y-1/2 tw-pointer-events-none">
+                  <CheckCircleIcon className="tw-text-emerald-500 tw-w-5 tw-h-5 tw-flex-shrink-0" />
+                </div>
+              )}
             </div>
           </div>
+
+          <ValidationError error={titleError} id="title-error" />
         </div>
-        <div className="tw-bg-iron-900/50 tw-rounded-xl tw-p-4 tw-ring-1 tw-ring-inset tw-transition-colors tw-ring-iron-800/5">
-          <div className="tw-flex sm:tw-items-center tw-gap-x-6 tw-flex-col sm:tw-flex-row tw-gap-y-1.5">
+
+        <div className="tw-group tw-relative">
+          <div className="tw-relative">
             <label
               htmlFor="field-description"
-              className="sm:tw-w-1/3 tw-text-sm tw-font-medium sm:tw-mt-2 tw-text-iron-300"
+              className={`tw-absolute tw-left-3 -tw-top-2 tw-px-1 tw-text-xs tw-font-medium tw-bg-iron-900 tw-z-10 tw-transition-all
+                ${
+                  descriptionError
+                    ? "tw-text-red"
+                    : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
+                }`}
             >
               Description
             </label>
-            <div className="tw-flex tw-flex-col sm:tw-w-2/3">
+
+            <div
+              className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200"
+            >
               <textarea
                 ref={descriptionRef}
                 id="field-description"
                 name="description"
                 defaultValue={description || ""}
                 onBlur={handleDescriptionBlur}
-                placeholder="Enter artwork description"
-                rows={3}
+                rows={4}
                 maxLength={500}
                 aria-invalid={!!descriptionError}
                 aria-describedby={
                   descriptionError ? "description-error" : undefined
                 }
                 data-field="description"
-                className={`tw-form-textarea tw-rounded-lg tw-px-3 tw-py-3 tw-text-sm tw-text-iron-100 tw-transition-all tw-shadow-inner
-                tw-bg-iron-900 tw-cursor-text tw-ring-1 tw-ring-inset tw-border-0 placeholder:tw-text-iron-500
-                ${
-                  descriptionError
-                    ? "tw-ring-red"
-                    : "tw-ring-iron-700/60 hover:tw-ring-primary-400 focus:tw-ring-primary-400"
-                }`}
+                className={`tw-form-textarea tw-w-full tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-sm tw-text-iron-100 tw-transition-all tw-duration-500 tw-ease-in-out
+                  tw-bg-iron-900 tw-border-0 tw-outline-none placeholder:tw-text-iron-500 tw-resize-none tw-cursor-text tw-ring-1
+                  ${
+                    descriptionError
+                      ? "tw-ring-red"
+                      : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
+                  }
+                  ${isDescriptionFilled && !descriptionError ? 'tw-pr-10' : ''}
+                  `}
               />
-              <ValidationError
-                error={descriptionError}
-                id="description-error"
-                className="tw-mt-1"
-              />
+              
+              {/* Description checkmark */}
+              {isDescriptionFilled && !descriptionError && (
+                <div className="tw-absolute tw-right-3 tw-top-3 tw-pointer-events-none">
+                  <CheckCircleIcon className="tw-text-emerald-500 tw-w-5 tw-h-5 tw-flex-shrink-0" />
+                </div>
+              )}
             </div>
           </div>
+
+          <ValidationError error={descriptionError} id="description-error" />
         </div>
       </div>
     </FormSection>
