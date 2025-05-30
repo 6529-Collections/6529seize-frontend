@@ -49,7 +49,7 @@ describe("MainLayout", () => {
 
   it("uses MobileLayout when device is mobile", () => {
     useRouter.mockReturnValue({ pathname: "/", asPath: "/" });
-    useDeviceInfo.mockReturnValue({ isMobileDevice: true, hasTouchScreen: false, isApp: false });
+    useDeviceInfo.mockReturnValue({ isMobileDevice: true, hasTouchScreen: false, isApp: true });
     render(<MainLayout metadata={metadata}>child</MainLayout>);
     expect(screen.getByTestId("mobile")).toBeInTheDocument();
     expect(screen.queryByTestId("desktop")).not.toBeInTheDocument();

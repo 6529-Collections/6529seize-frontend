@@ -31,10 +31,10 @@ beforeEach(() => {
 });
 
 describe('MediaDisplayVideo', () => {
-  it('autoplays when in view', () => {
+  it('uses controlled playback instead of autoplay attribute', () => {
     const { container } = render(<MediaDisplayVideo src="foo.mp4" />);
     const video = container.querySelector('video') as HTMLVideoElement;
-    expect(video.autoplay).toBe(true);
+    expect(video.autoplay).toBe(false); // Component uses useEffect for controlled playback
   });
 
   it('toggles play state on click when controls hidden', async () => {

@@ -46,7 +46,7 @@ describe('BooleanTrait', () => {
     expect(yesButton).toBeInTheDocument();
     expect(noButton).toBeInTheDocument();
     expect(yesButton).toHaveClass('tw-bg-iron-800/50');
-    expect(noButton).toHaveClass('tw-bg-rose-600/30');
+    expect(noButton).toHaveClass('tw-bg-primary-400/30');
   });
 
   it('renders with correct initial state for true value', () => {
@@ -60,7 +60,7 @@ describe('BooleanTrait', () => {
     const yesButton = screen.getByRole('button', { name: 'Yes' });
     const noButton = screen.getByRole('button', { name: 'No' });
 
-    expect(yesButton).toHaveClass('tw-bg-emerald-600/30');
+    expect(yesButton).toHaveClass('tw-bg-primary-400/30');
     expect(noButton).toHaveClass('tw-bg-iron-800/50');
   });
 
@@ -145,7 +145,7 @@ describe('BooleanTrait', () => {
     let yesButton = screen.getByRole('button', { name: 'Yes' });
     let noButton = screen.getByRole('button', { name: 'No' });
     expect(yesButton).toHaveClass('tw-bg-iron-800/50');
-    expect(noButton).toHaveClass('tw-bg-rose-600/30');
+    expect(noButton).toHaveClass('tw-bg-primary-400/30');
 
     // Change to true
     const updatedTraits = { ...mockTraits, punk6529: true };
@@ -158,7 +158,7 @@ describe('BooleanTrait', () => {
 
     yesButton = screen.getByRole('button', { name: 'Yes' });
     noButton = screen.getByRole('button', { name: 'No' });
-    expect(yesButton).toHaveClass('tw-bg-emerald-600/30');
+    expect(yesButton).toHaveClass('tw-bg-primary-400/30');
     expect(noButton).toHaveClass('tw-bg-iron-800/50');
   });
 
@@ -231,14 +231,14 @@ describe('BooleanTrait', () => {
 
     // Should default to false/No state
     expect(yesButton).toHaveClass('tw-bg-iron-800/50');
-    expect(noButton).toHaveClass('tw-bg-rose-600/30');
+    expect(noButton).toHaveClass('tw-bg-primary-400/30');
   });
 
   it('applies correct CSS classes for different states', () => {
     render(<BooleanTrait {...defaultProps} />);
 
     const buttonsContainer = screen.getByRole('button', { name: 'Yes' }).parentElement;
-    expect(buttonsContainer).toHaveClass('tw-flex', 'tw-gap-3', 'tw-flex-1');
+    expect(buttonsContainer).toHaveClass('tw-flex', 'tw-gap-3', 'tw-w-full');
     expect(buttonsContainer).toHaveAttribute('data-field', 'punk6529');
   });
 });

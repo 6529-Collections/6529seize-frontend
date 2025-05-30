@@ -44,7 +44,7 @@ describe('GroupCardDeleteModal', () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
-          <GroupCardDeleteModal group={{ id: 'g' } as any} onClose={jest.fn()} />
+          <GroupCardDeleteModal group={{ id: 'g', name: 'Test Group' } as any} onClose={jest.fn()} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
@@ -60,7 +60,7 @@ describe('GroupCardDeleteModal', () => {
     render(
       <AuthContext.Provider value={auth}>
         <ReactQueryWrapperContext.Provider value={rq}>
-          <GroupCardDeleteModal group={{ id: 'g' } as any} onClose={onClose} />
+          <GroupCardDeleteModal group={{ id: 'g', name: 'Test Group' } as any} onClose={onClose} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
     );
