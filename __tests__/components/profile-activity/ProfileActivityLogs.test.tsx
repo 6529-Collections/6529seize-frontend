@@ -38,4 +38,14 @@ describe('convertActivityLogParams', () => {
     const outgoing = convertActivityLogParams({ params: { ...base, handleOrWallet: 'u', targetType: FilterTargetType.OUTGOING }, disableActiveGroup: false });
     expect(outgoing.profile).toBe('u');
   });
+
+  it('produces empty log_type when none selected', () => {
+    const res = convertActivityLogParams({ params: { ...base, logTypes: [] }, disableActiveGroup: false });
+    expect(res.log_type).toBe('');
+  });
+
+  it('omits group id when handle present even if disableActiveGroup false', () => {
+    const res = convertActivityLogParams({ params: { ...base, handleOrWallet: 'user' }, disableActiveGroup: false });
+    expect(res.group_id).toBeUndefined();
+  });
 });

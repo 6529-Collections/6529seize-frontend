@@ -45,3 +45,17 @@ describe('WalletChecker', () => {
     expect(mockFetchUrl).toHaveBeenCalledWith(`${process.env.API_ENDPOINT}/api/consolidations/0x1111111111111111111111111111111111111111?show_incomplete=true`);
   });
 });
+
+describe('WalletChecker extras', () => {
+  it('clears input after clicking clear', async () => {
+    const setAddressQuery = jest.fn();
+    render(<WalletChecker address_query="" setAddressQuery={setAddressQuery} />);
+    const input = screen.getByPlaceholderText('0x... or ENS');
+    fireEvent.change(input, { target: { value: 'bad' } });
+    fireEvent.click(screen.getByText('Check'));
+    fireEvent.change(input, { target: { value: '0x1234567890123456789012345678901234567890' } });
+    fireEvent.click(screen.getByText('Clear'));
+    expect(input).toHaveValue('');
+    expect(setAddressQuery).toHaveBeenLastCalledWith('');
+  });
+});
