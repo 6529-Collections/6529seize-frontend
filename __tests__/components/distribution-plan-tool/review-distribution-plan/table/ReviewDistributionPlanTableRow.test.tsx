@@ -57,4 +57,51 @@ describe('ReviewDistributionPlanTableRow', () => {
     expect(createdAnchor!.download).toMatch(/phase-1\.json$/);
     document.createElement = origCreate;
   });
+
+  it('downloads csv results', async () => {
+    const origCreate = document.createElement;
+    let anchor: HTMLAnchorElement;
+    document.createElement = jest.fn((tag: string) => {
+      if (tag === 'a') {
+        anchor = origCreate.call(document, tag) as HTMLAnchorElement;
+        anchor.click = jest.fn();
+        return anchor;
+      }
+      return origCreate.call(document, tag);
+    });
+    setup();
+    await userEvent.click(screen.getByTestId('csv-btn'));
+    await waitFor(() => expect(distributionPlanApiFetch).toHaveBeenCalled());
+    expect(anchor!.download).toMatch(/phase-1\.csv$/);
+    expect((anchor!.href)).toContain('data:text/csv;charset=utf-8,');
+    document.createElement = origCreate;
+  });
+
+  it('aggregates values when downloading manifold csv', async () => {
+    (distributionPlanApiFetch as jest.Mock).mockResolvedValueOnce({ success: true, data: [
+      { wallet: '0x1', amount: 1, phaseId: 'p1', phaseComponentId: 'c1' },
+      { wallet: '0x1', amount: 2, phaseId: 'p1', phaseComponentId: 'c1' }
+    ]});
+    const origCreate = document.createElement;
+    let href = '';
+    document.createElement = jest.fn((tag: string) => {
+      if (tag === 'a') {
+        const a = origCreate.call(document, tag) as HTMLAnchorElement;
+        Object.defineProperty(a, 'href', {
+          set(v) { href = v; },
+          get() { return href; }
+        });
+        a.click = jest.fn();
+        return a;
+      }
+      return origCreate.call(document, tag);
+    });
+    setup();
+    await userEvent.click(screen.getByTestId('manifold-btn'));
+    await waitFor(() => expect(distributionPlanApiFetch).toHaveBeenCalled());
+    const data = decodeURIComponent(href.replace('data:text/csv;charset=utf-8,', ''));
+    const lines = data.trim().split('\n');
+    expect(lines[1]).toBe('0x1,3');
+    document.createElement = origCreate;
+  });
 });
