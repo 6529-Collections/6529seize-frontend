@@ -40,3 +40,22 @@ describe('ReactQueryWrapper context', () => {
     expect((client.invalidateQueries as jest.Mock).mock.calls[0][0]).toEqual({ queryKey: [QueryKey.DROPS] });
   });
 });
+
+it('sets initial wave drops only when cache empty', () => {
+  const client = new QueryClient();
+  let ctx: any;
+  function Child() { ctx = useContext(ReactQueryWrapperContext); return null; }
+  render(
+    <QueryClientProvider client={client}>
+      <ReactQueryWrapper><Child /></ReactQueryWrapper>
+    </QueryClientProvider>
+  );
+  const feed = { drops: ['d1'] } as any;
+  act(() => ctx.setWaveDrops({ waveDrops: feed, waveId: 'w1' }));
+  expect(client.getQueryData([QueryKey.DROPS, { waveId: 'w1', limit: 50, dropId: null }])).toEqual({ pages: [feed], pageParams: [undefined] });
+  // second call should not overwrite
+  const other = { drops: ['d2'] } as any;
+  act(() => ctx.setWaveDrops({ waveDrops: other, waveId: 'w1' }));
+  expect(client.getQueryData([QueryKey.DROPS, { waveId: 'w1', limit: 50, dropId: null }])).toEqual({ pages: [feed], pageParams: [undefined] });
+});
+
