@@ -54,4 +54,17 @@ describe('ManifoldMintingWidget', () => {
     await user.click(screen.getByTestId('connect'));
     expect(screen.getByRole('button', { name: /SEIZE x1/i })).toBeInTheDocument();
   });
+
+  it('allows minting when address provided', async () => {
+    const user = userEvent.setup();
+    const props = { ...baseProps, claim: { ...baseProps.claim, status: ManifoldClaimStatus.ACTIVE, phase: ManifoldPhase.PUBLIC } };
+    render(<ManifoldMintingWidget {...props} />);
+    // simulate setting address via connect component
+    await user.click(screen.getByTestId('connect'));
+    // button should now show seize text
+    const btn = await screen.findByRole('button', { name: /SEIZE x1/i });
+    expect(btn).toBeTruthy();
+    await user.click(btn);
+    expect(writeContract).toHaveBeenCalled();
+  });
 });
