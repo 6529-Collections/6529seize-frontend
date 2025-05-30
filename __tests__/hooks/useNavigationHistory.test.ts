@@ -129,7 +129,7 @@ describe('useNavigationHistory', () => {
     expect(typeof result.current.refresh).toBe('function');
   });
 
-  it.skip('reads initial state from sessionStorage', async () => {
+  it('reads initial state from sessionStorage', async () => {
     mockSessionStorage.getItem.mockImplementation((key) => {
       switch (key) {
         case 'backIndex':

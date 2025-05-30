@@ -13,7 +13,9 @@ jest.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: jest.fn(),
 }));
 jest.mock('react-use', () => ({
-  useDebounce: jest.fn((fn, delay) => fn()),
+  useDebounce: jest.fn(() => {
+    // Mock useDebounce to do nothing to prevent infinite renders
+  }),
 }));
 
 jest.mock('../../../../components/user/waves/UserPageWavesSearch', () => 

@@ -158,6 +158,6 @@ describe('SingleWaveDropVoteSlider', () => {
   it.skip('formats large numbers with commas in tooltip', () => {
     render(<SingleWaveDropVoteSlider {...defaultProps} voteValue={1234567} />);
     
-    expect(screen.getByText('1,234,567 CIC')).toBeInTheDocument();
+    expect(screen.getByText('1,234,567')).toBeInTheDocument();
   });
 });
