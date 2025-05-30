@@ -28,3 +28,22 @@ describe('EmojiPlugin', () => {
     expect(update).toHaveBeenCalledTimes(2);
   });
 });
+import { EMOJI_MATCH_REGEX } from '../../../../../../../components/drops/create/lexical/plugins/emoji/EmojiPlugin';
+
+describe('EmojiPlugin additional', () => {
+  it('ignores text without emoji pattern', () => {
+    const update = jest.fn((fn) => fn());
+    const register = jest.fn();
+    (useLexicalComposerContext as jest.Mock).mockReturnValue([{ update, registerTextContentListener: register }]);
+    render(<EmojiPlugin />);
+    const cb = register.mock.calls[0][0];
+    cb('hello');
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('EMOJI_MATCH_REGEX matches correctly', () => {
+    const str = 'a :smile: b :wave:';
+    const matches = str.match(EMOJI_MATCH_REGEX) || [];
+    expect(matches).toEqual([':smile:', ':wave:']);
+  });
+});
