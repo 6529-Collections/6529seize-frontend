@@ -6,25 +6,25 @@ function createTraits(): TraitsData {
     title: 'Title',
     description: 'Desc',
     artist: 'Artist',
-    seizeArtistProfile: '',
-    palette: '',
-    style: '',
-    jewel: '',
-    superpower: '',
-    dharma: '',
-    gear: '',
-    clothing: '',
-    element: '',
-    mystery: '',
-    secrets: '',
-    weapon: '',
-    home: '',
-    parent: '',
-    sibling: '',
-    food: '',
-    drink: '',
-    bonus: '',
-    boost: '',
+    seizeArtistProfile: 'Artist Profile',
+    palette: 'Color',
+    style: 'Style',
+    jewel: 'Jewel',
+    superpower: 'Superpower',
+    dharma: 'Dharma',
+    gear: 'Gear',
+    clothing: 'Clothing',
+    element: 'Element',
+    mystery: 'Mystery',
+    secrets: 'Secrets',
+    weapon: 'Weapon',
+    home: 'Home',
+    parent: 'Parent',
+    sibling: 'Sibling',
+    food: 'Food',
+    drink: 'Drink',
+    bonus: 'Bonus',
+    boost: 'Boost',
     punk6529: false,
     gradient: false,
     movement: false,
@@ -46,14 +46,14 @@ function createTraits(): TraitsData {
 }
 
 describe('validateTraitsData', () => {
-  it.skip('returns valid result for correct data', () => {
+  it('returns valid result for correct data', () => {
     const traits = createTraits();
     const result = validateTraitsData(traits);
     expect(result.isValid).toBe(true);
     expect(result.errorCount).toBe(0);
   });
 
-  it.skip('detects errors for empty required field', () => {
+  it('detects errors for empty required field', () => {
     const traits = createTraits();
     traits.artist = '';
     const result = validateTraitsData(traits);
@@ -61,7 +61,7 @@ describe('validateTraitsData', () => {
     expect(result.errors.artist).toBeTruthy();
   });
 
-  it.skip('skips untouched fields in touched mode', () => {
+  it('skips untouched fields in touched mode', () => {
     const traits = createTraits();
     traits.artist = '';
     const result = validateTraitsData(traits, { mode: 'touched', touchedFields: new Set(['title']) });
@@ -69,7 +69,7 @@ describe('validateTraitsData', () => {
     expect(result.errorCount).toBe(0);
   });
 
-  it.skip('only validates changed fields in dirty mode', () => {
+  it('only validates changed fields in dirty mode', () => {
     const initial = createTraits();
     const traits = createTraits();
     traits.artist = '';
