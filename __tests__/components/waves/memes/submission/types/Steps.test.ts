@@ -1,4 +1,8 @@
-import { SubmissionStep } from '../../../../../../components/waves/memes/submission/types/Steps';
+import {
+  SubmissionStep,
+  stepEnumToIndex,
+  stepIndexToEnum,
+} from '../../../../../../components/waves/memes/submission/types/Steps';
 
 describe('SubmissionStep enum', () => {
   it('contains expected values', () => {
@@ -6,8 +10,13 @@ describe('SubmissionStep enum', () => {
     expect(SubmissionStep.ARTWORK).toBe('artwork');
   });
 
-  it('is the only export from the module', () => {
-    const stepsModule = require('../../../../../../components/waves/memes/submission/types/Steps');
-    expect(Object.keys(stepsModule)).toEqual(['SubmissionStep']);
+  it('maps indices and enums correctly', () => {
+    expect(stepIndexToEnum(0)).toBe(SubmissionStep.AGREEMENT);
+    expect(stepIndexToEnum(1)).toBe(SubmissionStep.ARTWORK);
+    expect(stepIndexToEnum(5)).toBe(SubmissionStep.AGREEMENT);
+
+    expect(stepEnumToIndex(SubmissionStep.AGREEMENT)).toBe(0);
+    expect(stepEnumToIndex(SubmissionStep.ARTWORK)).toBe(1);
+    expect(stepEnumToIndex('unknown' as any)).toBe(0);
   });
 });

@@ -9,7 +9,7 @@ export enum SubmissionStep {
 /**
  * Maps step numbers to enum values
  */
-const stepIndexToEnum = (stepIndex: number): SubmissionStep => {
+export const stepIndexToEnum = (stepIndex: number): SubmissionStep => {
   switch (stepIndex) {
     case 0:
       return SubmissionStep.AGREEMENT;
@@ -23,7 +23,7 @@ const stepIndexToEnum = (stepIndex: number): SubmissionStep => {
 /**
  * Maps enum values to step numbers
  */
-const stepEnumToIndex = (step: SubmissionStep): number => {
+export const stepEnumToIndex = (step: SubmissionStep): number => {
   switch (step) {
     case SubmissionStep.AGREEMENT:
       return 0;
