@@ -1,6 +1,34 @@
-import { render, act, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useHlsPlayer } from '../../hooks/useHlsPlayer';
+
+// Provide a lightweight mock for hls.js so the hook logic can execute
+jest.mock('hls.js', () => {
+  return {
+    __esModule: true,
+    default: class MockHls {
+      static isSupported() {
+        return true;
+      }
+      static Events = { MANIFEST_PARSED: 'MANIFEST_PARSED', ERROR: 'ERROR' };
+      static ErrorTypes = { NETWORK_ERROR: 'NETWORK_ERROR', MEDIA_ERROR: 'MEDIA_ERROR' };
+      static ErrorDetails = { MANIFEST_LOAD_ERROR: 'MANIFEST_LOAD_ERROR', MANIFEST_LOAD_TIMEOUT: 'MANIFEST_LOAD_TIMEOUT' };
+      on(event: string, cb: () => void) {
+        if (event === 'MANIFEST_PARSED') {
+          // Trigger manifest parsed quickly
+          setTimeout(cb, 0);
+        }
+      }
+      loadSource() {}
+      attachMedia() {}
+      detachMedia() {}
+      destroy() {}
+      stopLoad() {}
+      startLoad() {}
+      recoverMediaError() {}
+    },
+  };
+});
 
 // Mock HTMLVideoElement.play to return a Promise
 Object.defineProperty(HTMLVideoElement.prototype, 'play', {
