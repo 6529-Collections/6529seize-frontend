@@ -10,6 +10,7 @@ jest.mock('../../../../../helpers/AllowlistToolHelpers', () => ({
 
 jest.mock('../../../../../components/user/utils/icons/XIcon', () => () => <div data-testid="X" />);
 jest.mock('../../../../../components/user/utils/icons/DiscordIcon', () => () => <div data-testid="DISCORD" />);
+jest.mock('../../../../../components/user/utils/icons/WebsiteIcon', () => () => <div data-testid="WEBSITE" />);
 
 // other icons default to simple spans
 jest.mock('../../../../../components/user/utils/icons/FacebookIcon', () => () => <div />);
@@ -24,6 +25,11 @@ describe('SocialStatementIcon', () => {
   it('renders Discord icon for STATEMENT_TYPE.DISCORD', () => {
     render(<SocialStatementIcon statementType={STATEMENT_TYPE.DISCORD} />);
     expect(screen.getByTestId('DISCORD')).toBeInTheDocument();
+  });
+
+  it('renders Website icon for STATEMENT_TYPE.WEBSITE', () => {
+    render(<SocialStatementIcon statementType={STATEMENT_TYPE.WEBSITE} />);
+    expect(screen.getByTestId('WEBSITE')).toBeInTheDocument();
   });
 
   it('calls assertUnreachable for unknown type', () => {

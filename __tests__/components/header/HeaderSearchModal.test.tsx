@@ -74,4 +74,10 @@ describe('HeaderSearchModal', () => {
     fireEvent.change(input, { target: { value: 'abc' } });
     expect(screen.getByTestId('item')).toBeInTheDocument();
   });
+
+  it('triggers onClose on click away', () => {
+    const { onClose } = setup();
+    clickAwayCb();
+    expect(onClose).toHaveBeenCalled();
+  });
 });

@@ -23,4 +23,17 @@ describe('UserPageStatsBoostBreakdown', () => {
     expect(screen.getByText('Boost Breakdown')).toBeInTheDocument();
     expect(screen.getByText('TOTAL BOOST')).toBeInTheDocument();
   });
+
+  it('shows season rows when card sets acquired is zero', () => {
+    const tdh: ConsolidatedTDH = {
+      boost: 2,
+      boost_breakdown: {
+        memes_card_sets: { available: 1, acquired: 0, available_info: [], acquired_info: [] },
+        memes_szn1: { available: 1, acquired: 1, available_info: [], acquired_info: [] },
+        gradients: { available: 0, acquired: 0, available_info: [], acquired_info: [] },
+      },
+    } as any;
+    render(<UserPageStatsBoostBreakdown tdh={tdh} />);
+    expect(screen.getByText('SZN1')).toBeInTheDocument();
+  });
 });

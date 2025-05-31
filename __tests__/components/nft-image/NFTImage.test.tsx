@@ -78,6 +78,20 @@ describe('NFTImage', () => {
     }
   });
 
+  it('renders GLB animation using NFTModel', () => {
+    const nft = {
+      ...mockNFT,
+      metadata: {
+        animation: 'model.glb',
+        animation_details: { format: 'GLB' },
+      },
+    } as any;
+    render(
+      <NFTImage {...defaultProps} nft={nft} animation={true} />
+    );
+    expect(screen.getByTestId('nft-model')).toBeInTheDocument();
+  });
+
   it('applies height classes correctly', () => {
     const { container, rerender } = render(<NFTImage {...defaultProps} height={300} />);
     expect(container.querySelector('.height300')).toBeInTheDocument();
@@ -97,5 +111,10 @@ describe('NFTImage', () => {
   it('shows balance when specified', () => {
     render(<NFTImage {...defaultProps} balance={5} showOwned={false} />);
     expect(screen.getByText('SEIZED x5')).toBeInTheDocument();
+  });
+
+  it('shows UNSEIZED when showUnseized and balance 0', () => {
+    render(<NFTImage {...defaultProps} balance={0} showUnseized={true} />);
+    expect(screen.getByText('UNSEIZED')).toBeInTheDocument();
   });
 });
