@@ -1,5 +1,5 @@
 import styles from "./Auth.module.scss";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSignMessage } from "wagmi";
@@ -131,36 +131,28 @@ export default function Auth({
     enabled: !!connectedProfile?.query,
   });
 
-  const [receivedProfileProxies, setReceivedProfileProxies] = useState<
-    ApiProfileProxy[]
-  >(
-    groupProfileProxies({
+  const receivedProfileProxies = useMemo(() => {
+    return groupProfileProxies({
       profileProxies: profileProxies ?? [],
       onlyActive: true,
       profileId: connectedProfile?.id ?? null,
-    }).received
-  );
+    }).received;
+  }, [profileProxies, connectedProfile?.id]);
 
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
 
   useEffect(() => {
-    const receivedProxies = groupProfileProxies({
-      profileProxies: profileProxies ?? [],
-      onlyActive: true,
-      profileId: connectedProfile?.id ?? null,
-    }).received;
-    setReceivedProfileProxies(receivedProxies);
     const role = getRole({ jwt: getAuthJwt() });
 
     if (role) {
-      const activeProxy = receivedProxies?.find(
+      const activeProxy = receivedProfileProxies?.find(
         (proxy) => proxy.created_by.id === role
       );
 
       setActiveProfileProxy(activeProxy ?? null);
     }
-  }, [profileProxies, connectedProfile]);
+  }, [receivedProfileProxies]);
 
   function reset() {
     invalidateAll();

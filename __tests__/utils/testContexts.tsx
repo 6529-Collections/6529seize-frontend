@@ -3,12 +3,31 @@ import { render } from '@testing-library/react';
 import { AuthContext } from '../../components/auth/Auth';
 export type AuthContextType = React.ContextType<typeof AuthContext>;
 
+const defaultConnectedProfile = {
+  id: 'test-id',
+  handle: 'test-handle',
+  normalised_handle: 'test-handle',
+  pfp: null,
+  cic: 0,
+  rep: 0,
+  level: 1,
+  tdh: 0,
+  consolidation_key: 'test-key',
+  display: 'Test User',
+  primary_wallet: '0x123',
+  banner1: null,
+  banner2: null,
+  classification: 'PSEUDONYM' as any,
+  sub_classification: null,
+  wallets: []
+};
+
 export const createMockAuthContext = (
   overrides: Partial<AuthContextType> = {}
 ): AuthContextType => ({
-  connectedProfile: null,
+  connectedProfile: defaultConnectedProfile,
   fetchingProfile: false,
-  connectionStatus: 0 as any,
+  connectionStatus: 'CONNECTED' as any,
   receivedProfileProxies: [],
   activeProfileProxy: null,
   showWaves: false,

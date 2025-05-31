@@ -72,3 +72,5 @@ function useWebSocketAuth() {
     disconnect,
   };
 }
+
+export default useWebSocketAuth;

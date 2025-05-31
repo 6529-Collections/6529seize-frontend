@@ -70,6 +70,7 @@ export default function CreateWavesMainStepIcon({
 
   return (
     <span
+      data-testid="wave-step-icon"
       className={`${WRAPPER_CLASSES[stepStatus]} tw-relative tw-z-10 tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-ring-2 tw-transform tw-transition tw-ease-out tw-duration-300`}
     >
       {components[debounceStepStatus]}

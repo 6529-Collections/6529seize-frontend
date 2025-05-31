@@ -75,6 +75,9 @@ export default function UserPageStatsActivityOverview({
   );
 }
 
+// Export helper for testing
+export { printEthValue };
+
 function UserPageStatsActivityOverviewTotals({
   activity,
 }: {

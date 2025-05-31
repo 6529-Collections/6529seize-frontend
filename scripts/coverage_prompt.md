@@ -1,14 +1,13 @@
 ## Enhanced Test Coverage Prompt
 
 **Task:**
-Iteratively enhance the project's test suite to achieve both quantitative coverage targets (+0.2% above baseline) and qualitative testing excellence through comprehensive real-world scenarios, within a time-boxed constraint.
+Iteratively enhance the project's test suite with high-quality tests focused on real-world scenarios. Continue improving coverage until the time limit is nearly reached, then finalize your work and prepare a pull request.
 
 **Time Management:**
-- The coverage improvement task has a **20-minute time limit** (configurable via `TIME_LIMIT_MINUTES` environment variable)
-- The task will complete successfully when either:
-  - The coverage target is reached (+0.2% above baseline), OR
-  - The time limit is reached
-- This prevents endless iteration while encouraging focused, incremental improvements
+- The coverage improvement task has a **configurable time limit** (default 60 minutes via `TIME_LIMIT_MINUTES`).
+- The script will run until the time limit is nearly reached. When time is close to expiring, wrap up your current work and submit a pull request.
+- This allows for longer sessions while still preventing endless iteration.
+- Always re-run the script after each set of tests to obtain new file suggestions. Keep iterating until the script reports the time limit has been reached.
 
 **Testing Philosophy:**
 - Coverage percentage is a metric, not the goal
@@ -22,11 +21,13 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - The script will use the environment variables you set up
 
 2. **Parse Output:** Analyze the coverage report for:
-   - Current coverage percentage vs. target
+   - Current coverage percentage
    - Time elapsed and remaining
    - Specific files needing coverage
 
-3. **Time-Aware Test Strategy:**
+3. **Iterate:** Add tests for the suggested files, then run `npm run improve-coverage` again to receive new recommendations. Repeat this cycle until the script announces the time limit has been reached.
+
+4. **Time-Aware Test Strategy:**
    Given the time constraint, prioritize tests in this order:
    
    **First 5-7 minutes: High-Impact Tests**
@@ -45,7 +46,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - Quick refactor for clarity
    - Add essential edge cases if time permits
 
-4. **Strategic Test Planning:**
+5. **Strategic Test Planning:**
    When adding tests for `[FILENAME]`, follow this comprehensive approach:
 
    ### A. Scenario Analysis (Before Writing Tests)
@@ -101,7 +102,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - [ ] **Focused**: Tests one behavior
    - [ ] **Realistic**: Uses production-like data/scenarios
 
-5. **Implementation Guidelines:**
+6. **Implementation Guidelines:**
 
    ```typescript
    // Example structure for comprehensive testing
@@ -133,7 +134,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    });
    ```
 
-6. **Specific Testing Patterns by File Type:**
+7. **Specific Testing Patterns by File Type:**
 
    **For API Routes:**
    - Authentication/authorization scenarios
@@ -157,7 +158,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
    - Data transformation edge cases
    - Async operation handling
 
-7. **Real-World Scenario Examples:**
+8. **Real-World Scenario Examples:**
 
    ```typescript
    // Instead of just: "sorts items"
@@ -179,7 +180,7 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
 - Ensure tests document expected behavior
 
 **Success Criteria:**
-- Coverage target is met (+0.2%) OR time limit is reached
+- Time limit is reached with meaningful tests added
 - No test is written solely for coverage
 - Each test adds value by preventing a potential bug
 - Test suite serves as living documentation
@@ -187,29 +188,24 @@ Iteratively enhance the project's test suite to achieve both quantitative covera
 - New developers can understand system behavior from tests
 
 **Time-Based Completion:**
-When the 20-minute limit is reached before the coverage target:
+When the time limit is reached:
 - The task is marked as complete (successful exit)
 - Progress is preserved for the next session
 - Focus on test quality over rushing to meet coverage
 - Consider it a successful iteration of incremental improvement
+- Do not finish the pull request early if time remains. Continue improving tests until this message appears.
 
 
 **Example Output Scenarios:**
 
-1. **Target Reached:**
+1. **Time Limit Reached:**
    ```
-   current: 75.20%
-   Success: Current coverage has met or exceeded the target. Task completed.
-   ```
-
-2. **Time Limit Reached:**
-   ```
-   elapsed time: 20.1 minutes
-   Success: Time limit of 20 minutes has been reached. Task completed due to time constraint.
-   Final coverage: 75.15% (target was 75.20%)
+   elapsed time: 60.0 minutes
+   Success: Time limit reached. Task completed due to time constraint.
+   Final coverage: 75.15%
    ```
 
-3. **In Progress:**
+2. **In Progress:**
    ```
    elapsed time: 12.3 minutes
    Time remaining: 7.7 minutes until automatic completion.

@@ -25,17 +25,29 @@ export const useNavigationHistory = (): NavigationHistory => {
   const [canGoForward, setCanGoForward] = useState<boolean>(false);
 
   const [backIndex, setBackIndex] = useState<number>(() => {
-    return parseInt(sessionStorage.getItem("backIndex") ?? "-1");
+    if (typeof window !== "undefined") {
+      return parseInt(sessionStorage.getItem("backIndex") ?? "-1");
+    }
+    return -1;
   });
   const [forwardIndex, setForwardIndex] = useState<number>(() => {
-    return parseInt(sessionStorage.getItem("forwardIndex") ?? "0");
+    if (typeof window !== "undefined") {
+      return parseInt(sessionStorage.getItem("forwardIndex") ?? "0");
+    }
+    return 0;
   });
 
   const [isGoingBack, setIsGoingBack] = useState<boolean>(() => {
-    return sessionStorage.getItem("isGoingBack") === "true";
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("isGoingBack") === "true";
+    }
+    return false;
   });
   const [isGoingForward, setIsGoingForward] = useState<boolean>(() => {
-    return sessionStorage.getItem("isGoingForward") === "true";
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("isGoingForward") === "true";
+    }
+    return false;
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -44,12 +56,16 @@ export const useNavigationHistory = (): NavigationHistory => {
     dlog("pathname effect", { pathname: router.pathname, backIndex, forwardIndex, isGoingBack, isGoingForward });
     if (isGoingBack) {
       setIsGoingBack(false);
-      sessionStorage.setItem("isGoingBack", "false");
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("isGoingBack", "false");
+      }
       setBackIndex(backIndex - 1);
       setForwardIndex(forwardIndex + 1);
     } else if (isGoingForward) {
       setIsGoingForward(false);
-      sessionStorage.setItem("isGoingForward", "false");
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("isGoingForward", "false");
+      }
       setBackIndex(backIndex + 1);
       setForwardIndex(forwardIndex - 1);
     } else {
@@ -62,8 +78,10 @@ export const useNavigationHistory = (): NavigationHistory => {
     setCanGoBack(backIndex > 0);
     setCanGoForward(forwardIndex > 0);
 
-    sessionStorage.setItem("backIndex", backIndex.toString());
-    sessionStorage.setItem("forwardIndex", forwardIndex.toString());
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("backIndex", backIndex.toString());
+      sessionStorage.setItem("forwardIndex", forwardIndex.toString());
+    }
   }, [backIndex, forwardIndex]);
 
   useEffect(() => {
@@ -86,7 +104,9 @@ export const useNavigationHistory = (): NavigationHistory => {
     dlog("goBack", { canGoBack, backIndex });
     if (canGoBack) {
       setIsGoingBack(true);
-      sessionStorage.setItem("isGoingBack", "true");
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("isGoingBack", "true");
+      }
       navRouter.back();
     } else {
       console.log("Cannot go back", backIndex);
@@ -97,7 +117,9 @@ export const useNavigationHistory = (): NavigationHistory => {
     dlog("goForward", { canGoForward, forwardIndex });
     if (canGoForward) {
       setIsGoingForward(true);
-      sessionStorage.setItem("isGoingForward", "true");
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("isGoingForward", "true");
+      }
       navRouter.forward();
     } else {
       console.log("Cannot go forward", forwardIndex);

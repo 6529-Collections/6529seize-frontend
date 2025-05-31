@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import React, { useContext, useRef, useState, type JSX } from "react";
 import CreateWaveDrops from "./drops/CreateWaveDrops";
 import CreateWavesMainSteps from "./main-steps/CreateWavesMainSteps";

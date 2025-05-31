@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import GroupCreateIdentitiesSearchItemsContent from "./GroupCreateIdentitiesSearchItemsContent";
 import { QueryKey } from "../../../../../../react-query-wrapper/ReactQueryWrapper";
 
-export default function GroupCreateIdentitiesSearchItems({
+function GroupCreateIdentitiesSearchItems({
   open,
   searchCriteria,
   selectedWallets,
@@ -62,3 +62,5 @@ export default function GroupCreateIdentitiesSearchItems({
     </AnimatePresence>
   );
 }
+
+export default GroupCreateIdentitiesSearchItems;
