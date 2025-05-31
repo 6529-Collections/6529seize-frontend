@@ -1,4 +1,5 @@
 import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import {
   CookieConsentProvider,
@@ -51,5 +52,47 @@ describe('CookieConsentContext', () => {
       return null;
     }
     expect(() => render(<Wrapper />)).toThrow('useCookieConsent must be used within a CookieConsentProvider');
+  });
+});
+
+describe('CookieConsentProvider actions', () => {
+  it('consent sends API request and sets cookies', async () => {
+    const { set } = require('js-cookie');
+    const { commonApiPost } = require('../../../services/api/common-api');
+    function Consumer() {
+      const { consent } = useCookieConsent();
+      return <button onClick={consent}>consent</button>;
+    }
+    render(
+      <CookieConsentProvider>
+        <Consumer />
+      </CookieConsentProvider>
+    );
+    await act(async () => {
+      await userEvent.click(screen.getByText('consent'));
+    });
+    expect(commonApiPost).toHaveBeenCalledWith({ endpoint: 'policies/cookies-consent', body: {} });
+    expect(set).toHaveBeenCalledWith('essential-cookies-consent', 'true', { expires: 365 });
+    expect(set).toHaveBeenCalledWith('performance-cookies-consent', 'true', { expires: 365 });
+  });
+
+  it('reject sends API request and sets cookies', async () => {
+    const { set } = require('js-cookie');
+    const { commonApiDelete } = require('../../../services/api/common-api');
+    function Consumer() {
+      const { reject } = useCookieConsent();
+      return <button onClick={reject}>reject</button>;
+    }
+    render(
+      <CookieConsentProvider>
+        <Consumer />
+      </CookieConsentProvider>
+    );
+    await act(async () => {
+      await userEvent.click(screen.getByText('reject'));
+    });
+    expect(commonApiDelete).toHaveBeenCalledWith({ endpoint: 'policies/cookies-consent' });
+    expect(set).toHaveBeenCalledWith('essential-cookies-consent', 'true', { expires: 365 });
+    expect(set).toHaveBeenCalledWith('performance-cookies-consent', 'false', { expires: 365 });
   });
 });

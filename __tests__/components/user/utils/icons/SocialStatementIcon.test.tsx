@@ -1,0 +1,33 @@
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+import SocialStatementIcon from '../../../../../components/user/utils/icons/SocialStatementIcon';
+import { STATEMENT_TYPE } from '../../../../../helpers/Types';
+import { assertUnreachable } from '../../../../../helpers/AllowlistToolHelpers';
+
+jest.mock('../../../../../helpers/AllowlistToolHelpers', () => ({
+  assertUnreachable: jest.fn(),
+}));
+
+jest.mock('../../../../../components/user/utils/icons/XIcon', () => () => <div data-testid="X" />);
+jest.mock('../../../../../components/user/utils/icons/DiscordIcon', () => () => <div data-testid="DISCORD" />);
+
+// other icons default to simple spans
+jest.mock('../../../../../components/user/utils/icons/FacebookIcon', () => () => <div />);
+
+
+describe('SocialStatementIcon', () => {
+  it('renders X icon for STATEMENT_TYPE.X', () => {
+    render(<SocialStatementIcon statementType={STATEMENT_TYPE.X} />);
+    expect(screen.getByTestId('X')).toBeInTheDocument();
+  });
+
+  it('renders Discord icon for STATEMENT_TYPE.DISCORD', () => {
+    render(<SocialStatementIcon statementType={STATEMENT_TYPE.DISCORD} />);
+    expect(screen.getByTestId('DISCORD')).toBeInTheDocument();
+  });
+
+  it('calls assertUnreachable for unknown type', () => {
+    render(<SocialStatementIcon statementType={"UNKNOWN" as any} />);
+    expect(assertUnreachable).toHaveBeenCalledWith('UNKNOWN');
+  });
+});
