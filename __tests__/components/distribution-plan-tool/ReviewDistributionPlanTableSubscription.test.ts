@@ -18,4 +18,14 @@ describe('ReviewDistributionPlanTableSubscription utilities', () => {
     await download('c','1','plan','phase','public');
     expect(mockFetch).toHaveBeenCalledWith({ endpoint: 'subscriptions/allowlists/c/1/plan/phase' });
   });
+  it('returns true when wallet is admin', () => {
+    const profile: Partial<ApiIdentity> = { wallets: [{ wallet: '0x0187C9a182736ba18b44eE8134eE438374cf87DC' }] };
+    expect(isSubscriptionsAdmin(profile as ApiIdentity)).toBe(true);
+  });
+
+  it('handles download failure', async () => {
+    mockFetch.mockRejectedValue('fail');
+    const result = await download('c','1','plan','phase','public');
+    expect(result.success).toBe(false);
+  });
 });
