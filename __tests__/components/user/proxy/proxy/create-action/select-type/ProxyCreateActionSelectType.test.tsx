@@ -1,3 +1,4 @@
+import userEvent from "@testing-library/user-event";
 import { render, screen } from '@testing-library/react';
 import ProxyCreateActionSelectType from '../../../../../../../components/user/proxy/proxy/create-action/select-type/ProxyCreateActionSelectType';
 import { ApiProfileProxyActionType } from '../../../../../../../generated/models/ApiProfileProxyActionType';
@@ -17,4 +18,18 @@ describe('ProxyCreateActionSelectType', () => {
     expect(items).toHaveLength(1);
     expect(items[0]).toHaveTextContent(ApiProfileProxyActionType.AllocateCic);
   });
+it('calls onCancel when cancel button clicked', async () => {
+  const onCancel = jest.fn();
+  render(
+    <ProxyCreateActionSelectType
+      currentActions={[] as any}
+      setSelectedActionType={jest.fn()}
+      onCancel={onCancel}
+    />
+  );
+  await userEvent.click(
+    screen.getByRole('button', { name: 'Cancel' })
+  );
+  expect(onCancel).toHaveBeenCalled();
+});
 });

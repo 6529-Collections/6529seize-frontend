@@ -59,4 +59,16 @@ describe('UserPageHeaderEditPfp', () => {
     expect(authCtx.requestAuth).toHaveBeenCalled();
     expect(mutateAsync).toHaveBeenCalled();
   });
+  it('calls onClose when cancel clicked', async () => {
+    const onClose = jest.fn();
+    render(
+      <AuthContext.Provider value={authCtx}>
+        <ReactQueryWrapperContext.Provider value={queryCtx}>
+          <UserPageHeaderEditPfp profile={profile} onClose={onClose} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(onClose).toHaveBeenCalled();
+  });
 });
