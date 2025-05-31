@@ -42,4 +42,9 @@ describe('getChains', () => {
     const result = loadGetChains({nextgen: goerli});
     expect(result.map(c => c.id)).toEqual([mainnet.id, goerli.id]);
   });
+
+  it('combines multiple test chains without duplicates', () => {
+    const result = loadGetChains({delegation: sepolia, nextgen: goerli, subs: sepolia});
+    expect(result.map(c => c.id)).toEqual([mainnet.id, sepolia.id, goerli.id]);
+  });
 });
