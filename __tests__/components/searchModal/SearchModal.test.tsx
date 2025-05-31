@@ -1,25 +1,31 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { SearchWalletsDisplay } from '../../../components/searchModal/SearchModal';
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
-jest.mock('@tippyjs/react', () => (props: any) => <span>{props.children}</span>);
-jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (props: any) => <svg onClick={props.onClick}>{props.children}</svg> }));
-jest.mock('react-bootstrap', () => ({
-  Modal: (props: any) => <div>{props.children}</div>,
-  InputGroup: (props: any) => <div {...props} />,
-  Form: { Control: (props: any) => <input {...props} /> },
-  Button: (props: any) => <button {...props} />,
-}));
-
-describe('SearchWalletsDisplay', () => {
-  it('formats and removes wallets', async () => {
-    const set = jest.fn();
-    render(<SearchWalletsDisplay searchWallets={['0x1234567890123456789012345678901234567890','bob.eth']} setSearchWallets={set} setShowSearchModal={jest.fn()} />);
-    expect(screen.getByText('0x1234...7890')).toBeInTheDocument();
-    expect(screen.getByText('bob.eth')).toBeInTheDocument();
-    await userEvent.click(screen.getAllByRole('button')[0]);
-    expect(set).toHaveBeenCalledWith(['bob.eth']);
-  });
+jest.mock("react-bootstrap", () => {
+  return {
+    Modal: (props: any) => <div>{props.children}</div>,
+    InputGroup: (props: any) => <div {...props} />,
+    Form: { Control: (props: any) => <input {...props} /> },
+    Button: (props: any) => <button {...props}>{props.children}</button>,
+  };
 });
 
+import { SearchWalletsDisplay } from "../../../components/searchModal/SearchModal";
+
+
+
+describe("SearchWalletsDisplay", () => {
+  it("formats addresses", () => {
+    function Wrapper() {
+      const [wallets, setWallets] = React.useState(["0x1234567890abcdef1234567890abcdef12345678", "bob.eth"]);
+      return (
+        <SearchWalletsDisplay searchWallets={wallets} setSearchWallets={setWallets} setShowSearchModal={jest.fn()} />
+      );
+    }
+    render(<Wrapper />);
+    expect(screen.getByText("0x1234...5678")).toBeInTheDocument();
+    expect(screen.getByText("bob.eth")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByText("x")[0]);
+    expect(screen.queryByText("0x1234...5678")).not.toBeInTheDocument();
+  });
+});

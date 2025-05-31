@@ -25,5 +25,28 @@ global.CSS = {
   escape: (str) => str
 };
 
+// Mock DOM methods that Bootstrap modals might use
+Object.defineProperty(window, 'scrollTo', {
+  value: () => {},
+  writable: true
+});
+
+// Mock CSS functions that dom-helpers/css might use
+global.css = (element, property, value) => {
+  if (arguments.length === 3) {
+    return element;
+  }
+  if (typeof property === 'string') {
+    if (property.includes('duration') || property.includes('delay')) {
+      return '0s';
+    }
+    if (property.includes('margin') || property.includes('padding')) {
+      return '0px';
+    }
+    return '';
+  }
+  return '';
+};
+
 // Default API endpoint needed for service tests
 process.env.API_ENDPOINT = process.env.API_ENDPOINT || 'http://example.com';

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, type JSX } from "react";
+import { useContext, useEffect, useState, useMemo, type JSX } from "react";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import ProxyList from "./list/ProxyList";
 import ProxyCreate from "./create/ProxyCreate";
@@ -39,7 +39,7 @@ export default function UserPageProxy({
 
   useEffect(
     () => setMode(ProxyMode.LIST),
-    [connectedProfile, user, activeProfileProxy, profile]
+    [connectedProfile?.id, user, activeProfileProxy?.id, profile?.id]
   );
 
   const getIsSelf = () =>
@@ -51,7 +51,7 @@ export default function UserPageProxy({
   const [isSelf, setIsSelf] = useState(getIsSelf());
   useEffect(
     () => setIsSelf(getIsSelf()),
-    [connectedProfile, profile, activeProfileProxy]
+    [connectedProfile?.id, profile?.id, activeProfileProxy?.id]
   );
 
   const { data: profileProxies, isFetching } = useQuery<ApiProfileProxy[]>({
@@ -67,26 +67,15 @@ export default function UserPageProxy({
     placeholderData: keepPreviousData,
   });
 
-  const [profileProxiesFiltered, setProfileProxiesFiltered] = useState<{
-    readonly granted: ApiProfileProxy[];
-    readonly received: ApiProfileProxy[];
-  }>(
-    groupProfileProxies({
-      profileProxies: profileProxies ?? [],
-      onlyActive: !isSelf,
-      profileId: profile?.id ?? null,
-    })
-  );
-
-  useEffect(() => {
-    setProfileProxiesFiltered(
+  const profileProxiesFiltered = useMemo(
+    () =>
       groupProfileProxies({
         profileProxies: profileProxies ?? [],
         onlyActive: !isSelf,
         profileId: profile?.id ?? null,
-      })
-    );
-  }, [profileProxies, isSelf, profile]);
+      }),
+    [profileProxies, isSelf, profile?.id]
+  );
 
   const components: Record<ProxyMode, JSX.Element> = {
     [ProxyMode.LIST]: (
