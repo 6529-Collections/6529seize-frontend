@@ -11,4 +11,9 @@ describe('getJsonData', () => {
     expect(items[0].textContent).toBe('Foo: bar');
     expect(items[1].textContent).toBe('Count: 5');
   });
+
+  it('handles empty object', () => {
+    render(getJsonData('def', JSON.stringify({})));
+    expect(screen.queryAllByRole('listitem')).toHaveLength(0);
+  });
 });
