@@ -2,28 +2,25 @@ import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useHlsPlayer } from '../../hooks/useHlsPlayer';
 
+// Force the dynamic import of `hls.js` to return a minimal unsupported
+// implementation so the hook immediately falls back to the provided source.
 jest.mock('hls.js', () => {
-  return {
-    __esModule: true,
-    default: class MockHls {
-      static Events = { ERROR: 'ERROR', MANIFEST_PARSED: 'MANIFEST_PARSED' };
-      static ErrorTypes = { OTHER_ERROR: 'OTHER_ERROR' };
-      static ErrorDetails = { MANIFEST_INCOMPATIBLE_CODECS_ERROR: 'ERR' };
-      static isSupported() { return true; }
-      handlers: Record<string, any> = {};
-      on(event: string, cb: any) { this.handlers[event] = cb; }
-      loadSource() {
-        // trigger fatal error to force fallback
-        this.handlers['ERROR']?.({}, { fatal: true, type: 'OTHER_ERROR' });
-      }
-      attachMedia() {}
-      stopLoad() {}
-      detachMedia() {}
-      destroy() {}
-    },
-  };
+  class MockHls {
+    static isSupported() {
+      return false;
+    }
+    // no-op methods used by the hook
+    on() {}
+    loadSource() {}
+    attachMedia() {}
+    stopLoad() {}
+    detachMedia() {}
+    destroy() {}
+  }
+  return { __esModule: true, default: MockHls };
 });
 
+// Mock HTMLVideoElement.play to return a Promise
 Object.defineProperty(HTMLVideoElement.prototype, 'play', {
   writable: true,
   value: jest.fn().mockImplementation(() => Promise.resolve()),

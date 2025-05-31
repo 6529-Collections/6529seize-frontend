@@ -150,7 +150,7 @@ export function useHlsPlayer({
 
       // If Hls is unsupported in this browser, fallback to direct src
       if (!HlsConstructor || !HlsConstructor.isSupported()) {
-        fallbackToSrc(videoEl, src);
+        fallbackToSrc(videoEl, fallbackSrc || src);
         return;
       }
 
