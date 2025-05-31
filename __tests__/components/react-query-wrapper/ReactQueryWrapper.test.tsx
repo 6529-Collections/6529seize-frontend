@@ -110,3 +110,22 @@ it('invalidateAll calls queryClient.invalidateQueries with no args', () => {
   act(() => ctx.invalidateAll());
   expect(client.invalidateQueries).toHaveBeenCalledWith();
 });
+
+it('sets profile proxy and invalidates on modify', () => {
+  const client = new QueryClient();
+  jest.spyOn(client, 'setQueryData');
+  jest.spyOn(client, 'invalidateQueries');
+  let ctx: any;
+  function Child() { ctx = useContext(ReactQueryWrapperContext); return null; }
+  render(
+    <QueryClientProvider client={client}>
+      <ReactQueryWrapper><Child /></ReactQueryWrapper>
+    </QueryClientProvider>
+  );
+  const proxy = { id: 'p1' } as any;
+  act(() => ctx.setProfileProxy(proxy));
+  expect(client.setQueryData).toHaveBeenCalledWith([QueryKey.PROFILE_PROXY, { id: 'p1' }], proxy);
+  act(() => ctx.onProfileProxyModify({ profileProxyId: 'p1', createdByHandle: 'a', grantedToHandle: 'b' }));
+  expect(client.invalidateQueries).toHaveBeenCalledWith({ queryKey: [QueryKey.PROFILE_PROXY, { id: 'p1' }] });
+  expect(client.invalidateQueries).toHaveBeenCalledWith({ queryKey: [QueryKey.PROFILE_PROFILE_PROXIES] });
+});
