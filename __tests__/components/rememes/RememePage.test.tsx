@@ -23,4 +23,11 @@ describe('RememePage helpers', () => {
     render(printMemeReferences([], 'path', false));
     expect(screen.getByText('Fetching references')).toBeInTheDocument();
   });
+
+  it('shows placeholder when no memes found', () => {
+    const { container } = render(printMemeReferences([], 'path', true));
+    expect(screen.getByText('Nothing here yet')).toBeInTheDocument();
+    // Ensure no links rendered
+    expect(container.querySelectorAll('a').length).toBe(0);
+  });
 });

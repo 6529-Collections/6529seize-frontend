@@ -34,5 +34,20 @@ describe('CreateDropContent utilities', () => {
       expect(res.updatedNfts).toEqual([{ contract: 'c', token: '1', name: 'coolNFT' }]);
       expect(res.updatedMarkdown).toBe(markdown);
     });
+
+    it('adds new mentions and nfts', () => {
+      const markdown = 'hi @[bob] #[other]';
+      const existingMentions: any[] = [];
+      const existingNfts: any[] = [];
+      const mentionedUsers = [
+        { mentioned_profile_id: '2', handle_in_content: 'bob', current_handle: null },
+      ];
+      const referencedNfts = [
+        { contract: 'c', token: '2', name: 'other' },
+      ];
+      const res = handleDropPart(markdown, existingMentions, existingNfts, mentionedUsers as any, referencedNfts as any);
+      expect(res.updatedMentions).toEqual(mentionedUsers);
+      expect(res.updatedNfts).toEqual(referencedNfts);
+    });
   });
 });
