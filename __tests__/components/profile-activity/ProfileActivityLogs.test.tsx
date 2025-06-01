@@ -48,4 +48,15 @@ describe('convertActivityLogParams', () => {
     const res = convertActivityLogParams({ params: { ...base, handleOrWallet: 'user' }, disableActiveGroup: false });
     expect(res.group_id).toBeUndefined();
   });
+
+  it('adds rating matter and sorts log types', () => {
+    const params = {
+      ...base,
+      logTypes: [ProfileActivityLogType.HANDLE_EDIT, ProfileActivityLogType.DROP_CREATED],
+      matter: 'FUN' as any
+    };
+    const res = convertActivityLogParams({ params, disableActiveGroup: false });
+    expect(res.log_type).toBe('DROP_CREATED,HANDLE_EDIT');
+    expect(res.rating_matter).toBe('FUN');
+  });
 });
