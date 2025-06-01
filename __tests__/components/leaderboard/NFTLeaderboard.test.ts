@@ -65,3 +65,31 @@ describe('setScrollPosition', () => {
     document.body.innerHTML = '';
   });
 });
+
+describe('fetchNftTdhResults multiple entries', () => {
+  it('converts cic_type for each entry', async () => {
+    (cicToType as jest.Mock).mockClear();
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      count: 2,
+      page: 1,
+      next: null,
+      data: [ { id: 1, cic_score: 1 }, { id: 2, cic_score: 2 } ],
+    });
+    (cicToType as jest.Mock).mockImplementation((score) => `T${score}`);
+
+    const result = await fetchNftTdhResults('0xdef', 1, '', 1, 'balance', 'DESC');
+    expect(cicToType).toHaveBeenCalledTimes(2);
+    expect(result.data[0].cic_type).toBe('T1');
+    expect(result.data[1].cic_type).toBe('T2');
+  });
+});
+
+describe('setScrollPosition', () => {
+  it('handles missing element gracefully', () => {
+    document.body.innerHTML = '';
+    const spy = jest.spyOn(window, 'scrollTo').mockImplementation();
+    setScrollPosition();
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+});
