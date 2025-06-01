@@ -1,18 +1,29 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 import CreateDropReplyingWrapper from '../../../components/waves/CreateDropReplyingWrapper';
 import { ActiveDropAction } from '../../../types/dropInteractionTypes';
 
-jest.mock('../../../components/waves/CreateDropReplying', () => (props: any) => <div data-testid="replying">{props.action}</div>);
+jest.mock('framer-motion', () => ({
+  AnimatePresence: ({ children }: any) => <div>{children}</div>,
+  motion: { div: ({ children, ...p }: any) => <div {...p}>{children}</div> }
+}));
 
-test('renders when active drop differs from current dropId', () => {
-  const active = { drop: { id: '1' }, action: ActiveDropAction.REPLY } as any;
-  render(<CreateDropReplyingWrapper activeDrop={active} submitting={false} dropId="2" onCancelReplyQuote={jest.fn()} />);
-  expect(screen.getByTestId('replying')).toHaveTextContent(String(ActiveDropAction.REPLY));
-});
+jest.mock('../../../components/waves/CreateDropReplying', () => ({ __esModule: true, default: (p: any) => <div data-testid="child" data-disabled={p.disabled} /> }));
 
-test('does not render when ids match', () => {
-  const active = { drop: { id: '1' }, action: ActiveDropAction.REPLY } as any;
-  const { container } = render(<CreateDropReplyingWrapper activeDrop={active} submitting={false} dropId="1" onCancelReplyQuote={jest.fn()} />);
-  expect(container.firstChild).toBeNull();
+describe('CreateDropReplyingWrapper', () => {
+  const drop = { id: 'd1', author: { handle: 'bob' } } as any;
+  it('renders child when different drop id', () => {
+    render(
+      <CreateDropReplyingWrapper activeDrop={{ drop, action: ActiveDropAction.REPLY }} submitting={false} dropId="other" onCancelReplyQuote={() => {}} />
+    );
+    expect(screen.getByTestId('child')).toBeInTheDocument();
+    expect(screen.getByTestId('child')).toHaveAttribute('data-disabled', 'false');
+  });
+
+  it('does not render when no active drop', () => {
+    const { queryByTestId } = render(
+      <CreateDropReplyingWrapper activeDrop={null} submitting={false} dropId={null} onCancelReplyQuote={() => {}} />
+    );
+    expect(queryByTestId('child')).toBeNull();
+  });
 });
