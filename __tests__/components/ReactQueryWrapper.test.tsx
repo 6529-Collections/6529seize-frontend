@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import React, { useContext, useEffect } from "react";
 import ReactQueryWrapper, { ReactQueryWrapperContext, QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import { WAVE_FOLLOWING_WAVES_PARAMS, WAVE_DROPS_PARAMS } from "../../components/react-query-wrapper/utils/query-utils";
 
 function useContextValue() {
   const ctx = useContext(ReactQueryWrapperContext);
@@ -57,4 +58,64 @@ test("waitAndInvalidateDrops invalidates drop queries", async () => {
   });
   expect(spy).toHaveBeenCalledWith({ queryKey: [QueryKey.DROPS] });
   jest.useRealTimers();
+});
+
+test("setWavesOverviewPage only sets when no cache", () => {
+  const queryClient = new QueryClient();
+  let context: any;
+  const Wrapper = () => {
+    context = useContextValue();
+    return null;
+  };
+  render(
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryWrapper>
+        <Wrapper />
+      </ReactQueryWrapper>
+    </QueryClientProvider>
+  );
+
+  const waves = [{ id: "1" }] as any;
+  context.setWavesOverviewPage(waves);
+  const key = [
+    QueryKey.WAVES_OVERVIEW,
+    {
+      limit: WAVE_FOLLOWING_WAVES_PARAMS.limit,
+      type: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
+      only_waves_followed_by_authenticated_user:
+        WAVE_FOLLOWING_WAVES_PARAMS.only_waves_followed_by_authenticated_user,
+    },
+  ];
+  const data = queryClient.getQueriesData({ queryKey: [QueryKey.WAVES_OVERVIEW] })[0]?.[1] as any;
+  expect(data.pages[0]).toEqual(waves);
+
+  const other = [{ id: "2" }] as any;
+  context.setWavesOverviewPage(other);
+  // should not overwrite existing data
+  const dataAgain = queryClient.getQueriesData({ queryKey: [QueryKey.WAVES_OVERVIEW] })[0]?.[1] as any;
+  expect(dataAgain.pages[0]).toEqual(waves);
+});
+
+test("setWaveDrops caches drops when empty", () => {
+  const queryClient = new QueryClient();
+  let context: any;
+  const Wrapper = () => {
+    context = useContextValue();
+    return null;
+  };
+  render(
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryWrapper>
+        <Wrapper />
+      </ReactQueryWrapper>
+    </QueryClientProvider>
+  );
+  const dropsData = { drops: [{ serial_no: 1 }] } as any;
+  context.setWaveDrops({ waveDrops: dropsData, waveId: "10" });
+  const key = [
+    QueryKey.DROPS,
+    { waveId: "10", limit: WAVE_DROPS_PARAMS.limit, dropId: null },
+  ];
+  const dropData = queryClient.getQueriesData({ queryKey: [QueryKey.DROPS] })[0]?.[1] as any;
+  expect(dropData.pages[0]).toEqual(dropsData);
 });

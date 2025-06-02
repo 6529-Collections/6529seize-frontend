@@ -45,5 +45,16 @@ describe('create-wave.validation', () => {
     const errors = getCreateWaveValidationErrors({ step: CreateWaveStep.DROPS, config });
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.DROPS_REQUIRED_METADATA_NON_UNIQUE);
   });
-});
 
+  it('approval threshold time must be smaller than duration', () => {
+    const config = { ...baseConfig, overview:{...baseConfig.overview, type: ApiWaveType.Approve}, approval: { threshold: 1, thresholdTimeMs: 10 }, dates: { submissionStartDate: 0, votingStartDate: 0, endDate: 5, firstDecisionTime:0, subsequentDecisions:[], isRolling:false } };
+    const errors = getCreateWaveValidationErrors({ step: CreateWaveStep.APPROVAL, config });
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_TIME_MUST_BE_SMALLER_THAN_WAVE_DURATION);
+  });
+
+  it('time weighted interval outside range', () => {
+    const config = { ...baseConfig, voting: { type: ApiWaveCreditType.Rep, category:'c', profileId:'p', timeWeighted:{ enabled:true, averagingInterval:1, averagingIntervalUnit:'minutes' } } };
+    const errors = getCreateWaveValidationErrors({ step: CreateWaveStep.VOTING, config });
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL);
+  });
+});
