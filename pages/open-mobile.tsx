@@ -21,10 +21,7 @@ const OpenMobilePage = () => {
     const decoded = decodeURIComponent(raw);
     const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${decoded}`;
 
-    console.log("⏩ DeepLink:", deepLink);
     setDecodedPath(decoded);
-
-    // Redirect into the app
     window.location.href = deepLink;
   }, [router.isReady, path]);
 
