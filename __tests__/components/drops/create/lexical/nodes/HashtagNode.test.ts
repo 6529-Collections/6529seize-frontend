@@ -34,4 +34,9 @@ describe('HashtagNode', () => {
     expect($isHashtagNode(result!.node)).toBe(true);
     expect(result!.node.getTextContent()).toBe('#foo');
   });
+
+  it('identifies non hashtag node', () => {
+    expect($isHashtagNode(null)).toBe(false);
+    expect($isHashtagNode({} as any)).toBe(false);
+  });
 });

@@ -47,4 +47,16 @@ describe('UserPageSubscriptionsTopUp', () => {
     const { container } = render(<UserPageSubscriptionsTopUp />);
     expect(container.textContent).toContain('Top Up Successful!');
   });
+
+  it('submits custom count', async () => {
+    const user = userEvent.setup();
+    render(<UserPageSubscriptionsTopUp />);
+    await user.type(screen.getByPlaceholderText('count'), '2');
+    await user.click(screen.getByRole('button', { name: 'Send custom top up' }));
+    expect(sendTransaction.sendTransaction).toHaveBeenLastCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther((2 * MEMES_MINT_PRICE).toString()),
+    });
+  });
 });
