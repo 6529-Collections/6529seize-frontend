@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { ShareMobileApp } from "../components/header/share/HeaderShareMobileApps";
 import ClientOnly from "../components/client-only/ClientOnly";
+import { DeepLinkScope } from "../hooks/useDeepLinkNavigation";
 
 const OpenMobilePage = () => {
   const router = useRouter();
@@ -14,7 +15,8 @@ const OpenMobilePage = () => {
 
     const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
     const decoded = decodeURIComponent(Array.isArray(path) ? path[0] : path);
-    const deepLink = `${appScheme}://navigate${decoded}`;
+    const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${decoded}`;
+    console.log("i am deepLink", deepLink);
     setDecodedPath(decoded);
 
     window.location.href = deepLink;
