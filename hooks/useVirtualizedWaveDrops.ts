@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useVirtualizedWaveMessages } from "./useVirtualizedWaveMessages";
 import { useMyStream } from "../contexts/wave/MyStreamContext";
 import { NextPageProps } from "../contexts/wave/hooks/useWavePagination";
