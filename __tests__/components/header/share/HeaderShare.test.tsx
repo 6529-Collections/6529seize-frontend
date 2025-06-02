@@ -51,4 +51,16 @@ describe('HeaderShare', () => {
     expect(await screen.findByTestId('modal')).toBeInTheDocument();
     expect(screen.getByText('Current URL')).toBeInTheDocument();
   });
+
+  it('copies url to clipboard', async () => {
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false as any);
+    Object.assign(navigator, { clipboard: { writeText: jest.fn() } });
+    const { container } = render(<HeaderShare />);
+    await userEvent.click(screen.getByRole('button', { name: 'QR Code' }));
+    const modal = await screen.findByTestId('modal');
+    const icon = modal.querySelector('[data-icon="copy"]') as HTMLElement;
+    await userEvent.click(icon);
+    expect(navigator.clipboard.writeText).toHaveBeenCalled();
+  });
 });
