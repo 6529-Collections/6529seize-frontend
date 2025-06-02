@@ -7,6 +7,20 @@ jest.mock('../../../services/api/common-api', () => ({
 import { download, isSubscriptionsAdmin } from '../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription';
 import { ApiIdentity } from '../../../generated/models/ApiIdentity';
 
+jest.mock('react-bootstrap', () => ({
+  __esModule: true,
+  Modal: Object.assign(({ show, children }: any) => (show ? <div>{children}</div> : null), {
+    Header: ({ children }: any) => <div>{children}</div>,
+    Title: ({ children }: any) => <div>{children}</div>,
+    Body: ({ children }: any) => <div>{children}</div>,
+    Footer: ({ children }: any) => <div>{children}</div>,
+  }),
+  Button: (p: any) => <button {...p}>{p.children}</button>,
+  Col: (p: any) => <div>{p.children}</div>,
+  Container: (p: any) => <div>{p.children}</div>,
+  Row: (p: any) => <div>{p.children}</div>,
+}));
+
 describe('ReviewDistributionPlanTableSubscription utilities', () => {
   it('checks subscriptions admin wallets', () => {
     const profile: Partial<ApiIdentity> = { wallets: [{ wallet: '0xabc' }] };
@@ -28,4 +42,22 @@ describe('ReviewDistributionPlanTableSubscription utilities', () => {
     const result = await download('c','1','plan','phase','public');
     expect(result.success).toBe(false);
   });
+});
+
+import { SubscriptionConfirm } from '../../../components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription';
+import { render, screen } from '@testing-library/react';
+import React from 'react';
+
+test('SubscriptionConfirm extracts token id from plan name', () => {
+  render(
+    <SubscriptionConfirm
+      title="t"
+      plan={{ id: '1', name: 'Meme 123 drop' } as any}
+      show={true}
+      handleClose={jest.fn()}
+      onConfirm={jest.fn()}
+    />
+  );
+  const input = screen.getByRole('spinbutton') as HTMLInputElement;
+  expect(input.value).toBe('123');
 });

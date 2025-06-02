@@ -86,4 +86,12 @@ describe('MemeLab utilities', () => {
     render(<div>{printNftContent(nft, MemeLabSort.FLOOR_PRICE, [nftMeta], VolumeType.ALL_TIME)}</div>);
     expect(screen.getByText(/Floor Price/)).toBeInTheDocument();
   });
+
+  it('prints volume info for selected period', () => {
+    const nft = createNft();
+    const { container } = render(
+      <div>{printNftContent(nft, MemeLabSort.VOLUME, [nftMeta], VolumeType.DAYS_7)}</div>
+    );
+    expect(container.textContent).toContain('Volume (7 Days):');
+  });
 });

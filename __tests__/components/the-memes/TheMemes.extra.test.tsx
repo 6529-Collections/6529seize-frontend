@@ -22,4 +22,11 @@ describe('printVolumeTypeDropdown css', () => {
     const { getByTestId } = render(printVolumeTypeDropdown(true, jest.fn(), jest.fn()));
     expect(getByTestId('dropdown').className).toContain('enabled');
   });
+
+  it('does not add enabled class when not active', () => {
+    const { getByTestId } = render(
+      printVolumeTypeDropdown(false, jest.fn(), jest.fn())
+    );
+    expect(getByTestId('dropdown').className).not.toContain('enabled');
+  });
 });
