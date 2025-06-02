@@ -1,5 +1,16 @@
 import { validateFile, testVideoCompatibility } from '../../../../../../components/waves/memes/file-upload/utils/fileValidation';
 
+// Mock MediaError constants
+const MediaErrorMock = {
+  MEDIA_ERR_ABORTED: 1,
+  MEDIA_ERR_NETWORK: 2,
+  MEDIA_ERR_DECODE: 3,
+  MEDIA_ERR_SRC_NOT_SUPPORTED: 4,
+};
+
+// Define MediaError globally for tests
+(global as any).MediaError = MediaErrorMock;
+
 // Mock constants
 jest.mock('../../../../../../components/waves/memes/file-upload/utils/constants', () => ({
   FILE_SIZE_LIMIT: 50 * 1024 * 1024, // 50MB
@@ -103,6 +114,32 @@ describe('fileValidation', () => {
       
       const result = await testVideoCompatibility(file);
       expect(result.tested).toBe(true);
+    });
+
+    it('handles error event', async () => {
+      const file = new File(['x'], 'vid.mp4', { type: 'video/mp4' });
+      const mockVideo: any = {
+        canPlayType: jest.fn(() => 'maybe'),
+        load: jest.fn(),
+        removeAttribute: jest.fn(),
+        error: { code: MediaError.MEDIA_ERR_NETWORK },
+      };
+      global.document.createElement = jest.fn(() => mockVideo) as any;
+      const promise = testVideoCompatibility(file);
+      mockVideo.onerror();
+      jest.runAllTimers();
+      const res = await promise;
+      expect(res.canPlay).toBe(false);
+      expect(res.tested).toBe(true);
+    });
+
+    it('returns error when thrown', async () => {
+      global.document.createElement = jest.fn(() => {
+        throw new Error('boom');
+      }) as any;
+      const res = await testVideoCompatibility(new File(['x'], 'v.mp4', { type: 'video/mp4' }));
+      expect(res.canPlay).toBe(false);
+      expect(res.technicalReason).toBe('boom');
     });
   });
 });

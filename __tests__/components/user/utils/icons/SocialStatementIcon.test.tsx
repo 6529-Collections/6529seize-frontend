@@ -36,4 +36,13 @@ describe('SocialStatementIcon', () => {
     render(<SocialStatementIcon statementType={"UNKNOWN" as any} />);
     expect(assertUnreachable).toHaveBeenCalledWith('UNKNOWN');
   });
+
+  it('handles every statement type without calling assertUnreachable', () => {
+    jest.clearAllMocks();
+    for (const type of Object.values(STATEMENT_TYPE)) {
+      const { unmount } = render(<SocialStatementIcon statementType={type} />);
+      unmount();
+    }
+    expect(assertUnreachable).not.toHaveBeenCalled();
+  });
 });

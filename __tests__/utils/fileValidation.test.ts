@@ -1,5 +1,16 @@
 import { validateFile, testVideoCompatibility } from "../../components/waves/memes/file-upload/utils/fileValidation";
 
+// Mock MediaError constants
+const MediaErrorMock = {
+  MEDIA_ERR_ABORTED: 1,
+  MEDIA_ERR_NETWORK: 2,
+  MEDIA_ERR_DECODE: 3,
+  MEDIA_ERR_SRC_NOT_SUPPORTED: 4,
+};
+
+// Define MediaError globally for tests
+(global as any).MediaError = MediaErrorMock;
+
 // helper to create File
 function makeFile(name: string, type: string, size = 10) {
   const file = new File(["a"], name, { type });
@@ -75,5 +86,33 @@ describe("testVideoCompatibility", () => {
     const result = await promise;
     expect(result.canPlay).toBe(true);
     expect(result.tested).toBe(true);
+  });
+
+  it("handles video error codes", async () => {
+    const error: Partial<MediaError> = { code: MediaError.MEDIA_ERR_DECODE };
+    const video: any = {
+      canPlayType: jest.fn(() => "maybe"),
+      load: jest.fn(),
+      removeAttribute: jest.fn(),
+      error,
+    };
+    jest.spyOn(document, "createElement").mockReturnValue(video);
+    const promise = testVideoCompatibility(makeFile("a.mp4", "video/mp4"));
+    video.onerror();
+    jest.runAllTimers();
+    const result = await promise;
+    expect(result.canPlay).toBe(false);
+    expect(result.tested).toBe(true);
+    expect(result.technicalReason).toMatch(/decoded/);
+  });
+
+  it("catches exceptions during setup", async () => {
+    jest.spyOn(document, "createElement").mockImplementation(() => {
+      throw new Error("fail");
+    });
+    const result = await testVideoCompatibility(makeFile("v.mp4", "video/mp4"));
+    expect(result.canPlay).toBe(false);
+    expect(result.tested).toBe(true);
+    expect(result.technicalReason).toBe("fail");
   });
 });
