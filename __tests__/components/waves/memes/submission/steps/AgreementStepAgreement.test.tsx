@@ -10,4 +10,9 @@ describe('AgreementStepAgreement', () => {
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', expect.stringContaining('nofollow'));
   });
+
+  it('sanitizes disallowed html', () => {
+    render(<AgreementStepAgreement text={'<script>bad()</script>'} />);
+    expect(screen.queryByText('bad()')).toBeNull();
+  });
 });

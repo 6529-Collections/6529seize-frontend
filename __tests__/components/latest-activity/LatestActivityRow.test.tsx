@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import { faFire, faCartPlus } from "@fortawesome/free-solid-svg-icons";
-import LatestActivityRow, { printRoyalties } from "../../../components/latest-activity/LatestActivityRow";
+import { faFire, faCartPlus, faGasPump } from "@fortawesome/free-solid-svg-icons";
+import LatestActivityRow, { printRoyalties, printGas } from "../../../components/latest-activity/LatestActivityRow";
 import { MANIFOLD } from "../../../constants";
 
 jest.mock('next/image', () => ({ __esModule: true, default: (p:any) => <img {...p}/> }));
@@ -67,5 +67,10 @@ describe('LatestActivityRow', () => {
   it('uses mint icon when from address is MANIFOLD and value > 0', () => {
     render(<table><tbody><LatestActivityRow tr={{...baseTr, from_address: MANIFOLD, value: 1}} /></tbody></table>);
     expect(iconMock).toHaveBeenCalledWith(expect.objectContaining({ icon: faCartPlus, className: 'iconWhite' }));
+  });
+
+  it('renders gas tooltip', () => {
+    render(<>{printGas(1,2,3)}</>);
+    expect(iconMock).toHaveBeenCalledWith(expect.objectContaining({ icon: faGasPump }));
   });
 });
