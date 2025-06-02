@@ -66,3 +66,11 @@ describe('setScrollPosition', () => {
     spy.mockRestore();
   });
 });
+
+describe('fetchNftTdhResults wallet filter', () => {
+  it('adds search param when wallets provided', async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({ count:0, page:1, next:null, data:[] });
+    await fetchNftTdhResults('0xabc', 2, '&search=0x1', 1, 'balance', 'ASC');
+    expect(commonApiFetch).toHaveBeenCalledWith({ endpoint: `tdh/nft/0xabc/2?&search=0x1&page_size=${PAGE_SIZE}&page=1&sort=balance&sort_direction=ASC` });
+  });
+});

@@ -74,3 +74,10 @@ describe('LatestActivityRow', () => {
     expect(iconMock).toHaveBeenCalledWith(expect.objectContaining({ icon: faGasPump }));
   });
 });
+
+describe('printGas', () => {
+  it('renders gas icon', () => {
+    render(<>{printGas(1, 2, 3)}</>);
+    expect(iconMock).toHaveBeenCalledWith(expect.objectContaining({ icon: faGasPump }));
+  });
+});

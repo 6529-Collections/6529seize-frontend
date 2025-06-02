@@ -39,5 +39,43 @@ describe('UserPageHeaderEditClassification', () => {
       capturedClassificationProps.onSelect(ApiProfileClassification.Bot);
     });
     expect(capturedSaveProps.disabled).toBe(false);
+});
+
+  it('submits when auth succeeds', async () => {
+    const mutate = jest.fn();
+    const requestAuth = jest.fn().mockResolvedValue({ success: true });
+    const setToast = jest.fn();
+    jest.spyOn(require('@tanstack/react-query'), 'useMutation').mockReturnValue({ mutateAsync: mutate } as any);
+    const { container } = render(
+      <AuthContext.Provider value={{ setToast, requestAuth } as any}>
+        <ReactQueryWrapperContext.Provider value={{ onProfileEdit: jest.fn() } as any}>
+          <UserPageHeaderEditClassification profile={profile} onClose={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    await act(async () => {
+      container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true }));
+    });
+    expect(requestAuth).toHaveBeenCalled();
+    expect(mutate).toHaveBeenCalledWith({ handle: 'alice', classification: ApiProfileClassification.Pseudonym });
+  });
+
+  it('shows error when auth fails', async () => {
+    const mutate = jest.fn();
+    const requestAuth = jest.fn().mockResolvedValue({ success: false });
+    const setToast = jest.fn();
+    jest.spyOn(require('@tanstack/react-query'), 'useMutation').mockReturnValue({ mutateAsync: mutate } as any);
+    const { container } = render(
+      <AuthContext.Provider value={{ setToast, requestAuth } as any}>
+        <ReactQueryWrapperContext.Provider value={{ onProfileEdit: jest.fn() } as any}>
+          <UserPageHeaderEditClassification profile={profile} onClose={jest.fn()} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    await act(async () => {
+      container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true }));
+    });
+    expect(setToast).toHaveBeenCalled();
+    expect(mutate).not.toHaveBeenCalled();
   });
 });

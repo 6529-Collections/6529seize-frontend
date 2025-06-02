@@ -32,4 +32,20 @@ describe('NextGenAdminUploadAL', () => {
     render(<NextGenAdminUploadAL close={() => {}} />);
     expect(screen.getByRole('button', { name: 'Upload' })).toBeDisabled();
   });
+
+  it('calls signMessage when uploading', () => {
+    const signSpy = jest.fn();
+    (useSignMessage as jest.Mock).mockReturnValue({ signMessage: signSpy, reset: jest.fn(), isError: false, isSuccess: false });
+    render(<NextGenAdminUploadAL close={() => {}} />);
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: '1' } });
+    fireEvent.change(screen.getByPlaceholderText('...Phase name'), { target: { value: 'p' } });
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(fileInput, { target: { files: [new File(['a'], 'a.csv', { type: 'text/csv' })] } });
+    fireEvent.change(screen.getAllByPlaceholderText('Unix epoch time')[0], { target: { value: '1' } });
+    fireEvent.change(screen.getAllByPlaceholderText('Unix epoch time')[1], { target: { value: '2' } });
+    fireEvent.change(screen.getByPlaceholderText('...0.06529'), { target: { value: '0.1' } });
+    const button = screen.getByRole('button', { name: 'Upload' });
+    expect(button).not.toBeDisabled();
+    fireEvent.click(button);
+  });
 });
