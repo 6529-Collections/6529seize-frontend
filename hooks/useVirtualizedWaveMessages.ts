@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useMyStreamWaveMessages } from "../contexts/wave/MyStreamContext";
 import { useDropMessages } from "./useDropMessages";
 
@@ -28,40 +28,44 @@ export function useVirtualizedWaveMessages(
   const fullWave = useMyStreamWaveMessages(waveId);
   const dropWave = useDropMessages(waveId, dropId);
 
-  // fallback defaults
-  const source = dropId ? dropWave : fullWave;
+  type SourceType = typeof fullWave | typeof dropWave;
+  const sourceRef = useRef<SourceType>(dropId ? dropWave : fullWave);
+
+  useEffect(() => {
+    sourceRef.current = dropId ? dropWave : fullWave;
+  }, [dropId, dropWave, fullWave]);
 
   const [virtualLimit, setVirtualLimit] = useState(pageSize);
   const [hasMoreLocal, setHasMoreLocal] = useState(false);
 
   useEffect(() => {
-    setHasMoreLocal((source?.drops.length ?? 0) > virtualLimit);
-  }, [source?.drops.length, virtualLimit]);
+    setHasMoreLocal((sourceRef.current?.drops.length ?? 0) > virtualLimit);
+  }, [sourceRef.current?.drops.length, virtualLimit]);
 
   useEffect(() => {
     setVirtualLimit(pageSize);
   }, [waveId, dropId, pageSize]);
 
   const loadMoreLocally = useCallback(() => {
-    const total = source?.drops.length ?? 0;
+    const total = sourceRef.current?.drops.length ?? 0;
     if (total > virtualLimit) {
       setVirtualLimit((prev) => Math.min(prev + pageSize, total));
     }
-  }, [source?.drops.length, virtualLimit, pageSize]);
+  }, [virtualLimit, pageSize]);
 
   const revealDrop = useCallback(
     (serialNo: number) => {
       const idx =
-        source?.drops.findIndex((d) => d.serial_no === serialNo) ?? -1;
+        sourceRef.current?.drops.findIndex((d) => d.serial_no === serialNo) ?? -1;
       if (idx !== -1) {
         const target = Math.min(
           idx + pageSize,
-          (source?.drops.length ?? 1) - 1
+          (sourceRef.current?.drops.length ?? 1) - 1
         );
         setVirtualLimit(target + 1);
       }
     },
-    [source?.drops, pageSize]
+    [pageSize]
   );
 
   const waitAndRevealDrop = useCallback(
@@ -72,7 +76,7 @@ export function useVirtualizedWaveMessages(
     ): Promise<boolean> => {
       const start = Date.now();
       while (Date.now() - start < maxWaitTimeMs) {
-        if (source?.drops?.some((d) => d.serial_no === serialNo)) {
+        if (sourceRef.current?.drops?.some((d) => d.serial_no === serialNo)) {
           revealDrop(serialNo);
           return true;
         }
@@ -83,7 +87,7 @@ export function useVirtualizedWaveMessages(
       );
       return false;
     },
-    [source?.drops, revealDrop, waveId]
+    [revealDrop, waveId]
   );
 
   const fetchNextPageForDrop = useCallback(() => {
@@ -95,7 +99,7 @@ export function useVirtualizedWaveMessages(
 
   return {
     id: waveId,
-    hasNextPage: source!.hasNextPage,
+    hasNextPage: sourceRef.current!.hasNextPage,
     isLoading: dropId ? dropWave.isFetching : fullWave.isLoading,
     isLoadingNextPage: dropId
       ? dropWave.isFetchingNextPage
@@ -103,8 +107,8 @@ export function useVirtualizedWaveMessages(
     latestFetchedSerialNo: dropId
       ? dropWave.drops.at(-1)?.serial_no ?? null
       : fullWave.latestFetchedSerialNo,
-    drops: source!.drops.slice(0, virtualLimit),
-    allDropsCount: source!.drops.length,
+    drops: sourceRef.current!.drops.slice(0, virtualLimit),
+    allDropsCount: sourceRef.current!.drops.length,
     loadMoreLocally,
     hasMoreLocal,
     fetchNextPageForDrop,
