@@ -4,14 +4,11 @@ import Pagination from "../pagination/Pagination";
 import { commonApiFetch } from "../../services/api/common-api";
 import { MEMES_CONTRACT } from "../../constants";
 
-// Pull in our Helpers:
 import {
   formatDate,
   DownloadsLayout,
   DownloadsTable,
 } from "./CommunityDownloadsHelpers";
-import { Row } from "react-bootstrap";
-import { getContractName, isMemesContract } from "../../helpers/Helpers";
 
 const PAGE_SIZE = 25;
 
@@ -42,19 +39,15 @@ export default function CommunityDownloadsSubscriptions() {
     fetchResults(page);
   }, [page, router.query]);
 
-  const tokenDisplay = (contract: string, tokenId: number) => {
-    return `${getContractName(contract)} #${tokenId}`;
-  };
-
   return (
     <DownloadsLayout title="Meme Subscriptions">
       <DownloadsTable
         data={downloads}
-        columns={["Date", "Token", "Link"]}
+        columns={["Date", "Token ID", "Link"]}
         renderRow={(download: SubscriptionDownload) => (
           <tr key={download.date}>
             <td>{formatDate(download.date)}</td>
-            <td>{tokenDisplay(download.contract, download.token_id)}</td>
+            <td>#{download.token_id}</td>
             <td>
               <a href={download.upload_url} target="_blank" rel="noreferrer">
                 {download.upload_url}
@@ -65,7 +58,7 @@ export default function CommunityDownloadsSubscriptions() {
       />
 
       {totalResults > PAGE_SIZE && (
-        <Row className="text-center pt-2 pb-3">
+        <div className="tw-text-center tw-pt-2 tw-pb-3">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
@@ -75,7 +68,7 @@ export default function CommunityDownloadsSubscriptions() {
               window.scrollTo(0, 0);
             }}
           />
-        </Row>
+        </div>
       )}
     </DownloadsLayout>
   );

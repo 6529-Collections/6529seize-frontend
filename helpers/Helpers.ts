@@ -57,22 +57,6 @@ export function isMemeLabContract(contract: string) {
   return contract.toUpperCase() === MEMELAB_CONTRACT.toUpperCase();
 }
 
-export function getContractName(contract: string) {
-  if (isMemesContract(contract)) {
-    return "The Memes";
-  }
-  if (isGradientsContract(contract)) {
-    return "6529 Gradient";
-  }
-  if (isMemeLabContract(contract)) {
-    return "Meme Lab";
-  }
-  if (isNextgenContract(contract)) {
-    return "NextGen";
-  }
-  return formatAddress(contract);
-}
-
 export function fromGWEI(from: number) {
   return from / 1e18;
 }
