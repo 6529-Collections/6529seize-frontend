@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import React from 'react';
 import TelegramIcon from '../../../../../components/user/utils/icons/TelegramIcon';
 

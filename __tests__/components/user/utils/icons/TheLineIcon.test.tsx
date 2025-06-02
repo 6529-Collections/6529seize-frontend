@@ -8,5 +8,6 @@ describe('TheLineIcon', () => {
     const img = screen.getByRole('img');
     expect(img).toHaveAttribute('src', '/OnCyber-Icon.jpg');
     expect(img).toHaveAttribute('alt', 'OnCyber');
+    expect(img).toHaveClass('tw-ring-1');
   });
 });
