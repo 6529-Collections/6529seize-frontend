@@ -41,8 +41,7 @@ describe('printRoyalties', () => {
   });
 });
 
-describe('LatestActivityRow', () => {
-  const baseTr = {
+const baseTr = {
     contract: '0xcontract',
     from_address: '0xfrom',
     from_display: 'From',
@@ -58,6 +57,8 @@ describe('LatestActivityRow', () => {
     transaction_date: '2020-01-01',
     royalties: 0,
   } as any;
+
+describe('LatestActivityRow', () => {
 
   it('uses burn icon when to address is null', () => {
     render(<table><tbody><LatestActivityRow tr={{...baseTr, to_address: "0x0"}} /></tbody></table>);
@@ -79,5 +80,17 @@ describe('printGas', () => {
   it('renders gas icon', () => {
     render(<>{printGas(1, 2, 3)}</>);
     expect(iconMock).toHaveBeenCalledWith(expect.objectContaining({ icon: faGasPump }));
+  });
+});
+
+describe('extra cases', () => {
+  it('renders gas tooltip', () => {
+    const { container } = render(<>{require('../../../components/latest-activity/LatestActivityRow').printGas(1,2,3)}</>);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('returns empty when token count is zero', () => {
+    const { container } = render(<table><tbody><LatestActivityRow tr={{...baseTr, token_count: 0}} /></tbody></table>);
+    expect(container.querySelector('tr')).toBeNull();
   });
 });

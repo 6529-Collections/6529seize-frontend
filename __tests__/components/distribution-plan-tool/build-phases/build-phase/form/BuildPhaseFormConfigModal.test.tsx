@@ -48,3 +48,35 @@ test('moves to next step on select', async () => {
   fireEvent.click(screen.getByText('select'));
   await waitFor(() => expect(screen.getByTestId('exclude')).toBeInTheDocument());
 });
+
+jest.mock('../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotExcludeComponentWinners', () => ({
+  __esModule: true,
+  default: () => <div data-testid="exclude-winners" />,
+}));
+
+jest.mock('../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/SnapshotSelectTokenIds', () => ({
+  __esModule: true,
+  default: () => <div data-testid="token-ids" />,
+}));
+
+function renderWithContext(ctx: any) {
+  return render(
+    <DistributionPlanToolContext.Provider value={ctx}>
+      <BuildPhaseFormConfigModal name="g" description="d" selectedPhase={{ id: 'p', components: ctx.phaseComponents ?? [] }} phases={[{ id: 'p', components: ctx.phaseComponents ?? [] }]} onClose={jest.fn()} />
+    </DistributionPlanToolContext.Provider>
+  );
+}
+
+test('select snapshot goes to exclude winners when single snapshot with components', async () => {
+  const ctx = { ...contextValue, operations: [{ code: AllowlistOperationCode.CREATE_TOKEN_POOL, params: { id: '1', name: 'A' } }], phaseComponents: [{}] } as any;
+  renderWithContext(ctx);
+  fireEvent.click(screen.getByText('select'));
+  await screen.findByTestId('exclude-winners');
+});
+
+test('select snapshot skips to token ids when no components', async () => {
+  const ctx = { ...contextValue, operations: [{ code: AllowlistOperationCode.CREATE_TOKEN_POOL, params: { id: '1', name: 'A' } }], phaseComponents: [] } as any;
+  renderWithContext(ctx);
+  fireEvent.click(screen.getByText('select'));
+  await screen.findByTestId('token-ids');
+});

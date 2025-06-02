@@ -24,4 +24,23 @@ describe('ContentTabContext', () => {
     act(() => result.current.setActiveContentTab(MyStreamWaveTab.WINNERS));
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
+
+  it('sets meme wave tabs correctly', () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        isChatWave: false,
+        isMemesWave: true,
+        votingState: WaveVotingState.NOT_STARTED,
+        hasFirstDecisionPassed: false,
+      })
+    );
+    expect(result.current.availableTabs).toEqual([
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.OUTCOME,
+      MyStreamWaveTab.FAQ,
+    ]);
+  });
 });
