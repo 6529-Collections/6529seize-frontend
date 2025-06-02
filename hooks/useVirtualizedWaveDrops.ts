@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useVirtualizedWaveMessages } from "./useVirtualizedWaveMessages";
 import { useMyStream } from "../contexts/wave/MyStreamContext";
 import { NextPageProps } from "../contexts/wave/hooks/useWavePagination";
@@ -26,7 +26,6 @@ export function useVirtualizedWaveDrops(
     dropId,
     pageSize
   );
-
   // Create a wrapper for fetchNextPageForWave that first tries to get data locally
   const fetchNextPageForWave = useCallback(
     async (props: NextPageProps) => {

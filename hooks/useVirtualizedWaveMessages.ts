@@ -28,30 +28,30 @@ export function useVirtualizedWaveMessages(
   const fullWave = useMyStreamWaveMessages(waveId);
   const dropWave = useDropMessages(waveId, dropId);
 
-  type SourceType = typeof fullWave | typeof dropWave;
-  const sourceRef = useRef<SourceType>(dropId ? dropWave : fullWave);
+  const source = dropId ? dropWave : fullWave;
+  const sourceRef = useRef(source);
 
   useEffect(() => {
-    sourceRef.current = dropId ? dropWave : fullWave;
-  }, [dropId, dropWave, fullWave]);
+    sourceRef.current = source;
+  }, [source]);
 
   const [virtualLimit, setVirtualLimit] = useState(pageSize);
   const [hasMoreLocal, setHasMoreLocal] = useState(false);
 
   useEffect(() => {
-    setHasMoreLocal((sourceRef.current?.drops.length ?? 0) > virtualLimit);
-  }, [sourceRef.current?.drops.length, virtualLimit]);
+    setHasMoreLocal((source?.drops.length ?? 0) > virtualLimit);
+  }, [source?.drops.length, virtualLimit]);
 
   useEffect(() => {
     setVirtualLimit(pageSize);
   }, [waveId, dropId, pageSize]);
 
   const loadMoreLocally = useCallback(() => {
-    const total = sourceRef.current?.drops.length ?? 0;
+    const total = source?.drops.length ?? 0;
     if (total > virtualLimit) {
       setVirtualLimit((prev) => Math.min(prev + pageSize, total));
     }
-  }, [virtualLimit, pageSize]);
+  }, [virtualLimit, pageSize, source?.drops.length]);
 
   const revealDrop = useCallback(
     (serialNo: number) => {
@@ -96,10 +96,11 @@ export function useVirtualizedWaveMessages(
 
   // Handle missing data
   if (!fullWave || (dropId && !dropWave)) return undefined;
+  if (!source) return undefined;
 
   return {
     id: waveId,
-    hasNextPage: sourceRef.current!.hasNextPage,
+    hasNextPage: source.hasNextPage,
     isLoading: dropId ? dropWave.isFetching : fullWave.isLoading,
     isLoadingNextPage: dropId
       ? dropWave.isFetchingNextPage
@@ -107,8 +108,8 @@ export function useVirtualizedWaveMessages(
     latestFetchedSerialNo: dropId
       ? dropWave.drops.at(-1)?.serial_no ?? null
       : fullWave.latestFetchedSerialNo,
-    drops: sourceRef.current!.drops.slice(0, virtualLimit),
-    allDropsCount: sourceRef.current!.drops.length,
+    drops: source.drops.slice(0, virtualLimit),
+    allDropsCount: source.drops.length,
     loadMoreLocally,
     hasMoreLocal,
     fetchNextPageForDrop,
