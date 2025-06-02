@@ -24,7 +24,6 @@ export const useDeepLinkNavigation = () => {
     if (!isCapacitor) return;
 
     const listener = App.addListener("appUrlOpen", (data) => {
-      console.log("i am appUrlOpen", data);
       const urlString = data.url;
 
       const schemeEndIndex = urlString.indexOf("://") + 3;
@@ -41,10 +40,6 @@ export const useDeepLinkNavigation = () => {
         searchParams.entries()
       );
       queryParams["_t"] = Date.now() / 1000;
-
-      console.log("i am scope", scope);
-      console.log("i am pathParts", pathParts);
-      console.log("i am queryParams", queryParams);
 
       switch (scope) {
         case DeepLinkScope.NAVIGATE:
