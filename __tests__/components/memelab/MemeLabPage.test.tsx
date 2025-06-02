@@ -7,6 +7,14 @@ jest.mock("next/router", () => ({ useRouter: jest.fn() }));
 jest.mock("../../../services/6529api", () => ({ fetchUrl: jest.fn(), fetchAllPages: jest.fn() }));
 jest.mock("../../../hooks/useCapacitor", () => ({ __esModule: true, default: () => ({ platform: 'web' }) }));
 jest.mock("../../../components/auth/Auth", () => ({ useAuth: () => ({ setTitle: jest.fn() }) }));
+jest.mock('../../../components/cookies/CookieConsentContext', () => ({ 
+  useCookieConsent: jest.fn(() => ({
+    showCookieConsent: false,
+    country: 'US',
+    consent: jest.fn(),
+    reject: jest.fn()
+  }))
+}));
 
 jest.mock("../../../components/download/Download", () => ({ __esModule: true, default: () => <div data-testid="Download" /> }));
 jest.mock("../../../components/latest-activity/LatestActivityRow", () => ({ __esModule: true, default: () => <tr data-testid="activity" /> }));

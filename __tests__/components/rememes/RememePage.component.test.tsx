@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RememePage from '../../../components/rememes/RememePage';
+import { CookieConsentProvider } from '../../../components/cookies/CookieConsentContext';
 
 jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props}/> }));
 jest.mock('../../../components/nft-image/RememeImage', () => ({ __esModule: true, default: () => <div data-testid='rememe-image'/> }));
@@ -36,7 +37,11 @@ const rememe = {
 it('loads data and switches tabs', async () => {
   fetchUrl.mockResolvedValue({ data: [rememe] });
   fetchAllPages.mockResolvedValue([]);
-  render(<RememePage contract="c" id="1" />);
+  render(
+    <CookieConsentProvider>
+      <RememePage contract="c" id="1" />
+    </CookieConsentProvider>
+  );
 
   await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
   // Name from metadata should render

@@ -1,9 +1,11 @@
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./CommunityDownloads.module.scss";
 import useCapacitor from "../../hooks/useCapacitor";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 export default function CommunityDownloads() {
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   return (
     <Container fluid>
       <Row>
@@ -29,7 +31,7 @@ export default function CommunityDownloads() {
                   </span>
                 </a>
               </Col>
-              {capacitor.platform !== "ios" && (
+              {(!capacitor.isIos || country === "US") && (
                 <Col xs={12} sm={6} md={4} className="pt-2 pb-3">
                   <a href="/open-data/meme-subscriptions">
                     <span className={styles.downloadLink}>

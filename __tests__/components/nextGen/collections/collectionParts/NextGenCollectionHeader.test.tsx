@@ -5,6 +5,14 @@ import NextGenCollectionHeader, {
 } from '../../../../../components/nextGen/collections/collectionParts/NextGenCollectionHeader';
 
 jest.mock('../../../../../services/6529api', () => ({ fetchUrl: jest.fn(() => Promise.resolve({})) }));
+jest.mock('../../../../../components/cookies/CookieConsentContext', () => ({ 
+  useCookieConsent: jest.fn(() => ({
+    showCookieConsent: false,
+    country: 'US',
+    consent: jest.fn(),
+    reject: jest.fn()
+  }))
+}));
 
 // Mock Next.js router
 jest.mock('next/router', () => ({

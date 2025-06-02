@@ -1,10 +1,15 @@
 import { render, screen } from '@testing-library/react';
-import CommunityDownloadsTeam from '../../../components/communityDownloads/CommunityDownloadsTeam';
+import CommunityDownloadsTeam from '../../../components/community-downloads/CommunityDownloadsTeam';
 
-jest.mock('../../../components/communityDownloads/CommunityDownloadsComponent', () => ({
-  __esModule: true,
-  CommunityDownloadsComponentRow: ({ date, url }: any) => (
-    <tr data-testid="row"><td>{date}</td><td>{url}</td></tr>
+jest.mock('../../../components/community-downloads/CommunityDownloadsHelpers', () => ({
+  formatDate: (date: string) => date,
+  DownloadsLayout: ({ children }: any) => <div>{children}</div>,
+  DownloadsTable: ({ data, renderRow }: any) => (
+    <div>
+      {data.map((item: any, idx: number) => (
+        <div key={idx} data-testid="row">{renderRow(item)}</div>
+      ))}
+    </div>
   ),
 }));
 

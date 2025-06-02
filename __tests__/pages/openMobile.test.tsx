@@ -12,7 +12,10 @@ describe('OpenMobilePage', () => {
     delete (window as any).location;
     (window as any).location = { href: 'http://example.com', origin: 'http://example.com' } as any;
     process.env.MOBILE_APP_SCHEME = 'app';
-    useRouterMock.mockReturnValue({ query: { path: '/foo%20bar' } });
+    useRouterMock.mockReturnValue({ 
+      query: { path: '/foo%20bar' }, 
+      isReady: true 
+    });
   });
 
   it('deep links and allows going back', async () => {

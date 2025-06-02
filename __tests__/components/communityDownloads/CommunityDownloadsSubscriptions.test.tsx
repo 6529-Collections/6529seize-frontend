@@ -1,5 +1,5 @@
 import { render, screen, act } from '@testing-library/react';
-import CommunityDownloadsSubscriptions from '../../../components/communityDownloads/CommunityDownloadsSubscriptions';
+import CommunityDownloadsSubscriptions from '../../../components/community-downloads/CommunityDownloadsSubscriptions';
 import { MEMES_CONTRACT } from '../../../constants';
 
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
@@ -18,7 +18,7 @@ describe('CommunityDownloadsSubscriptions', () => {
     commonApiFetch.mockResolvedValue({
       count: 1,
       data: [
-        { date: '2023', contract: MEMES_CONTRACT, token_id: 1, upload_url: 'http://example.com' },
+        { date: '20230101', contract: MEMES_CONTRACT, token_id: 1, upload_url: 'http://example.com' },
       ],
     });
     await act(async () => {
@@ -27,8 +27,8 @@ describe('CommunityDownloadsSubscriptions', () => {
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: `subscriptions/uploads?contract=${MEMES_CONTRACT}&page_size=25&page=1`,
     });
-    expect(screen.getByText('2023')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('Sun Jan 01 2023')).toBeInTheDocument();
+    expect(screen.getByText('#1')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'http://example.com' })).toHaveAttribute('href', 'http://example.com');
   });
 

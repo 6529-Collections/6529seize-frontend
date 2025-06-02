@@ -57,6 +57,7 @@ import {
 } from "../the-memes/MemeShared";
 import { useAuth } from "../auth/Auth";
 import NftNavigation from "../nft-navigation/NftNavigation";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
 
 const ACTIVITY_PAGE_SIZE = 25;
 
@@ -67,6 +68,7 @@ interface Props {
 export default function LabPage(props: Readonly<Props>) {
   const router = useRouter();
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const { setTitle } = useAuth();
 
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
@@ -512,7 +514,7 @@ export default function LabPage(props: Readonly<Props>) {
                 </Col>
               </Row>
             )}
-            {capacitor.platform !== "ios" && (
+            {(!capacitor.isIos || country === "US") && (
               <Row className="pt-4">
                 <Col>
                   <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />

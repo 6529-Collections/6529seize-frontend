@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { CommunityDownloadsComponentRow } from '../../../components/communityDownloads/CommunityDownloadsComponent';
+import { CommunityDownloadsComponentRow } from '../../../components/community-downloads/CommunityDownloadsHelpers';
 
 function renderRow(date: string) {
   return render(

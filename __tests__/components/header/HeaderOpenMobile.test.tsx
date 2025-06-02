@@ -17,7 +17,7 @@ describe('HeaderOpenMobile', () => {
     useCapacitor.mockReturnValue({ isCapacitor: true });
     useIsMobileDevice.mockReturnValue(true);
     const push = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({ asPath: '/path', push });
+    (useRouter as jest.Mock).mockReturnValue({ asPath: '/path', pathname: '/path', push });
     const { container } = render(<HeaderOpenMobile />);
     expect(container.firstChild).toBeNull();
   });
@@ -25,7 +25,7 @@ describe('HeaderOpenMobile', () => {
   it('opens mobile link when clicked', () => {
     useCapacitor.mockReturnValue({ isCapacitor: false });
     useIsMobileDevice.mockReturnValue(true);
-    (useRouter as jest.Mock).mockReturnValue({ asPath: '/foo' });
+    (useRouter as jest.Mock).mockReturnValue({ asPath: '/foo', pathname: '/foo' });
     const open = jest.fn();
     const original = window.open;
     // @ts-ignore

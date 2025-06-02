@@ -17,6 +17,7 @@ import useCapacitor from "../../../hooks/useCapacitor";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import { useIdentity } from "../../../hooks/useIdentity";
 import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
+import { useCookieConsent } from "../../cookies/CookieConsentContext";
 
 interface Props {
   collection: NextGenCollection;
@@ -25,6 +26,7 @@ interface Props {
 
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const account = useSeizeConnectContext();
 
   const [owner, setOwner] = useState<`0x${string}`>();
@@ -186,7 +188,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                   </span>
                 </span>
               </span>
-              {capacitor.platform !== "ios" && (
+              {(!capacitor.isIos || country === "US") && (
                 <span className="pt-1 pb-1 d-flex flex-column">
                   <span className="font-color-h">Marketplaces</span>
                   <span className="d-flex gap-4">

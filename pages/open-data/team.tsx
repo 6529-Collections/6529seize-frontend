@@ -4,7 +4,7 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "../../components/auth/Auth";
 
 const CommunityDownloadsTeam = dynamic(
-  () => import("../../components/communityDownloads/CommunityDownloadsTeam"),
+  () => import("../../components/community-downloads/CommunityDownloadsTeam"),
   {
     ssr: false,
   }

@@ -1,98 +1,178 @@
-import { render, screen, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React from "react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import {
   CookieConsentProvider,
-  getCookieConsentByName,
   useCookieConsent,
-} from '../../../components/cookies/CookieConsentContext';
+} from "../../../components/cookies/CookieConsentContext";
+import Cookies from "js-cookie";
+import {
+  CONSENT_ESSENTIAL_COOKIE,
+  CONSENT_PERFORMANCE_COOKIE,
+} from "../../../constants";
+import * as api from "../../../services/api/common-api";
 
-jest.mock('js-cookie', () => ({
+// Mock APIs and Cookies
+jest.mock("js-cookie", () => ({
   get: jest.fn(),
   set: jest.fn(),
 }));
 
-jest.mock('../../../components/cookies/CookiesBanner', () => () => <div data-testid="banner" />);
-
-jest.mock('../../../services/api/common-api', () => ({
-  commonApiFetch: jest.fn(() => Promise.resolve({ is_eu: true, is_consent: false })),
-  commonApiPost: jest.fn(() => Promise.resolve()),
-  commonApiDelete: jest.fn(() => Promise.resolve()),
+jest.mock("../../../services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
+  commonApiPost: jest.fn(),
+  commonApiDelete: jest.fn(),
 }));
 
-const { get } = require('js-cookie');
-const { commonApiFetch } = require('../../../services/api/common-api');
+jest.mock("next/router", () => ({
+  useRouter: () => ({
+    pathname: "/",
+    push: jest.fn(),
+    replace: jest.fn(),
+    query: {},
+  }),
+}));
 
-const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0));
+// Mock AuthContext
+jest.mock("../../../components/auth/Auth", () => ({
+  AuthContext: React.createContext({
+    setToast: jest.fn(),
+  }),
+}));
 
-describe('CookieConsentContext', () => {
-  it('getCookieConsentByName parses values', () => {
-    get.mockReturnValueOnce('true');
-    expect(getCookieConsentByName('a')).toBe(true);
-    get.mockReturnValueOnce('false');
-    expect(getCookieConsentByName('b')).toBe(false);
-    get.mockReturnValueOnce(undefined);
-    expect(getCookieConsentByName('c')).toBeUndefined();
+// Dummy component using the context
+const DummyConsumer = () => {
+  const { consent, reject, showCookieConsent, country } = useCookieConsent();
+  return (
+    <div>
+      <p>Show: {String(showCookieConsent)}</p>
+      <p>Country: {country}</p>
+      <button onClick={consent}>Consent</button>
+      <button onClick={reject}>Reject</button>
+    </div>
+  );
+};
+
+describe("CookieConsentProvider", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('loads cookie consent on mount and shows banner', async () => {
-    render(
-      <CookieConsentProvider>
-        <div>child</div>
-      </CookieConsentProvider>
-    );
-    await act(flushPromises);
-    expect(commonApiFetch).toHaveBeenCalled();
-    expect(screen.getByTestId('banner')).toBeInTheDocument();
-  });
-
-  it('useCookieConsent throws outside provider', () => {
-    function Wrapper() {
-      useCookieConsent();
-      return null;
-    }
-    expect(() => render(<Wrapper />)).toThrow('useCookieConsent must be used within a CookieConsentProvider');
-  });
-});
-
-describe('CookieConsentProvider actions', () => {
-  it('consent sends API request and sets cookies', async () => {
-    const { set } = require('js-cookie');
-    const { commonApiPost } = require('../../../services/api/common-api');
-    function Consumer() {
-      const { consent } = useCookieConsent();
-      return <button onClick={consent}>consent</button>;
-    }
-    render(
-      <CookieConsentProvider>
-        <Consumer />
-      </CookieConsentProvider>
-    );
-    await act(async () => {
-      await userEvent.click(screen.getByText('consent'));
+  it("renders and loads cookie consent banner for EU users", async () => {
+    (Cookies.get as jest.Mock).mockImplementation((name) => undefined);
+    (api.commonApiFetch as jest.Mock).mockResolvedValue({
+      is_eu: true,
+      is_consent: false,
+      country: "DE",
     });
-    expect(commonApiPost).toHaveBeenCalledWith({ endpoint: 'policies/cookies-consent', body: {} });
-    expect(set).toHaveBeenCalledWith('essential-cookies-consent', 'true', { expires: 365 });
-    expect(set).toHaveBeenCalledWith('performance-cookies-consent', 'true', { expires: 365 });
-  });
 
-  it('reject sends API request and sets cookies', async () => {
-    const { set } = require('js-cookie');
-    const { commonApiDelete } = require('../../../services/api/common-api');
-    function Consumer() {
-      const { reject } = useCookieConsent();
-      return <button onClick={reject}>reject</button>;
-    }
     render(
       <CookieConsentProvider>
-        <Consumer />
+        <DummyConsumer />
       </CookieConsentProvider>
     );
-    await act(async () => {
-      await userEvent.click(screen.getByText('reject'));
+
+    await waitFor(() => {
+      expect(screen.getByText("Show: true")).toBeInTheDocument();
+      expect(screen.getByText("Country: DE")).toBeInTheDocument();
     });
-    expect(commonApiDelete).toHaveBeenCalledWith({ endpoint: 'policies/cookies-consent' });
-    expect(set).toHaveBeenCalledWith('essential-cookies-consent', 'true', { expires: 365 });
-    expect(set).toHaveBeenCalledWith('performance-cookies-consent', 'false', { expires: 365 });
+  });
+
+  it("auto-consents for non-EU users", async () => {
+    (Cookies.get as jest.Mock).mockImplementation(() => undefined);
+    (api.commonApiFetch as jest.Mock).mockResolvedValue({
+      is_eu: false,
+      is_consent: false,
+      country: "US",
+    });
+
+    render(
+      <CookieConsentProvider>
+        <DummyConsumer />
+      </CookieConsentProvider>
+    );
+
+    await waitFor(() => {
+      expect(Cookies.set).toHaveBeenCalledWith(
+        CONSENT_ESSENTIAL_COOKIE,
+        "true",
+        { expires: 7 }
+      );
+      expect(Cookies.set).toHaveBeenCalledWith(
+        CONSENT_PERFORMANCE_COOKIE,
+        "true",
+        { expires: 7 }
+      );
+    });
+  });
+
+  it("calls API and sets cookies on consent", async () => {
+    render(
+      <CookieConsentProvider>
+        <DummyConsumer />
+      </CookieConsentProvider>
+    );
+
+    fireEvent.click(screen.getByText("Consent"));
+
+    await waitFor(() => {
+      expect(api.commonApiPost).toHaveBeenCalledWith({
+        endpoint: "policies/cookies-consent",
+        body: {},
+      });
+      expect(Cookies.set).toHaveBeenCalledWith(
+        CONSENT_ESSENTIAL_COOKIE,
+        "true",
+        { expires: 365 }
+      );
+      expect(Cookies.set).toHaveBeenCalledWith(
+        CONSENT_PERFORMANCE_COOKIE,
+        "true",
+        { expires: 365 }
+      );
+    });
+  });
+
+  it("calls API and sets cookies on reject", async () => {
+    render(
+      <CookieConsentProvider>
+        <DummyConsumer />
+      </CookieConsentProvider>
+    );
+
+    fireEvent.click(screen.getByText("Reject"));
+
+    await waitFor(() => {
+      expect(api.commonApiDelete).toHaveBeenCalledWith({
+        endpoint: "policies/cookies-consent",
+      });
+      expect(Cookies.set).toHaveBeenCalledWith(
+        CONSENT_ESSENTIAL_COOKIE,
+        "true",
+        { expires: 365 }
+      );
+      expect(Cookies.set).toHaveBeenCalledWith(
+        CONSENT_PERFORMANCE_COOKIE,
+        "false",
+        { expires: 365 }
+      );
+    });
+  });
+
+  it("throws error when useCookieConsent is used outside provider", () => {
+    const ErrorComponent = () => {
+      useCookieConsent(); // this should throw inside the component
+      return <div />;
+    };
+
+    // Silence React's console error
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    expect(() => render(<ErrorComponent />)).toThrow(
+      "useCookieConsent must be used within a CookieConsentProvider"
+    );
+
+    consoleError.mockRestore();
   });
 });

@@ -4,6 +4,7 @@ import Home, { getServerSideProps } from '../../pages/index';
 import { AuthContext } from '../../components/auth/Auth';
 import { commonApiFetch } from '../../services/api/common-api';
 import { getCommonHeaders } from '../../helpers/server.helpers';
+import { CookieConsentProvider } from '../../components/cookies/CookieConsentContext';
 
 jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
 jest.mock('next/image', () => ({ __esModule: true, default: (p:any) => <img {...p} /> }));
@@ -26,9 +27,11 @@ const mockNft = {
 const mockCollection = { name: 'Collection' } as any;
 
 const TestProvider: React.FC<{children: React.ReactNode}> = ({ children }) => (
-  <AuthContext.Provider value={{ setTitle: jest.fn(), connectedProfile: null } as any}>
-    {children}
-  </AuthContext.Provider>
+  <CookieConsentProvider>
+    <AuthContext.Provider value={{ setTitle: jest.fn(), connectedProfile: null } as any}>
+      {children}
+    </AuthContext.Provider>
+  </CookieConsentProvider>
 );
 
 describe('Home page', () => {

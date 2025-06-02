@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
-import CommunityDownloadsRoyalties from '../../../components/communityDownloads/CommunityDownloadsRoyalties';
-import CommunityDownloadsComponent from '../../../components/communityDownloads/CommunityDownloadsComponent';
+import CommunityDownloadsRoyalties from '../../../components/community-downloads/CommunityDownloadsRoyalties';
+import CommunityDownloadsComponent from '../../../components/community-downloads/CommunityDownloadsComponent';
 
-jest.mock('../../../components/communityDownloads/CommunityDownloadsComponent');
+jest.mock('../../../components/community-downloads/CommunityDownloadsComponent');
 
 const mockComponent = CommunityDownloadsComponent as jest.MockedFunction<typeof CommunityDownloadsComponent>;
 

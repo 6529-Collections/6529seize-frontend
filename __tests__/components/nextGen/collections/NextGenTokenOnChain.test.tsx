@@ -40,6 +40,14 @@ jest.mock('../../../../components/auth/SeizeConnectContext', () => ({
 jest.mock('../../../../hooks/useIdentity', () => ({
   useIdentity: () => ({ profile: { handle: 'testuser' } }),
 }));
+jest.mock('../../../../components/cookies/CookieConsentContext', () => ({ 
+  useCookieConsent: jest.fn(() => ({
+    showCookieConsent: false,
+    country: 'US',
+    consent: jest.fn(),
+    reject: jest.fn()
+  }))
+}));
 
 // Mock helpers
 jest.mock('../../../../helpers/Helpers', () => ({

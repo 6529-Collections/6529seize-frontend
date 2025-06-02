@@ -27,6 +27,14 @@ jest.mock('../../../../helpers/meme_calendar.helpers', () => ({
 }));
 
 jest.mock('../../../../components/dotLoader/DotLoader', () => () => <span data-testid="loader" />);
+jest.mock('../../../../components/cookies/CookieConsentContext', () => ({ 
+  useCookieConsent: jest.fn(() => ({
+    showCookieConsent: false,
+    country: 'US',
+    consent: jest.fn(),
+    reject: jest.fn()
+  }))
+}));
 
 jest.mock('@tippyjs/react', () => ({ __esModule: true, default: (props: any) => <span>{props.children}</span> }));
 

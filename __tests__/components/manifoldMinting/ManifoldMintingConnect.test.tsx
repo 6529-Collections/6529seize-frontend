@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import ManifoldMintingConnect from '../../../components/manifoldMinting/ManifoldMintingConnect';
 import { AuthContext } from '../../../components/auth/Auth';
 import { useSeizeConnectContext } from '../../../components/auth/SeizeConnectContext';
+import { CookieConsentProvider } from '../../../components/cookies/CookieConsentContext';
 
 jest.mock('../../../components/header/user/HeaderUserConnect', () => () => <div data-testid="header-connect" />);
 
@@ -41,9 +42,11 @@ function renderConnected(onMintFor = jest.fn()) {
   (mockedConnect as jest.Mock).mockReturnValue(seizeCtx);
   const auth = { connectedProfile: { handle: 'bob', display: 'bob', level: 1, cic: 1 } } as any;
   render(
-    <AuthContext.Provider value={auth}>
-      <ManifoldMintingConnect onMintFor={onMintFor} />
-    </AuthContext.Provider>
+    <CookieConsentProvider>
+      <AuthContext.Provider value={auth}>
+        <ManifoldMintingConnect onMintFor={onMintFor} />
+      </AuthContext.Provider>
+    </CookieConsentProvider>
   );
   return { onMintFor, seizeCtx };
 }
@@ -54,7 +57,11 @@ describe('ManifoldMintingConnect', () => {
 
   it('shows connect prompt when not connected', () => {
     (mockedConnect as jest.Mock).mockReturnValue({ isConnected: false });
-    render(<ManifoldMintingConnect onMintFor={jest.fn()} />);
+    render(
+      <CookieConsentProvider>
+        <ManifoldMintingConnect onMintFor={jest.fn()} />
+      </CookieConsentProvider>
+    );
     expect(screen.getByTestId('header-connect')).toBeInTheDocument();
   });
 

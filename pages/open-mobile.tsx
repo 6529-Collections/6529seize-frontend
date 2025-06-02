@@ -2,26 +2,35 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { ShareMobileApp } from "../components/header/share/HeaderShareMobileApps";
 import ClientOnly from "../components/client-only/ClientOnly";
+import { DeepLinkScope } from "../hooks/useDeepLinkNavigation";
 
 const OpenMobilePage = () => {
   const router = useRouter();
-  const { path = "/" } = router.query;
+  const { path } = router.query;
 
   const [decodedPath, setDecodedPath] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !path) return;
+    if (!router.isReady || typeof window === "undefined" || !path) {
+      return;
+    }
 
     const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";
-    const decoded = decodeURIComponent(Array.isArray(path) ? path[0] : path);
-    const deepLink = `${appScheme}://navigate${decoded}`;
-    setDecodedPath(decoded);
 
+    const raw = Array.isArray(path) ? path[0] : path;
+    const decoded = decodeURIComponent(raw);
+    const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${decoded}`;
+
+    setDecodedPath(decoded);
     window.location.href = deepLink;
-  }, [path]);
+  }, [router.isReady, path]);
 
   const handleBack = () => {
-    window.location.href = `${window.location.origin}${decodedPath}`;
+    if (decodedPath) {
+      window.location.href = `${window.location.origin}${decodedPath}`;
+    } else {
+      window.location.href = window.location.origin;
+    }
   };
 
   const printShareMobileApps = () => {
@@ -30,7 +39,6 @@ const OpenMobilePage = () => {
 
     const userAgent =
       typeof navigator === "undefined" ? "" : navigator.userAgent;
-
     const isIos = /iPad|iPhone|iPod/.test(userAgent);
     const isAndroid = /android/i.test(userAgent);
 

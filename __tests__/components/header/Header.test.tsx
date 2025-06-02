@@ -19,6 +19,14 @@ jest.mock('../../../components/app-wallets/AppWalletsContext', () => ({ useAppWa
 jest.mock('../../../components/auth/Auth', () => ({ useAuth: jest.fn() }));
 jest.mock('../../../hooks/isMobileScreen', () => ({ __esModule: true, default: jest.fn() }));
 jest.mock('../../../services/6529api', () => ({ fetchUrl: jest.fn() }));
+jest.mock('../../../components/cookies/CookieConsentContext', () => ({ 
+  useCookieConsent: jest.fn(() => ({
+    showCookieConsent: false,
+    country: 'US',
+    consent: jest.fn(),
+    reject: jest.fn()
+  }))
+}));
 
 const { useRouter } = require('next/router');
 const { useSeizeConnectContext } = require('../../../components/auth/SeizeConnectContext');

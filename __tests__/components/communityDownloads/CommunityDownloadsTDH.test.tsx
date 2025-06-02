@@ -1,8 +1,8 @@
 import { render } from '@testing-library/react';
-import CommunityDownloadsTDH, { VIEW } from '../../../components/communityDownloads/CommunityDownloadsTDH';
-import CommunityDownloadsComponent from '../../../components/communityDownloads/CommunityDownloadsComponent';
+import CommunityDownloadsTDH, { VIEW } from '../../../components/community-downloads/CommunityDownloadsTDH';
+import CommunityDownloadsComponent from '../../../components/community-downloads/CommunityDownloadsComponent';
 
-jest.mock('../../../components/communityDownloads/CommunityDownloadsComponent', () => ({
+jest.mock('../../../components/community-downloads/CommunityDownloadsComponent', () => ({
   __esModule: true,
   default: jest.fn(() => <div data-testid="mock" />)
 }));

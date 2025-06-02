@@ -20,7 +20,11 @@ export default function HeaderOpenMobile() {
     window.open(launchUrl, "_blank");
   };
 
-  if (capacitor.isCapacitor || !isMobileDevice) {
+  if (
+    capacitor.isCapacitor ||
+    !isMobileDevice ||
+    router.pathname.startsWith("/open-mobile")
+  ) {
     return null;
   }
 
