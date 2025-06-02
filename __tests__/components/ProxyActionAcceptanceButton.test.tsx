@@ -34,4 +34,29 @@ describe('ProxyActionAcceptanceButton', () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
     expect(mutateAsync).toHaveBeenCalledWith({ action: AcceptActionRequestActionEnum.Accept });
   });
+
+  it('shows revoke action for creator', async () => {
+    const action: any = { id: 'a', revoked_at: null };
+    const profile: any = { id: '1' };
+    const profileProxy: any = { id: 'p', granted_to: { id: '2' }, created_by: { id: '1', handle: 'bob' } };
+
+    const authValue = {
+      setToast: jest.fn(),
+      connectedProfile: { id: '1' },
+      requestAuth: jest.fn().mockResolvedValue({ success: true }),
+    } as any;
+    const rqValue = { onProfileProxyModify: jest.fn() } as any;
+
+    render(
+      <AuthContext.Provider value={authValue}>
+        <ReactQueryWrapperContext.Provider value={rqValue}>
+          <ProxyActionAcceptanceButton action={action} profile={profile} profileProxy={profileProxy} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    fireEvent.click(screen.getByText('Revoke'));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(mutateAsync).toHaveBeenCalledWith({ action: AcceptActionRequestActionEnum.Revoke });
+  });
 });

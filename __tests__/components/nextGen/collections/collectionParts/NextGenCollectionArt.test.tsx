@@ -21,8 +21,13 @@ jest.mock('react-bootstrap', () => {
     Row: (p: any) => <div {...p} />,
     Col: (p: any) => <div {...p} />,
     Form: (p: any) => <form {...p} />,
-    Dropdown: (p: any) => <div {...p} />,
   };
+  const Dropdown: any = (p: any) => <div {...p} />;
+  Dropdown.Toggle = (p: any) => <button {...p} />;
+  Dropdown.Menu = (p: any) => <div {...p} />;
+  Dropdown.Item = (p: any) => <div {...p} />;
+  Dropdown.Divider = (p: any) => <div {...p} />;
+  RB.Dropdown = Dropdown;
   const Accordion: any = (p: any) => <div {...p} />;
   Accordion.Item = (p: any) => <div {...p} />;
   Accordion.Button = (p: any) => <button {...p} />;
@@ -68,5 +73,13 @@ describe('NextGenCollectionArt', () => {
     expect(link).toHaveAttribute('href', '/nextgen/collection/Cool/art');
     await screen.findByTestId('token-list');
     expect(screen.getByTestId('token-list')).toHaveAttribute('data-limit', '6');
+  });
+
+  it('hides view all link and passes undefined limit when not show_view_all', async () => {
+    render(<NextGenCollectionArt collection={collection} />);
+    await screen.findByTestId('token-list');
+    expect(screen.queryByRole('link', { name: /View All/i })).toBeNull();
+    expect(screen.getByTestId('token-list')).toHaveAttribute('data-limit', 'undefined');
+    expect(commonApiFetch).toHaveBeenCalledWith({ endpoint: 'nextgen/collections/1/traits' });
   });
 });
