@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useReducer } from "react";
 import { useMyStreamWaveMessages } from "../contexts/wave/MyStreamContext";
 
 import { Drop } from "../helpers/waves/drop.helpers";
@@ -54,7 +54,7 @@ export function useVirtualizedWaveMessages(
 
   const fullWaveMessagesRef = useRef<WaveMessages | null>(null);
 
-  const [_, forceRefresh] = useState(0);
+  const [, forceRefresh] = useReducer((prev: number) => prev + 1, 0);
 
   useEffect(() => {
     const shouldRefresh = getShouldRefresh(
@@ -64,7 +64,7 @@ export function useVirtualizedWaveMessages(
 
     fullWaveMessagesRef.current = fullWaveMessages ?? null;
     if (shouldRefresh) {
-      forceRefresh((prev) => prev + 1);
+      forceRefresh();
     }
   }, [fullWaveMessages]);
 
