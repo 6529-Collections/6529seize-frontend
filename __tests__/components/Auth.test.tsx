@@ -9,17 +9,26 @@ jest.mock('react-toastify', () => ({
   Slide: () => null,
 }));
 
-jest.mock('wagmi', () => ({ useSignMessage: () => ({ signMessageAsync: jest.fn(), isPending: false }) }));
+jest.mock('wagmi', () => ({ useSignMessage: jest.fn(() => ({ signMessageAsync: jest.fn(), isPending: false })) }));
 
 jest.mock('../../services/api/common-api', () => ({
   commonApiFetch: jest.fn(),
   commonApiPost: jest.fn(),
 }));
 
+jest.mock('../../services/auth/auth.utils', () => ({
+  removeAuthJwt: jest.fn(),
+  setAuthJwt: jest.fn(),
+  getAuthJwt: jest.fn(),
+  getRefreshToken: jest.fn(),
+  getWalletAddress: jest.fn(),
+  getWalletRole: jest.fn(),
+}));
+
 jest.mock('jwt-decode', () => jest.fn());
 
 jest.mock('../../components/auth/SeizeConnectContext', () => ({
-  useSeizeConnectContext: () => ({ address: undefined, isConnected: false, seizeDisconnectAndLogout: jest.fn() }),
+  useSeizeConnectContext: jest.fn(() => ({ address: undefined, isConnected: false, seizeDisconnectAndLogout: jest.fn() })),
 }));
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: () => ({ data: undefined }) }));
@@ -70,4 +79,5 @@ describe('Auth component', () => {
     fireEvent.click(screen.getByText('auth'));
     await waitFor(() => expect(toast).toHaveBeenCalled());
   });
+
 });

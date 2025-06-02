@@ -36,4 +36,24 @@ describe('Decisions', () => {
     await user.click(screen.getByTestId('sub'));
     expect(setDates).toHaveBeenCalled();
   });
+
+  it('enables rolling mode and sets dates', async () => {
+    const user = userEvent.setup();
+    const setDates = jest.fn();
+    const setRolling = jest.fn();
+    render(
+      <Decisions
+        dates={{ ...baseDates, subsequentDecisions: [1] }}
+        setDates={setDates}
+        isRollingMode={false}
+        setIsRollingMode={setRolling}
+        isExpanded={true}
+        setIsExpanded={jest.fn()}
+        onInteraction={jest.fn()}
+      />
+    );
+    await user.click(screen.getByRole('switch'));
+    expect(setRolling).toHaveBeenCalledWith(true);
+    expect(setDates).toHaveBeenCalledWith(expect.objectContaining({ isRolling: true }));
+  });
 });

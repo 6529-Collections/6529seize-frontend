@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useNotificationsQuery } from '../../hooks/useNotificationsQuery';
+import { useNotificationsQuery, usePrefetchNotifications } from '../../hooks/useNotificationsQuery';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 
 jest.mock('@tanstack/react-query');
@@ -38,5 +38,28 @@ describe('useNotificationsQuery', () => {
     const { result } = renderHook(() => useNotificationsQuery({ identity: 'id' }));
     expect(result.current.items).toEqual([]);
     expect(result.current.isInitialQueryDone).toBe(false);
+  });
+
+  it('resets when identity changes', async () => {
+    useInfiniteQueryMock.mockReturnValue({
+      data: { pages: [{ notifications: [{ id: 1 }] }] }
+    });
+    const { result, rerender } = renderHook(
+      ({ identity }) => useNotificationsQuery({ identity }),
+      { initialProps: { identity: 'a' } }
+    );
+    expect(result.current.items).toHaveLength(1);
+
+    useInfiniteQueryMock.mockReturnValue({ data: undefined });
+    rerender({ identity: 'b' });
+
+    expect(result.current.items).toEqual([]);
+    expect(result.current.isInitialQueryDone).toBe(false);
+  });
+
+  it('prefetches notifications', () => {
+    const { result } = renderHook(() => usePrefetchNotifications());
+    result.current({ identity: 'id' });
+    expect(queryClientMock.prefetchInfiniteQuery).toHaveBeenCalled();
   });
 });
