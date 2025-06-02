@@ -23,4 +23,10 @@ describe('TheMemes helpers', () => {
     await user.click(screen.getByRole('button'));
     expect(select).toHaveBeenCalled();
   });
+
+  it('SortButton active state lacks disabled class', () => {
+    render(<SortButton currentSort={MemesSort.AGE} sort={MemesSort.AGE} select={jest.fn()} />);
+    const btn = screen.getByRole('button');
+    expect(btn.className).not.toContain('disabled');
+  });
 });

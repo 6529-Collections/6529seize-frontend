@@ -32,3 +32,10 @@ describe('DropListItemContentMediaImage', () => {
     expect(onContainerClick).toHaveBeenCalled();
   });
 });
+
+describe('DropListItemContentMediaImage retry', () => {
+  it('shows error and retries manually', () => {
+    render(<DropListItemContentMediaImage src="img" maxRetries={-1} />);
+    expect(screen.getByText("Couldn’t load image.")).toBeInTheDocument();
+  });
+});

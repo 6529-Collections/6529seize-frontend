@@ -61,3 +61,4 @@ test('SubscriptionConfirm extracts token id from plan name', () => {
   const input = screen.getByRole('spinbutton') as HTMLInputElement;
   expect(input.value).toBe('123');
 });
+

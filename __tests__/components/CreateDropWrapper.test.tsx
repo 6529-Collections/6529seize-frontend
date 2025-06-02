@@ -1,3 +1,4 @@
+import { act } from "@testing-library/react";
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import CreateDropWrapper from '../../components/drops/create/utils/CreateDropWrapper';
@@ -91,6 +92,42 @@ describe('CreateDropWrapper', () => {
       </CreateDropWrapper>
     );
     fireEvent.click(screen.getByTestId('full'));
+    expect(setDrop).toHaveBeenCalled();
+  });
+
+  it('exposes requestDrop via ref', () => {
+    const ref = React.createRef<any>();
+    render(
+      <CreateDropWrapper
+        ref={ref}
+        profile={profile}
+        quotedDrop={null}
+        type={0 as any}
+        loading={false}
+        title={'t'}
+        metadata={[]}
+        mentionedUsers={[]}
+        referencedNfts={[]}
+        drop={null}
+        viewType={CreateDropViewType.FULL}
+        showSubmit={false}
+        wave={null}
+        waveId={null}
+        setIsStormMode={jest.fn()}
+        setViewType={jest.fn()}
+        setDrop={setDrop}
+        setMentionedUsers={jest.fn()}
+        setReferencedNfts={jest.fn()}
+        onMentionedUser={jest.fn()}
+        setTitle={jest.fn()}
+        setMetadata={jest.fn()}
+        onSubmitDrop={jest.fn()}
+      >child</CreateDropWrapper>
+    );
+    let result: any;
+    act(() => {
+      result = ref.current!.requestDrop();
+    });
     expect(setDrop).toHaveBeenCalled();
   });
 });
