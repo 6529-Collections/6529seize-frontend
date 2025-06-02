@@ -1,10 +1,16 @@
-import { Container, Row, Col, Table } from "react-bootstrap";
-import styles from "./CommunityDownloads.module.scss";
-import { CommunityDownloadsComponentRow } from "./CommunityDownloadsComponent";
-import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
+import {
+  formatDate,
+  DownloadsLayout,
+  DownloadsTable,
+} from "./CommunityDownloadsHelpers";
+
+interface TeamDownload {
+  created_at: string;
+  url: string;
+}
 
 export default function CommunityDownloadsTeam() {
-  const downloads = [
+  const downloads: TeamDownload[] = [
     {
       created_at: "2023-05-10 11:44:03",
       url: "https://arweave.net/lRR1YuRwnThzKVXNIuDCbA-LfyfyZYU6sezNtF9-Dn0",
@@ -20,40 +26,21 @@ export default function CommunityDownloadsTeam() {
   ];
 
   return (
-    <Container fluid>
-      <Row>
-        <Col>
-          <Container className="pt-4">
-            <Row>
-              <Col>
-                <h1>
-                  <span className="font-lightest">Team</span> Downloads
-                </h1>
-              </Col>
-            </Row>
-            {downloads && downloads.length > 0 && (
-              <Row className={`pt-3 ${styles.downloadsScrollContainer}`}>
-                <Col>
-                  <Table bordered={false} className={styles.downloadsTable}>
-                    <tbody>
-                      {downloads.map((download) => (
-                        <CommunityDownloadsComponentRow
-                          key={download.created_at}
-                          date={download.created_at}
-                          url={download.url}
-                        />
-                      ))}
-                    </tbody>
-                  </Table>
-                </Col>
-              </Row>
-            )}
-            {downloads != undefined && downloads.length === 0 && (
-              <NothingHereYetSummer />
-            )}
-          </Container>
-        </Col>
-      </Row>
-    </Container>
+    <DownloadsLayout title="Team">
+      <DownloadsTable
+        data={downloads}
+        columns={["Date", "Link"]}
+        renderRow={(download: TeamDownload) => (
+          <tr key={download.created_at}>
+            <td>{formatDate(download.created_at)}</td>
+            <td>
+              <a href={download.url} target="_blank" rel="noreferrer">
+                {download.url}
+              </a>
+            </td>
+          </tr>
+        )}
+      />
+    </DownloadsLayout>
   );
 }
