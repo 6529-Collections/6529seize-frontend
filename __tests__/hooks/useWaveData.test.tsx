@@ -28,4 +28,16 @@ describe("useWaveData", () => {
     expect((result as any).current.queryFn).toBeDefined();
     expect(mockFetch).not.toHaveBeenCalled();
   });
+
+  it('handles retry logic', () => {
+    let options: any;
+    (useQuery as jest.Mock).mockImplementation((opts: any) => { options = opts; return { data: null }; });
+    const onWaveNotFound = jest.fn();
+    renderHook(() => useWaveData({ waveId: '1', onWaveNotFound }));
+    expect(options.retry(1, 'Wave 1 not found')).toBe(false);
+    expect(onWaveNotFound).toHaveBeenCalled();
+    expect(options.retry(2, new Error('e'))).toBe(true);
+    expect(options.retry(4, new Error('e'))).toBe(false);
+    expect(options.retryDelay(3)).toBe(3000);
+  });
 });
