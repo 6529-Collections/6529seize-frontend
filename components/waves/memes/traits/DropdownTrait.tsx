@@ -48,16 +48,35 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
       [onBlur, field]
     );
 
+    // Check if field is filled (option selected, not empty default)
+    const isFieldFilled = React.useMemo(() => {
+      const currentValue = (traits[field] as string) || '';
+      return currentValue.trim().length > 0;
+    }, [traits, field]);
+
     return (
-      <TraitWrapper label={label} className={className} error={error}>
+      <TraitWrapper label={label} className={className} error={error} isFieldFilled={isFieldFilled}>
         <select
           ref={selectRef}
           defaultValue={(traits[field] as string) || ""}
           onChange={handleChange}
           onBlur={handleBlur}
-          className="tw-form-select tw-w-full sm:tw-w-2/3 tw-bg-iron-900 tw-border-0 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-rounded-lg tw-px-3 tw-py-3 
-          tw-text-sm tw-text-iron-100 tw-cursor-pointer tw-transition-all tw-shadow-inner
-          focus:tw-ring-1 focus:tw-ring-primary-400 hover:tw-ring-primary-400"
+          className={`tw-form-select tw-w-full tw-bg-iron-900 tw-border-0 tw-outline-none tw-rounded-lg tw-px-4 tw-py-3.5 
+          tw-text-sm tw-text-iron-100 tw-cursor-pointer tw-transition-all tw-duration-500 tw-ease-in-out
+          tw-ring-1 ${
+            error
+              ? "tw-ring-red"
+              : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
+          }
+          tw-appearance-none
+          [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100
+          ${isFieldFilled && !error ? 'tw-pr-10' : ''}`}
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`,
+            backgroundPosition: 'right 0.5rem center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '1.5em 1.5em'
+          }}
         >
           <option value="" className="tw-bg-iron-950">
             Select {label}

@@ -1,12 +1,12 @@
 import CommunityDownloadsComponent from "./CommunityDownloadsComponent";
 
-interface Props {
-  view: VIEW;
-}
-
 export enum VIEW {
   CONSOLIDATION,
   WALLET,
+}
+
+interface Props {
+  view: VIEW;
 }
 
 export default function CommunityDownloadsTDH(props: Readonly<Props>) {

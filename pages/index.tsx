@@ -33,6 +33,7 @@ import { ManifoldClaim } from "../hooks/useManifoldClaim";
 import { NftPageStats } from "../components/nftAttributes/NftStats";
 import useCapacitor from "../hooks/useCapacitor";
 import NFTMarketplaceLinks from "../components/nft-marketplace-links/NFTMarketplaceLinks";
+import { useCookieConsent } from "../components/cookies/CookieConsentContext";
 
 export interface IndexPageProps {
   readonly nft: NFTWithMemesExtendedData;
@@ -71,6 +72,7 @@ export default function Home({
   readonly pageProps: IndexPageProps;
 }) {
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
 
   const { connectedProfile, setTitle } = useContext(AuthContext);
   useEffect(() => {
@@ -324,7 +326,7 @@ export default function Home({
                     />
                   </tbody>
                 </Table>
-                {capacitor.platform !== "ios" && (
+                {(!capacitor.isIos || country === "US") && (
                   <Row className="pt-3">
                     <Col>
                       <NFTMarketplaceLinks
