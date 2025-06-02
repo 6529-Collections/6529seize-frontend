@@ -11,7 +11,10 @@ jest.mock('../../../../components/waves/drops/WaveDropsEmptyPlaceholder', () => 
 jest.mock('../../../../components/waves/drops/WaveDropsScrollingOverlay', () => ({ __esModule: true, default: () => <div data-testid="overlay" /> }));
 jest.mock('next/router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
 jest.mock('../../../../hooks/useScrollBehavior', () => ({ useScrollBehavior: () => ({ scrollContainerRef: { current: null }, scrollToVisualBottom: jest.fn() }) }));
-jest.mock('../../../../hooks/useWaveIsTyping', () => ({ useWaveIsTyping: () => null }));
+let typingMsg: string | null = null;
+jest.mock('../../../../hooks/useWaveIsTyping', () => ({
+  useWaveIsTyping: () => typingMsg,
+}));
 jest.mock('../../../../components/notifications/NotificationsContext', () => ({ useNotificationsContext: () => ({ removeWaveDeliveredNotifications: jest.fn() }) }));
 jest.mock('../../../../components/auth/Auth', () => ({ useAuth: () => ({ connectedProfile: null }) }));
 jest.mock('../../../../services/api/common-api', () => ({
@@ -60,5 +63,12 @@ describe('WaveDropsAll', () => {
   it('renders drops list when drops present', () => {
     const { getByTestId } = renderComp({ messages: { drops: [{ id: 'd1' }] } });
     expect(getByTestId('drops')).toBeInTheDocument();
+  });
+
+  it('displays typing overlay when message present', () => {
+    typingMsg = 'typing';
+    const { getByText } = renderComp({ messages: { drops: [{ id: 'd' }] } });
+    expect(getByText('typing')).toBeInTheDocument();
+    typingMsg = null;
   });
 });

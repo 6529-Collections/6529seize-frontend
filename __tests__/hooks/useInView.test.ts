@@ -115,3 +115,14 @@ describe('useInView', () => {
     expect(result1.current[0]).not.toBe(result2.current[0]); // Should have different refs
   });
 });
+
+test('uses provided options and default rootMargin', () => {
+  let usedOpts: any;
+  const IO = jest.fn((cb, opts) => { usedOpts = opts; return { observe: jest.fn(), disconnect: jest.fn(), unobserve: jest.fn() }; });
+  // @ts-ignore
+  global.IntersectionObserver = IO;
+  const { result, rerender } = renderHook(() => useInView({ threshold: 0.2 }));
+  result.current[0].current = document.createElement('div');
+  rerender();
+  expect(usedOpts).toEqual({ rootMargin: '1000px 0px', threshold: 0.2 });
+});

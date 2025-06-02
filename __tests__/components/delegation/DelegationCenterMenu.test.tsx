@@ -44,6 +44,14 @@ describe('DelegationCenterMenu links', () => {
     const github = screen.getAllByText('Github')[0].closest('a');
     expect(github).toHaveAttribute('href', 'https://github.com/6529-Collections/nftdelegation');
   });
+
+  it('changes section on wallet checker click', async () => {
+    const mod = await import('../../../components/delegation/DelegationCenterMenu');
+    const DelegationCenterMenu = mod.default;
+    render(<DelegationCenterMenu {...props} />);
+    fireEvent.click(screen.getAllByText('Wallet Checker')[0]);
+    expect(props.setActiveSection).toHaveBeenCalledWith(mod.DelegationCenterSection.CHECKER);
+  });
 });
 
 describe('DelegationToast', () => {

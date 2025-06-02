@@ -16,4 +16,15 @@ describe('UserPageStatsActivityWalletTableRowIcon', () => {
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
   });
+
+  it('renders transfer icon for transfer out', () => {
+    const { container } = render(<UserPageStatsActivityWalletTableRowIcon type={TransactionType.TRANSFER_OUT} />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
+  });
+
+  it('throws for unknown type', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(() => render(<UserPageStatsActivityWalletTableRowIcon type={'X' as any} />)).toThrow();
+  });
 });

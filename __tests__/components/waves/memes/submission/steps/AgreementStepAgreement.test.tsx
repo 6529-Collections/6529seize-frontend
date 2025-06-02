@@ -15,4 +15,9 @@ describe('AgreementStepAgreement', () => {
     render(<AgreementStepAgreement text={'<script>bad()</script>'} />);
     expect(screen.queryByText('bad()')).toBeNull();
   });
+  it('renders lists and code blocks', () => {
+    render(<AgreementStepAgreement text={'- item\n\n`code`'} />);
+    expect(screen.getByText('item').closest('li')).toBeInTheDocument();
+    expect(screen.getByText('code')).toBeInTheDocument();
+  });
 });
