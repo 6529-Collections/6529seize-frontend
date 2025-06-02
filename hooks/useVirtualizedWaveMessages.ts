@@ -61,7 +61,7 @@ export function useVirtualizedWaveMessages(
       fullWaveMessagesRef.current?.drops ?? [],
       fullWaveMessages?.drops ?? []
     );
-    console.log("shouldRefresh", shouldRefresh);
+
     fullWaveMessagesRef.current = fullWaveMessages ?? null;
     if (shouldRefresh) {
       forceRefresh((prev) => prev + 1);
