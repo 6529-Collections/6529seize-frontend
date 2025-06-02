@@ -2,6 +2,7 @@ import { Fragment, ReactNode } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import NothingHereYetSummer from "../nothingHereYet/NothingHereYetSummer";
 import styles from "./CommunityDownloads.module.scss";
+import { getRandomObjectId } from "../../helpers/AllowlistToolHelpers";
 
 export function formatDate(dateString: string): string {
   const isYYYYMMDDFormat = (str: string): boolean => /^\d{8}$/.test(str);
@@ -21,8 +22,8 @@ export function DownloadsLayout({
   title,
   children,
 }: {
-  title: string;
-  children: ReactNode;
+  readonly title: string;
+  readonly children: ReactNode;
 }) {
   return (
     <Container fluid>
@@ -57,9 +58,9 @@ export function DownloadsTable<T>({
   columns,
   renderRow,
 }: {
-  data: T[] | undefined;
-  columns: string[];
-  renderRow: (item: T, index: number) => ReactNode;
+  readonly data: T[] | undefined;
+  readonly columns: string[];
+  readonly renderRow: (item: T, index: number) => ReactNode;
 }) {
   if (data === undefined) {
     return null;
@@ -82,7 +83,9 @@ export function DownloadsTable<T>({
           </thead>
           <tbody>
             {data.map((item, idx) => (
-              <Fragment key={idx}>{renderRow(item, idx)}</Fragment>
+              <Fragment key={getRandomObjectId()}>
+                {renderRow(item, idx)}
+              </Fragment>
             ))}
           </tbody>
         </Table>

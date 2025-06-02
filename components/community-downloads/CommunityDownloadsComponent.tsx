@@ -10,7 +10,6 @@ import {
   DownloadsLayout,
   DownloadsTable,
 } from "./CommunityDownloadsHelpers";
-import { Row } from "react-bootstrap";
 
 const PAGE_SIZE = 25;
 
@@ -56,7 +55,7 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
       />
 
       {totalResults > PAGE_SIZE && (
-        <Row className="text-center pt-2 pb-3">
+        <div className="tw-text-center tw-pt-2 tw-pb-3">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}
@@ -66,7 +65,7 @@ export default function CommunityDownloadsComponent(props: Readonly<Props>) {
               window.scrollTo(0, 0);
             }}
           />
-        </Row>
+        </div>
       )}
     </DownloadsLayout>
   );
