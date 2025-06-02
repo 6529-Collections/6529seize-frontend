@@ -56,18 +56,15 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   );
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-y-2">
-      <div className="tw-text-xl tw-font-semibold tw-text-iron-100">
+    <div className="tw-flex tw-flex-col tw-gap-y-1">
+      <h2 className="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4">
         Artwork Traits
-      </div>
-      <div className="tw-flex tw-flex-col tw-gap-y-6">
+      </h2>
+
+      <div className="tw-flex tw-flex-col tw-gap-y-8">
         {formSections.map((section, sectionIndex) => (
           <Section key={`section-${sectionIndex}`} title={section.title}>
-            <div
-              className={`tw-grid tw-grid-cols-${
-                section.layout === "double" ? "2" : "1"
-              } tw-gap-4`}
-            >
+            <div className="tw-flex tw-flex-col tw-gap-6">
               {section.fields.map((field, fieldIndex) => (
                 <TraitField
                   key={`field-${field.field}-${fieldIndex}`}

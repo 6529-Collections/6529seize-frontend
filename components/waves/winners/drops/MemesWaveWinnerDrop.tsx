@@ -73,7 +73,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   return (
     <div
       onClick={() => onDropClick(extendedDrop)}
-      className="tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full"
+      className="touch-select-none tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full"
     >
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/40 tw-shadow-[0_0_15px_rgba(251,191,36,0.15)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
         <div className="tw-flex tw-flex-col" {...touchHandlers}>
@@ -130,7 +130,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 )}
               </div>
               <div className="tw-mt-1 sm:tw-mt-0 sm:tw-ml-[3.25rem]">
-                <h3 className="tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0 tw-whitespace-nowrap">
+                <h3 className="tw-text-base sm:tw-text-lg tw-font-semibold tw-text-iron-100 tw-mb-0">
                   {title}
                 </h3>
                 <div className="tw-text-sm tw-text-iron-400">{description}</div>

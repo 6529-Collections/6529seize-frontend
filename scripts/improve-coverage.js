@@ -12,10 +12,57 @@ import {
 import path from "path";
 import { fileURLToPath } from "url";
 import libCoverage from "istanbul-lib-coverage";
+import crypto from "crypto";
 
 const { createCoverageMap } = libCoverage;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const progressPath = path.resolve(__dirname, "../.coverage-progress.json");
+
+// Add parallel processing configuration - REQUIRED
+if (!process.env.PROCESS_ID || !process.env.TOTAL_PROCESSES) {
+  console.error("Error: Required environment variables not set.");
+  console.error("");
+  console.error("Please set up your environment first:");
+  console.error("  source scripts/setup-coverage-env.sh <process_id> <total_processes>");
+  console.error("");
+  console.error("Examples:");
+  console.error("  source scripts/setup-coverage-env.sh 0 1  # Single process");
+  console.error("  source scripts/setup-coverage-env.sh 0 8  # Process 0 of 8");
+  console.error("");
+  console.error("Then run: npm run improve-coverage");
+  process.exit(1);
+}
+
+const PROCESS_ID = parseInt(process.env.PROCESS_ID);
+const TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES);
+
+if (isNaN(PROCESS_ID) || PROCESS_ID < 0 || PROCESS_ID >= TOTAL_PROCESSES) {
+  console.error(`PROCESS_ID must be between 0 and ${TOTAL_PROCESSES - 1}`);
+  process.exit(1);
+}
+
+if (isNaN(TOTAL_PROCESSES) || TOTAL_PROCESSES < 1) {
+  console.error("TOTAL_PROCESSES must be a positive integer");
+  process.exit(1);
+}
+
+// Create unique progress file per process when running in parallel
+const progressFilename = ".coverage-progress.json"
+const progressPath = path.resolve(__dirname, "..", progressFilename);
+
+const COVERAGE_INCREMENT_PERCENT_ENV = parseFloat(
+  process.env.COVERAGE_INCREMENT_PERCENT_ENV
+);
+const COVERAGE_INCREMENT_PERCENT = !isNaN(COVERAGE_INCREMENT_PERCENT_ENV)
+  ? COVERAGE_INCREMENT_PERCENT_ENV
+  : 0.2;
+
+// Add time limit configuration
+const TIME_LIMIT_MINUTES_ENV = parseFloat(
+  process.env.TIME_LIMIT_MINUTES
+);
+const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
+  ? TIME_LIMIT_MINUTES_ENV
+  : 20;
 
 function run(command) {
   execSync(command, { stdio: "inherit" });
@@ -29,17 +76,35 @@ function getTotalCoverage(summary) {
   return summary.total.lines.pct;
 }
 
+function getFileHash(filepath) {
+  // Create a deterministic hash for the file path
+  return crypto.createHash('md5').update(filepath).digest('hex');
+}
+
+function isFileAssignedToProcess(filepath, processId, totalProcesses) {
+  // Convert hex hash to number and use modulo to assign to a process
+  const hash = getFileHash(filepath);
+  const hashNum = parseInt(hash.substring(0, 8), 16);
+  return (hashNum % totalProcesses) === processId;
+}
+
 function getLowCoverageFiles(coverageData, limit = 1) {
   const map = createCoverageMap(coverageData);
-  const entries = Object.entries(map.data)
+  const allLowCoverageFiles = Object.entries(map.data)
     .map(([file, data]) => ({
       file,
       pct: map.fileCoverageFor(file).toSummary().lines.pct,
     }))
     .filter((e) => e.pct < 80)
-    .sort((a, b) => a.pct - b.pct)
-    .slice(0, limit);
-  return entries.map((e) => path.relative(process.cwd(), e.file));
+    .sort((a, b) => a.pct - b.pct);
+
+  // Filter files assigned to this process
+  const assignedFiles = allLowCoverageFiles.filter(entry => 
+    isFileAssignedToProcess(entry.file, PROCESS_ID, TOTAL_PROCESSES)
+  );
+
+  const selectedFiles = assignedFiles.slice(0, limit);
+  return selectedFiles.map((e) => path.relative(process.cwd(), e.file));
 }
 
 function main() {
@@ -64,6 +129,7 @@ function main() {
 
   let initialCoverage = 0;
   let targetCoverage = 0;
+  let startTime = null;
   let fd;
   let fileContent = "";
   let isNewFile = false;
@@ -87,21 +153,36 @@ function main() {
       if (chunks.length > 0) {
         fileContent = Buffer.concat(chunks).toString("utf-8");
       }
-
     } catch (e) {
-      if (e.code === 'ENOENT') {
-        console.log(`File not found (${progressPath}). Attempting to create it exclusively.`);
+      if (e.code === "ENOENT") {
+        console.log(
+          `File not found (${progressPath}). Attempting to create it exclusively.`
+        );
         try {
-          fd = openSync(progressPath, fsConstants.O_RDWR | fsConstants.O_CREAT | fsConstants.O_EXCL | fsConstants.O_NOFOLLOW, 0o600);
-          console.log(`Successfully created new file exclusively: ${progressPath}`);
+          fd = openSync(
+            progressPath,
+            fsConstants.O_RDWR |
+              fsConstants.O_CREAT |
+              fsConstants.O_EXCL |
+              fsConstants.O_NOFOLLOW,
+            0o600
+          );
+          console.log(
+            `Successfully created new file exclusively: ${progressPath}`
+          );
           isNewFile = true;
-
         } catch (createError) {
-          console.error(`Failed to create progress file exclusively (${progressPath}):`, createError);
+          console.error(
+            `Failed to create progress file exclusively (${progressPath}):`,
+            createError
+          );
           throw createError;
         }
       } else {
-        console.error(`Error opening initial progress file (${progressPath}):`, e);
+        console.error(
+          `Error opening initial progress file (${progressPath}):`,
+          e
+        );
         throw e;
       }
     }
@@ -111,12 +192,14 @@ function main() {
         "Progress file is new. Initializing coverage targets from current values."
       );
       initialCoverage = currentCoverage;
-      targetCoverage = currentCoverage + 1.0;
+      targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
+      startTime = Date.now();
     } else if (fileContent) {
       try {
         const parsedProgress = JSON.parse(fileContent);
         initialCoverage = parsedProgress.initialCoverage || 0;
         targetCoverage = parsedProgress.targetCoverage || 0;
+        startTime = parsedProgress.startTime || Date.now();
 
         if (
           targetCoverage === 0 &&
@@ -127,19 +210,19 @@ function main() {
             "Adjusting: Parsed initial/target are 0, but current > 0. Re-initializing from current."
           );
           initialCoverage = currentCoverage;
-          targetCoverage = currentCoverage + 1.0;
+          targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
         } else if (targetCoverage === 0 && initialCoverage > 0) {
           console.log(
             "Adjusting: Parsed target is 0, initial > 0. Setting target based on initial."
           );
-          targetCoverage = initialCoverage + 1.0;
+          targetCoverage = initialCoverage + COVERAGE_INCREMENT_PERCENT;
         } else if (initialCoverage === 0 && currentCoverage > 0) {
           console.log(
             "Adjusting: Parsed initial is 0, current > 0. Re-initializing initial from current; adjusting target."
           );
           initialCoverage = currentCoverage;
           if (targetCoverage <= initialCoverage) {
-            targetCoverage = currentCoverage + 1.0;
+            targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
           }
         }
 
@@ -151,21 +234,21 @@ function main() {
           console.log(
             "Adjusting: All coverage figures are zero. Setting target to 1.0% to initiate progress."
           );
-          targetCoverage = 1.0;
+          targetCoverage = COVERAGE_INCREMENT_PERCENT;
         }
       } catch (parseJsonError) {
         console.warn(
           `Could not parse JSON from existing progress file. Re-initializing from current. Error: ${parseJsonError.message}`
         );
         initialCoverage = currentCoverage;
-        targetCoverage = currentCoverage + 1.0;
+        targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
       }
     } else {
       console.log(
         "Progress file existed but was empty. Initializing coverage targets from current values."
       );
       initialCoverage = currentCoverage;
-      targetCoverage = currentCoverage + 1.0;
+      targetCoverage = currentCoverage + COVERAGE_INCREMENT_PERCENT;
     }
 
     if (
@@ -175,7 +258,7 @@ function main() {
       if (currentCoverage > initialCoverage) {
         initialCoverage = currentCoverage;
       }
-      targetCoverage = initialCoverage + 1.0;
+      targetCoverage = initialCoverage + COVERAGE_INCREMENT_PERCENT;
       console.log(
         `Safeguard: Adjusted target. Initial: ${initialCoverage.toFixed(
           2
@@ -186,6 +269,12 @@ function main() {
       targetCoverage = 100;
     }
 
+    // Ensure startTime is always set
+    if (!startTime) {
+      startTime = Date.now();
+      console.log("Warning: startTime was not set, initializing to current time.");
+    }
+
     if (fd === undefined) {
       console.error(
         "Critical error: File descriptor for progress file is undefined. This should not happen."
@@ -194,7 +283,7 @@ function main() {
     }
 
     const newProgressContent = JSON.stringify(
-      { initialCoverage, targetCoverage },
+      { initialCoverage, targetCoverage, startTime },
       null,
       2
     );
@@ -223,6 +312,10 @@ function main() {
   console.log(`target: ${targetCoverage.toFixed(2)}%`);
   console.log(`current: ${currentCoverage.toFixed(2)}%`);
 
+  // Check time constraint
+  const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
+  console.log(`elapsed time: ${elapsedMinutes.toFixed(1)} minutes`);
+
   if (currentCoverage >= targetCoverage) {
     console.log(
       `\nSuccess: Current coverage of ${currentCoverage.toFixed(
@@ -231,20 +324,47 @@ function main() {
         2
       )}%. Task completed.`
     );
+  } else if (elapsedMinutes >= TIME_LIMIT_MINUTES) {
+    console.log(
+      `\nSuccess: Time limit of ${TIME_LIMIT_MINUTES} minutes has been reached. Task completed due to time constraint.`
+    );
+    console.log(
+      `Final coverage: ${currentCoverage.toFixed(
+        2
+      )}% (target was ${targetCoverage.toFixed(2)}%)`
+    );
   } else {
+    const remainingMinutes = TIME_LIMIT_MINUTES - elapsedMinutes;
+    console.log(
+      `\nTime remaining: ${remainingMinutes.toFixed(1)} minutes until automatic completion.`
+    );
+    
     const nextFiles = getLowCoverageFiles(coverageData, 1);
     if (nextFiles.length > 0) {
       console.log(
         `\nAction: Add tests for ${nextFiles[0]} to improve coverage. Then re-run 'npm run improve-coverage'.`
       );
     } else {
-      console.log(
-        `\nInfo: All individual files meet the 80% threshold. However, current coverage of ${currentCoverage.toFixed(
-          2
-        )}% has not yet reached the target of ${targetCoverage.toFixed(
-          2
-        )}%. Please add more tests to any module to increase the overall percentage. Then re-run 'npm run improve-coverage'.`
-      );
+      // Check if there are low coverage files, just not assigned to this process
+      const map = createCoverageMap(coverageData);
+      const totalLowCoverageFiles = Object.entries(map.data)
+        .filter(([file, data]) => map.fileCoverageFor(file).toSummary().lines.pct < 80)
+        .length;
+      
+      if (TOTAL_PROCESSES > 1 && totalLowCoverageFiles > 0) {
+        console.log(
+          `\nInfo: No files assigned to process ${PROCESS_ID}. There are ${totalLowCoverageFiles} low coverage files ` +
+          `assigned to other processes. This process can rest while others work on coverage.`
+        );
+      } else {
+        console.log(
+          `\nInfo: All individual files meet the 80% threshold. However, current coverage of ${currentCoverage.toFixed(
+            2
+          )}% has not yet reached the target of ${targetCoverage.toFixed(
+            2
+          )}%. Please add more tests to any module to increase the overall percentage. Then re-run 'npm run improve-coverage'.`
+        );
+      }
     }
   }
 }
