@@ -145,7 +145,6 @@ export default function ManifoldMinting(props: Readonly<Props>) {
           <h2 className="mb-0">
             <span className="font-lightest">Mint</span> {props.title}
           </h2>
-          <span className="badge bg-white text-dark">beta</span>
         </Col>
       </Row>
     );

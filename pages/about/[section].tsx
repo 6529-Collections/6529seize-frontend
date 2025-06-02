@@ -26,6 +26,7 @@ import AboutCopyright from "../../components/about/AboutCopyright";
 import AboutPrimaryAddress from "../../components/about/AboutPrimaryAddress";
 import { AuthContext } from "../../components/auth/Auth";
 import useCapacitor from "../../hooks/useCapacitor";
+import { useCookieConsent } from "../../components/cookies/CookieConsentContext";
 
 const AboutCookiePolicy = dynamic(
   () => import("../../components/about/AboutCookiePolicy"),
@@ -263,6 +264,7 @@ function AboutMenu(
   }>
 ) {
   const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const { currentSection, setSection } = props;
 
   return (
@@ -278,7 +280,7 @@ function AboutMenu(
         setSection={setSection}
         title="The Memes"
       />
-      {capacitor.platform !== "ios" && (
+      {(!capacitor.isIos || country === "US") && (
         <AboutRow
           section={AboutSection.SUBSCRIPTIONS}
           currentSection={currentSection}

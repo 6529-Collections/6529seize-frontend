@@ -1,11 +1,30 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemePageLiveSubMenu, MemePageLiveRightMenu } from "../components/the-memes/MemePageLive";
+import {
+  MemePageLiveSubMenu,
+  MemePageLiveRightMenu,
+} from "../components/the-memes/MemePageLive";
 import { NFT, MemesExtendedData, Rememe } from "../entities/INFT";
+import { CookieConsentProvider } from "../components/cookies/CookieConsentContext";
 
-jest.mock("next/image", () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
-jest.mock("next/link", () => ({ __esModule: true, default: ({ href, children, ...rest }: any) => <a href={href} {...rest}>{children}</a> }));
-jest.mock("../components/nft-image/RememeImage", () => ({ __esModule: true, default: () => <div data-testid="rememe-image" /> }));
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img alt={props.alt ?? ""} {...props} />
+  ),
+}));
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({ href, children, ...rest }: any) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+jest.mock("../components/nft-image/RememeImage", () => ({
+  __esModule: true,
+  default: () => <div data-testid="rememe-image" />,
+}));
 jest.mock("../components/nftAttributes/NftStats", () => ({
   __esModule: true,
   NftPageStats: () => <tr data-testid="nft-stats" />,
@@ -15,6 +34,16 @@ const mockFetchUrl = jest.fn();
 jest.mock("../services/6529api", () => ({
   __esModule: true,
   fetchUrl: (url: string) => mockFetchUrl(url),
+}));
+
+jest.mock("../services/api/common-api", () => ({
+  __esModule: true,
+  commonApiFetch: jest.fn((opts: { endpoint: string }) => {
+    if (opts.endpoint === "policies/country-check") {
+      return Promise.resolve({ is_eu: false, country: "US" });
+    }
+    return Promise.reject(new Error("Unknown endpoint"));
+  }),
 }));
 
 beforeEach(() => {
@@ -128,7 +157,8 @@ describe("MemePageLiveSubMenu sorting", () => {
     const firstData = [createRememe("Random Rememe")];
     const secondData = [createRememe("Recent Rememe")];
 
-    mockFetchUrl.mockResolvedValueOnce({ data: [], count: 0 }) // meme lab
+    mockFetchUrl
+      .mockResolvedValueOnce({ data: [], count: 0 }) // meme lab
       .mockResolvedValueOnce({ data: firstData, count: 21 }); // initial rememes
 
     render(<MemePageLiveSubMenu show nft={nft} />);
@@ -136,18 +166,24 @@ describe("MemePageLiveSubMenu sorting", () => {
     expect(mockFetchUrl).toHaveBeenCalledWith(
       `http://api/api/nfts_memelab?sort_direction=asc&meme_id=${nft.id}`
     );
-    await waitFor(() => expect(screen.getByText("Random Rememe")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("Random Rememe")).toBeInTheDocument()
+    );
 
     mockFetchUrl.mockResolvedValueOnce({ data: secondData, count: 21 });
     await userEvent.click(screen.getByRole("button", { name: /sort/i }));
-    await userEvent.click(screen.getByRole("button", { name: /Recently Added/i }));
+    await userEvent.click(
+      screen.getByRole("button", { name: /Recently Added/i })
+    );
 
     await waitFor(() =>
       expect(mockFetchUrl).toHaveBeenLastCalledWith(
         expect.stringContaining("sort=created_at")
       )
     );
-    await waitFor(() => expect(screen.getByText("Recent Rememe")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("Recent Rememe")).toBeInTheDocument()
+    );
   });
 
   it("refreshes results on refresh icon click", async () => {
@@ -155,29 +191,40 @@ describe("MemePageLiveSubMenu sorting", () => {
     const firstData = [createRememe("Random1")];
     const refreshed = [createRememe("Random2")];
 
-    mockFetchUrl.mockResolvedValueOnce({ data: [], count: 0 })
+    mockFetchUrl
+      .mockResolvedValueOnce({ data: [], count: 0 })
       .mockResolvedValueOnce({ data: firstData, count: 21 })
       .mockResolvedValueOnce({ data: refreshed, count: 21 });
 
     const { container } = render(<MemePageLiveSubMenu show nft={nft} />);
 
-    await waitFor(() => expect(screen.getByText(/Random1/)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText(/Random1/)).toBeInTheDocument()
+    );
 
-    const refreshIcon = container.querySelector('svg[data-icon="arrows-rotate"]') as Element;
+    const refreshIcon = container.querySelector(
+      'svg[data-icon="arrows-rotate"]'
+    ) as Element;
     expect(refreshIcon).toBeInTheDocument();
     fireEvent.click(refreshIcon);
 
-    await waitFor(() => expect(screen.getByText(/Random2/)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText(/Random2/)).toBeInTheDocument()
+    );
   });
 });
 
 describe("MemePageLiveRightMenu distribution link", () => {
-  it("shows distribution plan link", () => {
+  it("shows distribution plan link", async () => {
     const nft = createNft({ id: 5, has_distribution: true });
     const meta = createMeta();
-    render(
-      <MemePageLiveRightMenu show nft={nft} nftMeta={meta} nftBalance={0} />
-    );
+    await waitFor(() => {
+      render(
+        <CookieConsentProvider>
+          <MemePageLiveRightMenu show nft={nft} nftMeta={meta} nftBalance={0} />
+        </CookieConsentProvider>
+      );
+    });
     const link = screen.getByRole("link", { name: /distribution plan/i });
     expect(link).toHaveAttribute("href", `/the-memes/5/distribution`);
   });
