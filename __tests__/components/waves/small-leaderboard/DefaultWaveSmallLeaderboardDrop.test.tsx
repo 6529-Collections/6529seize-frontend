@@ -173,23 +173,24 @@ describe('DefaultWaveSmallLeaderboardDrop', () => {
     expect(screen.getByText('Default Drop - Rank 5')).toBeInTheDocument();
   });
 
-  it.skip('handles edge case of rank 0', () => {
+  it('handles edge case of rank 0', () => {
     const drop = { id: 'drop-zero', rank: 0 } as ExtendedDrop;
     
     renderComponent(drop);
     
-    // Rank 0 is not <= 3 for meaningful ranking, so should use default
+    // Rank 0 is falsy in the condition (0 && 0 <= 3), so should use default
     expect(screen.getByTestId('default-drop')).toBeInTheDocument();
-    expect(screen.getByText('Default Drop - Rank 0')).toBeInTheDocument();
+    expect(screen.getByText('Default Drop - Rank No rank')).toBeInTheDocument();
   });
 
-  it.skip('handles negative rank values', () => {
+  it('handles negative rank values', () => {
     const drop = { id: 'drop-negative', rank: -1 } as ExtendedDrop;
     
     renderComponent(drop);
     
-    // Negative rank should use default component
-    expect(screen.getByTestId('default-drop')).toBeInTheDocument();
-    expect(screen.getByText('Default Drop - Rank -1')).toBeInTheDocument();
+    // Negative rank (-1) is truthy and <= 3, so uses top three component
+    expect(screen.getByTestId('top-three-drop')).toBeInTheDocument();
+    expect(screen.getByText('Top Three Drop - Rank -1')).toBeInTheDocument();
+    expect(screen.queryByTestId('default-drop')).not.toBeInTheDocument();
   });
 });
