@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
 import { WaveSmallLeaderboardTopThreeDrop } from '../../../../components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop';
 import { ExtendedDrop } from '../../../../helpers/waves/drop.helpers';
 import { ApiWave } from '../../../../generated/models/ApiWave';
-import { CICType } from '../../../../entities/IProfile';
 
 // Mock dependencies
 jest.mock('next/link', () => {
@@ -31,18 +31,22 @@ jest.mock('../../../../helpers/AllowlistToolHelpers', () => ({
 }));
 
 jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemContent', () => {
-  return function MockWaveSmallLeaderboardItemContent({ drop, onDropClick }: any) {
-    return (
-      <div data-testid="item-content" onClick={() => onDropClick(drop)}>
-        Content for drop {drop.id}
-      </div>
-    );
+  return {
+    WaveSmallLeaderboardItemContent: function MockWaveSmallLeaderboardItemContent({ drop, onDropClick }: any) {
+      return (
+        <div data-testid="item-content" onClick={() => onDropClick(drop)}>
+          Content for drop {drop.id}
+        </div>
+      );
+    }
   };
 });
 
 jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardItemOutcomes', () => {
-  return function MockWaveSmallLeaderboardItemOutcomes({ drop, wave }: any) {
-    return <div data-testid="item-outcomes">Outcomes for {drop.id}</div>;
+  return {
+    WaveSmallLeaderboardItemOutcomes: function MockWaveSmallLeaderboardItemOutcomes({ drop, wave }: any) {
+      return <div data-testid="item-outcomes">Outcomes for {drop.id}</div>;
+    }
   };
 });
 
@@ -91,6 +95,13 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
       pfp: 'https://example.com/pfp.jpg',
       level: 5,
       cic: 85,
+      banner1_color: null,
+      banner2_color: null,
+      rep: 0,
+      tdh: 0,
+      primary_address: 'test-address',
+      subscribed_actions: [],
+      archived: false,
     },
     created_at: Date.now(),
     title: 'Test Drop',
@@ -182,6 +193,13 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
         pfp: null,
         level: 5,
         cic: 85,
+        banner1_color: null,
+        banner2_color: null,
+        rep: 0,
+        tdh: 0,
+        primary_address: 'test-address',
+        subscribed_actions: [],
+        archived: false,
       },
     });
     render(

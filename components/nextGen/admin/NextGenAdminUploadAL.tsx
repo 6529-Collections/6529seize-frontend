@@ -158,15 +158,6 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                   }}
                 />
                 <Form.Check
-                  checked={type === Type.NO_ALLOWLIST}
-                  type="radio"
-                  label="No Allowlist"
-                  name="hasAllowlistRadio"
-                  onChange={() => {
-                    setType(Type.NO_ALLOWLIST);
-                  }}
-                />
-                <Form.Check
                   checked={type === Type.EXTERNAL_BURN}
                   type="radio"
                   label="Burn Allowlist"
