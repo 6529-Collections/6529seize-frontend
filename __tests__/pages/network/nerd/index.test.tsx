@@ -1,83 +1,90 @@
 import React from 'react';
-import { render, act } from '@testing-library/react';
-// Provide our own enum to avoid loading the real component
-enum LeaderboardFocus {
-  TDH = 'Cards Collected',
-  INTERACTIONS = 'Interactions',
-}
+import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-jest.mock('next/dynamic', () => () => () => <div data-testid="dynamic" />);
+// Import directly from the source
+import { LeaderboardFocus } from '../../../../components/leaderboard/Leaderboard';
 
-let capturedProps: any;
-jest.mock('../../../../components/leaderboard/Leaderboard', () => {
+
+// Mock the entire Auth module differently
+jest.mock('../../../../components/auth/Auth', () => {
+  const React = require('react');
+  const mockSetTitle = jest.fn();
+  const AuthContext = React.createContext({
+    setTitle: mockSetTitle,
+    title: '',
+  });
+  
   return {
     __esModule: true,
-    LeaderboardFocus,
-    default: (props: any) => {
-      capturedProps = props;
-      return <div data-testid="leaderboard" />;
-    },
+    AuthContext,
+    default: () => <div data-testid="auth" />,
+    mockSetTitle,
+  };
+});
+
+// Mock dynamic import to return a simple component
+jest.mock('next/dynamic', () => () => {
+  const React = require('react');
+  const { LeaderboardFocus } = require('../../../../components/leaderboard/Leaderboard');
+  
+  return function MockLeaderboard(props: any) {
+    return (
+      <div data-testid="leaderboard">
+        <span data-testid="focus">{props.focus}</span>
+        <button 
+          data-testid="set-focus" 
+          onClick={() => props.setFocus(LeaderboardFocus.INTERACTIONS)}
+        >
+          Change Focus
+        </button>
+      </div>
+    );
   };
 });
 
 const useRouterMock = jest.fn();
 jest.mock('next/router', () => ({
-  useRouter: useRouterMock,
+  useRouter: () => useRouterMock(),
 }));
 
-// Mock all components that cause router issues
-jest.mock('../../../../components/profile-activity/list/items/utils/ProfileActivityLogItemValueWithCopy', () => ({ 
-  __esModule: true, 
-  default: () => <div data-testid="value-with-copy" />
-}));
+const { default: CommunityNerdPage, getServerSideProps } = require('../../../../pages/network/nerd/[[...focus]]/index');
+const { mockSetTitle } = require('../../../../components/auth/Auth');
 
-jest.mock('../../../../components/profile-activity/list/items/ProfileActivityLogProxy', () => ({ 
-  __esModule: true, 
-  default: () => <div data-testid="profile-activity-log-proxy" />
-}));
-
-const AuthContext = React.createContext({});
-
-jest.mock('../../../../components/auth/Auth', () => ({
-  __esModule: true,
-  AuthContext,
-  default: () => <div data-testid="auth" />
-}));
-
-const { default: CommunityNerdPage, getServerSideProps } = require('../../../../pages/network/nerd/[[...focus]]');
-
-describe.skip('CommunityNerdPage', () => {
+describe('CommunityNerdPage', () => {
   beforeEach(() => {
-    capturedProps = undefined;
     jest.clearAllMocks();
   });
 
   const renderPage = (focus: LeaderboardFocus) => {
-    const setTitle = jest.fn();
-    useRouterMock.mockReturnValue({ asPath: '/network/nerd', replace: jest.fn() });
-    render(
-      <AuthContext.Provider value={{ setTitle, title: '' } as any}>
-        <CommunityNerdPage pageProps={{ focus }} />
-      </AuthContext.Provider>
-    );
-    return { setTitle, router: useRouterMock.mock.results[0].value };
+    const router = { asPath: '/network/nerd', replace: jest.fn() };
+    useRouterMock.mockReturnValue(router);
+    render(<CommunityNerdPage pageProps={{ focus }} />);
+    return { router };
   };
 
-  it.skip('passes focus to leaderboard and sets title', () => {
-    const { setTitle } = renderPage(LeaderboardFocus.TDH);
-    expect(capturedProps.focus).toBe(LeaderboardFocus.TDH);
-    expect(setTitle).toHaveBeenCalledWith({ title: 'Network Nerd - Cards Collected' });
+  it('passes focus to leaderboard and sets title', () => {
+    renderPage(LeaderboardFocus.TDH);
+    
+    // Check that the leaderboard component is rendered with correct focus
+    expect(screen.getByTestId('leaderboard')).toBeInTheDocument();
+    expect(screen.getByTestId('focus')).toHaveTextContent('Cards Collected');
+    expect(mockSetTitle).toHaveBeenCalledWith({ title: 'Network Nerd - Cards Collected' });
   });
 
-  it.skip('updates path when focus changes', () => {
+  it('updates path when focus changes', () => {
     const { router } = renderPage(LeaderboardFocus.TDH);
-    act(() => capturedProps.setFocus(LeaderboardFocus.INTERACTIONS));
+    
+    // Simulate focus change
+    const changeFocusButton = screen.getByTestId('set-focus');
+    fireEvent.click(changeFocusButton);
+    
     expect(router.replace).toHaveBeenCalledWith('/network/nerd/interactions', undefined, { shallow: true });
   });
 });
 
-describe.skip('getServerSideProps', () => {
-  it.skip('returns focus based on query', async () => {
+describe('getServerSideProps', () => {
+  it('returns focus based on query', async () => {
     const result = await getServerSideProps({ query: { focus: ['interactions'] } } as any);
     expect(result).toEqual({
       props: {
@@ -87,7 +94,7 @@ describe.skip('getServerSideProps', () => {
     });
   });
 
-  it.skip('defaults to TDH', async () => {
+  it('defaults to TDH', async () => {
     const result = await getServerSideProps({ query: {} } as any);
     expect(result.props.focus).toBe(LeaderboardFocus.TDH);
   });
