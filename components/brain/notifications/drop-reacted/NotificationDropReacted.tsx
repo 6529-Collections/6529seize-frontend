@@ -20,7 +20,6 @@ import type {
   INotificationDropReacted,
 } from "../../../../types/feed.types";
 
-// Helper to decide text color for a vote:
 const getNotificationVoteColor = (vote: number) => {
   if (vote > 0) return "tw-text-green";
   if (vote < 0) return "tw-text-red";
@@ -30,11 +29,11 @@ const getNotificationVoteColor = (vote: number) => {
 type NotificationUnion = INotificationDropVoted | INotificationDropReacted;
 
 interface Props {
-  notification: NotificationUnion;
-  activeDrop: ActiveDropState | null;
-  onReply: (param: DropInteractionParams) => void;
-  onQuote: (param: DropInteractionParams) => void;
-  onDropContentClick?: (drop: ExtendedDrop) => void;
+  readonly notification: NotificationUnion;
+  readonly activeDrop: ActiveDropState | null;
+  readonly onReply: (param: DropInteractionParams) => void;
+  readonly onQuote: (param: DropInteractionParams) => void;
+  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
 }
 
 export default function NotificationDropReacted({
@@ -55,7 +54,6 @@ export default function NotificationDropReacted({
     (notification as INotificationDropReacted).additional_context.reaction !==
     undefined;
 
-  // Build the "actionElement" (either "rated +123 • 2h ago" or "reacted 😊 • 2h ago")
   let actionElement: React.ReactNode = null;
 
   if (isVoted) {
@@ -94,7 +92,6 @@ export default function NotificationDropReacted({
     ).additional_context.reaction.replaceAll(":", "");
     let emojiNode: React.ReactNode = null;
 
-    // Try to find a custom emoji first
     const custom = emojiMap
       .flatMap((cat) => cat.emojis)
       .find((e) => e.id === rawId);
@@ -107,7 +104,6 @@ export default function NotificationDropReacted({
         />
       );
     } else {
-      // Fallback to native emoji if available
       const native = findNativeEmoji(rawId);
       if (native) {
         emojiNode = (
@@ -118,7 +114,6 @@ export default function NotificationDropReacted({
       }
     }
 
-    // If we failed to resolve an emoji, render nothing:
     if (!emojiNode) {
       return null;
     }
@@ -145,11 +140,9 @@ export default function NotificationDropReacted({
       </>
     );
   } else {
-    // If neither vote nor reaction, we don't know how to render:
     return null;
   }
 
-  // Common router callbacks:
   const onReplyClick = (serialNo: number) => {
     router.push(
       `/my-stream?wave=${notification.related_drops[0].wave.id}&serialNo=${serialNo}/`
@@ -161,7 +154,6 @@ export default function NotificationDropReacted({
     );
   };
 
-  // Finally, render the shared JSX structure:
   return (
     <div className="tw-flex tw-gap-x-3 tw-w-full">
       <div className="tw-space-y-2 tw-w-full">

@@ -7,9 +7,7 @@ import {
   UserFollowBtnSize,
 } from "../../user/utils/UserFollowBtn";
 import { useMutation } from "@tanstack/react-query";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../auth/Auth";
 import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
