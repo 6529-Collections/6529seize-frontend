@@ -14,8 +14,22 @@ jest.mock('../../../../components/waves/list/WaveItem', () => {
 });
 
 jest.mock('../../../../components/distribution-plan-tool/common/CircleLoader', () => {
-  return function MockCircleLoader() {
+  const MockCircleLoader = function MockCircleLoader() {
     return <div data-testid="circle-loader">Loading...</div>;
+  };
+  
+  MockCircleLoader.CircleLoaderSize = {
+    SMALL: "SMALL",
+    MEDIUM: "MEDIUM", 
+    LARGE: "LARGE",
+    XLARGE: "XLARGE",
+    XXLARGE: "XXLARGE",
+  };
+  
+  return {
+    __esModule: true,
+    default: MockCircleLoader,
+    CircleLoaderSize: MockCircleLoader.CircleLoaderSize,
   };
 });
 
@@ -139,7 +153,7 @@ describe('WavesListSearchResults', () => {
     )).toBeInTheDocument();
   });
 
-  it.skip('does not show no results message when fetching', () => {
+  it('does not show no results message when fetching', () => {
     mockUseWaves.mockReturnValue({
       waves: [],
       isFetching: true,
@@ -156,7 +170,7 @@ describe('WavesListSearchResults', () => {
     )).not.toBeInTheDocument();
   });
 
-  it.skip('shows loading indicator when fetching', () => {
+  it('shows loading indicator when fetching', () => {
     mockUseWaves.mockReturnValue({
       waves: [],
       isFetching: true,
@@ -171,7 +185,7 @@ describe('WavesListSearchResults', () => {
     expect(screen.getByTestId('circle-loader')).toBeInTheDocument();
   });
 
-  it('calls fetchNextPage on intersection when conditions are met', () => {
+  it('calls fetchNextPage on intersection when conditions are met', async () => {
     const mockFetchNextPage = jest.fn();
     mockUseWaves.mockReturnValue({
       waves: mockWaves,
@@ -185,12 +199,11 @@ describe('WavesListSearchResults', () => {
     render(<WavesListSearchResults {...defaultProps} />);
     
     // Wait for intersection to trigger
-    setTimeout(() => {
-      expect(mockFetchNextPage).toHaveBeenCalled();
-    }, 150);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    expect(mockFetchNextPage).toHaveBeenCalled();
   });
 
-  it.skip('does not call fetchNextPage when already fetching', () => {
+  it('does not call fetchNextPage when already fetching', async () => {
     const mockFetchNextPage = jest.fn();
     mockUseWaves.mockReturnValue({
       waves: mockWaves,
@@ -203,12 +216,11 @@ describe('WavesListSearchResults', () => {
 
     render(<WavesListSearchResults {...defaultProps} />);
     
-    setTimeout(() => {
-      expect(mockFetchNextPage).not.toHaveBeenCalled();
-    }, 150);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    expect(mockFetchNextPage).not.toHaveBeenCalled();
   });
 
-  it('does not call fetchNextPage when no more pages', () => {
+  it('does not call fetchNextPage when no more pages', async () => {
     const mockFetchNextPage = jest.fn();
     mockUseWaves.mockReturnValue({
       waves: mockWaves,
@@ -221,12 +233,11 @@ describe('WavesListSearchResults', () => {
 
     render(<WavesListSearchResults {...defaultProps} />);
     
-    setTimeout(() => {
-      expect(mockFetchNextPage).not.toHaveBeenCalled();
-    }, 150);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    expect(mockFetchNextPage).not.toHaveBeenCalled();
   });
 
-  it('does not call fetchNextPage when fetching next page', () => {
+  it('does not call fetchNextPage when fetching next page', async () => {
     const mockFetchNextPage = jest.fn();
     mockUseWaves.mockReturnValue({
       waves: mockWaves,
@@ -239,9 +250,8 @@ describe('WavesListSearchResults', () => {
 
     render(<WavesListSearchResults {...defaultProps} />);
     
-    setTimeout(() => {
-      expect(mockFetchNextPage).not.toHaveBeenCalled();
-    }, 150);
+    await new Promise(resolve => setTimeout(resolve, 150));
+    expect(mockFetchNextPage).not.toHaveBeenCalled();
   });
 
   it('passes correct parameters to useWaves hook', () => {
