@@ -18,4 +18,27 @@ describe('prefetchAuthenticatedNotifications', () => {
     await prefetchAuthenticatedNotifications({ queryClient: queryClient as any, headers: {}, context: {} as any });
     expect(queryClient.prefetchInfiniteQuery).not.toHaveBeenCalled();
   });
+
+  it('calls getUserProfile with provided headers', async () => {
+    const queryClient = createClient();
+    const { getUserProfile } = require('../../helpers/server.helpers');
+    await prefetchAuthenticatedNotifications({
+      queryClient: queryClient as any,
+      headers: { Authorization: 'Bearer t' },
+      context: {} as any,
+    });
+    expect(getUserProfile).toHaveBeenCalledWith({ user: 'wallet', headers: { Authorization: 'Bearer t' } });
+  });
+
+  it('does not prefetch when handle missing', async () => {
+    const queryClient = createClient();
+    const helpers = require('../../helpers/server.helpers');
+    helpers.getUserProfile.mockResolvedValueOnce({ handle: null });
+    await prefetchAuthenticatedNotifications({
+      queryClient: queryClient as any,
+      headers: { Authorization: 'Bearer t' },
+      context: {} as any,
+    });
+    expect(queryClient.prefetchInfiniteQuery).not.toHaveBeenCalled();
+  });
 });

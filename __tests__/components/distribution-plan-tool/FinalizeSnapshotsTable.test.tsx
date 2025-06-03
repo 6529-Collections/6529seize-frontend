@@ -50,4 +50,30 @@ describe('FinalizeSnapshotsTable', () => {
     expect(row.snapshot?.name).toBe('Snap1');
     expect(row.requiredTokens).toBe('1,2');
   });
+
+  it('handles empty top holder filter', () => {
+    rows.length = 0;
+    const groupSnapshots = [
+      {
+        groupSnapshotId: 'gs2',
+        snapshotId: 's2',
+        snapshotType: Pool.TOKEN_POOL,
+        snapshotSchema: null,
+        excludeComponentWinners: [],
+        excludeSnapshots: [],
+        topHoldersFilter: { type: null, from: null, to: null },
+        tokenIds: null,
+        uniqueWalletsCount: null,
+      },
+    ];
+    render(
+      <FinalizeSnapshotsTable
+        groupSnapshots={groupSnapshots as any}
+        snapshots={[] as any}
+        phases={[]}
+        onRemoveGroupSnapshot={() => {}}
+      />
+    );
+    expect(rows[0].topHoldersFilter).toBe('');
+  });
 });
