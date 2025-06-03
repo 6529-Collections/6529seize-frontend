@@ -16,7 +16,7 @@ jest.mock("../../../../helpers/Helpers", () => ({
 
 jest.mock("../../../../services/api/common-api", () => ({
   commonApiPost: jest.fn(),
-  commonApiDeleteWithBody: jest.fn(),
+  commonApiDelete: jest.fn(),
 }));
 
 describe("WaveDropReactions", () => {
@@ -140,7 +140,7 @@ describe("WaveDropReactions", () => {
     (commonApi.commonApiPost as jest.Mock).mockResolvedValue({
       id: "test-drop",
     });
-    (commonApi.commonApiDeleteWithBody as jest.Mock).mockResolvedValue({
+    (commonApi.commonApiDelete as jest.Mock).mockResolvedValue({
       id: "test-drop",
     });
 
