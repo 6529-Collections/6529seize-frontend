@@ -117,4 +117,16 @@ describe('NFTImage', () => {
     render(<NFTImage {...defaultProps} balance={0} showUnseized={true} />);
     expect(screen.getByText('UNSEIZED')).toBeInTheDocument();
   });
+
+  it('renders MP4 animation inside video tag', () => {
+    const nft = {
+      ...mockNFT,
+      animation: 'vid.mp4',
+      metadata: { animation_details: { format: 'MP4' }, animation: 'vid.mp4' },
+    } as any;
+    const { container } = render(
+      <NFTImage {...defaultProps} nft={nft} animation={true} />
+    );
+    expect(container.querySelector('video')).toBeInTheDocument();
+  });
 });
