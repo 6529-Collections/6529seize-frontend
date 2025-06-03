@@ -1,12 +1,17 @@
 jest.mock('lexical', () => ({
   TextNode: class {
-    __text: string; constructor(text = '') { this.__text = text; }
-    setMode() { return this; }
+    __text: string; format:any; detail:any; mode:string = 'segmented'; style:any; constructor(text = '') { this.__text = text; }
+    setMode(m:string) { this.mode = m; return this; }
     toggleDirectionless() { return this; }
     getTextContent() { return this.__text; }
-    getMode() { return 'segmented'; }
+    getMode() { return this.mode; }
     isDirectionless() { return true; }
-    exportDOM() { const el = document.createElement('span'); el.setAttribute('data-lexical-hashtag', 'true'); el.textContent = this.__text; return { element: el }; }
+    setTextContent(t:string){ this.__text = t; return this; }
+    setFormat(f:any){ this.format = f; return this; }
+    setDetail(d:any){ this.detail = d; return this; }
+    setStyle(s:any){ this.style = s; return this; }
+    exportJSON(){ return { text:this.__text, format:this.format, detail:this.detail, mode:this.mode, style:this.style }; }
+    exportDOM(){ const el=document.createElement('span'); el.setAttribute('data-lexical-hashtag','true'); el.textContent=this.__text; return { element: el }; }
   },
   $applyNodeReplacement: (n: any) => n,
 }));
@@ -38,5 +43,17 @@ describe('HashtagNode', () => {
   it('identifies non hashtag node', () => {
     expect($isHashtagNode(null)).toBe(false);
     expect($isHashtagNode({} as any)).toBe(false);
+  });
+
+  it('clones and imports from json', () => {
+    const node = $createHashtagNode('#foo');
+    const cloned = HashtagNode.clone(node);
+    expect(cloned).not.toBe(node);
+    expect(cloned.getTextContent()).toBe('#foo');
+
+    const imported = HashtagNode.importJSON({
+      hashtagName:'#bar', text:'#bar', format:0, detail:0, mode:'segmented', style:'', type:'hashtag', version:1
+    } as any);
+    expect(imported.getTextContent()).toBe('#bar');
   });
 });

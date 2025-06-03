@@ -42,4 +42,9 @@ describe('nextgen_helpers utility functions', () => {
       {display:'Page'}
     ]);
   });
+
+  it('builds opensea url for testnets', () => {
+    expect(getOpenseaLink(5, 1)).toContain('/assets/goerli/');
+    expect(getOpenseaLink(11155111, 2)).toContain('/assets/sepolia/');
+  });
 });

@@ -187,6 +187,12 @@ describe('UserPageCollected', () => {
     expect(screen.getByTestId('cards')).toHaveAttribute('data-show-data-row', 'true');
   });
 
+  it('hides data row for collections that disable it', () => {
+    mockSearchParams.get.mockImplementation((k:string)=> k==='collection' ? 'memelab' : null);
+    render(<UserPageCollected profile={mockProfile} />);
+    expect(screen.getByTestId('cards')).toHaveAttribute('data-show-data-row','false');
+  });
+
   it('calculates total pages correctly from data count', async () => {
     const mockData = {
       data: [],
