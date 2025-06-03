@@ -50,4 +50,18 @@ describe('CreateDropContent utilities', () => {
       expect(res.updatedNfts).toEqual(referencedNfts);
     });
   });
+
+  it('returns empty markdown string when input is null', () => {
+    const res = handleDropPart(null, [], [], [], []);
+    expect(res.updatedMarkdown).toBe('');
+    expect(res.updatedMentions).toEqual([]);
+    expect(res.updatedNfts).toEqual([]);
+  });
+
+  it('handles numeric metadata values', () => {
+    const out = convertMetadataToDropMetadata([
+      { key: 'num', type: ApiWaveMetadataType.Number, value: 10, required: true },
+    ]);
+    expect(out).toEqual([{ data_key: 'num', data_value: '10' }]);
+  });
 });

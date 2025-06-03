@@ -87,4 +87,9 @@ describe('Header', () => {
     rerender(<Header />);
     await waitFor(() => expect(container.querySelector('.' + styles.burgerMenuOpen)).not.toBeInTheDocument());
   });
+
+  it('applies capacitor class when running in capacitor', () => {
+    const { container } = setup({ capacitor: true });
+    expect(container.querySelector('.' + styles.capacitorMainContainer)).toBeInTheDocument();
+  });
 });

@@ -82,4 +82,11 @@ describe('NextGenCollectionArt', () => {
     expect(screen.getByTestId('token-list')).toHaveAttribute('data-limit', 'undefined');
     expect(commonApiFetch).toHaveBeenCalledWith({ endpoint: 'nextgen/collections/1/traits' });
   });
+
+  it('hides filters on small screens', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 500 });
+    render(<NextGenCollectionArt collection={collection} />);
+    await screen.findByTestId('token-list');
+    expect(screen.queryByText('Traits')).toBeNull();
+  });
 });

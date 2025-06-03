@@ -52,4 +52,11 @@ describe('CollectionDelegation utility functions', () => {
     const res = getDelegationsFromData([{ result: null } as any]);
     expect(res).toEqual([]);
   });
+
+  it('marks expired delegations correctly', () => {
+    const past = Math.floor(Date.now()/1000) - 100;
+    const data = [{ result: [['0x1'], [past], [false], [1]] }];
+    const res = getDelegationsFromData(data);
+    expect(res[0].wallets[0].expiry).toContain('expired');
+  });
 });
