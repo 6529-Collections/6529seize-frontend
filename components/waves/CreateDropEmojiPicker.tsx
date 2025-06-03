@@ -118,16 +118,14 @@ const CreateDropEmojiPicker: FC = () => {
           isOpen={showPicker}
           onClose={() => setShowPicker(false)}>
           <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-            <div className="tw-h-[40vh]">
-              <Picker
-                theme="dark"
-                data={data}
-                onEmojiSelect={addEmoji}
-                custom={emojiMap}
-                categories={categories}
-                categoryIcons={categoryIcons}
-              />
-            </div>
+            <Picker
+              theme="dark"
+              data={data}
+              onEmojiSelect={addEmoji}
+              custom={emojiMap}
+              categories={categories}
+              categoryIcons={categoryIcons}
+            />
           </div>
         </MobileWrapperDialog>
       )}
