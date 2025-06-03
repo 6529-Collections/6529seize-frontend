@@ -94,3 +94,8 @@ describe('extra cases', () => {
     expect(container.querySelector('tr')).toBeNull();
   });
 });
+
+test('printNft fallback when no nft provided', () => {
+  const { container } = render(<table><tbody><LatestActivityRow tr={{...baseTr, nft: undefined}} /></tbody></table>);
+  expect(container.textContent).toContain('Meme #1');
+});

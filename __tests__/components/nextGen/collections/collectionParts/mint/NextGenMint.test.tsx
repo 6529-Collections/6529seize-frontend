@@ -50,3 +50,13 @@ describe('NextGenMint', () => {
     expect(container.querySelector("output")).toBeInTheDocument();
   });
 });
+
+
+describe('NextGenMint additional', () => {
+  it('renders mint widget when public sale live', () => {
+    const helpers = require("../../../../../../components/nextGen/nextgen_helpers");
+    helpers.getStatusFromDates = jest.fn(() => 'LIVE');
+    render(<NextGenMint collection={{ id:1, name:'C', artist:'A', artist_address:'0x', image:'img.png', public_start:'', public_end:'', merkle_root:'' } as any} mint_price={1} burn_amount={1} />);
+    expect(screen.getByTestId('widget')).toBeInTheDocument();
+  });
+});
