@@ -61,7 +61,6 @@ export class ApiDropWithoutWave {
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
     'reactions': Array<ApiDropReaction>;
-    'context_profile_reaction': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -208,12 +207,6 @@ export class ApiDropWithoutWave {
             "name": "reactions",
             "baseName": "reactions",
             "type": "Array<ApiDropReaction>",
-            "format": ""
-        },
-        {
-            "name": "context_profile_reaction",
-            "baseName": "context_profile_reaction",
-            "type": "string",
             "format": ""
         }    ];
 

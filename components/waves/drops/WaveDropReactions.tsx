@@ -12,11 +12,12 @@ import { useEmoji } from "../../../contexts/EmojiContext";
 import { ApiDropReaction } from "../../../generated/models/ApiDropReaction";
 import { Tooltip } from "react-tooltip";
 import {
-  commonApiDeleteWithBody,
+  commonApiDelete,
   commonApiPost,
 } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
 import clsx from "clsx";
+import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
 
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
@@ -50,7 +51,8 @@ export function WaveDropReaction({
   const initialTotal = reaction.profiles.length;
   const initialTotalRef = useRef(initialTotal);
 
-  const initialSelected = reaction.reaction === drop.context_profile_reaction;
+  const initialSelected =
+    reaction.reaction === drop.context_profile_context?.reaction;
   const [total, setTotal] = useState(initialTotal);
   const [selected, setSelected] = useState(initialSelected);
   const [handles, setHandles] = useState(
@@ -129,14 +131,14 @@ export function WaveDropReaction({
 
     try {
       const body = { reaction: reaction.reaction };
+      const endpoint = `drops/${drop.id}/reaction`;
       if (selected) {
-        await commonApiDeleteWithBody<{ reaction: string }, ApiDrop>({
-          endpoint: `drops/${drop.id}/reaction`,
-          body,
+        await commonApiDelete({
+          endpoint,
         });
       } else {
-        await commonApiPost<{ reaction: string }, ApiDrop>({
-          endpoint: `drops/${drop.id}/reaction`,
+        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+          endpoint,
           body,
         });
       }

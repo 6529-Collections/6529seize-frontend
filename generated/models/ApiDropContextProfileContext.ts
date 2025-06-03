@@ -16,7 +16,7 @@ export class ApiDropContextProfileContext {
     'rating': number;
     'min_rating': number;
     'max_rating': number;
-    'rating_currency'?: ApiDropContextProfileContextRatingCurrencyEnum;
+    'reaction': string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -40,9 +40,9 @@ export class ApiDropContextProfileContext {
             "format": "int64"
         },
         {
-            "name": "rating_currency",
-            "baseName": "rating_currency",
-            "type": "ApiDropContextProfileContextRatingCurrencyEnum",
+            "name": "reaction",
+            "baseName": "reaction",
+            "type": "string",
             "format": ""
         }    ];
 
@@ -52,11 +52,5 @@ export class ApiDropContextProfileContext {
 
     public constructor() {
     }
-}
-
-
-export enum ApiDropContextProfileContextRatingCurrencyEnum {
-    Rep = 'REP',
-    Tdh = 'TDH'
 }
 

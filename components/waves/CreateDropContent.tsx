@@ -367,7 +367,6 @@ const getOptimisticDrop = (
     is_signed: false,
     rating_prediction: 0,
     reactions: [],
-    context_profile_reaction: null,
   };
 };
 

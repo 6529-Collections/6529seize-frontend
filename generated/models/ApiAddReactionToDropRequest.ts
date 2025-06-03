@@ -12,35 +12,21 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiProfilePreview {
-    'id': string;
-    'handle': string | null;
-    'pfp': string | null;
+export class ApiAddReactionToDropRequest {
+    'reaction': string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "id",
-            "baseName": "id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "handle",
-            "baseName": "handle",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "pfp",
-            "baseName": "pfp",
+            "name": "reaction",
+            "baseName": "reaction",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiProfilePreview.attributeTypeMap;
+        return ApiAddReactionToDropRequest.attributeTypeMap;
     }
 
     public constructor() {

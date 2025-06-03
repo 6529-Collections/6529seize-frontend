@@ -10,12 +10,12 @@
  * Do not edit the class manually.
  */
 
-import { ApiProfilePreview } from '../models/ApiProfilePreview';
+import { ApiProfileMin } from '../models/ApiProfileMin';
 import { HttpFile } from '../http/http';
 
 export class ApiDropReaction {
     'reaction': string;
-    'profiles': Array<ApiProfilePreview>;
+    'profiles': Array<ApiProfileMin>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -29,7 +29,7 @@ export class ApiDropReaction {
         {
             "name": "profiles",
             "baseName": "profiles",
-            "type": "Array<ApiProfilePreview>",
+            "type": "Array<ApiProfileMin>",
             "format": ""
         }    ];
 

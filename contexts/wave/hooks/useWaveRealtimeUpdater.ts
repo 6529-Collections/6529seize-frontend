@@ -123,6 +123,8 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
+      console.log("processIncomingDrop", drop, type);
+
       const waveId = drop.wave.id;
 
       const currentData = getData(waveId);
@@ -154,6 +156,7 @@ export function useWaveRealtimeUpdater({
         const apiDrop = await commonApiFetch<ApiDrop>({
           endpoint: `drops/${drop.id}`,
         });
+        console.log("apiDrop", apiDrop);
         if (apiDrop) {
           updateData({
             key: waveId,

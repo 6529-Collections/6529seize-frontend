@@ -8,6 +8,7 @@ import { useEmoji } from "../../../contexts/EmojiContext";
 import MobileWrapperDialog from "../../mobile-wrapper-dialog/MobileWrapperDialog";
 import { commonApiPost } from "../../../services/api/common-api";
 import { useAuth } from "../../auth/Auth";
+import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
 
 const WaveDropActionsAddReaction: React.FC<{
   drop: ApiDrop;
@@ -24,7 +25,7 @@ const WaveDropActionsAddReaction: React.FC<{
 
   const handleEmojiSelect = async (emoji: { native?: string; id?: string }) => {
     const emojiText = `:${emoji.id}:`;
-    await commonApiPost<{ reaction: string }, ApiDrop>({
+    await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
       endpoint: `drops/${drop.id}/reaction`,
       body: {
         reaction: emojiText,
@@ -102,7 +103,9 @@ const WaveDropActionsAddReaction: React.FC<{
         </g>
       </svg>
       <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
-        {drop.context_profile_reaction ? "Update Reaction" : "Add Reaction"}
+        {drop.context_profile_context?.reaction
+          ? "Update Reaction"
+          : "Add Reaction"}
       </span>
     </button>
   );
@@ -111,7 +114,9 @@ const WaveDropActionsAddReaction: React.FC<{
     <Tippy
       content={
         <span className="tw-text-xs">
-          {drop.context_profile_reaction ? "Update Reaction" : "Add Reaction"}
+          {drop.context_profile_context?.reaction
+            ? "Update Reaction"
+            : "Add Reaction"}
         </span>
       }
       placement="top">

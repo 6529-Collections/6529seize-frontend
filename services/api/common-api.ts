@@ -209,10 +209,17 @@ export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<void> => {
-  await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
     method: "DELETE",
     headers: getHeaders(param.headers),
   });
+  if (!res.ok) {
+    const body: any = await res.json();
+    return new Promise((_, rej) =>
+      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    );
+  }
+  return;
 };
 
 export const commonApiDeleteWithBody = async <
