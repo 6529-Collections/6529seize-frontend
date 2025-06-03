@@ -1,13 +1,14 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Auth, { useAuth } from "../../../components/auth/Auth";
 import { ReactQueryWrapperContext } from "../../../components/react-query-wrapper/ReactQueryWrapper";
 
+let walletAddress: string | null = "0x1";
 jest.mock("../../../components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
-    address: "0x1",
-    isConnected: true,
+    address: walletAddress,
+    isConnected: !!walletAddress,
     seizeDisconnectAndLogout: jest.fn(),
   }),
 }));
@@ -56,7 +57,20 @@ function Wrapper() {
   );
 }
 
+function ShowWaves() {
+  const { showWaves } = useAuth();
+  return <span data-testid="waves">{String(showWaves)}</span>;
+}
+
+function RequestAuthButton() {
+  const { requestAuth } = useAuth();
+  return <button onClick={() => requestAuth()} data-testid="req">req</button>;
+}
+
 describe("Auth", () => {
+  beforeEach(() => {
+    walletAddress = "0x1";
+  });
   it("updates title via context", async () => {
     render(
       <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
@@ -73,5 +87,31 @@ describe("Auth", () => {
     // Click the set button and wait for the title to update
     await userEvent.click(screen.getByText("set"));
     expect(await screen.findByTestId("title")).toHaveTextContent("New");
+  });
+
+  it("returns showWaves true when wallet and profile", async () => {
+    render(
+      <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+        <Auth>
+          <ShowWaves />
+        </Auth>
+      </ReactQueryWrapperContext.Provider>
+    );
+    await waitFor(() => expect(screen.getByTestId('waves')).toHaveTextContent('true'));
+  });
+
+  it("requestAuth shows error without wallet", async () => {
+    walletAddress = null;
+    const toast = require("react-toastify").toast;
+    const user = userEvent.setup();
+    render(
+      <ReactQueryWrapperContext.Provider value={{ invalidateAll: jest.fn() } as any}>
+        <Auth>
+          <RequestAuthButton />
+        </Auth>
+      </ReactQueryWrapperContext.Provider>
+    );
+    await user.click(screen.getByTestId('req'));
+    expect(toast).toHaveBeenCalled();
   });
 });
