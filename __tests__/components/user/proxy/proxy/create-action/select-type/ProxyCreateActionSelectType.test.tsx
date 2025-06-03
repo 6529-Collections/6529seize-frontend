@@ -18,6 +18,16 @@ describe('ProxyCreateActionSelectType', () => {
     expect(items).toHaveLength(1);
     expect(items[0]).toHaveTextContent(ApiProfileProxyActionType.AllocateCic);
   });
+
+  it('selects action type when item clicked', async () => {
+    const setSelected = jest.fn();
+    render(
+      <ProxyCreateActionSelectType currentActions={[]} setSelectedActionType={setSelected} />
+    );
+    const item = screen.getAllByTestId('item')[0];
+    await userEvent.click(item);
+    expect(setSelected).toHaveBeenCalledWith(item.textContent);
+  });
 it('calls onCancel when cancel button clicked', async () => {
   const onCancel = jest.fn();
   render(

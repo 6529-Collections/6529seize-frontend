@@ -2,6 +2,11 @@ import { render, screen } from '@testing-library/react';
 import FinalizeSnapshotsTable from '../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTable';
 import { TopHolderType } from '../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal';
 
+jest.mock('../../../../../../../../components/distribution-plan-tool/build-phases/build-phase/form/component-config/snapshots-table/FinalizeSnapshotsTableRow', () => (props: any) => (
+  <tr><td>{props.row.snapshot?.name}</td><td>{props.row.excludeSnapshotsText}</td><td>{props.row.topHoldersFilter}</td></tr>
+));
+jest.mock('../../../../../../../../components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper', () => (props: any) => <tbody>{props.children}</tbody>);
+
 const groupSnapshots = [
   {
     groupSnapshotId: 'g1',
@@ -16,8 +21,8 @@ const groupSnapshots = [
 
 const snapshots = [{ id: 's1', name: 'Snap1', poolType: 'MINT' }];
 
-describe.skip('FinalizeSnapshotsTable', () => {
-  it.skip('maps snapshots to rows and renders text', () => {
+describe('FinalizeSnapshotsTable', () => {
+  it('maps snapshots to rows and renders text', () => {
     render(
       <FinalizeSnapshotsTable
         onRemoveGroupSnapshot={jest.fn()}

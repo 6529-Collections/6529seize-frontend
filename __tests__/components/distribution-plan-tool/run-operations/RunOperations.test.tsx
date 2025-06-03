@@ -48,4 +48,21 @@ describe('RunOperations', () => {
     });
     expect(useInterval).toHaveBeenCalledWith(expect.any(Function), null);
   });
+
+  it('fetches updated run via interval callback', async () => {
+    const api = require('../../../../services/distribution-plan-api');
+    const setState = jest.fn();
+    api.distributionPlanApiFetch.mockResolvedValue({ success: true, data: { activeRun: { status: AllowlistRunStatus.FAILED } } });
+
+    renderWithContext({
+      distributionPlan: { id: '1', activeRun: { status: AllowlistRunStatus.CLAIMED } },
+      setState,
+      fetching: false,
+    });
+
+    const cb = useInterval.mock.calls[0][0];
+    await cb();
+    expect(api.distributionPlanApiFetch).toHaveBeenCalled();
+    expect(setState).toHaveBeenCalledWith({ activeRun: { status: AllowlistRunStatus.FAILED } });
+  });
 });

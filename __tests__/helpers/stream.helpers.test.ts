@@ -12,4 +12,10 @@ describe('prefetchWavesOverview', () => {
     await prefetchWavesOverview({ queryClient: queryClient as any, headers: { Authorization: 'Bearer token' }, waveId: '1' });
     expect(queryClient.prefetchInfiniteQuery).toHaveBeenCalled();
   });
+
+  it('skips when no auth header', async () => {
+    const queryClient = createClient();
+    await prefetchWavesOverview({ queryClient: queryClient as any, headers: {}, waveId: null });
+    expect(queryClient.prefetchInfiniteQuery).not.toHaveBeenCalled();
+  });
 });

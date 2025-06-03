@@ -57,4 +57,23 @@ describe('create-wave.validation', () => {
     const errors = getCreateWaveValidationErrors({ step: CreateWaveStep.VOTING, config });
     expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.TIME_WEIGHTED_VOTING_INTERVAL_TOO_SMALL);
   });
+
+  it('tdh voting cannot have category or profile id', () => {
+    const config = { ...baseConfig, voting: { type: ApiWaveCreditType.Tdh, category:'c', profileId:'p', timeWeighted:{ enabled:false, averagingInterval:5, averagingIntervalUnit:'minutes' } } };
+    const errors = getCreateWaveValidationErrors({ step: CreateWaveStep.VOTING, config });
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_CATEGORY);
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.TDH_VOTING_CANNOT_HAVE_PROFILE_ID);
+  });
+
+  it('approve wave requires equal submission and voting dates', () => {
+    const cfg = { ...baseConfig, overview:{ type: ApiWaveType.Approve, name:'n', image:null }, dates:{ submissionStartDate:1, votingStartDate:2, endDate:3, firstDecisionTime:0, subsequentDecisions:[], isRolling:false } };
+    const errors = getCreateWaveValidationErrors({ step: CreateWaveStep.DATES, config: cfg });
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.VOTING_START_DATE_MUST_BE_AFTER_OR_EQUAL_TO_SUBMISSION_START_DATE);
+  });
+
+  it('chat groups cannot have canDrop/canVote', () => {
+    const cfg = { ...baseConfig, overview:{ type: ApiWaveType.Chat, name:'n', image:null }, groups:{ canDrop:true, canVote:true } };
+    const errors = getCreateWaveValidationErrors({ step: CreateWaveStep.GROUPS, config: cfg });
+    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.CHAT_WAVE_CANNOT_HAVE_VOTING);
+  });
 });
