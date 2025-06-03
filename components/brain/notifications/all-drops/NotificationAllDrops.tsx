@@ -13,7 +13,7 @@ import Drop, {
 import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { getNotificationVoteColor } from "../drop-voted/NotificationDropVoted";
+import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
 
 export default function NotificationAllDrops({
   notification,

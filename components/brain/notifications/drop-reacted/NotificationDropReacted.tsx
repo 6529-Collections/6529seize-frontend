@@ -20,7 +20,7 @@ import type {
   INotificationDropReacted,
 } from "../../../../types/feed.types";
 
-const getNotificationVoteColor = (vote: number) => {
+export const getNotificationVoteColor = (vote: number) => {
   if (vote > 0) return "tw-text-green";
   if (vote < 0) return "tw-text-red";
   return "tw-text-iron-500";
