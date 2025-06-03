@@ -22,8 +22,8 @@ const defaultCtx = {
   activeProfileProxy: null,
 };
 
-describe.skip('UserPageRepModifyModal', () => {
-  it.skip('calls onClose when cancel clicked', async () => {
+describe('UserPageRepModifyModal', () => {
+  it('calls onClose when cancel clicked', async () => {
     const onClose = jest.fn();
     render(
       <ReactQueryWrapperContext.Provider value={{ onProfileRepModify: jest.fn() }}>
@@ -38,7 +38,7 @@ describe.skip('UserPageRepModifyModal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it.skip('disables save button initially', () => {
+  it('disables save button initially', () => {
     render(
       <ReactQueryWrapperContext.Provider value={{ onProfileRepModify: jest.fn() }}>
         <AuthContext.Provider value={defaultCtx as any}>
