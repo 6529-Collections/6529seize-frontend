@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import CreateSnapshotTableRowDownload from '../../../../../components/distribution-plan-tool/create-snapshots/table/CreateSnapshotTableRowDownload';
 import { DistributionPlanToolContext } from '../../../../../components/distribution-plan-tool/DistributionPlanToolContext';
 import { distributionPlanApiFetch } from '../../../../../services/distribution-plan-api';
@@ -24,7 +24,18 @@ describe('CreateSnapshotTableRowDownload', () => {
   it('downloads json when button clicked', async () => {
     const { container } = render(<CreateSnapshotTableRowDownload tokenPoolId="tp1" />, { wrapper: Wrapper });
     const jsonBtn = container.querySelector('button');
-    fireEvent.click(jsonBtn!);
+    await act(async () => {
+      fireEvent.click(jsonBtn!);
+    });
+    expect(distributionPlanApiFetch).toHaveBeenCalled();
+  });
+
+  it('downloads csv when csv button clicked', async () => {
+    const { container } = render(<CreateSnapshotTableRowDownload tokenPoolId="tp1" />, { wrapper: Wrapper });
+    const buttons = container.querySelectorAll('button');
+    await act(async () => {
+      fireEvent.click(buttons[1]);
+    });
     expect(distributionPlanApiFetch).toHaveBeenCalled();
   });
 });

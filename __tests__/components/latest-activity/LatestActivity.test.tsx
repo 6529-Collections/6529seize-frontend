@@ -29,4 +29,15 @@ describe('LatestActivity', () => {
     await userEvent.click(screen.getByText('Memes'));
     await waitFor(() => expect(fetchUrl).toHaveBeenLastCalledWith('http://api/api/transactions?page_size=10&page=1&contract=0x33FD426905F149f8376e227d0C9D3340AaD17aF1'));
   });
+
+  it('hides View All link on nft-activity page', async () => {
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: { pathname: '/nft-activity' },
+    });
+    render(<LatestActivity page={1} pageSize={10} showMore />);
+    // Wait for fetch
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
+    expect(screen.queryByText('View All')).toBeNull();
+  });
 });

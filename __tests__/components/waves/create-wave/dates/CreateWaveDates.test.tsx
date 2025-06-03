@@ -81,4 +81,11 @@ describe('CreateWaveDates', () => {
     await user.click(screen.getByTestId('decisions'));
     expect(screen.getByTestId('start')).toHaveAttribute('data-expanded', 'false');
   });
+
+  it('updates end date when calculateEndDate differs', () => {
+    const setDates = jest.fn();
+    const dates = { ...baseDates, endDate: 0 };
+    render(<CreateWaveDates waveType={ApiWaveType.Approve} dates={dates} setDates={setDates} />);
+    expect(setDates).toHaveBeenCalledWith({ ...dates, endDate: 123 });
+  });
 });

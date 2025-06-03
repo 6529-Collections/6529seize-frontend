@@ -18,4 +18,14 @@ describe('prefetchWavesOverview', () => {
     await prefetchWavesOverview({ queryClient: queryClient as any, headers: {}, waveId: null });
     expect(queryClient.prefetchInfiniteQuery).not.toHaveBeenCalled();
   });
+
+  it('skips when Authorization header is malformed', async () => {
+    const queryClient = createClient();
+    await prefetchWavesOverview({
+      queryClient: queryClient as any,
+      headers: { Authorization: 'token' },
+      waveId: null,
+    });
+    expect(queryClient.prefetchInfiniteQuery).not.toHaveBeenCalled();
+  });
 });

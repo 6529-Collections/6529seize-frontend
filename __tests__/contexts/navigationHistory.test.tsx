@@ -27,4 +27,16 @@ describe('NavigationHistoryContext', () => {
     });
     expect(routerMock.push).toHaveBeenCalledWith('/');
   });
+
+  it('navigates back through stacked views', () => {
+    const { result } = renderHook(() => useNavigationHistoryContext(), { wrapper });
+    act(() => {
+      result.current.pushView('v1' as any);
+      result.current.pushView('v2' as any);
+    });
+    act(() => {
+      result.current.goBack();
+    });
+    expect(hardBack).toHaveBeenCalledWith('v1');
+  });
 });

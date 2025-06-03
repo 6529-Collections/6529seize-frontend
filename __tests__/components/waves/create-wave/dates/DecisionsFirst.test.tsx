@@ -32,4 +32,17 @@ describe('DecisionsFirst', () => {
     await user.click(screen.getByText('time'));
     expect(setFirstDecisionTime).toHaveBeenCalledWith(expect.any(Number));
   });
+
+  it('initializes to end of day when minTimestamp provided', async () => {
+    const user = userEvent.setup();
+    const setFirstDecisionTime = jest.fn();
+    const minTs = new Date('2023-01-01T12:00:00Z').getTime();
+    render(
+      <DecisionsFirst firstDecisionTime={0} setFirstDecisionTime={setFirstDecisionTime} minTimestamp={minTs} />
+    );
+    const expected = new Date(minTs);
+    expected.setHours(23, 59, 0, 0);
+    await screen.findByText('calendar'); // wait for render
+    expect(setFirstDecisionTime).toHaveBeenCalledWith(expected.getTime());
+  });
 });

@@ -26,4 +26,19 @@ describe('parseSeizeQueryLink', () => {
     const res = parseSeizeQueryLink('https://site.com/other?foo=1', '/path', ['foo']);
     expect(res).toBeNull();
   });
+
+  it('returns null when host does not match', () => {
+    const res = parseSeizeQueryLink('https://example.com/path?foo=1', '/path', ['foo']);
+    expect(res).toBeNull();
+  });
+
+  it('respects exact parameter when extra query present', () => {
+    const res = parseSeizeQueryLink(
+      'https://site.com/path?foo=1&bar=2',
+      '/path',
+      ['foo'],
+      true
+    );
+    expect(res).toBeNull();
+  });
 });
