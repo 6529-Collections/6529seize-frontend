@@ -186,7 +186,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     expect(newVoteSpan).toHaveClass('tw-text-green');
   });
 
-  it.skip('applies red color for negative new votes', () => {
+  it('applies red color for negative new votes', () => {
     const negativeVoteLog = {
       ...mockLog,
       contents: { ...mockLog.contents, newVote: -5 },
@@ -194,7 +194,7 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     
     renderComponent({ log: negativeVoteLog });
     
-    const newVoteSpan = screen.getByText('-5 Rep');
+    const newVoteSpan = screen.getByText('-5 REP');
     expect(newVoteSpan).toHaveClass('tw-text-red');
   });
 
@@ -215,10 +215,10 @@ describe('WaveLeaderboardRightSidebarActivityLog', () => {
     expect(screen.queryByTestId('system-adjustment-pill')).not.toBeInTheDocument();
   });
 
-  it.skip('displays correct credit type', () => {
-    renderComponent({ creditType: ApiWaveCreditType.Cic });
+  it('displays correct credit type', () => {
+    renderComponent({ creditType: ApiWaveCreditType.Tdh });
     
-    expect(screen.getByText('1,000 CIC')).toBeInTheDocument();
+    expect(screen.getByText('1,000 TDH')).toBeInTheDocument();
   });
 
   it('formats numbers with commas in vote display', () => {
