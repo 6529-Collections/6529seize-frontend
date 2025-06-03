@@ -47,4 +47,9 @@ describe('CollectionDelegation utility functions', () => {
     const res = getDelegationsFromData(data);
     expect(res[0].wallets[0].expiry).toContain('active - non-expiring');
   });
+
+  it('returns empty when no result present', () => {
+    const res = getDelegationsFromData([{ result: null } as any]);
+    expect(res).toEqual([]);
+  });
 });
