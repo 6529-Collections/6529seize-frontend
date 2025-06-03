@@ -23,4 +23,14 @@ describe('UserSettingsImgSelectFile', () => {
     await userEvent.upload(input, file);
     expect(setFile).toHaveBeenCalledWith(file);
   });
+
+  it('shows error for large files', async () => {
+    const { container, findByText } = render(<UserSettingsImgSelectFile imageToShow={null} setFile={setFile} />, { wrapper: Wrapper });
+    const input = container.querySelector('#pfp-upload-input') as HTMLInputElement;
+    const bigFile = new File(['a'.repeat(10)], 'big.png', { type: 'image/png' });
+    Object.defineProperty(bigFile, 'size', { value: 3000000 });
+    await userEvent.upload(input, bigFile);
+    expect(await findByText('File size must be less than 2MB')).toBeInTheDocument();
+    expect(setFile).not.toHaveBeenCalled();
+  });
 });

@@ -31,4 +31,16 @@ describe('NewDelegation component', () => {
     await userEvent.click(tokenRadios[3]);
     expect(screen.getByTestId('token')).toBeInTheDocument();
   });
+
+  it('calls query setters on changes', async () => {
+    const setCollectionQuery = jest.fn();
+    const setUseCaseQuery = jest.fn();
+    render(
+      <NewDelegation address="0x1" ens={null} onHide={() => {}} onSetToast={() => {}} setCollectionQuery={setCollectionQuery} setUseCaseQuery={setUseCaseQuery} />
+    );
+    await userEvent.type(screen.getByTestId('collection'), '123');
+    expect(setCollectionQuery).toHaveBeenCalledWith('123');
+    await userEvent.selectOptions(screen.getByRole('combobox'), '1');
+    expect(setUseCaseQuery).toHaveBeenCalledWith(1);
+  });
 });

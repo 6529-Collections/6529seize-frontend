@@ -53,3 +53,24 @@ it('removes notifications when functions called', async () => {
   expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
   expect(PushNotifications.removeAllDeliveredNotifications).toHaveBeenCalled();
 });
+
+describe('push notification action handling', () => {
+  it('redirects based on notification data', async () => {
+    const addListenerMock = jest.fn((evt, cb) => {
+      if (evt === 'pushNotificationActionPerformed') {
+        setTimeout(() => cb({ notification: { data: { redirect: 'profile', handle: 'abc', notification_id: '1' } } }), 0);
+      }
+    });
+    const push = jest.fn();
+    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue({ push } as any);
+    const { PushNotifications } = require('@capacitor/push-notifications');
+    PushNotifications.addListener = addListenerMock;
+
+    const { result } = renderHook(() => useNotificationsContext(), { wrapper });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 10));
+    });
+    expect(push).toHaveBeenCalledWith('/abc');
+    expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
+  });
+});

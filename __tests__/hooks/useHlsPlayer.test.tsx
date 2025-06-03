@@ -26,10 +26,8 @@ Object.defineProperty(HTMLVideoElement.prototype, 'play', {
   value: jest.fn().mockImplementation(() => Promise.resolve()),
 });
 
-Object.defineProperty(HTMLVideoElement.prototype, 'load', {
-  writable: true,
-  value: jest.fn(),
-});
+Object.defineProperty(HTMLVideoElement.prototype, 'load', { writable: true, value: jest.fn() });
+Object.defineProperty(HTMLVideoElement.prototype, 'pause', { writable: true, value: jest.fn() });
 
 function TestComponent(props: any) {
   const { videoRef, isLoading } = useHlsPlayer(props);
@@ -63,5 +61,21 @@ describe('useHlsPlayer', () => {
     const video = getByTestId('vid') as HTMLVideoElement;
     expect(video.src).toContain('video.mp4');
     expect(video.getAttribute('data-loading')).toBe('false');
+  });
+
+  it('cleans up video on unmount', () => {
+    const { getByTestId, unmount } = render(<TestComponent src="v.mp4" isHls={false} />);
+    const video = getByTestId('vid') as HTMLVideoElement;
+    const pauseSpy = jest.spyOn(video, 'pause');
+    unmount();
+    expect(pauseSpy).toHaveBeenCalled();
+    expect(video.src).toBe('');
+  });
+
+  it('updates src when changed', () => {
+    const { getByTestId, rerender } = render(<TestComponent src="a.mp4" isHls={false} />);
+    rerender(<TestComponent src="b.mp4" isHls={false} />);
+    const video = getByTestId('vid') as HTMLVideoElement;
+    expect(video.src).toContain('b.mp4');
   });
 });

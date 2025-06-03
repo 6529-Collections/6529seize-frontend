@@ -49,4 +49,12 @@ describe('CreateWaveDates', () => {
     );
     expect(screen.getByTestId('rolling')).toBeInTheDocument();
   });
+
+  it('hides rolling section when not rolling', () => {
+    const dates = { ...baseDates, subsequentDecisions: [1], isRolling: false };
+    render(
+      <CreateWaveDates waveType={ApiWaveType.Approve} dates={dates} setDates={jest.fn()} />
+    );
+    expect(screen.queryByTestId('rolling')).toBeNull();
+  });
 });
