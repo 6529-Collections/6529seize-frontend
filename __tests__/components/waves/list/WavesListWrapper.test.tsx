@@ -35,4 +35,17 @@ describe('WavesListWrapper', () => {
     await userEvent.click(btn);
     expect(setShowAll).toHaveBeenCalledWith(ApiWavesOverviewType.Latest);
   });
+
+  it('fetches next page on intersection when conditions met', async () => {
+    const waves = Array.from({length:12}, (_,i)=>({id:`w${i}`}));
+    const query = { data:{pages:[waves]}, fetchNextPage: jest.fn(), hasNextPage: true, isFetching:false, isFetchingNextPage:false, status:'success' };
+    useInfiniteQueryMock.mockReturnValue(query);
+    render(
+      <AuthContext.Provider value={auth}>
+        <WavesListWrapper overviewType={ApiWavesOverviewType.Latest} showAllType={ApiWavesOverviewType.Latest} setShowAllType={() => {}} />
+      </AuthContext.Provider>
+    );
+    await userEvent.click(screen.getByTestId('intersect'));
+    expect(query.fetchNextPage).toHaveBeenCalled();
+  });
 });

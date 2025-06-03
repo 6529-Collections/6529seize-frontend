@@ -63,4 +63,14 @@ describe('HeaderShare', () => {
     await userEvent.click(icon);
     expect(navigator.clipboard.writeText).toHaveBeenCalled();
   });
+
+  it('generates QR codes when modal opens', async () => {
+    const qrcode = require('qrcode');
+    mockUseCapacitor.mockReturnValue({ isCapacitor: false } as any);
+    mockIsMobile.mockReturnValue(false as any);
+    render(<HeaderShare />);
+    await userEvent.click(screen.getByRole('button', { name: 'QR Code' }));
+    await screen.findByTestId('modal');
+    expect(qrcode.toDataURL).toHaveBeenCalled();
+  });
 });
