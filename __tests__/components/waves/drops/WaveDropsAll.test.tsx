@@ -4,12 +4,27 @@ import WaveDropsAll from '../../../../components/waves/drops/WaveDropsAll';
 import { useVirtualizedWaveDrops } from '../../../../hooks/useVirtualizedWaveDrops';
 
 jest.mock('../../../../hooks/useVirtualizedWaveDrops');
-jest.mock('../../../../components/waves/drops/WaveDropsReverseContainer', () => ({ __esModule: true, WaveDropsReverseContainer: (props: any) => <div data-testid="container">{props.children}</div> }));
-jest.mock('../../../../components/drops/view/DropsList', () => ({ __esModule: true, default: (props: any) => <div data-testid="drops" {...props} /> }));
+let containerProps: any;
+jest.mock('../../../../components/waves/drops/WaveDropsReverseContainer', () => ({
+  __esModule: true,
+  WaveDropsReverseContainer: (props: any) => {
+    containerProps = props;
+    return <div data-testid="container">{props.children}</div>;
+  }
+}));
+let dropsProps: any;
+jest.mock('../../../../components/drops/view/DropsList', () => ({
+  __esModule: true,
+  default: (props: any) => {
+    dropsProps = props;
+    return <div data-testid="drops" />;
+  }
+}));
 jest.mock('../../../../components/waves/drops/WaveDropsScrollBottomButton', () => ({ __esModule: true, WaveDropsScrollBottomButton: () => <div data-testid="scroll-btn" /> }));
 jest.mock('../../../../components/waves/drops/WaveDropsEmptyPlaceholder', () => ({ __esModule: true, default: () => <div data-testid="empty" /> }));
 jest.mock('../../../../components/waves/drops/WaveDropsScrollingOverlay', () => ({ __esModule: true, default: () => <div data-testid="overlay" /> }));
-jest.mock('next/router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+push = jest.fn();
+jest.mock('next/router', () => ({ useRouter: () => ({ push }) }));
 jest.mock('../../../../hooks/useScrollBehavior', () => ({ useScrollBehavior: () => ({ scrollContainerRef: { current: null }, scrollToVisualBottom: jest.fn() }) }));
 let typingMsg: string | null = null;
 jest.mock('../../../../hooks/useWaveIsTyping', () => ({
@@ -71,4 +86,12 @@ describe('WaveDropsAll', () => {
     expect(getByText('typing')).toBeInTheDocument();
     typingMsg = null;
   });
+
+  it('navigates to other wave on quote click', () => {
+    push.mockClear();
+    renderComp({ messages: { drops: [{ id: 'd1', wave: { id: '2' }, serial_no: 5 }] } });
+    dropsProps.onQuoteClick({ wave: { id: '2' }, serial_no: 5 } as any);
+    expect(push).toHaveBeenCalledWith('/my-stream?wave=2&serialNo=5');
+  });
+
 });

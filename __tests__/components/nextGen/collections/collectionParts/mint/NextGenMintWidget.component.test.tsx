@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import NextGenMintWidget from '../../../../../../components/nextGen/collections/collectionParts/mint/NextGenMintWidget';
 import { Status } from '../../../../../../components/nextGen/nextgen_entities';
 
+let minting = false;
 jest.mock('../../../../../../components/nextGen/nextgen_helpers', () => ({
   useMintSharedState: () => ({
     proofResponse: [],
@@ -16,7 +17,7 @@ jest.mock('../../../../../../components/nextGen/nextgen_helpers', () => ({
     setMintToInput: jest.fn(),
     mintToAddress: '',
     setMintToAddress: jest.fn(),
-    isMinting: false,
+    isMinting: minting,
     setIsMinting: jest.fn(),
     errors: [],
     setErrors: jest.fn(),
@@ -94,4 +95,13 @@ test('shows switch network when wrong chain', () => {
   useSeizeConnectContext.mockReturnValue({ isConnected: true, address: '0x1', seizeConnect: jest.fn() });
   render(<NextGenMintWidget {...baseProps} />);
   expect(screen.getByRole('button')).toHaveTextContent('Switch to Ethereum');
+});
+
+test('shows processing state when minting', () => {
+  useChainId.mockReturnValue(1);
+  useSeizeConnectContext.mockReturnValue({ isConnected: true, address: '0x1', seizeConnect: jest.fn() });
+  minting = true;
+  render(<NextGenMintWidget {...baseProps} />);
+  minting = false;
+  expect(screen.getByRole('button')).toHaveTextContent('Processing...');
 });

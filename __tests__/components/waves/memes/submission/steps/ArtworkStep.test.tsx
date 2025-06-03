@@ -120,4 +120,47 @@ describe('ArtworkStep', () => {
     );
     expect(screen.getByTestId('submit')).not.toBeDisabled();
   });
+
+  it('calls onSubmit when submit clicked', () => {
+    const traits = createTraits();
+    Object.keys(traits).forEach(k => { if(typeof (traits as any)[k] === 'string') (traits as any)[k] = 'x'; });
+    const onSubmit = jest.fn();
+    render(
+      <ArtworkStep
+        traits={{ ...traits, title: 't', description: 'd' }}
+        artworkUploaded={true}
+        artworkUrl="u"
+        setArtworkUploaded={() => {}}
+        handleFileSelect={() => {}}
+        onSubmit={onSubmit}
+        updateTraitField={() => {}}
+        setTraits={() => {}}
+      />
+    );
+    screen.getByTestId('submit').click();
+    expect(onSubmit).toHaveBeenCalled();
+  });
+
+  it('disables cancel during upload phase', () => {
+    const traits = createTraits();
+    traits.title = 't';
+    traits.description = 'd';
+    const onCancel = jest.fn();
+    render(
+      <ArtworkStep
+        traits={traits}
+        artworkUploaded={true}
+        artworkUrl="url"
+        setArtworkUploaded={() => {}}
+        handleFileSelect={() => {}}
+        onSubmit={() => {}}
+        onCancel={onCancel}
+        updateTraitField={() => {}}
+        setTraits={() => {}}
+        submissionPhase="uploading"
+      />
+    );
+    const btn = screen.getByRole('button', { name: /cancel/i });
+    expect(btn).toBeDisabled();
+  });
 });

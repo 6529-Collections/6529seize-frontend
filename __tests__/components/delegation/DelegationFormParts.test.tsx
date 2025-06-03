@@ -10,12 +10,18 @@ jest.mock('react-bootstrap', () => ({
   Container: (p:any)=> <div {...p} />,
   Row: (p:any)=> <div {...p} />,
   Col: (p:any)=> <div {...p} />,
-  Form: { Control: (p:any)=> <input {...p}/> },
+  Form: {
+    Control: (p:any)=> <input {...p}/>,
+    Label:(p:any)=> <label {...p}/>,
+    Group:(p:any)=> <div {...p}/>,
+    Select:(p:any)=> <select {...p}/>,
+  },
 }));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({ FontAwesomeIcon: (p:any)=> <svg data-testid="icon" onClick={p.onClick} {...p}/> }));
 
 jest.mock('@tippyjs/react', () => (props:any) => <div data-testid="tippy" {...props}>{props.children}</div>);
+jest.mock('wagmi', () => ({ useEnsName: () => ({ data: null }) }));
 
 describe('Delegation form helpers', () => {
   it('DelegationExpiryCalendar sets date correctly', () => {
@@ -43,5 +49,33 @@ describe('Delegation form helpers', () => {
     const { getByLabelText } = render(<DelegationCloseButton title="Test" onHide={onHide} />);
     fireEvent.click(getByLabelText('Cancel Test'));
     expect(onHide).toHaveBeenCalled();
+  });
+
+  it('DelegationFormOptionsFormGroup selects option', () => {
+    const setSelected = jest.fn();
+    const mod = require('../../../components/delegation/DelegationFormParts');
+    const { DelegationFormOptionsFormGroup } = mod;
+    const { container } = render(
+      <DelegationFormOptionsFormGroup
+        title="T"
+        tooltip="tip"
+        options={[ 'a', 'b' ]}
+        selected=""
+        setSelected={setSelected}
+      />
+    );
+    const select = container.querySelector('select') as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: 'b' } });
+    expect(setSelected).toHaveBeenCalledWith('b');
+  });
+
+  it('DelegationFormLabel renders tooltip', () => {
+    const mod = require('../../../components/delegation/DelegationFormParts');
+    const { DelegationFormLabel } = mod;
+    const { getByText, getByTestId } = render(
+      <DelegationFormLabel title="Label" tooltip="info" />
+    );
+    expect(getByText('Label')).toBeInTheDocument();
+    expect(getByTestId('tippy')).toBeInTheDocument();
   });
 });

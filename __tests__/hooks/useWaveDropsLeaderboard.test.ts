@@ -52,4 +52,21 @@ describe('useWaveDropsLeaderboard', () => {
     unmount();
     expect(queryClientMock.removeQueries).toHaveBeenCalledWith({ queryKey: ['DROPS', { waveId: '2' }] });
   });
+
+  it('does not fetch next page when none left', async () => {
+    const fetchNext = jest.fn();
+    (useInfiniteQuery as jest.Mock).mockReturnValue({
+      data: { pages: [] },
+      fetchNextPage: fetchNext,
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      refetch: jest.fn(),
+    });
+    const { result } = renderHook(() => useWaveDropsLeaderboard({ waveId: '3', connectedProfileHandle: 'h' }));
+    await act(async () => {
+      await result.current.manualFetch();
+    });
+    expect(fetchNext).not.toHaveBeenCalled();
+  });
 });

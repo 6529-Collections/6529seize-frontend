@@ -44,7 +44,7 @@ const profile = { handle: 'alice', wallet: '0x1', display: 'Alice', level: 1 };
 function setup() {
   const push = jest.fn();
   const onClose = jest.fn();
-  useRouter.mockReturnValue({ push, query: {} });
+  useRouter.mockReturnValue({ push, query: {}, route: '/' });
   useWaves.mockReturnValue({ waves: [], isFetching: false });
   useLocalPreference.mockReturnValue(['PROFILES', jest.fn()]);
   useQueryMock.mockImplementation(({ queryKey }) => {
@@ -79,5 +79,13 @@ describe('HeaderSearchModal', () => {
     const { onClose } = setup();
     clickAwayCb();
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('navigates on enter key', () => {
+    const { push } = setup();
+    const input = screen.getByRole('textbox');
+    fireEvent.change(input, { target: { value: 'alice' } });
+    enterCb();
+    expect(push).toHaveBeenCalled();
   });
 });
