@@ -59,4 +59,18 @@ describe('CapacitorWidget', () => {
     await waitFor(() => expect(overlay).toBeVisible());
     expect(shareMock).toHaveBeenCalled();
   });
+
+  it('copies link in share popup', async () => {
+    Object.assign(navigator, { clipboard: { writeText: jest.fn().mockResolvedValue(undefined) } });
+    mockUseCapacitor.mockReturnValue({ keyboardVisible: false });
+    shareMock.mockRejectedValueOnce(new Error('not implemented'));
+
+    render(<CapacitorWidget />);
+    const shareButton = screen.getAllByRole('button')[2];
+    await userEvent.click(shareButton);
+    const copyButton = await screen.findByText('Copy link');
+    await userEvent.click(copyButton);
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(window.location.href);
+    expect(copyButton.textContent).toBe('Copied!');
+  });
 });

@@ -62,4 +62,10 @@ describe('useNotificationsQuery', () => {
     result.current({ identity: 'id' });
     expect(queryClientMock.prefetchInfiniteQuery).toHaveBeenCalled();
   });
+
+  it('does nothing when prefetch called without identity', () => {
+    const { result } = renderHook(() => usePrefetchNotifications());
+    result.current({ identity: null });
+    expect(queryClientMock.prefetchInfiniteQuery).not.toHaveBeenCalled();
+  });
 });

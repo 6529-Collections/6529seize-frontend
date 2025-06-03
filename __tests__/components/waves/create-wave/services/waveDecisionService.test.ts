@@ -43,4 +43,21 @@ describe('waveDecisionService', () => {
   it('calculates end date for cycles', () => {
     expect(calculateEndDateForCycles(0, [10, 20], 2)).toBe(60);
   });
+
+  it('returns empty errors when dates are valid', () => {
+    const errs = validateDateSequence({
+      submissionStartDate: 1,
+      votingStartDate: 2,
+      firstDecisionTime: 3,
+      subsequentDecisions: [],
+      isRolling: false,
+      endDate: null,
+    } as any);
+    expect(errs).toHaveLength(0);
+  });
+
+  it('calculates end date for rolling waves', () => {
+    const dates = { firstDecisionTime: 10, subsequentDecisions: [5], isRolling: true, endDate: 50 } as any;
+    expect(calculateEndDate(dates)).toBe(50);
+  });
 });
