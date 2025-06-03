@@ -99,31 +99,32 @@ describe('WavesListSearch', () => {
     expect(setIdentity).toHaveBeenCalledWith('new identity');
   });
 
-  it.skip('shows clear button when waveName has value', () => {
+  it('shows clear button when waveName has value', () => {
     render(<WavesListSearch {...defaultProps} waveName="test wave" />);
     
-    const clearButton = screen.getByRole('button', { hidden: true });
+    // The clear button is an SVG with onClick, so we can find it by its aria-hidden attribute and cursor class
+    const clearButton = document.querySelector('svg.tw-cursor-pointer');
     expect(clearButton).toBeInTheDocument();
   });
 
-  it.skip('does not show clear button when waveName is null', () => {
+  it('does not show clear button when waveName is null', () => {
     render(<WavesListSearch {...defaultProps} waveName={null} />);
     
-    const clearButtons = screen.queryAllByRole('button', { hidden: true });
-    expect(clearButtons).toHaveLength(0);
+    const clearButton = document.querySelector('svg.tw-cursor-pointer');
+    expect(clearButton).not.toBeInTheDocument();
   });
 
-  it.skip('calls setWaveName with null when clear button is clicked', () => {
+  it('calls setWaveName with null when clear button is clicked', () => {
     const setWaveName = jest.fn();
     render(<WavesListSearch {...defaultProps} waveName="test wave" setWaveName={setWaveName} />);
     
-    const clearButton = screen.getByRole('button', { hidden: true });
-    fireEvent.click(clearButton);
+    const clearButton = document.querySelector('svg.tw-cursor-pointer');
+    fireEvent.click(clearButton!);
     
     expect(setWaveName).toHaveBeenCalledWith(null);
   });
 
-  it.skip('has proper accessibility attributes', () => {
+  it('has proper accessibility attributes', () => {
     render(<WavesListSearch {...defaultProps} />);
     
     const searchInput = screen.getByRole('textbox', { name: 'Search waves' });
@@ -132,8 +133,9 @@ describe('WavesListSearch', () => {
     const label = screen.getByLabelText('Search waves');
     expect(label).toBeInTheDocument();
     
-    const searchIcon = screen.getByRole('img', { hidden: true });
-    expect(searchIcon).toHaveAttribute('aria-hidden', 'true');
+    const searchIcon = document.querySelector('svg[aria-hidden="true"]');
+    expect(searchIcon).toBeTruthy();
+    expect(searchIcon?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('has correct styling classes', () => {
@@ -146,9 +148,9 @@ describe('WavesListSearch', () => {
     expect(mainContainer).toHaveClass('tw-flex', 'tw-flex-col', 'tw-w-full');
   });
 
-  it.skip('handles empty string input correctly', () => {
+  it('handles empty string input correctly', () => {
     const setWaveName = jest.fn();
-    render(<WavesListSearch {...defaultProps} setWaveName={setWaveName} />);
+    render(<WavesListSearch {...defaultProps} waveName="test" setWaveName={setWaveName} />);
     
     const input = screen.getByRole('textbox', { name: 'Search waves' });
     fireEvent.change(input, { target: { value: '' } });
