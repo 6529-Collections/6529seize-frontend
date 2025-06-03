@@ -3,7 +3,8 @@ import React from 'react';
 import { CreateDropWaveWrapperContext } from '../../components/waves/CreateDropWaveWrapper';
 
 let mockIos = false;
-jest.mock('../../hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isIos: mockIos, keyboardVisible: false }) }));
+let keyboard = false;
+jest.mock('../../hooks/useCapacitor', () => ({ __esModule: true, default: () => ({ isIos: mockIos, keyboardVisible: keyboard }) }));
 
 beforeEach(() => {
   (global as any).ResizeObserver = class { observe(){} disconnect(){} };
@@ -24,5 +25,14 @@ describe('CreateDropWaveWrapper', () => {
     render(<CreateDropWaveWrapper><span>ok</span></CreateDropWaveWrapper>);
     const div = screen.getByText('ok').parentElement as HTMLElement;
     expect(div.className).toContain('tw-max-h-[calc(100vh-8.5rem)]');
+  });
+
+  it('omits margin when keyboard visible', () => {
+    mockIos = true;
+    keyboard = true;
+    const { CreateDropWaveWrapper } = require('../../components/waves/CreateDropWaveWrapper');
+    render(<CreateDropWaveWrapper context={CreateDropWaveWrapperContext.WAVE_CHAT}><span>hi</span></CreateDropWaveWrapper>);
+    const div = screen.getByText('hi').parentElement as HTMLElement;
+    expect(div.className).not.toContain('tw-mb-[3.75rem]');
   });
 });

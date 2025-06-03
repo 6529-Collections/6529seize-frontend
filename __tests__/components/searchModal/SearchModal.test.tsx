@@ -112,4 +112,26 @@ describe("SearchModalDisplay", () => {
     expect(screen.getAllByText("dup").length).toBe(1);
     expect(inputGroupProps.className).toContain("shakeWalletInput");
   });
+
+  it("clears all wallets", () => {
+    render(<Wrapper initial={["a", "b"]} />);
+    fireEvent.click(screen.getByText("Clear All"));
+    expect(screen.queryByText("a")).not.toBeInTheDocument();
+    expect(screen.getByText("No search queries added")).toBeInTheDocument();
+  });
+});
+
+describe("SearchWalletsDisplay button", () => {
+  it("opens modal when search button clicked", () => {
+    const setShow = jest.fn();
+    render(
+      <SearchWalletsDisplay
+        searchWallets={[]}
+        setSearchWallets={jest.fn()}
+        setShowSearchModal={setShow}
+      />
+    );
+    fireEvent.click(screen.getByRole("button"));
+    expect(setShow).toHaveBeenCalledWith(true);
+  });
 });

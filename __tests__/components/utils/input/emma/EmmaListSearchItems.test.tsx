@@ -27,4 +27,13 @@ describe('EmmaListSearchItems', () => {
     );
     expect(received.items).toEqual([item2]);
   });
+
+  it('returns all items when no criteria', () => {
+    render(
+      <AuthContext.Provider value={context}>
+        <EmmaListSearchItems open searchCriteria={null} selectedId={null} onSelect={jest.fn()} />
+      </AuthContext.Provider>
+    );
+    expect(received.items).toEqual([item1, item2]);
+  });
 });
