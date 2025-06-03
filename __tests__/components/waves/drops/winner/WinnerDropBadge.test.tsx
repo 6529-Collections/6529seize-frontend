@@ -17,4 +17,9 @@ describe('WinnerDropBadge', () => {
     expect(getByText(', 10:00 AM')).toBeInTheDocument();
     toLocaleString.mockRestore();
   });
+
+  it('handles ordinal suffixes above third', () => {
+    const { container } = render(<WinnerDropBadge rank={4} position={1} decisionTime={null} />);
+    expect(container.textContent).toContain('4th');
+  });
 });

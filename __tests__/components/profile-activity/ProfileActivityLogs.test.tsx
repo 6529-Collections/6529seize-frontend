@@ -59,4 +59,10 @@ describe('convertActivityLogParams', () => {
     expect(res.log_type).toBe('DROP_CREATED,HANDLE_EDIT');
     expect(res.rating_matter).toBe('FUN');
   });
+
+  it('converts numbers to strings', () => {
+    const res = convertActivityLogParams({ params: base, disableActiveGroup: false });
+    expect(res.page).toBe('1');
+    expect(res.page_size).toBe('10');
+  });
 });

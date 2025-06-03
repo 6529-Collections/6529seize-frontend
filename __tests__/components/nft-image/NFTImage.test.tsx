@@ -4,7 +4,7 @@ import NFTImage from '../../../components/nft-image/NFTImage';
 
 // Mock next/image
 jest.mock('next/image', () => {
-  return function MockImage({ alt, ...props }: any) {
+  return function MockImage({ alt, priority, ...props }: any) {
     return <img alt={alt} {...props} />;
   };
 });
@@ -128,5 +128,42 @@ describe('NFTImage', () => {
       <NFTImage {...defaultProps} nft={nft} animation={true} />
     );
     expect(container.querySelector('video')).toBeInTheDocument();
+  });
+
+  it('falls back through image sources on error', () => {
+    const nft = {
+      ...mockNFT,
+      scaled: 'https://example.com/scaled.png',
+      metadata: { image: 'https://example.com/meta.png' },
+    } as any;
+    render(
+      <NFTImage {...defaultProps} nft={nft} showThumbnail={true} />
+    );
+    const img = screen.getByRole('img') as HTMLImageElement;
+    expect(img.src).toContain('thumb.png');
+    img.dispatchEvent(new Event('error'));
+    expect(img.src).toContain('scaled.png');
+    img.dispatchEvent(new Event('error'));
+    expect(img.src).toContain('image.png');
+    img.dispatchEvent(new Event('error'));
+    expect(img.src).toContain('meta.png');
+  });
+
+  it('falls back to animation url on video error', () => {
+    const nft = {
+      ...mockNFT,
+      animation: 'https://example.com/anim.mp4',
+      compressed_animation: 'https://example.com/comp.mp4',
+      metadata: { animation: 'https://example.com/backup.mp4', animation_details: { format: 'MP4' } },
+    } as any;
+    const { container } = render(
+      <NFTImage {...defaultProps} nft={nft} animation={true} />
+    );
+    const video = container.querySelector('video') as HTMLVideoElement;
+    expect(video.src).toContain('comp.mp4');
+    video.dispatchEvent(new Event('error'));
+    expect(video.src).toContain('anim.mp4');
+    video.dispatchEvent(new Event('error'));
+    expect(video.src).toContain('backup.mp4');
   });
 });

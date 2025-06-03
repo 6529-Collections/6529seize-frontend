@@ -42,4 +42,15 @@ describe('CommunityMembersTableHeader', () => {
       expect.objectContaining({ hoveringOption: null })
     );
   });
+
+  it('forwards sort props to content component', () => {
+    render(<table><CommunityMembersTableHeader {...baseProps} isLoading={true} /></table>);
+    expect(mockSortable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activeSort: baseProps.activeSort,
+        sortDirection: baseProps.sortDirection,
+        isLoading: true,
+      })
+    );
+  });
 });

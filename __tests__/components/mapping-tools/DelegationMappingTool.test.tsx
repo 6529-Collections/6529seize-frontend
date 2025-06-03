@@ -25,6 +25,16 @@ describe('DelegationMappingTool drag and drop', () => {
     fireEvent.drop(dropzone, { dataTransfer: { files: [file] } });
     expect(dropzone.textContent).toContain('test.csv');
   });
+
+  it('clicking area triggers hidden file input', () => {
+    const { getByText, container } = render(<DelegationMappingTool />);
+    const textElement = getByText(/drag and drop/i);
+    const dropzone = textElement.parentElement as HTMLElement;
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const spy = jest.spyOn(input, 'click');
+    fireEvent.click(dropzone);
+    expect(spy).toHaveBeenCalled();
+  });
 });
 
 import { screen, waitFor } from '@testing-library/react';

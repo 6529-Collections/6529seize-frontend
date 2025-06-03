@@ -1,7 +1,13 @@
 import { render, screen } from '@testing-library/react';
-import { NextGenTokenImage } from '../../../components/nextGen/collections/nextgenToken/NextGenTokenImage';
+import {
+  NextGenTokenImage,
+  getNextGenImageUrl,
+  getNextGenIconUrl,
+  get8KUrl,
+  get16KUrl,
+} from '../../../components/nextGen/collections/nextgenToken/NextGenTokenImage';
 
-jest.mock('next/image', () => ({ __esModule: true, default: (props: any) => <img {...props} /> }));
+jest.mock('next/image', () => ({ __esModule: true, default: ({ priority, ...props }: any) => <img {...props} /> }));
 
 jest.mock('@tippyjs/react', () => (props: any) => <div>{props.children}</div>);
 
@@ -57,4 +63,12 @@ test('shows listing info with royalty image', () => {
   render(<NextGenTokenImage token={token} show_listing hide_link />);
   expect(screen.getByText(/Listed for/)).toBeInTheDocument();
   expect(screen.getByAltText('pepe')).toBeInTheDocument();
+});
+
+
+test('helper url generators', () => {
+  expect(getNextGenImageUrl(5)).toContain('/png/5');
+  expect(getNextGenIconUrl(5)).toContain('/thumbnail/5');
+  expect(get8KUrl(5)).toContain('/png8k/5');
+  expect(get16KUrl(5)).toContain('/png16k/5');
 });

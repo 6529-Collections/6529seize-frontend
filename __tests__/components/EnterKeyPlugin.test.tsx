@@ -66,4 +66,28 @@ describe('EnterKeyPlugin', () => {
     expect($createParagraphNode).toHaveBeenCalled();
     expect($insertNodes).toHaveBeenCalled();
   });
+
+  it('returns true without action when mobile', () => {
+    const isMobile = require('../../hooks/isMobileDevice') as jest.Mock;
+    isMobile.mockReturnValueOnce(true);
+    render(<EnterKeyPlugin disabled={false} handleSubmit={jest.fn()} canSubmitWithEnter={() => true} />);
+    const event = { preventDefault: jest.fn(), shiftKey: false } as any;
+    const result = commandFn(event);
+    expect(result).toBe(true);
+  });
+
+  it('handles heading shift+enter', () => {
+    const { $getSelection, $isRangeSelection } = require('lexical');
+    const { $isHeadingNode } = require('@lexical/rich-text');
+    const node = { getParent: () => null, getTopLevelElement: () => ({}) };
+    $getSelection.mockReturnValue({ anchor: { getNode: () => node } });
+    $isRangeSelection.mockReturnValue(true);
+    $isHeadingNode.mockReturnValue(true);
+
+    render(<EnterKeyPlugin disabled={false} handleSubmit={jest.fn()} canSubmitWithEnter={() => true} />);
+    const event = { preventDefault: jest.fn(), shiftKey: true } as any;
+    const result = commandFn(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(result).toBe(true);
+  });
 });
