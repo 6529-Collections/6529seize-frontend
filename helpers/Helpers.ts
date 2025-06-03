@@ -139,7 +139,7 @@ export function getDateDisplay(date: Date) {
   if (2 > days) {
     return `${Math.round(secondsAgo / (60 * 60))} hours ago`;
   }
-  return `${days} days ago`;
+  return `${days.toLocaleString()} days ago`;
 }
 
 export function areEqualAddresses(w1: any, w2: any) {
