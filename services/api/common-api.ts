@@ -215,11 +215,10 @@ export const commonApiDelete = async (param: {
   });
   if (!res.ok) {
     const body: any = await res.json();
-    return new Promise((_, rej) =>
-      rej(body?.error ?? res.statusText ?? "Something went wrong")
+    return Promise.reject(
+      new Error(body?.error ?? res.statusText ?? "Something went wrong")
     );
   }
-  return;
 };
 
 export const commonApiDeleteWithBody = async <
