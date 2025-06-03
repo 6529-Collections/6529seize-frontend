@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import CreateWavesMainStepIcon from '../../../../../components/waves/create-wave/main-steps/CreateWavesMainStepIcon';
 import { CreateWaveStepStatus } from '../../../../../types/waves.types';
 
@@ -18,8 +18,7 @@ describe('CreateWavesMainStepIcon', () => {
   it('renders DONE status with checkmark icon', () => {
     renderComponent(CreateWaveStepStatus.DONE);
     
-    // Use class selector to find the specific span element we want
-    const icon = document.querySelector('.tw-ring-primary-500.tw-bg-primary-600.tw-delay-0');
+    const icon = screen.getByTestId('wave-step-icon');
     expect(icon).toBeInTheDocument();
     expect(icon).toHaveClass(
       'tw-ring-primary-500',
@@ -28,7 +27,7 @@ describe('CreateWavesMainStepIcon', () => {
     );
     
     // Check for checkmark SVG
-    const svg = icon?.querySelector('svg');
+    const svg = icon.querySelector('svg');
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveAttribute('width', '13');
     expect(svg).toHaveAttribute('height', '11');
@@ -96,17 +95,15 @@ describe('CreateWavesMainStepIcon', () => {
     );
   });
 
-  it('handles debounced state updates for ACTIVE status', async () => {
+  it('handles debounced state updates for ACTIVE status', () => {
     const { rerender } = renderComponent(CreateWaveStepStatus.PENDING);
     
     // Change to ACTIVE status
     rerender(<CreateWavesMainStepIcon stepStatus={CreateWaveStepStatus.ACTIVE} />);
     
-    // The debounced status should eventually update
-    await waitFor(() => {
-      const icon = screen.getByTestId('wave-step-icon');
-      expect(icon).toHaveClass('tw-delay-500');
-    }, { timeout: 1000 });
+    // The wrapper should have ACTIVE classes applied
+    const icon = screen.getByTestId('wave-step-icon');
+    expect(icon).toHaveClass('tw-delay-500');
   });
 
   it('immediately updates for non-ACTIVE status changes', () => {
@@ -120,7 +117,7 @@ describe('CreateWavesMainStepIcon', () => {
     expect(icon).toHaveClass('tw-delay-0');
   });
 
-  it.skip('maintains proper SVG structure for checkmark icon', () => {
+  it('maintains proper SVG structure for checkmark icon', () => {
     renderComponent(CreateWaveStepStatus.DONE);
     
     const svg = screen.getByTestId('wave-step-icon').querySelector('svg');
@@ -129,8 +126,8 @@ describe('CreateWavesMainStepIcon', () => {
     expect(svg).toHaveAttribute('xmlns', 'http://www.w3.org/2000/svg');
     
     const path = svg?.querySelector('path');
-    expect(path).toHaveAttribute('fillRule', 'evenodd');
-    expect(path).toHaveAttribute('clipRule', 'evenodd');
+    expect(path).toHaveAttribute('fill-rule', 'evenodd');
+    expect(path).toHaveAttribute('clip-rule', 'evenodd');
     expect(path).toHaveAttribute('fill', 'currentColor');
   });
 
@@ -148,24 +145,25 @@ describe('CreateWavesMainStepIcon', () => {
     expect(circle).toHaveAttribute('r', '4');
   });
 
-  it.skip('renders different icons for each status', () => {
-    const { rerender } = renderComponent(CreateWaveStepStatus.DONE);
-    
-    // DONE should have 13x11 checkmark
+  it('renders different icons for each status', () => {
+    // Test DONE status
+    const { unmount: unmountDone } = renderComponent(CreateWaveStepStatus.DONE);
     let svg = screen.getByTestId('wave-step-icon').querySelector('svg');
     expect(svg).toHaveAttribute('width', '13');
     expect(svg).toHaveAttribute('height', '11');
     expect(svg?.querySelector('path')).toBeInTheDocument();
+    unmountDone();
     
-    // ACTIVE should have 8x8 white circle
-    rerender(<CreateWavesMainStepIcon stepStatus={CreateWaveStepStatus.ACTIVE} />);
+    // Test ACTIVE status
+    const { unmount: unmountActive } = renderComponent(CreateWaveStepStatus.ACTIVE);
     svg = screen.getByTestId('wave-step-icon').querySelector('svg');
     expect(svg).toHaveAttribute('width', '8');
     expect(svg).toHaveAttribute('height', '8');
     expect(svg?.querySelector('circle')).toHaveAttribute('fill', 'white');
+    unmountActive();
     
-    // PENDING should have 8x8 gray circle
-    rerender(<CreateWavesMainStepIcon stepStatus={CreateWaveStepStatus.PENDING} />);
+    // Test PENDING status
+    renderComponent(CreateWaveStepStatus.PENDING);
     svg = screen.getByTestId('wave-step-icon').querySelector('svg');
     expect(svg).toHaveAttribute('width', '8');
     expect(svg).toHaveAttribute('height', '8');
