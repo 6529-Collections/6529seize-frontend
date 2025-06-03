@@ -73,6 +73,13 @@ describe('MemeLab utilities', () => {
     expect(initialSortDir).toBe('DESC');
   });
 
+  it('falls back to defaults for invalid router values', () => {
+    const router = { query: { sort: 'bad', sort_dir: 'bad' } } as unknown as NextRouter;
+    const { initialSortDir, initialSort } = getInitialRouterValues(router);
+    expect(initialSort).toBe(MemeLabSort.AGE);
+    expect(initialSortDir).toBe('ASC');
+  });
+
   it('renders sort buttons and triggers callbacks', async () => {
     const setSort = jest.fn();
     const setVolume = jest.fn();
