@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppWallet from '../../../components/app-wallets/AppWallet';
 import { useAppWallets } from '../../../components/app-wallets/AppWalletsContext';
@@ -21,6 +21,7 @@ jest.mock('../../../components/dotLoader/DotLoader', () => ({__esModule:true,def
 jest.mock('../../../components/app-wallets/AppWalletModal', () => ({ UnlockAppWalletModal: () => null }));
 jest.mock('../../../components/app-wallets/app-wallet-helpers', () => ({ decryptData: jest.fn(()=>Promise.resolve('decrypted')) }));
 jest.mock('wagmi', () => ({ useBalance: jest.fn(), useChainId: jest.fn() }));
+jest.mock('@tippyjs/react', () => ({ __esModule: true, default: ({ children, content }: any) => <span data-testid={content}>{children}</span> }));
 
 const mockedUseAppWallets = useAppWallets as jest.Mock;
 const mockedUseAuth = useAuth as jest.Mock;
@@ -103,5 +104,12 @@ describe('AppWallet', () => {
     renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
     expect(screen.getByText(/1\s*ETH/)).toBeInTheDocument();
     expect(screen.getByText(/sepolia/)).toBeInTheDocument();
+  });
+
+  it('copies wallet address to clipboard', async () => {
+    renderComponent({fetchingAppWallets:false, appWalletsSupported:true, appWallets:[wallet], deleteAppWallet:jest.fn()});
+    const icon = screen.getByTestId('Copy address to clipboard').querySelector('svg') as SVGElement;
+    await userEvent.click(icon);
+    expect((navigator.clipboard.writeText as jest.Mock)).toHaveBeenCalledWith('0xABC');
   });
 });

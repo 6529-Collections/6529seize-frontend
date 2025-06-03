@@ -129,3 +129,17 @@ it('sets profile proxy and invalidates on modify', () => {
   expect(client.invalidateQueries).toHaveBeenCalledWith({ queryKey: [QueryKey.PROFILE_PROXY, { id: 'p1' }] });
   expect(client.invalidateQueries).toHaveBeenCalledWith({ queryKey: [QueryKey.PROFILE_PROFILE_PROXIES] });
 });
+
+it('sets wave data in cache', () => {
+  const client = new QueryClient();
+  let ctx: any;
+  function Child() { ctx = useContext(ReactQueryWrapperContext); return null; }
+  render(
+    <QueryClientProvider client={client}>
+      <ReactQueryWrapper><Child /></ReactQueryWrapper>
+    </QueryClientProvider>
+  );
+  const wave = { id: 'w123' } as any;
+  act(() => ctx.setWave(wave));
+  expect(client.getQueryData([QueryKey.WAVE, { wave_id: 'w123' }])).toEqual(wave);
+});

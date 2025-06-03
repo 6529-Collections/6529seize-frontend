@@ -89,3 +89,8 @@ test('loads waves and triggers next page on intersection', () => {
   fireEvent.click(screen.getByTestId('inter'));
   expect(fetchNextPageMock).toHaveBeenCalled();
 });
+
+test('hides create button when viewing other profile', () => {
+  renderComp({ connectedProfile: { handle: 'other' } });
+  expect(screen.queryByTestId('create')).not.toBeInTheDocument();
+});

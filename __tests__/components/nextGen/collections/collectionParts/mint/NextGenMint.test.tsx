@@ -59,4 +59,15 @@ describe('NextGenMint additional', () => {
     render(<NextGenMint collection={{ id:1, name:'C', artist:'A', artist_address:'0x', image:'img.png', public_start:'', public_end:'', merkle_root:'' } as any} mint_price={1} burn_amount={1} />);
     expect(screen.getByTestId('widget')).toBeInTheDocument();
   });
+
+  it('renders burn widget when collection uses external burn', async () => {
+    const helpers = require("../../../../../../components/nextGen/nextgen_helpers");
+    helpers.getStatusFromDates = jest.fn(() => 'PAUSED');
+    const api = require("../../../../../../services/6529api");
+    (api.fetchUrl as jest.Mock).mockResolvedValue({ al_type: 'external_burn' });
+    render(
+      <NextGenMint collection={{ id:1, name:'C', artist:'A', artist_address:'0x', image:'img.png', public_start:'', public_end:'', merkle_root:'root' } as any} mint_price={1} burn_amount={1} />
+    );
+    expect(await screen.findByTestId('burn-widget')).toBeInTheDocument();
+  });
 });
