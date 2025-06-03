@@ -2,8 +2,7 @@ import {
   getScaledImageUri,
   ImageScale,
 } from "../../../../helpers/image.helpers";
-import { INotificationDropReacted } from "../../../../types/feed.types";
-import { getTimeAgoShort } from "../../../../helpers/Helpers";
+import { getTimeAgoShort, numberWithCommas } from "../../../../helpers/Helpers";
 import Link from "next/link";
 import Drop, {
   DropInteractionParams,
@@ -16,6 +15,27 @@ import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import NotificationsFollowBtn from "../NotificationsFollowBtn";
 import { UserFollowBtnSize } from "../../../user/utils/UserFollowBtn";
 import { useEmoji } from "../../../../contexts/EmojiContext";
+import type {
+  INotificationDropVoted,
+  INotificationDropReacted,
+} from "../../../../types/feed.types";
+
+// Helper to decide text color for a vote:
+const getNotificationVoteColor = (vote: number) => {
+  if (vote > 0) return "tw-text-green";
+  if (vote < 0) return "tw-text-red";
+  return "tw-text-iron-500";
+};
+
+type NotificationUnion = INotificationDropVoted | INotificationDropReacted;
+
+interface Props {
+  notification: NotificationUnion;
+  activeDrop: ActiveDropState | null;
+  onReply: (param: DropInteractionParams) => void;
+  onQuote: (param: DropInteractionParams) => void;
+  onDropContentClick?: (drop: ExtendedDrop) => void;
+}
 
 export default function NotificationDropReacted({
   notification,
@@ -23,58 +43,125 @@ export default function NotificationDropReacted({
   onReply,
   onQuote,
   onDropContentClick,
-}: {
-  readonly notification: INotificationDropReacted;
-  readonly activeDrop: ActiveDropState | null;
-  readonly onReply: (param: DropInteractionParams) => void;
-  readonly onQuote: (param: DropInteractionParams) => void;
-  readonly onDropContentClick?: (drop: ExtendedDrop) => void;
-}) {
+}: Props) {
   const router = useRouter();
   const { emojiMap, findNativeEmoji } = useEmoji();
 
+  // Determine if this notification is a "vote" or a "reaction"
+  const isVoted =
+    (notification as INotificationDropVoted).additional_context.vote !==
+    undefined;
+  const isReacted =
+    (notification as INotificationDropReacted).additional_context.reaction !==
+    undefined;
+
+  // Build the "actionElement" (either "rated +123 • 2h ago" or "reacted 😊 • 2h ago")
+  let actionElement: React.ReactNode = null;
+
+  if (isVoted) {
+    const voteValue = (notification as INotificationDropVoted)
+      .additional_context.vote;
+    const timeAgo = getTimeAgoShort(notification.created_at);
+
+    actionElement = (
+      <>
+        <Link
+          href={`/${notification.related_identity.handle}`}
+          className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
+          {notification.related_identity.handle}
+        </Link>
+        <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+          rated
+        </span>
+        <span
+          className={`${getNotificationVoteColor(
+            voteValue
+          )} tw-pl-1 tw-font-medium tw-text-sm`}>
+          {voteValue > 0 && "+"}
+          {numberWithCommas(voteValue)}
+        </span>
+        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
+            &#8226;
+          </span>
+          {timeAgo}
+        </span>
+      </>
+    );
+  } else if (isReacted) {
+    const rawId = (
+      notification as INotificationDropReacted
+    ).additional_context.reaction.replaceAll(":", "");
+    let emojiNode: React.ReactNode = null;
+
+    // Try to find a custom emoji first
+    const custom = emojiMap
+      .flatMap((cat) => cat.emojis)
+      .find((e) => e.id === rawId);
+    if (custom) {
+      emojiNode = (
+        <img
+          src={custom.skins[0].src}
+          alt={rawId}
+          className="tw-max-w-5 tw-max-h-5 tw-object-contain"
+        />
+      );
+    } else {
+      // Fallback to native emoji if available
+      const native = findNativeEmoji(rawId);
+      if (native) {
+        emojiNode = (
+          <span className="tw-text-[1.2rem] tw-flex tw-items-center tw-justify-center">
+            {native.skins[0].native}
+          </span>
+        );
+      }
+    }
+
+    // If we failed to resolve an emoji, render nothing:
+    if (!emojiNode) {
+      return null;
+    }
+
+    const timeAgo = getTimeAgoShort(notification.created_at);
+
+    actionElement = (
+      <>
+        <Link
+          href={`/${notification.related_identity.handle}`}
+          className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
+          {notification.related_identity.handle}
+        </Link>
+        <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
+          reacted
+        </span>
+        {emojiNode}
+        <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
+          <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
+            &#8226;
+          </span>
+          {timeAgo}
+        </span>
+      </>
+    );
+  } else {
+    // If neither vote nor reaction, we don't know how to render:
+    return null;
+  }
+
+  // Common router callbacks:
   const onReplyClick = (serialNo: number) => {
     router.push(
       `/my-stream?wave=${notification.related_drops[0].wave.id}&serialNo=${serialNo}/`
     );
   };
-
   const onQuoteClick = (quote: ApiDrop) => {
     router.push(
       `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
     );
   };
 
-  const emojiId = notification.additional_context.reaction.replaceAll(":", "");
-
-  let emojiNode = null;
-  const custom = emojiMap
-    .flatMap((cat) => cat.emojis)
-    .find((e) => e.id === emojiId);
-
-  if (custom) {
-    emojiNode = (
-      <img
-        src={custom.skins[0].src}
-        alt={emojiId}
-        className="tw-max-w-5 tw-max-h-5 tw-object-contain"
-      />
-    );
-  } else {
-    const native = findNativeEmoji(emojiId);
-    if (native) {
-      emojiNode = (
-        <span className="tw-text-[1.2rem] tw-flex tw-items-center tw-justify-center">
-          {native.skins[0].native}
-        </span>
-      );
-    }
-  }
-
-  if (!emojiNode) {
-    return null;
-  }
-
+  // Finally, render the shared JSX structure:
   return (
     <div className="tw-flex tw-gap-x-3 tw-w-full">
       <div className="tw-space-y-2 tw-w-full">
@@ -87,7 +174,7 @@ export default function NotificationDropReacted({
                     notification.related_identity.pfp,
                     ImageScale.W_AUTO_H_50
                   )}
-                  alt="#"
+                  alt={notification.related_identity.handle ?? ""}
                   className="tw-flex-shrink-0 tw-object-contain tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-iron-700"
                 />
               ) : (
@@ -95,23 +182,10 @@ export default function NotificationDropReacted({
               )}
             </div>
             <span className="tw-inline-flex tw-flex-wrap tw-gap-x-1 tw-items-center">
-              <Link
-                href={`/${notification.related_identity.handle}`}
-                className="tw-no-underline tw-font-semibold tw-text-sm tw-text-iron-50">
-                {notification.related_identity.handle}
-              </Link>
-              <span className="tw-text-iron-400 tw-font-normal tw-text-sm">
-                reacted
-              </span>
-              {emojiNode}
-              <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-                <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
-                  &#8226;
-                </span>
-                {getTimeAgoShort(notification.created_at)}
-              </span>
+              {actionElement}
             </span>
           </div>
+
           <NotificationsFollowBtn
             profile={notification.related_identity}
             size={UserFollowBtnSize.SMALL}

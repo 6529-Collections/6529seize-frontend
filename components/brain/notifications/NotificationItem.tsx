@@ -6,7 +6,6 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
 import NotificationDropReplied from "./drop-replied/NotificationDropReplied";
-import NotificationDropVoted from "./drop-voted/NotificationDropVoted";
 import NotificationIdentityMentioned from "./identity-mentioned/NotificationIdentityMentioned";
 import NotificationIdentitySubscribed from "./identity-subscribed/NotificationIdentitySubscribed";
 import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
@@ -51,15 +50,6 @@ export default function NotificationItem({
           />
         );
       case ApiNotificationCause.DropVoted:
-        return (
-          <NotificationDropVoted
-            notification={notification}
-            activeDrop={activeDrop}
-            onReply={onReply}
-            onQuote={onQuote}
-            onDropContentClick={onDropContentClick}
-          />
-        );
       case ApiNotificationCause.DropReacted:
         return (
           <NotificationDropReacted
