@@ -47,22 +47,28 @@ jest.mock('../../../../components/waves/small-leaderboard/WaveSmallLeaderboardIt
 });
 
 jest.mock('../../../../components/waves/drops/winner/WinnerDropBadge', () => {
-  return function MockWinnerDropBadge({ rank, decisionTime }: any) {
-    return (
-      <div data-testid="winner-badge">
-        Winner Badge - Rank: {rank} {decisionTime ? `Time: ${decisionTime}` : ''}
-      </div>
-    );
+  return {
+    __esModule: true,
+    default: function MockWinnerDropBadge({ rank, decisionTime }: any) {
+      return (
+        <div data-testid="winner-badge">
+          Winner Badge - Rank: {rank} {decisionTime ? `Time: ${decisionTime}` : ''}
+        </div>
+      );
+    },
   };
 });
 
 jest.mock('../../../../components/drops/view/utils/DropVoteProgressing', () => {
-  return function MockDropVoteProgressing({ current, projected }: any) {
-    return (
-      <div data-testid="vote-progressing">
-        Progress: {current}/{projected}
-      </div>
-    );
+  return {
+    __esModule: true,
+    default: function MockDropVoteProgressing({ current, projected }: any) {
+      return (
+        <div data-testid="vote-progressing">
+          Progress: {current}/{projected}
+        </div>
+      );
+    },
   };
 });
 
@@ -98,7 +104,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     jest.clearAllMocks();
   });
 
-  it.skip('renders drop with rank 1 styling', () => {
+  it('renders drop with rank 1 styling', () => {
     const drop = createMockDrop({ rank: 1 });
     render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -112,7 +118,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(screen.getByText('Winner Badge - Rank: 1 Time: 1234567890')).toBeInTheDocument();
   });
 
-  it.skip('renders drop with rank 2 styling', () => {
+  it('renders drop with rank 2 styling', () => {
     const drop = createMockDrop({ rank: 2 });
     render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -126,7 +132,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(screen.getByText('Winner Badge - Rank: 2 Time: 1234567890')).toBeInTheDocument();
   });
 
-  it.skip('renders drop with rank 3 styling', () => {
+  it('renders drop with rank 3 styling', () => {
     const drop = createMockDrop({ rank: 3 });
     render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -140,7 +146,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(screen.getByText('Winner Badge - Rank: 3 Time: 1234567890')).toBeInTheDocument();
   });
 
-  it.skip('does not render winner badge when rank is null', () => {
+  it('does not render winner badge when rank is null', () => {
     const drop = createMockDrop({ rank: null });
     render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -153,7 +159,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(screen.queryByTestId('winner-badge')).not.toBeInTheDocument();
   });
 
-  it.skip('renders author information correctly', () => {
+  it('renders author information correctly', () => {
     const drop = createMockDrop();
     render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -168,7 +174,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(screen.getByAltText('testuser')).toBeInTheDocument(); // PFP
   });
 
-  it.skip('renders placeholder when author has no pfp', () => {
+  it('renders placeholder when author has no pfp', () => {
     const drop = createMockDrop({
       author: {
         id: 'author-1',
@@ -190,7 +196,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(placeholderDiv).toBeInTheDocument();
   });
 
-  it.skip('displays rating information', () => {
+  it('displays rating information', () => {
     const drop = createMockDrop({ rating: 1234 });
     render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -204,7 +210,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(screen.getByTestId('vote-progressing')).toBeInTheDocument();
   });
 
-  it.skip('renders all child components', () => {
+  it('renders all child components', () => {
     const drop = createMockDrop();
     render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -218,7 +224,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(screen.getByTestId('item-outcomes')).toBeInTheDocument();
   });
 
-  it.skip('applies correct CIC color for highly accurate', () => {
+  it('applies correct CIC color for highly accurate', () => {
     const drop = createMockDrop({
       author: { ...createMockDrop().author, cic: 95 },
     });
@@ -234,7 +240,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(cicIndicator).toBeInTheDocument();
   });
 
-  it.skip('applies correct CIC color for inaccurate', () => {
+  it('applies correct CIC color for inaccurate', () => {
     const drop = createMockDrop({
       author: { ...createMockDrop().author, cic: 25 },
     });
@@ -250,9 +256,9 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(cicIndicator).toBeInTheDocument();
   });
 
-  it.skip('stops propagation when author link is clicked', () => {
+  it('stops propagation when author link is clicked', () => {
     const drop = createMockDrop();
-    render(
+    const { container } = render(
       <WaveSmallLeaderboardTopThreeDrop
         drop={drop}
         wave={mockWave}
@@ -261,13 +267,18 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     );
 
     const authorLink = screen.getByRole('link');
-    const mockEvent = { stopPropagation: jest.fn() };
-    fireEvent.click(authorLink, mockEvent);
+    
+    // Spy on stopPropagation on the prototype
+    const stopPropagationSpy = jest.spyOn(Event.prototype, 'stopPropagation');
+    
+    fireEvent.click(authorLink);
 
-    expect(mockEvent.stopPropagation).toHaveBeenCalled();
+    expect(stopPropagationSpy).toHaveBeenCalled();
+    
+    stopPropagationSpy.mockRestore();
   });
 
-  it.skip('has correct hover styling classes', () => {
+  it('has correct hover styling classes', () => {
     const drop = createMockDrop();
     const { container } = render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -281,7 +292,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(dropContainer).toBeInTheDocument();
   });
 
-  it.skip('renders with correct rank-based border styling', () => {
+  it('renders with correct rank-based border styling', () => {
     const drop = createMockDrop({ rank: 1 });
     const { container } = render(
       <WaveSmallLeaderboardTopThreeDrop
@@ -296,7 +307,7 @@ describe('WaveSmallLeaderboardTopThreeDrop', () => {
     expect(styledElement).toBeInTheDocument();
   });
 
-  it.skip('handles missing winning context gracefully', () => {
+  it('handles missing winning context gracefully', () => {
     const drop = createMockDrop({ winning_context: undefined });
     render(
       <WaveSmallLeaderboardTopThreeDrop

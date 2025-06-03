@@ -233,7 +233,7 @@ describe('WaveWinnersSmallOutcome', () => {
     expect(screen.getByText('500')).toBeInTheDocument();
   });
 
-  it.skip('shows tooltip content with Rep outcomes', () => {
+  it('shows tooltip content with Rep outcomes', () => {
     mockedUseDropOutcomes.mockReturnValue({
       outcomes: mockOutcomesWithRep,
       haveOutcomes: true,
@@ -245,7 +245,7 @@ describe('WaveWinnersSmallOutcome', () => {
     fireEvent.click(button);
 
     expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
-    expect(screen.getByText('Rep')).toBeInTheDocument();
+    expect(screen.getAllByText('Rep')).toHaveLength(2);
     expect(screen.getByText('200')).toBeInTheDocument();
     expect(screen.getByText('150')).toBeInTheDocument();
     expect(screen.getByText('Art')).toBeInTheDocument();
@@ -313,7 +313,7 @@ describe('WaveWinnersSmallOutcome', () => {
     expect(parentClickHandler).not.toHaveBeenCalled();
   });
 
-  it.skip('handles onClickOutside for tooltip', () => {
+  it('handles onClickOutside for tooltip', () => {
     mockedUseDropOutcomes.mockReturnValue({
       outcomes: mockOutcomesWithNIC,
       haveOutcomes: true,
@@ -327,8 +327,9 @@ describe('WaveWinnersSmallOutcome', () => {
     expect(screen.getByTestId('tippy-content')).toBeInTheDocument();
 
     // Simulate clicking outside
-    const container = screen.getByTestId('tippy-container');
-    fireEvent.blur(container);
+    const tippyContainer = screen.getByTestId('tippy-container');
+    const childDiv = tippyContainer.firstChild as HTMLElement;
+    fireEvent.blur(childDiv);
 
     expect(screen.queryByTestId('tippy-content')).not.toBeInTheDocument();
   });
