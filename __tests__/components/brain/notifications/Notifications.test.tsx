@@ -112,4 +112,20 @@ describe('Notifications component', () => {
 
     expect(screen.getByTestId('wrapper')).toBeInTheDocument();
   });
+
+  it('shows no items component when query done but empty', () => {
+    useNotificationsQueryMock.mockReturnValue({
+      items: [],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn(),
+      isInitialQueryDone: true,
+    });
+
+    render(<Notifications />);
+
+    expect(screen.getByTestId('no-items')).toBeInTheDocument();
+  });
 });
