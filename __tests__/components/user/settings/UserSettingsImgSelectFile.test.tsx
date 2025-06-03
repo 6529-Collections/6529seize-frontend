@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import UserSettingsImgSelectFile from '../../../../components/user/settings/UserSettingsImgSelectFile';
@@ -15,7 +15,6 @@ describe('UserSettingsImgSelectFile', () => {
     jest.clearAllMocks();
   });
 
-
   it('accepts valid file', async () => {
     const { container } = render(<UserSettingsImgSelectFile imageToShow={null} setFile={setFile} />, { wrapper: Wrapper });
     const input = container.querySelector('#pfp-upload-input') as HTMLInputElement;
@@ -31,6 +30,16 @@ describe('UserSettingsImgSelectFile', () => {
     Object.defineProperty(bigFile, 'size', { value: 3000000 });
     await userEvent.upload(input, bigFile);
     expect(await findByText('File size must be less than 2MB')).toBeInTheDocument();
+    expect(setFile).not.toHaveBeenCalled();
+  });
+
+  it('rejects invalid file type', async () => {
+    const { container } = render(<UserSettingsImgSelectFile imageToShow={null} setFile={setFile} />, { wrapper: Wrapper });
+    const input = container.querySelector('#pfp-upload-input') as HTMLInputElement;
+    const bad = new File(['1'], 'file.txt', { type: 'text/plain' });
+    fireEvent.change(input, { target: { files: [bad] } });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(setToast).toHaveBeenCalledWith({ type: 'error', message: 'Invalid file type' });
     expect(setFile).not.toHaveBeenCalled();
   });
 });

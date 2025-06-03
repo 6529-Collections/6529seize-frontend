@@ -58,4 +58,18 @@ describe('WebSocketProvider', () => {
     expect(ws.close).toHaveBeenCalled();
     expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
   });
+  it('reconnects on unexpected close', () => {
+    jest.useFakeTimers();
+    const wrapper = ({ children }: any) => (
+      <WebSocketProvider config={{ url: 'ws://test' }}>{children}</WebSocketProvider>
+    );
+    const { result } = renderHook(() => React.useContext(WebSocketContext)!, { wrapper });
+    act(() => { result.current.connect('abc'); });
+    const ws = (global.WebSocket as jest.Mock).mock.results[0].value as any;
+    act(() => { ws.triggerOpen(); });
+    act(() => { ws.onclose({ code: 1006 }); });
+    act(() => { jest.advanceTimersByTime(2000); });
+    expect((global.WebSocket as jest.Mock).mock.calls[1][0]).toBe('ws://test?token=abc');
+    jest.useRealTimers();
+  });
 });

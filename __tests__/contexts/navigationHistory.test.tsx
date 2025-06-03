@@ -7,7 +7,7 @@ import { useViewContext } from '../../components/navigation/ViewContext';
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 jest.mock('../../components/navigation/ViewContext', () => ({ useViewContext: jest.fn() }));
 
-const routerMock = { asPath: '/', push: jest.fn(), back: jest.fn(), events: { on: jest.fn(), off: jest.fn() } };
+const routerMock = { pathname: '/', asPath: '/', push: jest.fn(), back: jest.fn(), events: { on: jest.fn(), off: jest.fn() } };
 const hardBack = jest.fn();
 (useRouter as jest.Mock).mockReturnValue(routerMock);
 (useViewContext as jest.Mock).mockReturnValue({ hardBack });
