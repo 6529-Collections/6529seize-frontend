@@ -12,14 +12,12 @@ export default function DropListItemContentMention({
     <LazyTippy
       placement={"top"}
       interactive={false}
-      content={<UserProfileTooltip user={user.mentioned_profile_id} />}
-    >
+      content={<UserProfileTooltip user={user.mentioned_profile_id} />}>
       <Link
         onClick={(e) => e.stopPropagation()}
         href={`/${user.handle_in_content}`}
         target="_blank"
-        className="tw-no-underline tw-font-medium tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
-      >
+        className="tw-align-middle tw-no-underline tw-font-medium tw-text-primary-400 hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out">
         @{user.handle_in_content}
       </Link>
     </LazyTippy>
