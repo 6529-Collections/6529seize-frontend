@@ -1014,3 +1014,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 };
 
 export default memo(CreateDropContent);
+
+// Export internal helpers for testing
+export { handleDropPart, convertMetadataToDropMetadata };

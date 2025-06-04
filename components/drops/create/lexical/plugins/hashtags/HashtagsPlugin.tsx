@@ -276,4 +276,9 @@ const NewHashtagsPlugin = forwardRef<
 });
 
 NewHashtagsPlugin.displayName = "NewHashtagsPlugin";
+export {
+  useHashtagLookupService,
+  checkForAtSignHashtags,
+  getPossibleQueryMatch,
+};
 export default NewHashtagsPlugin;

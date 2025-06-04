@@ -17,23 +17,29 @@ import crypto from "crypto";
 const { createCoverageMap } = libCoverage;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Add parallel processing configuration - REQUIRED
-if (!process.env.PROCESS_ID || !process.env.TOTAL_PROCESSES) {
-  console.error("Error: Required environment variables not set.");
+// Add parallel processing configuration - support both CLI args and env vars
+let PROCESS_ID, TOTAL_PROCESSES;
+
+// Check if arguments are provided via command line
+if (process.argv.length >= 4) {
+  PROCESS_ID = parseInt(process.argv[2]);
+  TOTAL_PROCESSES = parseInt(process.argv[3]);
+} else if (process.env.PROCESS_ID && process.env.TOTAL_PROCESSES) {
+  PROCESS_ID = parseInt(process.env.PROCESS_ID);
+  TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES);
+} else {
+  console.error("Error: Process configuration not provided.");
   console.error("");
-  console.error("Please set up your environment first:");
-  console.error("  source scripts/setup-coverage-env.sh <process_id> <total_processes>");
+  console.error("You can either:");
+  console.error("1. Pass arguments directly:");
+  console.error("   npm run improve-coverage 0 1  # Single process");
+  console.error("   npm run improve-coverage 0 8  # Process 0 of 8");
   console.error("");
-  console.error("Examples:");
-  console.error("  source scripts/setup-coverage-env.sh 0 1  # Single process");
-  console.error("  source scripts/setup-coverage-env.sh 0 8  # Process 0 of 8");
-  console.error("");
-  console.error("Then run: npm run improve-coverage");
+  console.error("2. Set up environment variables:");
+  console.error("   source scripts/setup-coverage-env.sh <process_id> <total_processes>");
+  console.error("   npm run improve-coverage");
   process.exit(1);
 }
-
-const PROCESS_ID = parseInt(process.env.PROCESS_ID);
-const TOTAL_PROCESSES = parseInt(process.env.TOTAL_PROCESSES);
 
 if (isNaN(PROCESS_ID) || PROCESS_ID < 0 || PROCESS_ID >= TOTAL_PROCESSES) {
   console.error(`PROCESS_ID must be between 0 and ${TOTAL_PROCESSES - 1}`);
@@ -54,7 +60,7 @@ const COVERAGE_INCREMENT_PERCENT_ENV = parseFloat(
 );
 const COVERAGE_INCREMENT_PERCENT = !isNaN(COVERAGE_INCREMENT_PERCENT_ENV)
   ? COVERAGE_INCREMENT_PERCENT_ENV
-  : 0.2;
+  : 0;
 
 // Add time limit configuration
 const TIME_LIMIT_MINUTES_ENV = parseFloat(
@@ -62,7 +68,13 @@ const TIME_LIMIT_MINUTES_ENV = parseFloat(
 );
 const TIME_LIMIT_MINUTES = !isNaN(TIME_LIMIT_MINUTES_ENV)
   ? TIME_LIMIT_MINUTES_ENV
-  : 20;
+  : 60;
+
+// Number of files to suggest each iteration
+const FILE_SUGGESTION_COUNT_ENV = parseInt(process.env.FILE_SUGGESTION_COUNT);
+const FILE_SUGGESTION_COUNT = !isNaN(FILE_SUGGESTION_COUNT_ENV)
+  ? FILE_SUGGESTION_COUNT_ENV
+  : 10;
 
 function run(command) {
   execSync(command, { stdio: "inherit" });
@@ -135,10 +147,8 @@ function main() {
   let isNewFile = false;
 
   try {
-    console.log(`Attempting to open existing file: ${progressPath}`);
     try {
       fd = openSync(progressPath, fsConstants.O_RDWR | fsConstants.O_NOFOLLOW);
-      console.log(`Successfully opened existing file: ${progressPath}`);
       isNewFile = false;
 
       const chunks = [];
@@ -258,12 +268,6 @@ function main() {
       if (currentCoverage > initialCoverage) {
         initialCoverage = currentCoverage;
       }
-      targetCoverage = initialCoverage + COVERAGE_INCREMENT_PERCENT;
-      console.log(
-        `Safeguard: Adjusted target. Initial: ${initialCoverage.toFixed(
-          2
-        )}%, Target: ${targetCoverage.toFixed(2)}%`
-      );
     }
     if (targetCoverage > 100) {
       targetCoverage = 100;
@@ -308,42 +312,25 @@ function main() {
     }
   }
 
-  console.log(`initial: ${initialCoverage.toFixed(2)}%`);
-  console.log(`target: ${targetCoverage.toFixed(2)}%`);
-  console.log(`current: ${currentCoverage.toFixed(2)}%`);
-
   // Check time constraint
   const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
-  console.log(`elapsed time: ${elapsedMinutes.toFixed(1)} minutes`);
 
-  if (currentCoverage >= targetCoverage) {
-    console.log(
-      `\nSuccess: Current coverage of ${currentCoverage.toFixed(
-        2
-      )}% has met or exceeded the target of ${targetCoverage.toFixed(
-        2
-      )}%. Task completed.`
-    );
-  } else if (elapsedMinutes >= TIME_LIMIT_MINUTES) {
+  if (elapsedMinutes >= TIME_LIMIT_MINUTES) {
     console.log(
       `\nSuccess: Time limit of ${TIME_LIMIT_MINUTES} minutes has been reached. Task completed due to time constraint.`
     );
-    console.log(
-      `Final coverage: ${currentCoverage.toFixed(
-        2
-      )}% (target was ${targetCoverage.toFixed(2)}%)`
-    );
+    console.log(`Final coverage: ${currentCoverage.toFixed(2)}%`);
   } else {
-    const remainingMinutes = TIME_LIMIT_MINUTES - elapsedMinutes;
-    console.log(
-      `\nTime remaining: ${remainingMinutes.toFixed(1)} minutes until automatic completion.`
-    );
     
-    const nextFiles = getLowCoverageFiles(coverageData, 1);
+    const nextFiles = getLowCoverageFiles(coverageData, FILE_SUGGESTION_COUNT);
     if (nextFiles.length > 0) {
       console.log(
-        `\nAction: Add tests for ${nextFiles[0]} to improve coverage. Then re-run 'npm run improve-coverage'.`
+        `\nAction: Add tests for:`
       );
+      for (const file of nextFiles) {
+        console.log(`- ${file}`);
+      }
+      console.log(`to improve coverage. After each set of tests, re-run 'npm run improve-coverage' to get new suggestions. Continue until the time limit is reached.`)
     } else {
       // Check if there are low coverage files, just not assigned to this process
       const map = createCoverageMap(coverageData);
@@ -358,11 +345,7 @@ function main() {
         );
       } else {
         console.log(
-          `\nInfo: All individual files meet the 80% threshold. However, current coverage of ${currentCoverage.toFixed(
-            2
-          )}% has not yet reached the target of ${targetCoverage.toFixed(
-            2
-          )}%. Please add more tests to any module to increase the overall percentage. Then re-run 'npm run improve-coverage'.`
+          `\nInfo: All individual files meet the 80% threshold. Continue adding meaningful tests across the project and re-run 'npm run improve-coverage' until the time limit message is displayed.`
         );
       }
     }

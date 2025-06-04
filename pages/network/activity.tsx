@@ -27,14 +27,14 @@ const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   groupId: null,
 };
 
-export interface CommunityActivityPage {
+export interface CommunityActivityPageProps {
   readonly logsPage: CountlessPage<ProfileActivityLog>;
 }
 
 export default function CommunityActivityPage({
   pageProps,
 }: {
-  readonly pageProps: CommunityActivityPage;
+  readonly pageProps: CommunityActivityPageProps;
 }) {
   const { setTitle } = useContext(AuthContext);
   useEffect(() => {
@@ -69,7 +69,7 @@ export async function getServerSideProps(
   res: any,
   resolvedUrl: any
 ): Promise<{
-  props: CommunityActivityPage;
+  props: CommunityActivityPageProps;
 }> {
   try {
     const headers = getCommonHeaders(req);

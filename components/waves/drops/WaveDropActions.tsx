@@ -10,6 +10,8 @@ import WaveDropFollowAuthor from "./WaveDropFollowAuthor";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
+import { useSeizeSettings } from "../../../contexts/SeizeSettingsContext";
+import { ApiDropType } from "../../../generated/models/ApiDropType";
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
@@ -28,6 +30,11 @@ export default function WaveDropActions({
 }: WaveDropActionsProps) {
   const { connectedProfile } = useContext(AuthContext);
   const { canDelete } = useDropInteractionRules(drop);
+  const { isMemesWave } = useSeizeSettings();
+
+  // Hide voting for participation drops in memes waves
+  const shouldShowVoting = showVoting && 
+    !(drop.drop_type === ApiDropType.Participatory && isMemesWave(drop.wave?.id));
 
   return (
     <div className="tw-absolute tw-z-20 tw-right-2 tw-top-0 group-hover:tw-opacity-100 tw-opacity-0 tw-transition-opacity tw-duration-200 tw-ease-in-out">
@@ -50,7 +57,7 @@ export default function WaveDropActions({
           {canDelete && <WaveDropActionsOptions drop={drop} />}
           <WaveDropActionsAddReaction drop={drop} />
         </div>
-        {showVoting && <WaveDropActionsRate drop={drop} />}
+        {shouldShowVoting && <WaveDropActionsRate drop={drop} />}
       </div>
     </div>
   );

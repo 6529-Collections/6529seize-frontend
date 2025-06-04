@@ -45,14 +45,6 @@ export function DownloadsLayout({
   );
 }
 
-/**
- * DownloadsTable
- *   - data: array of “rows” (any type T)
- *   - columns: an array of strings (column headers)
- *   - renderRow: a function that receives (item, index) and returns a <tr>…</tr>
- *
- * If data.length === 0, it shows <NothingHereYetSummer />. If data is undefined, shows nothing.
- */
 export function DownloadsTable<T>({
   data,
   columns,

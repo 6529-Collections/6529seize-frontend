@@ -84,7 +84,7 @@ interface Revocation {
   wallet: string;
 }
 
-function getParams(
+export function getParams(
   address: string | undefined,
   collection: string | undefined,
   functionName: string,
@@ -124,7 +124,7 @@ function getParams(
   return params;
 }
 
-function getReadParams(
+export function getReadParams(
   address: string | undefined,
   collection: string | undefined,
   functionName: string,
@@ -136,7 +136,7 @@ function getReadParams(
   return getParams(address, collection, functionName, useCases);
 }
 
-function getActiveDelegationsReadParams(
+export function getActiveDelegationsReadParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
   functionName: string
@@ -144,7 +144,7 @@ function getActiveDelegationsReadParams(
   return getParams(address, collection, functionName, DELEGATION_USE_CASES);
 }
 
-function getConsolidationReadParams(
+export function getConsolidationReadParams(
   address: `0x${string}` | string | undefined,
   collection: `0x${string}` | string | undefined,
   consolidationAddresses: ContractDelegation
@@ -166,7 +166,7 @@ function getConsolidationReadParams(
   return [];
 }
 
-function formatExpiry(myDate: any) {
+export function formatExpiry(myDate: any) {
   const date = new Date(parseInt(myDate) * 1000);
   const year = date.getUTCFullYear();
   const month = String(date.getUTCMonth() + 1).padStart(2, "0");
@@ -174,7 +174,7 @@ function formatExpiry(myDate: any) {
   return `${year}-${month}-${day}`;
 }
 
-function getDelegationsFromData(data: any) {
+export function getDelegationsFromData(data: any) {
   const myDelegations: ContractDelegation[] = [];
   data.map((d: any, index: number) => {
     const walletDelegations: ContractWalletDelegation[] = [];

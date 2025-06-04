@@ -51,7 +51,7 @@ export const convertActivityLogParams = ({
     page: `${params.page}`,
     page_size: `${params.pageSize}`,
     log_type: params.logTypes.length
-      ? [...params.logTypes].sort((a, d) => a.localeCompare(d)).join(",")
+      ? [...params.logTypes].sort((a, b) => a.localeCompare(b)).join(",")
       : "",
   };
 

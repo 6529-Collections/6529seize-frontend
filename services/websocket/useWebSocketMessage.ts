@@ -52,7 +52,7 @@ export function useWebSocketMessage<T = any>(
  * @returns
  *   - isConnected: Whether the WebSocket is connected
  */
-function useWebSocketMessages<
+export function useWebSocketMessages<
   T extends Record<WsMessageType, any>
 >(subscriptions: {
   [K in keyof T]?: (data: T[K]) => void;

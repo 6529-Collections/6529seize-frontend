@@ -25,9 +25,11 @@ const config = {
     "^.+.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$": `<rootDir>/__mocks__/fileMock.js`, // You might need to create this mock file
     // Mock nano-css which is used by react-use
     "^nano-css(.*)$": "<rootDir>/__mocks__/nanoCssMock.js",
+    // Mock dom-helpers/css for react-bootstrap
+    "^dom-helpers/css$": "<rootDir>/__mocks__/css-functions.js",
     // Handle next/font - If you use next/font, uncomment and ensure mock exists
-    // '@next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
-    // 'next/font/(.*)': `<rootDir>/__mocks__/nextFontMock.js`,
+    '^@next/font/(.*)$': `<rootDir>/__mocks__/nextFontMock.js`,
+    '^next/font/(.*)$': `<rootDir>/__mocks__/nextFontMock.js`,
   },
   // Test Discovery
   testMatch: ["<rootDir>/**/*.test.ts", "<rootDir>/**/*.test.tsx"],
@@ -76,6 +78,9 @@ const config = {
   coverageDirectory: "coverage",
   coverageProvider: "babel", // Explicitly set provider if needed, default is babel
   coverageReporters: ["json", "lcov", "text", "clover", "json-summary"],
+  reporters: [
+    ["default", { "silent": true, "verbose": false }]
+  ],
 };
 
 module.exports = config; // Export the config object directly
