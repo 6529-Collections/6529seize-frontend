@@ -420,7 +420,7 @@ function DropPartMarkdown({
     ) => (
       <p
         key={getRandomObjectId()}
-        className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass} tw-flex tw-items-center`}>
+        className={`tw-mb-0 tw-leading-6 tw-text-iron-200 tw-font-normal tw-whitespace-pre-wrap tw-break-words word-break tw-transition tw-duration-300 tw-ease-out ${textSizeClass}`}>
         {customRenderer({
           content: params.children,
           mentionedUsers,
