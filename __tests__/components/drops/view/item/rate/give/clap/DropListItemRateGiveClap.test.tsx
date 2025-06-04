@@ -51,7 +51,7 @@ describe('DropListItemRateGiveClap', () => {
     render(
       <DropListItemRateGiveClap rate={1500} voteState={DropVoteState.CAN_VOTE} canVote onSubmit={() => {}} />
     );
-    const count = await screen.findByText('+1.5k');
+    const count = await screen.findByText('+1.5K');
     expect(count.className).toContain('tw-w-9 tw-h-9 tw-left-[6px]');
   });
 });

@@ -11,6 +11,10 @@ jest.mock("../../../../components/waves/drops/WaveDropActionsRate", () => () => 
 jest.mock("../../../../components/utils/select/dropdown/CommonDropdownItemsMobileWrapper", () => (props: any) => props.isOpen ? <div data-testid="wrapper">{props.children}</div> : null);
 
 jest.mock("../../../../contexts/SeizeSettingsContext", () => ({ useSeizeSettings: () => ({ isMemesWave: jest.fn().mockReturnValue(true) }) }));
+jest.mock("../../../../contexts/EmojiContext", () => ({ 
+  useEmoji: () => ({ emojiMap: [], loading: false, categories: [], categoryIcons: {}, findNativeEmoji: jest.fn() }),
+  EmojiProvider: ({ children }: any) => children
+}));
 
 beforeAll(() => {
   Object.assign(navigator, {
@@ -23,7 +27,7 @@ test("copies link and shows feedback", async () => {
   const drop = { id: "1", serial_no: 1, wave: { id: "w" }, drop_type: ApiDropType.Chat, author: { handle: "alice" } } as any;
   render(
     <AuthContext.Provider value={{ connectedProfile: { handle: "alice" }, activeProfileProxy: null } as any}>
-      <WaveDropMobileMenu drop={drop} isOpen showReplyAndQuote longPressTriggered={false} setOpen={jest.fn()} onReply={jest.fn()} onQuote={jest.fn()} />
+      <WaveDropMobileMenu drop={drop} isOpen showReplyAndQuote longPressTriggered={false} setOpen={jest.fn()} onReply={jest.fn()} onQuote={jest.fn()} onAddReaction={jest.fn()} />
     </AuthContext.Provider>
   );
   await userEvent.click(screen.getByText("Copy link"));
@@ -34,7 +38,7 @@ test("hides follow and clap when author and memes wave", () => {
   const drop = { id: "1", serial_no: 1, wave: { id: "w" }, drop_type: ApiDropType.Participatory, author: { handle: "alice" } } as any;
   render(
     <AuthContext.Provider value={{ connectedProfile: { handle: "alice" }, activeProfileProxy: null } as any}>
-      <WaveDropMobileMenu drop={drop} isOpen showReplyAndQuote longPressTriggered={false} setOpen={jest.fn()} onReply={jest.fn()} onQuote={jest.fn()} />
+      <WaveDropMobileMenu drop={drop} isOpen showReplyAndQuote longPressTriggered={false} setOpen={jest.fn()} onReply={jest.fn()} onQuote={jest.fn()} onAddReaction={jest.fn()} />
     </AuthContext.Provider>
   );
   expect(screen.queryByTestId("follow")).toBeNull();

@@ -3,7 +3,7 @@ import WaveItemFollow from '../../../../components/waves/list/WaveItemFollow';
 import { AuthContext } from '../../../../components/auth/Auth';
 import { ReactQueryWrapperContext } from '../../../../components/react-query-wrapper/ReactQueryWrapper';
 import { useMutation } from '@tanstack/react-query';
-import { commonApiPost, commonApiDeleWithBody } from '../../../../services/api/common-api';
+import { commonApiPost, commonApiDeleteWithBody } from '../../../../services/api/common-api';
 
 jest.mock('@tanstack/react-query');
 jest.mock('../../../../services/api/common-api');
@@ -67,7 +67,7 @@ describe('WaveItemFollow', () => {
       fireEvent.click(screen.getByRole('button'));
       await Promise.resolve();
     });
-    expect(commonApiDeleWithBody).toHaveBeenCalled();
+    expect(commonApiDeleteWithBody).toHaveBeenCalled();
     expect(onWaveFollowChange).toHaveBeenCalledWith({ waveId: 'w', following: false });
   });
 });

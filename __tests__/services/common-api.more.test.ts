@@ -1,4 +1,4 @@
-import { commonApiPut, commonApiDelete, commonApiDeleWithBody, commonApiPostForm } from '../../services/api/common-api';
+import { commonApiPut, commonApiDelete, commonApiDeleteWithBody, commonApiPostForm } from '../../services/api/common-api';
 import { getAuthJwt, getStagingAuth } from '../../services/auth/auth.utils';
 
 jest.mock('../../services/auth/auth.utils', () => ({
@@ -31,9 +31,9 @@ describe('commonApi utility methods', () => {
     });
   });
 
-  it('commonApiDeleWithBody deletes with body', async () => {
+  it('commonApiDeleteWithBody deletes with body', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({ r: 2 }) });
-    const res = await commonApiDeleWithBody({ endpoint: 'del', body: { a: 1 } });
+    const res = await commonApiDeleteWithBody({ endpoint: 'del', body: { a: 1 } });
     expect(res).toEqual({ r: 2 });
     expect(global.fetch).toHaveBeenCalledWith('http://api/api/del', {
       method: 'DELETE',
@@ -43,7 +43,7 @@ describe('commonApi utility methods', () => {
   });
 
   it('commonApiDelete sends DELETE request', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({});
+    (global.fetch as jest.Mock).mockResolvedValue({ ok: true });
     await commonApiDelete({ endpoint: 'x' });
     expect(global.fetch).toHaveBeenCalledWith('http://api/api/x', {
       method: 'DELETE',

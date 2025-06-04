@@ -27,7 +27,7 @@ describe('EmojiNode', () => {
   });
 
   it('renders emoji image when found', () => {
-    useEmoji.mockReturnValue({ emojiMap:[{ emojis:[{ id:'smile', skins:[{ src:'img.png' }] }] }], loading:false });
+    useEmoji.mockReturnValue({ emojiMap:[{ emojis:[{ id:'smile', skins:[{ src:'img.png' }] }] }], loading:false, findNativeEmoji: jest.fn() });
     const node = new EmojiNode('smile');
     const element = node.decorate(null as any, {} as any);
     render(<>{element}</>);
@@ -37,7 +37,7 @@ describe('EmojiNode', () => {
   });
 
   it('renders placeholder when emoji missing', () => {
-    useEmoji.mockReturnValue({ emojiMap:[{ emojis:[] }], loading:false });
+    useEmoji.mockReturnValue({ emojiMap:[{ emojis:[] }], loading:false, findNativeEmoji: jest.fn().mockReturnValue(null) });
     const node = new EmojiNode('unknown');
     const element = node.decorate(null as any, {} as any);
     render(<>{element}</>);

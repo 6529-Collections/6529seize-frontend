@@ -8,6 +8,9 @@ jest.mock('../../../../hooks/drops/useDropInteractionRules', () => ({
 }));
 
 jest.mock('../../../../components/drops/view/item/rate/give/DropListItemRateGive', () => (props: any) => <div data-testid="rate" data-mobile={props.isMobile} />);
+jest.mock('../../../../contexts/SeizeSettingsContext', () => ({ 
+  useSeizeSettings: () => ({ isMemesWave: jest.fn().mockReturnValue(false) })
+}));
 
 const drop: any = { id: 'd1' };
 

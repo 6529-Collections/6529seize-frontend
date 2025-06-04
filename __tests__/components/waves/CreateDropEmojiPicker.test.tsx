@@ -99,9 +99,10 @@ describe("CreateDropEmojiPicker", () => {
     // The portal wrapper should have updated styles
     const wrapper = picker.parentElement!;
     await waitFor(() => {
-      expect(wrapper).toHaveStyle("position: absolute");
-      expect(wrapper).toHaveStyle("top: -320px");
-      expect(wrapper).toHaveStyle("left: -50px");
+      expect(wrapper.style.position).toBe("absolute");
+      expect(wrapper.style.top).toBe("-320px");
+      expect(wrapper.style.left).toBe("-50px");
+      expect(wrapper.style.zIndex).toBe("1000");
     });
 
     // Select an emoji

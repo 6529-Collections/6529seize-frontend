@@ -5,6 +5,9 @@ import { NotificationsProvider, useNotificationsContext } from '../../../compone
 jest.mock('../../../hooks/useCapacitor', () => () => ({ isCapacitor: true, isIos: true }));
 jest.mock('next/router', () => ({ __esModule: true, useRouter: jest.fn(() => ({ push: jest.fn() })) }));
 jest.mock('../../../components/auth/Auth', () => ({ useAuth: () => ({ connectedProfile: null }) }));
+jest.mock('../../../services/api/common-api', () => ({
+  commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
+}));
 
 const wrapper: React.FC<{children: React.ReactNode}> = ({ children }) => (
   <NotificationsProvider>{children}</NotificationsProvider>
@@ -56,19 +59,21 @@ it('removes notifications when functions called', async () => {
 
 describe('push notification action handling', () => {
   it('redirects based on notification data', async () => {
+    const push = jest.fn();
+    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue({ push } as any);
+    
     const addListenerMock = jest.fn((evt, cb) => {
       if (evt === 'pushNotificationActionPerformed') {
         setTimeout(() => cb({ notification: { data: { redirect: 'profile', handle: 'abc', notification_id: '1' } } }), 0);
       }
     });
-    const push = jest.fn();
-    jest.spyOn(require('next/router'), 'useRouter').mockReturnValue({ push } as any);
+    
     const { PushNotifications } = require('@capacitor/push-notifications');
     PushNotifications.addListener = addListenerMock;
 
     const { result } = renderHook(() => useNotificationsContext(), { wrapper });
     await act(async () => {
-      await new Promise((r) => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 100));
     });
     expect(push).toHaveBeenCalledWith('/abc');
     expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();

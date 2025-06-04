@@ -16,6 +16,9 @@ jest.mock('../../../../components/waves/drops/WaveDropFollowAuthor', () => () =>
 
 jest.mock('../../../../hooks/drops/useDropInteractionRules', () => ({ useDropInteractionRules: jest.fn() }));
 jest.mock('../../../../contexts/SeizeSettingsContext', () => ({ useSeizeSettings: jest.fn() }));
+jest.mock('../../../../contexts/EmojiContext', () => ({ 
+  useEmoji: () => ({ emojiMap: [], loading: false, categories: [], categoryIcons: {}, findNativeEmoji: jest.fn() })
+}));
 
 const rulesMock = useDropInteractionRules as jest.Mock;
 const settingsMock = useSeizeSettings as jest.Mock;
@@ -23,7 +26,7 @@ const settingsMock = useSeizeSettings as jest.Mock;
 const auth = { connectedProfile: { handle: 'alice' } } as any;
 const wrapper = ({ children }: any) => <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 
-const baseDrop: any = { author: { handle: 'bob' }, wave: { id: 'w1' }, drop_type: ApiDropType.Chat };
+const baseDrop: any = { id: 'drop1', author: { handle: 'bob' }, wave: { id: 'w1' }, drop_type: ApiDropType.Chat };
 
 beforeEach(() => {
   rulesMock.mockReturnValue({ canDelete: true });

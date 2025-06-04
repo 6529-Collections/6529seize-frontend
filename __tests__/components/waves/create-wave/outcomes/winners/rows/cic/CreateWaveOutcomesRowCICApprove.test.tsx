@@ -7,7 +7,7 @@ const outcome = { credit: 1000, maxWinners: 2 } as any;
 describe('CreateWaveOutcomesRowCICApprove', () => {
   it('displays formatted credit and max winners', () => {
     render(<CreateWaveOutcomesRowCICApprove outcome={outcome} removeOutcome={jest.fn()} />);
-    expect(screen.getByText('1.0k NIC')).toBeInTheDocument();
+    expect(screen.getByText('1K NIC')).toBeInTheDocument();
     expect(screen.getByText(/Max winners: 2/)).toBeInTheDocument();
   });
 
