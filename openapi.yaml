@@ -475,6 +475,47 @@ paths:
           description: Invalid request
         "404":
           description: Drop not found
+  /drops/{dropId}/reactions:
+    post:
+      tags:
+        - Drops
+      summary: React to a drop
+      operationId: reactToDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiAddReactionToDropRequest"
+      responses:
+        "201":
+          description: successful operation
+    delete:
+      tags:
+        - Drops
+      summary: Remove reaction from a drop
+      operationId: removeReactionFromDrop
+      parameters:
+        - name: dropId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiAddReactionToDropRequest"
+      responses:
+        "201":
+          description: successful operation
   /drops/{dropId}/subscriptions:
     post:
       tags:
@@ -2854,6 +2895,13 @@ components:
       type: http
       scheme: bearer
   schemas:
+    ApiAddReactionToDropRequest:
+      type: object
+      required:
+        - reaction
+      properties:
+        reaction:
+          type: string
     ApiAggregatedActivity:
       type: object
       required:
@@ -3957,6 +4005,7 @@ components:
         - subscribed_actions
         - rank
         - is_signed
+        - reactions
       properties:
         id:
           type: string
@@ -4041,6 +4090,10 @@ components:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
         is_signed:
           type: boolean
+        reactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropReaction"
     ApiDropAndDropVote:
       type: object
       required:
@@ -4057,6 +4110,7 @@ components:
         - rating
         - min_rating
         - max_rating
+        - reaction
       properties:
         rating:
           type: number
@@ -4067,10 +4121,9 @@ components:
         max_rating:
           type: number
           format: int64
-        rating_currency:
-          enum:
-            - REP
-            - TDH
+        reaction:
+          type: string
+          nullable: true
     ApiDropMedia:
       type: object
       required:
@@ -4158,6 +4211,18 @@ components:
         category:
           type: string
           maxLength: 100
+    ApiDropReaction:
+      type: object
+      required:
+        - reaction
+        - profiles
+      properties:
+        reaction:
+          type: string
+        profiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileMin"
     ApiDropReferencedNFT:
       type: object
       required:
@@ -4291,6 +4356,7 @@ components:
         - context_profile_context
         - rank
         - is_signed
+        - reactions
       properties:
         id:
           type: string
@@ -4373,6 +4439,10 @@ components:
             $ref: "#/components/schemas/ApiDropSubscriptionTargetAction"
         is_signed:
           type: boolean
+        reactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropReaction"
     ApiFeedItem:
       type: object
       required:
@@ -5025,6 +5095,7 @@ components:
         - DROP_QUOTED
         - DROP_REPLIED
         - DROP_VOTED
+        - DROP_REACTED
         - WAVE_CREATED
         - ALL_DROPS
     ApiNotificationsResponse:

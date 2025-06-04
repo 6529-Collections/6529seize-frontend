@@ -18,6 +18,7 @@ interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
 export enum ProcessIncomingDropType {
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   DROP_INSERT = "DROP_INSERT",
+  DROP_REACTION_UPDATE = "DROP_REACTION_UPDATE",
 }
 
 type ProcessIncomingDropFn = (
@@ -122,6 +123,8 @@ export function useWaveRealtimeUpdater({
         return;
       }
 
+      console.log("processIncomingDrop", drop, type);
+
       const waveId = drop.wave.id;
 
       const currentData = getData(waveId);
@@ -138,15 +141,22 @@ export function useWaveRealtimeUpdater({
       if (
         (type === ProcessIncomingDropType.DROP_RATING_UPDATE &&
           !existingDrop) ||
+        (type === ProcessIncomingDropType.DROP_REACTION_UPDATE &&
+          !existingDrop) ||
         existingDrop?.type === DropSize.LIGHT
       ) {
         return;
       }
 
-      if (type === ProcessIncomingDropType.DROP_RATING_UPDATE && existingDrop) {
+      if (
+        (type === ProcessIncomingDropType.DROP_RATING_UPDATE ||
+          type === ProcessIncomingDropType.DROP_REACTION_UPDATE) &&
+        existingDrop
+      ) {
         const apiDrop = await commonApiFetch<ApiDrop>({
           endpoint: `drops/${drop.id}`,
         });
+        console.log("apiDrop", apiDrop);
         if (apiDrop) {
           updateData({
             key: waveId,
@@ -230,6 +240,16 @@ export function useWaveRealtimeUpdater({
       processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_RATING_UPDATE
+      );
+    }
+  );
+
+  useWebSocketMessage<WsDropUpdateMessage["data"]>(
+    WsMessageType.DROP_REACTION_UPDATE,
+    (messageData) => {
+      processIncomingDrop(
+        messageData,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
       );
     }
   );

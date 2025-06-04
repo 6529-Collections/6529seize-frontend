@@ -128,19 +128,25 @@ export const commonApiFetchWithRetry = async <
             new Promise((_, reject) => {
               // Check if already aborted before adding listener
               if (fetchParams.signal?.aborted) {
-                reject(new DOMException("Request aborted during delay", "AbortError"));
+                reject(
+                  new DOMException("Request aborted during delay", "AbortError")
+                );
                 return;
               }
               let timeoutId: NodeJS.Timeout | undefined = undefined;
               const abortListener = () => {
                 if (timeoutId) clearTimeout(timeoutId); // Clear the timeout if aborted
-                reject(new DOMException("Request aborted during delay", "AbortError"));
+                reject(
+                  new DOMException("Request aborted during delay", "AbortError")
+                );
               };
               // Ensure the delayPromise resolves and cleans up listener if not aborted
               timeoutId = setTimeout(() => {
                 fetchParams.signal?.removeEventListener("abort", abortListener);
               }, delayWithJitter);
-              fetchParams.signal?.addEventListener("abort", abortListener, { once: true });
+              fetchParams.signal?.addEventListener("abort", abortListener, {
+                once: true,
+              });
             }),
           ]);
         } else {
@@ -203,13 +209,19 @@ export const commonApiDelete = async (param: {
   endpoint: string;
   headers?: Record<string, string>;
 }): Promise<void> => {
-  await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
+  const res = await fetch(`${process.env.API_ENDPOINT}/api/${param.endpoint}`, {
     method: "DELETE",
     headers: getHeaders(param.headers),
   });
+  if (!res.ok) {
+    const body: any = await res.json();
+    return Promise.reject(
+      new Error(body?.error ?? res.statusText ?? "Something went wrong")
+    );
+  }
 };
 
-export const commonApiDeleWithBody = async <
+export const commonApiDeleteWithBody = async <
   T,
   U,
   Z = Record<string, string>

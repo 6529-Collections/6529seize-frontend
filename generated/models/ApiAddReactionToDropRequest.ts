@@ -12,33 +12,12 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiDropContextProfileContext {
-    'rating': number;
-    'min_rating': number;
-    'max_rating': number;
-    'reaction': string | null;
+export class ApiAddReactionToDropRequest {
+    'reaction': string;
 
     static readonly discriminator: string | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
-        {
-            "name": "rating",
-            "baseName": "rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "min_rating",
-            "baseName": "min_rating",
-            "type": "number",
-            "format": "int64"
-        },
-        {
-            "name": "max_rating",
-            "baseName": "max_rating",
-            "type": "number",
-            "format": "int64"
-        },
         {
             "name": "reaction",
             "baseName": "reaction",
@@ -47,7 +26,7 @@ export class ApiDropContextProfileContext {
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDropContextProfileContext.attributeTypeMap;
+        return ApiAddReactionToDropRequest.attributeTypeMap;
     }
 
     public constructor() {

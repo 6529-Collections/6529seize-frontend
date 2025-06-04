@@ -7,7 +7,7 @@ import { AuthContext } from "../../auth/Auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
 import {
-  commonApiDeleWithBody,
+  commonApiDeleteWithBody,
   commonApiFetch,
   commonApiPost,
 } from "../../../services/api/common-api";
@@ -24,6 +24,24 @@ export enum UserFollowBtnSize {
   MEDIUM = "MEDIUM",
 }
 
+export const FOLLOW_BTN_BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
+  [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-1.5 tw-text-xs",
+  [UserFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2.5 tw-text-sm",
+};
+
+export const FOLLOW_BTN_SVG_CLASSES: Record<UserFollowBtnSize, string> = {
+  [UserFollowBtnSize.SMALL]: "tw-h-4 tw-w-4",
+  [UserFollowBtnSize.MEDIUM]: "tw-h-5 tw-w-5",
+};
+
+export const FOLLOW_BTN_LOADER_SIZES: Record<
+  UserFollowBtnSize,
+  CircleLoaderSize
+> = {
+  [UserFollowBtnSize.SMALL]: CircleLoaderSize.SMALL,
+  [UserFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
+};
+
 export default function UserFollowBtn({
   handle,
   size = UserFollowBtnSize.MEDIUM,
@@ -35,21 +53,6 @@ export default function UserFollowBtn({
   readonly onDirectMessage?: () => void;
   readonly directMessageLoading?: boolean;
 }) {
-  const BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
-    [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-1.5 tw-text-xs",
-    [UserFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2.5 tw-text-sm",
-  };
-
-  const SVG_CLASSES: Record<UserFollowBtnSize, string> = {
-    [UserFollowBtnSize.SMALL]: "tw-h-4 tw-w-4",
-    [UserFollowBtnSize.MEDIUM]: "tw-h-5 tw-w-5",
-  };
-
-  const LOADER_SIZES: Record<UserFollowBtnSize, CircleLoaderSize> = {
-    [UserFollowBtnSize.SMALL]: CircleLoaderSize.SMALL,
-    [UserFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
-  };
-
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
@@ -103,7 +106,7 @@ export default function UserFollowBtn({
 
   const unFollowMutation = useMutation({
     mutationFn: async () => {
-      await commonApiDeleWithBody<
+      await commonApiDeleteWithBody<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
@@ -150,13 +153,11 @@ export default function UserFollowBtn({
           content="Direct Message"
           placement="left"
           theme="dark"
-          delay={250}
-        >
+          delay={250}>
           <button
             onClick={onDirectMessage}
             aria-label="Send direct message"
-            className={`${BUTTON_CLASSES[size]} tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700 tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
-          >
+            className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700 tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
             {directMessageLoading ? (
               <CircleLoader size={CircleLoaderSize.SMALL} />
             ) : (
@@ -170,14 +171,13 @@ export default function UserFollowBtn({
         disabled={mutating || isFetching}
         type="button"
         aria-label={following ? "Unfollow" : "Follow"}
-        className={`${BUTTON_CLASSES[size]} ${
+        className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${
           following
             ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
             : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
-        } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
-      >
+        } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
         {mutating || isFetching ? (
-          <CircleLoader size={LOADER_SIZES[size]} />
+          <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
         ) : following ? (
           <svg
             className="tw-h-3 tw-w-3"
@@ -186,8 +186,7 @@ export default function UserFollowBtn({
             viewBox="0 0 17 15"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               fillRule="evenodd"
               clipRule="evenodd"
@@ -197,12 +196,11 @@ export default function UserFollowBtn({
           </svg>
         ) : (
           <svg
-            className={SVG_CLASSES[size]}
+            className={FOLLOW_BTN_SVG_CLASSES[size]}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12 5V19M5 12H19"
               stroke="currentColor"

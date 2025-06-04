@@ -13,7 +13,7 @@ import Drop, {
 import { DropSize, ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
-import { getNotificationVoteColor } from "../drop-voted/NotificationDropVoted";
+import { getNotificationVoteColor } from "../drop-reacted/NotificationDropReacted";
 
 export default function NotificationAllDrops({
   notification,
@@ -45,8 +45,7 @@ export default function NotificationAllDrops({
     const userLink = (
       <Link
         href={`/${notification.related_identity.handle}`}
-        className="tw-no-underline tw-font-semibold"
-      >
+        className="tw-no-underline tw-font-semibold">
         {notification.related_identity.handle}
       </Link>
     );
@@ -62,8 +61,7 @@ export default function NotificationAllDrops({
           <span
             className={`${getNotificationVoteColor(
               notification.additional_context.vote
-            )} tw-pl-1 tw-font-medium`}
-          >
+            )} tw-pl-1 tw-font-medium`}>
             {notification.additional_context.vote > 0 && "+"}
             {numberWithCommas(notification.additional_context.vote)}
           </span>
@@ -82,8 +80,7 @@ export default function NotificationAllDrops({
         <span className="tw-text-iron-400"> new post from </span>
         <Link
           href={`/${notification.related_drops[0].author.handle}`}
-          className="tw-no-underline tw-font-semibold"
-        >
+          className="tw-no-underline tw-font-semibold">
           {notification.related_drops[0].author.handle}
         </Link>
       </>
@@ -111,7 +108,7 @@ export default function NotificationAllDrops({
           <span className="tw-text-sm tw-font-normal tw-text-iron-50">
             {getContent()}{" "}
             <span className="tw-text-sm tw-text-iron-300 tw-font-normal tw-whitespace-nowrap">
-              <span className="tw-font-bold tw-mx-0.5 tw-text-xs tw-text-iron-400">
+              <span className="tw-font-bold tw-mr-1 tw-text-xs tw-text-iron-400">
                 &#8226;
               </span>{" "}
               {getTimeAgoShort(notification.created_at)}
