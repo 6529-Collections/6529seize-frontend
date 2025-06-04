@@ -18,6 +18,7 @@ import {
 import { useAuth } from "../../auth/Auth";
 import clsx from "clsx";
 import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
+import useIsMobileDevice from "../../../hooks/isMobileDevice";
 
 const LONG_PRESS_DELAY = 250;
 
@@ -48,6 +49,7 @@ export function WaveDropReaction({
 }) {
   const { setToast, connectedProfile } = useAuth();
   const { emojiMap, findNativeEmoji } = useEmoji();
+  const isMobile = useIsMobileDevice();
 
   // initial
   const initialTotal = reaction.profiles.length;
@@ -64,6 +66,7 @@ export function WaveDropReaction({
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isLongPressRef = useRef(false);
+  const tooltipTargetRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (total !== initialTotalRef.current) {
@@ -123,75 +126,97 @@ export function WaveDropReaction({
     return { emojiNode: null, emojiNodeTooltip: null };
   }, [emojiId, emojiMap, findNativeEmoji]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    isLongPressRef.current = false;
-    timerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      // Manually show tooltip
-      const tooltipEl = document.querySelector(
-        `[data-tooltip-id="reaction-${drop.id}-${emojiId}"]`
-      );
-      tooltipEl?.dispatchEvent(new Event("pointerenter", { bubbles: true }));
-    }, LONG_PRESS_DELAY);
+  const showTooltip = (el: HTMLElement) => {
+    tooltipTargetRef.current = el;
+    el.dispatchEvent(new PointerEvent("pointerenter", { bubbles: true }));
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-
-    if (isLongPressRef.current) {
-      e.preventDefault();
-      e.stopPropagation();
+  const hideTooltip = () => {
+    if (tooltipTargetRef.current) {
+      tooltipTargetRef.current.dispatchEvent(
+        new PointerEvent("pointerleave", { bubbles: true })
+      );
+      tooltipTargetRef.current = null;
     }
   };
 
-  const handleClick = useCallback(
-    async (e: React.MouseEvent) => {
-      if (isLongPressRef.current) {
-        e.preventDefault();
-        return;
+  useEffect(() => {
+    if (!isMobile) return;
+    const handleTapOutside = (e: MouseEvent | TouchEvent) => {
+      if (
+        tooltipTargetRef.current &&
+        !tooltipTargetRef.current.contains(e.target as Node)
+      ) {
+        hideTooltip();
       }
+    };
 
-      // optimistic update
-      setSelected((s) => !s);
-      setTotal((n) => n + (selected ? -1 : +1));
+    window.addEventListener("mousedown", handleTapOutside);
+    window.addEventListener("touchstart", handleTapOutside);
+
+    return () => {
+      window.removeEventListener("mousedown", handleTapOutside);
+      window.removeEventListener("touchstart", handleTapOutside);
+    };
+  }, []);
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>) => {
+    const el = e.currentTarget;
+
+    isLongPressRef.current = false;
+    timerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+
+      if (tooltipTargetRef.current === el) {
+        hideTooltip(); // tapping same button → hide
+      } else {
+        showTooltip(el); // show new
+      }
+    }, LONG_PRESS_DELAY);
+  };
+
+  const handleTouchEnd = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  };
+
+  const handleClick = useCallback(async () => {
+    // optimistic update
+    setSelected((s) => !s);
+    setTotal((n) => n + (selected ? -1 : +1));
+    if (selected) {
+      setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
+    } else {
+      setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+    }
+
+    try {
+      const body = { reaction: reaction.reaction };
+      const endpoint = `drops/${drop.id}/reaction`;
       if (selected) {
+        await commonApiDelete({
+          endpoint,
+        });
+      } else {
+        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+          endpoint,
+          body,
+        });
+      }
+    } catch (error) {
+      let msg = selected ? "Error removing reaction" : "Error adding reaction";
+      if (typeof error === "string") msg = error;
+      setToast({ message: msg, type: "error" });
+
+      // optimistic revert
+      setSelected((s) => !s);
+      setTotal((n) => n + (selected ? +1 : -1));
+      if (!selected) {
         setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
       } else {
         setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
       }
-
-      try {
-        const body = { reaction: reaction.reaction };
-        const endpoint = `drops/${drop.id}/reaction`;
-        if (selected) {
-          await commonApiDelete({
-            endpoint,
-          });
-        } else {
-          await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-            endpoint,
-            body,
-          });
-        }
-      } catch (error) {
-        let msg = selected
-          ? "Error removing reaction"
-          : "Error adding reaction";
-        if (typeof error === "string") msg = error;
-        setToast({ message: msg, type: "error" });
-
-        // optimistic revert
-        setSelected((s) => !s);
-        setTotal((n) => n + (selected ? +1 : -1));
-        if (!selected) {
-          setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
-        } else {
-          setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
-        }
-      }
-    },
-    [selected, drop.id, reaction.reaction, setToast]
-  );
+    }
+  }, [selected, drop.id, reaction.reaction, setToast]);
 
   // tooltip text
   const tooltipText = useMemo(() => {
@@ -224,10 +249,19 @@ export function WaveDropReaction({
   return (
     <>
       <button
-        onClick={handleClick}
+        onClick={(e) => {
+          if (isMobile && isLongPressRef.current) {
+            // suppress click after long-press
+            e.preventDefault();
+            return;
+          }
+          handleClick();
+        }}
+        {...(isMobile && {
+          onTouchStart: handleTouchStart,
+          onTouchEnd: handleTouchEnd,
+        })}
         data-tooltip-id={`reaction-${drop.id}-${emojiId}`}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
         className={clsx(
           "tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-border tw-border-solid hover:tw-text-iron-100",
           borderStyle,
