@@ -19,6 +19,8 @@ import { useAuth } from "../../auth/Auth";
 import clsx from "clsx";
 import { ApiAddReactionToDropRequest } from "../../../generated/models/ApiAddReactionToDropRequest";
 
+const LONG_PRESS_DELAY = 250;
+
 interface WaveDropReactionsProps {
   readonly drop: ApiDrop;
 }
@@ -59,6 +61,9 @@ export function WaveDropReaction({
     reaction.profiles.map((p) => p.handle ?? p.id)
   );
   const [animate, setAnimate] = useState(false);
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isLongPressRef = useRef(false);
 
   useEffect(() => {
     if (total !== initialTotalRef.current) {
@@ -118,45 +123,75 @@ export function WaveDropReaction({
     return { emojiNode: null, emojiNodeTooltip: null };
   }, [emojiId, emojiMap, findNativeEmoji]);
 
-  // click handler: wait for API, then update via stream
-  const handleClick = useCallback(async () => {
-    // optimistic update
-    setSelected((s) => !s);
-    setTotal((n) => n + (selected ? -1 : +1));
-    if (selected) {
-      setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
-    } else {
-      setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isLongPressRef.current = false;
+    timerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      // Manually show tooltip
+      const tooltipEl = document.querySelector(
+        `[data-tooltip-id="reaction-${drop.id}-${emojiId}"]`
+      );
+      tooltipEl?.dispatchEvent(new Event("pointerenter", { bubbles: true }));
+    }, LONG_PRESS_DELAY);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    if (isLongPressRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
     }
+  };
 
-    try {
-      const body = { reaction: reaction.reaction };
-      const endpoint = `drops/${drop.id}/reaction`;
-      if (selected) {
-        await commonApiDelete({
-          endpoint,
-        });
-      } else {
-        await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
-          endpoint,
-          body,
-        });
+  const handleClick = useCallback(
+    async (e: React.MouseEvent) => {
+      if (isLongPressRef.current) {
+        e.preventDefault();
+        return;
       }
-    } catch (error) {
-      let msg = selected ? "Error removing reaction" : "Error adding reaction";
-      if (typeof error === "string") msg = error;
-      setToast({ message: msg, type: "error" });
 
-      // optimistic revert
+      // optimistic update
       setSelected((s) => !s);
-      setTotal((n) => n + (selected ? +1 : -1));
-      if (!selected) {
+      setTotal((n) => n + (selected ? -1 : +1));
+      if (selected) {
         setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
       } else {
         setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
       }
-    }
-  }, [selected, drop.id, reaction.reaction, setToast]);
+
+      try {
+        const body = { reaction: reaction.reaction };
+        const endpoint = `drops/${drop.id}/reaction`;
+        if (selected) {
+          await commonApiDelete({
+            endpoint,
+          });
+        } else {
+          await commonApiPost<ApiAddReactionToDropRequest, ApiDrop>({
+            endpoint,
+            body,
+          });
+        }
+      } catch (error) {
+        let msg = selected
+          ? "Error removing reaction"
+          : "Error adding reaction";
+        if (typeof error === "string") msg = error;
+        setToast({ message: msg, type: "error" });
+
+        // optimistic revert
+        setSelected((s) => !s);
+        setTotal((n) => n + (selected ? +1 : -1));
+        if (!selected) {
+          setHandles((h) => h.filter((h) => h !== connectedProfile?.handle));
+        } else {
+          setHandles((h) => [...h, connectedProfile?.handle ?? ""]);
+        }
+      }
+    },
+    [selected, drop.id, reaction.reaction, setToast]
+  );
 
   // tooltip text
   const tooltipText = useMemo(() => {
@@ -191,6 +226,8 @@ export function WaveDropReaction({
       <button
         onClick={handleClick}
         data-tooltip-id={`reaction-${drop.id}-${emojiId}`}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         className={clsx(
           "tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-border tw-border-solid hover:tw-text-iron-100",
           borderStyle,
