@@ -190,7 +190,7 @@ export function WaveDropReaction({
     <>
       <button
         onClick={handleClick}
-        data-tooltip-id={`reaction-${emojiId}`}
+        data-tooltip-id={`reaction-${drop.id}-${emojiId}`}
         className={clsx(
           "tw-inline-flex tw-items-center tw-gap-x-2 tw-mt-1 tw-py-1 tw-px-2 tw-rounded-lg tw-shadow-sm tw-border tw-border-solid hover:tw-text-iron-100",
           borderStyle,
@@ -211,7 +211,7 @@ export function WaveDropReaction({
         </div>
       </button>
       <Tooltip
-        id={`reaction-${emojiId}`}
+        id={`reaction-${drop.id}-${emojiId}`}
         delayShow={250}
         place="bottom"
         opacity={1}
