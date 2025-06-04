@@ -1,15 +1,18 @@
 import { FC, useState, useContext, useEffect } from "react";
 import { ApiProfileMin } from "../../../generated/models/ApiProfileMin";
-import { UserFollowBtnSize } from "../../user/utils/UserFollowBtn";
+import {
+  FOLLOW_BTN_BUTTON_CLASSES,
+  FOLLOW_BTN_LOADER_SIZES,
+  FOLLOW_BTN_SVG_CLASSES,
+  UserFollowBtnSize,
+} from "../../user/utils/UserFollowBtn";
 import { useMutation } from "@tanstack/react-query";
-import CircleLoader, {
-  CircleLoaderSize,
-} from "../../distribution-plan-tool/common/CircleLoader";
+import CircleLoader from "../../distribution-plan-tool/common/CircleLoader";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "../../auth/Auth";
 import { ApiIdentitySubscriptionActions } from "../../../generated/models/ApiIdentitySubscriptionActions";
 import {
-  commonApiDeleWithBody,
+  commonApiDeleteWithBody,
   commonApiPost,
 } from "../../../services/api/common-api";
 import { ApiIdentitySubscriptionTargetAction } from "../../../generated/models/ApiIdentitySubscriptionTargetAction";
@@ -23,21 +26,6 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
   profile,
   size = UserFollowBtnSize.MEDIUM,
 }) => {
-  const BUTTON_CLASSES: Record<UserFollowBtnSize, string> = {
-    [UserFollowBtnSize.SMALL]: "tw-gap-x-1 tw-px-2.5 tw-py-1.5 tw-text-xs",
-    [UserFollowBtnSize.MEDIUM]: "tw-gap-x-2 tw-px-3.5 tw-py-2.5 tw-text-sm",
-  };
-
-  const SVG_CLASSES: Record<UserFollowBtnSize, string> = {
-    [UserFollowBtnSize.SMALL]: "tw-h-4 tw-w-4",
-    [UserFollowBtnSize.MEDIUM]: "tw-h-5 tw-w-5",
-  };
-
-  const LOADER_SIZES: Record<UserFollowBtnSize, CircleLoaderSize> = {
-    [UserFollowBtnSize.SMALL]: CircleLoaderSize.SMALL,
-    [UserFollowBtnSize.MEDIUM]: CircleLoaderSize.MEDIUM,
-  };
-
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const { setToast, requestAuth } = useContext(AuthContext);
   const [mutating, setMutating] = useState<boolean>(false);
@@ -82,7 +70,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
 
   const unFollowMutation = useMutation({
     mutationFn: async () => {
-      await commonApiDeleWithBody<
+      await commonApiDeleteWithBody<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
@@ -128,14 +116,13 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
         onClick={onFollow}
         disabled={mutating}
         type="button"
-        className={`${BUTTON_CLASSES[size]} ${
+        className={`${FOLLOW_BTN_BUTTON_CLASSES[size]} ${
           following
             ? "tw-bg-iron-800 tw-ring-iron-800 tw-text-iron-300 hover:tw-bg-iron-700 hover:tw-ring-iron-700"
             : "tw-bg-primary-500 tw-ring-primary-500 hover:tw-bg-primary-600 hover:tw-ring-primary-600 tw-text-white"
-        } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}
-      >
+        } tw-flex tw-items-center tw-cursor-pointer tw-rounded-lg tw-font-semibold tw-border-0 tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out`}>
         {mutating ? (
-          <CircleLoader size={LOADER_SIZES[size]} />
+          <CircleLoader size={FOLLOW_BTN_LOADER_SIZES[size]} />
         ) : following ? (
           <svg
             className="tw-h-3 tw-w-3"
@@ -144,8 +131,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
             viewBox="0 0 17 15"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               fillRule="evenodd"
               clipRule="evenodd"
@@ -155,12 +141,11 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
           </svg>
         ) : (
           <svg
-            className={SVG_CLASSES[size]}
+            className={FOLLOW_BTN_SVG_CLASSES[size]}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12 5V19M5 12H19"
               stroke="currentColor"

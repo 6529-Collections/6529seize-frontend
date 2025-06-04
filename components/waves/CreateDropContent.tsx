@@ -1,7 +1,14 @@
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";
-import React, { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  memo,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -58,11 +65,10 @@ import throttle from "lodash/throttle";
 import { useWebSocket } from "../../services/websocket";
 import { WsMessageType } from "../../helpers/Types";
 import { ApiIdentity } from "../../generated/models/ObjectSerializer";
-import { MAX_DROP_UPLOAD_FILES } from '../../helpers/Helpers';
-
+import { MAX_DROP_UPLOAD_FILES } from "../../helpers/Helpers";
 
 // Use next/dynamic for lazy loading with SSR support
-const TermsSignatureFlow = dynamic(() => import('../terms/TermsSignatureFlow'));
+const TermsSignatureFlow = dynamic(() => import("../terms/TermsSignatureFlow"));
 
 export type CreateDropMetadataType =
   | {
@@ -360,6 +366,7 @@ const getOptimisticDrop = (
     realtime_rating: 0,
     is_signed: false,
     rating_prediction: 0,
+    reactions: [],
   };
 };
 
@@ -619,47 +626,50 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (!wave.participation.signature_required) {
       return requestBody;
     }
-    
+
     // Use direct signature if there are no terms to display
     if (!wave.participation.terms) {
       const { success, signature } = await signDrop({
         drop: requestBody,
         termsOfService: null,
       });
-      
+
       if (!success || !signature) {
         return null;
       }
-      
+
       return {
         ...requestBody,
         signature,
       };
     }
-    
+
     // For terms that need to be displayed, use the terms flow
     return new Promise<ApiCreateDropRequest | null>((resolve) => {
       // Define callback for when signing completes
-      const handleSigningComplete = (result: { success: boolean; signature?: string }) => {
+      const handleSigningComplete = (result: {
+        success: boolean;
+        signature?: string;
+      }) => {
         if (!result.success || !result.signature) {
           resolve(null);
           return;
         }
-        
+
         const updatedDropRequest = {
           ...requestBody,
           signature: result.signature,
         };
         resolve(updatedDropRequest);
       };
-      
+
       // Show the terms modal through a global event
-      const event = new CustomEvent('showTermsModal', { 
+      const event = new CustomEvent("showTermsModal", {
         detail: {
           drop: requestBody,
           termsOfService: wave.participation.terms,
-          onComplete: handleSigningComplete
-        }
+          onComplete: handleSigningComplete,
+        },
       });
       document.dispatchEvent(event);
     });
@@ -973,8 +983,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+            transition={{ duration: 0.3 }}>
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}
@@ -995,7 +1004,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         removeFile={removeFile}
         disabled={submitting}
       />
-      
+
       {/* Terms of Service Flow - Modal will render when needed */}
       <React.Suspense fallback={<div>Loading Terms...</div>}>
         <TermsSignatureFlow />

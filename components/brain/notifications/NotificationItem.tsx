@@ -6,13 +6,13 @@ import { ActiveDropState } from "../../../types/dropInteractionTypes";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 import NotificationDropQuoted from "./drop-quoted/NotificationDropQuoted";
 import NotificationDropReplied from "./drop-replied/NotificationDropReplied";
-import NotificationDropVoted from "./drop-voted/NotificationDropVoted";
 import NotificationIdentityMentioned from "./identity-mentioned/NotificationIdentityMentioned";
 import NotificationIdentitySubscribed from "./identity-subscribed/NotificationIdentitySubscribed";
 import NotificationWaveCreated from "./wave-created/NotificationWaveCreated";
 import NotificationAllDrops from "./all-drops/NotificationAllDrops";
 
 import type { JSX } from "react";
+import NotificationDropReacted from "./drop-reacted/NotificationDropReacted";
 
 export default function NotificationItem({
   notification,
@@ -50,8 +50,9 @@ export default function NotificationItem({
           />
         );
       case ApiNotificationCause.DropVoted:
+      case ApiNotificationCause.DropReacted:
         return (
-          <NotificationDropVoted
+          <NotificationDropReacted
             notification={notification}
             activeDrop={activeDrop}
             onReply={onReply}

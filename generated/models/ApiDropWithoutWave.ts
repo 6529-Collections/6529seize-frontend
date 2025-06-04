@@ -15,6 +15,7 @@ import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropRater } from '../models/ApiDropRater';
+import { ApiDropReaction } from '../models/ApiDropReaction';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropType } from '../models/ApiDropType';
@@ -59,6 +60,7 @@ export class ApiDropWithoutWave {
     'context_profile_context': ApiDropContextProfileContext | null;
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
+    'reactions': Array<ApiDropReaction>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -199,6 +201,12 @@ export class ApiDropWithoutWave {
             "name": "is_signed",
             "baseName": "is_signed",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "reactions",
+            "baseName": "reactions",
+            "type": "Array<ApiDropReaction>",
             "format": ""
         }    ];
 

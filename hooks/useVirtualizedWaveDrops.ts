@@ -26,7 +26,6 @@ export function useVirtualizedWaveDrops(
     dropId,
     pageSize
   );
-
   // Create a wrapper for fetchNextPageForWave that first tries to get data locally
   const fetchNextPageForWave = useCallback(
     async (props: NextPageProps) => {

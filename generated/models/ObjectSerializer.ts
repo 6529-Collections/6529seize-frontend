@@ -1,5 +1,6 @@
 export * from '../models/AcceptActionRequest';
 export * from '../models/AddActionToProxyRequest';
+export * from '../models/ApiAddReactionToDropRequest';
 export * from '../models/ApiAggregatedActivity';
 export * from '../models/ApiAggregatedActivityMemes';
 export * from '../models/ApiAggregatedActivityPage';
@@ -56,6 +57,7 @@ export * from '../models/ApiDropMetadata';
 export * from '../models/ApiDropPart';
 export * from '../models/ApiDropRater';
 export * from '../models/ApiDropRatingRequest';
+export * from '../models/ApiDropReaction';
 export * from '../models/ApiDropReferencedNFT';
 export * from '../models/ApiDropSearchStrategy';
 export * from '../models/ApiDropSubscriptionActions';
@@ -170,6 +172,7 @@ export * from '../models/GetWaveSubscription200Response';
 
 import { AcceptActionRequest, AcceptActionRequestActionEnum   } from '../models/AcceptActionRequest';
 import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
+import { ApiAddReactionToDropRequest } from '../models/ApiAddReactionToDropRequest';
 import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
 import { ApiAggregatedActivityPage } from '../models/ApiAggregatedActivityPage';
@@ -217,15 +220,16 @@ import { ApiCreateNewWaveVotingConfig         } from '../models/ApiCreateNewWave
 import { ApiCreateOrUpdateProfileRequest        } from '../models/ApiCreateOrUpdateProfileRequest';
 import { ApiCreateWaveConfig        } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
-import { ApiDrop                         } from '../models/ApiDrop';
+import { ApiDrop                          } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
-import { ApiDropContextProfileContext   , ApiDropContextProfileContextRatingCurrencyEnum   } from '../models/ApiDropContextProfileContext';
+import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropMedia } from '../models/ApiDropMedia';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
 import { ApiDropPart } from '../models/ApiDropPart';
 import { ApiDropRater } from '../models/ApiDropRater';
 import { ApiDropRatingRequest } from '../models/ApiDropRatingRequest';
+import { ApiDropReaction } from '../models/ApiDropReaction';
 import { ApiDropReferencedNFT } from '../models/ApiDropReferencedNFT';
 import { ApiDropSearchStrategy } from '../models/ApiDropSearchStrategy';
 import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions';
@@ -234,7 +238,7 @@ import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropVote } from '../models/ApiDropVote';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
-import { ApiDropWithoutWave                        } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWave                         } from '../models/ApiDropWithoutWave';
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsPage } from '../models/ApiDropsPage';
 import { ApiFeedItem    } from '../models/ApiFeedItem';
@@ -352,7 +356,6 @@ let primitives = [
 
 let enumsMap: Set<string> = new Set<string>([
     "AcceptActionRequestActionEnum",
-    "ApiDropContextProfileContextRatingCurrencyEnum",
     "ApiDropSearchStrategy",
     "ApiDropSubscriptionTargetAction",
     "ApiDropType",
@@ -381,6 +384,7 @@ let enumsMap: Set<string> = new Set<string>([
 let typeMap: {[index: string]: any} = {
     "AcceptActionRequest": AcceptActionRequest,
     "AddActionToProxyRequest": AddActionToProxyRequest,
+    "ApiAddReactionToDropRequest": ApiAddReactionToDropRequest,
     "ApiAggregatedActivity": ApiAggregatedActivity,
     "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
     "ApiAggregatedActivityPage": ApiAggregatedActivityPage,
@@ -437,6 +441,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropPart": ApiDropPart,
     "ApiDropRater": ApiDropRater,
     "ApiDropRatingRequest": ApiDropRatingRequest,
+    "ApiDropReaction": ApiDropReaction,
     "ApiDropReferencedNFT": ApiDropReferencedNFT,
     "ApiDropSubscriptionActions": ApiDropSubscriptionActions,
     "ApiDropTraceItem": ApiDropTraceItem,

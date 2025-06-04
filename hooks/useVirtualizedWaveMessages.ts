@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useReducer } from "react";
 import { useMyStreamWaveMessages } from "../contexts/wave/MyStreamContext";
 
 import { Drop } from "../helpers/waves/drop.helpers";
@@ -17,6 +17,21 @@ interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
     pollIntervalMs?: number
   ) => Promise<boolean>;
 }
+
+const getShouldRefresh = (old: Drop[], newDrops: Drop[]) => {
+  // loop throught new, find corresponding old, if found, compare reactions, if they are different, return true
+  for (const newDrop of newDrops) {
+    const oldDrop = old.find(
+      (oldDrop) => oldDrop.serial_no === newDrop.serial_no
+    );
+    if (oldDrop && "reactions" in oldDrop && "reactions" in newDrop) {
+      if (oldDrop.reactions !== newDrop.reactions) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -39,8 +54,18 @@ export function useVirtualizedWaveMessages(
 
   const fullWaveMessagesRef = useRef<WaveMessages | null>(null);
 
+  const [, forceRefresh] = useReducer((prev: number) => prev + 1, 0);
+
   useEffect(() => {
+    const shouldRefresh = getShouldRefresh(
+      fullWaveMessagesRef.current?.drops ?? [],
+      fullWaveMessages?.drops ?? []
+    );
+
     fullWaveMessagesRef.current = fullWaveMessages ?? null;
+    if (shouldRefresh) {
+      forceRefresh();
+    }
   }, [fullWaveMessages]);
 
   const fullWaveMessagesForDrop = useDropMessages(waveId, dropId);
