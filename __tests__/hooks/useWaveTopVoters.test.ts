@@ -44,6 +44,7 @@ describe('useWaveTopVoters', () => {
         queries: {
           retry: false,
           gcTime: 0,
+          staleTime: 0,
         },
       },
     });
@@ -61,10 +62,8 @@ describe('useWaveTopVoters', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.voters).toEqual(mockVotersPage.data);
     });
-
-    expect(result.current.voters).toEqual(mockVotersPage.data);
     expect(mockCommonApiFetch).toHaveBeenCalledWith({
       endpoint: 'waves/wave-123/voters',
       params: {
@@ -126,10 +125,8 @@ describe('useWaveTopVoters', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.voters).toEqual([...mockVotersPage.data].reverse());
     });
-
-    expect(result.current.voters).toEqual([...mockVotersPage.data].reverse());
   });
 
   it('returns empty voters when connectedProfileHandle is undefined', async () => {
@@ -150,7 +147,7 @@ describe('useWaveTopVoters', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.voters).toEqual(mockVotersPage.data);
     });
 
     // Should provide fetchNextPage function
@@ -165,14 +162,29 @@ describe('useWaveTopVoters', () => {
       count: 2,
     };
 
-    mockCommonApiFetch.mockResolvedValue(mockPageOne);
+    // Create fresh query client for this test
+    const freshQueryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          gcTime: 0,
+          staleTime: 0,
+        },
+      },
+    });
+
+    const freshWrapper = ({ children }: { children: React.ReactNode }) => 
+      React.createElement(QueryClientProvider, { client: freshQueryClient }, children);
+
+    mockCommonApiFetch.mockReset().mockResolvedValue(mockPageOne);
 
     const { result } = renderHook(() => useWaveTopVoters(defaultProps), {
-      wrapper: createWrapper,
+      wrapper: freshWrapper,
     });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.voters.length).toBeGreaterThan(0);
+      expect(result.current.voters).toContainEqual(mockPageOne.data[0]);
     });
 
     // Fetch next page
@@ -217,10 +229,9 @@ describe('useWaveTopVoters', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.voters).toEqual([]);
     });
 
-    expect(result.current.voters).toEqual([]);
     expect(result.current.hasNextPage).toBe(false);
   });
 
@@ -230,7 +241,7 @@ describe('useWaveTopVoters', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.voters).toEqual(mockVotersPage.data);
     });
 
     expect(typeof result.current.refetch).toBe('function');
@@ -256,10 +267,8 @@ describe('useWaveTopVoters', () => {
     );
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.voters).toEqual(mockVotersPage.data);
     });
-
-    expect(result.current.voters).toEqual(mockVotersPage.data);
 
     // Update data and rerender
     const newMockData = {
@@ -270,7 +279,7 @@ describe('useWaveTopVoters', () => {
 
     mockCommonApiFetch.mockResolvedValue(newMockData);
 
-    rerender({ ...defaultProps, sortDirection: 'DESC' });
+    rerender({ ...defaultProps, sortDirection: 'DESC' as const });
 
     await waitFor(() => {
       expect(result.current.voters).toEqual(newMockData.data);
@@ -293,17 +302,33 @@ describe('useWaveTopVoters', () => {
       { data: [{ id: '3', handle: 'voter3', rating: 6 }], next: null, count: 3 },
     ];
 
+    // Create fresh query client for this test
+    const freshQueryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          gcTime: 0,
+          staleTime: 0,
+        },
+      },
+    });
+
+    const freshWrapper = ({ children }: { children: React.ReactNode }) => 
+      React.createElement(QueryClientProvider, { client: freshQueryClient }, children);
+
     mockCommonApiFetch
+      .mockReset()
       .mockResolvedValueOnce(pages[0])
       .mockResolvedValueOnce(pages[1])
       .mockResolvedValueOnce(pages[2]);
 
     const { result } = renderHook(() => useWaveTopVoters(defaultProps), {
-      wrapper: createWrapper,
+      wrapper: freshWrapper,
     });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.voters.length).toBeGreaterThan(0);
+      expect(result.current.voters).toContainEqual(pages[0].data[0]);
     });
 
     // Fetch all pages
