@@ -4,6 +4,11 @@ import Tippy from "@tippyjs/react";
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import { ApiDropMetadata } from "../../../generated/models/ApiDropMetadata";
 import { TraitsData } from "../memes/submission/types/TraitsData";
+import {
+  FIELD_TO_LABEL_MAP,
+  MEME_TRAITS_SORT_ORDER,
+} from "../memes/traits/schema";
+import { isNumber } from "lodash";
 
 interface SingleWaveDropTraitsProps {
   readonly drop: ExtendedDrop;
@@ -22,16 +27,15 @@ const MetadataItem: React.FC<{
 
   return (
     <div className="tw-px-2 tw-py-1 tw-rounded-md tw-bg-iron-800 tw-flex tw-flex-col tw-gap-y-1.5">
-      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-uppercase tw-font-normal">
-        {label}:
+      <span className="tw-text-iron-400 tw-text-xs tw-mr-1.5 tw-font-normal">
+        {label}
       </span>
       <Tippy
         disabled={isMobile}
         content={displayValue}
         placement="top"
-        theme="dark"
-      >
-        <span className="tw-text-iron-50 tw-text-xs tw-font-medium tw-truncate">
+        theme="dark">
+        <span className="tw-text-iron-50 tw-text-sm tw-font-medium tw-truncate">
           {displayValue}
         </span>
       </Tippy>
@@ -95,7 +99,6 @@ const extractTraitsFromMetadata = (
   metadata.forEach((item) => {
     // Normalize the key by removing spaces, dashes, and converting to lowercase
     const normalizedKey = item.data_key
-      .toLowerCase()
       .replace(/[\s-_]+/g, "")
       .replace(/points-/g, "points")
       .replace(/type-/g, "type");
@@ -233,8 +236,8 @@ const extractTraitsFromMetadata = (
           (traits as Record<keyof TraitsData, any>)[traitKey] = numValue;
         }
       }
-    } else if (keyMapping[normalizedKey]) {
-      const textKey = keyMapping[normalizedKey];
+    } else if (keyMapping[normalizedKey.toLowerCase()]) {
+      const textKey = keyMapping[normalizedKey.toLowerCase()];
 
       // Safe assignment with type checking
       if (
@@ -306,7 +309,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       sibling: extractedTraits.sibling ?? "",
       food: extractedTraits.food ?? "",
       drink: extractedTraits.drink ?? "",
-      bonus: extractedTraits.boost ?? "",
+      bonus: extractedTraits.bonus ?? "",
       boost: extractedTraits.boost ?? "",
       punk6529: extractedTraits.punk6529 ?? false,
       gradient: extractedTraits.gradient ?? false,
@@ -395,8 +398,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       "pointsSpeed",
     ];
 
-    // Create an ordered array based on priority list
-    const orderedItems: { label: string; value: any }[] = [];
+    const items: { label: string; value: any }[] = [];
 
     // First add items in priority order
     priorityKeys.forEach((key) => {
@@ -408,13 +410,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
           (typeof value === "number" && value > 0) ||
           typeof value === "boolean"
         ) {
-          const formattedKey = key
-            .replace(/([A-Z])/g, " $1")
-            .replace(/^./, (str) => str.toUpperCase())
-            .replace(/Points /, "") // Remove "Points " prefix
-            .trim();
-
-          orderedItems.push({ label: formattedKey, value });
+          items.push({ label: key, value });
         }
       }
     });
@@ -427,18 +423,37 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
           (typeof value === "number" && value > 0) ||
           typeof value === "boolean"
         ) {
-          const formattedKey = key
-            .replace(/([A-Z])/g, " $1")
-            .replace(/^./, (str) => str.toUpperCase())
-            .replace(/Points /, "") // Remove "Points " prefix
-            .trim();
-
-          orderedItems.push({ label: formattedKey, value });
+          items.push({ label: key, value });
         }
       }
     });
 
-    return orderedItems;
+    items.sort((a, b) => {
+      const aIndex = MEME_TRAITS_SORT_ORDER.indexOf(a.label);
+      const bIndex = MEME_TRAITS_SORT_ORDER.indexOf(b.label);
+      return (
+        (aIndex === -1 ? Infinity : aIndex) -
+        (bIndex === -1 ? Infinity : bIndex)
+      );
+    });
+
+    items.forEach((item) => {
+      const knownKey =
+        FIELD_TO_LABEL_MAP[item.label as keyof typeof FIELD_TO_LABEL_MAP];
+      const formattedKey =
+        knownKey ??
+        item.label
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase())
+          .trim();
+      item.label = formattedKey;
+
+      if (isNumber(item.value)) {
+        item.value = item.value.toLocaleString();
+      }
+    });
+
+    return items;
   }, [traits]);
 
   // If there are no meaningful traits to display, don't render the component
@@ -463,7 +478,11 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
         {traitItems.slice(0, 2).map((item) => (
           <MetadataItem
             key={item.label}
-            label={item.label}
+            label={
+              FIELD_TO_LABEL_MAP[
+                item.label as keyof typeof FIELD_TO_LABEL_MAP
+              ] ?? item.label
+            }
             value={item.value}
           />
         ))}
@@ -475,22 +494,24 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
               {traitItems.slice(2).map((item) => (
                 <MetadataItem
                   key={item.label}
-                  label={item.label}
+                  label={
+                    FIELD_TO_LABEL_MAP[
+                      item.label as keyof typeof FIELD_TO_LABEL_MAP
+                    ] ?? item.label
+                  }
                   value={item.value}
                 />
               ))}
               <button
                 onClick={handleShowLess}
-                className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
-              >
+                className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
                 Show less
               </button>
             </>
           ) : (
             <button
               onClick={handleShowMore}
-              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left"
-            >
+              className="tw-text-xs tw-text-primary-400 desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out tw-font-semibold tw-bg-transparent tw-border-0 tw-text-left">
               Show all
             </button>
           ))}

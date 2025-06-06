@@ -2,11 +2,16 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MemeDropTraits from "../../../components/memes/drops/MemeDropTraits";
 
-jest.mock("../../../components/waves/memes/traits/schema", () => ({ FIELD_TO_LABEL_MAP: { artist: "Artist", memeName: "Name", other: "Other" } }));
-
-jest.mock("../../../components/memes/drops/MemeDropTrait", () => (props: any) => (
-  <div data-testid="trait" data-label={props.label} data-value={props.value}></div>
-));
+jest.mock(
+  "../../../components/memes/drops/MemeDropTrait",
+  () => (props: any) =>
+    (
+      <div
+        data-testid="trait"
+        data-label={props.label}
+        data-value={props.value}></div>
+    )
+);
 
 describe("MemeDropTraits", () => {
   const drop = {
