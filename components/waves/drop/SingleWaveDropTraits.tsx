@@ -8,6 +8,7 @@ import {
   FIELD_TO_LABEL_MAP,
   MEME_TRAITS_SORT_ORDER,
 } from "../memes/traits/schema";
+import { isNumber } from "lodash";
 
 interface SingleWaveDropTraitsProps {
   readonly drop: ExtendedDrop;
@@ -446,6 +447,10 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
           .replace(/^./, (str) => str.toUpperCase())
           .trim();
       item.label = formattedKey;
+
+      if (isNumber(item.value)) {
+        item.value = Number(item.value).toLocaleString();
+      }
     });
 
     return items;
