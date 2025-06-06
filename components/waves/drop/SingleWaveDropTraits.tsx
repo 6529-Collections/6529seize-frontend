@@ -449,7 +449,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       item.label = formattedKey;
 
       if (isNumber(item.value)) {
-        item.value = Number(item.value).toLocaleString();
+        item.value = item.value.toLocaleString();
       }
     });
 
