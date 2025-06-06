@@ -388,6 +388,7 @@ describe("SingleWaveDropTraits", () => {
       const showLessButton = screen.queryByText("Show less");
 
       // Either no "Show all" button OR it's present but we have valid traits
+      expect(showAllButton).toBeInTheDocument();
       expect(showLessButton).not.toBeInTheDocument();
     });
   });

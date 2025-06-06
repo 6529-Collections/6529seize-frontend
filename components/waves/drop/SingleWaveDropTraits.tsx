@@ -427,7 +427,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       }
     });
 
-    const orderedItems = items.sort((a, b) => {
+    items.sort((a, b) => {
       const aIndex = MEME_TRAITS_SORT_ORDER.indexOf(a.label);
       const bIndex = MEME_TRAITS_SORT_ORDER.indexOf(b.label);
       return (
@@ -436,7 +436,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       );
     });
 
-    orderedItems.map((item) => {
+    items.forEach((item) => {
       const knownKey =
         FIELD_TO_LABEL_MAP[item.label as keyof typeof FIELD_TO_LABEL_MAP];
       const formattedKey =
@@ -448,7 +448,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       item.label = formattedKey;
     });
 
-    return orderedItems;
+    return items;
   }, [traits]);
 
   // If there are no meaningful traits to display, don't render the component
