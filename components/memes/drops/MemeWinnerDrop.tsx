@@ -6,10 +6,10 @@ import WaveDropActions from "../../waves/drops/WaveDropActions";
 import MemeWinnerHeader from "./MemeWinnerHeader";
 import MemeWinnerDescription from "./MemeWinnerDescription";
 import MemeWinnerArtistInfo from "./MemeWinnerArtistInfo";
-import MemeDropTraits from "./MemeDropTraits";
 import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { useDropContext } from "../../waves/drops/DropContext";
+import { DropTraits } from "../../waves/drop/DropTraits";
 
 interface MemeWinnerDropProps {
   readonly drop: ExtendedDrop;
@@ -55,21 +55,18 @@ export default function MemeWinnerDrop({
       <div
         className={`tw-w-full ${
           location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-        } tw-relative tw-group`}
-      >
+        } tw-relative tw-group`}>
         <div
           className={`tw-rounded-xl tw-border tw-border-solid tw-border-transparent tw-border-l tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden ${
             location === DropLocation.WAVE
               ? "tw-bg-iron-900/80"
               : "tw-bg-iron-950"
-          } ${firstPlaceShadow}`}
-        >
+          } ${firstPlaceShadow}`}>
           <DropMobileMenuHandler
             drop={drop}
             showReplyAndQuote={showReplyAndQuote}
             onReply={handleOnReply}
-            onQuote={handleOnQuote}
-          >
+            onQuote={handleOnQuote}>
             <>
               <div className="tw-p-4">
                 <div className="tw-flex tw-flex-col tw-gap-4">
@@ -82,18 +79,17 @@ export default function MemeWinnerDrop({
               </div>
 
               {artworkMedia && (
-                <div className={`tw-flex tw-justify-center tw-mx-[1px] tw-h-96 ${
-                  location === DropLocation.WAVE ? "tw-bg-iron-800/30" : ""
-                }`}>
+                <div
+                  className={`tw-flex tw-justify-center tw-mx-[1px] tw-h-96 ${
+                    location === DropLocation.WAVE ? "tw-bg-iron-800/30" : ""
+                  }`}>
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
                   />
                 </div>
               )}
-            
-                <MemeDropTraits drop={drop} />
-             
+              <DropTraits drop={drop} />
             </>
           </DropMobileMenuHandler>
           {/* Actions for desktop */}

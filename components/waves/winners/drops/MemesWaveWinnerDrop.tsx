@@ -15,7 +15,6 @@ import { cicToType, formatNumberWithCommas } from "../../../../helpers/Helpers";
 import Tippy from "@tippyjs/react";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import MemeDropTraits from "../../../memes/drops/MemeDropTraits";
 import DropListItemContentMedia from "../../../drops/view/item/content/media/DropListItemContentMedia";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import useLongPressInteraction from "../../../../hooks/useLongPressInteraction";
@@ -23,6 +22,7 @@ import WaveDropActionsOpen from "../../../waves/drops/WaveDropActionsOpen";
 import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropMobileMenuOpen from "../../../waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "../../../waves/drops/time/WaveDropTime";
+import { DropTraits } from "../../drop/DropTraits";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -73,8 +73,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
   return (
     <div
       onClick={() => onDropClick(extendedDrop)}
-      className="touch-select-none tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full"
-    >
+      className="touch-select-none tw-cursor-pointer tw-rounded-xl tw-transition-all tw-duration-300 tw-ease-out tw-w-full">
       <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 desktop-hover:hover:tw-border-[#fbbf24]/40 tw-shadow-[0_0_15px_rgba(251,191,36,0.15)] tw-transition-all tw-duration-200 tw-ease-out tw-overflow-hidden tw-bg-iron-950">
         <div className="tw-flex tw-flex-col" {...touchHandlers}>
           <div className="tw-p-4">
@@ -84,8 +83,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                   <Link
                     href={`/${winner.drop.author?.handle}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group"
-                  >
+                    className="tw-flex tw-items-center tw-gap-x-2 tw-no-underline group">
                     <WaveWinnersDropHeaderAuthorPfp winner={winner} />
                   </Link>
                   <div className="tw-flex tw-items-center tw-gap-x-4">
@@ -100,15 +98,14 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                       <Link
                         href={`/${winner.drop.author?.handle}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="tw-no-underline hover:tw-opacity-80 tw-transition-opacity"
-                      >
+                        className="tw-no-underline hover:tw-opacity-80 tw-transition-opacity">
                         <span className="tw-text-sm tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
                           {winner.drop.author?.handle}
                         </span>
                       </Link>
 
                       <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
-                      
+
                       <WaveDropTime timestamp={winner.drop.created_at} />
                     </div>
                   </div>
@@ -147,15 +144,14 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             </div>
           )}
 
-          <MemeDropTraits drop={winner.drop} />
+          <DropTraits drop={winner.drop} />
 
           <div className="tw-flex tw-items-center tw-flex-wrap tw-gap-x-6 tw-gap-y-2 tw-px-4 tw-pt-4 lg:tw-pt-0 tw-pb-4">
             <div className="tw-flex tw-items-center tw-gap-x-1.5">
               <span
                 className={`tw-text-sm tw-font-semibold ${
                   isPositive ? "tw-text-emerald-500" : "tw-text-rose-500"
-                } `}
-              >
+                } `}>
                 {formatNumberWithCommas(rating)}
               </span>
               <span className="tw-text-sm tw-text-iron-400">{creditType}</span>
@@ -168,13 +164,11 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                     key={voter.profile.handle}
                     content={`${
                       voter.profile.handle
-                    } - ${formatNumberWithCommas(voter.rating)}`}
-                  >
+                    } - ${formatNumberWithCommas(voter.rating)}`}>
                     <Link
                       href={`/${voter.profile.handle}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]"
-                    >
+                      className="tw-transition-transform desktop-hover:hover:tw-translate-y-[-2px]">
                       {voter.profile.pfp ? (
                         <img
                           className="tw-size-6 tw-rounded-md tw-ring-2 tw-ring-black tw-object-contain tw-bg-iron-800"
@@ -210,8 +204,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                       isUserVoteNegative
                         ? "tw-text-rose-500"
                         : "tw-text-emerald-500"
-                    }`}
-                  >
+                    }`}>
                     {isUserVoteNegative && "-"}
                     {formatNumberWithCommas(Math.abs(userVote))}{" "}
                     <span className="tw-text-iron-400 tw-font-normal">
@@ -228,8 +221,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             createPortal(
               <CommonDropdownItemsMobileWrapper
                 isOpen={isActive}
-                setOpen={setIsActive}
-              >
+                setOpen={setIsActive}>
                 <div className="tw-grid tw-grid-cols-1 tw-gap-y-2">
                   {/* Open drop option */}
                   <WaveDropMobileMenuOpen

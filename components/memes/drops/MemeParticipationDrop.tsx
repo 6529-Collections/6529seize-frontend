@@ -10,11 +10,11 @@ import MemeDropDescription from "./meme-participation-drop/MemeDropDescription";
 import MemeDropVoteStats from "./meme-participation-drop/MemeDropVoteStats";
 import MemeDropArtistInfo from "./meme-participation-drop/MemeDropArtistInfo";
 import MemeDropActions from "./meme-participation-drop/MemeDropActions";
-import MemeDropTraits from "./MemeDropTraits";
 import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { VotingModal, MobileVotingModal } from "../../voting";
 import VotingModalButton from "../../voting/VotingModalButton";
+import { DropTraits } from "../../waves/drop/DropTraits";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -85,21 +85,18 @@ export default function MemeParticipationDrop({
       <div
         className={`tw-w-full tw-group tw-relative ${
           location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-        }`}
-      >
+        }`}>
         <div
           className={`${borderClasses} ${
             location === DropLocation.WAVE
               ? "tw-bg-iron-900/80"
               : "tw-bg-iron-950"
-          }`}
-        >
+          }`}>
           <DropMobileMenuHandler
             drop={drop}
             showReplyAndQuote={showReplyAndQuote}
             onReply={handleOnReply}
-            onQuote={handleOnQuote}
-          >
+            onQuote={handleOnQuote}>
             <>
               <div className="tw-p-4">
                 <MemeDropArtistInfo drop={drop} />
@@ -114,16 +111,14 @@ export default function MemeParticipationDrop({
                     location === DropLocation.WAVE
                       ? "tw-bg-iron-800/30"
                       : "tw-bg-iron-900/40"
-                  }`}
-                >
+                  }`}>
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
                   />
                 </div>
               )}
-
-              <MemeDropTraits drop={drop} />
+              <DropTraits drop={drop} />
             </>
           </DropMobileMenuHandler>
           <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-gap-3 @[700px]:tw-gap-y-0 tw-justify-between @[700px]:tw-items-center @[700px]:tw-px-4 tw-pb-4">

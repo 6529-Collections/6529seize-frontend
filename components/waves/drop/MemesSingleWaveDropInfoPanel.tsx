@@ -16,7 +16,7 @@ import { faCompress } from "@fortawesome/free-solid-svg-icons";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { useDropInteractionRules } from "../../../hooks/drops/useDropInteractionRules";
 import { WinnerBadge } from "./WinnerBadge";
-import { SingleWaveDropTraits } from "./SingleWaveDropTraits";
+import { DropTraits } from "./DropTraits";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
 import WaveDropDeleteButton from "../../utils/button/WaveDropDeleteButton";
 
@@ -87,7 +87,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
               </div>
             )}
             <div className="tw-px-6 tw-mt-4">
-              <SingleWaveDropTraits drop={drop} />
+              <DropTraits drop={drop} singleWaveDrop />
             </div>
             <div className="tw-px-6 tw-mt-4">
               <SingleWaveDropVotes drop={drop} />
@@ -116,8 +116,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="tw-fixed tw-inset-0 tw-z-50 tw-bg-iron-950/90 tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-4"
-          >
+            className="tw-fixed tw-inset-0 tw-z-50 tw-bg-iron-950/90 tw-flex tw-flex-col tw-items-center tw-justify-center tw-p-4">
             {/* Header bar with title, badge, and close button */}
             <div className="tw-w-full tw-max-w-5xl tw-flex tw-justify-between tw-items-center tw-mb-4">
               <div className="tw-flex tw-flex-col">
@@ -144,8 +143,7 @@ export const MemesSingleWaveDropInfoPanel: React.FC<
                 className="tw-bg-iron-900/80 tw-text-iron-100 tw-p-3 tw-rounded-lg 
                         tw-transition-colors tw-duration-200 hover:tw-bg-iron-800 
                         focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
-                aria-label="Exit fullscreen view"
-              >
+                aria-label="Exit fullscreen view">
                 <FontAwesomeIcon icon={faCompress} className="tw-w-5 tw-h-5" />
               </button>
             </div>
