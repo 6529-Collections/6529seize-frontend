@@ -31,7 +31,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
 
-  const { isChatWave, isMemesWave, isRankWave, pauses: { isPaused } } = useWave(wave);
+  const { isChatWave, isMemesWave, isRankWave, pauses: { isPaused, filterDecisionsDuringPauses } } = useWave(wave);
   const {
     voting: { isUpcoming, isCompleted, isInProgress },
     decisions: { firstDecisionDone },
@@ -40,20 +40,21 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   // For next decision countdown
   const { allDecisions } = useDecisionPoints(wave);
   
-  // Filter out decisions that occur during pause periods
-  const filteredDecisions = allDecisions.filter(decision => {
-    if (!wave.pauses || wave.pauses.length === 0) return true;
+  // Filter out decisions that occur during pause periods using the helper from useWave
+  const filteredDecisions = React.useMemo(() => {
+    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
+    const decisionsAsApiFormat = allDecisions.map(decision => ({
+      decision_time: decision.timestamp,
+    } as any));
     
-    // Check if this decision falls within any pause period
-    return !wave.pauses.some(pause => {
-      const decisionTime = decision.timestamp;
-      const pauseStart = pause.start_time;
-      const pauseEnd = pause.end_time;
-      
-      // Decision is excluded if it falls within the pause period
-      return decisionTime >= pauseStart && decisionTime <= pauseEnd;
-    });
-  });
+    // Apply the filter
+    const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
+    
+    // Convert back to DecisionPoint[] format
+    return allDecisions.filter(decision => 
+      filtered.some(f => f.decision_time === decision.timestamp)
+    );
+  }, [allDecisions, filterDecisionsDuringPauses]);
   
   // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =

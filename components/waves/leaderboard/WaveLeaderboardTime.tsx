@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
@@ -24,7 +24,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   const { allDecisions } = useDecisionPoints(wave);
   const {
     decisions: { multiDecision },
-    pauses: { isPaused, currentPause },
+    pauses: { isPaused, currentPause, filterDecisionsDuringPauses },
   } = useWave(wave);
 
 
@@ -32,21 +32,22 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
 
-  // Filter out decisions that occur during pause periods
-  const filteredDecisions = allDecisions.filter(decision => {
-    if (!wave.pauses || wave.pauses.length === 0) return true;
+  // Filter out decisions that occur during pause periods using the helper from useWave
+  const filteredDecisions = useMemo(() => {
+    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
+    const decisionsAsApiFormat = allDecisions.map(decision => ({
+      decision_time: decision.timestamp,
+      // Add other required fields if needed
+    } as any));
     
-    // Check if this decision falls within any pause period
-    // Both timestamps should be in milliseconds
-    return !wave.pauses.some(pause => {
-      const decisionTime = decision.timestamp;
-      const pauseStart = pause.start_time;
-      const pauseEnd = pause.end_time;
-      
-      // Decision is excluded if it falls within the pause period
-      return decisionTime >= pauseStart && decisionTime <= pauseEnd;
-    });
-  });
+    // Apply the filter
+    const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
+    
+    // Convert back to DecisionPoint[] format
+    return allDecisions.filter(decision => 
+      filtered.some(f => f.decision_time === decision.timestamp)
+    );
+  }, [allDecisions, filterDecisionsDuringPauses]);
 
   // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
@@ -73,9 +74,8 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
           <AnimatePresence>
             {isDecisionDetailsOpen && (
               <ExpandedTimelineContent
-                decisions={allDecisions}
+                decisions={filteredDecisions}
                 nextDecisionTime={nextDecisionTime}
-                pauses={wave.pauses}
               />
             )}
           </AnimatePresence>

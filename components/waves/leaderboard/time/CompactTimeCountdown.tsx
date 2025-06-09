@@ -15,19 +15,11 @@ interface CompactTimeCountdownProps {
  */
 export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
   timeLeft,
-  className = "",
-  isPaused = false,
 }) => {
   return (
-    <div
-      className={`tw-hidden md:tw-flex tw-items-center tw-gap-1.5 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-rounded-lg tw-border ${
-        isPaused ? "tw-border-yellow-600/20" : "tw-border-emerald-600/20"
-      } tw-flex-shrink-0 ${className}`}
-    >
+    <div className="tw-hidden md:tw-flex tw-items-center tw-gap-1.5 tw-px-4 tw-py-2 tw-bg-iron-900 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-justify-between tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-md">
       <div className="tw-flex tw-items-center tw-gap-x-2">
-        <span
-          className={`tw-text-xs tw-text-primary-400 tw-font-semibold`}
-        >
+        <span className={`tw-text-xs tw-text-primary-400 tw-font-semibold tw-whitespace-nowrap`}>
           Next winner:
         </span>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
@@ -35,14 +27,8 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
           {timeLeft.days > 0 && (
             <TimeUnitDisplay value={timeLeft.days} label="days" />
           )}
-
-          {/* Hours */}
           <TimeUnitDisplay value={timeLeft.hours} label="hrs" />
-
-          {/* Minutes */}
           <TimeUnitDisplay value={timeLeft.minutes} label="min" />
-
-          {/* Seconds */}
           <TimeUnitDisplay value={timeLeft.seconds} label="sec" />
         </div>
       </div>
