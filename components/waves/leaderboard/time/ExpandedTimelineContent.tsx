@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { DecisionPoint } from "../../../../helpers/waves/time.types";
 import { HorizontalTimeline } from "./HorizontalTimeline";
+import { ApiWaveDecisionPause } from "../../../../generated/models/ApiWaveDecisionPause";
 
 interface ExpandedTimelineContentProps {
   readonly decisions: DecisionPoint[];
   readonly nextDecisionTime: number | null;
+  readonly pauses?: ApiWaveDecisionPause[];
 }
 
 /**
@@ -13,7 +15,8 @@ interface ExpandedTimelineContentProps {
  */
 export const ExpandedTimelineContent: React.FC<ExpandedTimelineContentProps> = ({
   decisions,
-  nextDecisionTime
+  nextDecisionTime,
+  pauses = []
 }) => {
   const [animationComplete, setAnimationComplete] = useState(false);
   
@@ -32,6 +35,7 @@ export const ExpandedTimelineContent: React.FC<ExpandedTimelineContentProps> = (
           decisions={decisions} 
           nextDecisionTime={nextDecisionTime}
           animationComplete={animationComplete}
+          pauses={pauses}
         />
       </div>
     </motion.div>

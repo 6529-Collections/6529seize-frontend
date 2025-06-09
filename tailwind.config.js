@@ -39,7 +39,6 @@ module.exports = {
         "iron-350": "#B0B0B0",
         green: "#3CCB7F",
         red: "#F97066",
-        yellow: "#FEDF89",
         iron: {
           50: "#F5F5F5",
           100: "#EFEFF1",

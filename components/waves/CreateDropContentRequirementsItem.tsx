@@ -46,7 +46,7 @@ const CreateDropContentRequirementsItem: React.FC<
 
   const getButtonColorClass = () => {
     if (disabled) return "tw-opacity-50 tw-cursor-not-allowed";
-    return isValid ? "tw-text-green" : "tw-text-yellow";
+    return isValid ? "tw-text-green" : "tw-text-[#FEDF89]";
   };
 
   return (
@@ -59,7 +59,7 @@ const CreateDropContentRequirementsItem: React.FC<
             </p>
           ) : (
             <div>
-              <p className="tw-text-yellow tw-font-medium tw-mb-2">
+              <p className="tw-text-[#FEDF89] tw-font-medium tw-mb-2">
                 {requirementType === DropRequirementType.MEDIA
                   ? "Missing required media:"
                   : "Missing required metadata:"}

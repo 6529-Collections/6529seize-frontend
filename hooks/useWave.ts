@@ -3,6 +3,8 @@ import { ApiWave } from "../generated/models/ApiWave";
 import { Time } from "../helpers/time";
 import { calculateLastDecisionTime } from "../helpers/waves/time.utils";
 import { useSeizeSettings } from "../contexts/SeizeSettingsContext";
+import { ApiWaveDecisionPause } from "../generated/models/ApiWaveDecisionPause";
+import { ApiWaveDecision } from "../generated/models/ApiWaveDecision";
 
 /**
  * Possible states of a wave's submission period
@@ -42,6 +44,12 @@ interface WaveInfo {
   };
   decisions: {
     multiDecision: boolean;
+  };
+  pauses: {
+    isPaused: boolean;
+    currentPause: ApiWaveDecisionPause | null;
+    filterDecisionsDuringPauses: (decisions: ApiWaveDecision[]) => ApiWaveDecision[];
+    getNextValidDecision: (decisions: ApiWaveDecision[]) => ApiWaveDecision | null;
   };
   isChatWave: boolean;
   isRankWave: boolean;
@@ -105,6 +113,49 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   // Current time for all timestamp comparisons (consistent throughout the hook)
   const now = useMemo(() => Time.currentMillis(), []);
   const { isMemesWave } = useSeizeSettings();
+
+  // Calculate pause information
+  const currentPause = useMemo(() => {
+    if (!wave?.pauses || wave.pauses.length === 0) return null;
+    
+    // Pause times are already in milliseconds
+    return wave.pauses.find((pause: ApiWaveDecisionPause) => 
+      now >= pause.start_time && now <= pause.end_time
+    ) || null;
+  }, [wave?.pauses, now]);
+
+  const isPaused = useMemo(() => {
+    return currentPause !== null;
+  }, [currentPause]);
+
+  // Helper function to filter out decisions that occur during pause periods
+  const filterDecisionsDuringPauses = useMemo(() => {
+    return (decisions: ApiWaveDecision[]): ApiWaveDecision[] => {
+      if (!wave?.pauses || wave.pauses.length === 0) return decisions;
+
+      return decisions.filter(decision => {
+        return !wave.pauses.some((pause: ApiWaveDecisionPause) => 
+          decision.decision_time >= pause.start_time && 
+          decision.decision_time <= pause.end_time
+        );
+      });
+    };
+  }, [wave?.pauses]);
+
+  // Helper function to get the next valid decision (not during a pause)
+  const getNextValidDecision = useMemo(() => {
+    return (decisions: ApiWaveDecision[]): ApiWaveDecision | null => {
+      const filteredDecisions = filterDecisionsDuringPauses(decisions);
+      const futureDecisions = filteredDecisions.filter(d => d.decision_time > now);
+      
+      if (futureDecisions.length === 0) return null;
+      
+      // Return the earliest future decision
+      return futureDecisions.reduce((earliest, current) => 
+        current.decision_time < earliest.decision_time ? current : earliest
+      );
+    };
+  }, [filterDecisionsDuringPauses, now]);
 
   // Extract common wave properties that are used in multiple calculations
   const maxDropsCount = useMemo(
@@ -247,6 +298,12 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     decisions: {
       multiDecision:
         !!wave?.wave.decisions_strategy?.subsequent_decisions.length,
+    },
+    pauses: {
+      isPaused,
+      currentPause,
+      filterDecisionsDuringPauses,
+      getNextValidDecision,
     },
     // Wave type flags
     isChatWave: wave?.wave.type === "CHAT",

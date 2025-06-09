@@ -198,7 +198,7 @@ describe('CreateDropActions', () => {
     
     const buttons = screen.getAllByRole('button');
     const metadataButton = buttons.find(button => !button.getAttribute('aria-label') && !button.getAttribute('data-testid'));
-    expect(metadataButton).toHaveClass('tw-text-yellow');
+    expect(metadataButton).toHaveClass('tw-text-[#FEDF89]');
   });
 
   it('highlights upload button when media is missing', () => {
@@ -211,7 +211,7 @@ describe('CreateDropActions', () => {
     );
     
     const uploadLabel = screen.getByLabelText('Upload a file');
-    expect(uploadLabel).toHaveClass('tw-text-yellow');
+    expect(uploadLabel).toHaveClass('tw-text-[#FEDF89]');
   });
 
   it('highlights chevron button when any required content is missing', () => {
@@ -224,7 +224,7 @@ describe('CreateDropActions', () => {
     );
     
     const chevronButton = screen.getByRole('button');
-    expect(chevronButton).toHaveClass('tw-text-yellow');
+    expect(chevronButton).toHaveClass('tw-text-[#FEDF89]');
   });
 
   it('accepts multiple file types', () => {

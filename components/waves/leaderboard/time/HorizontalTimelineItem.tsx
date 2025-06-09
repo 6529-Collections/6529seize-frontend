@@ -7,6 +7,7 @@ interface HorizontalTimelineItemProps {
   readonly decision: DecisionPoint;
   readonly isNext: boolean;
   readonly flexGrow?: boolean;
+  readonly isDuringPause?: boolean;
 }
 
 /**
@@ -15,10 +16,11 @@ interface HorizontalTimelineItemProps {
 export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
   decision,
   isNext,
-  flexGrow = false
+  flexGrow = false,
+  isDuringPause = false,
 }) => {
   const isPast = decision.timestamp < Time.currentMillis();
-  
+
   return (
     <div
       className={`tw-relative tw-flex tw-flex-col tw-items-center tw-z-10 ${
@@ -33,14 +35,21 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
       {/* Information BELOW the line */}
       <div className="tw-mt-2 tw-z-10 tw-text-center">
         {/* Status badge - only for next or past */}
-        {isNext && (
+        {isDuringPause && (
+          <span className="tw-flex tw-justify-center tw-mb-1">
+            <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-yellow-500/20 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-yellow-400">
+              Paused
+            </span>
+          </span>
+        )}
+        {isNext && !isDuringPause && (
           <span className="tw-flex tw-justify-center tw-mb-1">
             <span className="tw-inline-flex tw-items-center tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-primary-400">
               Next
             </span>
           </span>
         )}
-        {isPast && (
+        {isPast && !isDuringPause && (
           <span className="tw-flex tw-justify-center tw-mb-1">
             <span className="tw-inline-flex tw-items-center tw-rounded-full tw-px-1.5 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-500">
               Completed
@@ -51,26 +60,22 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
         {/* Date text */}
         <div
           className={`tw-text-xs ${
-            isNext
-              ? "tw-text-iron-100"
-              : "tw-text-iron-400"
+            isNext ? "tw-text-iron-100" : "tw-text-iron-400"
           } tw-font-medium`}
         >
-          {new Date(
-            decision.timestamp
-          ).toLocaleDateString(undefined, {
+          {new Date(decision.timestamp).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
+            timeZone: "UTC",
           })}
         </div>
 
         {/* Time text */}
         <div className="tw-text-xs tw-text-iron-500 tw-mt-0.5 tw-font-mono">
-          {new Date(
-            decision.timestamp
-          ).toLocaleTimeString(undefined, {
+          {new Date(decision.timestamp).toLocaleTimeString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
+            timeZone: "UTC",
           })}
         </div>
       </div>

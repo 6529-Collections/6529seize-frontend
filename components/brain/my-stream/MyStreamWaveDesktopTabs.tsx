@@ -31,7 +31,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
 
-  const { isChatWave, isMemesWave, isRankWave } = useWave(wave);
+  const { isChatWave, isMemesWave, isRankWave, pauses: { isPaused } } = useWave(wave);
   const {
     voting: { isUpcoming, isCompleted, isInProgress },
     decisions: { firstDecisionDone },
@@ -39,8 +39,25 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   // For next decision countdown
   const { allDecisions } = useDecisionPoints(wave);
+  
+  // Filter out decisions that occur during pause periods
+  const filteredDecisions = allDecisions.filter(decision => {
+    if (!wave.pauses || wave.pauses.length === 0) return true;
+    
+    // Check if this decision falls within any pause period
+    return !wave.pauses.some(pause => {
+      const decisionTime = decision.timestamp;
+      const pauseStart = pause.start_time;
+      const pauseEnd = pause.end_time;
+      
+      // Decision is excluded if it falls within the pause period
+      return decisionTime >= pauseStart && decisionTime <= pauseEnd;
+    });
+  });
+  
+  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
-    allDecisions.find((decision) => decision.timestamp > Time.currentMillis())
+    filteredDecisions.find((decision) => decision.timestamp > Time.currentMillis())
       ?.timestamp ?? null;
 
   // Calculate time left for next decision
@@ -162,6 +179,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         activeTab === MyStreamWaveTab.CHAT && (
           <CompactTimeCountdown
             timeLeft={timeLeft}
+            isPaused={isPaused}
           />
         )}
     </div>

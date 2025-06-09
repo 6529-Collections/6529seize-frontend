@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
-import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
 import { ExpandedTimelineContent } from "./time/ExpandedTimelineContent";
 import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
@@ -25,15 +24,35 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   const { allDecisions } = useDecisionPoints(wave);
   const {
     decisions: { multiDecision },
+    pauses: { isPaused, currentPause },
   } = useWave(wave);
 
-  // Track expanded/collapsed state for decision details
+
+  // Track expanded/collapsed state for decjusision details
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
 
+  // Filter out decisions that occur during pause periods
+  const filteredDecisions = allDecisions.filter(decision => {
+    if (!wave.pauses || wave.pauses.length === 0) return true;
+    
+    // Check if this decision falls within any pause period
+    // Both timestamps should be in milliseconds
+    return !wave.pauses.some(pause => {
+      const decisionTime = decision.timestamp;
+      const pauseStart = pause.start_time;
+      const pauseEnd = pause.end_time;
+      
+      // Decision is excluded if it falls within the pause period
+      return decisionTime >= pauseStart && decisionTime <= pauseEnd;
+    });
+  });
+
+  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
-    allDecisions.find((decision) => decision.timestamp > Time.currentMillis())
+    filteredDecisions.find((decision) => decision.timestamp > Time.currentMillis())
       ?.timestamp ?? null;
+
 
 
   return (
@@ -43,10 +62,11 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
         <div className="tw-rounded-lg tw-bg-iron-950 tw-overflow-hidden">
           {/* Timeline header with title and countdown */}
           <TimelineToggleHeader
-            icon={faClock}
             isOpen={isDecisionDetailsOpen}
             setIsOpen={setIsDecisionDetailsOpen}
             nextDecisionTime={nextDecisionTime}
+            isPaused={isPaused}
+            currentPause={currentPause}
           />
 
           {/* Expandable timeline section */}
@@ -55,6 +75,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
               <ExpandedTimelineContent
                 decisions={allDecisions}
                 nextDecisionTime={nextDecisionTime}
+                pauses={wave.pauses}
               />
             )}
           </AnimatePresence>
