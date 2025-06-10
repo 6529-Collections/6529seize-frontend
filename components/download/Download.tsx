@@ -17,7 +17,8 @@ export default function Download(props: Readonly<Props>) {
   const showProgress = props.showProgress ?? true;
 
   async function startDownload() {
-    download(props.href, `${props.name}.${props.extension}`);
+    const filename = props.extension ? `${props.name}.${props.extension}` : props.name;
+    download(props.href, filename);
   }
 
   return (

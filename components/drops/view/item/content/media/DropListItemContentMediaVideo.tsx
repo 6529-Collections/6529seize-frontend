@@ -97,7 +97,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
         Your browser does not support the video tag.
       </video>
       {showControls && (isOptimized || src.startsWith("blob:")) && (
-        <div className="tw-absolute tw-top-2 tw-right-2">
+        <div className="tw-absolute tw-top-2 tw-right-2 tw-z-10">
           <Download
             href={src}
             name={fileName}
