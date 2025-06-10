@@ -53,3 +53,7 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 * Follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat:`, `fix:`).
 * Do not squash commits; maintain a clear history.
 * Each commit should represent a single logical change.
+* End every commit message with a sign-off line:
+  `Signed-off-by: <git-username> <git-email>`.
+  The username and email must match your Git configuration and
+  should be included at the bottom of any Pull Request description as well.
