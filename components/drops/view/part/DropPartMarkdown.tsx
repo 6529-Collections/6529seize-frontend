@@ -8,6 +8,8 @@ import {
   isValidElement,
   memo,
   ReactNode,
+  useEffect,
+  useState,
   type JSX,
 } from "react";
 import Markdown, { ExtraProps } from "react-markdown";
@@ -23,6 +25,7 @@ import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropRefere
 import { Tweet } from "react-tweet";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
+import { getLinkPreview, ILinkPreviewResponse } from "link-preview-js";
 import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
@@ -300,7 +303,12 @@ function DropPartMarkdown({
       }
     }
 
-    return renderExternalOrInternalLink(href, props);
+    return (
+      <>
+        {renderExternalOrInternalLink(href, props)}
+        <LinkPreview url={href} />
+      </>
+    );
   };
 
   const imgRenderer = ({
@@ -337,6 +345,52 @@ function DropPartMarkdown({
     } catch {
       return false;
     }
+  };
+
+  interface PreviewData extends ILinkPreviewResponse {}
+
+  const LinkPreview: React.FC<{ url: string }> = ({ url }) => {
+    const [data, setData] = useState<PreviewData | null>(null);
+
+    useEffect(() => {
+      let active = true;
+      getLinkPreview(url)
+        .then((res) => {
+          if (active) {
+            setData(res as PreviewData);
+          }
+        })
+        .catch(() => {});
+      return () => {
+        active = false;
+      };
+    }, [url]);
+
+    if (!data) return null;
+
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        className="tw-block tw-border tw-border-iron-500 tw-rounded tw-p-2 tw-max-w-xs"
+      >
+        {data.images?.[0] && (
+          <img
+            src={data.images[0]}
+            alt={data.title ?? url}
+            className="tw-w-full tw-h-24 tw-object-cover tw-rounded"
+          />
+        )}
+        <div className="tw-text-xs tw-mt-1">
+          {data.title && <div className="tw-font-bold tw-truncate">{data.title}</div>}
+          {data.description && (
+            <div className="tw-truncate tw-text-iron-300">{data.description}</div>
+          )}
+          <div className="tw-text-blue-500 tw-truncate">{url}</div>
+        </div>
+      </a>
+    );
   };
 
   const renderExternalOrInternalLink = (
