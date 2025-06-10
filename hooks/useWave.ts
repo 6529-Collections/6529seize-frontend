@@ -144,7 +144,7 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     // Return the earliest future pause
     return futurePauses.reduce((earliest: ApiWaveDecisionPause, current: ApiWaveDecisionPause) => 
       current.start_time < earliest.start_time ? current : earliest
-    );
+    , futurePauses[0]);
   }, [wave?.pauses, now]);
 
   // Helper function to filter out decisions that occur during pause periods
@@ -172,7 +172,7 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
       // Return the earliest future decision
       return futureDecisions.reduce((earliest, current) => 
         current.decision_time < earliest.decision_time ? current : earliest
-      );
+      , futureDecisions[0]);
     };
   }, [filterDecisionsDuringPauses, now]);
 
