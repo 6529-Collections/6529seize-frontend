@@ -2,6 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import useCapacitor from '../../hooks/useCapacitor';
 
 const listeners: Record<string, Function> = {};
+const removeListener = jest.fn();
 
 jest.mock('@capacitor/core', () => ({
   Capacitor: {
@@ -13,7 +14,10 @@ jest.mock('@capacitor/core', () => ({
 jest.mock('@capacitor/app', () => ({
   App: {
     getState: jest.fn(),
-    addListener: jest.fn((event: string, cb: any) => { listeners[event] = cb; }),
+    addListener: jest.fn((event: string, cb: any) => {
+      listeners[event] = cb;
+      return { remove: removeListener };
+    }),
     removeAllListeners: jest.fn(),
   },
 }));
@@ -34,6 +38,7 @@ beforeEach(() => {
   listeners.appStateChange = () => {};
   listeners.keyboardWillShow = () => {};
   listeners.keyboardWillHide = () => {};
+  removeListener.mockClear();
   (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
   (Capacitor.getPlatform as jest.Mock).mockReturnValue('ios');
   (App.getState as jest.Mock).mockResolvedValue({ isActive: false });
@@ -49,7 +54,7 @@ beforeEach(() => {
 
 describe('useCapacitor', () => {
   it('provides platform info and reacts to events', async () => {
-    const { result } = renderHook(() => useCapacitor());
+    const { result, unmount } = renderHook(() => useCapacitor());
     await waitFor(() => {
       expect(result.current.isIos).toBe(true);
       expect(result.current.isAndroid).toBe(false);
@@ -80,5 +85,9 @@ describe('useCapacitor', () => {
       listeners.appStateChange({ isActive: true });
     });
     expect(result.current.isActive).toBe(true);
+
+    expect(removeListener).not.toHaveBeenCalled();
+    unmount();
+    expect(removeListener).toHaveBeenCalled();
   });
 });
