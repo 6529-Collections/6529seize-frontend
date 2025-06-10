@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useInView } from "../../../../../../hooks/useInView";
 import useDeviceInfo from "../../../../../../hooks/useDeviceInfo";
 import { useOptimizedVideo } from "../../../../../../hooks/useOptimizedVideo";
