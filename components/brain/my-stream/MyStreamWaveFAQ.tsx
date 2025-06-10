@@ -412,7 +412,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             <div className="tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-md tw-w-8 tw-h-8 tw-mr-3">
               <FontAwesomeIcon
                 icon={faChartLine}
-                className="tw-text-yellow-500 tw-size-4 tw-flex-shrink-0"
+                className="tw-text-[#FEDF89] tw-size-4 tw-flex-shrink-0"
               />
             </div>
             What is TDH?

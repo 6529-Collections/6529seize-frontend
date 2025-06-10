@@ -13,7 +13,7 @@ interface ExpandedTimelineContentProps {
  */
 export const ExpandedTimelineContent: React.FC<ExpandedTimelineContentProps> = ({
   decisions,
-  nextDecisionTime
+  nextDecisionTime,
 }) => {
   const [animationComplete, setAnimationComplete] = useState(false);
   

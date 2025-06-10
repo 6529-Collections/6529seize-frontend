@@ -16,6 +16,7 @@ export interface DropInteractionParams {
 export enum DropLocation {
   MY_STREAM = "MY_STREAM",
   WAVE = "WAVE",
+  PROFILE = "PROFILE",
 }
 
 interface DropProps {
