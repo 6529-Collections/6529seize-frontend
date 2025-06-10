@@ -26,7 +26,7 @@ export default function NextGenContractWriteStatus(props: Readonly<Props>) {
   useEffect(() => {
     if (waitContractWrite.data) {
       const tokenIds: number[] = [];
-      waitContractWrite.data.logs.forEach((l) => {
+      waitContractWrite.data.logs.forEach((l: any) => {
         if (
           areEqualAddresses(l.topics[0], TRANSFER_EVENT) &&
           areEqualAddresses(l.topics[1], NULL_MERKLE)
