@@ -31,7 +31,7 @@ const useCapacitor = () => {
     });
 
     return () => {
-      Promise.resolve(appStateListener).then((handle) => handle.remove());
+      appStateListener.then((listener) => listener.remove());
     };
   }, [isCapacitor]);
 
