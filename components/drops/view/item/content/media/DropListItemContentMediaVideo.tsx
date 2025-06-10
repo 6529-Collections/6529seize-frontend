@@ -82,9 +82,6 @@ function DropListItemContentMediaVideo({ src }: Props) {
       className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
-      onFocus={() => setShowControls(true)}
-      onBlur={() => setShowControls(false)}
-      tabIndex={0}
     >
       <video
         ref={videoRef}
