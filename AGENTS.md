@@ -53,3 +53,12 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
 * Follow [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat:`, `fix:`).
 * Do not squash commits; maintain a clear history.
 * Each commit should represent a single logical change.
+* Add a Developer Certificate of Origin (DCO) signature to every commit
+  message footer using your name and `accountcode+username@users.noreply.github.com`
+  email address. Example:
+
+  ```
+  Add tests for address comparison
+  Signed-off-by: IAmAUser <1234567+IAmAUser@users.noreply.github.com>
+  ```
+  Always use `git commit -s` to automatically add the signature.
