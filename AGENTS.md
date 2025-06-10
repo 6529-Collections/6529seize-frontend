@@ -61,3 +61,4 @@ If `npm run test` fails due to low coverage on a modified file, write meaningful
   Add tests for address comparison
   Signed-off-by: IAmAUser <1234567+IAmAUser@users.noreply.github.com>
   ```
+  Always use `git commit -s` to automatically add the signature.
