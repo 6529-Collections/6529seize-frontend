@@ -31,7 +31,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
 
-  const { isChatWave, isMemesWave, isRankWave, pauses: { showPause, filterDecisionsDuringPauses } } = useWave(wave);
+  const { isChatWave, isMemesWave, isRankWave, pauses: { filterDecisionsDuringPauses } } = useWave(wave);
   const {
     voting: { isUpcoming, isCompleted, isInProgress },
     decisions: { firstDecisionDone },

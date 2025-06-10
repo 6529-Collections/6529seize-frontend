@@ -8,6 +8,7 @@ interface Props {
   name: string;
   extension: string;
   showProgress?: boolean;
+  className?: string;
 }
 
 export default function Download(props: Readonly<Props>) {
@@ -22,10 +23,13 @@ export default function Download(props: Readonly<Props>) {
   }
 
   return (
-    <span className={`${styles.download} `}>
+    <span className={`${styles.download} ${props.className || ''}`}>
       {!isInProgress || !showProgress ? (
         <button
-          onClick={startDownload}
+          onClick={(e) => {
+            e.stopPropagation();
+            startDownload();
+          }}
           className="tw-bg-iron-900 desktop-hover:hover:tw-bg-iron-800 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-border-0"
           aria-label="Download file"
           type="button"
