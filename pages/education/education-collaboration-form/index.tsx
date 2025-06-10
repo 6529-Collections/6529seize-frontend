@@ -52,7 +52,7 @@ const IndexPage = () => (
       />
       <meta
         name="description"
-        content="If you would like to collaborate with 6529 to help educate or conduct research in the fields of cryptocurrecny, digital rights, NFTs or metaverse, please fill in the form below: 
+        content="If you would like to collaborate with 6529 to help educate or conduct research in the fields of cryptocurrency, digital rights, NFTs or metaverse, please fill in the form below:
 
 EDUCATION COLLABORATION FORM"
       />
@@ -65,7 +65,7 @@ EDUCATION COLLABORATION FORM"
       />
       <meta
         property="og:description"
-        content="If you would like to collaborate with 6529 to help educate or conduct research in the fields of cryptocurrecny, digital rights, NFTs or metaverse, please fill in the form below: 
+        content="If you would like to collaborate with 6529 to help educate or conduct research in the fields of cryptocurrency, digital rights, NFTs or metaverse, please fill in the form below:
 
 EDUCATION COLLABORATION FORM"
       />
@@ -361,7 +361,7 @@ EDUCATION COLLABORATION FORM"
                               <p>
                                 If you would like to collaborate with 6529 to
                                 help educate or conduct research in the fields
-                                of cryptocurrecny, digital rights, NFTs or
+                                of cryptocurrency, digital rights, NFTs or
                                 metaverse, please fill in the form below:
                               </p>
                             </div>
