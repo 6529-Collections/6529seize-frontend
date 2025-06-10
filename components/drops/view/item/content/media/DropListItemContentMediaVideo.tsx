@@ -12,7 +12,6 @@ interface Props {
 function DropListItemContentMediaVideo({ src }: Props) {
   const [wrapperRef, inView] = useInView<HTMLDivElement>({ threshold: 0.1 });
   const { isApp } = useDeviceInfo();
-  const [showControls, setShowControls] = useState(false);
 
   // 1) Pick up the best URL (HLS or MP4)
   const { playableUrl, isHls, isOptimized } = useOptimizedVideo(src, {
@@ -79,9 +78,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
   return (
     <div
       ref={wrapperRef}
-      className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative"
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
+      className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-group"
     >
       <video
         ref={videoRef}
@@ -96,13 +93,13 @@ function DropListItemContentMediaVideo({ src }: Props) {
       >
         Your browser does not support the video tag.
       </video>
-      {showControls && (isOptimized || src.startsWith("blob:")) && (
+      {(isOptimized || src.startsWith("blob:")) && (
         <Download
           href={src}
           name={fileName}
           extension={fileExtension}
           showProgress={false}
-          className="tw-absolute tw-top-0 tw-right-8 tw-z-10"
+          className="tw-absolute tw-top-0 tw-right-8 tw-z-10 tw-opacity-0 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-100"
         />
       )}
     </div>
