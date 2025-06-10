@@ -26,12 +26,12 @@ const useCapacitor = () => {
       });
     }
 
-    App.addListener("appStateChange", (state) => {
+    const appStateListener = App.addListener("appStateChange", (state) => {
       setIsActive(state.isActive);
     });
 
     return () => {
-      App.removeAllListeners();
+      appStateListener.then((listener) => listener.remove());
     };
   }, [isCapacitor]);
 
