@@ -48,6 +48,9 @@ interface WaveInfo {
   pauses: {
     isPaused: boolean;
     currentPause: ApiWaveDecisionPause | null;
+    nextPause: ApiWaveDecisionPause | null;
+    showPause: (nextDecisionTime: number | null) => ApiWaveDecisionPause | null;
+    hasDecisionsBeforePause: (nextDecisionTime: number | null) => boolean;
     filterDecisionsDuringPauses: (decisions: ApiWaveDecision[]) => ApiWaveDecision[];
     getNextValidDecision: (decisions: ApiWaveDecision[]) => ApiWaveDecision | null;
   };
@@ -128,6 +131,22 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     return currentPause !== null;
   }, [currentPause]);
 
+  // Get the next upcoming pause
+  const nextPause = useMemo(() => {
+    if (!wave?.pauses || wave.pauses.length === 0) return null;
+    
+    const futurePauses = wave.pauses.filter((pause: ApiWaveDecisionPause) => 
+      pause.start_time > now
+    );
+    
+    if (futurePauses.length === 0) return null;
+    
+    // Return the earliest future pause
+    return futurePauses.reduce((earliest: ApiWaveDecisionPause, current: ApiWaveDecisionPause) => 
+      current.start_time < earliest.start_time ? current : earliest
+    );
+  }, [wave?.pauses, now]);
+
   // Helper function to filter out decisions that occur during pause periods
   const filterDecisionsDuringPauses = useMemo(() => {
     return (decisions: ApiWaveDecision[]): ApiWaveDecision[] => {
@@ -156,6 +175,29 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
       );
     };
   }, [filterDecisionsDuringPauses, now]);
+
+  // Check if there are any decisions before the next pause
+  const hasDecisionsBeforePause = useMemo(() => {
+    return (nextDecisionTime: number | null): boolean => {
+      if (!nextPause || !nextDecisionTime) return false;
+      return nextDecisionTime < nextPause.start_time;
+    };
+  }, [nextPause]);
+
+  // Get the pause to show (current if active, otherwise next if no decisions before it)
+  const showPause = useMemo(() => {
+    return (nextDecisionTime: number | null): ApiWaveDecisionPause | null => {
+      // If currently paused, return current pause
+      if (currentPause) return currentPause;
+      
+      // If there's a next pause and no decisions before it, return next pause
+      if (nextPause && !hasDecisionsBeforePause(nextDecisionTime)) {
+        return nextPause;
+      }
+      
+      return null;
+    };
+  }, [currentPause, nextPause, hasDecisionsBeforePause]);
 
   // Extract common wave properties that are used in multiple calculations
   const maxDropsCount = useMemo(
@@ -302,6 +344,9 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     pauses: {
       isPaused,
       currentPause,
+      nextPause,
+      showPause,
+      hasDecisionsBeforePause,
       filterDecisionsDuringPauses,
       getNextValidDecision,
     },

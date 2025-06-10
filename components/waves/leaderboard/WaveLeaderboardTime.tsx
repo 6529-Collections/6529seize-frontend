@@ -24,7 +24,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   const { allDecisions } = useDecisionPoints(wave);
   const {
     decisions: { multiDecision },
-    pauses: { isPaused, currentPause, filterDecisionsDuringPauses },
+    pauses: { showPause, filterDecisionsDuringPauses },
   } = useWave(wave);
 
 
@@ -66,8 +66,8 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
             isOpen={isDecisionDetailsOpen}
             setIsOpen={setIsDecisionDetailsOpen}
             nextDecisionTime={nextDecisionTime}
-            isPaused={isPaused}
-            currentPause={currentPause}
+            isPaused={!!showPause(nextDecisionTime)}
+            currentPause={showPause(nextDecisionTime)}
           />
 
           {/* Expandable timeline section */}

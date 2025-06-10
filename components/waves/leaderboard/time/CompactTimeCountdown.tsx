@@ -17,9 +17,9 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
   timeLeft,
 }) => {
   return (
-    <div className="tw-hidden md:tw-flex tw-items-center tw-gap-1.5 tw-px-4 tw-py-2 tw-bg-iron-900 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-justify-between tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-md">
-      <div className="tw-flex tw-items-center tw-gap-x-2">
-        <span className={`tw-text-xs tw-text-primary-400 tw-font-semibold tw-whitespace-nowrap`}>
+    <div className="tw-hidden md:tw-flex tw-px-4 tw-py-2 tw-bg-iron-800/95 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/50 tw-items-center tw-justify-between tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/95 tw-transition-all tw-duration-300 tw-ease-in-out tw-group tw-shadow-sm">
+      <div className="tw-flex tw-items-baseline tw-gap-x-2">
+        <span className={`tw-text-xs tw-text-iron-100 tw-font-semibold tw-whitespace-nowrap`}>
           Next winner:
         </span>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
