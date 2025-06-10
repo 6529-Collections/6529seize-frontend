@@ -147,17 +147,22 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     , futurePauses[0]);
   }, [wave?.pauses, now]);
 
+  // Helper function to check if a decision time falls within any pause period
+  const isDecisionDuringPause = (decisionTime: number, pauses: ApiWaveDecisionPause[]): boolean => {
+    return pauses.some(pause => 
+      decisionTime >= pause.start_time && 
+      decisionTime <= pause.end_time
+    );
+  };
+
   // Helper function to filter out decisions that occur during pause periods
   const filterDecisionsDuringPauses = useMemo(() => {
     return (decisions: ApiWaveDecision[]): ApiWaveDecision[] => {
       if (!wave?.pauses || wave.pauses.length === 0) return decisions;
-
-      return decisions.filter(decision => {
-        return !wave.pauses.some((pause: ApiWaveDecisionPause) => 
-          decision.decision_time >= pause.start_time && 
-          decision.decision_time <= pause.end_time
-        );
-      });
+      
+      return decisions.filter(decision => 
+        !isDecisionDuringPause(decision.decision_time, wave.pauses)
+      );
     };
   }, [wave?.pauses]);
 

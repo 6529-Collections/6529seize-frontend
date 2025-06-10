@@ -39,6 +39,46 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
 
   const [timeLeft, setTimeLeft] = React.useState<TimeLeft>(getTimeLeft());
 
+  // Extract the status display logic
+  const getStatusDisplay = () => {
+    if (isPaused && currentPause) {
+      return (
+        <span className="tw-inline-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-2.5 tw-px-3 tw-py-1.5 tw-rounded-md tw-text-xs tw-bg-gradient-to-r tw-from-iron-800/90 tw-to-iron-700/70 group-hover:tw-from-iron-700/60 group-hover:tw-to-iron-600/40 tw-border tw-border-iron-600/40 group-hover:tw-border-iron-600/30 tw-border-solid tw-shadow-sm group-hover:tw-shadow-none tw-transition-all tw-duration-300 tw-ease-out">
+          <span className="tw-font-bold tw-bg-gradient-to-r tw-from-amber-200 tw-via-amber-100 tw-to-amber-200/90 tw-bg-clip-text tw-text-transparent tw-whitespace-nowrap">
+            Congrats to all SZN 11 winners!
+          </span>
+          <span className="tw-text-iron-500">•</span>
+          <span className="tw-text-iron-300 tw-font-medium tw-whitespace-nowrap">
+            SZN 12 starts:{" "}
+            {new Date(currentPause.end_time).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })}
+          </span>
+        </span>
+      );
+    }
+    
+    if (nextDecisionTime) {
+      return (
+        <span className="tw-text-iron-300 tw-font-medium tw-text-xs">
+          {new Date(nextDecisionTime).toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+      );
+    }
+    
+    return (
+      <span className="tw-text-iron-400 tw-text-xs">
+        No upcoming events
+      </span>
+    );
+  };
+
   React.useEffect(() => {
     // Initial calculation
     setTimeLeft(getTimeLeft());
@@ -70,8 +110,14 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
       className="tw-@container tw-px-4 tw-py-2 tw-bg-iron-800/95 tw-rounded-t-lg tw-border tw-border-solid tw-border-iron-700/50 tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/80 tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-sm"
       onClick={() => setIsOpen(!isOpen)}
     >
+      {/* Mobile: Show pause info at the top */}
+      {isPaused && currentPause && (
+        <div className="tw-block @[700px]:tw-hidden tw-text-sm tw-font-medium tw-mb-2">
+          {getStatusDisplay()}
+        </div>
+      )}
+      
       <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-items-start @[700px]:tw-items-center tw-gap-2">
-        {/* Mobile: Row 1 - Countdown + Chevron | Desktop: Left section */}
         <div className="tw-flex tw-items-center tw-justify-between tw-w-full @[700px]:tw-w-auto @[700px]:tw-flex-1">
           <div className="tw-flex tw-items-baseline tw-gap-x-2">
             <span
@@ -89,7 +135,6 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
             )}
           </div>
 
-          {/* Chevron - visible on mobile, hidden on desktop */}
           <button
             className="tw-w-7 tw-h-7 tw-flex @[700px]:tw-hidden tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
             aria-label={isOpen ? "Collapse" : "Expand"}
@@ -112,38 +157,16 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
         </div>
 
 
-        <div className="tw-text-sm tw-font-medium">
-          {isPaused && currentPause ? (
-            <span className="tw-flex tw-items-center tw-gap-2.5 tw-px-3 tw-py-1.5 tw-rounded-md tw-text-xs tw-bg-gradient-to-r tw-from-iron-800/90 tw-to-iron-700/70 group-hover:tw-from-iron-700/60 group-hover:tw-to-iron-600/40 tw-border tw-border-iron-600/40 group-hover:tw-border-iron-600/30 tw-border-solid tw-shadow-sm group-hover:tw-shadow-none tw-transition-all tw-duration-300 tw-ease-out">
-              <span className="tw-font-bold tw-bg-gradient-to-r tw-from-amber-200 tw-via-amber-100 tw-to-amber-200/90 tw-bg-clip-text tw-text-transparent tw-whitespace-nowrap">
-                Congrats to all Season 11 winners!
-              </span>
-              <span className="tw-text-iron-500">•</span>
-              <span className="tw-text-iron-300 tw-font-medium tw-whitespace-nowrap">
-                S12 starts:{" "}
-                {new Date(currentPause.end_time).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </span>
-            </span>
-          ) : nextDecisionTime ? (
-            <span className="tw-text-iron-300 tw-font-medium tw-text-xs">
-              {new Date(nextDecisionTime).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-          ) : (
-            <span className="tw-text-iron-400 tw-text-xs">
-              No upcoming events
-            </span>
-          )}
+        {/* Desktop: Show all statuses | Mobile: Show only non-pause statuses */}
+        <div className="tw-text-sm tw-font-medium tw-hidden @[700px]:tw-block">
+          {getStatusDisplay()}
         </div>
+        {!isPaused && (
+          <div className="tw-text-sm tw-font-medium tw-block @[700px]:tw-hidden">
+            {getStatusDisplay()}
+          </div>
+        )}
 
-        {/* Chevron - visible on desktop, hidden on mobile */}
         <button
           className="tw-w-7 tw-h-7 tw-hidden @[700px]:tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
           aria-label={isOpen ? "Collapse" : "Expand"}
