@@ -180,7 +180,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         activeTab === MyStreamWaveTab.CHAT && (
           <CompactTimeCountdown
             timeLeft={timeLeft}
-            isPaused={!!showPause(nextDecisionTime)}
           />
         )}
     </div>

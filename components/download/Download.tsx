@@ -24,15 +24,17 @@ export default function Download(props: Readonly<Props>) {
   return (
     <span className={`${styles.download} `}>
       {!isInProgress || !showProgress ? (
-        <div
+        <button
           onClick={startDownload}
-          className="tw-bg-iron-900 desktop-hover:hover:tw-bg-iron-800 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out"
+          className="tw-bg-iron-900 desktop-hover:hover:tw-bg-iron-800 tw-rounded-full tw-size-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-cursor-pointer tw-transition tw-duration-300 tw-ease-out tw-border-0"
+          aria-label="Download file"
+          type="button"
         >
           <FontAwesomeIcon
             icon={faDownload}
             className="tw-text-white tw-w-4 tw-h-4 tw-flex-shrink-0"
           />
-        </div>
+        </button>
       ) : (
         <>
           Downloading {percentage} %{" "}
