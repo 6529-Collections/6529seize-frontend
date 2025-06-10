@@ -85,7 +85,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     onClick={onAddMetadataClick}
                     className={`tw-flex-shrink-0 ${
                       isRequiredMetadataMissing
-                        ? "tw-text-yellow"
+                        ? "tw-text-[#FEDF89]"
                         : "tw-text-iron-400"
                     } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/80 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}>
                     <svg
@@ -118,7 +118,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                       aria-label="Upload a file"
                       className={`tw-flex-shrink-0 ${
                         isRequiredMediaMissing
-                          ? "tw-text-yellow"
+                          ? "tw-text-[#FEDF89]"
                           : "tw-text-iron-400"
                       } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-8 lg:tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0 tw-cursor-pointer`}>
                       <input
@@ -196,7 +196,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                 onClick={onSetShowIconsClick}
                 className={`tw-flex-shrink-0 ${
                   isRequiredMetadataMissing || isRequiredMediaMissing
-                    ? "tw-text-yellow"
+                    ? "tw-text-[#FEDF89]"
                     : "tw-text-iron-400"
                 } tw-bg-iron-700 desktop-hover:hover:tw-bg-iron-700/70 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-size-7 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-iron-500 tw-border-0`}>
                 <svg

@@ -58,7 +58,7 @@ export default function DropPlaceholder({ type, chatRestriction, submissionRestr
         case SubmissionRestriction.NOT_LOGGED_IN:
           return "tw-text-primary-400";
         case SubmissionRestriction.NOT_STARTED:
-          return "tw-text-yellow";
+          return "tw-text-[#FEDF89]";
         case SubmissionRestriction.ENDED:
           return "tw-text-red";
         case SubmissionRestriction.MAX_DROPS_REACHED:

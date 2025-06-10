@@ -1,27 +1,28 @@
 import React from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
   calculateTimeLeft,
   TimeLeft,
 } from "../../../../helpers/waves/time.utils";
 import { TimeCountdown } from "./TimeCountdown";
+import { ApiWaveDecisionPause } from "../../../../generated/models/ApiWaveDecisionPause";
 
 interface TimelineToggleHeaderProps {
-  readonly icon: IconDefinition;
   readonly isOpen: boolean;
   readonly setIsOpen: (isOpen: boolean) => void;
   readonly nextDecisionTime: number | null;
+  readonly isPaused?: boolean;
+  readonly currentPause?: ApiWaveDecisionPause | null;
 }
 
 /**
  * Renders the header for the timeline with toggle functionality
  */
 export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
-  icon,
   isOpen,
   setIsOpen,
   nextDecisionTime,
+  isPaused = false,
+  currentPause,
 }) => {
   const hasNextDecision = !!nextDecisionTime;
   const getTimeLeft = () => {
@@ -37,6 +38,46 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
   };
 
   const [timeLeft, setTimeLeft] = React.useState<TimeLeft>(getTimeLeft());
+
+  // Extract the status display logic
+  const getStatusDisplay = () => {
+    if (isPaused && currentPause) {
+      return (
+        <span className="tw-inline-flex tw-items-center tw-gap-x-2 sm:tw-gap-x-2.5 tw-px-3 tw-py-1.5 tw-rounded-md tw-text-xs tw-bg-gradient-to-r tw-from-iron-800/90 tw-to-iron-700/70 group-hover:tw-from-iron-700/60 group-hover:tw-to-iron-600/40 tw-border tw-border-iron-600/40 group-hover:tw-border-iron-600/30 tw-border-solid tw-shadow-sm group-hover:tw-shadow-none tw-transition-all tw-duration-300 tw-ease-out">
+          <span className="tw-font-bold tw-bg-gradient-to-r tw-from-amber-200 tw-via-amber-100 tw-to-amber-200/90 tw-bg-clip-text tw-text-transparent tw-whitespace-nowrap">
+            Congrats to all SZN 11 winners!
+          </span>
+          <span className="tw-text-iron-500">•</span>
+          <span className="tw-text-iron-300 tw-font-medium tw-whitespace-nowrap">
+            SZN 12 starts:{" "}
+            {new Date(currentPause.end_time).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })}
+          </span>
+        </span>
+      );
+    }
+    
+    if (nextDecisionTime) {
+      return (
+        <span className="tw-text-iron-300 tw-font-medium tw-text-xs">
+          {new Date(nextDecisionTime).toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+      );
+    }
+    
+    return (
+      <span className="tw-text-iron-400 tw-text-xs">
+        No upcoming events
+      </span>
+    );
+  };
 
   React.useEffect(() => {
     // Initial calculation
@@ -66,60 +107,85 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
 
   return (
     <div
-      className="tw-px-3 tw-py-2 tw-group tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-flex tw-items-center tw-justify-between tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800/60 tw-transition tw-duration-300 tw-ease-out"
+      className="tw-@container tw-px-4 tw-py-2 tw-bg-iron-800/95 tw-rounded-t-lg tw-border tw-border-solid tw-border-iron-700/50 tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/80 tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-sm"
       onClick={() => setIsOpen(!isOpen)}
     >
-      <div className="tw-flex tw-items-center tw-w-full sm:tw-w-auto">
-        <div className="tw-flex tw-items-center">
-          <div className="tw-flex-shrink-0 tw-mr-2 tw-text-emerald-500">
-            <FontAwesomeIcon
-              icon={icon}
-              className="tw-size-4 tw-flex-shrink-0"
-            />
-          </div>
-          <div
-            className={`tw-text-xs tw-font-medium ${
-              hasNextDecision ? "tw-text-emerald-500" : "tw-text-iron-300"
-            }`}
-          >
-            {hasNextDecision ? "Next winner:" : "Announcement history"}
-          </div>
+      {/* Mobile: Show pause info at the top */}
+      {isPaused && currentPause && (
+        <div className="tw-block @[700px]:tw-hidden tw-text-sm tw-font-medium tw-mb-2">
+          {getStatusDisplay()}
         </div>
-        {hasNextDecision && (
-          <div className="tw-ml-2">
-            <TimeCountdown timeLeft={timeLeft} />
+      )}
+      
+      <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-items-start @[700px]:tw-items-center tw-gap-2">
+        <div className="tw-flex tw-items-center tw-justify-between tw-w-full @[700px]:tw-w-auto @[700px]:tw-flex-1">
+          <div className="tw-flex tw-items-baseline tw-gap-x-2">
+            <span
+              className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap tw-tracking-tight ${
+                hasNextDecision ? "tw-text-iron-100" : "tw-text-iron-400"
+              }`}
+            >
+              {hasNextDecision ? "Next winner:" : "Announcement history"}
+            </span>
+
+            {hasNextDecision && (
+              <div>
+                <TimeCountdown timeLeft={timeLeft} />
+              </div>
+            )}
+          </div>
+
+          <button
+            className="tw-w-7 tw-h-7 tw-flex @[700px]:tw-hidden tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
+            aria-label={isOpen ? "Collapse" : "Expand"}
+          >
+            <svg
+              className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 ${
+                isOpen ? "tw-rotate-180" : ""
+              } tw-transition-all tw-duration-300 tw-ease-in-out`}
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
+
+
+        {/* Desktop: Show all statuses | Mobile: Show only non-pause statuses */}
+        <div className="tw-text-sm tw-font-medium tw-hidden @[700px]:tw-block">
+          {getStatusDisplay()}
+        </div>
+        {!isPaused && (
+          <div className="tw-text-sm tw-font-medium tw-block @[700px]:tw-hidden">
+            {getStatusDisplay()}
           </div>
         )}
-      </div>
-      <div className="tw-flex tw-items-center tw-ml-auto">
-        <div className="tw-hidden md:tw-block tw-text-xs tw-text-iron-400 tw-mr-2 tw-whitespace-nowrap">
-          {nextDecisionTime
-            ? new Date(nextDecisionTime).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "No upcoming decisions"}
-        </div>
-        <div className="tw-w-6 tw-h-6 tw-flex tw-items-center tw-justify-center tw-bg-iron-700 tw-rounded-full tw-border tw-border-iron-700 desktop-hover:group-hover:tw-bg-iron-650 tw-transition-colors tw-duration-200">
+
+        <button
+          className="tw-w-7 tw-h-7 tw-hidden @[700px]:tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
+          aria-label={isOpen ? "Collapse" : "Expand"}
+        >
           <svg
-            className={`tw-w-4 tw-h-4 tw-text-iron-300 ${
+            className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 ${
               isOpen ? "tw-rotate-180" : ""
-            } tw-transition-transform tw-duration-300`}
-            viewBox="0 0 24 24"
-            fill="none"
+            } tw-transition-all tw-duration-300 tw-ease-in-out`}
+            viewBox="0 0 20 20"
             aria-hidden="true"
-            stroke="currentColor"
+            fill="currentColor"
           >
             <path
-              d="M19 9l-7 7-7-7"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clipRule="evenodd"
             />
           </svg>
-        </div>
+        </button>
       </div>
     </div>
   );

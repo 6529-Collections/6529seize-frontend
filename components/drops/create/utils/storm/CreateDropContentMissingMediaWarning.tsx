@@ -21,7 +21,7 @@ export default function CreateDropContentMissingMediaWarning({
     <Tippy content={TOOLTIP[missingMedia[0]]}>
       <div className="tw-inline-flex tw-items-center tw-gap-x-2">
         <svg
-          className="tw-size-4 tw-flex-shrink-0 tw-text-yellow"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-[#FEDF89]"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -36,7 +36,7 @@ export default function CreateDropContentMissingMediaWarning({
           />
         </svg>
 
-        <span className="tw-text-xs tw-text-yellow">
+        <span className="tw-text-xs tw-text-[#FEDF89]">
           {LABELS[missingMedia[0]]}
         </span>
       </div>

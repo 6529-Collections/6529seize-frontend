@@ -15,6 +15,7 @@ import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
 import { ApiWaveConfig } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
+import { ApiWaveDecisionPause } from '../models/ApiWaveDecisionPause';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
 import { ApiWaveOutcome } from '../models/ApiWaveOutcome';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
@@ -52,6 +53,7 @@ export class ApiWave {
     'contributors_overview': Array<ApiWaveContributorOverview>;
     'subscribed_actions': Array<ApiWaveSubscriptionTargetAction>;
     'metrics': ApiWaveMetrics;
+    'pauses': Array<ApiWaveDecisionPause>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -150,6 +152,12 @@ export class ApiWave {
             "name": "metrics",
             "baseName": "metrics",
             "type": "ApiWaveMetrics",
+            "format": ""
+        },
+        {
+            "name": "pauses",
+            "baseName": "pauses",
+            "type": "Array<ApiWaveDecisionPause>",
             "format": ""
         }    ];
 

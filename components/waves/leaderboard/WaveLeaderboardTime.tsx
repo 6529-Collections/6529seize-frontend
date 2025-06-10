@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
 import { AnimatePresence } from "framer-motion";
-import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
 import { ExpandedTimelineContent } from "./time/ExpandedTimelineContent";
 import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
@@ -25,15 +24,36 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   const { allDecisions } = useDecisionPoints(wave);
   const {
     decisions: { multiDecision },
+    pauses: { showPause, filterDecisionsDuringPauses },
   } = useWave(wave);
 
-  // Track expanded/collapsed state for decision details
+
+  // Track expanded/collapsed state for decjusision details
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
 
+  // Filter out decisions that occur during pause periods using the helper from useWave
+  const filteredDecisions = useMemo(() => {
+    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
+    const decisionsAsApiFormat = allDecisions.map(decision => ({
+      decision_time: decision.timestamp,
+      // Add other required fields if needed
+    } as any));
+    
+    // Apply the filter
+    const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
+    
+    // Convert back to DecisionPoint[] format
+    return allDecisions.filter(decision => 
+      filtered.some(f => f.decision_time === decision.timestamp)
+    );
+  }, [allDecisions, filterDecisionsDuringPauses]);
+
+  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
-    allDecisions.find((decision) => decision.timestamp > Time.currentMillis())
+    filteredDecisions.find((decision) => decision.timestamp > Time.currentMillis())
       ?.timestamp ?? null;
+
 
 
   return (
@@ -43,17 +63,18 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
         <div className="tw-rounded-lg tw-bg-iron-950 tw-overflow-hidden">
           {/* Timeline header with title and countdown */}
           <TimelineToggleHeader
-            icon={faClock}
             isOpen={isDecisionDetailsOpen}
             setIsOpen={setIsDecisionDetailsOpen}
             nextDecisionTime={nextDecisionTime}
+            isPaused={!!showPause(nextDecisionTime)}
+            currentPause={showPause(nextDecisionTime)}
           />
 
           {/* Expandable timeline section */}
           <AnimatePresence>
             {isDecisionDetailsOpen && (
               <ExpandedTimelineContent
-                decisions={allDecisions}
+                decisions={filteredDecisions}
                 nextDecisionTime={nextDecisionTime}
               />
             )}

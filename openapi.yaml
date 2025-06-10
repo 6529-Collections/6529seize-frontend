@@ -2347,6 +2347,66 @@ paths:
                 $ref: "#/components/schemas/ApiWaveDecisionsPage"
         "404":
           description: Wave not found
+  /waves/{id}/pauses:
+    post:
+      tags:
+        - Waves
+      summary: Create or edit wave decision pause
+      operationId: updateWaveDecisionPause
+      parameters:
+        - name: id
+          description: wave id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUpdateWaveDecisionPause"
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWave"
+        "404":
+          description: Wave not found
+  /waves/{waveId}/pauses/{id}:
+    delete:
+      tags:
+        - Waves
+      summary: Delete wave decision pause
+      description: >-
+        Pause can only be deleted if no past decisions have already been skipped
+        based on it.
+      operationId: deleteWaveDecisionPause
+      parameters:
+        - name: waveId
+          description: wave id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          description: pause id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWave"
+        "404":
+          description: Wave or pause not found
   /wave-media/prep:
     post:
       tags:
@@ -5784,6 +5844,31 @@ components:
           format: int64
           nullable: true
           example: 1719850339996
+    ApiUpdateWaveDecisionPause:
+      required:
+        - id
+        - start_time
+        - end_time
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+          description: null when new pause is created. Only supply when editing a pause.
+        start_time:
+          type: integer
+          format: int64
+          nullable: false
+          description: >-
+            Decisions after this time will not be made. Should not overlap with
+            other pauses. Needs to be in the future. Can not be updated after pause creation.
+        end_time:
+          type: integer
+          format: int64
+          nullable: false
+          description: >-
+            Decisions before this time will not be made. Should not overlap with
+            other pauses. Needs to be after start_time, after now and after wave.next_decision_time
     ApiUpdateWaveRequest:
       type: object
       required:
@@ -5897,6 +5982,7 @@ components:
         - contributors_overview
         - subscribed_actions
         - metrics
+        - pauses
       properties:
         id:
           description: The ID of the wave
@@ -5944,6 +6030,10 @@ components:
             $ref: "#/components/schemas/ApiWaveSubscriptionTargetAction"
         metrics:
           $ref: "#/components/schemas/ApiWaveMetrics"
+        pauses:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveDecisionPause"
     ApiWaveChatConfig:
       type: object
       required:
@@ -6064,6 +6154,24 @@ components:
         amount:
           type: number
           format: int64
+    ApiWaveDecisionPause:
+      required:
+        - id
+        - start_time
+        - end_time
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: false
+        start_time:
+          type: integer
+          format: int64
+          nullable: false
+        end_time:
+          type: integer
+          format: int64
+          nullable: false
     ApiWaveDecisionsPage:
       type: object
       required:
