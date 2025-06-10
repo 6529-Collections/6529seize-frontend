@@ -60,7 +60,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
     }
     try {
       const pathname = new URL(url).pathname;
-      const filename = pathname.split("/").pop() || "video";
+      const filename = pathname.split("/").pop() ?? "video";
       const lastDot = filename.lastIndexOf(".");
       if (lastDot > 0) {
         return {
