@@ -25,7 +25,7 @@ import { ApiDropReferencedNFT } from "../../../../generated/models/ApiDropRefere
 import { Tweet } from "react-tweet";
 
 import DropPartMarkdownImage from "./DropPartMarkdownImage";
-import { getLinkPreview, ILinkPreviewResponse } from "link-preview-js";
+import { getLinkPreview } from "link-preview-js";
 import WaveDropQuoteWithDropId from "../../../waves/drops/WaveDropQuoteWithDropId";
 import WaveDropQuoteWithSerialNo from "../../../waves/drops/WaveDropQuoteWithSerialNo";
 import { ApiDrop } from "../../../../generated/models/ApiDrop";
@@ -347,7 +347,12 @@ function DropPartMarkdown({
     }
   };
 
-  interface PreviewData extends ILinkPreviewResponse {}
+  interface PreviewData {
+    url: string;
+    title?: string;
+    description?: string;
+    images?: string[];
+  }
 
   const LinkPreview: React.FC<{ url: string }> = ({ url }) => {
     const [data, setData] = useState<PreviewData | null>(null);
