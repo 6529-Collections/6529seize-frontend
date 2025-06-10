@@ -79,6 +79,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
   return (
     <div
       ref={wrapperRef}
+      role="group"
       className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
@@ -97,7 +98,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
         Your browser does not support the video tag.
       </video>
       {showControls && (isOptimized || src.startsWith("blob:")) && (
-        <div 
+        <div
           className="tw-absolute tw-top-2 tw-right-2 tw-z-10"
           onClick={(e) => e.stopPropagation()}
         >
