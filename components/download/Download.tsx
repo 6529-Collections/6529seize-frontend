@@ -12,8 +12,7 @@ interface Props {
 }
 
 export default function Download(props: Readonly<Props>) {
-  const { size, elapsed, percentage, download, cancel, error, isInProgress } =
-    useDownloader();
+  const { percentage, download, cancel, isInProgress } = useDownloader();
   
   const showProgress = props.showProgress ?? true;
 
@@ -23,7 +22,7 @@ export default function Download(props: Readonly<Props>) {
   }
 
   return (
-    <span className={`${styles.download} ${props.className || ''}`}>
+    <span className={`${styles.download} ${props.className ?? ''}`}>
       {!isInProgress || !showProgress ? (
         <button
           onClick={(e) => {

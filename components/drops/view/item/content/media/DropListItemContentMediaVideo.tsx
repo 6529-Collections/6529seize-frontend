@@ -82,6 +82,9 @@ function DropListItemContentMediaVideo({ src }: Props) {
       className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
+      onFocus={() => setShowControls(true)}
+      onBlur={() => setShowControls(false)}
+      tabIndex={0}
     >
       <video
         ref={videoRef}
@@ -102,7 +105,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
           name={fileName}
           extension={fileExtension}
           showProgress={false}
-          className="tw-absolute tw-top-2 tw-right-2 tw-z-10"
+          className="tw-absolute tw-top-0 tw-right-8 tw-z-10"
         />
       )}
     </div>
