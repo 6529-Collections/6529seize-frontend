@@ -22,17 +22,6 @@ function DropListItemContentMediaVideo({ src }: Props) {
     exponentialBackoff: false,
   });
 
-  // Debug logging
-  useEffect(() => {
-    console.log("Video URLs:", {
-      originalSrc: src,
-      playableUrl,
-      isOptimized,
-      isHls,
-      isBlobUrl: src.startsWith("blob:"),
-    });
-  }, [src, playableUrl, isOptimized, isHls]);
-
   // 2) Setup HLS (or native) once and get back the videoRef + loading state
   const { videoRef, isLoading } = useHlsPlayer({
     src: playableUrl,
