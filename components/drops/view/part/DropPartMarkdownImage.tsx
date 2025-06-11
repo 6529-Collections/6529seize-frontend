@@ -20,6 +20,8 @@ const tooltipProps = {
   style: { backgroundColor: "#37373E", color: "white", zIndex: 1002 }
 };
 
+const modalButtonClasses = "tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out";
+
 interface DropPartMarkdownImageProps {
   readonly src: string;
   readonly alt?: string;
@@ -125,7 +127,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                   <button
                     onClick={(e) => e.stopPropagation()}
                     data-tooltip-id={`open-browser-markdown-${src}`}
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50  tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    className={modalButtonClasses}
                     aria-label="Open image in new tab"
                   >
                     <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
@@ -135,7 +137,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                   <button
                     onClick={handleFullScreen}
                     data-tooltip-id="full-screen-markdown"
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50  tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    className={modalButtonClasses}
                     aria-label="Full screen"
                   >
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
@@ -149,7 +151,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                       setIsZoomed(false);
                     }}
                     data-tooltip-id="reset-zoom-markdown"
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50  tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    className={modalButtonClasses}
                     aria-label="Reset"
                   >
                     <FontAwesomeIcon
@@ -161,7 +163,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                 <button
                   onClick={handleCloseModal}
                   data-tooltip-id="close-modal-markdown"
-                  className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50  tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 lg:tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                  className={modalButtonClasses}
                   aria-label="Close modal"
                 >
                   <svg
