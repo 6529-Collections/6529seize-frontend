@@ -1,13 +1,10 @@
 import React from "react";
 import { TimeLeft } from "../../../../helpers/waves/time.utils";
-import { faClock } from "@fortawesome/free-regular-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TimeUnitDisplay } from "./TimeUnitDisplay";
 
 interface CompactTimeCountdownProps {
   readonly timeLeft: TimeLeft;
   readonly label?: string;
-  readonly className?: string;
 }
 
 /**
@@ -16,19 +13,11 @@ interface CompactTimeCountdownProps {
  */
 export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
   timeLeft,
-  className = "",
 }) => {
   return (
-    <div
-      className={`tw-hidden md:tw-flex tw-items-center tw-gap-1.5 tw-bg-iron-900 tw-px-3 tw-py-1.5 tw-rounded-lg tw-border tw-border-emerald-600/20 tw-flex-shrink-0 ${className}`}
-    >
-      <div className="tw-flex-shrink-0 tw-text-emerald-500">
-        <FontAwesomeIcon icon={faClock} className="tw-size-3.5 -tw-mt-0.5" />
-      </div>
-      <div className="tw-flex tw-items-center tw-gap-x-2">
-        <span
-          className={`tw-text-xs tw-text-emerald-500 tw-font-medium tw-hidden @[700px]:tw-flex`}
-        >
+    <div className="tw-hidden md:tw-flex tw-px-4 tw-py-2 tw-bg-iron-800/95 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/50 tw-items-center tw-justify-between tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/95 tw-transition-all tw-duration-300 tw-ease-in-out tw-group tw-shadow-sm">
+      <div className="tw-flex tw-items-baseline tw-gap-x-2">
+        <span className={`tw-text-xs tw-text-iron-100 tw-font-semibold tw-whitespace-nowrap`}>
           Next winner:
         </span>
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
@@ -36,14 +25,8 @@ export const CompactTimeCountdown: React.FC<CompactTimeCountdownProps> = ({
           {timeLeft.days > 0 && (
             <TimeUnitDisplay value={timeLeft.days} label="days" />
           )}
-
-          {/* Hours */}
           <TimeUnitDisplay value={timeLeft.hours} label="hrs" />
-
-          {/* Minutes */}
           <TimeUnitDisplay value={timeLeft.minutes} label="min" />
-
-          {/* Seconds */}
           <TimeUnitDisplay value={timeLeft.seconds} label="sec" />
         </div>
       </div>

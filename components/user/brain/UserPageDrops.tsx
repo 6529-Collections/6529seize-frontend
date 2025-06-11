@@ -8,7 +8,9 @@ export default function UserPageDrops({
   const haveProfile = !!profile?.handle;
   return (
     <div className="tailwind-scope">
-      <div className="tw-max-w-[672px] mx-auto">{haveProfile && <Drops />}</div>
+      <div className="tw-max-w-4xl tw-mx-auto tw-py-4">
+        {haveProfile && <Drops />}
+      </div>
     </div>
   );
 }

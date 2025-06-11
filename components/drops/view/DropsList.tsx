@@ -28,6 +28,7 @@ interface DropsListProps {
   readonly targetDropRef: RefObject<HTMLDivElement | null> | null;
   readonly dropViewDropId: string | null;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null>;
+  readonly location?: DropLocation;
 }
 
 const MemoizedDrop = memo(Drop);
@@ -47,6 +48,7 @@ const DropsList = memo(function DropsList({
   onQuoteClick,
   onDropContentClick,
   dropViewDropId,
+  location = DropLocation.WAVE,
 }: DropsListProps) {
   const handleReply = useCallback<DropActionHandler>(
     ({ drop, partId }) => onReply({ drop, partId }),
@@ -134,7 +136,7 @@ const DropsList = memo(function DropsList({
                   activeDrop={getItemData.activeDrop}
                   onReply={getItemData.handleReply}
                   onQuote={getItemData.handleQuote}
-                  location={DropLocation.WAVE}
+                  location={location}
                   showReplyAndQuote={getItemData.showReplyAndQuote}
                   onQuoteClick={getItemData.onQuoteClick}
                   parentContainerRef={getItemData.parentContainerRef}

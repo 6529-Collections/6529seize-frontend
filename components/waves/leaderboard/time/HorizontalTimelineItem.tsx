@@ -15,10 +15,10 @@ interface HorizontalTimelineItemProps {
 export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
   decision,
   isNext,
-  flexGrow = false
+  flexGrow = false,
 }) => {
   const isPast = decision.timestamp < Time.currentMillis();
-  
+
   return (
     <div
       className={`tw-relative tw-flex tw-flex-col tw-items-center tw-z-10 ${
@@ -51,14 +51,10 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
         {/* Date text */}
         <div
           className={`tw-text-xs ${
-            isNext
-              ? "tw-text-iron-100"
-              : "tw-text-iron-400"
+            isNext ? "tw-text-iron-100" : "tw-text-iron-400"
           } tw-font-medium`}
         >
-          {new Date(
-            decision.timestamp
-          ).toLocaleDateString(undefined, {
+          {new Date(decision.timestamp).toLocaleDateString(undefined, {
             month: "short",
             day: "numeric",
           })}
@@ -66,9 +62,7 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
 
         {/* Time text */}
         <div className="tw-text-xs tw-text-iron-500 tw-mt-0.5 tw-font-mono">
-          {new Date(
-            decision.timestamp
-          ).toLocaleTimeString(undefined, {
+          {new Date(decision.timestamp).toLocaleTimeString(undefined, {
             hour: "2-digit",
             minute: "2-digit",
           })}

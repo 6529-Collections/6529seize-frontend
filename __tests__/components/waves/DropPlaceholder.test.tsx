@@ -146,7 +146,7 @@ describe('DropPlaceholder', () => {
         />
       );
       
-      expect(screen.getByText("Submissions haven't started yet")).toHaveClass('tw-text-yellow');
+      expect(screen.getByText("Submissions haven't started yet")).toHaveClass('tw-text-[#FEDF89]');
 
       rerender(
         <DropPlaceholder 

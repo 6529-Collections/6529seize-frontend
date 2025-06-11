@@ -7,6 +7,8 @@ import { ApiDrop } from "../../../generated/models/ApiDrop";
 import DropsList from "./DropsList";
 import { DropSize, ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { QueryKey } from "../../react-query-wrapper/ReactQueryWrapper";
+import { DropLocation } from "../../waves/drops/Drop";
+import SpinnerLoader from "../../common/SpinnerLoader";
 
 const REQUEST_SIZE = 10;
 
@@ -121,6 +123,10 @@ export default function Drops() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  if (status === "pending") {
+    return <SpinnerLoader text="Loading drops..." />;
+  }
+
   if (!drops.length && !isFetching) {
     return (
       <div className="tw-text-sm tw-italic tw-text-iron-500">
@@ -144,8 +150,10 @@ export default function Drops() {
         activeDrop={null}
         onQuoteClick={onQuoteClick}
         dropViewDropId={null}
+        location={DropLocation.PROFILE}
       />
       <div ref={bottomRef} style={{ height: "1px" }} />
+      {isFetchingNextPage && <SpinnerLoader text="Loading more drops..." />}
     </div>
   );
 }

@@ -26,6 +26,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
   // Create refs for each timeline item
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   
+  
   // Effect to scroll to the next decision or the end
   useEffect(() => {
     // Only attempt to scroll if animation is complete

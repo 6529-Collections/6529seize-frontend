@@ -17,7 +17,7 @@ export const WaveLeaderboardEmptyState: React.FC<
       <div className="tw-flex tw-items-center tw-justify-center tw-py-12 tw-px-4">
         <div className="tw-text-center">
           <svg
-            className="tw-w-12 tw-h-12 tw-mx-auto tw-mb-4 tw-text-iron-700"
+            className="tw-size-10 sm:tw-size-12 tw-flex-shrink-0 tw-mx-auto tw-mb-4 tw-text-iron-700"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -44,7 +44,7 @@ export const WaveLeaderboardEmptyState: React.FC<
               strokeLinejoin="round"
             />
           </svg>
-          <div className="tw-text-iron-300 tw-font-medium tw-mb-1">
+          <div className="tw-text-iron-300 tw-font-medium tw-mb-1 tw-text-base">
             No artwork submissions yet
           </div>
           <div className="tw-text-iron-500 tw-text-sm">

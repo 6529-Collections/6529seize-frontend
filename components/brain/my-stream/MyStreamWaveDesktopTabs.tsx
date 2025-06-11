@@ -31,7 +31,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const { availableTabs, updateAvailableTabs, setActiveContentTab } =
     useContentTab();
 
-  const { isChatWave, isMemesWave, isRankWave } = useWave(wave);
+  const { isChatWave, isMemesWave, isRankWave, pauses: { filterDecisionsDuringPauses } } = useWave(wave);
   const {
     voting: { isUpcoming, isCompleted, isInProgress },
     decisions: { firstDecisionDone },
@@ -39,8 +39,26 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
   // For next decision countdown
   const { allDecisions } = useDecisionPoints(wave);
+  
+  // Filter out decisions that occur during pause periods using the helper from useWave
+  const filteredDecisions = React.useMemo(() => {
+    // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
+    const decisionsAsApiFormat = allDecisions.map(decision => ({
+      decision_time: decision.timestamp,
+    } as any));
+    
+    // Apply the filter
+    const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
+    
+    // Convert back to DecisionPoint[] format
+    return allDecisions.filter(decision => 
+      filtered.some(f => f.decision_time === decision.timestamp)
+    );
+  }, [allDecisions, filterDecisionsDuringPauses]);
+  
+  // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
-    allDecisions.find((decision) => decision.timestamp > Time.currentMillis())
+    filteredDecisions.find((decision) => decision.timestamp > Time.currentMillis())
       ?.timestamp ?? null;
 
   // Calculate time left for next decision

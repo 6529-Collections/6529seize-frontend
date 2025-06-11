@@ -13,7 +13,7 @@ export const TimeCountdown: React.FC<TimeCountdownProps> = ({
   timeLeft
 }) => {
   return (
-    <div className="tw-flex tw-w-full sm:tw-w-auto tw-gap-1.5">
+    <div className="tw-flex tw-w-full sm:tw-w-auto tw-gap-2">
       {/* Days - only show when > 0 */}
       {timeLeft.days > 0 && (
         <div className="tw-flex-1 sm:tw-flex-none"> <TimeUnitDisplay value={timeLeft.days} label="days" /></div>

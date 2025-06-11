@@ -25,7 +25,7 @@ export default function CreateDropContentMissingMetadataWarning({
     >
       <div className="tw-inline-flex tw-items-center tw-gap-x-2">
         <svg
-          className="tw-size-4 tw-flex-shrink-0 tw-text-yellow"
+          className="tw-size-4 tw-flex-shrink-0 tw-text-[#FEDF89]"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
@@ -40,7 +40,7 @@ export default function CreateDropContentMissingMetadataWarning({
           />
         </svg>
 
-        <span className="tw-text-xs tw-text-yellow">Metadata is required</span>
+        <span className="tw-text-xs tw-text-[#FEDF89]">Metadata is required</span>
       </div>
     </Tippy>
   );

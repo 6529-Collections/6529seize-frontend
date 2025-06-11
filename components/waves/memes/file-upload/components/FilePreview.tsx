@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import type { FilePreviewProps } from "../reducers/types";
 import VideoFallbackPreview from "./VideoFallbackPreview";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 
 /**
  * File Preview Component
@@ -102,18 +102,19 @@ const FilePreview: React.FC<FilePreviewProps> = ({
       </div>
 
       {/* Control buttons */}
-      <div className="tw-absolute tw-top-0 tw-right-0 tw-z-30 tw-flex tw-gap-2">
+      <div className="tw-absolute tw-top-3 tw-right-3 tw-z-30 tw-flex tw-gap-2">
         <button
           onClick={onRemove}
-          className="tw-size-9 tw-flex tw-items-center tw-text-red tw-justify-center tw-rounded-full tw-bg-red/20 tw-backdrop-blur hover:tw-bg-red/30 tw-transition-colors tw-duration-200 tw-border-0 tw-shadow-lg"
-          aria-label="Remove uploaded file"
+          className="tw-border tw-border-solid tw-border-iron-800 hover:tw-ring-iron-650 hover:tw-bg-iron-700 hover:tw-border-iron-700 tw-ring-1 tw-ring-iron-700 tw-rounded-lg tw-bg-iron-800 tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-semibold tw-text-iron-300 tw-flex tw-items-center tw-justify-center tw-gap-x-2 tw-shadow-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out"
+          aria-label="Replace uploaded file"
           tabIndex={0}
-          data-testid="artwork-remove-button"
+          data-testid="artwork-replace-button"
         >
           <FontAwesomeIcon
-            icon={faXmark}
-            className="tw-size-4 tw-flex-shrink-0"
+            icon={faArrowsRotate}
+            className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0"
           />
+          Replace
         </button>
       </div>
     </motion.div>

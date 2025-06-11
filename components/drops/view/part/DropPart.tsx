@@ -114,7 +114,7 @@ const DropPart = memo(
                   {isStorm && (
                     <div className="tw-inline-flex tw-relative">
                       <svg
-                        className="tw-h-4 tw-w-4 tw-mr-2 tw-text-yellow"
+                        className="tw-h-4 tw-w-4 tw-mr-2 tw-text-[#FEDF89]"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"

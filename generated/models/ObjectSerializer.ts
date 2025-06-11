@@ -128,6 +128,7 @@ export * from '../models/ApiTransaction';
 export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUpdateDropRequest';
 export * from '../models/ApiUpdateProxyActionRequest';
+export * from '../models/ApiUpdateWaveDecisionPause';
 export * from '../models/ApiUpdateWaveRequest';
 export * from '../models/ApiUploadItem';
 export * from '../models/ApiUploadPartOfMultipartUploadRequest';
@@ -142,6 +143,7 @@ export * from '../models/ApiWaveCreditScope';
 export * from '../models/ApiWaveCreditType';
 export * from '../models/ApiWaveDecision';
 export * from '../models/ApiWaveDecisionAward';
+export * from '../models/ApiWaveDecisionPause';
 export * from '../models/ApiWaveDecisionWinner';
 export * from '../models/ApiWaveDecisionsPage';
 export * from '../models/ApiWaveDecisionsStrategy';
@@ -300,6 +302,7 @@ import { ApiTransaction } from '../models/ApiTransaction';
 import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
 import { ApiUpdateProxyActionRequest } from '../models/ApiUpdateProxyActionRequest';
+import { ApiUpdateWaveDecisionPause } from '../models/ApiUpdateWaveDecisionPause';
 import { ApiUpdateWaveRequest } from '../models/ApiUpdateWaveRequest';
 import { ApiUploadItem } from '../models/ApiUploadItem';
 import { ApiUploadPartOfMultipartUploadRequest } from '../models/ApiUploadPartOfMultipartUploadRequest';
@@ -314,6 +317,7 @@ import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveDecision } from '../models/ApiWaveDecision';
 import { ApiWaveDecisionAward       } from '../models/ApiWaveDecisionAward';
+import { ApiWaveDecisionPause } from '../models/ApiWaveDecisionPause';
 import { ApiWaveDecisionWinner } from '../models/ApiWaveDecisionWinner';
 import { ApiWaveDecisionsPage } from '../models/ApiWaveDecisionsPage';
 import { ApiWaveDecisionsStrategy } from '../models/ApiWaveDecisionsStrategy';
@@ -501,6 +505,7 @@ let typeMap: {[index: string]: any} = {
     "ApiTransactionPage": ApiTransactionPage,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
     "ApiUpdateProxyActionRequest": ApiUpdateProxyActionRequest,
+    "ApiUpdateWaveDecisionPause": ApiUpdateWaveDecisionPause,
     "ApiUpdateWaveRequest": ApiUpdateWaveRequest,
     "ApiUploadItem": ApiUploadItem,
     "ApiUploadPartOfMultipartUploadRequest": ApiUploadPartOfMultipartUploadRequest,
@@ -513,6 +518,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
     "ApiWaveDecision": ApiWaveDecision,
     "ApiWaveDecisionAward": ApiWaveDecisionAward,
+    "ApiWaveDecisionPause": ApiWaveDecisionPause,
     "ApiWaveDecisionWinner": ApiWaveDecisionWinner,
     "ApiWaveDecisionsPage": ApiWaveDecisionsPage,
     "ApiWaveDecisionsStrategy": ApiWaveDecisionsStrategy,
