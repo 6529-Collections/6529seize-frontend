@@ -18,10 +18,14 @@ import CircleLoader, {
   CircleLoaderSize,
 } from "../distribution-plan-tool/common/CircleLoader";
 import { useAuth } from "../auth/Auth";
+import { useCookieConsent } from "../cookies/CookieConsentContext";
+import useCapacitor from "../../hooks/useCapacitor";
 
 const PAGE_SIZE = 20;
 
 export default function SubscriptionsReportComponent() {
+  const capacitor = useCapacitor();
+  const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
   const pastDropsTarget = useRef<HTMLDivElement>(null);
 
@@ -42,7 +46,7 @@ export default function SubscriptionsReportComponent() {
   const [remainingMintsForSeason, setRemainingMintsForSeason] = useState<{
     szn: number;
     count: number;
-  }>({ szn: 0, count: 0 });
+  }>(numberOfCardsForSeasonEnd());
 
   async function fetchUpcomingCounts(count: number) {
     return await commonApiFetch<SubscriptionCounts[]>({
@@ -135,7 +139,7 @@ export default function SubscriptionsReportComponent() {
             <span className="font-lightest">Subscriptions</span> Report
           </h1>
           <div className="tw-flex tw-items-center tw-gap-3">
-            {connectedProfile && (
+            {connectedProfile && (!capacitor.isIos || country === "US") && (
               <Link
                 href={`/${connectedProfile.normalised_handle}/subscriptions`}
                 className="decoration-none"
