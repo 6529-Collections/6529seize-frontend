@@ -10,6 +10,13 @@ interface Props {
   setPage(page: number): any;
 }
 
+export interface Paginated<T> {
+  count: number;
+  page: number;
+  next: any;
+  data: T[];
+}
+
 export default function Pagination(props: Readonly<Props>) {
   const [inputPage, setInputPage] = useState<string>(props.page.toString());
 
@@ -91,8 +98,7 @@ export default function Pagination(props: Readonly<Props>) {
             className={isLastPage() ? styles.goToLast : ""}
             role="button"
             aria-label="Go to last page"
-            tabIndex={0}
-          >
+            tabIndex={0}>
             {Math.ceil(props.totalResults / props.pageSize).toLocaleString()}
           </span>{" "}
           <FontAwesomeIcon

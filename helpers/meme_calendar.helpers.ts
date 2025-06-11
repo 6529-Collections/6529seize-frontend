@@ -154,6 +154,22 @@ const CALENDAR_2025: YearCalendar = {
       title: "Spring SZN11",
       szn: 11,
     },
+    {
+      start: Time.fromString("2025-06-14"),
+      end: Time.fromString("2025-07-01"),
+      title: "Freedom",
+    },
+    {
+      start: Time.fromString("2025-07-02"),
+      end: Time.fromString("2025-09-12"),
+      title: "Summer SZN12",
+      szn: 12,
+    },
+    {
+      start: Time.fromString("2025-09-13"),
+      end: Time.fromString("2025-09-30"),
+      title: "Harvest",
+    },
   ],
 };
 
