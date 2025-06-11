@@ -99,7 +99,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
           name={fileName}
           extension={fileExtension}
           showProgress={false}
-          className="tw-absolute tw-top-0 tw-right-8 tw-z-10 tw-opacity-0 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-100"
+          className="tw-absolute tw-top-0 tw-right-8 tw-z-10 tw-opacity-0 tw-transition-opacity tw-duration-300 desktop-hover:group-hover:tw-opacity-100"
         />
       )}
     </div>
