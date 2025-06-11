@@ -116,6 +116,17 @@ export default function SubscriptionsReportComponent() {
     fetchData();
   }, [redeemedPage]);
 
+  function renderEmptyState(loading: boolean, type: string) {
+    if (loading) {
+      return (
+        <span className="tw-text-gray-400 tw-text-sm tw-animate-pulse">
+          Loading {type} drops...
+        </span>
+      );
+    }
+    return <>No Subscriptions Found</>;
+  }
+
   return (
     <Container className="pt-4">
       <Row>
@@ -182,12 +193,8 @@ export default function SubscriptionsReportComponent() {
                 ))}
               </tbody>
             </table>
-          ) : upcomingLoading ? (
-            <span className="tw-text-gray-400 tw-text-sm tw-animate-pulse">
-              Loading upcoming drops...
-            </span>
           ) : (
-            <>No Subscriptions Found</>
+            renderEmptyState(upcomingLoading, "upcoming")
           )}
         </Col>
       </Row>
@@ -230,12 +237,8 @@ export default function SubscriptionsReportComponent() {
                 ))}
               </tbody>
             </table>
-          ) : redeemedLoading ? (
-            <span className="tw-text-gray-400 tw-text-sm tw-animate-pulse">
-              Loading past drops...
-            </span>
           ) : (
-            <>No Subscriptions Found</>
+            renderEmptyState(redeemedLoading, "past")
           )}
         </Col>
       </Row>
