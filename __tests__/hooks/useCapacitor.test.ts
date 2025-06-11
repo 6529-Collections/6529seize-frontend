@@ -1,24 +1,27 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import useCapacitor from '../../hooks/useCapacitor';
+import { renderHook, act, waitFor } from "@testing-library/react";
+import useCapacitor from "../../hooks/useCapacitor";
 
 const listeners: Record<string, Function> = {};
 
-jest.mock('@capacitor/core', () => ({
+jest.mock("@capacitor/core", () => ({
   Capacitor: {
     isNativePlatform: jest.fn(),
     getPlatform: jest.fn(),
   },
 }));
 
-jest.mock('@capacitor/app', () => ({
+jest.mock("@capacitor/app", () => ({
   App: {
     getState: jest.fn(),
-    addListener: jest.fn((event: string, cb: any) => { listeners[event] = cb; }),
+    addListener: jest.fn((event: string, cb: any) => {
+      listeners[event] = cb;
+      return Promise.resolve({ remove: jest.fn() });
+    }),
     removeAllListeners: jest.fn(),
   },
 }));
 
-jest.mock('@capacitor/keyboard', () => ({
+jest.mock("@capacitor/keyboard", () => ({
   Keyboard: {
     addListener: jest.fn((event: string, cb: any) => {
       listeners[event] = cb;
@@ -27,17 +30,17 @@ jest.mock('@capacitor/keyboard', () => ({
   },
 }));
 
-const { Capacitor } = require('@capacitor/core');
-const { App } = require('@capacitor/app');
+const { Capacitor } = require("@capacitor/core");
+const { App } = require("@capacitor/app");
 
 beforeEach(() => {
   listeners.appStateChange = () => {};
   listeners.keyboardWillShow = () => {};
   listeners.keyboardWillHide = () => {};
   (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
-  (Capacitor.getPlatform as jest.Mock).mockReturnValue('ios');
+  (Capacitor.getPlatform as jest.Mock).mockReturnValue("ios");
   (App.getState as jest.Mock).mockResolvedValue({ isActive: false });
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(window, "matchMedia", {
     writable: true,
     value: jest.fn().mockImplementation(() => ({
       matches: true,
@@ -47,8 +50,8 @@ beforeEach(() => {
   });
 });
 
-describe('useCapacitor', () => {
-  it('provides platform info and reacts to events', async () => {
+describe("useCapacitor", () => {
+  it("provides platform info and reacts to events", async () => {
     const { result } = renderHook(() => useCapacitor());
     await waitFor(() => {
       expect(result.current.isIos).toBe(true);
@@ -62,7 +65,7 @@ describe('useCapacitor', () => {
         addEventListener: jest.fn(),
         removeEventListener: jest.fn(),
       });
-      window.dispatchEvent(new Event('orientationchange'));
+      window.dispatchEvent(new Event("orientationchange"));
     });
     expect(result.current.orientation).toBe(1); // LANDSCAPE
 
