@@ -266,8 +266,7 @@ export default function UserPageSubscriptions(
                 <span>
                   <a
                     href="/about/subscriptions"
-                    className="font-smaller font-color-silver decoration-hover-underline"
-                  >
+                    className="font-smaller font-color-silver decoration-hover-underline">
                     Learn More
                   </a>
                 </span>
