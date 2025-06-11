@@ -14,6 +14,12 @@ import {
 } from "../../../../helpers/image.helpers";
 import { Tooltip } from "react-tooltip";
 
+const tooltipProps = {
+  delayShow: 250,
+  place: "top" as const,
+  style: { backgroundColor: "#37373E", color: "white", zIndex: 1002 }
+};
+
 interface DropPartMarkdownImageProps {
   readonly src: string;
   readonly alt?: string;
@@ -185,36 +191,28 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
         <>
           <Tooltip
             id={`open-browser-markdown-${src}`}
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">Open in Browser</span>
           </Tooltip>
           
           <Tooltip
             id="full-screen-markdown"
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">Full screen</span>
           </Tooltip>
           
           <Tooltip
             id="reset-zoom-markdown"
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">Reset zoom</span>
           </Tooltip>
           
           <Tooltip
             id="close-modal-markdown"
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">Close</span>
           </Tooltip>

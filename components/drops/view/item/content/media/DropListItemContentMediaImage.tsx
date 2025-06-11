@@ -18,6 +18,12 @@ import {
 import { useInView } from "../../../../../../hooks/useInView";
 import { Tooltip } from "react-tooltip";
 
+const tooltipProps = {
+  delayShow: 250,
+  place: "top" as const,
+  style: { backgroundColor: "#37373E", color: "white", zIndex: 1002 }
+};
+
 function DropListItemContentMediaImage({
   src,
   maxRetries = 0,
@@ -228,45 +234,35 @@ function DropListItemContentMediaImage({
         <>
           <Tooltip
             id={`open-browser-${src}`}
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">Open in Browser</span>
           </Tooltip>
           
           <Tooltip
             id="full-screen"
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">Full screen</span>
           </Tooltip>
           
           <Tooltip
             id="view-drop-details"
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">View Drop details</span>
           </Tooltip>
           
           <Tooltip
             id="reset-zoom"
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">Reset zoom</span>
           </Tooltip>
           
           <Tooltip
             id="close-modal"
-            delayShow={250}
-            place="top"
-            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+            {...tooltipProps}
           >
             <span className="tw-text-xs">Close</span>
           </Tooltip>
