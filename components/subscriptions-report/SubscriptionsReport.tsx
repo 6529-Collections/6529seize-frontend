@@ -42,7 +42,7 @@ export default function SubscriptionsReportComponent() {
   const [remainingMintsForSeason, setRemainingMintsForSeason] = useState<{
     szn: number;
     count: number;
-  }>({ szn: 0, count: 0 });
+  }>(numberOfCardsForSeasonEnd());
 
   async function fetchUpcomingCounts(count: number) {
     return await commonApiFetch<SubscriptionCounts[]>({
