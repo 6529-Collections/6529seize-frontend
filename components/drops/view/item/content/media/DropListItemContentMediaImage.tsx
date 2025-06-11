@@ -150,7 +150,6 @@ function DropListItemContentMediaImage({
                 </TransformComponent>
               </div>
 
-              {/* Action buttons with responsive positioning */}
               <div className="tw-fixed tw-top-2 tw-right-4 tw-flex tw-flex-row tw-gap-x-4 tw-z-[1001] tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-top-0 lg:tw-right-auto lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-ml-4 lg:tw-pt-0 lg:tw-self-start">
                 <Link href={src} target="_blank" rel="noopener noreferrer">
                   <button
