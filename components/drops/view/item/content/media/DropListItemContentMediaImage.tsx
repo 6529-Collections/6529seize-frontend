@@ -16,8 +16,7 @@ import {
   ImageScale,
 } from "../../../../../../helpers/image.helpers";
 import { useInView } from "../../../../../../hooks/useInView";
-import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
+import { Tooltip } from "react-tooltip";
 
 function DropListItemContentMediaImage({
   src,
@@ -145,116 +144,134 @@ function DropListItemContentMediaImage({
 
               {/* Action buttons with responsive positioning */}
               <div className="tw-fixed tw-top-2 tw-right-4 tw-flex tw-flex-row tw-gap-x-4 tw-z-[1001] tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-top-0 lg:tw-right-auto lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-ml-4 lg:tw-pt-0 lg:tw-self-start">
-                <Tippy
-                  content={<span className="tw-text-xs">Open in Browser</span>}
-                  disabled={isCapacitor}
-                  trigger="mouseenter"
-                  placement="auto"
-                >
-                  <Link href={src} target="_blank" rel="noopener noreferrer">
-                    <button
-                      onClick={(e) => e.stopPropagation()}
-                      className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                      aria-label="Open image in new tab"
-                    >
-                      <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                    </button>
-                  </Link>
-                </Tippy>
-                {fullScreenSupported() && !isCapacitor && (
-                  <Tippy
-                    content={<span className="tw-text-xs">Full screen</span>}
-                    disabled={isCapacitor}
-                    trigger="mouseenter"
-                    placement="auto"
+                <Link href={src} target="_blank" rel="noopener noreferrer">
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    data-tooltip-id={`open-browser-${src}`}
+                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    aria-label="Open image in new tab"
                   >
-                    <button
-                      onClick={handleFullScreen}
-                      className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                      aria-label="Full screen"
-                    >
-                      <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
-                    </button>
-                  </Tippy>
+                    <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+                  </button>
+                </Link>
+                {fullScreenSupported() && !isCapacitor && (
+                  <button
+                    onClick={handleFullScreen}
+                    data-tooltip-id="full-screen"
+                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    aria-label="Full screen"
+                  >
+                    <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
+                  </button>
                 )}
                 {onContainerClick && (
-                  <Tippy
-                    content={
-                      <span className="tw-text-xs">View Drop details</span>
-                    }
-                    disabled={isCapacitor}
-                    trigger="mouseenter"
-                    placement="auto"
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCloseModal();
+                      onContainerClick();
+                    }}
+                    data-tooltip-id="view-drop-details"
+                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    aria-label="View drop details"
                   >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCloseModal();
-                        onContainerClick();
-                      }}
-                      className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                      aria-label="View drop details"
-                    >
-                      <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                    </button>
-                  </Tippy>
+                    <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+                  </button>
                 )}
                 {isZoomed && (
-                  <Tippy
-                    content={<span className="tw-text-xs">Reset zoom</span>}
-                    disabled={isCapacitor}
-                    trigger="mouseenter"
-                    placement="auto"
-                  >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        resetTransform();
-                        setIsZoomed(false);
-                      }}
-                      className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                      aria-label="Reset"
-                    >
-                      <FontAwesomeIcon
-                        icon={faRotateLeft}
-                        className="tw-size-4"
-                      />
-                    </button>
-                  </Tippy>
-                )}
-                <Tippy
-                  content={<span className="tw-text-xs">Close</span>}
-                  disabled={isCapacitor}
-                  trigger="mouseenter"
-                  placement="auto"
-                >
                   <button
-                    onClick={handleCloseModal}
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 lg:tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                    aria-label="Close modal"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetTransform();
+                      setIsZoomed(false);
+                    }}
+                    data-tooltip-id="reset-zoom"
+                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    aria-label="Reset"
                   >
-                    <svg
-                      className="tw-h-5 tw-w-5 tw-flex-shrink-0"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
+                    <FontAwesomeIcon
+                      icon={faRotateLeft}
+                      className="tw-size-4"
+                    />
                   </button>
-                </Tippy>
+                )}
+                <button
+                  onClick={handleCloseModal}
+                  data-tooltip-id="close-modal"
+                  className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 lg:tw-size-9 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                  aria-label="Close modal"
+                >
+                  <svg
+                    className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
         )}
       </TransformWrapper>
+      
+      {/* Tooltips inside modal */}
+      {!isCapacitor && (
+        <>
+          <Tooltip
+            id={`open-browser-${src}`}
+            delayShow={250}
+            place="top"
+            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+          >
+            <span className="tw-text-xs">Open in Browser</span>
+          </Tooltip>
+          
+          <Tooltip
+            id="full-screen"
+            delayShow={250}
+            place="top"
+            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+          >
+            <span className="tw-text-xs">Full screen</span>
+          </Tooltip>
+          
+          <Tooltip
+            id="view-drop-details"
+            delayShow={250}
+            place="top"
+            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+          >
+            <span className="tw-text-xs">View Drop details</span>
+          </Tooltip>
+          
+          <Tooltip
+            id="reset-zoom"
+            delayShow={250}
+            place="top"
+            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+          >
+            <span className="tw-text-xs">Reset zoom</span>
+          </Tooltip>
+          
+          <Tooltip
+            id="close-modal"
+            delayShow={250}
+            place="top"
+            style={{ backgroundColor: "#37373E", color: "white", zIndex: 1002 }}
+          >
+            <span className="tw-text-xs">Close</span>
+          </Tooltip>
+        </>
+      )}
     </div>
   );
 
