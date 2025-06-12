@@ -16,7 +16,7 @@ test('shows image preview and remove button', async () => {
   const user = userEvent.setup();
   render(<FilePreview url="data:image/png;base64,abc" file={new File(['a'],'a.png',{type:'image/png'})} onRemove={onRemove} isCheckingCompatibility={false} />);
   expect(screen.getByRole('img')).toHaveAttribute('src', 'data:image/png;base64,abc');
-  await user.click(screen.getByTestId('artwork-remove-button'));
+  await user.click(screen.getByTestId('artwork-replace-button'));
   expect(onRemove).toHaveBeenCalled();
 });
 
