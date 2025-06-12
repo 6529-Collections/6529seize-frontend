@@ -21,10 +21,11 @@ import { Tooltip } from "react-tooltip";
 const tooltipProps = {
   delayShow: 250,
   place: "top" as const,
-  style: { backgroundColor: "#37373E", color: "white", zIndex: 1002 }
+  style: { backgroundColor: "#37373E", color: "white", zIndex: 1002 },
 };
 
-const modalButtonClasses = "tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out";
+const modalButtonClasses =
+  "tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out";
 
 function DropListItemContentMediaImage({
   src,
@@ -145,12 +146,30 @@ function DropListItemContentMediaImage({
                   <img
                     src={src}
                     alt="Full size drop media"
-                    className="tw-max-h-[75vh] lg:tw-max-h-[90vh] tw-max-w-full tw-object-contain tw-pointer-events-auto"
+                    style={{ pointerEvents: "auto" }}
+                    className="tw-max-h-[75vh] lg:tw-max-h-[90vh] tw-max-w-full tw-object-contain"
                   />
                 </TransformComponent>
               </div>
 
               <div className="tw-fixed tw-top-2 tw-right-4 tw-flex tw-flex-row tw-gap-x-4 tw-z-[1001] tw-pt-[env(safe-area-inset-top,0px)] lg:tw-relative lg:tw-top-0 lg:tw-right-auto lg:tw-flex-col-reverse lg:tw-gap-x-0 lg:tw-gap-y-2 lg:tw-ml-4 lg:tw-pt-0 lg:tw-self-start">
+                {isZoomed && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetTransform();
+                      setIsZoomed(false);
+                    }}
+                    data-tooltip-id="reset-zoom"
+                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
+                    aria-label="Reset"
+                  >
+                    <FontAwesomeIcon
+                      icon={faRotateLeft}
+                      className="tw-size-4"
+                    />
+                  </button>
+                )}
                 <Link href={src} target="_blank" rel="noopener noreferrer">
                   <button
                     onClick={(e) => e.stopPropagation()}
@@ -185,23 +204,7 @@ function DropListItemContentMediaImage({
                     <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                   </button>
                 )}
-                {isZoomed && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      resetTransform();
-                      setIsZoomed(false);
-                    }}
-                    data-tooltip-id="reset-zoom"
-                    className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                    aria-label="Reset"
-                  >
-                    <FontAwesomeIcon
-                      icon={faRotateLeft}
-                      className="tw-size-4"
-                    />
-                  </button>
-                )}
+
                 <button
                   onClick={handleCloseModal}
                   data-tooltip-id="close-modal"
@@ -229,42 +232,27 @@ function DropListItemContentMediaImage({
           </div>
         )}
       </TransformWrapper>
-      
+
       {/* Tooltips inside modal */}
       {!isCapacitor && (
         <>
-          <Tooltip
-            id={`open-browser-${src}`}
-            {...tooltipProps}
-          >
+          <Tooltip id={`open-browser-${src}`} {...tooltipProps}>
             <span className="tw-text-xs">Open in Browser</span>
           </Tooltip>
-          
-          <Tooltip
-            id="full-screen"
-            {...tooltipProps}
-          >
+
+          <Tooltip id="full-screen" {...tooltipProps}>
             <span className="tw-text-xs">Full screen</span>
           </Tooltip>
-          
-          <Tooltip
-            id="view-drop-details"
-            {...tooltipProps}
-          >
+
+          <Tooltip id="view-drop-details" {...tooltipProps}>
             <span className="tw-text-xs">View Drop details</span>
           </Tooltip>
-          
-          <Tooltip
-            id="reset-zoom"
-            {...tooltipProps}
-          >
+
+          <Tooltip id="reset-zoom" {...tooltipProps}>
             <span className="tw-text-xs">Reset zoom</span>
           </Tooltip>
-          
-          <Tooltip
-            id="close-modal"
-            {...tooltipProps}
-          >
+
+          <Tooltip id="close-modal" {...tooltipProps}>
             <span className="tw-text-xs">Close</span>
           </Tooltip>
         </>
