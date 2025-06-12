@@ -15,7 +15,18 @@ const useWave = require('../../../../hooks/useWave').useWave;
 
 describe('WaveLeaderboardTime', () => {
   it('shows timeline when multi decision', () => {
-    useWave.mockReturnValue({ decisions: { multiDecision: true } });
+    useWave.mockReturnValue({ 
+      decisions: { multiDecision: true },
+      pauses: {
+        isPaused: false,
+        currentPause: null,
+        nextPause: null,
+        showPause: jest.fn(() => null),
+        hasDecisionsBeforePause: jest.fn(() => false),
+        filterDecisionsDuringPauses: jest.fn((decisions) => decisions),
+        getNextValidDecision: jest.fn(() => null),
+      }
+    });
     useDecisionPoints.mockReturnValue({ allDecisions: [{ timestamp: 10 }] });
     render(<WaveLeaderboardTime wave={{} as any} />);
     expect(screen.getByTestId('header')).toBeInTheDocument();
@@ -23,7 +34,18 @@ describe('WaveLeaderboardTime', () => {
   });
 
   it('shows compact cards when not multi decision', () => {
-    useWave.mockReturnValue({ decisions: { multiDecision: false } });
+    useWave.mockReturnValue({ 
+      decisions: { multiDecision: false },
+      pauses: {
+        isPaused: false,
+        currentPause: null,
+        nextPause: null,
+        showPause: jest.fn(() => null),
+        hasDecisionsBeforePause: jest.fn(() => false),
+        filterDecisionsDuringPauses: jest.fn((decisions) => decisions),
+        getNextValidDecision: jest.fn(() => null),
+      }
+    });
     useDecisionPoints.mockReturnValue({ allDecisions: [] });
     render(<WaveLeaderboardTime wave={{} as any} />);
     expect(screen.getByTestId('drop')).toBeInTheDocument();

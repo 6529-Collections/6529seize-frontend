@@ -22,7 +22,18 @@ jest.mock('../../../../components/brain/ContentTabContext', () => {
 });
 
 jest.mock('../../../../hooks/useWave', () => ({
-  useWave: () => mockWaveInfo,
+  useWave: () => ({
+    ...mockWaveInfo,
+    pauses: {
+      isPaused: false,
+      currentPause: null,
+      nextPause: null,
+      showPause: jest.fn(() => null),
+      hasDecisionsBeforePause: jest.fn(() => false),
+      filterDecisionsDuringPauses: jest.fn((decisions) => decisions),
+      getNextValidDecision: jest.fn(() => null),
+    },
+  }),
 }));
 
 jest.mock('../../../../hooks/useWaveTimers', () => ({
