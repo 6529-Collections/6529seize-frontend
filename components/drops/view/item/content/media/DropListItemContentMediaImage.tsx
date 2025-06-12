@@ -199,7 +199,7 @@ function DropListItemContentMediaImage({
                     }}
                     data-tooltip-id="view-drop-details"
                     className="tw-flex tw-items-center tw-justify-center tw-border-0 tw-text-iron-50 tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-700 tw-rounded-full tw-size-10 tw-flex-shrink-0 tw-backdrop-blur-sm tw-transition-all tw-duration-300 tw-ease-out"
-                    aria-label="Drop details"
+                    aria-label="View drop details"
                   >
                     <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                   </button>
