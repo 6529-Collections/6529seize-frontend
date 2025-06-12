@@ -5,7 +5,6 @@ import {
   faDownload,
   faXmarkCircle,
   faCheckCircle,
-  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
 
@@ -17,7 +16,7 @@ interface Props {
   className?: string;
 }
 
-export const getFilenameFromUrl = (
+export const getFileInfoFromUrl = (
   url: string | undefined
 ): { name: string; extension: string } | null => {
   try {
@@ -64,7 +63,7 @@ export default function Download(props: Readonly<Props>) {
       completionTimeoutRef.current = setTimeout(() => {
         setIsCompleted(false);
         completionTimeoutRef.current = null;
-      }, 2000);
+      }, 1500);
     }
   }, [percentage, showProgress]);
 
@@ -76,9 +75,9 @@ export default function Download(props: Readonly<Props>) {
     };
   }, []);
 
-  return (
-    <div className={`${styles.download} ${props.className ?? ""}`}>
-      {isCompleted ? (
+  const renderContent = () => {
+    if (isCompleted) {
+      return (
         <div
           className="tw-bg-iron-900 tw-rounded-full tw-h-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out tw-border-0 tw-text-white tw-gap-2 tw-px-3"
           aria-label="Download complete">
@@ -91,7 +90,11 @@ export default function Download(props: Readonly<Props>) {
             onClick={() => setIsCompleted(false)}
           />
         </div>
-      ) : !isInProgress || !showProgress ? (
+      );
+    }
+
+    if (!isInProgress || !showProgress) {
+      return (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -105,20 +108,28 @@ export default function Download(props: Readonly<Props>) {
             className="tw-text-white tw-w-4 tw-h-4 tw-flex-shrink-0"
           />
         </button>
-      ) : (
-        <div
-          className="tw-bg-iron-900 tw-rounded-full tw-h-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out tw-border-0 tw-text-white tw-gap-2 tw-px-3"
-          aria-label="Downloading file">
-          <span className="tw-leading-[2.25rem] tw-text-sm tw-font-medium">
-            Downloading {percentage}%
-          </span>
-          <FontAwesomeIcon
-            icon={faXmarkCircle}
-            className="tw-text-white tw-w-5 tw-h-5 tw-flex-shrink-0 tw-cursor-pointer"
-            onClick={() => cancel()}
-          />
-        </div>
-      )}
+      );
+    }
+
+    return (
+      <div
+        className="tw-bg-iron-900 tw-rounded-full tw-h-9 tw-flex-shrink-0 tw-inline-flex tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out tw-border-0 tw-text-white tw-gap-2 tw-px-3"
+        aria-label="Downloading file">
+        <span className="tw-leading-[2.25rem] tw-text-sm tw-font-medium">
+          Downloading {percentage}%
+        </span>
+        <FontAwesomeIcon
+          icon={faXmarkCircle}
+          className="tw-text-white tw-w-5 tw-h-5 tw-flex-shrink-0 tw-cursor-pointer"
+          onClick={() => cancel()}
+        />
+      </div>
+    );
+  };
+
+  return (
+    <div className={`${styles.download} ${props.className ?? ""}`}>
+      {renderContent()}
     </div>
   );
 }

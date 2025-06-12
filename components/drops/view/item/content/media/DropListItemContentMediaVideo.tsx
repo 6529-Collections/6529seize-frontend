@@ -13,7 +13,7 @@ function DropListItemContentMediaVideo({ src }: Props) {
   const { isApp } = useDeviceInfo();
 
   // 1) Pick up the best URL (HLS or MP4)
-  const { playableUrl, isHls, isOptimized } = useOptimizedVideo(src, {
+  const { playableUrl, isHls } = useOptimizedVideo(src, {
     pollInterval: 10000,
     maxRetries: 8,
     preferHls: true,
