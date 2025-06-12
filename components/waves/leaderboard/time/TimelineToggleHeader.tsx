@@ -110,16 +110,16 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
       className="tw-@container tw-px-4 tw-py-2 tw-bg-iron-800/95 tw-rounded-t-lg tw-border tw-border-solid tw-border-iron-700/50 tw-cursor-pointer desktop-hover:hover:tw-bg-iron-700/80 tw-transition-all tw-duration-300 tw-ease-out tw-group tw-shadow-sm"
       onClick={() => setIsOpen(!isOpen)}
     >
-      {/* Mobile: Show pause info at the top */}
+      {/* Mobile: Show pause info at the top (only when paused) */}
       {isPaused && currentPause && (
         <div className="tw-block @[700px]:tw-hidden tw-text-sm tw-font-medium tw-mb-2">
           {getStatusDisplay()}
         </div>
       )}
       
-      <div className="tw-flex tw-flex-col @[700px]:tw-flex-row tw-items-start @[700px]:tw-items-center tw-gap-2">
-        <div className="tw-flex tw-items-center tw-justify-between tw-w-full @[700px]:tw-w-auto @[700px]:tw-flex-1">
-          <div className="tw-flex tw-items-baseline tw-gap-x-2">
+      <div className="tw-flex tw-items-center tw-gap-2">
+        <div className="tw-flex tw-items-center tw-justify-between tw-flex-1">
+          <div className="tw-flex tw-items-baseline tw-gap-x-2 tw-flex-1">
             <span
               className={`tw-text-sm tw-font-semibold tw-whitespace-nowrap tw-tracking-tight ${
                 hasNextDecision ? "tw-text-iron-100" : "tw-text-iron-400"
@@ -135,40 +135,21 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
             )}
           </div>
 
-          <button
-            className="tw-w-7 tw-h-7 tw-flex @[700px]:tw-hidden tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
-            aria-label={isOpen ? "Collapse" : "Expand"}
-          >
-            <svg
-              className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 ${
-                isOpen ? "tw-rotate-180" : ""
-              } tw-transition-all tw-duration-300 tw-ease-in-out`}
-              viewBox="0 0 20 20"
-              aria-hidden="true"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
+          {/* Mobile: Show date inline when not paused */}
+          {!isPaused && (
+            <div className="tw-text-sm tw-font-medium @[700px]:tw-hidden tw-mr-2">
+              {getStatusDisplay()}
+            </div>
+          )}
         </div>
 
-
-        {/* Desktop: Show all statuses | Mobile: Show only non-pause statuses */}
+        {/* Desktop: Show all statuses */}
         <div className="tw-text-sm tw-font-medium tw-hidden @[700px]:tw-block">
           {getStatusDisplay()}
         </div>
-        {!isPaused && (
-          <div className="tw-text-sm tw-font-medium tw-block @[700px]:tw-hidden">
-            {getStatusDisplay()}
-          </div>
-        )}
 
         <button
-          className="tw-w-7 tw-h-7 tw-hidden @[700px]:tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
+          className="tw-w-7 tw-h-7 tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
           aria-label={isOpen ? "Collapse" : "Expand"}
         >
           <svg

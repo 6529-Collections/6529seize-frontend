@@ -830,8 +830,8 @@ export default function LabPage(props: Readonly<Props>) {
                         </Col>
                       </Row>
                       <Row>
-                        <Col>
-                          {nft.metadata.image_details.format}{" "}
+                        <Col className="tw-flex tw-items-center tw-gap-1">
+                          <span>{nft.metadata.image_details.format}</span>
                           <Link
                             className={styles.arweaveLink}
                             href={nft.metadata.image}
@@ -849,8 +849,8 @@ export default function LabPage(props: Readonly<Props>) {
                       {(nft.metadata.animation ||
                         nft.metadata.animation_url) && (
                         <Row className="pt-3">
-                          <Col>
-                            {nft.metadata.animation_details.format}{" "}
+                          <Col className="tw-flex tw-items-center tw-gap-1">
+                            <span>{nft.metadata.animation_details.format}</span>
                             <Link
                               className={styles.arweaveLink}
                               href={

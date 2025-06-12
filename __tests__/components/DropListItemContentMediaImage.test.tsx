@@ -28,7 +28,7 @@ describe('DropListItemContentMediaImage', () => {
     const img = screen.getByAltText('Drop media');
     fireEvent.load(img);
     fireEvent.click(img);
-    fireEvent.click(screen.getByText('View Drop Details'));
+    fireEvent.click(screen.getByLabelText('View drop details'));
     expect(onContainerClick).toHaveBeenCalled();
   });
 });

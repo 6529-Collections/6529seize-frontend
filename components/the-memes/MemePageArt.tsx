@@ -141,8 +141,8 @@ export function MemePageArt(props: {
                       </Col>
                     </Row>
                     <Row>
-                      <Col>
-                        {props.nft.metadata.image_details.format}{" "}
+                      <Col className="tw-flex tw-items-center tw-gap-1">
+                        <span>{props.nft.metadata.image_details.format}</span>
                         <Link
                           className={styles.arweaveLink}
                           href={props.nft.metadata.image}
@@ -160,8 +160,10 @@ export function MemePageArt(props: {
                     {(props.nft.metadata.animation ||
                       props.nft.metadata.animation_url) && (
                       <Row className="pt-3">
-                        <Col>
-                          {props.nft.metadata.animation_details.format}{" "}
+                        <Col className="tw-flex tw-items-center tw-gap-1">
+                          <span>
+                            {props.nft.metadata.animation_details.format}
+                          </span>
                           <Link
                             className={styles.arweaveLink}
                             href={
