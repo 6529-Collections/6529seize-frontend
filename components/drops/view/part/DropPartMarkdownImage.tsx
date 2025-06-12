@@ -117,7 +117,8 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                   <img
                     src={src}
                     alt={alt}
-                    className="tw-max-h-[75vh] lg:tw-max-h-[90vh] tw-max-w-full tw-object-contain tw-pointer-events-auto"
+                    style={{ pointerEvents: "auto" }}
+                    className="tw-max-h-[75vh] lg:tw-max-h-[90vh] tw-max-w-full tw-object-contain"
                   />
                 </TransformComponent>
               </div>
