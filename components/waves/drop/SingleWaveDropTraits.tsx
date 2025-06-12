@@ -407,7 +407,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
         const value = traits[key as keyof TraitsData];
         if (
           (typeof value === "string" && value) ||
-          (typeof value === "number" && value > 0) ||
+          typeof value === "number" ||
           typeof value === "boolean"
         ) {
           items.push({ label: key, value });
@@ -420,7 +420,7 @@ export const SingleWaveDropTraits: React.FC<SingleWaveDropTraitsProps> = ({
       if (!priorityKeys.includes(key)) {
         if (
           (typeof value === "string" && value) ||
-          (typeof value === "number" && value > 0) ||
+          typeof value === "number" ||
           typeof value === "boolean"
         ) {
           items.push({ label: key, value });
