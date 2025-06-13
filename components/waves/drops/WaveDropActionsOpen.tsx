@@ -58,7 +58,7 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
       <Tooltip
         id={`open-${drop.id}`}
         place="top"
-        style={{ backgroundColor: "#1F2937", color: "white", padding: "6px 8px" }}
+        style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
       >
         <span className="tw-text-xs">Open</span>
       </Tooltip>

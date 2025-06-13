@@ -148,7 +148,7 @@ const WaveDropActionsAddReaction: React.FC<{
           style={{
             backgroundColor: "#1F2937",
             color: "white",
-            padding: "6px 8px",
+            padding: "4px 8px",
           }}
         >
           <span className="tw-text-xs">

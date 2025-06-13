@@ -173,7 +173,7 @@ export default function WaveDropFollowAuthor({
       <Tooltip
         id={`follow-author-${drop.id}`}
         place="top"
-        style={{ backgroundColor: "#1F2937", color: "white", padding: "6px 8px" }}
+        style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
       >
         <span className="tw-text-xs">{tooltipText[followState]}</span>
       </Tooltip>
