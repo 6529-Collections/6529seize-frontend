@@ -153,7 +153,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
           aria-label={isOpen ? "Collapse" : "Expand"}
         >
           <svg
-            className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 ${
+            className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 tw-flex-shrink-0 ${
               isOpen ? "tw-rotate-180" : ""
             } tw-transition-all tw-duration-300 tw-ease-in-out`}
             viewBox="0 0 20 20"
