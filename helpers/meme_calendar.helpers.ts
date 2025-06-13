@@ -241,7 +241,7 @@ export function numberOfCardsForSeasonEnd() {
   const upcomingBlock: CalendarBlock | undefined = MEMES_CALENDARS.flatMap(
     (calendar) => calendar.blocks
   ).find((block) => {
-    return block.szn && block.end.gt(now);
+    return block.szn && block.end.plusDays(1).gt(now);
   });
 
   if (!upcomingBlock) {
