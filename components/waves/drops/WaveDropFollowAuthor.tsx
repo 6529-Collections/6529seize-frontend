@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
-import Tippy from "@tippyjs/react";
+import { Tooltip } from "react-tooltip";
 import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
@@ -150,9 +150,7 @@ export default function WaveDropFollowAuthor({
   };
 
   return (
-    <Tippy
-      content={<span className="tw-text-xs">{tooltipText[followState]}</span>}
-      placement="top">
+    <>
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -164,13 +162,21 @@ export default function WaveDropFollowAuthor({
           followState === FOLLOW_STATE.FOLLOWING
             ? `Unfollow ${drop.author.handle}`
             : `Follow ${drop.author.handle}`
-        }>
+        }
+        data-tooltip-id={`follow-author-${drop.id}`}>
         {mutating ? (
           <CircleLoader size={CircleLoaderSize.SMALL} />
         ) : (
           components[followState]
         )}
       </button>
-    </Tippy>
+      <Tooltip
+        id={`follow-author-${drop.id}`}
+        place="top"
+        style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
+      >
+        <span className="tw-text-xs">{tooltipText[followState]}</span>
+      </Tooltip>
+    </>
   );
 }
