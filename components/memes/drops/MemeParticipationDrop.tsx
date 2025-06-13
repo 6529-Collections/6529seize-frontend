@@ -15,6 +15,7 @@ import DropMobileMenuHandler from "../../waves/drops/DropMobileMenuHandler";
 import DropListItemContentMedia from "../../drops/view/item/content/media/DropListItemContentMedia";
 import { VotingModal, MobileVotingModal } from "../../voting";
 import VotingModalButton from "../../voting/VotingModalButton";
+import WaveDropReactions from "../../waves/drops/WaveDropReactions";
 
 interface MemeParticipationDropProps {
   readonly drop: ExtendedDrop;
@@ -85,21 +86,18 @@ export default function MemeParticipationDrop({
       <div
         className={`tw-w-full tw-group tw-relative ${
           location === DropLocation.WAVE ? "tw-px-4 tw-py-1" : ""
-        }`}
-      >
+        }`}>
         <div
           className={`${borderClasses} ${
             location === DropLocation.WAVE
               ? "tw-bg-iron-900/80"
               : "tw-bg-iron-950"
-          }`}
-        >
+          }`}>
           <DropMobileMenuHandler
             drop={drop}
             showReplyAndQuote={showReplyAndQuote}
             onReply={handleOnReply}
-            onQuote={handleOnQuote}
-          >
+            onQuote={handleOnQuote}>
             <>
               <div className="tw-p-4">
                 <MemeDropArtistInfo drop={drop} />
@@ -114,8 +112,7 @@ export default function MemeParticipationDrop({
                     location === DropLocation.WAVE
                       ? "tw-bg-iron-800/30"
                       : "tw-bg-iron-900/40"
-                  }`}
-                >
+                  }`}>
                   <DropListItemContentMedia
                     media_mime_type={artworkMedia.mime_type}
                     media_url={artworkMedia.url}
@@ -148,6 +145,10 @@ export default function MemeParticipationDrop({
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="tw-px-4 tw-pb-4 tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-gap-y-1 tw-flex-wrap">
+            <WaveDropReactions drop={drop} />
           </div>
 
           <div className="tw-absolute tw-right-4 tw-top-2">
