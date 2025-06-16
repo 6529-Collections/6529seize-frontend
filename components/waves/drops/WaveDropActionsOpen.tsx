@@ -1,7 +1,6 @@
 import React from "react";
 import { ApiDropType } from "../../../generated/models/ApiDropType";
-import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
+import { Tooltip } from "react-tooltip";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { useRouter } from "next/router";
 
@@ -31,22 +30,12 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
   }
 
   return (
-    <Tippy
-      content={
-        <div className="tw-text-center">
-          <span className="tw-text-xs tw-font-normal tw-text-center tw-w-full tw-transition tw-duration-300 tw-ease-out">
-            Open
-          </span>
-        </div>
-      }
-      placement="top"
-      trigger="mouseenter"
-      hideOnClick={false}
-    >
+    <>
       <button
         className="tw-text-iron-400 tw-px-2 desktop-hover:hover:tw-text-iron-50 tw-h-full tw-group tw-bg-transparent tw-rounded-full tw-border-0 tw-flex tw-items-center tw-gap-x-2 tw-text-[0.8125rem] tw-leading-5 tw-font-medium tw-transition tw-ease-out tw-duration-300"
         onClick={() => onDropClick(drop)}
         aria-label="Open drop"
+        data-tooltip-id={`open-${drop.id}`}
       >
         <svg
           width="24"
@@ -66,7 +55,14 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({ drop }) => {
           />
         </svg>
       </button>
-    </Tippy>
+      <Tooltip
+        id={`open-${drop.id}`}
+        place="top"
+        style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
+      >
+        <span className="tw-text-xs">Open</span>
+      </Tooltip>
+    </>
   );
 };
 
