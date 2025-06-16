@@ -5,6 +5,8 @@ import {
 } from "../../../../helpers/waves/time.utils";
 import { TimeCountdown } from "./TimeCountdown";
 import { ApiWaveDecisionPause } from "../../../../generated/models/ApiWaveDecisionPause";
+import { useWave } from "../../../../hooks/useWave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 
 interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;
@@ -12,6 +14,7 @@ interface TimelineToggleHeaderProps {
   readonly nextDecisionTime: number | null;
   readonly isPaused?: boolean;
   readonly currentPause?: ApiWaveDecisionPause | null;
+  readonly wave?: ApiWave;
 }
 
 /**
@@ -23,7 +26,9 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
   nextDecisionTime,
   isPaused = false,
   currentPause,
+  wave,
 }) => {
+  const waveData = wave ? useWave(wave) : null;
   const hasNextDecision = !!nextDecisionTime;
   const getTimeLeft = () => {
     if (hasNextDecision) {
@@ -50,15 +55,27 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
           <span className="tw-text-iron-500">•</span>
           <span className="tw-text-iron-300 tw-font-medium tw-whitespace-nowrap">
             SZN 12 starts:{" "}
-            {new Date(currentPause.end_time).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-            })}
+            {(() => {
+              const mintingDate =
+                waveData?.pauses.calculateMintingDate(nextDecisionTime);
+              return mintingDate
+                ? new Date(mintingDate).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })
+                : new Date(currentPause.end_time).toLocaleDateString(
+                    undefined,
+                    {
+                      month: "short",
+                      day: "numeric",
+                    }
+                  );
+            })()}
           </span>
         </span>
       );
     }
-    
+
     if (nextDecisionTime) {
       return (
         <span className="tw-text-iron-300 tw-font-medium tw-text-xs">
@@ -71,11 +88,9 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
         </span>
       );
     }
-    
+
     return (
-      <span className="tw-text-iron-400 tw-text-xs">
-        No upcoming events
-      </span>
+      <span className="tw-text-iron-400 tw-text-xs">No upcoming events</span>
     );
   };
 
@@ -116,7 +131,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
           {getStatusDisplay()}
         </div>
       )}
-      
+
       <div className="tw-flex tw-items-center tw-gap-2">
         <div className="tw-flex tw-items-center tw-justify-between tw-flex-1">
           <div className="tw-flex tw-items-baseline tw-gap-x-2 tw-flex-1">
