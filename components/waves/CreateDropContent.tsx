@@ -792,10 +792,41 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     if (!activeDrop) {
       return;
     }
-    const timer = setTimeout(() => {
-      createDropInputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
+    
+    // For mobile, we need to ensure the DOM is fully painted before focusing
+    const focusInput = () => {
+      if (!createDropInputRef.current) return;
+      
+      // Force a reflow to ensure all DOM updates are painted
+      // This helps with the issue where content appears only after scrolling
+      const container = document.querySelector('.tw-flex-1');
+      if (container instanceof HTMLElement) {
+        void container.offsetHeight; // Force reflow
+      }
+      
+      // Use requestAnimationFrame to wait for next paint
+      requestAnimationFrame(() => {
+        // Then focus after a small delay for mobile stability
+        setTimeout(() => {
+          createDropInputRef.current?.focus();
+        }, 300);
+      });
+    };
+    
+    // Check if mobile
+    const isMobile = window.innerWidth < 1024;
+    
+    if (isMobile) {
+      // On mobile, wait longer and force reflow
+      const timer = setTimeout(focusInput, 200);
+      return () => clearTimeout(timer);
+    } else {
+      // Desktop: keep simple behavior
+      const timer = setTimeout(() => {
+        createDropInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
   }, [activeDrop]);
 
   const handleFileChange = (newFiles: File[]) => {

@@ -60,11 +60,8 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   };
 
   const resetActiveDrop = () => {
-    setActiveDrop({
-      action: ActiveDropAction.REPLY,
-      drop: drop,
-      partId: 1,
-    });
+    // Set to null to clear the reply state without triggering focus
+    setActiveDrop(null);
   };
 
   return (
