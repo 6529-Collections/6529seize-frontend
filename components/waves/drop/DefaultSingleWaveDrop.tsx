@@ -59,13 +59,7 @@ export const DefaultSingleWaveDrop: React.FC<DefaultSingleWaveDropProps> = ({
             activeTab === SingleWaveDropTab.CHAT ? "tw-flex" : "tw-hidden"
           } lg:tw-flex lg:tw-flex-1 `}
         >
-          {wave && drop ? (
-            <SingleWaveDropChat wave={wave} drop={drop} />
-          ) : (
-            <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
-              <div className="tw-text-iron-500">Loading discussion...</div>
-            </div>
-          )}
+          {wave && drop && <SingleWaveDropChat wave={wave} drop={drop} />}
         </div>
       </div>
     </div>
