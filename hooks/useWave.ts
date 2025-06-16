@@ -206,8 +206,6 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
   }, [currentPause, nextPause, hasDecisionsBeforePause]);
 
   // Calculate the minting date based on checkpoint date
-  // Minting happens on Monday/Wednesday/Friday
-  // Pattern: Monday checkpoint → Wednesday mint, Wednesday → Friday, Friday → Monday
   const calculateMintingDate = useMemo(() => {
     return (checkpointTime: number | null): number | null => {
       if (!checkpointTime) return null;
