@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { ApiDrop, ApiWave } from "../../../generated/models/ObjectSerializer";
 import useCapacitor from "../../../hooks/useCapacitor";
+import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import WaveDropsAll from "../drops/WaveDropsAll";
 import {
   CreateDropWaveWrapper,
@@ -25,6 +26,7 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
   const capacitor = useCapacitor();
   const { spaces } = useLayout();
+  const { isApp } = useDeviceInfo();
 
   const containerStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
@@ -41,11 +43,15 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
     return `tw-w-full tw-flex tw-flex-col lg:[--tab-height:0px]`;
   }, []);
 
-  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>({
-    action: ActiveDropAction.REPLY,
-    drop: drop,
-    partId: 1,
-  });
+  // On mobile app, start with null to match native app behavior
+  // On desktop/web, pre-set reply for convenience
+  const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(
+    isApp ? null : {
+      action: ActiveDropAction.REPLY,
+      drop: drop,
+      partId: 1,
+    }
+  );
 
   const handleDropAction = ({
     drop,
@@ -60,8 +66,17 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   };
 
   const resetActiveDrop = () => {
-    // Set to null to clear the reply state without triggering focus
-    setActiveDrop(null);
+    if (isApp) {
+      // Mobile app: Set to null to prevent keyboard issues
+      setActiveDrop(null);
+    } else {
+      // Desktop/web: Reset to replying to main drop for convenience
+      setActiveDrop({
+        action: ActiveDropAction.REPLY,
+        drop: drop,
+        partId: 1,
+      });
+    }
   };
 
   return (
