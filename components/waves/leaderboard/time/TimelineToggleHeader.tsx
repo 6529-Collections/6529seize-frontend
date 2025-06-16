@@ -28,7 +28,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
   currentPause,
   wave,
 }) => {
-  const waveData = wave ? useWave(wave) : null;
+  const waveData = useWave(wave);
   const hasNextDecision = !!nextDecisionTime;
   const getTimeLeft = () => {
     if (hasNextDecision) {
@@ -57,7 +57,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
             SZN 12 starts:{" "}
             {(() => {
               const mintingDate =
-                waveData?.pauses.calculateMintingDate(nextDecisionTime);
+                wave && waveData ? waveData.pauses.calculateMintingDate(nextDecisionTime) : null;
               return mintingDate
                 ? new Date(mintingDate).toLocaleDateString(undefined, {
                     month: "short",
