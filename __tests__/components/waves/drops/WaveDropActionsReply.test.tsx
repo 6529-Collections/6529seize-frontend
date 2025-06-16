@@ -3,6 +3,13 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import WaveDropActionsReply from '../../../../components/waves/drops/WaveDropActionsReply';
 
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 jest.mock('@tippyjs/react', () => ({ __esModule: true, default: (p:any) => <div>{p.children}</div> }));
 
 describe('WaveDropActionsReply', () => {
