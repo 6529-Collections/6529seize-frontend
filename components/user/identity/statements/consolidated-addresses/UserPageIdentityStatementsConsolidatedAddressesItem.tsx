@@ -2,7 +2,7 @@ import Tippy from "@tippyjs/react";
 import EtherscanIcon from "../../../utils/icons/EtherscanIcon";
 import OpenseaIcon from "../../../utils/icons/OpenseaIcon";
 import CopyIcon from "../../../../utils/icons/CopyIcon";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 import { useRouter } from "next/router";
 import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPageIdentityStatementsConsolidatedAddressesItemPrimary";

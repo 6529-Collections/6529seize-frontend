@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTitle } from "../contexts/TitleContext";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useRouter } from "next/router";
