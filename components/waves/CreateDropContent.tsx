@@ -790,7 +790,6 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(createGifDrop(gif));
   };
 
-  // Helper function to reduce nesting depth
   const focusInputWithDelay = (delay: number) => {
     setTimeout(() => {
       createDropInputRef.current?.focus();
