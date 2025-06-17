@@ -790,6 +790,13 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(createGifDrop(gif));
   };
 
+  // Helper function to reduce nesting depth
+  const focusInputWithDelay = (delay: number) => {
+    setTimeout(() => {
+      createDropInputRef.current?.focus();
+    }, delay);
+  };
+
   useEffect(() => {
     if (!activeDrop) {
       return;
@@ -803,9 +810,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
         // Use requestAnimationFrame to wait for next paint
         requestAnimationFrame(() => {
           // Then focus after a delay for mobile stability
-          setTimeout(() => {
-            createDropInputRef.current?.focus();
-          }, 300);
+          focusInputWithDelay(300);
         });
       };
 
