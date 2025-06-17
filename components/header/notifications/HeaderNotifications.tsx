@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../auth/Auth";
-import { useSetTitle, useTitle } from "../../../contexts/TitleContext";
+import { useTitle } from "../../../contexts/TitleContext";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -9,7 +9,7 @@ import { useNotificationsContext } from "../../notifications/NotificationsContex
 
 export default function HeaderNotifications() {
   const { connectedProfile } = useAuth();
-  const { setTitle } = useTitle();
+  const { setNotificationCount } = useTitle();
   const router = useRouter();
 
   const [linkHref, setLinkHref] = useState("/my-stream/notifications");
@@ -21,15 +21,11 @@ export default function HeaderNotifications() {
   const { removeAllDeliveredNotifications } = useNotificationsContext();
 
   useEffect(() => {
-    setTitle(
-      haveUnreadNotifications
-        ? `(${notifications?.unread_count}) Notifications | 6529.io`
-        : "6529.io"
-    );
+    setNotificationCount(notifications?.unread_count || 0);
     if (!haveUnreadNotifications) {
       removeAllDeliveredNotifications();
     }
-  }, [haveUnreadNotifications]);
+  }, [notifications?.unread_count, haveUnreadNotifications, setNotificationCount]);
 
   useEffect(() => {
     if (router.pathname === "/my-stream/notifications") {

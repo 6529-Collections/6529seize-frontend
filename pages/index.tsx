@@ -76,7 +76,7 @@ export default function Home({
   const { country } = useCookieConsent();
 
   const { connectedProfile } = useAuth();
-  useSetTitle("6529");
+  useSetTitle("6529.io");
 
   const [nftBalance, setNftBalance] = useState<number>(0);
 

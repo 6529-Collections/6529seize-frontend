@@ -4,15 +4,17 @@ import { useRouter } from 'next/router';
 type TitleContextType = {
   title: string;
   setTitle: (title: string) => void;
+  notificationCount: number;
+  setNotificationCount: (count: number) => void;
 };
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
 
-const DEFAULT_TITLE = process.env.BASE_ENDPOINT?.includes('staging') ? '6529 Staging' : '6529';
+const DEFAULT_TITLE = process.env.BASE_ENDPOINT?.includes('staging') ? '6529 Staging' : '6529.io';
 
 // Default titles for routes
 const getDefaultTitleForRoute = (pathname: string): string => {
-  if (pathname === '/') return '6529';
+  if (pathname === '/') return '6529.io';
   if (pathname.startsWith('/waves')) return 'Waves | Brain';
   if (pathname.startsWith('/my-stream/notifications')) return 'Notifications | My Stream | Brain';
   if (pathname.startsWith('/my-stream')) return 'My Stream | Brain';
@@ -39,6 +41,7 @@ const getDefaultTitleForRoute = (pathname: string): string => {
 export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   const [title, setTitleState] = useState<string>(() => getDefaultTitleForRoute(router.pathname));
+  const [notificationCount, setNotificationCount] = useState<number>(0);
   const routeRef = useRef(router.pathname);
 
   // Update title when route changes
@@ -57,8 +60,11 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  // Compute the final title with notification count
+  const finalTitle = notificationCount > 0 ? `(${notificationCount}) ${title}` : title;
+
   return (
-    <TitleContext.Provider value={{ title, setTitle }}>
+    <TitleContext.Provider value={{ title: finalTitle, setTitle, notificationCount, setNotificationCount }}>
       {children}
     </TitleContext.Provider>
   );
@@ -81,4 +87,13 @@ export const useSetTitle = (pageTitle: string) => {
   useEffect(() => {
     setTitle(pageTitle);
   }, [pageTitle, setTitle, router.pathname]);
+};
+
+// Hook to set notification count
+export const useSetNotificationCount = (count: number) => {
+  const { setNotificationCount } = useTitle();
+  
+  useEffect(() => {
+    setNotificationCount(count);
+  }, [count, setNotificationCount]);
 };
