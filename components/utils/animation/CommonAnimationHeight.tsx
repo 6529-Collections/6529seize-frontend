@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
@@ -39,8 +41,7 @@ export default function CommonAnimationHeight({
       animate={{ height }}
       transition={{ duration: 0.3 }}
       onAnimationStart={onAnimationStart}
-      onAnimationComplete={onAnimationCompleted}
-    >
+      onAnimationComplete={onAnimationCompleted}>
       <div ref={containerRef}>{children}</div>
     </motion.div>
   );

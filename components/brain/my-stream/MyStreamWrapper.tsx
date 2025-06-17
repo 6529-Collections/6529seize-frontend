@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext, useEffect, useState } from "react";
 import MyStream from "./MyStream";
 import { useRouter } from "next/router";

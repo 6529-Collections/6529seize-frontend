@@ -1,5 +1,5 @@
 import { useConnections, useSwitchChain } from "wagmi";
-import { getChains } from "../../../../pages/_app";
+import { getChains } from "@/components/providers/WagmiSetup";
 
 export default function HeaderUserProxyDropdownChains({
   onSwitchChain,

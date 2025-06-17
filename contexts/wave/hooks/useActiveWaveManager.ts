@@ -1,5 +1,7 @@
-import { useRouter } from 'next/router';
-import { useState, useEffect, useCallback } from 'react';
+"use client";
+
+import { useRouter } from "next/router";
+import { useState, useEffect, useCallback } from "react";
 
 /**
  * Hook to manage the active wave ID state and synchronize it with the URL
@@ -12,7 +14,7 @@ export function useActiveWaveManager() {
   // Sync activeWaveId with URL when router query changes
   useEffect(() => {
     const { wave: waveId } = router.query;
-    if (typeof waveId === 'string') {
+    if (typeof waveId === "string") {
       setActiveWaveId(waveId);
     } else if (waveId === undefined && activeWaveId) {
       // URL no longer has wave parameter
@@ -29,7 +31,7 @@ export function useActiveWaveManager() {
       if (waveId) {
         router.push(`/my-stream?wave=${waveId}`, undefined, { shallow: true });
       } else {
-        router.push('/my-stream', undefined, { shallow: true });
+        router.push("/my-stream", undefined, { shallow: true });
       }
     },
     [router]

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useRef, useCallback, useMemo } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
@@ -76,13 +78,15 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
 
   // Check if fields are filled
   const isTitleFilled = useMemo(() => title.trim().length > 0, [title]);
-  const isDescriptionFilled = useMemo(() => description.trim().length > 0, [description]);
+  const isDescriptionFilled = useMemo(
+    () => description.trim().length > 0,
+    [description]
+  );
 
   return (
     <FormSection
       title="Artwork Details"
-      titleClassName="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4 sm:tw-mb-6"
-    >
+      titleClassName="tw-text-lg sm:tw-text-xl tw-font-semibold tw-text-iron-100 tw-mb-4 sm:tw-mb-6">
       <div className="tw-grid tw-grid-cols-1 tw-gap-6">
         <div className="tw-group tw-relative">
           <div className="tw-relative">
@@ -93,14 +97,11 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                   titleError
                     ? "tw-text-red"
                     : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
-                }`}
-            >
+                }`}>
               Artwork Title
             </label>
 
-            <div
-              className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200"
-            >
+            <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
               <input
                 ref={titleRef}
                 id="field-title"
@@ -119,10 +120,10 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                       ? "tw-ring-red"
                       : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
                   }
-                  ${isTitleFilled && !titleError ? 'tw-pr-10' : ''}
+                  ${isTitleFilled && !titleError ? "tw-pr-10" : ""}
                   `}
               />
-              
+
               {/* Title checkmark */}
               {isTitleFilled && !titleError && (
                 <div className="tw-absolute tw-right-3 tw-top-1/2 tw-transform -tw-translate-y-1/2 tw-pointer-events-none">
@@ -144,14 +145,11 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                   descriptionError
                     ? "tw-text-red"
                     : "tw-text-iron-300 group-focus-visible-within:tw-text-primary-400"
-                }`}
-            >
+                }`}>
               Description
             </label>
 
-            <div
-              className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200"
-            >
+            <div className="tw-relative tw-rounded-xl tw-bg-iron-950 tw-transition-all tw-duration-200">
               <textarea
                 ref={descriptionRef}
                 id="field-description"
@@ -172,10 +170,10 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = ({
                       ? "tw-ring-red"
                       : "tw-ring-iron-700 desktop-hover:hover:tw-ring-iron-650 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400"
                   }
-                  ${isDescriptionFilled && !descriptionError ? 'tw-pr-10' : ''}
+                  ${isDescriptionFilled && !descriptionError ? "tw-pr-10" : ""}
                   `}
               />
-              
+
               {/* Description checkmark */}
               {isDescriptionFilled && !descriptionError && (
                 <div className="tw-absolute tw-right-3 tw-top-3 tw-pointer-events-none">

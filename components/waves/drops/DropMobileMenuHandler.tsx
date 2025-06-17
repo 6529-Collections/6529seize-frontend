@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useRef, useState } from "react";
 import WaveDropMobileMenu from "./WaveDropMobileMenu";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";

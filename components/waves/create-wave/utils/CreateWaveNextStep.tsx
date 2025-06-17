@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { CreateWaveStep } from "../../../../types/waves.types";
 import PrimaryButton from "../../../utils/button/PrimaryButton";
@@ -35,8 +37,7 @@ export default function CreateWaveNextStep({
         onClicked={onClick}
         disabled={disabled}
         loading={false}
-        padding="tw-px-6 tw-py-3"
-      >
+        padding="tw-px-6 tw-py-3">
         Next
       </PrimaryButton>
     ),
@@ -45,8 +46,7 @@ export default function CreateWaveNextStep({
         onClicked={onClick}
         disabled={submitting}
         loading={submitting}
-        padding="tw-px-6 tw-py-3"
-      >
+        padding="tw-px-6 tw-py-3">
         Complete
       </PrimaryButton>
     ),

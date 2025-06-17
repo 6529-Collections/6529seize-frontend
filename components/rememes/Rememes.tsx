@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Dropdown, Button } from "react-bootstrap";
 import styles from "./Rememes.module.scss";
 import { fetchUrl } from "../../services/6529api";

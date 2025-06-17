@@ -1,13 +1,15 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 
 export function useInView<T extends HTMLElement>(
-  options?: IntersectionObserverInit,
+  options?: IntersectionObserverInit
 ): [React.RefObject<T | null>, boolean] {
   const ref = useRef<T>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    if (!ref.current || isVisible) return;            // already visible -> skip
+    if (!ref.current || isVisible) return; // already visible -> skip
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -16,7 +18,7 @@ export function useInView<T extends HTMLElement>(
           io.disconnect();
         }
       },
-      { rootMargin: "1000px 0px", ...options },        // preload 200 px beforehand
+      { rootMargin: "1000px 0px", ...options } // preload 200 px beforehand
     );
 
     io.observe(ref.current);

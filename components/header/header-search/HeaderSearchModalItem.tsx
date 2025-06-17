@@ -1,3 +1,5 @@
+"use client";
+
 import { useHoverDirty } from "react-use";
 import { CommunityMemberMinimal } from "../../../entities/IProfile";
 import {
@@ -128,7 +130,9 @@ export default function HeaderSearchModalItem({
     } else {
       const wave = getWave();
       const currentWaveId = router.query.wave as string | undefined;
-      return currentWaveId === wave.id ? "/my-stream" : `/my-stream?wave=${wave.id}`;
+      return currentWaveId === wave.id
+        ? "/my-stream"
+        : `/my-stream?wave=${wave.id}`;
     }
   };
 

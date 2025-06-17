@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
 import { AuthContext } from "../../../../../auth/Auth";
@@ -48,15 +50,13 @@ export default function GroupCardEditActions({
         onClick={(e) => {
           e.stopPropagation();
           setIsOptionsOpen(!isOptionsOpen);
-        }}
-      >
+        }}>
         <span className="tw-sr-only">Open options</span>
         <svg
           className="tw-h-5 tw-w-5"
           viewBox="0 0 20 20"
           fill="currentColor"
-          aria-hidden="true"
-        >
+          aria-hidden="true">
           <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
         </svg>
       </button>
@@ -71,8 +71,7 @@ export default function GroupCardEditActions({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
+            transition={{ duration: 0.2 }}>
             <div>
               <button
                 type="button"
@@ -83,8 +82,7 @@ export default function GroupCardEditActions({
                 className="tw-bg-transparent tw-w-full tw-border-none tw-block tw-px-3 tw-py-1 tw-text-sm tw-leading-6 tw-text-iron-300 hover:tw-text-iron-50 hover:tw-bg-iron-800 tw-text-left tw-transition tw-duration-300 tw-ease-out"
                 role="menuitem"
                 tabIndex={-1}
-                id="options-menu-0-item-0"
-              >
+                id="options-menu-0-item-0">
                 {editTitle}
               </button>
               {isMyFilter && <GroupCardDelete group={group} />}

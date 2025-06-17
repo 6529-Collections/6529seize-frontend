@@ -1,3 +1,5 @@
+"use client";
+
 import { Poppins } from "next/font/google";
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";

@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Distribution.module.scss";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -124,8 +126,7 @@ export default function DistributionPage(props: Readonly<Props>) {
           wrap={false}
           touch={true}
           fade={true}
-          className={styles.distributionCarousel}
-        >
+          className={styles.distributionCarousel}>
           {distributionPhotos.map((dp) => (
             <Carousel.Item key={dp.id}>
               <Image
@@ -179,8 +180,7 @@ export default function DistributionPage(props: Readonly<Props>) {
                     <th colSpan={2}></th>
                     <th
                       colSpan={distributionsPhases.length}
-                      className="text-center"
-                    >
+                      className="text-center">
                       ALLOWLIST SPOTS
                     </th>
                     <th colSpan={2} className="text-center">
@@ -271,8 +271,7 @@ export default function DistributionPage(props: Readonly<Props>) {
           <a
             href="https://x.com/6529Collections"
             target="_blank"
-            rel="noreferrer"
-          >
+            rel="noreferrer">
             &#64;6529Collections
           </a>{" "}
           account on X for drop updates.

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";

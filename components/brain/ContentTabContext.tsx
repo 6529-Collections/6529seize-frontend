@@ -1,5 +1,14 @@
-import React, { createContext, useState, useContext, ReactNode, useCallback, useMemo } from 'react';
-import { MyStreamWaveTab } from '../../types/waves.types';
+"use client";
+
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from "react";
+import { MyStreamWaveTab } from "../../types/waves.types";
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",
@@ -31,112 +40,131 @@ const ContentTabContext = createContext<ContentTabContextType>({
 });
 
 // Export a provider component
-export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activeContentTabRaw, setActiveContentTabRaw] = useState<MyStreamWaveTab>(MyStreamWaveTab.CHAT);
-  const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([MyStreamWaveTab.CHAT]);
+export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [activeContentTabRaw, setActiveContentTabRaw] =
+    useState<MyStreamWaveTab>(MyStreamWaveTab.CHAT);
+  const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([
+    MyStreamWaveTab.CHAT,
+  ]);
 
   // Function to determine which tabs are available based on wave state
   // Now accepts a params object or null
-  const updateAvailableTabs = useCallback((params: WaveTabParams | null) => {
-    if (!params) {
-      setAvailableTabs([MyStreamWaveTab.CHAT]);
-      
-      // If current tab is not CHAT, switch to it
-      if (activeContentTabRaw !== MyStreamWaveTab.CHAT) {
-        setActiveContentTabRaw(MyStreamWaveTab.CHAT);
-      }
-      return;
-    }
+  const updateAvailableTabs = useCallback(
+    (params: WaveTabParams | null) => {
+      if (!params) {
+        setAvailableTabs([MyStreamWaveTab.CHAT]);
 
-    const { isChatWave, isMemesWave, votingState, hasFirstDecisionPassed } = params;
-
-    // Chat-type waves only show chat tab
-    if (isChatWave) {
-      setAvailableTabs([MyStreamWaveTab.CHAT]);
-      
-      // If current tab is not CHAT, switch to it
-      if (activeContentTabRaw !== MyStreamWaveTab.CHAT) {
-        setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+        // If current tab is not CHAT, switch to it
+        if (activeContentTabRaw !== MyStreamWaveTab.CHAT) {
+          setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+        }
+        return;
       }
-      return;
-    }
-    
-    // For Memes wave - don't set default tab, let it use standard behavior
-    if (isMemesWave) {
-      const tabs = [MyStreamWaveTab.CHAT];
+
+      const { isChatWave, isMemesWave, votingState, hasFirstDecisionPassed } =
+        params;
+
+      // Chat-type waves only show chat tab
+      if (isChatWave) {
+        setAvailableTabs([MyStreamWaveTab.CHAT]);
+
+        // If current tab is not CHAT, switch to it
+        if (activeContentTabRaw !== MyStreamWaveTab.CHAT) {
+          setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+        }
+        return;
+      }
+
+      // For Memes wave - don't set default tab, let it use standard behavior
+      if (isMemesWave) {
+        const tabs = [MyStreamWaveTab.CHAT];
+        if (votingState !== WaveVotingState.ENDED) {
+          tabs.push(MyStreamWaveTab.LEADERBOARD);
+        }
+
+        if (hasFirstDecisionPassed) {
+          tabs.push(MyStreamWaveTab.WINNERS);
+        }
+        tabs.push(MyStreamWaveTab.MY_VOTES);
+        tabs.push(MyStreamWaveTab.OUTCOME);
+        tabs.push(MyStreamWaveTab.FAQ);
+
+        setAvailableTabs(tabs);
+
+        // Only switch if the current tab is not available
+        if (!tabs.includes(activeContentTabRaw)) {
+          setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+        }
+
+        return;
+      }
+
+      // Default tabs
+      const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
+
+      // Add Leaderboard if voting hasn't ended
       if (votingState !== WaveVotingState.ENDED) {
         tabs.push(MyStreamWaveTab.LEADERBOARD);
       }
 
+      // Add Winners if first decision has passed
       if (hasFirstDecisionPassed) {
         tabs.push(MyStreamWaveTab.WINNERS);
       }
-      tabs.push(MyStreamWaveTab.MY_VOTES);
-      tabs.push(MyStreamWaveTab.OUTCOME);
-      tabs.push(MyStreamWaveTab.FAQ);
 
-      
+      // Always add Outcome
+      tabs.push(MyStreamWaveTab.OUTCOME);
+      tabs.push(MyStreamWaveTab.MY_VOTES);
+
+      // FAQ tab is only available for Memes waves, which is handled in the isMemesWave block above
+
+      // Update available tabs
       setAvailableTabs(tabs);
-      
-      // Only switch if the current tab is not available
+
+      // If current tab is no longer available, switch to a default available tab
       if (!tabs.includes(activeContentTabRaw)) {
-        setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+        // Prefer to switch to LEADERBOARD if available, otherwise CHAT
+        if (tabs.includes(MyStreamWaveTab.LEADERBOARD)) {
+          setActiveContentTabRaw(MyStreamWaveTab.LEADERBOARD);
+        } else {
+          setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+        }
       }
-      
-      return;
-    }
-    
-    // Default tabs
-    const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
-    
-    // Add Leaderboard if voting hasn't ended
-    if (votingState !== WaveVotingState.ENDED) {
-      tabs.push(MyStreamWaveTab.LEADERBOARD);
-    }
-    
-    // Add Winners if first decision has passed
-    if (hasFirstDecisionPassed) {
-      tabs.push(MyStreamWaveTab.WINNERS);
-    }
-    
-    // Always add Outcome
-    tabs.push(MyStreamWaveTab.OUTCOME);
-  tabs.push(MyStreamWaveTab.MY_VOTES);
-    
-    // FAQ tab is only available for Memes waves, which is handled in the isMemesWave block above
-    
-    // Update available tabs
-    setAvailableTabs(tabs);
-    
-    // If current tab is no longer available, switch to a default available tab
-    if (!tabs.includes(activeContentTabRaw)) {
-      // Prefer to switch to LEADERBOARD if available, otherwise CHAT
-      if (tabs.includes(MyStreamWaveTab.LEADERBOARD)) {
-        setActiveContentTabRaw(MyStreamWaveTab.LEADERBOARD);
-      } else {
-        setActiveContentTabRaw(MyStreamWaveTab.CHAT);
-      }
-    }
-  }, [activeContentTabRaw]);
+    },
+    [activeContentTabRaw]
+  );
 
   // Wrapper for setActiveContentTab that validates the tab
-  const setActiveContentTab = useCallback((tab: MyStreamWaveTab) => {
-    // Only set the tab if it's available
-    if (availableTabs.includes(tab)) {
-      setActiveContentTabRaw(tab);
-    } else {
-      // If tab is not available, default to CHAT
-      setActiveContentTabRaw(MyStreamWaveTab.CHAT);
-    }
-  }, [availableTabs]);
+  const setActiveContentTab = useCallback(
+    (tab: MyStreamWaveTab) => {
+      // Only set the tab if it's available
+      if (availableTabs.includes(tab)) {
+        setActiveContentTabRaw(tab);
+      } else {
+        // If tab is not available, default to CHAT
+        setActiveContentTabRaw(MyStreamWaveTab.CHAT);
+      }
+    },
+    [availableTabs]
+  );
 
   // Memoize the context value to prevent unnecessary re-renders
-  const contextValue = useMemo(() => ({
-    activeContentTab: activeContentTabRaw,
-    setActiveContentTab,
-    availableTabs,
-    updateAvailableTabs
-  }), [activeContentTabRaw, setActiveContentTab, availableTabs, updateAvailableTabs]);
+  const contextValue = useMemo(
+    () => ({
+      activeContentTab: activeContentTabRaw,
+      setActiveContentTab,
+      availableTabs,
+      updateAvailableTabs,
+    }),
+    [
+      activeContentTabRaw,
+      setActiveContentTab,
+      availableTabs,
+      updateAvailableTabs,
+    ]
+  );
 
   return (
     <ContentTabContext.Provider value={contextValue}>

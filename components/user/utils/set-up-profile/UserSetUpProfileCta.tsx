@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { useSeizeConnectContext } from "../../../auth/SeizeConnectContext";

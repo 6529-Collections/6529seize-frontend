@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Time } from "../../../helpers/time";
 import CommonInput from "../input/CommonInput";
@@ -115,15 +117,13 @@ export default function CommonTimeSelect({
           <div
             className={`${
               disabled ? "tw-opacity-50 tw-hidden" : ""
-            }  tw-flex tw-items-center tw-gap-x-1.5`}
-          >
+            }  tw-flex tw-items-center tw-gap-x-1.5`}>
             <svg
               className="tw-flex-shrink-0 tw-h-4 tw-w-4 tw-text-iron-400"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
                 stroke="currentColor"
@@ -145,15 +145,13 @@ export default function CommonTimeSelect({
         <div
           className={`${
             disabled ? "tw-opacity-50 tw-hidden" : ""
-          }  tw-flex tw-items-center tw-gap-x-1.5`}
-        >
+          }  tw-flex tw-items-center tw-gap-x-1.5`}>
           <svg
             className="tw-h-4 tw-w-4 tw-text-iron-400"
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12 6V12L16 14M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
               stroke="currentColor"

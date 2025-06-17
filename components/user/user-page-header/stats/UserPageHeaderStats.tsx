@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "../../../../helpers/Helpers";
@@ -16,8 +18,7 @@ export default function UserPageHeaderStats({
       <div className="tw-flex tw-gap-x-6">
         <Link
           href={`/${user}/collected`}
-          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1"
-        >
+          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1">
           <span className="tw-text-base tw-font-medium tw-text-iron-50">
             {formatNumberWithCommas(profile.tdh)}
           </span>
@@ -27,8 +28,7 @@ export default function UserPageHeaderStats({
         </Link>
         <Link
           href={`/${user}/rep`}
-          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1"
-        >
+          className="tw-no-underline tw-inline-flex tw-items-center tw-gap-x-1">
           <span className="tw-text-base tw-font-medium tw-text-iron-50">
             {formatNumberWithCommas(profile.rep)}
           </span>

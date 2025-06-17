@@ -1,3 +1,5 @@
+"use client";
+
 import { useReadContract } from "wagmi";
 import { MEMES_CONTRACT, NULL_MERKLE } from "../constants";
 import { useCallback, useEffect, useState } from "react";

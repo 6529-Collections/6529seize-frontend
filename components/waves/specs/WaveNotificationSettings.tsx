@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useEffect, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { ApiWaveCreditType } from "../../../generated/models/ApiWaveCreditType";
@@ -101,18 +103,14 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
   }, [wave.subscribed_actions.length, refetch]);
 
   const getMentionsTooltip = () => {
-    return isAllEnabled
-      ? "Click to switch to mentions-only notifications"
-      : "";
+    return isAllEnabled ? "Click to switch to mentions-only notifications" : "";
   };
 
   const getAllTooltip = () => {
     if (disableSelection) {
       return `'All' notifications unavailable for waves with ${seizeSettings.all_drops_notifications_subscribers_limit.toLocaleString()}+ followers.`;
     }
-    return !isAllEnabled
-      ? "Click to enable notifications for all drops"
-      : "";
+    return !isAllEnabled ? "Click to enable notifications for all drops" : "";
   };
 
   const getActiveButtonStyle = () => {
@@ -142,14 +140,12 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                 <Tooltip id={`mentions-tooltip-${wave.id}`}>
                   {getMentionsTooltip()}
                 </Tooltip>
-              }
-            >
+              }>
               <button
                 disabled={loading}
                 onClick={() => toggleNotifications(false)}
                 className={`tw-px-3 tw-py-2 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
-                aria-label="Receive mentions-only notifications"
-              >
+                aria-label="Receive mentions-only notifications">
                 {loading && loadingTarget === "mentions" ? (
                   <Spinner dimension={12} />
                 ) : (
@@ -165,8 +161,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
               disabled={loading}
               onClick={() => toggleNotifications(false)}
               className={`tw-px-3 tw-py-2 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
-              aria-label="Receive mentions-only notifications"
-            >
+              aria-label="Receive mentions-only notifications">
               {loading && loadingTarget === "mentions" ? (
                 <Spinner dimension={12} />
               ) : (
@@ -182,14 +177,14 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
             <OverlayTrigger
               placement="top"
               overlay={
-                <Tooltip id={`all-tooltip-${wave.id}`}>{getAllTooltip()}</Tooltip>
-              }
-            >
+                <Tooltip id={`all-tooltip-${wave.id}`}>
+                  {getAllTooltip()}
+                </Tooltip>
+              }>
               <button
                 disabled={true}
                 className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getDisabledButtonStyle()}`}
-                aria-label="Receive all notifications"
-              >
+                aria-label="Receive all notifications">
                 {loading && loadingTarget === "all" ? (
                   <Spinner dimension={12} />
                 ) : (
@@ -199,8 +194,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                     viewBox="0 0 24 24"
                     strokeWidth="2"
                     stroke="currentColor"
-                    className="tw-size-4 tw-flex-shrink-0"
-                  >
+                    className="tw-size-4 tw-flex-shrink-0">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -215,8 +209,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
               disabled={loading}
               onClick={() => toggleNotifications(true)}
               className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getActiveButtonStyle()}`}
-              aria-label="Receive all notifications"
-            >
+              aria-label="Receive all notifications">
               {loading && loadingTarget === "all" ? (
                 <Spinner dimension={12} />
               ) : (
@@ -226,8 +219,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                   viewBox="0 0 24 24"
                   strokeWidth="2"
                   stroke="currentColor"
-                  className="tw-size-4 tw-flex-shrink-0"
-                >
+                  className="tw-size-4 tw-flex-shrink-0">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -240,15 +232,15 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
             <OverlayTrigger
               placement="top"
               overlay={
-                <Tooltip id={`all-tooltip-${wave.id}`}>{getAllTooltip()}</Tooltip>
-              }
-            >
+                <Tooltip id={`all-tooltip-${wave.id}`}>
+                  {getAllTooltip()}
+                </Tooltip>
+              }>
               <button
                 disabled={loading}
                 onClick={() => toggleNotifications(true)}
                 className={`tw-px-3 tw-py-2 lg:tw-px-2.5 lg:tw-py-1.5 tw-rounded-md tw-border-0 tw-transition tw-duration-300 tw-ease-out tw-flex tw-items-center tw-justify-center ${getInactiveButtonStyle()}`}
-                aria-label="Receive all notifications"
-              >
+                aria-label="Receive all notifications">
                 {loading && loadingTarget === "all" ? (
                   <Spinner dimension={12} />
                 ) : (
@@ -258,8 +250,7 @@ export default function WaveNotificationSettings({ wave }: WaveRatingProps) {
                     viewBox="0 0 24 24"
                     strokeWidth="2"
                     stroke="currentColor"
-                    className="tw-size-4 tw-flex-shrink-0"
-                  >
+                    className="tw-size-4 tw-flex-shrink-0">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

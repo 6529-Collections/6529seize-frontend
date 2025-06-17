@@ -1,3 +1,5 @@
+"use client";
+
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import { useEffect, useState } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";

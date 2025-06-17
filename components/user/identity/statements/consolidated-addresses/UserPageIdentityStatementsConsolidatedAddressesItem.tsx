@@ -1,3 +1,5 @@
+"use client";
+
 import Tippy from "@tippyjs/react";
 import EtherscanIcon from "../../../utils/icons/EtherscanIcon";
 import OpenseaIcon from "../../../utils/icons/OpenseaIcon";
@@ -39,7 +41,8 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
     window.open(`https://etherscan.io/address/${address.wallet}`, "_blank");
   };
 
-  const isPrimary = address.wallet.toLowerCase() === primaryAddress?.toLowerCase();
+  const isPrimary =
+    address.wallet.toLowerCase() === primaryAddress?.toLowerCase();
 
   const [title, setTitle] = useState(address.wallet.slice(0, 6));
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -84,8 +87,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               )}
               target="_blank"
               rel="noreferrer"
-              className="tw-text-primary-400 tw-underline"
-            >
+              className="tw-text-primary-400 tw-underline">
               View Transaction
             </a>
           )}
@@ -146,13 +148,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           content="Opensea"
           theme="dark"
           placement="top"
-          disabled={isTouchScreen}
-        >
+          disabled={isTouchScreen}>
           <button
             onClick={goToOpensea}
             aria-label="Go to Opensea"
-            className="tw-bg-transparent tw-border-none tw-p-0"
-          >
+            className="tw-bg-transparent tw-border-none tw-p-0">
             <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
               <OpenseaIcon />
             </div>
@@ -162,13 +162,11 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
           content="Etherscan"
           theme="dark"
           placement="top"
-          disabled={isTouchScreen}
-        >
+          disabled={isTouchScreen}>
           <button
             onClick={goToEtherscan}
             aria-label="Go to Etherscan"
-            className="tw-bg-transparent tw-border-none tw-p-0"
-          >
+            className="tw-bg-transparent tw-border-none tw-p-0">
             <div className="tw-flex-shrink-0 tw-w-6 tw-h-6 sm:tw-w-5 sm:tw-h-5 hover:tw-scale-110 tw-transition tw-duration-300 tw-ease-out">
               <EtherscanIcon />
             </div>
@@ -187,8 +185,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M20 6L9 17L4 12"
                 stroke="#3CCB7F"
@@ -208,15 +205,13 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               content="Copy"
               theme="dark"
               placement="top"
-              disabled={isTouchScreen}
-            >
+              disabled={isTouchScreen}>
               <button
                 aria-label="Copy address"
                 className={`${
                   isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
                 } tw-ml-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-                onClick={handleCopy}
-              >
+                onClick={handleCopy}>
                 <CopyIcon />
               </button>
             </Tippy>

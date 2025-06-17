@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { useInView } from "../../../../../../hooks/useInView";
 import useDeviceInfo from "../../../../../../hooks/useDeviceInfo";

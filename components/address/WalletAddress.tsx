@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Address.module.scss";
 import {
   containsEmojis,

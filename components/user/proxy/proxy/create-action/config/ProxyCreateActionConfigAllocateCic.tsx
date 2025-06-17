@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { CreateProxyAllocateCicAction } from "../../../../../../entities/IProxy";
 import { ApiProfileProxyActionType } from "../../../../../../generated/models/ApiProfileProxyActionType";
@@ -50,8 +52,7 @@ export default function ProxyCreateActionConfigAllocateCic({
           type="button"
           onClick={onCancel}
           disabled={submitting}
-          className="tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-iron-300 tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out"
-        >
+          className="tw-w-full sm:tw-w-auto tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-800 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-iron-300 tw-border tw-border-solid tw-border-iron-700 tw-rounded-lg hover:tw-bg-iron-700 tw-transition tw-duration-300 tw-ease-out">
           Cancel
         </button>
         <button
@@ -62,8 +63,7 @@ export default function ProxyCreateActionConfigAllocateCic({
             disabled
               ? "tw-opacity-50"
               : "hover:tw-bg-primary-600 hover:tw-border-primary-600"
-          } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}
-        >
+          } tw-w-full sm:tw-w-auto tw-bg-primary-500 tw-px-3.5 tw-py-2.5 tw-text-sm tw-leading-5 tw-font-semibold tw-text-white tw-border tw-border-solid tw-border-primary-500 tw-rounded-lg tw-transition tw-duration-300 tw-ease-out`}>
           <div className="tw-inline-flex tw-items-center tw-justify-center tw-space-x-2">
             {submitting && <CircleLoader size={CircleLoaderSize.SMALL} />}
             <span>Save</span>

@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./MemeLab.module.scss";
 
 import { Fragment, useEffect, useState } from "react";

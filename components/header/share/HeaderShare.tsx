@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./HeaderShare.module.scss";
 import {
   faCopy,

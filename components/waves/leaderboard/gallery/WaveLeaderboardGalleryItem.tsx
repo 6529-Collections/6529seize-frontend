@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import MediaDisplay from "../../../drops/view/item/content/media/MediaDisplay";
@@ -81,8 +83,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
         className={`${imageContainerClass} tw-border-none tw-m-0 tw-p-0 tw-w-full tw-text-left tw-bg-transparent`}
         onClick={handleImageClick}
         onKeyDown={handleKeyDown}
-        type="button"
-      >
+        type="button">
         <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
           <MediaDisplay
             media_mime_type={drop.parts[0].media[0].mime_type || "image/jpeg"}
@@ -114,8 +115,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
             <Link
               onClick={(e) => e.stopPropagation()}
               href={`/${drop.author?.handle}`}
-              className="tw-text-sm tw-truncate tw-no-underline tw-font-medium tw-text-iron-200"
-            >
+              className="tw-text-sm tw-truncate tw-no-underline tw-font-medium tw-text-iron-200">
               {drop.author?.handle || " "}
             </Link>
           </div>
@@ -135,8 +135,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
               strokeWidth="2.25"
               stroke="currentColor"
               aria-hidden="true"
-              className="tw-size-4 tw-flex-shrink-0 tw-text-iron-500"
-            >
+              className="tw-size-4 tw-flex-shrink-0 tw-text-iron-500">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -174,8 +173,7 @@ export const WaveLeaderboardGalleryItem: React.FC<
               onClick={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
               type="button"
-              className="tw-border-none tw-m-0 tw-p-0 tw-bg-transparent"
-            >
+              className="tw-border-none tw-m-0 tw-p-0 tw-bg-transparent">
               <VotingModalButton
                 drop={drop}
                 onClick={handleVoteButtonClick}

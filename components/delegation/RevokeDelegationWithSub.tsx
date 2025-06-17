@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Delegation.module.scss";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useEnsName } from "wagmi";

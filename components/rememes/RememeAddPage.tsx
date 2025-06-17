@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Rememes.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import Image from "next/image";

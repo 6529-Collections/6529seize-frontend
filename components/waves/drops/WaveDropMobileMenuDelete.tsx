@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { motion, AnimatePresence } from "framer-motion";
@@ -69,8 +71,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             className="tw-mt-4 tw-border-0 tw-w-full tw-flex tw-items-center tw-gap-x-4 tw-py-3 tw-px-4 tw-bg-iron-950 tw-rounded-xl  tw-transition-colors tw-duration-200"
-            onClick={() => setIsDeleteMode(true)}
-          >
+            onClick={() => setIsDeleteMode(true)}>
             <svg
               className="tw-size-5 tw-flex-shrink-0 tw-text-red"
               xmlns="http://www.w3.org/2000/svg"
@@ -78,8 +79,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor"
-            >
+              stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -97,19 +97,30 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="tw-mt-4 tw-flex tw-gap-x-2"
-          >
+            className="tw-mt-4 tw-flex tw-gap-x-2">
             <button
               className="tw-flex-1 tw-border-0 tw-flex tw-items-center tw-justify-center tw-py-3 tw-px-4 tw-bg-red/100 tw-rounded-xl active:tw-bg-red/90 tw-transition-colors tw-duration-200"
               onClick={onDelete}
-              disabled={mutating}
-            >
+              disabled={mutating}>
               <span className="tw-text-white tw-font-semibold tw-text-base tw-flex tw-items-center tw-gap-x-2">
                 {mutating ? (
                   <>
-                    <svg className="tw-size-4 tw-animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="tw-opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="tw-opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="tw-size-4 tw-animate-spin"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24">
+                      <circle
+                        className="tw-opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"></circle>
+                      <path
+                        className="tw-opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Deleting...
                   </>
@@ -120,8 +131,7 @@ const WaveDropMobileMenuDelete: React.FC<WaveDropMobileMenuDeleteProps> = ({
             </button>
             <button
               className="tw-flex-1 tw-border-0 tw-flex tw-items-center tw-justify-center tw-py-3 tw-px-4 tw-bg-iron-950 tw-rounded-xl active:tw-bg-iron-800 tw-transition-colors tw-duration-200"
-              onClick={() => setIsDeleteMode(false)}
-            >
+              onClick={() => setIsDeleteMode(false)}>
               <span className="tw-text-iron-300 tw-font-semibold tw-text-base">
                 Cancel
               </span>

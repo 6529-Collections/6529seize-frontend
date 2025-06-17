@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback, useRef } from "react";
 import { DropdownTraitProps } from "./types";
 import { TraitWrapper } from "./TraitWrapper";
@@ -6,16 +8,7 @@ import { TraitWrapper } from "./TraitWrapper";
  * Simplified DropdownTrait component with direct state management
  */
 export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
-  ({
-    label,
-    field,
-    traits,
-    updateText,
-    options,
-    className,
-    error,
-    onBlur,
-  }) => {
+  ({ label, field, traits, updateText, options, className, error, onBlur }) => {
     // Create ref for select element
     const selectRef = useRef<HTMLSelectElement>(null);
 
@@ -50,12 +43,16 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
 
     // Check if field is filled (option selected, not empty default)
     const isFieldFilled = React.useMemo(() => {
-      const currentValue = (traits[field] as string) || '';
+      const currentValue = (traits[field] as string) || "";
       return currentValue.trim().length > 0;
     }, [traits, field]);
 
     return (
-      <TraitWrapper label={label} className={className} error={error} isFieldFilled={isFieldFilled}>
+      <TraitWrapper
+        label={label}
+        className={className}
+        error={error}
+        isFieldFilled={isFieldFilled}>
         <select
           ref={selectRef}
           defaultValue={(traits[field] as string) || ""}
@@ -70,14 +67,13 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
           }
           tw-appearance-none
           [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100
-          ${isFieldFilled && !error ? 'tw-pr-10' : ''}`}
+          ${isFieldFilled && !error ? "tw-pr-10" : ""}`}
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E")`,
-            backgroundPosition: 'right 0.5rem center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '1.5em 1.5em'
-          }}
-        >
+            backgroundPosition: "right 0.5rem center",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "1.5em 1.5em",
+          }}>
           <option value="" className="tw-bg-iron-950">
             Select {label}
           </option>

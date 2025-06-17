@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";

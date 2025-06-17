@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useRef } from "react";
 import { useWebSocketMessage } from "../../../services/websocket/useWebSocketMessage";
 import { WsDropUpdateMessage, WsMessageType } from "../../../helpers/Types";

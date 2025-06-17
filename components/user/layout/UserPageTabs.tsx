@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { useContext, useEffect, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";

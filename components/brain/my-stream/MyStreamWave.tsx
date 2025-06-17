@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, type JSX } from "react";
 import { useContentTab } from "../ContentTabContext";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
@@ -87,8 +89,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   return (
     <div
       className="tailwind-scope tw-relative tw-flex tw-flex-col tw-h-full"
-      key={stableWaveKey}
-    >
+      key={stableWaveKey}>
       {/* Don't render tab container for simple waves */}
       {breakpoint !== "S" && <MyStreamWaveTabs wave={wave} />}
 

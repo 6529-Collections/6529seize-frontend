@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { ProfileActivityLogProxyActionChanged } from "../../../../entities/IProfile";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";

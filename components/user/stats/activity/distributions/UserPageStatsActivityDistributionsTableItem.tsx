@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { getRandomObjectId } from "../../../../../helpers/AllowlistToolHelpers";
 import {
@@ -40,8 +42,7 @@ export default function UserPageStatsActivityDistributionsTableItem({
       <td className="tw-py-3.5 tw-font-medium tw-px-4 sm:tw-px-6 lg:tw-pl-4 tw-text-right tw-whitespace-nowrap tw-text-sm sm:tw-text-base">
         <Link
           className="tw-no-underline hover:tw-underline tw-text-iron-50"
-          href={`${COLLECTION_TO_PATH[item.collection]}/${item.tokenId}`}
-        >
+          href={`${COLLECTION_TO_PATH[item.collection]}/${item.tokenId}`}>
           # {item.tokenId}
         </Link>
       </td>
@@ -54,8 +55,7 @@ export default function UserPageStatsActivityDistributionsTableItem({
       {item.phases.map((phase) => (
         <td
           key={getRandomObjectId()}
-          className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 tw-text-right sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base"
-        >
+          className="tw-text-iron-400 tw-py-3.5 tw-font-normal tw-px-4 tw-text-right sm:tw-px-6 lg:tw-pl-4 tw-whitespace-nowrap tw-text-sm sm:tw-text-base">
           {formatNumberWithCommasOrDash(phase)}
         </td>
       ))}

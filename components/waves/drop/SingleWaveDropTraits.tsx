@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import Tippy from "@tippyjs/react";

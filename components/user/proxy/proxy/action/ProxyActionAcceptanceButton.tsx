@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useState } from "react";
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { ApiProfileProxy } from "../../../../../generated/models/ApiProfileProxy";
@@ -110,7 +112,10 @@ export default function ProxyActionAcceptanceButton({
       });
     },
     onSuccess: (_, variables) => {
-      if (!profileProxy.granted_to?.handle || !profileProxy.created_by?.handle) {
+      if (
+        !profileProxy.granted_to?.handle ||
+        !profileProxy.created_by?.handle
+      ) {
         return;
       }
       onProfileProxyModify({
@@ -158,8 +163,7 @@ export default function ProxyActionAcceptanceButton({
                 onClick={() => onSubmit(AcceptActionRequestActionEnum.Accept)}
                 disabled={submitting}
                 type="button"
-                className="tw-text-green tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-              >
+                className="tw-text-green tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
                 {submitting ? <CircleLoader /> : "Accept"}
               </button>
             )}
@@ -170,8 +174,7 @@ export default function ProxyActionAcceptanceButton({
                 onClick={() => onSubmit(AcceptActionRequestActionEnum.Reject)}
                 type="button"
                 disabled={submitting}
-                className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-              >
+                className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
                 {submitting ? <CircleLoader /> : "Reject"}
               </button>
             )}
@@ -180,8 +183,7 @@ export default function ProxyActionAcceptanceButton({
                 onClick={() => onSubmit(AcceptActionRequestActionEnum.Revoke)}
                 disabled={submitting}
                 type="button"
-                className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-              >
+                className="tw-text-red tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
                 {submitting ? <CircleLoader /> : "Revoke"}
               </button>
             )}
@@ -192,8 +194,7 @@ export default function ProxyActionAcceptanceButton({
                 onClick={() => onSubmit(AcceptActionRequestActionEnum.Restore)}
                 disabled={submitting}
                 type="button"
-                className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out"
-              >
+                className="tw-text-iron-300 tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 hover:tw-border-iron-800 tw-rounded-lg hover:tw-bg-iron-800 tw-transition tw-duration-300 tw-ease-out">
                 {submitting ? <CircleLoader /> : "Restore"}
               </button>
             )}
@@ -206,8 +207,7 @@ export default function ProxyActionAcceptanceButton({
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <HeaderProxyNewModal
               onClose={onAcceptanceModalClose}
               connectedProfile={connectedProfile}

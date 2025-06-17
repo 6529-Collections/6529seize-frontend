@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 const CURRENT = process.env.VERSION!; // baked into the bundle

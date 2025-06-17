@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { SortDirection } from "../../../../entities/ISort";
 import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
@@ -46,15 +48,13 @@ export default function CommonTabsTab<T, U = unknown>(
         isActive
           ? "tw-p-[1px] tw-flex tw-rounded-lg tw-bg-gradient-to-b tw-from-iron-700 tw-to-iron-800"
           : "tw-p-[1px] tw-flex tw-rounded-lg"
-      }
-    >
+      }>
       <button
         type="button"
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
         onMouseLeave={() => setShouldRotate(false)}
-        className={`${dynamicClasses} tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}
-      >
+        className={`${dynamicClasses} tw-whitespace-nowrap tw-flex-1 sm:tw-flex-none tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-border-0 tw-rounded-lg tw-transition-all tw-duration-300 tw-ease-out`}>
         {item.label}
         {sortDirection && (
           <span className="-tw-mt-0.5 tw-ml-2">

@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import EmmaListSearch from "../../../../../utils/input/emma/EmmaListSearch";
 import {

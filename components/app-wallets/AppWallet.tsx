@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./AppWallet.module.scss";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import {

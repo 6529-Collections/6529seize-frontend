@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import styles from "./LFGSlideshow.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -179,7 +181,6 @@ const LFGSlideshow: React.FC<{
     </div>
   );
 };
-
 
 export const LFGButton: React.FC<{
   contract: string;

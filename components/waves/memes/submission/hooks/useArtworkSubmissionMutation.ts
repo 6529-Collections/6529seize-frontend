@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "../../../../auth/Auth";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useReadContract, useReadContracts, useWriteContract } from "wagmi";
 import {
   NEXTGEN_ADMIN,

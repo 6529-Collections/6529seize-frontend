@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState, type JSX } from "react";
 import WavesList from "./list/WavesList";
 import { AuthContext } from "../auth/Auth";

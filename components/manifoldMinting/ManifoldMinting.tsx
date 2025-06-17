@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./ManifoldMinting.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import useManifoldClaim, {

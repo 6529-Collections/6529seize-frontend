@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import WaveDropContent from "../../drops/WaveDropContent";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
@@ -13,7 +15,7 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
 }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState(0);
-  
+
   const onDropContentClick = (drop: ExtendedDrop) => {
     router.push(
       `/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}/`,
@@ -21,7 +23,7 @@ export const WaveWinnersDropContent: React.FC<WaveWinnersDropContentProps> = ({
       { shallow: true }
     );
   };
-  
+
   return (
     <WaveDropContent
       drop={{

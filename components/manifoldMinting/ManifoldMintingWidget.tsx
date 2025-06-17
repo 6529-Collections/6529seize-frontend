@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./ManifoldMinting.module.scss";
 import { useEffect, useState, type JSX } from "react";
 import { Col, Container, Form, Row, Table } from "react-bootstrap";

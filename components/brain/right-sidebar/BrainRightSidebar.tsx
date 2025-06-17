@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { ApiWave } from "../../../generated/models/ApiWave";
@@ -64,19 +66,19 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
         duration: 0.2,
         ease: [0.4, 0, 0.2, 1],
         x: { duration: 0.2 },
-      }}
-    >
+      }}>
       <button
         type="button"
         aria-label="Toggle sidebar"
         className={`tw-absolute tw-z-50 tw-top-[7.25rem] tw-bg-primary-500 desktop-hover:hover:tw-opacity-80 tw-border tw-border-solid
           tw-border-primary-400 tw-size-7 tw-text-white desktop-hover:hover:tw-text-white tw-ring-1 tw-ring-white/20
           focus:tw-outline-none tw-flex tw-items-center tw-justify-center tw-transition-all tw-duration-300 tw-ease-out
-          ${isCollapsed ? 
-            "tw-border-r-0 -tw-left-8 tw-rounded-l-lg" : 
-            "tw-border-l-0 -tw-left-5 tw-rounded-lg"}`}
-        onClick={() => setIsCollapsed(!isCollapsed)}
-      >
+          ${
+            isCollapsed
+              ? "tw-border-r-0 -tw-left-8 tw-rounded-l-lg"
+              : "tw-border-l-0 -tw-left-5 tw-rounded-lg"
+          }`}
+        onClick={() => setIsCollapsed(!isCollapsed)}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -85,8 +87,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
           strokeWidth="2"
           stroke="currentColor"
           className={`tw-size-5 tw-transition-transform tw-duration-300 
-            tw-ease-in-out ${isCollapsed ? "tw-rotate-180" : ""}`}
-        >
+            tw-ease-in-out ${isCollapsed ? "tw-rotate-180" : ""}`}>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -97,8 +98,7 @@ const BrainRightSidebar: React.FC<BrainRightSidebarProps> = ({
       <div
         className="tw-mt-[6.2rem] tw-text-iron-500 tw-text-sm tw-overflow-y-auto 
         tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 
-        hover:tw-scrollbar-thumb-iron-300 tw-h-full"
-      >
+        hover:tw-scrollbar-thumb-iron-300 tw-h-full">
         {wave && (
           <WaveContent
             wave={wave}

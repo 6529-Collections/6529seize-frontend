@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import styles from "./CookiesBanner.module.scss";
 import { useCookieConsent } from "./CookieConsentContext";

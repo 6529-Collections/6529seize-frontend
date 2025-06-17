@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./MemeLab.module.scss";
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

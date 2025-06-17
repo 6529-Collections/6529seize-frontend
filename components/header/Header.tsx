@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useRouter } from "next/router";

@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./WaveDropReactions.module.scss";
 import React, {
   useCallback,

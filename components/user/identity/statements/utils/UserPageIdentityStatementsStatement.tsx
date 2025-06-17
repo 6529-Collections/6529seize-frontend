@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { CicStatement } from "../../../../../entities/IProfile";
 import CopyIcon from "../../../../utils/icons/CopyIcon";
@@ -50,16 +52,14 @@ export default function UserPageIdentityStatementsStatement({
           content="Open"
           theme="dark"
           placement="top"
-          disabled={isTouchScreen}
-        >
+          disabled={isTouchScreen}>
           <a
             href={statement.statement_value}
             target="_blank"
             rel="noopener noreferrer"
             className={`${
               isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
-            } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-          >
+            } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}>
             <OutsideLinkIcon />
           </a>
         </Tippy>
@@ -68,15 +68,13 @@ export default function UserPageIdentityStatementsStatement({
         content="Copy"
         theme="dark"
         placement="top"
-        disabled={isTouchScreen}
-      >
+        disabled={isTouchScreen}>
         <button
           aria-label="Copy"
           className={`${
             isTouchScreen ? "tw-block" : "tw-hidden group-hover:tw-block"
           } tw-p-2 tw-bg-transparent tw-cursor-pointer tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-200 tw-border-0 focus:tw-outline-none tw-transition tw-duration-300 tw-ease-out`}
-          onClick={handleCopy}
-        >
+          onClick={handleCopy}>
           <CopyIcon />
         </button>
       </Tippy>

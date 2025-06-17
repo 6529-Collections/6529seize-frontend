@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState, type JSX } from "react";
 import { ApiProfileProxy } from "../../../../generated/models/ApiProfileProxy";
 import ProxyActions from "../proxy/list/ProxyActions";
@@ -96,8 +98,7 @@ export default function ProxyListItem({
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M4 12H20M20 12L14 6M20 12L14 18"
             stroke="currentColor"
@@ -109,8 +110,7 @@ export default function ProxyListItem({
         <div className="tw-flex tw-w-full tw-gap-x-4">
           <Link
             href={`/${profileProxy.granted_to.handle}/proxy`}
-            className="tw-group"
-          >
+            className="tw-group">
             <div className="tw-flex tw-items-center tw-gap-x-3">
               {profileProxy.granted_to.pfp ? (
                 <img
@@ -132,15 +132,13 @@ export default function ProxyListItem({
             <button
               type="button"
               onClick={() => setViewType(VIEW_TYPE.CREATE_NEW)}
-              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-50 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-iron-700 tw-border tw-border-solid tw-border-iron-50 tw-rounded-lg hover:tw-bg-iron-300 hover:tw-border-iron-300 tw-transition tw-duration-300 tw-ease-out tw-text-nowrap"
-            >
+              className="tw-flex tw-items-center tw-justify-center tw-relative tw-bg-iron-50 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-font-semibold tw-text-iron-700 tw-border tw-border-solid tw-border-iron-50 tw-rounded-lg hover:tw-bg-iron-300 hover:tw-border-iron-300 tw-transition tw-duration-300 tw-ease-out tw-text-nowrap">
               <svg
                 className="tw-w-5 tw-h-5 tw-mr-1.5 -tw-ml-1"
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+                xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M12 5V19M5 12H19"
                   stroke="currentColor"

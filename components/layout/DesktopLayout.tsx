@@ -1,3 +1,5 @@
+"use client";
+
 import React, { ReactNode, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
@@ -40,8 +42,7 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
         ref={headerWrapperRef}
         className={`${
           isStreamView ? "tw-sticky tw-top-0 tw-z-50 tw-bg-black" : ""
-        }`}
-      >
+        }`}>
         <Header isSmall={isSmall} />
         {!isHomePage && <Breadcrumb breadcrumbs={breadcrumbs} />}
       </div>

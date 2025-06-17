@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, type JSX } from "react";
 import {
   CreateProxyAction,
@@ -99,8 +101,7 @@ export default function ProxyCreateActionConfig({
             <span
               className={`${
                 isEndTimeDisabled ? "tw-opacity-50" : ""
-              } tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300`}
-            >
+              } tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300`}>
               End time
             </span>
             <div className="tw-mt-1.5">

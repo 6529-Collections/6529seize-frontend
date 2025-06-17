@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import UserPageIdentityAddStatementsContactItems from "./UserPageIdentityAddStatementsContactItems";
 import UserPageIdentityAddStatementsContactHeader from "./UserPageIdentityAddStatementsContactHeader";

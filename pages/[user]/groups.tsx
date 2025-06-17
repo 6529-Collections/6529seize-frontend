@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { NextPageWithLayout } from "../_app";
+import { NextPageWithLayout } from "@/components/providers/Providers";
 import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
@@ -12,6 +12,8 @@ import { getMetadataForUserPage } from "../../helpers/Helpers";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
+}: {
+  pageProps: UserPageProps;
 }) => {
   return <UserPageGroupsWrapper profile={pageProps.profile} />;
 };

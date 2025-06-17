@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Form } from "react-bootstrap";
 import { useContext, useEffect, useState } from "react";
 
@@ -235,8 +237,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
         </Col>
         <Col
           xs={2}
-          className="pt-3 pb-1 d-flex align-items-center justify-content-end"
-        >
+          className="pt-3 pb-1 d-flex align-items-center justify-content-end">
           <DelegationCloseButton onHide={props.onHide} title="Consolidation" />
         </Col>
       </Row>

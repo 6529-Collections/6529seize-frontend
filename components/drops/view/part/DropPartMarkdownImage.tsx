@@ -1,3 +1,5 @@
+"use client";
+
 import { faExpand, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
@@ -88,15 +90,13 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
       onClick={handleCloseModal}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}
-    >
+      onTouchMove={(e) => e.stopPropagation()}>
       <div className="tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-80 tw-pointer-events-none"></div>
       <TransformWrapper
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
         smooth
-        onZoom={(e) => setIsZoomed(e.state.scale > 1)}
-      >
+        onZoom={(e) => setIsZoomed(e.state.scale > 1)}>
         {({ resetTransform }) => (
           <div className="tw-fixed tw-inset-0 tw-z-1000 tw-overflow-hidden tw-flex tw-items-center tw-justify-center">
             <div className="tw-relative tw-flex tw-flex-col lg:tw-flex-row tw-max-w-[95vw] tw-max-h-[90vh]">
@@ -109,12 +109,10 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                   if (e.key === "Enter" || e.key === " ") {
                     e.stopPropagation();
                   }
-                }}
-              >
+                }}>
                 <TransformComponent
                   wrapperClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
-                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center"
-                >
+                  contentClass="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center">
                   <img
                     src={src}
                     alt={alt}
@@ -134,8 +132,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                     }}
                     data-tooltip-id="reset-zoom-markdown"
                     className={modalButtonClasses}
-                    aria-label="Reset"
-                  >
+                    aria-label="Reset">
                     <FontAwesomeIcon
                       icon={faRotateLeft}
                       className="tw-size-4"
@@ -147,8 +144,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                     onClick={(e) => e.stopPropagation()}
                     data-tooltip-id={`open-browser-markdown-${src}`}
                     className={modalButtonClasses}
-                    aria-label="Open image in new tab"
-                  >
+                    aria-label="Open image in new tab">
                     <ArrowTopRightOnSquareIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
                   </button>
                 </Link>
@@ -157,8 +153,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                     onClick={handleFullScreen}
                     data-tooltip-id="full-screen-markdown"
                     className={modalButtonClasses}
-                    aria-label="Full screen"
-                  >
+                    aria-label="Full screen">
                     <FontAwesomeIcon icon={faExpand} className="tw-size-4" />
                   </button>
                 )}
@@ -166,16 +161,14 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                   onClick={handleCloseModal}
                   data-tooltip-id="close-modal-markdown"
                   className={modalButtonClasses}
-                  aria-label="Close modal"
-                >
+                  aria-label="Close modal">
                   <svg
                     className="tw-h-5 tw-w-5 tw-flex-shrink-0"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    aria-hidden="true"
-                  >
+                    aria-hidden="true">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -225,8 +218,7 @@ const DropPartMarkdownImage: React.FC<DropPartMarkdownImageProps> = ({
                 70
               )}%`,
               maxHeight: "70vh",
-            }}
-          ></div>
+            }}></div>
         )}
         <img
           ref={imgRef}

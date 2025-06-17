@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Time } from "../../../../helpers/time";
 
@@ -9,9 +11,7 @@ interface WaveDropTimeProps {
  * A reusable component for displaying timestamps in wave drops
  * Uses the exact same logic as the original WaveDropHeader implementation
  */
-const WaveDropTime: React.FC<WaveDropTimeProps> = ({
-  timestamp,
-}) => {
+const WaveDropTime: React.FC<WaveDropTimeProps> = ({ timestamp }) => {
   // Hooks must be called at the top level
   const [isMobile, setIsMobile] = useState(false);
 
@@ -49,7 +49,7 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({
         minute: "2-digit",
       });
     }
-    
+
     // Otherwise follow the original behavior
     if (isMobile) {
       // On mobile: show only date for non-today timestamps
@@ -60,23 +60,23 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({
       const yesterday = new Date();
       yesterday.setDate(now.getDate() - 1);
       const isYesterday = date.toDateString() === yesterday.toDateString();
-      
+
       const timeStr = date.toLocaleTimeString(undefined, {
         hour: "2-digit",
         minute: "2-digit",
       });
-      
+
       if (isYesterday) {
         return `Yesterday - ${timeStr}`;
       }
-      
+
       const sameYear = date.getFullYear() === now.getFullYear();
       const dateStr = date.toLocaleDateString(undefined, {
         month: "short",
         day: "2-digit",
         ...(sameYear ? {} : { year: "numeric" }),
       });
-      
+
       return `${dateStr} - ${timeStr}`;
     }
   };

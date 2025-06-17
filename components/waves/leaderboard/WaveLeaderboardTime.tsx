@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { useDecisionPoints } from "../../../hooks/waves/useDecisionPoints";
@@ -27,7 +29,6 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     pauses: { showPause, filterDecisionsDuringPauses },
   } = useWave(wave);
 
-
   // Track expanded/collapsed state for decjusision details
   const [isDecisionDetailsOpen, setIsDecisionDetailsOpen] =
     useState<boolean>(false);
@@ -35,26 +36,28 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   // Filter out decisions that occur during pause periods using the helper from useWave
   const filteredDecisions = useMemo(() => {
     // Convert DecisionPoint[] to ApiWaveDecision[] format for the filter function
-    const decisionsAsApiFormat = allDecisions.map(decision => ({
-      decision_time: decision.timestamp,
-      // Add other required fields if needed
-    } as any));
-    
+    const decisionsAsApiFormat = allDecisions.map(
+      (decision) =>
+        ({
+          decision_time: decision.timestamp,
+          // Add other required fields if needed
+        } as any)
+    );
+
     // Apply the filter
     const filtered = filterDecisionsDuringPauses(decisionsAsApiFormat);
-    
+
     // Convert back to DecisionPoint[] format
-    return allDecisions.filter(decision => 
-      filtered.some(f => f.decision_time === decision.timestamp)
+    return allDecisions.filter((decision) =>
+      filtered.some((f) => f.decision_time === decision.timestamp)
     );
   }, [allDecisions, filterDecisionsDuringPauses]);
 
   // Get the next valid decision time (excluding paused decisions)
   const nextDecisionTime =
-    filteredDecisions.find((decision) => decision.timestamp > Time.currentMillis())
-      ?.timestamp ?? null;
-
-
+    filteredDecisions.find(
+      (decision) => decision.timestamp > Time.currentMillis()
+    )?.timestamp ?? null;
 
   return (
     <div className="tw-mb-2 lg:tw-mb-4">

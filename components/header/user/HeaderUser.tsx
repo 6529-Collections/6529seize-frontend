@@ -1,3 +1,5 @@
+"use client";
+
 import HeaderUserConnected from "./HeaderUserConnected";
 import HeaderUserConnect from "./HeaderUserConnect";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";

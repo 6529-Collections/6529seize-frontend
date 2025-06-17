@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,7 +12,9 @@ interface SingleWaveDropLogsProps {
   readonly drop: ApiDrop;
 }
 
-export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({ drop }) => {
+export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
+  drop,
+}) => {
   const [isActivityOpen, setIsActivityOpen] = useState(false);
 
   const { connectedProfile } = useAuth();
@@ -35,15 +39,13 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({ drop }) 
         onClick={() => setIsActivityOpen(!isActivityOpen)}
         className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-2.5 md:tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
           isActivityOpen ? "tw-rounded-t-xl" : "tw-rounded-xl"
-        }`}
-      >
+        }`}>
         <span
           className={
             isActivityOpen
               ? "tw-text-primary-300"
               : "tw-text-iron-300 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
-          }
-        >
+          }>
           Activity Logs
         </span>
         <motion.svg
@@ -56,8 +58,7 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({ drop }) 
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          aria-hidden="true"
-        >
+          aria-hidden="true">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -74,8 +75,7 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({ drop }) 
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900"
-          >
+            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900">
             <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
               {logs.length > 0 || isLoading ? (
                 <div className="tw-divide-y tw-divide-solid tw-divide-iron-700 tw-divide-x-0">
@@ -100,8 +100,7 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({ drop }) 
                       viewBox="0 0 24 24"
                       strokeWidth="1"
                       stroke="currentColor"
-                      aria-hidden="true"
-                    >
+                      aria-hidden="true">
                       <path
                         d="M22.7 13.5L20.7005 11.5L18.7 13.5M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C15.3019 3 18.1885 4.77814 19.7545 7.42909M12 7V12L15 14"
                         strokeLinecap="round"
@@ -133,4 +132,4 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({ drop }) 
       </AnimatePresence>
     </div>
   );
-}; 
+};

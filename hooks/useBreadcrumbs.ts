@@ -1,3 +1,5 @@
+"use client";
+
 import { useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
@@ -166,7 +168,7 @@ export const useBreadcrumbs = (): Crumb[] => {
       // Similar to getQueryKey/fetchQueryData, 'as any' casts help manage the complexity of
       // calling a method from a union of configs with a union of params.
       // Type safety is largely enforced at the definition of each RouteDynamicConfig.
-      const dynamicCrumbs = (determinedRouteInfo.config.crumbBuilder)(
+      const dynamicCrumbs = determinedRouteInfo.config.crumbBuilder(
         determinedRouteInfo.params,
         dynamicData,
         isLoadingDynamicData,

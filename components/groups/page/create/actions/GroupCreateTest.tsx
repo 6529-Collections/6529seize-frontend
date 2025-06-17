@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ApiCreateGroup } from "../../../../../generated/models/ApiCreateGroup";
 import CircleLoader from "../../../../distribution-plan-tool/common/CircleLoader";
@@ -116,8 +118,7 @@ export default function GroupCreateTest({
           disabled
             ? "tw-opacity-70 tw-text-iron-500"
             : "tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-300"
-        } tw-border tw-border-solid tw-border-iron-950 tw-ring-1 tw-ring-iron-700 tw-rounded-lg tw-bg-iron-950 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm hover:tw-border-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}
-      >
+        } tw-border tw-border-solid tw-border-iron-950 tw-ring-1 tw-ring-iron-700 tw-rounded-lg tw-bg-iron-950 tw-px-3.5 tw-py-2.5 tw-text-sm tw-font-semibold tw-shadow-sm hover:tw-border-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}>
         <div className="tw-flex tw-items-center tw-gap-x-3">
           {loading && <CircleLoader />}
           <span>Test</span>
@@ -133,8 +134,7 @@ export default function GroupCreateTest({
               aria-hidden="true"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor"
-            >
+              stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"

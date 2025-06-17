@@ -1,3 +1,5 @@
+"use client";
+
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useRouter } from "next/router";

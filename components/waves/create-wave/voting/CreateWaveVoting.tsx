@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
@@ -33,7 +35,7 @@ export default function CreateWaveVoting({
   readonly onTimeWeightedChange: (config: TimeWeightedVotingConfig) => void;
 }) {
   // We now use the props from the parent instead of local state
-  
+
   // Still using local state for negative voting toggle for now
   const [allowNegativeVotes, setAllowNegativeVotes] = useState(true);
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode, useContext, useMemo } from "react";
 import Head from "next/head";
 import Brain from "../../Brain";

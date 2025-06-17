@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import UserPageIdentityAddStatements from "./UserPageIdentityAddStatements";
 import CommonAnimationWrapper from "../../../../utils/animation/CommonAnimationWrapper";
@@ -18,14 +20,12 @@ export default function UserPageIdentityStatementsAddButton({
       <PrimaryButton
         loading={false}
         disabled={false}
-        onClicked={() => setIsAddStatementsOpen(!isAddStatementsOpen)}
-      >
+        onClicked={() => setIsAddStatementsOpen(!isAddStatementsOpen)}>
         <svg
           className="tw-h-5 tw-w-5 -tw-ml-1"
           viewBox="0 0 24 24"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+          xmlns="http://www.w3.org/2000/svg">
           <path
             d="M12 5V19M5 12H19"
             stroke="currentColor"
@@ -43,8 +43,7 @@ export default function UserPageIdentityStatementsAddButton({
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <UserPageIdentityAddStatements
               profile={profile}
               onClose={() => setIsAddStatementsOpen(false)}
