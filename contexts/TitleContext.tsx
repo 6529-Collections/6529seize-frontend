@@ -40,14 +40,14 @@ const getDefaultTitleForRoute = (pathname: string): string => {
 
 export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
-  const [title, setTitleState] = useState<string>(DEFAULT_TITLE);
+  const [title, setTitle] = useState<string>(DEFAULT_TITLE);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const routeRef = useRef(router.pathname);
 
   // Set initial title on mount
   useEffect(() => {
     const defaultTitle = getDefaultTitleForRoute(router.pathname);
-    setTitleState(defaultTitle);
+    setTitle(defaultTitle);
   }, []);
 
   // Update title when route changes
@@ -55,14 +55,14 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (routeRef.current !== router.pathname) {
       routeRef.current = router.pathname;
       const defaultTitle = getDefaultTitleForRoute(router.pathname);
-      setTitleState(defaultTitle);
+      setTitle(defaultTitle);
     }
   }, [router.pathname]);
 
-  const setTitle = (newTitle: string) => {
+  const updateTitle = (newTitle: string) => {
     // Only update if we're still on the same route
     if (routeRef.current === router.pathname) {
-      setTitleState(newTitle);
+      setTitle(newTitle);
     }
   };
 
@@ -71,7 +71,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(
-    () => ({ title: finalTitle, setTitle, notificationCount, setNotificationCount }),
+    () => ({ title: finalTitle, setTitle: updateTitle, notificationCount, setNotificationCount }),
     [finalTitle, notificationCount]
   );
 
