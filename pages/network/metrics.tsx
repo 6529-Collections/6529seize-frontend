@@ -1,6 +1,5 @@
 import styles from "../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../contexts/TitleContext";
 
 export default function CommunityMetrics() {

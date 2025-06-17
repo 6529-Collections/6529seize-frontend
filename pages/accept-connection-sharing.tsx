@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useSetTitle, useTitle } from "../contexts/TitleContext";
+import { useTitle } from "../contexts/TitleContext";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useRouter } from "next/router";
 import Link from "next/link";

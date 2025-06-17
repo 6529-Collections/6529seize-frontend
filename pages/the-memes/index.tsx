@@ -1,6 +1,6 @@
 import styles from "../../styles/Home.module.scss";
 
-import { useContext, useEffect } from "react";
+import React from "react";
 import dynamic from "next/dynamic";
 import { useSetTitle } from "../../contexts/TitleContext";
 

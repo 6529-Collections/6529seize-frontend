@@ -1,7 +1,7 @@
 import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { useContext, useEffect } from "react";
-import { useSetTitle, useTitle } from "../../../contexts/TitleContext";
+import { useEffect } from "react";
+import { useTitle } from "../../../contexts/TitleContext";
 import { formatAddress } from "../../../helpers/Helpers";
 
 const AppWalletComponent = dynamic(

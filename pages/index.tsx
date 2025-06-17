@@ -1,6 +1,6 @@
 import styles from "../styles/Home.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { DBResponse } from "../entities/IDBResponse";
 import { NFTWithMemesExtendedData } from "../entities/INFT";
 import dynamic from "next/dynamic";

@@ -7,8 +7,8 @@ import { NFTWithMemesExtendedData } from "../../entities/INFT";
 import { getCommonHeaders } from "../../helpers/server.helpers";
 import { commonApiFetch } from "../../services/api/common-api";
 import { Time } from "../../helpers/time";
-import { useContext, useEffect } from "react";
-import { useSetTitle, useTitle } from "../../contexts/TitleContext";
+import { useEffect } from "react";
+import { useTitle } from "../../contexts/TitleContext";
 
 const ManifoldMinting = dynamic(
   () => import("../../components/manifoldMinting/ManifoldMinting"),

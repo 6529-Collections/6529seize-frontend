@@ -7,7 +7,6 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiGroupFull } from "../../generated/models/ApiGroupFull";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../contexts/TitleContext";
 import { CommunityMembersSortOption } from "../../enums";
 

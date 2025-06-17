@@ -1,6 +1,5 @@
 import styles from "../styles/Home.module.scss";
 import Image from "next/image";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../contexts/TitleContext";
 
 export default function Seize404() {

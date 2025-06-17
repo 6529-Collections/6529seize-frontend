@@ -1,8 +1,7 @@
 import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../../contexts/TitleContext";
-import { AuthContext, useAuth } from "../../../components/auth/Auth";
+import { useAuth } from "../../../components/auth/Auth";
 import { useRouter } from "next/router";
 
 const LabCollectionComponent = dynamic(

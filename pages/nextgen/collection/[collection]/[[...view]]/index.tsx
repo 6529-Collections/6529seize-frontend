@@ -5,11 +5,11 @@ import { NextGenCollection } from "../../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../../helpers/Helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { getCommonHeaders } from "../../../../../helpers/server.helpers";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
-import { useSetTitle, useTitle } from "../../../../../contexts/TitleContext";
+import { useTitle } from "../../../../../contexts/TitleContext";
 
 const NextGenCollectionComponent = dynamic(
   () =>

@@ -1,5 +1,5 @@
 import styles from "../styles/Home.module.scss";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import MappingToolPlaceholder from "../components/mapping-tools/MappingToolPlaceholder";

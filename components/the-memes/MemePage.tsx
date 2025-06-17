@@ -24,8 +24,8 @@ import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
 } from "./MemePageYourCards";
-import { AuthContext, useAuth } from "../auth/Auth";
-import { useSetTitle, useTitle } from "../../contexts/TitleContext";
+import { AuthContext } from "../auth/Auth";
+import { useTitle } from "../../contexts/TitleContext";
 import { commonApiFetch } from "../../services/api/common-api";
 import MemePageMintCountdown from "./MemePageMintCountdown";
 import Link from "next/link";

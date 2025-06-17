@@ -8,7 +8,7 @@ import {
 } from "../../nextgen_entities";
 import Image from "next/image";
 import { NEXTGEN_CHAIN_ID } from "../../nextgen_contracts";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import DateCountdown from "../../../date-countdown/DateCountdown";
 import { fetchUrl } from "../../../../services/6529api";

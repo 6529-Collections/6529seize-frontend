@@ -1,6 +1,6 @@
 import styles from "../styles/Home.module.scss";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSetTitle } from "../contexts/TitleContext";
 

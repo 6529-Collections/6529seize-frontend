@@ -2,7 +2,6 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { GRADIENT_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../contexts/TitleContext";
 
 const GradientPageComponent = dynamic(

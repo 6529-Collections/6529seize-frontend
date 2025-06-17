@@ -1,9 +1,6 @@
 import { Poppins } from "next/font/google";
-import { useContext, useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import "react-toastify/dist/ReactToastify.css";
 import { useSetTitle } from "../../../contexts/TitleContext";
-import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],

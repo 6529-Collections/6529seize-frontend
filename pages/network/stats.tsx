@@ -1,7 +1,6 @@
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../contexts/TitleContext";
 
 const CommunityStatsComponent = dynamic(

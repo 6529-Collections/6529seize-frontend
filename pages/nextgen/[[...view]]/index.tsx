@@ -10,7 +10,7 @@ import NextGenNavigationHeader, {
   NextGenView,
 } from "../../../components/nextGen/collections/NextGenNavigationHeader";
 import Image from "next/image";
-import { useSetTitle, useTitle } from "../../../contexts/TitleContext";
+import { useTitle } from "../../../contexts/TitleContext";
 
 const NextGenComponent = dynamic(
   () => import("../../../components/nextGen/collections/NextGen"),

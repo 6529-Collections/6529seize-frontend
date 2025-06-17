@@ -1,7 +1,6 @@
 import styles from "../../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import { useContext } from "react";
 import { useTitle } from "../../../contexts/TitleContext";
 
 const NextGenAdminComponent = dynamic(

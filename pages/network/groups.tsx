@@ -1,5 +1,4 @@
 import Groups from "../../components/groups/page/Groups";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../contexts/TitleContext";
 
 export default function GroupsPage() {

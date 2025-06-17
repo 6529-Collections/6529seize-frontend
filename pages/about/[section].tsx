@@ -2,7 +2,7 @@ import styles from "../../styles/Home.module.scss";
 import menuStyles from "../../components/about/About.module.scss";
 import { Col, Container, Row } from "react-bootstrap";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import AboutMemes from "../../components/about/AboutMemes";
@@ -24,7 +24,7 @@ import AboutSubscriptions from "../../components/about/AboutSubscriptions";
 import AboutNakamotoThreshold from "../../components/about/AboutNakamotoThreshold";
 import AboutCopyright from "../../components/about/AboutCopyright";
 import AboutPrimaryAddress from "../../components/about/AboutPrimaryAddress";
-import { useSetTitle, useTitle } from "../../contexts/TitleContext";
+import { useTitle } from "../../contexts/TitleContext";
 import useCapacitor from "../../hooks/useCapacitor";
 import { useCookieConsent } from "../../components/cookies/CookieConsentContext";
 

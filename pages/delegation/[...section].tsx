@@ -1,5 +1,5 @@
 import styles from "../../styles/Home.module.scss";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { DelegationCenterSection } from "../../components/delegation/DelegationCenterMenu";
@@ -9,7 +9,7 @@ import {
   MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
 } from "../../constants";
-import { useSetTitle, useTitle } from "../../contexts/TitleContext";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 const DelegationCenterMenu = dynamic(
   () => import("../../components/delegation/DelegationCenterMenu"),

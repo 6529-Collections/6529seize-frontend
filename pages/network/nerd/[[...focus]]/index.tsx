@@ -2,10 +2,9 @@ import styles from "../../../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import { LeaderboardFocus } from "../../../../components/leaderboard/Leaderboard";
-import { useContext, useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
-import { useSetTitle, useTitle } from "../../../../contexts/TitleContext";
-import { useAuth } from "../../../../components/auth/Auth";
+import { useTitle } from "../../../../contexts/TitleContext";
 
 const Leaderboard = dynamic(
   () => import("../../../../components/leaderboard/Leaderboard"),

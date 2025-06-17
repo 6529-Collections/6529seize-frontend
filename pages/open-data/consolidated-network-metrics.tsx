@@ -1,7 +1,6 @@
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { VIEW } from "../../components/community-downloads/CommunityDownloadsTDH";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../contexts/TitleContext";
 
 const CommunityDownloadsTDH = dynamic(

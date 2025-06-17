@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSetTitle } from "../../../contexts/TitleContext";
 import MyStream from "./MyStream";
 import { useRouter } from "next/router";

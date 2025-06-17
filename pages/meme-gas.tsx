@@ -1,7 +1,6 @@
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useSetTitle } from "../contexts/TitleContext";
-import { useContext, useEffect } from "react";
 
 const Gas = dynamic(() => import("../components/gas-royalties/Gas"), {
   ssr: false,

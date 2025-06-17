@@ -1,7 +1,6 @@
 import styles from "../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../contexts/TitleContext";
 
 const LatestActivity = dynamic(

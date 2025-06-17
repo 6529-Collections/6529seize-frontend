@@ -1,4 +1,3 @@
-import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../contexts/TitleContext";
 import ProgressChart from "../../components/levels/ProgressChart";
 import TableOfLevels from "../../components/levels/TableOfLevels";

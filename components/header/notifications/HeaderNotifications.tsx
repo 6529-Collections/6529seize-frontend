@@ -21,7 +21,7 @@ export default function HeaderNotifications() {
   const { removeAllDeliveredNotifications } = useNotificationsContext();
 
   useEffect(() => {
-    setNotificationCount(notifications?.unread_count || 0);
+    setNotificationCount(notifications?.unread_count ?? 0);
     if (!haveUnreadNotifications) {
       removeAllDeliveredNotifications();
     }

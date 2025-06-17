@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/router';
 
 type TitleContextType = {
@@ -63,8 +63,14 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Compute the final title with notification count
   const finalTitle = notificationCount > 0 ? `(${notificationCount}) ${title}` : title;
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({ title: finalTitle, setTitle, notificationCount, setNotificationCount }),
+    [finalTitle, notificationCount]
+  );
+
   return (
-    <TitleContext.Provider value={{ title: finalTitle, setTitle, notificationCount, setNotificationCount }}>
+    <TitleContext.Provider value={contextValue}>
       {children}
     </TitleContext.Provider>
   );
