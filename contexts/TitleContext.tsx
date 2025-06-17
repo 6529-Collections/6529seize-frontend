@@ -40,9 +40,15 @@ const getDefaultTitleForRoute = (pathname: string): string => {
 
 export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
-  const [title, setTitleState] = useState<string>(() => getDefaultTitleForRoute(router.pathname));
+  const [title, setTitleState] = useState<string>(DEFAULT_TITLE);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const routeRef = useRef(router.pathname);
+
+  // Set initial title on mount
+  useEffect(() => {
+    const defaultTitle = getDefaultTitleForRoute(router.pathname);
+    setTitleState(defaultTitle);
+  }, []);
 
   // Update title when route changes
   useEffect(() => {
