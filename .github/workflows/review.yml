@@ -19,6 +19,7 @@ jobs:
       uses: 6529-Collections/ai-code-review-action@main
       with:
         greeting: "Hello from another repo!"
+        anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
       id: greet
 
     - name: Show the output
