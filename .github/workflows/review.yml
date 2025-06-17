@@ -18,4 +18,4 @@ jobs:
       id: greet
 
     - name: Show the output
-      run: echo "The action said: ${{ steps.greet.outputs.message }}"
+      run: 'echo "The action said: ${{ steps.greet.outputs.message }}"'
