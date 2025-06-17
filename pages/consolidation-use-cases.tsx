@@ -1,16 +1,11 @@
 import styles from "../styles/Home.module.scss";
 import { Container, Row, Col, Table } from "react-bootstrap";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AuthContext } from "../components/auth/Auth";
+import { useSetTitle } from "../contexts/TitleContext";
 
 export default function ConsolidationUseCases() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Consolidation Use Cases | Tools",
-    });
-  }, []);
+  useSetTitle("Consolidation Use Cases | Tools");
 
   const [html, setHtml] = useState("");
   const [error, setError] = useState(false);

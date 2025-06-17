@@ -1,15 +1,8 @@
 import Waves from "../../components/waves/Waves";
-import { AuthContext } from "../../components/auth/Auth";
-import { useContext, useEffect } from "react";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 export default function WavesPage() {
-  const { setTitle } = useContext(AuthContext);
-
-  useEffect(() => {
-    setTitle({
-      title: "Waves | Brain",
-    });
-  }, []);
+  useSetTitle("Waves | Brain");
 
   return (
     <div className="tailwind-scope lg:tw-min-h-screen tw-bg-iron-950 tw-overflow-x-hidden">

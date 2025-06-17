@@ -53,6 +53,7 @@ import MainLayout from "../components/layout/MainLayout";
 import { HeaderProvider } from "../contexts/HeaderContext";
 import NewVersionToast from "../components/utils/NewVersionToast";
 import { PageSSRMetadata } from "../helpers/Types";
+import { TitleProvider } from "../contexts/TitleContext";
 
 export function getChains() {
   const chains: Chain[] = [mainnet];
@@ -268,18 +269,20 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
                           <CookieConsentProvider>
                             <EULAConsentProvider>
                               <AppWebSocketProvider>
-                                <HeaderProvider>
-                                  <MainLayout metadata={metadata}>
-                                    {getLayout(
-                                      <Component
-                                        {...props}
-                                        key={router.asPath.split("?")[0]}
-                                      />
-                                    )}
-                                  </MainLayout>
-                                </HeaderProvider>
-                                {appWalletPasswordModal.modal}
-                                <NewVersionToast />
+                                <TitleProvider>
+                                  <HeaderProvider>
+                                    <MainLayout metadata={metadata}>
+                                      {getLayout(
+                                        <Component
+                                          {...props}
+                                          key={router.asPath.split("?")[0]}
+                                        />
+                                      )}
+                                    </MainLayout>
+                                  </HeaderProvider>
+                                  {appWalletPasswordModal.modal}
+                                  <NewVersionToast />
+                                </TitleProvider>
                               </AppWebSocketProvider>
                             </EULAConsentProvider>
                           </CookieConsentProvider>

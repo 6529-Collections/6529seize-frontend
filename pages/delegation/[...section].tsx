@@ -1,5 +1,5 @@
 import styles from "../../styles/Home.module.scss";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { DelegationCenterSection } from "../../components/delegation/DelegationCenterMenu";
@@ -9,7 +9,7 @@ import {
   MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
 } from "../../constants";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 const DelegationCenterMenu = dynamic(
   () => import("../../components/delegation/DelegationCenterMenu"),
@@ -168,7 +168,7 @@ export const ALL_USE_CASES = [
 ];
 
 export default function DelegationsDocumentation(props: any) {
-  const { setTitle } = useContext(AuthContext);
+  useSetTitle("Delegation | 6529.io");
   const pageProps = props.pageProps;
   const router = useRouter();
   const section = pageProps.section;
@@ -181,7 +181,7 @@ export default function DelegationsDocumentation(props: any) {
   const [useCaseQuery, setUseCaseQuery] = useState<number>(
     pageProps.useCaseQuery
   );
-
+  
   function getQueryParams(s: DelegationCenterSection) {
     let queryParams: { [key: string]: string | number } = {};
     if (
@@ -242,12 +242,6 @@ export default function DelegationsDocumentation(props: any) {
   };
 
   useEffect(() => {
-    setTitle({
-      title: "Delegation | 6529.io",
-    });
-  }, []);
-
-  useEffect(() => {
     updateQueryParams(section);
   }, [addressQuery, collectionQuery, useCaseQuery]);
 
@@ -255,7 +249,7 @@ export default function DelegationsDocumentation(props: any) {
     <main className={styles.main}>
       <DelegationCenterMenu
         section={section}
-        path={pageProps.path}
+        path={props.pageProps.path}
         setActiveSection={(s) => updatePath(s)}
         address_query={addressQuery}
         setAddressQuery={setAddressQuery}

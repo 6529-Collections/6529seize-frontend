@@ -1,16 +1,9 @@
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 import ProgressChart from "../../components/levels/ProgressChart";
 import TableOfLevels from "../../components/levels/TableOfLevels";
 
 export default function Levels() {
-  const { setTitle } = useContext(AuthContext);
-
-  useEffect(() => {
-    setTitle({
-      title: "Levels | Network",
-    });
-  }, []);
+  useSetTitle("Levels | Network");
 
   return (
     <div className="tailwind-scope">

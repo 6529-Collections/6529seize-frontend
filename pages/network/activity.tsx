@@ -9,11 +9,11 @@ import ProfileActivityLogs, {
   convertActivityLogParams,
 } from "../../components/profile-activity/ProfileActivityLogs";
 import { FilterTargetType } from "../../components/utils/CommonFilterTargetSelect";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import SidebarLayout from "../../components/utils/sidebar/SidebarLayout";
 import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
   page: 1,
@@ -36,12 +36,7 @@ export default function CommunityActivityPage({
 }: {
   readonly pageProps: CommunityActivityPageProps;
 }) {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Activity | Network",
-    });
-  }, []);
+  useSetTitle("Activity | Network");
 
   const { initCommunityActivityPage } = useContext(ReactQueryWrapperContext);
   initCommunityActivityPage({

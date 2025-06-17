@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSetTitle } from "../../../contexts/TitleContext";
 import MyStream from "./MyStream";
 import { useRouter } from "next/router";
 import MyStreamWave from "./MyStreamWave";
 import BrainContent from "../content/BrainContent";
-import { AuthContext, TitleType } from "../../auth/Auth";
 import {
   useMyStreamQuery,
   usePollingQuery,
@@ -16,7 +16,6 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 
 const MyStreamWrapper: React.FC = () => {
-  const { setTitle } = useContext(AuthContext);
   const router = useRouter();
   const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
 
@@ -84,26 +83,8 @@ const MyStreamWrapper: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    setTitle({
-      title: haveNewItems ? "New Stream Items Available | Brain" : null,
-      type: TitleType.MY_STREAM,
-    });
-
-    return () => {
-      setTitle({
-        title: null,
-        type: TitleType.MY_STREAM,
-      });
-    };
-  }, [haveNewItems]);
-
-  useEffect(() => {
-    setTitle({
-      title: "My Stream | Brain",
-      type: TitleType.MY_STREAM,
-    });
-  }, []);
+  // Use conditional title based on haveNewItems
+  useSetTitle(haveNewItems ? "New Stream Items Available | Brain" : "My Stream | Brain");
 
   useEffect(() => {
     const checkAndRefetch = () => {
