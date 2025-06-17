@@ -9,6 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import useDeviceInfo from "../../hooks/useDeviceInfo";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -386,6 +387,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 }) => {
   const { send } = useWebSocket();
   const breakpoint = useBreakpoint();
+  const { isApp } = useDeviceInfo();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
@@ -788,51 +790,35 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(createGifDrop(gif));
   };
 
-  // TODO: This focus handling is overly complex but necessary to prevent mobile issues:
-  // - Content blanking when clicking reply
-  // - Keyboard closing immediately after opening
-  // - UI not painting properly before focus
-  // The forced reflow and multiple delays suggest a deeper rendering issue that should be investigated
   useEffect(() => {
     if (!activeDrop) {
       return;
     }
-    
-    // For mobile, we need to ensure the DOM is fully painted before focusing
-    const focusInput = () => {
-      if (!createDropInputRef.current) return;
-      
-      // Force a reflow to ensure all DOM updates are painted
-      // This helps with the issue where content appears only after scrolling
-      const container = document.querySelector('.tw-flex-1');
-      if (container instanceof HTMLElement) {
-        void container.offsetHeight; // Force reflow
-      }
-      
-      // Use requestAnimationFrame to wait for next paint
-      requestAnimationFrame(() => {
-        // Then focus after a small delay for mobile stability
-        setTimeout(() => {
-          createDropInputRef.current?.focus();
-        }, 300);
-      });
-    };
-    
-    // Check if mobile
-    const isMobile = window.innerWidth < 1024;
-    
-    if (isMobile) {
-      // On mobile, wait longer and force reflow
+
+    if (isApp) {
+      // Mobile app: Complex focus handling to prevent keyboard issues
+      const focusInput = () => {
+        if (!createDropInputRef.current) return;
+
+        // Use requestAnimationFrame to wait for next paint
+        requestAnimationFrame(() => {
+          // Then focus after a delay for mobile stability
+          setTimeout(() => {
+            createDropInputRef.current?.focus();
+          }, 300);
+        });
+      };
+
       const timer = setTimeout(focusInput, 200);
       return () => clearTimeout(timer);
     } else {
-      // Desktop: keep simple behavior
+      // Desktop/web: Keep original simple behavior
       const timer = setTimeout(() => {
         createDropInputRef.current?.focus();
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [activeDrop]);
+  }, [activeDrop, isApp]);
 
   const handleFileChange = (newFiles: File[]) => {
     let updatedFiles = [...files, ...newFiles];
@@ -1019,7 +1005,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}>
+            transition={{ duration: 0.3 }}
+          >
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}

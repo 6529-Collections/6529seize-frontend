@@ -1,6 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
 import { ApiDrop, ApiWave } from "../../../generated/models/ObjectSerializer";
-import useCapacitor from "../../../hooks/useCapacitor";
 import useDeviceInfo from "../../../hooks/useDeviceInfo";
 import WaveDropsAll from "../drops/WaveDropsAll";
 import {
@@ -24,16 +23,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   drop,
 }) => {
   const contentWrapperRef = useRef<HTMLDivElement | null>(null);
-  const capacitor = useCapacitor();
-  const { spaces } = useLayout();
   const { isApp } = useDeviceInfo();
+  const { spaces } = useLayout();
 
   const containerStyle = useMemo(() => {
     if (!spaces.measurementsComplete) {
       return {};
     }
-
-    // Use similar calculation to SingleWaveDropInfoContainer
     return {
       height: `calc(100vh - ${spaces.headerSpace}px - var(--tab-height, 47px))`,
     };
@@ -46,11 +42,13 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
   // On mobile app, start with null to match native app behavior
   // On desktop/web, pre-set reply for convenience
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(
-    isApp ? null : {
-      action: ActiveDropAction.REPLY,
-      drop: drop,
-      partId: 1,
-    }
+    isApp
+      ? null
+      : {
+          action: ActiveDropAction.REPLY,
+          drop: drop,
+          partId: 1,
+        }
   );
 
   const handleDropAction = ({
@@ -86,45 +84,51 @@ export const SingleWaveDropChat: React.FC<SingleWaveDropChatProps> = ({
         className="tw-h-full tw-overflow-hidden tw-bg-iron-950 tw-relative"
       >
         <div className="tw-relative tw-h-full">
-          <div className="tw-h-full tw-w-full tw-flex tw-items-stretch lg:tw-divide-x-4 lg:tw-divide-iron-600 lg:tw-divide-solid lg:tw-divide-y-0">
+          <div className="tw-h-full tw-w-full tw-flex tw-items-stretch">
             <div className={containerClassName} style={containerStyle}>
-              <WaveDropsAll
-                waveId={wave.id}
-                onReply={({
-                  drop,
-                  partId,
-                }: {
-                  drop: ApiDrop;
-                  partId: number;
-                }) =>
-                  handleDropAction({
+              <div className={`tw-flex-1 tw-min-h-0 ${isApp ? "tw-mb-20" : ""}`}>
+                <WaveDropsAll
+                  waveId={wave.id}
+                  onReply={({
                     drop,
                     partId,
-                    action: ActiveDropAction.REPLY,
-                  })
-                }
-                onQuote={({
-                  drop,
-                  partId,
-                }: {
-                  drop: ApiDrop;
-                  partId: number;
-                }) =>
-                  handleDropAction({
+                  }: {
+                    drop: ApiDrop;
+                    partId: number;
+                  }) =>
+                    handleDropAction({
+                      drop,
+                      partId,
+                      action: ActiveDropAction.REPLY,
+                    })
+                  }
+                  onQuote={({
                     drop,
                     partId,
-                    action: ActiveDropAction.QUOTE,
-                  })
-                }
-                activeDrop={activeDrop}
-                initialDrop={null}
-                dropId={drop.id}
-              />
+                  }: {
+                    drop: ApiDrop;
+                    partId: number;
+                  }) =>
+                    handleDropAction({
+                      drop,
+                      partId,
+                      action: ActiveDropAction.QUOTE,
+                    })
+                  }
+                  activeDrop={activeDrop}
+                  initialDrop={null}
+                  dropId={drop.id}
+                />
+              </div>
               <div
                 style={{
                   paddingBottom: "calc(env(safe-area-inset-bottom))",
                 }}
-                className="tw-mt-auto"
+                className={`${
+                  isApp
+                    ? "tw-fixed tw-bottom-0 tw-left-0 tw-right-0 tw-bg-iron-950 tw-z-10"
+                    : "tw-mt-auto"
+                }`}
               >
                 <CreateDropWaveWrapper
                   context={CreateDropWaveWrapperContext.SINGLE_DROP}

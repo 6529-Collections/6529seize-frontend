@@ -71,6 +71,9 @@ const useCapacitor = () => {
 
     const addKeyboardListeners = async () => {
       try {
+        // Show the keyboard accessory bar (Done button)
+        await Keyboard.setAccessoryBarVisible({ isVisible: true });
+        
         keyboardShowListener = await Keyboard.addListener(
           "keyboardWillShow",
           () => {
