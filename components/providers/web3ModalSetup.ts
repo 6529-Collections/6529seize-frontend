@@ -7,6 +7,8 @@ let initialized = false;
 export function initWeb3Modal(wagmiConfig: Config) {
   if (initialized) return;
 
+  if (typeof window === "undefined") return;
+
   createWeb3Modal({
     wagmiConfig,
     projectId: CW_PROJECT_ID,
