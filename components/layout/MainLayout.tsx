@@ -1,11 +1,10 @@
 import React, { ReactNode } from "react";
 import { useRouter } from "next/router";
-import useDeviceInfo from "../../hooks/useDeviceInfo";
 import ClientOnly from "../client-only/ClientOnly";
 import Head from "next/head";
 import { PageSSRMetadata } from "../../helpers/Types";
-import { useAuth } from "../auth/Auth";
 import LayoutWrapper from "../providers/LayoutWrapper";
+import { useTitle } from "../../contexts/TitleContext";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -15,7 +14,7 @@ interface MainLayoutProps {
 const MainLayout = ({ children, metadata }: MainLayoutProps) => {
   const router = useRouter();
 
-  const { title: pageTitle } = useAuth();
+  const { title: pageTitle } = useTitle();
   const { title: metadataTitle, description, ogImage, twitterCard } = metadata;
 
   const ogUrl = `${process.env.BASE_ENDPOINT}${router.asPath}`;

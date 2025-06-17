@@ -1,19 +1,13 @@
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { AuthContext } from "../components/auth/Auth";
-import { useContext, useEffect } from "react";
+import { useSetTitle } from "../contexts/TitleContext";
 
 const Gas = dynamic(() => import("../components/gas-royalties/Gas"), {
   ssr: false,
 });
 
 export default function GasPage() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Meme Gas | Tools",
-    });
-  }, []);
+  useSetTitle("Meme Gas | Tools");
 
   return (
     <main className={styles.main}>

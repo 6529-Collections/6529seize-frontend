@@ -1,8 +1,7 @@
 import styles from "../../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import { useContext } from "react";
-import { AuthContext } from "../../../components/auth/Auth";
+import { useTitle } from "../../../contexts/TitleContext";
 
 const NextGenAdminComponent = dynamic(
   () => import("../../../components/nextGen/admin/NextGenAdmin"),
@@ -12,10 +11,8 @@ const NextGenAdminComponent = dynamic(
 );
 
 export default function NextGenAdmin() {
-  const { setTitle } = useContext(AuthContext);
-  setTitle({
-    title: "NextGen Admin",
-  });
+  const { setTitle } = useTitle();
+  setTitle("NextGen Admin");
 
   return (
     <main className={styles.main}>

@@ -2,8 +2,7 @@ import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { GRADIENT_CONTRACT } from "../../constants";
 import { fetchUrl } from "../../services/6529api";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 const GradientPageComponent = dynamic(
   () => import("../../components/6529Gradient/GradientPage"),
@@ -13,15 +12,8 @@ const GradientPageComponent = dynamic(
 );
 
 export default function GradientPageIndex(props: { readonly name: string }) {
-  const { setTitle } = useContext(AuthContext);
-
   const pagenameFull = `${props.name} | 6529.io`;
-
-  useEffect(() => {
-    setTitle({
-      title: pagenameFull,
-    });
-  }, [pagenameFull]);
+  useSetTitle(pagenameFull);
 
   return (
     <main className={styles.main}>

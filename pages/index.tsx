@@ -1,6 +1,6 @@
 import styles from "../styles/Home.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { DBResponse } from "../entities/IDBResponse";
 import { NFTWithMemesExtendedData } from "../entities/INFT";
 import dynamic from "next/dynamic";
@@ -22,7 +22,8 @@ import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
 import DotLoader from "../components/dotLoader/DotLoader";
 import ArtistProfileHandle from "../components/the-memes/ArtistProfileHandle";
 import Link from "next/link";
-import { AuthContext } from "../components/auth/Auth";
+import { useSetTitle } from "../contexts/TitleContext";
+import { useAuth } from "../components/auth/Auth";
 import { NftOwner } from "../entities/IOwner";
 import {
   getFileTypeFromMetadata,
@@ -70,12 +71,8 @@ export default function Home(props: IndexPageProps) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
 
-  const { connectedProfile, setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "6529",
-    });
-  }, []);
+  const { connectedProfile } = useAuth();
+  useSetTitle("6529.io");
 
   const [nftBalance, setNftBalance] = useState<number>(0);
 

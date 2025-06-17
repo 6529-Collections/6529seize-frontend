@@ -7,8 +7,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiGroupFull } from "../../generated/models/ApiGroupFull";
 import { QueryKey } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import { commonApiFetch } from "../../services/api/common-api";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 import { CommunityMembersSortOption } from "../../enums";
 
 export interface CommunityMembersQuery
@@ -17,12 +16,7 @@ export interface CommunityMembersQuery
 }
 
 export default function CommunityPage() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Network",
-    });
-  }, []);
+  useSetTitle("Network");
 
   const activeGroupId = useSelector(selectActiveGroupId);
   useQuery<ApiGroupFull>({

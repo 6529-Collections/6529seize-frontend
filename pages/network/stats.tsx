@@ -1,8 +1,7 @@
 import styles from "../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 const CommunityStatsComponent = dynamic(
   () => import("../../components/communityStats/CommunityStats"),
@@ -10,12 +9,7 @@ const CommunityStatsComponent = dynamic(
 );
 
 export default function CommunityStats() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Stats | Network",
-    });
-  }, []);
+  useSetTitle("Stats | Network");
 
   return (
     <main className={`${styles.main} ${styles.tdhMain}`}>

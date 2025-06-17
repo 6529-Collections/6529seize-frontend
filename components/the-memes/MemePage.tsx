@@ -26,7 +26,8 @@ import {
   MemePageYourCardsRightMenu,
   MemePageYourCardsSubMenu,
 } from "./MemePageYourCards";
-import { AuthContext, useAuth } from "../auth/Auth";
+import { AuthContext } from "../auth/Auth";
+import { useTitle } from "../../contexts/TitleContext";
 import { commonApiFetch } from "../../services/api/common-api";
 import MemePageMintCountdown from "./MemePageMintCountdown";
 import Link from "next/link";
@@ -37,7 +38,7 @@ const ACTIVITY_PAGE_SIZE = 25;
 
 export default function MemePage() {
   const router = useRouter();
-  const { setTitle } = useAuth();
+  const { setTitle } = useTitle();
   const { connectedProfile } = useContext(AuthContext);
   const [connectedWallets, setConnectedWallets] = useState<string[]>([]);
 
@@ -61,9 +62,7 @@ export default function MemePage() {
   const [userLoaded, setUserLoaded] = useState(false);
 
   useEffect(() => {
-    setTitle({
-      title: getMemeTabTitle(`The Memes`, nftId, nft, activeTab),
-    });
+    setTitle(getMemeTabTitle(`The Memes`, nftId, nft, activeTab));
   }, [nft, nftId, activeTab]);
 
   useEffect(() => {

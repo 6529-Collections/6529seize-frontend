@@ -1,7 +1,6 @@
 import styles from "../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../components/auth/Auth";
+import { useSetTitle } from "../contexts/TitleContext";
 
 const Royalties = dynamic(
   () => import("../components/gas-royalties/Royalties"),
@@ -11,12 +10,7 @@ const Royalties = dynamic(
 );
 
 export default function MemeAccountingPage() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Meme Accounting | Tools",
-    });
-  }, []);
+  useSetTitle("Meme Accounting | Tools");
 
   return (
     <main className={styles.main}>

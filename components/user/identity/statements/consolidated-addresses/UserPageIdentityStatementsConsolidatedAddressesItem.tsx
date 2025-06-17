@@ -4,7 +4,7 @@ import Tippy from "@tippyjs/react";
 import EtherscanIcon from "../../../utils/icons/EtherscanIcon";
 import OpenseaIcon from "../../../utils/icons/OpenseaIcon";
 import CopyIcon from "../../../../utils/icons/CopyIcon";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCopyToClipboard } from "react-use";
 import { useRouter } from "next/router";
 import UserPageIdentityStatementsConsolidatedAddressesItemPrimary from "./UserPageIdentityStatementsConsolidatedAddressesItemPrimary";
@@ -16,7 +16,7 @@ import {
 import { PRIMARY_ADDRESS_USE_CASE } from "../../../../../pages/delegation/[...section]";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
-import { AuthContext } from "../../../../auth/Auth";
+import { useAuth } from "../../../../../components/auth/Auth";
 import { getTransactionLink } from "../../../../../helpers/Helpers";
 import { ApiWallet } from "../../../../../generated/models/ApiWallet";
 
@@ -30,7 +30,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   readonly canEdit: boolean;
 }) {
   const router = useRouter();
-  const { setToast } = useContext(AuthContext);
+  const { setToast } = useAuth();
 
   const goToOpensea = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();

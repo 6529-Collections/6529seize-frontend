@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../components/auth/Auth";
+import { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -7,9 +6,10 @@ import { areEqualAddresses } from "../helpers/Helpers";
 import { setAuthJwt } from "../services/auth/auth.utils";
 import { commonApiPost } from "../services/api/common-api";
 import { Spinner } from "../components/dotLoader/DotLoader";
-import { useSeizeConnectContext } from "../components/auth/SeizeConnectContext";
 import { ApiRedeemRefreshTokenRequest } from "../generated/models/ApiRedeemRefreshTokenRequest";
 import { ApiRedeemRefreshTokenResponse } from "../generated/models/ApiRedeemRefreshTokenResponse";
+import { useTitle } from "react-use";
+import { useSetTitle } from "@/contexts/TitleContext";
 
 interface AcceptConnectionSharingProps {
   token: string;
@@ -20,24 +20,13 @@ interface AcceptConnectionSharingProps {
 export default function AcceptConnectionSharing(
   props: Readonly<AcceptConnectionSharingProps>
 ) {
-  const { setTitle, setToast } = useContext(AuthContext);
-  const {
-    address: connectedAddress,
-    seizeDisconnectAndLogout,
-    seizeAcceptConnection,
-  } = useSeizeConnectContext();
-
   const router = useRouter();
 
   const { token, address, role } = props;
 
   const [acceptingConnection, setAcceptingConnection] = useState(false);
 
-  useEffect(() => {
-    setTitle({
-      title: "Accept Connection Sharing",
-    });
-  }, []);
+  useSetTitle("Accept Connection Sharing");
 
   const acceptConnection = async () => {
     try {

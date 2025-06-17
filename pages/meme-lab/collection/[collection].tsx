@@ -1,7 +1,8 @@
 import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { useContext, useEffect } from "react";
-import { AuthContext, useAuth } from "../../../components/auth/Auth";
+import { useSetTitle } from "../../../contexts/TitleContext";
+import { useAuth } from "../../../components/auth/Auth";
+import { useRouter } from "next/router";
 
 const LabCollectionComponent = dynamic(
   () => import("../../../components/memelab/MemeLabCollection"),
@@ -14,17 +15,14 @@ export default function MemeLabIndex(props: {
   readonly collection: string;
   readonly name: string;
 }) {
-  const { setTitle } = useContext(AuthContext);
-  const name = props.name;
   const { connectedProfile } = useAuth();
+  const router = useRouter();
 
-  const pagenameFull = `${name} | Meme Lab`;
-
-  useEffect(() => {
-    setTitle({
-      title: pagenameFull,
-    });
-  }, [pagenameFull, setTitle]);
+  // Get collection from router for client-side navigation
+  const collection = (router.query.collection as string) || props.collection;
+  const collectionName = collection ? collection.replaceAll("-", " ") : "";
+  const pagenameFull = `Collection ${collectionName} | Meme Lab`;
+  useSetTitle(pagenameFull);
 
   return (
     <main className={styles.main}>

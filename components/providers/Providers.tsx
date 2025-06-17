@@ -25,6 +25,7 @@ import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import StoreSetup from "./StoreSetup";
+import { TitleProvider } from "@/contexts/TitleContext";
 
 export default function AllProviders({ children }: { children: ReactNode }) {
   return (
@@ -44,19 +45,21 @@ export default function AllProviders({ children }: { children: ReactNode }) {
                           <CookieConsentProvider>
                             <EULAConsentProvider>
                               <AppWebSocketProvider>
-                                <HeaderProvider>
-                                  <ScrollPositionProvider>
-                                    <ViewProvider>
-                                      <NavigationHistoryProvider>
-                                        <LayoutProvider>
-                                          <MyStreamProvider>
-                                            {children}
-                                          </MyStreamProvider>
-                                        </LayoutProvider>
-                                      </NavigationHistoryProvider>
-                                    </ViewProvider>
-                                  </ScrollPositionProvider>
-                                </HeaderProvider>
+                                <TitleProvider>
+                                  <HeaderProvider>
+                                    <ScrollPositionProvider>
+                                      <ViewProvider>
+                                        <NavigationHistoryProvider>
+                                          <LayoutProvider>
+                                            <MyStreamProvider>
+                                              {children}
+                                            </MyStreamProvider>
+                                          </LayoutProvider>
+                                        </NavigationHistoryProvider>
+                                      </ViewProvider>
+                                    </ScrollPositionProvider>
+                                  </HeaderProvider>
+                                </TitleProvider>
                                 <NewVersionToast />
                               </AppWebSocketProvider>
                             </EULAConsentProvider>

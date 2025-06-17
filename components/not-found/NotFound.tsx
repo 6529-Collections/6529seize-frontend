@@ -2,15 +2,13 @@
 
 import styles from "./NotFound.module.scss";
 import Image from "next/image";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "@/components/auth/Auth";
+import { useEffect } from "react";
+import { useTitle } from "@/contexts/TitleContext";
 
 export default function NotFound() {
-  const { setTitle } = useContext(AuthContext);
+  const { setTitle } = useTitle();
   useEffect(() => {
-    setTitle({
-      title: "404 - NOT FOUND",
-    });
+    setTitle("404 - NOT FOUND");
   }, []);
 
   return (

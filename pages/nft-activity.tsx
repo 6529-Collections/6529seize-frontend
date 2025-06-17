@@ -1,8 +1,7 @@
 import styles from "../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../components/auth/Auth";
+import { useSetTitle } from "../contexts/TitleContext";
 
 const LatestActivity = dynamic(
   () => import("../components/latest-activity/LatestActivity"),
@@ -10,12 +9,7 @@ const LatestActivity = dynamic(
 );
 
 export default function TheMemesPage() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "NFT Activity | Network",
-    });
-  }, []);
+  useSetTitle("NFT Activity | Network");
 
   return (
     <main className={styles.main}>

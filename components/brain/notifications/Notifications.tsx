@@ -1,7 +1,8 @@
 "use client";
 
 import { useContext, useEffect, useRef, useState } from "react";
-import { AuthContext, useAuth } from "../../auth/Auth";
+import { useSetTitle } from "../../../contexts/TitleContext";
+import { AuthContext } from "../../auth/Auth";
 import { ReactQueryWrapperContext } from "../../react-query-wrapper/ReactQueryWrapper";
 import { commonApiPostWithoutBodyAndResponse } from "../../../services/api/common-api";
 import NotificationsWrapper from "./NotificationsWrapper";
@@ -25,7 +26,6 @@ export default function Notifications() {
   const [activeDrop, setActiveDrop] = useState<ActiveDropState | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { notificationsViewStyle } = useLayout();
-  const { setTitle } = useAuth();
 
   const [activeFilter, setActiveFilter] = useState<NotificationFilter | null>(
     null
@@ -36,9 +36,7 @@ export default function Notifications() {
   const router = useRouter();
   const { reload } = router.query;
 
-  useEffect(() => {
-    setTitle({ title: "Notifications | My Stream | Brain" });
-  }, []);
+  useSetTitle("Notifications | My Stream | Brain");
 
   useEffect(() => {
     if (reload === "true") {

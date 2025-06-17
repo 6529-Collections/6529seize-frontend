@@ -1,7 +1,7 @@
 import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../../../components/auth/Auth";
+import { useEffect } from "react";
+import { useTitle } from "../../../contexts/TitleContext";
 import { formatAddress } from "../../../helpers/Helpers";
 
 const AppWalletComponent = dynamic(
@@ -12,14 +12,13 @@ const AppWalletComponent = dynamic(
 );
 
 export default function AppWalletPage(props: { readonly address: string }) {
-  const { setTitle } = useContext(AuthContext);
+  const { setTitle } = useTitle();
+
   const address = props.address;
 
   useEffect(() => {
-    setTitle({
-      title: `${formatAddress(address)} | App Wallets | 6529.io`,
-    });
-  }, []);
+    setTitle(`${formatAddress(address)} | App Wallets | 6529.io`);
+  }, [setTitle]);
 
   return (
     <main className={styles.main}>

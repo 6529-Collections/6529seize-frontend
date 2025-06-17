@@ -1,5 +1,5 @@
 import styles from "../../styles/Home.module.scss";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { DelegationCenterSection } from "../../components/delegation/DelegationCenterMenu";
@@ -9,7 +9,7 @@ import {
   MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
 } from "../../constants";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 const DelegationCenterMenu = dynamic(
   () => import("../../components/delegation/DelegationCenterMenu"),
@@ -174,7 +174,7 @@ export default function DelegationsDocumentation(props: {
   readonly useCaseQuery: number;
   readonly path: string[];
 }) {
-  const { setTitle } = useContext(AuthContext);
+  useSetTitle("Delegation | 6529.io");
   const router = useRouter();
   const section = props.section;
   const [addressQuery, setAddressQuery] = useState<string>(
@@ -243,12 +243,6 @@ export default function DelegationsDocumentation(props: {
       { shallow: true }
     );
   };
-
-  useEffect(() => {
-    setTitle({
-      title: "Delegation | 6529.io",
-    });
-  }, []);
 
   useEffect(() => {
     updateQueryParams(section);

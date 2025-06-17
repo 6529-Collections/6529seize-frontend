@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TitleType, useAuth } from "../../auth/Auth";
+import { useAuth } from "../../auth/Auth";
+import { useTitle } from "../../../contexts/TitleContext";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,8 +10,9 @@ import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 
 export default function HeaderNotifications() {
-  const { connectedProfile, setTitle } = useAuth();
+  const { connectedProfile } = useAuth();
   const pathname = usePathname();
+  const { setNotificationCount } = useTitle();
 
   const [linkHref, setLinkHref] = useState("/my-stream/notifications");
 
@@ -21,16 +23,15 @@ export default function HeaderNotifications() {
   const { removeAllDeliveredNotifications } = useNotificationsContext();
 
   useEffect(() => {
-    setTitle({
-      title: haveUnreadNotifications
-        ? `(${notifications?.unread_count}) Notifications | 6529.io`
-        : null,
-      type: TitleType.NOTIFICATION,
-    });
+    setNotificationCount(notifications?.unread_count ?? 0);
     if (!haveUnreadNotifications) {
       removeAllDeliveredNotifications();
     }
-  }, [haveUnreadNotifications]);
+  }, [
+    notifications?.unread_count,
+    haveUnreadNotifications,
+    setNotificationCount,
+  ]);
 
   useEffect(() => {
     if (pathname === "/my-stream/notifications") {

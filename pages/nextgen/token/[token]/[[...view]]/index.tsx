@@ -10,8 +10,8 @@ import { getCommonHeaders } from "../../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
 import NextGenNavigationHeader from "../../../../../components/nextGen/collections/NextGenNavigationHeader";
-import { AuthContext } from "../../../../../components/auth/Auth";
-import { useContext, useEffect, useState } from "react";
+import { useSetTitle, useTitle } from "../../../../../contexts/TitleContext";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 const NextGenTokenComponent = dynamic(
@@ -42,12 +42,16 @@ export default function NextGenCollectionToken(props: {
 }) {
   const router = useRouter();
 
-  const { setTitle } = useContext(AuthContext);
+  const { setTitle } = useTitle();
   const tokenId: number = props.token_id;
   const token: NextGenToken | null = props.token;
   const traits: NextGenTrait[] = props.traits;
   const tokenCount: number = props.tokenCount;
   const collection: NextGenCollection = props.collection;
+
+  // Set initial title
+  const initialTitle = token?.name ?? `${collection.name} - #${tokenId}`;
+  useSetTitle(initialTitle);
 
   const [tokenView, setTokenView] = useState<ContentView>(props.view);
 
@@ -64,9 +68,7 @@ export default function NextGenCollectionToken(props: {
     const title = viewFromUrlDisplay
       ? `${baseTitle} | ${viewFromUrlDisplay}`
       : baseTitle;
-    setTitle({
-      title,
-    });
+    setTitle(title);
   }, [router.query.view]);
 
   const updateView = (newView?: ContentView) => {

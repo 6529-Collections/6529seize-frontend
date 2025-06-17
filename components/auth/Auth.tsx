@@ -36,12 +36,6 @@ import { ApiRedeemRefreshTokenResponse } from "../../generated/models/ApiRedeemR
 import { areEqualAddresses } from "../../helpers/Helpers";
 import { ApiIdentity } from "../../generated/models/ApiIdentity";
 
-export enum TitleType {
-  PAGE = "PAGE",
-  WAVE = "WAVE",
-  MY_STREAM = "MY_STREAM",
-  NOTIFICATION = "NOTIFICATION",
-}
 
 type AuthContextType = {
   readonly connectedProfile: ApiIdentity | null;
@@ -61,14 +55,7 @@ type AuthContextType = {
   readonly setActiveProfileProxy: (
     profileProxy: ApiProfileProxy | null
   ) => Promise<void>;
-  readonly setTitle: (param: {
-    title: string | null;
-    type?: TitleType;
-  }) => void;
-  readonly title: string;
 };
-
-const DEFAULT_TITLE = "6529";
 
 export const AuthContext = createContext<AuthContextType>({
   connectedProfile: null,
@@ -80,8 +67,6 @@ export const AuthContext = createContext<AuthContextType>({
   requestAuth: async () => ({ success: false }),
   setToast: () => {},
   setActiveProfileProxy: async () => {},
-  setTitle: () => {},
-  title: DEFAULT_TITLE,
 });
 
 export const useAuth = () => {
@@ -493,43 +478,6 @@ export default function Auth({
     setShowWaves(getShowWaves());
   }, [connectedProfile, activeProfileProxy, address]);
 
-  const [pageTitle, setPageTitle] = useState<string>(DEFAULT_TITLE);
-  const [titles, setTitles] = useState<Record<TitleType, string | null>>({
-    [TitleType.PAGE]: DEFAULT_TITLE,
-    [TitleType.WAVE]: null,
-    [TitleType.MY_STREAM]: null,
-    [TitleType.NOTIFICATION]: null,
-  });
-
-  const setTitle = ({
-    title,
-    type,
-  }: {
-    title: string | null;
-    type?: TitleType;
-  }) => {
-    setTitles((prev) => ({ ...prev, [type ?? TitleType.PAGE]: title }));
-  };
-
-  useEffect(() => {
-    if (titles[TitleType.WAVE]) {
-      setPageTitle(titles[TitleType.WAVE]);
-      return;
-    }
-    if (titles[TitleType.MY_STREAM]) {
-      setPageTitle(titles[TitleType.MY_STREAM]);
-      return;
-    }
-    if (titles[TitleType.NOTIFICATION]) {
-      setPageTitle(titles[TitleType.NOTIFICATION]);
-      return;
-    }
-    if (titles[TitleType.PAGE]) {
-      setPageTitle(titles[TitleType.PAGE]);
-      return;
-    }
-    setPageTitle(DEFAULT_TITLE);
-  }, [titles]);
 
   return (
     <AuthContext.Provider
@@ -546,8 +494,6 @@ export default function Auth({
           isProxy: !!activeProfileProxy,
         }),
         setActiveProfileProxy: onActiveProfileProxy,
-        setTitle,
-        title: pageTitle,
       }}>
       {children}
       <ToastContainer />
