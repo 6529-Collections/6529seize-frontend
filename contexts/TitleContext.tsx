@@ -1,0 +1,84 @@
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router';
+
+type TitleContextType = {
+  title: string;
+  setTitle: (title: string) => void;
+};
+
+const TitleContext = createContext<TitleContextType | undefined>(undefined);
+
+const DEFAULT_TITLE = process.env.BASE_ENDPOINT?.includes('staging') ? '6529 Staging' : '6529';
+
+// Default titles for routes
+const getDefaultTitleForRoute = (pathname: string): string => {
+  if (pathname === '/') return '6529';
+  if (pathname.startsWith('/waves')) return 'Waves | Brain';
+  if (pathname.startsWith('/my-stream/notifications')) return 'Notifications | My Stream | Brain';
+  if (pathname.startsWith('/my-stream')) return 'My Stream | Brain';
+  if (pathname.startsWith('/the-memes')) return 'The Memes';
+  if (pathname.startsWith('/meme-lab')) return 'Meme Lab';
+  if (pathname.startsWith('/network')) return 'Network';
+  if (pathname.startsWith('/6529-gradient')) return '6529 Gradient';
+  if (pathname.startsWith('/nextgen')) return 'NextGen';
+  if (pathname.startsWith('/rememes')) return 'Rememes';
+  if (pathname.startsWith('/open-data')) return 'Open Data';
+  // Handle profile pages (e.g., /username)
+  if (pathname !== '/' && pathname.split('/').length === 2) {
+    const segments = pathname.split('/');
+    const firstSegment = segments[1];
+    // Check if it's not one of the known routes
+    const knownRoutes = ['waves', 'my-stream', 'the-memes', 'meme-lab', 'network', '6529-gradient', 'nextgen', 'rememes', 'open-data', 'tools', 'about', 'delegation'];
+    if (!knownRoutes.includes(firstSegment)) {
+      return `Profile | 6529.io`;
+    }
+  }
+  return DEFAULT_TITLE;
+};
+
+export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter();
+  const [title, setTitleState] = useState<string>(() => getDefaultTitleForRoute(router.pathname));
+  const routeRef = useRef(router.pathname);
+
+  // Update title when route changes
+  useEffect(() => {
+    if (routeRef.current !== router.pathname) {
+      routeRef.current = router.pathname;
+      const defaultTitle = getDefaultTitleForRoute(router.pathname);
+      setTitleState(defaultTitle);
+    }
+  }, [router.pathname]);
+
+  const setTitle = (newTitle: string) => {
+    // Only update if we're still on the same route
+    if (routeRef.current === router.pathname) {
+      setTitleState(newTitle);
+    }
+  };
+
+  return (
+    <TitleContext.Provider value={{ title, setTitle }}>
+      {children}
+    </TitleContext.Provider>
+  );
+};
+
+export const useTitle = () => {
+  const context = useContext(TitleContext);
+  if (!context) {
+    throw new Error('useTitle must be used within a TitleProvider');
+  }
+  return context;
+};
+
+// Hook to set page title - use this in page components
+export const useSetTitle = (pageTitle: string) => {
+  const { setTitle } = useTitle();
+  const router = useRouter();
+  
+  // Set title immediately on mount and when title changes
+  useEffect(() => {
+    setTitle(pageTitle);
+  }, [pageTitle, setTitle, router.pathname]);
+};

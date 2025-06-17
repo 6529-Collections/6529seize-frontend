@@ -1,5 +1,6 @@
 import styles from "../../styles/Home.module.scss";
 import { useContext, useEffect } from "react";
+import { useSetTitle } from "../../contexts/TitleContext";
 import dynamic from "next/dynamic";
 import { AuthContext, useAuth } from "../../components/auth/Auth";
 
@@ -9,12 +10,7 @@ const GradientsComponent = dynamic(
 );
 
 export default function GradientsPage() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "6529 Gradient | Collections",
-    });
-  }, []);
+  useSetTitle("6529 Gradient | Collections");
 
   const { connectedProfile } = useAuth();
 

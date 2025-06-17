@@ -4,17 +4,11 @@ import Cookies from "js-cookie";
 import { API_AUTH_COOKIE } from "../constants";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import { AuthContext } from "../components/auth/Auth";
+import { useSetTitle } from "../contexts/TitleContext";
 import { getStagingAuth } from "../services/auth/auth.utils";
 
 export default function Access() {
-  const { setTitle } = useContext(AuthContext);
-
-  useEffect(() => {
-    setTitle({
-      title: "Access Page",
-    });
-  }, []);
+  useSetTitle("Access Page");
   const router = useRouter();
   const [image, setImage] = useState();
   const [inputDisabled, setInputDisabled] = useState(false);

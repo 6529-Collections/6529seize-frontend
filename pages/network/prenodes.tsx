@@ -1,7 +1,7 @@
 import styles from "../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 import { useContext, useEffect } from "react";
 
 const PrenodesStatus = dynamic(
@@ -10,12 +10,7 @@ const PrenodesStatus = dynamic(
 );
 
 export default function PrenodesPage() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Prenodes | Network",
-    });
-  }, []);
+  useSetTitle("Prenodes | Network");
 
   return (
     <main className={styles.main}>

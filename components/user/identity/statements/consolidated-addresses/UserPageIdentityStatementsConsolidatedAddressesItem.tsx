@@ -14,7 +14,7 @@ import {
 import { PRIMARY_ADDRESS_USE_CASE } from "../../../../../pages/delegation/[...section]";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { DELEGATION_ABI } from "../../../../../abis";
-import { AuthContext } from "../../../../auth/Auth";
+import { useAuth } from "../../../../../components/auth/Auth";
 import { getTransactionLink } from "../../../../../helpers/Helpers";
 import { ApiWallet } from "../../../../../generated/models/ApiWallet";
 
@@ -28,7 +28,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
   readonly canEdit: boolean;
 }) {
   const router = useRouter();
-  const { setToast } = useContext(AuthContext);
+  const { setToast } = useAuth();
 
   const goToOpensea = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();

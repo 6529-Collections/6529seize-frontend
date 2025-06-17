@@ -1,6 +1,7 @@
 import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useContext, useEffect } from "react";
+import { useSetTitle } from "../../../contexts/TitleContext";
 import { AuthContext, useAuth } from "../../../components/auth/Auth";
 
 const LabCollectionComponent = dynamic(
@@ -11,17 +12,9 @@ const LabCollectionComponent = dynamic(
 );
 
 export default function MemeLabIndex(props: any) {
-  const { setTitle } = useContext(AuthContext);
-  const pageProps = props.pageProps;
   const { connectedProfile } = useAuth();
-
-  const pagenameFull = `${pageProps.name} | Meme Lab`;
-
-  useEffect(() => {
-    setTitle({
-      title: pagenameFull,
-    });
-  }, [pagenameFull, setTitle]);
+  const pagenameFull = `Collection ${props.collection} | Meme Lab`;
+  useSetTitle(pagenameFull);
 
   return (
     <main className={styles.main}>

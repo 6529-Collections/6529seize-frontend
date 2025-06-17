@@ -8,7 +8,7 @@ import { getCommonHeaders } from "../../helpers/server.helpers";
 import { commonApiFetch } from "../../services/api/common-api";
 import { Time } from "../../helpers/time";
 import { useContext, useEffect } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle, useTitle } from "../../contexts/TitleContext";
 
 const ManifoldMinting = dynamic(
   () => import("../../components/manifoldMinting/ManifoldMinting"),
@@ -18,14 +18,12 @@ const ManifoldMinting = dynamic(
 );
 
 export default function TheMemesMint(props: any) {
-  const { setTitle } = useContext(AuthContext);
-  const nft: NFTWithMemesExtendedData = props.pageProps.nft;
-
+  const { setTitle } = useTitle();
+  const nft = props.pageProps.nft;
+  
   useEffect(() => {
-    setTitle({
-      title: `Mint #${nft.id} | ${nft.name} | The Memes`,
-    });
-  }, []);
+    setTitle(`Mint #${nft.id} | ${nft.name} | The Memes`);
+  }, [nft.id, nft.name, setTitle]);
 
   return (
     <main className={styles.main}>

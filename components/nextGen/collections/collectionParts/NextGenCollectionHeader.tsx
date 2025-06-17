@@ -24,7 +24,7 @@ import { isEmptyObject, numberWithCommas } from "../../../../helpers/Helpers";
 import { DistributionLink } from "../NextGen";
 import { getCommonHeaders } from "../../../../helpers/server.helpers";
 import { commonApiFetch } from "../../../../services/api/common-api";
-import { AuthContext } from "../../../auth/Auth";
+import { useSetTitle } from "../../../../contexts/TitleContext";
 import useCapacitor from "../../../../hooks/useCapacitor";
 import { faArrowCircleLeft } from "@fortawesome/free-solid-svg-icons";
 import { useCookieConsent } from "../../../cookies/CookieConsentContext";
@@ -352,12 +352,7 @@ export function NextGenMintCounts(
 export function NextGenCollectionHead(
   props: Readonly<{ collection: NextGenCollection }>
 ) {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: props.collection.name,
-    });
-  }, []);
+  useSetTitle(props.collection.name);
 
   return <></>;
 }
