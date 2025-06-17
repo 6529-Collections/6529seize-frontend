@@ -8,7 +8,8 @@ import { commonApiPost } from "../services/api/common-api";
 import { Spinner } from "../components/dotLoader/DotLoader";
 import { ApiRedeemRefreshTokenRequest } from "../generated/models/ApiRedeemRefreshTokenRequest";
 import { ApiRedeemRefreshTokenResponse } from "../generated/models/ApiRedeemRefreshTokenResponse";
-import { useTitle } from "react-use";
+import { useAuth } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSetTitle } from "@/contexts/TitleContext";
 
 interface AcceptConnectionSharingProps {
@@ -21,9 +22,14 @@ export default function AcceptConnectionSharing(
   props: Readonly<AcceptConnectionSharingProps>
 ) {
   const router = useRouter();
+  const { setToast } = useAuth();
+  const {
+    seizeAcceptConnection,
+    seizeDisconnectAndLogout,
+    address: connectedAddress,
+  } = useSeizeConnectContext();
 
   const { token, address, role } = props;
-
   const [acceptingConnection, setAcceptingConnection] = useState(false);
 
   useSetTitle("Accept Connection Sharing");
