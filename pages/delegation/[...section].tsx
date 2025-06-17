@@ -168,36 +168,82 @@ export const ALL_USE_CASES = [
 ];
 
 export default function DelegationsDocumentation(props: any) {
+  useSetTitle("Delegation | 6529.io");
+  const pageProps = props.pageProps;
   const router = useRouter();
-  const { setTitle } = useTitle();
-  const { section, addressQuery: initialAddressQuery, collectionQuery: initialCollectionQuery, useCaseQuery: initialUseCaseQuery } = props.pageProps;
+  const section = pageProps.section;
+  const [addressQuery, setAddressQuery] = useState<string>(
+    pageProps.addressQuery ?? ""
+  );
+  const [collectionQuery, setCollectionQuery] = useState<string>(
+    pageProps.collectionQuery ?? ""
+  );
+  const [useCaseQuery, setUseCaseQuery] = useState<number>(
+    pageProps.useCaseQuery
+  );
   
-  const [addressQuery, setAddressQuery] = useState(initialAddressQuery);
-  const [collectionQuery, setCollectionQuery] = useState(initialCollectionQuery);
-  const [useCaseQuery, setUseCaseQuery] = useState(initialUseCaseQuery);
-  
-  useEffect(() => {
-    setTitle("Delegation | 6529.io");
-  }, [setTitle]);
-  
-  const updateQueryParams = (currentSection: DelegationCenterSection) => {
-    const queryParams = new URLSearchParams();
-    if (addressQuery) queryParams.set('address', addressQuery);
-    if (collectionQuery) queryParams.set('collection', collectionQuery);
-    if (useCaseQuery) queryParams.set('use_case', useCaseQuery.toString());
-    
-    const queryString = queryParams.toString();
-    const path = `/delegation/${currentSection}${queryString ? `?${queryString}` : ''}`;
-    router.push(path, undefined, { shallow: true });
+  function getQueryParams(s: DelegationCenterSection) {
+    let queryParams: { [key: string]: string | number } = {};
+    if (
+      addressQuery &&
+      [
+        DelegationCenterSection.CHECKER,
+        DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+      ].includes(s)
+    ) {
+      queryParams = { address: addressQuery };
+    } else {
+      setAddressQuery("");
+    }
+    if (s === DelegationCenterSection.REGISTER_DELEGATION) {
+      if (collectionQuery) {
+        queryParams = { ...queryParams, collection: collectionQuery };
+      }
+      if (useCaseQuery) {
+        queryParams = { ...queryParams, use_case: useCaseQuery };
+      }
+    } else {
+      setCollectionQuery("");
+      setUseCaseQuery(0);
+    }
+    return queryParams;
+  }
+
+  const updatePath = (s: DelegationCenterSection) => {
+    if (s) {
+      if (s === DelegationCenterSection.HTML && pageProps.path) {
+        router.push({
+          pathname: `/delegation/${pageProps.path.join("/")}`,
+        });
+      } else {
+        const queryParams = getQueryParams(s);
+        router.push({
+          pathname: `/delegation/${s}`,
+          query: queryParams,
+        });
+      }
+    }
+    window.scrollTo(0, 0);
   };
-  
-  const updatePath = (newSection: DelegationCenterSection) => {
-    updateQueryParams(newSection);
+
+  const updateQueryParams = (s: DelegationCenterSection) => {
+    if (s === DelegationCenterSection.HTML) {
+      return;
+    }
+    const queryParams = getQueryParams(s);
+    router.push(
+      {
+        pathname: `/delegation/${s}`,
+        query: queryParams,
+      },
+      undefined,
+      { shallow: true }
+    );
   };
 
   useEffect(() => {
     updateQueryParams(section);
-  }, [addressQuery, collectionQuery, useCaseQuery, section]);
+  }, [addressQuery, collectionQuery, useCaseQuery]);
 
   return (
     <main className={styles.main}>

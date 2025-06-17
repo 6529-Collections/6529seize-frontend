@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { useContext, useEffect } from "react";
 import { useSetTitle } from "../../../contexts/TitleContext";
 import { AuthContext, useAuth } from "../../../components/auth/Auth";
+import { useRouter } from "next/router";
 
 const LabCollectionComponent = dynamic(
   () => import("../../../components/memelab/MemeLabCollection"),
@@ -13,7 +14,12 @@ const LabCollectionComponent = dynamic(
 
 export default function MemeLabIndex(props: any) {
   const { connectedProfile } = useAuth();
-  const pagenameFull = `Collection ${props.collection} | Meme Lab`;
+  const router = useRouter();
+  
+  // Get collection from router for client-side navigation
+  const collection = (router.query.collection as string) || props.collection;
+  const collectionName = collection ? collection.replaceAll("-", " ") : "";
+  const pagenameFull = `Collection ${collectionName} | Meme Lab`;
   useSetTitle(pagenameFull);
 
   return (
