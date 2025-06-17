@@ -11,11 +11,9 @@ const AppWalletComponent = dynamic(
   }
 );
 
-export default function AppWalletPage(props: any) {
+export default function AppWalletPage(props: { readonly address: string }) {
   const { setTitle } = useContext(AuthContext);
-
-  const pageProps = props.pageProps;
-  const address = pageProps.address;
+  const address = props.address;
 
   useEffect(() => {
     setTitle({

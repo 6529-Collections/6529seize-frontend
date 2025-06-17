@@ -18,9 +18,7 @@ interface AcceptConnectionSharingProps {
 }
 
 export default function AcceptConnectionSharing(
-  props: Readonly<{
-    pageProps: AcceptConnectionSharingProps;
-  }>
+  props: Readonly<AcceptConnectionSharingProps>
 ) {
   const { setTitle, setToast } = useContext(AuthContext);
   const {
@@ -31,7 +29,7 @@ export default function AcceptConnectionSharing(
 
   const router = useRouter();
 
-  const { token, address, role } = props.pageProps;
+  const { token, address, role } = props;
 
   const [acceptingConnection, setAcceptingConnection] = useState(false);
 

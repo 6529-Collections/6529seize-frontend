@@ -21,13 +21,16 @@ const NextGenCollectionComponent = dynamic(
   }
 );
 
-export default function NextGenCollectionPage(props: any) {
+export default function NextGenCollectionPage(props: {
+  readonly collection: NextGenCollection;
+  readonly view: ContentView;
+}) {
   const { setTitle } = useContext(AuthContext);
   const router = useRouter();
-  const collection: NextGenCollection = props.pageProps.collection;
+  const collection: NextGenCollection = props.collection;
   useShallowRedirect(collection.name);
 
-  const [view, setView] = useState<ContentView>(props.pageProps.view);
+  const [view, setView] = useState<ContentView>(props.view);
 
   useEffect(() => {
     const viewFromUrl = getCollectionView(

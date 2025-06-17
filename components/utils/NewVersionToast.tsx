@@ -3,16 +3,16 @@
 import React, { type JSX } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRefresh } from "@fortawesome/free-solid-svg-icons";
-import { useIsStale } from "../../hooks/useVersion";
+import { useIsVersionStale } from "../../hooks/useIsVersionStale";
 import { useRouter } from "next/navigation";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 
 const NewVersionToast = (): JSX.Element | null => {
-  const stale = useIsStale();
+  const isVersionStale = useIsVersionStale();
   const router = useRouter();
   const { isApp } = useDeviceInfo();
 
-  if (!stale) {
+  if (!isVersionStale) {
     return null;
   }
 

@@ -10,19 +10,22 @@ const RememePageComponent = dynamic(
   { ssr: false }
 );
 
-export default function ReMeme(props: any) {
+export default function ReMeme(props: {
+  readonly name: string;
+  readonly contract: string;
+  readonly id: string;
+}) {
   const { setTitle } = useContext(AuthContext);
-  const pageProps = props.pageProps;
 
   useEffect(() => {
     setTitle({
-      title: `${pageProps.name} | ReMemes | 6529.io`,
+      title: `${props.name} | ReMemes | 6529.io`,
     });
   }, []);
 
   return (
     <main className={styles.main}>
-      <RememePageComponent contract={pageProps.contract} id={pageProps.id} />
+      <RememePageComponent contract={props.contract} id={props.id} />
     </main>
   );
 }

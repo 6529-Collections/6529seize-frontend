@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { TitleType, useAuth } from "../../auth/Auth";
 
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { useUnreadNotifications } from "../../../hooks/useUnreadNotifications";
 import { useNotificationsContext } from "../../notifications/NotificationsContext";
 
 export default function HeaderNotifications() {
   const { connectedProfile, setTitle } = useAuth();
-  const router = useRouter();
+  const pathname = usePathname();
 
   const [linkHref, setLinkHref] = useState("/my-stream/notifications");
 
@@ -33,10 +33,10 @@ export default function HeaderNotifications() {
   }, [haveUnreadNotifications]);
 
   useEffect(() => {
-    if (router.pathname === "/my-stream/notifications") {
+    if (pathname === "/my-stream/notifications") {
       setLinkHref("/my-stream/notifications?reload=true");
     }
-  }, [router.pathname]);
+  }, [pathname]);
 
   return (
     <div className="tailwind-scope tw-relative min-[1200px]:tw-mr-3 tw-self-center">

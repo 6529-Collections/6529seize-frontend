@@ -2,12 +2,12 @@
 
 import React, { ReactNode, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import Breadcrumb from "../breadcrumb/Breadcrumb";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs";
 import { useHeaderContext } from "../../contexts/HeaderContext";
+import { usePathname } from "next/navigation";
 
 const Header = dynamic(() => import("../header/Header"), {
   ssr: false,
@@ -24,9 +24,9 @@ const DesktopLayout = ({ children, isSmall }: DesktopLayoutProps) => {
   const { setHeaderRef } = useHeaderContext();
 
   const breadcrumbs = useBreadcrumbs();
-  const router = useRouter();
-  const isHomePage = router.pathname === "/";
-  const isStreamView = router.pathname.startsWith("/my-stream");
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+  const isStreamView = pathname?.startsWith("/my-stream");
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {

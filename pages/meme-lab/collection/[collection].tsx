@@ -10,12 +10,15 @@ const LabCollectionComponent = dynamic(
   }
 );
 
-export default function MemeLabIndex(props: any) {
+export default function MemeLabIndex(props: {
+  readonly collection: string;
+  readonly name: string;
+}) {
   const { setTitle } = useContext(AuthContext);
-  const pageProps = props.pageProps;
+  const name = props.name;
   const { connectedProfile } = useAuth();
 
-  const pagenameFull = `${pageProps.name} | Meme Lab`;
+  const pagenameFull = `${name} | Meme Lab`;
 
   useEffect(() => {
     setTitle({

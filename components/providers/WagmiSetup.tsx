@@ -5,11 +5,7 @@ import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 import { wagmiConfigCapacitor } from "@/wagmiConfig/wagmiConfigCapacitor";
 import { wagmiConfigWeb } from "@/wagmiConfig/wagmiConfigWeb";
-import {
-  CW_PROJECT_ID,
-  DELEGATION_CONTRACT,
-  SUBSCRIPTIONS_CHAIN,
-} from "@/constants";
+import { DELEGATION_CONTRACT, SUBSCRIPTIONS_CHAIN } from "@/constants";
 import { MANIFOLD_NETWORK } from "@/hooks/useManifoldClaim";
 import { Chain } from "viem";
 import { mainnet, sepolia, goerli } from "viem/chains";
@@ -23,7 +19,7 @@ import {
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-import { createWeb3Modal } from "@web3modal/wagmi/react";
+import { initWeb3Modal } from "./web3ModalSetup";
 
 export function getChains() {
   const chains: Chain[] = [mainnet];
@@ -61,12 +57,7 @@ const wagmiConfig = isCapacitor
   ? wagmiConfigCapacitor(chains, wagmiMetadata)
   : wagmiConfigWeb(chains, wagmiMetadata);
 
-createWeb3Modal({
-  wagmiConfig: wagmiConfig,
-  projectId: CW_PROJECT_ID,
-  enableAnalytics: true,
-  themeMode: "dark",
-});
+initWeb3Modal(wagmiConfig);
 
 export default function WagmiSetup({
   children,

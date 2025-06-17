@@ -1,32 +1,27 @@
 import { ReactElement, useContext } from "react";
-import { NextPageWithLayout } from "../../_app";
-import UserPageLayout from "../../../components/user/layout/UserPageLayout";
+import { NextPageWithLayout } from "../_app";
+import UserPageLayout from "../../components/user/layout/UserPageLayout";
 import {
   getCommonHeaders,
   getUserProfile,
   userPageNeedsRedirect,
-} from "../../../helpers/server.helpers";
-import { ReactQueryWrapperContext } from "../../../components/react-query-wrapper/ReactQueryWrapper";
-import UserPageProxy from "../../../components/user/proxy/UserPageProxy";
-import { UserPageProps } from "../../../helpers/Types";
-import { getMetadataForUserPage } from "../../../helpers/Helpers";
+} from "../../helpers/server.helpers";
+import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
+import UserPageProxy from "../../components/user/proxy/UserPageProxy";
+import { UserPageProps } from "../../helpers/Types";
+import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
-  pageProps,
-}) => {
+const Page: NextPageWithLayout<{ profile: ApiIdentity }> = ({ profile }) => {
   const { setProfile } = useContext(ReactQueryWrapperContext);
-  setProfile(pageProps.profile);
-  return <UserPageProxy profile={pageProps.profile} />;
+  setProfile(profile);
+  return <UserPageProxy profile={profile} />;
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageProps }>
+  page: ReactElement<{ profile: ApiIdentity }>
 ) {
-  return (
-    <UserPageLayout profile={page.props.pageProps.profile}>
-      {page}
-    </UserPageLayout>
-  );
+  return <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>;
 };
 
 export default Page;

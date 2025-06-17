@@ -1,8 +1,8 @@
-import { render, act } from '@testing-library/react';
+import { render, act } from "@testing-library/react";
 
 const ORIGINAL_ENV_VERSION = process.env.VERSION;
 
-describe('useIsStale', () => {
+describe("useIsVersionStale", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     (global as any).fetch = jest.fn();
@@ -14,24 +14,32 @@ describe('useIsStale', () => {
   });
 
   function TestComponent({ interval }: { interval?: number }) {
-    const { useIsStale } = require('../../hooks/useVersion');
-    const stale = useIsStale(interval);
-    return <span>{stale ? 'stale' : 'fresh'}</span>;
+    const { useIsVersionStale } = require("../../hooks/useIsVersionStale");
+    const stale = useIsVersionStale(interval);
+    return <span>{stale ? "stale" : "fresh"}</span>;
   }
 
-  it('shows fresh when versions match', async () => {
-    process.env.VERSION = '1.0.0';
-    (global.fetch as jest.Mock).mockResolvedValue({ json: async () => ({ version: '1.0.0' }) });
+  it("shows fresh when versions match", async () => {
+    process.env.VERSION = "1.0.0";
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: async () => ({ version: "1.0.0" }),
+    });
     const { findByText } = render(<TestComponent interval={1000} />);
-    await act(async () => { jest.runOnlyPendingTimers(); });
-    expect(await findByText('fresh')).toBeInTheDocument();
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(await findByText("fresh")).toBeInTheDocument();
   });
 
-  it('shows stale when versions differ', async () => {
-    process.env.VERSION = '1.0.0';
-    (global.fetch as jest.Mock).mockResolvedValue({ json: async () => ({ version: '2.0.0' }) });
+  it("shows stale when versions differ", async () => {
+    process.env.VERSION = "1.0.0";
+    (global.fetch as jest.Mock).mockResolvedValue({
+      json: async () => ({ version: "2.0.0" }),
+    });
     const { findByText } = render(<TestComponent interval={1000} />);
-    await act(async () => { jest.runOnlyPendingTimers(); });
-    expect(await findByText('stale')).toBeInTheDocument();
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(await findByText("stale")).toBeInTheDocument();
   });
 });

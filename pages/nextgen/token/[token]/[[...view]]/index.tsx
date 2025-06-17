@@ -32,17 +32,24 @@ const NextGenTokenOnChainComponent = dynamic(
   }
 );
 
-export default function NextGenCollectionToken(props: any) {
+export default function NextGenCollectionToken(props: {
+  readonly token_id: number;
+  readonly token: NextGenToken;
+  readonly traits: NextGenTrait[];
+  readonly tokenCount: number;
+  readonly collection: NextGenCollection;
+  readonly view: ContentView;
+}) {
   const router = useRouter();
 
   const { setTitle } = useContext(AuthContext);
-  const tokenId: number = props.pageProps.token_id;
-  const token: NextGenToken | null = props.pageProps.token;
-  const traits: NextGenTrait[] = props.pageProps.traits;
-  const tokenCount: number = props.pageProps.tokenCount;
-  const collection: NextGenCollection = props.pageProps.collection;
+  const tokenId: number = props.token_id;
+  const token: NextGenToken | null = props.token;
+  const traits: NextGenTrait[] = props.traits;
+  const tokenCount: number = props.tokenCount;
+  const collection: NextGenCollection = props.collection;
 
-  const [tokenView, setTokenView] = useState<ContentView>(props.pageProps.view);
+  const [tokenView, setTokenView] = useState<ContentView>(props.view);
 
   useEffect(() => {
     const viewFromUrl = getContentView(

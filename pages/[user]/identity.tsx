@@ -14,6 +14,7 @@ import UserPageIdentityWrapper from "../../components/user/identity/UserPageIden
 import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export interface UserPageIdentityProps extends UserPageProps {
   readonly handleOrWallet: string;
@@ -35,29 +36,28 @@ const getInitialActivityLogParams = (
   groupId: null,
 });
 
-const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
-  pageProps,
-}) => {
+const Page: NextPageWithLayout<{
+  profile: ApiIdentity;
+  handleOrWallet: string;
+}> = ({ profile, handleOrWallet }) => {
   const initialCICGivenParams = getInitialRatersParams({
-    handleOrWallet: pageProps.handleOrWallet,
+    handleOrWallet,
     matter: MATTER_TYPE,
     given: false,
   });
 
   const initialCICReceivedParams = getInitialRatersParams({
-    handleOrWallet: pageProps.handleOrWallet,
+    handleOrWallet,
     matter: MATTER_TYPE,
     given: true,
   });
 
-  const initialActivityLogParams = getInitialActivityLogParams(
-    pageProps.handleOrWallet
-  );
+  const initialActivityLogParams = getInitialActivityLogParams(handleOrWallet);
 
   return (
     <div className="tailwind-scope">
       <UserPageIdentityWrapper
-        profile={pageProps.profile}
+        profile={profile}
         initialCICReceivedParams={initialCICReceivedParams}
         initialCICGivenParams={initialCICGivenParams}
         initialActivityLogParams={initialActivityLogParams}
@@ -67,13 +67,9 @@ const Page: NextPageWithLayout<{ pageProps: UserPageIdentityProps }> = ({
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageIdentityProps }>
+  page: ReactElement<{ profile: ApiIdentity }>
 ) {
-  return (
-    <UserPageLayout profile={page.props.pageProps.profile}>
-      {page}
-    </UserPageLayout>
-  );
+  return <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>;
 };
 
 export default Page;

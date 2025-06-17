@@ -19,39 +19,59 @@ import CapacitorSetup from "./CapacitorSetup";
 import FooterWrapper from "@/FooterWrapper";
 import IpfsImageSetup from "./IpfsImageSetup";
 import QueryClientSetup from "./QueryClientSetup";
+import { NavigationHistoryProvider } from "@/contexts/NavigationHistoryContext";
+import { ScrollPositionProvider } from "@/contexts/ScrollPositionContext";
+import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
+import { ViewProvider } from "../navigation/ViewContext";
+import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
+import StoreSetup from "./StoreSetup";
 
 export default function AllProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientSetup>
-      <WagmiSetup>
-        <CapacitorSetup />
-        <IpfsImageSetup />
-        <ReactQueryWrapper>
-          <SeizeSettingsProvider>
-            <EmojiProvider>
-              <IpfsProvider>
-                <AppWalletsProvider>
-                  <SeizeConnectProvider>
-                    <Auth>
-                      <NotificationsProvider>
-                        <CookieConsentProvider>
-                          <EULAConsentProvider>
-                            <AppWebSocketProvider>
-                              <HeaderProvider>{children}</HeaderProvider>
-                              <NewVersionToast />
-                            </AppWebSocketProvider>
-                          </EULAConsentProvider>
-                        </CookieConsentProvider>
-                      </NotificationsProvider>
-                    </Auth>
-                  </SeizeConnectProvider>
-                </AppWalletsProvider>
-              </IpfsProvider>
-            </EmojiProvider>
-          </SeizeSettingsProvider>
-        </ReactQueryWrapper>
-        <FooterWrapper />
-      </WagmiSetup>
+      <StoreSetup>
+        <WagmiSetup>
+          <CapacitorSetup />
+          <IpfsImageSetup />
+          <ReactQueryWrapper>
+            <SeizeSettingsProvider>
+              <EmojiProvider>
+                <IpfsProvider>
+                  <AppWalletsProvider>
+                    <SeizeConnectProvider>
+                      <Auth>
+                        <NotificationsProvider>
+                          <CookieConsentProvider>
+                            <EULAConsentProvider>
+                              <AppWebSocketProvider>
+                                <HeaderProvider>
+                                  <ScrollPositionProvider>
+                                    <ViewProvider>
+                                      <NavigationHistoryProvider>
+                                        <LayoutProvider>
+                                          <MyStreamProvider>
+                                            {children}
+                                          </MyStreamProvider>
+                                        </LayoutProvider>
+                                      </NavigationHistoryProvider>
+                                    </ViewProvider>
+                                  </ScrollPositionProvider>
+                                </HeaderProvider>
+                                <NewVersionToast />
+                              </AppWebSocketProvider>
+                            </EULAConsentProvider>
+                          </CookieConsentProvider>
+                        </NotificationsProvider>
+                      </Auth>
+                    </SeizeConnectProvider>
+                  </AppWalletsProvider>
+                </IpfsProvider>
+              </EmojiProvider>
+            </SeizeSettingsProvider>
+          </ReactQueryWrapper>
+          <FooterWrapper />
+        </WagmiSetup>
+      </StoreSetup>
     </QueryClientSetup>
   );
 }

@@ -169,17 +169,11 @@ export const WaveLeaderboardGalleryItem: React.FC<
             )}
           </div>
           {canShowVote && (
-            <button
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-              type="button"
-              className="tw-border-none tw-m-0 tw-p-0 tw-bg-transparent">
-              <VotingModalButton
-                drop={drop}
-                onClick={handleVoteButtonClick}
-                variant={artFocused ? "subtle" : "default"}
-              />
-            </button>
+            <VotingModalButton
+              drop={drop}
+              onClick={handleVoteButtonClick}
+              variant={artFocused ? "subtle" : "default"}
+            />
           )}
         </div>
       </div>

@@ -4,7 +4,7 @@ import {
   CapacitorBarcodeScanner,
   CapacitorBarcodeScannerTypeHint,
 } from "@capacitor/barcode-scanner";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import useCapacitor from "../../../hooks/useCapacitor";
 import { useAuth } from "../../auth/Auth";
@@ -122,7 +122,8 @@ export default function HeaderQRScanner({
 
         // Navigate to the extracted path
         onScanSuccess();
-        router.push({ pathname: path, query: queryParams });
+        const routerPath = `/${path}?${queryParams.toString()}`;
+        router.push(routerPath);
       } else {
         setToast({
           message: "Invalid QR code",

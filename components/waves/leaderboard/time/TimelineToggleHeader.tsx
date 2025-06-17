@@ -7,6 +7,8 @@ import {
 } from "../../../../helpers/waves/time.utils";
 import { TimeCountdown } from "./TimeCountdown";
 import { ApiWaveDecisionPause } from "../../../../generated/models/ApiWaveDecisionPause";
+import { useWave } from "../../../../hooks/useWave";
+import { ApiWave } from "../../../../generated/models/ApiWave";
 
 interface TimelineToggleHeaderProps {
   readonly isOpen: boolean;
@@ -14,6 +16,7 @@ interface TimelineToggleHeaderProps {
   readonly nextDecisionTime: number | null;
   readonly isPaused?: boolean;
   readonly currentPause?: ApiWaveDecisionPause | null;
+  readonly wave?: ApiWave;
 }
 
 /**
@@ -25,7 +28,9 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
   nextDecisionTime,
   isPaused = false,
   currentPause,
+  wave,
 }) => {
+  const waveData = useWave(wave);
   const hasNextDecision = !!nextDecisionTime;
   const getTimeLeft = () => {
     if (hasNextDecision) {
@@ -52,10 +57,22 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
           <span className="tw-text-iron-500">•</span>
           <span className="tw-text-iron-300 tw-font-medium tw-whitespace-nowrap">
             SZN 12 starts:{" "}
-            {new Date(currentPause.end_time).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-            })}
+            {(() => {
+              const mintingDate =
+                wave && waveData ? waveData.pauses.calculateMintingDate(nextDecisionTime) : null;
+              return mintingDate
+                ? new Date(mintingDate).toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })
+                : new Date(currentPause.end_time).toLocaleDateString(
+                    undefined,
+                    {
+                      month: "short",
+                      day: "numeric",
+                    }
+                  );
+            })()}
           </span>
         </span>
       );
@@ -150,7 +167,7 @@ export const TimelineToggleHeader: React.FC<TimelineToggleHeaderProps> = ({
           className="tw-w-7 tw-h-7 tw-flex tw-items-center tw-justify-center tw-bg-iron-700/50 tw-rounded-md tw-border tw-border-solid tw-border-iron-600/40 desktop-hover:hover:tw-bg-iron-600/60 desktop-hover:hover:tw-border-iron-500/50 tw-transition-all tw-duration-300 tw-ease-out tw-flex-shrink-0"
           aria-label={isOpen ? "Collapse" : "Expand"}>
           <svg
-            className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 ${
+            className={`tw-w-4 tw-h-4 tw-text-iron-200 desktop-hover:group-hover:tw-text-iron-100 tw-flex-shrink-0 ${
               isOpen ? "tw-rotate-180" : ""
             } tw-transition-all tw-duration-300 tw-ease-in-out`}
             viewBox="0 0 20 20"
