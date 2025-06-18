@@ -178,7 +178,6 @@ NFT investing is difficult specifically"
         <link
           rel="stylesheet"
           id="fusion-dynamic-css-css"
-          // href="/wp.css"
           href="https://dnclu2fna0b2b.cloudfront.net/wp-content/uploads/fusion-styles/131abea3e11386a1d10efb44f4033532.min.css?ver=3.11.11"
           type="text/css"
           media="all"
