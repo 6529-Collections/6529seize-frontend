@@ -55,9 +55,7 @@ const TermsOfServiceModal: FC<TermsOfServiceModalProps> = ({
         aria-modal="true">
         <ModalLayout title="Terms of Service" onCancel={onClose}>
           <div className="tw-p-4">
-            <div
-              className="tw-max-h-[400px] tw-overflow-y-auto tw-border tw-border-iron-800/50 tw-rounded-lg tw-p-3 lg:tw-p-5 tw-mb-4 tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500"
-              tabIndex={0}>
+            <div className="tw-max-h-[400px] tw-overflow-y-auto tw-border tw-border-iron-800/50 tw-rounded-lg tw-p-3 lg:tw-p-5 tw-mb-4 tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500">
               {termsContent ? (
                 <div className="tw-whitespace-pre-wrap">{termsContent}</div>
               ) : (
