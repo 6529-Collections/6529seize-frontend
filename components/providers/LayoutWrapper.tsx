@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import DesktopLayout from "@/components/layout/DesktopLayout";
 import MobileLayout from "@/components/layout/MobileLayout";
+import { Suspense, useMemo } from "react";
 
 export default function LayoutWrapper({
   children,
@@ -16,13 +17,17 @@ export default function LayoutWrapper({
   const isSmall = pathname?.startsWith("/my-stream");
   const isAccess = pathname?.startsWith("/access");
 
+  const content = useMemo(() => {
+    return isApp ? (
+      <MobileLayout>{children}</MobileLayout>
+    ) : (
+      <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
+    );
+  }, [isApp, isSmall, children]);
+
   if (isAccess) {
     return <>{children}</>;
   }
 
-  return isApp ? (
-    <MobileLayout>{children}</MobileLayout>
-  ) : (
-    <DesktopLayout isSmall={isSmall}>{children}</DesktopLayout>
-  );
+  return content;
 }

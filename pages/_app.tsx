@@ -11,6 +11,11 @@ import "../components/drops/create/lexical/lexical.styles.scss";
 import MainLayout from "../components/layout/MainLayout";
 import Providers from "@/components/providers/Providers";
 import { getPageMetadata } from "@/components/providers/metadata";
+import { wrapper } from "@/store/store";
+import { Provider } from "react-redux";
+import { CW_PROJECT_ID } from "@/constants";
+import { createWeb3Modal } from "@web3modal/wagmi";
+import { getWagmiConfig } from "@/wagmiConfig/wagmiConfig";
 
 export type NextPageWithLayout<Props> = NextPage<Props> & {
   getLayout?: (page: ReactElement<any>) => ReactNode;
@@ -21,6 +26,8 @@ type AppPropsWithLayout = AppProps & {
 };
 
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
+  const { store, props } = wrapper.useWrappedStore(rest);
+
   const pageMetadata = rest.pageProps.metadata;
   const componentMetadata = (Component as any).metadata;
 
@@ -32,10 +39,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   });
 
   return (
-    <Providers>
-      <MainLayout metadata={metadata}>
-        {getLayout(<Component {...rest.pageProps} />)}
-      </MainLayout>
-    </Providers>
+    <Provider store={store}>
+      <Providers>
+        <MainLayout metadata={metadata}>
+          {getLayout(<Component {...rest.pageProps} {...props.pageProps} />)}
+        </MainLayout>
+      </Providers>
+    </Provider>
   );
 }

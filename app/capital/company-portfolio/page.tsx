@@ -1017,3 +1017,7 @@ Transient Labs"
     </>
   );
 }
+
+export const metadata = {
+  title: "Company Portfolio",
+};

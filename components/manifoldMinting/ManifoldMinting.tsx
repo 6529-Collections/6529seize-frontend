@@ -2,7 +2,8 @@
 
 import styles from "./ManifoldMinting.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
-import useManifoldClaim, {
+import {
+  useManifoldClaim,
   buildMemesPhases,
   ManifoldClaim,
   ManifoldClaimStatus,

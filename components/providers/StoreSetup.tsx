@@ -2,10 +2,10 @@
 
 import { ReactNode } from "react";
 import { Provider } from "react-redux";
-import { wrapper } from "@/store/store";
+import { makeStore } from "@/store/store";
 
-export default function StoreSetup({ children }: { children: ReactNode }) {
-  const store = wrapper.useWrappedStore({});
+const store = makeStore();
 
-  return <Provider store={store.store}>{children}</Provider>;
+export default function StoreProvider({ children }: { children: ReactNode }) {
+  return <Provider store={store}>{children}</Provider>;
 }

@@ -857,3 +857,7 @@ NFT investing is difficult specifically"
     </>
   );
 }
+
+export const metadata = {
+  title: "6529 Capital",
+};

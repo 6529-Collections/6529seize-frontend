@@ -1,7 +1,7 @@
 "use client";
 
 import Auth from "@/components/auth/Auth";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
@@ -24,27 +24,31 @@ import { ScrollPositionProvider } from "@/contexts/ScrollPositionContext";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
-import StoreSetup from "./StoreSetup";
 import { TitleProvider } from "@/contexts/TitleContext";
+import { getWagmiConfig } from "@/wagmiConfig/wagmiConfig";
+import { initWeb3Modal } from "./web3ModalSetup";
 
-export default function AllProviders({ children }: { children: ReactNode }) {
+export default function Providers({ children }: { children: ReactNode }) {
+  const wagmiConfig = getWagmiConfig();
+  initWeb3Modal(wagmiConfig.config);
+
   return (
     <QueryClientSetup>
-      <StoreSetup>
-        <WagmiSetup>
-          <CapacitorSetup />
-          <IpfsImageSetup />
-          <ReactQueryWrapper>
-            <SeizeSettingsProvider>
-              <EmojiProvider>
-                <IpfsProvider>
-                  <AppWalletsProvider>
-                    <SeizeConnectProvider>
-                      <Auth>
-                        <NotificationsProvider>
-                          <CookieConsentProvider>
-                            <EULAConsentProvider>
-                              <AppWebSocketProvider>
+      <WagmiSetup wagmiConfig={wagmiConfig}>
+        <CapacitorSetup />
+        <IpfsImageSetup />
+        <ReactQueryWrapper>
+          <SeizeSettingsProvider>
+            <EmojiProvider>
+              <IpfsProvider>
+                <AppWalletsProvider>
+                  <SeizeConnectProvider>
+                    <Auth>
+                      <NotificationsProvider>
+                        <CookieConsentProvider>
+                          <EULAConsentProvider>
+                            <AppWebSocketProvider>
+                              <Suspense fallback={null}>
                                 <TitleProvider>
                                   <HeaderProvider>
                                     <ScrollPositionProvider>
@@ -60,21 +64,21 @@ export default function AllProviders({ children }: { children: ReactNode }) {
                                     </ScrollPositionProvider>
                                   </HeaderProvider>
                                 </TitleProvider>
-                                <NewVersionToast />
-                              </AppWebSocketProvider>
-                            </EULAConsentProvider>
-                          </CookieConsentProvider>
-                        </NotificationsProvider>
-                      </Auth>
-                    </SeizeConnectProvider>
-                  </AppWalletsProvider>
-                </IpfsProvider>
-              </EmojiProvider>
-            </SeizeSettingsProvider>
-          </ReactQueryWrapper>
-          <FooterWrapper />
-        </WagmiSetup>
-      </StoreSetup>
+                              </Suspense>
+                              <NewVersionToast />
+                            </AppWebSocketProvider>
+                          </EULAConsentProvider>
+                        </CookieConsentProvider>
+                      </NotificationsProvider>
+                    </Auth>
+                  </SeizeConnectProvider>
+                </AppWalletsProvider>
+              </IpfsProvider>
+            </EmojiProvider>
+          </SeizeSettingsProvider>
+        </ReactQueryWrapper>
+        <FooterWrapper />
+      </WagmiSetup>
     </QueryClientSetup>
   );
 }

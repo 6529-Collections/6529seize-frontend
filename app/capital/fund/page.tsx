@@ -499,3 +499,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
     </>
   );
 }
+
+export const metadata = {
+  title: "NFT Fund",
+};

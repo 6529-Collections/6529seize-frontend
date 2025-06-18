@@ -1,6 +1,7 @@
+"use client";
+
 import React, { ReactNode } from "react";
 import { useRouter } from "next/router";
-import ClientOnly from "../client-only/ClientOnly";
 import Head from "next/head";
 import { PageSSRMetadata } from "../../helpers/Types";
 import LayoutWrapper from "../providers/LayoutWrapper";
@@ -31,9 +32,7 @@ const MainLayout = ({ children, metadata }: MainLayoutProps) => {
         <meta property="og:image" content={ogImage} />
         <meta name="twitter:card" content={twitterCard} />
       </Head>
-      <ClientOnly>
-        <LayoutWrapper>{children}</LayoutWrapper>
-      </ClientOnly>
+      <LayoutWrapper>{children}</LayoutWrapper>
     </>
   );
 };

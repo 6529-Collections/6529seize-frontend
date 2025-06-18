@@ -8,6 +8,7 @@ import "tippy.js/themes/light.css";
 import Providers from "@/components/providers/Providers";
 import { getAppMetadata } from "@/components/providers/metadata";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
+import StoreSetup from "@/components/providers/StoreSetup";
 
 export const metadata = getAppMetadata({});
 
@@ -19,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>
-          <LayoutWrapper>{children}</LayoutWrapper>
-        </Providers>
+        <StoreSetup>
+          <Providers>
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </Providers>
+        </StoreSetup>
       </body>
     </html>
   );
