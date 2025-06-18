@@ -1,7 +1,7 @@
 "use client";
 
 import Auth from "@/components/auth/Auth";
-import { ReactNode, Suspense } from "react";
+import { Suspense } from "react";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";

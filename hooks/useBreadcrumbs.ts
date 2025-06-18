@@ -54,9 +54,7 @@ export const useBreadcrumbs = (): Crumb[] => {
 
     for (const [key, value] of Array.from(searchParams.entries())) {
       if (q[key]) {
-        q[key] = Array.isArray(q[key])
-          ? [...q[key], value]
-          : [q[key] as string, value];
+        q[key] = Array.isArray(q[key]) ? [...q[key], value] : [q[key], value];
       } else {
         q[key] = value;
       }

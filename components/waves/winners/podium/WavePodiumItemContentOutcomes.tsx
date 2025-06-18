@@ -53,8 +53,8 @@ export const WavePodiumItemContentOutcomes: React.FC<
         )
         .map((award) => ({
           type: OutcomeType.REP as const,
-          value: award.amount || 0,
-          category: award.rep_category || "",
+          value: award.amount ?? 0,
+          category: award.rep_category ?? "",
         }));
 
       const manualOutcomes = winner.awards

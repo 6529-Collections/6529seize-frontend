@@ -23,7 +23,7 @@ export default function HeaderUserProfile({
   const { address, isConnected } = useSeizeConnectContext();
 
   const getLabel = (): string => {
-    if (activeProfileProxy) return activeProfileProxy.created_by.handle || "";
+    if (activeProfileProxy) return activeProfileProxy.created_by.handle ?? "";
     if (profile?.handle) return profile.handle.slice(0, 20);
     const wallet = profile?.wallets?.find(
       (w) => w.wallet.toLowerCase() === address?.toLowerCase()

@@ -2,7 +2,6 @@ import styles from "../../../styles/Home.module.scss";
 import dynamic from "next/dynamic";
 import { useSetTitle } from "../../../contexts/TitleContext";
 import { useAuth } from "../../../components/auth/Auth";
-import { useRouter } from "next/router";
 
 const LabCollectionComponent = dynamic(
   () => import("../../../components/memelab/MemeLabCollection"),
@@ -11,10 +10,7 @@ const LabCollectionComponent = dynamic(
   }
 );
 
-export default function MemeLabIndex(props: {
-  readonly collection: string;
-  readonly name: string;
-}) {
+export default function MemeLabIndex(props: { readonly name: string }) {
   const { connectedProfile } = useAuth();
 
   const pagenameFull = `Collection ${props.name} | Meme Lab`;
@@ -35,8 +31,7 @@ export async function getServerSideProps(req: any, res: any, resolvedUrl: any) {
 
   return {
     props: {
-      collection: collection,
-      name: name,
+      name,
       metadata: {
         title: name,
         description: "Meme Lab",
