@@ -1,5 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
-import { useRouter } from 'next/router';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+} from "react";
+import { useRouter } from "next/router";
 
 type TitleContextType = {
   title: string;
@@ -10,27 +17,43 @@ type TitleContextType = {
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
 
-const DEFAULT_TITLE = process.env.BASE_ENDPOINT?.includes('staging') ? '6529 Staging' : '6529.io';
+const DEFAULT_TITLE = process.env.BASE_ENDPOINT?.includes("staging")
+  ? "6529 Staging"
+  : "6529.io";
 
 // Default titles for routes
 const getDefaultTitleForRoute = (pathname: string): string => {
-  if (pathname === '/') return '6529.io';
-  if (pathname.startsWith('/waves')) return 'Waves | Brain';
-  if (pathname.startsWith('/my-stream/notifications')) return 'Notifications | My Stream | Brain';
-  if (pathname.startsWith('/my-stream')) return 'My Stream | Brain';
-  if (pathname.startsWith('/the-memes')) return 'The Memes';
-  if (pathname.startsWith('/meme-lab')) return 'Meme Lab';
-  if (pathname.startsWith('/network')) return 'Network';
-  if (pathname.startsWith('/6529-gradient')) return '6529 Gradient';
-  if (pathname.startsWith('/nextgen')) return 'NextGen';
-  if (pathname.startsWith('/rememes')) return 'Rememes';
-  if (pathname.startsWith('/open-data')) return 'Open Data';
+  if (pathname === "/") return "6529.io";
+  if (pathname.startsWith("/waves")) return "Waves | Brain";
+  if (pathname.startsWith("/my-stream/notifications"))
+    return "Notifications | My Stream | Brain";
+  if (pathname.startsWith("/my-stream")) return "My Stream | Brain";
+  if (pathname.startsWith("/the-memes")) return "The Memes";
+  if (pathname.startsWith("/meme-lab")) return "Meme Lab";
+  if (pathname.startsWith("/network")) return "Network";
+  if (pathname.startsWith("/6529-gradient")) return "6529 Gradient";
+  if (pathname.startsWith("/nextgen")) return "NextGen";
+  if (pathname.startsWith("/rememes")) return "Rememes";
+  if (pathname.startsWith("/open-data")) return "Open Data";
   // Handle profile pages (e.g., /username)
-  if (pathname !== '/' && pathname.split('/').length === 2) {
-    const segments = pathname.split('/');
+  if (pathname !== "/" && pathname.split("/").length === 2) {
+    const segments = pathname.split("/");
     const firstSegment = segments[1];
     // Check if it's not one of the known routes
-    const knownRoutes = ['waves', 'my-stream', 'the-memes', 'meme-lab', 'network', '6529-gradient', 'nextgen', 'rememes', 'open-data', 'tools', 'about', 'delegation'];
+    const knownRoutes = [
+      "waves",
+      "my-stream",
+      "the-memes",
+      "meme-lab",
+      "network",
+      "6529-gradient",
+      "nextgen",
+      "rememes",
+      "open-data",
+      "tools",
+      "about",
+      "delegation",
+    ];
     if (!knownRoutes.includes(firstSegment)) {
       return `Profile | 6529.io`;
     }
@@ -38,7 +61,9 @@ const getDefaultTitleForRoute = (pathname: string): string => {
   return DEFAULT_TITLE;
 };
 
-export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const router = useRouter();
   const [title, setTitle] = useState<string>(DEFAULT_TITLE);
   const [notificationCount, setNotificationCount] = useState<number>(0);
@@ -67,11 +92,24 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Compute the final title with notification count
-  const finalTitle = notificationCount > 0 ? `(${notificationCount}) ${title}` : title;
+  const notificationText =
+    notificationCount === 1
+      ? "1 notification"
+      : notificationCount > 1
+      ? `${notificationCount} notifications`
+      : "";
+  const finalTitle = notificationText
+    ? `(${notificationText}) ${title}`
+    : title;
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(
-    () => ({ title: finalTitle, setTitle: updateTitle, notificationCount, setNotificationCount }),
+    () => ({
+      title: finalTitle,
+      setTitle: updateTitle,
+      notificationCount,
+      setNotificationCount,
+    }),
     [finalTitle, notificationCount]
   );
 
@@ -85,7 +123,7 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 export const useTitle = () => {
   const context = useContext(TitleContext);
   if (!context) {
-    throw new Error('useTitle must be used within a TitleProvider');
+    throw new Error("useTitle must be used within a TitleProvider");
   }
   return context;
 };
@@ -94,7 +132,7 @@ export const useTitle = () => {
 export const useSetTitle = (pageTitle: string) => {
   const { setTitle } = useTitle();
   const router = useRouter();
-  
+
   // Set title immediately on mount and when title changes
   useEffect(() => {
     setTitle(pageTitle);
@@ -104,7 +142,7 @@ export const useSetTitle = (pageTitle: string) => {
 // Hook to set notification count
 export const useSetNotificationCount = (count: number) => {
   const { setNotificationCount } = useTitle();
-  
+
   useEffect(() => {
     setNotificationCount(count);
   }, [count, setNotificationCount]);

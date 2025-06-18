@@ -5,6 +5,7 @@ import React, {
   ReactNode,
   useEffect,
   useState,
+  useRef,
 } from "react";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
 import useEnhancedDmWavesList from "./hooks/useEnhancedDmWavesList";
@@ -76,12 +77,13 @@ const MyStreamContext = createContext<MyStreamContextType | null>(null);
 export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   children,
 }) => {
-  const { isCapacitor } = useCapacitor();
+  const { isCapacitor, isActive } = useCapacitor();
   const { activeWaveId, setActiveWave } = useActiveWaveManager();
   const wavesHookData = useEnhancedWavesList(activeWaveId);
   const dmWavesHookData = useEnhancedDmWavesList(activeWaveId);
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
+  const prevIsActiveRef = useRef(isActive);
 
   // Instantiate the data manager, passing the updater function from the store
   const waveDataManager = useWaveDataManager({
@@ -117,6 +119,22 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       waveDataManager.registerWave(activeWaveId, true);
     }
   }, [activeWaveId]);
+
+  // Detect when app comes to foreground on mobile
+  useEffect(() => {
+    if (!isCapacitor) {
+      return;
+    }
+    
+    // Check if app transitioned from background to foreground
+    if (!prevIsActiveRef.current && isActive) {
+      // App just became active, refresh waves
+      wavesHookData.refetchAllWaves();
+    }
+    
+    // Update the ref for next comparison
+    prevIsActiveRef.current = isActive;
+  }, [isActive, isCapacitor, wavesHookData.refetchAllWaves]);
 
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {

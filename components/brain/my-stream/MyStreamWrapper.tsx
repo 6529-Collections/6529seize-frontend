@@ -83,8 +83,13 @@ const MyStreamWrapper: React.FC = () => {
     }
   };
 
-  // Use conditional title based on haveNewItems
-  useSetTitle(haveNewItems ? "New Stream Items Available | Brain" : "My Stream | Brain");
+  useSetTitle(
+    status === "pending" || !isInitialQueryDone
+      ? "My Stream | Brain"
+      : haveNewItems
+      ? "My Stream (New items) | Brain"
+      : "My Stream | Brain"
+  );
 
   useEffect(() => {
     const checkAndRefetch = () => {
@@ -99,10 +104,8 @@ const MyStreamWrapper: React.FC = () => {
     return () => {
       document.removeEventListener("visibilitychange", checkAndRefetch);
     };
-  }, [haveNewItems]);
+  }, [haveNewItems, refetch]);
 
-  // Add a key prop based on wave ID to force component remount on wave change
-  // This breaks the update cycle and ensures clean state when navigating between waves
   const component = serialisedWaveId ? (
     <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
   ) : (
@@ -121,7 +124,8 @@ const MyStreamWrapper: React.FC = () => {
   return (
     <BrainContent
       activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}>
+      onCancelReplyQuote={onCancelReplyQuote}
+    >
       {component}
     </BrainContent>
   );
