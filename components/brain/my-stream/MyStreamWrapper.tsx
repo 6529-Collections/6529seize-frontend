@@ -83,28 +83,10 @@ const MyStreamWrapper: React.FC = () => {
     }
   };
 
-  useSetTitle(
-    status === "pending" || !isInitialQueryDone
-      ? "My Stream | Brain"
-      : haveNewItems
-      ? "My Stream (New items) | Brain"
-      : "My Stream | Brain"
-  );
-
-  useEffect(() => {
-    const checkAndRefetch = () => {
-      if (haveNewItems && document.visibilityState === "visible") {
-        refetch();
-      }
-    };
-
-    checkAndRefetch();
-    document.addEventListener("visibilitychange", checkAndRefetch);
-
-    return () => {
-      document.removeEventListener("visibilitychange", checkAndRefetch);
-    };
-  }, [haveNewItems, refetch]);
+  const titlePrefix = (status !== "pending" && isInitialQueryDone && haveNewItems) 
+    ? "My Stream (New items)" 
+    : "My Stream";
+  useSetTitle(`${titlePrefix} | Brain`);
 
   const component = serialisedWaveId ? (
     <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
