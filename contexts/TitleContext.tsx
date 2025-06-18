@@ -92,12 +92,12 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   // Compute the final title with notification count
-  const notificationText =
-    notificationCount === 1
-      ? "1 notification"
-      : notificationCount > 1
-      ? `${notificationCount} notifications`
-      : "";
+  let notificationText = "";
+  if (notificationCount === 1) {
+    notificationText = "1 notification";
+  } else if (notificationCount > 1) {
+    notificationText = `${notificationCount} notifications`;
+  }
   const finalTitle = notificationText
     ? `(${notificationText}) ${title}`
     : title;

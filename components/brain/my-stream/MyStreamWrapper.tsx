@@ -65,7 +65,6 @@ const MyStreamWrapper: React.FC = () => {
     isFetching,
     isFetchingNextPage,
     status,
-    refetch,
     isInitialQueryDone,
   } = useMyStreamQuery({ reverse: true });
 
@@ -83,7 +82,7 @@ const MyStreamWrapper: React.FC = () => {
     }
   };
 
-  const titlePrefix = (status !== "pending" && isInitialQueryDone && haveNewItems) 
+  const titlePrefix = (!serialisedWaveId && status !== "pending" && isInitialQueryDone && haveNewItems) 
     ? "My Stream (New items)" 
     : "My Stream";
   useSetTitle(`${titlePrefix} | Brain`);

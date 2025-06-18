@@ -27,8 +27,6 @@ export default function WaveDropFollowAuthor({
   const followState = drop.author?.subscribed_actions?.length
     ? FOLLOW_STATE.FOLLOWING
     : FOLLOW_STATE.NOT_FOLLOWING;
-  
-  const [localFollowState, setLocalFollowState] = useState(followState);
 
   const components: Record<FOLLOW_STATE, React.ReactNode> = {
     [FOLLOW_STATE.FOLLOWING]: (
