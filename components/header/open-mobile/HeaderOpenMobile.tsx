@@ -11,7 +11,7 @@ export default function HeaderOpenMobile() {
   const pathname = usePathname();
 
   const openInApp = () => {
-    let routerPath = pathname || "";
+    let routerPath = pathname ?? "";
     if (routerPath.endsWith("/")) {
       routerPath = routerPath.slice(0, -1);
     }

@@ -17,8 +17,8 @@ export default function WagmiSetup({
   wagmiConfig,
   children,
 }: {
-  wagmiConfig: WagmiConfig;
-  children: React.ReactNode;
+  readonly wagmiConfig: WagmiConfig;
+  readonly children: React.ReactNode;
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
 

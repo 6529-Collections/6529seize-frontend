@@ -67,7 +67,7 @@ interface Props {
   ensText: string;
 }
 
-export default function About(props: Props) {
+export default function About(props: Readonly<Props>) {
   const router = useRouter();
   const { setTitle } = useTitle();
   const {

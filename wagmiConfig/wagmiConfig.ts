@@ -1,12 +1,15 @@
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
-import { DELEGATION_CONTRACT, SUBSCRIPTIONS_CHAIN } from "@/constants";
+import {
+  DELEGATION_CONTRACT,
+  SUBSCRIPTIONS_CHAIN,
+  MANIFOLD_NETWORK,
+} from "@/constants";
 import { Capacitor } from "@capacitor/core";
 import { Chain } from "viem";
 import { mainnet, sepolia, goerli } from "viem/chains";
 import { wagmiConfigCapacitor } from "./wagmiConfigCapacitor";
 import { wagmiConfigWeb } from "./wagmiConfigWeb";
 import { Config } from "wagmi";
-import { MANIFOLD_NETWORK } from "@/constants";
 
 export type WagmiConfig = {
   chains: Chain[];
@@ -32,8 +35,6 @@ export function getChains() {
   return chains;
 }
 
-let wagmiConfig: WagmiConfig;
-
 const wagmiMetadata = {
   name: "6529.io",
   description: "6529.io",
@@ -43,22 +44,15 @@ const wagmiMetadata = {
   ],
 };
 
-function initWagmiConfig() {
+export function getWagmiConfig(): WagmiConfig {
   const isCapacitor = Capacitor.isNativePlatform();
   const CONTRACT_CHAINS = getChains();
   const chains = [...CONTRACT_CHAINS] as [Chain, ...Chain[]];
   const config = isCapacitor
     ? wagmiConfigCapacitor(chains, wagmiMetadata)
     : wagmiConfigWeb(chains, wagmiMetadata);
-  wagmiConfig = {
+  return {
     chains,
     config,
   };
-}
-
-export function getWagmiConfig() {
-  if (!wagmiConfig) {
-    initWagmiConfig();
-  }
-  return wagmiConfig;
 }

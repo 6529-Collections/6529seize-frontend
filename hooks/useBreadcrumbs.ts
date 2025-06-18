@@ -65,7 +65,7 @@ export const useBreadcrumbs = (): Crumb[] => {
   }, [searchParams]);
 
   const [activeItem, setActiveItem] = useState<BreadcrumbQueueItem>(() => ({
-    pathname: pathname || "",
+    pathname: pathname ?? "",
     asPath:
       pathname +
       (searchParams?.toString() ? `?${searchParams.toString()}` : ""),
@@ -75,7 +75,7 @@ export const useBreadcrumbs = (): Crumb[] => {
 
   useEffect(() => {
     setActiveItem({
-      pathname: pathname || "",
+      pathname: pathname ?? "",
       asPath:
         pathname +
         (searchParams?.toString() ? `?${searchParams.toString()}` : ""),

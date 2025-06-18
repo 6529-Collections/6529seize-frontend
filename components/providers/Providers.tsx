@@ -28,7 +28,11 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { getWagmiConfig } from "@/wagmiConfig/wagmiConfig";
 import { initWeb3Modal } from "./web3ModalSetup";
 
-export default function Providers({ children }: { children: ReactNode }) {
+export default function Providers({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   const wagmiConfig = getWagmiConfig();
   initWeb3Modal(wagmiConfig.config);
 

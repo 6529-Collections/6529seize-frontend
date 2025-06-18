@@ -6,6 +6,10 @@ import { makeStore } from "@/store/store";
 
 const store = makeStore();
 
-export default function StoreProvider({ children }: { children: ReactNode }) {
+export default function StoreProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   return <Provider store={store}>{children}</Provider>;
 }

@@ -1,11 +1,10 @@
 import { createConnector } from "wagmi";
 import { privateKeyToAccount } from "viem/accounts";
 import { createWalletClient, fallback, http, WalletClient } from "viem";
-import type { Address, Hex } from "viem";
+import type { Address, Hex, Chain } from "viem";
 import type { AppWallet } from "../components/app-wallets/AppWalletsContext";
 import { decryptData } from "../components/app-wallets/app-wallet-helpers";
 import { areEqualAddresses } from "../helpers/Helpers";
-import { Chain } from "viem";
 
 export const APP_WALLET_CONNECTOR_TYPE = "app-wallet";
 

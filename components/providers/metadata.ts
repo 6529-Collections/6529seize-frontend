@@ -26,11 +26,11 @@ export function getPageMetadata({
   const twitterCard =
     componentMetadata?.twitterCard ?? pageMetadata?.twitterCard ?? "summary";
 
+  const domain = isStaging ? "staging.6529.io" : "6529.io";
+
   return {
     title,
-    description: `${description ? `${description} | ` : ""}${
-      isStaging ? "staging.6529.io" : "6529.io"
-    }`,
+    description: description ? `${description} | ${domain}` : domain,
     ogImage,
     twitterCard,
   };

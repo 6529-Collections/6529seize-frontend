@@ -109,7 +109,7 @@ function HeaderQRModal({
     walletAddress: string | null,
     role: string | null
   ) {
-    let routerPath = pathname || "";
+    let routerPath = pathname ?? "";
     if (routerPath.endsWith("/")) {
       routerPath = routerPath.slice(0, -1);
     }

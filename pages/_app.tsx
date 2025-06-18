@@ -13,9 +13,6 @@ import Providers from "@/components/providers/Providers";
 import { getPageMetadata } from "@/components/providers/metadata";
 import { wrapper } from "@/store/store";
 import { Provider } from "react-redux";
-import { CW_PROJECT_ID } from "@/constants";
-import { createWeb3Modal } from "@web3modal/wagmi";
-import { getWagmiConfig } from "@/wagmiConfig/wagmiConfig";
 
 export type NextPageWithLayout<Props> = NextPage<Props> & {
   getLayout?: (page: ReactElement<any>) => ReactNode;

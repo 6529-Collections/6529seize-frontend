@@ -4,12 +4,12 @@ import { usePathname } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import DesktopLayout from "@/components/layout/DesktopLayout";
 import MobileLayout from "@/components/layout/MobileLayout";
-import { Suspense, useMemo } from "react";
+import { useMemo } from "react";
 
 export default function LayoutWrapper({
   children,
 }: {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }) {
   const { isApp } = useDeviceInfo();
   const pathname = usePathname();
