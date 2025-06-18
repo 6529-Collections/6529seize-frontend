@@ -5,6 +5,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import DesktopLayout from "@/components/layout/DesktopLayout";
 import MobileLayout from "@/components/layout/MobileLayout";
 import { useMemo } from "react";
+import FooterWrapper from "@/FooterWrapper";
 
 export default function LayoutWrapper({
   children,
@@ -29,5 +30,10 @@ export default function LayoutWrapper({
     return <>{children}</>;
   }
 
-  return content;
+  return (
+    <>
+      {content}
+      <FooterWrapper />
+    </>
+  );
 }

@@ -16,7 +16,6 @@ import { HeaderProvider } from "@/contexts/HeaderContext";
 import NewVersionToast from "@/components/utils/NewVersionToast";
 import WagmiSetup from "./WagmiSetup";
 import CapacitorSetup from "./CapacitorSetup";
-import FooterWrapper from "@/FooterWrapper";
 import IpfsImageSetup from "./IpfsImageSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import { NavigationHistoryProvider } from "@/contexts/NavigationHistoryContext";
@@ -81,7 +80,6 @@ export default function Providers({
             </EmojiProvider>
           </SeizeSettingsProvider>
         </ReactQueryWrapper>
-        <FooterWrapper />
       </WagmiSetup>
     </QueryClientSetup>
   );
