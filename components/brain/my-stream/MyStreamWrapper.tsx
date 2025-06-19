@@ -65,7 +65,6 @@ const MyStreamWrapper: React.FC = () => {
     isFetching,
     isFetchingNextPage,
     status,
-    refetch,
     isInitialQueryDone,
   } = useMyStreamQuery({ reverse: true });
 
@@ -83,26 +82,11 @@ const MyStreamWrapper: React.FC = () => {
     }
   };
 
-  // Use conditional title based on haveNewItems
-  useSetTitle(haveNewItems ? "New Stream Items Available | Brain" : "My Stream | Brain");
+  const titlePrefix = (!serialisedWaveId && status !== "pending" && isInitialQueryDone && haveNewItems) 
+    ? "My Stream (New items)" 
+    : "My Stream";
+  useSetTitle(`${titlePrefix} | Brain`);
 
-  useEffect(() => {
-    const checkAndRefetch = () => {
-      if (haveNewItems && document.visibilityState === "visible") {
-        refetch();
-      }
-    };
-
-    checkAndRefetch();
-    document.addEventListener("visibilitychange", checkAndRefetch);
-
-    return () => {
-      document.removeEventListener("visibilitychange", checkAndRefetch);
-    };
-  }, [haveNewItems]);
-
-  // Add a key prop based on wave ID to force component remount on wave change
-  // This breaks the update cycle and ensures clean state when navigating between waves
   const component = serialisedWaveId ? (
     <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
   ) : (
@@ -121,7 +105,8 @@ const MyStreamWrapper: React.FC = () => {
   return (
     <BrainContent
       activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}>
+      onCancelReplyQuote={onCancelReplyQuote}
+    >
       {component}
     </BrainContent>
   );

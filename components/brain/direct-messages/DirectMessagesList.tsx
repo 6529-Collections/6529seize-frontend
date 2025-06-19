@@ -138,6 +138,7 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
 
         <UnifiedWavesListEmpty
           sortedWaves={directMessages.list}
+          isFetching={directMessages.isFetching}
           isFetchingNextPage={directMessages.isFetchingNextPage}
           emptyMessage="No messages to display"
         />
