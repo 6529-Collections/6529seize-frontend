@@ -1,0 +1,26 @@
+name: Test My Action
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Test my greeting action
+      uses: 6529-Collections/ai-code-review-action@main
+      with:
+        greeting: "Hello from another repo!"
+        anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      id: greet
+
+    - name: Show the output
+      run: 'echo "The action said: ${{ steps.greet.outputs.message }}"'
