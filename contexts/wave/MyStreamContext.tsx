@@ -128,13 +128,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     
     // Check if app transitioned from background to foreground
     if (!prevIsActiveRef.current && isActive) {
-      // App just became active, refresh waves
+      // App just became active, do exactly what WebSocket connect does
+      if (activeWaveId) {
+        waveDataManager.registerWave(activeWaveId, true);
+      }
       wavesHookData.refetchAllWaves();
+      wavesHookData.resetAllWavesNewDropsCount();
     }
     
     // Update the ref for next comparison
     prevIsActiveRef.current = isActive;
-  }, [isActive, isCapacitor, wavesHookData.refetchAllWaves]);
+  }, [isActive, isCapacitor, activeWaveId, waveDataManager, wavesHookData]);
 
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
