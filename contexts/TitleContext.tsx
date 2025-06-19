@@ -116,13 +116,14 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     if (router.pathname === '/my-stream') {
       if (router.query.wave && waveData) {
         // Wave title
-        const newItemsText = waveData.newItemsCount > 0 
-          ? ` (${waveData.newItemsCount} new item${waveData.newItemsCount > 1 ? 's' : ''})`
-          : '';
-        return `${waveData.name}${newItemsText} | Brain`;
+        let newItemsText = '';
+        if (waveData.newItemsCount > 0) {
+          newItemsText = `(${waveData.newItemsCount} new) `;
+        }
+        return `${newItemsText}${waveData.name} | Brain`;
       } else {
         // Main stream title
-        const prefix = streamHasNewItems ? "My Stream (New items)" : "My Stream";
+        const prefix = streamHasNewItems ? "(New items) My Stream" : "My Stream";
         return `${prefix} | Brain`;
       }
     }
