@@ -10,7 +10,7 @@ import {
 import { useEffect, useRef } from "react";
 import HeaderSearchModalItemHighlight from "./HeaderSearchModalItemHighlight";
 import UserCICAndLevel from "../../user/utils/UserCICAndLevel";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
 import Link from "next/link";
 import {
@@ -53,6 +53,8 @@ export default function HeaderSearchModalItem({
   readonly onClose: () => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const ref = useRef<HTMLDivElement>(null);
   const isHovering = useHoverDirty(ref as React.RefObject<HTMLDivElement>);
 
@@ -120,7 +122,7 @@ export default function HeaderSearchModalItem({
       const profile = getProfile();
       return getProfileTargetRoute({
         handleOrWallet: profile.handle ?? profile.wallet.toLowerCase(),
-        router,
+        pathname: pathname ?? "",
         defaultPath: UserPageTabType.IDENTITY,
       });
     } else if (isNft()) {
@@ -129,7 +131,7 @@ export default function HeaderSearchModalItem({
       return `${collectionMap[nft.contract].path}/${nft.id}`;
     } else {
       const wave = getWave();
-      const currentWaveId = router.query.wave as string | undefined;
+      const currentWaveId = searchParams?.get("wave") as string | undefined;
       return currentWaveId === wave.id
         ? "/my-stream"
         : `/my-stream?wave=${wave.id}`;

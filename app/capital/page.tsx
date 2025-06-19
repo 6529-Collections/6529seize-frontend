@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function CapitalPage() {
   return (
     <div>
@@ -853,6 +855,6 @@ NFT investing is difficult specifically"
   );
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "6529 Capital",
 };

@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function AboutMissionPage() {
   return (
     <div>
@@ -390,6 +392,6 @@ export default function AboutMissionPage() {
   );
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "6529 Mission",
 };

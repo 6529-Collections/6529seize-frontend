@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function AboutMediaPage() {
   return (
     <div>
@@ -956,6 +958,6 @@ Punk no background"
   );
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Media Center",
 };

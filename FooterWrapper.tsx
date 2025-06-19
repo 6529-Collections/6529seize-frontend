@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import useDeviceInfo from "./hooks/useDeviceInfo";
-import Footer from "./components/footer/Footer";
+import Footer from "@/components/footer/Footer";
 
 export default function FooterWrapper() {
   const { isApp } = useDeviceInfo();

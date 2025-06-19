@@ -19,7 +19,7 @@ type TitleContextType = {
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
 
-const DEFAULT_TITLE = process.env.BASE_ENDPOINT?.includes("staging")
+export const DEFAULT_TITLE = process.env.BASE_ENDPOINT?.includes("staging")
   ? "6529 Staging"
   : "6529.io";
 
@@ -72,42 +72,32 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const routeRef = useRef(pathname);
 
-  // Set initial title on mount
   useEffect(() => {
+    if (routeRef.current === pathname) {
+      return;
+    }
+    routeRef.current = pathname;
     const defaultTitle = getDefaultTitleForRoute(pathname);
     setTitle(defaultTitle);
-  }, []);
-
-  // Update title when route changes
-  useEffect(() => {
-    if (routeRef.current !== pathname) {
-      routeRef.current = pathname;
-      const defaultTitle = getDefaultTitleForRoute(pathname);
-      setTitle(defaultTitle);
-    }
   }, [pathname]);
 
   const updateTitle = (newTitle: string) => {
-    // Only update if we're still on the same route
     if (routeRef.current === pathname) {
       setTitle(newTitle);
     }
   };
 
-  // Compute the final title with notification count
-  const finalTitle =
-    notificationCount > 0 ? `(${notificationCount}) ${title}` : title;
+  const contextValue = useMemo(() => {
+    const finalTitle =
+      notificationCount > 0 ? `(${notificationCount}) ${title}` : title;
 
-  // Memoize the context value to prevent unnecessary re-renders
-  const contextValue = useMemo(
-    () => ({
+    return {
       title: finalTitle,
       setTitle: updateTitle,
       notificationCount,
       setNotificationCount,
-    }),
-    [finalTitle, notificationCount]
-  );
+    };
+  }, [title, notificationCount]);
 
   return (
     <TitleContext.Provider value={contextValue}>

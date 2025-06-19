@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function AboutPressPage() {
   return (
     <div>
@@ -1997,6 +1999,6 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
   );
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Press",
 };

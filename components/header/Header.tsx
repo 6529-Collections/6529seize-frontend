@@ -4,7 +4,7 @@ import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AboutSection } from "../../pages/about/[section]";
+import { AboutSection } from "@/enums";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";

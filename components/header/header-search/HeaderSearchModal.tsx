@@ -9,7 +9,7 @@ import HeaderSearchModalItem, {
   NFTSearchResult,
   HeaderSearchModalItemType,
 } from "./HeaderSearchModalItem";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
@@ -42,6 +42,8 @@ export default function HeaderSearchModal({
   readonly onClose: () => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
@@ -123,10 +125,10 @@ export default function HeaderSearchModal({
     const handleOrWallet = profile.handle ?? profile.wallet.toLowerCase();
     const path = getProfileTargetRoute({
       handleOrWallet,
-      router,
+      pathname: pathname ?? "",
       defaultPath: UserPageTabType.IDENTITY,
     });
-    await router.push(path);
+    router.push(path);
     onClose();
   };
 
@@ -170,10 +172,10 @@ export default function HeaderSearchModal({
     }
     if (selectedCategory === CATEGORY.WAVES) {
       const wave = item as ApiWave;
-      const currentWaveId = router.query.wave as string | undefined;
+      const currentWaveId = searchParams?.get("wave") as string | undefined;
       const target =
         currentWaveId === wave.id ? "/my-stream" : `/my-stream?wave=${wave.id}`;
-      router.push(target, undefined, { shallow: true });
+      router.push(target);
       onClose();
     }
   });

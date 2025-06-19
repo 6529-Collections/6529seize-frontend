@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function EmailSignaturesPage() {
   return (
     <div>
@@ -535,6 +537,6 @@ Notes:
   );
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Email Signatures",
 };

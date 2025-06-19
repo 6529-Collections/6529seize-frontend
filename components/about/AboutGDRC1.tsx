@@ -1,11 +1,9 @@
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
+import { fetchAboutSectionFile } from "./about.helpers";
 
-interface Props {
-  html: string;
-}
-
-export default function AboutGDRC1(props: Readonly<Props>) {
+export default async function AboutGDRC1() {
+  const html = await fetchAboutSectionFile("gdrc1");
   return (
     <Container>
       <Row>
@@ -34,7 +32,7 @@ export default function AboutGDRC1(props: Readonly<Props>) {
         <Col
           className={styles.htmlContainer}
           dangerouslySetInnerHTML={{
-            __html: props.html,
+            __html: html,
           }}></Col>
       </Row>
     </Container>

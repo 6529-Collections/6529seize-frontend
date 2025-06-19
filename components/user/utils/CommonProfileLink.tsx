@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { UserPageTabType } from "../layout/UserPageTabs";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 
 export default function CommonProfileLink({
   handleOrWallet,
@@ -14,10 +14,10 @@ export default function CommonProfileLink({
   readonly isCurrentUser: boolean;
   readonly tabTarget: UserPageTabType;
 }) {
-  const router = useRouter();
+  const pathname = usePathname();
   const url = getProfileTargetRoute({
     handleOrWallet,
-    router,
+    pathname: pathname ?? "",
     defaultPath: tabTarget,
   });
 

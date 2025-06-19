@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function AboutOpenMetaversePage() {
   return (
     <div>
@@ -545,6 +547,6 @@ STATE OF TECHNOLOGY
   );
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Open Metaverse",
 };

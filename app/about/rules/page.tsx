@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function AboutRulesPage() {
   return (
     <div>
@@ -420,6 +422,6 @@ export default function AboutRulesPage() {
   );
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "6529 Fam Rules",
 };

@@ -1,3 +1,5 @@
+import { Metadata } from "next";
+
 export default function CapitalCompanyPortfolioPage() {
   return (
     <div>
@@ -1016,6 +1018,6 @@ Transient Labs"
   );
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Company Portfolio",
 };

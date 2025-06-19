@@ -1,4 +1,4 @@
-import styles from "../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../entities/IDBResponse";
@@ -13,8 +13,6 @@ import {
 } from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
 import { getCommonHeaders } from "../helpers/server.helpers";
-import { ActivityLogParams } from "../components/profile-activity/ProfileActivityLogs";
-import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
 import NextGenCollectionSlideshow from "../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
@@ -22,14 +20,12 @@ import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
 import DotLoader from "../components/dotLoader/DotLoader";
 import ArtistProfileHandle from "../components/the-memes/ArtistProfileHandle";
 import Link from "next/link";
-import { useSetTitle } from "../contexts/TitleContext";
 import { useAuth } from "../components/auth/Auth";
 import { NftOwner } from "../entities/IOwner";
 import {
   getFileTypeFromMetadata,
   getDimensionsFromMetadata,
 } from "../helpers/nft.helpers";
-import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
 import { ManifoldClaim } from "../hooks/useManifoldClaim";
 import { NftPageStats } from "../components/nftAttributes/NftStats";
 import useCapacitor from "../hooks/useCapacitor";
@@ -40,18 +36,6 @@ export interface IndexPageProps {
   readonly nft: NFTWithMemesExtendedData;
   readonly nextGenFeatured: NextGenCollection;
 }
-
-const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
-  page: 1,
-  pageSize: 20,
-  logTypes: getProfileLogTypes({
-    logTypes: [],
-  }),
-  matter: null,
-  targetType: FilterTargetType.ALL,
-  handleOrWallet: null,
-  groupId: null,
-};
 
 const NFTImage = dynamic(() => import("../components/nft-image/NFTImage"), {
   ssr: false,
@@ -72,7 +56,6 @@ export default function Home(props: IndexPageProps) {
   const { country } = useCookieConsent();
 
   const { connectedProfile } = useAuth();
-  useSetTitle("6529.io");
 
   const [nftBalance, setNftBalance] = useState<number>(0);
 
