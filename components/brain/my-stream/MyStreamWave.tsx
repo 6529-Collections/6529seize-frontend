@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, type JSX, useMemo } from "react";
+import React, { type JSX, useMemo } from "react";
 import { useSetWaveData } from "../../../contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
@@ -41,23 +41,14 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   // Get new drops count from the waves list
   const newDropsCount = useMemo(() => {
     // Check both regular waves and direct messages
-    const allWaves = [...waves.list, ...directMessages.list];
-    const waveFromList = allWaves.find(w => w.id === waveId);
+    const waveFromList = waves.list.find(w => w.id === waveId) || 
+                       directMessages.list.find(w => w.id === waveId);
     return waveFromList?.newDropsCount.count ?? 0;
   }, [waves.list, directMessages.list, waveId]);
   
   // Update wave data in title context
   useSetWaveData(wave ? { name: wave.name, newItemsCount: newDropsCount } : null);
   
-  // Track mount status to prevent post-unmount updates
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
   // Create a stable key for proper remounting
   const stableWaveKey = `wave-${waveId}`;
 

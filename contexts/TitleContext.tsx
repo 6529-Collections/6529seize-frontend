@@ -195,7 +195,7 @@ export const useSetWaveData = (data: { name: string; newItemsCount: number } | n
 
   useEffect(() => {
     setWaveData(data);
-  }, [data?.name, data?.newItemsCount, setWaveData]);
+  }, [data, setWaveData]);
 };
 
 // Hook to set stream new items status
