@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useSetTitle } from "../../../contexts/TitleContext";
 import MyStream from "./MyStream";
 import { useRouter } from "next/router";
 import MyStreamWave from "./MyStreamWave";
@@ -82,11 +81,6 @@ const MyStreamWrapper: React.FC = () => {
     }
   };
 
-  const titlePrefix = (!serialisedWaveId && status !== "pending" && isInitialQueryDone && haveNewItems) 
-    ? "My Stream (New items)" 
-    : "My Stream";
-  useSetTitle(`${titlePrefix} | Brain`);
-
   const component = serialisedWaveId ? (
     <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
   ) : (
@@ -99,6 +93,9 @@ const MyStreamWrapper: React.FC = () => {
       items={items}
       isFetching={isFetching}
       onBottomIntersection={onBottomIntersection}
+      haveNewItems={haveNewItems}
+      status={status}
+      isInitialQueryDone={isInitialQueryDone}
     />
   );
 
