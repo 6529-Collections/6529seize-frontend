@@ -29,7 +29,7 @@ import AboutTermsOfService from "./AboutTermsOfService";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
 
-export default function About({ section }: { section: AboutSection }) {
+export default function About({ section }: { readonly section: AboutSection }) {
   const router = useRouter();
 
   const sectionTitle = capitalizeEveryWord(section.replaceAll("-", " "));
@@ -107,8 +107,8 @@ export default function About({ section }: { section: AboutSection }) {
 
 function AboutMenu(
   props: Readonly<{
-    currentSection: AboutSection | undefined;
-    setSection: (section: AboutSection) => void;
+    readonly currentSection: AboutSection | undefined;
+    readonly setSection: (section: AboutSection) => void;
   }>
 ) {
   const capacitor = useCapacitor();
@@ -281,10 +281,10 @@ function AboutMenu(
 
 function AboutRow(
   props: Readonly<{
-    section: AboutSection;
-    currentSection: AboutSection | undefined;
-    setSection: (section: AboutSection) => void;
-    title: string;
+    readonly section: AboutSection;
+    readonly currentSection: AboutSection | undefined;
+    readonly setSection: (section: AboutSection) => void;
+    readonly title: string;
   }>
 ) {
   return (

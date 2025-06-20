@@ -8,7 +8,7 @@ import {
   getProfileTargetRoute,
 } from "../../../../../../../helpers/Helpers";
 import { TransactionType } from "./UserPageStatsActivityWalletTableRow";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { UserPageTabType } from "../../../../../layout/UserPageTabs";
 
 export default function UserPageStatsActivityWalletTableRowSecondAddress({
@@ -18,7 +18,6 @@ export default function UserPageStatsActivityWalletTableRowSecondAddress({
   readonly transaction: Transaction;
   readonly type: TransactionType;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
 
   const TYPE_TO_ACTION: Record<TransactionType, string> = {

@@ -52,7 +52,7 @@ export default function UserPageRepsItem({
               )}`}
               theme="dark"
               placement="top"
-              disabled={isTouchScreen || !rep.rater_contribution}>
+              disabled={isTouchScreen ?? !rep.rater_contribution}>
               <span>{formatNumberWithCommas(rep.rating)}</span>
             </Tippy>
           </span>
