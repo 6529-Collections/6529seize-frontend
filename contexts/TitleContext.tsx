@@ -8,13 +8,15 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 type TitleContextType = {
   title: string;
   setTitle: (title: string) => void;
   notificationCount: number;
   setNotificationCount: (count: number) => void;
+  setWaveData: (data: { name: string; newItemsCount: number } | null) => void;
+  setStreamHasNewItems: (hasNewItems: boolean) => void;
 };
 
 const TitleContext = createContext<TitleContextType | undefined>(undefined);
@@ -68,9 +70,16 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [title, setTitle] = useState<string>(DEFAULT_TITLE);
   const [notificationCount, setNotificationCount] = useState<number>(0);
+  const [waveData, setWaveData] = useState<{
+    name: string;
+    newItemsCount: number;
+  } | null>(null);
+  const [streamHasNewItems, setStreamHasNewItems] = useState(false);
   const routeRef = useRef(pathname);
+  const queryRef = useRef(searchParams);
 
   useEffect(() => {
     if (routeRef.current === pathname) {
@@ -81,23 +90,78 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
     setTitle(defaultTitle);
   }, [pathname]);
 
+  // Update title when route or query changes
+  useEffect(() => {
+    const pathChanged = routeRef.current !== pathname;
+    const queryChanged =
+      JSON.stringify(queryRef.current) !== JSON.stringify(searchParams);
+
+    if (pathChanged) {
+      routeRef.current = pathname;
+      queryRef.current = searchParams;
+      const defaultTitle = getDefaultTitleForRoute(pathname);
+      setTitle(defaultTitle);
+      // Reset wave data when leaving my-stream
+      if (pathname !== "/my-stream") {
+        setWaveData(null);
+        setStreamHasNewItems(false);
+      }
+    } else if (queryChanged && pathname === "/my-stream") {
+      queryRef.current = searchParams;
+      // Reset wave data when navigating between waves or back to stream
+      if (!searchParams?.get("wave")) {
+        setWaveData(null);
+      }
+    }
+  }, [pathname, searchParams]);
+
   const updateTitle = (newTitle: string) => {
     if (routeRef.current === pathname) {
       setTitle(newTitle);
     }
   };
 
-  const contextValue = useMemo(() => {
-    const finalTitle =
-      notificationCount > 0 ? `(${notificationCount}) ${title}` : title;
+  // Compute the title based on current state
+  const computedTitle = useMemo(() => {
+    if (pathname === "/my-stream") {
+      if (searchParams?.get("wave") && waveData) {
+        // Wave title
+        let newItemsText = "";
+        if (waveData.newItemsCount > 0) {
+          newItemsText = `(${waveData.newItemsCount} new) `;
+        }
+        return `${newItemsText}${waveData.name} | Brain`;
+      } else {
+        // Main stream title
+        const prefix = streamHasNewItems
+          ? "(New items) My Stream"
+          : "My Stream";
+        return `${prefix} | Brain`;
+      }
+    }
+    return title;
+  }, [pathname, searchParams?.get("wave"), waveData, streamHasNewItems, title]);
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => {
+    let notificationText = "";
+    if (notificationCount === 1) {
+      notificationText = "1 notification";
+    } else if (notificationCount > 1) {
+      notificationText = `${notificationCount} notifications`;
+    }
+    const finalTitle = notificationText
+      ? `(${notificationText}) ${computedTitle}`
+      : computedTitle;
     return {
       title: finalTitle,
       setTitle: updateTitle,
       notificationCount,
       setNotificationCount,
+      setWaveData,
+      setStreamHasNewItems,
     };
-  }, [title, notificationCount]);
+  }, [computedTitle, notificationCount]);
 
   return (
     <TitleContext.Provider value={contextValue}>
@@ -132,4 +196,24 @@ export const useSetNotificationCount = (count: number) => {
   useEffect(() => {
     setNotificationCount(count);
   }, [count, setNotificationCount]);
+};
+
+// Hook to set wave data for title
+export const useSetWaveData = (
+  data: { name: string; newItemsCount: number } | null
+) => {
+  const { setWaveData } = useTitle();
+
+  useEffect(() => {
+    setWaveData(data);
+  }, [data, setWaveData]);
+};
+
+// Hook to set stream new items status
+export const useSetStreamHasNewItems = (hasNewItems: boolean) => {
+  const { setStreamHasNewItems } = useTitle();
+
+  useEffect(() => {
+    setStreamHasNewItems(hasNewItems);
+  }, [hasNewItems, setStreamHasNewItems]);
 };

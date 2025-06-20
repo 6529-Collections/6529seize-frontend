@@ -2,13 +2,15 @@ import { motion } from "framer-motion";
 import React from "react";
 
 interface UnifiedWavesListLoaderProps {
+  readonly isFetching?: boolean;
   readonly isFetchingNextPage: boolean;
 }
 
 export const UnifiedWavesListLoader: React.FC<UnifiedWavesListLoaderProps> = ({
+  isFetching = false,
   isFetchingNextPage,
 }) => {
-  if (!isFetchingNextPage) {
+  if (!isFetching && !isFetchingNextPage) {
     return null;
   }
 

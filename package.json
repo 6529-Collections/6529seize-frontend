@@ -99,8 +99,8 @@
     "three": "^0.163.0",
     "use-debounce": "^10.0.3",
     "uuid": "^10.0.0",
-    "viem": "^2.15.1",
-    "wagmi": "^2.10.3"
+    "viem": "^2.31.3",
+    "wagmi": "^2.15.6"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.0",

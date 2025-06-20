@@ -104,7 +104,7 @@ export function usePollingQuery(
         params,
       });
     },
-    enabled: !haveNewItems && isInitialQueryDone,
+    enabled: isInitialQueryDone, // Keep polling even when new items exist
     refetchInterval: isTabVisible ? 5000 : 30000,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
@@ -130,13 +130,8 @@ export function usePollingQuery(
           ? latestPolledItem.serial_no > latestExistingItem.serial_no
           : true
       );
-    } else if (
-      pollingResult &&
-      pollingResult.length > 0 &&
-      items.length === 0
-    ) {
-      setHaveNewItems(true);
     } else {
+      // Don't show "new items" when feed hasn't loaded yet
       setHaveNewItems(false);
     }
   }, [pollingResult, items, reverse]);
