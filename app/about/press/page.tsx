@@ -801,7 +801,7 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
                             </div>
                             <div className="fusion-text fusion-text-11">
                               <p className="paragraphs__P-sc-1q25yhg-0 iJJHWN">
-                                In the alpha version, the&nbsp;
+                                In the alpha version, the{" "}
                                 <a
                                   className="links__A-sc-1pd4kk3-0 Linkstyles__LinkWrapper-sc-1wr4e19-1 gBJCvZ bDAinA"
                                   href="https://oncyber.io/6529om"
