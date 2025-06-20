@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import PencilIcon from "../../../utils/icons/PencilIcon";
@@ -22,8 +24,7 @@ export default function UserPageHeaderPfpWrapper({
         onClick={() => setIsEditPfpOpen(true)}
         disabled={!canEdit}
         className="tw-group tw-bg-transparent tw-border-none tw-relative tw-p-1 tw-rounded-lg"
-        aria-label={canEdit ? "Edit profile picture" : "Profile picture"}
-      >
+        aria-label={canEdit ? "Edit profile picture" : "Profile picture"}>
         {children}
 
         {canEdit && (
@@ -40,8 +41,7 @@ export default function UserPageHeaderPfpWrapper({
             key="modal"
             elementClasses="tw-absolute tw-z-[1000]"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <UserPageHeaderEditPfp
               profile={profile}
               onClose={() => setIsEditPfpOpen(false)}

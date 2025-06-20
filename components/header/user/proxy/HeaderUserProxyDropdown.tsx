@@ -1,3 +1,5 @@
+"use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import { ApiIdentity } from "../../../../generated/models/ApiIdentity";
 import { useContext, useEffect, useState } from "react";

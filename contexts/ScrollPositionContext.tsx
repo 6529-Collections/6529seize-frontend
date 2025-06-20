@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useMemo, useRef } from "react";
 
 interface ScrollPositionContextValue {

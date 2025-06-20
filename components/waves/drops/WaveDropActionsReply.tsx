@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { Tooltip } from "react-tooltip";
@@ -37,8 +39,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
         onClick={canReply ? handleReplyClick : undefined}
         disabled={!canReply}
         aria-label="Reply to drop"
-        data-tooltip-id={!isTemporaryDrop ? `reply-${drop.id}` : undefined}
-      >
+        data-tooltip-id={!isTemporaryDrop ? `reply-${drop.id}` : undefined}>
         <svg
           className={`tw-flex-shrink-0 tw-w-5 tw-h-5 tw-transition tw-ease-out tw-duration-300 ${
             !canReply ? "tw-opacity-50" : ""
@@ -47,8 +48,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
           fill="none"
           viewBox="0 0 24 24"
           strokeWidth="1.5"
-          stroke="currentColor"
-        >
+          stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -59,9 +59,12 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
       {!isTemporaryDrop && (
         <Tooltip
           id={`reply-${drop.id}`}
-            place="top"
-          style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
-        >
+          place="top"
+          style={{
+            backgroundColor: "#1F2937",
+            color: "white",
+            padding: "4px 8px",
+          }}>
           <span className="tw-text-xs">Reply</span>
         </Tooltip>
       )}

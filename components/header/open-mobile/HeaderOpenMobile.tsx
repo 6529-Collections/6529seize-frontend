@@ -1,15 +1,17 @@
+"use client";
+
 import useIsMobileDevice from "../../../hooks/isMobileDevice";
 import useCapacitor from "../../../hooks/useCapacitor";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 
 export default function HeaderOpenMobile() {
   const capacitor = useCapacitor();
   const isMobileDevice = useIsMobileDevice();
 
-  const router = useRouter();
+  const pathname = usePathname();
 
   const openInApp = () => {
-    let routerPath = router.asPath;
+    let routerPath = pathname ?? "";
     if (routerPath.endsWith("/")) {
       routerPath = routerPath.slice(0, -1);
     }
@@ -23,7 +25,7 @@ export default function HeaderOpenMobile() {
   if (
     capacitor.isCapacitor ||
     !isMobileDevice ||
-    router.pathname.startsWith("/open-mobile")
+    pathname?.startsWith("/open-mobile")
   ) {
     return null;
   }

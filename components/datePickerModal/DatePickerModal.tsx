@@ -1,3 +1,5 @@
+"use client";
+
 import { Button, Col, Container, Form, Modal, Row } from "react-bootstrap";
 import styles from "./DatePickerModal.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

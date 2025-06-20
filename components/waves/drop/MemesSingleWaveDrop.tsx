@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { SingleWaveDropHeader } from "./SingleWaveDropHeader";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
@@ -22,9 +24,13 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   const { data: wave } = useWaveData({
     waveId: drop?.wave.id ?? null,
     onWaveNotFound: () => {
-      router.push({ pathname: router.pathname, query: { wave: null } }, undefined, {
-        shallow: true,
-      });
+      router.push(
+        { pathname: router.pathname, query: { wave: null } },
+        undefined,
+        {
+          shallow: true,
+        }
+      );
     },
   });
   const [activeTab, setActiveTab] = useState<SingleWaveDropTab>(
@@ -57,8 +63,7 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
         <div
           className={`${
             activeTab === SingleWaveDropTab.CHAT ? "tw-flex" : "tw-hidden"
-          } lg:tw-flex lg:tw-flex-1 `}
-        >
+          } lg:tw-flex lg:tw-flex-1 `}>
           {wave && drop && <SingleWaveDropChat wave={wave} drop={drop} />}
         </div>
       </div>

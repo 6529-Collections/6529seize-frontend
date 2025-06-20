@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -32,7 +34,7 @@ export const BrainLeftSidebarViewChange: React.FC<
 
   const onNotificationsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    router.push('/my-stream/notifications', undefined, { shallow: true });
+    router.push("/my-stream/notifications", undefined, { shallow: true });
   };
 
   return (
@@ -50,8 +52,7 @@ export const BrainLeftSidebarViewChange: React.FC<
       <Link
         href="/my-stream/notifications"
         onClick={onNotificationsClick}
-        className={getLinkClasses("/my-stream/notifications")}
-      >
+        className={getLinkClasses("/my-stream/notifications")}>
         <span className="tw-font-semibold tw-text-sm">Notifications</span>
         {haveUnreadNotifications && (
           <span className="tw-size-2 -tw-mt-3 -tw-ml-0.5 tw-bg-red tw-rounded-full"></span>

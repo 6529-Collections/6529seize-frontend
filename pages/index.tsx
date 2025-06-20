@@ -1,4 +1,4 @@
-import styles from "../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { DBResponse } from "../entities/IDBResponse";
@@ -13,8 +13,6 @@ import {
 } from "../helpers/Helpers";
 import { fetchUrl } from "../services/6529api";
 import { getCommonHeaders } from "../helpers/server.helpers";
-import { ActivityLogParams } from "../components/profile-activity/ProfileActivityLogs";
-import { FilterTargetType } from "../components/utils/CommonFilterTargetSelect";
 import NextGenCollectionSlideshow from "../components/nextGen/collections/collectionParts/NextGenCollectionSlideshow";
 import { NextGenCollection } from "../entities/INextgen";
 import { commonApiFetch } from "../services/api/common-api";
@@ -22,14 +20,12 @@ import { formatNameForUrl } from "../components/nextGen/nextgen_helpers";
 import DotLoader from "../components/dotLoader/DotLoader";
 import ArtistProfileHandle from "../components/the-memes/ArtistProfileHandle";
 import Link from "next/link";
-import { useSetTitle } from "../contexts/TitleContext";
 import { useAuth } from "../components/auth/Auth";
 import { NftOwner } from "../entities/IOwner";
 import {
   getFileTypeFromMetadata,
   getDimensionsFromMetadata,
 } from "../helpers/nft.helpers";
-import { getProfileLogTypes } from "../helpers/profile-logs.helpers";
 import { ManifoldClaim } from "../hooks/useManifoldClaim";
 import { NftPageStats } from "../components/nftAttributes/NftStats";
 import useCapacitor from "../hooks/useCapacitor";
@@ -40,18 +36,6 @@ export interface IndexPageProps {
   readonly nft: NFTWithMemesExtendedData;
   readonly nextGenFeatured: NextGenCollection;
 }
-
-const INITIAL_ACTIVITY_LOGS_PARAMS: ActivityLogParams = {
-  page: 1,
-  pageSize: 20,
-  logTypes: getProfileLogTypes({
-    logTypes: [],
-  }),
-  matter: null,
-  targetType: FilterTargetType.ALL,
-  handleOrWallet: null,
-  groupId: null,
-};
 
 const NFTImage = dynamic(() => import("../components/nft-image/NFTImage"), {
   ssr: false,
@@ -67,25 +51,20 @@ const MemePageMintCountdown = dynamic(
   { ssr: false }
 );
 
-export default function Home({
-  pageProps,
-}: {
-  readonly pageProps: IndexPageProps;
-}) {
+export default function Home(props: IndexPageProps) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
 
   const { connectedProfile } = useAuth();
-  useSetTitle("6529.io");
 
   const [nftBalance, setNftBalance] = useState<number>(0);
 
   const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
 
   useEffect(() => {
-    if (connectedProfile?.consolidation_key && pageProps.nft) {
+    if (connectedProfile?.consolidation_key && props.nft) {
       fetchUrl(
-        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${pageProps.nft.contract}&token_id=${pageProps.nft.id}`
+        `${process.env.API_ENDPOINT}/api/nft-owners/consolidation/${connectedProfile?.consolidation_key}?contract=${props.nft.contract}&token_id=${props.nft.id}`
       ).then((response: DBResponse) => {
         const balanceObject: NftOwner = response.data[0];
         setNftBalance(balanceObject?.balance ?? 0);
@@ -152,14 +131,13 @@ export default function Home({
               lg={{ span: 6 }}>
               <Container className="no-padding">
                 <Row>
-                  {pageProps.nft.animation ||
-                  pageProps.nft.metadata.animation ? (
+                  {props.nft.animation || props.nft.metadata.animation ? (
                     <span
                       className={
                         connectedProfile ? styles.nftImagePadding : ""
                       }>
                       <NFTImage
-                        nft={pageProps.nft}
+                        nft={props.nft}
                         animation={true}
                         height={650}
                         balance={nftBalance}
@@ -168,12 +146,12 @@ export default function Home({
                     </span>
                   ) : (
                     <Link
-                      href={`/the-memes/${pageProps.nft.id}`}
+                      href={`/the-memes/${props.nft.id}`}
                       className={
                         connectedProfile ? styles.nftImagePadding : ""
                       }>
                       <NFTImage
-                        nft={pageProps.nft}
+                        nft={props.nft}
                         animation={true}
                         height={650}
                         balance={nftBalance}
@@ -196,8 +174,8 @@ export default function Home({
                   <Col>
                     <u>
                       <h3>
-                        <Link href={`/the-memes/${pageProps.nft.id}`}>
-                          Card {pageProps.nft.id} - {pageProps.nft.name}
+                        <Link href={`/the-memes/${props.nft.id}`}>
+                          Card {props.nft.id} - {props.nft.name}
                         </Link>
                       </h3>
                     </u>
@@ -216,56 +194,52 @@ export default function Home({
                         <tr>
                           <td>Collection</td>
                           <td>
-                            <b>{pageProps.nft.collection}</b>
+                            <b>{props.nft.collection}</b>
                           </td>
                         </tr>
                         <tr>
                           <td>Season</td>
                           <td>
-                            <b>{pageProps.nft.season}</b>
+                            <b>{props.nft.season}</b>
                           </td>
                         </tr>
                         <tr>
                           <td>Meme</td>
                           <td>
-                            <b>{pageProps.nft.meme_name}</b>
+                            <b>{props.nft.meme_name}</b>
                           </td>
                         </tr>
                         <tr>
                           <td>Artist Name</td>
                           <td>
-                            <b>{pageProps.nft.artist}</b>
+                            <b>{props.nft.artist}</b>
                           </td>
                         </tr>
                         <tr>
                           <td>Artist Profile</td>
                           <td>
                             <b>
-                              <ArtistProfileHandle nft={pageProps.nft} />
+                              <ArtistProfileHandle nft={props.nft} />
                             </b>
                           </td>
                         </tr>
                         <tr>
                           <td>Mint Date</td>
                           <td>
-                            <b>{printMintDate(pageProps.nft.mint_date)}</b>
+                            <b>{printMintDate(props.nft.mint_date)}</b>
                           </td>
                         </tr>
                         <tr>
                           <td>File Type</td>
                           <td>
-                            <b>
-                              {getFileTypeFromMetadata(pageProps.nft.metadata)}
-                            </b>
+                            <b>{getFileTypeFromMetadata(props.nft.metadata)}</b>
                           </td>
                         </tr>
                         <tr>
                           <td>Dimensions</td>
                           <td>
                             <b>
-                              {getDimensionsFromMetadata(
-                                pageProps.nft.metadata
-                              )}
+                              {getDimensionsFromMetadata(props.nft.metadata)}
                             </b>
                           </td>
                         </tr>
@@ -276,7 +250,7 @@ export default function Home({
                 <Row>
                   <Col>
                     <MemePageMintCountdown
-                      nft_id={pageProps.nft.id}
+                      nft_id={props.nft.id}
                       setClaim={setManifoldClaim}
                       is_full_width={true}
                     />
@@ -289,7 +263,7 @@ export default function Home({
                 </Row>
                 <Row className="pb-3">
                   <Col>
-                    <Link href={`/the-memes/${pageProps.nft.id}/distribution`}>
+                    <Link href={`/the-memes/${props.nft.id}/distribution`}>
                       Distribution Plan
                     </Link>
                   </Col>
@@ -317,7 +291,7 @@ export default function Home({
                       </td>
                     </tr>
                     <NftPageStats
-                      nft={pageProps.nft}
+                      nft={props.nft}
                       hide_mint_price={true}
                       hide_hodl_rate={true}
                     />
@@ -327,8 +301,8 @@ export default function Home({
                   <Row className="pt-3">
                     <Col>
                       <NFTMarketplaceLinks
-                        contract={pageProps.nft.contract}
-                        id={pageProps.nft.id}
+                        contract={props.nft.contract}
+                        id={props.nft.id}
                       />
                     </Col>
                   </Row>
@@ -337,33 +311,32 @@ export default function Home({
             </Col>
           </Row>
         </Container>
-        {pageProps.nextGenFeatured &&
-          !isEmptyObject(pageProps.nextGenFeatured) && (
-            <Container className="pt-3 pb-5">
-              <Row>
-                <Col className="d-flex align-items-center gap-3">
-                  <h1>
-                    <span className="font-lightest">Discover</span> NextGen -{" "}
-                    {pageProps.nextGenFeatured.name}{" "}
-                  </h1>
-                  <Link
-                    href={`/nextgen/collection/${formatNameForUrl(
-                      pageProps.nextGenFeatured.name
-                    )}`}
-                    className={styles.viewAllLink}>
-                    <span>View Collection</span>
-                  </Link>
-                </Col>
-              </Row>
-              <Row className="pt-3">
-                <Col>
-                  <NextGenCollectionSlideshow
-                    collection={pageProps.nextGenFeatured}
-                  />
-                </Col>
-              </Row>
-            </Container>
-          )}
+        {props.nextGenFeatured && !isEmptyObject(props.nextGenFeatured) && (
+          <Container className="pt-3 pb-5">
+            <Row>
+              <Col className="d-flex align-items-center gap-3">
+                <h1>
+                  <span className="font-lightest">Discover</span> NextGen -{" "}
+                  {props.nextGenFeatured.name}{" "}
+                </h1>
+                <Link
+                  href={`/nextgen/collection/${formatNameForUrl(
+                    props.nextGenFeatured.name
+                  )}`}
+                  className={styles.viewAllLink}>
+                  <span>View Collection</span>
+                </Link>
+              </Col>
+            </Row>
+            <Row className="pt-3">
+              <Col>
+                <NextGenCollectionSlideshow
+                  collection={props.nextGenFeatured}
+                />
+              </Col>
+            </Row>
+          </Container>
+        )}
         <div className="tailwind-scope tw-relative tw-px-2 min-[1000px]:tw-max-w-[850px] min-[1100px]:tw-max-w-[950px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px] tw-mx-auto">
           <div className="tw-px-2">
             {/* <ProfileActivityLogs

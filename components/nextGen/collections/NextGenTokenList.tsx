@@ -1,3 +1,5 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import { NextGenTokenImage } from "./nextgenToken/NextGenTokenImage";
 import {

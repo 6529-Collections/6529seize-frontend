@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { AuthContext } from "../../auth/Auth";

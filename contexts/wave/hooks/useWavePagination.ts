@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useRef } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { useWaveAbortController } from "./useWaveAbortController";

@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import React, { ReactNode, useCallback } from "react";
 import { useRouter } from "next/router";

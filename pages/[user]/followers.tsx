@@ -9,16 +9,15 @@ import {
 import UserPageFollowers from "../../components/user/followers/UserPageFollowers";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
-  pageProps,
-}) => (
+const Page: NextPageWithLayout<{ profile: ApiIdentity }> = ({ profile }) => (
   <div className="tailwind-scope">
-    <UserPageFollowers profile={pageProps.profile} />
+    <UserPageFollowers profile={profile} />
   </div>
 );
-Page.getLayout = (page: ReactElement<{ pageProps: UserPageProps }>) => (
-  <UserPageLayout profile={page.props.pageProps.profile}>{page}</UserPageLayout>
+Page.getLayout = (page: ReactElement<{ profile: ApiIdentity }>) => (
+  <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>
 );
 
 export default Page;

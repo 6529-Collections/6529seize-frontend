@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./HeaderShare.module.scss";
 import {
   faCopy,
@@ -6,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import useCapacitor from "../../../hooks/useCapacitor";
@@ -77,7 +79,7 @@ function HeaderQRModal({
   readonly show: boolean;
   readonly onClose: () => void;
 }) {
-  const router = useRouter();
+  const pathname = usePathname();
 
   const isMobile = useIsMobileDevice();
 
@@ -107,9 +109,9 @@ function HeaderQRModal({
     walletAddress: string | null,
     role: string | null
   ) {
-    let routerPath = router.asPath;
+    let routerPath = pathname ?? "";
     if (routerPath.endsWith("/")) {
-      routerPath = routerPath.slice(1);
+      routerPath = routerPath.slice(0, -1);
     }
 
     const appScheme = process.env.MOBILE_APP_SCHEME ?? "mobile6529";

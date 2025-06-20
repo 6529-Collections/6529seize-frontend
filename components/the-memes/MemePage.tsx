@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./TheMemes.module.scss";
 
 import { useContext, useEffect, useState } from "react";
@@ -280,7 +282,7 @@ export default function MemePage() {
             {nftMeta && nft && (
               <>
                 <Row className="pt-3 pb-3">
-                  <Col className="d-flex align-items-center justify-content-between">
+                  <Col className="d-flex">
                     <NftNavigation
                       nftId={nft.id}
                       path="/the-memes"

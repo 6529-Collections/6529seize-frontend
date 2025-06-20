@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import { AuthContext } from "../../../auth/Auth";

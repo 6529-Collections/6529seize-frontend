@@ -1,3 +1,5 @@
+"use client";
+
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
@@ -7,7 +9,7 @@ import HeaderSearchModalItem, {
   NFTSearchResult,
   HeaderSearchModalItemType,
 } from "./HeaderSearchModalItem";
-import { useRouter } from "next/router";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { getRandomObjectId } from "../../../helpers/AllowlistToolHelpers";
 import { getProfileTargetRoute } from "../../../helpers/Helpers";
 import { UserPageTabType } from "../../user/layout/UserPageTabs";
@@ -40,6 +42,8 @@ export default function HeaderSearchModal({
   readonly onClose: () => void;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const modalRef = useRef<HTMLDivElement>(null);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
@@ -121,10 +125,10 @@ export default function HeaderSearchModal({
     const handleOrWallet = profile.handle ?? profile.wallet.toLowerCase();
     const path = getProfileTargetRoute({
       handleOrWallet,
-      router,
+      pathname: pathname ?? "",
       defaultPath: UserPageTabType.IDENTITY,
     });
-    await router.push(path);
+    router.push(path);
     onClose();
   };
 
@@ -168,9 +172,10 @@ export default function HeaderSearchModal({
     }
     if (selectedCategory === CATEGORY.WAVES) {
       const wave = item as ApiWave;
-      const currentWaveId = router.query.wave as string | undefined;
-      const target = currentWaveId === wave.id ? "/my-stream" : `/my-stream?wave=${wave.id}`;
-      router.push(target, undefined, { shallow: true });
+      const currentWaveId = searchParams?.get("wave") as string | undefined;
+      const target =
+        currentWaveId === wave.id ? "/my-stream" : `/my-stream?wave=${wave.id}`;
+      router.push(target);
       onClose();
     }
   });
@@ -237,8 +242,7 @@ export default function HeaderSearchModal({
       return (
         <div
           ref={currentIndex === selectedItemIndex ? activeElementRef : null}
-          key={getRandomObjectId()}
-        >
+          key={getRandomObjectId()}>
           <HeaderSearchModalItem
             content={item}
             searchValue={debouncedValue}
@@ -257,15 +261,13 @@ export default function HeaderSearchModal({
         <div className="tw-flex tw-min-h-full tw-items-start tw-justify-center tw-p-2 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden inset-safe-area"
-          >
+            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-overflow-hidden inset-safe-area">
             <div className="tw-border-b tw-border-x-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-4 tw-px-4 tw-mt-4 tw-flex tw-items-center tw-gap-2">
               {/* Back arrow mobile */}
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="tw-flex sm:tw-hidden tw-size-6 tw-bg-transparent -tw-ml-1 tw-mr-1 tw-border-none tw-rounded-full tw-items-center tw-justify-center tw-text-iron-300 hover:tw-text-iron-50 tw-transition tw-duration-200"
-              >
+                className="tw-flex sm:tw-hidden tw-size-6 tw-bg-transparent -tw-ml-1 tw-mr-1 tw-border-none tw-rounded-full tw-items-center tw-justify-center tw-text-iron-300 hover:tw-text-iron-50 tw-transition tw-duration-200">
                 <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
               </button>
 
@@ -274,8 +276,7 @@ export default function HeaderSearchModal({
                   className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-3.5 tw-h-5 tw-w-5 tw-text-iron-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
-                  aria-hidden="true"
-                >
+                  aria-hidden="true">
                   <path
                     fillRule="evenodd"
                     d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"

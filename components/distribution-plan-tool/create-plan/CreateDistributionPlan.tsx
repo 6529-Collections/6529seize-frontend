@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import DistributionPlanPrimaryBtn from "../common/DistributionPlanPrimaryBtn";
 import { distributionPlanApiPost } from "../../../services/distribution-plan-api";
@@ -91,8 +93,7 @@ export default function CreateDistributionPlan({
             loading={isLoading}
             type="submit"
             onClick={() => undefined}
-            isDisabled={isLoading}
-          >
+            isDisabled={isLoading}>
             Create
           </DistributionPlanPrimaryBtn>
         </div>

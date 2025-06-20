@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../auth/Auth";
 import { useQuery } from "@tanstack/react-query";
@@ -58,8 +60,7 @@ export default function EmmaListSearchItems({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.2 }}
-        >
+          transition={{ duration: 0.2 }}>
           <div className="tw-absolute tw-z-10 tw-mt-1 tw-overflow-hidden tw-w-full tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
             <div className="tw-py-1 tw-flow-root tw-overflow-x-hidden tw-overflow-y-auto">
               <ul className="tw-flex tw-flex-col tw-gap-y-1 tw-px-2 tw-mx-0 tw-mb-0 tw-list-none">

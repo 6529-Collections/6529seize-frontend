@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./AppWallet.module.scss";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useRef, useState } from "react";

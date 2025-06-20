@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import {
   isVideoUrl,
@@ -123,7 +125,6 @@ export function useOptimizedVideo(
 
         timeoutRef.current = window.setTimeout(checkOptimized, delay);
       } catch {
-        
       } finally {
         if (isMounted) {
           setIsChecking(false);

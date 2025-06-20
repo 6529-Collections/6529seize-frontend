@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext } from "react";
 import FinalizeSnapshotsTableSnapshotTooltipTableRow from "./FinalizeSnapshotsTableSnapshotTooltipTableRow";
 import { DistributionPlanToolContext } from "../../../../../DistributionPlanToolContext";

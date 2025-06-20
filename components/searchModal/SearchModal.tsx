@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./SearchModal.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -39,8 +41,7 @@ function SearchModal(props: Readonly<Props>) {
     <Modal
       show={props.show}
       centered={true}
-      onHide={() => props.setShow(false)}
-    >
+      onHide={() => props.setShow(false)}>
       <Modal.Header>
         <Modal.Title>Search</Modal.Title>
       </Modal.Header>
@@ -48,8 +49,7 @@ function SearchModal(props: Readonly<Props>) {
         <InputGroup
           className={`${
             invalidWalletAdded ? styles.shakeWalletInput : ""
-          } mb-3`}
-        >
+          } mb-3`}>
           <Form.Control
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
@@ -65,8 +65,7 @@ function SearchModal(props: Readonly<Props>) {
           <Button
             className={styles.modalButton}
             onClick={addSearchWallet}
-            aria-label="Add search wallet"
-          >
+            aria-label="Add search wallet">
             +
           </Button>
         </InputGroup>
@@ -76,15 +75,13 @@ function SearchModal(props: Readonly<Props>) {
               delay={250}
               content={"Clear"}
               placement={"top"}
-              theme={"dark"}
-            >
+              theme={"dark"}>
               <FontAwesomeIcon
                 onClick={() => {
                   props.removeSearchWallet(w);
                 }}
                 className={styles.removeWalletBtn}
-                icon={faSquareXmark}
-              ></FontAwesomeIcon>
+                icon={faSquareXmark}></FontAwesomeIcon>
             </Tippy>
             {"  "}
             {w}
@@ -98,14 +95,12 @@ function SearchModal(props: Readonly<Props>) {
         <Button
           disabled={props.searchWallets.length === 0}
           className={`${styles.modalButtonClear} mt-3 mb-2`}
-          onClick={() => props.clearSearchWallets()}
-        >
+          onClick={() => props.clearSearchWallets()}>
           Clear All
         </Button>
         <Button
           className={`${styles.modalButtonDone} mt-3 mb-2`}
-          onClick={() => props.setShow(false)}
-        >
+          onClick={() => props.setShow(false)}>
           Done
         </Button>
       </Modal.Body>
@@ -130,14 +125,12 @@ export function SearchWalletsDisplay(
               delay={250}
               content={"Clear"}
               placement={"top"}
-              theme={"light"}
-            >
+              theme={"light"}>
               <button
                 className={`btn-link ${styles.searchWalletDisplayBtn}`}
                 onClick={() =>
                   setSearchWallets(searchWallets.filter((s) => s != sw))
-                }
-              >
+                }>
                 x
               </button>
             </Tippy>
@@ -151,29 +144,25 @@ export function SearchWalletsDisplay(
           delay={250}
           content={"Clear All"}
           placement={"top"}
-          theme={"light"}
-        >
+          theme={"light"}>
           <FontAwesomeIcon
             onClick={() => setSearchWallets([])}
             className={styles.clearSearchBtnIcon}
-            icon={faTimesCircle}
-          ></FontAwesomeIcon>
+            icon={faTimesCircle}></FontAwesomeIcon>
         </Tippy>
       )}
       <button
         onClick={() => setShowSearchModal(true)}
         className={`btn-link ${styles.searchBtn} ${
           searchWallets.length > 0 ? styles.searchBtnActive : ""
-        } d-inline-flex align-items-center justify-content-center`}
-      >
+        } d-inline-flex align-items-center justify-content-center`}>
         <FontAwesomeIcon
           style={{
             width: "20px",
             height: "20px",
             color: "#000",
           }}
-          icon={faSearch}
-        ></FontAwesomeIcon>
+          icon={faSearch}></FontAwesomeIcon>
       </button>
     </span>
   );

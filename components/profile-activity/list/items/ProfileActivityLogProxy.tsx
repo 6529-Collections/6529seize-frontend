@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { ProfileActivityLogProxyCreated } from "../../../../entities/IProfile";
 import CommonProfileLink from "../../../user/utils/CommonProfileLink";

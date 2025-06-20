@@ -1,3 +1,5 @@
+"use client";
+
 import { CicStatement } from "../../../entities/IProfile";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import UserPageHeaderName from "./name/UserPageHeaderName";

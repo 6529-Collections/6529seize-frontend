@@ -15,6 +15,7 @@ import UserPageRepWrapper from "../../components/user/rep/UserPageRepWrapper";
 import { getProfileLogTypes } from "../../helpers/profile-logs.helpers";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 export interface UserPageRepPropsRepRates {
   readonly ratings: ApiProfileRepRatesState;
@@ -41,28 +42,27 @@ const getInitialActivityLogParams = (
   groupId: null,
 });
 
-const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
-  pageProps,
-}) => {
+const Page: NextPageWithLayout<{
+  profile: ApiIdentity;
+  handleOrWallet: string;
+}> = ({ profile, handleOrWallet }) => {
   const initialRepGivenParams = getInitialRatersParams({
-    handleOrWallet: pageProps.handleOrWallet,
+    handleOrWallet,
     matter: MATTER_TYPE,
     given: false,
   });
 
   const initialRepReceivedParams = getInitialRatersParams({
-    handleOrWallet: pageProps.handleOrWallet,
+    handleOrWallet,
     matter: MATTER_TYPE,
     given: true,
   });
-  const initialActivityLogParams = getInitialActivityLogParams(
-    pageProps.handleOrWallet
-  );
+  const initialActivityLogParams = getInitialActivityLogParams(handleOrWallet);
 
   return (
     <div className="tailwind-scope">
       <UserPageRepWrapper
-        profile={pageProps.profile}
+        profile={profile}
         initialRepReceivedParams={initialRepReceivedParams}
         initialRepGivenParams={initialRepGivenParams}
         initialActivityLogParams={initialActivityLogParams}
@@ -72,13 +72,9 @@ const Page: NextPageWithLayout<{ pageProps: UserPageRepProps }> = ({
 };
 
 Page.getLayout = function getLayout(
-  page: ReactElement<{ pageProps: UserPageRepProps }>
+  page: ReactElement<{ profile: ApiIdentity }>
 ) {
-  return (
-    <UserPageLayout profile={page.props.pageProps.profile}>
-      {page}
-    </UserPageLayout>
-  );
+  return <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>;
 };
 
 export default Page;

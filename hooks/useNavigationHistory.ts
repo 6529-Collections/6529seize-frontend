@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useRouter as useNavRouter } from "next/navigation";
@@ -12,7 +14,8 @@ interface NavigationHistory {
 }
 
 // DEBUG LOGGER
-const DEBUG_NAV = typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
+const DEBUG_NAV =
+  typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_NAV === "true";
 const dlog = (...args: unknown[]): void => {
   if (DEBUG_NAV) console.log("[useNavigationHistory]", ...args);
 };
@@ -53,7 +56,13 @@ export const useNavigationHistory = (): NavigationHistory => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    dlog("pathname effect", { pathname: router.pathname, backIndex, forwardIndex, isGoingBack, isGoingForward });
+    dlog("pathname effect", {
+      pathname: router.pathname,
+      backIndex,
+      forwardIndex,
+      isGoingBack,
+      isGoingForward,
+    });
     if (isGoingBack) {
       setIsGoingBack(false);
       if (typeof window !== "undefined") {

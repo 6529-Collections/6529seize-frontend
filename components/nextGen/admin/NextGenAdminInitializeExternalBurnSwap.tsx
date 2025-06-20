@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from "./NextGenAdmin.module.scss";
 import { useSignMessage } from "wagmi";

@@ -1,9 +1,10 @@
+"use client";
+
 import styles from "./Header.module.scss";
 import { Container, Row, Col, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { AboutSection } from "../../pages/about/[section]";
+import { AboutSection } from "@/enums";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchUrl } from "../../services/6529api";
@@ -26,6 +27,7 @@ import useIsMobileScreen from "../../hooks/isMobileScreen";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import HeaderOpenMobile from "./open-mobile/HeaderOpenMobile";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
+import { usePathname } from "next/navigation";
 
 interface Props {
   onLoad?: () => void;
@@ -49,7 +51,7 @@ export default function Header(props: Readonly<Props>) {
   const isMobile = useIsMobileScreen();
 
   const { showWaves } = useAuth();
-  const router = useRouter();
+  const pathname = usePathname();
   const [consolidations, setConsolidations] = useState<string[]>([]);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
 
@@ -105,7 +107,7 @@ export default function Header(props: Readonly<Props>) {
     setShowBurgerMenuCommunity(false);
     setShowBurgerMenuTools(false);
     setShowBurgerMenuBrain(false);
-  }, [router.route]);
+  }, [pathname]);
 
   useEffect(() => {
     if (props.onSetWallets) {
@@ -669,8 +671,7 @@ export default function Header(props: Readonly<Props>) {
                                 }}
                               />
                               <NavDropdown.Divider />
-                              <NavDropdown.Item
-                                className={styles.submenuContainer}>
+                              <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   Metrics
                                   <FontAwesomeIcon
@@ -699,7 +700,7 @@ export default function Header(props: Readonly<Props>) {
                                     }}
                                   />
                                 </div>
-                              </NavDropdown.Item>
+                              </div>
                             </NavDropdown>
                             <NavDropdown
                               title="Tools"
@@ -716,8 +717,7 @@ export default function Header(props: Readonly<Props>) {
                                   <NavDropdown.Divider />
                                 </>
                               )}
-                              <NavDropdown.Item
-                                className={styles.submenuContainer}>
+                              <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   NFT Delegation
                                   <FontAwesomeIcon
@@ -758,9 +758,8 @@ export default function Header(props: Readonly<Props>) {
                                     }}
                                   />
                                 </div>
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.submenuContainer}>
+                              </div>
+                              <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   The Memes Tools
                                   <FontAwesomeIcon
@@ -791,7 +790,7 @@ export default function Header(props: Readonly<Props>) {
                                     }}
                                   />
                                 </div>
-                              </NavDropdown.Item>
+                              </div>
                               <NavDropdown.Divider />
                               <HeaderDesktopLink
                                 link={{
@@ -817,13 +816,10 @@ export default function Header(props: Readonly<Props>) {
                               className={`${styles.mainNavLink} ${
                                 styles.mainNavLinkPadding
                               } ${
-                                router.pathname.includes("/about")
-                                  ? "active"
-                                  : ""
+                                pathname?.includes("/about") ? "active" : ""
                               }`}
                               align={"start"}>
-                              <NavDropdown.Item
-                                className={styles.submenuContainer}>
+                              <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   NFTs
                                   <FontAwesomeIcon
@@ -879,15 +875,14 @@ export default function Header(props: Readonly<Props>) {
                                     }}
                                   />
                                 </div>
-                              </NavDropdown.Item>
+                              </div>
                               <HeaderDesktopLink
                                 link={{
                                   name: "GDRC1",
                                   path: `/about/${AboutSection.GDRC1}`,
                                 }}
                               />
-                              <NavDropdown.Item
-                                className={styles.submenuContainer}>
+                              <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   NFT Delegation
                                   <FontAwesomeIcon
@@ -910,9 +905,8 @@ export default function Header(props: Readonly<Props>) {
                                     }}
                                   />
                                 </div>
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.submenuContainer}>
+                              </div>
+                              <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   6529 Capital
                                   <FontAwesomeIcon
@@ -941,9 +935,8 @@ export default function Header(props: Readonly<Props>) {
                                     }}
                                   />
                                 </div>
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.submenuContainer}>
+                              </div>
+                              <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   Support
                                   <FontAwesomeIcon
@@ -972,9 +965,8 @@ export default function Header(props: Readonly<Props>) {
                                     }}
                                   />
                                 </div>
-                              </NavDropdown.Item>
-                              <NavDropdown.Item
-                                className={styles.submenuContainer}>
+                              </div>
+                              <div className={styles.submenuContainer}>
                                 <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
                                   Resources
                                   <FontAwesomeIcon
@@ -1009,7 +1001,7 @@ export default function Header(props: Readonly<Props>) {
                                     }}
                                   />
                                 </div>
-                              </NavDropdown.Item>
+                              </div>
                             </NavDropdown>
                             <HeaderUser />
                             {showWaves && <HeaderNotifications />}

@@ -1,3 +1,5 @@
+"use client";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDownloader from "react-use-downloader";
 import styles from "./Download.module.scss";

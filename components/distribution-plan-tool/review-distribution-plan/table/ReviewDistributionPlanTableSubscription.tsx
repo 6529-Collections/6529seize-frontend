@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useState } from "react";
 import { Modal, Button, Col, Container, Row } from "react-bootstrap";
 import {
@@ -50,8 +52,7 @@ export function SubscriptionLinks(
           onClick={() => setShowConfirm(true)}
           disabled={downloading}
           type="button"
-          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300"
-        >
+          className="tw-group tw-rounded-full tw-group tw-flex tw-items-center tw-justify-center tw-h-8 tw-text-xs tw-font-medium tw-border-none tw-ring-1 tw-ring-inset tw-text-neutral-400 tw-bg-neutral-400/10 tw-ring-neutral-400/20 hover:tw-bg-neutral-400/20 tw-ease-out tw-transition tw-duration-300">
           {downloading ? (
             <span className="d-flex gap-2 align-items-center">
               <CircleLoader />
@@ -162,8 +163,7 @@ export function SubscriptionConfirm(
         <Button
           disabled={!tokenId || isNaN(parseInt(tokenId))}
           variant="primary"
-          onClick={() => props.onConfirm(contract, tokenId)}
-        >
+          onClick={() => props.onConfirm(contract, tokenId)}>
           Looks good
         </Button>
       </Modal.Footer>

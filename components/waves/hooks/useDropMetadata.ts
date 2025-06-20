@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useMemo, useState } from "react";
 import { ApiWaveMetadataType } from "../../../generated/models/ApiWaveMetadataType";
 
@@ -36,7 +38,9 @@ const isValueSet = (md: CreateDropMetadataType): boolean => {
   return false;
 };
 
-const createInitialDropMetadata = (requiredMetadata: UseDropMetadataProps["requiredMetadata"]) => {
+const createInitialDropMetadata = (
+  requiredMetadata: UseDropMetadataProps["requiredMetadata"]
+) => {
   return requiredMetadata.map((md) => ({
     key: md.name,
     type: md.type,
@@ -63,13 +67,20 @@ const removeUnsetRequiredMetadata = (metadata: CreateDropMetadataType[]) => {
   return metadata.filter((md) => !md.required || isValueSet(md));
 };
 
-export const useDropMetadata = ({ isDropMode, requiredMetadata }: UseDropMetadataProps) => {
+export const useDropMetadata = ({
+  isDropMode,
+  requiredMetadata,
+}: UseDropMetadataProps) => {
   const initialMetadata = useMemo(
-    () => isDropMode ? createInitialDropMetadata(requiredMetadata) : createEmptyMetadata(),
+    () =>
+      isDropMode
+        ? createInitialDropMetadata(requiredMetadata)
+        : createEmptyMetadata(),
     [requiredMetadata, isDropMode]
   );
 
-  const [metadata, setMetadata] = useState<CreateDropMetadataType[]>(initialMetadata);
+  const [metadata, setMetadata] =
+    useState<CreateDropMetadataType[]>(initialMetadata);
 
   useEffect(() => {
     setMetadata((prev) => {
@@ -77,8 +88,8 @@ export const useDropMetadata = ({ isDropMode, requiredMetadata }: UseDropMetadat
         ? addMissingRequiredMetadata(prev, initialMetadata)
         : removeUnsetRequiredMetadata(prev);
 
-      return JSON.stringify(updatedMetadata) !== JSON.stringify(prev) 
-        ? updatedMetadata 
+      return JSON.stringify(updatedMetadata) !== JSON.stringify(prev)
+        ? updatedMetadata
         : prev;
     });
   }, [isDropMode, initialMetadata]);
@@ -89,4 +100,4 @@ export const useDropMetadata = ({ isDropMode, requiredMetadata }: UseDropMetadat
     isValueSet,
     initialMetadata,
   };
-}; 
+};

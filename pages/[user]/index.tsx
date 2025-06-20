@@ -9,6 +9,7 @@ import {
 import UserPageBrainWrapper from "../../components/user/brain/UserPageBrainWrapper";
 import { UserPageProps } from "../../helpers/Types";
 import { getMetadataForUserPage } from "../../helpers/Helpers";
+import { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
   pageProps,
@@ -17,8 +18,8 @@ const Page: NextPageWithLayout<{ pageProps: UserPageProps }> = ({
     <UserPageBrainWrapper profile={pageProps.profile} />
   </div>
 );
-Page.getLayout = (page: ReactElement<{ pageProps: UserPageProps }>) => (
-  <UserPageLayout profile={page.props.pageProps.profile}>{page}</UserPageLayout>
+Page.getLayout = (page: ReactElement<{ profile: ApiIdentity }>) => (
+  <UserPageLayout profile={page.props.profile}>{page}</UserPageLayout>
 );
 
 export default Page;

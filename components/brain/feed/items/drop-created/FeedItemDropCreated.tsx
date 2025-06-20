@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { IFeedItemDropCreated } from "../../../../../types/feed.types";
 import Drop, {
@@ -6,7 +8,10 @@ import Drop, {
 } from "../../../../waves/drops/Drop";
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
-import { DropSize, ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import {
+  DropSize,
+  ExtendedDrop,
+} from "../../../../../helpers/waves/drop.helpers";
 
 export default function FeedItemDropCreated({
   item,
@@ -29,7 +34,9 @@ export default function FeedItemDropCreated({
   };
 
   const onQuoteClick = (quote: ApiDrop) => {
-    router.push(`/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`);
+    router.push(
+      `/my-stream?wave=${quote.wave.id}&serialNo=${quote.serial_no}/`
+    );
   };
   return (
     <Drop

@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import CreateDropReplyingWrapper from "./CreateDropReplyingWrapper";
 import CreateDropInput, { CreateDropInputHandles } from "./CreateDropInput";

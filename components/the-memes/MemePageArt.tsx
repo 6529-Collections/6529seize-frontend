@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./TheMemes.module.scss";
 import { Carousel, Col, Container, Row, Table } from "react-bootstrap";
 import { NFT, MemesExtendedData } from "../../entities/INFT";

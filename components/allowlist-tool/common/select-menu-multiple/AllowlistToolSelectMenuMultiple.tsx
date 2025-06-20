@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { motion, useAnimate } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -72,8 +74,7 @@ export default function AllowlistToolSelectMenuMultiple({
     <div ref={listRef}>
       <label
         id="listbox-label"
-        className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100"
-      >
+        className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-neutral-100">
         {label}
       </label>
       <div className="tw-relative tw-mt-1.5">
@@ -86,8 +87,7 @@ export default function AllowlistToolSelectMenuMultiple({
           onClick={(e) => {
             e.stopPropagation();
             toggleOpen();
-          }}
-        >
+          }}>
           <span className="tw-block tw-truncate">{title}</span>
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
             <svg
@@ -95,8 +95,7 @@ export default function AllowlistToolSelectMenuMultiple({
               className="tw-h-5 tw-w-5 tw-text-zinc-400"
               viewBox="0 0 24 24"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -114,8 +113,7 @@ export default function AllowlistToolSelectMenuMultiple({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-            >
+              transition={{ duration: 0.2 }}>
               <AllowlistToolSelectMenuMultipleList
                 options={options}
                 toggleSelectedOption={onSelect}

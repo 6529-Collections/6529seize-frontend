@@ -1,6 +1,11 @@
+"use client";
+
 import React, { useState, memo, useEffect } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
-import { ExtendedDrop, convertApiDropToExtendedDrop } from "../../../helpers/waves/drop.helpers";
+import {
+  ExtendedDrop,
+  convertApiDropToExtendedDrop,
+} from "../../../helpers/waves/drop.helpers";
 import { useWaveDecisions } from "../../../hooks/waves/useWaveDecisions";
 import { ApiWaveDecision } from "../../../generated/models/ApiWaveDecision";
 
@@ -24,26 +29,35 @@ interface EnhancedDecisionPoint extends ApiWaveDecision {
 
 export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
   ({ wave, onDropClick }) => {
-    const { decisions: { multiDecision } } = useWave(wave);
-    const [activeDecisionPoint, setActiveDecisionPoint] = useState<string | null>(null);
-    
+    const {
+      decisions: { multiDecision },
+    } = useWave(wave);
+    const [activeDecisionPoint, setActiveDecisionPoint] = useState<
+      string | null
+    >(null);
+
     // Fetch data using decisions endpoint for all waves - same approach as WaveWinners
-    const { decisionPoints: rawDecisionPoints, isFetching: isDecisionsLoading } = useWaveDecisions({
+    const {
+      decisionPoints: rawDecisionPoints,
+      isFetching: isDecisionsLoading,
+    } = useWaveDecisions({
       wave,
       enabled: true, // Always enabled now that we use it for both types
     });
 
     // Process decision points to include UI-friendly fields
-    const decisionPoints: EnhancedDecisionPoint[] = rawDecisionPoints.map((point, index) => {
-      const decisionTime = point.decision_time;
-      // Create a formatted date string
-      const dateObj = new Date(decisionTime);
-      return {
-        ...point,
-        id: decisionTime.toString(), // Use decision_time as ID
-        date: dateObj.toISOString()
-      };
-    });
+    const decisionPoints: EnhancedDecisionPoint[] = rawDecisionPoints.map(
+      (point, index) => {
+        const decisionTime = point.decision_time;
+        // Create a formatted date string
+        const dateObj = new Date(decisionTime);
+        return {
+          ...point,
+          id: decisionTime.toString(), // Use decision_time as ID
+          date: dateObj.toISOString(),
+        };
+      }
+    );
 
     // Set first decision point as active when loaded
     useEffect(() => {
@@ -61,7 +75,6 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
     if (!decisionPoints || decisionPoints.length === 0) {
       return <WaveWinnersSmallEmpty isMultiDecision={multiDecision} />;
     }
-
 
     // For single decision waves, just render the first decision point's drops
     if (!multiDecision) {
@@ -98,13 +111,13 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
             Winners
           </h2>
         </div>
-        
+
         {/* Decision point selector */}
         <WaveWinnersSmallDecisionSelector
-          decisionPoints={decisionPoints.map(point => ({
+          decisionPoints={decisionPoints.map((point) => ({
             id: point.id,
             date: point.date,
-            winnersCount: point.winners.length
+            winnersCount: point.winners.length,
           }))}
           activeDecisionPoint={activeDecisionPoint}
           onChange={setActiveDecisionPoint}
@@ -112,10 +125,10 @@ export const WaveWinnersSmall = memo<WaveWinnersSmallProps>(
 
         {/* Show winners for selected decision point */}
         <div className="tw-space-y-3">
-          {activeDecisionPoint && 
+          {activeDecisionPoint &&
             decisionPoints
-              .find(point => point.id === activeDecisionPoint)
-              ?.winners.map(winner => (
+              .find((point) => point.id === activeDecisionPoint)
+              ?.winners.map((winner) => (
                 <WaveWinnerItemSmall
                   key={winner.drop.id}
                   drop={convertApiDropToExtendedDrop(winner.drop)}

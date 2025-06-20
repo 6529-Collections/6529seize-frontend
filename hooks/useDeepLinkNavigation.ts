@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { App } from "@capacitor/app";
 import { useCallback, useEffect } from "react";

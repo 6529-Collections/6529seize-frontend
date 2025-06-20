@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { useDebounce } from "react-use";
 import { commonApiFetch } from "../../../services/api/common-api";
@@ -74,7 +76,9 @@ export default function UserSettingsUsername({
 
   return (
     <div>
-      <label htmlFor="name" className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
+      <label
+        htmlFor="name"
+        className="tw-block tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-300">
         Username
       </label>
       <div className="tw-mt-2 tw-relative">
@@ -99,8 +103,7 @@ export default function UserSettingsUsername({
           availabilityState === AVAILABILITY.NOT_AVAILABLE
             ? "tw-text-red"
             : "tw-text-green"
-        } `}
-      >
+        } `}>
         {usernameAvailability}
       </p>
     </div>
