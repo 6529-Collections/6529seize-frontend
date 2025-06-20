@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./NextGen.module.scss";
 
 import { useState, useEffect } from "react";

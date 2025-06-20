@@ -1,17 +1,22 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { 
-  CreateWaveConfig, 
-  CreateWaveGroupConfigType, 
-  CreateWaveOutcomeType, 
-  CreateWaveStep, 
-  TimeWeightedVotingSettings, 
+import {
+  CreateWaveConfig,
+  CreateWaveGroupConfigType,
+  CreateWaveOutcomeType,
+  CreateWaveStep,
+  TimeWeightedVotingSettings,
 } from "../../../../types/waves.types";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";
 import { Time } from "../../../../helpers/time";
 import { ApiGroupFull } from "../../../../generated/models/ApiGroupFull";
 import { ApiWaveCreditType } from "../../../../generated/models/ApiWaveCreditType";
 import { Period } from "../types/period";
-import { getCreateWaveValidationErrors, CREATE_WAVE_VALIDATION_ERROR } from "../../../../helpers/waves/create-wave.validation";
+import {
+  getCreateWaveValidationErrors,
+  CREATE_WAVE_VALIDATION_ERROR,
+} from "../../../../helpers/waves/create-wave.validation";
 import { assertUnreachable } from "../../../../helpers/AllowlistToolHelpers";
 
 interface EndDateConfig {
@@ -95,10 +100,12 @@ export function useWaveConfig() {
   const [step, setStep] = useState<CreateWaveStep>(initialStep);
   const [selectedOutcomeType, setSelectedOutcomeType] =
     useState<CreateWaveOutcomeType | null>(null);
-    
+
   const [errors, setErrors] = useState<CREATE_WAVE_VALIDATION_ERROR[]>([]);
-  
-  const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>({});
+
+  const [groupsCache, setGroupsCache] = useState<Record<string, ApiGroupFull>>(
+    {}
+  );
 
   // Update end date config when config changes
   useEffect(() => {
@@ -139,7 +146,7 @@ export function useWaveConfig() {
       ...prev,
       drops: {
         ...prev.drops,
-        adminCanDeleteDrops,  
+        adminCanDeleteDrops,
       },
     }));
   };
@@ -254,8 +261,10 @@ export function useWaveConfig() {
       },
     }));
   };
-  
-  const onTimeWeightedVotingChange = (timeWeighted: TimeWeightedVotingSettings) => {
+
+  const onTimeWeightedVotingChange = (
+    timeWeighted: TimeWeightedVotingSettings
+  ) => {
     setConfig((prev) => ({
       ...prev,
       voting: {

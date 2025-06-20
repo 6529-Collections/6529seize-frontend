@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { useContext } from "react";
 import { AuthContext } from "../../auth/Auth";
@@ -35,11 +37,7 @@ export default function DistributionPlanToolConnected() {
         </ul>
       </div>
       <div className="tw-flex">
-        <PrimaryButton
-          onClicked={trySignIn}
-          disabled={false}
-          loading={false}
-        >
+        <PrimaryButton onClicked={trySignIn} disabled={false} loading={false}>
           Sign In with Web3
         </PrimaryButton>
       </div>

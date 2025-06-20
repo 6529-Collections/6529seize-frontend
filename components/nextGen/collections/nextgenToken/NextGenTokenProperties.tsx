@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./NextGenToken.module.scss";
 
 import { Accordion, Col, Container, Row } from "react-bootstrap";

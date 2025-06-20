@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WaveDropContent from "../../drops/WaveDropContent";

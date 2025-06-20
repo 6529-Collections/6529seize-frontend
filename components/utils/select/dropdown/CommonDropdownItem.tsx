@@ -1,3 +1,5 @@
+"use client";
+
 import { cloneElement, isValidElement, useEffect, useState } from "react";
 import CommonTableSortIcon from "../../../user/utils/icons/CommonTableSortIcon";
 import { CommonSelectItemProps } from "../CommonSelect";
@@ -44,8 +46,7 @@ export default function CommonDropdownItem<T, U = unknown>(
         } tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-inline-flex tw-justify-between  tw-text-white tw-rounded-lg tw-relative tw-cursor-pointer tw-select-none tw-px-2 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
-        onMouseLeave={() => setShouldRotate(false)}
-      >
+        onMouseLeave={() => setShouldRotate(false)}>
         <div className="tw-w-44 tw-truncate tw-flex tw-items-center">
           <span className="tw-text-sm tw-font-medium tw-text-white">
             {label}
@@ -65,8 +66,7 @@ export default function CommonDropdownItem<T, U = unknown>(
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M20 6L9 17L4 12"
                 stroke="currentColor"

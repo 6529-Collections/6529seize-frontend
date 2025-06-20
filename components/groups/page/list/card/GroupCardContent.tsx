@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext } from "react";
 import { AuthContext } from "../../../../auth/Auth";
 import { ApiGroupFull } from "../../../../../generated/models/ApiGroupFull";

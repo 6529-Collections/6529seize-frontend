@@ -1,3 +1,5 @@
+"use client";
+
 import { RateChangeType } from "./DropListItemRateGive";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../../auth/Auth";
@@ -76,8 +78,7 @@ export default function DropListItemRateGiveChangeButton({
         isMobile
           ? "tw-bg-iron-800 tw-size-10 active:tw-bg-iron-600 active:tw-scale-95"
           : "tw-bg-iron-900 tw-size-6 hover:tw-bg-iron-800 hover:tw-ring-iron-600/50 hover:tw-text-iron-200"
-      } tw-transition-all tw-duration-150 ${buttonClasses}`}
-    >
+      } tw-transition-all tw-duration-150 ${buttonClasses}`}>
       <svg
         className={`${
           isMobile ? "tw-size-6" : "tw-size-4"
@@ -85,8 +86,7 @@ export default function DropListItemRateGiveChangeButton({
         viewBox="0 0 24 24"
         fill="none"
         aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+        xmlns="http://www.w3.org/2000/svg">
         <path
           d={svgpaths[type]}
           stroke="currentColor"

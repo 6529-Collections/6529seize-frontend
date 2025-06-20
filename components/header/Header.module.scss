@@ -1,4 +1,4 @@
-@use 'sass:color';
+@use "sass:color";
 @use "../../styles/variables.scss";
 
 .mainContainer {
@@ -350,6 +350,19 @@
 
 .submenuContainer {
   position: relative;
+  width: 98%;
+  margin-left: 1%;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+  font-weight: normal;
+  color: variables.$font-color;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #222 !important;
+  }
 }
 
 .nestedMenu {

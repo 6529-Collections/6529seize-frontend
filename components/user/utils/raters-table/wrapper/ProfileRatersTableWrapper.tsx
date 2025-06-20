@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import ProfileRatersTableWrapperHeader from "./ProfileRatersTableWrapperHeader";
 import {
@@ -90,7 +92,9 @@ export default function ProfileRatersTableWrapper({
     ],
     queryFn: async () =>
       await commonApiFetch<Page<RatingWithProfileInfoAndLevel>>({
-        endpoint: `profiles/${handleOrWallet}/${matter === RateMatter.NIC ? 'cic' : matter.toLowerCase()}/ratings/by-rater`,
+        endpoint: `profiles/${handleOrWallet}/${
+          matter === RateMatter.NIC ? "cic" : matter.toLowerCase()
+        }/ratings/by-rater`,
         params: {
           page: `${currentPage}`,
           page_size: `${pageSize}`,

@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import AllowlistToolJsonIcon from "../../../allowlist-tool/icons/AllowlistToolJsonIcon";
 import DistributionPlanTableHeaderWrapper from "../../common/DistributionPlanTableHeaderWrapper";

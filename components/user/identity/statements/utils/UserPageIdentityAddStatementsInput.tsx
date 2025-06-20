@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import { STATEMENT_META, STATEMENT_TYPE } from "../../../../../helpers/Types";
 import SocialStatementIcon from "../../../utils/icons/SocialStatementIcon";
@@ -28,8 +30,7 @@ export default function UserPageIdentityAddStatementsContactInput({
     <>
       <label
         htmlFor={inputId}
-        className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
-      >
+        className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
         {STATEMENT_META[activeType].title}
       </label>
       <div className="tw-relative tw-mt-1.5">

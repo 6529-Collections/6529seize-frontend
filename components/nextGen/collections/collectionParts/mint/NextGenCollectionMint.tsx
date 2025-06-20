@@ -1,3 +1,5 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import NextGenMint from "./NextGenMint";
 import { useEffect, useState } from "react";
@@ -15,7 +17,6 @@ interface Props {
 }
 
 export default function NextGenCollectionMint(props: Readonly<Props>) {
-
   const [burnAmount, setBurnAmount] = useState<number>(0);
   const [mintPrice, setMintPrice] = useState<number>(0);
 

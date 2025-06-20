@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { CreateWaveDatesConfig } from "../../../../types/waves.types";
 import { ApiWaveType } from "../../../../generated/models/ApiWaveType";

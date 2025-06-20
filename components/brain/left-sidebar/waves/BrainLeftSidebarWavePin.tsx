@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbtack } from "@fortawesome/free-solid-svg-icons";
@@ -121,8 +123,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
             ? "tw-text-iron-300 tw-bg-iron-700/40 desktop-hover:hover:tw-bg-iron-700/60"
             : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 tw-bg-iron-800"
         }`}
-        aria-label={isPinned ? "Unpin wave" : "Pin wave"}
-      >
+        aria-label={isPinned ? "Unpin wave" : "Pin wave"}>
         <FontAwesomeIcon
           icon={faThumbtack}
           className={`tw-size-3 tw-flex-shrink-0 ${

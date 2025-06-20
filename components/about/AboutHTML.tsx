@@ -1,12 +1,21 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
+import { fetchAboutSectionFile } from "./about.helpers";
 
 interface Props {
-  html: string;
+  path: string;
   title: string;
 }
 
 export default function AboutHTML(props: Readonly<Props>) {
+  const [html, setHtml] = useState<string>("");
+  useEffect(() => {
+    fetchAboutSectionFile(props.path).then(setHtml);
+  }, [props.path]);
+
   let titleLighter = "";
   let titleDarker = props.title;
 
@@ -34,7 +43,7 @@ export default function AboutHTML(props: Readonly<Props>) {
         <Col
           className={styles.htmlContainer}
           dangerouslySetInnerHTML={{
-            __html: props.html,
+            __html: html,
           }}></Col>
       </Row>
     </Container>

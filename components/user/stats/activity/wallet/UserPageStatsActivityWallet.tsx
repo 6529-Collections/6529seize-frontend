@@ -1,3 +1,5 @@
+"use client";
+
 import { ApiIdentity } from "../../../../../generated/models/ApiIdentity";
 import { useRouter } from "next/router";
 import { usePathname, useSearchParams } from "next/navigation";

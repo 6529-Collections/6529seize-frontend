@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
 
@@ -24,9 +26,10 @@ export default function UserPageSetUpProfile({
 
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
-  const [classification, setClassification] = useState<ApiProfileClassification>(
-    profile.classification ?? ApiProfileClassification.Pseudonym
-  );
+  const [classification, setClassification] =
+    useState<ApiProfileClassification>(
+      profile.classification ?? ApiProfileClassification.Pseudonym
+    );
 
   const getHighestTdhWalletOrNone = () => {
     const tdhWallets =
@@ -55,10 +58,7 @@ export default function UserPageSetUpProfile({
   const updateUser = useMutation({
     mutationFn: async (body: ApiCreateOrUpdateProfileRequest) => {
       setMutating(true);
-      return await commonApiPost<
-        ApiCreateOrUpdateProfileRequest,
-        ApiIdentity
-      >({
+      return await commonApiPost<ApiCreateOrUpdateProfileRequest, ApiIdentity>({
         endpoint: `profiles`,
         body,
       });

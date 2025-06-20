@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./TheMemes.module.scss";
 import { Col, Container, Dropdown, Row, Table } from "react-bootstrap";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "../../constants";

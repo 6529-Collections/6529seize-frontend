@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useCallback } from "react";
 import {
   getScaledImageUri,
@@ -31,8 +33,7 @@ function MediaDisplayImage({ src }: Props) {
   return (
     <div
       ref={ref}
-      className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-mx-[1px]"
-    >
+      className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-relative tw-mx-[1px]">
       {isLoading && (
         <div
           className="tw-bg-iron-800 tw-animate-pulse tw-rounded-xl"

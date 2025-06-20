@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   ActiveDropAction,
@@ -86,8 +88,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     setActiveDrop(null);
   };
 
-
-
   if (!searchParamsDone) {
     return null;
   }
@@ -95,8 +95,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({ wave }) => {
     <div
       ref={containerRef}
       className={`${containerClassName}`}
-      style={waveViewStyle}
-    >
+      style={waveViewStyle}>
       <WaveDropsAll
         key={wave.id}
         waveId={wave.id}

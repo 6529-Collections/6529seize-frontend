@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import { formatNumberWithCommas } from "../../../helpers/Helpers";
 import { SliderTheme, SLIDER_THEMES } from "./types/slider.types";
@@ -19,41 +21,52 @@ interface PresetMark {
   position: number;
 }
 
-const transformToLog = (value: number, minValue: number, maxValue: number): number => {
+const transformToLog = (
+  value: number,
+  minValue: number,
+  maxValue: number
+): number => {
   const absMin = Math.abs(minValue);
   const absMax = Math.abs(maxValue);
   const maxAbs = Math.max(absMin, absMax);
-  
+
   if (value === 0) return 0;
-  
+
   const sign = Math.sign(value);
   const absValue = Math.abs(value);
-  
+
   const logScale = Math.log10(maxAbs);
   const logValue = Math.log10(absValue) / logScale;
-  
+
   return sign * logValue * maxAbs;
 };
 
-const transformFromLog = (value: number, minValue: number, maxValue: number): number => {
+const transformFromLog = (
+  value: number,
+  minValue: number,
+  maxValue: number
+): number => {
   const absMin = Math.abs(minValue);
   const absMax = Math.abs(maxValue);
   const maxAbs = Math.max(absMin, absMax);
-  
+
   if (value === 0) return 0;
-  
+
   const sign = Math.sign(value);
   const absValue = Math.abs(value);
   const normalizedValue = absValue / maxAbs;
-  
+
   const logScale = Math.log10(maxAbs);
   const result = sign * Math.pow(10, normalizedValue * logScale);
-  
+
   return Math.round(result);
 };
 
 const calculatePresetMarks = (minValue: number, maxValue: number) => {
-  const zeroPoint = ((transformToLog(0, minValue, maxValue) - minValue) / (maxValue - minValue)) * 100;
+  const zeroPoint =
+    ((transformToLog(0, minValue, maxValue) - minValue) /
+      (maxValue - minValue)) *
+    100;
   const marks: PresetMark[] = [];
 
   // Add 0% mark
@@ -66,7 +79,7 @@ const calculatePresetMarks = (minValue: number, maxValue: number) => {
   // Negative presets
   if (minValue < 0) {
     const negativeValues = [-75, -50, -25];
-    negativeValues.forEach(percentage => {
+    negativeValues.forEach((percentage) => {
       const value = -(Math.abs(minValue) * Math.abs(percentage)) / 100;
       const logValue = transformToLog(value, minValue, maxValue);
       const position = ((logValue - minValue) / (maxValue - minValue)) * 100;
@@ -81,7 +94,7 @@ const calculatePresetMarks = (minValue: number, maxValue: number) => {
   // Positive presets
   if (maxValue > 0) {
     const positiveValues = [25, 50, 75];
-    positiveValues.forEach(percentage => {
+    positiveValues.forEach((percentage) => {
       const value = (maxValue * percentage) / 100;
       const logValue = transformToLog(value, minValue, maxValue);
       const position = ((logValue - minValue) / (maxValue - minValue)) * 100;
@@ -124,12 +137,12 @@ export default function WaveDropVoteSlider({
 
   const numericVoteValue = typeof voteValue === "string" ? 0 : voteValue;
   const logValue = transformToLog(numericVoteValue, minValue, maxValue);
-  
+
   const zeroPercentage =
     minValue === 0 && maxValue === 0
       ? 50
       : ((0 - minValue) / (maxValue - minValue)) * 100;
-      
+
   const currentPercentage =
     minValue === 0 && maxValue === 0 && logValue === 0
       ? 50
@@ -157,8 +170,7 @@ export default function WaveDropVoteSlider({
   return (
     <div
       className="tw-h-9 tw-flex tw-items-center"
-      onClick={(e) => e.stopPropagation()}
-    >
+      onClick={(e) => e.stopPropagation()}>
       <div className="tw-relative tw-flex-1 tw-overflow-visible">
         <div className="tw-relative tw-h-[6px] tw-group tw-mt-6 sm:tw-mt-0">
           {/* Base range input for track clicks */}
@@ -192,8 +204,7 @@ export default function WaveDropVoteSlider({
             className="tw-absolute tw-inset-0 tw-w-full tw-h-full tw-z-30"
             style={{
               clipPath: `circle(10px at ${currentPercentage}% 50%)`,
-            }}
-          >
+            }}>
             <input
               type="range"
               min={minValue}
@@ -233,8 +244,7 @@ export default function WaveDropVoteSlider({
             className="tw-absolute tw-z-40 tw-pointer-events-none"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ duration: 0.3, type: "spring" }}
-          >
+            transition={{ duration: 0.3, type: "spring" }}>
             <div className="tw-relative">
               <div
                 className={`tw-absolute tw-bottom-6 tw-left-1/2 
@@ -246,8 +256,7 @@ export default function WaveDropVoteSlider({
                   transform: `translateX(calc(-50% + ${
                     currentPercentage <= 10 ? 50 : 0
                   }%))`,
-                }}
-              >
+                }}>
                 <span className="tw-block">
                   {formatNumberWithCommas(
                     typeof voteValue === "string" ? 0 : voteValue
@@ -287,4 +296,4 @@ export default function WaveDropVoteSlider({
       </div>
     </div>
   );
-}; 
+}

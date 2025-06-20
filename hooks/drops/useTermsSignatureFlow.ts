@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback } from "react";
 import { ApiCreateDropRequest } from "../../generated/models/ApiCreateDropRequest";
 import { useDropSignature } from "./useDropSignature";
@@ -14,12 +16,12 @@ interface TermsAcknowledgment {
  */
 const getTermsHash = (termsContent: string | null): string | null => {
   if (!termsContent) return null;
-  
+
   const encoder = new TextEncoder();
   const data = encoder.encode(termsContent);
   return Array.from(data)
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 };
 
 /**
@@ -28,55 +30,66 @@ const getTermsHash = (termsContent: string | null): string | null => {
 export const useTermsSignatureFlow = () => {
   // Terms modal state
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
-  const [pendingDrop, setPendingDrop] = useState<ApiCreateDropRequest | null>(null);
+  const [pendingDrop, setPendingDrop] = useState<ApiCreateDropRequest | null>(
+    null
+  );
   const [pendingTerms, setPendingTerms] = useState<string | null>(null);
-  const [termsAcknowledgment, setTermsAcknowledgment] = useState<TermsAcknowledgment>({
-    hasAcknowledged: false,
-    acknowledgedAt: null,
-    termsVersion: null,
-  });
-  const [pendingCallback, setPendingCallback] = useState<((result: { success: boolean; signature?: string }) => void) | null>(null);
-  
+  const [termsAcknowledgment, setTermsAcknowledgment] =
+    useState<TermsAcknowledgment>({
+      hasAcknowledged: false,
+      acknowledgedAt: null,
+      termsVersion: null,
+    });
+  const [pendingCallback, setPendingCallback] = useState<
+    ((result: { success: boolean; signature?: string }) => void) | null
+  >(null);
+
   // Use the original signature hook
   const { signDrop: originalSignDrop, isLoading } = useDropSignature();
 
   /**
    * Initiates the terms signature flow
    */
-  const prepareAndSignDrop = useCallback(async ({
-    drop,
-    termsOfService,
-    onSigningComplete,
-  }: {
-    drop: ApiCreateDropRequest;
-    termsOfService: string | null;
-    onSigningComplete: (result: { success: boolean; signature?: string }) => void;
-  }): Promise<void> => {
-    // Check if terms exists and requires acknowledgment
-    if (termsOfService && termsOfService.trim().length > 0) {
-      // Store pending data for later use
-      setPendingDrop(drop);
-      setPendingTerms(termsOfService);
-      setPendingCallback(() => onSigningComplete);
-      
-      // Calculate terms version hash
-      const termsVersion = getTermsHash(termsOfService);
+  const prepareAndSignDrop = useCallback(
+    async ({
+      drop,
+      termsOfService,
+      onSigningComplete,
+    }: {
+      drop: ApiCreateDropRequest;
+      termsOfService: string | null;
+      onSigningComplete: (result: {
+        success: boolean;
+        signature?: string;
+      }) => void;
+    }): Promise<void> => {
+      // Check if terms exists and requires acknowledgment
+      if (termsOfService && termsOfService.trim().length > 0) {
+        // Store pending data for later use
+        setPendingDrop(drop);
+        setPendingTerms(termsOfService);
+        setPendingCallback(() => onSigningComplete);
 
-      // Check if user already acknowledged this version of terms
-      if (
-        !termsAcknowledgment.hasAcknowledged || 
-        termsAcknowledgment.termsVersion !== termsVersion
-      ) {
-        // Open terms modal for user to acknowledge
-        setIsTermsModalOpen(true);
-        return;
+        // Calculate terms version hash
+        const termsVersion = getTermsHash(termsOfService);
+
+        // Check if user already acknowledged this version of terms
+        if (
+          !termsAcknowledgment.hasAcknowledged ||
+          termsAcknowledgment.termsVersion !== termsVersion
+        ) {
+          // Open terms modal for user to acknowledge
+          setIsTermsModalOpen(true);
+          return;
+        }
       }
-    }
-    
-    // If no terms or already acknowledged, proceed directly with signing
-    const result = await originalSignDrop({ drop, termsOfService });
-    onSigningComplete(result);
-  }, [originalSignDrop, termsAcknowledgment]);
+
+      // If no terms or already acknowledged, proceed directly with signing
+      const result = await originalSignDrop({ drop, termsOfService });
+      onSigningComplete(result);
+    },
+    [originalSignDrop, termsAcknowledgment]
+  );
 
   /**
    * Called when user acknowledges and accepts the terms
@@ -100,11 +113,11 @@ export const useTermsSignatureFlow = () => {
     setIsTermsModalOpen(false);
 
     // Proceed with the signing process
-    const result = await originalSignDrop({ 
-      drop: pendingDrop, 
-      termsOfService: pendingTerms 
+    const result = await originalSignDrop({
+      drop: pendingDrop,
+      termsOfService: pendingTerms,
     });
-    
+
     pendingCallback(result);
   }, [pendingDrop, pendingTerms, pendingCallback, originalSignDrop]);
 
@@ -113,11 +126,11 @@ export const useTermsSignatureFlow = () => {
    */
   const onTermsRejected = useCallback((): void => {
     setIsTermsModalOpen(false);
-    
+
     if (pendingCallback) {
       pendingCallback({ success: false });
     }
-    
+
     setPendingDrop(null);
     setPendingTerms(null);
     setPendingCallback(null);

@@ -1,3 +1,5 @@
+"use client";
+
 import Toggle from "react-toggle";
 import styles from "./About.module.scss";
 import { Col, Container, Row, Table } from "react-bootstrap";

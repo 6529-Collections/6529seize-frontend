@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState, useMemo, type JSX } from "react";
 import { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import ProxyList from "./list/ProxyList";

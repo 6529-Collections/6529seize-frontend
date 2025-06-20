@@ -1,3 +1,5 @@
+"use client";
+
 import { useViewContext } from "../navigation/ViewContext";
 import { useRouter } from "next/router";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,8 +25,7 @@ export default function HeaderViewActionButtons() {
         aria-label="Create Wave"
         title="Create Wave"
         onClick={onCreateWave}
-        className={baseButtonClasses}
-      >
+        className={baseButtonClasses}>
         <PlusIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
       </button>
     );
@@ -42,9 +43,11 @@ export default function HeaderViewActionButtons() {
         aria-label="Create DM"
         title="Create DM"
         onClick={onCreateDm}
-        className={baseButtonClasses}
-      >
-        <FontAwesomeIcon icon={faPaperPlane} className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        className={baseButtonClasses}>
+        <FontAwesomeIcon
+          icon={faPaperPlane}
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+        />
       </button>
     );
   }

@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { SortDirection } from "../../../../../entities/ISort";
 import { RepsTableSort } from "./UserPageRepRepsTable";
@@ -29,8 +31,7 @@ export default function UserPageRepRepsTableHeader({
       <tr>
         <th
           scope="col"
-          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400"
-        >
+          className="tw-whitespace-nowrap tw-px-4 sm:tw-px-6 tw-py-3 tw-text-left tw-text-sm sm:tw-text-md tw-font-medium tw-text-iron-400">
           Category
         </th>
         {types.map((sortType) => (

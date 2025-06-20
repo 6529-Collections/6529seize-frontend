@@ -1,3 +1,5 @@
+"use client";
+
 import {
   forwardRef,
   useEffect,
@@ -154,8 +156,7 @@ const DropEditor = forwardRef<DropEditorHandles, DropEditorProps>(
           setMetadata={setMetadata}
           onSubmitDrop={onSubmitDrop}
           onCanSubmitChange={onCanSubmitChange}
-          key={dropEditorRefreshKey}
-        >
+          key={dropEditorRefreshKey}>
           {!!drop?.parts.length && isStormMode && !loading ? (
             <CreateDropStormView
               drop={drop}

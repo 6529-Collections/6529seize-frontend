@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { Capacitor, PluginListenerHandle } from "@capacitor/core";
 import { Keyboard } from "@capacitor/keyboard";

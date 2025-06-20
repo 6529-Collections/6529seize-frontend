@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useState } from "react";
 import DistributionPlanSecondaryText from "../../../../common/DistributionPlanSecondaryText";
 import {
@@ -255,8 +257,7 @@ export default function SnapshotSelectTopHolders({
                     isFromError
                       ? "tw-ring-error focus-within:tw-ring-error"
                       : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400"
-                  }`}
-                >
+                  }`}>
                   <input
                     type="number"
                     value={from}
@@ -286,8 +287,7 @@ export default function SnapshotSelectTopHolders({
                     isToError
                       ? "tw-ring-error focus-within:tw-ring-error"
                       : "tw-ring-neutral-700/40 focus-within:tw-ring-primary-400"
-                  }`}
-                >
+                  }`}>
                   <input
                     type="number"
                     min={1}
@@ -310,8 +310,7 @@ export default function SnapshotSelectTopHolders({
             showNextBtn={!isDisabled}
             isDisabled={isDisabled}
             onSkip={onSelectTopHoldersSkip}
-            onNext={onSelectTopHolders}
-          >
+            onNext={onSelectTopHolders}>
             <ComponentConfigMeta
               tags={[]}
               walletsCount={localUniqueWalletsCount}

@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "./NextGenToken.module.scss";
 import { Col, Container, Dropdown, Row } from "react-bootstrap";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";

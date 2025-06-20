@@ -1,5 +1,7 @@
-import { useRouter } from 'next/router';
-import { useState, useEffect, useCallback } from 'react';
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 /**
  * Hook to manage the active wave ID state and synchronize it with the URL
@@ -7,18 +9,19 @@ import { useState, useEffect, useCallback } from 'react';
  */
 export function useActiveWaveManager() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeWaveId, setActiveWaveId] = useState<string | null>(null);
 
   // Sync activeWaveId with URL when router query changes
   useEffect(() => {
-    const { wave: waveId } = router.query;
-    if (typeof waveId === 'string') {
+    const waveId = searchParams?.get("wave");
+    if (typeof waveId === "string") {
       setActiveWaveId(waveId);
     } else if (waveId === undefined && activeWaveId) {
       // URL no longer has wave parameter
       setActiveWaveId(null);
     }
-  }, [router.query, activeWaveId]);
+  }, [searchParams, activeWaveId]);
 
   // Function to programmatically change active wave (and update URL)
   const setActiveWave = useCallback(
@@ -27,9 +30,9 @@ export function useActiveWaveManager() {
 
       // Update URL
       if (waveId) {
-        router.push(`/my-stream?wave=${waveId}`, undefined, { shallow: true });
+        router.push(`/my-stream?wave=${waveId}`);
       } else {
-        router.push('/my-stream', undefined, { shallow: true });
+        router.push("/my-stream");
       }
     },
     [router]

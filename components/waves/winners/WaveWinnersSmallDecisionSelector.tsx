@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { useAnimate } from "framer-motion";
@@ -66,8 +68,7 @@ export const WaveWinnersSmallDecisionSelector: React.FC<
         type="button"
         aria-haspopup="true"
         onClick={() => setIsOpen(!isOpen)}
-        className="tw-w-full tw-text-sm tw-text-left tw-relative tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-2.5 tw-pl-3.5 tw-pr-10 tw-font-medium tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-bg-iron-800/80 hover:tw-ring-iron-600 tw-transition tw-duration-300 tw-ease-out"
-      >
+        className="tw-w-full tw-text-sm tw-text-left tw-relative tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-2.5 tw-pl-3.5 tw-pr-10 tw-font-medium tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-bg-iron-800/80 hover:tw-ring-iron-600 tw-transition tw-duration-300 tw-ease-out">
         {getCurrentLabel()}
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center -tw-mr-1 tw-pr-3.5">
           <svg
@@ -76,8 +77,7 @@ export const WaveWinnersSmallDecisionSelector: React.FC<
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M6 9L12 15L18 9"
               stroke="currentColor"
@@ -103,8 +103,7 @@ export const WaveWinnersSmallDecisionSelector: React.FC<
                   point.id === activeDecisionPoint
                     ? "tw-bg-iron-700 tw-text-primary-400"
                     : ""
-                }`}
-              >
+                }`}>
                 {format(new Date(point.date), "MMM d, yyyy h:mm a")}
                 {point.winnersCount !== undefined && (
                   <span className="tw-ml-1 tw-text-iron-400">

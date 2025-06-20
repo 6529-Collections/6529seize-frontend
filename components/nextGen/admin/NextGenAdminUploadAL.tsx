@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";

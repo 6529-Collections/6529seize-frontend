@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote";
@@ -41,8 +43,7 @@ export const SingleWaveDropVoteContent: React.FC<
   return (
     <div
       className="tw-bg-iron-800 tw-backdrop-blur-sm tw-border tw-border-iron-700 tw-border-solid tw-rounded-lg tw-px-2 tw-py-3 sm:tw-p-4"
-      onClick={(e) => e.stopPropagation()}
-    >
+      onClick={(e) => e.stopPropagation()}>
       {/* Main container using flexbox and wrapping */}
       <div className="tw-flex tw-flex-wrap tw-gap-3 sm:tw-gap-2.5">
         {/* Toggle button - first item in both layouts */}
@@ -52,8 +53,7 @@ export const SingleWaveDropVoteContent: React.FC<
             className="tw-h-8 tw-px-2.5 tw-rounded-lg tw-bg-iron-700 tw-border tw-border-solid tw-border-iron-650
                     tw-flex tw-items-center tw-justify-center tw-gap-1.5 tw-transition-all
                     desktop-hover:hover:tw-bg-iron-600"
-            title="Switch mode"
-          >
+            title="Switch mode">
             <FontAwesomeIcon
               icon={faExchange}
               className="tw-text-white tw-size-3 tw-flex-shrink-0"

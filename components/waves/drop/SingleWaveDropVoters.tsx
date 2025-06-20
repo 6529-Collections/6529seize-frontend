@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { ApiDrop } from "../../../generated/models/ApiDrop";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,7 +12,9 @@ interface SingleWaveDropVotersProps {
   readonly drop: ApiDrop;
 }
 
-export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop }) => {
+export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
+  drop,
+}) => {
   const { connectedProfile } = useAuth();
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
     useWaveTopVoters({
@@ -35,15 +39,13 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop
         onClick={() => setIsVotersOpen(!isVotersOpen)}
         className={`tw-text-sm tw-w-full tw-group tw-ring-1 tw-ring-iron-700 desktop-hover:hover:tw-ring-primary-400/30 tw-flex tw-justify-between tw-items-center tw-font-medium tw-py-2.5 md:tw-py-3 tw-px-5 tw-bg-iron-900 tw-transition-all tw-duration-300 tw-border-0 ${
           isVotersOpen ? "tw-rounded-t-xl" : "tw-rounded-xl"
-        }`}
-      >
+        }`}>
         <span
           className={
             isVotersOpen
               ? "tw-text-primary-300"
               : "tw-text-iron-300 desktop-hover:group-hover:tw-text-primary-300 tw-transition-all tw-duration-300"
-          }
-        >
+          }>
           Top Voters
         </span>
         <motion.svg
@@ -57,8 +59,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"
-          stroke="currentColor"
-        >
+          stroke="currentColor">
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -75,8 +76,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900"
-          >
+            className="tw-overflow-hidden tw-ring-1 tw-ring-iron-700 tw-rounded-b-xl tw-bg-iron-900">
             <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
               {voters.length > 0 || isLoading ? (
                 <>
@@ -110,8 +110,7 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop
                       viewBox="0 0 24 24"
                       strokeWidth="1"
                       stroke="currentColor"
-                      aria-hidden="true"
-                    >
+                      aria-hidden="true">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -135,4 +134,4 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({ drop
       </AnimatePresence>
     </div>
   );
-}; 
+};

@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useState } from "react";
 import DistributionPlanSecondaryText from "../../../../../common/DistributionPlanSecondaryText";
 import ComponentConfigNextBtn from "../ComponentConfigNextBtn";
@@ -67,8 +69,7 @@ export default function SelectSnapshot({
         onSkip={() => undefined}
         onNext={onAddSnapshot}
         isDisabled={false}
-        isLoading={isLoading}
-      >
+        isLoading={isLoading}>
         <ComponentConfigMeta
           tags={[]}
           walletsCount={selectedSnapshot?.walletsCount ?? null}

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useMemo } from "react";
 import { ApiWave } from "../../../generated/models/ApiWave";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -129,8 +131,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             href="https://docs.google.com/presentation/d/1Aejko31qFkAIyu-Qc3Ao9tHQGbbaFCIcqrBj_kZzo_M/edit#slide=id.p1"
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
-          >
+            className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
             Read Artist Brief
             <FontAwesomeIcon
               icon={faArrowRight}
@@ -300,8 +301,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="tw-border-b tw-border-iron-800 tw-pb-3  "
-              >
+                className="tw-border-b tw-border-iron-800 tw-pb-3  ">
                 <dt className="tw-text-sm tw-font-medium tw-text-primary-400">
                   {item.q}
                 </dt>
@@ -354,8 +354,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             href="https://6529.io/my-stream?wave=0ecb95d0-d8f2-48e8-8137-bfa71ee8593c"
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-group tw-flex tw-text-base tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-mb-4"
-          >
+            className="tw-group tw-flex tw-text-base tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors tw-mb-4">
             Nomination Wave
             <FontAwesomeIcon
               icon={faArrowRight}
@@ -398,8 +397,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             href="https://6529.io/my-stream?wave=e2dae377-d27d-4a69-8b77-38d88fad4d01"
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
-          >
+            className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
             FAQ Wave
             <FontAwesomeIcon
               icon={faArrowRight}
@@ -430,8 +428,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               href="https://x.com/punk6529/status/1906753171751412006"
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
-            >
+              className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
               Theory
               <FontAwesomeIcon
                 icon={faArrowRight}
@@ -442,8 +439,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
               href="https://6529.io/network/metrics"
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
-            >
+              className="tw-group tw-text-base tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
               Formula
               <FontAwesomeIcon
                 icon={faArrowRight}
@@ -495,8 +491,7 @@ const MyStreamWaveFAQ: React.FC<MyStreamWaveFAQProps> = ({ wave }) => {
             href="https://6529.io/about/subscriptions"
             target="_blank"
             rel="noopener noreferrer"
-            className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors"
-          >
+            className="tw-group tw-flex tw-items-center tw-text-primary-400 tw-font-medium desktop-hover:hover:tw-text-primary-300 tw-transition-colors">
             Subscriptions
             <FontAwesomeIcon
               icon={faArrowRight}

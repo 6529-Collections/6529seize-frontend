@@ -1,3 +1,5 @@
+"use client";
+
 import { Container, Row, Col, Button } from "react-bootstrap";
 import DotLoader from "../dotLoader/DotLoader";
 import AppWalletCard from "./AppWalletCard";

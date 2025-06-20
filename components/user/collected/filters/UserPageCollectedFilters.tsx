@@ -1,3 +1,5 @@
+"use client";
+
 import { RefObject, useEffect, useRef, useState } from "react";
 import {
   CollectedCollectionType,
@@ -117,15 +119,13 @@ export default function UserPageCollectedFilters({
             ref={leftArrowRef}
             aria-label="Scroll filters left"
             className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-left-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
-            onClick={() => scrollHorizontally("left")}
-          >
+            onClick={() => scrollHorizontally("left")}>
             <svg
               className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -141,15 +141,13 @@ export default function UserPageCollectedFilters({
             ref={rightArrowRef}
             aria-label="Scroll filters right"
             className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-p-0 tw-h-8 tw-w-8 tw-right-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-rounded-md tw-border-none"
-            onClick={() => scrollHorizontally("right")}
-          >
+            onClick={() => scrollHorizontally("right")}>
             <svg
               className="tw-h-5 tw-w-5 tw-text-iron-200 group-hover:tw-text-iron-400 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
               viewBox="0 0 24 24"
               aria-hidden="true"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+              xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"

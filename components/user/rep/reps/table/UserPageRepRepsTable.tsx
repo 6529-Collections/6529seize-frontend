@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { RatingStats } from "../../../../../entities/IProfile";
 import UserPageRepRepsTableBody from "./UserPageRepRepsTableBody";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import CommonAnimationWrapper from "../../../utils/animation/CommonAnimationWrapper";
 import CommonAnimationOpacity from "../../../utils/animation/CommonAnimationOpacity";
@@ -52,8 +54,7 @@ export default function UserPageRepNewRep({
             key="modal"
             elementClasses="tw-absolute tw-z-10"
             elementRole="dialog"
-            onClicked={(e) => e.stopPropagation()}
-          >
+            onClicked={(e) => e.stopPropagation()}>
             <UserPageRepModifyModal
               profile={profile}
               category={repToAdd.category}

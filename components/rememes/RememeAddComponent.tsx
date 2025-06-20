@@ -1,3 +1,5 @@
+"use client";
+
 import { NFT } from "../../entities/INFT";
 import styles from "./Rememes.module.scss";
 import { Row, Col, Form, Container, Button, Dropdown } from "react-bootstrap";

@@ -1,9 +1,14 @@
+"use client";
+
 import { useRouter } from "next/router";
 import { IFeedItemWaveCreated } from "../../../../../types/feed.types";
 
 import { ApiDrop } from "../../../../../generated/models/ApiDrop";
 import { ActiveDropState } from "../../../../../types/dropInteractionTypes";
-import { DropSize, ExtendedDrop } from "../../../../../helpers/waves/drop.helpers";
+import {
+  DropSize,
+  ExtendedDrop,
+} from "../../../../../helpers/waves/drop.helpers";
 import Drop, {
   DropInteractionParams,
   DropLocation,

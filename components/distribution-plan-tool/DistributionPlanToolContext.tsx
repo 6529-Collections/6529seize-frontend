@@ -1,3 +1,5 @@
+"use client";
+
 import { Slide, ToastContainer, TypeOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createContext, useState } from "react";

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { AnimatePresence, motion } from "framer-motion";
@@ -38,22 +40,22 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   }, []);
 
   const [isCreatingDrop, setIsCreatingDrop] = useState(false);
-  
+
   // Generate a unique preference key for this wave
-  const viewPreferenceKey = `waveViewMode_${wave.id ?? 'default'}`;
-  
+  const viewPreferenceKey = `waveViewMode_${wave.id ?? "default"}`;
+
   // Determine the default view mode based on wave type
   const defaultViewMode = isMemesWave ? "grid" : "list";
-  
+
   // Use our custom hook to manage view mode preference
   const [viewMode, setViewMode] = useLocalPreference<"list" | "grid">(
     viewPreferenceKey,
     defaultViewMode,
     (value) => value === "list" || value === "grid"
   );
-  
+
   // Use our custom hook for sort preference too
-  const sortPreferenceKey = `waveSortMode_${wave.id ?? 'default'}`;
+  const sortPreferenceKey = `waveSortMode_${wave.id ?? "default"}`;
   const [sort, setSort] = useLocalPreference<WaveDropsLeaderboardSort>(
     sortPreferenceKey,
     WaveDropsLeaderboardSort.RANK,
@@ -89,8 +91,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-            >
+              transition={{ duration: 0.2, ease: "easeInOut" }}>
               <WaveDropCreate
                 wave={wave}
                 onCancel={() => {

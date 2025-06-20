@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
@@ -133,8 +135,7 @@ export default function RollingEndDate({
         }
         isExpanded={isExpanded}
         onToggle={() => setIsExpanded(!isExpanded)}
-        collapsedContent={renderCollapsedContent()}
-      >
+        collapsedContent={renderCollapsedContent()}>
         <div className="tw-px-5 tw-pt-2 tw-pb-5">
           {/* Date and Time Selection Container */}
           <div className="tw-col-span-2">

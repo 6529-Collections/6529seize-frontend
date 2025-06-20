@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ApiWave } from "../../../../generated/models/ApiWave";
 import { useContext, useEffect, useState } from "react";

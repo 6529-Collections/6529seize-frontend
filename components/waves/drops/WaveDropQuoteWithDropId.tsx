@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useContext } from "react";
 import { commonApiFetch } from "../../../services/api/common-api";
 import { AuthContext } from "../../auth/Auth";

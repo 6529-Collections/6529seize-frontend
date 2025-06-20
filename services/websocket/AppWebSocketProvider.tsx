@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { WebSocketProvider } from "./WebSocketProvider";
 import { DEFAULT_WEBSOCKET_CONFIG, WebSocketConfig } from "./index";

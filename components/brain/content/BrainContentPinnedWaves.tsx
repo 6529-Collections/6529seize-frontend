@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import BrainContentPinnedWave from "./BrainContentPinnedWave";
 import { usePinnedWaves } from "../../../hooks/usePinnedWaves";
@@ -37,9 +39,9 @@ const BrainContentPinnedWaves: React.FC = () => {
       const viewportWidth = container.offsetWidth;
       const currentScroll = container.scrollLeft;
       const maxScroll = scrollableWidth - viewportWidth;
-      
+
       const isAtEnd = Math.abs(currentScroll - maxScroll) < 1;
-      
+
       setShowLeftArrow(currentScroll > 0);
       setShowRightArrow(maxScroll > 0 && !isAtEnd);
     }
@@ -108,14 +110,12 @@ const BrainContentPinnedWaves: React.FC = () => {
           ref={leftArrowRef}
           aria-label="Scroll left"
           onClick={() => scrollHorizontally("left")}
-          className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-top-0 sm:tw-top-0.5 tw-p-0 tw-size-8 sm:tw-size-7 tw-left-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-md tw-border-none"
-        >
+          className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-top-0 sm:tw-top-0.5 tw-p-0 tw-size-8 sm:tw-size-7 tw-left-0 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-md tw-border-none">
           <svg
             className="tw-size-5 sm:tw-size-4 tw-text-iron-200 group-hover:tw-text-iron-400 tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
             fill="none"
-            aria-hidden="true"
-          >
+            aria-hidden="true">
             <path
               d="M6 9L12 15L18 9"
               stroke="currentColor"
@@ -131,14 +131,12 @@ const BrainContentPinnedWaves: React.FC = () => {
           ref={rightArrowRef}
           aria-label="Scroll right"
           onClick={() => scrollHorizontally("right")}
-          className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-right-0 tw-top-0 sm:tw-top-0.5 tw-p-0 tw-size-8 sm:tw-size-7 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-md tw-border-none"
-        >
+          className="tw-inline-flex tw-items-center tw-justify-center tw-group tw-absolute tw-z-10 tw-right-0 tw-top-0 sm:tw-top-0.5 tw-p-0 tw-size-8 sm:tw-size-7 tw-bg-iron-700 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-rounded-md tw-border-none">
           <svg
             className="tw-size-5 sm:tw-size-4 tw-text-iron-200 group-hover:tw-text-iron-400 -tw-rotate-90 tw-transition tw-duration-300 tw-ease-out"
             viewBox="0 0 24 24"
             fill="none"
-            aria-hidden="true"
-          >
+            aria-hidden="true">
             <path
               d="M6 9L12 15L18 9"
               stroke="currentColor"
@@ -151,8 +149,7 @@ const BrainContentPinnedWaves: React.FC = () => {
       )}
       <div
         ref={containerRef}
-        className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300"
-      >
+        className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-overflow-x-auto tw-overflow-y-hidden no-scrollbar tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 hover:tw-scrollbar-thumb-iron-300">
         <div className="tw-flex tw-gap-x-3">
           {pinnedIds.map((id) => (
             <BrainContentPinnedWave

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
 interface ClientThumbnailGeneratorProps {
@@ -96,7 +98,6 @@ const ClientThumbnailGenerator: React.FC<ClientThumbnailGeneratorProps> = ({
     };
   }, [src, handleMetadataLoaded, handleSeeked, handleError, cleanup]);
 
-
   // Render Logic
   if (isLoading) {
     // Simple pulsing placeholder
@@ -110,18 +111,17 @@ const ClientThumbnailGenerator: React.FC<ClientThumbnailGeneratorProps> = ({
     // Using FontAwesome icon as an example
     return (
       <div className="tw-w-full tw-h-full tw-flex tw-items-center tw-justify-center tw-bg-iron-800 tw-rounded-xl">
-        <svg 
-          className="tw-w-10 tw-h-10 tw-text-iron-500" 
-          fill="currentColor" 
-          viewBox="0 0 20 20" 
+        <svg
+          className="tw-w-10 tw-h-10 tw-text-iron-500"
+          fill="currentColor"
+          viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
-            <path 
-              clipRule="evenodd" 
-              fillRule="evenodd" 
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" 
-            />
+          aria-hidden="true">
+          <path
+            clipRule="evenodd"
+            fillRule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+          />
         </svg>
       </div>
     );
@@ -139,4 +139,4 @@ const ClientThumbnailGenerator: React.FC<ClientThumbnailGeneratorProps> = ({
   );
 };
 
-export default React.memo(ClientThumbnailGenerator); 
+export default React.memo(ClientThumbnailGenerator);

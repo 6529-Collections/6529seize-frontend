@@ -1,3 +1,5 @@
+"use client";
+
 import { useContext, useEffect, useRef, useState } from "react";
 import CreateSnapshotFormSearchCollectionDropdown from "./CreateSnapshotFormSearchCollectionDropdown";
 import CreateSnapshotFormSearchCollectionInput from "./CreateSnapshotFormSearchCollectionInput";
@@ -140,8 +142,7 @@ export default function CreateSnapshotFormSearchCollection({
         onClose={() => setIsOnMemesCollection(false)}
         title={`Select "The Memes by 6529" Seasons`}
         modalSize={AllowlistToolModalSize.X_LARGE}
-        showTitle={false}
-      >
+        showTitle={false}>
         <CreateSnapshotFormSearchCollectionMemesModal
           onMemesCollection={onMemesCollection}
           collectionName="The Memes by 6529"

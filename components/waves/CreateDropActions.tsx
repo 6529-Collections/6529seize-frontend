@@ -1,3 +1,5 @@
+"use client";
+
 import Tippy from "@tippyjs/react";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import React, { memo, useEffect, useState } from "react";
