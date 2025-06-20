@@ -14,7 +14,6 @@ import Providers from "@/components/providers/Providers";
 import { getPageMetadata } from "@/components/providers/metadata";
 import { wrapper } from "@/store/store";
 import { Provider } from "react-redux";
-import { TitleProvider } from "@/contexts/TitleContext";
 import BaseLayout from "@/components/layout/BaseLayout";
 
 export type NextPageWithLayout<Props> = NextPage<Props> & {
@@ -40,17 +39,13 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
 
   return (
     <Provider store={store}>
-      <TitleProvider>
-        <BaseLayout metadata={metadata}>
-          <Providers>
-            <MainLayout>
-              {getLayout(
-                <Component {...rest.pageProps} {...props.pageProps} />
-              )}
-            </MainLayout>
-          </Providers>
-        </BaseLayout>
-      </TitleProvider>
+      <BaseLayout metadata={metadata}>
+        <Providers>
+          <MainLayout>
+            {getLayout(<Component {...rest.pageProps} {...props.pageProps} />)}
+          </MainLayout>
+        </Providers>
+      </BaseLayout>
     </Provider>
   );
 }

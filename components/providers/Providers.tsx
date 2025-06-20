@@ -43,21 +43,21 @@ export default function Providers({
                         <CookieConsentProvider>
                           <EULAConsentProvider>
                             <AppWebSocketProvider>
-                              {/* <TitleProvider> */}
-                              <HeaderProvider>
-                                <ScrollPositionProvider>
-                                  <ViewProvider>
-                                    <NavigationHistoryProvider>
-                                      <LayoutProvider>
-                                        <MyStreamProvider>
-                                          {children}
-                                        </MyStreamProvider>
-                                      </LayoutProvider>
-                                    </NavigationHistoryProvider>
-                                  </ViewProvider>
-                                </ScrollPositionProvider>
-                              </HeaderProvider>
-                              {/* </TitleProvider> */}
+                              <TitleProvider>
+                                <HeaderProvider>
+                                  <ScrollPositionProvider>
+                                    <ViewProvider>
+                                      <NavigationHistoryProvider>
+                                        <LayoutProvider>
+                                          <MyStreamProvider>
+                                            {children}
+                                          </MyStreamProvider>
+                                        </LayoutProvider>
+                                      </NavigationHistoryProvider>
+                                    </ViewProvider>
+                                  </ScrollPositionProvider>
+                                </HeaderProvider>
+                              </TitleProvider>
                               <NewVersionToast />
                             </AppWebSocketProvider>
                           </EULAConsentProvider>

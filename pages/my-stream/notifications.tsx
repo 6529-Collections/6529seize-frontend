@@ -19,8 +19,10 @@ interface Props {
   metadata: Partial<PageSSRMetadata>;
 }
 
-const Page: NextPageWithLayout<{ pageProps: Props }> = ({ pageProps }) => (
-  <HydrationBoundary state={pageProps.dehydratedState}>
+const Page: NextPageWithLayout<{ dehydratedState: DehydratedState }> = ({
+  dehydratedState,
+}) => (
+  <HydrationBoundary state={dehydratedState}>
     <div className="tailwind-scope tw-flex-1">
       <Notifications />
     </div>

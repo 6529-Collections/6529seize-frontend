@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import styles from "./CookiesBanner.module.scss";
 import { useCookieConsent } from "./CookieConsentContext";
 import Link from "next/link";
@@ -9,10 +9,10 @@ import useIsMobileDevice from "../../hooks/isMobileDevice";
 
 export default function CookiesBanner() {
   const isMobile = useIsMobileDevice();
-  const router = useRouter();
+  const pathname = usePathname() ?? "";
   const { consent, reject } = useCookieConsent();
 
-  if (["/restricted", "/access"].includes(router.pathname)) {
+  if (["/restricted", "/access"].includes(pathname)) {
     return <></>;
   }
 

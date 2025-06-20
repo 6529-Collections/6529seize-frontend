@@ -358,7 +358,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
                                 <a href="mailto:jeff@6529.io">
                                   <u>jeff&#64;6529.io</u>
                                 </a>
-                                .
+                                {"."}
                               </p>
                               <p>
                                 Alternatively, you can access the fund
@@ -369,7 +369,7 @@ It is targeting approximately $25M to $50M of capital deployed each quarter in a
                                   rel="noopener">
                                   <u>here</u>
                                 </a>
-                                .
+                                {"."}
                               </p>
                             </div>
                           </div>
