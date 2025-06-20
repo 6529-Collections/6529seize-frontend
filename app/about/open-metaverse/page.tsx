@@ -426,9 +426,6 @@ STATE OF TECHNOLOGY
                               <h3>
                                 WHAT DO NFTS AND THE METAVERSE HAVE TO DO WITH
                                 EACH OTHER?
-                                <strong>
-                                  <br />
-                                </strong>
                               </h3>
                               <ul>
                                 <li>
@@ -466,12 +463,7 @@ STATE OF TECHNOLOGY
                                   internet architecture lens
                                 </li>
                               </ul>
-                              <h3>
-                                WHAT ARE THE OVERALL GOALS?
-                                <strong>
-                                  <br />
-                                </strong>
-                              </h3>
+                              <h3>WHAT ARE THE OVERALL GOALS?</h3>
                               <ul>
                                 <li>
                                   Get 100,000,000 people to use an NFT – that
@@ -482,12 +474,7 @@ STATE OF TECHNOLOGY
                                   metaverse before it begins
                                 </li>
                               </ul>
-                              <h3>
-                                WHAT ARE 6529'S GOALS?
-                                <strong>
-                                  <br />
-                                </strong>
-                              </h3>
+                              <h3>WHAT ARE 6529'S GOALS?</h3>
                               <ul>
                                 <li>Educate!</li>
                                 <li>

@@ -369,7 +369,7 @@ Representative groups:
                                   rel="noopener">
                                   OM Discord channel
                                 </a>
-                                .
+                                {"."}
                               </p>
                               <p>Representative groups:</p>
                               <ul>

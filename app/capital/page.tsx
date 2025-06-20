@@ -379,7 +379,7 @@ NFT investing is difficult specifically"
                                   className="decoration-underline">
                                   here
                                 </a>
-                                .
+                                {"."}
                               </p>
                             </div>
                           </div>
@@ -801,7 +801,7 @@ NFT investing is difficult specifically"
                                 <a href="/capital/fund/">
                                   <u>6529 NFT Fund</u>
                                 </a>
-                                .
+                                {"."}
                               </p>
                             </div>
                           </div>

@@ -9,7 +9,7 @@ import { capitalizeEveryWord } from "@/helpers/Helpers";
 import { getAppMetadata } from "@/components/providers/metadata";
 
 interface Props {
-  params: { section: string };
+  params: Promise<{ section: string }>;
 }
 
 export default async function AboutPage(props: Readonly<Props>) {
