@@ -1,3 +1,4 @@
+import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
 
 export default function CapitalPage() {
@@ -855,6 +856,6 @@ NFT investing is difficult specifically"
   );
 }
 
-export const metadata: Metadata = {
+export const metadata: Metadata = getAppMetadata({
   title: "6529 Capital",
-};
+});

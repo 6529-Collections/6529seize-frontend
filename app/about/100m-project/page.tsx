@@ -1,3 +1,4 @@
+import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
 
 export default function About100mProjectPage() {
@@ -338,6 +339,6 @@ export default function About100mProjectPage() {
   );
 }
 
-export const metadata: Metadata = {
+export const metadata: Metadata = getAppMetadata({
   title: "100M Project",
-};
+});

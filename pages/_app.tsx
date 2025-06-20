@@ -1,18 +1,21 @@
-import "../styles/seize-bootstrap.scss";
-import "../styles/globals.scss";
+import "@/styles/seize-bootstrap.scss";
+import "@/styles/globals.scss";
+import "@/styles/swiper.scss";
+import "@/components/drops/create/lexical/lexical.styles.scss";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
-import "../styles/swiper.scss";
+
 import type { AppProps } from "next/app";
 
 import { NextPage, NextPageContext } from "next";
 import { ReactElement, ReactNode } from "react";
-import "../components/drops/create/lexical/lexical.styles.scss";
-import MainLayout from "../components/layout/MainLayout";
+import MainLayout from "@/components/layout/MainLayout";
 import Providers from "@/components/providers/Providers";
 import { getPageMetadata } from "@/components/providers/metadata";
 import { wrapper } from "@/store/store";
 import { Provider } from "react-redux";
+import { TitleProvider } from "@/contexts/TitleContext";
+import BaseLayout from "@/components/layout/BaseLayout";
 
 export type NextPageWithLayout<Props> = NextPage<Props> & {
   getLayout?: (page: ReactElement<any>) => ReactNode;
@@ -37,11 +40,17 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
 
   return (
     <Provider store={store}>
-      <Providers>
-        <MainLayout metadata={metadata}>
-          {getLayout(<Component {...rest.pageProps} {...props.pageProps} />)}
-        </MainLayout>
-      </Providers>
+      <TitleProvider>
+        <BaseLayout metadata={metadata}>
+          <Providers>
+            <MainLayout>
+              {getLayout(
+                <Component {...rest.pageProps} {...props.pageProps} />
+              )}
+            </MainLayout>
+          </Providers>
+        </BaseLayout>
+      </TitleProvider>
     </Provider>
   );
 }
