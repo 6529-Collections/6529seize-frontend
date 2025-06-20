@@ -218,7 +218,7 @@ export default function Header(props: Readonly<Props>) {
           <Row className="pt-4 pb-3">
             <Col>
               <h3
-                className={`d-flex justify-content-center ${styles.burgerMenuHeader} gap-2`}>
+                className={`d-flex justify-content-center gap-2 ${styles.burgerMenuHeader}`}>
                 <HeaderUser />
                 <HeaderQRScanner
                   onScanSuccess={() => {
@@ -564,7 +564,7 @@ export default function Header(props: Readonly<Props>) {
                       <Container
                         className={`d-flex align-items-center justify-content-end no-padding`}>
                         <div
-                          className={`${styles.dMdNone} d-flex align-items-center`}>
+                          className={`d-flex align-items-center ${styles.dMdNone}`}>
                           <div className="tw-inline-flex tw-space-x-3 tw-mr-3">
                             <HeaderOpenMobile />
                             {showWaves && <HeaderNotifications />}
