@@ -6,9 +6,10 @@ import { Metadata } from "next";
 import { AboutSection } from "@/enums";
 import About from "@/components/about/About";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
+import { getAppMetadata } from "@/components/providers/metadata";
 
 interface Props {
-  params: Promise<{ section: string }>;
+  params: { section: string };
 }
 
 export default async function AboutPage(props: Readonly<Props>) {
@@ -50,14 +51,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ) {
     const sectionTitle = capitalizeEveryWord(section.replaceAll("-", " "));
 
-    return {
-      title: `${sectionTitle}`,
+    return getAppMetadata({
+      title: sectionTitle,
       description: "About",
-    };
+    });
   }
 
-  return {
+  return getAppMetadata({
     title: "About",
     description: "About",
-  };
+  });
 }

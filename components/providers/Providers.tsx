@@ -1,5 +1,4 @@
 import Auth from "@/components/auth/Auth";
-import { Suspense } from "react";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
@@ -44,23 +43,21 @@ export default function Providers({
                         <CookieConsentProvider>
                           <EULAConsentProvider>
                             <AppWebSocketProvider>
-                              <Suspense fallback={null}>
-                                <TitleProvider>
-                                  <HeaderProvider>
-                                    <ScrollPositionProvider>
-                                      <ViewProvider>
-                                        <NavigationHistoryProvider>
-                                          <LayoutProvider>
-                                            <MyStreamProvider>
-                                              {children}
-                                            </MyStreamProvider>
-                                          </LayoutProvider>
-                                        </NavigationHistoryProvider>
-                                      </ViewProvider>
-                                    </ScrollPositionProvider>
-                                  </HeaderProvider>
-                                </TitleProvider>
-                              </Suspense>
+                              {/* <TitleProvider> */}
+                              <HeaderProvider>
+                                <ScrollPositionProvider>
+                                  <ViewProvider>
+                                    <NavigationHistoryProvider>
+                                      <LayoutProvider>
+                                        <MyStreamProvider>
+                                          {children}
+                                        </MyStreamProvider>
+                                      </LayoutProvider>
+                                    </NavigationHistoryProvider>
+                                  </ViewProvider>
+                                </ScrollPositionProvider>
+                              </HeaderProvider>
+                              {/* </TitleProvider> */}
                               <NewVersionToast />
                             </AppWebSocketProvider>
                           </EULAConsentProvider>

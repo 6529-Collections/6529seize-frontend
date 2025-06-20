@@ -44,20 +44,23 @@ export function getAppMetadata(
   const isStaging = baseEndpoint.includes("staging");
 
   const title = customMetadata?.title ?? (isStaging ? "6529 Staging" : "6529");
-  const description = customMetadata?.description ?? "";
+  const description =
+    customMetadata?.description ?? (isStaging ? "staging.6529.io" : "6529.io");
   const ogImage = customMetadata?.ogImage ?? `${baseEndpoint}/6529io.png`;
   const twitterCard = customMetadata?.twitterCard ?? "summary";
 
+  const domain = isStaging ? "staging.6529.io" : "6529.io";
+
   return {
     title,
-    description,
+    description: description ? `${description} | ${domain}` : domain,
     icons: {
       icon: "/favicon.ico",
     },
     openGraph: {
       images: [ogImage],
       title,
-      description,
+      description: description ? `${description} | ${domain}` : domain,
       url: baseEndpoint,
     },
     twitter: {

@@ -1,3 +1,4 @@
+import { getAppMetadata } from "@/components/providers/metadata";
 import { Metadata } from "next";
 
 export default function AboutPressPage() {
@@ -1999,6 +2000,6 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
   );
 }
 
-export const metadata: Metadata = {
+export const metadata: Metadata = getAppMetadata({
   title: "Press",
-};
+});
