@@ -44,11 +44,13 @@ export interface HeaderLink {
 
 export default function Header(props: Readonly<Props>) {
   const capacitor = useCapacitor();
+  console.log("i am capacitor [Header]", capacitor);
   const { country } = useCookieConsent();
   const { appWalletsSupported } = useAppWallets();
   const { address, seizeConnectOpen } = useSeizeConnectContext();
 
   const isMobile = useIsMobileScreen();
+  console.log("i am isMobile [Header]", isMobile);
 
   const { showWaves } = useAuth();
   const pathname = usePathname();
