@@ -10,7 +10,6 @@ export default function DynamicHeadTitle() {
     if (!document.title || title !== DEFAULT_TITLE) {
       document.title = title;
     }
-    // document.title = title;
   }, [title]);
 
   return null;

@@ -44,7 +44,7 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const newDropsCount = useMemo(() => {
     // Check both regular waves and direct messages
     const waveFromList =
-      waves.list.find((w) => w.id === waveId) ||
+      waves.list.find((w) => w.id === waveId) ??
       directMessages.list.find((w) => w.id === waveId);
     return waveFromList?.newDropsCount.count ?? 0;
   }, [waves.list, directMessages.list, waveId]);
