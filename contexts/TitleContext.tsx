@@ -127,20 +127,32 @@ export const TitleProvider: React.FC<{ children: React.ReactNode }> = ({
       if (searchParams?.get("wave") && waveData) {
         // Wave title
         let newItemsText = "";
-        if (waveData.newItemsCount > 0) {
-          newItemsText = `(${waveData.newItemsCount} new) `;
+        // Only show new items if there are no notifications
+        if (waveData.newItemsCount > 0 && notificationCount === 0) {
+          const messageText =
+            waveData.newItemsCount === 1 ? "message" : "messages";
+          newItemsText = `(${waveData.newItemsCount} new ${messageText}) `;
         }
         return `${newItemsText}${waveData.name} | Brain`;
       } else {
         // Main stream title
-        const prefix = streamHasNewItems
-          ? "(New items) My Stream"
-          : "My Stream";
+        // Only show new items if there are no notifications
+        const prefix =
+          streamHasNewItems && notificationCount === 0
+            ? "(New messages) My Stream"
+            : "My Stream";
         return `${prefix} | Brain`;
       }
     }
     return title;
-  }, [pathname, searchParams?.get("wave"), waveData, streamHasNewItems, title]);
+  }, [
+    pathname,
+    searchParams?.get("wave"),
+    waveData,
+    streamHasNewItems,
+    title,
+    notificationCount,
+  ]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => {
