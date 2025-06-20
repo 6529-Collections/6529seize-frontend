@@ -578,440 +578,438 @@ export default function Header(props: Readonly<Props>) {
                             </button>
                           </div>
                         </div>
-                        <div className={`d-none ${styles.dMdBlock}`}>
-                          <Navbar
-                            id="seize-navbar-nav"
-                            className="justify-content-end ">
-                            <Nav className="justify-content-end ml-auto">
-                              {showWaves && (
-                                <NavDropdown
-                                  title="Brain"
-                                  align={"start"}
-                                  className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                        <Navbar
+                          id="seize-navbar-nav"
+                          className={`tw-hidden ${styles.dMdBlock}`}>
+                          <Nav className="ml-auto">
+                            {showWaves && (
+                              <NavDropdown
+                                title="Brain"
+                                align={"start"}
+                                className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                                <HeaderDesktopLink
+                                  link={{
+                                    name: "My Stream",
+                                    path: "/my-stream",
+                                  }}
+                                />
+                                <HeaderDesktopLink
+                                  link={{
+                                    name: "Waves",
+                                    path: "/waves",
+                                  }}
+                                />
+                              </NavDropdown>
+                            )}
+                            <NavDropdown
+                              title="Collections"
+                              align={"start"}
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "The Memes",
+                                  path: "/the-memes",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Gradient",
+                                  path: "/6529-gradient",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "NextGen",
+                                  path: "/nextgen",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Meme Lab",
+                                  path: "/meme-lab",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "ReMemes",
+                                  path: "/rememes",
+                                }}
+                              />
+                            </NavDropdown>
+                            <NavDropdown
+                              title="Network"
+                              align={"start"}
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Identities",
+                                  path: "/network",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Activity",
+                                  path: "/network/activity",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Groups",
+                                  path: "/network/groups",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "NFT Activity",
+                                  path: "/nft-activity",
+                                }}
+                              />
+                              <NavDropdown.Divider />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Prenodes",
+                                  path: "/network/prenodes",
+                                }}
+                              />
+                              <NavDropdown.Divider />
+                              <div className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  Metrics
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
                                   <HeaderDesktopLink
                                     link={{
-                                      name: "My Stream",
-                                      path: "/my-stream",
+                                      name: "Definitions",
+                                      path: "/network/metrics",
                                     }}
                                   />
                                   <HeaderDesktopLink
                                     link={{
-                                      name: "Waves",
-                                      path: "/waves",
+                                      name: "Network Stats",
+                                      path: "/network/stats",
                                     }}
                                   />
-                                </NavDropdown>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Levels",
+                                      path: "/network/levels",
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </NavDropdown>
+                            <NavDropdown
+                              title="Tools"
+                              align={"start"}
+                              className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
+                              {appWalletsSupported && (
+                                <>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "App Wallets",
+                                      path: "/tools/app-wallets",
+                                    }}
+                                  />
+                                  <NavDropdown.Divider />
+                                </>
                               )}
-                              <NavDropdown
-                                title="Collections"
-                                align={"start"}
-                                className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "The Memes",
-                                    path: "/the-memes",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Gradient",
-                                    path: "/6529-gradient",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "NextGen",
-                                    path: "/nextgen",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Meme Lab",
-                                    path: "/meme-lab",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "ReMemes",
-                                    path: "/rememes",
-                                  }}
-                                />
-                              </NavDropdown>
-                              <NavDropdown
-                                title="Network"
-                                align={"start"}
-                                className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Identities",
-                                    path: "/network",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Activity",
-                                    path: "/network/activity",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Groups",
-                                    path: "/network/groups",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "NFT Activity",
-                                    path: "/nft-activity",
-                                  }}
-                                />
-                                <NavDropdown.Divider />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Prenodes",
-                                    path: "/network/prenodes",
-                                  }}
-                                />
-                                <NavDropdown.Divider />
-                                <div className={styles.submenuContainer}>
-                                  <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-                                    Metrics
-                                    <FontAwesomeIcon
-                                      icon={faChevronRight}
-                                      height={16}
-                                      width={16}
-                                    />
-                                  </div>
-                                  <div className={styles.nestedMenu}>
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Definitions",
-                                        path: "/network/metrics",
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Network Stats",
-                                        path: "/network/stats",
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Levels",
-                                        path: "/network/levels",
-                                      }}
-                                    />
-                                  </div>
+                              <div className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  NFT Delegation
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
                                 </div>
-                              </NavDropdown>
-                              <NavDropdown
-                                title="Tools"
-                                align={"start"}
-                                className={`${styles.mainNavLink} ${styles.mainNavLinkPadding}`}>
-                                {appWalletsSupported && (
-                                  <>
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "App Wallets",
-                                        path: "/tools/app-wallets",
-                                      }}
-                                    />
-                                    <NavDropdown.Divider />
-                                  </>
-                                )}
-                                <div className={styles.submenuContainer}>
-                                  <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-                                    NFT Delegation
-                                    <FontAwesomeIcon
-                                      icon={faChevronRight}
-                                      height={16}
-                                      width={16}
-                                    />
-                                  </div>
-                                  <div className={styles.nestedMenu}>
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Delegation Center",
-                                        path: "/delegation/delegation-center",
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Wallet Architecture",
-                                        path: "/delegation/wallet-architecture",
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Delegation FAQs",
-                                        path: "/delegation/delegation-faq",
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Consolidation Use Cases",
-                                        path: "/delegation/consolidation-use-cases",
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Wallet Checker",
-                                        path: "/delegation/wallet-checker",
-                                      }}
-                                    />
-                                  </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Delegation Center",
+                                      path: "/delegation/delegation-center",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Wallet Architecture",
+                                      path: "/delegation/wallet-architecture",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Delegation FAQs",
+                                      path: "/delegation/delegation-faq",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Consolidation Use Cases",
+                                      path: "/delegation/consolidation-use-cases",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Wallet Checker",
+                                      path: "/delegation/wallet-checker",
+                                    }}
+                                  />
                                 </div>
-                                <div className={styles.submenuContainer}>
-                                  <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-                                    The Memes Tools
-                                    <FontAwesomeIcon
-                                      icon={faChevronRight}
-                                      height={16}
-                                      width={16}
-                                    />
-                                  </div>
-                                  <div className={styles.nestedMenu}>
-                                    {(!capacitor.isIos || country === "US") && (
-                                      <HeaderDesktopLink
-                                        link={{
-                                          name: "Memes Subscriptions",
-                                          path: "/tools/subscriptions-report",
-                                        }}
-                                      />
-                                    )}
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Memes Accounting",
-                                        path: "/meme-accounting",
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Memes Gas",
-                                        path: "/meme-gas",
-                                      }}
-                                    />
-                                  </div>
+                              </div>
+                              <div className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  The Memes Tools
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
                                 </div>
-                                <NavDropdown.Divider />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "EMMA",
-                                    path: "/emma",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Block Finder",
-                                    path: "/meme-blocks",
-                                  }}
-                                />
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "Open Data",
-                                    path: "/open-data",
-                                  }}
-                                />
-                              </NavDropdown>
-                              <NavDropdown
-                                title="About"
-                                className={`${styles.mainNavLink} ${
-                                  styles.mainNavLinkPadding
-                                } ${
-                                  pathname?.includes("/about") ? "active" : ""
-                                }`}
-                                align={"start"}>
-                                <div className={styles.submenuContainer}>
-                                  <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-                                    NFTs
-                                    <FontAwesomeIcon
-                                      icon={faChevronRight}
-                                      height={16}
-                                      width={16}
-                                    />
-                                  </div>
-                                  <div className={styles.nestedMenu}>
+                                <div className={styles.nestedMenu}>
+                                  {(!capacitor.isIos || country === "US") && (
                                     <HeaderDesktopLink
                                       link={{
-                                        name: "The Memes",
-                                        path: `/about/${AboutSection.MEMES}`,
+                                        name: "Memes Subscriptions",
+                                        path: "/tools/subscriptions-report",
                                       }}
                                     />
-                                    {(!capacitor.isIos || country === "US") && (
-                                      <HeaderDesktopLink
-                                        link={{
-                                          name: "Subscriptions",
-                                          path: `/about/${AboutSection.SUBSCRIPTIONS}`,
-                                        }}
-                                      />
-                                    )}
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Memes Calendar",
-                                        path: `/about/${AboutSection.MEMES_CALENDAR}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Minting",
-                                        path: `/about/${AboutSection.MINTING}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Nakamoto Threshold",
-                                        path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
-                                      }}
-                                    />
-                                    <NavDropdown.Divider />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Meme Lab",
-                                        path: `/about/${AboutSection.MEME_LAB}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Gradient",
-                                        path: `/about/${AboutSection.GRADIENTS}`,
-                                      }}
-                                    />
-                                  </div>
+                                  )}
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Memes Accounting",
+                                      path: "/meme-accounting",
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Memes Gas",
+                                      path: "/meme-gas",
+                                    }}
+                                  />
                                 </div>
-                                <HeaderDesktopLink
-                                  link={{
-                                    name: "GDRC1",
-                                    path: `/about/${AboutSection.GDRC1}`,
-                                  }}
-                                />
-                                <div className={styles.submenuContainer}>
-                                  <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-                                    NFT Delegation
-                                    <FontAwesomeIcon
-                                      icon={faChevronRight}
-                                      height={16}
-                                      width={16}
-                                    />
-                                  </div>
-                                  <div className={styles.nestedMenu}>
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "About NFTD",
-                                        path: `/about/${AboutSection.NFT_DELEGATION}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Primary Address",
-                                        path: `/about/${AboutSection.PRIMARY_ADDRESS}`,
-                                      }}
-                                    />
-                                  </div>
+                              </div>
+                              <NavDropdown.Divider />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "EMMA",
+                                  path: "/emma",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Block Finder",
+                                  path: "/meme-blocks",
+                                }}
+                              />
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "Open Data",
+                                  path: "/open-data",
+                                }}
+                              />
+                            </NavDropdown>
+                            <NavDropdown
+                              title="About"
+                              className={`${styles.mainNavLink} ${
+                                styles.mainNavLinkPadding
+                              } ${
+                                pathname?.includes("/about") ? "active" : ""
+                              }`}
+                              align={"start"}>
+                              <div className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  NFTs
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
                                 </div>
-                                <div className={styles.submenuContainer}>
-                                  <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-                                    6529 Capital
-                                    <FontAwesomeIcon
-                                      icon={faChevronRight}
-                                      height={16}
-                                      width={16}
-                                    />
-                                  </div>
-                                  <div className={styles.nestedMenu}>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "The Memes",
+                                      path: `/about/${AboutSection.MEMES}`,
+                                    }}
+                                  />
+                                  {(!capacitor.isIos || country === "US") && (
                                     <HeaderDesktopLink
                                       link={{
-                                        name: "About 6529 Capital",
-                                        path: `/capital`,
+                                        name: "Subscriptions",
+                                        path: `/about/${AboutSection.SUBSCRIPTIONS}`,
                                       }}
                                     />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Company Portfolio",
-                                        path: `/capital/company-portfolio`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "NFT Fund",
-                                        path: `/capital/fund`,
-                                      }}
-                                    />
-                                  </div>
+                                  )}
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Memes Calendar",
+                                      path: `/about/${AboutSection.MEMES_CALENDAR}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Minting",
+                                      path: `/about/${AboutSection.MINTING}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Nakamoto Threshold",
+                                      path: `/about/${AboutSection.NAKAMOTO_THRESHOLD}`,
+                                    }}
+                                  />
+                                  <NavDropdown.Divider />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Meme Lab",
+                                      path: `/about/${AboutSection.MEME_LAB}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Gradient",
+                                      path: `/about/${AboutSection.GRADIENTS}`,
+                                    }}
+                                  />
                                 </div>
-                                <div className={styles.submenuContainer}>
-                                  <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-                                    Support
-                                    <FontAwesomeIcon
-                                      icon={faChevronRight}
-                                      height={16}
-                                      width={16}
-                                    />
-                                  </div>
-                                  <div className={styles.nestedMenu}>
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "FAQ",
-                                        path: `/about/${AboutSection.FAQ}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Apply",
-                                        path: `/about/${AboutSection.APPLY}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Contact Us",
-                                        path: `/about/${AboutSection.CONTACT_US}`,
-                                      }}
-                                    />
-                                  </div>
+                              </div>
+                              <HeaderDesktopLink
+                                link={{
+                                  name: "GDRC1",
+                                  path: `/about/${AboutSection.GDRC1}`,
+                                }}
+                              />
+                              <div className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  NFT Delegation
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
                                 </div>
-                                <div className={styles.submenuContainer}>
-                                  <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
-                                    Resources
-                                    <FontAwesomeIcon
-                                      icon={faChevronRight}
-                                      height={16}
-                                      width={16}
-                                    />
-                                  </div>
-                                  <div className={styles.nestedMenu}>
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Data Decentralization",
-                                        path: `/about/${AboutSection.DATA_DECENTR}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "ENS",
-                                        path: `/about/${AboutSection.ENS}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "License",
-                                        path: `/about/${AboutSection.LICENSE}`,
-                                      }}
-                                    />
-                                    <HeaderDesktopLink
-                                      link={{
-                                        name: "Release Notes",
-                                        path: `/about/${AboutSection.RELEASE_NOTES}`,
-                                      }}
-                                    />
-                                  </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "About NFTD",
+                                      path: `/about/${AboutSection.NFT_DELEGATION}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Primary Address",
+                                      path: `/about/${AboutSection.PRIMARY_ADDRESS}`,
+                                    }}
+                                  />
                                 </div>
-                              </NavDropdown>
-                              <HeaderUser />
-                              {showWaves && <HeaderNotifications />}
-                              <HeaderShare />
-                              <HeaderSearchButton />
-                            </Nav>
-                          </Navbar>
-                        </div>
+                              </div>
+                              <div className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  6529 Capital
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "About 6529 Capital",
+                                      path: `/capital`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Company Portfolio",
+                                      path: `/capital/company-portfolio`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "NFT Fund",
+                                      path: `/capital/fund`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              <div className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  Support
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "FAQ",
+                                      path: `/about/${AboutSection.FAQ}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Apply",
+                                      path: `/about/${AboutSection.APPLY}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Contact Us",
+                                      path: `/about/${AboutSection.CONTACT_US}`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                              <div className={styles.submenuContainer}>
+                                <div className="d-flex justify-content-between align-items-center gap-3 submenu-trigger">
+                                  Resources
+                                  <FontAwesomeIcon
+                                    icon={faChevronRight}
+                                    height={16}
+                                    width={16}
+                                  />
+                                </div>
+                                <div className={styles.nestedMenu}>
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Data Decentralization",
+                                      path: `/about/${AboutSection.DATA_DECENTR}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "ENS",
+                                      path: `/about/${AboutSection.ENS}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "License",
+                                      path: `/about/${AboutSection.LICENSE}`,
+                                    }}
+                                  />
+                                  <HeaderDesktopLink
+                                    link={{
+                                      name: "Release Notes",
+                                      path: `/about/${AboutSection.RELEASE_NOTES}`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </NavDropdown>
+                            <HeaderUser />
+                            {showWaves && <HeaderNotifications />}
+                            <HeaderShare />
+                            <HeaderSearchButton />
+                          </Nav>
+                        </Navbar>
                       </Container>
                     </Navbar>
                   </Container>
