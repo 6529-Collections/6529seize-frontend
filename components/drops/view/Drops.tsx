@@ -121,6 +121,10 @@ export default function Drops() {
     router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`);
   };
 
+  const onDropContentClick = (drop: ExtendedDrop) => {
+    router.push(`/my-stream?wave=${drop.wave.id}&serialNo=${drop.serial_no}`);
+  };
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   if (status === "pending") {
@@ -149,6 +153,7 @@ export default function Drops() {
         showReplyAndQuote={false}
         activeDrop={null}
         onQuoteClick={onQuoteClick}
+        onDropContentClick={onDropContentClick}
         dropViewDropId={null}
         location={DropLocation.PROFILE}
       />
