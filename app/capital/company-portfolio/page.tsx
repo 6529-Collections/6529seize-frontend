@@ -302,7 +302,7 @@ Transient Labs"
               <div className="fusion-page-title-row">
                 <div className="fusion-page-title-wrapper">
                   <div className="fusion-page-title-captions">
-                    <h1 className="entry-title">6529 NFT FUND</h1>
+                    <h1 className="entry-title">Company Portfolio</h1>
                     <div className="fusion-page-title-secondary"></div>
                   </div>
                 </div>
