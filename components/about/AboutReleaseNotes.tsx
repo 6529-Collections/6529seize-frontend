@@ -1,9 +1,14 @@
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
 import { fetchAboutSectionFile } from "./about.helpers";
+import { useEffect, useState } from "react";
 
-export default async function AboutReleaseNotes() {
-  const html = await fetchAboutSectionFile("release_notes");
+export default function AboutReleaseNotes() {
+  const [html, setHtml] = useState<string>("");
+  useEffect(() => {
+    fetchAboutSectionFile("release_notes").then(setHtml);
+  }, []);
+
   return (
     <Container>
       <Row>

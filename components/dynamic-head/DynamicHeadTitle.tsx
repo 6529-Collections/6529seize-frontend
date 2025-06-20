@@ -7,9 +7,10 @@ export default function DynamicHeadTitle() {
   const { title } = useTitle();
 
   useEffect(() => {
-    if (document.title && document.title !== DEFAULT_TITLE) {
+    if (!document.title || title !== DEFAULT_TITLE) {
       document.title = title;
     }
+    // document.title = title;
   }, [title]);
 
   return null;

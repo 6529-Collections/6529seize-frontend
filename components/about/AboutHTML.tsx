@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
 import { fetchAboutSectionFile } from "./about.helpers";
@@ -7,8 +10,12 @@ interface Props {
   title: string;
 }
 
-export default async function AboutHTML(props: Readonly<Props>) {
-  const html = await fetchAboutSectionFile(props.path);
+export default function AboutHTML(props: Readonly<Props>) {
+  const [html, setHtml] = useState<string>("");
+  useEffect(() => {
+    fetchAboutSectionFile(props.path).then(setHtml);
+  }, [props.path]);
+
   let titleLighter = "";
   let titleDarker = props.title;
 

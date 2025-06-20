@@ -1,7 +1,7 @@
 "use client";
 
 import Auth from "@/components/auth/Auth";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
@@ -24,7 +24,7 @@ import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { TitleProvider } from "@/contexts/TitleContext";
-import { getWagmiConfig } from "@/wagmiConfig/wagmiConfig";
+import { getWagmiConfig, WagmiConfig } from "@/wagmiConfig/wagmiConfig";
 import { initWeb3Modal } from "./web3ModalSetup";
 
 export default function Providers({
@@ -32,8 +32,16 @@ export default function Providers({
 }: {
   readonly children: React.ReactNode;
 }) {
-  const wagmiConfig = getWagmiConfig();
-  initWeb3Modal(wagmiConfig.config);
+  const [wagmiConfig, setWagmiConfig] = useState<WagmiConfig>();
+  useEffect(() => {
+    const wagmiConfig = getWagmiConfig();
+    initWeb3Modal(wagmiConfig.config);
+    setWagmiConfig(wagmiConfig);
+  }, []);
+
+  if (!wagmiConfig) {
+    return null;
+  }
 
   return (
     <QueryClientSetup>

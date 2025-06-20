@@ -1,9 +1,16 @@
+"use client";
+
 import { Col, Container, Row } from "react-bootstrap";
 import styles from "./About.module.scss";
 import { fetchAboutSectionFile } from "./about.helpers";
+import { useEffect, useState } from "react";
 
-export default async function AboutGDRC1() {
-  const html = await fetchAboutSectionFile("gdrc1");
+export default function AboutGDRC1() {
+  const [html, setHtml] = useState<string>("");
+  useEffect(() => {
+    fetchAboutSectionFile("gdrc1").then(setHtml);
+  }, []);
+
   return (
     <Container>
       <Row>

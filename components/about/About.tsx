@@ -26,11 +26,10 @@ import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTermsOfService from "./AboutTermsOfService";
-import { useSetTitle, useTitle } from "@/contexts/TitleContext";
+import { useSetTitle } from "@/contexts/TitleContext";
 import { capitalizeEveryWord } from "@/helpers/Helpers";
 
 export default function About({ section }: { section: AboutSection }) {
-  const { title } = useTitle();
   const router = useRouter();
 
   const sectionTitle = capitalizeEveryWord(section.replaceAll("-", " "));
