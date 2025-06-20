@@ -578,10 +578,10 @@ export default function Header(props: Readonly<Props>) {
                             </button>
                           </div>
                         </div>
-                        <div className={styles.dMdBlock}>
+                        <div className={`d-none ${styles.dMdBlock}`}>
                           <Navbar
                             id="seize-navbar-nav"
-                            className="justify-content-end d-none">
+                            className="justify-content-end ">
                             <Nav className="justify-content-end ml-auto">
                               {showWaves && (
                                 <NavDropdown
