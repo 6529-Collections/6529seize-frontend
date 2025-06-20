@@ -18,8 +18,6 @@ export default function LayoutWrapper({
   const isSmall = pathname?.startsWith("/my-stream");
   const isAccess = pathname?.startsWith("/access");
 
-  console.log("i am isApp [LayoutWrapper]", isApp);
-
   const content = useMemo(() => {
     return isApp ? (
       <MobileLayout>{children}</MobileLayout>
