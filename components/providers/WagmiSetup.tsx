@@ -1,7 +1,7 @@
 "use client";
 
 import { Connector, WagmiProvider } from "wagmi";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   AppWallet,
   appWalletsEventEmitter,
@@ -11,18 +11,25 @@ import {
   createAppWalletConnector,
 } from "@/wagmiConfig/wagmiAppWalletConnector";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
-import { WagmiConfig } from "@/wagmiConfig/wagmiConfig";
+import { getWagmiConfig, WagmiConfig } from "@/wagmiConfig/wagmiConfig";
+import { initWeb3Modal } from "./web3ModalSetup";
 
 export default function WagmiSetup({
-  wagmiConfig,
   children,
 }: {
-  readonly wagmiConfig: WagmiConfig;
   readonly children: React.ReactNode;
 }) {
   const appWalletPasswordModal = useAppWalletPasswordModal();
+  const [wagmiConfig, setWagmiConfig] = useState<WagmiConfig>();
+  useEffect(() => {
+    const wagmiConfig = getWagmiConfig();
+    initWeb3Modal(wagmiConfig.config);
+    setWagmiConfig(wagmiConfig);
+  }, []);
 
   useEffect(() => {
+    if (!wagmiConfig) return;
+
     const createConnectorForWallet = (
       wallet: AppWallet,
       requestPassword: (
@@ -84,7 +91,11 @@ export default function WagmiSetup({
     return () => {
       appWalletsEventEmitter.off("update", appWalletsEventEmitterHandler);
     };
-  }, []);
+  }, [wagmiConfig]);
+
+  if (!wagmiConfig) {
+    return null;
+  }
 
   return (
     <WagmiProvider config={wagmiConfig.config}>
