@@ -70,9 +70,6 @@ export default function FeedItem({
 
   return (
     <div className="tw-flex">
-      <div className="tw-relative tw-hidden">
-        <div className="tw-h-full tw-w-[1px] tw-bg-iron-800 -tw-translate-x-8"></div>
-      </div>
       <div className="tw-w-full">{getComponent()}</div>
     </div>
   );
