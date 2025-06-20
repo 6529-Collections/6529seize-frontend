@@ -1,16 +1,10 @@
 import styles from "../styles/Home.module.scss";
 import Image from "next/image";
-import { useContext, useEffect } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { AuthContext } from "../components/auth/Auth";
+import { useSetTitle } from "../contexts/TitleContext";
 
 export default function Buidl() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "BUIDL",
-    });
-  }, []);
+  useSetTitle("BUIDL");
 
   return (
     <main className={styles.main}>

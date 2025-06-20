@@ -54,8 +54,9 @@ describe('Download', () => {
     });
     render(<Download href="/file" name="test" extension="txt" />);
     expect(screen.getByText(/Downloading 55/)).toBeInTheDocument();
-    const cancel = screen.getByText('Cancel');
-    await userEvent.click(cancel);
+    // The cancel button is an X icon, not text
+    const cancelButton = screen.getByRole('img', { hidden: true });
+    await userEvent.click(cancelButton);
     expect(mockCancel).toHaveBeenCalled();
   });
 });

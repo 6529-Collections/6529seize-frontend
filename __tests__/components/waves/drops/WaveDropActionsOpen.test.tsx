@@ -4,6 +4,13 @@ import WaveDropActionsOpen from '../../../../components/waves/drops/WaveDropActi
 import { ApiDropType } from '../../../../generated/models/ApiDropType';
 import { useRouter } from 'next/router';
 
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 jest.mock('next/router', () => ({ useRouter: jest.fn() }));
 
 afterEach(() => jest.clearAllMocks());

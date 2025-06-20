@@ -10,8 +10,8 @@ import { MyStreamProvider } from "../../contexts/wave/MyStreamContext";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import Head from "next/head";
 import { PageSSRMetadata } from "../../helpers/Types";
-import { useAuth } from "../auth/Auth";
 import { ScrollPositionProvider } from "../../contexts/ScrollPositionContext";
+import { useTitle } from "../../contexts/TitleContext";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -25,7 +25,7 @@ const MainLayout = ({ children, metadata }: MainLayoutProps) => {
   const isSmall = router.pathname.startsWith("/my-stream");
   const isAccess = router.pathname.startsWith("/access");
 
-  const { title: pageTitle } = useAuth();
+  const { title: pageTitle } = useTitle();
   const { title: metadataTitle, description, ogImage, twitterCard } = metadata;
 
   const ogUrl = `${process.env.BASE_ENDPOINT}${router.asPath}`;

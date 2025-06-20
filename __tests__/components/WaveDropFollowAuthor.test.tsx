@@ -5,6 +5,13 @@ import { AuthContext } from "../../components/auth/Auth";
 import { ReactQueryWrapperContext } from "../../components/react-query-wrapper/ReactQueryWrapper";
 import React from "react";
 
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}));
+
 jest.mock("@tanstack/react-query", () => ({
   __esModule: true,
   useMutation: jest.fn(),

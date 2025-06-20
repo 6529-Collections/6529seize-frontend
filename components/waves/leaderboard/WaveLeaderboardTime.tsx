@@ -68,6 +68,7 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
             nextDecisionTime={nextDecisionTime}
             isPaused={!!showPause(nextDecisionTime)}
             currentPause={showPause(nextDecisionTime)}
+            wave={wave}
           />
 
           {/* Expandable timeline section */}

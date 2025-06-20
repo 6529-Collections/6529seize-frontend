@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, type JSX } from "react";
+import React, { type JSX, useMemo } from "react";
+import { useSetWaveData } from "../../../contexts/TitleContext";
 import { useContentTab } from "../ContentTabContext";
 import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
@@ -12,6 +13,7 @@ import { MyStreamWaveTab } from "../../../types/waves.types";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
+import { useMyStream } from "../../../contexts/wave/MyStreamContext";
 
 interface MyStreamWaveProps {
   readonly waveId: string;
@@ -22,6 +24,7 @@ const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const breakpoint = useBreakpoint();
   const router = useRouter();
+  const { waves, directMessages } = useMyStream();
   const { data: wave } = useWaveData({
     waveId,
     onWaveNotFound: () => {
@@ -34,15 +37,18 @@ const MyStreamWave: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       );
     },
   });
-  // Track mount status to prevent post-unmount updates
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
+  
+  // Get new drops count from the waves list
+  const newDropsCount = useMemo(() => {
+    // Check both regular waves and direct messages
+    const waveFromList = waves.list.find(w => w.id === waveId) || 
+                       directMessages.list.find(w => w.id === waveId);
+    return waveFromList?.newDropsCount.count ?? 0;
+  }, [waves.list, directMessages.list, waveId]);
+  
+  // Update wave data in title context
+  useSetWaveData(wave ? { name: wave.name, newItemsCount: newDropsCount } : null);
+  
   // Create a stable key for proper remounting
   const stableWaveKey = `wave-${waveId}`;
 

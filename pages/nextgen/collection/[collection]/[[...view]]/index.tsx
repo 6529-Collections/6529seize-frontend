@@ -5,11 +5,11 @@ import { NextGenCollection } from "../../../../../entities/INextgen";
 import { isEmptyObject } from "../../../../../helpers/Helpers";
 import { commonApiFetch } from "../../../../../services/api/common-api";
 import { getCommonHeaders } from "../../../../../helpers/server.helpers";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { formatNameForUrl } from "../../../../../components/nextGen/nextgen_helpers";
 import { ContentView } from "../../../../../components/nextGen/collections/collectionParts/NextGenCollection";
-import { AuthContext } from "../../../../../components/auth/Auth";
+import { useTitle } from "../../../../../contexts/TitleContext";
 
 const NextGenCollectionComponent = dynamic(
   () =>
@@ -22,7 +22,7 @@ const NextGenCollectionComponent = dynamic(
 );
 
 export default function NextGenCollectionPage(props: any) {
-  const { setTitle } = useContext(AuthContext);
+  const { setTitle } = useTitle();
   const router = useRouter();
   const collection: NextGenCollection = props.pageProps.collection;
   useShallowRedirect(collection.name);
@@ -38,8 +38,8 @@ export default function NextGenCollectionPage(props: any) {
     setView(viewFromUrl);
     const viewTitle =
       viewFromUrl !== ContentView.OVERVIEW ? ` | ${viewFromUrl}` : "";
-    setTitle({ title: `${collection.name}${viewTitle} | NextGen` });
-  }, [router.query.view]);
+    setTitle(`${collection.name}${viewTitle} | NextGen`);
+  }, [router.query.view, collection.name, setTitle]);
 
   const updateView = (newView: ContentView) => {
     let path =

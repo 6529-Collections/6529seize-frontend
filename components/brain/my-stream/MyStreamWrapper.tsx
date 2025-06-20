@@ -1,9 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import MyStream from "./MyStream";
 import { useRouter } from "next/router";
 import MyStreamWave from "./MyStreamWave";
 import BrainContent from "../content/BrainContent";
-import { AuthContext, TitleType } from "../../auth/Auth";
 import {
   useMyStreamQuery,
   usePollingQuery,
@@ -16,7 +15,6 @@ import { ExtendedDrop } from "../../../helpers/waves/drop.helpers";
 import { DropInteractionParams } from "../../waves/drops/Drop";
 
 const MyStreamWrapper: React.FC = () => {
-  const { setTitle } = useContext(AuthContext);
   const router = useRouter();
   const [serialisedWaveId, setSerialisedWaveId] = useState<string | null>(null);
 
@@ -66,7 +64,6 @@ const MyStreamWrapper: React.FC = () => {
     isFetching,
     isFetchingNextPage,
     status,
-    refetch,
     isInitialQueryDone,
   } = useMyStreamQuery({ reverse: true });
 
@@ -84,44 +81,6 @@ const MyStreamWrapper: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    setTitle({
-      title: haveNewItems ? "New Stream Items Available | Brain" : null,
-      type: TitleType.MY_STREAM,
-    });
-
-    return () => {
-      setTitle({
-        title: null,
-        type: TitleType.MY_STREAM,
-      });
-    };
-  }, [haveNewItems]);
-
-  useEffect(() => {
-    setTitle({
-      title: "My Stream | Brain",
-      type: TitleType.MY_STREAM,
-    });
-  }, []);
-
-  useEffect(() => {
-    const checkAndRefetch = () => {
-      if (haveNewItems && document.visibilityState === "visible") {
-        refetch();
-      }
-    };
-
-    checkAndRefetch();
-    document.addEventListener("visibilitychange", checkAndRefetch);
-
-    return () => {
-      document.removeEventListener("visibilitychange", checkAndRefetch);
-    };
-  }, [haveNewItems]);
-
-  // Add a key prop based on wave ID to force component remount on wave change
-  // This breaks the update cycle and ensures clean state when navigating between waves
   const component = serialisedWaveId ? (
     <MyStreamWave key={`wave-${serialisedWaveId}`} waveId={serialisedWaveId} />
   ) : (
@@ -134,13 +93,17 @@ const MyStreamWrapper: React.FC = () => {
       items={items}
       isFetching={isFetching}
       onBottomIntersection={onBottomIntersection}
+      haveNewItems={haveNewItems}
+      status={status}
+      isInitialQueryDone={isInitialQueryDone}
     />
   );
 
   return (
     <BrainContent
       activeDrop={activeDrop}
-      onCancelReplyQuote={onCancelReplyQuote}>
+      onCancelReplyQuote={onCancelReplyQuote}
+    >
       {component}
     </BrainContent>
   );

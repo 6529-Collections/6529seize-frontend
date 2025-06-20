@@ -1,8 +1,8 @@
 import styles from "../../styles/Home.module.scss";
 
-import { useContext, useEffect } from "react";
+import React from "react";
 import dynamic from "next/dynamic";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 const TheMemesComponent = dynamic(
   () => import("../../components/the-memes/TheMemes"),
@@ -10,13 +10,7 @@ const TheMemesComponent = dynamic(
 );
 
 export default function TheMemesPage() {
-  const { setTitle } = useContext(AuthContext);
-
-  useEffect(() => {
-    setTitle({
-      title: "The Memes | Collections",
-    });
-  }, []);
+  useSetTitle("The Memes | Collections");
 
   return (
     <main className={styles.main}>

@@ -51,7 +51,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                       fill="none"
                       aria-hidden="true"
                       viewBox="0 0 24 24"
-                      stroke-width="1.5"
+                      strokeWidth="1.5"
                       stroke="currentColor"
                       className="tw-size-5 tw-flex-shrink-0"
                     >
@@ -81,7 +81,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                       fill="none"
                       aria-hidden="true"
                       viewBox="0 0 24 24"
-                      stroke-width="1.5"
+                      strokeWidth="1.5"
                       stroke="currentColor"
                       className="tw-size-5 tw-flex-shrink-0"
                     >

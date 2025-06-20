@@ -1,15 +1,9 @@
 import styles from "../../styles/Home.module.scss";
 import { Container, Row, Col } from "react-bootstrap";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 export default function CommunityMetrics() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Metrics | Network",
-    });
-  }, []);
+  useSetTitle("Metrics | Network");
 
   return (
     <main className={`${styles.main} ${styles.tdhMain}`}>

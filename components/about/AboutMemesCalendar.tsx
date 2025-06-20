@@ -7,7 +7,7 @@ import { Fragment } from "react";
 export default function AboutMemesCalendar() {
   function isActiveSection(start: Time, end: Time) {
     const now = Time.now();
-    return start.lte(now) && end.gte(now);
+    return start.lte(now) && end.plusDays(1).gte(now);
   }
 
   return (

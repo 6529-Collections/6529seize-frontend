@@ -4,7 +4,8 @@ import { useRouter } from "next/router";
 import { useViewContext } from "./ViewContext";
 import type { NavItem as NavItemData } from "./navTypes";
 import { motion } from "framer-motion";
-import { TitleType, useAuth } from "../auth/Auth";
+import { useAuth } from "../auth/Auth";
+import { useTitle } from "../../contexts/TitleContext";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
 import { useUnreadIndicator } from "../../hooks/useUnreadIndicator";
 import { useNotificationsContext } from "../notifications/NotificationsContext";
@@ -36,7 +37,8 @@ const NavItem = ({ item }: Props) => {
   const { isDm: isCurrentWaveDmValue } = useWave(waveData);
 
   // Add unread notifications logic
-  const { connectedProfile, setTitle } = useAuth();
+  const { connectedProfile } = useAuth();
+  const { setTitle } = useTitle();
   const { notifications, haveUnreadNotifications } = useUnreadNotifications(
     item.name === "Notifications" ? connectedProfile?.handle ?? null : null
   );
@@ -51,12 +53,11 @@ const NavItem = ({ item }: Props) => {
 
   useEffect(() => {
     if (item.name !== "Notifications") return;
-    setTitle({
-      title: haveUnreadNotifications
+    setTitle(
+      haveUnreadNotifications
         ? `(${notifications?.unread_count}) Notifications | 6529.io`
-        : null,
-      type: TitleType.NOTIFICATION,
-    });
+        : "6529.io"
+    );
     if (!haveUnreadNotifications) {
       removeAllDeliveredNotifications();
     }

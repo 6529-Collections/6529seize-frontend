@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../components/auth/Auth";
+import { useEffect, useState } from "react";
+import { useTitle } from "../contexts/TitleContext";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import { setAuthJwt } from "../services/auth/auth.utils";
 import { commonApiPost } from "../services/api/common-api";
 import { Spinner } from "../components/dotLoader/DotLoader";
 import { useSeizeConnectContext } from "../components/auth/SeizeConnectContext";
+import { useAuth } from "../components/auth/Auth";
 import { ApiRedeemRefreshTokenRequest } from "../generated/models/ApiRedeemRefreshTokenRequest";
 import { ApiRedeemRefreshTokenResponse } from "../generated/models/ApiRedeemRefreshTokenResponse";
 
@@ -22,24 +23,17 @@ export default function AcceptConnectionSharing(
     pageProps: AcceptConnectionSharingProps;
   }>
 ) {
-  const { setTitle, setToast } = useContext(AuthContext);
-  const {
-    address: connectedAddress,
-    seizeDisconnectAndLogout,
-    seizeAcceptConnection,
-  } = useSeizeConnectContext();
-
   const router = useRouter();
-
+  const { setToast } = useAuth();
+  const { setTitle } = useTitle();
+  const { seizeAcceptConnection, seizeDisconnectAndLogout, address: connectedAddress } = useSeizeConnectContext();
+  
   const { token, address, role } = props.pageProps;
-
   const [acceptingConnection, setAcceptingConnection] = useState(false);
-
+  
   useEffect(() => {
-    setTitle({
-      title: "Accept Connection Sharing",
-    });
-  }, []);
+    setTitle("Accept Connection Sharing");
+  }, [setTitle]);
 
   const acceptConnection = async () => {
     try {

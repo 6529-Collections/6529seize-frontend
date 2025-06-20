@@ -9,6 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import useDeviceInfo from "../../hooks/useDeviceInfo";
 import { EditorState } from "lexical";
 import {
   CreateDropConfig,
@@ -386,6 +387,7 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
 }) => {
   const { send } = useWebSocket();
   const breakpoint = useBreakpoint();
+  const { isApp } = useDeviceInfo();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
   const { processIncomingDrop } = useMyStream();
@@ -788,15 +790,39 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
     await prepareAndSubmitDrop(createGifDrop(gif));
   };
 
+  const focusInputWithDelay = (delay: number) => {
+    setTimeout(() => {
+      createDropInputRef.current?.focus();
+    }, delay);
+  };
+
   useEffect(() => {
     if (!activeDrop) {
       return;
     }
-    const timer = setTimeout(() => {
-      createDropInputRef.current?.focus();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [activeDrop]);
+
+    if (isApp) {
+      // Mobile app: Complex focus handling to prevent keyboard issues
+      const focusInput = () => {
+        if (!createDropInputRef.current) return;
+
+        // Use requestAnimationFrame to wait for next paint
+        requestAnimationFrame(() => {
+          // Then focus after a delay for mobile stability
+          focusInputWithDelay(300);
+        });
+      };
+
+      const timer = setTimeout(focusInput, 200);
+      return () => clearTimeout(timer);
+    } else {
+      // Desktop/web: Keep original simple behavior
+      const timer = setTimeout(() => {
+        createDropInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [activeDrop, isApp]);
 
   const handleFileChange = (newFiles: File[]) => {
     let updatedFiles = [...files, ...newFiles];
@@ -983,7 +1009,8 @@ const CreateDropContent: React.FC<CreateDropContentProps> = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}>
+            transition={{ duration: 0.3 }}
+          >
             <CreateDropMetadata
               disabled={submitting}
               onRemoveMetadata={onRemoveMetadata}

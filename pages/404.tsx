@@ -1,15 +1,9 @@
 import styles from "../styles/Home.module.scss";
 import Image from "next/image";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../components/auth/Auth";
+import { useSetTitle } from "../contexts/TitleContext";
 
 export default function Seize404() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "404 - NOT FOUND",
-    });
-  }, []);
+  useSetTitle("404 - NOT FOUND");
 
   return (
     <main className={styles.main}>

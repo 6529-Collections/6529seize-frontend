@@ -1,15 +1,8 @@
 import Groups from "../../components/groups/page/Groups";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "../../components/auth/Auth";
+import { useSetTitle } from "../../contexts/TitleContext";
 
 export default function GroupsPage() {
-  const { setTitle } = useContext(AuthContext);
-
-  useEffect(() => {
-    setTitle({
-      title: "Groups | Network",
-    });
-  }, []);
+  useSetTitle("Groups | Network");
 
   return (
     <main className="tw-min-h-[100dvh] tw-bg-iron-950">

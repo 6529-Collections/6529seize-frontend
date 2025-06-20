@@ -1,9 +1,9 @@
 import styles from "../styles/Home.module.scss";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import dynamic from "next/dynamic";
 import MappingToolPlaceholder from "../components/mapping-tools/MappingToolPlaceholder";
-import { AuthContext } from "../components/auth/Auth";
+import { useSetTitle } from "../contexts/TitleContext";
 
 const ConsolidationMappingTool = dynamic(
   () => import("../components/mapping-tools/ConsolidationMappingTool"),
@@ -12,12 +12,7 @@ const ConsolidationMappingTool = dynamic(
 );
 
 export default function ConsolidationMappingToolPage() {
-  const { setTitle } = useContext(AuthContext);
-  useEffect(() => {
-    setTitle({
-      title: "Consolidation Mapping Tool | Tools",
-    });
-  }, []);
+  useSetTitle("Consolidation Mapping Tool | Tools");
 
   const [html, setHtml] = useState("");
   const [htmlError, setHtmlError] = useState(false);

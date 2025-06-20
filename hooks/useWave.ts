@@ -53,6 +53,7 @@ interface WaveInfo {
     hasDecisionsBeforePause: (nextDecisionTime: number | null) => boolean;
     filterDecisionsDuringPauses: (decisions: ApiWaveDecision[]) => ApiWaveDecision[];
     getNextValidDecision: (decisions: ApiWaveDecision[]) => ApiWaveDecision | null;
+    calculateMintingDate: (checkpointTime: number | null) => number | null;
   };
   isChatWave: boolean;
   isRankWave: boolean;
@@ -204,6 +205,47 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     };
   }, [currentPause, nextPause, hasDecisionsBeforePause]);
 
+  // Calculate the minting date based on checkpoint date
+  const calculateMintingDate = useMemo(() => {
+    return (checkpointTime: number | null): number | null => {
+      if (!checkpointTime) return null;
+      
+      const checkpointDate = new Date(checkpointTime);
+      const dayOfWeek = checkpointDate.getUTCDay();
+      
+      // Calculate days until next minting day
+      let daysToAdd: number;
+      switch (dayOfWeek) {
+        case 1: // Monday → Wednesday
+          daysToAdd = 2;
+          break;
+        case 3: // Wednesday → Friday
+          daysToAdd = 2;
+          break;
+        case 5: // Friday → Monday
+          daysToAdd = 3;
+          break;
+        default:
+          // For other days, find next Monday/Wednesday/Friday
+          if (dayOfWeek === 0) { // Sunday → Monday
+            daysToAdd = 1;
+          } else if (dayOfWeek === 2) { // Tuesday → Wednesday
+            daysToAdd = 1;
+          } else if (dayOfWeek === 4) { // Thursday → Friday
+            daysToAdd = 1;
+          } else { // Saturday → Monday
+            daysToAdd = 2;
+          }
+      }
+      
+      // Create new date and add days
+      const mintingDate = new Date(checkpointTime);
+      mintingDate.setUTCDate(mintingDate.getUTCDate() + daysToAdd);
+      
+      return mintingDate.getTime();
+    };
+  }, []);
+
   // Extract common wave properties that are used in multiple calculations
   const maxDropsCount = useMemo(
     () =>
@@ -354,6 +396,7 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
       hasDecisionsBeforePause,
       filterDecisionsDuringPauses,
       getNextValidDecision,
+      calculateMintingDate,
     },
     // Wave type flags
     isChatWave: wave?.wave.type === "CHAT",

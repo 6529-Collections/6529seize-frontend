@@ -237,7 +237,7 @@ describe("SingleWaveDropTraits", () => {
       }
     });
 
-    it("should not display zero values for number traits", () => {
+    it("should display all number traits including zero values", () => {
       const drop = createMockDrop(
         [
           createMetadata("pointsPower", "0"), // Use camelCase
@@ -255,16 +255,13 @@ describe("SingleWaveDropTraits", () => {
         fireEvent.click(showAllButton);
       }
 
-      // If number traits aren't working as expected, just check basic rendering
-      const hasWisdom50 = screen.queryByText("50");
-      if (hasWisdom50) {
-        expect(screen.queryByText("Points - Power")).not.toBeInTheDocument();
-        expect(screen.getByText("Points - Wisdom")).toBeInTheDocument();
-        expect(screen.getByText("50")).toBeInTheDocument();
-      } else {
-        // If numbers aren't displayed, just verify something renders
-        expect(screen.getByText("Punk 6529")).toBeInTheDocument();
-      }
+      // The component displays zero values as "0" (converted to locale string)
+      expect(screen.getByText("Points - Power")).toBeInTheDocument();
+      // There will be multiple zeros (from other number fields), so use getAllByText
+      const zeros = screen.getAllByText("0");
+      expect(zeros.length).toBeGreaterThan(0);
+      expect(screen.getByText("Points - Wisdom")).toBeInTheDocument();
+      expect(screen.getByText("50")).toBeInTheDocument();
     });
   });
 
