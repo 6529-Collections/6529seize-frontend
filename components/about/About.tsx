@@ -1,12 +1,14 @@
 "use client";
 
-import { Container, Row, Col } from "react-bootstrap";
-import styles from "./About.module.scss";
 import { AboutSection } from "@/enums";
-import AboutHTML from "./AboutHTML";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useRouter } from "next/navigation";
+import { useSetTitle } from "@/contexts/TitleContext";
+import { capitalizeEveryWord } from "@/helpers/Helpers";
 import { useCookieConsent } from "../cookies/CookieConsentContext";
+import useCapacitor from "@/hooks/useCapacitor";
+
+// Section components
+import AboutHTML from "./AboutHTML";
 import AboutApply from "./AboutApply";
 import AboutContactUs from "./AboutContactUs";
 import AboutCookiePolicy from "./AboutCookiePolicy";
@@ -26,12 +28,9 @@ import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTermsOfService from "./AboutTermsOfService";
-import { useSetTitle } from "@/contexts/TitleContext";
-import { capitalizeEveryWord } from "@/helpers/Helpers";
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const router = useRouter();
-
   const sectionTitle = capitalizeEveryWord(section.replaceAll("-", " "));
   useSetTitle(`${sectionTitle} | About`);
 
@@ -39,7 +38,7 @@ export default function About({ section }: { readonly section: AboutSection }) {
     router.push(`/about/${newSection}`);
   };
 
-  const printSection = () => {
+  const renderSection = () => {
     switch (section) {
       case AboutSection.MEMES:
         return <AboutMemes />;
@@ -89,215 +88,97 @@ export default function About({ section }: { readonly section: AboutSection }) {
   };
 
   return (
-    <Container className="pt-4">
-      <Row>
-        <Col className={styles.aboutMenuLeft}>
+    <div className="tw-px-4 tw-pt-6 tw-max-w-screen-xl tw-mx-auto">
+      <div className="tw-flex tw-flex-col md:tw-flex-row">
+        <div className="tw-hidden md:tw-block tw-w-1/5">
           <AboutMenu currentSection={section} setSection={setNewSection} />
-        </Col>
-        <Col className={styles.aboutMenuRight}>{printSection()}</Col>
-      </Row>
-      <Row className="pt-4">
-        <Col className={styles.aboutMenuLeftFull}>
-          <AboutMenu currentSection={section} setSection={setNewSection} />
-        </Col>
-      </Row>
-    </Container>
+        </div>
+        <div className="tw-w-full md:tw-w-4/5">{renderSection()}</div>
+      </div>
+
+      <div className="tw-block md:tw-hidden tw-mt-6 tw-text-center">
+        <AboutMenu currentSection={section} setSection={setNewSection} />
+      </div>
+    </div>
   );
 }
 
-function AboutMenu(
-  props: Readonly<{
-    readonly currentSection: AboutSection | undefined;
-    readonly setSection: (section: AboutSection) => void;
-  }>
-) {
+function AboutMenu({
+  currentSection,
+  setSection,
+}: {
+  readonly currentSection: AboutSection | undefined;
+  readonly setSection: (section: AboutSection) => void;
+}) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
-  const { currentSection, setSection } = props;
+
+  const MenuItem = ({
+    title,
+    section,
+  }: {
+    title: string;
+    section: AboutSection;
+  }) => (
+    <div
+      onClick={() => setSection(section)}
+      className={`tw-cursor-pointer tw-py-1 tw-font-medium hover:tw-text-gray-400 ${
+        currentSection === section ? "tw-underline" : ""
+      }`}>
+      {title}
+    </div>
+  );
 
   return (
-    <Container>
-      <Row>
-        <Col>
-          <h3>About</h3>
-        </Col>
-      </Row>
-      <AboutRow
-        section={AboutSection.MEMES}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="The Memes"
-      />
+    <div>
+      <h3 className="tw-text-xl tw-font-semibold tw-mb-2">About</h3>
+      <MenuItem section={AboutSection.MEMES} title="The Memes" />
       {(!capacitor.isIos || country === "US") && (
-        <AboutRow
-          section={AboutSection.SUBSCRIPTIONS}
-          currentSection={currentSection}
-          setSection={setSection}
-          title="Subscriptions"
-        />
+        <MenuItem section={AboutSection.SUBSCRIPTIONS} title="Subscriptions" />
       )}
-      <AboutRow
-        section={AboutSection.MEMES_CALENDAR}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Memes Calendar"
-      />
-      <AboutRow
-        section={AboutSection.MEME_LAB}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Meme Lab"
-      />
-      <AboutRow
-        section={AboutSection.GRADIENTS}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Gradient"
-      />
-      <Row>
-        <Col>
-          <hr />
-        </Col>
-      </Row>
-      <AboutRow
-        section={AboutSection.GDRC1}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="GDRC1"
-      />
-      <Row>
-        <Col>
-          <hr />
-        </Col>
-      </Row>
-      <AboutRow
-        section={AboutSection.NFT_DELEGATION}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="NFT Delegation"
-      />
-      <AboutRow
+      <MenuItem section={AboutSection.MEMES_CALENDAR} title="Memes Calendar" />
+      <MenuItem section={AboutSection.MEME_LAB} title="Meme Lab" />
+      <MenuItem section={AboutSection.GRADIENTS} title="Gradient" />
+
+      <hr className="tw-my-2" />
+
+      <MenuItem section={AboutSection.GDRC1} title="GDRC1" />
+      <MenuItem section={AboutSection.NFT_DELEGATION} title="NFT Delegation" />
+      <MenuItem
         section={AboutSection.PRIMARY_ADDRESS}
-        currentSection={currentSection}
-        setSection={setSection}
         title="Primary Address"
       />
-      <Row>
-        <Col>
-          <hr />
-        </Col>
-      </Row>
-      <AboutRow
-        section={AboutSection.FAQ}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="FAQ"
-      />
-      <AboutRow
-        section={AboutSection.ENS}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="ENS"
-      />
-      <AboutRow
-        section={AboutSection.MINTING}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Minting"
-      />
-      <AboutRow
+
+      <hr className="tw-my-2" />
+
+      <MenuItem section={AboutSection.FAQ} title="FAQ" />
+      <MenuItem section={AboutSection.ENS} title="ENS" />
+      <MenuItem section={AboutSection.MINTING} title="Minting" />
+      <MenuItem
         section={AboutSection.NAKAMOTO_THRESHOLD}
-        currentSection={currentSection}
-        setSection={setSection}
         title="Nakamoto Threshold"
       />
-      <AboutRow
-        section={AboutSection.LICENSE}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="License"
-      />
-      <Row>
-        <Col>
-          <hr />
-        </Col>
-      </Row>
-      <AboutRow
-        section={AboutSection.APPLY}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Apply"
-      />
-      <AboutRow
-        section={AboutSection.CONTACT_US}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Contact Us"
-      />
-      <AboutRow
-        section={AboutSection.RELEASE_NOTES}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Release Notes"
-      />
-      <AboutRow
+      <MenuItem section={AboutSection.LICENSE} title="License" />
+
+      <hr className="tw-my-2" />
+
+      <MenuItem section={AboutSection.APPLY} title="Apply" />
+      <MenuItem section={AboutSection.CONTACT_US} title="Contact Us" />
+      <MenuItem section={AboutSection.RELEASE_NOTES} title="Release Notes" />
+      <MenuItem
         section={AboutSection.DATA_DECENTR}
-        currentSection={currentSection}
-        setSection={setSection}
         title="Data Decentralization"
       />
-      <Row>
-        <Col>
-          <hr />
-        </Col>
-      </Row>
-      <AboutRow
+
+      <hr className="tw-my-2" />
+
+      <MenuItem
         section={AboutSection.TERMS_OF_SERVICE}
-        currentSection={currentSection}
-        setSection={setSection}
         title="Terms of Service"
       />
-      <AboutRow
-        section={AboutSection.PRIVACY_POLICY}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Privacy Policy"
-      />
-      <AboutRow
-        section={AboutSection.COPYRIGHT}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Copyright"
-      />
-      <AboutRow
-        section={AboutSection.COOKIE_POLICY}
-        currentSection={currentSection}
-        setSection={setSection}
-        title="Cookie Policy"
-      />
-    </Container>
-  );
-}
-
-function AboutRow(
-  props: Readonly<{
-    readonly section: AboutSection;
-    readonly currentSection: AboutSection | undefined;
-    readonly setSection: (section: AboutSection) => void;
-    readonly title: string;
-  }>
-) {
-  return (
-    <Row className="pt-1 pb-1">
-      <Col
-        onClick={() => props.setSection(props.section)}
-        className={`${styles.aboutMenuLeftItem} ${
-          props.currentSection === props.section
-            ? styles.aboutMenuLeftItemActive
-            : ""
-        }`}>
-        {props.title}
-      </Col>
-    </Row>
+      <MenuItem section={AboutSection.PRIVACY_POLICY} title="Privacy Policy" />
+      <MenuItem section={AboutSection.COPYRIGHT} title="Copyright" />
+      <MenuItem section={AboutSection.COOKIE_POLICY} title="Cookie Policy" />
+    </div>
   );
 }
