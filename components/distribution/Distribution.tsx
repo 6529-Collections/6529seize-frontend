@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Container, Row, Col, Carousel, Table, Button } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
-import { useRouter } from "next/router";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { Distribution, DistributionPhoto } from "../../entities/IDistribution";
 import ScrollToButton from "../scrollTo/ScrollToButton";
@@ -23,15 +22,7 @@ import DotLoader from "../dotLoader/DotLoader";
 import Address from "../address/Address";
 import { MEMES_CONTRACT } from "../../constants";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
-
-enum Sort {
-  phase = "phase",
-  card_mint_count = "card_mint_count",
-  count = "count",
-  wallet_tdh = "wallet_tdh",
-  wallet_balance = "wallet_balance",
-  wallet_unique_balance = "wallet_unique_balance",
-}
+import { useParams, useSearchParams } from "next/navigation";
 
 interface Props {
   header: string;
@@ -40,7 +31,7 @@ interface Props {
 }
 
 export default function DistributionPage(props: Readonly<Props>) {
-  const router = useRouter();
+  const params = useParams();
   const [pageProps, setPageProps] = useState<{
     page: number;
     pageSize: number;
@@ -88,12 +79,11 @@ export default function DistributionPage(props: Readonly<Props>) {
   }
 
   useEffect(() => {
-    if (router.isReady) {
-      if (router.query.id) {
-        setNftId(router.query.id as string);
-      }
+    const id = params?.id as string;
+    if (id) {
+      setNftId(id);
     }
-  }, [router.isReady]);
+  }, [params]);
 
   useEffect(() => {
     if (nftId) {

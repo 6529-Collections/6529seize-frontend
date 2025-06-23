@@ -13,7 +13,6 @@ import {
 import { useEffect, useState } from "react";
 import NFTImage from "../nft-image/NFTImage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRouter } from "next/router";
 import Download from "../download/Download";
 import ArtistProfileHandle from "./ArtistProfileHandle";
 import {
@@ -29,8 +28,6 @@ export function MemePageArt(props: {
   nft: NFT | undefined;
   nftMeta: MemesExtendedData | undefined;
 }) {
-  const router = useRouter();
-
   const [isFullScreenSupported, setIsFullScreenSupported] = useState(false);
 
   const [fullscreenElementId, setFullscreenElementId] = useState<string>(
@@ -47,10 +44,8 @@ export function MemePageArt(props: {
   })();
 
   useEffect(() => {
-    if (router.isReady) {
-      setIsFullScreenSupported(fullScreenSupported());
-    }
-  }, [router.isReady]);
+    setIsFullScreenSupported(fullScreenSupported());
+  }, []);
 
   function carouselHandlerSlide(event: any) {
     if (event === 0) {
