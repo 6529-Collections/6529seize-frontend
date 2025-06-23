@@ -18,7 +18,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MANIFOLD } from "../../constants";
 import { NFTLite } from "../../entities/INFT";
 import Address from "../address/Address";
-import { Container, Row, Col } from "react-bootstrap";
 import { NEXTGEN_CHAIN_ID, NEXTGEN_CORE } from "../nextGen/nextgen_contracts";
 import { NextGenCollection } from "../../entities/INextgen";
 import { normalizeNextgenTokenID } from "../nextGen/nextgen_helpers";
