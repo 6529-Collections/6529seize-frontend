@@ -2,7 +2,7 @@
 
 import styles from "./CollectionsDropdown.module.scss";
 import { Dropdown } from "react-bootstrap";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 type CollectionType = "memes" | "gradient" | "nextgen" | "memelab" | "rememes";
 
