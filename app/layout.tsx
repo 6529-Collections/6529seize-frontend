@@ -11,8 +11,15 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import StoreSetup from "@/components/providers/StoreSetup";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
+import { Viewport } from "next";
 
 export const metadata = getAppMetadata();
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export default function RootLayout({
   children,
