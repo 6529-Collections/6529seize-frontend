@@ -24,6 +24,7 @@ export const isNavItemActive = (
     }
   }
 
+  // Collections routes
   if (item.name === "Collections" && activeView === null) {
     const relatedHrefs = [
       "/the-memes",
