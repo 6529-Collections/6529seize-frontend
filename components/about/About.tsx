@@ -28,6 +28,7 @@ import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTermsOfService from "./AboutTermsOfService";
+import { Container, Row, Col } from "react-bootstrap";
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const router = useRouter();
@@ -88,18 +89,22 @@ export default function About({ section }: { readonly section: AboutSection }) {
   };
 
   return (
-    <div className="tw-px-4 tw-pt-6 tw-max-w-screen-xl tw-mx-auto">
-      <div className="tw-flex tw-flex-col md:tw-flex-row">
-        <div className="tw-hidden md:tw-block tw-w-1/5">
-          <AboutMenu currentSection={section} setSection={setNewSection} />
-        </div>
-        <div className="tw-w-full md:tw-w-4/5">{renderSection()}</div>
-      </div>
+    <Container className="pt-2">
+      <Row>
+        <Col>
+          <div className="tw-flex tw-flex-col md:tw-flex-row">
+            <div className="tw-hidden md:tw-block tw-w-1/5">
+              <AboutMenu currentSection={section} setSection={setNewSection} />
+            </div>
+            <div className="tw-w-full md:tw-w-4/5">{renderSection()}</div>
+          </div>
 
-      <div className="tw-block md:tw-hidden tw-mt-6 tw-text-center">
-        <AboutMenu currentSection={section} setSection={setNewSection} />
-      </div>
-    </div>
+          <div className="tw-block md:tw-hidden tw-mt-6 tw-text-center">
+            <AboutMenu currentSection={section} setSection={setNewSection} />
+          </div>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
@@ -272,12 +277,15 @@ function MenuItem({
   readonly currentSection?: AboutSection;
 }) {
   return (
-    <div
-      onClick={() => setSection(section)}
-      className={`tw-cursor-pointer tw-py-1 tw-font-medium hover:tw-text-gray-400 ${
-        currentSection === section ? "tw-underline" : ""
-      }`}>
-      {title}
+    <div className="tw-py-1">
+      <button
+        onClick={() => setSection(section)}
+        className="btn-link tw-no-underline tw-font-medium hover:tw-text-gray-400"
+        style={{
+          borderBottom: currentSection === section ? "1px solid" : "none",
+        }}>
+        {title}
+      </button>
     </div>
   );
 }

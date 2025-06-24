@@ -15,7 +15,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { ManifoldClaim } from "@/hooks/useManifoldClaim";
 import { fetchUrl } from "@/services/6529api";
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DotLoader from "@/components/dotLoader/DotLoader";
@@ -61,6 +61,35 @@ export default function Home({
 
   const [manifoldClaim, setManifoldClaim] = useState<ManifoldClaim>();
 
+  const manifoldClaimEditionSizeDisplay = useMemo(() => {
+    if (!manifoldClaim) return <DotLoader />;
+    if (manifoldClaim.isFinalized) {
+      return <>{numberWithCommas(manifoldClaim.total)}</>;
+    } else {
+      return (
+        <>
+          {numberWithCommas(manifoldClaim.total)} /{" "}
+          {numberWithCommas(manifoldClaim.totalMax)}
+          {manifoldClaim.isFetching && (
+            <>
+              {" "}
+              <DotLoader />
+            </>
+          )}
+        </>
+      );
+    }
+  }, [manifoldClaim]);
+
+  const manifoldClaimstatusDisplay = useMemo(() => {
+    if (!manifoldClaim) return <DotLoader />;
+    if (manifoldClaim.isFinalized) {
+      return manifoldClaim.remaining > 0 ? "Ended" : "Sold Out";
+    } else {
+      return capitalizeEveryWord(manifoldClaim.status);
+    }
+  }, [manifoldClaim]);
+
   useEffect(() => {
     if (connectedProfile?.consolidation_key && featuredNft) {
       fetchUrl(
@@ -74,42 +103,16 @@ export default function Home({
     }
   }, [connectedProfile]);
 
-  const renderManifoldClaimEditionSize = () => {
-    if (manifoldClaim) {
-      if (manifoldClaim.isFinalized) {
-        return <>{numberWithCommas(manifoldClaim.total)}</>;
-      } else {
-        return (
-          <>
-            {numberWithCommas(manifoldClaim.total)} /{" "}
-            {numberWithCommas(manifoldClaim.totalMax)}
-            {manifoldClaim.isFetching && (
-              <>
-                {" "}
-                <DotLoader />
-              </>
-            )}
-          </>
-        );
-      }
+  const manifoldClaimCostDisplay = useMemo(() => {
+    if (!manifoldClaim) return <DotLoader />;
+    if (manifoldClaim.cost > 0) {
+      return `${numberWithCommas(
+        Math.round(fromGWEI(manifoldClaim.cost) * 100000) / 100000
+      )} ETH`;
     } else {
-      return <DotLoader />;
+      return `N/A`;
     }
-  };
-
-  const renderManifoldClaimCost = () => {
-    if (manifoldClaim) {
-      if (manifoldClaim.cost > 0) {
-        return `${numberWithCommas(
-          Math.round(fromGWEI(manifoldClaim.cost) * 100000) / 100000
-        )} ETH`;
-      } else {
-        return `N/A`;
-      }
-    } else {
-      return <DotLoader />;
-    }
-  };
+  }, [manifoldClaim]);
 
   return (
     <>
@@ -182,7 +185,7 @@ export default function Home({
                       <tr>
                         <td>Edition Size</td>
                         <td>
-                          <b>{renderManifoldClaimEditionSize()}</b>
+                          <b>{manifoldClaimEditionSizeDisplay}</b>
                         </td>
                       </tr>
                       <tr>
@@ -264,24 +267,16 @@ export default function Home({
               </Row>
               <Table bordered={false}>
                 <tbody>
-                  {manifoldClaim && (
-                    <tr>
-                      <td>Status</td>
-                      <td>
-                        <b>
-                          {manifoldClaim?.isFinalized
-                            ? manifoldClaim.remaining > 0
-                              ? "Ended"
-                              : "Sold Out"
-                            : capitalizeEveryWord(manifoldClaim?.status)}
-                        </b>
-                      </td>
-                    </tr>
-                  )}
+                  <tr>
+                    <td>Status</td>
+                    <td>
+                      <b>{manifoldClaimstatusDisplay}</b>
+                    </td>
+                  </tr>
                   <tr>
                     <td>Mint Price</td>
                     <td>
-                      <b>{renderManifoldClaimCost()}</b>
+                      <b>{manifoldClaimCostDisplay}</b>
                     </td>
                   </tr>
                   <NftPageStats
