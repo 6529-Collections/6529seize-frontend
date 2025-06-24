@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import React, { ReactNode, useCallback } from "react";
-import { useRouter } from "next/router";
+import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { useViewContext } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
@@ -26,9 +26,10 @@ export default function AppLayout({ children }: Props) {
   const { registerRef } = useLayout();
   const { setHeaderRef } = useHeaderContext();
   const { activeView } = useViewContext();
-  const router = useRouter();
-  const isSingleDropOpen = typeof router.query.drop === "string";
-  const isStreamRoute = router.pathname.startsWith("/my-stream");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const isSingleDropOpen = searchParams?.get("drop") !== null;
+  const isStreamRoute = pathname?.startsWith("/my-stream");
 
   const headerWrapperRef = useCallback(
     (node: HTMLDivElement | null) => {
