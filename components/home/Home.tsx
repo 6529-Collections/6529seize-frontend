@@ -49,8 +49,8 @@ export default function Home({
   featuredNft,
   featuredNextgen,
 }: {
-  featuredNft: NFTWithMemesExtendedData;
-  featuredNextgen: NextGenCollection;
+  readonly featuredNft: NFTWithMemesExtendedData;
+  readonly featuredNextgen: NextGenCollection;
 }) {
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();

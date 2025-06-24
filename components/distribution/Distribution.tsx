@@ -3,7 +3,7 @@
 import styles from "./Distribution.module.scss";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Container, Row, Col, Carousel, Table, Button } from "react-bootstrap";
+import { Container, Row, Col, Carousel, Table } from "react-bootstrap";
 import { DBResponse } from "../../entities/IDBResponse";
 import { fetchAllPages, fetchUrl } from "../../services/6529api";
 import { Distribution, DistributionPhoto } from "../../entities/IDistribution";
@@ -22,7 +22,7 @@ import DotLoader from "../dotLoader/DotLoader";
 import Address from "../address/Address";
 import { MEMES_CONTRACT } from "../../constants";
 import MemePageMintCountdown from "../the-memes/MemePageMintCountdown";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 
 interface Props {
   header: string;
