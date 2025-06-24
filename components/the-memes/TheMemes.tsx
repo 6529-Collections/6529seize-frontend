@@ -413,7 +413,7 @@ export default function TheMemesComponent() {
               {/* Page header - visible on all devices */}
               <Row>
                 <Col className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                  <span className="d-flex align-items-center gap-3">
+                  <span className="d-flex align-items-center gap-3 flex-wrap">
                     <h1 className="no-wrap mb-0">
                       <span className="font-lightest">The</span> Memes
                     </h1>

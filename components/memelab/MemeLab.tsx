@@ -667,7 +667,7 @@ export default function MemeLabComponent(props: Readonly<Props>) {
               {/* Page header - visible on all devices */}
               <Row>
                 <Col className="d-flex align-items-center justify-content-between mb-3">
-                  <span className="d-flex align-items-center gap-3">
+                  <span className="d-flex align-items-center gap-3 flex-wrap">
                     <h1 className="mb-0">
                       <span className="font-lightest">Meme</span> Lab
                     </h1>

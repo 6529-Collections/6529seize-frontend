@@ -83,7 +83,7 @@ export default function NextGenNavigationHeader(
           height: isMobile ? "auto" : "90px",
           paddingTop: isMobile ? "20px" : "0",
         }}>
-        <div className="d-flex align-items-center gap-3">
+        <div className="d-flex align-items-center gap-3 flex-wrap">
           <Image
             priority
             width="0"
