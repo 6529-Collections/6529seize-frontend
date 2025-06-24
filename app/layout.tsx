@@ -11,8 +11,12 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import StoreSetup from "@/components/providers/StoreSetup";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
+import { Capacitor } from "@capacitor/core";
+import { Viewport } from "next";
+import { getViewport } from "@/components/providers/viewport";
 
 export const metadata = getAppMetadata();
+export const viewport: Viewport = getViewport();
 
 export default function RootLayout({
   children,
