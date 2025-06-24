@@ -25,6 +25,10 @@ const BaseLayout = ({ children, metadata }: BaseLayoutProps) => {
         <meta property="og:description" content={description} />
         <meta property="og:image" content={ogImage} />
         <meta name="twitter:card" content={twitterCard} />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
       </Head>
       {children}
     </>
