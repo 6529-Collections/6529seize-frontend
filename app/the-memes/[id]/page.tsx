@@ -1,14 +1,14 @@
-import styles from "../../../styles/Home.module.scss";
+import styles from "@/styles/Home.module.scss";
 
 import { getSharedAppServerSideProps } from "@/components/the-memes/MemeShared";
-import { MEMES_CONTRACT } from "../../../constants";
+import { MEMES_CONTRACT } from "@/constants";
 import MemePageComponent from "@/components/the-memes/MemePage";
 import { Metadata } from "next";
 
 export default async function MemePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  readonly params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
   return (

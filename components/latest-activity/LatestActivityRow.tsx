@@ -110,9 +110,9 @@ export function printGas(
             ["Gas", `${displayDecimal(gas, 5)}`],
             ["GWEI", numberWithCommas(gas_gwei)],
             ["Gas Price", `${displayDecimal(gas_price_gwei, 2)}`],
-          ].map(([label, value], idx) => (
+          ].map(([label, value]) => (
             <div
-              key={idx}
+              key={label}
               className="tw-flex tw-justify-between tw-w-full tw-gap-4">
               <span className="tw-text-left tw-w-1/2">{label}</span>
               <span className="tw-text-right tw-w-1/2">{value}</span>
