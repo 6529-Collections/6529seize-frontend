@@ -24,6 +24,17 @@ export const isNavItemActive = (
     }
   }
 
+  if (item.name === "Collections" && activeView === null) {
+    const relatedHrefs = [
+      "/the-memes",
+      "/6529-gradient",
+      "/nextgen",
+      "/meme-lab",
+      "/rememes",
+    ];
+    return relatedHrefs.some((href) => pathname.startsWith(href));
+  }
+
   const isWaveSubRoute =
     pathname === "/my-stream" && typeof searchParams?.get("wave") === "string";
 
