@@ -28,6 +28,7 @@ import AboutPrivacyPolicy from "./AboutPrivacyPolicy";
 import AboutReleaseNotes from "./AboutReleaseNotes";
 import AboutSubscriptions from "./AboutSubscriptions";
 import AboutTermsOfService from "./AboutTermsOfService";
+import { Container, Row, Col } from "react-bootstrap";
 
 export default function About({ section }: { readonly section: AboutSection }) {
   const router = useRouter();
@@ -88,18 +89,22 @@ export default function About({ section }: { readonly section: AboutSection }) {
   };
 
   return (
-    <div className="tw-px-4 tw-pt-6 tw-max-w-screen-xl tw-mx-auto">
-      <div className="tw-flex tw-flex-col md:tw-flex-row">
-        <div className="tw-hidden md:tw-block tw-w-1/5">
-          <AboutMenu currentSection={section} setSection={setNewSection} />
-        </div>
-        <div className="tw-w-full md:tw-w-4/5">{renderSection()}</div>
-      </div>
+    <Container className="pt-2">
+      <Row>
+        <Col>
+          <div className="tw-flex tw-flex-col md:tw-flex-row">
+            <div className="tw-hidden md:tw-block tw-w-1/5">
+              <AboutMenu currentSection={section} setSection={setNewSection} />
+            </div>
+            <div className="tw-w-full md:tw-w-4/5">{renderSection()}</div>
+          </div>
 
-      <div className="tw-block md:tw-hidden tw-mt-6 tw-text-center">
-        <AboutMenu currentSection={section} setSection={setNewSection} />
-      </div>
-    </div>
+          <div className="tw-block md:tw-hidden tw-mt-6 tw-text-center">
+            <AboutMenu currentSection={section} setSection={setNewSection} />
+          </div>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
@@ -113,61 +118,121 @@ function AboutMenu({
   const capacitor = useCapacitor();
   const { country } = useCookieConsent();
 
-  const MenuItem = ({
-    title,
-    section,
-  }: {
-    title: string;
-    section: AboutSection;
-  }) => (
-    <div
-      onClick={() => setSection(section)}
-      className={`tw-cursor-pointer tw-py-1 tw-font-medium hover:tw-text-gray-400 ${
-        currentSection === section ? "tw-underline" : ""
-      }`}>
-      {title}
-    </div>
-  );
-
   return (
     <div>
       <h3 className="tw-text-xl tw-font-semibold tw-mb-2">About</h3>
-      <MenuItem section={AboutSection.MEMES} title="The Memes" />
+      <MenuItem
+        section={AboutSection.MEMES}
+        title="The Memes"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
       {(!capacitor.isIos || country === "US") && (
-        <MenuItem section={AboutSection.SUBSCRIPTIONS} title="Subscriptions" />
+        <MenuItem
+          section={AboutSection.SUBSCRIPTIONS}
+          title="Subscriptions"
+          setSection={setSection}
+          currentSection={currentSection}
+        />
       )}
-      <MenuItem section={AboutSection.MEMES_CALENDAR} title="Memes Calendar" />
-      <MenuItem section={AboutSection.MEME_LAB} title="Meme Lab" />
-      <MenuItem section={AboutSection.GRADIENTS} title="Gradient" />
+      <MenuItem
+        section={AboutSection.MEMES_CALENDAR}
+        title="Memes Calendar"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.MEME_LAB}
+        title="Meme Lab"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.GRADIENTS}
+        title="Gradient"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
 
       <hr className="tw-my-2" />
 
-      <MenuItem section={AboutSection.GDRC1} title="GDRC1" />
-      <MenuItem section={AboutSection.NFT_DELEGATION} title="NFT Delegation" />
+      <MenuItem
+        section={AboutSection.GDRC1}
+        title="GDRC1"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.NFT_DELEGATION}
+        title="NFT Delegation"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
       <MenuItem
         section={AboutSection.PRIMARY_ADDRESS}
         title="Primary Address"
+        setSection={setSection}
+        currentSection={currentSection}
       />
 
       <hr className="tw-my-2" />
 
-      <MenuItem section={AboutSection.FAQ} title="FAQ" />
-      <MenuItem section={AboutSection.ENS} title="ENS" />
-      <MenuItem section={AboutSection.MINTING} title="Minting" />
+      <MenuItem
+        section={AboutSection.FAQ}
+        title="FAQ"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.ENS}
+        title="ENS"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.MINTING}
+        title="Minting"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
       <MenuItem
         section={AboutSection.NAKAMOTO_THRESHOLD}
         title="Nakamoto Threshold"
+        setSection={setSection}
+        currentSection={currentSection}
       />
-      <MenuItem section={AboutSection.LICENSE} title="License" />
+      <MenuItem
+        section={AboutSection.LICENSE}
+        title="License"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
 
       <hr className="tw-my-2" />
 
-      <MenuItem section={AboutSection.APPLY} title="Apply" />
-      <MenuItem section={AboutSection.CONTACT_US} title="Contact Us" />
-      <MenuItem section={AboutSection.RELEASE_NOTES} title="Release Notes" />
+      <MenuItem
+        section={AboutSection.APPLY}
+        title="Apply"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.CONTACT_US}
+        title="Contact Us"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.RELEASE_NOTES}
+        title="Release Notes"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
       <MenuItem
         section={AboutSection.DATA_DECENTR}
         title="Data Decentralization"
+        setSection={setSection}
+        currentSection={currentSection}
       />
 
       <hr className="tw-my-2" />
@@ -175,10 +240,52 @@ function AboutMenu({
       <MenuItem
         section={AboutSection.TERMS_OF_SERVICE}
         title="Terms of Service"
+        setSection={setSection}
+        currentSection={currentSection}
       />
-      <MenuItem section={AboutSection.PRIVACY_POLICY} title="Privacy Policy" />
-      <MenuItem section={AboutSection.COPYRIGHT} title="Copyright" />
-      <MenuItem section={AboutSection.COOKIE_POLICY} title="Cookie Policy" />
+      <MenuItem
+        section={AboutSection.PRIVACY_POLICY}
+        title="Privacy Policy"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.COPYRIGHT}
+        title="Copyright"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+      <MenuItem
+        section={AboutSection.COOKIE_POLICY}
+        title="Cookie Policy"
+        setSection={setSection}
+        currentSection={currentSection}
+      />
+    </div>
+  );
+}
+
+function MenuItem({
+  title,
+  section,
+  setSection,
+  currentSection,
+}: {
+  readonly title: string;
+  readonly section: AboutSection;
+  readonly setSection: (section: AboutSection) => void;
+  readonly currentSection?: AboutSection;
+}) {
+  return (
+    <div className="tw-py-1">
+      <button
+        onClick={() => setSection(section)}
+        className="btn-link tw-no-underline tw-font-medium hover:tw-text-gray-400"
+        style={{
+          borderBottom: currentSection === section ? "1px solid" : "none",
+        }}>
+        {title}
+      </button>
     </div>
   );
 }

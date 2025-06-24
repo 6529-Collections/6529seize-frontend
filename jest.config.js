@@ -16,7 +16,7 @@ const config = {
   // Path Aliases (from your tsconfig/jsconfig) - Keep existing one
   // Add mocks for CSS Modules, static assets, and next/font that next/jest handled
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/src/$1",
+    "^@/(.*)$": "<rootDir>/$1",
     // Handle CSS imports (with CSS modules)
     "^.+.module.(css|sass|scss)$": "identity-obj-proxy",
     // Handle CSS imports (without CSS modules)
@@ -28,8 +28,8 @@ const config = {
     // Mock dom-helpers/css for react-bootstrap
     "^dom-helpers/css$": "<rootDir>/__mocks__/css-functions.js",
     // Handle next/font - If you use next/font, uncomment and ensure mock exists
-    '^@next/font/(.*)$': `<rootDir>/__mocks__/nextFontMock.js`,
-    '^next/font/(.*)$': `<rootDir>/__mocks__/nextFontMock.js`,
+    "^@next/font/(.*)$": `<rootDir>/__mocks__/nextFontMock.js`,
+    "^next/font/(.*)$": `<rootDir>/__mocks__/nextFontMock.js`,
   },
   // Test Discovery
   testMatch: ["<rootDir>/**/*.test.ts", "<rootDir>/**/*.test.tsx"],
@@ -78,9 +78,7 @@ const config = {
   coverageDirectory: "coverage",
   coverageProvider: "babel", // Explicitly set provider if needed, default is babel
   coverageReporters: ["json", "lcov", "text", "clover", "json-summary"],
-  reporters: [
-    ["default", { "silent": true, "verbose": false }]
-  ],
+  reporters: [["default", { silent: true, verbose: false }]],
 };
 
 module.exports = config; // Export the config object directly
