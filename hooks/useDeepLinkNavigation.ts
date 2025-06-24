@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
 import { useCallback, useEffect } from "react";
 import useCapacitor from "./useCapacitor";
@@ -16,8 +16,13 @@ export const useDeepLinkNavigation = () => {
 
   const doNavigation = useCallback(
     (pathname: string, query: Record<string, string | number>) => {
-      console.log("Deep Link Navigation", pathname, query);
-      router.push({ pathname, query });
+      const searchParams = new URLSearchParams(
+        Object.entries(query).map(([key, value]) => [key, String(value)])
+      );
+      const url = `${pathname}?${searchParams.toString()}`;
+
+      console.log("Deep Link Navigation", url);
+      router.push(url);
     },
     [router]
   );
