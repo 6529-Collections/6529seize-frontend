@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
 import Head from "next/head";
 
-export default function CapacitorBodyClass() {
+export default function CapacitorSetup() {
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
       document.body.classList.add("capacitor-native");
