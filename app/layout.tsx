@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import "@/styles/seize-bootstrap.scss";
 import "@/styles/globals.scss";
 import "@/styles/swiper.scss";

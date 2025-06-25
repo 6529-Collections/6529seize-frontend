@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import styles from "@/styles/Home.module.scss";
 
 import React from "react";
