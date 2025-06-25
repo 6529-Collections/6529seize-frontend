@@ -8,6 +8,8 @@ import WaveDropAuthorPfp from "../../../waves/drops/WaveDropAuthorPfp";
 import { ExtendedDrop } from "../../../../helpers/waves/drop.helpers";
 import WinnerDropBadge from "../../../waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "../../../waves/drops/time/WaveDropTime";
+import UserProfileTooltip from "../../../user/utils/profile/UserProfileTooltip";
+import LazyTippy from "../../../utils/tooltip/LazyTippy";
 
 interface MemeDropArtistInfoProps {
   readonly drop: ExtendedDrop;
@@ -37,9 +39,15 @@ export default function MemeDropArtistInfo({ drop }: MemeDropArtistInfoProps) {
             onClick={(e) => e.stopPropagation()}
             className="tw-no-underline"
           >
-            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-              {drop.author?.handle}
-            </span>
+            <LazyTippy
+              placement="bottom"
+              interactive={false}
+              delay={[500, 200]}
+              content={drop.author?.handle ? <UserProfileTooltip user={drop.author.handle || drop.author.id} /> : null}>
+              <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+                {drop.author?.handle}
+              </span>
+            </LazyTippy>
           </Link>
           <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
           <WaveDropTime timestamp={drop.created_at} />

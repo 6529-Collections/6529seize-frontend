@@ -7,6 +7,8 @@ import { WavePodiumItemContentOutcomes } from "./WavePodiumItemContentOutcomes";
 import { ApiWaveDecisionWinner } from "../../../../generated/models/ApiWaveDecisionWinner";
 import { motion } from "framer-motion";
 import { WaveWinnersPodiumPlaceholder } from "./WaveWinnersPodiumPlaceholder";
+import LazyTippy from "../../../utils/tooltip/LazyTippy";
+import UserProfileTooltip from "../../../user/utils/profile/UserProfileTooltip";
 
 interface WavePodiumItemProps {
   readonly winner?: ApiWaveDecisionWinner;
@@ -195,30 +197,36 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
               <div className="tw-absolute tw-bottom-0 tw-h-3/4 tw-inset-x-0 tw-bg-gradient-to-t tw-from-black/20 tw-via-black/10 tw-to-transparent" />
             </div>
 
-            <Link
-              href={`/${drop.author.handle}`}
-              onClick={(e) => e.stopPropagation()}
-              className={`tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center desktop-hover:hover:${styles.textColor} tw-group/link`}
-            >
-              <span className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 desktop-hover:hover:${styles.textColor} tw-transition-colors tw-inline-flex tw-items-center`}>
-                {drop.author.handle}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100 tw-absolute tw-left-[100%]`}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
-                  />
-                </svg>
-              </span>
-            </Link>
+            <LazyTippy
+              placement="bottom"
+              interactive={false}
+              delay={[500, 200]}
+              content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+              <Link
+                href={`/${drop.author.handle}`}
+                onClick={(e) => e.stopPropagation()}
+                className={`tw-transition-all tw-no-underline tw-mb-2 tw-mt-2 sm:tw-mt-4 tw-relative tw-text-center desktop-hover:hover:${styles.textColor} tw-group/link`}
+              >
+                <span className={`${styles.autorFontSize} tw-font-semibold tw-text-iron-200 desktop-hover:hover:${styles.textColor} tw-transition-colors tw-inline-flex tw-items-center`}>
+                  {drop.author.handle}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className={`tw-size-3 tw-opacity-0 tw-transition-opacity ${styles.textColor} tw-ml-2 desktop-hover:group-hover/link:tw-opacity-100 tw-absolute tw-left-[100%]`}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25"
+                    />
+                  </svg>
+                </span>
+              </Link>
+            </LazyTippy>
 
             <div className="tw-flex tw-flex-col tw-items-center tw-gap-y-2 tw-relative">
               <div className="tw-flex tw-items-center tw-gap-x-1">

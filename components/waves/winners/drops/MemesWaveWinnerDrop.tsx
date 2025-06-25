@@ -23,6 +23,8 @@ import WaveDropActionsOpen from "../../../waves/drops/WaveDropActionsOpen";
 import CommonDropdownItemsMobileWrapper from "../../../utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import WaveDropMobileMenuOpen from "../../../waves/drops/WaveDropMobileMenuOpen";
 import WaveDropTime from "../../../waves/drops/time/WaveDropTime";
+import LazyTippy from "../../../utils/tooltip/LazyTippy";
+import UserProfileTooltip from "../../../user/utils/profile/UserProfileTooltip";
 
 interface MemesWaveWinnersDropProps {
   readonly winner: ApiWaveDecisionWinner;
@@ -97,15 +99,21 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                           size={UserCICAndLevelSize.SMALL}
                         />
                       )}
-                      <Link
-                        href={`/${winner.drop.author?.handle}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="tw-no-underline hover:tw-opacity-80 tw-transition-opacity"
-                      >
-                        <span className="tw-text-sm tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
-                          {winner.drop.author?.handle}
-                        </span>
-                      </Link>
+                      <LazyTippy
+                        placement="bottom"
+                        interactive={false}
+                        delay={[500, 200]}
+                        content={winner.drop.author?.handle ? <UserProfileTooltip user={winner.drop.author.handle || winner.drop.author.id} /> : null}>
+                        <Link
+                          href={`/${winner.drop.author?.handle}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="tw-no-underline desktop-hover:hover:tw-underline desktop-hover:hover:tw-opacity-80 tw-transition-opacity"
+                        >
+                          <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold tw-text-iron-100">
+                            {winner.drop.author?.handle}
+                          </span>
+                        </Link>
+                      </LazyTippy>
 
                       <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
                       

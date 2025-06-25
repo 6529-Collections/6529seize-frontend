@@ -10,6 +10,8 @@ import { DropContentSmall } from "./drops/DropContentSmall";
 import { WaveWinnersSmallOutcome } from "./WaveWinnersSmallOutcome";
 import WinnerDropBadge from "../drops/winner/WinnerDropBadge";
 import WaveDropTime from "../drops/time/WaveDropTime";
+import LazyTippy from "../../utils/tooltip/LazyTippy";
+import UserProfileTooltip from "../../user/utils/profile/UserProfileTooltip";
 
 interface MemesWaveWinnerDropSmallProps {
   readonly drop: ExtendedDrop;
@@ -130,15 +132,21 @@ export const MemesWaveWinnerDropSmall = memo<MemesWaveWinnerDropSmallProps>(
             </Link>
 
             <div className="tw-flex tw-items-center tw-gap-1.5">
-              <Link
-                href={`/${drop.author.handle}`}
-                onClick={(e) => e.stopPropagation()}
-                className="tw-no-underline tw-truncate"
-              >
-                <span className="tw-text-sm tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-iron-100 tw-transition-colors">
-                  {drop.author.handle}
-                </span>
-              </Link>
+              <LazyTippy
+                placement="bottom"
+                interactive={false}
+                delay={[500, 200]}
+                content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+                <Link
+                  href={`/${drop.author.handle}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="tw-no-underline tw-truncate desktop-hover:hover:tw-underline"
+                >
+                  <span className="tw-text-sm tw-font-semibold tw-text-iron-200 desktop-hover:hover:tw-text-opacity-80 tw-transition-colors">
+                    {drop.author.handle}
+                  </span>
+                </Link>
+              </LazyTippy>
               <span className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></span>
               <WaveDropTime timestamp={drop.created_at} />
             </div>

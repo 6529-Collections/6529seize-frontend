@@ -8,6 +8,8 @@ import UserCICAndLevel, {
 } from "../../../../user/utils/UserCICAndLevel";
 import WinnerDropBadge from "../../../../waves/drops/winner/WinnerDropBadge";
 import WaveDropTime from "../../../../waves/drops/time/WaveDropTime";
+import LazyTippy from "../../../../utils/tooltip/LazyTippy";
+import UserProfileTooltip from "../../../../user/utils/profile/UserProfileTooltip";
 
 interface WaveLeaderboardDropAuthorProps {
   readonly drop: ExtendedDrop;
@@ -48,17 +50,23 @@ export const WaveLeaderboardDropAuthor: React.FC<
             cicType={cicToType(drop.author.cic)}
             size={UserCICAndLevelSize.SMALL}
           />
-          <Link
-            href={`/${drop.author.handle}`}
-            onClick={(e) => e.stopPropagation()}
-            className="tw-no-underline"
-          >
-            <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
-              {drop.author.handle}
-            </span>
-          </Link>
+          <LazyTippy
+            placement="bottom"
+            interactive={false}
+            delay={[500, 200]}
+            content={<UserProfileTooltip user={drop.author.handle || drop.author.id} />}>
+            <Link
+              href={`/${drop.author.handle}`}
+              onClick={(e) => e.stopPropagation()}
+              className="tw-no-underline"
+            >
+              <span className="tw-text-md tw-mb-0 tw-leading-none tw-font-semibold">
+                {drop.author.handle}
+              </span>
+            </Link>
+          </LazyTippy>
 
-          <div className="tw-size-[3px] tw-bg-iron-600 tw-rounded-full tw-flex-shrink-0"></div>
+          <div className="tw-size-[3px] tw-bg-iron-900 tw-rounded-full tw-flex-shrink-0"></div>
 
           <WaveDropTime timestamp={drop.created_at} />
         </div>

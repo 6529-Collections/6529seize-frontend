@@ -34,11 +34,9 @@ export const WaveLeaderboardRightSidebarVoter: React.FC<
           ) : (
             <div className="tw-size-5 tw-rounded-md tw-ring-1 tw-ring-inset tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0" />
           )}
-          <Tippy content={voter.voter.handle}>
-            <span className="tw-text-sm tw-font-medium tw-text-iron-50 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-iron-300 tw-truncate">
-              {voter.voter.handle}
-            </span>
-          </Tippy>
+          <span className="tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-all tw-duration-300 desktop-hover:group-hover:tw-text-opacity-80 tw-truncate">
+            {voter.voter.handle}
+          </span>
         </Link>
       </div>
       <div className="tw-flex tw-items-center tw-gap-x-3 tw-ml-6">
