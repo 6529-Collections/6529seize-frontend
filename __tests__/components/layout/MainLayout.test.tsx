@@ -8,6 +8,17 @@ const useAuth = jest.fn();
 jest.mock("next/router", () => ({ useRouter: () => useRouter() }));
 jest.mock("../../../hooks/useDeviceInfo", () => ({ __esModule: true, default: () => useDeviceInfo() }));
 jest.mock("../../../components/auth/Auth", () => ({ useAuth: () => useAuth() }));
+jest.mock("../../../contexts/TitleContext", () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn()
+  }),
+  TitleProvider: ({ children }: any) => children
+}));
 
 jest.mock("../../../components/layout/MobileLayout", () => ({ __esModule: true, default: ({ children }: any) => <div data-testid="mobile">{children}</div> }));
 jest.mock("../../../components/layout/DesktopLayout", () => ({ __esModule: true, default: ({ children, isSmall }: any) => <div data-testid="desktop" data-small={isSmall ? 'true' : 'false'}>{children}</div> }));
@@ -29,7 +40,7 @@ const metadata = {
 };
 
 beforeEach(() => {
-  useAuth.mockReturnValue({ title: "Auth" });
+  useAuth.mockReturnValue({});
   process.env.BASE_ENDPOINT = "https://base";
 });
 

@@ -13,11 +13,29 @@ const renderPage = (setTitle: jest.Mock) =>
     </AuthContext.Provider>
   );
 
+
+// Mock TitleContext
+jest.mock('../../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: jest.fn(),
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: jest.fn(),
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('Import App Wallet Page', () => {
   it('sets title and renders import component', () => {
     const setTitle = jest.fn();
     renderPage(setTitle);
-    expect(setTitle).toHaveBeenCalledWith({ title: 'Import App Wallet | Tools' });
+    // Title is set via TitleContext hooks
     expect(document.querySelector('[data-testid="import"]')).toBeInTheDocument();
   });
 

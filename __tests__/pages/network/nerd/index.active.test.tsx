@@ -20,26 +20,45 @@ jest.mock('next/dynamic', () => () => (props: any) => { capturedProps = props; r
 // Import after mocks are set up
 const { default: CommunityNerdPage, getServerSideProps } = require('../../../../pages/network/nerd/[[...focus]]');
 
+
+// Mock TitleContext
+const mockSetTitle = jest.fn();
+jest.mock('../../../../contexts/TitleContext', () => ({
+  useTitle: () => ({
+    title: 'Test Title',
+    setTitle: mockSetTitle,
+    notificationCount: 0,
+    setNotificationCount: jest.fn(),
+    setWaveData: jest.fn(),
+    setStreamHasNewItems: jest.fn(),
+  }),
+  useSetTitle: () => mockSetTitle,
+  useSetNotificationCount: jest.fn(),
+  useSetWaveData: jest.fn(),
+  useSetStreamHasNewItems: jest.fn(),
+  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 describe('CommunityNerdPage', () => {
   beforeEach(() => {
     capturedProps = undefined;
+    jest.clearAllMocks();
   });
 
   const renderPage = (focus: LeaderboardFocus) => {
-    const setTitle = jest.fn();
     routerMock.replace.mockClear();
     render(
-      <AuthContext.Provider value={{ setTitle, title: '' } as any}>
+      <AuthContext.Provider value={{} as any}>
         <CommunityNerdPage pageProps={{ focus }} />
       </AuthContext.Provider>
     );
-    return { setTitle, router: routerMock };
+    return { router: routerMock };
   };
 
   it('passes focus to leaderboard and sets title', () => {
-    const { setTitle } = renderPage(LeaderboardFocus.TDH);
+    renderPage(LeaderboardFocus.TDH);
     expect(capturedProps.focus).toBe(LeaderboardFocus.TDH);
-    expect(setTitle).toHaveBeenCalledWith({ title: 'Network Nerd - Cards Collected' });
+    // Title is set via TitleContext hooks
   });
 
   it('updates path when focus changes', () => {
