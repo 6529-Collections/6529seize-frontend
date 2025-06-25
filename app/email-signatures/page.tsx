@@ -538,6 +538,6 @@ Notes:
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "Email Signatures",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Email Signatures" });
+}

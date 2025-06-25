@@ -393,6 +393,6 @@ export default function AboutMissionPage() {
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "6529 Mission",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "6529 Mission" });
+}

@@ -856,6 +856,6 @@ NFT investing is difficult specifically"
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "6529 Capital",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "6529 Capital" });
+}

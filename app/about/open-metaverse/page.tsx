@@ -535,6 +535,6 @@ STATE OF TECHNOLOGY
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "Open Metaverse",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Open Metaverse" });
+}

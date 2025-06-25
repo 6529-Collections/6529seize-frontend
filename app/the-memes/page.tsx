@@ -13,9 +13,11 @@ export default function TheMemesPage() {
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "The Memes",
-  ogImage: `${process.env.BASE_ENDPOINT}/memes-preview.png`,
-  description: "Collections",
-  twitterCard: "summary_large_image",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({
+    title: "The Memes",
+    ogImage: `${process.env.BASE_ENDPOINT}/memes-preview.png`,
+    description: "Collections",
+    twitterCard: "summary_large_image",
+  });
+}

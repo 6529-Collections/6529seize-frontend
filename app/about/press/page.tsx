@@ -2000,6 +2000,6 @@ Known for his philosophical Twitter threads and love of decentralization, the ps
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "Press",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "Press" });
+}

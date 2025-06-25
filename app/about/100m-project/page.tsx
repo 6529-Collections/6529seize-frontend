@@ -339,6 +339,6 @@ export default function About100mProjectPage() {
   );
 }
 
-export const metadata: Metadata = getAppMetadata({
-  title: "100M Project",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return getAppMetadata({ title: "100M Project" });
+}
