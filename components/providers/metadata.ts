@@ -60,7 +60,6 @@ export function getAppMetadata(
       images: [ogImage],
       title,
       description: description ? `${description} | ${domain}` : domain,
-      url: baseEndpoint,
     },
     twitter: {
       card: twitterCard,
